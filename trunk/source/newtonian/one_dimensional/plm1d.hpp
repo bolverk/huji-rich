@@ -23,12 +23,12 @@ public:
   Primitive InterpState(vector<double> const& vp,
 			vector<Primitive> const& hv,
 			double interface_speed,
-			int i, int dir, double dt) const;
+			size_t i, int dir, double dt) const;
 
 private:
 
-  bool second_order_time_;
-  bool slope_limiter_flag_;
+  const bool second_order_time_;
+  const bool slope_limiter_flag_;
 };
 
 #endif // PLM1D_HPP

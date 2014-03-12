@@ -23,7 +23,7 @@ public:
     \return Velocity of the point
    */
   virtual Vector2D CalcVelocity(int index, 
-				Tessellation const* tessellation,
+				Tessellation const& tessellation,
 				vector<Primitive> const& primitives,double time)= 0;
 
   /*! \brief Calculates the velocity of all mesh points
@@ -32,9 +32,9 @@ public:
     \param time The simulation time	
     \return Velocities of the points
    */
-  virtual vector<Vector2D> calcAllVelocities(Tessellation const* tess,
-					vector<Primitive> const& cells,
-					double time);
+  virtual vector<Vector2D> calcAllVelocities(Tessellation const& tess,
+					     vector<Primitive> const& cells,
+					     double time);
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
 };

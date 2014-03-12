@@ -27,11 +27,11 @@ public:
 		   Vector2D const& center=Vector2D(0,0));
 
   Vector2D CalcVelocity(int index, 
-			Tessellation const* tess,
+			Tessellation const& tess,
 			vector<Primitive> const& cells,
 			double time);
 
-  vector<Vector2D> calcAllVelocities(Tessellation const* tess,
+  vector<Vector2D> calcAllVelocities(Tessellation const& tess,
 				     vector<Primitive> const& cells,
 				     double time);
 

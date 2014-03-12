@@ -15,7 +15,7 @@ public:
   Primitive InterpState(vector<double> const& vp,
 			vector<Primitive> const& hv,
 			double interface_speed,
-			int i, int dir, double dt) const;
+			size_t i, int dir, double dt) const;
 };
 
 #endif // PCM1D_HPP 

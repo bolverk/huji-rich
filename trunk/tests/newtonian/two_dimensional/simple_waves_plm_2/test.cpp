@@ -42,7 +42,7 @@ public:
     outer_(0,width_,width_,0),
     tess_(),
     eos_(read_number("adiabatic_index.txt")),
-    interpm_(eos_,outer_,&hbc_,true,false),
+    interpm_(eos_,outer_,hbc_,true,false),
     density_1d_(1,10,0.3,0.5),
     density_(density_1d_),
     pressure_1d_(density_1d_,1,
@@ -63,18 +63,18 @@ public:
     point_motion_(bpm_,hbc_),
     force_(),
     sim_(init_points_,
-	 &tess_,
-	 &interpm_,
+	 tess_,
+	 interpm_,
 	 density_,
 	 pressure_,
 	 xvelocity_,
 	 yvelocity_,
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

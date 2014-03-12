@@ -196,4 +196,11 @@ Vector2D calc_mid_point(Vector2D const& v1, Vector2D const& v2);
  */
 Vector2D zcross(Vector2D const& v);
 
+/*! \brief Converts from polar coordinates to cartesian coordinates
+  \param radius Radius
+  \param angle Angle relative to the x axis
+  \return Same vector in cartesian coordiantes
+ */
+Vector2D pol2cart(double radius, double angle);
+
 #endif // GEOMETRY_HPP

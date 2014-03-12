@@ -114,14 +114,11 @@ public:
    */
   void overrideCFL(double cfl);
 
-  /*! \brief Advances the simulation in time
-    \return Void
-   */
+  //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
   /*! \brief Advances the simulation in time
     \param order Order of accuracy of the scheme
-    \return Void
    */
   void TimeAdvanceRK(int order);
 
@@ -137,7 +134,7 @@ public:
     \param i Vertex index
     \return Position of cell vertex
   */
-  double GetVertexPosition(int i) const;
+  double GetVertexPosition(size_t i) const;
 
   /*! \brief Returns the number of cells
    */
@@ -147,13 +144,13 @@ public:
     \param i Cell index
     \return Primitive variables in a hydrodynamic cells
   */
-  Primitive GetCell(int i) const;
+  Primitive GetCell(size_t i) const;
   
   /*! \brief Returns the position of the center of the cell
   \param index Cell index
   \return Position of cell center
   */
-  double GetCellCenter(int index) const;
+  double GetCellCenter(size_t index) const;
 
   /*! \brief Returns the time of the simulation
     \return Time

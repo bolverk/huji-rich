@@ -31,14 +31,6 @@ namespace {
   private:
     ofstream file_;
   };
-
-void write_output(hdsim const& sim)
-{
-  write_edges_and_neighbors(sim, "edges.txt");
-  write_generating_points(sim,"pointpos.txt");
-  write_cells_property(sim,"pressure",
-		       "pressures.txt");
-}
 }
 
 int main(void)

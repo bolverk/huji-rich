@@ -1,21 +1,21 @@
-#include "../source/tessellation/VoronoiMesh.hpp"
-#include "../source/newtonian/two_dimensional/hdsim2d.hpp"
-#include "../source/newtonian/common/hllc.hpp"
-#include "../source/newtonian/common/ideal_gas.hpp"
-#include "../source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "../source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "../source/newtonian/two_dimensional/hydro_boundary_conditions/InFlow.hpp"
-#include "../source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/eulerian.hpp"
-#include "../source/misc/mesh_generator.hpp"
-#include "../source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
-#include "../source/misc/int2str.hpp"
-#include "../source/newtonian/two_dimensional/source_terms/CenterGravity.hpp"
-#include "../source/newtonian/two_dimensional/source_terms/SeveralSources.hpp"
-#include "../source/newtonian/two_dimensional/custom_evolutions/ConstantPrimitiveEvolution.hpp"
-#include "../source/newtonian/two_dimensional/linear_gauss_scalar.hpp"
+#include "source/tessellation/VoronoiMesh.hpp"
+#include "source/newtonian/two_dimensional/hdsim2d.hpp"
+#include "source/newtonian/common/hllc.hpp"
+#include "source/newtonian/common/ideal_gas.hpp"
+#include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
+#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "source/newtonian/two_dimensional/hydro_boundary_conditions/InFlow.hpp"
+#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
+#include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
+#include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/misc/int2str.hpp"
+#include "source/newtonian/two_dimensional/source_terms/CenterGravity.hpp"
+#include "source/newtonian/two_dimensional/source_terms/SeveralSources.hpp"
+#include "source/newtonian/two_dimensional/custom_evolutions/ConstantPrimitiveEvolution.hpp"
 #include "binary_outflow.hpp"
 
+// Finds the indeces of the cell and its neighbors that is at a location point
 vector<int> FindCells(Vector2D const& point,Tessellation const& tess,int nx)
 {
 	int N=tess.GetPointNo();
@@ -70,12 +70,18 @@ int main(void)
 	// Set up the initial Hydro
 	double rho=0.001;
 	double P=0.001;
+	Vector2D loc1(-0.4,0);
+	Vector2D loc2(0.3,0);
+	double StarR=0.04;
+	double star_mass=1;
+	double softening_scale=0.01;
+	double v_outflow=10;
+
 	Uniform2D density(rho);
 	Uniform2D pressure(P);
-	Uniform2D xvelocity(0);
-	Uniform2D yvelocity(0);
+	BinaryOutflowVelocity xvelocity(StarR,v_outflow,loc1,Xaxis);
+	BinaryOutflowVelocity yvelocity(StarR,v_outflow,loc1,Yaxis);
 
-	
 	// Set the hydro boundary conditions
 	Primitive inflow_primitive;
 	inflow_primitive.Density=rho;
@@ -88,56 +94,41 @@ int main(void)
 	InFlow hbc(inflow_primitive,rs,outer_entropy);
 
 	// Set up the interpolation
-	LinearGaussConsistent interpolation(eos,outer,&hbc);
+	LinearGaussConsistent interpolation(eos,outer,hbc);
 
 	// Set up the external source term
-	double star_mass=1;
-	double softening_scale=0.01;
-	double x1=-0.4;
-	double x2=0.3;
-	double y1=0;
-	double y2=0;
-	double mdot=0.01;
-	double cs=9.5;
-	CenterGravity gravity1(star_mass,softening_scale,Vector2D(x1,y1));
-	CenterGravity gravity2(4*star_mass,softening_scale,Vector2D(x2,y2));
-	BinaryOutflow star_output(mdot,0.01*gamma*cs*cs/(gamma-1),cs,npointsx,npointsy);
-	ConservativeForce gforce1(&gravity1);
-	ConservativeForce gforce2(&gravity2);
+	CenterGravity gravity1(2*star_mass,softening_scale,loc1);
+	CenterGravity gravity2(star_mass,softening_scale,loc2);
+	ConservativeForce gforce1(gravity1);
+	ConservativeForce gforce2(gravity2);
 	vector<SourceTerm*> forces;
 	forces.push_back(&gforce1);
 	forces.push_back(&gforce2);
-	forces.push_back(&star_output);
 
 	SeveralSources force(forces);
 
 	// Set up the simulation
-	hdsim sim(InitPoints,&tess,&interpolation,density,pressure,xvelocity,
-		yvelocity,eos,rs,&pointmotion,&force,&outer,&hbc);
+	hdsim sim(InitPoints,tess,interpolation,density,pressure,xvelocity,
+		yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
 	// Set cold flows on
 	double kineticfraction=0.01;
 	double gravityfraction=0.01;
 	sim.SetColdFlows(kineticfraction,gravityfraction);
 
-	// Define the interpolation for the cold flows
-	LinearGaussScalar sinterp(&interpolation,&hbc);
-	sim.setTracerInterpolation(&sinterp);
-
-	// Initialize the outflow
-	star_output.Init(tess,x1,y1);
-
-	// Set the outflow cell to be constant
+	// Set the outflow cells to be constant
 	ConstantPrimitiveEvolution ouflow_evolve;
-	sim.CellsEvolve[star_output.GetCellIndex()]=&ouflow_evolve;
+	vector<int> sink_cells=FindCells(loc1,tess,npointsx);
+	for(size_t i=0;i<(int)sink_cells.size();++i)
+		sim.CellsEvolve[sink_cells[i]]=&ouflow_evolve;
 
 	// Set custom evolution for 2nd star in order to remove mass
-	vector<int> sink_cells=FindCells(Vector2D(x2,y2),tess,npointsx);
-	for(size_t i=0;i<sink_cells.size();++i)
+	sink_cells=FindCells(loc2,tess,npointsx);
+	for(size_t i=0;i<(int)sink_cells.size();++i)
 		sim.CellsEvolve[sink_cells[i]]=&ouflow_evolve;
 
 	// Set the first time step
-	sim.SetTimeStepExternal(0.001);
+	sim.SetTimeStepExternal(0.0001);
 
 	// Choose the Courant number
 	double cfl=0.7;
@@ -166,7 +157,7 @@ int main(void)
 			{
 				last_dump_time=sim.GetTime();
 				++dump_number;
-				BinOutput("c:\\sim_data\\output"+int2str(dump_number)+".bin",sim,tess);
+				write_snapshot_to_hdf5(sim,"c:\\sim_data\\output"+int2str(dump_number)+".bin");
 			}
 
 			// Advance one time step
@@ -177,7 +168,7 @@ int main(void)
 		}
 		catch(UniversalError const& eo)
 		{
-			DisplayError(eo,sim.GetCycle());
+			DisplayError(eo);
 		}
 	}
 

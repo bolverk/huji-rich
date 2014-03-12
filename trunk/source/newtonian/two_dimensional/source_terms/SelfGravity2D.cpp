@@ -1,6 +1,5 @@
 #include "SelfGravity2D.hpp"
 #include "../../../misc/universal_error.hpp"
-#include <fstream>
 
 SelfGravity::SelfGravity(double OpenAngle, double hFactor):
 _counter(0),
@@ -16,7 +15,7 @@ SelfGravity::~SelfGravity()
 {
 }
 
-Vector2D SelfGravity::Calculate(Tessellation const* tess,
+Vector2D SelfGravity::Calculate(Tessellation const& tess,
 	vector<Primitive> const& cell,int point)
 {
 	if(_counter==0)
@@ -27,8 +26,8 @@ Vector2D SelfGravity::Calculate(Tessellation const* tess,
 		h.resize(n);
 		for(int i=0;i<n;++i)
 		{
-			masses[i]=cell[i].Density*tess->GetVolume(i);
-			h[i]=tess->GetWidth(i)*_Factor;
+			masses[i]=cell[i].Density*tess.GetVolume(i);
+			h[i]=tess.GetWidth(i)*_Factor;
 		}
 		// Create the tree 
 		ANNkd_tree *tree;
@@ -38,7 +37,7 @@ Vector2D SelfGravity::Calculate(Tessellation const* tess,
 		treePoints=annAllocPts(n,2);
 		for(int i=0;i<n;++i)
 		{
-			pvec=tess->GetCellCM(i);
+			pvec=tess.GetCellCM(i);
 			treePoints[i][0]=pvec.x;
 			treePoints[i][1]=pvec.y;
 		}
@@ -48,7 +47,7 @@ Vector2D SelfGravity::Calculate(Tessellation const* tess,
 		_tree=tree;
 	}
 	Vector2D pvec;
-	pvec=tess->GetCellCM(point);
+	pvec=tess.GetCellCM(point);
 	vector<double> qpoint;
 	qpoint.resize(2);
 	qpoint[0]=pvec.x;
@@ -69,12 +68,12 @@ Vector2D SelfGravity::Calculate(Tessellation const* tess,
 }
 
 Vector2D SelfGravity::Calculate
-	(Tessellation const* tess,
+	(Tessellation const& tess,
 	vector<Primitive> const& cells,
 	int point,
 	vector<Conserved> const& /*fluxes*/,
 	vector<Vector2D> const& /*point_velocity*/,
-	HydroBoundaryConditions const* /*hbc*/,
+	HydroBoundaryConditions const& /*hbc*/,
 	double /*t*/,
 	double /*dt*/)
 {

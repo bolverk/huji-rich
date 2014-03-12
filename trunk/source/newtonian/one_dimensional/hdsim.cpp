@@ -18,30 +18,30 @@ HydroSnapshot1D::HydroSnapshot1D
   extensive(rextensive) {}
 
 namespace {
-vector<Primitive> InitialiseCells
-(vector<double> const& vertices,
- SpatialDistribution1D const& density,
- SpatialDistribution1D const& pressure,
- SpatialDistribution1D const& paravelocity,
- SpatialDistribution1D const& perpvelocity,
- EquationOfState const& eos)
-{
-  vector<Primitive> res(vertices.size()-1);
-  for(int i = 0; i<(int)vertices.size() - 1; i++){
-    double r = 0.5*(vertices[i] + vertices[i+1]);
-    double d = density.EvalAt(r);
-    double p = pressure.EvalAt(r);
-    Vector2D v(paravelocity.EvalAt(r),
-	       perpvelocity.EvalAt(r));
-    res[i] = CalcPrimitive(d, p, v, eos);
+  vector<Primitive> InitialiseCells
+  (vector<double> const& vertices,
+   SpatialDistribution1D const& density,
+   SpatialDistribution1D const& pressure,
+   SpatialDistribution1D const& paravelocity,
+   SpatialDistribution1D const& perpvelocity,
+   EquationOfState const& eos)
+  {
+    vector<Primitive> res(vertices.size()-1);
+    for(size_t i = 0; i<vertices.size() - 1; i++){
+      const double r = 0.5*(vertices[i] + vertices[i+1]);
+      const double d = density.EvalAt(r);
+      const double p = pressure.EvalAt(r);
+      const Vector2D v(paravelocity.EvalAt(r),
+		       perpvelocity.EvalAt(r));
+      res[i] = CalcPrimitive(d, p, v, eos);
+    }
+    return res;
   }
-  return res;
-}
 }
 
 // Diagnostics
 
-double hdsim1D::GetCellCenter(int index) const
+double hdsim1D::GetCellCenter(size_t index) const
 {
   return 0.5*(_Vertices[index]+
 	      _Vertices[index+1]);
@@ -67,7 +67,7 @@ int hdsim1D::GetVertexNo(void) const
   return (int)_Vertices.size();
 }
 
-double hdsim1D::GetVertexPosition(int i) const
+double hdsim1D::GetVertexPosition(size_t i) const
 {
   return _Vertices[i];
 }
@@ -77,7 +77,7 @@ int hdsim1D::GetCellNo(void) const
   return (int)_Cells.size();
 }
 
-Primitive hdsim1D::GetCell(int i) const
+Primitive hdsim1D::GetCell(size_t i) const
 {
   return _Cells[i];
 }
@@ -85,29 +85,29 @@ Primitive hdsim1D::GetCell(int i) const
 // External functions
 
 namespace {
-vector<Conserved> CalcConservedIntensive(vector<Primitive> p)
-{
-  vector<Conserved> res(p.size());
-  for(int i=0;i<(int)p.size();i++){
-    res[i] = Primitive2Conserved(p[i]);
+  vector<Conserved> CalcConservedIntensive(vector<Primitive> p)
+  {
+    vector<Conserved> res(p.size());
+    for(size_t i=0;i<p.size();i++){
+      res[i] = Primitive2Conserved(p[i]);
+    }
+    return res;
   }
-  return res;
-}
 
-double GetVolume(vector<double> v, int i)
-{
-  return v[i+1] - v[i];
-}
-
-vector<Conserved> CalcConservedExtensive
-(vector<Conserved> const& ci, vector<double> const& v)
-{
-  vector<Conserved> res(ci.size());
-  for(int i=0;i<(int)ci.size();i++){
-    res[i] = GetVolume(v, i)*ci[i];
+  double GetVolume(vector<double> v, size_t i)
+  {
+    return v[i+1] - v[i];
   }
-  return res;
-}
+
+  vector<Conserved> CalcConservedExtensive
+  (vector<Conserved> const& ci, vector<double> const& v)
+  {
+    vector<Conserved> res(ci.size());
+    for(size_t i=0;i<ci.size();i++){
+      res[i] = GetVolume(v, i)*ci[i];
+    }
+    return res;
+  }
 }
 
 hdsim1D::hdsim1D
@@ -137,142 +137,134 @@ hdsim1D::hdsim1D
   tracers_extensive_(vector<vector<double> >()) {}
 
 namespace {
-vector<double> CalcVertexVelocities
-(vector<double> const& Vertices, 
- vector<Primitive> const& Cells,
- VertexMotion const& vm)
-{
-  vector<double> res(Vertices.size());
-  for(int i = 0; i<(int)Vertices.size();i++)
-    res[i] = vm.CalcVelocity(i, Vertices, Cells);
+  vector<double> CalcVertexVelocities
+  (vector<double> const& Vertices, 
+   vector<Primitive> const& Cells,
+   VertexMotion const& vm)
+  {
+    vector<double> res(Vertices.size());
+    for(size_t i = 0; i<Vertices.size();i++)
+      res[i] = vm.CalcVelocity(int(i), Vertices, Cells);
 
-  return res;
-}
+    return res;
+  }
 
-void riemann_solver_rethrow(Primitive const& left,
-			    Primitive const& right,
-			    int idx, double pos,
-			    double vertex_velocity,
-			    UniversalError& eo)
-{
-  eo.AddEntry("riemann solver stage data starts here",0);
-  eo.AddEntry("left density",left.Density);
-  eo.AddEntry("left pressure",left.Pressure);
-  eo.AddEntry("left x velocity",left.Velocity.x);
-  eo.AddEntry("left y velocity",left.Velocity.y);
-  eo.AddEntry("left sound speed",left.SoundSpeed);
-  eo.AddEntry("right density",right.Density);
-  eo.AddEntry("right pressure",right.Pressure);
-  eo.AddEntry("right x velocity",right.Velocity.x);
-  eo.AddEntry("right y velocity",right.Velocity.y);
-  eo.AddEntry("right sound speed",right.SoundSpeed);
-  eo.AddEntry("right energy",right.Energy);
-  eo.AddEntry("interface index",(double)idx);
-  eo.AddEntry("interface position",pos);
-  eo.AddEntry("interface velocity",vertex_velocity);
-  throw eo;
-}
+  __attribute__((noreturn)) void riemann_solver_rethrow
+  (Primitive const& left,
+   Primitive const& right,
+   size_t idx, 
+   double pos,
+   double vertex_velocity,
+   UniversalError& eo)
+  {
+    eo.AddEntry("riemann solver stage data starts here",0);
+    eo.AddEntry("left density",left.Density);
+    eo.AddEntry("left pressure",left.Pressure);
+    eo.AddEntry("left x velocity",left.Velocity.x);
+    eo.AddEntry("left y velocity",left.Velocity.y);
+    eo.AddEntry("left sound speed",left.SoundSpeed);
+    eo.AddEntry("right density",right.Density);
+    eo.AddEntry("right pressure",right.Pressure);
+    eo.AddEntry("right x velocity",right.Velocity.x);
+    eo.AddEntry("right y velocity",right.Velocity.y);
+    eo.AddEntry("right sound speed",right.SoundSpeed);
+    eo.AddEntry("right energy",right.Energy);
+    eo.AddEntry("interface index",(double)idx);
+    eo.AddEntry("interface position",pos);
+    eo.AddEntry("interface velocity",vertex_velocity);
+    throw eo;
+  }
 
-vector<Conserved> SolveRiemannProblems
-(vector<double> const& Vertices, 
- vector<Primitive> const& Cells,
- SpatialReconstruction1D const& Interpolation,
- vector<double> const& VertexVelocity,
- RiemannSolver const& rs,
- BoundaryConditions1D const& bc,
- double dt)
-{
-  vector<Conserved> res(Vertices.size());
-  for(int i = 1;i<(int)Vertices.size()-1; i++){
-    Primitive left = Interpolation.InterpState(Vertices,
-					       Cells, 
-					       VertexVelocity[i],
-					       i, 0,dt);
-    Primitive right = Interpolation.InterpState(Vertices,
-						Cells, 
-						VertexVelocity[i],
-						i, 1,dt);
-    try{
-      res[i] = rs.Solve(left, right, VertexVelocity[i]);
+  vector<Conserved> SolveRiemannProblems
+  (vector<double> const& Vertices, 
+   vector<Primitive> const& Cells,
+   SpatialReconstruction1D const& Interpolation,
+   vector<double> const& VertexVelocity,
+   RiemannSolver const& rs,
+   BoundaryConditions1D const& bc,
+   double dt)
+  {
+    vector<Conserved> res(Vertices.size());
+    for(size_t i = 1;i<Vertices.size()-1; i++){
+      const Primitive left = Interpolation.InterpState
+	(Vertices, Cells, VertexVelocity[i], int(i), 0,dt);
+      const Primitive right = Interpolation.InterpState
+	(Vertices, Cells, VertexVelocity[i], int(i), 1,dt);
+      try{
+	res[i] = rs.Solve(left, right, VertexVelocity[i]);
+      }
+      catch(UniversalError& eo){
+	riemann_solver_rethrow(left,
+			       right,
+			       i, 
+			       Vertices[i],
+			       VertexVelocity[i],
+			       eo);
+      }
     }
-    catch(UniversalError& eo){
-      riemann_solver_rethrow(left,
-			     right,
-			     i, Vertices[i],
-			     VertexVelocity[i],
-			     eo);
+    res[0] = bc.CalcFlux(Vertices, Cells, rs, 
+			 VertexVelocity,0);
+    res[Vertices.size()-1] = 
+      bc.CalcFlux(Vertices, Cells, rs, 
+		  VertexVelocity, (int)Vertices.size()-1);
+    return res;
+  }
+
+  double MaxTimeStepForCell(double width, Primitive const& p)
+  {
+    return width/(p.SoundSpeed+abs(p.Velocity.x));
+  }
+
+  double MaxTimeStep(vector<double> const& Vertices,
+		     vector<Primitive> const& Cells)
+  {
+    double res = MaxTimeStepForCell(Vertices[1]-Vertices[0], Cells[0]);
+    for(size_t i=1;i<Vertices.size()-1;i++){
+      res = min(res,MaxTimeStepForCell
+		(Vertices[i+1]-Vertices[i],Cells[i]));
+    }
+    return res;
+  }
+
+  void UpdateConservedExtensive
+  (vector<Conserved> const& Fluxes, double dt,
+   vector<Conserved>& ConservedExtensive)
+  {
+    for(size_t i = 0; i<ConservedExtensive.size(); i++){
+      ConservedExtensive[i] += dt*Fluxes[i];
+      ConservedExtensive[i] -= dt*Fluxes[i+1];
     }
   }
-  res[0] = bc.CalcFlux(Vertices, Cells, rs, 
-		       VertexVelocity,0);
-  res[Vertices.size()-1] = 
-    bc.CalcFlux(Vertices, Cells, rs, 
-		VertexVelocity, (int)Vertices.size()-1);
-  return res;
-}
 
-double MaxTimeStepForCell(double width, Primitive const& p)
-{
-  return width/(p.SoundSpeed+abs(p.Velocity.x));
-}
-
-double MaxTimeStep(vector<double> const& Vertices,
-		   vector<Primitive> const& Cells)
-{
-  double res = MaxTimeStepForCell(Vertices[1]-Vertices[0], Cells[0]);
-  for(int i=1;i<(int)Vertices.size()-1;i++){
-    res = min(res,MaxTimeStepForCell
-	      (Vertices[i+1]-Vertices[i],Cells[i]));
+  void MoveVertices(vector<double> const& VertexVelocity,
+		    double dt, vector<double>& Vertices)
+  {
+    for(size_t i=0;i<Vertices.size();i++){
+      Vertices[i] += dt*VertexVelocity[i];
+    }
   }
-  return res;
-}
 
-void UpdateConservedExtensive
-(vector<Conserved> const& Fluxes, double dt,
- vector<Conserved>& ConservedExtensive)
-{
-  for(int i = 0; i<(int)ConservedExtensive.size(); i++){
-    ConservedExtensive[i] += dt*Fluxes[i];
-    ConservedExtensive[i] -= dt*Fluxes[i+1];
+  vector<Conserved> UpdateConservedIntensive
+  (vector<Conserved> const& ConservedExtensive, 
+   vector<double> const& Vertices)
+  {
+    vector<Conserved> res(ConservedExtensive.size());
+    for(size_t i=0;i<ConservedExtensive.size();i++){
+      res[i] = ConservedExtensive[i] / 
+	GetVolume(Vertices, i);
+    }
+    return res;
   }
-}
 
- void MoveVertices(vector<double> const& VertexVelocity,
-		  double dt, vector<double>& Vertices)
- {
-   for(int i=0;i<(int)Vertices.size();i++){
-     Vertices[i] += dt*VertexVelocity[i];
-   }
- }
-
-vector<Conserved> UpdateConservedIntensive
-(vector<Conserved> const& ConservedExtensive, 
- vector<double> const& Vertices)
-{
-  vector<Conserved> res(ConservedExtensive.size());
-  for(int i=0;i<(int)ConservedExtensive.size();i++){
-    res[i] = ConservedExtensive[i] / 
-      GetVolume(Vertices, i);
-  }
-  return res;
-}
-
-vector<Primitive> UpdatePrimitives
-(vector<Conserved> const& ConservedIntensive,
- EquationOfState const& eos)
-{
-  vector<Primitive> res(ConservedIntensive.size());
-  for(int i=0;i<(int)ConservedIntensive.size();i++){
-    try{
+  vector<Primitive> UpdatePrimitives
+  (vector<Conserved> const& ConservedIntensive,
+   EquationOfState const& eos)
+  {
+    vector<Primitive> res(ConservedIntensive.size());
+    for(size_t i=0;i<ConservedIntensive.size();i++)
       res[i] = Conserved2Primitive(ConservedIntensive[i], eos);
-    }
-    catch(UniversalError& eo){
-      eo.AddEntry("cell number",i);
-      throw;
-    }
+    return res;
   }
-  return res;
-}
 }
 
 void hdsim1D::overrideCFL(double cfl)
@@ -281,20 +273,20 @@ void hdsim1D::overrideCFL(double cfl)
 }
 
 namespace {
-void force_contribution
-(vector<double> const& vertices,
- vector<Primitive> const& cells,
- ExternalForces1D const& force,
- double t,
- double dt,
- vector<Conserved>& extensive)
-{
-  for(int i=0;i<(int)extensive.size();++i)
-    extensive[i] +=
-      dt*force.calc(vertices,
-		    cells,
-		    i, t, dt); 
-}
+  void force_contribution
+  (vector<double> const& vertices,
+   vector<Primitive> const& cells,
+   ExternalForces1D const& force,
+   double t,
+   double dt,
+   vector<Conserved>& extensive)
+  {
+    for(size_t i=0;i<extensive.size();++i)
+      extensive[i] +=
+	dt*force.calc(vertices,
+		      cells,
+		      int(i), t, dt); 
+  }
 }
 
 void hdsim1D::TimeAdvance(void)
@@ -326,81 +318,81 @@ void hdsim1D::TimeAdvance(void)
 }
 
 namespace{
-HydroSnapshot1D time_advance_1st_order
-(HydroSnapshot1D const& old,
- VertexMotion const& vm,
- SpatialReconstruction1D const& sr,
- RiemannSolver const& rs,
- BoundaryConditions1D const& bc,
- EquationOfState const& eos,
- ExternalForces1D const& force,
- double t, double dt)
-{
-  const vector<double> edge_velocity = CalcVertexVelocities
-    (old.edges,old.cells,vm);
+  HydroSnapshot1D time_advance_1st_order
+    (HydroSnapshot1D const& old,
+     VertexMotion const& vm,
+     SpatialReconstruction1D const& sr,
+     RiemannSolver const& rs,
+     BoundaryConditions1D const& bc,
+     EquationOfState const& eos,
+     ExternalForces1D const& force,
+     double t, double dt)
+  {
+    const vector<double> edge_velocity = CalcVertexVelocities
+      (old.edges,old.cells,vm);
 
-  const vector<Conserved> fluxes = SolveRiemannProblems
-    (old.edges,old.cells,sr,edge_velocity,rs,bc,dt);
+    const vector<Conserved> fluxes = SolveRiemannProblems
+      (old.edges,old.cells,sr,edge_velocity,rs,bc,dt);
 
-  vector<Conserved> extensive = old.extensive;
-  UpdateConservedExtensive(fluxes,dt,extensive);
-  force_contribution(old.edges,
-		     old.cells,
-		     force,
-		     t, dt,
-		     extensive);
+    vector<Conserved> extensive = old.extensive;
+    UpdateConservedExtensive(fluxes,dt,extensive);
+    force_contribution(old.edges,
+		       old.cells,
+		       force,
+		       t, dt,
+		       extensive);
   
-  vector<double> edges = old.edges;
-  MoveVertices(edge_velocity,dt,edges);
+    vector<double> edges = old.edges;
+    MoveVertices(edge_velocity,dt,edges);
 
-  const vector<Conserved> intensive = UpdateConservedIntensive(extensive,edges);
+    const vector<Conserved> intensive = UpdateConservedIntensive(extensive,edges);
 
-  const vector<Primitive> cells = UpdatePrimitives(intensive,eos);
+    const vector<Primitive> cells = UpdatePrimitives(intensive,eos);
 
-  return HydroSnapshot1D(edges,cells,intensive,extensive);
-}
+    return HydroSnapshot1D(edges,cells,intensive,extensive);
+  }
 
-HydroSnapshot1D time_advance_2nd_order
-(HydroSnapshot1D const& old,
- VertexMotion const& vm,
- SpatialReconstruction1D const& sr,
- RiemannSolver const& rs,
- BoundaryConditions1D const& bc,
- EquationOfState const& eos,
- ExternalForces1D const& force,
- double t, double dt)
-{
-  const HydroSnapshot1D mid = time_advance_1st_order
-    (old,vm,sr,rs,bc,eos,force,t,dt/2);
+  HydroSnapshot1D time_advance_2nd_order
+    (HydroSnapshot1D const& old,
+     VertexMotion const& vm,
+     SpatialReconstruction1D const& sr,
+     RiemannSolver const& rs,
+     BoundaryConditions1D const& bc,
+     EquationOfState const& eos,
+     ExternalForces1D const& force,
+     double t, double dt)
+  {
+    const HydroSnapshot1D mid = time_advance_1st_order
+      (old,vm,sr,rs,bc,eos,force,t,dt/2);
 
-  const vector<double> edge_velocity = CalcVertexVelocities
-    (mid.edges,mid.cells,vm);
+    const vector<double> edge_velocity = CalcVertexVelocities
+      (mid.edges,mid.cells,vm);
 
-  const vector<Conserved> fluxes = SolveRiemannProblems
-    (mid.edges,mid.cells,sr,edge_velocity,rs,bc,dt);
+    const vector<Conserved> fluxes = SolveRiemannProblems
+      (mid.edges,mid.cells,sr,edge_velocity,rs,bc,dt);
 
-  vector<Conserved> new_extensive = old.extensive;
-  UpdateConservedExtensive(fluxes,dt,new_extensive);
-  force_contribution(mid.edges,
-		     mid.cells,
-		     force,
-		     t+dt/2, dt,
-		     new_extensive);
+    vector<Conserved> new_extensive = old.extensive;
+    UpdateConservedExtensive(fluxes,dt,new_extensive);
+    force_contribution(mid.edges,
+		       mid.cells,
+		       force,
+		       t+dt/2, dt,
+		       new_extensive);
 
-  vector<double> new_edges = old.edges;
-  MoveVertices(edge_velocity,dt,new_edges);
+    vector<double> new_edges = old.edges;
+    MoveVertices(edge_velocity,dt,new_edges);
 
-  vector<Conserved> new_intensive = 
-    UpdateConservedIntensive(new_extensive,new_edges);
+    vector<Conserved> new_intensive = 
+      UpdateConservedIntensive(new_extensive,new_edges);
 
-  vector<Primitive> new_cells = 
-    UpdatePrimitives(new_intensive,eos);
+    vector<Primitive> new_cells = 
+      UpdatePrimitives(new_intensive,eos);
 
-  return HydroSnapshot1D(new_edges,
-			 new_cells,
-			 new_intensive,
-			 new_extensive);
-}
+    return HydroSnapshot1D(new_edges,
+			   new_cells,
+			   new_intensive,
+			   new_extensive);
+  }
 }
 
 void hdsim1D::TimeAdvanceRK(int order)
@@ -438,8 +430,8 @@ void hdsim1D::TimeAdvanceRK(int order)
 }
 
 /*
-void hdsim1D::AddTracer(SpatialReconstruction1D const& tracer)
-{
+  void hdsim1D::AddTracer(SpatialReconstruction1D const& tracer)
+  {
   for(int i=0;i<(int)
-}
+  }
 */

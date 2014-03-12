@@ -61,17 +61,30 @@ public:
 
   Primitive(void);
 
+  /*! \brief Class constructor
+    \param density_i Density
+    \param pressure_i Pressure
+    \param velocity_i Velocity
+    \param energy_i Energy
+    \param sound_speed_i Sound speed
+   */
+  Primitive(double density_i,
+	    double pressure_i,
+	    Vector2D const& velocity_i,
+	    double energy_i,
+	    double sound_speed_i);
+
   //! \brief Density
   double Density;
 
   //! \brief Pressure
   double Pressure;
 
-  //! \brief Thermal energy per unit mass
-  double Energy;
-
   //! \brief Velocity
   Vector2D Velocity;
+
+  //! \brief Thermal energy per unit mass
+  double Energy;
 
   //! \brief Speed of sound
   double SoundSpeed;

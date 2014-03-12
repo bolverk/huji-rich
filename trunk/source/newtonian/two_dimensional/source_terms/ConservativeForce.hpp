@@ -24,12 +24,12 @@ public:
 	\param dt The time step
 	\return The calculated acceleration
 	*/
-  virtual Vector2D Calculate(Tessellation const* tess,
+  virtual Vector2D Calculate(Tessellation const& tess,
 			     vector<Primitive> const& cells,
 			     int point,
 			     vector<Conserved> const& fluxes,
 			     vector<Vector2D> const& point_velocity,
-			     HydroBoundaryConditions const*hbc,
+			     HydroBoundaryConditions const& hbc,
 			     double time,
 			     double dt)=0;
 
@@ -46,18 +46,22 @@ public:
 	\param acc The acceleration force
 	\param DtCalc Should we calcualte the time step for the force
 	*/
-	ConservativeForce(Acceleration *acc,bool DtCalc=false);
+	ConservativeForce(Acceleration& acc,bool DtCalc=false);
 
 	/*!
 	\brief Class destructor
 	*/
 	~ConservativeForce(void);
 
-	Conserved Calculate(Tessellation const* tess,
-		vector<Primitive> const& cells,int point,vector<Conserved> const& fluxes,
-		vector<Vector2D> const& point_velocity,HydroBoundaryConditions const*hbc,
-		vector<vector<double> > const &tracer_extensive,vector<double> &dtracer,
-		double time,double dt);
+	Conserved Calculate(Tessellation const& tess,
+			    vector<Primitive> const& cells,
+			    int point,
+			    vector<Conserved> const& fluxes,
+			    vector<Vector2D> const& point_velocity,
+			    HydroBoundaryConditions const& hbc,
+			    vector<vector<double> > const &tracer_extensive,
+			    vector<double> &dtracer,
+			    double time,double dt);
 
 	/*!
 	\brief Returns a the smallest time step for all cells based on dt=sqrt(R/g) where R is the cell's width and g is the acceleration
@@ -66,16 +70,10 @@ public:
 	double GetTimeStep(void) const;
 
 private:
-	Acceleration *acc_;
+	Acceleration& acc_;
 	bool DtCalc_;
 	double dt_;
 	double last_time_;
-
-  /*
-	Vector2D MassFlux
-	(Tessellation const* tess,int point,
-	 vector<Conserved> const& fluxes,HydroBoundaryConditions const*hbc);
-  */
 
   ConservativeForce(const ConservativeForce& origin);
   ConservativeForce& operator=(const ConservativeForce& origin);

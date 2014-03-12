@@ -1,7 +1,7 @@
 #include "point_motion.hpp"
 
 vector<Vector2D> PointMotion::calcAllVelocities
-(Tessellation const* tess,
+(Tessellation const& tess,
  vector<Primitive> const& cells,
  double time)
 {

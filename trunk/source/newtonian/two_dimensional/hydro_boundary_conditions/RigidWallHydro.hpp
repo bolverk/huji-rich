@@ -20,20 +20,20 @@ public:
   //! \brief Class destructor
   ~RigidWallHydro();
 
-  Conserved CalcFlux(Tessellation const* tessellation,
+  Conserved CalcFlux(Tessellation const& tessellation,
 	  vector<Primitive> const& cells,Vector2D const& edge_velocity,
-	  Edge const& edge,SpatialReconstruction const* interp,double dt,
+	  Edge const& edge,SpatialReconstruction const& interp,double dt,
 	  double time) const;
 
   Vector2D CalcEdgeVelocity
-  (Tessellation const* tessellation,
+  (Tessellation const& tessellation,
    vector<Vector2D> const& point_velocities,
    Edge const& edge,
    double time) const;
 
-  bool IsBoundary(Edge const& edge,Tessellation const* Data)const;
+  bool IsBoundary(Edge const& edge,Tessellation const& Data)const;
 
-  bool IsGhostCell(int i,Tessellation const* Data) const;
+  bool IsGhostCell(int i,Tessellation const& Data) const;
   /*!
   \brief Returns the real cell on a boundary edge
   \param edge The edge
@@ -53,25 +53,25 @@ public:
 	\return The flux
 	*/
   Conserved CalcFluxCi
-  (Tessellation const* tessellation,
+  (Tessellation const& tessellation,
    vector<Primitive> const& cells,Vector2D const& edge_velocity,
-   RiemannSolver const* rs,Edge const& edge,
-   SpatialReconstruction const* interp,double dt,int ci) const;
+   RiemannSolver const& rs,Edge const& edge,
+   SpatialReconstruction const& interp,double dt,int ci) const;
 
   Primitive GetBoundaryPrimitive
   (Edge const& edge,
-   Tessellation const* Data,
+   Tessellation const& Data,
    vector<Primitive> const& cells,double time)const;
 
   vector<double> GetBoundaryTracers(Edge const& edge,
-   Tessellation const* Data,
+   Tessellation const& Data,
    vector<vector<double> > const& tracers,double time)const;
   
   vector<double> CalcTracerFlux
-  (Tessellation const* tessellation,vector<Primitive> const& cells,
+  (Tessellation const& tessellation,vector<Primitive> const& cells,
    vector<vector<double> > const& tracers,double dm,
    Edge const& edge,int index,double dt,
-   double time,SpatialReconstruction const* interp,Vector2D const& edge_velocity) const;
+   double time,SpatialReconstruction const& interp,Vector2D const& edge_velocity) const;
 
 private:
   

@@ -9,6 +9,8 @@
 #include "spatial_reconstruction1d.hpp"
 #include "../common/equation_of_state.hpp"
 
+using std::vector;
+
 //! \brief Interpolations for one dimensional simulation
 namespace interpolations1d{
 
@@ -27,7 +29,7 @@ namespace interpolations1d{
     Primitive InterpState(vector<double> const& vp,
 			  vector<Primitive> const& hv,
 			  double interface_speed,
-			  int i, int dir, double dt) const;
+			  size_t i, int dir, double dt) const;
 
   private:
     SpatialReconstruction1D const& naive_;

@@ -28,6 +28,7 @@
 #define ANN_kd_tree_H
 
 #include "ANNx.h"					// all ANN includes
+#include <algorithm>
 
 using namespace std;					// make std:: available
 

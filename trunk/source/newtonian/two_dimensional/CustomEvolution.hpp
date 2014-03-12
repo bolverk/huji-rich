@@ -36,14 +36,18 @@ public:
 	\param tracers The passive tracers
 	\return The flux
 	*/
-	virtual Conserved CalcFlux(Tessellation const* tessellation,
-		vector<Primitive> const& cells,	double dt,
-		SpatialReconstruction* interpolation,Edge const& edge,
-		Vector2D const& facevelocity,
-		RiemannSolver const& rs,int index,
-		HydroBoundaryConditions const* boundaryconditions,double time,
-		vector<vector<double> > const& tracers)=0; 
-	/*!
+	virtual Conserved CalcFlux
+	(Tessellation const& tessellation,
+	 vector<Primitive> const& cells,
+	 double dt,
+	 SpatialReconstruction& interpolation,
+	 Edge const& edge,
+	 Vector2D const& facevelocity,
+	 RiemannSolver const& rs,int index,
+	 HydroBoundaryConditions const& boundaryconditions,
+	 double time,
+	 vector<vector<double> > const& tracers)=0; 
+  /*!
 	\brief Updates the primitive variables of a cell
 	\param conservedintensive The intensive consrved variables
 	\param eos The equation of state
@@ -54,9 +58,14 @@ public:
 	\param tracers The extensive scalar tracers
 	\return The primitive of the cell
 	*/
-	virtual Primitive UpdatePrimitive(vector<Conserved> const& conservedintensive,
-		EquationOfState const* eos,vector<Primitive>& cells,int index,
-		Tessellation const* tess,double time,vector<vector<double> > const& tracers)=0;
+	virtual Primitive UpdatePrimitive
+	(vector<Conserved> const& conservedintensive,
+	 EquationOfState const& eos,
+	 vector<Primitive>& cells,
+	 int index,
+	 Tessellation const& tess,
+	 double time,
+	 vector<vector<double> > const& tracers)=0;
 
 	/*!
 	\brief Updates the tracer variables of a cell
@@ -67,9 +76,12 @@ public:
 	\param time The simulation time
 	\return The extensive tracers of the cell
 	*/
-	virtual vector<double> UpdateTracer(int index,vector<vector<double> >
-		const& tracers,vector<Primitive> const& cells,Tessellation const* tess,
-		double time)=0;
+	virtual vector<double> UpdateTracer
+	(int index,vector<vector<double> >
+	 const& tracers,
+	 vector<Primitive> const& cells,
+	 Tessellation const& tess,
+	 double time)=0;
 
 	/*! \brief Calculates the tracer flux for a custom evolution cell
 	\param tess Point and edge positions
@@ -84,10 +96,11 @@ public:
 	\param vface The velocity of the edge
 	\return The flux of the tracer
 	*/
-	virtual vector<double> CalcTracerFlux(Tessellation const* tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
-		double dm,Edge const& edge,int index,double dt,double time,
-		SpatialReconstruction const* interp,Vector2D const& vface) = 0;
+	virtual vector<double> CalcTracerFlux
+	(Tessellation const& tess,
+	 vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+	 double dm,Edge const& edge,int index,double dt,double time,
+	 SpatialReconstruction const& interp,Vector2D const& vface) = 0;
 
 
 	/*!

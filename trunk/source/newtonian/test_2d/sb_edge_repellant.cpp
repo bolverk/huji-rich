@@ -17,7 +17,7 @@ SBEdgeRepellant::SBEdgeRepellant(PointMotion& naive,
 
 Vector2D SBEdgeRepellant::CalcVelocity
 (int index, 
- Tessellation const* tess,
+ Tessellation const& tess,
  vector<Primitive> const& cells,
  double time)
 {
@@ -37,7 +37,7 @@ bool SBEdgeRepellant::should_be_decelerated(Vector2D const& mp,
     return false;
 }
 
-vector<Vector2D> SBEdgeRepellant::calcAllVelocities(Tessellation const* tess,
+vector<Vector2D> SBEdgeRepellant::calcAllVelocities(Tessellation const& tess,
 						  vector<Primitive> const& cells,
 						  double time)
 {
@@ -46,7 +46,7 @@ vector<Vector2D> SBEdgeRepellant::calcAllVelocities(Tessellation const* tess,
   for(int i=0;i<total_specials_;++i)
     result[i] = Vector2D(0,0);
   for(int i=total_specials_;i<(int)result.size();++i){
-    const Vector2D mp = tess->GetMeshPoint(i);
+    const Vector2D mp = tess.GetMeshPoint(i);
     const Vector2D vm = cells[i].Velocity;
     if(should_be_decelerated(mp,vm)){
       const Vector2D rhat = mp/abs(mp);

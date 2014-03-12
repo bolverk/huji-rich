@@ -2,13 +2,13 @@
 #include "../../../misc/universal_error.hpp"
 
 Primitive InFlow::GetBoundaryPrimitive(Edge const& /*edge*/,
-	Tessellation const* /*Data*/,vector<Primitive> const& /*cells*/,
+	Tessellation const& /*Data*/,vector<Primitive> const& /*cells*/,
 	double /*time*/)const
 {
 	return outer_;
 }
 
-vector<double> InFlow::GetBoundaryTracers(Edge const& /*edge*/,Tessellation const* /*Data*/,
+vector<double> InFlow::GetBoundaryTracers(Edge const& /*edge*/,Tessellation const& /*Data*/,
 	vector<vector<double> > const& /*tracers*/,double /*time*/)const
 {
 	return outer_tracer_;
@@ -21,10 +21,10 @@ outer_(InFlux), rs_(rs),outer_tracer_(outer_tracer) {}
 InFlow::~InFlow() {}
 
 Conserved InFlow::CalcFlux
-	(Tessellation const* tessellation,
+	(Tessellation const& tessellation,
 	vector<Primitive> const& cells,Vector2D const& edge_velocity,
 	Edge const& edge,
-	SpatialReconstruction const* interp,double dt,
+	SpatialReconstruction const& interp,double dt,
 	double /*time*/)const
 {
 	const bool cond1 = (edge.GetNeighbor(0)==-1)&&(edge.GetNeighbor(1)!=-1);
@@ -39,7 +39,7 @@ Conserved InFlow::CalcFlux
 		if(IsGhostCell(edge.GetNeighbor(i),tessellation))
 			states[i] = outer_;
 		else
-			states[i] = interp->Interpolate(tessellation,cells,dt,edge,i,InBulk,
+			states[i] = interp.Interpolate(tessellation,cells,dt,edge,i,InBulk,
 			edge_velocity);
 		states[i].Velocity.Set
 			(Projection(states[i].Velocity, n),
@@ -51,7 +51,7 @@ Conserved InFlow::CalcFlux
 	return res;
 }
 
-Vector2D InFlow::CalcEdgeVelocity(Tessellation const* /*tessellation*/,
+Vector2D InFlow::CalcEdgeVelocity(Tessellation const& /*tessellation*/,
 	vector<Vector2D> const& /*point_velocities*/,
 	Edge const& /*edge*/, double /*time*/) const
 {
@@ -59,29 +59,29 @@ Vector2D InFlow::CalcEdgeVelocity(Tessellation const* /*tessellation*/,
 	return res;
 }
 
-bool InFlow::IsBoundary(Edge const& edge,Tessellation const* tessellation)const
+bool InFlow::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation->GetPointNo()))
+	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
 		return true;
-	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation->GetPointNo()))
+	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }
 
-bool InFlow::IsGhostCell(int i,Tessellation const* Data) const
+bool InFlow::IsGhostCell(int i,Tessellation const& Data) const
 {
-	if(i>Data->GetPointNo()||i<0)
+	if(i>Data.GetPointNo()||i<0)
 		return true;
 	else
 		return false;
 }
 
 
-vector<double> InFlow::CalcTracerFlux(Tessellation const* tessellation,
+vector<double> InFlow::CalcTracerFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,
 	vector<vector<double> > const& tracers,double dm,
 	Edge const& edge,int /*index*/,double dt,
-	double /*time*/,SpatialReconstruction const* interp,
+	double /*time*/,SpatialReconstruction const& interp,
 	Vector2D const& edge_velocity) const
 {
 	vector<double> res(tracers[0].size());
@@ -92,7 +92,7 @@ vector<double> InFlow::CalcTracerFlux(Tessellation const* tessellation,
 			res.begin(),bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
 		else
 		{
-			res=interp->interpolateTracers(tessellation,cells,tracers,dt,edge,1,
+			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,1,
 				InBulk,edge_velocity);
 			transform(res.begin(),res.end(),res.begin(),
 				bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
@@ -105,7 +105,7 @@ vector<double> InFlow::CalcTracerFlux(Tessellation const* tessellation,
 			res.begin(),bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
 		else
 		{
-			res=interp->interpolateTracers(tessellation,cells,tracers,dt,edge,0,
+			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,0,
 				InBulk,edge_velocity);
 			transform(res.begin(),res.end(),res.begin(),
 				bind1st(multiplies<double>(),dm*dt*edge.GetLength()));

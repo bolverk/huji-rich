@@ -9,7 +9,7 @@
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
 
-using namespace std;
+using std::vector;
 
 //! \brief Base class for vertex motion
 class VertexMotion

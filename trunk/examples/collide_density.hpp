@@ -1,7 +1,7 @@
 #ifndef COLLIDE_DENSITY_HPP
 #define COLLIDE_DENSITY_HPP 1
 
-#include "../source/newtonian/two_dimensional/spatial_distribution2d.hpp"
+#include "source/newtonian/two_dimensional/spatial_distribution2d.hpp"
 
 /*!
 	\brief Class that shows an example of customizing a SpatialDistribution

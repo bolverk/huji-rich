@@ -8,10 +8,8 @@
 
 #include <string>
 
-using namespace std;
-
 /*! \brief Converts an integer to a string
-*/
-string int2str(int n);
+ */
+std::string int2str(int n);
 
 #endif

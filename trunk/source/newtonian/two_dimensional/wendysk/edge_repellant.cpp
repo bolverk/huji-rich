@@ -22,14 +22,14 @@ EdgeRepellant::EdgeRepellant(PointMotion& naive,double inner_radius,
 
 Vector2D EdgeRepellant::CalcVelocity
 (int index, 
- Tessellation const* tess,
+ Tessellation const& tess,
  vector<Primitive> const& cells,
  double time)
 {
   return naive_.CalcVelocity(index,tess,cells,time);
 }
 
-vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const* tess,
+vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const& tess,
 						  vector<Primitive> const& cells,
 						  double time)
 {
@@ -39,7 +39,7 @@ vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const* tess,
 		  init_angles_.resize(total_specials_);
 		  for(int i=0;i<total_specials_;++i)
 		  {
-			  const Vector2D point=tess->GetMeshPoint(i);
+			  const Vector2D point=tess.GetMeshPoint(i);
 			  init_angles_[i]=atan2(point.y,point.x);
 				  if(point.y<0)
 					  init_angles_[i]+=2*M_PI;
@@ -51,7 +51,7 @@ vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const* tess,
   {
 	  for(int i=0;i<total_specials_;++i)
 	  {
-		  const Vector2D point=tess->GetMeshPoint(i);
+		  const Vector2D point=tess.GetMeshPoint(i);
 		  const double r=abs(point);
 		  const Vector2D phi_hat(-point.y/r,point.x/r);
 		  const Vector2D r_hat(point.x/r,point.y/r);
@@ -72,21 +72,21 @@ vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const* tess,
 				  d_angle=time_angle-(p_angle-2*M_PI);
 		  if(i<inner_n1_)
 			result[i]=vmag*phi_hat+vmag*(1-r/inner_r1_)*r_hat+
-			r*vmag*d_angle*phi_hat/tess->GetWidth(i);
+			r*vmag*d_angle*phi_hat/tess.GetWidth(i);
 		  else
 			  if(i<n2start_)
 				  result[i]=Vector2D(0,0);
 			  else
 				  if(i<(n2start_+inner_n2_))
 					  result[i]=vmag*phi_hat+vmag*(1-r/inner_r2_)*r_hat+
-					  r*vmag*d_angle*phi_hat/tess->GetWidth(i);
+					  r*vmag*d_angle*phi_hat/tess.GetWidth(i);
 				  else
 					  if(i<n3start_)
 						  result[i]=Vector2D(0,0);
 					  else
 						  if(i<(n3start_+inner_n3_))
 							  result[i]=vmag*phi_hat+vmag*(1-r/inner_r3_)*r_hat
-							  +r*vmag*d_angle*phi_hat/tess->GetWidth(i);
+							  +r*vmag*d_angle*phi_hat/tess.GetWidth(i);
 						  else
 							  result[i]=Vector2D(0,0);
 	  }	  
@@ -96,7 +96,7 @@ vector<Vector2D> EdgeRepellant::calcAllVelocities(Tessellation const* tess,
     result[i] = Vector2D(0,0);
   for(int i=total_specials_;i<(int)result.size();++i)
   {
-    const Vector2D mp = tess->GetMeshPoint(i);
+    const Vector2D mp = tess.GetMeshPoint(i);
     const Vector2D vm = cells[i].Velocity;
     if((ScalarProd(mp,vm)>0&&abs(mp)>outer_radius_)||
        (ScalarProd(mp,vm)<0&&abs(mp)<inner_radius_)){

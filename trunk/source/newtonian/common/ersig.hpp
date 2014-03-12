@@ -9,7 +9,7 @@
 #include <string>
 #include "riemann_solver.hpp"
 
-using namespace std;
+using std::string;
 
 //! \brief Exact Riemann solver for ideal gas
 class ERSIG: public RiemannSolver

@@ -7,7 +7,6 @@
 #include "source/newtonian/one_dimensional/spatial_distribution1d.hpp"
 #include "source/newtonian/one_dimensional/eulerian1d.hpp"
 #include "source/newtonian/one_dimensional/outflow1d.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/newtonian/one_dimensional/zero_force_1d.hpp"
 #include "source/misc/int2str.hpp"
 #include "source/misc/utils.hpp"

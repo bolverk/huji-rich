@@ -55,8 +55,7 @@ void simulation2d::main_loop(hdsim& sim,
 		}
 		catch(UniversalError const& eo)
 		{
-			DisplayError(eo,sim.GetCycle());
-			throw;
+		  DisplayError(eo);
 		}
 		if(diagfunc)
 			diagfunc->diagnose(sim);

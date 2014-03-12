@@ -1,21 +1,6 @@
 #include "FreeFlow.hpp"
 #include "../hydrodynamics_2d.hpp"
 
-void FreeFlow::ReadMassFlux(string loc)const
-{
-	fstream myFile(loc.c_str(),ios::in | ios::binary);
-	myFile.read((char*)&mass_flux,sizeof(double));
-	cout<<"Read mass flux as "<<mass_flux<<endl;
-	myFile.close();
-}
-
-void FreeFlow::WriteMassFlux(string loc)const
-{
-	fstream myFile(loc.c_str(),ios::out | ios::binary);
-	myFile.write((char*)&mass_flux,sizeof(double));
-	myFile.close();
-}
-
 double FreeFlow::GetMassFlux(void) const
 {
 	return mass_flux;
@@ -28,7 +13,7 @@ FreeFlow::~FreeFlow(void) {}
 
 Primitive FreeFlow::GetBoundaryPrimitive
 	(Edge const& edge,
-	Tessellation const* /*Data*/,
+	Tessellation const& /*Data*/,
 	vector<Primitive> const& cells,double /*time*/)const
 {
 	if(edge.GetNeighbor(0)==-1)
@@ -39,7 +24,8 @@ Primitive FreeFlow::GetBoundaryPrimitive
 
 vector<double> FreeFlow::GetBoundaryTracers
 	(Edge const& edge,
-	Tessellation const* /*Data*/,vector<vector<double> > const& tracers,double
+	Tessellation const& /*Data*/,
+	 vector<vector<double> > const& tracers,double
 	/*time*/)const
 {
 	if(edge.GetNeighbor(0)==-1)
@@ -63,11 +49,11 @@ int calc_ci(Edge const& edge)
 }
 
 Conserved FreeFlow::CalcFlux
-	(Tessellation const* tessellation,
-	vector<Primitive> const& cells,Vector2D const& edge_velocity,
-	Edge const& edge,
-	SpatialReconstruction const* /*interp*/,double /*dt*/,
-	double /*time*/) const
+(Tessellation const& tessellation,
+ vector<Primitive> const& cells,Vector2D const& edge_velocity,
+ Edge const& edge,
+ SpatialReconstruction const& /*interp*/,double /*dt*/,
+ double /*time*/) const
 {
 	const int ci = calc_ci(edge);
 	const Vector2D p = Parallel(edge);
@@ -100,39 +86,39 @@ Conserved FreeFlow::CalcFlux
 }
 
 Vector2D FreeFlow::CalcEdgeVelocity
-	(Tessellation const* /*tessellation*/,
-	vector<Vector2D> const& /*point_velocities*/,
-	Edge const& /*edge*/, double /*time*/) const
+(Tessellation const& /*tessellation*/,
+ vector<Vector2D> const& /*point_velocities*/,
+ Edge const& /*edge*/, double /*time*/) const
 {
 	return Vector2D(0,0);
 }
 
 bool FreeFlow::IsBoundary
-	(Edge const& edge,Tessellation const* tessellation)const
+(Edge const& edge,Tessellation const& tessellation)const
 {
 	if((edge.GetNeighbor(0)<0)||
-		(edge.GetNeighbor(0)>=tessellation->GetPointNo()))
+		(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
 		return true;
 	if((edge.GetNeighbor(1)<0)||
-		(edge.GetNeighbor(1)>=tessellation->GetPointNo()))
+		(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }
 
-bool FreeFlow::IsGhostCell(int i,Tessellation const* Data) const
+bool FreeFlow::IsGhostCell(int i,Tessellation const& Data) const
 {
-	if(i>Data->GetPointNo()||i<0)
+	if(i>Data.GetPointNo()||i<0)
 		return true;
 	else
 		return false;
 }
 
 
-vector<double> FreeFlow::CalcTracerFlux(Tessellation const* /*tessellation*/,
+vector<double> FreeFlow::CalcTracerFlux(Tessellation const& /*tessellation*/,
 	vector<Primitive> const& /*cells*/,
 	vector<vector<double> > const& tracers,double dm,
 	Edge const& edge,int index,double dt,
-	double /*time*/,SpatialReconstruction const* /*interp*/,
+	double /*time*/,SpatialReconstruction const& /*interp*/,
 	Vector2D const& /*edge_velocity*/) const
 {
 	vector<double> res=tracers[index];

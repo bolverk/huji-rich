@@ -43,22 +43,22 @@ TriangleStep::TriangleStep(string const& point_motion):
   hbc_(rs_),
   force_(),
   sim_(init_points_,
-       &tess_,
-       &interp_method_,
+       tess_,
+       interp_method_,
        density_,
        pressure_,
        xvelocity_,
        yvelocity_,
        eos_,
        rs_,
-       &choose_between(point_motion,
-		       "eulerian",
-		       eulerian_,
-		       "lagrangian",
-		       lagrangian_),
-       &force_,
-       &outer_,
-       &hbc_) {}
+       choose_between(point_motion,
+		      "eulerian",
+		      eulerian_,
+		      "lagrangian",
+		      lagrangian_),
+       force_,
+       outer_,
+       hbc_) {}
 
 hdsim& TriangleStep::getSim(void)
 {

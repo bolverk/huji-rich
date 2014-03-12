@@ -4,47 +4,50 @@
 
 RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
 	double chi, 
-	double eta,
+	double eta,bool coldflows,
 	int innerNum,
 	OuterBoundary const* outer):
-pm_(pm), hbc_(hbc),
-	chi_(chi), 
+	pm_(pm), hbc_(hbc),
+	chi_(chi*((int)!coldflows)+((int)coldflows)*((int)chi==0.4)
+	+chi*((int)coldflows)*((int)chi!=0.4)), 
 	eta_(eta),
 	inner_(innerNum),
 	outer_(outer),
-	coldflows_(false),
+	coldflows_(coldflows),
 	lastdt_(0),
 	evencall_(false),
-	external_dt_(-1){}
+	external_dt_(-1)
+{}
 
 namespace {
-	void FixRefinedCells(vector<Vector2D> &vel,Tessellation const* tess,
-		HydroBoundaryConditions const* hbc)
+	void FixRefinedCells(vector<Vector2D> &vel,Tessellation const& tess,
+		HydroBoundaryConditions const& hbc)
 	{
-		for(size_t i=0;(int)i<tess->GetPointNo();++i)
+		for(size_t i=0;(int)i<tess.GetPointNo();++i)
 		{
-			const vector<int> edge_index(tess->GetCellEdges((int)i));
-			double R=tess->GetWidth((int)i);
-			Vector2D r=tess->GetMeshPoint((int)i);
+			const vector<int> edge_index(tess.GetCellEdges((int)i));
+			double R=tess.GetWidth((int)i);
+			Vector2D r=tess.GetMeshPoint((int)i);
 			for(size_t j=0;j<edge_index.size();++j)
 			{
-				if(DistanceToEdge(r,tess->GetEdge(edge_index[j]))<0.05*R)
+				if(DistanceToEdge(r,tess.GetEdge(edge_index[j]))<0.1*R)
 				{
-					if((int)i==tess->GetEdge(edge_index[j]).GetNeighbor(0))
+					const int other=tess.GetOriginalIndex(tess.GetEdge(edge_index[j])
+							.GetNeighbor(1));
+					if((int)i==tess.GetEdge(edge_index[j]).GetNeighbor(0)||
+						hbc.IsGhostCell(tess.GetEdge(edge_index[j]).GetNeighbor(1),
+						tess))
 					{
-						if(tess->GetEdge(edge_index[j]).GetNeighbor(1)==-1)
+						if(tess.GetEdge(edge_index[j]).GetNeighbor(1)==-1)
 							continue;
-						Vector2D p = Parallel(tess->GetEdge(edge_index[j]));
+						Vector2D p = Parallel(tess.GetEdge(edge_index[j]));
 						p=p/abs(p);
-						Vector2D n = r - tess->GetEdge(edge_index[j]).GetVertex(0);
+						Vector2D n = r - tess.GetEdge(edge_index[j]).GetVertex(0);
 						n-=ScalarProd(n,p)*p;
 						n=n/abs(n);
-						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[tess->GetEdge(
-							edge_index[j]).GetNeighbor(1)],p));
+						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[other],p));
 						vel[i]=ScalarProd(vel[i],n)*n+v_avg*p;
-						if(!hbc->IsGhostCell(tess->GetEdge(edge_index[j]).GetNeighbor(1),tess))
-							vel[tess->GetEdge(edge_index[j]).GetNeighbor(1)]=ScalarProd(
-							vel[tess->GetEdge(edge_index[j]).GetNeighbor(1)],n)*n+v_avg*p;
+						vel[other]=ScalarProd(vel[other],n)*n+v_avg*p;
 						continue;
 					}
 				}
@@ -53,15 +56,15 @@ namespace {
 	}
 
 	Vector2D calc_dw(int index,
-		Tessellation const* tess,
+		Tessellation const& tess,
 		double c,
 		double /*v*/,
 		double eta,
 		double chi)
 	{
-		const double R = tess->GetWidth(index);
-		const Vector2D s = tess->GetCellCM(index);
-		const Vector2D r = tess->GetMeshPoint(index);
+		const double R = tess.GetWidth(index);
+		const Vector2D s = tess.GetCellCM(index);
+		const Vector2D r = tess.GetMeshPoint(index);
 		const double d = abs(s-r);
 
 		if(d<(0.9*eta*R))
@@ -78,7 +81,7 @@ namespace {
 	}
 }
 
-Vector2D RoundCells::CalcVelocity(int index,Tessellation const* tessellation,
+Vector2D RoundCells::CalcVelocity(int index,Tessellation const& tessellation,
 	vector<Primitive> const& primitives,double time)
 {
 	if(index<inner_)
@@ -93,23 +96,18 @@ Vector2D RoundCells::CalcVelocity(int index,Tessellation const* tessellation,
 	}
 }
 
-void RoundCells::SetColdFlows(void)
-{
-	coldflows_=true;
-}
-
 namespace {
 
-	double numeric_velocity_scale(Tessellation const* tess,int index,double dt)
+	double numeric_velocity_scale(Tessellation const& tess,int index,double dt)
 	{
-		const Vector2D s = tess->GetCellCM(index);
-		const Vector2D r = tess->GetMeshPoint(index);
+		const Vector2D s = tess.GetCellCM(index);
+		const Vector2D r = tess.GetMeshPoint(index);
 		return abs(s-r)/dt;
 	}
 }
 
 vector<Vector2D> RoundCells::calcAllVelocities
-	(Tessellation const* tess,
+	(Tessellation const& tess,
 	vector<Primitive> const& cells,double time)
 {
 	vector<Vector2D> res;
@@ -117,11 +115,11 @@ vector<Vector2D> RoundCells::calcAllVelocities
 	res.reserve(n);
 	for(int i=0;i<n;++i)
 		res.push_back(CalcVelocity(i,tess,cells,time));
-	FixRefinedCells(res,tess,&hbc_);
+	FixRefinedCells(res,tess,hbc_);
 	if(!coldflows_&&outer_==0)
 		return res;
-	const vector<Vector2D> edge_vel=tess->calc_edge_velocities(&hbc_,res,time);
-	double dt=CalcTimeStep(tess,cells,edge_vel,&hbc_,time);
+	const vector<Vector2D> edge_vel=tess.calc_edge_velocities(&hbc_,res,time);
+	double dt=CalcTimeStep(tess,cells,edge_vel,hbc_,time);
 	if(!evencall_)
 	{
 		lastdt_=dt;
@@ -156,7 +154,7 @@ vector<Vector2D> RoundCells::calcAllVelocities
 				res[i]=res[i]+dw; 
 			}
 		}
-		FixRefinedCells(res,tess,&hbc_);
+		FixRefinedCells(res,tess,hbc_);
 		if(outer_!=0)
 			CorrectPointsOverShoot(res,dt,tess);
 	}
@@ -164,17 +162,17 @@ vector<Vector2D> RoundCells::calcAllVelocities
 }
 
 namespace {
-	void LimitNeighborVelocity(vector<Vector2D> &vel,Tessellation const* tess,
+	void LimitNeighborVelocity(vector<Vector2D> &vel,Tessellation const& tess,
 		int index,double factor)
 	{
-		vector<int> neigh=tess->GetNeighbors(index);
-		Vector2D r=tess->GetMeshPoint(index);
-		double R=tess->GetWidth(index);
+		vector<int> neigh=tess.GetNeighbors(index);
+		Vector2D r=tess.GetMeshPoint(index);
+		double R=tess.GetWidth(index);
 		for(size_t i=0;i<neigh.size();++i)
 		{
 			if(neigh[i]>-1)
 			{
-				if(r.distance(tess->GetMeshPoint(neigh[i]))<0.1*R)
+				if(r.distance(tess.GetMeshPoint(neigh[i]))<0.1*R)
 				{
 					vel[neigh[i]]=vel[neigh[i]]*factor;
 					return;
@@ -185,14 +183,14 @@ namespace {
 }
 
 void RoundCells::CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
-	Tessellation const* tess) const
+	Tessellation const& tess) const
 {
 	// check that we don't go outside grid
 	int n=(int)v.size();
 	const double inv_dt=1.0/dt;
 	for(int i=inner_;i<n;++i)
 	{
-		Vector2D point(tess->GetMeshPoint(i));
+		Vector2D point(tess.GetMeshPoint(i));
 		if((v[i].x*dt*2+point.x)>outer_->GetGridBoundary(Right))
 		{
 			double factor=0.9*(outer_->GetGridBoundary(Right)-

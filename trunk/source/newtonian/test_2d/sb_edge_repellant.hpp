@@ -29,11 +29,11 @@ public:
 		  int total_specials);
 
   Vector2D CalcVelocity(int index, 
-			Tessellation const* tess,
+			Tessellation const& tess,
 			vector<Primitive> const& cells,
 			double time);
 
-  vector<Vector2D> calcAllVelocities(Tessellation const* tess,
+  vector<Vector2D> calcAllVelocities(Tessellation const& tess,
 				     vector<Primitive> const& cells,
 				     double time);
 

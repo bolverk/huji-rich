@@ -26,7 +26,7 @@ public:
   DiskRemove2(double inner_radius1,double inner_radius2,double outer_radius,
 	  int total_specials,Vector2D s1,Vector2D s2);
 
-  vector<int> CellsToRemove(Tessellation const* tess,
+  vector<int> CellsToRemove(Tessellation const& tess,
 			    vector<Primitive> const& /*cells*/,
 			    vector<vector<double> > const& /*tracers*/,
 			    double /*time*/) const;
@@ -60,7 +60,7 @@ public:
 	  double max_radius,double max_volume,Vector2D s1,Vector2D s2);
 
   vector<int> CellsToRefine
-  (Tessellation const* tess,
+  (Tessellation const& tess,
    vector<Primitive> const& cells,vector<vector<double> > const& /*tracers*/,
    double /*time*/,vector<Vector2D> & directions ,vector<int> const& Removed);
 

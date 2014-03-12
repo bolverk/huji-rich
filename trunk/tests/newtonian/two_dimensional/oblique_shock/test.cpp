@@ -2,8 +2,6 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
 #include "source/misc/int2str.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/tessellation/tessellation.hpp"
@@ -26,193 +24,185 @@
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/InFlow.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 
 using namespace std;
 
 namespace {
-vector<Vector2D> CustomPoints(int nx,int ny,double sidex,double sidey)
-{
-  vector<Vector2D> res;
-  double widthx = sidex/(double)nx;
-  double widthy = sidey/(double)ny;
-  Vector2D point;
-  for(int i=0;i<nx;i++){
-    for(int j=0;j<ny;j++){
-      point.x = ((double)i+0.5)*widthx-sidex/2;
-      point.y = ((double)j+0.5)*widthy-sidey/2;
-      if(point.y>0.1*point.x-0.428)
-	res.push_back(point);
+  vector<Vector2D> CustomPoints(int nx,int ny,double sidex,double sidey)
+  {
+    vector<Vector2D> res;
+    double widthx = sidex/(double)nx;
+    double widthy = sidey/(double)ny;
+    Vector2D point;
+    for(int i=0;i<nx;i++){
+      for(int j=0;j<ny;j++){
+	point.x = ((double)i+0.5)*widthx-sidex/2;
+	point.y = ((double)j+0.5)*widthy-sidey/2;
+	if(point.y>0.1*point.x-0.428)
+	  res.push_back(point);
+      }
+    }
+    return res;
+  }
+
+  vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,double ymax)
+  {
+    double dy=ymax-ymin,dx=xmax-xmin;
+    double angle=atan2(dy,dx);
+    double length=sqrt(dy*dy+dx*dx);
+    double dl=length/PointNum;
+
+    vector<Vector2D> res;
+    Vector2D temp;
+
+    for(int i=0;i<PointNum;++i)
+      {
+	temp.Set(xmin+dl*(i+0.5)*cos(angle),ymin+dl*(i+0.5)*sin(angle));
+	res.push_back(temp);
+      }
+    return res;
+  }
+
+  class HBCData
+  {
+  public:
+
+    HBCData(Hllc const& rs,
+	    Primitive const& hv):
+      f_hbc_(rs),
+      r_hbc_(rs),
+      i_hbc_(hv,rs),
+      hbc_(i_hbc_,f_hbc_,r_hbc_,f_hbc_)
+    {
+      write_number(hv.Velocity.x/hv.SoundSpeed,
+		   "mach_number.txt");
+    }
+
+    CustomOuter& getHBC(void)
+    {
+      return hbc_;
+    }
+
+  private:
+    FreeFlow f_hbc_;
+    RigidWallHydro r_hbc_;
+    InFlow i_hbc_;
+    CustomOuter hbc_;
+  };
+
+  vector<Vector2D> create_initial_points
+  (double width, int np, int inner_num)
+  {
+    vector<Vector2D> init_points = CustomPoints(np,np,width,width);
+    vector<Vector2D> inner_boundary_1 = 
+      Line(inner_num,
+	   -width/2+0.01,
+	   width/2,
+	   -width/2,
+	   width/2-0.9);
+    const double alpha = atan((inner_boundary_1[0].y-inner_boundary_1[1].y)/
+			      (inner_boundary_1[0].x-inner_boundary_1[1].x));
+    write_number(alpha,"wedge_angle.txt");
+    vector<Vector2D> inner_boundary_2(inner_boundary_1.size());
+    const double a = 0.01;
+    for(int i=0;i<(int)inner_boundary_1.size();++i)
+      inner_boundary_2[i] = Vector2D(inner_boundary_1[i].x-a*sin(alpha),
+				     inner_boundary_1[i].y+a*cos(alpha));
+    init_points.insert
+      (init_points.begin(), inner_boundary_2.begin(), inner_boundary_2.end());
+    init_points.insert
+      (init_points.begin(), inner_boundary_1.begin(), inner_boundary_1.end());
+    return init_points;
+  }
+
+  class SimData
+  {
+  public:
+
+    SimData(double adiabatic_index = 5./3.,
+	    double width=1,
+	    int np=30,
+	    int inner_num=60):
+      eos_(adiabatic_index),
+      rs_(),
+      point_motion_(),
+      tess_(),
+      hbc_data_(rs_,CalcPrimitive(1,1,Vector2D(4,0),eos_)),
+      outer_(-width/2,width/2,width/2,-width/2),
+      interp_(eos_,outer_,hbc_data_.getHBC(),
+	      true, false),
+      force_(),
+      rigid_(),
+      sim_(create_initial_points(width,np,inner_num),
+	   tess_,
+	   interp_,
+	   Uniform2D(1),
+	   Uniform2D(1),
+	   Uniform2D(4),
+	   Uniform2D(0),
+	   eos_,
+	   rs_,
+	   point_motion_,
+	   force_,
+	   outer_,
+	   hbc_data_.getHBC())
+    {
+      for(int i=0;i<inner_num;++i)
+	sim_.CellsEvolve[i]=&rigid_;
+
+      write_number(adiabatic_index,
+		   "adiabatic_index.txt");
+    }
+
+    hdsim& getSim(void)
+    {
+      return sim_;
+    }
+
+  private:
+    const IdealGas eos_;
+    const Hllc rs_;
+    Eulerian point_motion_;
+    VoronoiMesh tess_;
+    HBCData hbc_data_;
+    SquareBox outer_;
+    LinearGaussConsistent interp_;
+    ZeroForce force_;
+    RigidBodyEvolve rigid_;
+    hdsim sim_;
+  };
+
+  void main_loop(hdsim& sim)
+  {
+    sim.SetCfl(0.5);
+    const int max_iter = 5e6;
+    const double tf = 1;
+    sim.SetEndTime(tf);
+    while(tf>sim.GetTime()){
+      try{
+	sim.TimeAdvance2Mid();
+      }
+      catch(UniversalError const& eo){
+	DisplayError(eo);
+      }
+
+      if(sim.GetCycle()>max_iter)
+	throw UniversalError
+	  ("Maximum number of iterations exceeded in main loop");
     }
   }
-  return res;
-}
-
-vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,double ymax)
-{
-  double dy=ymax-ymin,dx=xmax-xmin;
-  double angle=atan2(dy,dx);
-  double length=sqrt(dy*dy+dx*dx);
-  double dl=length/PointNum;
-
-  vector<Vector2D> res;
-  Vector2D temp;
-
-  for(int i=0;i<PointNum;++i)
-    {
-      temp.Set(xmin+dl*(i+0.5)*cos(angle),ymin+dl*(i+0.5)*sin(angle));
-      res.push_back(temp);
-    }
-  return res;
-}
-
-void write_output(hdsim const& sim)
-{
-  write_generating_points(sim,"mesh_points.txt");
-  write_cells_property(sim,"velocity y","yvelocities.txt");
-}
 }
 
 int main(void)
 {
-  // Initialization
-  double width = 1;
-  int np = 30;
-  int innerNum=np*2;
+  SimData sim_data;
 
-  // Define Outer Box
-  SquareBox outer(-width/2,width/2,width/2,-width/2);
+  hdsim& sim = sim_data.getSim();
 
-  // Create mesh points
-  vector<Vector2D> InitPoints=CustomPoints(np,np,width,width);
-  vector<Vector2D> InnerBoundary1=Line(innerNum,-width/2+0.01,width/2,-width/2,width/2-0.9);
-  vector<Vector2D> InnerBoundary2;
-  Vector2D temp;
-  double alpha=atan((InnerBoundary1[0].y-InnerBoundary1[1].y)/
-		    (InnerBoundary1[0].x-InnerBoundary1[1].x));
-  write_number(alpha,"wedge_angle.txt");
-  double a=0.01;
-  for(int i=0;i<(int)InnerBoundary1.size();++i)
-    {
-      temp.Set(InnerBoundary1[i].x-a*sin(alpha),
-	       InnerBoundary1[i].y+a*cos(alpha));
-      InnerBoundary2.push_back(temp);
-    }
-	
-  InitPoints.insert(InitPoints.begin(),InnerBoundary2.begin(),InnerBoundary2.end());
-  InitPoints.insert(InitPoints.begin(),InnerBoundary1.begin(),InnerBoundary1.end());
+  main_loop(sim);
 
-  //EOS
-  IdealGas eos(5./3.);
-  write_number(eos.getAdiabaticIndex(),"adiabatic_index.txt");
-  Hllc rs;
-
-  // Hydro boundary conditions
-  FreeFlow f_hbc(rs);
-  RigidWallHydro r_hbc(rs);
-
-  Primitive InFlux;
-  InFlux.Density=1;
-  InFlux.Pressure=1;
-  InFlux.Velocity.Set(4,0);
-  InFlux.Energy=eos.dp2e(InFlux.Density,InFlux.Pressure);
-  InFlux.SoundSpeed=eos.dp2c(InFlux.Density,InFlux.Pressure);
-  write_number(InFlux.Velocity.x/InFlux.SoundSpeed,
-	       "mach_number.txt");
-
-  InFlow i_hbc(InFlux, rs);
-
-  CustomOuter hbc(&i_hbc,&f_hbc,&r_hbc,&f_hbc);	
-
-  // Create tessellation structure
-  VoronoiMesh tess;
-
-  // Spatial interpolation
-  LinearGaussConsistent interpm(eos,outer,&hbc,true,false);
-
-  // Hydro initial conditions
-
-  Uniform2D pressure(1);
-  Uniform2D density(1);
-  Uniform2D xvelocity(4);
-  Uniform2D yvelocity(0);
-	
-  //Point Motion
-  Eulerian pointmotion;
-
-  //External Forces
-  ZeroForce force;
-
-  hdsim sim(InitPoints, //Initial points
-	    &tess, // Tessellation
-	    &interpm, // Spatial reconstruction
-	    density, pressure, xvelocity, yvelocity,
-	    eos,
-	    rs,
-	    &pointmotion,
-	    &force,
-	    &outer,
-	    &hbc);
-
-  // Assign the inner boundary
-  RigidBodyEvolve rigid;
-  for(int i=0;i<innerNum;++i)
-    sim.CellsEvolve[i]=&rigid;
-
-  // Main process
-  sim.SetCfl(0.5);
-  //  int iter = 0;
-  const int max_iter = (int) 5e6;
-
-	
-  double tf =1;
-  sim.SetEndTime(tf);
-	
-  //Main simulation run
-  while(tf>sim.GetTime()){
-    try{
-      sim.TimeAdvance2Mid();
-    }
-    catch(UniversalError const& eo){
-      cout << eo.GetErrorMessage() << endl;
-      for(int i=0;i<(int)eo.GetFields().size();++i){
-	cout << eo.GetFields()[i] << " = "
-	     << eo.GetValues()[i] << endl;
-	cout << "Iteration number = " << sim.GetCycle() << endl;
-	if(eo.GetFields()[i]=="cell index"){
-	  cout << "Exact value = " << eo.GetValues()[i] << endl;
-	  cout << "Rounded values = " << (int)eo.GetValues()[i] << endl;
-	  Vector2D temp2(sim.GetMeshPoint((int)eo.GetValues()[i]));
-	  cout << "cell x coordinate = " << temp2.x << endl;
-	  cout << "cell y coordinate = " << temp2.y << endl;
-	}
-      }
-      throw;
-    }
-    catch(vector<double> const& eo){
-      cout << "Nan occurred in cell " << eo[0] <<  endl;
-      cout << "Cell density = " << eo[1] << endl;
-      cout << "Cell pressure = " << eo[2] << endl;
-      cout << "Cell x velocity = " << eo[3] << endl;
-      cout << "Cell y velocity = " << eo[4] << endl;
-      throw;
-    }
-    catch(char const* eo){
-      cout << eo << endl;
-      throw;
-    }
-    catch(Primitive const& eo){
-      for(int i=0;i<6;i++){
-	cout << eo[i] << endl;
-      }
-      throw;
-    }
-
-    // Infinite loop guard
-    if(sim.GetCycle()>max_iter)
-      throw "Maximum number of iterations exceeded in main loop";
-  }
-
-  write_output(sim);
+  write_snapshot_to_hdf5(sim, "final.h5");
 
   return 0;
 }

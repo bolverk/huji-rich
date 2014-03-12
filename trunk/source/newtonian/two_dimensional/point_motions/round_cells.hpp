@@ -16,19 +16,25 @@ class RoundCells: public PointMotion
 public:
 	
   Vector2D CalcVelocity
-  (int index, Tessellation const* tessellation,
+  (int index, Tessellation const& tessellation,
    vector<Primitive> const& primitives,double /*time*/);
 	
   /*! \brief Class constructor
     \param pm Base point motion
 	\param hbc The hydro boundary conditions
-    \param chi Chi (see equation 63 in arepo paper)
+    \param chi Chi (see equation 63 in arepo paper). Default value is 1 if coldflows is on.
     \param eta Eta (see equation 63 in arepo paper)
+	\param coldflows The coldflows flag. Chooses if the fix velocity is set by the soundsspeed or by the time step
     \param innerNum The number of innerboundary cells
     \param outer pointer to outer boundary conditions, used to slow points so they don't overshoot the boundaries
   */
-  RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,double chi=1.0,
-	     double eta=0.1,int innerNum=0,OuterBoundary const* outer=0);
+  RoundCells(PointMotion& pm,
+	     HydroBoundaryConditions const& hbc,
+	     double chi=0.3,
+	     double eta=0.02,
+	     bool coldflows=false,
+	     int innerNum=0,
+	     OuterBoundary const* outer=0);
 
   /*! \brief Calculates the velocities of all cells
     \param tess Tessellation
@@ -37,13 +43,9 @@ public:
     \return Velocities of all cells
    */
   vector<Vector2D> calcAllVelocities
-  (Tessellation const* tess,
+  (Tessellation const& tess,
    vector<Primitive> const& cells,
    double time);
-
-  /*! \brief Sets the option for cold flows dependence
-  */
-  void SetColdFlows(void);
 
   /*!
   \brief Sets an external time step
@@ -53,7 +55,7 @@ public:
 
 private:
 	void CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
-		Tessellation const* tess) const;
+		Tessellation const& tess) const;
 
   PointMotion& pm_;
   HydroBoundaryConditions const& hbc_;

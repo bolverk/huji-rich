@@ -2,19 +2,6 @@
 
 namespace
 {
-  class AllMyParameters
-  {
-  public:
-
-    AllMyParameters(vector<int> * vin):
-      v(vin) {}
-
-    AllMyParameters(const AllMyParameters &other):
-      v(other.v) {}
-
-    vector<int> *v;
-  };
-
   class AllLocalData
   {
   public:
@@ -37,84 +24,97 @@ namespace
   class Context
   {
   public:
-    Context (const AllMyParameters &par,const AllLocalData &local_data,int i):
+    Context (vector<int>* par,AllLocalData const& local_data,int i):
       _params(par), _data(local_data), _i(i) {}
 
-    AllMyParameters _params;
+    vector<int>* _params;
     AllLocalData _data;
     int _i;
   };
 
-  bool point_compare_x(Vector2D &p1,Vector2D &p2)
+  bool point_compare_x(Vector2D const& p1,Vector2D const& p2)
   {
-    if(p1.get_x()<p2.get_x())
-      return true;
-    else
-      return false;
+    return p1.get_x()<p2.get_x();
   }
 
-  bool point_compare_y(Vector2D &p1,Vector2D &p2)
+  bool point_compare_y(Vector2D const& p1,Vector2D const& p2)
   {
-    if(p1.get_y()<p2.get_y())
-      return true;
-    else
-      return false;
+    return p1.get_y()<p2.get_y();
   }
 
-  //rotate/flip a quadrant appropriately
-  void rot(int n, int *x, int *y, int rx, int ry) {
-    if (ry == 0) {
-      int t;
-      if (rx == 1) {
-	*x = n-1 - *x;
-	*y = n-1 - *y;
-      }
-      t  = *x;
-      *x = *y;
-      *y = t;
+  pair<int,int> rot(int n, pair<int,int> const& origin, pair<int,int> const& r)
+  {
+    pair<int,int> res = origin;
+    if(r.second==0){
+      if(r.first==1)
+	res = pair<int,int>(n-1-res.first,n-1-res.second);
+      return pair<int,int>(res.second,res.first);
     }
+    else
+      return res;
   }
 
   //convert (x,y) to d
   int xy2d (int n, int x, int y) {
-    int rx, ry, s, d=0;
-    for (s=n/2; s>0; s/=2) {
-      rx = (x & s) > 0;
-      ry = (y & s) > 0;
-      d += s * s * ((3 * rx) ^ ry);
-      rot(s, &x, &y, rx, ry);
+    int d=0;
+    pair<int,int> temp(x,y);
+    for (int s=n/2; s>0; s/=2) {
+      const pair<int,int> r((x&s)>0,(y&s)>0);
+      d += s * s * ((3 * r.first) ^ r.second);
+      temp = rot(s, temp, r);
     }
     return d;
   }
 }
 
+namespace {
+  vector<int> range(int n)
+  {
+    vector<int> res(n);
+    for(int i=0;i<n;++i)
+      res[i] = i;
+    return res;
+  }
+
+  template<class T> void zero_pad_start(vector<T>& v,int n)
+  {
+    const vector<int> temp(n);
+    v.insert(v.begin(),temp.begin(),temp.end());
+  }
+
+  int calc_d(pair<double, double> const& dxdy,
+	     pair<double, double> const& xminymin,
+	     Vector2D const& cor,
+	     int pow2)
+  {
+    if(dxdy.first<=0&&dxdy.second<=0)
+      return 0;
+
+    const pair<int, int> index
+      (dxdy.first <=0 ? 0 : (int)((cor.x-xminymin.first)/dxdy.first),
+       dxdy.second <=0 ? 0 : (int)((cor.y-xminymin.second)/dxdy.second));
+    return xy2d(pow2,index.first,index.second);
+  }
+}
+
 vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 {
-  vector<Vector2D> cortemp;
-  int N=num-innernum;
-  cortemp.resize(N);
-  copy(cor.begin()+innernum,cor.begin()+num,cortemp.begin());
-  //if(innernum>0)
-  //	cortemp.erase(cortemp.begin(),cortemp.begin()+innernum);
+  const int N=num-innernum;
   vector<int> insert_order;
-  vector<int> p;
 
   insert_order.reserve(N);
-  p.resize(N);
-  for(int i=0;i<N;++i)
-    p[i]=i;
-  double AvgNumInCell=1;
-  int MaxOcc_upy=2;
   stack<Context*> context_list;
-  vector<int> *last_IndexTable;
   stack<vector<int>*> IndexTableStack;
-  int temp_n=max((int)sqrt((double)N/AvgNumInCell),2);
-  int temp_pow2=max((int) pow(2.0,(int)(log(1.0*temp_n)/log(2.0))),2);
+  const int temp_n=max((int)sqrt((double)N),2);
+  const int temp_pow2=max((int) pow(2.0,(int)(log(1.0*temp_n)/log(2.0))),2);
   AllLocalData d_local_data(0,N,temp_n,temp_pow2);
-  AllMyParameters param(&p);
+  vector<int> p = range(N);
+  vector<int>* param = &p;
   Context *context=new Context(param,d_local_data,0);
   context_list.push(context);
   bool expand;
+  const vector<Vector2D> cortemp(cor.begin()+innernum,
+				 cor.begin()+num);
   while(!context_list.empty())
     {
       context=context_list.top();
@@ -127,48 +127,38 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	throw("Error in creating the hilbert order, probably two points are identical");
       if(i==0)
 	{
-	  vector<Vector2D> *p_cor=new vector<Vector2D>;
-	  p_cor->reserve(local_data.N);
+	  vector<Vector2D> p_cor(local_data.N);
 	  for(int j=0;j<local_data.N;j++)
-	    p_cor->push_back(cortemp[param.v->at(j)]);
-	  double xmin=(*min_element(p_cor->begin(),p_cor->end(),point_compare_x)).get_x();
-	  double xmax=(*max_element(p_cor->begin(),p_cor->end(),point_compare_x)).get_x();
-	  double ymin=(*min_element(p_cor->begin(),p_cor->end(),point_compare_y)).get_y();
-	  double ymax=(*max_element(p_cor->begin(),p_cor->end(),point_compare_y)).get_y();
-	  double dx=(double)(xmax-xmin)/(local_data.pow2-1),dy=(double)(ymax-ymin)/(local_data.pow2-1);
+	      p_cor[j] = cortemp[param->at(j)];
+	  const double xmin=(*min_element(p_cor.begin(),
+					  p_cor.end(),
+					  point_compare_x)).get_x();
+	  const double xmax=(*max_element(p_cor.begin(),
+					  p_cor.end(),
+					  point_compare_x)).get_x();
+	  const double ymin=(*min_element(p_cor.begin(),
+					  p_cor.end(),
+					  point_compare_y)).get_y();
+	  const double ymax=(*max_element(p_cor.begin(),
+					  p_cor.end(),
+					  point_compare_y)).get_y();
+	  const double dx=(double)(xmax-xmin)/(local_data.pow2-1);
+	  const double dy=(double)(ymax-ymin)/(local_data.pow2-1);
 	  local_data.IndexTable=new vector<int>[local_data.pow2*local_data.pow2];
-	  int d,xIndex,yIndex;
-	  for(int j=0;j<local_data.N;j++)
-	    {
-	      if(dx<=0||dy<=0)
-		{
-		  if(dx<=0)
-		    {
-		      yIndex=(int)((p_cor->at(j).get_y()-ymin)/dy);
-		      xIndex=0;
-		    }
-		  else
-		    {
-		      xIndex=(int)((p_cor->at(j).get_x()-xmin)/dx);
-		      yIndex=0;
-		    }
-		}
-	      else
-		{
-		  xIndex=(int)((p_cor->at(j).get_x()-xmin)/dx);
-		  yIndex=(int)((p_cor->at(j).get_y()-ymin)/dy);
-		}
-	      d=xy2d(local_data.pow2,xIndex,yIndex);
-	      local_data.IndexTable[d].push_back(param.v->at(j));
-	    }
-	  delete p_cor;
+	  for(int j=0;j<local_data.N;j++){
+	    const int d = calc_d
+	      (pair<double,double>(dx,dy),
+	       pair<double,double>(xmin,ymin),
+	       p_cor[j],local_data.pow2);
+	    local_data.IndexTable[d].push_back(param->at(j));
+	  }
 	}
       if(i<(local_data.pow2*local_data.pow2-1))
 	{
 	  context = new Context(param, local_data,i+1);	// i+1 is the for loop increment
 	  context_list.push(context);
 	}
-      if((int)local_data.IndexTable[i].size()<MaxOcc_upy)
+      if((int)local_data.IndexTable[i].size()<2)
 	{
 	  expand=false;
 	  for(int k=0;k<(int)local_data.IndexTable[i].size();k++)
@@ -177,36 +167,33 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
       else
 	{
 	  expand=true;
-	  //int temp_n2=max((int)sqrt(1.0*(local_data.IndexTable[i].size())/AvgNumInCell),2);
-	  int temp_n2=max((int)sqrt(double(local_data.IndexTable[i].size())/AvgNumInCell),2);
-	  int temp_pow22=max((int) pow(2.0,(int)(log(1.0*temp_n2)/log(2.0))),2);
-	  AllMyParameters param2(&local_data.IndexTable[i]);
-	  AllLocalData local_temp(0,int(local_data.IndexTable[i].size()),temp_n2,temp_pow22);
-	  context=new Context(param2,local_temp,0);
+	  int temp_n2=max((int)sqrt(double(local_data.IndexTable[i].size())),2);
+	  context=new Context
+	    (&local_data.IndexTable[i],
+	     AllLocalData
+	     (0,
+	      (int)local_data.IndexTable[i].size(),
+	      temp_n2,
+	      max((int) pow(2.0,(int)(log(1.0*temp_n2)/log(2.0))),2)),
+	     0);
 	  context_list.push(context);
 	}
       if(i==(local_data.pow2*local_data.pow2-1))
 	{
-	  int NN=(int)IndexTableStack.size();
-	  for(int l=0;l<NN;++l)
+	  for(size_t l=0;l<IndexTableStack.size();++l)
 	    {
-	      last_IndexTable=IndexTableStack.top();
-	      delete [] last_IndexTable;
+	      delete [] IndexTableStack.top();
 	      IndexTableStack.pop();
 	    }
 	  if(!expand)
 	    delete [] local_data.IndexTable;
 	  else
-	    {
-	      last_IndexTable=local_data.IndexTable;
-	      IndexTableStack.push(last_IndexTable);
-	    }
+	    IndexTableStack.push(local_data.IndexTable);
 	}
     }
   if(innernum>0)
     {
-      vector<int> temp(innernum,0);
-      insert_order.insert(insert_order.begin(),temp.begin(),temp.end());
+      zero_pad_start(insert_order,innernum);
       for(int i=0;i<num;++i)
 	{
 	  if(i<innernum)

@@ -18,7 +18,7 @@ ExternalData::ExternalData(string const& fname):
   else if('l'==buf_c)
     vertex_motion_flag_ = true;
   else
-    throw UniversalError("First argument in external file should either be e or l (short for eulerian or lagrangian) instead, it is "+buf_c);
+    throw UniversalError(string("First argument in external file should either be e or l (short for eulerian or lagrangian) instead, it is ")+buf_c);
 
   f >> buf_c;
   if('f'==buf_c)

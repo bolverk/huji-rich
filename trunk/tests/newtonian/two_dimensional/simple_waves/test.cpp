@@ -107,18 +107,18 @@ public:
     point_motion_(bpm_,hbc_),
     force_(),
     sim_(square_grid(init_prof.getWidth(),30),
-	 &tess_,
-	 &interpm_,
+	 tess_,
+	 interpm_,
 	 init_prof.getDensity(),
 	 init_prof.getPressure(),
 	 init_prof.getXVelocity(),
 	 init_prof.getYVelocity(),
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

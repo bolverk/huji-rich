@@ -23,13 +23,15 @@
 #include "RefineStrategy.hpp"
 #include "RemovalStrategy.hpp"
 #include "../../misc/utils.hpp"
+#include "ResetDump.hpp"
+
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
 {
 private:
 
-  Tessellation* _tessellation;
+  Tessellation& _tessellation;
   
   vector<Primitive> _cells;
 
@@ -47,15 +49,15 @@ private:
 
   RiemannSolver const& _rs;
 
-  SpatialReconstruction* _interpolation;
+  SpatialReconstruction& _interpolation;
 
-  PointMotion *_pointmotion;
+  PointMotion& _pointmotion;
 
-  HydroBoundaryConditions const* _hbc;
+  HydroBoundaryConditions const& _hbc;
 
-  OuterBoundary const* _obc;
+  OuterBoundary const& _obc;
 
-  SourceTerm *external_force_;
+  SourceTerm& external_force_;
 
   double _cfl;
 
@@ -86,7 +88,7 @@ public:
 	/*! \brief Returns the tessellation
 	\return The tessellation
 	*/
-	Tessellation const* GetTessellation(void)const;
+	Tessellation const& GetTessellation(void)const;
 
 
 	/*! 
@@ -124,50 +126,37 @@ public:
 	\param CMvalue A flag whether to give the cell value according to CM or the location of the mesh point
    */
   hdsim(vector<Vector2D> const& points,
-	Tessellation* tessellation,
-	SpatialReconstruction* interpolation,
+	Tessellation& tessellation,
+	SpatialReconstruction& interpolation,
 	SpatialDistribution const& density,
 	SpatialDistribution const& pressure,
 	SpatialDistribution const& xvelocity,
 	SpatialDistribution const& yvelocity,
 	EquationOfState const& eos,
 	RiemannSolver const& rs,
-	PointMotion *pointmotion,
-	SourceTerm *external_force,
-	OuterBoundary const* obc,
-	HydroBoundaryConditions const* hbc,bool EntropyCalc=false,bool CMvalue=true);
+	PointMotion& pointmotion,
+	SourceTerm& external_force,
+	OuterBoundary const& obc,
+	HydroBoundaryConditions const& hbc,bool EntropyCalc=false,bool CMvalue=true);
   
   /*! \brief Class constructor from restart file
-    \param points The mesh points
+    \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
     \param interpolation Interpolation method
-	\param cells The primitve hydro variables
     \param eos Equation of state
     \param rs Riemann solver
     \param pointmotion Motion of the mesh generating points
     \param external_force External force
     \param hbc Hydro boundary conditions
 	\param obc Outer boundary conditions
-	\param tracers The primitive tracers
-	\param time The sim time
-	\param cfl The courant number
-	\param cycle The iteration number of the sim
-	\param coldflows Coldflows flag
-	\param a The coldflows kinetic energy sensitivity
-	\param b The coldflows potential energy sensitivity
-	\param densityfloor The densityfloor flag
-	\param densitymin The minimum density
-	\param pressuremin The minimum pressure that goes along with the minimum density
 	\param EntropyCalc A flag whether to recalculate the entropy during the half time step
    */
-  hdsim(vector<Vector2D> const& points,Tessellation* tessellation,
-	SpatialReconstruction* interpolation,vector<Primitive> const& cells,
+  hdsim(ResetDump const& dump,Tessellation& tessellation,
+	SpatialReconstruction& interpolation,
 	EquationOfState const& eos,RiemannSolver const& rs,
-	PointMotion *pointmotion,SourceTerm *external_force,
-	OuterBoundary const* obc,HydroBoundaryConditions const* hbc,
-	vector<vector<double> > const& tracers,double time,double cfl,
-	int cycle,bool coldflows,double a,double b,bool densityfloor,
-	double densitymin,double pressuremin,bool EntropyCalc=false);
+	PointMotion& pointmotion,SourceTerm& external_force,
+	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
+	bool EntropyCalc=false);
   /*!
   \brief Class destructor
   */

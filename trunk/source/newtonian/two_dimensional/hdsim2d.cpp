@@ -1,6 +1,5 @@
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 #include "hdsim2d.hpp"
 #include "hydrodynamics_2d.hpp"
 
@@ -10,25 +9,25 @@ void hdsim::SetData(vector<Primitive> const& cells,
 	vector<Vector2D> const& points,double time,vector<vector<double> > const& tracers)
 {
 	_cells=cells;
-	_tessellation->Update(points);
+	_tessellation.Update(points);
 	tracer_=tracers;
 	_time=time;
 }
 
 hdsim::hdsim
 (vector<Vector2D> const& points,
- Tessellation* tessellation,
- SpatialReconstruction* interpolation,
+ Tessellation& tessellation,
+ SpatialReconstruction& interpolation,
  SpatialDistribution const& density,
  SpatialDistribution const& pressure,
  SpatialDistribution const& xvelocity,
  SpatialDistribution const& yvelocity,
  EquationOfState const& eos,
  RiemannSolver const& rs,
- PointMotion *pointmotion,
- SourceTerm *external_force,
- OuterBoundary const* obc,
- HydroBoundaryConditions const* hbc,
+ PointMotion& pointmotion,
+ SourceTerm& external_force,
+ OuterBoundary const& obc,
+ HydroBoundaryConditions const& hbc,
  bool EntropyCalc,bool CMvalue):
   _tessellation(tessellation),
   _cells(vector<Primitive>()),
@@ -59,7 +58,7 @@ hdsim::hdsim
   _dt_external(0),
   CellsEvolve(points.size(),0)
 {
-  _tessellation->Initialise(points, obc);
+  _tessellation.Initialise(points, &obc);
 
   _cells = InitialiseCells(density, pressure,xvelocity, yvelocity,
 			   eos, tessellation,CMvalue);
@@ -70,20 +69,18 @@ hdsim::hdsim
   _dt_external=-1;
 }
 
-hdsim::hdsim(vector<Vector2D> const& points,Tessellation* tessellation,
-	     SpatialReconstruction* interpolation,vector<Primitive> const& cells,
+hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
+	     SpatialReconstruction& interpolation,
 	     EquationOfState const& eos,RiemannSolver const& rs,
-	     PointMotion *pointmotion,SourceTerm *external_force,
-	     OuterBoundary const* obc,HydroBoundaryConditions const* hbc,
-	     vector<vector<double> > const& tracers,double time,double cfl,
-	     int cycle,bool coldflows,double a,double b,bool densityfloor,
-	     double densitymin,double pressuremin,bool EntropyCalc):
+	     PointMotion& pointmotion,SourceTerm& external_force,
+	     OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
+		 bool EntropyCalc):
   _tessellation(tessellation),
-  _cells(cells),
+  _cells(dump.snapshot.cells),
   _fluxes(vector<Conserved>()),
   _pointvelocity(vector<Vector2D>()),
   _facevelocity(vector<Vector2D>()),
-  _conservedintensive(vector<Conserved>()),
+  _conservedintensive(CalcConservedIntensive(_cells)),
   _conservedextensive(vector<Conserved>()),
   _eos(eos),
   _rs(rs),
@@ -92,38 +89,25 @@ hdsim::hdsim(vector<Vector2D> const& points,Tessellation* tessellation,
   _hbc(hbc),
   _obc(obc),
   external_force_(external_force),
-  _cfl(cfl),
-  _time(time),
+  _cfl(dump.cfl),
+  _time(dump.time),
   _endtime(-1),
-  cycle_(cycle),
-  tracer_(vector<vector<double> >()),
-  tracer_flag_(false),
-  coldflows_flag_(coldflows),
-  densityfloor_(densityfloor),
-  as_(a),
-  bs_(b),
-  densityMin_(densitymin),
-  pressureMin_(pressuremin),
+  cycle_(dump.cycle),
+  tracer_(dump.tracers),
+  tracer_flag_(!tracer_.empty()),
+  coldflows_flag_(dump.coldflows),
+  densityfloor_(dump.densityfloor),
+  as_(dump.a),
+  bs_(dump.b),
+  densityMin_(dump.densitymin),
+  pressureMin_(dump.pressuremin),
   EntropyReCalc_(EntropyCalc),
-  _dt_external(0),
-  CellsEvolve(vector<CustomEvolution*>())
+  _dt_external(-1),
+  CellsEvolve(vector<CustomEvolution*>(dump.snapshot.cells.size(),0))
 {
-	tracer_=tracers;			
-	if(!tracer_.empty())
-		tracer_flag_=true;
-	else
-	{
-		tracer_flag_=false;
-	}
-	_tessellation->Initialise(points,_obc);
-	_conservedintensive = CalcConservedIntensive(_cells);
-	_conservedextensive = CalcConservedExtensive
-		(_conservedintensive,tessellation);
-	int n=int(_cells.size());
-	CellsEvolve.reserve(n);
-	for(int i=0;i<n;++i)
-		CellsEvolve.push_back(0);
-	_dt_external=-1;
+  _tessellation.Initialise(dump.snapshot.mesh_points,&_obc);
+  _conservedextensive = CalcConservedExtensive
+    (_conservedintensive,tessellation);
 }
 
 hdsim::~hdsim(void) {}
@@ -144,7 +128,8 @@ void hdsim::TimeAdvance(void)
 	CalcPointVelocities(_tessellation, _cells, 
 		_pointmotion, _pointvelocity,_time);
 
-	_facevelocity=_tessellation->calc_edge_velocities(_hbc,_pointvelocity,_time);
+	_facevelocity=_tessellation.calc_edge_velocities
+	  (&_hbc,_pointvelocity,_time);
 	
 	double dt = _cfl*CalcTimeStep(_tessellation, _cells, _facevelocity,_hbc,
 		_time,CellsEvolve);
@@ -158,9 +143,8 @@ void hdsim::TimeAdvance(void)
 
 	if(coldflows_flag_)
 	{
-	  int n=int(_cells.size());
-		for(int i=0;i<n;++i)
-			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
+	  for(int i=0;i<_tessellation.GetPointNo();++i)
+	    tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
 	}
 
 	CalcFluxes(_tessellation, _cells, dt, _time,
@@ -227,7 +211,7 @@ void hdsim::TimeAdvance(void)
 	cycle_++;	
 }
 
-Tessellation const* hdsim::GetTessellation(void) const
+Tessellation const& hdsim::GetTessellation(void) const
 {
 	return _tessellation;
 }
@@ -247,30 +231,31 @@ void hdsim::TimeAdvance2Mid(void)
 
 void hdsim::addTracer(SpatialDistribution const& tp)
 {
-	if(!tracer_flag_){
-		tracer_.resize(_cells.size());
-		tracer_flag_ = true;
-	}
+  const int n = _tessellation.GetPointNo();
+  if(!tracer_flag_){
+    tracer_.resize(n);
+    tracer_flag_ = true;
+  }
 
-	for(int i=0;i<(int)_cells.size();++i)
-		tracer_[i].push_back(tp.EvalAt(_tessellation->GetCellCM(i)));
+  for(int i=0;i<n;++i)
+    tracer_[i].push_back(tp.EvalAt(_tessellation.GetCellCM(i)));
 }
 
 // Diagnostics
 
 int hdsim::GetEdgeNo(void) const
 {
-  return _tessellation->GetTotalSidesNumber();
+  return _tessellation.GetTotalSidesNumber();
 }
 
 Edge hdsim::GetEdge(int i) const
 {
-  return _tessellation->GetEdge(i);
+  return _tessellation.GetEdge(i);
 }
 
 int hdsim::GetCellNo(void) const
 {
-  return _tessellation->GetPointNo();
+  return _tessellation.GetPointNo();
 }
 
 Primitive hdsim::GetCell(int i) const
@@ -280,7 +265,7 @@ Primitive hdsim::GetCell(int i) const
 
 Vector2D hdsim::GetMeshPoint(int i) const
 {
-  return _tessellation->GetMeshPoint(i);
+  return _tessellation.GetMeshPoint(i);
 }
 
 Conserved hdsim::GetFlux(int i) const
@@ -295,7 +280,7 @@ double hdsim::GetTime(void) const
 
 double hdsim::GetCellVolume(int index) const
 {
-  return _tessellation->GetVolume(index);
+  return _tessellation.GetVolume(index);
 }
 
 int hdsim::GetCycle(void) const
@@ -310,17 +295,19 @@ void hdsim::SetEndTime(double endtime)
 
 void hdsim::SetColdFlows(double as,double bs)
 {
-	coldflows_flag_=true;
-	if(!tracer_flag_)
-	{
-		tracer_.resize(_cells.size());
-		tracer_flag_ = true;
-	}
+  const int n = _tessellation.GetPointNo();
 
-	for(int i=0;i<(int)_cells.size();++i)
-		tracer_[i].push_back(0);
-	as_=as;
-	bs_=bs;
+  coldflows_flag_=true;
+  if(!tracer_flag_)
+    {
+      tracer_.resize(n);
+      tracer_flag_ = true;
+    }
+
+  for(int i=0;i<n;++i)
+    tracer_[i].push_back(0);
+  as_=as;
+  bs_=bs;
 }
 
 vector<vector<double> > const& hdsim::getTracers(void) const
@@ -345,7 +332,7 @@ void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 {
-	if(remove==0)
+	if(!remove)
 		throw UniversalError("No Removal strategy");
 	vector<int> ToRemove=remove->CellsToRemove(_tessellation,_cells,tracer_,
 		_time);
@@ -359,14 +346,14 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		traceractive=false;
 	sort(ToRemove.begin(),ToRemove.end());
 	// save the extensive of the removed cells
-	vector<double> OldVol(_cells.size());
+	vector<double> OldVol(_tessellation.GetPointNo());
 	vector<Conserved> OldExtensive;
 	vector<vector<double> > OldTracer;
 	OldExtensive.reserve(n);
 	if(traceractive)
 		OldTracer.reserve(n);
-	for(int i=0;i<(int)_cells.size();++i)
-		OldVol[i]=_tessellation->GetVolume(i);
+	for(int i=0;i<(int)_tessellation.GetPointNo();++i)
+	  OldVol[i]=_tessellation.GetVolume(i);
 	for(int i=0;i<n;++i)
 	{
 		double vol=OldVol[ToRemove[i]];
@@ -378,7 +365,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	// Change the tessellation
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > VolRatio;
-	_tessellation->RemoveCells(ToRemove,VolIndex,VolRatio);
+	_tessellation.RemoveCells(ToRemove,VolIndex,VolRatio);
 	// gather all the relevant neighbors
 	vector<int> TotalNeigh;
 	for(int i=0;i<n;++i)
@@ -420,7 +407,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	{
 	  int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[i])-
 			ToRemove.begin());
-		double vol_inv=1.0/_tessellation->GetVolume(TotalNeigh[i]-index);
+		double vol_inv=1.0/_tessellation.GetVolume(TotalNeigh[i]-index);
 		try
 		{
 			_cells[TotalNeigh[i]]=Conserved2Primitive(vol_inv*c_temp[i],_eos);
@@ -470,14 +457,14 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	if(PointsToRefine.empty())
 		return PointsToRefine;
 	int n=int(PointsToRefine.size());
-	int N=int(_cells.size());
+	const int N=_tessellation.GetPointNo();
 	// Resize vectors
 	_cells.resize(N+n);
 	CellsEvolve.resize(N+n);
 	if(traceractive)
 		tracer_.resize(N+n);
 	// Change the mesh
-	_tessellation->RefineCells(PointsToRefine,directions,dr);
+	_tessellation.RefineCells(PointsToRefine,directions,dr);
 	// Fill the new hydro
 	for(int i=N;i<N+n;++i)
 	{
@@ -531,15 +518,15 @@ vector<Primitive>& hdsim::GetAllCells(void)
 
 void hdsim::HilbertArrange(int innernum)
 {
-	vector<Vector2D> cor=_tessellation->GetMeshPoints();
-	vector<int> order=HilbertOrder(cor,int(_cells.size()),innernum);
+	vector<Vector2D> cor=_tessellation.GetMeshPoints();
+	vector<int> order=HilbertOrder(cor,_tessellation.GetPointNo(),innernum);
 	ReArrangeVector(cor,order);
 	if(cor.size()>order.size())
 		cor.erase(cor.begin()+order.size(),cor.end());
 	ReArrangeVector(_cells,order);
 	if(tracer_flag_)
 		ReArrangeVector(tracer_,order);
-	_tessellation->Update(cor);
+	_tessellation.Update(cor);
 }
 
 vector<Conserved>const& hdsim::GetFluxes(void)const

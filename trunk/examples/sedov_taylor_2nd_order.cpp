@@ -1,17 +1,17 @@
-#include "../source/tessellation/VoronoiMesh.hpp"
-#include "../source/newtonian/two_dimensional/hdsim2d.hpp"
-#include "../source/newtonian/common/hllc.hpp"
-#include "../source/newtonian/common/ideal_gas.hpp"
-#include "../source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "../source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
-#include "../source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "../source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
-#include "../source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "../source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/round_cells.hpp"
-#include "../source/misc/mesh_generator.hpp"
-#include "../source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/tessellation/VoronoiMesh.hpp"
+#include "source/newtonian/two_dimensional/hdsim2d.hpp"
+#include "source/newtonian/common/hllc.hpp"
+#include "source/newtonian/common/ideal_gas.hpp"
+#include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
+#include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
+#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
+#include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
+#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
+#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
+#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 
 int main(void)
 {
@@ -40,10 +40,10 @@ int main(void)
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion);
+	RoundCells pointmotion(l_motion,hbc);
 
 	// Set up the interpolation
-	LinearGaussConsistent interpolation(eos,outer,&hbc);
+	LinearGaussConsistent interpolation(eos,outer,hbc);
 
 	// Set up the initial Hydro
 	double rho=1;
@@ -61,8 +61,8 @@ int main(void)
 	ZeroForce force;
 
 	// Set up the simulation
-	hdsim sim(InitPoints,&tess,&interpolation,density,pressure,xvelocity,
-		yvelocity,eos,rs,&pointmotion,&force,&outer,&hbc);
+	hdsim sim(InitPoints,tess,interpolation,density,pressure,xvelocity,
+		  yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
 	// Choose the Courant number
 	double cfl=0.7;

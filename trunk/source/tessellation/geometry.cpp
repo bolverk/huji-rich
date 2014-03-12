@@ -174,3 +174,10 @@ Vector2D zcross(Vector2D const& v)
 {
   return Vector2D(v.y,-v.x);
 }
+
+Vector2D pol2cart(double radius,
+		  double angle)
+{
+  return Vector2D(radius*cos(angle),
+		  radius*sin(angle));
+}

@@ -64,7 +64,7 @@ namespace simulation1d{
   };
 
   //! \brief Writes the time to a file after each time advance cycle
-  class WriteTime
+  class WriteTime: public DiagnosticsFunction
   {
   public:
 
@@ -79,7 +79,7 @@ namespace simulation1d{
     void diagnose(hdsim1D const& sim);
 
   private:
-    string fname_;
+    const string fname_;
   };
 
   /*! \brief Main simulation time advance loop

@@ -1,5 +1,7 @@
 #include "universal_error.hpp"
 
+using namespace std;
+
 UniversalError::UniversalError(string const& err_msg):
   err_msg_(err_msg),
   fields_(vector<string>()),

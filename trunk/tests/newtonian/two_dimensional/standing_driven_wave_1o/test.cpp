@@ -40,16 +40,16 @@ public:
     v_(phase_velocity) {}
 
   Vector2D Calculate
-  (Tessellation const* tess,
+  (Tessellation const& tess,
    vector<Primitive> const& /*cells*/,
    int point,
    vector<Conserved> const& /*fluxes*/,
    vector<Vector2D> const& /*point_velocity*/,
-   HydroBoundaryConditions const* /*hbc*/,
+   HydroBoundaryConditions const& /*hbc*/,
    double t,
    double /*dt*/)
   {
-    const double x = tess->GetMeshPoint(point).x;
+    const double x = tess.GetMeshPoint(point).x;
     const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
     return Vector2D(-acceleration,0);
   }
@@ -82,20 +82,20 @@ public:
     acc_(read_number("wavelength.txt"),
 	   read_number("amplitude.txt"),
 	   read_number("phase_velocity.txt")),
-	force_(&acc_),
+	force_(acc_),
     sim_(init_points_,
-	 &tess_,
-	 &interp_method_,
+	 tess_,
+	 interp_method_,
 	 density_,
 	 pressure_,
 	 xvelocity_,
 	 yvelocity_,
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

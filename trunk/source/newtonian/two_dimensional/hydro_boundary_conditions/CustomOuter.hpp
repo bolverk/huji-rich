@@ -20,40 +20,43 @@ public:
 	\param Down Pointer to the bottom HydroBoundaryConditions
 	\param Up Pointer to the upper HydroBoundaryConditions
 	*/
-	CustomOuter(HydroBoundaryConditions* Left,HydroBoundaryConditions* Right,
-		HydroBoundaryConditions* Down,HydroBoundaryConditions* Up);
+	CustomOuter(HydroBoundaryConditions& Left,HydroBoundaryConditions& Right,
+		HydroBoundaryConditions& Down,HydroBoundaryConditions& Up);
 
 
 	Conserved CalcFlux
-	(Tessellation const* tessellation,
+	(Tessellation const& tessellation,
 	 vector<Primitive> const& cells,
 	 Vector2D const& edge_velocity,
-	 Edge const& edge,SpatialReconstruction const* interp,
+	 Edge const& edge,SpatialReconstruction const& interp,
 	 double dt, double time) const;
 
-	Vector2D CalcEdgeVelocity(Tessellation const* tessellation,
+	Vector2D CalcEdgeVelocity(Tessellation const& tessellation,
 		vector<Vector2D> const& point_velocities,
 				  Edge const& edge, double time) const;
 
-	bool IsBoundary(Edge const& edge,Tessellation const* Data)const;
+	bool IsBoundary(Edge const& edge,Tessellation const& Data)const;
 
-	bool IsGhostCell(int i,Tessellation const* Data) const;
+	bool IsGhostCell(int i,Tessellation const& Data) const;
 
 	Primitive GetBoundaryPrimitive(Edge const& edge,
-	  Tessellation const* Data,vector<Primitive> const& cells,double
+	  Tessellation const& Data,vector<Primitive> const& cells,double
 	  time)const;
 
-	vector<double> GetBoundaryTracers(Edge const& edge,Tessellation const* Data,
+	vector<double> GetBoundaryTracers(Edge const& edge,Tessellation const& Data,
 		vector<vector<double> > const& tracers,double time)const;
 
-	vector<double> CalcTracerFlux(Tessellation const* tessellation,
+	vector<double> CalcTracerFlux(Tessellation const& tessellation,
 		vector<Primitive> const& cells,
 	  vector<vector<double> > const& tracers,double dm,
 	  Edge const& edge,int index,double dt,
-	  double time,SpatialReconstruction const* interp,
+	  double time,SpatialReconstruction const& interp,
 	  Vector2D const& edge_velocity) const;
 private:
-	HydroBoundaryConditions *_left,*_right,*_down,*_up;
+  HydroBoundaryConditions& _left;
+  HydroBoundaryConditions& _right;
+  HydroBoundaryConditions& _down;
+  HydroBoundaryConditions& _up;
 
   CustomOuter(const CustomOuter& origin);
   CustomOuter& operator=(const CustomOuter& origin);

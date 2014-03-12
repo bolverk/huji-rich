@@ -23,7 +23,7 @@ public:
   (vector<double> const& vp,
    vector<Primitive> const& hv,
    double interface_speed,
-   int i, int dir, double dt) const;
+   size_t i, int dir, double dt) const;
 
 private:
   IdealGas const& eos_;

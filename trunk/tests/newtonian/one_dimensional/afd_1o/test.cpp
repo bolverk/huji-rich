@@ -7,7 +7,6 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/one_dimensional/eulerian1d.hpp"
 #include "source/newtonian/one_dimensional/rigid_wall_1d.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/newtonian/one_dimensional/zero_force_1d.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/test_1d/simple_waves_ideal_gas.hpp"

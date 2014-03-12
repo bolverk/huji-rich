@@ -49,18 +49,18 @@ public:
     force_(Vector2D(0,0),
 	   Vector2D(0,1)),
     sim_(mesh_,
-	 &tess_,
-	 &interpm_,
+	 tess_,
+	 interpm_,
 	 density_,
 	 pressure_,
 	 xvelocity_,
 	 yvelocity_,
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

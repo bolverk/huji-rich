@@ -5,25 +5,27 @@ Primitive CalcPrimitive(double density, double pressure,
 			Vector2D const& velocity, 
 			EquationOfState const& eos)
 {
-  Primitive res;
-  res.Density = density;
-  res.Pressure = pressure;
-  res.Velocity = velocity;
-  res.Energy = eos.dp2e(res.Density, res.Pressure);
-  res.SoundSpeed = eos.dp2c(res.Density, res.Pressure);
-  return res;
+  return Primitive(density,
+		   pressure,
+		   velocity,
+		   eos.dp2e(density, pressure),
+		   eos.dp2c(density, pressure));
 }
 
 Primitive Conserved2Primitive
 (Conserved const& c, EquationOfState const& eos)
 {
-  Primitive res;
-  res.Density = c.Mass;
-  res.Velocity = c.Momentum / c.Mass;
-  res.Energy = c.Energy/c.Mass - 0.5*pow(abs(res.Velocity),2);
-  res.Pressure = eos.de2p(res.Density, res.Energy);
-  res.SoundSpeed = eos.dp2c(res.Density, res.Pressure);
-  return res;
+  const double density = c.Mass;
+  const Vector2D velocity = c.Momentum / c.Mass;
+  const double energy = c.Energy/c.Mass - 
+    0.5*pow(abs(velocity),2);
+  const double pressure = eos.de2p(density, energy);
+  const double sound_speed = eos.dp2c(density, pressure);
+  return Primitive(density,
+		   pressure,
+		   velocity,
+		   energy,
+		   sound_speed);
 }
 
 Primitive make_eos_consistent

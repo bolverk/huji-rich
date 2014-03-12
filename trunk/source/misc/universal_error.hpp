@@ -9,50 +9,49 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 /*! \brief Container for error reports
  */
 class UniversalError
 {
+
 public:
 
   /*! \brief Class constructor
     \param err_msg Error message
    */
-  UniversalError(string const& err_msg);
+  UniversalError(std::string const& err_msg);
 
-  /*! \brief Appends string to the error message
+  /*! \brief Appends std::string to the error message
     \param msg Message to append
    */
-  void Append2ErrorMessage(string const& msg);
+  void Append2ErrorMessage(std::string const& msg);
 
   /*! \brief Adds an entry to the list
    */
-  void AddEntry(string const& field,
+  void AddEntry(std::string const& field,
 		double value);
 
   /*! \brief Returns the error message
    */
-  string const& GetErrorMessage(void) const;
+  std::string const& GetErrorMessage(void) const;
 
   /*! \brief Returns entry fields
    */
-  vector<string> const& GetFields(void) const;
+  std::vector<std::string> const& GetFields(void) const;
 
   /*! \brief Returns entry values
    */
-  vector<double> const& GetValues(void) const;
+  std::vector<double> const& GetValues(void) const;
 
   ~UniversalError(void);
   
 private:
 
-  string err_msg_;
+  std::string err_msg_;
 
-  vector<string> fields_;
+  std::vector<std::string> fields_;
 
-  vector<double> values_;
+  std::vector<double> values_;
 
 };
 

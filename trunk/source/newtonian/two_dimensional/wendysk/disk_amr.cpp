@@ -8,15 +8,15 @@ DiskRemove::DiskRemove(double inner_radius,
   total_specials_(total_specials),MinVol_(MinVol) {}
 
 vector<int> DiskRemove::CellsToRemove
-(Tessellation const* tess,
+(Tessellation const& tess,
  vector<Primitive> const& /*cells*/,
  vector<vector<double> > const& /*tracers*/,
  double /*time*/) const
 {
   vector<int> candidates;
   vector<double> merits;
-  for(int i=total_specials_;i<tess->GetPointNo();++i){
-    const Vector2D mp = tess->GetMeshPoint(i);
+  for(int i=total_specials_;i<tess.GetPointNo();++i){
+    const Vector2D mp = tess.GetMeshPoint(i);
     if(abs(mp)<inner_radius_)
 	{
       candidates.push_back(i);
@@ -26,10 +26,10 @@ vector<int> DiskRemove::CellsToRemove
       candidates.push_back(i);
       merits.push_back(abs(mp)-outer_radius_);
     }
-	else if(tess->GetVolume(i)<pow(abs(mp),1.3)*MinVol_) 
+	else if(tess.GetVolume(i)<pow(abs(mp),1.3)*MinVol_) 
 	{
 		candidates.push_back(i);
-		merits.push_back(tess->GetVolume(i));
+		merits.push_back(tess.GetVolume(i));
 	}
   }
   vector<int> result = RemoveNeighbors(merits,
@@ -51,33 +51,33 @@ DiskRefine::DiskRefine(int total_specials,
   max_volume_(max_volume) {}
 
 vector<int> DiskRefine::CellsToRefine
-(Tessellation const* tess,
+(Tessellation const& tess,
  vector<Primitive> const& cells,vector<vector<double> > const& /*tracers*/,
  double /*time*/,vector<Vector2D> & directions ,vector<int> const& Removed)
 {
   vector<int> stage1;
-  for(int i=total_specials_;i<tess->GetPointNo();++i){
+  for(int i=total_specials_;i<tess.GetPointNo();++i){
     if(cells[i].Density>d_min_)
       stage1.push_back(i);
   }
   vector<int> stage2;
   for(int i=0;i<(int)stage1.size();++i)
   {
-    if((abs(tess->GetMeshPoint(stage1[i]))>min_radius_)&&
-		abs(tess->GetMeshPoint(stage1[i]))<max_radius_)
+    if((abs(tess.GetMeshPoint(stage1[i]))>min_radius_)&&
+		abs(tess.GetMeshPoint(stage1[i]))<max_radius_)
       stage2.push_back(stage1[i]);
   }
    vector<int> res;
   for(int i=0;i<(int)stage2.size();++i)
   {
-    if(tess->GetVolume(stage2[i])>max_volume_
-		*pow(max(abs(tess->GetMeshPoint(stage2[i])),0.003),1.3))
+    if(tess.GetVolume(stage2[i])>max_volume_
+		*pow(max(abs(tess.GetMeshPoint(stage2[i])),0.003),1.3))
       res.push_back(stage2[i]);
   }
 
  
   return RemoveDuplicatedLately(res,
-				tess->GetPointNo(),
+				tess.GetPointNo(),
 				directions,
 				Removed);
 }

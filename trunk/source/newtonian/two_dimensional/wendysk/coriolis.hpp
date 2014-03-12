@@ -18,12 +18,12 @@ public:
    */
   Coriolis(double angular_velocity);
 
-  Conserved Calculate(Tessellation const* tess,
+  Conserved Calculate(Tessellation const& tess,
 		      vector<Primitive> const& cells,
 		      int point,
 		      vector<Conserved> const& /*fluxes*/,
 		      vector<Vector2D> const& /*point_velocity*/,
-		      HydroBoundaryConditions const* /*hbc*/,
+		      HydroBoundaryConditions const& /*hbc*/,
 		      vector<vector<double> > const& /*tracers*/,
 		      vector<double>& /*dtracer*/,
 		      double /*time*/,

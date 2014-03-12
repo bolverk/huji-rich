@@ -8,10 +8,13 @@
 
 #define _USE_MATH_DEFINES
 #include "Delaunay.hpp"
+#include <list>
 #include "tessellation.hpp"
 #include "../misc/utils.hpp"
 #include "../newtonian/two_dimensional/HydroBoundaryConditions.hpp"
 #include "../newtonian/two_dimensional/RefineStrategy.hpp"
+#include "../newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "voronoi_logger.hpp"
 
 //! \brief Voronoi tessellation class
 class VoronoiMesh : public Tessellation
@@ -26,6 +29,7 @@ public:
 	*/
 	friend void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		vector<vector<int> > &VolIndex,vector<vector<double> > &Volratio);
+
 	/*!
 	\brief Refines cells
 	\param V The Voronoi tesselllation
@@ -36,6 +40,18 @@ public:
 	*/
 	friend void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,
 		double alpha,vector<Vector2D> const& directions,bool PeriodicBoundary);
+
+	/*!
+	\brief Fixes the number in the NewIndex for periodic boundary conditions
+	\param V The Voronoi
+	\param other The real index of the cell whose edge we fix
+	\param ToRefine The point that is refined
+	\param NewIndex The index of the new point
+	\param NewPoint The new point
+	\return The index of the duplicated cor
+	*/
+	friend int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,
+		int NewIndex,Vector2D const& NewPoint);
 
 	vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc,
 		vector<Vector2D> const& point_velocities,double time)const;
@@ -52,6 +68,13 @@ public:
 	Tessellation* clone(void)const;
 
 	vector<int> GetNeighbors(int index)const;
+
+	/*!
+	\brief Returns the list of neighbors including ghost points
+	\return The neighbors
+	\param index The cell whose neighbors are returned
+	*/
+	vector<int> GetLiteralNeighbors(int index)const;
 
 	int GetOriginalIndex(int point) const;
 	
@@ -125,6 +148,14 @@ public:
 	
   bool NearBoundary(int index) const;
 
+  //! \brief Diagnostics method
+  voronoi_loggers::VoronoiLogger* logger;
+
+  /*! \brief Returns a reference to a list of all edges
+    \return List of all edges
+   */
+  vector<Edge>& GetAllEdges(void);
+
 private:
 	OuterBoundary const* bc;
 	double eps;
@@ -138,6 +169,21 @@ private:
 	void build_v(void);//Builds the voronoi mesh
 	VoronoiMesh& operator=(const VoronoiMesh& origin);
 	Vector2D CalcCellCM(int index) const;
+	void FindIntersectingPoints(vector<Edge> box_edges,
+		vector<vector<int> > &toduplicate);
+	vector<int> CellIntersectBoundary(vector<Edge> const&box_edges,int cell);
+	vector<Edge> GetBoxEdges(void);
+	void GetAdditionalBoundary(vector<vector<int> > &copied,
+		vector<vector<int> > &result,vector<vector<int> > &totest);
+	void GetCorners(vector<vector<int> > const& copied,vector<vector<int> > &result);
+	void GetNeighborNeighbors(vector<int> &result,int point);
+	void GetRealNeighbor(vector<int> &result,int point);
+	vector<int> GetBorderingCells(vector<int> const& copied,
+		vector<int> const& totest,int tocheck,vector<int> tempresult,int outer);
+	bool CloseToBorder(int point,int &border);
+	void GetToTest(vector<vector<int> > &copied,vector<vector<int> > &totest);
+	void ConvexEdgeOrder(void);
+	vector<int> FindEdgeStartConvex(int point);
 };
 
 

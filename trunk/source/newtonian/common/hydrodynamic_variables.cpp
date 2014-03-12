@@ -4,9 +4,22 @@
 #include "../../misc/utils.hpp"
 
 Primitive::Primitive(void):
-  Density(0), Pressure(0),
-   Energy(0),
-  Velocity(0,0), SoundSpeed(0) {}
+  Density(0), 
+  Pressure(0),
+  Velocity(0,0), 
+  Energy(0),
+  SoundSpeed(0) {}
+
+Primitive::Primitive(double density_i,
+		     double pressure_i,
+		     Vector2D const& velocity_i,
+		     double energy_i,
+		     double sound_speed_i):
+  Density(density_i),
+  Pressure(pressure_i),
+  Velocity(velocity_i),
+  Energy(energy_i),
+  SoundSpeed(sound_speed_i) {}
 
 int Primitive::GetVarNo(void) const
 {
@@ -15,14 +28,14 @@ int Primitive::GetVarNo(void) const
 
 Primitive& Primitive::operator=(Primitive const&other)
 {
-	if (this == &other)
-       return *this;
-	Density=other.Density;
-	Energy=other.Energy;
-	Pressure=other.Pressure;
-	SoundSpeed=other.SoundSpeed;
-	Velocity=other.Velocity;
-	return *this;
+  if (this == &other)
+    return *this;
+  Density=other.Density;
+  Energy=other.Energy;
+  Pressure=other.Pressure;
+  SoundSpeed=other.SoundSpeed;
+  Velocity=other.Velocity;
+  return *this;
 }
 
 bool primitive_has_nan(Primitive const& p)
@@ -43,12 +56,12 @@ Conserved::Conserved(double mass,
 
 Conserved& Conserved::operator=(Conserved const&other)
 {
-	if (this == &other)
-       return *this;
-	Energy=other.Energy;
-	Mass=other.Mass;
-	Momentum=other.Momentum;
-	return *this;
+  if (this == &other)
+    return *this;
+  Energy=other.Energy;
+  Mass=other.Mass;
+  Momentum=other.Momentum;
+  return *this;
 }
 
 Primitive& Primitive::operator+=(Primitive const& p)
@@ -98,49 +111,39 @@ double Primitive::operator[](int index) const
     throw UniversalError("Invalid index in Primitive::operator[]");
 }
 
-//! \brief Operation on two numbers that reeturns a number
-class BinaryOperation
-{
-public:
-
-  /*! \brief Abstract class for binary operation
-    \param x Left argument
-    \param y Right argument
-    \return Result of the binary operation
-   */
-  virtual double Eval(double x, double y) const = 0;
-
-  virtual ~BinaryOperation(void) {}
-};
-
 namespace{
+
   Primitive binary_op_primitive(Primitive const& p1,
 				Primitive const& p2,
-				BinaryOperation const& op)
+				BinaryOperation<double> const& op)
   {
-    Primitive res;
-    for(int i = 0;i<res.GetVarNo();i++)
-      res[i] = op.Eval(p1[i],p2[i]);
-    return res;
+    return Primitive(op(p1.Density,p2.Density),
+		     op(p1.Pressure,p2.Pressure),
+		     Vector2D(op(p1.Velocity.x,p2.Velocity.x),
+			      op(p1.Velocity.y,p2.Velocity.y)),
+		     op(p1.Energy,p2.Energy),
+		     op(p1.SoundSpeed,p2.SoundSpeed));
   }
 
   Primitive primitive_scalar_op(Primitive const& p,
 				double c,
-				BinaryOperation const& op)
+				BinaryOperation<double> const& op)
   {
-    Primitive res;
-    for(int i=0;i<res.GetVarNo();i++)
-      res[i] = op.Eval(p[i],c);
-    return res;
+    return Primitive(op(p.Density,c),
+		     op(p.Pressure,c),
+		     Vector2D(op(p.Velocity.x,c),
+			      op(p.Velocity.y,c)),
+		     op(p.Energy,c),
+		     op(p.SoundSpeed,c));
   }
 }
 
 Primitive operator+(Primitive const& p1,
-		   Primitive const& p2)
+		    Primitive const& p2)
 {
-  class plus: public BinaryOperation
+  class plus: public BinaryOperation<double>
   {
-    double Eval(double x, double y) const
+    double operator()(double const& x, double const& y) const
     {
       return x+y;
     }
@@ -151,10 +154,10 @@ Primitive operator+(Primitive const& p1,
 Primitive operator-(Primitive const& p1,
 		    Primitive const& p2)
 {
-  class minus: public BinaryOperation
+  class minus: public BinaryOperation<double>
   {
   public:
-    double Eval(double x, double y) const
+    double operator()(double const& x, double const& y) const
     {
       return x-y;
     }
@@ -166,10 +169,10 @@ Primitive operator-(Primitive const& p1,
 Primitive operator/(Primitive const& p,
 		    double c)
 {
-  class divide: public BinaryOperation
+  class divide: public BinaryOperation<double>
   {
   public:
-    double Eval(double x,double y) const
+    double operator()(double const& x,double const& y) const
     {
       return x/y;
     }
@@ -180,10 +183,10 @@ Primitive operator/(Primitive const& p,
 Primitive operator*(Primitive const& p,
 		    double s)
 {
-  class multiply: public BinaryOperation
+  class multiply: public BinaryOperation<double>
   {
   public:
-    double Eval(double x, double y) const
+    double operator()(double const& x, double const& y) const
     {
       return x*y;
     }
@@ -192,7 +195,7 @@ Primitive operator*(Primitive const& p,
 }
 
 Primitive operator*(double s,
-		   Primitive const& p)
+		    Primitive const& p)
 {
   return p*s;
 }
@@ -202,38 +205,30 @@ Conserved::Conserved(void):
 
 Conserved operator+(Conserved const& c1, Conserved const& c2)
 {
-  Conserved res;
-  res.Mass = c1.Mass + c2.Mass;
-  res.Momentum = c1.Momentum + c2.Momentum;
-  res.Energy = c1.Energy + c2.Energy;
-  return res;
+  return Conserved(c1.Mass+c2.Mass,
+		   c1.Momentum+c2.Momentum,
+		   c1.Energy+c2.Energy);
 }
 
 Conserved operator-(Conserved const& c1, Conserved const& c2)
 {
-  Conserved res;
-  res.Mass = c1.Mass - c2.Mass;
-  res.Momentum = c1.Momentum - c2.Momentum;
-  res.Energy = c1.Energy - c2.Energy;
-  return res;
+  return Conserved(c1.Mass-c2.Mass,
+		   c1.Momentum-c2.Momentum,
+		   c1.Energy-c2.Energy);
 }
 
 Conserved operator*(double d, Conserved const& c)
 {
-  Conserved res;
-  res.Mass = d * c.Mass;
-  res.Momentum = d * c.Momentum;
-  res.Energy = d * c.Energy;
-  return res;
+  return Conserved(d*c.Mass,
+		   d*c.Momentum,
+		   d*c.Energy);
 }
 
 Conserved operator/(Conserved const& c, double d)
 {
-  Conserved res;
-  res.Mass = c.Mass / d;
-  res.Momentum = c.Momentum / d;
-  res.Energy = c.Energy / d;
-  return res;
+  return Conserved(c.Mass/d,
+		   c.Momentum/d,
+		   c.Energy/d);
 }
 
 Conserved& Conserved::operator+=(Conserved const& c)
@@ -260,32 +255,26 @@ double TotalEnergyDensity(Primitive const& p)
 
 Conserved Primitive2Conserved(Primitive const& p)
 {
-  Conserved res;
-  res.Mass = p.Density;
-  res.Momentum = p.Density*p.Velocity;
-  res.Energy = TotalEnergyDensity(p);
-  return res;
+  return Conserved(p.Density,
+		   p.Density*p.Velocity,
+		   TotalEnergyDensity(p));
 }
 
 Conserved Primitive2Conserved(Primitive const& p,double vol)
 {
-  Conserved res;
-  res.Mass = vol*p.Density;
-  res.Momentum = vol*p.Density*p.Velocity;
-  res.Energy = vol*TotalEnergyDensity(p);
-  return res;
+  return Conserved(vol*p.Density,
+		   vol*p.Density*p.Velocity,
+		   vol*TotalEnergyDensity(p));
 }
 
 
 Conserved Primitive2Flux(Primitive const& p, 
 			 Vector2D const& n)
 {
-  Vector2D nn = n/abs(n);
-  Conserved res;
-  res.Mass = p.Density*ScalarProd(p.Velocity, nn);
-  res.Momentum = p.Pressure*nn + 
-    p.Density*ScalarProd(p.Velocity, nn)*p.Velocity;
-  res.Energy = (TotalEnergyDensity(p)+p.Pressure)*
-    ScalarProd(p.Velocity, nn);
-  return res;
+  const Vector2D nn = n/abs(n);
+  return Conserved(p.Density*ScalarProd(p.Velocity, nn),
+		   p.Pressure*nn + 
+		   p.Density*ScalarProd(p.Velocity, nn)*p.Velocity,
+		   (TotalEnergyDensity(p)+p.Pressure)*
+		   ScalarProd(p.Velocity, nn));
 }

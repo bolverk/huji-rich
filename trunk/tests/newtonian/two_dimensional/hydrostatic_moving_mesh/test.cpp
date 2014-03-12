@@ -28,66 +28,74 @@ using namespace simulation2d;
 
 namespace {
 
-class SimData
-{
-public:
-
-  SimData(void):
-    width_(1),
-    np_(10),
-    init_points_(square_grid(width_,np_)),
-    outer_(0,width_,width_,0),
-    tess_(),
-    interpm_(),
-    density_(1),
-    pressure_(1),
-    xvelocity_(0),
-    yvelocity_(0),
-    eos_(5./3.),
-    bpm_(),
-    rs_(),
-    hbc_(rs_),
-    point_motion_(bpm_,hbc_),
-    force_(),
-    sim_(init_points_,
-	 &tess_,
-	 &interpm_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
-	 eos_,
-	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
-
-  hdsim& getSim(void)
+  class SimData
   {
-    return sim_;
-  }
+  public:
 
-private:
+    SimData(void):
+      width_(1),
+      np_(10),
+      init_points_(square_grid(width_,np_)),
+      outer_(0,width_,width_,0),
+      tess_(),
+      interpm_(),
+      density_(1),
+      pressure_(1),
+      xvelocity_(0),
+      yvelocity_(0),
+      eos_(5./3.),
+      bpm_(),
+      rs_(),
+      hbc_(rs_),
+      point_motion_(bpm_,hbc_),
+      force_(),
+      sim_(init_points_,
+	   tess_,
+	   interpm_,
+	   density_,
+	   pressure_,
+	   xvelocity_,
+	   yvelocity_,
+	   eos_,
+	   rs_,
+	   point_motion_,
+	   force_,
+	   outer_,
+	   hbc_) {}
+
+    hdsim& getSim(void)
+    {
+      return sim_;
+    }
+
+  private:
   
-  const double width_;
-  const int np_;
-  const vector<Vector2D> init_points_;
-  const SquareBox outer_;
-  VoronoiMesh tess_;
-  PCM2D interpm_;
-  const Uniform2D density_;
-  const Uniform2D pressure_;
-  const Uniform2D xvelocity_;
-  const Uniform2D yvelocity_;
-  const IdealGas eos_;
-  Eulerian bpm_;
-  const Hllc rs_;
-  const RigidWallHydro hbc_;
-  RoundCells point_motion_;
-  ZeroForce force_;
-  hdsim sim_;
-};
+    const double width_;
+    const int np_;
+    const vector<Vector2D> init_points_;
+    const SquareBox outer_;
+    VoronoiMesh tess_;
+    PCM2D interpm_;
+    const Uniform2D density_;
+    const Uniform2D pressure_;
+    const Uniform2D xvelocity_;
+    const Uniform2D yvelocity_;
+    const IdealGas eos_;
+    Eulerian bpm_;
+    const Hllc rs_;
+    const RigidWallHydro hbc_;
+    RoundCells point_motion_;
+    ZeroForce force_;
+    hdsim sim_;
+  };
+
+  vector<double> volume_list(hdsim const& sim)
+  {
+    vector<double> res(sim.GetCellNo(),0);
+    for(int i=0;i<sim.GetCellNo();++i)
+      res[i] = sim.GetCellVolume(i);
+    return res;
+  }
 
   class WriteMinMaxVolume: public DiagnosticFunction
   {
@@ -98,8 +106,8 @@ private:
 
     void diagnose(hdsim const& sim)
     {
-      fhandle_ << min(cells_property(sim,"volume")) << " "
-	<< max(cells_property(sim,"volume")) << endl;
+      fhandle_ << min(volume_list(sim)) << " "
+	       << max(volume_list(sim)) << endl;
     }
 
     ~WriteMinMaxVolume(void)

@@ -7,8 +7,7 @@
 #include <string>
 #include "hdsim.hpp"
 
-using namespace std;
-using namespace H5;
+using std::string;
 
 //! \brief Diagnostics for one dimensional simulation
 namespace diagnostics1d{

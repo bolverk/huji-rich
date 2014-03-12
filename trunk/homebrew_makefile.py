@@ -53,7 +53,7 @@ def safe_create(folder_name):
     import os
 
     if not os.path.isdir(folder_name):
-        os.system('mkdir '+folder_name)
+        os.mkdir(folder_name)
 
 def get_all_files(absroot):
 
@@ -76,24 +76,55 @@ def source2lib(fname, lname):
 
 def strict_compile(fname, lname):
 
-    import os
+    import subprocess
 
     oname = source2lib(fname, lname)
-    os.system('g++ -c '+fname+' '+
-              '-O3 '+
-              gcc_strict_warning_flags()+' '+
-              '-o '+oname)
+    compile_command = ['g++','-c','-g',fname,'-O0']
+    for item in gcc_strict_warning_flags().split():
+        compile_command.append(item)
+    compile_command.append('-o')
+    compile_command.append(oname)
+    proc = subprocess.Popen(compile_command,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+    stdout_data = proc.stdout.readlines()
+    stderr_data = proc.stderr.readlines()
+    if stdout_data<>[] or stderr_data<>[]:
+        if stdout_data<>[]:
+            for line in stdout_data:
+                print line.rstrip()
+        if stderr_data<>[]:
+            for line in stderr_data:
+                print line.rstrip()
+        raise NameError('problem with compilation')
 
 def simple_compile(fname, lname):
 
-    import os
+    import subprocess
 
     oname = source2lib(fname, lname)
-    os.system('g++ -c '+fname+' '+
-              '-O3 '+
-              '-o '+oname)
+    compile_command = ['g++','-c','-g',fname,'-O0','-o',oname]
+    proc = subprocess.Popen(compile_command,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    stdout_data = proc.stdout.readlines()
+    stderr_data = proc.stderr.readlines()
+    if stdout_data<>[] or stderr_data<>[]:
+        if stdout_data<>[]:
+            for line in stdout_data:
+                print line.rstrip()
+        if stderr_data<>[]:
+            for line in stderr_data:
+                print line.rstrip()
+        raise NameError('problem with compilation')    
 
 def sensitive_compile(fname, lname):
+
+    import os.path
+
+    opath = fname.split('/')[-1].replace('cpp','o')
+    if os.path.isfile(opath):
+        os.remove(opath)
 
     if '/treecode/' in fname:
         simple_compile(fname, lname)
@@ -135,6 +166,10 @@ def main():
     lname = 'library'
     safe_create(lname)
 
+    # Erase old library file
+    if os.path.isfile(lname+'/librich.a'):
+        os.remove(lname+'/librich.a')
+
     for fname in get_source_files('source'):
         efficient_compile(fname,lname)
 
@@ -144,5 +179,3 @@ def main():
 if __name__ == '__main__':
 
     main()
-
-    

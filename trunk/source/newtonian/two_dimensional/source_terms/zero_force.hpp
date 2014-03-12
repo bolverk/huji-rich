@@ -12,24 +12,31 @@
 class ZeroForce: public SourceTerm
 {
 public:
-	Conserved Calculate(Tessellation const* tess,
-		vector<Primitive> const& cells,int point,
-		vector<Conserved> const& fluxes,
-		vector<Vector2D> const& point_velocity,
-		HydroBoundaryConditions const *hbc,
-		vector<vector<double> > const &tracer_extensive,vector<double> &dtracer,
-		double t,
-		double dt);
+
+  Conserved Calculate
+  (Tessellation const& tess,
+   vector<Primitive> const& cells,
+   int point,
+   vector<Conserved> const& fluxes,
+   vector<Vector2D> const& point_velocity,
+   HydroBoundaryConditions const& hbc,
+   vector<vector<double> > const& tracers,
+   vector<double>& dtracer,
+   double t,
+   double dt);
 };
 
 //! \brief Zero acceleration
 class ZeroAcceleration: public Acceleration
 {
 public:
-	Vector2D Calculate(Tessellation const* tess,
-		vector<Primitive> const& cells,int point,vector<Conserved> const& fluxes,
-		vector<Vector2D> const& point_velocity,HydroBoundaryConditions const*hbc,
-		double time,double dt);
+  Vector2D Calculate(Tessellation const& tess,
+		     vector<Primitive> const& cells,
+		     int point,
+		     vector<Conserved> const& fluxes,
+		     vector<Vector2D> const& point_velocity,
+		     HydroBoundaryConditions const& hbc,
+		     double time,double dt);
 };
 
 #endif // ZEROFORCE_HPP

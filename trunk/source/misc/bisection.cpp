@@ -2,6 +2,14 @@
 #include "bisection.hpp"
 #include "universal_error.hpp"
 
+namespace 
+{
+  bool is_effectively_zero(double x)
+  {
+    return fabs(x)<1e-14;
+  }
+}
+
 double find_upper_bracket(Func1Var const& f,
 			  double xl)
 {
@@ -33,11 +41,11 @@ double bisection(Func1Var const& f,
   int iter = 0;
 
   double fl = f.eval(xl);
-  if(fl==0)
+  if(is_effectively_zero(fl))
     return xl;
   
   double fr = f.eval(xr);
-  if(fr==0)
+  if(is_effectively_zero(fr))
     return xr;
 
   if(fl*fr>0){
@@ -49,11 +57,10 @@ double bisection(Func1Var const& f,
     throw eo;
   }
 
-  //  double xm = 0.5*(xl+xm);
-  while(abs(xl-xr)>tol){
+  while(fabs(xl-xr)>tol){
     double xm = 0.5*(xl+xr);
     double fm = f.eval(xm);
-    if(fm==0)
+    if(is_effectively_zero(fm))
       return xm;
     if(fm*fl>0)
       xl = xm;

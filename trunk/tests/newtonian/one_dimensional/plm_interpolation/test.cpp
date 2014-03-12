@@ -6,7 +6,6 @@
 #include "source/misc/utils.hpp"
 #include "source/newtonian/one_dimensional/pcm1d.hpp"
 #include "source/newtonian/one_dimensional/plm1d.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_1d/sine_wave.hpp"
 

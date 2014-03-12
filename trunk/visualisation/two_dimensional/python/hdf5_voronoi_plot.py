@@ -1,7 +1,8 @@
+import matplotlib
+matplotlib.use('Cairo')
 import h5py
 import pylab
 import numpy
-import matplotlib
 import sys
 import argparse
 
@@ -33,9 +34,10 @@ for i in range(len(vert_n_raw)):
         lowbound = vert_idx_list[i-1]
     pylab.fill(vert_x_raw[lowbound:upbound],
                vert_y_raw[lowbound:upbound],
-               fc=matplotlib.cm.jet(z_scaled[i]))
+               fc=matplotlib.cm.jet(z_scaled[i]),
+               ec='None')
 
 pylab.title(args.field)
 ax, _ = matplotlib.colorbar.make_axes(pylab.gca())
 matplotlib.colorbar.ColorbarBase(ax,norm=matplotlib.colors.Normalize(vmin=min(z_list),vmax=max(z_list)))
-pylab.show()
+pylab.savefig(args.file_name.replace('.h5','.png'))

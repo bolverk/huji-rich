@@ -13,18 +13,18 @@ class PCM2D: public SpatialReconstruction
 {
 public:
 
-  void Prepare(Tessellation const* tessellation,
+  void Prepare(Tessellation const& tessellation,
 	       vector<Primitive> const& cells,
 	       vector<vector<double> > const& tracers,
 	       double dt,double time);
 
-  Primitive Interpolate(Tessellation const* /*tessellation*/,
+  Primitive Interpolate(Tessellation const& /*tessellation*/,
 			vector<Primitive> const& cells,
 			double /*dt*/,Edge const& edge, int side,
 			InterpolationType /*interptype*/,Vector2D const& /*vface*/) const;
 
   vector<double> interpolateTracers
-  (Tessellation const* tess,vector<Primitive> const& cells,
+  (Tessellation const& tess,vector<Primitive> const& cells,
    vector<vector<double> > const& tracers,
    double dt,
    Edge const& edge,

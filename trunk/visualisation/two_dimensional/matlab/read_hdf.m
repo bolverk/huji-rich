@@ -1,6 +1,6 @@
 function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Matlab script to read RICH binary files in float format
+%   Matlab script to read RICH binary files in float/double format
 %
 %   Inputs  : filename - The location of the binary file 
 %             ShouldPlot - 1 indicates that a plot is wanted 0 otherwise
@@ -18,11 +18,11 @@ function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=r
 %             Tracers - The scalar tracers
 %             NumberOfPointsInCell - The number of vertices in each Voronoi
 %             cell
-%   Example : [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=RichReadFloat("output.bin",1,1,1)
+%   Example : [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=read_hdf("output.bin",1,1,1)
 %               Plots a log scaled density plot from the file "output.bin"
-%             [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=RichReadFloat("output.bin",0)
+%             [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=read_hdf("output.bin",0)
 %               Only reads the data from "output.bin"
-%             [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=RichReadFloat("output.bin")
+%             [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=read_hdf("output.bin")
 %               Only reads the data from "output.bin"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(nargin==1),
@@ -63,7 +63,10 @@ end
 draw=WhatToPlot;
 Log=LogScale;
 Temperature=Pressure./Density;
-maxfaces=14;
+maxfaces=max(nVert);
+if(maxfaces>14)
+    display('Warning, max number of faces exceeds 14!!')
+end
 
 if(ShouldPlot==1)
     Vertices=zeros(maxfaces*NumberOfCells,2);

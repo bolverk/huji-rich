@@ -18,10 +18,13 @@ public:
 	*/
 	ConstantGravity(Vector2D const& force);
 
-	Vector2D Calculate(Tessellation const* tess,
-		vector<Primitive> const& cells,int point,vector<Conserved> const& fluxes,
-		vector<Vector2D> const& point_velocity,HydroBoundaryConditions const*hbc,
-		double time,double dt);
+  Vector2D Calculate(Tessellation const& tess,
+		     vector<Primitive> const& cells,
+		     int point,
+		     vector<Conserved> const& fluxes,
+		     vector<Vector2D> const& point_velocity,
+		     HydroBoundaryConditions const& hbc,
+		     double time,double dt);
 
 private:
 	Vector2D force_;

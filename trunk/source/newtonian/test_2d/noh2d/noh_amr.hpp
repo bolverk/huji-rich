@@ -22,7 +22,7 @@ public:
 	//! \brief Class destructor
 	~NohRefine();
 
-	vector<int> CellsToRefine(Tessellation const* tess,
+	vector<int> CellsToRefine(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double time,vector<Vector2D> &directions,vector<int> const& Removed);
 };
@@ -41,7 +41,7 @@ public:
 	//! \brief Class destructor
 	~NohRemove();
 
-	vector<int> CellsToRemove(Tessellation const* tess,
+	vector<int> CellsToRemove(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double time)const;
 };

@@ -2,20 +2,20 @@
 #include "../../misc/universal_error.hpp"
 
 Vector2D HydroBoundaryConditions::Normal(Edge const& edge,
-	Tessellation const* tessellation)const
+	Tessellation const& tessellation)const
 {
   if(!IsBoundary(edge,tessellation)){
-    return tessellation->GetMeshPoint(edge.GetNeighbor(1))-
-      tessellation->GetMeshPoint(edge.GetNeighbor(0));
+    return tessellation.GetMeshPoint(edge.GetNeighbor(1))-
+      tessellation.GetMeshPoint(edge.GetNeighbor(0));
   }
   else{ 
     Vector2D v;
     if(!IsGhostCell(edge.GetNeighbor(0),tessellation)){
       v = edge.GetVertex(0) - 
-	tessellation->GetMeshPoint(edge.GetNeighbor(0));
+	tessellation.GetMeshPoint(edge.GetNeighbor(0));
     }
     else if(!IsGhostCell(edge.GetNeighbor(1),tessellation)){
-      v = tessellation->GetMeshPoint(edge.GetNeighbor(1)) - 
+      v = tessellation.GetMeshPoint(edge.GetNeighbor(1)) - 
 	edge.GetVertex(0);
     }
     else{

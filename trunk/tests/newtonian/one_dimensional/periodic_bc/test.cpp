@@ -8,7 +8,6 @@
 #include "source/newtonian/one_dimensional/spatial_distribution1d.hpp"
 #include "source/newtonian/one_dimensional/eulerian1d.hpp"
 #include "source/newtonian/one_dimensional/periodic_1d.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/misc/int2str.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/test_1d/sine_wave.hpp"

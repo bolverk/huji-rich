@@ -9,7 +9,7 @@
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
 
-using namespace std;
+using std::vector;
 
 //! \brief Abstract class for external forces
 class ExternalForces1D

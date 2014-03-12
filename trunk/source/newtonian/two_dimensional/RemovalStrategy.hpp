@@ -26,7 +26,7 @@ public:
 		\param time The sim time
 		\return The cells to remove
 	*/
-	virtual vector<int> CellsToRemove(Tessellation const* tess,
+	virtual vector<int> CellsToRemove(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double time)const=0;
 	/*!
@@ -34,7 +34,7 @@ public:
 		\param tess The tessellation
 		\param ToRemove The list of points to remove
 	*/
-	void CheckOutput(Tessellation const* tess,vector<int> & ToRemove)const;
+	void CheckOutput(Tessellation const& tess,vector<int> & ToRemove) const;
 
 	/*! \brief Removes neighboring points
 	\param merits The vector of merits that decides which one of the neighbors to keep (the one with the higher merit)
@@ -43,7 +43,7 @@ public:
 	\return The list of points to remove without neighboring points
 	*/
 	vector<int> RemoveNeighbors(vector<double> const& merits,vector<int> const& 
-		candidates,Tessellation const* tess) const;
+		candidates,Tessellation const& tess) const;
 
 	//! \brief Virtual destructor
   virtual ~RemovalStrategy(void);

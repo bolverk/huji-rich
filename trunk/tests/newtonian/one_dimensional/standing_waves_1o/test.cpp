@@ -8,7 +8,6 @@
 #include "source/newtonian/one_dimensional/rigid_wall_1d.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/misc/utils.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/newtonian/one_dimensional/source_term_1d.hpp"
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"

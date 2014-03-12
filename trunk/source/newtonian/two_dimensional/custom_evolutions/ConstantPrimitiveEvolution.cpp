@@ -7,24 +7,24 @@ mass_count_(mass_count),mass_flux(0),mass_fluxt(0),N_(n)
 ConstantPrimitiveEvolution::~ConstantPrimitiveEvolution(void)
 {}
 
-Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const* tessellation,
+Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,	double dt,
-	SpatialReconstruction* interpolation,Edge const& edge,
+	SpatialReconstruction& interpolation,Edge const& edge,
 	Vector2D const& facevelocity,RiemannSolver const& rs,int index,
-	HydroBoundaryConditions const* bc,double time,vector<vector<double> > const& tracers)
+	HydroBoundaryConditions const& bc,double time,vector<vector<double> > const& tracers)
 {
-	if(bc->IsBoundary(edge,tessellation))
-		return bc->CalcFlux(tessellation,cells,facevelocity,edge,interpolation,dt,time);
+	if(bc.IsBoundary(edge,tessellation))
+		return bc.CalcFlux(tessellation,cells,facevelocity,edge,interpolation,dt,time);
 	else
 	{
-		Vector2D normaldir = tessellation->GetMeshPoint(edge.GetNeighbor(1))-
-			tessellation->GetMeshPoint(edge.GetNeighbor(0));
+		Vector2D normaldir = tessellation.GetMeshPoint(edge.GetNeighbor(1))-
+			tessellation.GetMeshPoint(edge.GetNeighbor(0));
 
 		Vector2D paraldir = edge.GetVertex(1) - edge.GetVertex(0);
 
-		Primitive left = interpolation->Interpolate
+		Primitive left = interpolation.Interpolate
 			(tessellation, cells, dt, edge, 0,InBulk,facevelocity);
-		Primitive right = interpolation->Interpolate
+		Primitive right = interpolation.Interpolate
 			(tessellation, cells, dt, edge, 1,InBulk,facevelocity);
 		Conserved res(FluxInBulk(normaldir,paraldir,left,right,facevelocity,rs));
 		int n0=edge.GetNeighbor(0);
@@ -56,8 +56,8 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const* tessellation,
 
 Primitive ConstantPrimitiveEvolution::UpdatePrimitive
 	(vector<Conserved> const& /*conservedintensive*/,
-	EquationOfState const* /*eos*/,
-	vector<Primitive>& cells,int index,Tessellation const* /*tess*/,
+	EquationOfState const& /*eos*/,
+	vector<Primitive>& cells,int index,Tessellation const& /*tess*/,
 	double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
 	Primitive res=cells[index];
@@ -77,28 +77,28 @@ double ConstantPrimitiveEvolution::GetMassFlux(void) const
 vector<double> ConstantPrimitiveEvolution::UpdateTracer
 (int index,vector<vector<double> >
  const& tracers,vector<Primitive> const& /*cells*/,
- Tessellation const* /*tess*/,double /*time*/)
+ Tessellation const& /*tess*/,double /*time*/)
 {
   return tracers[index];
 }
 
 vector<double> ConstantPrimitiveEvolution::CalcTracerFlux
-(Tessellation const* tess,
+(Tessellation const& tess,
  vector<Primitive> const& cells,vector<vector<double> > const& tracers,
  double dm,Edge const& edge,int /*index*/,double dt,double /*time*/,
- SpatialReconstruction const* interp,Vector2D const& vface)
+ SpatialReconstruction const& interp,Vector2D const& vface)
 {
 	vector<double> res(tracers[0].size());
 	if(dm>0)
 	{	
-		res=interp->interpolateTracers(tess,cells,tracers,dt,edge,0,
+		res=interp.interpolateTracers(tess,cells,tracers,dt,edge,0,
 			InBulk,vface);
 		transform(res.begin(),res.end(),res.begin(),
 			bind1st(multiplies<double>(),dm*dt*edge.GetLength()));	
 	}
 	else
 	{
-		res=interp->interpolateTracers(tess,cells,tracers,dt,edge,1,
+		res=interp.interpolateTracers(tess,cells,tracers,dt,edge,1,
 			Boundary,vface);
 		transform(res.begin(),res.end(),res.begin(),
 			bind1st(multiplies<double>(),dm*dt*edge.GetLength()));

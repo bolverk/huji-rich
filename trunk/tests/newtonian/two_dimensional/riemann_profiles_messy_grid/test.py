@@ -40,7 +40,7 @@ def main():
     gof2 = goodness_of_fit(ps,pa)
     gof3 = goodness_of_fit(vs,va)
     
-    return gof1<0.08 and gof2<0.11 and gof3<0.11
+    return gof1<0.1 and gof2<0.11 and gof3<0.11
 
 import sys
 if __name__=='__main__':

@@ -20,6 +20,6 @@ double Lagrangian1D::CalcVelocity
       return hv[hv.size()-1].Velocity.x;
   }
   else
-    return 0.5*(hv[i-1].Velocity.x+
-		hv[i].Velocity.x);
+    return 0.5*(hv[size_t(i)-1].Velocity.x+
+		hv[size_t(i)].Velocity.x);
 }

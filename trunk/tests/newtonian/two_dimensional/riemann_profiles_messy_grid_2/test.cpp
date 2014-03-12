@@ -37,7 +37,7 @@ public:
     outer_(0,width_,width_,0),
     tess_(),
     eos_(5./3.),
-    interpm_(eos_,outer_,&hbc_,true,false),
+    interpm_(eos_,outer_,hbc_,true,false),
     density_(1),
     pressure_(0,0.5,0,1,2,1),
     xvelocity_(0),
@@ -48,18 +48,18 @@ public:
     point_motion_(pm_naive_,hbc_),
     force_(),
     sim_(init_points_,
-	 &tess_,
-	 &interpm_,
+	 tess_,
+	 interpm_,
 	 density_,
 	 pressure_,
 	 xvelocity_,
 	 yvelocity_,
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

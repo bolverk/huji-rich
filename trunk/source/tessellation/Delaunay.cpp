@@ -1,88 +1,73 @@
 #include "Delaunay.hpp"
-#include <iostream>
 #include <vector>
 #include <cmath>
 
 Delaunay::DataOnlyForBuild::DataOnlyForBuild():insert_order(vector<int> ()),
-	copied(vector<vector<char> > ()),BoundaryCandidates(vector<int> ())
+	copied(vector<vector<char> > ())
 {}
 
 Delaunay::DataOnlyForBuild::DataOnlyForBuild(DataOnlyForBuild const& other):
-insert_order(other.insert_order),copied(other.copied),BoundaryCandidates
-(other.BoundaryCandidates){}
+insert_order(other.insert_order),copied(other.copied){}
 
 Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 	(DataOnlyForBuild const& other)
 {
-	 if(this != &other)
-	 {
-		 copied=other.copied;
-		 insert_order=other.insert_order;
-	 }
-	 return *this;
+	if(this != &other)
+	{
+		copied=other.copied;
+		insert_order=other.insert_order;
+	}
+	return *this;
 }
 
 
 Delaunay::Delaunay(void): 
-  tree(0),
-  treePoints(0),
-  NewPointIndex(vector<int>()),
-  lastFacet(0),CalcRadius(false),
-  radius(vector<double>()),
-  PointWasAdded(false),
-  BIG(0), last_facet_added(0),
-  f(vector<facet>()),
-  cor(vector<Vector2D>()),
-  totalCor(vector<Vector2D>()),
-  length(0),
-  olength(0),location_pointer(0), last_loc(0),bc(0)
-{}
+NewPointIndex(vector<int>()),
+	lastFacet(0),CalcRadius(false),
+	radius(vector<double>()),
+	PointWasAdded(false),
+	BIG(0), last_facet_added(0),
+	f(vector<facet>()),
+	cor(vector<Vector2D>()),
+	length(0),
+	olength(0),location_pointer(0), last_loc(0),bc(0),
+	logger(0) {}
 
 Delaunay::Delaunay(Delaunay const& other):
-  tree(0),
-  treePoints(0),
-  NewPointIndex(other.NewPointIndex),
-  lastFacet(other.lastFacet),
-  CalcRadius(other.CalcRadius),
-  radius(other.radius),
-  PointWasAdded(other.PointWasAdded),
-  BIG(other.BIG),
-  last_facet_added(other.last_facet_added),
-  f(other.f),
-  cor(other.cor),
-  totalCor(other.totalCor),
-  length(other.length),
-  olength(other.olength),
-  location_pointer(other.location_pointer),
-  last_loc(other.last_loc),
-  bc(other.bc) {}
+NewPointIndex(other.NewPointIndex),
+	lastFacet(other.lastFacet),
+	CalcRadius(other.CalcRadius),
+	radius(other.radius),
+	PointWasAdded(other.PointWasAdded),
+	BIG(other.BIG),
+	last_facet_added(other.last_facet_added),
+	f(other.f),
+	cor(other.cor),
+	length(other.length),
+	olength(other.olength),
+	location_pointer(other.location_pointer),
+	last_loc(other.last_loc),
+	bc(other.bc),
+	logger(other.logger) {}
 
 Delaunay::~Delaunay(void)
 {
-	//	cout<<"Entered d destruct"<<endl;
 	cor.clear();
 	f.clear();
-	if(treePoints!=0)
-	{
-		annDeallocPts(treePoints);
-		delete tree;
-		annClose();	
-	}
 	NewPointIndex.clear();
-	totalCor.clear();
 }
 
 namespace{
-  int find_index(facet const& fc, int i)
-  {
-    for(int j=0;j<3;++j)
-      {
-	if(fc.get_friend(j)==i)
-	  return j;
-      }
-    cout<<"Couldn't find number "<<i<<" in facet";
-    return 0;
-  }
+	int find_index(facet const& fc, int i)
+	{
+		for(int j=0;j<3;++j)
+		{
+			if(fc.get_friend(j)==i)
+				return j;
+		}
+		cout<<"Couldn't find number "<<i<<" in facet";
+		return 0;
+	}
 }
 
 void Delaunay::add_point(int index)
@@ -179,7 +164,7 @@ void Delaunay::flip(int i, int j)
 		{
 			indexes[0]=flip_stack.top()[0];
 			indexes[1]=flip_stack.top()[1];
-// Returns the index to the point to check in coordinates and the index of the point in the facet
+			// Returns the index to the point to check in coordinates and the index of the point in the facet
 			find_diff(&f[indexes[1]],&f[indexes[0]],&check[0]); 
 			find_diff(&f[indexes[0]],&f[indexes[1]],&other[0]);
 
@@ -249,6 +234,7 @@ void Delaunay::flip(int i, int j)
 void Delaunay::build_delaunay(vector<Vector2D>const& vp,OuterBoundary const* bc1)
 {
 	DataOnlyForBuild data;
+	NewPointIndex.clear();
 	// copy the boundary conditions
 	bc=bc1;
 	lastFacet=0;
@@ -300,8 +286,12 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,OuterBoundary const* bc1
 	{
 		add_point(data.insert_order[i]);
 	}
-	BuildBoundary(data);
-
+	// Calculate radius
+	radius.resize(f.size());
+	int n=int(f.size());
+	for(int i=0;i<n;++i)
+		radius[i]=CalculateRadius(i);
+	CalcRadius=true;
 }
 
 void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
@@ -332,48 +322,6 @@ void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
 	throw eo;
 }
 
-void Delaunay::output()
-{	
-	fstream myFile ("c:\\Delaunay.bin",ios::out | ios::binary);
-	length-=3;
-	int int_temp=int(cor.size());
-	myFile.write ((char*)&int_temp, sizeof (int));
-	length+=3;
-	int_temp=int(f.size());
-	myFile.write ((char*)&(int_temp), sizeof (int));
-	double temp;
-	for(int i=0;i<(int)cor.size();i++)
-	{
-		temp=cor[i].x;
-		myFile.write ((char*)&temp, sizeof (double));
-		temp=cor[i].y;
-		myFile.write ((char*)&temp, sizeof (double));
-	}
-	int temp2,j;
-
-	for(int i=0;i<(int)f.size();i++)
-	{
-		{
-			for(j=0;j<3;j++)
-			{
-				temp2=f[i].get_vertice(j);
-				myFile.write ((char*)&temp2, sizeof (int));
-			}
-		}
-	}
-	for(int i=0;i<(int)f.size();i++)
-	{
-		{
-			for(j=0;j<3;j++)
-			{
-				temp2=f[i].get_friend(j);
-				myFile.write ((char*)&temp2, sizeof (int));
-			}
-		}
-	}
-	myFile.close();
-}
-
 double Delaunay::triangle_area(int index)
 {
 	boost::array<Vector2D,3> p;
@@ -389,6 +337,8 @@ double Delaunay::triangle_area(int index)
 
 void Delaunay::update(const vector<Vector2D>& points)
 {
+	if(logger)
+		logger->output(cor,f);
 	build_delaunay(points,bc);
 }
 
@@ -417,40 +367,6 @@ int Delaunay::Walk(int point)
 	}
 	lastFacet=cur_facet;
 	return cur_facet;
-}
-
-void Delaunay::BuildTree(DataOnlyForBuild &data)
-{
-	// Find the points to add
-	data.BoundaryCandidates.reserve(int(20*sqrt(1.0*(double)cor.size())));
-	int N=olength;
-	for(int i=0;i<N;++i)
-	{
-		double R=FindMaxRadius(data.insert_order[i]);
-		if(BoundaryCandidate(R,data.insert_order[i]))
-			data.BoundaryCandidates.push_back(data.insert_order[i]);
-	}
-	// Build kd-tree
-	N=(int)data.BoundaryCandidates.size();
-	treePoints=annAllocPts(N,2);
-	for(int i=0;i<N;++i)
-	{
-		treePoints[i][0]=cor[data.BoundaryCandidates[i]].x;
-		treePoints[i][1]=cor[data.BoundaryCandidates[i]].y;
-	}
-	tree=new ANNkd_tree(treePoints,N,2,1,ANN_KD_SUGGEST);	
-}
-
-void Delaunay::BuildBoundary(DataOnlyForBuild &data)
-{
-	NewPointIndex.clear();
-	NewPointIndex.reserve(8*(int)sqrt(double(cor.size())*1.2));
-
-	DuplicatePoints(data);
-
-	annDeallocPts(treePoints);
-	delete tree;
-	annClose();	
 }
 
 double Delaunay::FindMaxRadius(int point)
@@ -506,441 +422,35 @@ bool Delaunay::IsOuterFacet(int facet)
 
 double Delaunay::CalculateRadius(int facet)
 {
-  const double big=1e10;
-  const double a=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(1)]);
-  const double b=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(2)]);
-  const double c=cor[f[facet].get_vertice(2)].distance(cor[f[facet].get_vertice(1)]);
-  const double temp1=b+c-a;
-  if(temp1<=0)
-    {
-      if(a>big*b||a>big*c) // Do we have a small edge?
-	return 0.5*a;
-      else
-	return 0.5*(b+c); // we have 3 points on a line
-    }
-  const double temp2=c+a-b;
-  if(temp2<=0)
-    {
-      if(b>big*a||b>big*c) // Do we have a small edge?
-	return 0.5*b;
-      else
-	return 0.5*(a+c); // we have 3 points on a line
-    }
-  const double temp3=b-c+a;
-  if(temp3<=0)
-    {
-      if(c>big*b||c>big*a) // Do we have a small edge?
-	return 0.5*c;
-      else
-	return 0.5*(b+a); // we have 3 points on a line
-    }
-  return a*b*c/sqrt((a+b+c)*temp1*temp2*temp3);
-}
-
-double Delaunay::ReflectDistance(double SearchR,Sides side,int point,int maxPoints,int &closest)
-{
-	// Finds the distance from point point reflecting at side and looking at the 
-	// numOfPoints closest neighbor. Also returns the index of the closest point
-	Vector2D newPoint;
-	ANNpoint queryPt;
-	boost::array<double,2> pointToCheck;
-	switch(side)
+	const double big=1e10;
+	const double a=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(1)]);
+	const double b=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(2)]);
+	const double c=cor[f[facet].get_vertice(2)].distance(cor[f[facet].get_vertice(1)]);
+	const double temp1=b+c-a;
+	if(temp1<=0)
 	{
-	case(LU):
-	  throw UniversalError("I do not know what to do in case LU in Delaunay::ReflectDistance");
-	case(LD):
-	  throw UniversalError("I do not know what to do in case LD in Delaunay::ReflectDistance");
-	case(RU):
-	  throw UniversalError("I do not know what to do in case RU in Delaunay::ReflectDistance");
-	case(RD):
-	  throw UniversalError("I do not know what to do in case RD in Delaunay::ReflectDistance");
-	case(RIGHT):
-		{
-			pointToCheck[0]=-cor[point].x+2*bc->GetGridBoundary(Right);
-			pointToCheck[1]=cor[point].y;
-			if((pointToCheck[0]-SearchR)>bc->GetGridBoundary(Right))
-			{
-				closest=point;
-				return 2*BIG;
-			}
-			break;
-		}
-	case(LEFT):
-		{
-			pointToCheck[0]=-cor[point].x+2*bc->GetGridBoundary(Left);
-			pointToCheck[1]=cor[point].y;
-			if((pointToCheck[0]+SearchR)<bc->GetGridBoundary(Left))
-			{
-				closest=point;
-				return 2*BIG;
-			}
-			break;
-		}
-	case(DOWN):
-		{
-			pointToCheck[0]=cor[point].x;
-			pointToCheck[1]=2*bc->GetGridBoundary(Down)-cor[point].y;
-			if((pointToCheck[1]+SearchR)<bc->GetGridBoundary(Down))
-			{
-				closest=point;
-				return 2*BIG;
-			}
-			break;
-		}
-	case(UP):
-		{
-			pointToCheck[0]=cor[point].x;
-			pointToCheck[1]=2*bc->GetGridBoundary(Up)-cor[point].y;
-			if((pointToCheck[1]-SearchR)>bc->GetGridBoundary(Up))
-			{
-				closest=point;
-				return 2*BIG;
-			}
-			break;
-		}
-	default:
-		UniversalError eo("Error in Delaunay::ReflectDistance: Expected UP, DOWN, LEFT or RIGHT, but got a different input");
-		throw eo;
+		if(a>big*b||a>big*c) // Do we have a small edge?
+			return 0.5*a;
+		else
+			return 0.5*(b+c); // we have 3 points on a line
 	}
-	queryPt=annAllocPt(2);
-	queryPt[0]=pointToCheck[0];
-	queryPt[1]=pointToCheck[1];
-	ANNidxArray nnIdx; // near neighbor indices
-	ANNdistArray dists; // near neighbor distances
-	nnIdx = new ANNidx[maxPoints]; // allocate near neigh indices
-	dists = new ANNdist[maxPoints]; // allocate near neighbor dists
-	tree->annkFRSearch(queryPt,SearchR*SearchR,maxPoints,nnIdx,dists,0);
-	closest=nnIdx[maxPoints-1];
-	double res=dists[maxPoints-1];
-
-	//cleanup
-	delete []nnIdx;
-	delete []dists;
-	annDeallocPt(queryPt);
-
-	return res;
-}
-
-void Delaunay::AddBoundaryPoint(int pointToAdd,Sides side,bool partial,DataOnlyForBuild
-	&data)
-{
-	bool AddedNewPoint=false;
-	vector<Vector2D> *vecPoint;
-	if(partial)
-		vecPoint=&totalCor;
-	else
-		vecPoint=&cor;
-	Vector2D newPoint;
-	switch(side)
+	const double temp2=c+a-b;
+	if(temp2<=0)
 	{
-	case(LD):
-		{
-			newPoint.Set(-bc->GetGridBoundary(Right)+bc->GetGridBoundary(Left)+
-				vecPoint->at(pointToAdd).x,	vecPoint->at(pointToAdd).y+
-				bc->GetGridBoundary(Down)-bc->GetGridBoundary(Up));
-			NewPointIndex.push_back(pointToAdd);
-			AddedNewPoint=true;
-			break;
-		}
-	case(LU):
-		{
-			newPoint.Set(-bc->GetGridBoundary(Right)+bc->GetGridBoundary(Left)+
-				vecPoint->at(pointToAdd).x,	vecPoint->at(pointToAdd).y-bc->GetGridBoundary(Down)+
-				bc->GetGridBoundary(Up));
-			NewPointIndex.push_back(pointToAdd);
-			AddedNewPoint=true;
-			break;
-		}
-	case(RD):
-		{
-			newPoint.Set(bc->GetGridBoundary(Right)-bc->GetGridBoundary(Left)+
-				vecPoint->at(pointToAdd).x,	vecPoint->at(pointToAdd).y+bc->GetGridBoundary(Down)-
-				bc->GetGridBoundary(Up));
-			NewPointIndex.push_back(pointToAdd);
-			AddedNewPoint=true;
-			break;
-		}
-	case(RU):
-		{
-			newPoint.Set(bc->GetGridBoundary(Right)-bc->GetGridBoundary(Left)+
-				vecPoint->at(pointToAdd).x,	vecPoint->at(pointToAdd).y-bc->GetGridBoundary(Down)+
-				bc->GetGridBoundary(Up));
-			NewPointIndex.push_back(pointToAdd);
-			AddedNewPoint=true;
-			break;
-		}
-	case(RIGHT):
-		{
-			if(bc->GetBoundaryType()==Rectengular)
-				newPoint.Set(2*bc->GetGridBoundary(Right)-vecPoint->at(pointToAdd).x,
-				vecPoint->at(pointToAdd).y);
-			else
-			{
-				newPoint.Set(bc->GetGridBoundary(Right)-bc->GetGridBoundary(Left)+vecPoint->at(pointToAdd).x,
-					vecPoint->at(pointToAdd).y);
-				NewPointIndex.push_back(pointToAdd);
-				AddedNewPoint=true;
-			}
-			break;
-		}
-	case(LEFT):
-		{
-			if(bc->GetBoundaryType()==Rectengular)
-				newPoint.Set(2*bc->GetGridBoundary(Left)-vecPoint->at(pointToAdd).x,
-				vecPoint->at(pointToAdd).y);
-			else
-			{
-				newPoint.Set(bc->GetGridBoundary(Left)-bc->GetGridBoundary(Right)+vecPoint->at(pointToAdd).x,
-					vecPoint->at(pointToAdd).y);
-				NewPointIndex.push_back(pointToAdd);
-				AddedNewPoint=true;
-			}
-			break;
-		}
-	case(DOWN):
-		{
-			if(bc->GetBoundaryType()!=Periodic)
-			{
-				newPoint.Set(vecPoint->at(pointToAdd).x,
-					2*bc->GetGridBoundary(Down)-vecPoint->at(pointToAdd).y);
-				if(bc->GetBoundaryType()==HalfPeriodic)
-				{
-					NewPointIndex.push_back(pointToAdd);
-					AddedNewPoint=true;
-				}
-			}
-			else
-			{
-				newPoint.Set(vecPoint->at(pointToAdd).x,
-					bc->GetGridBoundary(Down)-bc->GetGridBoundary(Up)+vecPoint->at(pointToAdd).y);
-				NewPointIndex.push_back(pointToAdd);
-				AddedNewPoint=true;
-			}
-			break;
-		}
-	case(UP):
-		{
-			if(bc->GetBoundaryType()!=Periodic)
-			{
-				newPoint.Set(vecPoint->at(pointToAdd).x,
-					2*bc->GetGridBoundary(Up)-vecPoint->at(pointToAdd).y);
-				if(bc->GetBoundaryType()==HalfPeriodic)
-				{
-					NewPointIndex.push_back(pointToAdd);
-					AddedNewPoint=true;
-				}
-			}
-			else
-			{
-				newPoint.Set(vecPoint->at(pointToAdd).x,
-					-bc->GetGridBoundary(Down)+bc->GetGridBoundary(Up)+vecPoint->at(pointToAdd).y);
-				NewPointIndex.push_back(pointToAdd);
-				AddedNewPoint=true;
-			}
-			break;
-		}
-	default:
-		UniversalError eo("Error in Delaunay::AddBoundaryPoint: got unexpected input");
-		throw eo;
-	}	
-	if(data.copied[side][pointToAdd]==0)
-	{
-		cor.push_back(newPoint);
-		add_point(int(cor.size())-1);
-		data.copied[side][pointToAdd]=1;
-		PointWasAdded=true;
+		if(b>big*a||b>big*c) // Do we have a small edge?
+			return 0.5*b;
+		else
+			return 0.5*(a+c); // we have 3 points on a line
 	}
-	else
-		if(AddedNewPoint)
-			NewPointIndex.pop_back();
-}
-
-int Delaunay::AddSphere(double minR,double maxR,ANNpoint &queryPt,Sides side,
-	bool partial,DataOnlyForBuild &data)
-{
-	// Get how many point are in the sphere
-	int NumberInSphere=tree->annkFRSearch(queryPt,maxR*maxR,0);
-	//allocate
-	ANNidxArray nnIdx; // near neighbor indices
-	ANNdistArray dists; // near neighbor distances
-	nnIdx = new ANNidx[NumberInSphere]; // allocate near neigh indices
-	dists = new ANNdist[NumberInSphere]; // allocate near neighbor dists
-	// Get the points
-	tree->annkFRSearch(queryPt,maxR*maxR,NumberInSphere,nnIdx,dists,0);
-	for(int i=0;i<NumberInSphere;++i)
+	const double temp3=b-c+a;
+	if(temp3<=0)
 	{
-		if(dists[i]>(minR*minR))
-			AddBoundaryPoint(data.BoundaryCandidates[nnIdx[i]],side,partial,data); // add the point
+		if(c>big*b||c>big*a) // Do we have a small edge?
+			return 0.5*c;
+		else
+			return 0.5*(b+a); // we have 3 points on a line
 	}
-	delete [] nnIdx;
-	delete [] dists;
-	return NumberInSphere;
-}
-
-bool Delaunay::GetQueryPointReflective(Vector2D &qpoint,Sides side,double SearchR,int point)
-{
-	switch(side)
-	{
-	case(LU):
-	  throw UniversalError("I do not know what to do in case LU in Delaunay::GetQueryPointReflective");
-	case(LD):
-	  throw UniversalError("I do not know what to do in case LD in Delaunay::GetQueryPointReflective");
-	case(RU):
-	  throw UniversalError("I do not know what to do in case RU in Delaunay::GetQueryPointReflective");
-	case(RD):
-	  throw UniversalError("I do not know what to do in case RD in Delaunay::GetQueryPointReflective");
-	case(RIGHT):
-		{
-			qpoint.x=-cor[point].x+2*bc->GetGridBoundary(Right);
-			qpoint.y=cor[point].y;
-			if((qpoint.x-SearchR)>bc->GetGridBoundary(Right))
-			{
-				return false;
-			}
-			break;
-		}
-	case(LEFT):
-		{
-			qpoint.x=-cor[point].x+2*bc->GetGridBoundary(Left);
-			qpoint.y=cor[point].y;
-			if((qpoint.x+SearchR)<bc->GetGridBoundary(Left))
-			{
-				return false;
-			}
-			break;
-		}
-	case(DOWN):
-		{
-			qpoint.x=cor[point].x;
-			qpoint.y=2*bc->GetGridBoundary(Down)-cor[point].y;
-			if((qpoint.y+SearchR)<bc->GetGridBoundary(Down))
-			{
-				return false;
-			}
-			break;
-		}
-	case(UP):
-		{
-			qpoint.x=cor[point].x;
-			qpoint.y=2*bc->GetGridBoundary(Up)-cor[point].y;
-			if((qpoint.y-SearchR)>bc->GetGridBoundary(Up))
-			{
-				return false;
-			}
-			break;
-		}
-	default:
-		UniversalError eo("Error in Delaunay::GetQueryPoint got unexpected input");
-		throw eo;
-	}
-	return true;
-}
-
-bool Delaunay::GetQueryPointPeriodic(Vector2D &qpoint,Sides side,double SearchR,int point)
-{
-	switch(side)
-	{
-	case(RIGHT):
-		{
-			qpoint.x=cor[point].x-bc->GetGridBoundary(Right)
-				+bc->GetGridBoundary(Left);
-			qpoint.y=cor[point].y;
-			if((qpoint.x+SearchR)<bc->GetGridBoundary(Left))
-			{
-				return false;
-			}
-			break;
-		}
-	case(LEFT):
-		{
-			qpoint.x=cor[point].x+bc->GetGridBoundary(Right)
-				-bc->GetGridBoundary(Left);
-			qpoint.y=cor[point].y;
-			if((qpoint.x-SearchR)>bc->GetGridBoundary(Right))
-			{
-				return false;
-			}
-			break;
-		}
-	case(DOWN):
-		{
-			qpoint.x=cor[point].x;
-			qpoint.y=bc->GetGridBoundary(Up)-bc->GetGridBoundary(Down)
-				+cor[point].y;
-			if((qpoint.y-SearchR)>bc->GetGridBoundary(Up))
-			{
-				return false;
-			}
-			break;
-		}
-	case(UP):
-		{
-			qpoint.x=cor[point].x;
-			qpoint.y=bc->GetGridBoundary(Down)-bc->GetGridBoundary(Up)
-				+cor[point].y;
-			if((qpoint.y+SearchR)<bc->GetGridBoundary(Down))
-			{
-				return false;
-			}
-			break;
-		}
-	case(LU):
-		{
-			qpoint.x=cor[point].x+bc->GetGridBoundary(Right)
-				-bc->GetGridBoundary(Left);
-			qpoint.y=bc->GetGridBoundary(Down)-bc->GetGridBoundary(Up)
-				+cor[point].y;
-			if(((qpoint.y+SearchR)<bc->GetGridBoundary(Down))||
-				((qpoint.x-SearchR)>bc->GetGridBoundary(Right)))
-			{
-				return false;
-			}
-			break;
-		}
-	case(LD):
-		{
-			qpoint.x=cor[point].x+bc->GetGridBoundary(Right)
-				-bc->GetGridBoundary(Left);
-			qpoint.y=-bc->GetGridBoundary(Down)+bc->GetGridBoundary(Up)
-				+cor[point].y;
-			if(((qpoint.y-SearchR)>bc->GetGridBoundary(Up))||
-				((qpoint.x-SearchR)>bc->GetGridBoundary(Right)))
-			{
-				return false;
-			}
-			break;
-		}
-	case(RD):
-		{
-			qpoint.x=cor[point].x-bc->GetGridBoundary(Right)
-				+bc->GetGridBoundary(Left);
-			qpoint.y=-bc->GetGridBoundary(Down)+bc->GetGridBoundary(Up)
-				+cor[point].y;
-			if(((qpoint.y-SearchR)>bc->GetGridBoundary(Up))||
-				((qpoint.x+SearchR)<bc->GetGridBoundary(Left)))
-			{
-				return false;
-			}
-			break;
-		}
-	case(RU):
-		{
-			qpoint.x=cor[point].x-bc->GetGridBoundary(Right)
-				+bc->GetGridBoundary(Left);
-			qpoint.y=bc->GetGridBoundary(Down)-bc->GetGridBoundary(Up)
-				+cor[point].y;
-			if(((qpoint.y+SearchR)<bc->GetGridBoundary(Down))||
-				((qpoint.x+SearchR)<bc->GetGridBoundary(Left)))
-			{
-				return false;
-			}
-			break;
-		}
-	default:
-		UniversalError eo("Error in Delaunay::GetQueryPoint got unexpected input");
-		throw eo;
-	}
-	return true;
+	return a*b*c/sqrt((a+b+c)*temp1*temp2*temp3);
 }
 
 void Delaunay::CheckInput(void)
@@ -1018,394 +528,9 @@ int Delaunay::GetOriginalIndex(int NewPoint) const
 		return NewPoint;
 }
 
-double Delaunay::GetInitialSearchR(int index,double &maxradius)
-{
-	int startFacet=Walk(index);
-	vector<int> neigh;
-	FindContainingTetras(startFacet,index,neigh);
-	double res=1;
-	maxradius=0;
-	size_t n=neigh.size();
-	for(size_t i=0;i<n;++i)
-	{
-		res*=1.5*radius[neigh[i]];
-		maxradius=max(maxradius,radius[neigh[i]]);
-	}
-	maxradius*=2;
-	return pow(res,1.0/(double)neigh.size());
-}
-
-bool Delaunay::BoundaryCandidate(double maxR,int point)
-{
-	if(cor[point].x-bc->GetGridBoundary(Left)<4*maxR)
-		return true;
-	if(cor[point].y-bc->GetGridBoundary(Down)<4*maxR)
-		return true;
-	if(bc->GetGridBoundary(Up)-cor[point].y<4*maxR)
-		return true;
-	if(bc->GetGridBoundary(Right)-cor[point].x<4*maxR)
-		return true;
-	return false;
-}
-
-void Delaunay::DuplicatePoints(DataOnlyForBuild &data)
-{
-	int sidesNumber,point;
-	if(bc->GetBoundaryType()!=Periodic) // How many duplicates do I need to check
-		sidesNumber=4;
-	else
-		sidesNumber=8;
-	data.copied.clear();
-	data.copied.resize(sidesNumber);
-	for(int i=0;i<sidesNumber;++i)
-		data.copied[i].assign(olength,0);
-	vector<Sides> SidesToCheck;
-	SidesToCheck.resize(sidesNumber);
-	for(int i=0;i<sidesNumber;++i)
-		SidesToCheck[i]=(Sides)i;
-	Vector2D qpoint;
-	ANNpoint queryPt;
-	queryPt=annAllocPt(2);
-	// Copy the outer points
-	vector<vector<int> > outerpoints;
-	GetOuterPoints2(outerpoints);
-	int n;
-	for(int i=0;i<4;++i)
-	{
-	  n=int(outerpoints[i].size());
-		for(int j=0;j<n;++j)
-		{
-			if(bc->GetBoundaryType()==Rectengular)
-				AddBoundaryPoint(outerpoints[i][j],(Sides)i,false,data);
-			else
-				if(bc->GetBoundaryType()==Periodic)
-					AddBoundaryPoint(outerpoints[i][j],(Sides)((i+2)%4),false,data);
-				else
-					if(i==1||i==3)
-						AddBoundaryPoint(outerpoints[i][j],(Sides)i,false,data);
-					else
-						AddBoundaryPoint(outerpoints[i][j],(Sides)((i+2)%4),false,
-						data);
-		}
-	}
-	// Calculate radius
-	radius.resize(f.size());
-	n=int(f.size());
-	for(int i=0;i<n;++i)
-		radius[i]=CalculateRadius(i);
-	/*vector<double> searchr(olength);
-	for(int i=0;i<olength;++i)
-	{
-		searchr[data.insert_order[i]]=GetInitialSearchR(data.insert_order[i]);
-	}*/
-	CalcRadius=true;
-	BuildTree(data);
-	// Check the integrity for all of the other points
-	double searchR;
-	for(int i=0;i<olength;++i)
-	{
-		point=data.insert_order[i];
-		bool condition=true;
-		//double maxR=FindMaxRadius(point);
-		double maxR;
-		searchR=GetInitialSearchR(data.insert_order[i],maxR);
-		if(!BoundaryCandidate(maxR,point))
-			continue;
-		double tempR=0;
-		while(condition)
-		{
-			PointWasAdded=false;
-			for(int j=0;j<sidesNumber;++j)
-			{
-				if(bc->GetBoundaryType()==Rectengular||
-					((bc->GetBoundaryType()==HalfPeriodic)&&(j==1||j==3)))
-				{
-					if(GetQueryPointReflective(qpoint,SidesToCheck[j],searchR,point))
-					{
-						queryPt[0]=qpoint.x;
-						queryPt[1]=qpoint.y;
-						AddSphere(tempR,searchR,queryPt,SidesToCheck[j],false,data);
-					}
-				}
-				if(bc->GetBoundaryType()==Periodic||
-					((bc->GetBoundaryType()==HalfPeriodic)&&(j!=1&&j!=3)))
-				{
-					if(GetQueryPointPeriodic(qpoint,SidesToCheck[j],searchR,point))
-					{
-						queryPt[0]=qpoint.x;
-						queryPt[1]=qpoint.y;
-						AddSphere(tempR,searchR,queryPt,SidesToCheck[j],false,data);
-					}
-				}
-			}
-			if(PointWasAdded)
-				maxR=FindMaxRadius(point);
-			if(maxR<=searchR)
-			{
-				condition=false;
-			}
-			else
-			{
-				tempR=searchR;
-				searchR=tempR*1.4;
-			}
-		}
-	}
-	annDeallocPt(queryPt);
-}
-
-void Delaunay::GetOuterPoints2(vector<vector<int> > &OuterPoints)
-{
-	// Find the first point and triangle
-
-	int cur_facet=Walk(olength);
-	int startpoint=0;
-	for(int i=0;i<3;++i)
-	{
-		if(f[cur_facet].get_vertice(i)<olength)
-		{
-			startpoint=f[cur_facet].get_vertice(i);
-			break;
-		}
-	}
-	vector<int> tetras;
-	FindContainingTetras(cur_facet,startpoint,tetras);
-	bool foundok=false;
-	for(int i=0;i<(int)tetras.size();++i)
-	{
-		if(IsOuterFacet(f[tetras[i]].get_friend((FindPointInFacet(tetras[i],
-			startpoint)+2)%3))&&!IsOuterFacet(tetras[i]))
-		{
-			cur_facet=tetras[i];
-			foundok=true;
-			break;
-		}
-	}
-	if(!foundok)
-		throw UniversalError("Error in locating first outer point in Delaunay.cpp");
-	// Start adding the outer facets and allocate data
-	if(OuterPoints.empty())
-		OuterPoints.resize(4);
-	vector<int> AllPoints;
-	int n=(int)(2*sqrt(olength*1.0));
-	AllPoints.reserve(4*n);
-	if(olength<6)
-	{
-		for(int i=0;i<4;++i)
-			for(int j=0;j<olength;++j)
-				OuterPoints[i].push_back(j);
-		return;
-	}
-	// Start the walking
-	int point=startpoint;
-	int nextpoint,nextfacet=cur_facet;
-	AllPoints.push_back(point);
-	nextfacet=FindNextOuterFacet(nextfacet,point,nextpoint);
-	while(nextpoint!=startpoint)
-	{
-		AllPoints.push_back(nextpoint);
-		point=nextpoint;
-		nextfacet=FindNextOuterFacet(nextfacet,point,nextpoint);
-	}
-	// Find the containing tetras
-	n=(int)AllPoints.size();
-	vector<int> OuterTetras;
-	OuterTetras.reserve(n*4);
-	for(int i=0;i<n;++i)
-	{
-		int facet_index=Walk(AllPoints[i]);
-		vector<int> facets;
-		FindContainingTetras(facet_index,AllPoints[i],facets);
-		for(int j=0;j<(int)facets.size();++j)
-			OuterTetras.push_back(facets[j]);
-	}
-	// Sort and clean the vector
-	sort(OuterTetras.begin(),OuterTetras.end());
-	OuterTetras=unique(OuterTetras);
-	// Find all of the points in the sorted facets
-	AllPoints.clear();
-	for(int i=0;i<(int)OuterTetras.size();++i)
-		for(int j=0;j<3;++j)
-			if(f[OuterTetras[i]].get_vertice(j)<olength)
-				AllPoints.push_back(f[OuterTetras[i]].get_vertice(j));
-	// Sort and clean the vector
-	sort(AllPoints.begin(),AllPoints.end());
-	AllPoints=unique(AllPoints);
-	// Do Hilbert ordering
-	vector<Vector2D> points_cor;
-	n=(int)AllPoints.size();
-	points_cor.resize(n);
-	for(int i=0;i<n;++i)
-		points_cor[i]=cor[AllPoints[i]];
-	vector<int> order=HilbertOrder(points_cor,n,0);
-	boost::array<Edge,4> edges;
-	edges[1]=Edge(Vector2D(bc->GetGridBoundary(Right),bc->GetGridBoundary(Up)),
-		Vector2D(bc->GetGridBoundary(Left),bc->GetGridBoundary(Up)),0,0);
-	edges[2]=Edge(Vector2D(bc->GetGridBoundary(Left),bc->GetGridBoundary(Up)),
-		Vector2D(bc->GetGridBoundary(Left),bc->GetGridBoundary(Down)),0,0);
-	edges[3]=Edge(Vector2D(bc->GetGridBoundary(Left),bc->GetGridBoundary(Down)),
-		Vector2D(bc->GetGridBoundary(Right),bc->GetGridBoundary(Down)),0,0);
-	edges[0]=Edge(Vector2D(bc->GetGridBoundary(Right),bc->GetGridBoundary(Down)),
-		Vector2D(bc->GetGridBoundary(Right),bc->GetGridBoundary(Up)),0,0);
-	// Divide into sides
-	for(int i=0;i<4;++i)
-		OuterPoints[i].reserve((int)(n*0.26));
-	for(int i=0;i<n;++i)
-	{
-		int min_index=0;
-		double min_distance=DistanceToEdge(cor[AllPoints[order[i]]],edges[0]);
-		for(int j=1;j<4;++j)
-		{
-			double temp=DistanceToEdge(cor[AllPoints[order[i]]],edges[j]);
-			if(temp<min_distance)
-			{
-				min_distance=temp;
-				min_index=j;
-			}
-		}
-		OuterPoints[min_index].push_back(AllPoints[order[i]]);
-	}
-}
-
-void Delaunay::GetOuterPoints(vector<vector<int> > &OuterPoints)
-{
-	// Find the first point and triangle
-
-	int cur_facet=Walk(olength);
-	int startpoint=0;
-	for(int i=0;i<3;++i)
-	{
-		if(f[cur_facet].get_vertice(i)<olength)
-		{
-			startpoint=f[cur_facet].get_vertice(i);
-			break;
-		}
-	}
-	vector<int> tetras;
-	FindContainingTetras(cur_facet,startpoint,tetras);
-	bool foundok=false;
-	for(int i=0;i<(int)tetras.size();++i)
-	{
-		if(IsOuterFacet(f[tetras[i]].get_friend((FindPointInFacet(tetras[i],
-			startpoint)+2)%3))&&!IsOuterFacet(tetras[i]))
-		{
-			cur_facet=tetras[i];
-			foundok=true;
-			break;
-		}
-	}
-	if(!foundok)
-		throw UniversalError("Error in locating first outer point in Delaunay.cpp");
-	// Allocate the space needed
-	OuterPoints.clear();
-	OuterPoints.resize(4);
-	vector<int> AllPoints;
-	int n=(int)(2*sqrt(olength*1.0));
-	AllPoints.reserve(4*n);
-	for(int i=0;i<4;++i)
-		OuterPoints[i].reserve(n);
-	if(olength<6)
-	{
-		for(int i=0;i<4;++i)
-			for(int j=0;j<olength;++j)
-				OuterPoints[i].push_back(j);
-		return;
-	}
-	// Start the walking
-	int point=startpoint;
-	int nextpoint,nextfacet=cur_facet;
-	AllPoints.push_back(point);
-	nextfacet=FindNextOuterFacet(nextfacet,point,nextpoint);
-	while(nextpoint!=startpoint)
-	{
-		AllPoints.push_back(nextpoint);
-		point=nextpoint;
-		nextfacet=FindNextOuterFacet(nextfacet,point,nextpoint);
-	}
-	// Divide the points into quadrants
-	Vector2D direction;
-	n=int(AllPoints.size());
-	double angle;
-	for(int i=0;i<n;++i)
-	{
-		direction=cor[AllPoints[(i+1)%n]]-cor[AllPoints[i]];
-		angle=direction.y/direction.x;
-		if(abs(angle)<0.2) 
-		{
-			// Horizontal
-			if(direction.x<0)
-				OuterPoints[1].push_back(AllPoints[i]);
-			else
-				OuterPoints[3].push_back(AllPoints[i]);
-		}
-		else
-		{
-			if(abs(angle)>0.8)
-			{
-				// Vertical
-				if(direction.y>0)
-					OuterPoints[0].push_back(AllPoints[i]);
-				else
-					OuterPoints[2].push_back(AllPoints[i]);
-			}
-			else
-			{
-				// We are at a corner probably
-				if(angle>0)
-				{
-					if(direction.y>0)
-					{
-						OuterPoints[0].push_back(AllPoints[i]);
-						OuterPoints[3].push_back(AllPoints[i]);
-					}
-					else
-					{
-						OuterPoints[1].push_back(AllPoints[i]);
-						OuterPoints[2].push_back(AllPoints[i]);
-					}
-				}
-				else
-				{
-					if(direction.y>0)
-					{
-						OuterPoints[0].push_back(AllPoints[i]);
-						OuterPoints[1].push_back(AllPoints[i]);
-					}
-					else
-					{
-						OuterPoints[3].push_back(AllPoints[i]);
-						OuterPoints[2].push_back(AllPoints[i]);
-					}
-				}
-			}
-		}
-	}
-}
-
-int Delaunay::FindNextOuterFacet(int facet,int point,int &nextpoint)
-{
-	// Method gets an initial facet and point and returns
-	// the next point on the outer edge and its facet
-	int location=FindPointInFacet(facet,point);
-	int next_facet=f[facet].get_friend(location);
-	// Does facet have 3 points on edge?
-	if(IsOuterFacet(next_facet))
-	{
-		nextpoint=f[facet].get_vertice((location+1)%3);
-		return facet;
-	}
-	while(!IsOuterFacet(next_facet))
-	{
-		location=next_facet;
-		next_facet=f[location].get_friend(FindPointInFacet(location,point));
-	}
-	nextpoint=f[location].get_vertice((FindPointInFacet(location,point)+1)%3);
-	return location;
-}
-
 double Delaunay::GetFacetRadius(int facet) const
 {
-  return radius[facet];
+	return radius[facet];
 }
 
 void Delaunay::ChangeOlength(int n)
@@ -1446,12 +571,14 @@ Vector2D Delaunay::get_point(int index) const
 	return cor[index];
 }
 
-double Delaunay::get_cor(int index,int dim)
+double Delaunay::get_cor(int index, int dim) const
 {
-	if(dim==0) 
+	if(dim==0)
 		return cor[index].x;
-	else 
+	else if(dim==1)
 		return cor[index].y;
+	else
+		throw UniversalError("Error in Delaunay::get_cor. Invalid index");
 }
 
 int Delaunay::get_num_facet(void)
@@ -1489,325 +616,122 @@ int Delaunay::GetTotalLength(void)
 	return (int)cor.size();
 }
 
-/* Reserved for future work
-Vector2D Delaunay::CalCircleCenter(int facet)
+Vector2D Delaunay::GetBoundaryPoint(int index,Sides side,Edge const& edge)
 {
-	Vector2D B=cor[f[facet].get_vertice(1)]-cor[f[facet].get_vertice(0)];
-	Vector2D C=cor[f[facet].get_vertice(2)]-cor[f[facet].get_vertice(0)];
-	Vector2D res;
-	double D_1=1/(2*(B.x*C.y-B.y*C.x));
-	res.Set((C.y*(B.x*B.x+B.y*B.y)
-		-B.y*(C.x*C.x+C.y*C.y))
-		*D_1,(-C.x*(B.x*B.x+B.y*B.y)
-		+B.x*(C.x*C.x+C.y*C.y))
-		*D_1);
-	return res;
+	if(bc->AreWeReflective(edge))
+	{
+		switch(side)
+		{
+		case LEFT:
+			return cor[index]-Vector2D((cor[index].x-bc->GetGridBoundary(Left))*2,0);
+		case RIGHT:
+			return cor[index]-Vector2D((cor[index].x-bc->GetGridBoundary(Right))*2,0);
+		case UP:
+			return cor[index]-Vector2D(0,(cor[index].y-bc->GetGridBoundary(Up))*2);
+		case DOWN:
+			return cor[index]-Vector2D(0,(cor[index].y-bc->GetGridBoundary(Down))*2);
+		case LU:
+		case RU:
+		case LD:
+		case RD:
+		default:
+			throw UniversalError("Wrong side in Delaunay GetBoundary");
+		}
+	}
+	else
+	{
+		switch(side)
+		{
+		case LEFT:
+			return cor[index]+Vector2D(bc->GetGridBoundary(Right)-
+				bc->GetGridBoundary(Left),0);
+		case RIGHT:
+			return cor[index]-Vector2D(bc->GetGridBoundary(Right)-
+				bc->GetGridBoundary(Left),0);
+		case UP:
+			return cor[index]-Vector2D(0,bc->GetGridBoundary(Up)-
+				bc->GetGridBoundary(Down));
+		case DOWN:
+			return cor[index]+Vector2D(0,bc->GetGridBoundary(Up)-
+				bc->GetGridBoundary(Down));
+		case LU:
+			return cor[index]-Vector2D(bc->GetGridBoundary(Left)-
+				bc->GetGridBoundary(Right),bc->GetGridBoundary(Up)-
+				bc->GetGridBoundary(Down));
+		case RD:
+			return cor[index]+Vector2D(bc->GetGridBoundary(Left)-
+				bc->GetGridBoundary(Right),bc->GetGridBoundary(Up)-
+				bc->GetGridBoundary(Down));
+		case LD:
+			return cor[index]-Vector2D(bc->GetGridBoundary(Left)-
+				bc->GetGridBoundary(Right),-bc->GetGridBoundary(Up)+
+				bc->GetGridBoundary(Down));
+		case RU:
+			return cor[index]-Vector2D(-bc->GetGridBoundary(Left)+
+				bc->GetGridBoundary(Right),bc->GetGridBoundary(Up)-
+				bc->GetGridBoundary(Down));
+		default:
+			throw UniversalError("Wrong side in Delaunay GetBoundary");
+		}
+	}
 }
-*/
 
-/* Reserved for future work
-vector<double> Delaunay::GetNonLocalRadii(int point,vector<Vector2D> &centers)
+void Delaunay::DoBoundary(vector<Edge> const& edges,
+	vector<vector<int> > const& toduplicate)
 {
-	int start=Walk(point);
-	vector<double> res;
-	centers.clear();
-	vector<int> facets;
-	FindContainingTetras(start,point,facets);
-	int n=facets.size();
+	int n=(int)toduplicate.size();
 	for(int i=0;i<n;++i)
 	{
-		//if(IsOuterFacet(facets[i]))
-		{
-			centers.push_back(CalCircleCenter(facets[i]));
-			res.push_back(radius[facets[i]]);
-		}
-	}
-	return res;
-}
-*/
-
-/* Reserved for future work
-void Delaunay::AddBigTirangle(int point)
-{
-	vector<double> radii;
-	vector<Vector2D> centers;
-	ANNpoint queryPt;
-	queryPt=annAllocPt(2);
-	double searchR;
-	//bool condition=true;
-	//condition=false;
-	radii=GetNonLocalRadii(point,centers);
-	int n=radii.size();
-	for(int j=0;j<n;++j)
-	{
-		queryPt[0]=centers[j].x;
-		queryPt[1]=centers[j].y;
-		searchR=radii[j];
-		ANNidxboost::array nnIdx; // near neighbor indices
-		ANNdistboost::array dists; // near neighbor distances
-		int NumberInSphere=tree->annkFRSearch(queryPt,searchR*searchR,0);
-		if(NumberInSphere>5)
+		int N=(int)toduplicate[i].size();
+		if(N==0)
 			continue;
-		nnIdx = new ANNidx[NumberInSphere]; // allocate near neigh indices
-		dists = new ANNdist[NumberInSphere]; // allocate near neighbor dists
-		// Get the points
-		tree->annkFRSearch(queryPt,searchR*searchR,NumberInSphere,nnIdx,dists,0);
-		for(int i=0;i<NumberInSphere;++i)
+		vector<Vector2D> points(N);
+		for(int j=0;j<N;++j)
+			points[j]=GetBoundaryPoint(toduplicate[i][j],Sides(i),edges[i]);
+		vector<int> order=HilbertOrder(points,N);
+		for(int j=0;j<N;++j)
 		{
-			cor.push_back(totalCor[nnIdx[i]]);
-			int facetLoc=WalkRobust(cor.size()-1);
-			if(facetLoc!=-1)
-			{
-				add_point(cor.size()-1);
-				++length;
-				NewPointIndex.push_back(nnIdx[i]);
-			}
-			else
-				cor.pop_back();
+			cor.push_back(points[order[j]]);
+			add_point((int)cor.size()-1);
+			NewPointIndex.push_back(toduplicate[i][order[j]]);
 		}
-		delete [] nnIdx;
-		delete [] dists;
 	}
-	annDeallocPt(queryPt);
 }
-*/
 
-
-/* Reserve for future work
-void Delaunay::build_limited(vector<Vector2D>const& vp,vector<int> 
-	_pointIndex,OuterBoundary const *_bc)
-{// copy the boundary conditions
-	bc=_bc;
-	lastFacet=0;
-	double d_temp;
-	double maxV=(bc->GetGridBoundary(Right)-bc->GetGridBoundary(Left)),
-		maxH=(bc->GetGridBoundary(Up)-bc->GetGridBoundary(Down));
-	BIG=pow(max(maxV,maxH),2);
-	eps=max(abs(bc->GetGridBoundary(Up)),abs(bc->GetGridBoundary(Down)));
-	d_temp=max(abs(bc->GetGridBoundary(Right)),abs(bc->GetGridBoundary(Left)));
-	eps=max(eps,d_temp);
-	eps=eps*1E-12;
-	length=_pointIndex.size()+3;
-	int len=length-3;
-	olength=len;
-	f.clear();
-	cor.clear();
-	f.reserve(2*length+1);
-	cor.reserve(length);
-	last_loc=100*length;
-	for(int i=0;i<(int)_pointIndex.size();i++)
-	{
-		cor.push_back(vp[_pointIndex[i]]);
-	}
-	// Check point input
-	CheckInput();
-
-	insert_order=HilbertOrder(cor,cor.size());	
-
-	totalCor.reserve(vp.size()+3);
-	for(int i=0;i<(int)vp.size();i++)
-	{
-		totalCor.push_back(vp[i]);
-	}
-
-
-	// add the 3 extreme points
-	Vector2D p_temp;
-	p_temp.set_x(bc->GetGridBoundary(Left)-5*bc->GetGridBoundary(Right));
-	p_temp.set_y(bc->GetGridBoundary(Down)-5*bc->GetGridBoundary(Up));
-	cor.push_back(p_temp);
-	p_temp.set_x(5*bc->GetGridBoundary(Right));
-	p_temp.set_y(bc->GetGridBoundary(Down)-5*bc->GetGridBoundary(Up));
-	cor.push_back(p_temp);
-	p_temp.set_x((bc->GetGridBoundary(Left)+bc->GetGridBoundary(Right))/2.0);
-	p_temp.set_y(5*bc->GetGridBoundary(Up));
-	cor.push_back(p_temp);
-	// Create the big triangle, and assign friends
-	facet f_temp;
-	f.push_back(f_temp);
-	f[0].set_vertice(len,0);
-	f[0].set_vertice(len+1,1);
-	f[0].set_vertice(len+2,2);
-	for(int i=0;i<3;i++)
-		f[0].set_friend(last_loc,i);
-	location_pointer=0;
-	// add the points
-	for(int i=0;i<length-3;i++)
-	{// Need to fix here lack of hilber order
-		add_point(insert_order[i]);
-	}
-	BuildBoundaryLimited();
-}
-*/
-
-/* Reserved for future work
-void Delaunay::BuildBoundaryLimited(void)
+void Delaunay::DoCorners(vector<Edge> const& edges,
+	vector<vector<int> > const& toduplicate)
 {
-	// Build kd-tree
-	treePoints=annAllocPts(totalCor.size(),2);
-	for(int i=0;i<(int)totalCor.size();i++)
+	int n=(int)toduplicate.size();
+	vector<Sides> stodo(4);
+	stodo[0]=RU;
+	stodo[1]=LU;
+	stodo[2]=LD;
+	stodo[3]=RD;
+	for(int i=0;i<n;++i)
 	{
-		treePoints[i][0]=totalCor[i].x;
-		treePoints[i][1]=totalCor[i].y;
+		if(toduplicate[i].empty())
+			continue;
+		int N=(int)toduplicate[i].size();
+		vector<Vector2D> points(N);
+		for(int j=0;j<N;++j)
+			points[j]=GetBoundaryPoint(toduplicate[i][j],stodo[i],edges[i]);
+		vector<int> order=HilbertOrder(points,N);
+		for(int j=0;j<N;++j)
+		{
+			cor.push_back(points[order[j]]);
+			add_point((int)cor.size()-1);
+			NewPointIndex.push_back(toduplicate[i][order[j]]);
+		}
 	}
-	tree=new ANNkd_tree(treePoints,totalCor.size()-3,2,1,ANN_KD_SUGGEST);	
-	NewPointIndex.clear();
-	NewPointIndex.reserve(8*(int)sqrt(cor.size()*1.2));
-	if(lastRadius.capacity()!=cor.size())
-	{
-		lastRadius.reserve(cor.size());
-		for(int i=0;i<(int)cor.size();i++)
-			lastRadius.push_back(0.3*BIG/sqrt((double)(totalCor.size())));
-	}
-
-	DuplicatePointsLimited();
-
-	//annDeallocPts(treePoints);
-	//delete tree;
-	annClose();	
 }
-*/
 
-/*
-Reserved for future work
-void Delaunay::DuplicatePointsLimited(void)
+void Delaunay::AddAditionalPoint(Vector2D const& vec,int index)
 {
-	int sidesNumber=0,point=0;
-	if(bc->GetBoundaryType()==Rectengular) // How many duplicates do I need to check
-		sidesNumber=4;
-	else
-		sidesNumber=8;
-	vector<Sides> SidesToCheck;
-	SidesToCheck.resize(sidesNumber);
-	for(int i=0;i<sidesNumber;i++)
-		SidesToCheck[i]=(Sides)i;
-
-	double searchR,tempR;
-	bool condition;
-	Vector2D qpoint;
-	ANNpoint queryPt;
-	queryPt=annAllocPt(2);
-	for(int i=0;i<(int)insert_order.size();i++)
-	{
-		point=insert_order[i];
-		searchR=lastRadius[point];
-		tempR=0;
-		condition=true;
-		while(condition)
-		{
-			queryPt[0]=cor[point].x;
-			queryPt[1]=cor[point].y;
-			int NumberInSphere=tree->annkFRSearch(queryPt,searchR*searchR,0);
-			if(NumberInSphere>25)
-			{
-				AddBigTirangle(point);
-				break;
-			}
-			ANNidxboost::array nnIdx; // near neighbor indices
-			ANNdistboost::array dists; // near neighbor distances
-			nnIdx = new ANNidx[NumberInSphere]; // allocate near neigh indices
-			dists = new ANNdist[NumberInSphere]; // allocate near neighbor dists
-			// Get the points
-			tree->annkFRSearch(queryPt,searchR*searchR,NumberInSphere,nnIdx,dists,0);
-			for(int i=0;i<NumberInSphere;i++)
-			{
-				if(dists[i]>(tempR*tempR))
-				{
-					cor.push_back(totalCor[nnIdx[i]]);
-					int facetLoc=WalkRobust(cor.size()-1);
-					if(facetLoc!=-1)
-					{
-						add_point(cor.size()-1);
-						++length;
-						NewPointIndex.push_back(nnIdx[i]);
-					}
-					else
-						cor.pop_back();
-				}
-			}
-			double maxR=FindMaxRadius(point);
-			if(maxR<=searchR)
-			{
-				condition=false;
-			}
-			else
-			{
-				tempR=searchR;
-				searchR=tempR*1.2;
-			}
-			delete [] nnIdx;
-			delete [] dists;
-		}
-	}
-	// Outer boundaries
-	annDeallocPts(treePoints);
-	delete tree;
-	// Build kd-tree
-	treePoints=annAllocPts(olength,2);
-	for(int i=0;i<olength;i++)
-	{
-		treePoints[i][0]=cor[i].x;
-		treePoints[i][1]=cor[i].y;
-	}
-	tree=new ANNkd_tree(treePoints,olength,2,1,ANN_KD_SUGGEST);
-	int sidenum;
-	for(int i=0;i<(int)insert_order.size();i++)
-	{
-		tempR=0;
-		condition=true;
-		searchR=lastRadius[point];
-		sidenum=sidesNumber;
-		while(condition)
-		{
-			for(int j=0;j<sidenum;j++)
-			{
-				if(bc->GetBoundaryType()==Rectengular)
-				{
-					if(GetQueryPointReflective(qpoint,SidesToCheck[j],searchR,point))
-					{
-						queryPt[0]=qpoint.x;
-						queryPt[1]=qpoint.y;
-						int ndup=AddSphere(tempR,searchR,queryPt,SidesToCheck[j],false);
-						if(ndup>25)
-						{
-							SidesToCheck.erase(SidesToCheck.begin()+j);
-							--j;
-							--sidenum;
-						}
-					}
-				}
-				if(bc->GetBoundaryType()==Periodic)
-				{
-					if(GetQueryPointPeriodic(qpoint,SidesToCheck[j],searchR,point))
-					{
-						queryPt[0]=qpoint.x;
-						queryPt[1]=qpoint.y;
-						int ndup=AddSphere(tempR,searchR,queryPt,SidesToCheck[j],false);
-						if(ndup>25)
-						{
-							SidesToCheck.erase(SidesToCheck.begin()+j);
-							--j;
-							--sidenum;
-						}
-					}
-				}
-			}
-			double maxR=FindMaxRadius(point);
-			if(maxR<=searchR)
-			{
-				condition=false;
-				lastRadius[point]=maxR*1.2;
-			}
-			else
-			{
-				tempR=searchR;
-				searchR=tempR*1.2;
-			}
-		}
-	}
-	annDeallocPt(queryPt);
-	annDeallocPts(treePoints);
-	delete tree;
-	annClose();	
+	cor.push_back(vec);
+	NewPointIndex.push_back(index);
 }
-*/
+
+int Delaunay::GetCorSize(void)const
+{
+	return (int)cor.size();
+}

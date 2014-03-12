@@ -1,6 +1,6 @@
 #include "Edge.hpp"
-
 #include <cmath>
+#include "../misc/universal_error.hpp"
 
 Edge::Edge(void): 
   _p1(Vector2D()),
@@ -26,7 +26,8 @@ int Edge::GetNeighbor(int index) const
   else if(index==1)
     return _neighbor2;
   else{
-    InvalidSideIndexException eo(index);
+    UniversalError eo("Invalid index in Edge::GetNeighbor");
+    eo.AddEntry("index",index);
     throw eo;
   }
 }
@@ -47,20 +48,6 @@ double Edge::get_y(int index) const
     return _p2.get_y();
 }
 
-/*int Edge::get_other_adjacent_cell(int cell) const
-  {
-  if(cell == _neighbor1)
-  return _neighbor2;
-  else if(cell == _neighbor2)
-  return _neighbor1;
-  else
-  {
-  InvalidCellEdgeException eo(cell);
-  throw eo;
-  }
-  }*/
-
-
 Vector2D Edge::GetVertex(int index) const
 {
   if(index==0)
@@ -68,7 +55,8 @@ Vector2D Edge::GetVertex(int index) const
   else if(index==1)
     return _p2;
   else{
-    InvalidSideIndexException eo(index);
+    UniversalError eo("Invalid index in Edge::GetVertex");
+    eo.AddEntry("index",index);
     throw eo;
   }
 }
@@ -102,26 +90,6 @@ void Edge::set_y(int p,double data)
     _p2.y=data;
 }
 
-InvalidSideIndexException::InvalidSideIndexException(int index)
-  :	_index(index)
-{}
-
-
-/*int InvalidSideIndexException::GetIndex(void) const
-  {
-  return _index;
-  }*/
-
-
-InvalidCellEdgeException::InvalidCellEdgeException(int index)
-  :	_index(index)
-{}
-
-/*int InvalidCellEdgeException::get_index(void) const
-  {
-  return _index;
-  }*/
-
 double DistanceToEdge(Vector2D const& point,Edge const& edge)
 {
   Vector2D v=edge.GetVertex(1)-edge.GetVertex(0);
@@ -136,9 +104,15 @@ double DistanceToEdge(Vector2D const& point,Edge const& edge)
   return point.distance(edge.GetVertex(0)+(c1/c2)*v);
 }
 
-bool SegmentIntersection(Edge const& edge1,Edge const& edge2,
+bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 			 Vector2D &Intersection)
 {
+	bool res=true;
+	if(min(edge1.get_x(1),edge1.get_x(0))>max(edge2.get_x(1),edge2.get_x(0))||
+		min(edge2.get_x(1),edge2.get_x(0))>max(edge1.get_x(1),edge1.get_x(0))||
+		min(edge1.get_y(1),edge1.get_y(0))>max(edge2.get_y(1),edge2.get_y(0))||
+		min(edge2.get_y(1),edge2.get_y(0))>max(edge1.get_y(1),edge1.get_y(0)))
+		res=false;
   double d=(edge1.get_x(0)-edge1.get_x(1))*(edge2.get_y(0)-edge2.get_y(1))
     -(edge2.get_x(0)-edge2.get_x(1))*(edge1.get_y(0)-edge1.get_y(1));
   if(d==0)
@@ -155,7 +129,11 @@ bool SegmentIntersection(Edge const& edge1,Edge const& edge2,
     return false;
   if((xi+eps)<min(edge2.get_x(0),edge2.get_x(1))||(xi-eps)>max(edge2.get_x(0),edge2.get_x(1)))
     return false;
-  return true;
+  if((yi+eps)<min(edge1.get_y(0),edge1.get_y(1))||(yi-eps)>max(edge1.get_y(0),edge1.get_y(1)))
+    return false;
+  if((yi+eps)<min(edge2.get_y(0),edge2.get_y(1))||(yi-eps)>max(edge2.get_y(0),edge2.get_y(1)))
+    return false;
+  return res;
 }
 
 Vector2D Parallel(Edge const& edge)

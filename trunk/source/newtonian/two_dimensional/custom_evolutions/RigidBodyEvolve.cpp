@@ -1,11 +1,11 @@
 #include "RigidBodyEvolve.hpp"
 
-Conserved RigidBodyEvolve::CalcFlux(Tessellation const* tessellation,
+Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,	double /*dt*/,
-	SpatialReconstruction* /*interpolation*/,Edge const& edge,
+	SpatialReconstruction& /*interpolation*/,Edge const& edge,
 	Vector2D const& facevelocity,
 	RiemannSolver const& rs,int index,
-	HydroBoundaryConditions const* boundaryconditions,double /*time*/,
+	HydroBoundaryConditions const& boundaryconditions,double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
 	int other;
@@ -14,11 +14,11 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const* tessellation,
 		other=edge.GetNeighbor(1);
 	else
 		other=edge.GetNeighbor(0);
-	if(boundaryconditions->IsGhostCell(other,tessellation))
+	if(boundaryconditions.IsGhostCell(other,tessellation))
 		return res;
 	Vector2D p = Parallel(edge);
-	Vector2D n = tessellation->GetMeshPoint(edge.GetNeighbor(1))
-		-tessellation->GetMeshPoint(edge.GetNeighbor(0));
+	Vector2D n = tessellation.GetMeshPoint(edge.GetNeighbor(1))
+		-tessellation.GetMeshPoint(edge.GetNeighbor(0));
 	Primitive ghost = cells[other];
 	ghost.Velocity = Reflect(cells[other].Velocity, p);
 
@@ -39,8 +39,8 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const* tessellation,
 }
 
 Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedintensive*/,
-	EquationOfState const* /*eos*/,vector<Primitive>& cells,int index,
-	Tessellation const* /*tess*/,double /*time*/,vector<vector<double> > const& /*tracers*/)
+	EquationOfState const& /*eos*/,vector<Primitive>& cells,int index,
+	Tessellation const& /*tess*/,double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
 	return cells[index];
 }
@@ -53,16 +53,16 @@ RigidBodyEvolve::~RigidBodyEvolve()
 {}
 
 vector<double> RigidBodyEvolve::UpdateTracer(int index,vector<vector<double> >
-	const& tracers,vector<Primitive> const& cells,Tessellation const* tess,
+	const& tracers,vector<Primitive> const& cells,Tessellation const& tess,
 	double /*time*/)
 {
-	return tess->GetVolume(index)*cells[index].Density*tracers[index];
+	return tess.GetVolume(index)*cells[index].Density*tracers[index];
 }
 
-vector<double> RigidBodyEvolve::CalcTracerFlux(Tessellation const* /*tess*/,
+vector<double> RigidBodyEvolve::CalcTracerFlux(Tessellation const& /*tess*/,
 	vector<Primitive> const& /*cells*/,vector<vector<double> > const& tracers,
 	double /*dm*/,Edge const& /*edge*/,int /*index*/,double /*dt*/,double /*time*/,
-	SpatialReconstruction const* /*interp*/,Vector2D const& /*vface*/)
+	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {
 	vector<double> res(tracers[0].size(),0);
 	return res;

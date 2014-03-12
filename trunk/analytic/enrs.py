@@ -574,6 +574,6 @@ class RiemannProfile:
 			res = self._right_prof.CalcPrim(v - self._right.Velocity)
 			res.Velocity = res.Velocity + self._right.Velocity
 		else:
-			res = self._left_prof.CalcPrim(self._left.Velocity - v)			
+			res = self._left_prof.CalcPrim(self._left.Velocity - v) 
 			res.Velocity = self._left.Velocity-res.Velocity
 		return res

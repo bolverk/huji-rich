@@ -77,9 +77,9 @@ def main():
     f.write(str(gof3)+'\n')
     f.close()
 
-    return gof1<0.06 and \
-        gof2<0.18 and \
-        gof3<0.07
+    return gof1<0.09 and \
+        gof2<0.26 and \
+        gof3<0.11
 
 import sys
 if __name__=='__main__':

@@ -12,15 +12,15 @@ bool Ratchet::flux_indifferent(void) const
 }
 
 Conserved Ratchet::CalcFlux
-	(Tessellation const* tess,
+	(Tessellation const& tess,
 	vector<Primitive> const& cells,
 	double /*dt*/,
-	SpatialReconstruction* /*interp*/,
+	SpatialReconstruction& /*interp*/,
 	Edge const& edge,
 	Vector2D const& face_velocity,
 	RiemannSolver const& rs,
 	int index,
-	HydroBoundaryConditions const* hbc,
+	HydroBoundaryConditions const& hbc,
 	double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
@@ -34,15 +34,15 @@ Conserved Ratchet::CalcFlux
 		my_index = 1;
 		other = edge.GetNeighbor(0);
 	}
-	if(hbc->IsGhostCell(other,tess))
+	if(hbc.IsGhostCell(other,tess))
 		return Conserved();
 	const Vector2D p = Parallel(edge);
 	const Vector2D n = 
-		tess->GetMeshPoint(edge.GetNeighbor(1))
-		-tess->GetMeshPoint(edge.GetNeighbor(0));
+		tess.GetMeshPoint(edge.GetNeighbor(1))
+		-tess.GetMeshPoint(edge.GetNeighbor(0));
 	const Vector2D outward = 
-		tess->GetMeshPoint(edge.GetNeighbor(1-my_index))
-		-tess->GetMeshPoint(edge.GetNeighbor(my_index));
+		tess.GetMeshPoint(edge.GetNeighbor(1-my_index))
+		-tess.GetMeshPoint(edge.GetNeighbor(my_index));
 	Primitive ghost = cells[other];
 	if (((dir_==in)&&(ScalarProd(ghost.Velocity,outward)>0))||
 		((dir_==out)&&(ScalarProd(ghost.Velocity,outward)<0)))
@@ -60,9 +60,9 @@ Conserved Ratchet::CalcFlux
 }
 
 Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
-	EquationOfState const* /*eos*/,
+	EquationOfState const& /*eos*/,
 	vector<Primitive>& /*cells*/,
-	int index,Tessellation const* /*tess*/,double /*time*/,
+	int index,Tessellation const& /*tess*/,double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
 	return init_cells_[index];
@@ -70,15 +70,15 @@ Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
 
 
 vector<double> Ratchet::UpdateTracer(int index,vector<vector<double> > const& tracers,
-	vector<Primitive> const& /*cells*/,Tessellation const* /*tess*/,double /*time*/)
+	vector<Primitive> const& /*cells*/,Tessellation const& /*tess*/,double /*time*/)
 {
 	return tracers[index];
 }
 
-vector<double> Ratchet::CalcTracerFlux(Tessellation const* /*tess*/,
+vector<double> Ratchet::CalcTracerFlux(Tessellation const& /*tess*/,
 	vector<Primitive> const& /*cells*/,vector<vector<double> > const& tracers,
 	double dm,Edge const& edge,int index,double dt,double /*time*/,
-	SpatialReconstruction const* /*interp*/,Vector2D const& /*vface*/)
+	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {
 	int other;
 	if(edge.GetNeighbor(0)==index)

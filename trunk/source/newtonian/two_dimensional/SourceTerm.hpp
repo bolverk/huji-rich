@@ -29,13 +29,15 @@ public:
     \return The flux of conserved variables 
   */
   virtual Conserved Calculate
-  (Tessellation const* tess,
+  (Tessellation const& tess,
    vector<Primitive> const& cells,
-   int point,vector<Conserved> const& fluxes,
+   int point,
+   vector<Conserved> const& fluxes,
    vector<Vector2D> const& point_velocity,
-   HydroBoundaryConditions const*hbc,
+   HydroBoundaryConditions const& hbc,
    vector<vector<double> > const& tracers,
-   vector<double> &dtracer,double t,
+   vector<double>& dtracer,
+   double t,
    double dt)=0;
 
   virtual ~SourceTerm(void);

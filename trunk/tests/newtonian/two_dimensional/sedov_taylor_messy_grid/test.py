@@ -7,10 +7,6 @@ def goodness_of_fit(a1, a2):
     diff2 = [(x-y)**2 for x,y in zip(a1,a2)]
     return math.sqrt(sum(diff2)/(max(a1)-min(a1))/len(a1))
 
-def weighted_l1_norm(a1,a2,weights):
-
-    return sum([abs(x-y)*w for x,y,w in zip(a1,a2,weights)])/sum(weights)
-
 def main():
 
     import numpy

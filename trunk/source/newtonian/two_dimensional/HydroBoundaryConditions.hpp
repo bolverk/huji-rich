@@ -30,9 +30,9 @@ public:
 	\param time The sim time
 	\return The flux through the edge
    */
-  virtual Conserved CalcFlux(Tessellation const* tessellation,
+  virtual Conserved CalcFlux(Tessellation const& tessellation,
 	  vector<Primitive> const& cells,Vector2D const& edge_velocity,
-	  Edge const& edge,SpatialReconstruction const* interp,double dt,
+	  Edge const& edge,SpatialReconstruction const& interp,double dt,
 	  double time) const = 0;
 
   /*! \brief Calculates the velocity of the boundary edge
@@ -43,7 +43,7 @@ public:
 	\return Velocity of edge
    */
   virtual Vector2D CalcEdgeVelocity
-  (Tessellation const* tessellation,
+  (Tessellation const& tessellation,
    vector<Vector2D> const& point_velocities,
    Edge const& edge,
    double time) const = 0;
@@ -54,7 +54,7 @@ public:
    \param edge The edge to check
    \returns If it is on a boundary or not
    */
-  virtual bool IsBoundary(Edge const& edge,Tessellation const* tess)const=0;
+  virtual bool IsBoundary(Edge const& edge,Tessellation const& tess)const=0;
 
   /*!
   \brief Checks if the cell is a ghost cell
@@ -62,14 +62,14 @@ public:
   \param tess The tessellation
    \returns If the cell is a ghost cell or not
    */
-  virtual bool IsGhostCell(int i,Tessellation const* tess) const=0;
+  virtual bool IsGhostCell(int i,Tessellation const& tess) const=0;
   /*!
   \brief Returns the normal direction to an edge
   \param edge The edge
   \param tess The tessellation
    \returns The normal direction
    */
-  Vector2D Normal(Edge const& edge, Tessellation const* tess)const;
+  Vector2D Normal(Edge const& edge, Tessellation const& tess)const;
 
   /*!
   \brief Returns the primitive on the other side of the boundary edge
@@ -80,7 +80,7 @@ public:
   \return The primitive on the other side
   */
   virtual Primitive GetBoundaryPrimitive(Edge const& edge,
-	  Tessellation const* tess,vector<Primitive> const& cells,
+	  Tessellation const& tess,vector<Primitive> const& cells,
 	  double time)const=0;
   /*!
   \brief Returns the tracers on the other side of the boundary edge
@@ -91,7 +91,7 @@ public:
   \return The tracers on the other side
   */
   virtual vector<double> GetBoundaryTracers(Edge const& edge,
-	  Tessellation const* tess,vector<vector<double> > const& tracers,
+	  Tessellation const& tess,vector<vector<double> > const& tracers,
 	  double time)const=0;
 
   /*! \brief Calculates the tracer flux on the boundary edge
@@ -108,10 +108,16 @@ public:
 	\return The flux of the tracer
    */
   virtual vector<double> CalcTracerFlux
-  (Tessellation const* tessellation,vector<Primitive> const& cells,
-   vector<vector<double> > const& tracers,double dm,
-   Edge const& edge,int index,double dt,
-   double time,SpatialReconstruction const* interp,Vector2D const& edge_velocity
+  (Tessellation const& tessellation,
+   vector<Primitive> const& cells,
+   vector<vector<double> > const& tracers,
+   double dm,
+   Edge const& edge,
+   int index,
+   double dt,
+   double time,
+   SpatialReconstruction const& interp,
+   Vector2D const& edge_velocity
    ) const = 0;
 
   //! \brief virtual destructor

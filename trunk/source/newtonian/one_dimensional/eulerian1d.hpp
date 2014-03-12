@@ -8,6 +8,8 @@
 
 #include "vertex_motion.hpp"
 
+using std::vector;
+
 //! \brief Eulerian vertex motion (no vertex motion)
 class Eulerian1D: public VertexMotion
 {

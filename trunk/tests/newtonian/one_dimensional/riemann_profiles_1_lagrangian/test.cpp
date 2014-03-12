@@ -9,7 +9,6 @@
 #include "source/newtonian/one_dimensional/eulerian1d.hpp"
 #include "source/newtonian/one_dimensional/lagrangian1d.hpp"
 #include "source/newtonian/one_dimensional/rigid_wall_1d.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/newtonian/one_dimensional/zero_force_1d.hpp"
 #include "source/misc/int2str.hpp"
 #include "source/misc/utils.hpp"
@@ -22,13 +21,6 @@ using namespace std;
 using namespace diagnostics1d;
 
 namespace {
-void WriteTime(hdsim1D const& sim, string fname)
-{
-  ofstream f;
-  f.open(fname.c_str());
-  f << sim.GetTime() << endl;
-  f.close();
-}
 
 double GetXVelocityAt(const hdsim1D* sim, double x)
 {
@@ -126,14 +118,6 @@ void main_loop(hdsim1D& sim)
   }
 }
 
-void write_output(hdsim1D const& sim)
-{
-  write_number(sim.GetTime(),"time.txt");
-  write_cells_property(sim,"center","cell_centres.txt");
-  write_cells_property(sim,"density","densities.txt");
-  write_cells_property(sim,"pressure","pressures.txt");
-  write_cells_property(sim,"xvelocity","velocities.txt");
-}
 }
 
 int main(void)

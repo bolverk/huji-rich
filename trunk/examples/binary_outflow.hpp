@@ -1,50 +1,32 @@
 #ifndef BINARY_OUTFLOW_HPP
 #define BINARY_OUTFLOW_HPP 1
 
-#include "../source/newtonian/two_dimensional/SourceTerm.hpp"
-#include "../source/newtonian/common/equation_of_state.hpp"
+#include "source/newtonian/two_dimensional/spatial_distribution2d.hpp"
 
 /*!
-	\brief Example of creating a custom force for Binary outflow/inflow
+	\brief Example of creating a custom spatial distribution for Binary outflow/inflow
 */
 
-class BinaryOutflow: public SourceTerm
+enum Dir{Xaxis,Yaxis};
+
+class BinaryOutflowVelocity: public SpatialDistribution
 {
 private:
-	double mdot_,e_,cs_;
-	int nx_,ny_;
-	int cell_index_;
+	double R_,val_;
+	Vector2D loc_;
+	Dir axis_;
 
 public:
 	/*!
 	\brief Class constructor
-	\param mdot The mass per unit time that is ejected
-	\param e The thermal energy per unit mass of the ejecta
-	\param cs The velocity of the ejecta
-	\param nx The number of cells in the x direction
-	\param ny The number of cells in the y direction
+	\param R The radius of the star
+	\param val The value of the velocity
+	\param loc The location of the star
+	\param axis Determines if it is xvelocity or yvelocity
 	*/
-	BinaryOutflow(double mdot,double e,double cs,int nx,int ny);
+	BinaryOutflowVelocity(double R,double val,Vector2D loc,Dir axis);
 
-	/*!
-		\brief Initializes the outflow parameters
-		\param tess The tessellation
-		\param xc The x coordinate of the source
-		\param yc The x coordinate of the source
-	*/
-	void Init(Tessellation const& tess,double xc,double yc);
-
-	/*!
-		\brief Returns the index of the outflow cell
-		\returns The cell index
-	*/
-	int GetCellIndex(void);
-
-	Conserved Calculate(Tessellation const* tess,
-	  vector<Primitive> const& cells,int point,vector<Conserved> const& fluxes,
-	  vector<Vector2D> const& point_velocity,HydroBoundaryConditions const*hbc,
-	  vector<vector<double> > const& tracers,vector<double> &dtracer,double t,
-	  double dt);
+	double EvalAt(Vector2D const& point) const;
 };
 
 #endif // BINARY_OUTFLOW_HPP

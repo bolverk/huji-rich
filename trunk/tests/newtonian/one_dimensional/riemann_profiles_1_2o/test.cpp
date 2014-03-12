@@ -12,7 +12,6 @@
 #include "source/newtonian/one_dimensional/eos_consistent1d.hpp"
 #include "source/misc/universal_error.hpp"
 #include "source/misc/utils.hpp"
-#include "source/newtonian/one_dimensional/diagnostics_1d.hpp"
 #include "source/newtonian/one_dimensional/zero_force_1d.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"

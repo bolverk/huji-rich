@@ -2,7 +2,7 @@
 
 vector<int> RemovalStrategy::RemoveNeighbors
 (vector<double> const& merits,vector<int> const& 
- candidates,Tessellation const* tess) const
+ candidates,Tessellation const& tess) const
 {
 	vector<int> result;
 	if(merits.size()!=candidates.size())
@@ -12,7 +12,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	  int n=(int)merits.size();
 	for(int i=0;i<n;++i)
 	{
-		vector<int> neigh=tess->GetNeighbors(candidates[i]);
+		vector<int> neigh=tess.GetNeighbors(candidates[i]);
 		bool good=true;
 		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[i])!=
 			bad_neigh.end())
@@ -45,21 +45,20 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	return result;
 }
 
-void RemovalStrategy::CheckOutput(Tessellation const* tess,vector<int> 
+void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int> 
 	& ToRemove)const
 {
 	sort(ToRemove.begin(),ToRemove.end());
 	int n=int(ToRemove.size());
-	int N=tess->GetPointNo();
 	for(int i=0;i<n;++i)
 	{
-		vector<int> edges=tess->GetCellEdges(ToRemove[i]);
+		vector<int> edges=tess.GetCellEdges(ToRemove[i]);
 		//check we are not near periodic boundary
 		for(int j=0;j<(int)edges.size();++j)
 		{
-			Edge temp=tess->GetEdge(edges[j]);
-			if(temp.GetNeighbor(0)>N||temp.GetNeighbor(1)>N)
-				throw UniversalError("Bad removal, neighbor is periodic");
+			Edge temp=tess.GetEdge(edges[j]);
+/*			if(temp.GetNeighbor(0)>N||temp.GetNeighbor(1)>N)
+				throw UniversalError("Bad removal, neighbor is periodic");*/
 			if(temp.GetNeighbor(0)==ToRemove[i])
 			{
 				if(binary_search(ToRemove.begin(),ToRemove.end(),temp.

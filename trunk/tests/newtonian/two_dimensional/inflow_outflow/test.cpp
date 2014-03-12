@@ -36,196 +36,205 @@ using namespace std;
 
 namespace {
 
-void CheckSim(hdsim const& sim,Tessellation const& tess)
-{
-	double GoodMass=0.06;
-	int n=tess.GetPointNo();
-	double SimMass=0;
-	for(int i=0;i<n;++i)
-	{
-		SimMass+=tess.GetVolume(i)*sim.GetCell(i).Density;
-	}
-	ofstream myfile("result.txt");
-	myfile<<(GoodMass-SimMass)/GoodMass;
-	myfile.close();
-}
+  class HBCData
+  {
+  public:
 
-class RefineBow : public RefineStrategy
-{
-private:
-	int _N;
-public:
-  RefineBow(int npoints):
-    _N(npoints) {}
-	~RefineBow(){};
-	vector<int> CellsToRefine(Tessellation const* tess,
-		vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
-		double /*time*/,vector<Vector2D> &directions,const vector<int> &Removed)
-	{
-		double dv=1.2*5.0/(_N*_N);
-		vector<int> res;
-		directions.clear();
-		Vector2D dir(1,0);
-		for(int i=0;i<_N;++i)
-		{
-			if(tess->GetVolume(i)>dv)
-			{
-				res.push_back(i);
-				directions.push_back(dir);
-			}
-		}
-		return RemoveDuplicatedLately(res,tess->GetPointNo(),directions,Removed);
-	}
-};
+    HBCData(Hllc const& rs,
+	    IdealGas const& eos):
+      hbc1_(rs),
+      hbc3_(rs),
+      hbc2_(CalcPrimitive(0.01,0.0015,
+			  Vector2D(1,0),
+			  eos),rs),
+      hbc_(hbc2_,hbc1_,hbc3_,hbc3_) {}
 
-class RemoveBow : public RemovalStrategy
-{
-public:
-	vector<int> CellsToRemove(Tessellation const* tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& /*tracers*/,
-		double /*time*/)const
+    CustomOuter& getHBC(void)
+    {
+      return hbc_;
+    }
+
+  private:
+    FreeFlow hbc1_;
+    RigidWallHydro hbc3_;
+    InFlow hbc2_;
+    CustomOuter hbc_;
+  };
+
+  class RefineBow : public RefineStrategy
+  {
+  private:
+    int N_;
+  public:
+
+    RefineBow(int npoints):
+      N_(npoints) {}
+
+    ~RefineBow(){}
+
+    vector<int> CellsToRefine(Tessellation const& tess,
+			      vector<Primitive> const& /*cells*/,
+			      vector<vector<double> > const& /*tracers*/,
+			      double /*time*/,
+			      vector<Vector2D> &directions,
+			      const vector<int> &Removed)
+    {
+      const double dv=1.2*5.0/(N_*N_);
+      vector<int> res;
+      directions.clear();
+      Vector2D dir(1,0);
+      for(int i=0;i<N_;++i)
 	{
-		vector<int> res;
-		vector<double> merit;
-		int n=(int)cells.size();
-		double r=2/sqrt(1.0*n);
-		for(int i=0;i<n;++i)
-		{
-			double dx=1-tess->GetMeshPoint(i).x;
-			if(dx<2*r)
-			{
-				res.push_back(i);
-				merit.push_back(1.0/dx);
-			}
-		}
-		// Make sure there are no neighbors
-		vector<int> result=RemoveNeighbors(merit,res,tess);
-		CheckOutput(tess,result);
-		return result;
+	  if(tess.GetVolume(i)>dv)
+	    {
+	      res.push_back(i);
+	      directions.push_back(dir);
+	    }
 	}
-};
+      return RemoveDuplicatedLately(res,tess.GetPointNo(),directions,Removed);
+    }
+  };
+
+  class RemoveBow : public RemovalStrategy
+  {
+  public:
+    vector<int> CellsToRemove(Tessellation const& tess,
+			      vector<Primitive> const& cells,
+			      vector<vector<double> > const& /*tracers*/,
+			      double /*time*/)const
+    {
+      vector<int> res;
+      vector<double> merit;
+      const int n=(int)cells.size();
+      const double r=2/sqrt(1.0*n);
+      for(int i=0;i<n;++i)
+	{
+	  const double dx=1-tess.GetMeshPoint(i).x;
+	  if(dx<2*r)
+	    {
+	      res.push_back(i);
+	      merit.push_back(1.0/dx);
+	    }
+	}
+      // Make sure there are no neighbors
+      vector<int> result=RemoveNeighbors(merit,res,tess);
+      CheckOutput(tess,result);
+      return result;
+    }
+  };
+
+  class SimData
+  {
+  public:
+
+    SimData(double width=1, int np=40):
+      tess_(),
+      eos_(5./3.),
+      outer_(-width, width,width*1.5,-width*1.5),
+      rs_(),
+      hbc_data_(rs_,eos_),
+      interp_(eos_,outer_,hbc_data_.getHBC(), true, false, 0.1, 0.4),
+      naive_(),
+      point_motion_(naive_,hbc_data_.getHBC(),0.65,0.05,true,np,&outer_),
+      force_(),
+      refine_(np),
+      remove_(),
+      sim_(SquareMesh(np,np,width*2,width*3),
+	   tess_,
+	   interp_,
+	   Uniform2D(0.01),
+	   Uniform2D(0.0015),
+	   Uniform2D(1),
+	   Uniform2D(0),
+	   eos_,
+	   rs_,
+	   point_motion_,
+	   force_,
+	   outer_,
+	   hbc_data_.getHBC()) {}
+
+    Tessellation& getTessellation(void)
+    {
+      return tess_;
+    }
+
+    RefineBow& getRefineScheme(void)
+    {
+      return refine_;
+    }
+
+    RemoveBow& getRemoveScheme(void)
+    {
+      return remove_;
+    }
+
+    hdsim& getSim(void)
+    {
+      return sim_;
+    }
+
+  private:
+    VoronoiMesh tess_;
+    const IdealGas eos_;
+    const SquareBox outer_;
+    const Hllc rs_;
+    HBCData hbc_data_;
+    LinearGaussConsistent interp_;
+    Lagrangian naive_;
+    RoundCells point_motion_;
+    ZeroForce force_;
+    RefineBow refine_;
+    RemoveBow remove_;
+    hdsim sim_;
+  };
+
+  void CheckSim(SimData& sim_data)
+  {
+    Tessellation const& tess = sim_data.getTessellation();
+    hdsim const& sim = sim_data.getSim();
+    const double GoodMass=0.06;
+    const int n=tess.GetPointNo();
+    double SimMass=0;
+    for(int i=0;i<n;++i)
+      SimMass+=tess.GetVolume(i)*sim.GetCell(i).Density;
+
+    ofstream myfile("result.txt");
+    myfile<<(GoodMass-SimMass)/GoodMass;
+    myfile.close();
+  }
+
+  void main_loop(SimData& sim_data)
+  {
+    hdsim& sim = sim_data.getSim();
+
+    sim.SetCfl(0.8);
+    const int max_iter = 5e6;
+    const double tf = 2;
+    sim.SetEndTime(tf);
+    while(tf>sim.GetTime()){
+      try{
+	sim.TimeAdvance2Mid();
+	sim.RefineCells(&sim_data.getRefineScheme(),
+			sim.RemoveCells(&sim_data.getRemoveScheme()));
+      }
+      catch(UniversalError const& eo){
+	DisplayError(eo);
+      }
+
+      if(sim.GetCycle()>max_iter)
+	throw UniversalError
+	  ("Maximum number of iterations exceeded in main loop");
+    }
+  }
 }
 
 int main(void)
 {
-  // Initialization
-  int np = 40;
-  double width=1;
+  SimData sim_data;
 
-  SquareBox outer(-width,width,width*1.5,-width*1.5);
+  main_loop(sim_data);
 
-  vector<Vector2D> InitPoints=SquareMesh(np,np,width*2,width*3);
-	
-  Hllc rs;
-  IdealGas eos(5./3.);
-  RefineBow refine(np);
-  RemoveBow remove;
+  CheckSim(sim_data);
 
-  FreeFlow hbc1(rs);
-  RigidWallHydro hbc3(rs);
-  Primitive in;
-  // Set the inflow
-  in.Density=0.01;
-  in.Velocity.Set(1,0);
-  in.Pressure=0.0015;
-  in.Energy=eos.dp2e(in.Density,in.Pressure);
-  in.SoundSpeed=eos.dp2c(in.Density,in.Pressure);
-  InFlow hbc2(in,rs);
-  CustomOuter hbc(&hbc2,&hbc1,&hbc3,&hbc3);
-  
-  VoronoiMesh tess;
-  LinearGaussConsistent interp(eos,outer,&hbc,true,false,0.1,0.4);
-
-  Uniform2D pressure(0.0015);
-  Uniform2D density(0.01);
-  Uniform2D xvelocity(1);
-  Uniform2D yvelocity(0);
-
-  Lagrangian bpm;
-  RoundCells pointmotion(bpm,hbc,0.65,0.05,np,&outer);
-  pointmotion.SetColdFlows();
-
-  ZeroForce force;
-
-  //ERSIG rs(5./3.,"zero flux");
-  hdsim sim(InitPoints, //Initial points
-	    &tess, // Tessellation
-	    &interp, // Spatial reconstruction
-	    density, pressure, xvelocity, yvelocity,
-	    eos,rs,&pointmotion,&force,&outer,&hbc);
-
-  // Main process
-  sim.SetCfl(0.8);
-  int iter = 0;
-  const int max_iter = 5e6;
-  double tf =2;
-  sim.SetEndTime(tf);
-  int cntr = 0;
-  string loc="c:\\sim_data\\";
-  int dumpnum=1;
-   while(tf>sim.GetTime())
-    {
-      try
-	{
-		if(cntr%20==0)
-		{
-			BinOutput(loc+int2str(dumpnum)+".bin",sim,tess);
-			++dumpnum;
-		}
-	  sim.TimeAdvance2Mid();
-	  vector<int> removed=sim.RemoveCells(&remove);
-	  sim.RefineCells(&refine,removed);
-	  cntr++;
-	}
-      catch(UniversalError const& eo)
-	{
-	  cout << eo.GetErrorMessage() << endl;
-	  cout << "Iteration number = " << sim.GetCycle() << endl;
-	  for(int i=0;i<(int)eo.GetFields().size();++i)
-	    {
-	      cout << eo.GetFields()[i] << " = "
-		   << eo.GetValues()[i] << endl;
-	      if(eo.GetFields()[i]=="cell index")
-		{
-		  cout << "Exact value = " << eo.GetValues()[i] << endl;
-		  cout << "Rounded values = " << (int)eo.GetValues()[i] << endl;
-		  Vector2D temp(sim.GetMeshPoint((int)eo.GetValues()[i]));
-		  cout << "cell x coordinate = " << temp.x << endl;
-		  cout << "cell y coordinate = " << temp.y << endl;
-		}
-	    }
-	  throw;
-	}
-      catch(vector<double> const& eo)
-	{
-	  cout << "Nan occurred in cell " << eo[0] <<  endl;
-	  cout << "Cell density = " << eo[1] << endl;
-	  cout << "Cell pressure = " << eo[2] << endl;
-	  cout << "Cell x velocity = " << eo[3] << endl;
-	  cout << "Cell y velocity = " << eo[4] << endl;
-	  throw;
-	}
-      catch(char const* eo)
-	{
-	  cout << eo << endl;
-	  throw;
-	}
-      catch(Primitive const& eo)
-	{
-	  for(int i=0;i<6;i++){
-	    cout << eo[i] << endl;
-	  }
-	  throw;
-	}
-      // Infinite loop guard
-      iter++;
-      if(iter>max_iter)
-	throw "Maximum number of iterations exceeded in main loop";
-    }
-  // Check if sim ran ok
-  CheckSim(sim,tess);
-  // Finalise
   return 0;
 }
-
-

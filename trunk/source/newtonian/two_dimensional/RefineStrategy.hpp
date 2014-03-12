@@ -10,7 +10,6 @@
 #include "../../tessellation/tessellation.hpp"
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../misc/utils.hpp"
-#include <iostream>
 /*! \brief Abstract class for refinment strategies
 	\author Elad Steinberg
 */
@@ -29,11 +28,11 @@ public:
   \param Removed A list of the cells that were removed in the last cell removal
   \return A list of the cells to refine
   */
-	virtual vector<int> CellsToRefine(Tessellation const* tess,
+	virtual vector<int> CellsToRefine(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double time,vector<Vector2D> &directions,vector<int> const& Removed)=0;
 	/*!
-	\brief Removes cells that were splitted in the alst time step
+	\brief Removes cells that were splitted in the last time step
 	\param ToRefine The list of candidate cells to split
 	\param Npoints The number of points in the tessellation
 	\param directions The directions to move the splitted points, can be given empty

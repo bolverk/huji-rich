@@ -25,30 +25,30 @@ public:
 
   bool flux_indifferent(void) const;
 
-  Conserved CalcFlux(Tessellation const* tess,
+  Conserved CalcFlux(Tessellation const& tess,
 		     vector<Primitive> const& cells,
 		     double /*dt*/,
-		     SpatialReconstruction* /*interp*/,
+		     SpatialReconstruction& /*interp*/,
 		     Edge const& edge,
 		     Vector2D const& face_velocity,
 		     RiemannSolver const& rs,
 		     int index,
-		     HydroBoundaryConditions const* hbc,
+		     HydroBoundaryConditions const& hbc,
 		     double /*time*/,
 		     vector<vector<double> > const& /*tracers*/);
 
   Primitive UpdatePrimitive(vector<Conserved> const& /*intensives*/,
-			    EquationOfState const* /*eos*/,vector<Primitive>& /*cells*/,
-			    int index,Tessellation const* /*tess*/,double /*time*/,
+			    EquationOfState const& /*eos*/,vector<Primitive>& /*cells*/,
+			    int index,Tessellation const& /*tess*/,double /*time*/,
 			    vector<vector<double> > const& /*tracers*/);
 
   vector<double> UpdateTracer(int index,vector<vector<double> > const& tracers,
-			      vector<Primitive> const& cells,Tessellation const* tess,double /*time*/);
+			      vector<Primitive> const& cells,Tessellation const& tess,double /*time*/);
 
-  vector<double> CalcTracerFlux(Tessellation const* tess,
+  vector<double> CalcTracerFlux(Tessellation const& tess,
 				vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 				double dm,Edge const& edge,int index,double dt,double time,
-				SpatialReconstruction const* interp,Vector2D const& vface);
+				SpatialReconstruction const& interp,Vector2D const& vface);
 
   bool TimeStepRelevant(void)const;
 private:

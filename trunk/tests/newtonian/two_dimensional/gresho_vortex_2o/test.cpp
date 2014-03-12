@@ -86,23 +86,23 @@ public:
     hbc_(rs_),
     tess_(),
     eos_(5./3.),
-    interpm_(eos_,outer_,&hbc_,true,false),
+    interpm_(eos_,outer_,hbc_,true,false),
     bpm_(),
     point_motion_(bpm_,hbc_),
     force_(),
     sim_(offset_grid(square_grid(1,30),Vector2D(-0.5,-0.5)),
-	 &tess_,
-	 &interpm_,
+	 tess_,
+	 interpm_,
 	 Uniform2D(1),
 	 Pressure(),
 	 VelocityX(),
 	 VelocityY(),
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {

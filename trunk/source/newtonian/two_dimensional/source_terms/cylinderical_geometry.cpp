@@ -20,12 +20,12 @@ Vector2D cross_z(Vector2D const& v)
 }
 
 Conserved CylindericalGeometry::Calculate
-(Tessellation const* tess,
+(Tessellation const& tess,
  vector<Primitive> const& cells,
  int point,
  vector<Conserved> const& /*fluxes*/,
  vector<Vector2D> const& /*point_velocity*/,
- HydroBoundaryConditions const* /*hbc*/,
+ HydroBoundaryConditions const& /*hbc*/,
  vector<vector<double> > const &tracer,vector<double> &dtracer,
  double /*t*/,
  double /*dt*/)
@@ -38,12 +38,12 @@ Conserved CylindericalGeometry::Calculate
 			       r_hat);
   const double p = cells[point].Pressure;
   const double e = cells[point].Energy;
-  const double r = distance_from_line(tess->GetCellCM(point),
+  const double r = distance_from_line(tess.GetCellCM(point),
 				      origin_,
 				      direction_);
   const double r_mom = d*pow(vr,2)/r;
   const double z_mom = d*vr*vz/r;
-  const double volume = tess->GetVolume(point);
+  const double volume = tess.GetVolume(point);
   if(!dtracer.empty())
 	  dtracer=-d*volume*(vr/r)*tracer[point];
   return -volume*Conserved

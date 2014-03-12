@@ -10,7 +10,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "../common/riemann_solver.hpp"
 
-using namespace std;
+using std::vector;
 
 //! \brief Base class for boundary conditions
 class BoundaryConditions1D

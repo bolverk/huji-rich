@@ -32,7 +32,7 @@ public:
     \param dt The time step
     \param time The simulation time
   */
-  virtual void Prepare(Tessellation const* tessellation,
+  virtual void Prepare(Tessellation const& tessellation,
 		       vector<Primitive> const& cells,
 		       vector<vector<double> > const& tracers,
 		       double dt,double time) = 0;
@@ -47,9 +47,14 @@ public:
     \param vface The face of the velocity
     \return The interpolated primitive
   */
-  virtual Primitive Interpolate(Tessellation const* tessellation,
-				vector<Primitive> const& cells,double dt,Edge const& edge,
-				int side,InterpolationType interptype,Vector2D const& vface) const = 0;
+  virtual Primitive Interpolate
+  (Tessellation const& tessellation,
+   vector<Primitive> const& cells,
+   double dt,
+   Edge const& edge,
+   int side,
+   InterpolationType interptype,
+   Vector2D const& vface) const = 0;
  
   /*! \brief Interpolates the scalar tracers near the edge
     \param tess Point and edge positions
@@ -63,7 +68,7 @@ public:
     \return The interpolated tracer
   */
   virtual vector<double> interpolateTracers
-  (Tessellation const* tess,vector<Primitive> const& cells,
+  (Tessellation const& tess,vector<Primitive> const& cells,
    vector<vector<double> > const& tracers,double dt,Edge const& edge,int side,
    InterpolationType interp_type,Vector2D const& vface) const = 0;
 

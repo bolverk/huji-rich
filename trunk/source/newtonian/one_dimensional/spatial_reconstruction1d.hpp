@@ -9,7 +9,7 @@
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
 
-using namespace std;
+using std::vector;
 
 //! \brief Base class for spatial reconstruction
 class SpatialReconstruction1D
@@ -30,7 +30,7 @@ public:
   virtual Primitive InterpState(vector<double> const& vp, 
 				vector<Primitive> const& hv, 
 				double interface_speed,
-				int i, int dir,double dt) const = 0;
+				size_t i, int dir,double dt) const = 0;
 
   virtual ~SpatialReconstruction1D(void);
 };

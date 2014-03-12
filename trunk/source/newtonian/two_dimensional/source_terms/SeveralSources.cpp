@@ -14,11 +14,11 @@ SeveralSources::~SeveralSources(void)
 }
 
 
-Conserved SeveralSources::Calculate(Tessellation const* tess,
+Conserved SeveralSources::Calculate(Tessellation const& tess,
 	vector<Primitive> const& cells,int point,
 	vector<Conserved> const& fluxes,
 	vector<Vector2D> const& point_velocity,
-	HydroBoundaryConditions const*hbc,
+	HydroBoundaryConditions const& hbc,
 	vector<vector<double> > const &tracer_extensive,vector<double> &dtracer,
 	double time,double dt)
 {

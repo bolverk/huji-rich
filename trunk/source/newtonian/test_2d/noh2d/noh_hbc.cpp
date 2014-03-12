@@ -1,11 +1,11 @@
 #include "noh_hbc.hpp"
 
-NohHBC::NohHBC(Vector2D const& center,double d0,double v0,double p0,
-	RiemannSolver const& rs):center_(center), d0_(d0), v0_(v0),p0_(p0),rs_(rs) {}
+NohHBC::NohHBC(Vector2D const& center,double d0,double v0,double p0 ):
+  center_(center), d0_(d0), v0_(v0),p0_(p0) {}
 
-Conserved NohHBC::CalcFlux(Tessellation const* tess,vector<Primitive> const& /*cells*/,
+Conserved NohHBC::CalcFlux(Tessellation const& tess,vector<Primitive> const& /*cells*/,
 	Vector2D const& /*edge_velocity*/,Edge const& edge,
-	SpatialReconstruction const* /*interp*/,double /*dt*/,double time) const
+	SpatialReconstruction const& /*interp*/,double /*dt*/,double time) const
 {
 	const Vector2D edge_cen = 0.5*(edge.GetVertex(0)+
 		edge.GetVertex(1));
@@ -20,7 +20,7 @@ Conserved NohHBC::CalcFlux(Tessellation const* tess,vector<Primitive> const& /*c
 }
 
 Primitive NohHBC::GetBoundaryPrimitive(Edge const& edge,
-	Tessellation const* /*tess*/,vector<Primitive> const& /*cells*/,double
+	Tessellation const& /*tess*/,vector<Primitive> const& /*cells*/,double
 	time)const
 {
 	const Vector2D edge_cen = 0.5*(edge.GetVertex(0)+
@@ -37,7 +37,7 @@ Primitive NohHBC::GetBoundaryPrimitive(Edge const& edge,
 }
 
 Vector2D NohHBC::CalcEdgeVelocity
-	(Tessellation const* /*tessellation*/,
+	(Tessellation const& /*tessellation*/,
 	vector<Vector2D> const& /*point_velocities*/,
 	Edge const& /*edge*/, double /*time*/) const
 {
@@ -45,25 +45,25 @@ Vector2D NohHBC::CalcEdgeVelocity
 	return res;
 }
 
-bool NohHBC::IsBoundary(Edge const& edge,Tessellation const* tessellation)const
+bool NohHBC::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation->GetPointNo()))
+	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
 		return true;
-	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation->GetPointNo()))
+	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }
 
-bool NohHBC::IsGhostCell(int i,Tessellation const* tess) const
+bool NohHBC::IsGhostCell(int i,Tessellation const& tess) const
 {
-	if(i>tess->GetPointNo()||i<0)
+	if(i>tess.GetPointNo()||i<0)
 		return true;
 	else
 		return false;
 }
 
 vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
-	Tessellation const* tess,vector<vector<double> > const& tracers,double
+	Tessellation const& tess,vector<vector<double> > const& tracers,double
 	time)const
 {
 	vector<double> res;
@@ -90,11 +90,11 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	return res;
 }
 
-vector<double> NohHBC::CalcTracerFlux(Tessellation const* tessellation,
+vector<double> NohHBC::CalcTracerFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,
 	  vector<vector<double> > const& tracers,double dm,
 	  Edge const& edge,int /*index*/,double dt,
-	  double time,SpatialReconstruction const* interp,
+	  double time,SpatialReconstruction const& interp,
 	  Vector2D const& vface) const
 {
 	vector<double> res;
@@ -108,7 +108,7 @@ vector<double> NohHBC::CalcTracerFlux(Tessellation const* tessellation,
 		}
 		else
 		{	
-			res=interp->interpolateTracers(tessellation,cells,tracers,dt,edge,1,
+			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,1,
 				InBulk,vface);
 			transform(res.begin(),res.end(),res.begin(),
 				bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
@@ -124,7 +124,7 @@ vector<double> NohHBC::CalcTracerFlux(Tessellation const* tessellation,
 		}
 		else
 		{
-			res=interp->interpolateTracers(tessellation,cells,tracers,dt,edge,0,
+			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,0,
 				InBulk,vface);
 			transform(res.begin(),res.end(),res.begin(),
 				bind1st(multiplies<double>(),dm*dt*edge.GetLength()));

@@ -4,7 +4,7 @@
 Primitive PCM1D::InterpState(vector<double> const& /*vp*/,
 			     vector<Primitive> const& hv,
 			     double /*interface_speed*/,
-			     int i, int dir, double /*dt*/) const
+			     size_t i, int dir, double /*dt*/) const
 {
   if(dir==0)//left boundary 
     return hv[i-1];

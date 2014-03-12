@@ -29,15 +29,15 @@ public:
     \return Acceleration
     \todo Determine if this function is necessary
    */
-  Vector2D Calculate(Tessellation const* tess,
+  Vector2D Calculate(Tessellation const& tess,
 		     vector<Primitive> const& cell,int point);
 
 	Vector2D Calculate
-		(Tessellation const* tess,
+		(Tessellation const& tess,
 		vector<Primitive> const& cells,
 		int point,vector<Conserved> const& fluxes,
 		vector<Vector2D> const& point_velocity,
-		HydroBoundaryConditions const*hbc,
+		HydroBoundaryConditions const& hbc,
 		double t,
 		double dt);
 

@@ -1,21 +1,20 @@
-#include "../source/tessellation/VoronoiMesh.hpp"
-#include "../source/newtonian/two_dimensional/hdsim2d.hpp"
-#include "../source/newtonian/common/hllc.hpp"
-#include "../source/newtonian/common/ideal_gas.hpp"
-#include "../source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "../source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "../source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "../source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "../source/newtonian/two_dimensional/linear_gauss_scalar.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/round_cells.hpp"
-#include "../source/misc/mesh_generator.hpp"
-#include "../source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
-#include "../source/newtonian/two_dimensional/Reset.hpp"
-#include "../source/misc/int2str.hpp"
-#include "../source/tessellation/RoundGrid.hpp"
-#include "noh_hbc.hpp"
-#include "noh_amr.hpp"
+#include "source/tessellation/VoronoiMesh.hpp"
+#include "source/newtonian/two_dimensional/hdsim2d.hpp"
+#include "source/newtonian/common/hllc.hpp"
+#include "source/newtonian/common/ideal_gas.hpp"
+#include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
+#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
+#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
+#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
+#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/newtonian/two_dimensional/Reset.hpp"
+#include "source/misc/int2str.hpp"
+#include "source/tessellation/RoundGrid.hpp"
+#include "source/newtonian/test_2d/noh2d/noh_amr.hpp"
+#include "source/newtonian/test_2d/noh2d/noh_hbc.hpp"
 
 class xVel :public SpatialDistribution
 {
@@ -67,7 +66,7 @@ int main(void)
 	double rho=1;
 	double v_in=1;
 	double p=1e-6;
-	NohHBC hbc(center,rho,v_in,p,rs);
+	NohHBC hbc(center,rho,v_in,p);
 
 	// Set up the equation of state
 	double gamma=5./3.;
@@ -75,11 +74,10 @@ int main(void)
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion);
-	pointmotion.SetColdFlows(&hbc);
+	RoundCells pointmotion(l_motion,hbc,0.7,0.02,true);
 
 	// Set up the interpolation
-	LinearGaussConsistent interpolation(eos,outer,&hbc);
+	LinearGaussConsistent interpolation(eos,outer,hbc);
 
 	// Set up the initial Hydro
 	Uniform2D density(rho);
@@ -94,17 +92,13 @@ int main(void)
 	InitPoints=RoundGrid(InitPoints,&outer,5);
 
 	// Set up the simulation
-	hdsim sim(InitPoints,&tess,&interpolation,density,pressure,xvelocity,
-		yvelocity,eos,rs,&pointmotion,&force,&outer,&hbc);
+	hdsim sim(InitPoints,tess,interpolation,density,pressure,xvelocity,
+		yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
 	// Set cold flows on
 	double kineticfraction=0.01;
 	double gravityfraction=0.01;
 	sim.SetColdFlows(kineticfraction,gravityfraction);
-
-	// Define the interpolation for the cold flows
-	LinearGaussScalar sinterp(&interpolation,&hbc);
-	sim.setTracerInterpolation(&sinterp);
 
 	// Define the AMR classes
 	double Vmax=2*width*width/(np*np);
@@ -124,7 +118,7 @@ int main(void)
 	double output_dt=0.1;
 	double last_dump_time=0;
 	int dump_number=0;
-
+	
 	// Run main loop of the sim
 	while(sim.GetTime()<tend)
 	{
@@ -152,7 +146,7 @@ int main(void)
 		}
 		catch(UniversalError const& eo)
 		{
-			DisplayError(eo,sim.GetCycle());
+			DisplayError(eo);
 		}
 	}
 

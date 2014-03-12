@@ -8,7 +8,6 @@
 
 #include "../SourceTerm.hpp"
 #include "../spatial_distribution2d.hpp"
-#include "../scalar_interpolation.hpp"
 
 //! \brief Class for a adding a rotation force force for cylndrical geometry assuming conservation of angular momentum
 class RotationForce : public SourceTerm
@@ -24,11 +23,11 @@ public:
 
 	~RotationForce(void);
 
-	Conserved Calculate(Tessellation const* tess,
+	Conserved Calculate(Tessellation const& tess,
 		vector<Primitive> const& cells,int point,
 		vector<Conserved> const& fluxes,
 		vector<Vector2D> const& point_velocity,
-		HydroBoundaryConditions const*hbc,
+		HydroBoundaryConditions const& hbc,
 		vector<vector<double> > const &tracer,vector<double> &dtracer,
 		double time,double dt);
 

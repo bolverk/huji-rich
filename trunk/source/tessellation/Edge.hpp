@@ -100,27 +100,6 @@ public:
   //  int GetIndex(void) const;
 };
 
-/*! \brief Exception thrown in case a cell is given that does not belong to an edge
-  \details The index is the cell number
-*/
-class InvalidCellEdgeException
-{
-private:
-  
-  int _index;
-
-public:
-  /*! \brief Class constructor
-    \param index The invalid input argument
-  */
-  InvalidCellEdgeException(int index);
-
-  /*! \brief Returns the invalid index
-    \return The invalid index1
-  */
-  //  int get_index(void) const;
-};
-
 /*! \brief Calculates a unit vector parallel to an edge
   \param edge Edge
   \return Unit vector parallel to the edge

@@ -6,9 +6,12 @@ def main():
     oblique_shock = imp.load_source(\
         'oblique_shock',\
             '../../analytic/oblique_shock.py')
+    import h5py
 
-    x_list, y_list = numpy.loadtxt('mesh_points.txt',unpack=True)
-    v_list = numpy.loadtxt('yvelocities.txt')
+    h5f = h5py.File('final.h5')
+    x_list = h5f['x_coordinate']
+    y_list = h5f['y_coordinate']
+    v_list = h5f['y_velocity']
     wedge_angle = numpy.loadtxt('wedge_angle.txt')
     adiabatic_index =numpy.loadtxt('adiabatic_index.txt')
     mach = numpy.loadtxt('mach_number.txt')

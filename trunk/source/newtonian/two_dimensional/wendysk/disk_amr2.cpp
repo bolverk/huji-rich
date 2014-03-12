@@ -6,15 +6,15 @@ inner_radius1_(inner_radius1),inner_radius2_(inner_radius2),
 	outer_radius_(outer_radius),
 	total_specials_(total_specials),s1_(s1),s2_(s2) {}
 
-vector<int> DiskRemove2::CellsToRemove(Tessellation const* tess,
+vector<int> DiskRemove2::CellsToRemove(Tessellation const& tess,
 	vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
 	double /*time*/) const
 {
 	vector<int> candidates;
 	vector<double> merits;
-	for(int i=total_specials_;i<tess->GetPointNo();++i)
+	for(int i=total_specials_;i<tess.GetPointNo();++i)
 	{
-		const Vector2D mp = tess->GetMeshPoint(i);
+		const Vector2D mp = tess.GetMeshPoint(i);
 		if(abs(mp-s1_)<inner_radius1_)
 		{
 			candidates.push_back(i);
@@ -47,12 +47,12 @@ total_specials_(total_specials),d_min_(d_min),min_radius1_(min_radius1),
 	min_radius2_(min_radius2),max_radius_(max_radius),
 	max_volume_(max_volume),s1_(s1),s2_(s2) {}
 
-vector<int> DiskRefine2::CellsToRefine(Tessellation const* tess,
+vector<int> DiskRefine2::CellsToRefine(Tessellation const& tess,
 	vector<Primitive> const& cells,vector<vector<double> > const& /*tracers*/,
 	double /*time*/,vector<Vector2D> & directions ,vector<int> const& Removed)
 {
 	vector<int> stage1;
-	for(int i=total_specials_;i<tess->GetPointNo();++i)
+	for(int i=total_specials_;i<tess.GetPointNo();++i)
 	{
 		if(cells[i].Density>d_min_)
 			stage1.push_back(i);
@@ -60,14 +60,14 @@ vector<int> DiskRefine2::CellsToRefine(Tessellation const* tess,
 	vector<int> stage2;
 	for(int i=0;i<(int)stage1.size();++i)
 	{
-		if((abs(tess->GetMeshPoint(stage1[i])-s1_)>min_radius1_)&&
-			abs(tess->GetMeshPoint(stage1[i]))<max_radius_)
+		if((abs(tess.GetMeshPoint(stage1[i])-s1_)>min_radius1_)&&
+			abs(tess.GetMeshPoint(stage1[i]))<max_radius_)
 		{
 			stage2.push_back(stage1[i]);
 			continue;
 		}
-		if((abs(tess->GetMeshPoint(stage1[i])-s2_)>min_radius2_)&&
-			abs(tess->GetMeshPoint(stage1[i]))<max_radius_)
+		if((abs(tess.GetMeshPoint(stage1[i])-s2_)>min_radius2_)&&
+			abs(tess.GetMeshPoint(stage1[i]))<max_radius_)
 		{
 			stage2.push_back(stage1[i]);
 			continue;
@@ -76,16 +76,16 @@ vector<int> DiskRefine2::CellsToRefine(Tessellation const* tess,
 	vector<int> res;
 	for(int i=0;i<(int)stage2.size();++i)
 	{
-		if(tess->GetVolume(stage2[i])>max_volume_
-			*max(min(abs(tess->GetMeshPoint(stage2[i])-s1_),
-			abs(tess->GetMeshPoint(stage2[i])-s2_)),0.05)*3)
+		if(tess.GetVolume(stage2[i])>max_volume_
+			*max(min(abs(tess.GetMeshPoint(stage2[i])-s1_),
+			abs(tess.GetMeshPoint(stage2[i])-s2_)),0.05)*3)
 		{
 			res.push_back(stage2[i]);
 			continue;
 		}
-		if(tess->GetVolume(stage2[i])>(2*max_volume_))
+		if(tess.GetVolume(stage2[i])>(2*max_volume_))
 			res.push_back(stage2[i]);
 	}
 
-	return RemoveDuplicatedLately(res,tess->GetPointNo(),directions,	Removed);
+	return RemoveDuplicatedLately(res,tess.GetPointNo(),directions,	Removed);
 }

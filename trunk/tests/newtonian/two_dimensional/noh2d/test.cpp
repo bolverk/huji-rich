@@ -67,18 +67,17 @@ int main(void)
 	double rho=1;
 	double v_in=1;
 	double p=1e-6;
-	NohHBC hbc(center,rho,v_in,p,rs);
+	NohHBC hbc(center,rho,v_in,p);
 
 	// Set up the equation of state
 	IdealGas eos(read_number("adiabatic_index.txt"));
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion,hbc);
-	pointmotion.SetColdFlows();
+	RoundCells pointmotion(l_motion,hbc,1,0.02,true);
 
 	// Set up the interpolation
-	LinearGaussConsistent interpolation(eos,outer,&hbc);
+	LinearGaussConsistent interpolation(eos,outer,hbc);
 
 	// Set up the initial Hydro
 	Uniform2D density(rho);
@@ -90,8 +89,8 @@ int main(void)
 	ZeroForce force;
 
 	// Set up the simulation
-	hdsim sim(InitPoints,&tess,&interpolation,density,pressure,xvelocity,
-		yvelocity,eos,rs,&pointmotion,&force,&outer,&hbc);
+	hdsim sim(InitPoints,tess,interpolation,density,pressure,xvelocity,
+		yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
 	// Set cold flows on
 	double kineticfraction=0.01;
@@ -126,7 +125,7 @@ int main(void)
 		}
 		catch(UniversalError const& eo)
 		{
-			DisplayError(eo,sim.GetCycle());
+		  DisplayError(eo);
 		}
 	}
 

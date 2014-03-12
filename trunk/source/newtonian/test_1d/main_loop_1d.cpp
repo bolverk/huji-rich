@@ -2,6 +2,33 @@
 #include "../../misc/universal_error.hpp"
 #include "../../misc/simple_io.hpp"
 
+simulation1d::TerminationCondition::~TerminationCondition(void) {}
+
+simulation1d::SafeTimeTermination::SafeTimeTermination
+(double termination_time,
+ int max_cycles):
+termination_time_(termination_time),
+  max_cycles_(max_cycles) {}
+
+bool simulation1d::SafeTimeTermination::should_continue(hdsim1D const& sim)
+{
+  if(sim.GetCycle()>max_cycles_)
+    throw UniversalError("Maximum number of time steps exceeded");
+
+  return sim.GetTime()<termination_time_;
+}
+
+simulation1d::DiagnosticsFunction::~DiagnosticsFunction(void) {}
+
+simulation1d::WriteTime::WriteTime
+(string const& fname):
+fname_(fname) {}
+
+void simulation1d::WriteTime::diagnose(hdsim1D const& sim)
+{
+  write_number(sim.GetTime(),fname_.c_str());
+}
+
 void simulation1d::main_loop(hdsim1D& sim,
 			     TerminationCondition& term_cond,
 			     int time_order,

@@ -1,4 +1,5 @@
 #include "azimuthal_velocity.hpp"
+#include "../../../misc/universal_error.hpp"
 
 AzimuthalVelocity::AzimuthalVelocity(Func1Var const& radial,
 				     Vector2D const& center,
@@ -17,5 +18,5 @@ double AzimuthalVelocity::EvalAt(Vector2D const& p) const
   else if(comp_=='y')
     return vq*rvec.x/radius;
   else
-    throw "Unknown component name "+comp_;
+    throw UniversalError(string("Unknown component name ")+comp_);
 }

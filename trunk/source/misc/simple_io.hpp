@@ -11,7 +11,11 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::ofstream;
+using std::endl;
+using std::ifstream;
 
 /*! \brief Writes a single number to a file
 \param num Number
@@ -49,5 +53,17 @@ double read_number(string const& fname);
 \return The integer
 */
 int read_int(string const& fname);
+
+/*! \brief Writes a single integer to a binary file
+  \param n Integer
+  \param fh File handle
+ */
+void binary_write_single_int(int n,ofstream& fh);
+
+/*! \brief Writes a double to a binary file
+  \param d A double
+  \param fh File handle
+ */
+void binary_write_single_double(double d,ofstream& fh);
 
 #endif // SIMPLE_IO_HPP

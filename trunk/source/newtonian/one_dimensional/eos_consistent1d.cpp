@@ -1,5 +1,6 @@
 #include "eos_consistent1d.hpp"
 
+using namespace std;
 using namespace interpolations1d;
 
 EOSConsistent::EOSConsistent
@@ -11,7 +12,7 @@ Primitive EOSConsistent::InterpState
 (vector<double> const& vp,
  vector<Primitive> const& hv,
  double interface_speed,
- int i, int dir, double dt) const
+ size_t i, int dir, double dt) const
 {
   Primitive res = naive_.InterpState
     (vp,hv,interface_speed,i,dir,dt);

@@ -132,7 +132,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 	yvert.reserve(7*sim.GetCellNo());
 	for(int i=0;i<sim.GetCellNo();++i) 
 	{
-		ConvexHull(convhull,sim.GetTessellation(),i);
+		ConvexHull(convhull,&sim.GetTessellation(),i);
 		for(int j=0;j<(int)convhull.size();++j)
 		{
 			xvert.push_back(convhull[j].x);

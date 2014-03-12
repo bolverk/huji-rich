@@ -7,20 +7,20 @@ ConstantFluxEvolution::ConstantFluxEvolution(Primitive const& cell,
 ConstantFluxEvolution::~ConstantFluxEvolution(void)
 {}
 
-Conserved ConstantFluxEvolution::CalcFlux(Tessellation const* tessellation,
+Conserved ConstantFluxEvolution::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,	double dt,
-	SpatialReconstruction* interpolation,Edge const& edge,
+	SpatialReconstruction& interpolation,Edge const& edge,
 	Vector2D const& facevelocity,RiemannSolver const& /*rs*/,int index,
-	HydroBoundaryConditions const* bc,double time,
+	HydroBoundaryConditions const& bc,double time,
 	vector<vector<double> > const& /*tracers*/)
 {
-	if(bc->IsBoundary(edge,tessellation))
-		return bc->CalcFlux(tessellation,cells,facevelocity,edge,interpolation,dt,
+	if(bc.IsBoundary(edge,tessellation))
+		return bc.CalcFlux(tessellation,cells,facevelocity,edge,interpolation,dt,
 		time);
 	else
 	{
-		Vector2D normaldir = tessellation->GetMeshPoint(edge.GetNeighbor(1))-
-			tessellation->GetMeshPoint(edge.GetNeighbor(0));
+		Vector2D normaldir = tessellation.GetMeshPoint(edge.GetNeighbor(1))-
+			tessellation.GetMeshPoint(edge.GetNeighbor(0));
 		normaldir=normaldir/abs(normaldir);
 		double v=abs(cell_.Velocity);
 		Primitive cell(cell_);
@@ -34,8 +34,8 @@ Conserved ConstantFluxEvolution::CalcFlux(Tessellation const* tessellation,
 
 Primitive ConstantFluxEvolution::UpdatePrimitive
 	(vector<Conserved> const& /*conservedintensive*/,
-	EquationOfState const* /*eos*/,
-	vector<Primitive>& cells,int index,Tessellation const* /*tess*/,
+	EquationOfState const& /*eos*/,
+	vector<Primitive>& cells,int index,Tessellation const& /*tess*/,
 	double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
 	Primitive res=cells[index];
@@ -44,22 +44,22 @@ Primitive ConstantFluxEvolution::UpdatePrimitive
 
 vector<double> ConstantFluxEvolution::UpdateTracer(int index,vector<vector<double> >
 	const& /*tracers*/,vector<Primitive> const& cells,
-	Tessellation const* tess,double /*time*/)
+	Tessellation const& tess,double /*time*/)
 {
 	if(entropy_)
 	{
 		vector<double> res(tracer_);
 		res[0]=eos_.dp2s(cells[index].Density,cells[index].Pressure);
-		return tess->GetVolume(index)*cells[index].Density*res;
+		return tess.GetVolume(index)*cells[index].Density*res;
 	}
 	else
-		return tess->GetVolume(index)*cells[index].Density*tracer_;
+		return tess.GetVolume(index)*cells[index].Density*tracer_;
 }
 
-vector<double> ConstantFluxEvolution::CalcTracerFlux(Tessellation const* /*tess*/,
+vector<double> ConstantFluxEvolution::CalcTracerFlux(Tessellation const& /*tess*/,
 	vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
 	double dm,Edge const& edge,int /*index*/,double dt,double /*time*/,
-	SpatialReconstruction const* /*interp*/,Vector2D const& /*vface*/)
+	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {
 	vector<double> res(tracer_);
 	if(entropy_)

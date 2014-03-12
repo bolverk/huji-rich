@@ -7,9 +7,7 @@
 #ifndef COSNTANTPRIMITIVEEVOLUTION_HPP
 #define COSNTANTPRIMITIVEEVOLUTION_HPP 1
 
-#include <fstream>
 #include <string>
-#include <iostream>
 #include "../CustomEvolution.hpp"
 #include "../hydrodynamics_2d.hpp"
 
@@ -31,26 +29,26 @@ public:
 	*/
 	~ConstantPrimitiveEvolution(void);
 
-	Conserved CalcFlux(Tessellation const* tessellation,
+	Conserved CalcFlux(Tessellation const& tessellation,
 		vector<Primitive> const& cells,	double dt,
-		SpatialReconstruction* interpolation,Edge const& edge,
+		SpatialReconstruction& interpolation,Edge const& edge,
 		Vector2D const& facevelocity,
 		RiemannSolver const& rs,int index,
-		HydroBoundaryConditions const* boundaryconditions,double time,
+		HydroBoundaryConditions const& boundaryconditions,double time,
 		vector<vector<double> > const& tracers); 
 
 	Primitive UpdatePrimitive(vector<Conserved> const& conservedintensive,
-		EquationOfState const* eos,vector<Primitive>& cells,int index,
-		Tessellation const* tess,double time,vector<vector<double> > const& tracers);
+		EquationOfState const& eos,vector<Primitive>& cells,int index,
+		Tessellation const& tess,double time,vector<vector<double> > const& tracers);
 
 	vector<double> UpdateTracer(int index,vector<vector<double> >
-		const& tracers,vector<Primitive> const& cells,Tessellation const* tess,
+		const& tracers,vector<Primitive> const& cells,Tessellation const& tess,
 		double time);
 
-	vector<double> CalcTracerFlux(Tessellation const* tess,
+	vector<double> CalcTracerFlux(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double dm,Edge const& edge,int index,double dt,double time,
-		SpatialReconstruction const* interp,Vector2D const& vface);
+		SpatialReconstruction const& interp,Vector2D const& vface);
 
 	bool flux_indifferent(void)const;
 

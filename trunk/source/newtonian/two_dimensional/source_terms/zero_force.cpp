@@ -1,11 +1,11 @@
 #include "zero_force.hpp"
 
 Conserved ZeroForce::Calculate
-(Tessellation const* /*tess*/,
+(Tessellation const& /*tess*/,
  vector<Primitive> const& /*cells*/,
  int /*point*/,vector<Conserved> const& /*fluxes*/,
  vector<Vector2D> const& /*point_velocity*/,
- HydroBoundaryConditions const* /*hbc*/,
+ HydroBoundaryConditions const& /*hbc*/,
  vector<vector<double> > const &/*tracer_extensive*/,
  vector<double> &/*dtracer*/,
  double /*t*/,
@@ -14,11 +14,15 @@ Conserved ZeroForce::Calculate
   return Conserved();
 }
 
-Vector2D ZeroAcceleration::Calculate(Tessellation const* /*tess*/,
-		vector<Primitive> const& /*cells*/,int /*point*/,
-		vector<Conserved> const& /*fluxes*/,
-		vector<Vector2D> const& /*point_velocity*/,
-		HydroBoundaryConditions const* /*hbc*/,double /*time*/,double /*dt*/)
+Vector2D ZeroAcceleration::Calculate
+(Tessellation const& /*tess*/,
+ vector<Primitive> const& /*cells*/,
+ int /*point*/,
+ vector<Conserved> const& /*fluxes*/,
+ vector<Vector2D> const& /*point_velocity*/,
+ HydroBoundaryConditions const& /*hbc*/,
+ double /*time*/,
+ double /*dt*/)
 {
-	return Vector2D(0,0);
+  return Vector2D(0,0);
 }

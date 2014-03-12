@@ -5,14 +5,28 @@ namespace
 {
 	bool VectorSort(Vector2D const& v1,Vector2D const& v2)
 	{
-		return ((v1.x<v2.x)||((v1.x==v2.x)&&(v1.y<v2.y)));
+		return ((v1.y<v2.y)||((v1.y==v2.y)&&(v1.x<v2.x)));
+	}
+
+	bool AngleSort(Vector2D const& v1,Vector2D const& v2)
+	{
+		const double tol=1e-8;
+		const double a1=atan2(v1.y,v1.x);
+		const double a2=atan2(v2.y,v2.x);
+		if(a1<a2+tol)
+			return true;
+		if(a2<a1+tol)
+			return false;
+		if(abs(v1)<abs(v2))
+			return true;
+		else
+			return false;
 	}
 }
 
 void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 {
 	vector<int> edge_index=tess->GetCellEdges(index);
-	result.clear();
 	vector<Vector2D> points;
 	double R=tess->GetWidth(index);
 	points.push_back(tess->GetEdge(edge_index[0]).GetVertex(0));
@@ -38,130 +52,67 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 		if(!samepoint)
 			points.push_back(tess->GetEdge(edge_index[i]).GetVertex(1));
 	}
-	// Find the leftmost point
+	// Find the bottom point
 	sort(points.begin(),points.end(),VectorSort);
 	// Start building the convexhull
-	size_t k=0;
-	result.resize(2*points.size());
-	double tol=-R*R*1e-9;
-	for(size_t i=0;i<points.size();++i)
-	{
-		while((k>=2)&&(CrossProduct(result[k-1]-result[k-2],points[i]-
-			result[k-2])<=tol))
-		{
-			--k;
-		}
-		result[k++]=points[i];
-	}
-	size_t t=k+1;
-	for(int i=(int)points.size()-2;i>=0;--i)
-	{
-		while((k>=t)&&(CrossProduct(result[k-1]-result[k-2],points[i]-
-			result[k-2])<=tol))
-		{
-			--k;
-		}
-		result[k++]=points[i];
-	}
+	int n=(int)points.size();
+	vector<int> indeces(n-1);
+	vector<double> angles(n-1);
+	for(int i=0;i<n-1;++i)
+		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);
+	sort_index(angles,indeces);
 	result.resize(points.size());
+	result[0]=points[0];
+	// Check for colinear points
+	const double tol=1e-8;
+	vector<Vector2D> pfirst,plast;
+	for(int i=1;i<n-1;++i)
+	{
+		if(abs(angles[indeces[i]]-angles[indeces[0]])<tol)
+			pfirst.push_back(points[indeces[i]+1]);
+		if(abs(angles[indeces[n-i-2]]-angles[indeces[n-2]])<tol)
+			plast.push_back(points[indeces[n-i-2]+1]);
+	}
+	result[0]=points[0];
+	if(!pfirst.empty())
+	{
+		pfirst.insert(pfirst.begin(),points[indeces[0]+1]);
+		int N=(int)pfirst.size();
+		vector<double> dist(N);
+		for(int i=0;i<N;++i)
+			dist[i]=abs(pfirst[i]-points[0]);
+		vector<int> indeces2(N);
+		sort_index(dist,indeces2);
+		ReArrangeVector(pfirst,indeces2);
+		for(int i=0;i<N;++i)
+			result[i+1]=pfirst[i];
+	}
+	if(!plast.empty())
+	{
+		plast.insert(plast.begin(),points[indeces[n-2]+1]);
+		int N=(int)plast.size();
+		vector<double> dist;
+		for(int i=0;i<N;++i)
+			dist.push_back(abs(plast[i]-points[0]));
+		vector<int> indeces2(N);
+		sort_index(dist,indeces2);
+		ReArrangeVector(plast,indeces2);
+		for(int i=0;i<N;++i)
+			result[n-1-i]=plast[i];
+	}
+	int loc1=(int)pfirst.size();
+	int loc2=(int)plast.size();
+	for(int i=loc1+1;i<n-loc2;++i)
+		result[i]=points[indeces[i-1]+1];
 }
 
 
-void DisplayError(UniversalError const& eo,int cycle_number)
+void DisplayError(UniversalError const& eo)
 {
 	cout << eo.GetErrorMessage() << endl;
-	cout << "Iteration number = " << cycle_number<< endl;
 	for(size_t i=0;i<eo.GetFields().size();++i)
 		cout << eo.GetFields()[i] << " = "<< eo.GetValues()[i] << endl;
 	throw;
-}
-
-namespace {
-	double cell_property(hdsim const& sim,int cell_index,string const& property)
-	{
-		if("generating point x"==property)
-			return sim.GetMeshPoint(cell_index).x;
-		else if("generating point y"==property)
-			return sim.GetMeshPoint(cell_index).y;
-		else if("density"==property)
-			return sim.GetCell(cell_index).Density;
-		else if("pressure"==property)
-			return sim.GetCell(cell_index).Pressure;
-		else if("velocity x"==property)
-			return sim.GetCell(cell_index).Velocity.x;
-		else if("velocity y"==property)
-			return sim.GetCell(cell_index).Velocity.y;
-		else if("volume"==property)
-			return sim.GetCellVolume(cell_index);
-		else
-		  throw UniversalError("Unknown cell property");
-	}
-}
-
-vector<double> cells_property(hdsim const& sim,
-	string const& property)
-{
-	vector<double> res(sim.GetCellNo(),0);
-	for(int i=0;i<sim.GetCellNo();++i)
-		res[i] = cell_property(sim,i,property);
-	return res;
-}
-
-void write_cells_property(hdsim const& sim,
-	string const& property,
-	string const& fname)
-{
-	const vector<double> temp = cells_property(sim,property);
-	write_vector(temp,fname);
-}
-
-string replace_all(string const& base,
-	char char_old, char char_new)
-{
-	string res = base;
-	for(int i=0;i<(int)res.size();++i){
-		if(res[i]==char_old)
-			res[i] = char_new;
-	}
-	return res;
-}
-
-void write_edges_and_neighbors(hdsim const& sim,
-	string const& fname)
-{
-	ofstream f(fname.c_str());
-	for(int i=0;i<sim.GetEdgeNo();++i){
-		Edge edge = sim.GetEdge(i);
-		for(int j=0;j<2;++j)
-			f << edge.GetVertex(j).x << " "
-			<< edge.GetVertex(j).y << " "
-			<< edge.GetNeighbor(j) << " ";
-		f << endl;
-	}
-	f.close();
-}
-
-void write_generating_points(hdsim const& sim,
-			     string const& fname)
-{
-  ofstream f(fname.c_str());
-  for(int i=0;i<sim.GetCellNo();++i){
-    f << cell_property(sim,i,"generating point x") << " "
-      << cell_property(sim,i,"generating point y") << endl;
-  }
-  f.close();
-}
-
-void write_array_2d(vector<vector<double> > const& data,
-	string const& fname)
-{
-	ofstream f(fname.c_str());
-	for(int i=0;i<(int)data.size();++i){
-		for(int j=0;j<(int)data[i].size();++j)
-			f << data[i][j] << " ";
-		f << endl;
-	}
-	f.close();
 }
 
 Conserved total_conserved(hdsim const& sim)
@@ -303,4 +254,3 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
 	}
 	myFile.close();
 }
-

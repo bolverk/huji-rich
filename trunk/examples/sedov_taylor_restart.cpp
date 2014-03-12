@@ -1,15 +1,15 @@
-#include "../source/tessellation/VoronoiMesh.hpp"
-#include "../source/newtonian/two_dimensional/hdsim2d.hpp"
-#include "../source/newtonian/common/hllc.hpp"
-#include "../source/newtonian/common/ideal_gas.hpp"
-#include "../source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "../source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
-#include "../source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "../source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "../source/newtonian/two_dimensional/point_motions/round_cells.hpp"
-#include "../source/misc/mesh_generator.hpp"
-#include "../source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/tessellation/VoronoiMesh.hpp"
+#include "source/newtonian/two_dimensional/hdsim2d.hpp"
+#include "source/newtonian/common/hllc.hpp"
+#include "source/newtonian/common/ideal_gas.hpp"
+#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
+#include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
+#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
+#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
+#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 
 int main(void)
 {
@@ -35,10 +35,10 @@ int main(void)
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion);
+	RoundCells pointmotion(l_motion,hbc);
 
 	// Set up the interpolation
-	LinearGaussConsistent interpolation(eos,outer,&hbc);
+	LinearGaussConsistent interpolation(eos,outer,hbc);
 
 	// Set up the external source term
 	ZeroForce force;
@@ -48,10 +48,7 @@ int main(void)
 	read_hdf5_snapshot(dump,"c:\\sim_data\\output.bin",&eos);
 
 	// Set up the simulation
-	hdsim sim(dump.snapshot.mesh_points,&tess,&interpolation,dump.snapshot.cells,
-		eos,rs,&pointmotion,&force,&outer,&hbc,dump.tracers,dump.time,dump.cfl,
-		dump.cycle,dump.coldflows,dump.a,dump.b,dump.densityfloor,dump.densitymin,
-		dump.pressuremin);
+	hdsim sim(dump,tess,interpolation,eos,rs,pointmotion,force,outer,hbc);
 
 	// How long shall we run the simulation?
 	double tend=0.1;

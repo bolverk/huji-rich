@@ -40,16 +40,16 @@ public:
     amp_(amplitude) {}
 
   Vector2D Calculate
-  (Tessellation const* tess,
+  (Tessellation const& tess,
    vector<Primitive> const& /*cells*/,
    int point,
    vector<Conserved> const& /*fluxes*/,
    vector<Vector2D> const& /*point_velocity*/,
-   HydroBoundaryConditions const* /*hbc*/,
+   HydroBoundaryConditions const& /*hbc*/,
    double /*t*/,
    double /*dt*/)
   {
-    const double x = tess->GetMeshPoint(point).x;
+    const double x = tess.GetMeshPoint(point).x;
       const double acceleration = amp_*cos(k_*x);
      return Vector2D(-acceleration,0);
   }
@@ -79,20 +79,20 @@ public:
     hbc_(rs_),
     point_motion_(pm_naive_,hbc_),
     acc_(1,0.001),
-	force_(&acc_),
+	force_(acc_),
     sim_(init_points_,
-	 &tess_,
-	 &interp_method_,
+	 tess_,
+	 interp_method_,
 	 density_,
 	 pressure_,
 	 xvelocity_,
 	 yvelocity_,
 	 eos_,
 	 rs_,
-	 &point_motion_,
-	 &force_,
-	 &outer_,
-	 &hbc_) {}
+	 point_motion_,
+	 force_,
+	 outer_,
+	 hbc_) {}
 
   hdsim& getSim(void)
   {
