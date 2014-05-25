@@ -1,0 +1,109 @@
+/*! \file main_loop_2d.hpp
+  \brief Standard simulation time advance loop
+  \author Almog Yalinewich
+ */
+
+#ifndef MAIN_LOOP_2D_HPP
+#define MAIN_LOOP_2D_HPP 1
+
+#include <string>
+#include "../two_dimensional/hdsim2d.hpp"
+
+using namespace std;
+
+//! \brief Abstract class for a diagnostic function
+class DiagnosticFunction
+{
+public:
+
+  /*! \brief Perform diagnostics
+    \param sim Hydrodynamic simulation
+   */
+  virtual void diagnose(hdsim const& sim) = 0;
+
+  virtual ~DiagnosticFunction(void);
+};
+
+//! \brief Writes the time after each time step
+class WriteTime: public DiagnosticFunction
+{
+public:
+
+  /*! \brief Class constructor
+    \param fname File name
+   */
+  WriteTime(string const& fname);
+
+  void diagnose(hdsim const& sim);
+
+private:
+  string fname_;
+};
+
+//! \brief Abstract class for a termination condition for the main loop
+class TerminationCondition
+{
+public:
+
+  /*! \brief Returns true if the simulation should continue, false otherwise
+    \param sim Hydrodynamic simulation
+    \return True is simulation should continue running
+   */
+  virtual bool should_continue(hdsim const& sim) = 0;
+
+  //! \brief Virtual destructor
+  virtual ~TerminationCondition(void) = 0;
+};
+
+//! \brief Terminates the simulation after a certain time was reached
+class SafeTimeTermination: public TerminationCondition
+{
+public:
+
+  /*! \brief Class constructor
+    \param termination_time The simulation is advanced until that time is reached
+    \param max_cycles Upper limit on the number of time advance cycles. An error is thrown if this number is exceeded.
+   */
+  SafeTimeTermination(double termination_time,
+		      int max_cycles);
+
+  bool should_continue(hdsim const& sim);
+
+private:
+  const double termination_time_;
+  const int max_cycles_;
+};
+
+//! \brief Terminates the simulation after a specified number of iterations
+class CycleTermination: public TerminationCondition
+{
+public:
+
+  /*! \brief Class constructor
+    \param max_cycles Maximum number of cycles
+   */
+  CycleTermination(int max_cycles);
+
+  bool should_continue(hdsim const& sim);
+
+private:
+
+  const int max_cycles_;
+};
+
+//! \brief Functions for managing two dimensional simulations
+namespace simulation2d{
+
+  /*! \brief Simulation time advance loop
+    \param sim Hydrodynamic simulation 
+    \param term_cond Termination condition
+    \param time_order Time integration order
+    \param diagfunc Diagnostic function
+   */
+  void main_loop(hdsim& sim,
+		 TerminationCondition& term_cond,
+		 int time_order = 1,
+		 DiagnosticFunction* diagfunc = 0);
+}
+
+#endif // MAIN_LOOP_2D_HPP
