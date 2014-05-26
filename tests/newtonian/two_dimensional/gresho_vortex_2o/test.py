@@ -29,14 +29,32 @@ def main():
     import numpy
     import math
     import h5py
+    import glob
 
-    h5f = h5py.File('final.h5')
-    rx_list = h5f['x_coordinate']
-    ry_list = h5f['y_coordinate']
-    d_list = h5f['density']
-    p_list = h5f['pressure']
-    vx_list = h5f['x_velocity']
-    vy_list = h5f['y_velocity']
+    np = len(glob.glob('process_*_final.h5'))
+    if np>0:
+        rx_list = []
+        ry_list = []
+        d_list = []
+        p_list = []
+        vx_list = []
+        vy_list = []
+        for fname in glob.glob('process_*_final.h5'):
+            f = h5py.File(fname)
+            rx_list.extend(f['x_coordinate'])
+            ry_list.extend(f['y_coordinate'])
+            d_list.extend(f['density'])
+            p_list.extend(f['pressure'])
+            vx_list.extend(f['x_velocity'])
+            vy_list.extend(f['y_velocity'])
+    else:
+        h5f = h5py.File('final.h5')
+        rx_list = h5f['x_coordinate']
+        ry_list = h5f['y_coordinate']
+        d_list = h5f['density']
+        p_list = h5f['pressure']
+        vx_list = h5f['x_velocity']
+        vy_list = h5f['y_velocity']
 
     r_list = [math.sqrt(x**2+y**2)
               for x,y in zip(rx_list,ry_list)]

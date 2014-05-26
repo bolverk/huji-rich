@@ -1,3 +1,6 @@
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#endif
 #include <iostream>
 #include <cmath>
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
@@ -16,6 +19,7 @@
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/misc/mesh_generator.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -76,12 +80,31 @@ namespace {
   };
 }
 
+#ifdef RICH_MPI
+  vector<Vector2D> process_positions(const SquareBox& boundary)
+  {
+    const Vector2D lower_left = boundary.getBoundary().first;
+    const Vector2D upper_right = boundary.getBoundary().second;
+    vector<Vector2D> res(get_mpi_size());
+    if(get_mpi_rank()==0){
+      res = RandSquare(get_mpi_size(),
+		       lower_left.x,upper_right.x,
+		       lower_left.y,upper_right.y);
+    }
+    MPI_VectorBcast_Vector2D(res,0,MPI_COMM_WORLD,get_mpi_rank());
+    return res;
+  }
+#endif
+
 class SimData
 {
 public:
   
   SimData(void):
     outer_(-0.5,0.5,0.5,-0.5),
+    #ifdef RICH_MPI
+    proc_tess_(process_positions(outer_),outer_),
+    #endif
     rs_(),
     hbc_(rs_),
     tess_(),
@@ -90,8 +113,19 @@ public:
     bpm_(),
     point_motion_(bpm_,hbc_),
     force_(),
-    sim_(offset_grid(square_grid(1,30),Vector2D(-0.5,-0.5)),
+    sim_(
+	 #ifdef RICH_MPI
+	 distribute_grid(proc_tess_,
+			 CartesianGridGenerator
+			 (30,30,outer_.getBoundary().first,
+			  outer_.getBoundary().second)),
+	 #else
+	 offset_grid(square_grid(1,30),Vector2D(-0.5,-0.5)),
+	 #endif
 	 tess_,
+	 #ifdef RICH_MPI
+	 proc_tess_,
+	 #endif
 	 interpm_,
 	 Uniform2D(1),
 	 Pressure(),
@@ -112,6 +146,9 @@ public:
 private:
   
   const SquareBox outer_;
+  #ifdef RICH_MPI
+  VoronoiMesh proc_tess_;
+  #endif
   const Hllc rs_;
   const RigidWallHydro hbc_;
   VoronoiMesh tess_;
@@ -138,12 +175,25 @@ namespace {
 
 int main(void)
 {
+
+  #ifdef RICH_MPI
+  MPI_Init(NULL, NULL);
+  #endif
+
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
 
   my_main_loop(sim);
 
+  #ifdef RICH_MPI
+  write_snapshot_to_hdf5(sim, "process_"+int2str(get_mpi_rank())+"_final.h5");
+  #else
   write_snapshot_to_hdf5(sim, "final.h5");
+  #endif
+
+  #ifdef RICH_MPI
+  MPI_Finalize();
+  #endif
 
   return 0;
 }
