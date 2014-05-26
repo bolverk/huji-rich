@@ -13,13 +13,27 @@ def main():
     import os
     import imp
     import h5py
+    import glob
     enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
 
-    h5f = h5py.File('final.h5')
-    x = h5f['x_coordinate']
-    d = h5f['density']
-    p = h5f['pressure']
-    v = h5f['x_velocity']
+    ns = len(glob.glob('process_*_final.h5'))
+    if ns>0:
+        x = []
+        d = []
+        p = []
+        v = []
+        for fname in glob.glob('process_*_final.h5'):
+            f = h5py.File(fname)
+            x.extend(f['x_coordinate'])
+            d.extend(f['density'])
+            p.extend(f['pressure'])
+            v.extend(f['x_velocity'])
+    else:
+        h5f = h5py.File('final.h5')
+        x = h5f['x_coordinate']
+        d = h5f['density']
+        p = h5f['pressure']
+        v = h5f['x_velocity']
 
     xs = numpy.sort(x)
     ids = numpy.argsort(x)
