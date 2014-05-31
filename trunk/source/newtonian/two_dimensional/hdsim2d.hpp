@@ -413,6 +413,11 @@ public:
     \return A list of all point velocities
   */
   vector<Vector2D> const& getAllPointVelocities(void) const;
+
+  /*! \brief Sets the initial time for the simulation
+    \param t_start Start time
+   */
+  void setStartTime(double t_start);
 };
 
 #endif
