@@ -2146,7 +2146,6 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	int nbox=(int) box_edges.size();
 	vector<int> res;
 	vector<Vector2D> intersections;
-	vector<int> cell_edges_intersect;
 	Vector2D intersect;
 	for(int i=0;i<ncell;++i)
 	{
@@ -2157,7 +2156,6 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 			{
 				res.push_back(j);
 				intersections.push_back(intersect);
-				cell_edges_intersect.push_back(i);
 			}
 		}
 	}
@@ -2170,7 +2168,16 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	{
 		if(nintersect>3)
 		{
-			cout<<"Too many intersections of boundary cell with box edges"<<endl;
+		        UniversalError eo("Too many intersections of boundary cell with box edges");
+			eo.AddEntry("Cell number",(double)cell);
+			Vector2D pp=Tri->get_point(cell);
+			eo.AddEntry("x cor",pp.x);
+			eo.AddEntry("y cor",pp.y);
+			for(int jj=0;jj<(int)intersections.size();++jj)
+			{
+				eo.AddEntry("Intersection x",intersections[jj].x);
+				eo.AddEntry("Intersection y",intersections[jj].y);
+			}
 			throw;
 		}
 		vector<Vector2D> cpoints;
