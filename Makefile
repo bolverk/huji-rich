@@ -48,12 +48,14 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp external_libraries/boost_dump/boost_1_55_0/stage/lib/libboost_mpi.a
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_55_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH) > set_environ_vars.sh
 	echo export\ HDF5_LIB_PATH=`pwd`/external_libraries/lib >> set_environ_vars.sh
-	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib >> set_environ_vars.sh
+	echo export\ BOOST_LIB_PATH=`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
+	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
+	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
 
 external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h
@@ -64,6 +66,15 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.13/c++
 
 external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.13.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.13.tar.gz
+
+external_libraries/boost_dump/boost_1_55_0/stage/lib/libboost_mpi.a: external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp
+	cd external_libraries/boost_dump/ && \
+	./bootstrap.sh --prefix=`cd ../.. && pwd` && \
+	if ! grep -q "using mpi ;" tools/build/v2/user-config.jam
+	then
+		echo "using mpi ;" >> tools/build/v2/user-config.jam
+	fi && \
+	./b2 --with-mpi && bjam --with-mpi install
 
 external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_55_0.tar.bz2
 	cd external_libraries/boost_dump/ && tar xvf ./boost_1_55_0.tar.bz2

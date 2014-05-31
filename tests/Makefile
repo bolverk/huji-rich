@@ -45,7 +45,7 @@ $(NORMAL_TERMINATION_LIST): $(MODE)/%/normal_termination.res: $(MODE)/%/test.exe
 
 $(BINARY_LIST): $(MODE)/%/test.exe: $(MODE)/%/test.o
 	$(MAKE) -C .. MODE=$(MODE)
-	$(CC) $(MODE)/$*/test.o ../library_$(MODE)/librich.a -L $(HDF5_LIB_PATH) -lhdf5 -lhdf5_cpp -lz -o $(MODE)/$*/test.exe $(LFLAGS)
+	$(CC) $(MODE)/$*/test.o ../library_$(MODE)/librich.a -L $(HDF5_LIB_PATH) -lhdf5 -lhdf5_cpp -lboost_serialization -lboost_mpi -lz -o $(MODE)/$*/test.exe $(LFLAGS) -L $(BOOST_LIB_PATH)
 
 $(OBJECT_LIST): $(MODE)/%/test.o: %/test.cpp $(SOURCE_DEPENDENCIES) | $(MODE)/%
 	$(CC) -c $(CFLAGS) $*/test.cpp -o $(MODE)/$*/test.o -I ..
