@@ -1,5 +1,8 @@
 CC := g++
 DUMP_FOLDER := temp_$(TARGET)
+LINT_FLAGS := -Wall -Wextra -pedantic -Werror -Wfatal-errors
+NUM_PROCESSES := 2
+PREXECUTE := 
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
 	LFLAGS := -pg
@@ -9,6 +12,7 @@ else ifeq ($(MODE),intel)
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
+	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI
 	LINT_FLAGS = -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
@@ -17,18 +21,13 @@ else
 	OPTIMIZATION_FLAGS := -O2
 	LFLAGS :=
 endif
-LINT_FLAGS := -Wall -Wextra -pedantic -Werror -Wfatal-errors
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
-$*DUMP_FOLDER/normal_termination.res: $(DUMP_FOLDER)/test.exe
-	$(MAKE) -C .. set_environ_vars.sh && \
-	`cat ../set_environ_vars.sh` && \
-	cd $(DUMP_FOLDER) && ./test.exe
+$(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
+	cd $(DUMP_FOLDER) && $(PREXECUTE) ./test.exe
 
 $(DUMP_FOLDER)/test.exe: $(DUMP_FOLDER)/test.o | ../library_$(MODE)/librich.a
-	$(MAKE) -C .. set_environ_vars.sh
-	`cat ../set_environ_vars.sh` && \
-	$(CC) $^ $| -o $@ -lhdf5 -lhdf5_cpp -L $$HDF5_LIB_PATH $$LFLAGS
+	$(CC) $^ $| -o $@ -lhdf5 -lhdf5_cpp -L $$HDF5_LIB_PATH $$LFLAGS -lboost_serialization -lboost_mpi -L $$BOOST_LIB_PATH
 
 ../library_$(MODE)/librich.a:
 	$(MAKE) -C .. set_environ_vars.sh
