@@ -841,3 +841,8 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
   checkpoint.densitymin = densityMin_;
   checkpoint.pressuremin = pressureMin_;
 }
+
+void hdsim::setStartTime(double t_start)
+{
+  _time = t_start;
+}
