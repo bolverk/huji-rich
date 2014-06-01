@@ -176,6 +176,7 @@ void UpdatePrimitives(vector<Conserved> const& conservedintensive,
   \param rs Riemann solver
   \param fluxes Hydrodynamic fluxes
   \param CellsEvolve Custum evolution
+  \param cem Custom evolution manager
   \param tracers Tracers
  */
 void CalcFluxes
@@ -325,6 +326,7 @@ vector<Primitive> make_eos_consistent
   \param interp Spatial reconstruction
   \param time Time
   \param cellsevolve Custom evolution
+  \param cem Custom evolution manager
   \param edge_velocities Velocities of the edges between cells
   \param lengthes The corrected lengthes of the edges
   \return List of tracers

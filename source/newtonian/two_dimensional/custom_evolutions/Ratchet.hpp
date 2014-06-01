@@ -1,4 +1,4 @@
-/*! \file ratchet.hpp
+/*! \file Ratchet.hpp
 \brief Boundary conditions where matter is only allowed to flow in one direction
 \author Almog Yalinewich
 */

@@ -1,4 +1,4 @@
-/*! \file NoMovement.hpp
+/*! \file NoMovment.hpp
   \brief Cells that do not move but hydro as normal
   \author Elad Steinberg
  */
