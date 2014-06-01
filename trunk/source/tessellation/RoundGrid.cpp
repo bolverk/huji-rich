@@ -13,8 +13,11 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	vector<Vector2D> cpoints;
 #ifdef RICH_MPI
 	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	ConvexHull(cpoints,tproc,rank);
+	if(tproc!=0)
+	{
+		MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+		ConvexHull(cpoints,tproc,rank);
+	}
 #endif
 	// Copy the points
 	vector<Vector2D> res(N);
@@ -35,13 +38,16 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			else 
 				dw = chi_*0.5*(s-r);
 #ifdef RICH_MPI
-			if(!PointInCell(cpoints,tess->GetMeshPoint(i)+dw))
-				dw=Vector2D(0,0);
+			if(tproc!=0)
+			{
+				if(!PointInCell(cpoints,tess->GetMeshPoint(i)+dw))
+					dw=Vector2D(0,0);
+			}
 #endif
 			res[i]=tess->GetMeshPoint(i)+dw;
 		}
 		tess->Update(res);
 	}
-	
+
 	return res;
 }
