@@ -29,6 +29,7 @@ public:
 
   /*! \brief Class constructor
     \param point_motion Name of point motion scheme
+    \param width Length scale
    */
   TriangleStep(string const& point_motion, double width=1);
 
