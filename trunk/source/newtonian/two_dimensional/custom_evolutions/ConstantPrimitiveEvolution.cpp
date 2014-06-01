@@ -111,11 +111,6 @@ vector<double> ConstantPrimitiveEvolution::CalcTracerFlux
 	return res;
 }
 
-bool ConstantPrimitiveEvolution::flux_indifferent(void)const
-{
-	return true;
-}
-
 bool ConstantPrimitiveEvolution::TimeStepRelevant(void)const
 {
 	return false;
