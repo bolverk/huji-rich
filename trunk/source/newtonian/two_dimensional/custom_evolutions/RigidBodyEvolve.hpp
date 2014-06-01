@@ -38,8 +38,6 @@ public:
 		double dm,Edge const& edge,int index,double dt,double time,
 		SpatialReconstruction const& interp,Vector2D const& vface);
 
-	bool flux_indifferent(void) const;
-
 	bool TimeStepRelevant(void)const;
 
 	~RigidBodyEvolve(void);
