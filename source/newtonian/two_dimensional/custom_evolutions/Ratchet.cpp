@@ -4,11 +4,6 @@
 Ratchet::Ratchet(DIRECTION dir):
 dir_(dir) {}
 
-bool Ratchet::flux_indifferent(void) const
-{
-	return true;
-}
-
 Conserved Ratchet::CalcFlux(Tessellation const& tess,vector<Primitive> const& cells,
 	double /*dt*/,SpatialReconstruction& /*interp*/,Edge const& edge,
 	Vector2D const& face_velocity,RiemannSolver const& rs,int index,

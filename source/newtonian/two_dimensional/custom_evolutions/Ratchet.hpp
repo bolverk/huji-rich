@@ -21,8 +21,6 @@ public:
 	*/
 	Ratchet(DIRECTION dir);
 
-	bool flux_indifferent(void) const;
-
 	Conserved CalcFlux(Tessellation const& tess,
 		vector<Primitive> const& cells,
 		double /*dt*/,
