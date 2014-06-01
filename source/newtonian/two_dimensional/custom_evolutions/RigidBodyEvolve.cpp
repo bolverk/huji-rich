@@ -68,11 +68,6 @@ vector<double> RigidBodyEvolve::CalcTracerFlux(Tessellation const& /*tess*/,
 	return res;
 }
 
-bool RigidBodyEvolve::flux_indifferent(void) const
-{
-	return true;
-}
-
 bool RigidBodyEvolve::TimeStepRelevant(void)const
 {
 	return false;
