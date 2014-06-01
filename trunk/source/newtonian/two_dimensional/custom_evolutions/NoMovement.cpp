@@ -71,11 +71,6 @@ vector<double> NoMovement::CalcTracerFlux(Tessellation const& tess,
 	return res;
 }
 
-bool NoMovement::flux_indifferent(void) const
-{
-	return false;
-}
-
 bool NoMovement::TimeStepRelevant(void)const
 {
 	return true;
