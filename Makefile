@@ -68,13 +68,12 @@ external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h: | external_libraries/h
 	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.13.tar.gz
 
 external_libraries/boost_dump/boost_1_55_0/stage/lib/libboost_mpi.a: external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp
-	cd external_libraries/boost_dump/ && \
-	./bootstrap.sh --prefix=`cd ../.. && pwd` && \
-	if ! grep -q "using mpi ;" tools/build/v2/user-config.jam
-	then
-		echo "using mpi ;" >> tools/build/v2/user-config.jam
-	fi && \
-	./b2 --with-mpi && bjam --with-mpi install
+	cd external_libraries/boost_dump/boost_1_55_0 && \
+	./bootstrap.sh --prefix=`cd ../.. && pwd`
+	if ! grep -q "using mpi ;" external_libraries/boost_dump/boost_1_55_0/tools/build/v2/user-config.jam ; then \
+		echo "using mpi ;" >> external_libraries/boost_dump/boost_1_55_0/tools/build/v2/user-config.jam; \
+	fi; 
+	cd external_libraries/boost_dump/boost_1_55_0 && ./b2 --with-mpi && bjam --with-mpi install
 
 external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_55_0.tar.bz2
 	cd external_libraries/boost_dump/ && tar xvf ./boost_1_55_0.tar.bz2
