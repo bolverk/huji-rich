@@ -1,22 +1,7 @@
 #include "MeshPointsMPI.hpp"
 #include "../misc/mesh_generator.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/environment.hpp>
-#include <boost/mpi/communicator.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/mpi/nonblocking.hpp>
 typedef boost::mt19937_64 gen_type;
-
-namespace boost{
-  namespace serialization{
-    template<class Archive> void serialize(Archive& ar, Vector2D& v,
-					   const unsigned int version)
-    {
-      ar & v.x;
-      ar & v.y;
-    }
-  }
-}
 
 namespace
 {
@@ -320,7 +305,6 @@ namespace {
 vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 				 Index2Member<Vector2D> const& grid_generator)
 {
-  boost::mpi::communicator world;
   assert(get_mpi_size()==process_tess.GetPointNo() &&
 	 "Number of processors must be equal to the number of cells");
   const vector<size_t> range_list = most_uniform_range_partition
@@ -332,21 +316,19 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
   const vector<vector<Vector2D> > sorted_points = 
     sort_points(process_tess, grid_generator, start, ending);
   vector<Vector2D> res = sorted_points[get_mpi_rank()];
-  for(size_t i=0;i<get_mpi_size();++i){
-    if(get_mpi_rank()!=i){
-      /*
-      MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
-      vector<Vector2D> buf;
-      MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
-      */
-      boost::mpi::request reqs[2];
-      reqs[0] = world.isend(i,0,sorted_points[i]);
-      vector<Vector2D> buf;
-      reqs[1] = world.irecv(i,0,buf);
-      boost::mpi::wait_all(reqs,reqs+2);
-      res.reserve(res.size()+distance(buf.begin(),buf.end()));
-      res.insert(res.end(),buf.begin(),buf.end());
-    }
+  for(size_t i=0;i<get_mpi_rank();++i){
+    MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
+    vector<Vector2D> buf;
+    MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
+    res.reserve(res.size()+distance(buf.begin(),buf.end()));
+    res.insert(res.end(),buf.begin(),buf.end());
+  }
+  for(size_t i=get_mpi_rank()+1;i<get_mpi_size();++i){
+    vector<Vector2D> buf;
+    MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
+    MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
+    res.reserve(res.size()+distance(buf.begin(),buf.end()));
+    res.insert(res.end(),buf.begin(),buf.end());
   }
   return res;
 }
