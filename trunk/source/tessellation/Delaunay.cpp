@@ -289,14 +289,14 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 	vector<double> cellsize=CellSize(cell_points);
 	double width=cellsize[1]-cellsize[0];
 	double height=cellsize[3]-cellsize[2];
-	p_temp.set_x(cellsize[0]-100*width);
-	p_temp.set_y(cellsize[2]-100*height);
+	p_temp.x = cellsize[0]-100*width;
+	p_temp.y = cellsize[2]-100*height;
 	cor.push_back(p_temp);
-	p_temp.set_x(cellsize[1]+100*width);
-	p_temp.set_y(cellsize[2]-100*height);
+	p_temp.x = cellsize[1]+100*width;
+	p_temp.y = cellsize[2]-100*height;
 	cor.push_back(p_temp);
-	p_temp.set_x((cellsize[0]+cellsize[1])/2.0);
-	p_temp.set_y(cellsize[3]+100*height);
+	p_temp.x = (cellsize[0]+cellsize[1])/2.0;
+	p_temp.y = cellsize[3]+100*height;
 	cor.push_back(p_temp);
 	// Create the big triangle, and assign friends
 	facet f_temp;
