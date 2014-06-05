@@ -1995,10 +1995,16 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 					index=0;
 				else
 					index=1;
+				/*
 				NewEdge.set_x(0,edges[j].get_x(index));
 				NewEdge.set_y(0,edges[j].get_y(index));
+				*/
+				NewEdge.vertices.first = pair_member(edges[j].vertices,index);
+				/*
 				NewEdge.set_x(1,intersect.x);
 				NewEdge.set_y(1,intersect.y);
+				*/
+				NewEdge.vertices.second = intersect;
 				Vector2D diff(0,0);
 				if(NewEdge.GetNeighbor(1)>(n+Npoints))
 				{
@@ -2031,8 +2037,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 				new_ref.push_back((int)V.edges.size());
 				V.edges.push_back(NewEdge);
 				// Do the other split
-				NewEdge.set_x(0,edges[j].get_x((index+1)%2));
-				NewEdge.set_y(0,edges[j].get_y((index+1)%2));
+				NewEdge.vertices.first = pair_member(edges[j].vertices,(index+1)%2);
 				NewEdge.set_friend(0,ToRefine[i]);
 				V.edges[edge_index[j]]=NewEdge;
 				old_ref.push_back(edge_index[j]);

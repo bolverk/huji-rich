@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include "universal_error.hpp"
+#include <cassert>
 
 using std::vector;
 
@@ -484,6 +485,12 @@ template<class T> vector<T> trim_top(const vector<T>& v,
 	} trimmer(v,max_index);
 
 	return serial_generate(trimmer);
+}
+
+template<class T> T pair_member(const std::pair<T,T>& p, int index)
+{
+  assert((0==index)||(1==index));
+  return 0==index ? p.first : p.second;
 }
 
 #endif // UTILS_HPP
