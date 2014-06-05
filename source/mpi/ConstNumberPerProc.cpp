@@ -145,18 +145,19 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	dx+=dxround;
 	dy+=dyround;
 	// Make sure not out of bounds
-	if(point.x+dx>outer_.GetGridBoundary(Right))
+	const double close=0.99999;
+	if(point.x+dx>close*outer_.GetGridBoundary(Right))
 		dx=min(0.5*(outer_.GetGridBoundary(Right)-point.x),
-		0.9999*outer_.GetGridBoundary(Right)-point.x);
-	if(point.x+dx<outer_.GetGridBoundary(Left))
+		close*outer_.GetGridBoundary(Right)-point.x);
+	if(point.x+dx<close*outer_.GetGridBoundary(Left))
 		dx=max(-0.5*(-outer_.GetGridBoundary(Left)+point.x),
-		0.9999*outer_.GetGridBoundary(Left)-point.x);
-	if(point.y+dy>outer_.GetGridBoundary(Up))
+		close*outer_.GetGridBoundary(Left)-point.x);
+	if(point.y+dy>close*outer_.GetGridBoundary(Up))
 		dy=min(0.5*(outer_.GetGridBoundary(Up)-point.y),
-		0.9999*outer_.GetGridBoundary(Up)-point.y);
-	if(point.y+dy<outer_.GetGridBoundary(Down))
+		close*outer_.GetGridBoundary(Up)-point.y);
+	if(point.y+dy<close*outer_.GetGridBoundary(Down))
 		dy=max(-0.5*(-outer_.GetGridBoundary(Down)+point.y),
-		+0.9999*outer_.GetGridBoundary(Down)-point.y);
+		+close*outer_.GetGridBoundary(Down)-point.y);
 	vector<Vector2D> cor=tproc.GetMeshPoints();
 	cor[rank]=cor[rank]+Vector2D(dx,dy);
 	cor.resize(nproc);
