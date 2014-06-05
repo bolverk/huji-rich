@@ -770,12 +770,16 @@ void VoronoiMesh::build_v()
 				continue;
 			center_temp=centers[to_check->get_friend(j)];
 			{
-				edge_temp.set_x(0,center.x);
-				edge_temp.set_x(1,center_temp.x);
-				edge_temp.set_y(0,center.y);
-				edge_temp.set_y(1,center_temp.y);
-				edge_temp.set_friend(0,to_check->get_vertice(j));
-				edge_temp.set_friend(1,to_check->get_vertice((j+1)%3));
+			  edge_temp.vertices.first = center;
+			  edge_temp.vertices.second = center_temp;
+			  edge_temp.neighbors.first = to_check->get_vertice(j);
+			  edge_temp.neighbors.second = to_check->get_vertice((j+1)%3);
+			  // edge_temp.set_x(0,center.x);
+			  // edge_temp.set_x(1,center_temp.x);
+			  // edge_temp.set_y(0,center.y);
+			  // edge_temp.set_y(1,center_temp.y);
+			  // edge_temp.set_friend(0,to_check->get_vertice(j));
+			  // edge_temp.set_friend(1,to_check->get_vertice((j+1)%3));
 
 				int n0=edge_temp.GetNeighbor(0);
 				int n1=edge_temp.GetNeighbor(1);
