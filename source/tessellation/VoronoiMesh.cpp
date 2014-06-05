@@ -387,19 +387,19 @@ namespace {
 	Vector2D GetPeriodicDiff(Edge const& edge,OuterBoundary const* obc)
 	{
 		Vector2D diff;
-		if(abs(edge.get_x(0)-edge.get_x(1))
-			<abs(edge.get_y(0)-edge.get_y(1)))
+		if(abs(edge.vertices.first.x-edge.vertices.second.x)
+			<abs(edge.vertices.first.y-edge.vertices.second.y))
 		{
-			if(abs(edge.get_x(0)-obc->GetGridBoundary(Left))
-				<abs(edge.get_x(0)-obc->GetGridBoundary(Right)))
+			if(abs(edge.vertices.first.x-obc->GetGridBoundary(Left))
+				<abs(edge.vertices.first.x-obc->GetGridBoundary(Right)))
 				diff=Vector2D(obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left),0);
 			else
 				diff=Vector2D(-obc->GetGridBoundary(Right)+obc->GetGridBoundary(Left),0);
 		}
 		else
 		{
-			if(abs(edge.get_y(0)-obc->GetGridBoundary(Down))
-				<abs(edge.get_y(0)-obc->GetGridBoundary(Up)))
+			if(abs(edge.vertices.first.y-obc->GetGridBoundary(Down))
+				<abs(edge.vertices.first.y-obc->GetGridBoundary(Up)))
 				diff=Vector2D(0,obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down));
 			else
 				diff=Vector2D(0,-obc->GetGridBoundary(Up)+obc->GetGridBoundary(Down));
@@ -538,10 +538,10 @@ namespace {
 		for(int jj=0;jj<(int)bad_edgesindex.size();++jj)
 		{
 			Edge e=V.GetEdge(bad_edgesindex[jj]);
-			eo.AddEntry("Edge X cor",e.get_x(0));
-			eo.AddEntry("Edge Y cor",e.get_y(0));
-			eo.AddEntry("Edge X cor",e.get_x(1));
-			eo.AddEntry("Edge Y cor",e.get_y(1));
+			eo.AddEntry("Edge X cor",e.vertices.first.x);
+			eo.AddEntry("Edge Y cor",e.vertices.first.y);
+			eo.AddEntry("Edge X cor",e.vertices.second.x);
+			eo.AddEntry("Edge Y cor",e.vertices.second.y);
 			eo.AddEntry("Edge length",e.GetLength());
 			eo.AddEntry("Edge neighbor 0",e.GetNeighbor(0));
 			eo.AddEntry("Edge neighbor 1",e.GetNeighbor(1));
@@ -1148,10 +1148,10 @@ double VoronoiMesh::GetVolume(int index) const
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[index].size();++i)
 	{
-		x1=edges[mesh_vertices[index][i]].get_x(0)-center.x;
-		x2=edges[mesh_vertices[index][i]].get_x(1)-center.x;
-		y1=edges[mesh_vertices[index][i]].get_y(0)-center.y;
-		y2=edges[mesh_vertices[index][i]].get_y(1)-center.y;
+		x1=edges[mesh_vertices[index][i]].vertices.first.x-center.x;
+		x2=edges[mesh_vertices[index][i]].vertices.second.x-center.x;
+		y1=edges[mesh_vertices[index][i]].vertices.first.y-center.y;
+		y2=edges[mesh_vertices[index][i]].vertices.second.y-center.y;
 		area+=abs(x2*y1-y2*x1)*0.5;
 	}
 	return area;
@@ -1167,14 +1167,14 @@ Vector2D VoronoiMesh::CalcCellCM(int index) const
 	for (int i=0;i<(int)mesh_vertices[index].size();i++)
 	{
 		int temp=mesh_vertices[index][i];
-		x1=edges[temp].get_x(0)-center.x;
-		x2=edges[mesh_vertices[index][i]].get_x(1)-center.x;
-		y1=edges[mesh_vertices[index][i]].get_y(0)-center.y;
-		y2=edges[mesh_vertices[index][i]].get_y(1)-center.y;
+		x1=edges[temp].vertices.first.x-center.x;
+		x2=edges[mesh_vertices[index][i]].vertices.second.x-center.x;
+		y1=edges[mesh_vertices[index][i]].vertices.first.y-center.y;
+		y2=edges[mesh_vertices[index][i]].vertices.second.y-center.y;
 		area_temp=abs(x2*y1-y2*x1)*0.5;
 		area+=area_temp;
-		xc+=area_temp*(center.x+edges[temp].get_x(0)+edges[temp].get_x(1))/3;
-		yc+=area_temp*(center.y+edges[temp].get_y(0)+edges[temp].get_y(1))/3;
+		xc+=area_temp*(center.x+edges[temp].vertices.first.x+edges[temp].vertices.second.x)/3;
+		yc+=area_temp*(center.y+edges[temp].vertices.first.y+edges[temp].vertices.second.y)/3;
 	}
 	area=1/area;
 	Vector2D p(xc*area,yc*area);
@@ -1902,10 +1902,10 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		splitedge.set_friend(0,Npoints+i);
 		splitedge.set_x(0,0.5*(NewPoint.x+V.GetMeshPoint(ToRefine[i]).x));
 		splitedge.set_y(0,0.5*(NewPoint.y+V.GetMeshPoint(ToRefine[i]).y));
-		splitedge.set_x(1,splitedge.get_x(0)+normal.x*R*20);
-		splitedge.set_y(1,splitedge.get_y(0)+normal.y*R*20);
-		splitedge.set_x(0,splitedge.get_x(0)-normal.x*R*20);
-		splitedge.set_y(0,splitedge.get_y(0)-normal.y*R*20);
+		splitedge.set_x(1,splitedge.vertices.first.x+normal.x*R*20);
+		splitedge.set_y(1,splitedge.vertices.first.y+normal.y*R*20);
+		splitedge.set_x(0,splitedge.vertices.first.x-normal.x*R*20);
+		splitedge.set_y(0,splitedge.vertices.first.y-normal.y*R*20);
 		Vector2D intersect;
 		// Find other intersecting segment
 		int counter_edges=0;
@@ -2005,10 +2005,10 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 					diff=V.GetMeshPoint(NewEdge.GetNeighbor(1))-
 						V.GetMeshPoint(V.GetOriginalIndex(NewEdge.GetNeighbor(1)));
 					Edge temp(NewEdge);
-					temp.set_x(0,NewEdge.get_x(0)-diff.x);
-					temp.set_x(1,NewEdge.get_x(1)-diff.x);
-					temp.set_y(0,NewEdge.get_y(0)-diff.y);
-					temp.set_y(1,NewEdge.get_y(1)-diff.y);
+					temp.set_x(0,NewEdge.vertices.first.x-diff.x);
+					temp.set_x(1,NewEdge.vertices.second.x-diff.x);
+					temp.set_y(0,NewEdge.vertices.first.y-diff.y);
+					temp.set_y(1,NewEdge.vertices.second.y-diff.y);
 					temp.set_friend(1,V.GetOriginalIndex(NewEdge.GetNeighbor(1)));
 					temp.set_friend(0,Npoints+i);
 					V.mesh_vertices[temp.GetNeighbor(1)].push_back((int)V.edges.size());
@@ -2020,8 +2020,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 						index2=0;
 					else
 						index2=1;
-					V.edges[loc].set_x(index2,temp.get_x(1));
-					V.edges[loc].set_y(index2,temp.get_y(1));
+					V.edges[loc].set_x(index2,temp.vertices.second.x);
+					V.edges[loc].set_y(index2,temp.vertices.second.y);
 					FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.GetNeighbor(1)),
 						Npoints+i,Npoints+i,NewPoint-diff);
 				}
@@ -2459,8 +2459,8 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
 	int n=(int)mesh_vertices[point].size();
 	Vector2D min_point;
 	int min_index=0,p_index;
-	if(edges[mesh_vertices[point][0]].get_x(0)<
-		edges[mesh_vertices[point][0]].get_x(1))
+	if(edges[mesh_vertices[point][0]].vertices.first.x<
+		edges[mesh_vertices[point][0]].vertices.second.x)
 	{
 		min_point=edges[mesh_vertices[point][0]].GetVertex(0);
 		p_index=0;
@@ -2473,28 +2473,28 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
 	for(int i=1;i<n;++i)
 	{
 		double R=edges[mesh_vertices[point][i]].GetLength();
-		if(edges[mesh_vertices[point][i]].get_x(0)<(min_point.x-R*eps))
+		if(edges[mesh_vertices[point][i]].vertices.first.x<(min_point.x-R*eps))
 		{
 			min_point=edges[mesh_vertices[point][i]].GetVertex(0);
 			min_index=i;
 			p_index=0;
 		}
-		if(edges[mesh_vertices[point][i]].get_x(1)<(min_point.x-R*eps))
+		if(edges[mesh_vertices[point][i]].vertices.second.x<(min_point.x-R*eps))
 		{
 			min_point=edges[mesh_vertices[point][i]].GetVertex(1);
 			min_index=i;
 			p_index=1;
 		}
-		if(edges[mesh_vertices[point][i]].get_x(0)<(min_point.x+R*eps)&&
-			edges[mesh_vertices[point][i]].get_y(0)<min_point.y)
+		if(edges[mesh_vertices[point][i]].vertices.first.x<(min_point.x+R*eps)&&
+			edges[mesh_vertices[point][i]].vertices.first.y<min_point.y)
 		{	
 			min_point=edges[mesh_vertices[point][i]].GetVertex(0);
 			min_index=i;
 			p_index=0;
 		}
 
-		if(edges[mesh_vertices[point][i]].get_x(1)<(min_point.x+R*eps)&&
-			edges[mesh_vertices[point][i]].get_y(1)<min_point.y)
+		if(edges[mesh_vertices[point][i]].vertices.second.x<(min_point.x+R*eps)&&
+			edges[mesh_vertices[point][i]].vertices.second.y<min_point.y)
 		{	
 			min_point=edges[mesh_vertices[point][i]].GetVertex(1);
 			min_index=i;
@@ -2849,16 +2849,16 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 {
 	int n=(int)cell_edges.size();
 	boost::array<double,4> res;
-	res[0]=min(cell_edges[0].get_x(0),cell_edges[0].get_x(1));
-	res[1]=max(cell_edges[0].get_x(0),cell_edges[0].get_x(1));
-	res[2]=min(cell_edges[0].get_y(0),cell_edges[0].get_y(1));
-	res[3]=max(cell_edges[0].get_y(0),cell_edges[0].get_y(1));
+	res[0]=min(cell_edges[0].vertices.first.x,cell_edges[0].vertices.second.x);
+	res[1]=max(cell_edges[0].vertices.first.x,cell_edges[0].vertices.second.x);
+	res[2]=min(cell_edges[0].vertices.first.y,cell_edges[0].vertices.second.y);
+	res[3]=max(cell_edges[0].vertices.first.y,cell_edges[0].vertices.second.y);
 	for(int i=1;i<n;++i)
 	{
-		res[0]=min(min(cell_edges[i].get_x(0),cell_edges[i].get_x(1)),res[0]);
-		res[1]=max(max(cell_edges[i].get_x(0),cell_edges[i].get_x(1)),res[1]);		
-		res[2]=min(min(cell_edges[i].get_y(0),cell_edges[i].get_y(1)),res[2]);
-		res[3]=max(max(cell_edges[i].get_y(0),cell_edges[i].get_y(1)),res[3]);
+		res[0]=min(min(cell_edges[i].vertices.first.x,cell_edges[i].vertices.second.x),res[0]);
+		res[1]=max(max(cell_edges[i].vertices.first.x,cell_edges[i].vertices.second.x),res[1]);		
+		res[2]=min(min(cell_edges[i].vertices.first.y,cell_edges[i].vertices.second.y),res[2]);
+		res[3]=max(max(cell_edges[i].vertices.first.y,cell_edges[i].vertices.second.y),res[3]);
 	}
 	return res;
 }
