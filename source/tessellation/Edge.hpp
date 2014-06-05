@@ -14,12 +14,10 @@ using namespace std;
 //! \brief Interface between two cells
 class Edge
 {
-private:
-  Vector2D _p1;
-  Vector2D _p2;
-  int _neighbor1;
-  int _neighbor2;
 public:
+
+  std::pair<Vector2D, Vector2D> vertices;
+  std::pair<int, int> neighbors;
 
   /*! \brief Class constructor
     \param p1 Position of first vertex
