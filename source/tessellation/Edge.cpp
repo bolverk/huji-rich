@@ -35,17 +35,17 @@ int Edge::GetNeighbor(int index) const
 double Edge::get_x(int index) const
 {
 	if(index==0) 
-		return _p1.get_x();
+		return _p1.x;
 	else 
-		return _p2.get_x();
+		return _p2.x;
 }
 
 double Edge::get_y(int index) const
 {
 	if(index==0) 
-		return _p1.get_y();
+		return _p1.y;
 	else 
-		return _p2.get_y();
+		return _p2.y;
 }
 
 Vector2D Edge::GetVertex(int index) const

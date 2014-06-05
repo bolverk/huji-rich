@@ -770,10 +770,10 @@ void VoronoiMesh::build_v()
 				continue;
 			center_temp=centers[to_check->get_friend(j)];
 			{
-				edge_temp.set_x(0,center.get_x());
-				edge_temp.set_x(1,center_temp.get_x());
-				edge_temp.set_y(0,center.get_y());
-				edge_temp.set_y(1,center_temp.get_y());
+				edge_temp.set_x(0,center.x);
+				edge_temp.set_x(1,center_temp.x);
+				edge_temp.set_y(0,center.y);
+				edge_temp.set_y(1,center_temp.y);
 				edge_temp.set_friend(0,to_check->get_vertice(j));
 				edge_temp.set_friend(1,to_check->get_vertice((j+1)%3));
 
@@ -1148,10 +1148,10 @@ double VoronoiMesh::GetVolume(int index) const
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[index].size();++i)
 	{
-		x1=edges[mesh_vertices[index][i]].get_x(0)-center.get_x();
-		x2=edges[mesh_vertices[index][i]].get_x(1)-center.get_x();
-		y1=edges[mesh_vertices[index][i]].get_y(0)-center.get_y();
-		y2=edges[mesh_vertices[index][i]].get_y(1)-center.get_y();
+		x1=edges[mesh_vertices[index][i]].get_x(0)-center.x;
+		x2=edges[mesh_vertices[index][i]].get_x(1)-center.x;
+		y1=edges[mesh_vertices[index][i]].get_y(0)-center.y;
+		y2=edges[mesh_vertices[index][i]].get_y(1)-center.y;
 		area+=abs(x2*y1-y2*x1)*0.5;
 	}
 	return area;
@@ -1167,14 +1167,14 @@ Vector2D VoronoiMesh::CalcCellCM(int index) const
 	for (int i=0;i<(int)mesh_vertices[index].size();i++)
 	{
 		int temp=mesh_vertices[index][i];
-		x1=edges[temp].get_x(0)-center.get_x();
-		x2=edges[mesh_vertices[index][i]].get_x(1)-center.get_x();
-		y1=edges[mesh_vertices[index][i]].get_y(0)-center.get_y();
-		y2=edges[mesh_vertices[index][i]].get_y(1)-center.get_y();
+		x1=edges[temp].get_x(0)-center.x;
+		x2=edges[mesh_vertices[index][i]].get_x(1)-center.x;
+		y1=edges[mesh_vertices[index][i]].get_y(0)-center.y;
+		y2=edges[mesh_vertices[index][i]].get_y(1)-center.y;
 		area_temp=abs(x2*y1-y2*x1)*0.5;
 		area+=area_temp;
-		xc+=area_temp*(center.get_x()+edges[temp].get_x(0)+edges[temp].get_x(1))/3;
-		yc+=area_temp*(center.get_y()+edges[temp].get_y(0)+edges[temp].get_y(1))/3;
+		xc+=area_temp*(center.x+edges[temp].get_x(0)+edges[temp].get_x(1))/3;
+		yc+=area_temp*(center.y+edges[temp].get_y(0)+edges[temp].get_y(1))/3;
 	}
 	area=1/area;
 	Vector2D p(xc*area,yc*area);

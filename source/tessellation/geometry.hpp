@@ -41,26 +41,6 @@ public:
   //! \brief Component in the y direction
   double y;
 
-  /*! \brief Returns the x component 
-    \returns The x component
-  */
-  double get_x(void) const;
-
-  /*! \brief Returns the x component 
-    \returns The x component
-  */
-  double get_y(void) const;
-
-  /*! \brief Sets the X component 
-    \param X The data to set
-  */
-  void set_x(double X);
-
-  /*! \brief Sets the Y component 
-  \param Y The data to set
-  */
-  void set_y(double Y);
-
   /*! \brief Addition
     \param v Vector to be added
     \return Reference to sum

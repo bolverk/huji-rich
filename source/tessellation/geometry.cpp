@@ -38,32 +38,12 @@ void Vector2D::Set(double ix, double iy)
   y = iy;
 }
 
-double Vector2D::get_x(void) const
-{
-  return x;
-}
-
-double Vector2D::get_y(void) const
-{
-  return y;
-}
-
-void Vector2D::set_x(double xi)
-{
-  x = xi;
-}
-
-void Vector2D::set_y(double yi)
-{
-  y = yi;
-}
-
 Vector2D& Vector2D::operator=(Vector2D const& v)
 {
 	if (this == &v)
        return *this;
-	x=v.get_x();
-	y=v.get_y();
+	x=v.x;
+	y=v.y;
 	return *this;
 }
 

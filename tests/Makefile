@@ -10,6 +10,12 @@ else ifeq ($(MODE),parallel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors
+else ifeq ($(MODE),debug_parallel)
+	CC := mpiCC
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
+	LFLAGS := -pg
+	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
+	LINT_FLAGS :=
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise

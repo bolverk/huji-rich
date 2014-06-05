@@ -34,12 +34,12 @@ namespace
 
   bool point_compare_x(Vector2D const& p1,Vector2D const& p2)
   {
-    return p1.get_x()<p2.get_x();
+    return p1.x<p2.x;
   }
 
   bool point_compare_y(Vector2D const& p1,Vector2D const& p2)
   {
-    return p1.get_y()<p2.get_y();
+    return p1.y<p2.y;
   }
 
   pair<int,int> rot(int n, pair<int,int> const& origin, pair<int,int> const& r)
@@ -134,16 +134,16 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	      p_cor[j] = cortemp[param->at(j)];
 	  const double xmin=(*min_element(p_cor.begin(),
 					  p_cor.end(),
-					  point_compare_x)).get_x();
+					  point_compare_x)).x;
 	  const double xmax=(*max_element(p_cor.begin(),
 					  p_cor.end(),
-					  point_compare_x)).get_x();
+					  point_compare_x)).x;
 	  const double ymin=(*min_element(p_cor.begin(),
 					  p_cor.end(),
-					  point_compare_y)).get_y();
+					  point_compare_y)).y;
 	  const double ymax=(*max_element(p_cor.begin(),
 					  p_cor.end(),
-					  point_compare_y)).get_y();
+					  point_compare_y)).y;
 	  const double dx=(double)(xmax-xmin)/(local_data.pow2-1);
 	  const double dy=(double)(ymax-ymin)/(local_data.pow2-1);
 	  local_data.IndexTable=new vector<int>[local_data.pow2*local_data.pow2];
