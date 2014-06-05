@@ -49,10 +49,10 @@ Conserved PeriodicHydro::CalcFlux
 	Edge const& edge,SpatialReconstruction const& interp,double dt,
 	double /*time*/) const
 {
-	if(has_nan(cells)){
+	/*if(has_nan(cells)){
 		UniversalError eo("Error in PeriodicHydro::CalcFlux. Input has nan");
 		throw eo;
-	}
+	}*/
 
 	const Vector2D normaldir
 		(tessellation.GetMeshPoint(edge.GetNeighbor(1))-
