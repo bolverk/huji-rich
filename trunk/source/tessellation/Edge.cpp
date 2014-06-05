@@ -3,91 +3,88 @@
 #include "../misc/universal_error.hpp"
 
 Edge::Edge(void): 
-_p1(Vector2D()),
-	_p2(Vector2D()),
-	_neighbor1(0), 
-	_neighbor2(0) {}
+  vertices(Vector2D(), Vector2D()),
+  neighbors(0,0) {}
 
 Edge::~Edge(void){}
 
 Edge::Edge(Edge const& other):
-_p1(other._p1), _p2(other._p2),
-	_neighbor1(other._neighbor1),
-	_neighbor2(other._neighbor2){}
+  vertices(other.vertices),
+  neighbors(other.neighbors) {}
 
 Edge::Edge(Vector2D const& p1, Vector2D const& p2,
 	int neighbor1, int neighbor2):
-_p1(p1), _p2(p2), _neighbor1(neighbor1), _neighbor2(neighbor2) {}
+  vertices(p1,p2), neighbors(neighbor1, neighbor2) {}
 
 int Edge::GetNeighbor(int index) const
 {
 	if(index==0)
-		return _neighbor1;
+	  return neighbors.first;
 	else if(index==1)
-		return _neighbor2;
+	  return neighbors.second;
 	else{
-		UniversalError eo("Invalid index in Edge::GetNeighbor");
-		eo.AddEntry("index",index);
-		throw eo;
+	  UniversalError eo("Invalid index in Edge::GetNeighbor");
+	  eo.AddEntry("index",index);
+	  throw eo;
 	}
 }
 
 double Edge::get_x(int index) const
 {
 	if(index==0) 
-		return _p1.x;
+	  return vertices.first.x;
 	else 
-		return _p2.x;
+	  return vertices.second.x;
 }
 
 double Edge::get_y(int index) const
 {
 	if(index==0) 
-		return _p1.y;
+	  return vertices.first.y;
 	else 
-		return _p2.y;
+	  return vertices.second.y;
 }
 
 Vector2D Edge::GetVertex(int index) const
 {
 	if(index==0)
-		return _p1;
+	  return vertices.first;
 	else if(index==1)
-		return _p2;
+	  return vertices.second;
 	else{
-		UniversalError eo("Invalid index in Edge::GetVertex");
-		eo.AddEntry("index",index);
-		throw eo;
+	  UniversalError eo("Invalid index in Edge::GetVertex");
+	  eo.AddEntry("index",index);
+	  throw eo;
 	}
 }
 
 double Edge::GetLength(void) const
 {
-	return abs(_p1-_p2);
+  return abs(vertices.second-vertices.first);
 }
 
 void Edge::set_friend(int dim,int data)
 {
 	if(dim==0)
-		_neighbor1=data;
+	  neighbors.first = data;
 	else
-		_neighbor2=data;
+	  neighbors.second = data;
 }
 
 void Edge::set_x(int p,double data)
 {
 	if(p==0)
-		_p1.x=data;
+	  vertices.first.x=data;
 	else
-		_p2.x=data;
+	  vertices.second.x=data;
 }
 
 void Edge::set_y(int p,double data)
 {
 	if(p==0)
-		_p1.y=data;
+	  vertices.first.y=data;
 	else
-		_p2.y=data;
+	  vertices.second.y=data;
 }
 
 double DistanceToEdge(Vector2D const& point,Edge const& edge)
@@ -144,7 +141,7 @@ Vector2D Parallel(Edge const& edge)
 void Edge::SetVertex(Vector2D const& vec,int index)
 {
 	if(index==0)
-		_p1=vec;
+	  vertices.first = vec;
 	else
-		_p2=vec;
+	  vertices.second = vec;
 }
