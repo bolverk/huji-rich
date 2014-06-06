@@ -25,15 +25,15 @@ void BinLogger::output(Tessellation const& v)
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
 	{
 		Edge edge=v.GetEdge(i);
-		binary_write_single_double(edge.get_x(0),file_handle);
-		binary_write_single_double(edge.get_x(1),file_handle);
+		binary_write_single_double(edge.vertices.first.x,file_handle);
+		binary_write_single_double(edge.vertices.second.x,file_handle);
 	}
 
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
 	{
 		Edge edge=v.GetEdge(i);
-		binary_write_single_double(edge.get_y(0),file_handle);
-		binary_write_single_double(edge.get_y(1),file_handle);
+		binary_write_single_double(edge.vertices.first.y,file_handle);
+		binary_write_single_double(edge.vertices.second.y,file_handle);
 	}
 
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
@@ -70,15 +70,15 @@ void BinLogger::output(VoronoiMesh const& v)
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
 	{
 		Edge edge=v.GetEdge(i);
-		binary_write_single_double(edge.get_x(0),file_handle);
-		binary_write_single_double(edge.get_x(1),file_handle);
+		binary_write_single_double(edge.vertices.first.x,file_handle);
+		binary_write_single_double(edge.vertices.second.x,file_handle);
 	}
 
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
 	{
 		Edge edge=v.GetEdge(i);
-		binary_write_single_double(edge.get_y(0),file_handle);
-		binary_write_single_double(edge.get_y(1),file_handle);
+		binary_write_single_double(edge.vertices.first.y,file_handle);
+		binary_write_single_double(edge.vertices.second.y,file_handle);
 	}
 
 	for(int i=0;i<(int)v.GetTotalSidesNumber();++i)
