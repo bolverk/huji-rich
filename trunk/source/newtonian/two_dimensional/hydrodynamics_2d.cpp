@@ -598,10 +598,10 @@ namespace {
     eo.AddEntry("Error in CalcFlux",0);
     eo.AddEntry("edge index",edge_index);
     const Edge edge = tess.GetEdge(edge_index);
-    eo.AddEntry("edge x1 location",edge.get_x(0));
-    eo.AddEntry("edge y1 location",edge.get_y(0));
-    eo.AddEntry("edge x2 location",edge.get_x(1));
-    eo.AddEntry("edge y2 location",edge.get_y(1));
+    eo.AddEntry("edge x1 location",edge.vertices.first.x);
+    eo.AddEntry("edge y1 location",edge.vertices.first.y);
+    eo.AddEntry("edge x2 location",edge.vertices.second.x);
+    eo.AddEntry("edge y2 location",edge.vertices.second.y);
     throw eo;
   }
 }
@@ -1482,10 +1482,10 @@ namespace {
     }
     else{
       // We are in the y direction
-      if(MeshPoint.x>edge.get_x(0))
-	MeshPoint.x-=MeshPoint.x-edge.get_x(0);
+      if(MeshPoint.x>edge.vertices.first.x)
+	MeshPoint.x-=MeshPoint.x-edge.vertices.first.x;
       else
-	MeshPoint.x+=edge.get_x(0)-MeshPoint.x;
+	MeshPoint.x+=edge.vertices.first.x-MeshPoint.x;
     }
     return MeshPoint;
   }
