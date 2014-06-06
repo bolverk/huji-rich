@@ -1986,15 +1986,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		index=0;
 	      else
 		index=1;
-	      /*
-		NewEdge.set_x(0,edges[j].get_x(index));
-		NewEdge.set_y(0,edges[j].get_y(index));
-	      */
 	      NewEdge.vertices.first = pair_member(edges[j].vertices,index);
-	      /*
-		NewEdge.set_x(1,intersect.x);
-		NewEdge.set_y(1,intersect.y);
-	      */
 	      NewEdge.vertices.second = intersect;
 	      Vector2D diff(0,0);
 	      if(NewEdge.GetNeighbor(1)>(n+Npoints))
