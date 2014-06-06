@@ -1721,20 +1721,20 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	{
 	  toReduce=int(lower_bound(ToRemove.begin(),ToRemove.end(),temp)-
 		       ToRemove.begin());
-	  V.edges[i].set_friend(0,temp-toReduce);
+	  V.edges[i].neighbors.first = temp - toReduce;
 	}
-      temp=V.edges[i].GetNeighbor(1);
+      temp = V.edges[i].neighbors.second;
       if(temp>-1)
 	{
 	  toReduce=int(lower_bound(ToRemove.begin(),ToRemove.end(),temp)-
 		       ToRemove.begin());
-	  V.edges[i].set_friend(1,temp-toReduce);
+	  V.edges[i].neighbors.second = temp - toReduce;
 	}
     }
   // Remove bad edges
   RemoveVector(V.edges,RemovedEdges);
   // Fix mesh_vertices
-  RemoveVector(V.mesh_vertices,ToRemove);	
+  RemoveVector(V.mesh_vertices,ToRemove);
   size_t N=V.mesh_vertices.size();
   // Fix edge number in mesh_vertices
   for(size_t i=0;i<N;++i)
@@ -1804,12 +1804,13 @@ int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int NewIndex,
 {
   int loc=FindEdge(V,ToRefine,other);
   vector<Vector2D>& cor=V.Tri->ChangeCor();
-  int index=1;
-  if(V.edges[loc].GetNeighbor(1)==other)
-    index=0;
-  V.edges[loc].set_friend(index,(int)cor.size());
   cor.push_back(NewPoint);
-  return V.edges[loc].GetNeighbor(index);
+  int index= V.edges[loc].neighbors.second==other ? 0 : 1;
+  int& temp = V.edges[loc].neighbors.second==other ? 
+    V.edges[loc].neighbors.first :
+    V.edges[loc].neighbors.second;
+  temp = (int)cor.size();
+  return (int)cor.size();
 }
 
 
@@ -1848,12 +1849,12 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	  int temp_neigh=V.edges[i].GetNeighbor(0);
 	  if(temp_neigh>Npoints)
 	    {
-	      V.edges[i].set_friend(0,temp_neigh+n);
+	      V.edges[i].neighbors.first = temp_neigh+n;
 	      continue;
 	    }
 	  temp_neigh=V.edges[i].GetNeighbor(1);
 	  if(temp_neigh>Npoints)
-	    V.edges[i].set_friend(1,temp_neigh+n);
+	    V.edges[i].neighbors.second = temp_neigh+n;
 	}
     }
   // Update the lengths
@@ -1891,15 +1892,11 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
       vector<int> old_ref;
       vector<int> new_ref;
       // Calculate the splitting edge
-      Edge splitedge;
-      splitedge.set_friend(1,ToRefine[i]);
-      splitedge.set_friend(0,Npoints+i);
-      splitedge.set_x(0,0.5*(NewPoint.x+V.GetMeshPoint(ToRefine[i]).x));
-      splitedge.set_y(0,0.5*(NewPoint.y+V.GetMeshPoint(ToRefine[i]).y));
-      splitedge.set_x(1,splitedge.vertices.first.x+normal.x*R*20);
-      splitedge.set_y(1,splitedge.vertices.first.y+normal.y*R*20);
-      splitedge.set_x(0,splitedge.vertices.first.x-normal.x*R*20);
-      splitedge.set_y(0,splitedge.vertices.first.y-normal.y*R*20);
+      Edge splitedge(0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) - 
+		     normal*R*20,
+		     0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) +
+		     normal*R*20,
+		     Npoints+i,ToRefine[i]);
       Vector2D intersect;
       // Find other intersecting segment
       int counter_edges=0;
