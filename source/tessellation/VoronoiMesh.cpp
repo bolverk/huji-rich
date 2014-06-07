@@ -640,7 +640,7 @@ vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const
 					     point_velocities[edges[i].GetNeighbor(1)],
 					     GetMeshPoint(edges[i].GetNeighbor(0)),
 					     GetMeshPoint(edges[i].GetNeighbor(1)),
-					     0.5*(edges[i].GetVertex(0)+edges[i].GetVertex(1)));
+					     0.5*(edges[i].vertices.first+edges[i].vertices.second));
 	}
     }
   return facevelocity;
@@ -1937,14 +1937,14 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
       for(int j=0;j<nedges;++j)
 	{
 	  // Does the edge have a coinciding point with the splitting edge?
-	  if(splitedge.GetVertex(0).distance(edges[j].GetVertex(0))<
-	     1e-8*R||splitedge.GetVertex(0).distance(edges[j].
-						     GetVertex(1))<1e-8*R)
+	  if(splitedge.vertices.first.distance(edges[j].vertices.first)<
+	     1e-8*R||splitedge.vertices.first.distance(edges[j].
+						     vertices.second)<1e-8*R)
 	    coincide=0;
 	  else
-	    if(splitedge.GetVertex(1).distance(edges[j].GetVertex(0))<
-	       1e-8*R||splitedge.GetVertex(1).distance(edges[j].
-						       GetVertex(1))<1e-8*R)
+	    if(splitedge.vertices.second.distance(edges[j].vertices.first)<
+	       1e-8*R||splitedge.vertices.second.distance(edges[j].
+						       vertices.second)<1e-8*R)
 	      coincide=1;
 	    else
 	      coincide=2;
@@ -1981,8 +1981,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      else
 		NewEdge.set_friend(1,edges[j].GetNeighbor(0));
 	      int index;
-	      if(NewPoint.distance(edges[j].GetVertex(0))<
-		 v.distance(edges[j].GetVertex(0)))
+	      if(NewPoint.distance(edges[j].vertices.first)<
+		 v.distance(edges[j].vertices.first))
 		index=0;
 	      else
 		index=1;
@@ -2004,8 +2004,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		  V.edges.push_back(temp);
 		  int loc=FindEdge(V,ToRefine[i],temp.GetNeighbor(1));
 		  int index2;
-		  if(temp.GetVertex(0).distance(V.edges[loc].GetVertex(0))<
-		     temp.GetVertex(0).distance(V.edges[loc].GetVertex(1)))
+		  if(temp.vertices.first.distance(V.edges[loc].vertices.first)<
+		     temp.vertices.first.distance(V.edges[loc].vertices.second))
 		    index2=0;
 		  else
 		    index2=1;
@@ -2028,8 +2028,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	    }
 	  // No need to split the edge
 	  // check if update is needed
-	  if(NewPoint.distance(edges[j].GetVertex(0))<
-	     v.distance(edges[j].GetVertex(0)))
+	  if(NewPoint.distance(edges[j].vertices.first)<
+	     v.distance(edges[j].vertices.first))
 	    {
 	      // Change edge neighbors
 	      int index=1;
@@ -2171,8 +2171,8 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
       vector<Vector2D> cpoints;
       ConvexHull(cpoints,this,cell);
       for(int i=0;i<nbox;++i)
-	if(PointInCell(cpoints,box_edges[i].GetVertex(0))||
-	   PointInCell(cpoints,box_edges[i].GetVertex(1)))
+	if(PointInCell(cpoints,box_edges[i].vertices.first)||
+	   PointInCell(cpoints,box_edges[i].vertices.second))
 	  res.push_back(i);
       sort(res.begin(),res.end());
       res=unique(res);
@@ -2189,7 +2189,7 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 			{
 			if(binary_search(res.begin(),res.end(),k))
 			continue;
-			test[0]=0.5*(box_edges[k].GetVertex(0)+box_edges[k].GetVertex(1));
+			test[0]=0.5*(box_edges[k].vertices.first+box_edges[k].vertices.second);
 			if(orient2d(test)*temp<0)
 			toadd.push_back(k);
 			}
@@ -2205,13 +2205,13 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 			{
 			if(binary_search(res.begin(),res.end(),k))
 			continue;
-			test[2]=box_edges[k].GetVertex(1);
+			test[2]=box_edges[k].vertices.second;
 			if(orient2d(test)*temp>0)
 			{
 			toadd.push_back(k);
 			continue;
 			}
-			test[2]=box_edges[k].GetVertex(0);
+			test[2]=box_edges[k].vertices.first;
 			if(orient2d(test)*temp>0)
 			toadd.push_back(k);
 			}
@@ -2450,12 +2450,12 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
   if(edges[mesh_vertices[point][0]].vertices.first.x<
      edges[mesh_vertices[point][0]].vertices.second.x)
     {
-      min_point=edges[mesh_vertices[point][0]].GetVertex(0);
+      min_point=edges[mesh_vertices[point][0]].vertices.first;
       p_index=0;
     }
   else
     {
-      min_point=edges[mesh_vertices[point][0]].GetVertex(1);
+      min_point=edges[mesh_vertices[point][0]].vertices.second;
       p_index=1;
     }
   for(int i=1;i<n;++i)
@@ -2463,20 +2463,20 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
       double R=edges[mesh_vertices[point][i]].GetLength();
       if(edges[mesh_vertices[point][i]].vertices.first.x<(min_point.x-R*eps))
 	{
-	  min_point=edges[mesh_vertices[point][i]].GetVertex(0);
+	  min_point=edges[mesh_vertices[point][i]].vertices.first;
 	  min_index=i;
 	  p_index=0;
 	}
       if(edges[mesh_vertices[point][i]].vertices.second.x<(min_point.x-R*eps))
 	{
-	  min_point=edges[mesh_vertices[point][i]].GetVertex(1);
+	  min_point=edges[mesh_vertices[point][i]].vertices.second;
 	  min_index=i;
 	  p_index=1;
 	}
       if(edges[mesh_vertices[point][i]].vertices.first.x<(min_point.x+R*eps)&&
 	 edges[mesh_vertices[point][i]].vertices.first.y<min_point.y)
 	{	
-	  min_point=edges[mesh_vertices[point][i]].GetVertex(0);
+	  min_point=edges[mesh_vertices[point][i]].vertices.first;
 	  min_index=i;
 	  p_index=0;
 	}
@@ -2484,7 +2484,7 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
       if(edges[mesh_vertices[point][i]].vertices.second.x<(min_point.x+R*eps)&&
 	 edges[mesh_vertices[point][i]].vertices.second.y<min_point.y)
 	{	
-	  min_point=edges[mesh_vertices[point][i]].GetVertex(1);
+	  min_point=edges[mesh_vertices[point][i]].vertices.second;
 	  min_index=i;
 	  p_index=1;
 	}
@@ -2522,8 +2522,7 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 	  list<int>::iterator it=elist.begin();
 	  for(int k=0;k<nlist;++k)
 	    {
-	      double temp0=edges[edge_loc].GetVertex((p_loc+1)%2).distance(
-									   edges[*it].GetVertex(0));
+	      double temp0=pair_member(edges[edge_loc].vertices,(p_loc+1)%2).distance(edges[*it].vertices.first);
 	      if(temp0<eps*R)
 		{
 		  p_loc=0;
@@ -2532,8 +2531,8 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 		  new_order.push_back(edge_loc);
 		  break;
 		}
-	      double temp1=edges[edge_loc].GetVertex((p_loc+1)%2).distance(
-									   edges[*it].GetVertex(1));
+	      double temp1=pair_member(edges[edge_loc].vertices,(p_loc+1)%2).distance(
+									   edges[*it].vertices.second);
 	      if(temp1<eps*R)
 		{
 		  p_loc=1;
@@ -2703,7 +2702,7 @@ void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
   toadd.reserve(npoints);
   Vector2D par(Parallel(edge));
   par=par/abs(par);
-  Vector2D edge0=edge.GetVertex(0);
+  Vector2D edge0=edge.vertices.first;
   boost::array<double,4> maxedges=FindMaxCellEdges();
   double dx=maxedges[1]-maxedges[0];
   double dy=maxedges[3]-maxedges[2];
