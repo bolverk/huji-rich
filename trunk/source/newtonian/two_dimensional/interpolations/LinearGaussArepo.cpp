@@ -173,8 +173,8 @@ namespace
     vector<Vector2D> res(n);
     for(int i=0;i<n;++i)
       {
-	neigh0=edges[i].GetNeighbor(0);
-	neigh1=edges[i].GetNeighbor(1);
+	neigh0=edges[i].neighbors.first;
+	neigh1=edges[i].neighbors.second;
 	if(neigh0==cell_index)
 	  if(neigh1>-1) // we are not near rigid wall
 	    res[i]=tess.GetMeshPoint(neigh1);
@@ -206,8 +206,8 @@ namespace
 	  }
 	else
 	  {
-	    neigh0=edges[i].GetNeighbor(0);
-	    neigh1=edges[i].GetNeighbor(1);
+	    neigh0=edges[i].neighbors.first;
+	    neigh1=edges[i].neighbors.second;
 	    if(neigh0==cell_index)
 	      res[i]=cells[neigh1];
 	    else
@@ -233,8 +233,8 @@ namespace
 	  }
 	else
 	  {
-	    neigh0=edges[i].GetNeighbor(0);
-	    neigh1=edges[i].GetNeighbor(1);
+	    neigh0=edges[i].neighbors.first;
+	    neigh1=edges[i].neighbors.second;
 	    if(neigh0==cell_index)
 	      res[i]=tracers[neigh1];
 	    else
@@ -724,7 +724,7 @@ vector<double> LinearGaussArepo::interpolateTracers
  vector<vector<double> > const& tracers,double dt,Edge const& edge,
  int side,InterpolationType interptype,Vector2D const& vface) const
 {
-  int cell_index = edge.GetNeighbor(side);
+  int cell_index = pair_member(edge.neighbors,side);
   Vector2D target = CalcCentroid(edge);
   if(interptype==InBulk)
     {
@@ -740,7 +740,7 @@ vector<double> LinearGaussArepo::interpolateTracers
   else
     if(interptype==Boundary)
       {
-	int other=edge.GetNeighbor((side+1)%2);
+	int other = pair_member(edge.neighbors,(side+1)%2);
 	vector<double> res=interp_tracer(tracers[other],tess.GetMeshPoint(other),
 		rslopes_[other],target);
 	vector<double> temp=CalcDtFlux(tracers[other],cells[other],rslopes_[other],
@@ -758,7 +758,7 @@ Primitive LinearGaussArepo::Interpolate(Tessellation const& tess,
 					vector<Primitive> const& cells,double dt,Edge const& edge,int side,
 					InterpolationType interptype,Vector2D const& vface) const
 {
-  int cell_index = edge.GetNeighbor(side);
+  int cell_index = pair_member(edge.neighbors,side);
   Vector2D target = CalcCentroid(edge);
   vector<Conserved> fluxes(1);
   vector<Vector2D> pv(1);
@@ -778,7 +778,7 @@ Primitive LinearGaussArepo::Interpolate(Tessellation const& tess,
   else
     if(interptype==Boundary)
       {
-	const int other=edge.GetNeighbor((side+1)%2);
+	const int other=pair_member(edge.neighbors,(side+1)%2);
 	const Primitive temp = interp_primitive(cells[other],tess.GetMeshPoint(other),
 		rslopes_[other],target);
 	Primitive res = CalcPrimitive(temp.Density,temp.Pressure,temp.Velocity,eos_);
