@@ -7,8 +7,8 @@ Conserved NohHBC::CalcFlux(Tessellation const& tess,vector<Primitive> const& /*c
 	Vector2D const& /*edge_velocity*/,Edge const& edge,
 	SpatialReconstruction const& /*interp*/,double /*dt*/,double time) const
 {
-	const Vector2D edge_cen = 0.5*(edge.GetVertex(0)+
-		edge.GetVertex(1));
+	const Vector2D edge_cen = 0.5*(edge.vertices.first+
+				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
@@ -23,8 +23,8 @@ Primitive NohHBC::GetBoundaryPrimitive(Edge const& edge,
 	Tessellation const& /*tess*/,vector<Primitive> const& /*cells*/,double
 	time)const
 {
-	const Vector2D edge_cen = 0.5*(edge.GetVertex(0)+
-		edge.GetVertex(1));
+	const Vector2D edge_cen = 0.5*(edge.vertices.first+
+				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
@@ -69,8 +69,8 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	vector<double> res;
 	if(tracers.empty())
 		throw UniversalError("Noh problem must use cold flows flag");
-	const Vector2D edge_cen = 0.5*(edge.GetVertex(0)+
-		edge.GetVertex(1));
+	const Vector2D edge_cen = 0.5*(edge.vertices.first+
+				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
