@@ -420,12 +420,12 @@ namespace {
     vector<int> result(n);
     for(int i=0;i<n;++i)
       {
-	int other=v.GetEdge(edgeindex[i]).GetNeighbor(0);
+	int other=v.GetEdge(edgeindex[i]).neighbors.first;
 	if(other==rank)
-	  other=v.GetEdge(edgeindex[i]).GetNeighbor(1);
-	int nextneigh=v.GetEdge(edgeindex[(i+1)%n]).GetNeighbor(0);
+	  other=v.GetEdge(edgeindex[i]).neighbors.second;
+	int nextneigh=v.GetEdge(edgeindex[(i+1)%n]).neighbors.first;
 	if(nextneigh==rank)
-	  nextneigh=v.GetEdge(edgeindex[(i+1)%n]).GetNeighbor(1);
+	  nextneigh=v.GetEdge(edgeindex[(i+1)%n]).neighbors.second;
 	if(other==-1&&nextneigh==-1)
 	  {
 	    result[i]=-1;
@@ -440,7 +440,7 @@ namespace {
 	    for(int k=0;k<nedges;++k)
 	      {
 		Edge e=v.GetEdge(nextedges[k]);
-		if(e.GetNeighbor(0)==rank||e.GetNeighbor(1)==rank)
+		if(e.neighbors.first==rank||e.neighbors.second==rank)
 		  {
 		    counter=k;
 		    break;
@@ -449,11 +449,11 @@ namespace {
 	    Edge nextedge=(other==-1)?v.GetEdge(nextedges[(counter+2)%nedges])
 	      :v.GetEdge(nextedges[(counter-2+nedges)%nedges]);
 	    if(nextneigh==-1)
-	      result[i]=(nextedge.GetNeighbor(0)==other)?
-		nextedge.GetNeighbor(1):nextedge.GetNeighbor(0);
+	      result[i]=(nextedge.neighbors.first==other)?
+		nextedge.neighbors.second:nextedge.neighbors.first;
 	    else
-	      result[i]=(nextedge.GetNeighbor(0)==nextneigh)?
-		nextedge.GetNeighbor(1):nextedge.GetNeighbor(0);
+	      result[i]=(nextedge.neighbors.first==nextneigh)?
+		nextedge.neighbors.second:nextedge.neighbors.first;
 	  }
 	else
 	  {
@@ -543,8 +543,8 @@ namespace {
 	eo.AddEntry("Edge X cor",e.vertices.second.x);
 	eo.AddEntry("Edge Y cor",e.vertices.second.y);
 	eo.AddEntry("Edge length",e.GetLength());
-	eo.AddEntry("Edge neighbor 0",e.GetNeighbor(0));
-	eo.AddEntry("Edge neighbor 1",e.GetNeighbor(1));
+	eo.AddEntry("Edge neighbor 0",e.neighbors.first);
+	eo.AddEntry("Edge neighbor 1",e.neighbors.second);
       }
     for(int i=0;i<(int)ToRemove.size();++i)
       {
@@ -636,10 +636,10 @@ vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const
 	{
 	  // Bulk
 	  facevelocity[i] = CalcFaceVelocity(
-					     point_velocities[edges[i].GetNeighbor(0)],
-					     point_velocities[edges[i].GetNeighbor(1)],
-					     GetMeshPoint(edges[i].GetNeighbor(0)),
-					     GetMeshPoint(edges[i].GetNeighbor(1)),
+					     point_velocities[edges[i].neighbors.first],
+					     point_velocities[edges[i].neighbors.second],
+					     GetMeshPoint(edges[i].neighbors.first),
+					     GetMeshPoint(edges[i].neighbors.second),
 					     0.5*(edges[i].vertices.first+edges[i].vertices.second));
 	}
     }
@@ -653,8 +653,8 @@ bool VoronoiMesh::NearBoundary(int index) const
   int N=Tri->get_length();
   for(int i=0;i<n;++i)
     {
-      n0=edges[mesh_vertices[index][i]].GetNeighbor(0);
-      n1=edges[mesh_vertices[index][i]].GetNeighbor(1);
+      n0=edges[mesh_vertices[index][i]].neighbors.first;
+      n1=edges[mesh_vertices[index][i]].neighbors.second;
       if(n0<0||n1<0||n0>=N||n1>=N)
 	return true;
     }
@@ -775,8 +775,8 @@ void VoronoiMesh::build_v()
 	    edge_temp.neighbors.first = to_check->get_vertice(j);
 	    edge_temp.neighbors.second = to_check->get_vertice((j+1)%3);
 
-	    int n0=edge_temp.GetNeighbor(0);
-	    int n1=edge_temp.GetNeighbor(1);
+	    int n0=edge_temp.neighbors.first;
+	    int n1=edge_temp.neighbors.second;
 
 	    if(legal_edge(&edge_temp))
 	      {
@@ -785,17 +785,17 @@ void VoronoiMesh::build_v()
 						  Tri->GetFacetRadius(to_check->get_friend(j))))
 		  {
 		    {
-		      if(edge_temp.GetNeighbor(0)<Tri->GetOriginalLength())
-			mesh_vertices[edge_temp.GetNeighbor(0)].push_back((int)edges.size());
+		      if(edge_temp.neighbors.first<Tri->GetOriginalLength())
+			mesh_vertices[edge_temp.neighbors.first].push_back((int)edges.size());
 		      else
 			if(obc->PointIsReflective(Tri->get_point(
-								 edge_temp.GetNeighbor(0))))
+								 edge_temp.neighbors.first)))
 			  edge_temp.neighbors.first = -1;
-		      if(edge_temp.GetNeighbor(1)<Tri->GetOriginalLength())
-			mesh_vertices[edge_temp.GetNeighbor(1)].push_back((int)edges.size());
+		      if(edge_temp.neighbors.second<Tri->GetOriginalLength())
+			mesh_vertices[edge_temp.neighbors.second].push_back((int)edges.size());
 		      else
 			if(obc->PointIsReflective(Tri->get_point(
-								 edge_temp.GetNeighbor(1))))
+								 edge_temp.neighbors.second)))
 			  edge_temp.neighbors.second = -1;
 		      edges.push_back(edge_temp);
 		    }
@@ -976,8 +976,8 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
   FindIntersectingPoints(bedge,boxduplicate);
   vector<int> proclist(vproc.GetCellEdges(rank).size());
   for(int i=0;i<(int)proclist.size();++i)
-    proclist[i]=(vproc.GetOriginalIndex(cell_edges[i].GetNeighbor(0))==rank)? vproc.GetOriginalIndex(
-												     cell_edges[i].GetNeighbor(1)):vproc.GetOriginalIndex(cell_edges[i].GetNeighbor(0));
+    proclist[i]=(vproc.GetOriginalIndex(cell_edges[i].neighbors.first)==rank)? vproc.GetOriginalIndex(
+												     cell_edges[i].neighbors.second):vproc.GetOriginalIndex(cell_edges[i].neighbors.first);
   // Remove box boundaries from to duplicate
   int ndup=(int)toduplicate.size();
   int counter=0;
@@ -1121,8 +1121,8 @@ Vector2D VoronoiMesh::get_center(int facet)
 
 bool VoronoiMesh::legal_edge(Edge *e) //checks if both ends of the edge are outside the grid and that the edge doesn't cross the grid
 {
-  if((e->GetNeighbor(0)<Tri->get_length())||
-     (e->GetNeighbor(1)<Tri->get_length()))
+  if((e->neighbors.first<Tri->get_length())||
+     (e->neighbors.second<Tri->get_length()))
     return true;
   else
     return false;
@@ -1319,8 +1319,8 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
   vector<int> cornerproc=GetCornerNeighbors(vproc,rank);
   vector<int> proclist(vproc.GetCellEdges(rank).size());
   for(int i=0;i<(int)proclist.size();++i)
-    proclist[i]=(cell_edges[i].GetNeighbor(0)==rank)? vproc.GetOriginalIndex(
-									     cell_edges[i].GetNeighbor(1)):vproc.GetOriginalIndex(cell_edges[i].GetNeighbor(0));
+    proclist[i]=(cell_edges[i].neighbors.first==rank)? vproc.GetOriginalIndex(
+									     cell_edges[i].neighbors.second):vproc.GetOriginalIndex(cell_edges[i].neighbors.first);
   vector<Vector2D> points=UpdateMPIPoints(vproc,rank,cornerproc,proclist,p,obc,
 					  selfindex,SentProcs,SentPoints);
 
@@ -1426,14 +1426,14 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
   res.reserve(n);
   for(int i=0;i<n;++i)
     {
-      if((other=edges[mesh_vertices[index][i]].GetNeighbor(0))!=index)
+      if((other=edges[mesh_vertices[index][i]].neighbors.first)!=index)
 	{
 	  //if(other!=-1)
 	  res.push_back(other);
 	}
       else
 	{
-	  other=edges[mesh_vertices[index][i]].GetNeighbor(1);
+	  other=edges[mesh_vertices[index][i]].neighbors.second;
 	  //if(other!=-1)
 	  res.push_back(other);
 	}	
@@ -1450,7 +1450,7 @@ vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
   res.reserve(n);
   for(int i=0;i<n;++i)
     {
-      if((other=edges[mesh_vertices[index][i]].GetNeighbor(0))!=index)
+      if((other=edges[mesh_vertices[index][i]].neighbors.first)!=index)
 	{
 	  if(other>-1)
 	    res.push_back(other);
@@ -1458,7 +1458,7 @@ vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
       else
 	{
 	  if(other>-1)
-	    other=edges[mesh_vertices[index][i]].GetNeighbor(1);
+	    other=edges[mesh_vertices[index][i]].neighbors.second;
 	  res.push_back(other);
 	}	
     }
@@ -1569,8 +1569,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
       int N=(int)real_neigh.size();
       for(int j=0;j<Nedges;++j)
 	{
-	  int temp0=Vlocal.edges[j].GetNeighbor(0);
-	  int temp1=Vlocal.edges[j].GetNeighbor(1);
+	  int temp0=Vlocal.edges[j].neighbors.first;
+	  int temp1=Vlocal.edges[j].neighbors.second;
 	  if(temp0<N)
 	    {
 	      if(temp1<N||temp1<0||Vlocal.GetOriginalIndex(temp1)<N)
@@ -1586,7 +1586,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
       // Fix the new edges to correspond to the correct points in cor, use real_neigh
       for(size_t j=0;j<NewEdges.size();++j)
 	{
-	  int temp=NewEdges[j].GetNeighbor(0);
+	  int temp=NewEdges[j].neighbors.first;
 	  if(temp>N)
 	    {
 	      // New point add to tessellation
@@ -1598,7 +1598,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	      if(temp>-1)
 		NewEdges[j].neighbors.first = real_neigh[temp];
 	    }
-	  temp=NewEdges[j].GetNeighbor(1);
+	  temp=NewEdges[j].neighbors.second;
 	  if(temp>N)
 	    {
 	      // New point add to tessellation
@@ -1621,10 +1621,10 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	  for(int jj=0;jj<NN;++jj)
 	    {
 	      Edge etemp=V.edges[V.mesh_vertices[temp1][jj]];
-	      if(etemp.GetNeighbor(0)==-1||V.GetOriginalIndex(etemp.GetNeighbor(0))
+	      if(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 		 ==ToRemove[i])
 		{
-		  if(etemp.GetNeighbor(0)<0||etemp.GetNeighbor(0)>Npoints)
+		  if(etemp.neighbors.first<0||etemp.neighbors.first>Npoints)
 		    oldedges.push_back(V.mesh_vertices[temp1][jj]);
 		  V.mesh_vertices[temp1].erase(V.mesh_vertices[temp1].begin()
 					       +jj);
@@ -1632,10 +1632,10 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		  --jj;
 		  continue;
 		}
-	      if(etemp.GetNeighbor(1)==-1||V.GetOriginalIndex(etemp.GetNeighbor(1))
+	      if(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 		 ==ToRemove[i])
 		{
-		  if(etemp.GetNeighbor(1)<0||etemp.GetNeighbor(1)>Npoints)
+		  if(etemp.neighbors.second<0||etemp.neighbors.second>Npoints)
 		    oldedges.push_back(V.mesh_vertices[temp1][jj]);
 		  V.mesh_vertices[temp1].erase(V.mesh_vertices[temp1].begin()
 					       +jj);
@@ -1665,16 +1665,16 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		{
 		  for(jj=0;jj<V.mesh_vertices[temp].size();++jj)
 		    {
-		      if(V.edges[V.mesh_vertices[temp][jj]].GetNeighbor(0)>-1)
+		      if(V.edges[V.mesh_vertices[temp][jj]].neighbors.first>-1)
 			if(V.GetMeshPoint(V.edges[V.mesh_vertices[temp][jj]].
-					  GetNeighbor(0)).distance(V.GetMeshPoint(other))<eps*R)
+					  neighbors.first).distance(V.GetMeshPoint(other))<eps*R)
 			  {
 			    V.edges[V.mesh_vertices[temp][jj]]=NewEdges[j];
 			    break;
 			  }
-		      if(V.edges[V.mesh_vertices[temp][jj]].GetNeighbor(1)>-1)
+		      if(V.edges[V.mesh_vertices[temp][jj]].neighbors.second>-1)
 			if(V.GetMeshPoint(V.edges[V.mesh_vertices[temp][jj]].
-					  GetNeighbor(1)).distance(V.GetMeshPoint(other))<eps*R)
+					  neighbors.second).distance(V.GetMeshPoint(other))<eps*R)
 			  {
 			    V.edges[V.mesh_vertices[temp][jj]]=NewEdges[j];
 			    break;
@@ -1716,7 +1716,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
   int temp;
   for(size_t i=0;i<Nedges;++i)
     {
-      temp=V.edges[i].GetNeighbor(0);
+      temp=V.edges[i].neighbors.first;
       if(temp>-1)
 	{
 	  toReduce=int(lower_bound(ToRemove.begin(),ToRemove.end(),temp)-
@@ -1791,8 +1791,8 @@ namespace
     for(int i=0;i<n;++i)
       {
 	Edge edge=V.GetEdge(edges[i]);
-	if(V.GetOriginalIndex(edge.GetNeighbor(0))==tofind||
-	   V.GetOriginalIndex(edge.GetNeighbor(1))==tofind)
+	if(V.GetOriginalIndex(edge.neighbors.first)==tofind||
+	   V.GetOriginalIndex(edge.neighbors.second)==tofind)
 	  return edges[i];
       }
     throw("Couldn't find neighbor in Voronoi::FindEdge");
@@ -1846,13 +1846,13 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
     {
       for(int i=0;i<(int)V.edges.size();++i)
 	{
-	  int temp_neigh=V.edges[i].GetNeighbor(0);
+	  int temp_neigh=V.edges[i].neighbors.first;
 	  if(temp_neigh>Npoints)
 	    {
 	      V.edges[i].neighbors.first = temp_neigh+n;
 	      continue;
 	    }
-	  temp_neigh=V.edges[i].GetNeighbor(1);
+	  temp_neigh=V.edges[i].neighbors.second;
 	  if(temp_neigh>Npoints)
 	    V.edges[i].neighbors.second = temp_neigh+n;
 	}
@@ -1955,7 +1955,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		{
 		  Edge NewEdge(edges[j]);
 		  int rindex=1;
-		  if(NewEdge.GetNeighbor(0)==ToRefine[i])
+		  if(NewEdge.neighbors.first==ToRefine[i])
 		    rindex=0;
 		  NewEdge.set_friend(rindex,Npoints+i);
 		  V.edges[edge_index[j]]=NewEdge;
@@ -1976,10 +1976,10 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	    {
 	      Edge NewEdge;
 	      NewEdge.set_friend(0,Npoints+i);
-	      if(edges[j].GetNeighbor(0)==ToRefine[i])
-		NewEdge.set_friend(1,edges[j].GetNeighbor(1));
+	      if(edges[j].neighbors.first==ToRefine[i])
+		NewEdge.set_friend(1,edges[j].neighbors.second);
 	      else
-		NewEdge.set_friend(1,edges[j].GetNeighbor(0));
+		NewEdge.set_friend(1,edges[j].neighbors.first);
 	      int index;
 	      if(NewPoint.distance(edges[j].vertices.first)<
 		 v.distance(edges[j].vertices.first))
@@ -1989,17 +1989,17 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      NewEdge.vertices.first = pair_member(edges[j].vertices,index);
 	      NewEdge.vertices.second = intersect;
 	      Vector2D diff(0,0);
-	      if(NewEdge.GetNeighbor(1)>(n+Npoints))
+	      if(NewEdge.neighbors.second>(n+Npoints))
 		{
-		  diff=V.GetMeshPoint(NewEdge.GetNeighbor(1))-
-		    V.GetMeshPoint(V.GetOriginalIndex(NewEdge.GetNeighbor(1)));
+		  diff=V.GetMeshPoint(NewEdge.neighbors.second)-
+		    V.GetMeshPoint(V.GetOriginalIndex(NewEdge.neighbors.second));
 		  Edge temp(NewEdge.vertices.first-diff,
 			    NewEdge.vertices.second-diff,
 			    Npoints+i, 
 			    V.GetOriginalIndex(NewEdge.neighbors.second));
-		  V.mesh_vertices[temp.GetNeighbor(1)].push_back((int)V.edges.size());
+		  V.mesh_vertices[temp.neighbors.second].push_back((int)V.edges.size());
 		  V.edges.push_back(temp);
-		  int loc=FindEdge(V,ToRefine[i],temp.GetNeighbor(1));
+		  int loc=FindEdge(V,ToRefine[i],temp.neighbors.second);
 		  int index2;
 		  if(temp.vertices.first.distance(V.edges[loc].vertices.first)<
 		     temp.vertices.first.distance(V.edges[loc].vertices.second))
@@ -2008,12 +2008,12 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		    index2=1;
 		  set_pair_member(V.edges[loc].vertices,
 				  index2, temp.vertices.second);
-		  FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.GetNeighbor(1)),
+		  FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.neighbors.second),
 				    Npoints+i,Npoints+i,NewPoint-diff);
 		}
 	      else
-		if(NewEdge.GetNeighbor(1)>-1)
-		  V.mesh_vertices[NewEdge.GetNeighbor(1)].push_back((int)V.edges.size());
+		if(NewEdge.neighbors.second>-1)
+		  V.mesh_vertices[NewEdge.neighbors.second].push_back((int)V.edges.size());
 	      new_ref.push_back((int)V.edges.size());
 	      V.edges.push_back(NewEdge);
 	      // Do the other split
@@ -2030,7 +2030,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	    {
 	      // Change edge neighbors
 	      int index=1;
-	      if(edges[j].GetNeighbor(0)==ToRefine[i])
+	      if(edges[j].neighbors.first==ToRefine[i])
 		index=0;
 	      V.edges[edge_index[j]].set_friend(index,Npoints+i);
 	      // add new reference
@@ -2249,10 +2249,10 @@ bool VoronoiMesh::CloseToBorder(int point,int &border)
   int n=(int)mesh_vertices[point].size();
   for(int i=0;i<n;++i)
     {
-      if(edges[mesh_vertices[point][i]].GetNeighbor(1)==point)
-	border=edges[mesh_vertices[point][i]].GetNeighbor(0);
+      if(edges[mesh_vertices[point][i]].neighbors.second==point)
+	border=edges[mesh_vertices[point][i]].neighbors.first;
       else
-	border=edges[mesh_vertices[point][i]].GetNeighbor(1);
+	border=edges[mesh_vertices[point][i]].neighbors.second;
       if(border>olength)
 	return true;
     }
@@ -2269,10 +2269,10 @@ vector<int> VoronoiMesh::GetBorderingCells(vector<int> const& copied,
   int n=(int)mesh_vertices[tocheck].size();
   for(int i=0;i<n;++i)
     {
-      if(edges[mesh_vertices[tocheck][i]].GetNeighbor(1)==tocheck)
-	test=edges[mesh_vertices[tocheck][i]].GetNeighbor(0);
+      if(edges[mesh_vertices[tocheck][i]].neighbors.second==tocheck)
+	test=edges[mesh_vertices[tocheck][i]].neighbors.first;
       else
-	test=edges[mesh_vertices[tocheck][i]].GetNeighbor(1);
+	test=edges[mesh_vertices[tocheck][i]].neighbors.second;
       if(test>=olength)
 	continue;
       if(test<0)
@@ -2324,17 +2324,17 @@ void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point)
   int olength=Tri->GetOriginalLength();
   for(int i=0;i<n;++i)
     {
-      if(edges[mesh_vertices[point][i]].GetNeighbor(0)==point)
+      if(edges[mesh_vertices[point][i]].neighbors.first==point)
 	{
-	  if(edges[mesh_vertices[point][i]].GetNeighbor(1)>-1&&
-	     edges[mesh_vertices[point][i]].GetNeighbor(1)<olength)
-	    result.push_back(edges[mesh_vertices[point][i]].GetNeighbor(1));
+	  if(edges[mesh_vertices[point][i]].neighbors.second>-1&&
+	     edges[mesh_vertices[point][i]].neighbors.second<olength)
+	    result.push_back(edges[mesh_vertices[point][i]].neighbors.second);
 	}
       else
 	{
-	  if(edges[mesh_vertices[point][i]].GetNeighbor(0)>-1&&
-	     edges[mesh_vertices[point][i]].GetNeighbor(0)<olength)
-	    result.push_back(edges[mesh_vertices[point][i]].GetNeighbor(0));
+	  if(edges[mesh_vertices[point][i]].neighbors.first>-1&&
+	     edges[mesh_vertices[point][i]].neighbors.first<olength)
+	    result.push_back(edges[mesh_vertices[point][i]].neighbors.first);
 	}
     }
   sort(result.begin(),result.end());
@@ -2423,11 +2423,11 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &t
 	  int n=(int)mesh_vertices[copied[i][j]].size();
 	  for(int k=0;k<n;++k)
 	    {
-	      if(edges[mesh_vertices[copied[i][j]][k]].GetNeighbor(0)==
+	      if(edges[mesh_vertices[copied[i][j]][k]].neighbors.first==
 		 copied[i][j])
-		test=edges[mesh_vertices[copied[i][j]][k]].GetNeighbor(1);
+		test=edges[mesh_vertices[copied[i][j]][k]].neighbors.second;
 	      else
-		test=edges[mesh_vertices[copied[i][j]][k]].GetNeighbor(0);
+		test=edges[mesh_vertices[copied[i][j]][k]].neighbors.first;
 	      if(test<olength)
 		totest2.push_back(test);
 	    }
