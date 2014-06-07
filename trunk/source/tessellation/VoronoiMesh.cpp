@@ -2220,27 +2220,26 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 vector<Edge> VoronoiMesh::GetBoxEdges(void)
 {
   vector<Edge> res(4);
-  Edge temp;
-  temp.set_y(0,obc->GetGridBoundary(Up));
-  temp.set_y(1,obc->GetGridBoundary(Up));
-  temp.set_x(0,obc->GetGridBoundary(Left));
-  temp.set_x(1,obc->GetGridBoundary(Right));
-  res[1]=temp;
-  temp.set_y(0,obc->GetGridBoundary(Down));
-  temp.set_y(1,obc->GetGridBoundary(Down));
-  temp.set_x(0,obc->GetGridBoundary(Left));
-  temp.set_x(1,obc->GetGridBoundary(Right));
-  res[3]=temp;
-  temp.set_y(0,obc->GetGridBoundary(Up));
-  temp.set_y(1,obc->GetGridBoundary(Down));
-  temp.set_x(0,obc->GetGridBoundary(Right));
-  temp.set_x(1,obc->GetGridBoundary(Right));
-  res[0]=temp;
-  temp.set_y(0,obc->GetGridBoundary(Up));
-  temp.set_y(1,obc->GetGridBoundary(Down));
-  temp.set_x(0,obc->GetGridBoundary(Left));
-  temp.set_x(1,obc->GetGridBoundary(Left));
-  res[2]=temp;
+  res[1]=Edge(Vector2D(obc->GetGridBoundary(Left),
+		       obc->GetGridBoundary(Up)),
+	      Vector2D(obc->GetGridBoundary(Right),
+		       obc->GetGridBoundary(Up)),
+	      0,0);
+  res[3]=Edge(Vector2D(obc->GetGridBoundary(Left),
+		       obc->GetGridBoundary(Down)),
+	      Vector2D(obc->GetGridBoundary(Right),
+		       obc->GetGridBoundary(Down)),
+	      0,0);
+  res[0]=Edge(Vector2D(obc->GetGridBoundary(Right),
+		       obc->GetGridBoundary(Up)),
+	      Vector2D(obc->GetGridBoundary(Right),
+		       obc->GetGridBoundary(Down)),
+	      0,0);
+  res[2]=Edge(Vector2D(obc->GetGridBoundary(Left),
+		       obc->GetGridBoundary(Up)),
+	      Vector2D(obc->GetGridBoundary(Left),
+		       obc->GetGridBoundary(Down)),
+	      0,0);
   return res;
 }
 
