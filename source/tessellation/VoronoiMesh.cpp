@@ -1993,13 +1993,10 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		{
 		  diff=V.GetMeshPoint(NewEdge.GetNeighbor(1))-
 		    V.GetMeshPoint(V.GetOriginalIndex(NewEdge.GetNeighbor(1)));
-		  Edge temp(NewEdge);
-		  temp.set_x(0,NewEdge.vertices.first.x-diff.x);
-		  temp.set_x(1,NewEdge.vertices.second.x-diff.x);
-		  temp.set_y(0,NewEdge.vertices.first.y-diff.y);
-		  temp.set_y(1,NewEdge.vertices.second.y-diff.y);
-		  temp.set_friend(1,V.GetOriginalIndex(NewEdge.GetNeighbor(1)));
-		  temp.set_friend(0,Npoints+i);
+		  Edge temp(NewEdge.vertices.first-diff,
+			    NewEdge.vertices.second-diff,
+			    Npoints+i, 
+			    V.GetOriginalIndex(NewEdge.neighbors.second));
 		  V.mesh_vertices[temp.GetNeighbor(1)].push_back((int)V.edges.size());
 		  V.edges.push_back(temp);
 		  int loc=FindEdge(V,ToRefine[i],temp.GetNeighbor(1));
