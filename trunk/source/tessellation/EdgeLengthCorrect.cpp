@@ -15,8 +15,8 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessnew,
 		for(int j=0;j<nedges;++j)
 		{
 			Edge const& edge=tessold.GetEdge(edgesold[j]);
-			int n0=edge.GetNeighbor(0);
-			int n1=edge.GetNeighbor(1);
+			int n0=edge.neighbors.first;
+			int n1=edge.neighbors.second;
 			bool found=false;
 			// Don't do double work
 			if((n0<i&&n0>=0)||(n1<i&&n1>=0))
@@ -26,12 +26,12 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessnew,
 				Edge const& edgenew=tessnew.GetEdge(edgesnew[(k+j)%nedgesnew]);
 				// are the two edges the same?
 				if(((tessold.GetOriginalIndex(n0)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(0)))&&
+					edgenew.neighbors.first))&&
 					(tessold.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(1))))||((tessold.GetOriginalIndex(n0)==
-					tessnew.GetOriginalIndex(edgenew.GetNeighbor(1)))&&
+					edgenew.neighbors.second)))||((tessold.GetOriginalIndex(n0)==
+					tessnew.GetOriginalIndex(edgenew.neighbors.second))&&
 					(tessold.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(0)))))
+					edgenew.neighbors.first))))
 				{
 					lengths[edgesold[j]]=0.5*(edge.GetLength()+edgenew.GetLength());
 					found=true;
@@ -62,8 +62,8 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 		for(int j=0;j<nedgesmid;++j)
 		{
 			Edge const& edge=tessmid.GetEdge(edgesmid[j]);
-			int n0=edge.GetNeighbor(0);
-			int n1=edge.GetNeighbor(1);
+			int n0=edge.neighbors.first;
+			int n1=edge.neighbors.second;
 			// Don't do double work
 			if((n0<i&&n0>=0)||(n1<i&&n1>=0))
 				continue;
@@ -73,12 +73,12 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 				Edge const& edgenew=tessnew.GetEdge(edgesnew[(k+j)%nedgesnew]);
 				// are the two edges the same?
 				if(((tessmid.GetOriginalIndex(n0)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(0)))&&
+					edgenew.neighbors.first))&&
 					(tessmid.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(1))))||((tessmid.GetOriginalIndex(n0)==
-					tessnew.GetOriginalIndex(edgenew.GetNeighbor(1)))&&
+					edgenew.neighbors.second)))||((tessmid.GetOriginalIndex(n0)==
+					tessnew.GetOriginalIndex(edgenew.neighbors.second))&&
 					(tessmid.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
-					edgenew.GetNeighbor(0)))))
+					edgenew.neighbors.first))))
 				{
 					lengths[edgesmid[j]]+=0.25*edgenew.GetLength();
 					break;
@@ -89,12 +89,12 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 				Edge const& edgeold=tessold.GetEdge(edgesold[(k+j)%nedges]);
 				// are the two edges the same?
 				if(((tessmid.GetOriginalIndex(n0)==tessold.GetOriginalIndex(
-					edgeold.GetNeighbor(0)))&&
+					edgeold.neighbors.first))&&
 					(tessmid.GetOriginalIndex(n1)==tessold.GetOriginalIndex(
-					edgeold.GetNeighbor(1))))||((tessmid.GetOriginalIndex(n0)==
-					tessold.GetOriginalIndex(edgeold.GetNeighbor(1)))&&
+					edgeold.neighbors.second)))||((tessmid.GetOriginalIndex(n0)==
+					tessold.GetOriginalIndex(edgeold.neighbors.second))&&
 					(tessmid.GetOriginalIndex(n1)==tessold.GetOriginalIndex(
-					edgeold.GetNeighbor(0)))))
+					edgeold.neighbors.first))))
 				{
 					lengths[edgesmid[j]]+=0.25*edgeold.GetLength();
 					break;
