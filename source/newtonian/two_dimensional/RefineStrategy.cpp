@@ -110,7 +110,7 @@ Vector2D FindBestSplit(Tessellation const* tess,int PointToRefine,
 		}
 		slope=Parallel(edges[min_edge]);
 		slope=slope/abs(slope);
-		Vector2D v=point-edges[min_edge].GetVertex(0);
+		Vector2D v=point-edges[min_edge].vertices.first;
 		normal=v-ScalarProd(slope,v)*slope;
 		normal=normal/abs(normal);
 	}

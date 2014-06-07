@@ -25,7 +25,7 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 		Vector2D normaldir = tessellation.GetMeshPoint(edge.GetNeighbor(1))-
 			tessellation.GetMeshPoint(edge.GetNeighbor(0));
 
-		Vector2D paraldir = edge.GetVertex(1) - edge.GetVertex(0);
+		Vector2D paraldir = edge.vertices.second - edge.vertices.first;
 
 		Primitive left = interpolation.Interpolate
 			(tessellation, cells, dt, edge, 0,InBulk,facevelocity);
