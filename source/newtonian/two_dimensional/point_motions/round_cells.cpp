@@ -46,7 +46,7 @@ namespace {
 #endif
 						Vector2D p = Parallel(tess.GetEdge(edge_index[j]));
 						p=p/abs(p);
-						Vector2D n = r - tess.GetEdge(edge_index[j]).GetVertex(0);
+						Vector2D n = r - tess.GetEdge(edge_index[j]).vertices.first;
 						n-=ScalarProd(n,p)*p;
 						n=n/abs(n);
 						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[other],p));

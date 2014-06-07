@@ -149,11 +149,11 @@ namespace
   Vector2D GetReflectedPoint(Tessellation const& tess,int point,
 			     OuterBoundary const& /*obc*/,Edge const& edge)
   {
-    Vector2D par=edge.GetVertex(1)-edge.GetVertex(0);
+    Vector2D par=edge.vertices.second-edge.vertices.first;
     par=par/abs(par);
     Vector2D norm=Vector2D(-par.y,par.x);
-    Vector2D tofix=tess.GetMeshPoint(point)-edge.GetVertex(0);
-    tofix-=2*ScalarProd(norm,tofix)*norm-edge.GetVertex(0);
+    Vector2D tofix=tess.GetMeshPoint(point)-edge.vertices.first;
+    tofix-=2*ScalarProd(norm,tofix)*norm-edge.vertices.first;
     return tofix;
   }
 
