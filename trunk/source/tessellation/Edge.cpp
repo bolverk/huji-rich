@@ -29,19 +29,6 @@ int Edge::GetNeighbor(int index) const
   }
 }
 
-Vector2D Edge::GetVertex(int index) const
-{
-  if(index==0)
-    return vertices.first;
-  else if(index==1)
-    return vertices.second;
-  else{
-    UniversalError eo("Invalid index in Edge::GetVertex");
-    eo.AddEntry("index",index);
-    throw eo;
-  }
-}
-
 double Edge::GetLength(void) const
 {
   return abs(vertices.second-vertices.first);
@@ -73,16 +60,16 @@ void Edge::set_y(int p,double data)
 
 double DistanceToEdge(Vector2D const& point,Edge const& edge)
 {
-  Vector2D v=edge.GetVertex(1)-edge.GetVertex(0);
-  Vector2D w=point-edge.GetVertex(0);
+  Vector2D v=edge.vertices.second-edge.vertices.first;
+  Vector2D w=point-edge.vertices.first;
   double c1,c2;
   c1=ScalarProd(v,w);
   if(c1<=0)
-    return point.distance(edge.GetVertex(0));
+    return point.distance(edge.vertices.first);
   c2=ScalarProd(v,v);
   if(c2<=c1)
-    return point.distance(edge.GetVertex(1));
-  return point.distance(edge.GetVertex(0)+(c1/c2)*v);
+    return point.distance(edge.vertices.second);
+  return point.distance(edge.vertices.first+(c1/c2)*v);
 }
 
 bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
@@ -119,7 +106,7 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 
 Vector2D Parallel(Edge const& edge)
 {
-  return (edge.GetVertex(1) - edge.GetVertex(0));
+  return (edge.vertices.second - edge.vertices.first);
 }
 
 void Edge::SetVertex(Vector2D const& vec,int index)

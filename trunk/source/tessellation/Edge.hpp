@@ -37,12 +37,6 @@ public:
   */
   Edge(Edge const& other);
 
-  /*! \brief Returns the vertex of the edge
-    \param index Side index (either 0 or 1)
-    \return Position of vertex
-  */
-  Vector2D GetVertex(int index) const;
-
   /*! \brief Returns the length of the edge
     \return Length
   */
