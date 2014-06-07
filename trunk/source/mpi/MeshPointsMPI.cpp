@@ -13,24 +13,24 @@ namespace
     const vector<int> edge_index=tess.GetCellEdges(rank);
     const int n=(int)edge_index.size();
     boost::array<double,4> res;
-    res[0]=min(tess.GetEdge(edge_index[0]).get_x(0),
-	       tess.GetEdge(edge_index[0]).get_x(1));
-    res[1]=max(tess.GetEdge(edge_index[0]).get_x(0),
-	       tess.GetEdge(edge_index[0]).get_x(1));
-    res[2]=min(tess.GetEdge(edge_index[0]).get_y(0),
-	       tess.GetEdge(edge_index[0]).get_y(1));
-    res[3]=max(tess.GetEdge(edge_index[0]).get_y(0),
-	       tess.GetEdge(edge_index[0]).get_y(1));
+    res[0]=min(tess.GetEdge(edge_index[0]).vertices.first.x,
+	       tess.GetEdge(edge_index[0]).vertices.second.x);
+    res[1]=max(tess.GetEdge(edge_index[0]).vertices.first.x,
+	       tess.GetEdge(edge_index[0]).vertices.second.x);
+    res[2]=min(tess.GetEdge(edge_index[0]).vertices.first.y,
+	       tess.GetEdge(edge_index[0]).vertices.second.y);
+    res[3]=max(tess.GetEdge(edge_index[0]).vertices.first.y,
+	       tess.GetEdge(edge_index[0]).vertices.second.y);
     for(int i=1;i<n;++i)
       {
-	res[0]=min(min(tess.GetEdge(edge_index[i]).get_x(0),
-		       tess.GetEdge(edge_index[i]).get_x(1)),res[0]);
-	res[1]=max(max(tess.GetEdge(edge_index[i]).get_x(0),
-		       tess.GetEdge(edge_index[i]).get_x(1)),res[1]);
-	res[2]=min(min(tess.GetEdge(edge_index[i]).get_y(0),
-		       tess.GetEdge(edge_index[i]).get_y(1)),res[2]);
-	res[3]=max(max(tess.GetEdge(edge_index[i]).get_y(0),
-		       tess.GetEdge(edge_index[i]).get_y(1)),res[3]);
+	res[0]=min(min(tess.GetEdge(edge_index[i]).vertices.first.x,
+		       tess.GetEdge(edge_index[i]).vertices.second.x),res[0]);
+	res[1]=max(max(tess.GetEdge(edge_index[i]).vertices.first.x,
+		       tess.GetEdge(edge_index[i]).vertices.second.x),res[1]);
+	res[2]=min(min(tess.GetEdge(edge_index[i]).vertices.first.y,
+		       tess.GetEdge(edge_index[i]).vertices.second.y),res[2]);
+	res[3]=max(max(tess.GetEdge(edge_index[i]).vertices.first.y,
+		       tess.GetEdge(edge_index[i]).vertices.second.y),res[3]);
       }
     return res;
   }

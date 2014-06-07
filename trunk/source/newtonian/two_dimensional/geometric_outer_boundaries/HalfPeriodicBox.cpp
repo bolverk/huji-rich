@@ -39,9 +39,9 @@ bool HalfPeriodicBox::AreWeReflective(Edge const& edge) const
 {
 	double length=edge.GetLength();
 	// Are we periodic or reflective?
-	if(abs((edge.get_y(0)-edge.get_y(1)))<1e-5*length)
-		if(abs(edge.get_y(0)-_up)<1e-5*length
-			||abs(edge.get_y(0)-_down)<1e-5*length)
+	if(abs((edge.vertices.first.y-edge.vertices.second.y))<1e-5*length)
+		if(abs(edge.vertices.first.y-_up)<1e-5*length
+			||abs(edge.vertices.first.y-_down)<1e-5*length)
 			return true;
 		else
 			return false;
