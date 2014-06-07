@@ -26,7 +26,7 @@ namespace
 	{
 		Vector2D par(Parallel(edge));
 		par=par/abs(par);
-		Vector2D edge0=edge.GetVertex(0);
+		Vector2D edge0=edge.vertices.first;
 		Vector2D temp=point-edge0;
 		return 2*par*ScalarProd(par,temp)-temp+edge0;
 	}
@@ -39,8 +39,8 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	const double eps=1e-7;
 	vector<Vector2D> points;
 	double R=tess->GetWidth(index);
-	points.push_back(tess->GetEdge(edge_index[0]).GetVertex(0));
-	points.push_back(tess->GetEdge(edge_index[0]).GetVertex(1));
+	points.push_back(tess->GetEdge(edge_index[0]).vertices.first);
+	points.push_back(tess->GetEdge(edge_index[0]).vertices.second);
 	// Remove identical points
 	for(size_t i=1;i<edge_index.size();++i)
 	{
@@ -48,19 +48,19 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 		bool samepoint=false;
 		for(size_t j=0;j<n;++j)
 		{
-			if(tess->GetEdge(edge_index[i]).GetVertex(0).distance(points[j])<eps*R)
+			if(tess->GetEdge(edge_index[i]).vertices.first.distance(points[j])<eps*R)
 				samepoint=true;
 		}
 		if(!samepoint)
-			points.push_back(tess->GetEdge(edge_index[i]).GetVertex(0));
+			points.push_back(tess->GetEdge(edge_index[i]).vertices.first);
 		samepoint=false;
 		for(size_t j=0;j<n;++j)
 		{
-			if(tess->GetEdge(edge_index[i]).GetVertex(1).distance(points[j])<eps*R)
+			if(tess->GetEdge(edge_index[i]).vertices.second.distance(points[j])<eps*R)
 				samepoint=true;
 		}
 		if(!samepoint)
-			points.push_back(tess->GetEdge(edge_index[i]).GetVertex(1));
+			points.push_back(tess->GetEdge(edge_index[i]).vertices.second);
 	}
 	// Find the bottom point
 	sort(points.begin(),points.end(),VectorSort);
