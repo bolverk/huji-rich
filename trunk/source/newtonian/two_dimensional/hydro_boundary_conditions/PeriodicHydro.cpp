@@ -59,7 +59,7 @@ Conserved PeriodicHydro::CalcFlux
 		tessellation.GetMeshPoint(edge.GetNeighbor(0)));
 
 	const Vector2D paraldir
-		(edge.GetVertex(1) - edge.GetVertex(0));
+	  (edge.vertices.second - edge.vertices.first);
 
 	if(edge.GetNeighbor(0)>tessellation.GetPointNo()){
 		const Primitive left =interp.Interpolate
@@ -104,10 +104,10 @@ Vector2D PeriodicHydro::CalcEdgeVelocity
 	neigh0=edge.GetNeighbor(0);
 	neigh1=edge.GetNeighbor(1);
 	return tessellation.CalcFaceVelocity
-		(point_velocities[neigh0],point_velocities[neigh1],
-		tessellation.GetMeshPoint(edge.GetNeighbor(0)),
-		tessellation.GetMeshPoint(edge.GetNeighbor(1)),
-		0.5*(edge.GetVertex(0)+edge.GetVertex(1)));
+	  (point_velocities[neigh0],point_velocities[neigh1],
+	   tessellation.GetMeshPoint(edge.GetNeighbor(0)),
+	   tessellation.GetMeshPoint(edge.GetNeighbor(1)),
+	   0.5*(edge.vertices.first+edge.vertices.second));
 }
 
 bool PeriodicHydro::IsBoundary

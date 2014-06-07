@@ -11,12 +11,12 @@ Vector2D HydroBoundaryConditions::Normal(Edge const& edge,
   else{ 
     Vector2D v;
     if(!IsGhostCell(edge.GetNeighbor(0),tessellation)){
-      v = edge.GetVertex(0) - 
+      v = edge.vertices.first - 
 	tessellation.GetMeshPoint(edge.GetNeighbor(0));
     }
     else if(!IsGhostCell(edge.GetNeighbor(1),tessellation)){
       v = tessellation.GetMeshPoint(edge.GetNeighbor(1)) - 
-	edge.GetVertex(0);
+	edge.vertices.first;
     }
     else{
       throw UniversalError("Both neighbors are ghosts");
