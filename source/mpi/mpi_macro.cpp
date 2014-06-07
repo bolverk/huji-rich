@@ -108,8 +108,8 @@ bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & po
 {
   boost::array<Vector2D,3> triangle;
   vector<int>const& cell_edges=tess.GetCellEdges(cell_index);
-  triangle[0]=tess.GetEdge(cell_edges[0]).GetVertex(0);
-  triangle[1]=tess.GetEdge(cell_edges[0]).GetVertex(1);
+  triangle[0]=tess.GetEdge(cell_edges[0]).vertices.first;
+  triangle[1]=tess.GetEdge(cell_edges[0]).vertices.second;
   triangle[2]=tess.GetCellCM(cell_index);
   double temp=orient2d(triangle);
   triangle[2]=point;

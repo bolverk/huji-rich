@@ -22,7 +22,7 @@ Conserved NoMovement::CalcFlux(Tessellation const& tess,
 			tess.GetMeshPoint(edge.GetNeighbor(0));
 
 		const Vector2D paral_dir = 
-			edge.GetVertex(1) - edge.GetVertex(0);
+			edge.vertices.second - edge.vertices.first;
 
 		const Primitive left = interpolation.Interpolate
 			(tess,cells,dt,edge,0,InBulk,face_velocity);
