@@ -126,7 +126,7 @@ void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
 	for(int i=0;i<nedges;++i)
 	{
 		Edge const& edge=tess->GetEdge(edges[i]);
-		const int other=(edge.GetNeighbor(0)==index)? edge.GetNeighbor(1):edge.GetNeighbor(0);
+		const int other=(edge.neighbors.first==index)? edge.neighbors.second : edge.neighbors.first;
 		Vector2D otherpoint=(other==-1) ? GetReflectedPoint(edge,mypoint) : tess->GetMeshPoint(other);
 		angles[i]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
 	}
