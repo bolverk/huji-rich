@@ -54,18 +54,6 @@ public:
   */
   int GetNeighbor(int index) const;
 
-  /*! \brief Returns the x-coordinate from one of the ends of the edge. 
-    \param index Which end of the edge to return. 
-    \returns The chosen x-coordinate.
-  */
-  double get_x(int index) const;
-
-  /*! \brief Returns the y-coordinate from one of the ends of the edge. 
-    \param index Which end of the edge to return. 
-    \returns The chosen y-coordinate.
-  */
-  double get_y(int index)const;
-
   //! \brief Sets the x-coordinate of a chosen end of the edge. \param point The end to change. \param data The new x-coordinate.
   void set_x(int point,double data);
 

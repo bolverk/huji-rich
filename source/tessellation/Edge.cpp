@@ -29,22 +29,6 @@ int Edge::GetNeighbor(int index) const
   }
 }
 
-double Edge::get_x(int index) const
-{
-  if(index==0) 
-    return vertices.first.x;
-  else 
-    return vertices.second.x;
-}
-
-double Edge::get_y(int index) const
-{
-  if(index==0) 
-    return vertices.first.y;
-  else 
-    return vertices.second.y;
-}
-
 Vector2D Edge::GetVertex(int index) const
 {
   if(index==0)

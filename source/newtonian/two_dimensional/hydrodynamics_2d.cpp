@@ -1475,10 +1475,10 @@ namespace {
     Vector2D par=edge.GetVertex(1)-edge.GetVertex(0);
     if(abs(par.x)>abs(par.y)){
       // We are in the x direction
-      if(MeshPoint.y>edge.get_y(0))
-	MeshPoint.y-=MeshPoint.y-edge.get_y(0);
+      if(MeshPoint.y>edge.vertices.first.y)
+	MeshPoint.y-=MeshPoint.y-edge.vertices.first.y;
       else
-	MeshPoint.y+=edge.get_y(0)-MeshPoint.y;
+	MeshPoint.y+=edge.vertices.first.y-MeshPoint.y;
     }
     else{
       // We are in the y direction
