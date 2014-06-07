@@ -552,7 +552,7 @@ namespace {
       tess.GetMeshPoint(edge.GetNeighbor(0));
 
     const Vector2D paral_dir = 
-      edge.GetVertex(1) - edge.GetVertex(0);
+      edge.vertices.second - edge.vertices.first;
 
     const Primitive left = interpolation.Interpolate
       (tess,cells,dt,edge,0,InBulk,face_velocity);
@@ -1472,7 +1472,7 @@ namespace {
 			     Edge const& edge)
   {
     Vector2D MeshPoint=tess.GetMeshPoint(point);
-    Vector2D par=edge.GetVertex(1)-edge.GetVertex(0);
+    Vector2D par=edge.vertices.second-edge.vertices.first;
     if(abs(par.x)>abs(par.y)){
       // We are in the x direction
       if(MeshPoint.y>edge.vertices.first.y)
