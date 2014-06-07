@@ -2006,8 +2006,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		    index2=0;
 		  else
 		    index2=1;
-		  V.edges[loc].set_x(index2,temp.vertices.second.x);
-		  V.edges[loc].set_y(index2,temp.vertices.second.y);
+		  set_pair_member(V.edges[loc].vertices,
+				  index2, temp.vertices.second);
 		  FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.GetNeighbor(1)),
 				    Npoints+i,Npoints+i,NewPoint-diff);
 		}

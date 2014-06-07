@@ -493,4 +493,13 @@ template<class T> T pair_member(const std::pair<T,T>& p, int index)
   return 0==index ? p.first : p.second;
 }
 
+template<class T> void set_pair_member(std::pair<T,T>& p, int index, const T& val)
+{
+  assert((0==index)||(1==index));
+  if(0==index)
+    p.first = val;
+  else
+    p.second = val;
+}
+
 #endif // UTILS_HPP

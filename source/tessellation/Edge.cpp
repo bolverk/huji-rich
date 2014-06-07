@@ -42,22 +42,6 @@ void Edge::set_friend(int dim,int data)
     neighbors.second = data;
 }
 
-void Edge::set_x(int p,double data)
-{
-  if(p==0)
-    vertices.first.x=data;
-  else
-    vertices.second.x=data;
-}
-
-void Edge::set_y(int p,double data)
-{
-  if(p==0)
-    vertices.first.y=data;
-  else
-    vertices.second.y=data;
-}
-
 double DistanceToEdge(Vector2D const& point,Edge const& edge)
 {
   Vector2D v=edge.vertices.second-edge.vertices.first;

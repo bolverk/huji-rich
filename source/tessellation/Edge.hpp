@@ -48,12 +48,6 @@ public:
   */
   int GetNeighbor(int index) const;
 
-  //! \brief Sets the x-coordinate of a chosen end of the edge. \param point The end to change. \param data The new x-coordinate.
-  void set_x(int point,double data);
-
-  //! \brief Sets the y-coordinate of a chosen end of the edge. \param point The end to change. \param data The new y-coordinate.
-  void set_y(int point,double data);
-
   //! \brief Sets the mesh generating point related to the edge. \param dim The index in the edge we want to change. \param data The index of the new mesh generating point.
   void set_friend(int dim,int data);
 
