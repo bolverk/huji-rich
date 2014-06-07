@@ -1656,8 +1656,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	  const double eps=1e-8;
 	  for(int k=0;k<2;++k)
 	    {
-	      temp=NewEdges[j].GetNeighbor(k);
-	      other=NewEdges[j].GetNeighbor((k+1)%2);
+	      temp=pair_member(NewEdges[j].neighbors,k);
+	      other=pair_member(NewEdges[j].neighbors,(k+1)%2);
 	      if(temp==-1||temp>Npoints)
 		continue;				
 	      size_t jj=0;			
@@ -1960,10 +1960,9 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		  NewEdge.set_friend(rindex,Npoints+i);
 		  V.edges[edge_index[j]]=NewEdge;
 		  new_ref.push_back(edge_index[j]);
-		  const Vector2D diff(V.GetMeshPoint(NewEdge.GetNeighbor((rindex+1)%2))-
-				      V.GetMeshPoint(V.GetOriginalIndex(NewEdge.GetNeighbor((rindex+1)%2))));
-		  if(NewEdge.GetNeighbor((rindex+1)%2)>(n+Npoints))
-		    FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.GetNeighbor((rindex+1)%2)),
+		  const Vector2D diff(V.GetMeshPoint(pair_member(NewEdge.neighbors,(rindex+1)%2))-V.GetMeshPoint(V.GetOriginalIndex(pair_member(NewEdge.neighbors,(rindex+1)%2))));
+		  if(pair_member(NewEdge.neighbors,(rindex+1)%2)>(n+Npoints))
+		    FixPeriodNeighbor(V,V.GetOriginalIndex(pair_member(NewEdge.neighbors,(rindex+1)%2)),
 				      ToRefine[i],Npoints+i,NewPoint-diff);
 		}
 	      else
@@ -2035,9 +2034,9 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      V.edges[edge_index[j]].set_friend(index,Npoints+i);
 	      // add new reference
 	      new_ref.push_back(edge_index[j]);
-	      if(V.edges[edge_index[j]].GetNeighbor((index+1)%2)>(n+Npoints))
+	      if(pair_member(V.edges[edge_index[j]].neighbors,(index+1)%2)>(n+Npoints))
 		{
-		  int other=edges[j].GetNeighbor((index+1)%2);
+		  int other=pair_member(edges[j].neighbors,(index+1)%2);
 		  const Vector2D diff=V.GetMeshPoint(other)-V.GetMeshPoint(
 									   V.GetOriginalIndex(other));
 		  other=V.GetOriginalIndex(other);
