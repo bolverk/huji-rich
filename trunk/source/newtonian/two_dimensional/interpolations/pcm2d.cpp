@@ -1,4 +1,5 @@
 #include "pcm2d.hpp"
+#include "../../../misc/utils.hpp"
 
 PCM2D::PCM2D(void): slopes_(vector<ReducedPrimitiveGradient2D> ()){}
 
@@ -14,9 +15,9 @@ Primitive PCM2D::Interpolate
  InterpolationType interptype,Vector2D const& /*vface*/) const
 {
   if(interptype==InBulk)
-    return cells[edge.GetNeighbor(side)];
+    return cells[pair_member(edge.neighbors,side)];
   else
-    return cells[edge.GetNeighbor((side+1)%2)];
+    return cells[pair_member(edge.neighbors,(side+1)%2)];
 }
 
 vector<ReducedPrimitiveGradient2D>& PCM2D::GetGradients(void)
@@ -32,17 +33,17 @@ vector<double> PCM2D::interpolateTracers
  int side,
  InterpolationType interp_type,Vector2D const& /*vface*/) const
 {
-  const int n = (int)tracers[edge.GetNeighbor(side)].size();
+  const int n = (int)tracers[pair_member(edge.neighbors,side)].size();
   vector<double> res(n);
   if(interp_type==InBulk)
     {
       for(int i=0;i<n;++i)
-	res[i] = tracers[edge.GetNeighbor(side)][i];
+	res[i] = tracers[pair_member(edge.neighbors,side)][i];
     }
   else
     {
       for(int i=0;i<n;++i)
-	res[i] = tracers[edge.GetNeighbor((side+1)%2)][i];
+	res[i] = tracers[pair_member(edge.neighbors,(side+1)%2)][i];
     }
   return res;
 }
