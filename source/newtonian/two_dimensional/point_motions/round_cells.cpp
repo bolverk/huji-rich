@@ -34,13 +34,13 @@ namespace {
 			{
 				if(DistanceToEdge(r,tess.GetEdge(edge_index[j]))<0.2*R)
 				{
-					if((int)i==tess.GetEdge(edge_index[j]).GetNeighbor(0)||
-						hbc.IsGhostCell(tess.GetEdge(edge_index[j]).GetNeighbor(1),
+					if((int)i==tess.GetEdge(edge_index[j]).neighbors.first||
+						hbc.IsGhostCell(tess.GetEdge(edge_index[j]).neighbors.second,
 						tess))
 					{
-						if(tess.GetEdge(edge_index[j]).GetNeighbor(1)==-1)
+						if(tess.GetEdge(edge_index[j]).neighbors.second==-1)
 							continue;
-						int other=tess.GetEdge(edge_index[j]).GetNeighbor(1);
+						int other=tess.GetEdge(edge_index[j]).neighbors.second;
 #ifndef RICH_MPI
 						other=tess.GetOriginalIndex(other);
 #endif
