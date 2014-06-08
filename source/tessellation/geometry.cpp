@@ -19,8 +19,7 @@ double Vector2D::distance(Vector2D const& v1) const
 
 double abs(Vector2D const& v)
 {
-  return sqrt(pow(v.x,2)+
-	      pow(v.y,2));
+  return sqrt(v.x*v.x+v.y*v.y);
 }
 
 Vector2D::Vector2D(void):
@@ -147,7 +146,7 @@ double CrossProduct(Vector2D const& v1, Vector2D const& v2)
 
 Vector2D calc_mid_point(Vector2D const& v1, Vector2D const& v2)
 {
-	return Vector2D((v1.x+v2.x) / 2, (v1.y+v2.y) / 2);
+	return Vector2D((v1.x+v2.x)*0.5, (v1.y+v2.y)*0.5);
 }
 
 Vector2D zcross(Vector2D const& v)
