@@ -14,7 +14,7 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 		for(int j=0;j<nedge;++j)
 		{
 			Edge const& edge=tess.GetEdge(edges[j]);
-			if(edge.GetNeighbor(0)>npoints||edge.GetNeighbor(1)>npoints)
+			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
 				break;
@@ -47,7 +47,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		for(int j=0;j<nneigh;++j)
 		{
 			Edge const& edge=tess.GetEdge(edges[j]);
-			if(edge.GetNeighbor(0)>npoints||edge.GetNeighbor(1)>npoints)
+			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
 				break;
@@ -98,17 +98,17 @@ void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int>
 		for(int j=0;j<(int)edges.size();++j)
 		{
 			Edge temp=tess.GetEdge(edges[j]);
-/*			if(temp.GetNeighbor(0)>N||temp.GetNeighbor(1)>N)
+/*			if(temp.neighbors.first>N||temp.neighbors.second>N)
 				throw UniversalError("Bad removal, neighbor is periodic");*/
-			if(temp.GetNeighbor(0)==ToRemove[i])
+			if(temp.neighbors.first==ToRemove[i])
 			{
 				if(binary_search(ToRemove.begin(),ToRemove.end(),temp.
-					GetNeighbor(1)))
+					neighbors.second))
 					throw UniversalError("Bad removal, neighboring cells");
 			}
 			else
 				if(binary_search(ToRemove.begin(),ToRemove.end(),temp.
-					GetNeighbor(0)))
+					neighbors.first))
 					throw UniversalError("Bad removal, neighboring cells");
 		}
 	}
