@@ -328,9 +328,9 @@ void UpdateConservedExtensive
 	const int edge_index = cell_edge_indices[j];
 	const Edge edge = tessellation.GetEdge(edge_index);
 	const Conserved delta = dt*lengthes[edge_index]*fluxes[edge_index];
-	if(i==edge.GetNeighbor(0))
+	if(i==edge.neighbors.first)
 	  conserved_extensive[i] -= delta;
-	else if(i==edge.GetNeighbor(1))
+	else if(i==edge.neighbors.second)
 	  conserved_extensive[i] += delta;
 	else
 	  update_conserved_extensive_error(edge_index,i);
@@ -548,8 +548,8 @@ namespace {
 				     double dt)
   {
     const Vector2D normal_dir = 
-      tess.GetMeshPoint(edge.GetNeighbor(1))-
-      tess.GetMeshPoint(edge.GetNeighbor(0));
+      tess.GetMeshPoint(edge.neighbors.second)-
+      tess.GetMeshPoint(edge.neighbors.first);
 
     const Vector2D paral_dir = 
       edge.vertices.second - edge.vertices.first;
@@ -643,8 +643,8 @@ void CalcFluxes
       try
 	{
 	  const Edge edge = tessellation.GetEdge(i);
-	  const int n1=edge.GetNeighbor(1);
-	  const int n0=edge.GetNeighbor(0);
+	  const int n1=edge.neighbors.second;
+	  const int n0=edge.neighbors.first;
 	  if(!boundaryconditions.IsBoundary(edge,tessellation))
 	    {
 	      if(!CellsEvolve[n0]&&!CellsEvolve[n1])
@@ -1223,8 +1223,8 @@ vector<vector<double> > CalcTraceChange
 	  const int edge_index = cell_edge_indices[k];
 	  const Edge edge = tess.GetEdge(edge_index);
 	  const double dm=fluxes[edge_index].Mass;
-	  const int n1=edge.GetNeighbor(1);
-	  const int n0=edge.GetNeighbor(0);
+	  const int n1=edge.neighbors.second;
+	  const int n0=edge.neighbors.first;
 	  if(!hbc.IsBoundary(edge,tess))
 	    {
 	      if(CellsEvolve[n0]||CellsEvolve[n1]){	     
@@ -1514,7 +1514,7 @@ bool IsShockedCell(Tessellation const& tess,int index,
 	{
 	  Primitive other2=hbc.GetBoundaryPrimitive(edges[i],tess,cells,
 						    time);
-	  if((edges[i].GetNeighbor(0)==-1)||(edges[i].GetNeighbor(1)==-1))
+	  if((edges[i].neighbors.first==-1)||(edges[i].neighbors.second==-1))
 	    {
 	      c_ij = CalcCentroid(edges[i])-0.5*(GetReflectedPoint
 						 (tess,index,edges[i])+center);
@@ -1523,10 +1523,10 @@ bool IsShockedCell(Tessellation const& tess,int index,
 	  else
 	    {
 	      int other_point;
-	      if(edges[i].GetNeighbor(0)==index)
-		other_point=edges[i].GetNeighbor(1);
+	      if(edges[i].neighbors.first==index)
+		other_point=edges[i].neighbors.second;
 	      else
-		other_point=edges[i].GetNeighbor(0);
+		other_point=edges[i].neighbors.first;
 	      c_ij = CalcCentroid(edges[i])-0.5*(
 						 tess.GetMeshPoint(other_point)+center);
 	      r_ij = center-tess.GetMeshPoint(other_point);
@@ -1540,10 +1540,10 @@ bool IsShockedCell(Tessellation const& tess,int index,
 	}
       else
 	{
-	  if(edges[i].GetNeighbor(0)==index)
-	    other=edges[i].GetNeighbor(1);
+	  if(edges[i].neighbors.first==index)
+	    other=edges[i].neighbors.second;
 	  else
-	    other=edges[i].GetNeighbor(0);	
+	    other=edges[i].neighbors.first;	
 	  c_ij = CalcCentroid(edges[i])-
 	    0.5*(tess.GetMeshPoint(other)+center);
 	  r_ij = center-tess.GetMeshPoint(other);
@@ -1583,8 +1583,8 @@ void FixAdvection(vector<Conserved>& extensive,
   for(int i=0;i<n;++i)
     {
       Edge const& edge=tessold.GetEdge(i);
-      int n0=edge.GetNeighbor(0);
-      int n1=edge.GetNeighbor(1);
+      int n0=edge.neighbors.first;
+      int n1=edge.neighbors.second;
       if(n0<0||n1<0)
 	continue;
       Vector2D norm(tessold.GetMeshPoint(n1)-tessold.GetMeshPoint(n0));
