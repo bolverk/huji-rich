@@ -92,11 +92,10 @@ namespace{
   {
     for(int j=0;j<3;++j)
       {
-	if(fc.get_friend(j)==i)
+	if(fc.neighbors[j]==i)
 	  return j;
       }
-    cout<<"Couldn't find number "<<i<<" in facet";
-    return 0;
+    throw UniversalError("Error in find_index: Index not found");
   }
 }
 
@@ -109,7 +108,7 @@ void Delaunay::add_point(int index)
   for(i=0;i<3;++i)
     {
       outer[i]=f[triangle].get_vertice(i);
-      temp_friends[i]=f[triangle].get_friend(i);
+      temp_friends[i]=f[triangle].neighbors[i];
     }
   // create and _update the new facets
   f.push_back(f_temp);
