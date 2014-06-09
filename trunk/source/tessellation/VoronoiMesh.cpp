@@ -772,8 +772,8 @@ void VoronoiMesh::build_v()
 	  {
 	    edge_temp.vertices.first = center;
 	    edge_temp.vertices.second = center_temp;
-	    edge_temp.neighbors.first = to_check->get_vertice(j);
-	    edge_temp.neighbors.second = to_check->get_vertice((j+1)%3);
+	    edge_temp.neighbors.first = to_check->vertices[j];
+	    edge_temp.neighbors.second = to_check->vertices[(j+1)%3];
 
 	    int n0=edge_temp.neighbors.first;
 	    int n1=edge_temp.neighbors.second;

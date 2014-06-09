@@ -199,18 +199,18 @@ void Delaunay::flip(int i, int j)
 
 	  for(int k=0;k<3;++k)
 	    {
-	      circle_test[k]=cor[f[indexes[0]].get_vertice(k)];
+	      circle_test[k]=cor[f[indexes[0]].vertices[k]];
 	    }
 	  circle_test[3]=cor[check[0]];
 
 	  if(incircle(circle_test)>0)
 	    {
 	      //The point is in a circle change the facets and their friends
-	      const int v1=f[indexes[0]].get_vertice((other[1]+1)%3);
+	      const int v1=f[indexes[0]].vertices[(other[1]+1)%3];
 	      const int f1=f[indexes[0]].get_friend(other[1]);
 	      const int f12=f[indexes[0]].get_friend((other[1]+2)%3);
 	      const int f13=f[indexes[0]].get_friend((other[1]+2)%3);
-	      const int v2=f[indexes[1]].get_vertice((check[1]+1)%3);
+	      const int v2=f[indexes[1]].vertices[(check[1]+1)%3];
 	      const int f2=f[indexes[1]].get_friend((check[1]+2)%3);
 	      const int f22=f[indexes[1]].get_friend(check[1]);
 	      const int f23=f[indexes[1]].get_friend((check[1]+2)%3);
@@ -328,7 +328,7 @@ void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
       counter=false;
       for(int j=0;j<3;++j)
 	{
-	  if(f1->get_vertice(i)==f2->get_vertice(j))
+	  if(f1->vertices[i]==f2->vertices[j])
 	    {
 	      counter=true;
 	      break;
@@ -336,7 +336,7 @@ void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
 	}
       if(counter==false)
 	{
-	  p[0]=f1->get_vertice(i);
+	  p[0]=f1->vertices[i];
 	  p[1]=i;
 	  return;
 	}
@@ -350,9 +350,9 @@ void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
 double Delaunay::triangle_area(int index)
 {
   boost::array<Vector2D,3> p;
-  p[0]=cor[f[index].get_vertice(0)];
-  p[1]=cor[f[index].get_vertice(1)];
-  p[2]=cor[f[index].get_vertice(2)];
+  p[0]=cor[f[index].vertices[0]];
+  p[1]=cor[f[index].vertices[1]];
+  p[2]=cor[f[index].vertices[2]];
   double x1=p[2].x-p[0].x;
   double x2=p[1].x-p[0].x;
   double y1=p[2].y-p[0].y;
@@ -381,8 +381,8 @@ int Delaunay::Walk(int point)
       //Test friends
       for(int i=0;i<3;++i)
 	{
-	  points[0]=cor[f[cur_facet].get_vertice(i)];
-	  points[1]=cor[f[cur_facet].get_vertice((i+1)%3)];
+	  points[0]=cor[f[cur_facet].vertices[i]];
+	  points[1]=cor[f[cur_facet].vertices[(i+1)%3]];
 	  if(orient2d(points)<0)
 	    {
 	      finish=0;
@@ -428,7 +428,7 @@ void Delaunay::FindContainingTetras(int StartFacet,int point,vector<int> &result
 int Delaunay::FindPointInFacet(int facet,int point)
 {
   for(int i=0;i<3;++i)
-    if(f[facet].get_vertice(i)==point)
+    if(f[facet].vertices[i]==point)
       return i;
   UniversalError eo("Error in Delaunay, FindPointInFacet");
   eo.AddEntry("Facet number",facet);
@@ -441,7 +441,7 @@ bool Delaunay::IsOuterFacet(int facet)
   //int PointNum=length-1;
   for(int i=0;i<3;++i)
     for(int j=0;j<3;++j)
-      if(f[facet].get_vertice(i)==(olength+j))
+      if(f[facet].vertices[i]==(olength+j))
 	return true;
   return false;
 }
@@ -449,9 +449,9 @@ bool Delaunay::IsOuterFacet(int facet)
 double Delaunay::CalculateRadius(int facet)
 {
   const double big=1e10;
-  const double a=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(1)]);
-  const double b=cor[f[facet].get_vertice(0)].distance(cor[f[facet].get_vertice(2)]);
-  const double c=cor[f[facet].get_vertice(2)].distance(cor[f[facet].get_vertice(1)]);
+  const double a=cor[f[facet].vertices[0]].distance(cor[f[facet].vertices[1]]);
+  const double b=cor[f[facet].vertices[0]].distance(cor[f[facet].vertices[2]]);
+  const double c=cor[f[facet].vertices[2]].distance(cor[f[facet].vertices[1]]);
   const double temp1=b+c-a;
   if(temp1<=0)
     {
@@ -528,9 +528,9 @@ facet* Delaunay::get_facet(int index)
 double Delaunay::get_facet_coordinate(int Facet,int vertice, int dim)
 {
   if(dim==0) 
-    return cor[f[Facet].get_vertice(vertice)].x;
+    return cor[f[Facet].vertices[vertice]].x;
   else 
-    return cor[f[Facet].get_vertice(vertice)].y;
+    return cor[f[Facet].vertices[vertice]].y;
 }
 
 Vector2D Delaunay::get_point(int index) const
