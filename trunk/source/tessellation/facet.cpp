@@ -19,8 +19,4 @@ int facet::get_friend(int dim) const
 	return neighbors[dim];
 }
 
-int facet::get_vertice(int dim) const
-{
-	return vertices[dim];
-}
 
