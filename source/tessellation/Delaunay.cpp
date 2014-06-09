@@ -136,12 +136,12 @@ void Delaunay::add_point(int index)
   if(temp_friends[1]!=last_loc)
     {
       i=find_index(f[temp_friends[1]],triangle);
-      f[temp_friends[1]].set_friend(location_pointer+2,i);
+      f[temp_friends[1]].neighbors[i] = location_pointer+2;
     }
   if(temp_friends[0]!=last_loc)
     {
       i=find_index(f[temp_friends[0]],triangle);
-      f[temp_friends[0]].set_friend(location_pointer+1,i);
+      f[temp_friends[0]].neighbors[i] = location_pointer+1;
     }
   // Calculate radius if needed
   if(CalcRadius)
@@ -220,12 +220,12 @@ void Delaunay::flip(int i, int j)
 	      f[indexes[1]].set_vertice(check[0],0);
 	      f[indexes[1]].set_vertice(v2,1);
 	      f[indexes[1]].set_vertice(other[0],2);
-	      f[indexes[0]].set_friend(f1,0);
-	      f[indexes[0]].set_friend(f2,1);
-	      f[indexes[0]].set_friend(indexes[1],2);
-	      f[indexes[1]].set_friend(f22,0);
-	      f[indexes[1]].set_friend(f12,1);
-	      f[indexes[1]].set_friend(indexes[0],2);
+	      f[indexes[0]].neighbors[0] = f1;
+	      f[indexes[0]].neighbors[1] = f2;
+	      f[indexes[0]].neighbors[2] = indexes[1];
+	      f[indexes[1]].neighbors[0] = f22;
+	      f[indexes[1]].neighbors[1] = f12;
+	      f[indexes[1]].neighbors[2] = indexes[0];
 	      // change the friends of the friends if needed
 	      if(f23!=last_loc)
 		{
