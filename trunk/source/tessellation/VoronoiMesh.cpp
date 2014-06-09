@@ -764,11 +764,11 @@ void VoronoiMesh::build_v()
       to_check=Tri->get_facet(i);
       for(j=0;j<3;++j)
 	{
-	  if(to_check->get_friend(j)==Tri->get_last_loc())
+	  if(to_check->neighbors[j]==Tri->get_last_loc())
 	    continue;
-	  if(to_check->get_friend(j)<i)
+	  if(to_check->neighbors[j]<i)
 	    continue;
-	  center_temp=centers[to_check->get_friend(j)];
+	  center_temp=centers[to_check->neighbors[j]];
 	  {
 	    edge_temp.vertices.first = center;
 	    edge_temp.vertices.second = center_temp;
@@ -782,7 +782,7 @@ void VoronoiMesh::build_v()
 	      {
 		// I added a change here, if edge has zero length I don't add it.
 		if(edge_temp.GetLength()>eps*sqrt(Tri->GetFacetRadius(i)*
-						  Tri->GetFacetRadius(to_check->get_friend(j))))
+						  Tri->GetFacetRadius(to_check->neighbors[j])))
 		  {
 		    {
 		      if(edge_temp.neighbors.first<Tri->GetOriginalLength())

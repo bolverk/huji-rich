@@ -35,7 +35,7 @@ void BinaryLogger::output(vector<Vector2D> const& cor,
 
   for(int i=0;i<(int)f.size();++i){
     for(int j=0;j<3;++j)
-      binary_write_single_int(f[i].get_friend(j),file_handle);
+      binary_write_single_int(f[i].neighbors[j],file_handle);
   }
 
   file_handle.close();
