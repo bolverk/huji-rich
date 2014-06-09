@@ -29,8 +29,3 @@ void facet::set_vertice(int data,int dim)
 	vertices[dim]=data;
 }
 
-void facet::set_friend(int data,int dim)
-{
-	neighbors[dim]=data;
-}
-

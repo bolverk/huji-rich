@@ -33,10 +33,7 @@ public:
 	void set_vertice(int data,int dim);
 	//! \brief Returns a vertice. \returns The index of the vertice. \param dim The index in the facet to return.
 	int get_vertice(int dim) const;
-	/*! \brief Changes the index of a friend.
-	\param data The index of the new friend. \param dim The index in the facet to change.
-	*/
-	void set_friend(int data,int dim);
+
 	//! \brief Returns a friend. \returns The index of the friend. \param dim The index in the facet to return.
 	int get_friend(int dim) const;
 };
