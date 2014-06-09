@@ -38,23 +38,16 @@ double DistanceToEdge(Vector2D const& point,Edge const& edge)
 bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 			 Vector2D &Intersection,double eps)
 {
-  bool res=true;
-  if(min(edge1.vertices.second.x,edge1.vertices.first.x)>max(edge2.vertices.second.x,edge2.vertices.first.x)||
-     min(edge2.vertices.second.x,edge2.vertices.first.x)>max(edge1.vertices.second.x,edge1.vertices.first.x)||
-     min(edge1.vertices.second.y,edge1.vertices.first.y)>max(edge2.vertices.second.y,edge2.vertices.first.y)||
-     min(edge2.vertices.second.y,edge2.vertices.first.y)>max(edge1.vertices.second.y,edge1.vertices.first.y))
-    res=false;
-  double d=(edge1.vertices.first.x-edge1.vertices.second.x)*(edge2.vertices.first.y-edge2.vertices.second.y)
+  const double d=(edge1.vertices.first.x-edge1.vertices.second.x)*(edge2.vertices.first.y-edge2.vertices.second.y)
     -(edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.y-edge1.vertices.second.y);
   if(d==0)
     return false;
-  double xi=((edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.x*edge1.vertices.second.y-
-					      edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.x-edge1.vertices.second.x)*
-	     (edge2.vertices.first.x*edge2.vertices.second.y-edge2.vertices.second.x*edge2.vertices.first.y))/d;
-  double yi=((edge2.vertices.first.y-edge2.vertices.second.y)*(edge1.vertices.first.x*edge1.vertices.second.y-
-					      edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.y-edge1.vertices.second.y)*
-	     (edge2.vertices.first.x*edge2.vertices.second.y-edge2.vertices.second.x*edge2.vertices.first.y))/d;
-  Intersection.Set(xi,yi);
+  const double xi=((edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.x*edge1.vertices.second.y-
+								     edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.x-edge1.vertices.second.x)*
+		   (edge2.vertices.first.x*edge2.vertices.second.y-edge2.vertices.second.x*edge2.vertices.first.y))/d;
+  const double yi=((edge2.vertices.first.y-edge2.vertices.second.y)*(edge1.vertices.first.x*edge1.vertices.second.y-
+								     edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.y-edge1.vertices.second.y)*
+		   (edge2.vertices.first.x*edge2.vertices.second.y-edge2.vertices.second.x*edge2.vertices.first.y))/d;
   eps=eps*min(edge1.GetLength(),edge2.GetLength());
   if((xi+eps)<min(edge1.vertices.first.x,edge1.vertices.second.x)||(xi-eps)>max(edge1.vertices.first.x,edge1.vertices.second.x))
     return false;
@@ -64,7 +57,11 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
     return false;
   if((yi+eps)<min(edge2.vertices.first.y,edge2.vertices.second.y)||(yi-eps)>max(edge2.vertices.first.y,edge2.vertices.second.y))
     return false;
-  return res;
+  Intersection.Set(xi,yi);
+  return !(min(edge1.vertices.second.x,edge1.vertices.first.x)>max(edge2.vertices.second.x,edge2.vertices.first.x)||
+	   min(edge2.vertices.second.x,edge2.vertices.first.x)>max(edge1.vertices.second.x,edge1.vertices.first.x)||
+	   min(edge1.vertices.second.y,edge1.vertices.first.y)>max(edge2.vertices.second.y,edge2.vertices.first.y)||
+	   min(edge2.vertices.second.y,edge2.vertices.first.y)>max(edge1.vertices.second.y,edge1.vertices.first.y));
 }
 
 Vector2D Parallel(Edge const& edge)
