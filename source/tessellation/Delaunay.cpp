@@ -123,15 +123,15 @@ void Delaunay::add_point(int index)
   f[location_pointer+2].vertices[1] = outer[2];
   f[location_pointer+2].vertices[2] = index;
 
-  f[triangle].set_friend(temp_friends[2],0);
-  f[triangle].set_friend(location_pointer+1,1);
-  f[triangle].set_friend(location_pointer+2,2);
-  f[location_pointer+1].set_friend(temp_friends[0],0);
-  f[location_pointer+1].set_friend(location_pointer+2,1);
-  f[location_pointer+1].set_friend(triangle,2);
-  f[location_pointer+2].set_friend(temp_friends[1],0);
-  f[location_pointer+2].set_friend(triangle,1);
-  f[location_pointer+2].set_friend(location_pointer+1,2);
+  f[triangle].neighbors[0] = temp_friends[2];
+  f[triangle].neighbors[1] = location_pointer+1;;
+  f[triangle].neighbors[2] = location_pointer+2;
+  f[location_pointer+1].neighbors[0] = temp_friends[0];
+  f[location_pointer+1].neighbors[1] = location_pointer+2;
+  f[location_pointer+1].neighbors[2] = triangle;
+  f[location_pointer+2].neighbors[0] = temp_friends[1];
+  f[location_pointer+2].neighbors[1] = triangle;
+  f[location_pointer+2].neighbors[2] = location_pointer+1;
   // _update the friends list of the friends
   if(temp_friends[1]!=last_loc)
     {
