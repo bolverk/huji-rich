@@ -9,10 +9,10 @@ namespace {
 	int calc_n(Edge const& edge,
 		Tessellation const& tess)
 	{
-		if(edge.GetNeighbor(1)>tess.GetPointNo())
-			return edge.GetNeighbor(1);
+		if(edge.neighbors.second>tess.GetPointNo())
+			return edge.neighbors.second;
 		else
-			return edge.GetNeighbor(0);
+			return edge.neighbors.first;
 	}
 }
 
@@ -55,13 +55,13 @@ Conserved PeriodicHydro::CalcFlux
 	}*/
 
 	const Vector2D normaldir
-		(tessellation.GetMeshPoint(edge.GetNeighbor(1))-
-		tessellation.GetMeshPoint(edge.GetNeighbor(0)));
+		(tessellation.GetMeshPoint(edge.neighbors.second)-
+		tessellation.GetMeshPoint(edge.neighbors.first));
 
 	const Vector2D paraldir
 	  (edge.vertices.second - edge.vertices.first);
 
-	if(edge.GetNeighbor(0)>tessellation.GetPointNo()){
+	if(edge.neighbors.first>tessellation.GetPointNo()){
 		const Primitive left =interp.Interpolate
 			(tessellation,cells,dt,edge,1,Boundary,edge_velocity);
 		const Primitive right = interp.Interpolate
@@ -101,23 +101,23 @@ Vector2D PeriodicHydro::CalcEdgeVelocity
 	Edge const& edge, double /*time*/) const
 {
 	int neigh1,neigh0;
-	neigh0=edge.GetNeighbor(0);
-	neigh1=edge.GetNeighbor(1);
+	neigh0=edge.neighbors.first;
+	neigh1=edge.neighbors.second;
 	return tessellation.CalcFaceVelocity
 	  (point_velocities[neigh0],point_velocities[neigh1],
-	   tessellation.GetMeshPoint(edge.GetNeighbor(0)),
-	   tessellation.GetMeshPoint(edge.GetNeighbor(1)),
+	   tessellation.GetMeshPoint(edge.neighbors.first),
+	   tessellation.GetMeshPoint(edge.neighbors.second),
 	   0.5*(edge.vertices.first+edge.vertices.second));
 }
 
 bool PeriodicHydro::IsBoundary
 	(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.GetNeighbor(0)<0)||
-		(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
+	if((edge.neighbors.first<0)||
+		(edge.neighbors.first>=tessellation.GetPointNo()))
 		return true;
-	if((edge.GetNeighbor(1)<0)||
-		(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
+	if((edge.neighbors.second<0)||
+		(edge.neighbors.second>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }
@@ -141,7 +141,7 @@ vector<double> PeriodicHydro::CalcTracerFlux(Tessellation const& tessellation,
 	vector<double> res(tracers[0].size());
 	if(dm>0)
 	{
-		if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+		if(IsGhostCell(edge.neighbors.first,tessellation))
 		{
 			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,0,
 				Boundary,edge_velocity);
@@ -158,7 +158,7 @@ vector<double> PeriodicHydro::CalcTracerFlux(Tessellation const& tessellation,
 	}
 	else
 	{
-		if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+		if(IsGhostCell(edge.neighbors.first,tessellation))
 		{
 			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,1,
 				InBulk,edge_velocity);

@@ -19,7 +19,7 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 		for(int j=0;j<nedge;++j)
 		{
 			Edge const& edge=tess.GetEdge(edges[j]);
-			if(edge.GetNeighbor(0)>npoints||edge.GetNeighbor(1)>npoints)
+			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
 				break;
