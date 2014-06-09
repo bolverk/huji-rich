@@ -27,9 +27,6 @@ public:
 	facet(const facet & other);
 	//! \brief Class destructor
 	~facet();
-
-	//! \brief Returns a friend. \returns The index of the friend. \param dim The index in the facet to return.
-	int get_friend(int dim) const;
 };
 
 #endif //FACET_HPP

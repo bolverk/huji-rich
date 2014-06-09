@@ -14,9 +14,4 @@ facet::~facet()
 {
 }
 
-int facet::get_friend(int dim) const
-{
-	return neighbors[dim];
-}
-
 

@@ -207,13 +207,13 @@ void Delaunay::flip(int i, int j)
 	    {
 	      //The point is in a circle change the facets and their friends
 	      const int v1=f[indexes[0]].vertices[(other[1]+1)%3];
-	      const int f1=f[indexes[0]].get_friend(other[1]);
-	      const int f12=f[indexes[0]].get_friend((other[1]+2)%3);
-	      const int f13=f[indexes[0]].get_friend((other[1]+2)%3);
+	      const int f1=f[indexes[0]].neighbors[other[1]];
+	      const int f12=f[indexes[0]].neighbors[(other[1]+2)%3];
+	      const int f13=f[indexes[0]].neighbors[(other[1]+2)%3];
 	      const int v2=f[indexes[1]].vertices[(check[1]+1)%3];
-	      const int f2=f[indexes[1]].get_friend((check[1]+2)%3);
-	      const int f22=f[indexes[1]].get_friend(check[1]);
-	      const int f23=f[indexes[1]].get_friend((check[1]+2)%3);
+	      const int f2=f[indexes[1]].neighbors[(check[1]+2)%3];
+	      const int f22=f[indexes[1]].neighbors[check[1]];
+	      const int f23=f[indexes[1]].neighbors[(check[1]+2)%3];
 	      f[indexes[0]].vertices[0] = other[0];
 	      f[indexes[0]].vertices[1] = v1;
 	      f[indexes[0]].vertices[2] = check[0];
@@ -245,10 +245,10 @@ void Delaunay::flip(int i, int j)
 	      flip_stack.pop();
 	      // push into the stack the new facets to check
 	      array_temp[0]=indexes[1];
-	      array_temp[1]=f[indexes[1]].get_friend(0);
+	      array_temp[1]=f[indexes[1]].neighbors[0];
 	      flip_stack.push(array_temp);
 	      array_temp[0]=indexes[0];
-	      array_temp[1]=f[indexes[0]].get_friend(1);
+	      array_temp[1]=f[indexes[0]].neighbors[1];
 	      flip_stack.push(array_temp);
 	    }
 	  else
@@ -386,7 +386,7 @@ int Delaunay::Walk(int point)
 	  if(orient2d(points)<0)
 	    {
 	      finish=0;
-	      cur_facet=f[cur_facet].get_friend(i);
+	      cur_facet=f[cur_facet].neighbors[i];
 	      break;
 	    }
 	}
@@ -414,13 +414,13 @@ double Delaunay::FindMaxRadius(int point)
 void Delaunay::FindContainingTetras(int StartFacet,int point,vector<int> &result)
 {
   int PointLocation=FindPointInFacet(StartFacet,point);
-  int NextFacet=f[StartFacet].get_friend(PointLocation);
+  int NextFacet=f[StartFacet].neighbors[PointLocation];
   result.reserve(8);
   result.push_back(NextFacet);
   while(NextFacet!=StartFacet)
     {
       PointLocation=FindPointInFacet(NextFacet,point);
-      NextFacet=f[NextFacet].get_friend(PointLocation);
+      NextFacet=f[NextFacet].neighbors[PointLocation];
       result.push_back(NextFacet);
     }
 }
