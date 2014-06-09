@@ -71,11 +71,3 @@ Vector2D Parallel(Edge const& edge)
 {
   return (edge.vertices.second - edge.vertices.first);
 }
-
-void Edge::SetVertex(Vector2D const& vec,int index)
-{
-  if(index==0)
-    vertices.first = vec;
-  else
-    vertices.second = vec;
-}

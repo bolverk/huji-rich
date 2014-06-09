@@ -41,34 +41,6 @@ public:
     \return Length
   */
   double GetLength(void) const;
-
-   /*! \brief Sets the vertex of the edge
-   \param vec The new vertex
-    \param index Side index (either 0 or 1)
-  */
-  void SetVertex(Vector2D const& vec,int index);
-
-};
-
-/*! \brief Exception thrown in case an invalid side index is entered
-  \details The index can only be 0 or 1
-*/
-class InvalidSideIndexException
-{
-private:
-  
-  int _index;
-
-public:
-  /*! \brief Class constructor
-    \param index The invalid input argument
-  */
-  InvalidSideIndexException(int index);
-
-  /*! \brief Returns the invalid index
-    \return The invalid index1
-  */
-  //  int GetIndex(void) const;
 };
 
 /*! \brief Calculates a unit vector parallel to an edge
