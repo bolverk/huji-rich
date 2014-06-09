@@ -1,5 +1,6 @@
 #include "InFlow.hpp"
 #include "../../../misc/universal_error.hpp"
+#include "../../../misc/utils.hpp"
 
 Primitive InFlow::GetBoundaryPrimitive(Edge const& /*edge*/,
 	Tessellation const& /*Data*/,vector<Primitive> const& /*cells*/,
@@ -36,7 +37,7 @@ Conserved InFlow::CalcFlux
 	Vector2D n = Normal(edge, tessellation);
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
-		if(IsGhostCell(edge.GetNeighbor(i),tessellation))
+	  if(IsGhostCell(pair_member(edge.neighbors,i),tessellation))
 			states[i] = outer_;
 		else
 			states[i] = interp.Interpolate(tessellation,cells,dt,edge,i,InBulk,

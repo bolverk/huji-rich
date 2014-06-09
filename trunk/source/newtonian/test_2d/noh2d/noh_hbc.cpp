@@ -47,9 +47,9 @@ Vector2D NohHBC::CalcEdgeVelocity
 
 bool NohHBC::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
+	if((edge.neighbors.first<0)||(edge.neighbors.first>=tessellation.GetPointNo()))
 		return true;
-	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
+	if((edge.neighbors.second<0)||(edge.neighbors.second>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }
@@ -81,10 +81,10 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	res.push_back(p.Pressure*pow(d,-1.66666));
 	for(size_t i=1;i<tracers[0].size();++i)
 	{
-		if(IsGhostCell(edge.GetNeighbor(1),tess))
-			res.push_back(tracers[edge.GetNeighbor(0)][i]);
+		if(IsGhostCell(edge.neighbors.second,tess))
+			res.push_back(tracers[edge.neighbors.first][i]);
 		else
-			res.push_back(tracers[edge.GetNeighbor(1)][i]);
+			res.push_back(tracers[edge.neighbors.second][i]);
 	}
 		
 	return res;
@@ -98,7 +98,7 @@ vector<double> NohHBC::CalcTracerFlux(Tessellation const& tessellation,
 	  Vector2D const& vface) const
 {
 	vector<double> res;
-	if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+	if(IsGhostCell(edge.neighbors.first,tessellation))
 	{
 		if(dm>0)
 		{
