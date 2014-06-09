@@ -1917,8 +1917,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      ++counter_edges;
 	      if(counter_edges==2)
 		{
-		  splitedge.SetVertex(vs1,0);
-		  splitedge.SetVertex(vs2,1);
+		  splitedge.vertices.first = vs1;
+		  splitedge.vertices.second = vs2;
 		  break;
 		}
 	    }
