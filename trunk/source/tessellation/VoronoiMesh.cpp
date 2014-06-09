@@ -1898,10 +1898,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		vector<int> new_ref;
 		// Calculate the splitting edge
 		Edge splitedge(0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) - 
-			normal*R*20,
-			0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) +
-			normal*R*20,
-			Npoints+i,ToRefine[i]);
+			normal*R*20,0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) +
+			normal*R*20,Npoints+i,ToRefine[i]);
 		Vector2D intersect;
 		// Find other intersecting segment
 		int counter_edges=0;
@@ -2014,8 +2012,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 						index2=0;
 					else
 						index2=1;
-					set_pair_member(V.edges[loc].vertices,
-						index2, temp.vertices.second);
+					set_pair_member(V.edges[loc].vertices,index2,temp.vertices.second);
 					FixPeriodNeighbor(V,V.GetOriginalIndex(NewEdge.neighbors.second),
 						Npoints+i,Npoints+i,NewPoint-diff);
 				}
@@ -2026,7 +2023,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 				V.edges.push_back(NewEdge);
 				// Do the other split
 				NewEdge.vertices.first = pair_member(edges[j].vertices,(index+1)%2);
-				NewEdge.neighbors.first==ToRefine[i];
+				NewEdge.neighbors.first=ToRefine[i];
 				V.edges[edge_index[j]]=NewEdge;
 				old_ref.push_back(edge_index[j]);
 				continue;
@@ -2053,8 +2050,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 					const Vector2D diff=V.GetMeshPoint(other)-V.GetMeshPoint(
 						V.GetOriginalIndex(other));
 					other=V.GetOriginalIndex(other);
-					FixPeriodNeighbor(V,other,ToRefine[i],Npoints+i,
-						NewPoint-diff);
+					FixPeriodNeighbor(V,other,ToRefine[i],Npoints+i,NewPoint-diff);
 				}
 			}
 			else
