@@ -16,11 +16,10 @@ using namespace boost;
 */
 class facet
 {
-private:
-	boost::array<int,3> vertices;
-	boost::array<int,3> friends;
-
 public:
+
+	boost::array<int,3> vertices;
+	boost::array<int,3> neighbors;
 
 	//! \brief Defualt constructor. Sets vertices and friends to zero.
 	facet();
