@@ -40,9 +40,9 @@ Vector2D HalfPeriodicHydro::CalcEdgeVelocity(Tessellation const& tessellation,
 
 bool HalfPeriodicHydro::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.GetNeighbor(0)<0)||(edge.GetNeighbor(0)>=tessellation.GetPointNo()))
+	if((edge.neighbors.first<0)||(edge.neighbors.first>=tessellation.GetPointNo()))
 		return true;
-	if((edge.GetNeighbor(1)<0)||(edge.GetNeighbor(1)>=tessellation.GetPointNo()))
+	if((edge.neighbors.second<0)||(edge.neighbors.second>=tessellation.GetPointNo()))
 		return true;
 	return false;
 }

@@ -6,7 +6,7 @@ vector<double> CustomOuter::GetBoundaryTracers(Edge const& edge,Tessellation con
 {
 	Vector2D n = Normal(edge,Data);
 	double angle;
-	if(IsGhostCell(edge.GetNeighbor(0),Data))
+	if(IsGhostCell(edge.neighbors.first,Data))
 		angle=atan2(-n.y,-n.x);
 	else
 		angle=atan2(n.y,n.x);
@@ -27,7 +27,7 @@ Primitive CustomOuter::GetBoundaryPrimitive(Edge const& edge,
 {
 	Vector2D n = Normal(edge, tessellation);
 	double angle;
-	if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+	if(IsGhostCell(edge.neighbors.first,tessellation))
 		angle=atan2(-n.y,-n.x);
 	else
 		angle=atan2(n.y,n.x);
@@ -55,7 +55,7 @@ Conserved CustomOuter::CalcFlux
 {
 	Vector2D n = Normal(edge, tessellation);
 	double angle;
-	if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+	if(IsGhostCell(edge.neighbors.first,tessellation))
 		angle=atan2(-n.y,-n.x);
 	else
 		angle=atan2(n.y,n.x);
@@ -85,9 +85,9 @@ Vector2D CustomOuter::CalcEdgeVelocity
 
 bool CustomOuter::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if(edge.GetNeighbor(0)<0)
+	if(edge.neighbors.first<0)
 		return true;
-	if(edge.GetNeighbor(1)<0)
+	if(edge.neighbors.second<0)
 		return true;
 	return false;
 }
@@ -109,7 +109,7 @@ vector<double> CustomOuter::CalcTracerFlux
 {
 	Vector2D n = Normal(edge, tessellation);
 	double angle;
-	if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+	if(IsGhostCell(edge.neighbors.first,tessellation))
 		angle=atan2(-n.y,-n.x);
 	else
 		angle=atan2(n.y,n.x);

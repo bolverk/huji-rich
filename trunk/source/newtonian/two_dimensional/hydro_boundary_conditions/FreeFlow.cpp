@@ -16,10 +16,10 @@ Primitive FreeFlow::GetBoundaryPrimitive
 	Tessellation const& /*Data*/,
 	vector<Primitive> const& cells,double /*time*/)const
 {
-	if(edge.GetNeighbor(0)==-1)
-		return cells[edge.GetNeighbor(1)];
+	if(edge.neighbors.first==-1)
+		return cells[edge.neighbors.second];
 	else
-		return cells[edge.GetNeighbor(0)];
+		return cells[edge.neighbors.first];
 }
 
 vector<double> FreeFlow::GetBoundaryTracers
@@ -28,20 +28,20 @@ vector<double> FreeFlow::GetBoundaryTracers
 	 vector<vector<double> > const& tracers,double
 	/*time*/)const
 {
-	if(edge.GetNeighbor(0)==-1)
-		return tracers[edge.GetNeighbor(1)];
+	if(edge.neighbors.first==-1)
+		return tracers[edge.neighbors.second];
 	else
-		return tracers[edge.GetNeighbor(0)];
+		return tracers[edge.neighbors.first];
 }
 
 namespace {
 int calc_ci(Edge const& edge)
 {
-	if((edge.GetNeighbor(0)==-1)&&
-		(edge.GetNeighbor(1)!=-1))
+	if((edge.neighbors.first==-1)&&
+		(edge.neighbors.second!=-1))
 		return 1;
-	else if((edge.GetNeighbor(1)==-1)&&
-		edge.GetNeighbor(0)!=-1)
+	else if((edge.neighbors.second==-1)&&
+		edge.neighbors.first!=-1)
 		return 0;
 	else
 	  throw UniversalError("Boundary condition called for bulk cell");
@@ -58,15 +58,9 @@ Conserved FreeFlow::CalcFlux
 	const int ci = calc_ci(edge);
 	const Vector2D p = Parallel(edge);
 	const Vector2D n = Normal(edge, tessellation);
-	const Primitive ghost=cells[edge.GetNeighbor(ci)];
+	const Primitive ghost=cells[pair_member(edge.neighbors,ci)];
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
-	  /*
-		if(IsGhostCell(edge.GetNeighbor(i),tessellation))
-			states[i] = ghost;
-		else
-			states[i] = ghost;
-	  */
 	  states[i] = ghost;
 		states[i].Velocity.Set
 			(Projection(states[i].Velocity, n),
@@ -96,9 +90,9 @@ Vector2D FreeFlow::CalcEdgeVelocity
 bool FreeFlow::IsBoundary
 (Edge const& edge,Tessellation const& tessellation)const
 {
-	if(edge.GetNeighbor(0)<0)
+	if(edge.neighbors.first<0)
 		return true;
-	if(edge.GetNeighbor(1)<0)
+	if(edge.neighbors.second<0)
 		return true;
 	return false;
 }
