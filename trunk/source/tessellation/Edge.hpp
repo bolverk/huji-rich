@@ -42,9 +42,6 @@ public:
   */
   double GetLength(void) const;
 
-  //! \brief Sets the mesh generating point related to the edge. \param dim The index in the edge we want to change. \param data The index of the new mesh generating point.
-  void set_friend(int dim,int data);
-
    /*! \brief Sets the vertex of the edge
    \param vec The new vertex
     \param index Side index (either 0 or 1)

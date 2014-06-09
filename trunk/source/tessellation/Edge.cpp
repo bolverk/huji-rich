@@ -21,14 +21,6 @@ double Edge::GetLength(void) const
   return abs(vertices.second-vertices.first);
 }
 
-void Edge::set_friend(int dim,int data)
-{
-  if(dim==0)
-    neighbors.first = data;
-  else
-    neighbors.second = data;
-}
-
 double DistanceToEdge(Vector2D const& point,Edge const& edge)
 {
   Vector2D v=edge.vertices.second-edge.vertices.first;
