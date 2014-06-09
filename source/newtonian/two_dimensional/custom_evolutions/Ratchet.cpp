@@ -11,23 +11,23 @@ Conserved Ratchet::CalcFlux(Tessellation const& tess,vector<Primitive> const& ce
 {
 	int other;
 	int my_index;
-	if(edge.GetNeighbor(0)==index)
+	if(edge.neighbors.first==index)
 	{
 		my_index = 0;
-		other = edge.GetNeighbor(1);
+		other = edge.neighbors.second;
 	}
 	else
 	{
 		my_index = 1;
-		other = edge.GetNeighbor(0);
+		other = edge.neighbors.first;
 	}
 	if(hbc.IsGhostCell(other,tess))
 		return Conserved();
 	const Vector2D p = Parallel(edge);
-	const Vector2D n = tess.GetMeshPoint(edge.GetNeighbor(1))
-		-tess.GetMeshPoint(edge.GetNeighbor(0));
-	const Vector2D outward = tess.GetMeshPoint(edge.GetNeighbor(1-my_index))
-		-tess.GetMeshPoint(edge.GetNeighbor(my_index));
+	const Vector2D n = tess.GetMeshPoint(edge.neighbors.second)
+		-tess.GetMeshPoint(edge.neighbors.first);
+	const Vector2D outward = tess.GetMeshPoint(pair_member(edge.neighbors,1-my_index))
+	  -tess.GetMeshPoint(pair_member(edge.neighbors,my_index));
 	Primitive ghost = cells[other];
 	if (((dir_==in)&&(ScalarProd(ghost.Velocity,outward)>0))||
 		((dir_==out)&&(ScalarProd(ghost.Velocity,outward)<0)))
@@ -67,8 +67,8 @@ vector<double> Ratchet::CalcTracerFlux
 	double dm,Edge const& edge,int index,double dt,double /*time*/,
 	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {
-	const int other = (edge.GetNeighbor(0)==index) ?
-		edge.GetNeighbor(1) : edge.GetNeighbor(0);
+	const int other = (edge.neighbors.first==index) ?
+		edge.neighbors.second : edge.neighbors.first;
 	if(dir_==in)
 		return vector<double>(tracers[0].size(),0);
 	else
