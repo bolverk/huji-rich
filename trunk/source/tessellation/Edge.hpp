@@ -42,12 +42,6 @@ public:
   */
   double GetLength(void) const;
 
-  /*! \brief Returns the index of neighbor cells
-    \param index side index (either 0 or 1)
-    \return Cell index
-  */
-  int GetNeighbor(int index) const;
-
   //! \brief Sets the mesh generating point related to the edge. \param dim The index in the edge we want to change. \param data The index of the new mesh generating point.
   void set_friend(int dim,int data);
 

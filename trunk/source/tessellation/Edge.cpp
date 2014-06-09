@@ -16,19 +16,6 @@ Edge::Edge(Vector2D const& p1, Vector2D const& p2,
 	   int neighbor1, int neighbor2):
   vertices(p1,p2), neighbors(neighbor1, neighbor2) {}
 
-int Edge::GetNeighbor(int index) const
-{
-  if(index==0)
-    return neighbors.first;
-  else if(index==1)
-    return neighbors.second;
-  else{
-    UniversalError eo("Invalid index in Edge::GetNeighbor");
-    eo.AddEntry("index",index);
-    throw eo;
-  }
-}
-
 double Edge::GetLength(void) const
 {
   return abs(vertices.second-vertices.first);
