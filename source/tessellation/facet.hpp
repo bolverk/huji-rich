@@ -28,9 +28,6 @@ public:
 	//! \brief Class destructor
 	~facet();
 
-	//! \brief Returns a vertice. \returns The index of the vertice. \param dim The index in the facet to return.
-	int get_vertice(int dim) const;
-
 	//! \brief Returns a friend. \returns The index of the friend. \param dim The index in the facet to return.
 	int get_friend(int dim) const;
 };
