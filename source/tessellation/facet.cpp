@@ -2,12 +2,12 @@
 
 facet::facet():
   vertices(boost::array<int,3> ()),
-  friends(boost::array<int,3> ()) {}
+  neighbors(boost::array<int,3> ()) {}
 
 
 facet::facet(const facet & other):
   vertices(other.vertices),
-  friends(other.friends)
+  neighbors(other.neighbors)
 {}
 
 facet::~facet()
@@ -16,7 +16,7 @@ facet::~facet()
 
 int facet::get_friend(int dim) const
 {
-	return friends[dim];
+	return neighbors[dim];
 }
 
 int facet::get_vertice(int dim) const
@@ -31,6 +31,6 @@ void facet::set_vertice(int data,int dim)
 
 void facet::set_friend(int data,int dim)
 {
-	friends[dim]=data;
+	neighbors[dim]=data;
 }
 
