@@ -13,11 +13,11 @@ namespace {
 		for(int i=0;i<n;++i)
 		{
 			edge=tess.GetEdge(edge_index[i]);
-			if(point==edge.GetNeighbor(0))
-				if(edge.GetNeighbor(1)>-1)
+			if(point==edge.neighbors.first)
+				if(edge.neighbors.second>-1)
 				{
 					dm-=lengthes[edge_index[i]]*fluxes[edge_index[i]].Mass*
-						(center-tess.GetMeshPoint(edge.GetNeighbor(1)));
+						(center-tess.GetMeshPoint(edge.neighbors.second));
 				}
 				else
 				{
@@ -25,11 +25,11 @@ namespace {
 					dm-=2*lengthes[edge_index[i]]*fluxes[edge_index[i]].Mass*r;
 				}
 			else 
-				if(point==edge.GetNeighbor(1))
-					if(edge.GetNeighbor(0)>-1)
+				if(point==edge.neighbors.second)
+					if(edge.neighbors.first>-1)
 					{
 						dm+=lengthes[edge_index[i]]*fluxes[edge_index[i]].Mass*
-							(center-tess.GetMeshPoint(edge.GetNeighbor(0)));
+							(center-tess.GetMeshPoint(edge.neighbors.first));
 					}
 					else
 					{
