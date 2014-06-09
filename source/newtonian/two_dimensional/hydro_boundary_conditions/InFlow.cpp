@@ -27,8 +27,8 @@ Conserved InFlow::CalcFlux
 	SpatialReconstruction const& interp,double dt,
 	double /*time*/)const
 {
-	const bool cond1 = (edge.GetNeighbor(0)==-1)&&(edge.GetNeighbor(1)!=-1);
-	const bool cond2 = (edge.GetNeighbor(1)==-1)&&(edge.GetNeighbor(0)!=-1);
+	const bool cond1 = (edge.neighbors.first==-1)&&(edge.neighbors.second!=-1);
+	const bool cond2 = (edge.neighbors.second==-1)&&(edge.neighbors.first!=-1);
 	if(!(cond1||cond2))
 	  throw UniversalError("Boundary condition called for bulk cell");
 
@@ -61,9 +61,9 @@ Vector2D InFlow::CalcEdgeVelocity(Tessellation const& /*tessellation*/,
 
 bool InFlow::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if(edge.GetNeighbor(0)<0)
+	if(edge.neighbors.first<0)
 		return true;
-	if(edge.GetNeighbor(1)<0)
+	if(edge.neighbors.second<0)
 		return true;
 	return false;
 }
@@ -85,7 +85,7 @@ vector<double> InFlow::CalcTracerFlux(Tessellation const& tessellation,
 	Vector2D const& edge_velocity) const
 {
 	vector<double> res(tracers[0].size());
-	if(IsGhostCell(edge.GetNeighbor(0),tessellation))
+	if(IsGhostCell(edge.neighbors.first,tessellation))
 	{
 		if(dm>0)
 			transform(outer_tracer_.begin(),outer_tracer_.end(),

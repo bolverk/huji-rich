@@ -8,10 +8,10 @@ RigidWallHydro::~RigidWallHydro(void) {}
 vector<double> RigidWallHydro::GetBoundaryTracers(Edge const& edge,Tessellation const& /*Data*/,
 	vector<vector<double> > const& tracers,double /*time*/)const
 {
-	if(edge.GetNeighbor(0)==-1)
-		return tracers[edge.GetNeighbor(1)];
+	if(edge.neighbors.first==-1)
+		return tracers[edge.neighbors.second];
 	else
-		return tracers[edge.GetNeighbor(0)];
+		return tracers[edge.neighbors.first];
 }
 
 Primitive RigidWallHydro::GetBoundaryPrimitive(Edge const& edge,
@@ -19,17 +19,17 @@ Primitive RigidWallHydro::GetBoundaryPrimitive(Edge const& edge,
 	double /*time*/)const
 {
 	const Vector2D p = Parallel(edge);
-	Primitive res =cells[edge.GetNeighbor(GetRealCell(edge))];
+	Primitive res =cells[pair_member(edge.neighbors,GetRealCell(edge))];
 	res.Velocity = Reflect(res.Velocity,p);
 	return res;
 }
 
 int RigidWallHydro::GetRealCell(Edge const& edge)const
 {
-	if((edge.GetNeighbor(0)==-1)&&(edge.GetNeighbor(1)!=-1))
+	if((edge.neighbors.first==-1)&&(edge.neighbors.second!=-1))
 		return 1;
 	else{
-		if((edge.GetNeighbor(1)==-1)&&(edge.GetNeighbor(0)!=-1))
+		if((edge.neighbors.second==-1)&&(edge.neighbors.first!=-1))
 			return 0;
 		else{
 		  throw UniversalError("Boundary condition called for bulk cell");
@@ -52,7 +52,7 @@ Conserved RigidWallHydro::CalcFluxCi
 	ghost.Velocity = Reflect(ghost.Velocity, p);
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
-		if(IsGhostCell(edge.GetNeighbor(i),tessellation))
+	  if(IsGhostCell(pair_member(edge.neighbors,i),tessellation))
 			states[i] = ghost;
 		else
 			states[i] = othercell;
@@ -88,9 +88,9 @@ Vector2D RigidWallHydro::CalcEdgeVelocity
 
 bool RigidWallHydro::IsBoundary(Edge const& edge,Tessellation const& Data)const
 {
-	if(edge.GetNeighbor(0)<0)
+	if(edge.neighbors.first<0)
 		return true;
-	if(edge.GetNeighbor(1)<0)
+	if(edge.neighbors.second<0)
 		return true;
 	return false;
 }
