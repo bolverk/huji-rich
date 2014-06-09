@@ -27,10 +27,7 @@ public:
 	facet(const facet & other);
 	//! \brief Class destructor
 	~facet();
-	/*! \brief Changes the index of a vertice.
-	\param data The index of the new vertice. \param dim The index in the facet to change.
-	*/
-	void set_vertice(int data,int dim);
+
 	//! \brief Returns a vertice. \returns The index of the vertice. \param dim The index in the facet to return.
 	int get_vertice(int dim) const;
 
