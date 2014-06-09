@@ -107,21 +107,21 @@ void Delaunay::add_point(int index)
   int i=0;
   for(i=0;i<3;++i)
     {
-      outer[i]=f[triangle].get_vertice(i);
+      outer[i]=f[triangle].vertices[i];
       temp_friends[i]=f[triangle].neighbors[i];
     }
   // create and _update the new facets
   f.push_back(f_temp);
   f.push_back(f_temp);
-  f[triangle].set_vertice(outer[2],0);
-  f[triangle].set_vertice(outer[0],1);
-  f[triangle].set_vertice(index,2);
-  f[location_pointer+1].set_vertice(outer[0],0);
-  f[location_pointer+1].set_vertice(outer[1],1);
-  f[location_pointer+1].set_vertice(index,2);
-  f[location_pointer+2].set_vertice(outer[1],0);
-  f[location_pointer+2].set_vertice(outer[2],1);
-  f[location_pointer+2].set_vertice(index,2);
+  f[triangle].vertices[0] = outer[2];
+  f[triangle].vertices[1] = outer[0];
+  f[triangle].vertices[2] = index;
+  f[location_pointer+1].vertices[0] = outer[0];
+  f[location_pointer+1].vertices[1] = outer[1];
+  f[location_pointer+1].vertices[2] = index;
+  f[location_pointer+2].vertices[0] = outer[1];
+  f[location_pointer+2].vertices[1] = outer[2];
+  f[location_pointer+2].vertices[2] = index;
 
   f[triangle].set_friend(temp_friends[2],0);
   f[triangle].set_friend(location_pointer+1,1);
