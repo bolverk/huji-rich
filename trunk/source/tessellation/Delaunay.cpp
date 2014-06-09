@@ -214,12 +214,12 @@ void Delaunay::flip(int i, int j)
 	      const int f2=f[indexes[1]].get_friend((check[1]+2)%3);
 	      const int f22=f[indexes[1]].get_friend(check[1]);
 	      const int f23=f[indexes[1]].get_friend((check[1]+2)%3);
-	      f[indexes[0]].set_vertice(other[0],0);
-	      f[indexes[0]].set_vertice(v1,1);
-	      f[indexes[0]].set_vertice(check[0],2);
-	      f[indexes[1]].set_vertice(check[0],0);
-	      f[indexes[1]].set_vertice(v2,1);
-	      f[indexes[1]].set_vertice(other[0],2);
+	      f[indexes[0]].vertices[0] = other[0];
+	      f[indexes[0]].vertices[1] = v1;
+	      f[indexes[0]].vertices[2] = check[0];
+	      f[indexes[1]].vertices[0] = check[0];
+	      f[indexes[1]].vertices[1] = v2;
+	      f[indexes[1]].vertices[2] = other[0];
 	      f[indexes[0]].neighbors[0] = f1;
 	      f[indexes[0]].neighbors[1] = f2;
 	      f[indexes[0]].neighbors[2] = indexes[1];
@@ -300,9 +300,9 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
   // Create the big triangle, and assign friends
   facet f_temp;
   f.push_back(f_temp);
-  f[0].set_vertice(len,0);
-  f[0].set_vertice(len+1,1);
-  f[0].set_vertice(len+2,2);
+  f[0].vertices[0] = len;
+  f[0].vertices[1] = len+1;
+  f[0].vertices[2] = len+2;
   for(int i=0;i<3;i++)
     f[0].neighbors[i] = last_loc;
   location_pointer=0;

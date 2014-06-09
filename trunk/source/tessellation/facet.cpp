@@ -24,8 +24,3 @@ int facet::get_vertice(int dim) const
 	return vertices[dim];
 }
 
-void facet::set_vertice(int data,int dim)
-{
-	vertices[dim]=data;
-}
-
