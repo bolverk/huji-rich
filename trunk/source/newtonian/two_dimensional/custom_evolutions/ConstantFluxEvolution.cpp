@@ -19,12 +19,12 @@ Conserved ConstantFluxEvolution::CalcFlux(Tessellation const& tessellation,
 		time);
 	else
 	{
-		Vector2D normaldir = tessellation.GetMeshPoint(edge.GetNeighbor(1))-
-			tessellation.GetMeshPoint(edge.GetNeighbor(0));
+		Vector2D normaldir = tessellation.GetMeshPoint(edge.neighbors.second)-
+			tessellation.GetMeshPoint(edge.neighbors.first);
 		normaldir=normaldir/abs(normaldir);
 		double v=abs(cell_.Velocity);
 		Primitive cell(cell_);
-		if(edge.GetNeighbor(1)==index)
+		if(edge.neighbors.second==index)
 			cell.Velocity=-v*normaldir;
 		else
 			cell.Velocity=v*normaldir;

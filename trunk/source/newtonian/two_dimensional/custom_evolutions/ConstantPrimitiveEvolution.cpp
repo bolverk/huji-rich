@@ -22,8 +22,8 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 		return bc.CalcFlux(tessellation,cells,facevelocity,edge,interpolation,dt,time);
 	else
 	{
-		Vector2D normaldir = tessellation.GetMeshPoint(edge.GetNeighbor(1))-
-			tessellation.GetMeshPoint(edge.GetNeighbor(0));
+		Vector2D normaldir = tessellation.GetMeshPoint(edge.neighbors.second)-
+			tessellation.GetMeshPoint(edge.neighbors.first);
 
 		Vector2D paraldir = edge.vertices.second - edge.vertices.first;
 
@@ -32,8 +32,8 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 		Primitive right = interpolation.Interpolate
 			(tessellation, cells, dt, edge, 1,InBulk,facevelocity);
 		Conserved res(FluxInBulk(normaldir,paraldir,left,right,facevelocity,rs));
-		int n0=edge.GetNeighbor(0);
-		int n1=edge.GetNeighbor(1);
+		int n0=edge.neighbors.first;
+		int n1=edge.neighbors.second;
 		// Do not allow outflow from this region
 		if(((n0<N_&&res.Mass>0)||n1<N_&&res.Mass<0)&&(n0>=N_||n1>=N_))
 		{
