@@ -1957,7 +1957,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		  int rindex=1;
 		  if(NewEdge.neighbors.first==ToRefine[i])
 		    rindex=0;
-		  NewEdge.set_friend(rindex,Npoints+i);
+		  set_pair_member(NewEdge.neighbors,rindex,Npoints+i);
 		  V.edges[edge_index[j]]=NewEdge;
 		  new_ref.push_back(edge_index[j]);
 		  const Vector2D diff(V.GetMeshPoint(pair_member(NewEdge.neighbors,(rindex+1)%2))-V.GetMeshPoint(V.GetOriginalIndex(pair_member(NewEdge.neighbors,(rindex+1)%2))));
@@ -1974,11 +1974,11 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	  if(DistanceToEdge(intersect,edges[j])<1e-8*R)
 	    {
 	      Edge NewEdge;
-	      NewEdge.set_friend(0,Npoints+i);
+	      NewEdge.neighbors.first = Npoints+i;
 	      if(edges[j].neighbors.first==ToRefine[i])
-		NewEdge.set_friend(1,edges[j].neighbors.second);
+		NewEdge.neighbors.second = edges[j].neighbors.second;
 	      else
-		NewEdge.set_friend(1,edges[j].neighbors.first);
+		NewEdge.neighbors.second = edges[j].neighbors.first;
 	      int index;
 	      if(NewPoint.distance(edges[j].vertices.first)<
 		 v.distance(edges[j].vertices.first))
@@ -2017,7 +2017,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      V.edges.push_back(NewEdge);
 	      // Do the other split
 	      NewEdge.vertices.first = pair_member(edges[j].vertices,(index+1)%2);
-	      NewEdge.set_friend(0,ToRefine[i]);
+	      NewEdge.neighbors.first = ToRefine[i];
 	      V.edges[edge_index[j]]=NewEdge;
 	      old_ref.push_back(edge_index[j]);
 	      continue;
@@ -2031,7 +2031,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	      int index=1;
 	      if(edges[j].neighbors.first==ToRefine[i])
 		index=0;
-	      V.edges[edge_index[j]].set_friend(index,Npoints+i);
+	      set_pair_member(V.edges[edge_index[j]].neighbors,index,Npoints+i);
 	      // add new reference
 	      new_ref.push_back(edge_index[j]);
 	      if(pair_member(V.edges[edge_index[j]].neighbors,(index+1)%2)>(n+Npoints))
