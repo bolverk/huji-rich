@@ -10,22 +10,22 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 {
 	int other;
 	Conserved res;
-	if(edge.GetNeighbor(0)==index)
-		other=edge.GetNeighbor(1);
+	if(edge.neighbors.first==index)
+		other=edge.neighbors.second;
 	else
-		other=edge.GetNeighbor(0);
+		other=edge.neighbors.first;
 	if(boundaryconditions.IsGhostCell(other,tessellation))
 		return res;
 	Vector2D p = Parallel(edge);
-	Vector2D n = tessellation.GetMeshPoint(edge.GetNeighbor(1))
-		-tessellation.GetMeshPoint(edge.GetNeighbor(0));
+	Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
+		-tessellation.GetMeshPoint(edge.neighbors.first);
 	Primitive ghost = cells[other];
 	ghost.Velocity = Reflect(cells[other].Velocity, p);
 
 	vector<Primitive> states(2);
 	for(int i=0;i<2;++i)
 	{
-		if(edge.GetNeighbor(i)==index)
+	  if(pair_member(edge.neighbors,i)==index)
 			states[i] = ghost;
 		else
 			states[i] = cells[other];
