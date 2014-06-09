@@ -240,6 +240,9 @@ private:
 	void PeriodicBoundaryPoints(vector<int> &points,int edge_number);
 	void CornerBoundaryPoints(vector<int> &points,int edge_number);
 	boost::array<double,4> FindMaxCellEdges(void);
+	vector<int> CellIntersectOuterBoundary(vector<Edge> const&box_edges,int cell);
+	void FindIntersectingOuterPoints(vector<Edge> const&bedge,vector<vector<int> >
+		&boxduplicate,vector<vector<int> > const&firstduplicated);
 };
 /*! \brief Checks if a point is inside a Voronoi cell
 \param cpoints The points of the cell in convex order
