@@ -18,8 +18,8 @@ Conserved NoMovement::CalcFlux(Tessellation const& tess,
 		vector<vector<double> > const& tracers)
 {
 	const Vector2D normal_dir = 
-			tess.GetMeshPoint(edge.GetNeighbor(1))-
-			tess.GetMeshPoint(edge.GetNeighbor(0));
+			tess.GetMeshPoint(edge.neighbors.second)-
+			tess.GetMeshPoint(edge.neighbors.first);
 
 		const Vector2D paral_dir = 
 			edge.vertices.second - edge.vertices.first;
@@ -65,7 +65,7 @@ vector<double> NoMovement::CalcTracerFlux(Tessellation const& tess,
 		edge,dm<0,InBulk,vface);
 	int n=(int)temp2.size();
 	vector<double> res(n);
-	int sign=(edge.GetNeighbor(1)==cell_index)? 1 : -1;
+	int sign=(edge.neighbors.second==cell_index)? 1 : -1;
 	for(int i=0;i<n;++i)
 		res[i]=sign*dm*dt*edge.GetLength()*temp2[i];
 	return res;
