@@ -122,16 +122,48 @@ namespace {
 				ConvexHull(cellpoints,&vproc,j);
 				if(PointInCell(cellpoints,temp))
 				{
-					realneighproc.insert(realneighproc.end(),j);
-					vector<int> vtemp;
-					vtemp.push_back(i);
-					sentpoints.insert(sentpoints.end(),vtemp);
-					vector<Vector2D> v2temp;
-					v2temp.push_back(temp);
-					neighsend.insert(neighsend.end(),v2temp);
-					good=true;
-					pointoutside=1;
-					break;
+					bool notadded=false;
+					int indexadd=0;
+					if((int)realneighproc.size()==nneigh)
+						notadded=true;
+					if(!notadded)
+					{
+						indexadd=find(realneighproc.begin()+nneigh,
+							realneighproc.end(),j)-realneighproc.begin();
+						if(indexadd==(int)realneighproc.size())
+							notadded=true;
+					}
+					if(notadded)
+					{
+						realneighproc.insert(realneighproc.end(),j);
+						vector<int> vtemp;
+						vtemp.push_back(i);
+						sentpoints.insert(sentpoints.end(),vtemp);
+						vector<Vector2D> v2temp;
+						v2temp.push_back(temp);
+						neighsend.insert(neighsend.end(),v2temp);
+						good=true;
+						pointoutside=1;
+						break;
+					}
+					else
+					{
+						vector<int> vtemp;
+						vtemp.push_back(i);
+						if(indexadd<nneigh)
+							sentpoints[indexadd].insert(sentpoints[indexadd].end(),vtemp.begin(),
+								vtemp.end());
+						else
+							sentpoints[indexadd+ncorner].insert(sentpoints[indexadd+ncorner].end(),vtemp.begin(),
+								vtemp.end());
+						vector<Vector2D> v2temp;
+						v2temp.push_back(temp);
+						neighsend[indexadd].insert(neighsend[indexadd].end(),v2temp.begin(),
+							v2temp.end());
+						good=true;
+						pointoutside=1;
+						break;
+					}
 				}
 			}
 			if(good)
@@ -154,96 +186,77 @@ namespace {
 		// Send/Recv the points
 		vector<int> procorder=GetProcOrder(rank,nproc);
 		// Combine the vectors
+		int ntemp=(int)realneighproc.size();
 		vector<int> neightemp;
 		vector<vector<int> > senttemp;
-		int ntemp=(int)realneighproc.size();
 		vector<vector<Vector2D> > tosend;
 		int pointoutside2;
 		MPI_Allreduce(&pointoutside,&pointoutside2,1,MPI_INT,MPI_MAX,MPI_COMM_WORLD);
 		if(pointoutside2==1)
 		{
-			neightemp.reserve(nproc-1);
-			senttemp.resize(nproc-1);
-			tosend.resize(nproc-1);
-			for(int i=0;i<nproc;++i)
-				if(i!=rank)
-					neightemp.push_back(i);
-			int ntemp2=(int)realneighproc.size();
-			int ntemp=(int)realcornerproc.size();
-			for(int i=0;i<(ntemp2+ntemp);++i)
+			vector<int> allsend=join(realneighproc,realcornerproc);
+			vector<int> sendnumber(nproc,0),scounts(nproc,1);
+			int nsend=(int)allsend.size();
+			for(int jj=0;jj<nsend;++jj)
+				sendnumber[allsend[jj]]+=1;
+			int nrecv;
+			MPI_Reduce_scatter(&sendnumber[0],&nrecv,&scounts[0],MPI_INT,MPI_SUM,
+				MPI_COMM_WORLD);
+			MPI_Request *request=new MPI_Request[nsend];
+			char temp;
+			for(int jj=0;jj<nsend;++jj)
+				MPI_Isend(&temp,1,MPI_CHAR,allsend[jj],1,MPI_COMM_WORLD,
+					&request[jj]);
+			MPI_Status status;
+			vector<int> newtalk;
+			for(int jj=0;jj<nrecv;++jj)
 			{
-				if(i<nneigh)
+				MPI_Probe(MPI_ANY_SOURCE,1,MPI_COMM_WORLD,&status);
+				MPI_Recv(&temp,1,MPI_CHAR,status.MPI_SOURCE,1,MPI_COMM_WORLD,
+					MPI_STATUS_IGNORE);
+				if(find(allsend.begin(),allsend.end(),status.MPI_SOURCE)==
+					allsend.end())
+					newtalk.push_back(status.MPI_SOURCE);
+			}
+			MPI_Barrier(MPI_COMM_WORLD);
+			delete [] request;
+			for(int i=0;i<nneigh;++i)
+			{
+				neightemp.push_back(realneighproc[i]);
+				senttemp.push_back(sentpoints[i]);
+				tosend.push_back(neighsend[i]);
+			}
+			ntemp=(int)realcornerproc.size();
+			for(int i=0;i<ntemp;++i)
+			{
+				int index=find(realneighproc.begin(),realneighproc.end(),realcornerproc[i])
+					-realneighproc.begin();
+				if(index<(int)realneighproc.size())
 				{
-					if(realneighproc[i]>rank)
-					{
-						if(!sentpoints[i].empty())
-						{
-							senttemp[realneighproc[i]-1].insert(senttemp[realneighproc[i]-1].end(),
-								sentpoints[i].begin(),sentpoints[i].end());
-							tosend[realneighproc[i]-1].insert(tosend[realneighproc[i]-1].end(),
-								neighsend[i].begin(),neighsend[i].end());
-						}
-					}
-					else
-					{
-						if(!sentpoints[i].empty())
-						{
-							senttemp[realneighproc[i]].insert(senttemp[realneighproc[i]].end(),
-								sentpoints[i].begin(),sentpoints[i].end());
-							tosend[realneighproc[i]].insert(tosend[realneighproc[i]].end(),
-								neighsend[i].begin(),neighsend[i].end());
-						}
-					}
+					senttemp[index].insert(senttemp[index].begin(),sentpoints[i+nneigh].begin(),
+						sentpoints[i+nneigh].end());
+					tosend[index].insert(tosend[index].end(),cornersend[i].begin(),
+						cornersend[i].end());
 				}
 				else
 				{
-					if(i<(nneigh+ntemp)) // corners
-					{
-						if(realcornerproc[i-nneigh]>rank)
-						{
-							if(!sentpoints[i].empty())
-							{
-								senttemp[realcornerproc[i-nneigh]-1].insert(	senttemp[
-									realcornerproc[i-nneigh]-1].end(),sentpoints[i].begin(),sentpoints[i].end());
-									tosend[realcornerproc[i-nneigh]-1].insert(tosend[realcornerproc[i-nneigh]-1].end(),
-										cornersend[i-nneigh].begin(),cornersend[i-nneigh].end());
-							}
-						}
-						else
-						{
-							if(!sentpoints[i].empty())
-							{
-								senttemp[realcornerproc[i-nneigh]].insert(senttemp[
-									realcornerproc[i-nneigh]].end(),sentpoints[i].begin(),sentpoints[i].end());
-									tosend[realcornerproc[i-nneigh]].insert(tosend[realcornerproc[i-nneigh]].end(),
-										cornersend[i-nneigh].begin(),cornersend[i-nneigh].end());
-							}
-						}
-					}
-					else // the extra points
-					{
-						if(realneighproc[i-ntemp]>rank)
-						{
-							if(!sentpoints[i].empty())
-							{
-								senttemp[realneighproc[i-ntemp]-1].insert(senttemp[realneighproc[i-ntemp]-1].end(),
-									sentpoints[i].begin(),sentpoints[i].end());
-								tosend[realneighproc[i-ntemp]-1].insert(tosend[realneighproc[i-ntemp]-1].end(),
-									neighsend[i-ntemp].begin(),neighsend[i-ntemp].end());
-							}
-						}
-						else
-						{
-							if(!sentpoints[i].empty())
-							{
-								senttemp[realneighproc[i-ntemp]].insert(senttemp[realneighproc[i-ntemp]].end(),
-									sentpoints[i].begin(),sentpoints[i].end());
-								tosend[realneighproc[i-ntemp]].insert(tosend[realneighproc[i-ntemp]].end(),
-									neighsend[i-ntemp].begin(),neighsend[i-ntemp].end());
-							}
-						}
-					}
-				}	
+					neightemp.push_back(realcornerproc[i]);
+					senttemp.push_back(sentpoints[i+nneigh]);
+					tosend.push_back(cornersend[i]);
+				}
+			}
+			for(int i=nneigh;i<(int)realneighproc.size();++i)
+			{
+				neightemp.push_back(realneighproc[i]);
+				senttemp.push_back(sentpoints[i+ntemp]);
+				tosend.push_back(neighsend[i]);
+			}
+			ntemp=(int)newtalk.size();
+			for(int i=0;i<ntemp;++i)
+			{
+				senttemp.push_back(vector<int> ());
+				neightemp.push_back(newtalk[i]);
+				tosend.push_back(vector<Vector2D> ());
 			}
 		}
 		else
