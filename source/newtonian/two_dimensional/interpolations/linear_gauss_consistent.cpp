@@ -247,6 +247,14 @@ namespace
     ReducedPrimitiveGradient2D res;
     const ReducedPrimitive phi_i(cell,cell_tracer);
     int n=(int)edge_list.size();
+	if(n>17)
+	{
+		UniversalError eo("Cell has too many neighbors");
+		eo.AddEntry("Cell x cor",center.x);
+		eo.AddEntry("Cell y cor",center.y);
+		throw eo;
+	}
+
     for(int i=0;i<n;++i)
       {
 	const Vector2D c_ij = CalcCentroid(edge_list[i])-
@@ -365,13 +373,6 @@ namespace
     ReducedPrimitiveGradient2D res = slope;
     vector<ReducedPrimitive> centroid_vars(edge_list.size());
     int n=(int)edge_list.size();
-	if(n>17)
-	{
-		UniversalError eo("Cell has too many neighbors");
-		eo.AddEntry("Cell x cor",center.x);
-		eo.AddEntry("Cell y cor",center.y);
-		throw eo;
-	}
     for(int i=0;i<n;++i)
       {
 	centroid_vars[i] = interp_all(cell,cell_trace,center,slope,
