@@ -26,6 +26,7 @@ public:
 	 int point,vector<Conserved> const& fluxes,
 	 vector<Vector2D> const& point_velocity,
 	 HydroBoundaryConditions const& hbc,
+	 vector<vector<double> > const& tracers,
 	 double time,double dt);
 
 private:

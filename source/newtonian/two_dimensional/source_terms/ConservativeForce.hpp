@@ -20,6 +20,7 @@ public:
 	\param fluxes The vector of the fluxes
 	\param point_velocity The velocities of the mesh points
 	\param hbc The hydro boudnary conditions
+	\param tracers The intensive scalar tracers
 	\param time The simulation time
 	\param dt The time step
 	\return The calculated acceleration
