@@ -371,7 +371,7 @@ namespace
 					 vector<double> const& cell_trace=vector<double> ())
   {
     ReducedPrimitiveGradient2D res = slope;
-    vector<ReducedPrimitive> centroid_vars(edge_list.size());
+    boost::array<ReducedPrimitive,20> centroid_vars;
     int n=(int)edge_list.size();
     for(int i=0;i<n;++i)
       {
@@ -471,7 +471,7 @@ namespace
 						 vector<double> const& cell_trace=vector<double> ())
   {
     ReducedPrimitiveGradient2D res = slope;
-    vector<ReducedPrimitive> centroid_vars(edge_list.size());
+    boost::array<ReducedPrimitive,20> centroid_vars;
     int n=(int)edge_list.size();
     for(int i=0;i<n;++i)
       {
