@@ -247,7 +247,7 @@ namespace
     ReducedPrimitiveGradient2D res;
     const ReducedPrimitive phi_i(cell,cell_tracer);
     int n=(int)edge_list.size();
-	if(n>17)
+	if(n>20)
 	{
 		UniversalError eo("Cell has too many neighbors");
 		eo.AddEntry("Cell x cor",center.x);
@@ -391,7 +391,7 @@ namespace
       {
 	PropertyGetter const& pg = *rpg;
 	double psi = 1;
-	boost::container::static_vector<double,17> neighbor_vals;
+	boost::container::static_vector<double,20> neighbor_vals;
 	BOOST_FOREACH(Primitive const& pr,neighbors)
 	  {
 	    neighbor_vals.push_back(pg.get_property(pr));
@@ -427,7 +427,7 @@ namespace
 	for(int i=0;i<tracer_number;++i)
 	  {
 	    double psi = 1;
-	    boost::container::static_vector<double,17> neighbor_vals;
+	    boost::container::static_vector<double,20> neighbor_vals;
 	    for(int j=0;j<n;++j)
 	      neighbor_vals.push_back(neighbor_tracers[j][i]);
 	    const double my_val = cell_trace[i];
@@ -491,7 +491,7 @@ namespace
       {
 	PropertyGetter const& pg = *rpg;
 	double psi = 1;
-	boost::container::static_vector<double,17> neighbor_vals;
+	boost::container::static_vector<double,20> neighbor_vals;
 	BOOST_FOREACH(Primitive const& pr,neighbors)
 	  {
 	    neighbor_vals.push_back(pg.get_property(pr));
@@ -527,7 +527,7 @@ namespace
 	for(int i=0;i<tracer_number;++i)
 	  {
 	    double psi = 1;
-	    boost::container::static_vector<double,17> neighbor_vals;
+	    boost::container::static_vector<double,20> neighbor_vals;
 	    for(int j=0;j<n;++j)
 	      neighbor_vals.push_back(neighbor_tracers[j][i]); 
 	    //const double my_val = cell_trace[i];
