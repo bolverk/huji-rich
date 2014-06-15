@@ -178,7 +178,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,Tessellation &tpro
   EntropyReCalc_(EntropyCalc),
   _dt_external(-1),
   custom_evolution_manager(),
-  custom_evolution_indices(dump.snapshot.cells.size(),0),
+  custom_evolution_indices(dump.cevolve),
   procupdate_(0)
 {
 
@@ -231,7 +231,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
   EntropyReCalc_(EntropyCalc),
   _dt_external(-1),
   custom_evolution_manager(),
-  custom_evolution_indices(dump.snapshot.cells.size(),0),
+  custom_evolution_indices(dump.cevolve),
   procupdate_(0)
 {
   _tessellation.Initialise(dump.snapshot.mesh_points,&_obc);
