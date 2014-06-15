@@ -3,6 +3,34 @@
 using namespace H5;
 
 namespace {
+
+	void write_std_vector_to_hdf5
+  (H5File& file,
+   vector<size_t> const& num_list,
+   string const& caption)
+  {
+    hsize_t dimsf[1];
+    dimsf[0] = (int)num_list.size();
+    DataSpace dataspace(1, dimsf);
+
+    FloatType datatype(PredType::NATIVE_UINT);
+    datatype.setOrder(H5T_ORDER_LE);
+
+    // Modify dataset creation property to enable chunking
+    DSetCreatPropList  plist;
+    if(dimsf[0]>100000)
+      dimsf[0]=100000;
+    plist.setChunk(1,dimsf);
+    plist.setDeflate(6);
+
+    DataSet dataset = file.createDataSet(H5std_string(caption),
+					 datatype,
+					 dataspace,plist);
+
+    dataset.write(&num_list[0],PredType::NATIVE_UINT);
+  }
+
+
   void write_std_vector_to_hdf5
   (H5File& file,
    vector<double> const& num_list,
@@ -40,6 +68,19 @@ namespace {
     dataset.read(&result[0],PredType::NATIVE_DOUBLE);
     return result;
   }
+
+  vector<size_t> read_sizet_vector_from_hdf5(H5File& file,string const& data_name)
+  {
+    DataSet dataset = file.openDataSet(data_name);
+    DataSpace filespace = dataset.getSpace();
+    hsize_t dims_out[2];
+    filespace.getSimpleExtentDims(dims_out,NULL);
+    int NX = (int)dims_out[0];
+    vector<size_t> result(NX);
+    dataset.read(&result[0],PredType::NATIVE_UINT);
+    return result;
+  }
+
 
   vector<int> read_int_vector_from_hdf5(H5File& file,string const& data_name)
   {
@@ -157,7 +198,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   write_std_vector_to_hdf5(file,yvert,"y position of vertices");
   write_std_vector_to_hdf5(file,nvert,"Number of vertices in cell");
 
-  // write traceres if needed
+  // write tracers if needed
   vector<vector<double> > tracers=sim.getTracers();
   vector<int> number_of_tracers;
   number_of_tracers.push_back(0);
@@ -208,6 +249,8 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   else
     densityfloor[0]=-1;
   write_std_vector_to_hdf5(file,densityfloor,"Density floor parameters");
+  // write the custom evolution indeces
+  write_std_vector_to_hdf5(file,sim.custom_evolution_indices,"Custom evolution indeces");
 }
 
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
@@ -298,4 +341,6 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
     dump.densityfloor=false;
   dump.densitymin=densityfloor[1];
   dump.pressuremin=densityfloor[2];
+  // read the custom evolution indeces
+  dump.cevolve= read_sizet_vector_from_hdf5(file,"Custom evolution indeces");
 }

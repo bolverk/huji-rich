@@ -2,7 +2,7 @@
 
 ResetDump::ResetDump(void):snapshot(vector<Vector2D> (),vector<Primitive> ()),
 	tracers(vector<vector<double> > ()),time(0),cfl(0),cycle(0),coldflows(false),densityfloor(false),a(0),b(0),
-	densitymin(0),pressuremin(0),procmesh(vector<Vector2D>())
+	densitymin(0),pressuremin(0),procmesh(vector<Vector2D>()),cevolve(vector<size_t> ())
 {}
 
 ResetDump::~ResetDump(void)

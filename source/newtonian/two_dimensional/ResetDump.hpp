@@ -57,6 +57,8 @@ public:
 	double pressuremin;
 	//! \brief The points of the processors
 	vector<Vector2D> procmesh;
+	//! \brief The indeces of the custom evolution
+	vector<size_t> cevolve;
 };
 
 #endif //RESTDUMP_HPP
