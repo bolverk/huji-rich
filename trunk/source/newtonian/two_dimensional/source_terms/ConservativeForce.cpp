@@ -55,14 +55,16 @@ Conserved ConservativeForce::Calculate
 	vector<Conserved> const& fluxes,
 	vector<Vector2D> const& point_velocity,
 	HydroBoundaryConditions const& hbc,
-	vector<vector<double> > const &/*tracer_extensive*/,
+	vector<vector<double> > const &tracer_extensive,
 	vector<double> &/*dtracer*/,vector<double> const& lengthes,
 	double time,
 	double dt)
 {
 	Conserved res;
 	Vector2D acc=acc_.Calculate
-		(tess,cells,point,fluxes,point_velocity,hbc,time, dt);
+		(tess,cells,point,fluxes,point_velocity,hbc,
+		 tracer_extensive,
+		 time, dt);
 	double volume=tess.GetVolume(point);
 	res.Momentum=volume*cells[point].Density*acc;
 	res.Energy=cells[point].Density*volume*ScalarProd(point_velocity[point],acc)+

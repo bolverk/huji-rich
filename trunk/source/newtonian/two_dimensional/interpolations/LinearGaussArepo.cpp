@@ -754,9 +754,10 @@ vector<double> LinearGaussArepo::interpolateTracers
       throw UniversalError("Wrong interpolation type in linear_gauss_scalar");
 }
 
-Primitive LinearGaussArepo::Interpolate(Tessellation const& tess,
-					vector<Primitive> const& cells,double dt,Edge const& edge,int side,
-					InterpolationType interptype,Vector2D const& vface) const
+Primitive LinearGaussArepo::Interpolate
+(Tessellation const& tess,
+ vector<Primitive> const& cells,double dt,Edge const& edge,int side,
+ InterpolationType interptype,Vector2D const& vface) const
 {
   int cell_index = pair_member(edge.neighbors,side);
   Vector2D target = CalcCentroid(edge);
@@ -768,7 +769,9 @@ Primitive LinearGaussArepo::Interpolate(Tessellation const& tess,
 					      tess.GetCellCM(cell_index),rslopes_[cell_index],target);
       Primitive res = CalcPrimitive(temp.Density,temp.Pressure,
 				    temp.Velocity,eos_);
-      res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,cell_index,fluxes,pv,hbc_,
+      res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,cell_index,
+					  fluxes,pv,hbc_,
+					  vector<vector<double> >(),
 					  time_,dt);
       res+=CalcDtFlux(cells[cell_index],rslopes_[cell_index],dt,vface);
       res = CalcPrimitive(res.Density,res.Pressure,Vector2D(res.Velocity.x,
@@ -782,7 +785,7 @@ Primitive LinearGaussArepo::Interpolate(Tessellation const& tess,
 	const Primitive temp = interp_primitive(cells[other],tess.GetMeshPoint(other),
 		rslopes_[other],target);
 	Primitive res = CalcPrimitive(temp.Density,temp.Pressure,temp.Velocity,eos_);
-	res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,other,fluxes,pv,hbc_,time_,dt);
+	res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,other,fluxes,pv,hbc_,vector<vector<double> >(), time_,dt);
 	res+=CalcDtFlux(cells[other],rslopes_[other],
 		dt,vface);
 	res = CalcPrimitive(res.Density,res.Pressure,res.Velocity,eos_);
