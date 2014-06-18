@@ -11,6 +11,9 @@
 #include <cmath>
 #include "geometry.hpp"
 #include "../misc/universal_error.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 using namespace std;
 
 /*!
