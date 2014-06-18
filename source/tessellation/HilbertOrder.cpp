@@ -126,7 +126,7 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
       context_list.pop();
       delete context;
       if((int)context_list.size()>N)
-	throw("Error in creating the hilbert order, probably two points are identical");
+	throw UniversalError("Error in creating the hilbert order, probably two points are identical");
       if(i==0)
 	{
 	  vector<Vector2D> p_cor(local_data.N);
