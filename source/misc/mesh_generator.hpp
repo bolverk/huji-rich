@@ -187,7 +187,7 @@ std::vector<Vector2D> RandSquare(int PointNum,boost::random::mt19937 &eng,
 */
 
 std::vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double alpha,
-	Vector2D const& lowerleft,Vector2D const& upperright,Vector2D const& center);
+	Vector2D const& lowerleft,Vector2D const& upperright,Vector2D const& center=Vector2D(0,0));
 
 /*!
   \brief Generates a random round grid with 1/r point density

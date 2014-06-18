@@ -2,7 +2,7 @@
 
 #ifdef RICH_MPI
 
-void SetLoad(Tessellation &tproc,vector<Vector2D> const& points,OuterBoundary const&
+void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	outer,int Nbest,int Niter)
 {
 	int rank,ws;
@@ -26,6 +26,8 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> const& points,OuterBoundary co
 			DisplayError(eo);
 		}
 	}
+	points=local.GetMeshPoints();
+	points.resize(local.GetPointNo());
 }
 
 #endif
