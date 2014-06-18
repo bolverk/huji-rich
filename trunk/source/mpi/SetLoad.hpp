@@ -17,7 +17,7 @@
 	\param Nbest The ideal number of points per processor
 	\param Niter The number of correction iterations to use
 */
-void SetLoad(Tessellation &tproc,vector<Vector2D> const& points,OuterBoundary const&
+void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	outer,int Nbest,int Niter=10);
 
 #endif //SETLOAD
