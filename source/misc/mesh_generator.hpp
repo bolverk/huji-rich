@@ -175,7 +175,7 @@ std::vector<Vector2D> RandSquare(int PointNum,boost::random::mt19937 &eng,
 	double xl=-0.5,double xr=0.5,double yd=-0.5,double yu=0.5);
 
 /*!
-  \brief Generates a random round grid with r^-(a+1) point density
+  \brief Generates a random round grid with r^(1-a) point density
   \param PointNum The number of points.
   \param Rmin The min radius
   \param Rmax The max radius
