@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include "geometry.hpp"
+#include "../misc/universal_error.hpp"
 using namespace std;
 
 /*!
