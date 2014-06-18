@@ -173,6 +173,22 @@ std::vector<Vector2D> RandSquare(int PointNum,double xl=-0.5,double xr=0.5,
 
 std::vector<Vector2D> RandSquare(int PointNum,boost::random::mt19937 &eng,
 	double xl=-0.5,double xr=0.5,double yd=-0.5,double yu=0.5);
+
+/*!
+  \brief Generates a random round grid with r^-(a+1) point density
+  \param PointNum The number of points.
+  \param Rmin The min radius
+  \param Rmax The max radius
+  \param alpha The radial density of the points, shouldn't be 1
+  \param lowerleft The lowerleft corner of the domain
+  \param upperright The upperright corner of the domain
+  \param center The center of the coordinates system
+  \return List of two dimensional points
+*/
+
+std::vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double alpha,
+	Vector2D const& lowerleft,Vector2D const& upperright,Vector2D const& center);
+
 /*!
   \brief Generates a random round grid with 1/r point density
   \param PointNum The number of points.
