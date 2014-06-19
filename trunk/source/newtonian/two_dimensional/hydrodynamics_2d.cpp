@@ -1337,6 +1337,7 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 			  eo.AddEntry("Thermal energy",Et);
 			  eo.AddEntry("ShockedStatus",shockedcells[i]);
 			  eo.AddEntry("Extensive entropy",entropy[i][0]);
+			  eo.AddEntry("The density",intensive[i].Mass);
 			  throw eo;
 		  }
 		  intensive[i].Energy=intensive[i].Mass*(Et+Ek2);
