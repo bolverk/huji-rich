@@ -63,7 +63,7 @@ namespace {
 	Vector2D calc_dw(int index,
 		Tessellation const& tess,
 		double c,
-		double /*v*/,
+		double v,
 		double eta,
 		double chi)
 	{
@@ -71,6 +71,7 @@ namespace {
 		const Vector2D s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
 		const double d = abs(s-r);
+		c=max(c,v);
 
 		if(d<(0.9*eta*R))
 			return Vector2D();
