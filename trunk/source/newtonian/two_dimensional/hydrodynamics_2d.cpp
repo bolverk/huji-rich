@@ -862,6 +862,7 @@ double TimeAdvance2mid
 	 custom_evolution_manager,
 	 edge_velocities,lengths);
       MakeTracerExtensive(tracers,tess,cells,tracer_extensive);
+	  old_trace=tracer_extensive;
       UpdateTracerExtensive(tracer_extensive,trace_change,CellsEvolve,cells,
 			    tess,time);
     }
@@ -872,8 +873,8 @@ double TimeAdvance2mid
     (intensive, tess);
 
   // Save extensive variables of beginning of time step
-  if(traceflag)
-    MakeTracerExtensive(tracers,tess,cells,old_trace);
+ // if(traceflag)
+   // MakeTracerExtensive(tracers,tess,cells,old_trace);
   vector<Conserved> old_extensive=extensive;
 
   UpdateConservedExtensive(tess, fluxes, 0.5*dt,
@@ -984,7 +985,7 @@ double TimeAdvance2mid
 
   if(coldflows_flag)
     FixPressure(intensive,tracer_extensive,eos,Ek,Ef,as,bs,CellsEvolve,
-		tess,extensive,shockedcells);
+		tess,extensive,shockedcells,densityfloor);
 
   cells.resize(tess.GetPointNo());
   UpdatePrimitives(intensive, eos, cells,CellsEvolve,cells,densityfloor,
@@ -1137,7 +1138,7 @@ double TimeAdvance2mid
 
   if(coldflows_flag)
     FixPressure(intensive,old_trace,eos,Ek,Ef,as,bs,CellsEvolve,tess,
-		extensive,shockedcells);
+		extensive,shockedcells,densityfloor);
 
   UpdatePrimitives
     (intensive, eos, cells,CellsEvolve,cells,densityfloor,
@@ -1310,7 +1311,7 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 		 EquationOfState const& eos,vector<double> const& Ek,
 		 vector<double> const& Ef,double as,double bs,vector<CustomEvolution*>
 		 const& customevolve,Tessellation const& tess,vector<Conserved> &extensive,
-		 vector<char> const& shockedcells)
+		 vector<char> const& shockedcells,bool densityfloor)
 {
   int n=tess.GetPointNo();
   double Et,Ek2;
@@ -1329,6 +1330,15 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 		{
 		  Et=eos.dp2e(intensive[i].Mass,
 			      eos.sd2p(temp,intensive[i].Mass));
+		  if(Et<0&&!densityfloor)
+		  {
+			  UniversalError eo("Negative thermal enegry");
+			  eo.AddEntry("Cell index",i);
+			  eo.AddEntry("Thermal energy",Et);
+			  eo.AddEntry("ShockedStatus",shockedcells[i]);
+			  eo.AddEntry("Extensive entropy",entropy[i][0]);
+			  throw eo;
+		  }
 		  intensive[i].Energy=intensive[i].Mass*(Et+Ek2);
 		  extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
 		}
