@@ -434,7 +434,8 @@ void hdsim::TimeAdvance(void)
   if(coldflows_flag_)
     {
       FixPressure(_conservedintensive,tracer_extensive,_eos,Ek,Ef,as_,bs_,
-		  custom_evolutions,_tessellation,_conservedextensive,shockedcells);
+		  custom_evolutions,_tessellation,_conservedextensive,shockedcells,
+		  densityfloor_);
     }
 
   UpdatePrimitives(_conservedintensive, _eos, _cells,custom_evolutions,_cells,

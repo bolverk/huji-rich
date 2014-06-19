@@ -372,13 +372,14 @@ vector<double> GetForceEnergy(Tessellation const& tess,
   \param tess Tessellation
   \param extensive Extensive conserved variables
   \param shockedcells Flag whether the cell is shocked or not
+  \param densityfloor Is the densityfllor on or off
  */
 void FixPressure
 (vector<Conserved> &intensive,vector<vector<double> > const& entropy,
  EquationOfState const& eos,vector<double> const& Ek,
  vector<double> const& Ef,double as,double bs,vector<CustomEvolution*>
  const& customevolve,Tessellation const& tess,vector<Conserved>
- &extensive,vector<char> const& shockedcells);
+ &extensive,vector<char> const& shockedcells,bool densityfloor);
 
 /*! \brief Returns true is a cell is near a boundary
   \param index Cell index
