@@ -195,7 +195,7 @@ template <class T> T VectorSum(vector<T> const&v)
 		return 0;
 	int N=int(v.size());
 	T result(0);
-	for(int i=0;i<n;++i)
+	for(int i=0;i<N;++i)
 	{
 		result=result+v[i];
 	}
