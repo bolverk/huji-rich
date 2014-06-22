@@ -904,8 +904,6 @@ double TimeAdvance2mid
   vector<vector<double> > ttoadd;
   vector<size_t> ctemp(custom_evolution_indices);
   vector<size_t> ctoadd;
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
   SendRecvExtensive(extensive,tracer_extensive,custom_evolution_indices,
 		    tess.GetSentPoints(),tess.GetSentProcs(),ptoadd,ttoadd,
 		    ctoadd);

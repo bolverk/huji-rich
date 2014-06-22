@@ -941,8 +941,8 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
       tosend[gradlength*i+7]=vec[i].yvelocity.y;
       for(int j=0;j<(gradlength-8)/2;++j)
 	{
-	  tosend[gradlength*i+j+8]=vec[i].tracers[j].x;
-	  tosend[gradlength*i+j+9]=vec[i].tracers[j].y;
+	  tosend[gradlength*i+j*2+8]=vec[i].tracers[j].x;
+	  tosend[gradlength*i+j*2+9]=vec[i].tracers[j].y;
 	}
     }
   return MPI_Send(&tosend[0],gradlength*n,MPI_DOUBLE,dest,tag,comm);
@@ -977,7 +977,7 @@ void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
       vec[i].yvelocity.y=temp[gradlength*i+7];
       for(int j=0;j<(gradlength-8)/2;++j)
 	{
-	  Vector2D vtemp(temp[gradlength*i+j+8],temp[gradlength*i+j+9]);
+	  Vector2D vtemp(temp[gradlength*i+2*j+8],temp[gradlength*i+2*j+9]);
 	  vec[i].tracers.push_back(vtemp);
 	}
     }

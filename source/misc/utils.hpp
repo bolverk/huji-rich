@@ -184,6 +184,24 @@ template <class T> vector<T> VectorValues(vector<T> const&v,vector<int> const &i
 	return result;
 }
 
+/*!
+\brief Returns the sum of the vector
+\param v The vector to sum
+\return The sum
+*/
+template <class T> T VectorSum(vector<T> const&v)
+{
+	if(v.empty())
+		return 0;
+	int N=int(v.size());
+	T result(0);
+	for(int i=0;i<n;++i)
+	{
+		result=result+v[i];
+	}
+	return result;
+}
+
 
 /*!
 \brief Returns a vector containing only unique elements
