@@ -12,12 +12,24 @@
 /*!
 	\brief Corrects the load between processors based on number of cells per processor
 	\param tproc The tessellation of the processors
-	\param points The local cell points of the current rank (the points for this current cpu)
+	\param points The local cell points of the current rank (the points for this current cpu), may be redistributed among other cpus
 	\param outer The geometric boundary conditions
 	\param Nbest The ideal number of points per processor
 	\param Niter The number of correction iterations to use
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	outer,int Nbest,int Niter=10);
+
+/*!
+	\brief Corrects the load between processors based on number of cells per processor, continues until target load is reached
+	\param tproc The tessellation of the processors
+	\param points The local cell points of the current rank (the points for this current cpu), may be redistributed among other cpus
+	\param outer The geometric boundary conditions
+	\param Nbest The ideal number of points per processor
+	\param TargetLoad The target load balance, must be higher than 1, recommened to be 1.5
+*/
+void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
+	outer,int Nbest,double TargetLoad);
+
 
 #endif //SETLOAD
