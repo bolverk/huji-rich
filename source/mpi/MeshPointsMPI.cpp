@@ -122,7 +122,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,&tess,rank);
 	double ran[2];
-	gen_type gen;
+	gen_type gen(rank);
 	boost::random::uniform_real_distribution<> dist;
 	// change aboev to have seed==rank
 	while((int)res.size()<mypoints)
