@@ -6,19 +6,23 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	VoronoiMesh default_tess;
 	if(tess==0)
 		tess=&default_tess;
+#ifdef RICH_MPI
+	tess->Initialise(points,*tproc,bc);
+#else
 	tess->Initialise(points,bc);
+#endif
 	double pi= 3.141592653;
-	double eta_=0.05,chi_=1;
+	double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
 	vector<Vector2D> cpoints;
-#ifdef RICH_MPI
+	/*#ifdef RICH_MPI
 	int rank;
 	if(tproc!=0)
 	{
-		MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-		ConvexHull(cpoints,tproc,rank);
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	ConvexHull(cpoints,tproc,rank);
 	}
-#endif
+	#endif*/
 	// Copy the points
 	vector<Vector2D> res(N);
 	for(int i=0;i<N;++i)
@@ -26,6 +30,11 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 
 	for(int j=0;j<NumberIt;++j)
 	{
+#ifdef RICH_MPI
+		N=tess->GetPointNo();
+		res=tess->GetMeshPoints();
+		res.resize(N);
+#endif
 		for(int i=InnerNum;i<N;++i)
 		{
 			double R = sqrt(tess->GetVolume(i)/pi);
@@ -37,17 +46,25 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 				dw = 0*s;
 			else 
 				dw = chi_*0.5*(s-r);
-#ifdef RICH_MPI
+			/*#ifdef RICH_MPI
 			if(tproc!=0)
 			{
-				if(!PointInCell(cpoints,tess->GetMeshPoint(i)+dw))
-					dw=Vector2D(0,0);
+			if(!PointInCell(cpoints,tess->GetMeshPoint(i)+dw))
+			dw=Vector2D(0,0);
 			}
-#endif
+			#endif*/
 			res[i]=tess->GetMeshPoint(i)+dw;
 		}
+#ifdef RICH_MPI
+		tess->Update(res,*tproc);
+#else
 		tess->Update(res);
+#endif
 	}
-
+#ifdef RICH_MPI
+	N=tess->GetPointNo();
+	res=tess->GetMeshPoints();
+	res.resize(N);
+#endif
 	return res;
 }
