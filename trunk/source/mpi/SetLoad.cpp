@@ -8,7 +8,7 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	int rank,ws;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	MPI_Comm_size(MPI_COMM_WORLD,&ws);
-	ConstNumberPerProc procmove(outer,Nbest,0.75);
+	ConstNumberPerProc procmove(outer,Nbest,0.5);
 	VoronoiMesh local(points,tproc,outer);
 	for(int i=0;i<Niter;++i)
 	{
