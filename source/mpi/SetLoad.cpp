@@ -9,7 +9,7 @@ namespace
 		int ws;
 		MPI_Comm_size(MPI_COMM_WORLD,&ws);
 		int n=tess.GetPointNo();
-		int result=0;
+		int result=10;
 		int total=n;
 		MPI_Reduce(&n,&result,1,MPI_INT,MPI_MAX,0,MPI_COMM_WORLD);
 		MPI_Reduce(&n,&total,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
@@ -30,16 +30,6 @@ namespace
 			procmove.Update(tproc,local);
 			vector<Vector2D> cp=local.GetMeshPoints();
 			cp.resize(local.GetPointNo());
-			MPI_Barrier(MPI_COMM_WORLD);
-			double load=GetLoad(local);
-			if(rank==0&&i%10==0)
-				cout<<"Setting the load balance, iteration="<<i<<" load="<<load<<endl;
-			if(load<tload)
-			{
-				points=local.GetMeshPoints();
-				points.resize(local.GetPointNo());
-				return;
-			}
 			try
 			{
 				local.Update(cp,tproc);
@@ -48,6 +38,21 @@ namespace
 			{
 				DisplayError(eo);
 			}
+			MPI_Barrier(MPI_COMM_WORLD);
+			double load=GetLoad(local);
+			MPI_Bcast(&load,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+			if(rank==0&&i%10==0)
+				cout<<"Setting the load balance, iteration="<<i<<" load="<<load<<endl;
+			if(load<tload)
+			{
+				points=local.GetMeshPoints();
+				points.resize(local.GetPointNo());
+				if(rank==0)
+					cout<<"Finished setting load, load="<<load<<endl;
+				return;
+			}
+			if(i==Niter-1&&rank==0)
+				cout<<"Finished setting load, load="<<load<<endl;
 		}
 		points=local.GetMeshPoints();
 		points.resize(local.GetPointNo());
