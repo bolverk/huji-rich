@@ -30,6 +30,7 @@ endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
 $(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
+	cp $(TARGET)/*.txt $(DUMP_FOLDER)
 	cd $(DUMP_FOLDER) && $(PREXECUTE) ./test.exe
 
 $(DUMP_FOLDER)/test.exe: $(DUMP_FOLDER)/test.o | ../library_$(MODE)/librich.a
