@@ -18,8 +18,11 @@ class facet
 {
 public:
 
-	boost::array<int,3> vertices;
-	boost::array<int,3> neighbors;
+  //! \brief Indices of vertices
+  boost::array<int,3> vertices;
+
+  //! \brief Indices of neighboring facets
+  boost::array<int,3> neighbors;
 
 	//! \brief Defualt constructor. Sets vertices and friends to zero.
 	facet();

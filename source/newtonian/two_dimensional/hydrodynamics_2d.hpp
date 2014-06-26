@@ -266,23 +266,33 @@ void ExternalForceContribution(Tessellation const& tess,
   \return Time step
   \todo document and encapsulate parameters as, bs
  */
-double TimeAdvance2mid(Tessellation& tess,Tessellation& proctess,
-		       vector<Primitive> &cells,PointMotion& point_motion,
-		       HydroBoundaryConditions const& hbc,
-		       SpatialReconstruction& interpolation,
-		       RiemannSolver const& rs,EquationOfState const& eos,
-		       SourceTerm& force,double time,double cfl,double endtime,		       
-		       vector<vector<double> >& tracers,double dt_external,
-		       vector<size_t>& custom_evolution_indices,
-		       const CustomEvolutionManager& custom_evolution_manager,
-		       ProcessorUpdate *procupdate,
-		       bool traceflag=false,
-		       bool coldflows_flag=false,double as=0.01,
-		       double bs=0.01,
-		       bool densityfloor=false,
-		       double densitymin=0.01,
-		       double pressuremin=0.01,
-		       bool EntropyCalc=false);
+double TimeAdvance2mid
+(Tessellation& tess,
+ Tessellation& proctess,
+ vector<Primitive> &cells,
+ PointMotion& point_motion,
+ HydroBoundaryConditions const& hbc,
+ SpatialReconstruction& interpolation,
+ RiemannSolver const& rs,
+ EquationOfState const& eos,
+ SourceTerm& force,
+ double time,
+ double cfl,
+ double endtime,		       
+ vector<vector<double> >& tracers,
+ double dt_external,
+ vector<size_t>& custom_evolution_indices,
+ const CustomEvolutionManager& custom_evolution_manager,
+ #ifdef MPI_RICH
+ ProcessorUpdate *procupdate,
+ #endif
+ bool traceflag=false,
+ bool coldflows_flag=false,double as=0.01,
+ double bs=0.01,
+ bool densityfloor=false,
+ double densitymin=0.01,
+ double pressuremin=0.01,
+ bool EntropyCalc=false);
 
 /*! 
   \brief Essential data needed to advance a numerical simulation to the next time step
