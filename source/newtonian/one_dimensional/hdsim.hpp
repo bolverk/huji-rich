@@ -173,7 +173,10 @@ public:
     \param order Order of accuracy of the scheme
   */
   void TimeAdvanceRK(int order);
-
+  
+  /*! \brief Enables cold flows correction
+    \param thres Threshold for the ratio between thermal and total energy below which the correction is applied
+   */
   void enableColdFlows(double thres=1e-2);
 
   //  void AddTracer(SpatialDistribution1D const& tracer);
