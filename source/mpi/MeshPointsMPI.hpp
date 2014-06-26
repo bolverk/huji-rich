@@ -1,3 +1,8 @@
+/*! \file MeshPointsMPI.hpp
+  \brief Generates grids for parallel simulations
+  \author Elad Steinberg
+ */
+
 #ifndef MESHPOINTSMPI_HPP
 #define MESHPOINTSMPI_HPP 1
 #ifdef RICH_MPI
@@ -10,6 +15,11 @@
 
 using namespace std;
 
+/*! \brief Distributes mesh points to the processes
+  \param process_tess Tessellation of the processes
+  \param grid_generator A function that generates the mesh points
+  \return Mesh generating points of the currect process
+ */
 vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 				 Index2Member<Vector2D> const& grid_generator);
 
@@ -18,8 +28,8 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 \param nx The total number of point in the x direction
 \param ny The total number of point in the y direction
 \param tess The tessellation of the processors
-\param sidex The size of the domain in the x direction
-\param sidey The size of the domain in the y direction
+\param lower_left Lower left point
+\param upper_right Upper right point
 \return The set of points corresponding to the local process
 */
 vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
@@ -78,10 +88,17 @@ vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	Vector2D const& lowerleft,Vector2D const& upperright);
 
+//! \brief Generates a cartesian grid
 class CartesianGridGenerator: public Index2Member<Vector2D>
 {
 public:
 
+/*! \brief Class constructor
+  \param nx Number of points along the x axis
+  \param ny Number of points along the y axis
+  \param lower_left Lower left point
+  \param upper_right Upper right point
+ */
   CartesianGridGenerator(size_t nx, size_t ny,
 			 const Vector2D& lower_left,
 			 const Vector2D& upper_right);
