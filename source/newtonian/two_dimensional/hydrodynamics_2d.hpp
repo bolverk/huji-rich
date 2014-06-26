@@ -254,6 +254,7 @@ void ExternalForceContribution(Tessellation const& tess,
   \param dt_external Extrnal time step
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
+  \param procupdate Scheme for advancing the positions of the processors
   \param traceflag Determines whether tracers should be updated
   \param coldflows_flag Determines whether cold flows should be used
   \param as Described in the Arepo paper
@@ -274,7 +275,7 @@ double TimeAdvance2mid(Tessellation& tess,Tessellation& proctess,
 		       vector<vector<double> >& tracers,double dt_external,
 		       vector<size_t>& custom_evolution_indices,
 		       const CustomEvolutionManager& custom_evolution_manager,
-			   ProcessorUpdate *procupdate,
+		       ProcessorUpdate *procupdate,
 		       bool traceflag=false,
 		       bool coldflows_flag=false,double as=0.01,
 		       double bs=0.01,
