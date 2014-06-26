@@ -497,10 +497,22 @@ double TimeStepForCellBoundary
 vector<CustomEvolution*> convert_indices_to_custom_evolution(const CustomEvolutionManager& cem,
 	const vector<size_t>& indices);
 
+/*! \brief Applies a correction to the extensive variables due to the change in volume during time step.
+  \details This method calculates the change in extensive by calculating the volume swept by an edge and multiplying it by the intensive variables of the respective cell.
+  \param extensive Extensive variables
+  \param intensive Intensive variables
+  \param tessold Old tessellation
+  \param tessnew New tessellation
+  \param facevelocity Face velocity
+  \param dt Time step
+  \param pointvelocity Velocities of mesh generating points
+ */
 void FixAdvection(vector<Conserved>& extensive,
-	vector<Conserved> const& intensive,Tessellation const& tessold,
-	Tessellation const& tessnew,vector<Vector2D> const& facevelocity,
-	double dt,vector<Vector2D> const& pointvelocity);
+		  vector<Conserved> const& intensive,
+		  Tessellation const& tessold,
+		  Tessellation const& tessnew,
+		  vector<Vector2D> const& facevelocity,
+		  double dt,vector<Vector2D> const& pointvelocity);
 
 
 #endif // HYDRODYNAMICS_2D_HPP
