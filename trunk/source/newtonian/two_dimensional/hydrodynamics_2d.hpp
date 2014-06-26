@@ -254,7 +254,6 @@ void ExternalForceContribution(Tessellation const& tess,
   \param dt_external Extrnal time step
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
-  \param procupdate Scheme for advancing the positions of the processors
   \param traceflag Determines whether tracers should be updated
   \param coldflows_flag Determines whether cold flows should be used
   \param as Described in the Arepo paper

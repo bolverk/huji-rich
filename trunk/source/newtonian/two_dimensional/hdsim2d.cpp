@@ -139,8 +139,9 @@ hdsim::hdsim
   _dt_external=-1;
 }
 
-
-hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,Tessellation &tproc,
+#ifdef RICH_MPI
+hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
+	     Tessellation &tproc,
 	     SpatialReconstruction& interpolation,
 	     EquationOfState const& eos,RiemannSolver const& rs,
 	     PointMotion& pointmotion,SourceTerm& external_force,
@@ -179,17 +180,16 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,Tessellation &tpro
   custom_evolution_indices(dump.cevolve)
 {
 
-#ifdef RICH_MPI
   int ws;
   MPI_Comm_size(MPI_COMM_WORLD,&ws);
   if(ws%2==1)
     throw UniversalError("MPI needs even number of threads");
-#endif
 
   _tessellation.Initialise(dump.snapshot.mesh_points,_proctess,&_obc);
   _conservedextensive = CalcConservedExtensive
     (_conservedintensive,tessellation);
 }
+#endif
 
 
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
