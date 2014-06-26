@@ -22,7 +22,7 @@ namespace
 		int rank,ws;
 		MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 		MPI_Comm_size(MPI_COMM_WORLD,&ws);
-		ConstNumberPerProc procmove(outer,Nbest,speed);
+		ConstNumberPerProc procmove(outer,Nbest,speed,0.5);
 		VoronoiMesh local(points,tproc,outer);
 		for(int i=0;i<Niter;++i)
 		{
@@ -45,15 +45,28 @@ namespace
 				cout<<"Setting the load balance, iteration="<<i<<" load="<<load<<endl;
 			if(load<tload)
 			{
-				points=local.GetMeshPoints();
-				points.resize(local.GetPointNo());
-				if(rank==0)
-					cout<<"Finished setting load, load="<<load<<endl;
-				return;
+				break;
 			}
-			if(i==Niter-1&&rank==0)
-				cout<<"Finished setting load, load="<<load<<endl;
 		}
+		ConstNumberPerProc procmove2(outer,Nbest,speed,1.6);
+		for(int i=0;i<5;++i)
+		{
+			MPI_Barrier(MPI_COMM_WORLD);
+			procmove.Update(tproc,local);
+			vector<Vector2D> cp=local.GetMeshPoints();
+			cp.resize(local.GetPointNo());
+			try
+			{
+				local.Update(cp,tproc);
+			}
+			catch(UniversalError const& eo)
+			{
+				DisplayError(eo);
+			}
+		}
+		double load=GetLoad(local);
+		if(rank==0)
+			cout<<"Finished setting load, the load balance is "<<load<<endl;
 		points=local.GetMeshPoints();
 		points.resize(local.GetPointNo());
 	}

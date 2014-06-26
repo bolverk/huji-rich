@@ -3,8 +3,8 @@
 ConstNumberPerProc::~ConstNumberPerProc(void){}
 
 ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
-	double speed):
-outer_(outer),PointsPerProc_(npercell),speed_(speed){}
+	double speed,double RoundSpeed):
+outer_(outer),PointsPerProc_(npercell),speed_(speed),RoundSpeed_(RoundSpeed){}
 
 void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)const
 {
@@ -24,8 +24,8 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	double dxround,dyround;
 	if(d>0.1*R[rank])
 	{
-		dxround=speed_*(CM.x-point.x);
-		dyround=speed_*(CM.y-point.y);
+		dxround=RoundSpeed_*speed_*(CM.x-point.x);
+		dyround=RoundSpeed_*speed_*(CM.y-point.y);
 	}
 	// Find out how many points each proc has
 	vector<int> NPerProc(nproc);
@@ -140,8 +140,8 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	}
 
 
-	dx=(dx>0) ? min(dx,speed_*0.6*R[rank]) : -min(-dx,speed_*0.6*R[rank]);
-	dy=(dy>0) ? min(dy,speed_*0.6*R[rank]) : -min(-dy,speed_*0.6*R[rank]);
+	dx=(dx>0) ? min(dx,speed_*R[rank]) : -min(-dx,speed_*R[rank]);
+	dy=(dy>0) ? min(dy,speed_*R[rank]) : -min(-dy,speed_*R[rank]);
 	dx+=dxround;
 	dy+=dyround;
 	// Make sure not out of bounds
