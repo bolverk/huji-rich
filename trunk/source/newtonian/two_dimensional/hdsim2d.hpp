@@ -94,6 +94,9 @@ private:
 public:
 
   #ifdef RICH_MPI
+  /*! \brief Chooses scheme for processor motion
+    \param procupdate Pointer to process motion scheme
+   */
   void SetProcessorMovement(ProcessorUpdate *procupdate);
   #endif
 
@@ -227,6 +230,7 @@ public:
     /*! \brief Class constructor from restart file for MPI
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
+    \param tproc Tessellation of the processes
     \param interpolation Interpolation method
     \param eos Equation of state
     \param rs Riemann solver
