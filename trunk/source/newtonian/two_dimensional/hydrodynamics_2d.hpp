@@ -282,7 +282,7 @@ double TimeAdvance2mid
  double dt_external,
  vector<size_t>& custom_evolution_indices,
  const CustomEvolutionManager& custom_evolution_manager,
- #ifdef MPI_RICH
+ #ifdef RICH_MPI
  ProcessorUpdate *procupdate,
  #endif
  bool traceflag=false,

@@ -223,7 +223,7 @@ public:
    */
   void makeCheckpoint(ResetDump& checkpoint) const;
 
-  #ifdef MPI_RICH
+  #ifdef RICH_MPI
     /*! \brief Class constructor from restart file for MPI
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method

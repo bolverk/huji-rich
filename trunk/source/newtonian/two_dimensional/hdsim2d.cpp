@@ -464,7 +464,7 @@ void hdsim::TimeAdvance2Mid(void)
      _hbc,_interpolation,_rs,_eos,external_force_,_time,_cfl,_endtime,
      tracer_,_dt_external,custom_evolution_indices,
      custom_evolution_manager,
-     #ifdef MPI_RICH
+     #ifdef RICH_MPI
      procupdate_,
      #endif
      tracer_flag_,
