@@ -505,12 +505,22 @@ template<class T> vector<T> trim_top(const vector<T>& v,
 	return serial_generate(trimmer);
 }
 
+/*! \brief Selects a member of std::pair
+  \param p A pair
+  \param index 0 for first member, 1 for second, error otherwise
+  \return Either first or second members of pair
+ */
 template<class T> T pair_member(const std::pair<T,T>& p, int index)
 {
   assert((0==index)||(1==index));
   return 0==index ? p.first : p.second;
 }
 
+/*! \brief Sets a member of std::pair
+  \param p Pair
+  \param index 0 for first, 1 for second, error otherwise
+  \param val Value to be written
+ */
 template<class T> void set_pair_member(std::pair<T,T>& p, int index, const T& val)
 {
   assert((0==index)||(1==index));
