@@ -60,8 +60,7 @@ hdsim::hdsim
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
   custom_evolution_manager(),
-  custom_evolution_indices(points.size(),0),
-  procupdate_(0)
+  custom_evolution_indices(points.size(),0)
 {
   _tessellation.Initialise(points, &obc);
 
@@ -119,8 +118,7 @@ hdsim::hdsim
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
   custom_evolution_manager(),
-  custom_evolution_indices(points.size(),0),
-  procupdate_(0)
+  custom_evolution_indices(points.size(),0)
 {
 
 #ifdef RICH_MPI
@@ -178,8 +176,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,Tessellation &tpro
   EntropyReCalc_(EntropyCalc),
   _dt_external(-1),
   custom_evolution_manager(),
-  custom_evolution_indices(dump.cevolve),
-  procupdate_(0)
+  custom_evolution_indices(dump.cevolve)
 {
 
 #ifdef RICH_MPI
@@ -231,8 +228,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
   EntropyReCalc_(EntropyCalc),
   _dt_external(-1),
   custom_evolution_manager(),
-  custom_evolution_indices(dump.cevolve),
-  procupdate_(0)
+  custom_evolution_indices(dump.cevolve)
 {
   _tessellation.Initialise(dump.snapshot.mesh_points,&_obc);
   _conservedextensive = CalcConservedExtensive
@@ -467,7 +463,10 @@ void hdsim::TimeAdvance2Mid(void)
     (_tessellation,_proctess,_cells,_pointmotion,
      _hbc,_interpolation,_rs,_eos,external_force_,_time,_cfl,_endtime,
      tracer_,_dt_external,custom_evolution_indices,
-     custom_evolution_manager,procupdate_,
+     custom_evolution_manager,
+     #ifdef MPI_RICH
+     procupdate_,
+     #endif
      tracer_flag_,
      coldflows_flag_,as_,bs_,densityfloor_,densityMin_,pressureMin_,
      EntropyReCalc_);
@@ -792,10 +791,12 @@ vector<Vector2D> const& hdsim::getAllPointVelocities(void) const
   return _pointvelocity;
 }
 
+#ifdef RICH_MPI
 void hdsim::SetProcessorMovement(ProcessorUpdate *procupdate)
 {
   procupdate_=procupdate;
 }
+#endif
 
 void hdsim::load(const ResetDump& checkpoint)
 {

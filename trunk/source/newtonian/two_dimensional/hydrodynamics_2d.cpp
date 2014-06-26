@@ -772,7 +772,10 @@ double TimeAdvance2mid
  double dt_external,
  vector<size_t>& custom_evolution_indices,
  const CustomEvolutionManager& custom_evolution_manager,
- ProcessorUpdate *procupdate,bool traceflag,bool coldflows_flag,
+ #ifdef MPI_RICH
+ ProcessorUpdate *procupdate,
+ #endif
+ bool traceflag,bool coldflows_flag,
  double as,double bs,bool densityfloor,double densitymin,
  double pressuremin,bool EntropyCalc)
 {

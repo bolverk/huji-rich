@@ -82,7 +82,9 @@ private:
 
   double _dt_external;
 
+  #ifdef RICH_MPI
   ProcessorUpdate *procupdate_;
+  #endif
 
   // The purpose of these declarations is to disable copying
   hdsim(const hdsim& origin);
@@ -91,7 +93,9 @@ private:
 
 public:
 
-	void SetProcessorMovement(ProcessorUpdate *procupdate);
+  #ifdef RICH_MPI
+  void SetProcessorMovement(ProcessorUpdate *procupdate);
+  #endif
 
   /*! \brief Returns the tessellation
     \return The tessellation

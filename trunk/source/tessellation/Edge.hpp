@@ -16,7 +16,10 @@ class Edge
 {
 public:
 
+  //! \brief Points at the ends of the edge
   std::pair<Vector2D, Vector2D> vertices;
+
+  //! \brief Neighboring cells
   std::pair<int, int> neighbors;
 
   /*! \brief Class constructor
