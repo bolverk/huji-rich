@@ -10,6 +10,22 @@ ConsecutiveSnapshots::ConsecutiveSnapshots(double dt,double init_time,int counte
 
 void ConsecutiveSnapshots::diagnose(hdsim const& sim)
 {
+#ifdef RICH_MPI
+  const int rank = get_mpi_rank();
+  if(rank==0)
+    {
+      write_number(sim.GetTime(),"time.txt");
+      write_number(sim.GetTime()-last_time_,"dt.txt");
+    }
+  last_time_=sim.GetTime();
+  if(sim.GetTime()>next_time_)
+    {
+      next_time_ += dt_;
+
+      write_snapshot_to_hdf5(sim,"snapshot_"+int2str(counter_)+"_"+int2str(rank)+".h5");
+      ++counter_;
+    }
+#else
   write_number(sim.GetTime(),"time.txt");
   write_number(sim.GetTime()-last_time_,"dt.txt");
   last_time_=sim.GetTime();
@@ -19,21 +35,5 @@ void ConsecutiveSnapshots::diagnose(hdsim const& sim)
     write_snapshot_to_hdf5(sim,"snapshot_"+int2str(counter_)+".h5");
     ++counter_;
   }
-}
-
-void ConsecutiveSnapshots::diagnose(hdsim const& sim,int rank)
-{
-	if(rank==0)
-	{
-		write_number(sim.GetTime(),"time.txt");
-		write_number(sim.GetTime()-last_time_,"dt.txt");
-	}
-  last_time_=sim.GetTime();
-  if(sim.GetTime()>next_time_)
-  {
-    next_time_ += dt_;
-
-    write_snapshot_to_hdf5(sim,"snapshot_"+int2str(counter_)+"_"+int2str(rank)+".h5");
-    ++counter_;
-  }
+#endif
 }

@@ -22,8 +22,6 @@ public:
 
   void diagnose(hdsim const& sim);
 
-  void diagnose(hdsim const& sim,int rank);
-
 private:
   double next_time_;
   double last_time_;
