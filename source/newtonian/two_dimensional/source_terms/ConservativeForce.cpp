@@ -44,7 +44,7 @@ namespace {
 }
 
 ConservativeForce::ConservativeForce(Acceleration& acc,bool DtCalc):acc_(acc),
-	DtCalc_(DtCalc),dt_(-1),last_time_(-1){}
+	DtCalc_(DtCalc),dt_(-1),first_time_(true){}
 
 ConservativeForce::~ConservativeForce(void){}
 
@@ -71,10 +71,13 @@ Conserved ConservativeForce::Calculate
 		0.5*ScalarProd(MassFlux(tess,point,fluxes,hbc,lengthes),acc);
 	if(DtCalc_)
 	{
-		if(time>last_time_)
+		if(first_time_)
+		{
 			dt_=sqrt(tess.GetWidth(point)/abs(acc));
+			first_time_=false;
+		}
 		else
-			dt_=max(dt_,sqrt(tess.GetWidth(point)/abs(acc)));
+			dt_=min(dt_,sqrt(tess.GetWidth(point)/abs(acc)));
 	}
 	return res;
 }
