@@ -48,7 +48,7 @@ public:
 	\param acc The acceleration force
 	\param DtCalc Should we calcualte the time step for the force
 	*/
-	ConservativeForce(Acceleration& acc,bool DtCalc=false);
+	ConservativeForce(Acceleration& acc,bool DtCalc=true);
 
 	/*!
 	\brief Class destructor
@@ -75,7 +75,7 @@ private:
 	Acceleration& acc_;
 	bool DtCalc_;
 	double dt_;
-	double last_time_;
+	bool first_time_;
 
   ConservativeForce(const ConservativeForce& origin);
   ConservativeForce& operator=(const ConservativeForce& origin);

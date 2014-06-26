@@ -17,12 +17,12 @@ namespace
 	}
 
 	void RunLoadBalance(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-		outer,int Nbest,int Niter,double tload)
+		outer,int Nbest,int Niter,double tload,double speed)
 	{
 		int rank,ws;
 		MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 		MPI_Comm_size(MPI_COMM_WORLD,&ws);
-		ConstNumberPerProc procmove(outer,Nbest,0.5);
+		ConstNumberPerProc procmove(outer,Nbest,speed);
 		VoronoiMesh local(points,tproc,outer);
 		for(int i=0;i<Niter;++i)
 		{
@@ -61,15 +61,15 @@ namespace
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,int Niter)
+	outer,int Nbest,int Niter,double speed)
 {
-	RunLoadBalance(tproc,points,outer,Nbest,Niter,0);
+	RunLoadBalance(tproc,points,outer,Nbest,Niter,0,speed);
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,double TargetLoad)
+	outer,int Nbest,double TargetLoad,double speed)
 {
-	RunLoadBalance(tproc,points,outer,Nbest,1000,TargetLoad);
+	RunLoadBalance(tproc,points,outer,Nbest,1000,TargetLoad,speed);
 }
 
 #endif

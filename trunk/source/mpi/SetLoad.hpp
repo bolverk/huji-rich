@@ -16,9 +16,10 @@
 	\param outer The geometric boundary conditions
 	\param Nbest The ideal number of points per processor
 	\param Niter The number of correction iterations to use
+	\param speed How fast to make the correction each iteration in units of cpu cell size
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,int Niter=10);
+	outer,int Nbest,int Niter=10,double speed=0.1);
 
 /*!
 	\brief Corrects the load between processors based on number of cells per processor, continues until target load is reached
@@ -27,9 +28,10 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	\param outer The geometric boundary conditions
 	\param Nbest The ideal number of points per processor
 	\param TargetLoad The target load balance, must be higher than 1, recommened to be 1.5
+	\param speed How fast to make the correction each iteration in units of cpu cell size
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,double TargetLoad);
+	outer,int Nbest,double TargetLoad,double speed=0.1);
 
 
 #endif //SETLOAD
