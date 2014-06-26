@@ -122,7 +122,10 @@ public:
   */
   void HilbertArrange(int innernum=0);
 
+  //! \brief Assigns a common index to custom_evolutions and manges them
   CustomEvolutionManager custom_evolution_manager;
+  
+  //! \brief container for the indices of the custom evolution
   vector<size_t> custom_evolution_indices;
 
   /*! \brief Class constructor
@@ -210,10 +213,17 @@ public:
 	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 	bool EntropyCalc=false);
 
+  /*! \brief Loads reset data into simulation
+    \param checkpoint Reset dump
+   */
   void load(const ResetDump& checkpoint);
 
+  /*! \brief Dumps simulation data
+    \param checkpoint Reset dump where data is to be written
+   */
   void makeCheckpoint(ResetDump& checkpoint) const;
 
+  #ifdef MPI_RICH
     /*! \brief Class constructor from restart file for MPI
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
@@ -226,12 +236,14 @@ public:
     \param obc Outer boundary conditions
     \param EntropyCalc A flag whether to recalculate the entropy during the half time step
   */
-  hdsim(ResetDump const& dump,Tessellation& tessellation,Tessellation &tproc,
+  hdsim(ResetDump const& dump,Tessellation& tessellation,
+	Tessellation &tproc,
 	SpatialReconstruction& interpolation,
 	EquationOfState const& eos,RiemannSolver const& rs,
 	PointMotion& pointmotion,SourceTerm& external_force,
 	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 	bool EntropyCalc=false);
+  #endif
 
   /*!
     \brief Class destructor
