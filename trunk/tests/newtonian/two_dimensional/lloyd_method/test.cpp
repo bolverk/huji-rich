@@ -18,11 +18,11 @@
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/test_2d/random_pert.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
+#include "source/misc/mesh_generator.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -35,10 +35,7 @@ namespace {
     SimData(void):
       width_(1),
       np_(10),
-      init_points_(add_random_pert
-		   (square_grid
-		    (width_,np_),
-		    0.04,0.04)),
+      init_points_(RandSquare(np_*np_,0,width_,0,width_)),
       outer_(0, width_, width_, 0),
       tess_(),
       interpm_(),

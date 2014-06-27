@@ -21,7 +21,6 @@
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/newtonian/test_2d/random_pert.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
@@ -67,7 +66,8 @@ namespace {
 		    (30,30, outer_.getBoundary().first,
 		     outer_.getBoundary().second))),
 #else
-      init_points_(square_grid(width_,30)),
+      init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
+				  outer_.getBoundary().second)),
 #endif
       tess_(),
       interp_method_(),
