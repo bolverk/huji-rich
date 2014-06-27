@@ -13,7 +13,6 @@
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
@@ -120,7 +119,8 @@ public:
 			 (30,30,outer_.getBoundary().first,
 			  outer_.getBoundary().second)),
 	 #else
-	 offset_grid(square_grid(1,30),Vector2D(-0.5,-0.5)),
+	 cartesian_mesh(30,30,outer_.getBoundary().first,
+			outer_.getBoundary().second),
 	 #endif
 	 tess_,
 	 #ifdef RICH_MPI

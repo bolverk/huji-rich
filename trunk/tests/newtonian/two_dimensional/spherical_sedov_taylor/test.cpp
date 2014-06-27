@@ -1,5 +1,4 @@
 #include <iostream>
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
@@ -18,6 +17,7 @@
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/misc/mesh_generator.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -28,17 +28,14 @@ class SimData
 {
 public:
 
-  SimData(void):
-    offset_(1e-3,0),
-    mesh_(offset_grid(square_grid(1,50),offset_)),
-    outer_(offset_.x,offset_.x+1,
-	   offset_.y+1,offset_.y),
+  SimData(Vector2D lower_left = Vector2D(0,0),
+	  Vector2D upper_right = Vector2D(1,1)):
+    mesh_(cartesian_mesh(50,50,lower_left,upper_right)),
+    outer_(lower_left, upper_right),
     tess_(),
     interpm_(),
     density_(1),
-    pressure_(0+offset_.x,
-	      0.5+offset_.y,
-	      0.05,1e5,1),
+    pressure_(0,0.5,0.05,1e5,1),
     xvelocity_(0),
     yvelocity_(0),
     eos_(5./3.),
@@ -68,7 +65,6 @@ public:
   }
   
 private:
-  const Vector2D offset_;
   const vector<Vector2D> mesh_;
   const SquareBox outer_;
   VoronoiMesh tess_;
