@@ -21,10 +21,10 @@ namespace {
 				   EquationOfState const& eos)
   {
     const Vector2D r = calc_representing_point(tess,index,cm_flag);
-    return CalcPrimitive(density.EvalAt(r),
-			 pressure.EvalAt(r),
-			 Vector2D(xvelocity.EvalAt(r),
-				  yvelocity.EvalAt(r)),
+    return CalcPrimitive(density(r),
+			 pressure(r),
+			 Vector2D(xvelocity(r),
+				  yvelocity(r)),
 			 eos);
   }
 
@@ -1447,10 +1447,10 @@ void TracerResetCalc
 	customforce=cevolve[i]->ShouldForceTracerReset();
       if((tracer[i][tracerindex]<alpha)||customforce)
 	{
-	  velocity.Set(originalVx.EvalAt(tess.GetCellCM(i)),
-		       originalVy.EvalAt(tess.GetCellCM(i)));
-	  cells[i]=CalcPrimitive(originalD.EvalAt(tess.GetCellCM(i)),
-				 originalP.EvalAt(tess.GetCellCM(i)),velocity,eos);
+	  velocity.Set(originalVx(tess.GetCellCM(i)),
+		       originalVy(tess.GetCellCM(i)));
+	  cells[i]=CalcPrimitive(originalD(tess.GetCellCM(i)),
+				 originalP(tess.GetCellCM(i)),velocity,eos);
 	  if(tracer[i][tracerindex]<0)
 	    tracer[i][tracerindex]=0;
 	}

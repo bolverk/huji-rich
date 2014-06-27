@@ -3,7 +3,7 @@
 KeplerVelocity::KeplerVelocity(Direction dir,double Mass,Vector2D const&
 	center):dir_(dir),M_(Mass),center_(center){}
 
-double KeplerVelocity::EvalAt(Vector2D const& vec) const
+double KeplerVelocity::operator()(Vector2D const& vec) const
 {
 	const double r=abs(center_-vec);
 	if(dir_==xdir)

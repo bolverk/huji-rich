@@ -21,7 +21,7 @@ public:
    */
   Triangle(vector<Vector2D> vv, double vi, double vo);
 
-  double EvalAt(Vector2D const& r) const;
+  double operator()(Vector2D const& r) const;
 
 private:
 

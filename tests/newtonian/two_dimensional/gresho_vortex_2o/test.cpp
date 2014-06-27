@@ -39,7 +39,7 @@ namespace {
   class VelocityX: public SpatialDistribution
   {
   public:
-    double EvalAt(Vector2D const& r) const
+    double operator()(Vector2D const& r) const
     {
       if(abs(r)==0)
 	return 0;
@@ -51,7 +51,7 @@ namespace {
   class VelocityY: public SpatialDistribution
   {
   public:
-    double EvalAt(Vector2D const& r) const
+    double operator()(Vector2D const& r) const
     {
       if(abs(r)==0)
 	return 0;
@@ -73,7 +73,7 @@ namespace {
   class Pressure: public SpatialDistribution
   {
   public:
-    double EvalAt(Vector2D const& r) const
+    double operator()(Vector2D const& r) const
     {
       return calc_pressure(abs(r));
     }

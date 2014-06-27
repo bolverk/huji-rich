@@ -25,7 +25,7 @@ public:
    */
   Line2D(double a,double b,double above,double under);
   ~Line2D();
-  double EvalAt(Vector2D const& r) const;
+  double operator()(Vector2D const& r) const;
 };
 
 #endif // LINE2D_HPP

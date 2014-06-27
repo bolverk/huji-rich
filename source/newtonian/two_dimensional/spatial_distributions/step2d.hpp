@@ -29,7 +29,7 @@ public:
 	 double yd, double yu,
 	 double vs, double vo);
 
-  double EvalAt(Vector2D const& r) const;
+  double operator()(Vector2D const& r) const;
 };
 
 #endif // STEP2D_HPP

@@ -484,7 +484,7 @@ void hdsim::addTracer(SpatialDistribution const& tp)
   }
 
   for(int i=0;i<n;++i)
-    tracer_[i].push_back(tp.EvalAt(_tessellation.GetCellCM(i)));
+    tracer_[i].push_back(tp(_tessellation.GetCellCM(i)));
 }
 
 // Diagnostics

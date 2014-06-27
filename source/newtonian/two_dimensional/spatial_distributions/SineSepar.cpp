@@ -9,7 +9,7 @@ Amplitude(Amp),freq(f),offset(off),above_(above),under_(under)
 SineSepar::~SineSepar(void)
 {}
 
-double SineSepar::EvalAt(Vector2D const& r) const
+double SineSepar::operator()(Vector2D const& r) const
 {
 	if(r.y>offset+Amplitude*sin(freq*r.x))
 		return above_;
