@@ -100,7 +100,9 @@ TriangleStep::TriangleStep(string const& point_motion, double width):
 				       outer_.getBoundary().first,
 				       outer_.getBoundary().second))),
   #else
-  init_points_(square_grid(width,30)),
+  init_points_(cartesian_mesh(30,30,
+			      outer_.getBoundary().first,
+			      outer_.getBoundary().second)),
   #endif
   tess_(),
   interp_method_(),
