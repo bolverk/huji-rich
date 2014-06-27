@@ -11,11 +11,11 @@
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/misc/mesh_generator.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -28,7 +28,9 @@ public:
 
   SimData(void):
     width_(read_number("width.txt")),
-    init_points_(square_grid(width_,30)),
+    init_points_(cartesian_mesh(30,30,
+				Vector2D(0,0),
+				Vector2D(width_,width_))),
     outer_(0,width_,width_,0),
     tess_(),
     eos_(read_number("adiabatic_index.txt")),
