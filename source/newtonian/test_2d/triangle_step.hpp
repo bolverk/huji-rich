@@ -18,7 +18,6 @@
 #include "../two_dimensional/point_motions/lagrangian.hpp"
 #include "../common/hllc.hpp"
 #include "../two_dimensional/source_terms/zero_force.hpp"
-#include "square_grid.hpp"
 #include  "../../misc/mesh_generator.hpp"
 
 /*! \brief Simulation data for a square grid with a trigangular step in the middle
