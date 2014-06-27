@@ -19,7 +19,7 @@
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
+#include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/test_2d/profile_1d.hpp"
 #include "source/newtonian/test_1d/collela.hpp"
 #include "source/newtonian/test_1d/simple_waves_ideal_gas.hpp"
@@ -106,7 +106,10 @@ public:
     hbc_(rs_),
     point_motion_(bpm_,hbc_),
     force_(),
-    sim_(square_grid(init_prof.getWidth(),30),
+    sim_(cartesian_mesh(30,30,
+			Vector2D(0,0),
+			Vector2D(init_prof.getWidth(),
+				 init_prof.getWidth())),
 	 tess_,
 	 interpm_,
 	 init_prof.getDensity(),
