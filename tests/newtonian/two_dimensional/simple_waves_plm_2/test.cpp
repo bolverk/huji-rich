@@ -38,7 +38,6 @@ public:
 
   SimData(void):
     width_(1),
-    //    init_points_(square_grid(width_,30)),
     init_points_(cartesian_mesh(30,30,Vector2D(0,0),
 				Vector2D(width_,width_))),
     outer_(0,width_,width_,0),
