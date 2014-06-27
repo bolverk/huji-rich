@@ -21,7 +21,6 @@
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
-#include "source/newtonian/test_2d/square_grid.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
@@ -61,7 +60,8 @@ public:
 		  (30,30,outer_.getBoundary().first,
 		   outer_.getBoundary().second))),
     #else
-    init_points_(square_grid(width_,30)),
+    init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
+				outer_.getBoundary().second)),
     #endif
     tess_(),
     interp_method_(),
