@@ -2,7 +2,7 @@
 
 Uniform2D::Uniform2D(double val): _val(val) {}
 
-double Uniform2D::EvalAt(Vector2D const& /*r*/) const
+double Uniform2D::operator()(Vector2D const& /*r*/) const
 {
   return _val;
 }

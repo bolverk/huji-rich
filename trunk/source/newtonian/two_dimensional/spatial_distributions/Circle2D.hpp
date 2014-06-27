@@ -27,7 +27,7 @@ public:
    */
   Circle2D(double xc,double yc,double R, double in,double out);
   ~Circle2D();
-  double EvalAt(Vector2D const& r) const;
+  double operator()(Vector2D const& r) const;
 };
 
 #endif // CIRCLE2D_HPP

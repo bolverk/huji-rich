@@ -9,7 +9,7 @@ Line2D::~Line2D(void)
 {
 }
 
-double Line2D::EvalAt(Vector2D const& r) const
+double Line2D::operator()(Vector2D const& r) const
 {
 	if(r.y>(_a*r.x+_b))
 		return _above;

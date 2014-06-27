@@ -23,7 +23,7 @@ public:
 		\param center The location of the star
 	*/
 	KeplerVelocity(Direction dir,double Mass,Vector2D const& center=Vector2D(0,0));
-	double EvalAt(Vector2D const& point) const;
+	double operator()(Vector2D const& point) const;
 private:
 	const Direction dir_;
 	const double M_;

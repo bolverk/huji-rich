@@ -6,7 +6,7 @@ Step2D::Step2D(double xl, double xr,
   _xl(xl), _xr(xr), _yd(yd),
   _yu(yu), _vs(vs), _vo(vo) {}
 
-double Step2D::EvalAt(Vector2D const& r) const
+double Step2D::operator()(Vector2D const& r) const
 {
   if(r.x>_xl&&r.x<_xr&&
      r.y>_yd&&r.y<_yu)

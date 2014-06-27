@@ -9,7 +9,7 @@ Circle2D::~Circle2D(void)
 {
 }
 
-double Circle2D::EvalAt(Vector2D const& r) const
+double Circle2D::operator()(Vector2D const& r) const
 {
 	if(r.distance(center)<_R)
 		return _in;
