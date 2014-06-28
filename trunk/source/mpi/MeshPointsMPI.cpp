@@ -192,7 +192,6 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
 	for(int i=nrmin;i<nrmax;++i)
 	{
 		double r=Rmin+i*dr;
-		int Nphi=int(2*M_PI*r/A);
 		double dphi=A/r;
 		int phimin=(int)(minangle/dphi);
 		int phimax=(int)(maxangle/dphi+0.5);
