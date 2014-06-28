@@ -21,7 +21,7 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	const Vector2D CM=tproc.GetCellCM(rank);
 	const Vector2D point=tproc.GetMeshPoint(rank);
 	const double d=abs(CM-tproc.GetMeshPoint(rank));
-	double dxround,dyround;
+	double dxround=0,dyround=0;
 	if(d>0.1*R[rank])
 	{
 		dxround=RoundSpeed_*speed_*(CM.x-point.x);
