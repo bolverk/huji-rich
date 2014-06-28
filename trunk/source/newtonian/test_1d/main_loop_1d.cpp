@@ -26,7 +26,7 @@ fname_(fname) {}
 
 void simulation1d::WriteTime::diagnose(hdsim1D const& sim)
 {
-  write_number(sim.GetTime(),fname_.c_str());
+  write_number(sim.GetTime(),fname_);
 }
 
 void simulation1d::main_loop(hdsim1D& sim,
