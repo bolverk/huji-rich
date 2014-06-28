@@ -608,7 +608,7 @@ namespace {
     PrimitiveRetriever(const vector<Conserved>& intensive,
 		       const vector<Conserved>& extensive,
 		       const EquationOfState& eos,
-		       const vector<double> entropies,
+		       const vector<double>& entropies,
 		       double threshold,
 		       bool active):
       intensive_(intensive),
