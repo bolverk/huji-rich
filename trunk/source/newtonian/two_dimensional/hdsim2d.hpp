@@ -167,25 +167,6 @@ public:
 	OuterBoundary const& obc,
 	HydroBoundaryConditions const& hbc,
 	bool EntropyCalc=false,bool CMvalue=true);
- 
-  /*! \brief Class constructor from restart file
-    \param dump The ResetDump file
-    \param tessellation Voronoi tessellation method
-    \param interpolation Interpolation method
-    \param eos Equation of state
-    \param rs Riemann solver
-    \param pointmotion Motion of the mesh generating points
-    \param external_force External force
-    \param hbc Hydro boundary conditions
-    \param obc Outer boundary conditions
-    \param EntropyCalc A flag whether to recalculate the entropy during the half time step
-  */
-  hdsim(ResetDump const& dump,Tessellation& tessellation,
-	SpatialReconstruction& interpolation,
-	EquationOfState const& eos,RiemannSolver const& rs,
-	PointMotion& pointmotion,SourceTerm& external_force,
-	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
-	bool EntropyCalc=false);
 
   /*! \brief Loads reset data into simulation
     \param checkpoint Reset dump
@@ -197,7 +178,6 @@ public:
    */
   void makeCheckpoint(ResetDump& checkpoint) const;
 
-  #ifdef RICH_MPI
     /*! \brief Class constructor from restart file for MPI
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
@@ -212,13 +192,14 @@ public:
     \param EntropyCalc A flag whether to recalculate the entropy during the half time step
   */
   hdsim(ResetDump const& dump,Tessellation& tessellation,
+	#ifdef RICH_MPI
 	Tessellation &tproc,
+	#endif
 	SpatialReconstruction& interpolation,
 	EquationOfState const& eos,RiemannSolver const& rs,
 	PointMotion& pointmotion,SourceTerm& external_force,
 	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 	bool EntropyCalc=false);
-  #endif
 
   /*!
     \brief Class destructor
