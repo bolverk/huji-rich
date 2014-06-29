@@ -85,16 +85,19 @@ hdsim::hdsim
   _dt_external=-1;
 }
 
-#ifdef RICH_MPI
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
-	     Tessellation &tproc,
+	     #ifdef RICH_MPI
+	     Tessellation& tproc,
+	     #endif
 	     SpatialReconstruction& interpolation,
 	     EquationOfState const& eos,RiemannSolver const& rs,
 	     PointMotion& pointmotion,SourceTerm& external_force,
 	     OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 	     bool EntropyCalc):
   _tessellation(tessellation),
+  #ifdef RICH_MPI
   _proctess(tproc),
+  #endif
   _cells(dump.snapshot.cells),
   _fluxes(vector<Conserved>()),
   _pointvelocity(vector<Vector2D>()),
@@ -122,65 +125,21 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
   pressureMin_(dump.pressuremin),
   EntropyReCalc_(EntropyCalc),
   _dt_external(-1),
+  #ifdef RICH_MPI
+  procupdate_(0),
+  #endif
   custom_evolution_manager(),
   custom_evolution_indices(dump.cevolve)
 {
-
-  int ws;
-  MPI_Comm_size(MPI_COMM_WORLD,&ws);
-  if(ws%2==1)
-    throw UniversalError("MPI needs even number of threads");
-
-  _tessellation.Initialise(dump.snapshot.mesh_points,_proctess,&_obc);
-  _conservedextensive = CalcConservedExtensive
-    (_conservedintensive,tessellation);
-}
+#ifdef RICH_MPI
+  assert(get_mpi_size()%2==0 && 
+	 "RICH only works with an even number of processes");
 #endif
 
-
-#ifndef RICH_MPI
-hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
-	     SpatialReconstruction& interpolation,
-	     EquationOfState const& eos,RiemannSolver const& rs,
-	     PointMotion& pointmotion,SourceTerm& external_force,
-	     OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
-	     bool EntropyCalc):
-  _tessellation(tessellation),
-  _cells(dump.snapshot.cells),
-  _fluxes(vector<Conserved>()),
-  _pointvelocity(vector<Vector2D>()),
-  _facevelocity(vector<Vector2D>()),
-  _conservedintensive(CalcConservedIntensive(_cells)),
-  _conservedextensive(vector<Conserved>()),
-  _eos(eos),
-  _rs(rs),
-  _interpolation(interpolation),
-  _pointmotion(pointmotion),
-  _hbc(hbc),
-  _obc(obc),
-  external_force_(external_force),
-  _cfl(dump.cfl),
-  _time(dump.time),
-  _endtime(-1),
-  cycle_(dump.cycle),
-  tracer_(dump.tracers),
-  tracer_flag_(!tracer_.empty()),
-  coldflows_flag_(dump.coldflows),
-  densityfloor_(dump.densityfloor),
-  as_(dump.a),
-  bs_(dump.b),
-  densityMin_(dump.densitymin),
-  pressureMin_(dump.pressuremin),
-  EntropyReCalc_(EntropyCalc),
-  _dt_external(-1),
-  custom_evolution_manager(),
-  custom_evolution_indices(dump.cevolve)
-{
   _tessellation.Initialise(dump.snapshot.mesh_points,&_obc);
   _conservedextensive = CalcConservedExtensive
     (_conservedintensive,tessellation);
 }
-#endif
 
 hdsim::~hdsim(void) {}
 
