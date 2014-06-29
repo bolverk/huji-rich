@@ -764,7 +764,11 @@ vector<CustomEvolution*> convert_indices_to_custom_evolution
 
 
 double TimeAdvance2mid
-(Tessellation& tess,Tessellation& proctess,vector<Primitive> &cells,
+(Tessellation& tess,
+ #ifdef RICH_MPI
+ Tessellation& proctess,
+ #endif
+ vector<Primitive> &cells,
  PointMotion& point_motion,HydroBoundaryConditions const& hbc,
  SpatialReconstruction& interpolation,RiemannSolver const& rs,
  EquationOfState const& eos,SourceTerm& force,double time,double cfl,

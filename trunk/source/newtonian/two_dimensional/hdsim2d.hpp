@@ -34,7 +34,9 @@ private:
 
   Tessellation& _tessellation;
 
+  #ifdef RICH_MPI
   Tessellation& _proctess;
+  #endif
   
   vector<Primitive> _cells;
 
