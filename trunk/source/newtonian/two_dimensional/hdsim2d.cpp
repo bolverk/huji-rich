@@ -16,10 +16,12 @@ void hdsim::SetData(vector<Primitive> const& cells,
   _time=time;
 }
 
-#ifndef RICH_MPI
 hdsim::hdsim
 (vector<Vector2D> const& points,
  Tessellation& tessellation,
+ #ifdef RICH_MPI
+ Tessellation& proctess,
+ #endif
  SpatialReconstruction& interpolation,
  SpatialDistribution const& density,
  SpatialDistribution const& pressure,
@@ -33,6 +35,9 @@ hdsim::hdsim
  HydroBoundaryConditions const& hbc,
  bool EntropyCalc,bool CMvalue):
   _tessellation(tessellation),
+  #ifdef RICH_MPI
+  _proctess(proctess),
+  #endif
   _cells(vector<Primitive>()),
   _fluxes(vector<Conserved>()),
   _pointvelocity(vector<Vector2D>(points.size(),Vector2D(0,0))),
@@ -59,10 +64,16 @@ hdsim::hdsim
   pressureMin_(0),
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
-  
+  #ifdef RICH_MPI
+  procupdate_(0),
+  #endif
   custom_evolution_manager(),
   custom_evolution_indices(points.size(),0)
 {
+  #ifdef RICH_MPI
+  assert(get_mpi_size()%2==0 && "RICH only works with an even number of processes");
+  #endif
+
   _tessellation.Initialise(points, &obc);
 
   _cells = InitialiseCells(density, pressure,xvelocity, yvelocity,
@@ -73,73 +84,6 @@ hdsim::hdsim
     (_conservedintensive,tessellation);
   _dt_external=-1;
 }
-#endif
-
-#ifdef RICH_MPI
-hdsim::hdsim
-(vector<Vector2D> const& points,
- Tessellation& tessellation,
- Tessellation& proctess,
- SpatialReconstruction& interpolation,
- SpatialDistribution const& density,
- SpatialDistribution const& pressure,
- SpatialDistribution const& xvelocity,
- SpatialDistribution const& yvelocity,
- EquationOfState const& eos,
- RiemannSolver const& rs,
- PointMotion& pointmotion,
- SourceTerm& external_force,
- OuterBoundary const& obc,
- HydroBoundaryConditions const& hbc,
- bool EntropyCalc,bool CMvalue):
-  _tessellation(tessellation),
-  _proctess(proctess),
-  _cells(vector<Primitive>()),
-  _fluxes(vector<Conserved>()),
-  _pointvelocity(vector<Vector2D>(points.size(),Vector2D(0,0))),
-  _facevelocity(vector<Vector2D>()),
-  _conservedintensive(vector<Conserved>()),
-  _conservedextensive(vector<Conserved>()),
-  _eos(eos),
-  _rs(rs),
-  _interpolation(interpolation),
-  _pointmotion(pointmotion),
-  _hbc(hbc),_obc(obc),
-  external_force_(external_force),
-  _cfl(1./3.),
-  _time(0),
-  _endtime(-1),
-  cycle_(0),
-  tracer_(vector<vector<double> >()),
-  tracer_flag_(false),
-  coldflows_flag_(false),
-  densityfloor_(false),
-  as_(0),
-  bs_(0),
-  densityMin_(0),
-  pressureMin_(0),
-  EntropyReCalc_(EntropyCalc),
-  _dt_external(0),
-  procupdate_(0),
-  custom_evolution_manager(),
-  custom_evolution_indices(points.size(),0)
-{
-  int ws;
-  MPI_Comm_size(MPI_COMM_WORLD,&ws);
-  if(ws%2==1)
-    throw UniversalError("MPI needs even number of threads");
-
-  _tessellation.Initialise(points,_proctess,&obc);
-
-  _cells = InitialiseCells(density, pressure,xvelocity, yvelocity,
-			   eos, tessellation,CMvalue);
-
-  _conservedintensive = CalcConservedIntensive(_cells);
-  _conservedextensive = CalcConservedExtensive
-    (_conservedintensive,tessellation);
-  _dt_external=-1;
-}
-#endif
 
 #ifdef RICH_MPI
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,

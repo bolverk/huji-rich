@@ -152,6 +152,9 @@ public:
   */
   hdsim(vector<Vector2D> const& points,
 	Tessellation& tessellation,
+	#ifdef RICH_MPI
+	Tessellation& proctess,
+	#endif
 	SpatialReconstruction& interpolation,
 	SpatialDistribution const& density,
 	SpatialDistribution const& pressure,
@@ -164,41 +167,7 @@ public:
 	OuterBoundary const& obc,
 	HydroBoundaryConditions const& hbc,
 	bool EntropyCalc=false,bool CMvalue=true);
-  
-   /*! \brief Class constructor
-    \param points Initial position of the mesh generating points
-    \param tessellation Voronoi tessellation method
-	\param proctess The tessellation of the proccessors
-    \param interpolation Interpolation method
-    \param density Initial spatial density distribution
-    \param pressure Initial spatial pressure distribution
-    \param xvelocity Initial spatial distribution of the x component of the velocity
-    \param yvelocity Initial spatial distribution of the y component of the velocity
-    \param eos Equation of state
-    \param rs Riemann solver
-    \param pointmotion Motion of the mesh generating points
-    \param external_force External force
-    \param hbc Hydro boundary conditions
-    \param obc Outer boundary conditions
-    \param EntropyCalc A flag whether to recalculate the entropy during the half time step
-    \param CMvalue A flag whether to give the cell value according to CM or the location of the mesh point
-  */
-  hdsim(vector<Vector2D> const& points,
-	Tessellation& tessellation,
-	Tessellation& proctess,
-	SpatialReconstruction& interpolation,
-	SpatialDistribution const& density,
-	SpatialDistribution const& pressure,
-	SpatialDistribution const& xvelocity,
-	SpatialDistribution const& yvelocity,
-	EquationOfState const& eos,
-	RiemannSolver const& rs,
-	PointMotion& pointmotion,
-	SourceTerm& external_force,
-	OuterBoundary const& obc,
-	HydroBoundaryConditions const& hbc,bool EntropyCalc=false,bool CMvalue=true);
  
-
   /*! \brief Class constructor from restart file
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
