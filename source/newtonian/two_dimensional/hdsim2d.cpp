@@ -16,6 +16,7 @@ void hdsim::SetData(vector<Primitive> const& cells,
   _time=time;
 }
 
+#ifndef RICH_MPI
 hdsim::hdsim
 (vector<Vector2D> const& points,
  Tessellation& tessellation,
@@ -32,7 +33,6 @@ hdsim::hdsim
  HydroBoundaryConditions const& hbc,
  bool EntropyCalc,bool CMvalue):
   _tessellation(tessellation),
-  _proctess(tessellation),
   _cells(vector<Primitive>()),
   _fluxes(vector<Conserved>()),
   _pointvelocity(vector<Vector2D>(points.size(),Vector2D(0,0))),
@@ -73,7 +73,9 @@ hdsim::hdsim
     (_conservedintensive,tessellation);
   _dt_external=-1;
 }
+#endif
 
+#ifdef RICH_MPI
 hdsim::hdsim
 (vector<Vector2D> const& points,
  Tessellation& tessellation,
@@ -118,19 +120,14 @@ hdsim::hdsim
   pressureMin_(0),
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
-  #ifdef RICH_MPI
   procupdate_(0),
-  #endif
   custom_evolution_manager(),
   custom_evolution_indices(points.size(),0)
 {
-
-#ifdef RICH_MPI
   int ws;
   MPI_Comm_size(MPI_COMM_WORLD,&ws);
   if(ws%2==1)
     throw UniversalError("MPI needs even number of threads");
-#endif
 
   _tessellation.Initialise(points,_proctess,&obc);
 
@@ -142,6 +139,7 @@ hdsim::hdsim
     (_conservedintensive,tessellation);
   _dt_external=-1;
 }
+#endif
 
 #ifdef RICH_MPI
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
@@ -196,6 +194,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
 #endif
 
 
+#ifndef RICH_MPI
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
 	     SpatialReconstruction& interpolation,
 	     EquationOfState const& eos,RiemannSolver const& rs,
@@ -203,7 +202,6 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
 	     OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 	     bool EntropyCalc):
   _tessellation(tessellation),
-  _proctess(tessellation),
   _cells(dump.snapshot.cells),
   _fluxes(vector<Conserved>()),
   _pointvelocity(vector<Vector2D>()),
@@ -238,6 +236,7 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
   _conservedextensive = CalcConservedExtensive
     (_conservedintensive,tessellation);
 }
+#endif
 
 hdsim::~hdsim(void) {}
 
@@ -456,15 +455,21 @@ Tessellation const& hdsim::GetTessellation(void) const
   return _tessellation;
 }
 
+#ifdef RICH_MPI
 Tessellation const& hdsim::GetProcTessellation(void) const
 {
   return _proctess;
 }
+#endif
 
 void hdsim::TimeAdvance2Mid(void)
 {
   const double dt=TimeAdvance2mid
-    (_tessellation,_proctess,_cells,_pointmotion,
+    (_tessellation,
+     #ifdef RICH_MPI
+     _proctess,
+     #endif
+     _cells,_pointmotion,
      _hbc,_interpolation,_rs,_eos,external_force_,_time,_cfl,_endtime,
      tracer_,_dt_external,custom_evolution_indices,
      custom_evolution_manager,
@@ -832,8 +837,10 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
   checkpoint.snapshot.mesh_points = _tessellation.GetMeshPoints();
   int n=_tessellation.GetPointNo();
   checkpoint.snapshot.mesh_points.resize(n);
+  #ifdef RICH_MPI
   checkpoint.procmesh=_proctess.GetMeshPoints();
   n=_proctess.GetPointNo();
+  #endif
   checkpoint.procmesh.resize(n);
   checkpoint.snapshot.cells = _cells;
   checkpoint.cfl = _cfl;

@@ -268,7 +268,9 @@ void ExternalForceContribution(Tessellation const& tess,
  */
 double TimeAdvance2mid
 (Tessellation& tess,
+#ifdef RICH_MPI
  Tessellation& proctess,
+#endif
  vector<Primitive> &cells,
  PointMotion& point_motion,
  HydroBoundaryConditions const& hbc,
