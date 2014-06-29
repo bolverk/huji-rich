@@ -59,6 +59,7 @@ hdsim::hdsim
   pressureMin_(0),
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
+  
   custom_evolution_manager(),
   custom_evolution_indices(points.size(),0)
 {
@@ -117,6 +118,9 @@ hdsim::hdsim
   pressureMin_(0),
   EntropyReCalc_(EntropyCalc),
   _dt_external(0),
+  #ifdef RICH_MPI
+  procupdate_(0),
+  #endif
   custom_evolution_manager(),
   custom_evolution_indices(points.size(),0)
 {
