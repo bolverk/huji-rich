@@ -19,6 +19,15 @@ Primitive Conserved2Primitive
   const Vector2D velocity = c.Momentum / c.Mass;
   const double energy = c.Energy/c.Mass - 
     0.5*pow(abs(velocity),2);
+  if(energy<0)
+  {
+	  UniversalError eo("Negative thermal energy",0);
+	  eo.AddEntry("x velocity",velocity.x);
+	  eo.AddEntry("y velocity",velocity.y);
+	  eo.AddEntry("density",density);
+	  eo.AddEntry("Energy per volume",c.Energy);
+	  throw eo;
+  }
   const double pressure = eos.de2p(density, energy);
   const double sound_speed = eos.dp2c(density, pressure);
   return Primitive(density,

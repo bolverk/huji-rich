@@ -8,6 +8,7 @@
 
 #include "hydrodynamic_variables.hpp"
 #include "equation_of_state.hpp"
+#include "../../misc/universal_error.hpp"
 
 /*! \brief Calculates the primitive variables
   \param density Density
