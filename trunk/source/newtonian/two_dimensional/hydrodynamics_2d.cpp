@@ -444,9 +444,9 @@ namespace {
       if(res.Mass<min_density)
 	res = density_floor_correction
 	  (min_density, eos, old);
-      const double kinetic_energy = 0.5*pow(abs(res.Momentum),2)/res.Mass;
-      const double thermal_energy = res.Energy-kinetic_energy;
-      const double pressure = eos.de2p(res.Mass,thermal_energy/res.Mass);
+      const double kinetic_energy = 0.5*pow(abs(res.Momentum/res.Mass),2);
+      const double thermal_energy = res.Energy/res.Mass-kinetic_energy;
+      const double pressure = eos.de2p(res.Mass,thermal_energy);
       if(pressure<min_pressure)
 	res.Energy = kinetic_energy+res.Mass*eos.dp2e(res.Mass, min_pressure);
     }
@@ -495,7 +495,10 @@ void UpdatePrimitives
 	    (conservedintensive,
 	     eos,old_cells,i,tess,time,tracers);
       }
-    catch(UniversalError& eo){
+    catch(UniversalError& eo)
+	{
+		eo.AddEntry("x momentum per unit volume",conservedintensive[i].Momentum.x);
+		eo.AddEntry("y momentum per unit volume",conservedintensive[i].Momentum.y);
       update_primitives_rethrow(i,eo);
     }
   }
