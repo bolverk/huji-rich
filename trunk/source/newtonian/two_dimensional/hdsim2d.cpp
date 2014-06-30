@@ -73,9 +73,12 @@ hdsim::hdsim
   #ifdef RICH_MPI
   assert(get_mpi_size()%2==0 && "RICH only works with an even number of processes");
   #endif
-
+ 
+#ifdef RICH_MPI
+  _tessellation.Initialise(points,_proctess,&obc);
+#else
   _tessellation.Initialise(points, &obc);
-
+#endif
   _cells = InitialiseCells(density, pressure,xvelocity, yvelocity,
 			   eos, tessellation,CMvalue);
 
