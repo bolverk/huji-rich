@@ -1,5 +1,6 @@
 #include "VoronoiMesh.hpp"
 #include <cmath>
+#include "../misc/simple_io.hpp"
 
 namespace {
 
@@ -470,32 +471,35 @@ namespace {
 			}
 			else
 			{
-				vector<int> otherneigh=v.GetNeighbors(nextneigh);
-				vector<int> myneigh=v.GetNeighbors(other);
-				sort(otherneigh.begin(),otherneigh.end());
-				sort(myneigh.begin(),myneigh.end());
-				int N=(int)myneigh.size();
-				int j;
+				// Do they have a mutual edge?
+				vector<int> const& otheredges=v.GetCellEdges(other);
+				int N=(int)otheredges.size();
+				for(int k=0;k<N;++k)
+				{
+					Edge const& edge=v.GetEdge(otheredges[k]);
+					if(edge.neighbors.first==nextneigh||
+						edge.neighbors.second==nextneigh)
+					{
+						// We have a mutual edge
+						Vector2D otherv=(abs(v.GetMeshPoint(rank)-
+							edge.vertices.first)<abs(v.GetMeshPoint(rank)-
+							edge.vertices.second)) ? edge.vertices.second :
+							edge.vertices.first;
+						// Look for close cell and not in neighbors
+						vector<int> neighbors2=v.GetNeighbors(nextneigh);
+						sort(neighbors2.begin(),neighbors2.end());
+						neighbors2=RemoveList(neighbors2,minremove);
+						int n2=(int)neighbors2.size();
+						vector<double> dist(n2);
+						for(int kk=0;kk<n2;++kk)
+							dist[kk]=abs(otherv-v.GetMeshPoint(neighbors2[kk]));
+						result[i]=neighbors2[min_element(dist.begin(),dist.end())
+							-dist.begin()];
+						break;
+					}
+				}
+				// No mutual edge, probably a square
 				result[i]=-1;
-				vector<int> candidates;
-				vector<double> dist;
-				for(j=0;j<N;++j)
-				{
-					if(myneigh[j]==rank||myneigh[j]==-1)
-						continue;
-					if(binary_search(otherneigh.begin(),otherneigh.end(),myneigh[j]))
-						if(!binary_search(neighbors.begin(),neighbors.end(),myneigh[j]))
-						{
-							candidates.push_back(myneigh[j]);
-							dist.push_back(v.GetMeshPoint(myneigh[j]).distance(
-								v.GetMeshPoint(rank)));
-						}
-				}
-				if(!dist.empty())
-				{
-					int place=min_element(dist.begin(),dist.end())-dist.begin();
-					result[i]=candidates[place];
-				}
 			}
 		}
 		return result;
@@ -972,7 +976,18 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	if(logger)
 		logger->output(*this);
 	vector<vector<int> > toduplicate;
-	FindIntersectingPoints(cell_edges,toduplicate);
+	try
+	{
+		FindIntersectingPoints(cell_edges,toduplicate);
+	}
+	catch(UniversalError const& eo)
+	{
+		voronoi_loggers::BinLogger log("vprocerror.bin");
+		log.output(vproc);
+		voronoi_loggers::BinLogger log2("verror.bin");
+		log2.output(*this);
+		throw eo;
+	}
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
 	vector<int> cornerproc=GetCornerNeighbors(vproc,rank);
@@ -1021,6 +1036,10 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	proclisttemp.insert(proclisttemp.end(),cornerproc.begin(),cornerproc.end());
 	toduptemp.insert(toduptemp.end(),corners.begin(),corners.end());
 	//SendRecv(procorder,proclist,toduplicate,vproc);
+
+
+	//write_vector(proclisttemp,"talked"+int2str(rank)+".txt");
+
 	SendRecv(procorder,proclisttemp,toduptemp,vproc);
 	ndup=(int)toduplicate.size();
 	for(int i=0;i<(int)toduptemp.size();++i)
@@ -1342,13 +1361,41 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	vector<Vector2D> points=UpdateMPIPoints(vproc,rank,cornerproc,proclist,p,obc,
 		selfindex,SentProcs,SentPoints);
 
-	Tri->update(points,cproc);
+	try
+	{
+		Tri->update(points,cproc);
+	}
+	catch(UniversalError &eo)
+	{
+		int NN=(int)cproc.size();
+		for(int j=0;j<NN;++j)
+		{
+			eo.AddEntry("cell point x",cproc[j].x);
+			eo.AddEntry("cell point y",cproc[j].y);
+		}
+		eo.AddEntry("Error in rank",rank);
+		voronoi_loggers::BinLogger log("verror"+int2str(rank)+".bin");
+		log.output(vproc);
+		throw eo;
+	}
 	build_v();
 
 	if(logger)
 		logger->output(*this);
 	vector<vector<int> > toduplicate;
-	FindIntersectingPoints(cell_edges,toduplicate);
+	try
+	{
+		FindIntersectingPoints(cell_edges,toduplicate);
+	}
+	catch(UniversalError const& eo)
+	{
+		voronoi_loggers::BinLogger log("vprocerror.bin");
+		log.output(vproc);
+		voronoi_loggers::BinLogger log2("verror.bin");
+		log2.output(*this);
+		throw eo;
+	}
+
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
 
@@ -2169,7 +2216,15 @@ void VoronoiMesh::FindIntersectingPoints(vector<Edge> const &box_edges,
 
 	for(int i=0;i<N;++i)
 	{
-		vector<int> temp=CellIntersectBoundary(box_edges,i);
+		vector<int> temp;
+		try
+		{
+			temp=CellIntersectBoundary(box_edges,i);
+		}
+		catch(UniversalError const& eo)
+		{
+			throw eo;
+		}
 		int j=(int)temp.size();
 		if(j>0)
 		{
@@ -2207,15 +2262,15 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	int nintersect=(int)res.size();
 	if(nintersect>1)
 	{
-		if(nintersect>3)
+		/*if(nintersect>3)
 		{
 			UniversalError eo("Too many intersections of boundary cell with box edges");
 			eo.AddEntry("Cell number",(double)cell);
 			Vector2D pp=Tri->get_point(cell);
 			eo.AddEntry("x cor",pp.x);
 			eo.AddEntry("y cor",pp.y);
-			throw;
-		}
+			throw eo;
+		}*/
 		vector<Vector2D> cpoints;
 		ConvexHull(cpoints,this,cell);
 		for(int i=0;i<nbox;++i)
