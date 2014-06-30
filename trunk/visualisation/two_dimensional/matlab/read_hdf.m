@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Matlab script to read RICH binary files in float/double format
 %
@@ -9,6 +9,9 @@ function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=r
 %             Entropy (assuming gamma=5/3), 5: Tracer (assuming
 %             tracerindex=1)
 %             LogScale - 1 Plot Log scaled, 0 linear scale
+%             edgestrength - The intensity of line edges around each
+%             voronoi cell. Values are from 0 to 1 with 1 being very strong
+%             edges and 0 no edges.
 %   Output  : X - The mesh points
 %             Pressure - The pressure
 %             Density - The density
@@ -30,13 +33,18 @@ if(nargin==1),
     ShouldPlot=0;
     WhatToPlot=1;
     LogScale=0;
+    edgestrength=0;
 elseif (nargin==2),
     ShouldPlot=0;
     WhatToPlot=1;
     LogScale=0;
+    edgestrength=0;
 elseif (nargin==3),
     LogScale=0;
+    edgestrength=0;
 elseif (nargin==4),
+    edgestrength=0;
+elseif (nargin==5),
     % do nothing
 else
     error('Illigal number of input arguments');
@@ -65,8 +73,8 @@ draw=WhatToPlot;
 Log=LogScale;
 Temperature=Pressure./Density;
 maxfaces=max(nVert);
-if(maxfaces>14)
-    display('Warning, max number of faces exceeds 14!!')
+if(maxfaces>20)
+    display('Warning, max number of faces exceeds 20!!')
 end
 
 if(ShouldPlot==1||ShouldPlot==2)
@@ -107,26 +115,26 @@ if(ShouldPlot==1||ShouldPlot==2)
             case 1
                 if(Log==1)
                     caxis([min(log10(Density)) max(log10(Density*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Density((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0.1);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Density((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
                 else
                     caxis([min(Density) max(Density)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Density((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0.05);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Density((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 2
                 if(Log==1)
                     caxis([min(log10(Pressure)) max(log10(Pressure*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Pressure((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Pressure((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
                 else
                     caxis([min(Pressure) max(Pressure)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 3
                 if(Log==1)
                     caxis([min(log10(Temperature)) max(log10(Temperature*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
                 else
                     caxis([min(Temperature) max(Temperature)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Temperature((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Temperature((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 4
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,11 +152,11 @@ if(ShouldPlot==1||ShouldPlot==2)
             case 5
                 tracerindex=1;
                 if(Log==1)
-                    caxis([min(log10(Tracers(tracerindex,:))) max(log10(Tracers(tracerindex,:)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers(tracerindex,(i-1)*maxdraw+1:maxindex)'),'FaceColor','flat','EdgeAlpha',0);
+                    caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);
                 else
-                    caxis([min((Tracers(tracerindex,:))) max((Tracers(tracerindex,:)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers(tracerindex,(i-1)*maxdraw+1:maxindex)','FaceColor','flat','EdgeAlpha',0.05);
+                    caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',0.05);
                 end
         end
     end
