@@ -21,7 +21,7 @@ Primitive Conserved2Primitive
     0.5*pow(abs(velocity),2);
   if(energy<0)
   {
-	  UniversalError eo("Negative thermal energy",0);
+	  UniversalError eo("Negative thermal energy");
 	  eo.AddEntry("x velocity",velocity.x);
 	  eo.AddEntry("y velocity",velocity.y);
 	  eo.AddEntry("density",density);
