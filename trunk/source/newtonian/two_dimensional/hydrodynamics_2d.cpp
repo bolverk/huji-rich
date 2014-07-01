@@ -448,7 +448,7 @@ namespace {
       const double thermal_energy = res.Energy/res.Mass-kinetic_energy;
       const double pressure = eos.de2p(res.Mass,thermal_energy);
       if(pressure<min_pressure)
-	res.Energy = kinetic_energy+res.Mass*eos.dp2e(res.Mass, min_pressure);
+	res.Energy = res.Mass*kinetic_energy+res.Mass*eos.dp2e(res.Mass, min_pressure);
     }
     return res;
   }
