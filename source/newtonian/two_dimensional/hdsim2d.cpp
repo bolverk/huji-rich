@@ -139,7 +139,11 @@ hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
 	 "RICH only works with an even number of processes");
 #endif
 
+#ifndef RICH_MPI
   _tessellation.Initialise(dump.snapshot.mesh_points,&_obc);
+#else
+    _tessellation.Initialise(dump.snapshot.mesh_points,_proctess,&_obc);
+#endif
   _conservedextensive = CalcConservedExtensive
     (_conservedintensive,tessellation);
 }
