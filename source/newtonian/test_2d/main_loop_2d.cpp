@@ -21,7 +21,7 @@ SafeTimeTermination::SafeTimeTermination
 termination_time_(termination_time),
 	max_cycles_(max_cycles) {}
 
-bool SafeTimeTermination::should_continue(hdsim const& sim)
+bool SafeTimeTermination::operator()(hdsim const& sim)
 {
 	if(sim.GetCycle()>max_cycles_)
 		throw UniversalError("Error in SafeTimeTermination: too many iterations");
@@ -32,7 +32,7 @@ bool SafeTimeTermination::should_continue(hdsim const& sim)
 CycleTermination::CycleTermination(int max_cycles):
 max_cycles_(max_cycles) {}
 
-bool CycleTermination::should_continue(hdsim const& sim)
+bool CycleTermination::operator()(hdsim const& sim)
 {
 	return sim.GetCycle()<max_cycles_;
 }
@@ -42,7 +42,7 @@ void simulation2d::main_loop(hdsim& sim,
 	int time_order,
 	DiagnosticFunction* diagfunc)
 {
-	while(term_cond.should_continue(sim))
+	while(term_cond(sim))
 	{
 		try
 		{
