@@ -1,3 +1,8 @@
+/*! \file delaunay_logger.hpp
+  \brief A debugging function for the Delaunay triangulation
+  \author Almog Yalinewich
+ */
+
 #ifndef DELAUNAY_OUTPUT_HPP
 #define DELAUNAY_OUTPUT_HPP 1
 
