@@ -1,3 +1,8 @@
+/*! \file ResetDump.hpp
+  \brief Data needed to restart a simulation
+  \author Elad Steinberg
+ */
+
 #ifndef RESTDUMP_HPP
 #define RESTDUMP_HPP 1
 #include "../common/hydrodynamic_variables.hpp"
