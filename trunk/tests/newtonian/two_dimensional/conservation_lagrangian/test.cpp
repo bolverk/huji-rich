@@ -18,7 +18,7 @@ namespace {
     WriteConserved(string const& fname):
       cons_(), fname_(fname) {}
 
-    void diagnose(hdsim const& sim)
+    void operator()(hdsim const& sim)
     {
       cons_.push_back(total_conserved(sim));
     }

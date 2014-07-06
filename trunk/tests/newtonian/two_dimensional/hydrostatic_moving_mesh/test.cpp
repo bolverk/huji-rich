@@ -106,7 +106,7 @@ namespace {
     WriteMinMaxVolume(string const& fname):
       fhandle_(fname.c_str()) {}
 
-    void diagnose(hdsim const& sim)
+    void operator()(hdsim const& sim)
     {
       fhandle_ << min(volume_list(sim)) << " "
 	       << max(volume_list(sim)) << endl;
