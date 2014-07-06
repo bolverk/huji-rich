@@ -7,6 +7,7 @@
 #define CONSTPERPROC 1
 #include "ProcessorUpdate.hpp"
 
+//! \brief A load balancing scheme aiming for the same number of points in each process
 class ConstNumberPerProc: public ProcessorUpdate
 {
 public:
