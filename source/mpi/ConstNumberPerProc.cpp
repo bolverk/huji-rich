@@ -3,8 +3,9 @@
 ConstNumberPerProc::~ConstNumberPerProc(void){}
 
 ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
-	double speed,double RoundSpeed):
-outer_(outer),PointsPerProc_(npercell),speed_(speed),RoundSpeed_(RoundSpeed){}
+	double speed,double RoundSpeed,int mode):
+outer_(outer),PointsPerProc_(max(npercell,1)),speed_(speed),RoundSpeed_(RoundSpeed),
+	mode_(mode){}
 
 void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)const
 {
@@ -19,7 +20,7 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 		R[i]=tproc.GetWidth(i);
 	// Make cell rounder
 	const Vector2D CM=tproc.GetCellCM(rank);
-	const Vector2D point=tproc.GetMeshPoint(rank);
+	Vector2D point(CM);
 	const double d=abs(CM-tproc.GetMeshPoint(rank));
 	double dxround=0,dyround=0;
 	if(d>0.1*R[rank])
@@ -33,118 +34,135 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	MPI_Gather(&mypointnumber,1,MPI_INT,&NPerProc[0],1,MPI_INT,0,MPI_COMM_WORLD);
 	MPI_Bcast(&NPerProc[0],nproc,MPI_INT,0,MPI_COMM_WORLD);
 	// Move point according to density
-	/*
-	for(int i=0;i<nproc;++i)
+	if(mode_==1||mode_==3)
 	{
-		Vector2D otherpoint=tproc.GetMeshPoint(i);
-		double dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		double temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Right side
-		otherpoint.x=2*outer_.GetGridBoundary(Right)-otherpoint.x;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Right Up side
-		otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Right Down side
-		otherpoint.y=2*outer_.GetGridBoundary(Down)-tproc.GetMeshPoint(i).y;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Center bottom side
-		otherpoint.x=tproc.GetMeshPoint(i).x;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Left Bottom side
-		otherpoint.x=2*outer_.GetGridBoundary(Left)-otherpoint.x;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Left side
-		otherpoint.y=tproc.GetMeshPoint(i).y;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Left top side
-		otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-		// Top side
-		otherpoint.x=tproc.GetMeshPoint(i).x;
-		dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-			(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.x-otherpoint.x)/(dist*dist*dist);
-		dx+=temp;
-		temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-			(point.y-otherpoint.y)/(dist*dist*dist);
-		dy+=temp;
-	}*/
-	// Moving according to pressure
-	vector<int> neigh=tproc.GetNeighbors(rank);
-	for(int i=0;i<(int)neigh.size();++i)
-	{
-		if(neigh[i]==-1)
-			continue;
-		Vector2D otherpoint=tproc.GetMeshPoint(neigh[i]);
-		dx+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
-			otherpoint.x-point.x);
-		dy+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
-			otherpoint.y-point.y);
+		for(int i=0;i<nproc;++i)
+		{
+			Vector2D otherpoint=tproc.GetCellCM(i);
+			double dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			double temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Right side
+			otherpoint.x=2*outer_.GetGridBoundary(Right)-otherpoint.x;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Right Up side
+			otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Right Down side
+			otherpoint.y=2*outer_.GetGridBoundary(Down)-tproc.GetCellCM(i).y;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Center bottom side
+			otherpoint.x=tproc.GetCellCM(i).x;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Left Bottom side
+			otherpoint.x=2*outer_.GetGridBoundary(Left)-otherpoint.x;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Left side
+			otherpoint.y=tproc.GetCellCM(i).y;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Left top side
+			otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+			// Top side
+			otherpoint.x=tproc.GetCellCM(i).x;
+			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.x-otherpoint.x)/(dist*dist*dist);
+			dx+=temp;
+			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)/(dist*dist*dist);
+			dy+=temp;
+		}
 	}
-
-
+	double old_dx=dx;
+	double old_dy=dy;
+	dx=0;
+	dy=0;
+	// Moving according to pressure
+	if(mode_==1||mode_==2)
+	{
+		vector<int> neigh=tproc.GetNeighbors(rank);
+		for(int i=0;i<(int)neigh.size();++i)
+		{
+			if(neigh[i]==-1)
+				continue;
+			//Vector2D otherpoint=tproc.GetMeshPoint(neigh[i]);
+			Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
+			dx+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
+				otherpoint.x-point.x);
+			dy+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
+				otherpoint.y-point.y);
+		}
+	}
+	old_dx=(old_dx>0) ? min(old_dx,speed_*R[rank]) : -min(-old_dx,speed_*R[rank]);
+	old_dy=(old_dy>0) ? min(old_dy,speed_*R[rank]) : -min(-old_dy,speed_*R[rank]);
 	dx=(dx>0) ? min(dx,speed_*R[rank]) : -min(-dx,speed_*R[rank]);
 	dy=(dy>0) ? min(dy,speed_*R[rank]) : -min(-dy,speed_*R[rank]);
+	//if(rank==0)
+	//	cout<<"Unlimited dx="<<dx<<" dy="<<dy<<" old_dx="<<old_dx<<" old_dy="<<old_dy<<" max allowed="<<speed_*R[rank]<<endl;
+	// Combine the two additions
+	dx+=old_dx;
+	dy+=old_dy;
+	// Add the round cells
 	dx+=dxround;
 	dy+=dyround;
 	// Make sure not out of bounds
+	point=tproc.GetMeshPoint(rank);
 	const double close=0.99999;
 	const double wx=outer_.GetGridBoundary(Right)-outer_.GetGridBoundary(Left);
 	const double wy=outer_.GetGridBoundary(Up)-outer_.GetGridBoundary(Down);
