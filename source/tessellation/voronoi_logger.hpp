@@ -1,3 +1,8 @@
+/*! \file voronoi_logger.hpp
+  \brief A debugging function for the Voronoi tessellation
+  \author Almog Yalinewich
+ */
+
 #ifndef VORONOI_LOGGER_HPP
 #define VORONOI_LOGGER_HPP 1
 
