@@ -7,7 +7,7 @@ Circle::Circle(Vector2D const& center,
   center_(center),
   radius_(radius) {}
 
-bool Circle::is_in(Vector2D const& r) const
+bool Circle::operator()(Vector2D const& r) const
 {
   return abs(r-center_)<radius_;
 }
@@ -15,8 +15,8 @@ bool Circle::is_in(Vector2D const& r) const
 Outside::Outside(Shape2D const& shape):
   shape_(shape) {}
 
-bool Outside::is_in(Vector2D const& r) const
+bool Outside::operator()(Vector2D const& r) const
 {
-  return !shape_.is_in(r);
+  return !shape_(r);
 }
 
