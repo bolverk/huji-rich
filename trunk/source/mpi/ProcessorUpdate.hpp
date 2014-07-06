@@ -1,4 +1,4 @@
-/*!
+/*! \file ProcessorUpdate.hpp
   \brief Abstract class for motion of the processor points
   \author Elad Steinberg
 */
