@@ -1207,6 +1207,73 @@ namespace {
   };
 }
 
+namespace {
+  class TracerFluxCalculator: public Index2Member<vector<double> >
+  {
+  public:
+
+    TracerFluxCalculator(const Tessellation& tess,
+			 const vector<Conserved> fluxes,
+			 const vector<CustomEvolution*>& cev,
+			 const CustomEvolutionManager& cem,
+			 const vector<vector<double> >& tracers,
+			 const vector<Primitive>& cells,
+			 const HydroBoundaryConditions& hbc,
+			 const double dt,
+			 const double time,
+			 const SpatialReconstruction& interp,
+			 const vector<Vector2D>& edge_velocities,
+			 const vector<double>& lengths):
+      tess_(tess), fluxes_(fluxes), cev_(cev), cem_(cem),
+      tracers_(tracers), cells_(cells), hbc_(hbc), dt_(dt),
+      time_(time), interp_(interp), 
+      edge_velocities_(edge_velocities), lengths_(lengths) {}
+
+    size_t getLength(void) const
+    {
+      return tess_.GetTotalSidesNumber();
+    }
+
+    vector<double> operator()(size_t i) const
+    {
+      const Edge& edge = tess_.GetEdge(i);
+      const double dm = fluxes_[i].Mass;
+      const int n1 = edge.neighbors.second;
+      const int n0 = edge.neighbors.first;
+      if(hbc_.IsBoundary(edge,tess_))
+	return hbc_.CalcTracerFlux
+	  (tess_,cells_,tracers_,dm,edge,i,dt_,time_,interp_,
+	   edge_velocities_[i]);
+      else{
+	if(cev_[n0]||cev_[n1])
+	  return cev_[choose_special_cell_index(cev_,cem_,n0,n1)]->CalcTracerFlux
+	    (tess_,cells_,tracers_,dm,edge,i,dt_,
+	     time_,interp_,edge_velocities_[i]);
+	else
+	  return apply_to_each_term
+	    (interp_.interpolateTracers
+	     (tess_,cells_,tracers_,dt_,edge,dm<0,InBulk,
+	      edge_velocities_[i]),
+	     ScalarMultiply(dt_*dm*lengths_[i]));
+      }
+    }
+
+  private:
+    const Tessellation& tess_;
+    const vector<Conserved>& fluxes_;
+    const vector<CustomEvolution*>& cev_;
+    const CustomEvolutionManager& cem_;
+    const vector<vector<double> >& tracers_;
+    const vector<Primitive>& cells_;
+    const HydroBoundaryConditions& hbc_;
+    const double dt_;
+    const double time_;
+    const SpatialReconstruction& interp_;
+    const vector<Vector2D>& edge_velocities_;
+    const vector<double>& lengths_;
+  };
+}
+
 vector<vector<double> > CalcTraceChange
 (vector<vector<double> > const& old_trace,
  vector<Primitive> const& cells,
@@ -1216,66 +1283,26 @@ vector<vector<double> > CalcTraceChange
  double time,vector<CustomEvolution*> const& CellsEvolve,
  CustomEvolutionManager const& cem,
  vector<Vector2D> const& edge_velocities,
- vector<double> const& lengthes)
+ vector<double> const& lengths)
 {
   if(old_trace.empty())
     return vector<vector<double> >();
-  const int n = tess.GetPointNo();
-  const int dim = (int)old_trace[0].size();
-  vector<vector<double> > res(n,vector<double>(dim,0));
-  for(int i=0;i<n;++i)
-    {
-      const vector<int> cell_edge_indices=tess.GetCellEdges(i);
-      const int Nedges=int(cell_edge_indices.size());
-      for(int k=0;k<Nedges;++k)
-	{
-	  const int edge_index = cell_edge_indices[k];
-	  const Edge edge = tess.GetEdge(edge_index);
-	  const double dm=fluxes[edge_index].Mass;
-	  const int n1=edge.neighbors.second;
-	  const int n0=edge.neighbors.first;
-	  if(!hbc.IsBoundary(edge,tess))
-	    {
-	      if(CellsEvolve[n0]||CellsEvolve[n1]){	     
-		const int ns = choose_special_cell_index
-		  (CellsEvolve,cem,n0,n1);
-		if(CellsEvolve[ns])
-		  {
-		    const vector<double> temp = 
-		      CellsEvolve[ns]->CalcTracerFlux
-		      (tess,cells,old_trace,dm,edge,i,dt,
-		       time,interp,edge_velocities[edge_index]);
-		    transform(res[i].begin(),
-			      res[i].end(),
-			      temp.begin(),
-			      res[i].begin(),
-			      plus<double>());
-		    continue;
-		  }
-	      }
-	    }
 
-	  if(hbc.IsBoundary(edge,tess))
-	    {
-	      const vector<double> temp=hbc.CalcTracerFlux
-		(tess,cells,old_trace,dm,edge,i,dt,time,interp,
-		 edge_velocities[edge_index]);
-	      res[i] = binary_unite(res[i],temp,
-				    ConditionalPlusMinus(i==n1));
-	    }
-	  else
-	    {
-	      const vector<double> temp2=interp.interpolateTracers
-		(tess,cells,old_trace,dt,edge,dm<0,InBulk,
-		 edge_velocities[edge_index]);
-	      const vector<double> temp = apply_to_each_term
-		(temp2,ScalarMultiply(dm*dt*lengthes[edge_index]));
-	      res[i] = binary_unite(res[i],temp,
-				    ConditionalPlusMinus(i==n1));
-	    }
-	}
+  const vector<vector<double> >& tracer_fluxes = 
+    serial_generate(TracerFluxCalculator
+		    (tess,fluxes,CellsEvolve,cem,
+		     old_trace, cells, hbc, dt, time,
+		     interp, edge_velocities, lengths));
+  vector<vector<double> > res(old_trace.size(),
+			      vector<double>(old_trace[0].size(),0));
+  for(int i=0;i<tess.GetTotalSidesNumber();++i){
+    for(size_t j=0;j<res[0].size();++j){
+      if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.first,tess))
+	res[tess.GetEdge(i).neighbors.first][j] -= tracer_fluxes[i][j];
+      if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.second,tess))
+	res[tess.GetEdge(i).neighbors.second][j] += tracer_fluxes[i][j];
     }
-
+  }
   return res;
 }
 
