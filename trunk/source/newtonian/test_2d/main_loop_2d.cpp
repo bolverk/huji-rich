@@ -6,7 +6,7 @@
 DiagnosticFunction::~DiagnosticFunction(void) {}
 
 WriteTime::WriteTime(string const& fname):
-fname_(fname) {}
+  fname_(fname) {}
 
 void WriteTime::operator()(hdsim const& sim)
 {
@@ -16,48 +16,53 @@ void WriteTime::operator()(hdsim const& sim)
 TerminationCondition::~TerminationCondition(void) {}
 
 SafeTimeTermination::SafeTimeTermination
-	(double termination_time,
-	int max_cycles):
-termination_time_(termination_time),
-	max_cycles_(max_cycles) {}
+(double termination_time,
+ int max_cycles):
+  termination_time_(termination_time),
+  max_cycles_(max_cycles) {}
 
 bool SafeTimeTermination::operator()(hdsim const& sim)
 {
-	if(sim.GetCycle()>max_cycles_)
-		throw UniversalError("Error in SafeTimeTermination: too many iterations");
+  if(sim.GetCycle()>max_cycles_)
+    throw UniversalError("Error in SafeTimeTermination: too many iterations");
 
-	return sim.GetTime()<termination_time_;
+  return sim.GetTime()<termination_time_;
 }
 
 CycleTermination::CycleTermination(int max_cycles):
-max_cycles_(max_cycles) {}
+  max_cycles_(max_cycles) {}
 
 bool CycleTermination::operator()(hdsim const& sim)
 {
-	return sim.GetCycle()<max_cycles_;
+  return sim.GetCycle()<max_cycles_;
 }
 
+Manipulate::~Manipulate(void) {}
+
 void simulation2d::main_loop(hdsim& sim,
-	TerminationCondition& term_cond,
-	int time_order,
-	DiagnosticFunction* diagfunc)
+			     TerminationCondition& term_cond,
+			     int time_order,
+			     DiagnosticFunction* diagfunc,
+			     Manipulate* manipulate)
 {
-	while(term_cond(sim))
+  while(term_cond(sim))
+    {
+      try
 	{
-		try
-		{
-			if(1==time_order)
-				sim.TimeAdvance();
-			else if(2==time_order)
-				sim.TimeAdvance2Mid();
-			else
-				throw UniversalError("Error in 2d main loop: unsupported time integration order");
-		}
-		catch(UniversalError const& eo)
-		{
-		  DisplayError(eo);
-		}
-		if(diagfunc)
-		  (*diagfunc)(sim);
+	  if(1==time_order)
+	    sim.TimeAdvance();
+	  else if(2==time_order)
+	    sim.TimeAdvance2Mid();
+	  else
+	    throw UniversalError("Error in 2d main loop: unsupported time integration order");
 	}
+      catch(UniversalError const& eo)
+	{
+	  DisplayError(eo);
+	}
+      if(diagfunc)
+	(*diagfunc)(sim);
+      if(manipulate)
+	(*manipulate)(sim);
+    }
 }
