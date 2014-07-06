@@ -4,46 +4,44 @@
 Ratchet::Ratchet(DIRECTION dir):
 dir_(dir) {}
 
-Conserved Ratchet::CalcFlux(Tessellation const& tess,vector<Primitive> const& cells,
-	double /*dt*/,SpatialReconstruction& /*interp*/,Edge const& edge,
-	Vector2D const& face_velocity,RiemannSolver const& rs,int index,
-	HydroBoundaryConditions const& hbc,double /*time*/,vector<vector<double> > const& /*tracers*/)
+Conserved Ratchet::CalcFlux(Tessellation const& tess,
+			    vector<Primitive> const& cells,
+			    double /*dt*/,
+			    SpatialReconstruction& /*interp*/,
+			    Edge const& edge,
+			    Vector2D const& face_velocity,
+			    RiemannSolver const& rs,int index,
+			    HydroBoundaryConditions const& hbc,
+			    double /*time*/,
+			    vector<vector<double> > const& /*tracers*/)
 {
-	int other;
-	int my_index;
-	if(edge.neighbors.first==index)
-	{
-		my_index = 0;
-		other = edge.neighbors.second;
-	}
-	else
-	{
-		my_index = 1;
-		other = edge.neighbors.first;
-	}
-	if(hbc.IsGhostCell(other,tess))
-		return Conserved();
-	const Vector2D p = Parallel(edge);
-	const Vector2D n = tess.GetMeshPoint(edge.neighbors.second)
-		-tess.GetMeshPoint(edge.neighbors.first);
-	const Vector2D outward = tess.GetMeshPoint(pair_member(edge.neighbors,1-my_index))
-	  -tess.GetMeshPoint(pair_member(edge.neighbors,my_index));
-	Primitive ghost = cells[other];
-	if (((dir_==in)&&(ScalarProd(ghost.Velocity,outward)>0))||
-		((dir_==out)&&(ScalarProd(ghost.Velocity,outward)<0)))
-		ghost.Velocity = Reflect(cells[other].Velocity, p);
-	Primitive left, right;
-	if(0==my_index)
-	{
-		left = ghost;
-		right = cells[other];
-	}
-	else
-	{
-		left = cells[other];
-		right = ghost;
-	}
-	return FluxInBulk(n,p,left,right,face_velocity,rs);
+  const int other = (edge.neighbors.first==index) ?
+    edge.neighbors.second : edge.neighbors.first;
+  if(hbc.IsGhostCell(other,tess))
+    return Conserved();
+  const int my_index = (edge.neighbors.first==index) ? 0 : 1;
+  const Vector2D p = Parallel(edge);
+  const Vector2D n = tess.GetMeshPoint(edge.neighbors.second)
+    -tess.GetMeshPoint(edge.neighbors.first);
+  const Vector2D outward = 
+    tess.GetMeshPoint(pair_member(edge.neighbors,1-my_index))
+    - tess.GetMeshPoint(pair_member(edge.neighbors,my_index));
+  Primitive ghost = cells[other];
+  if (((dir_==in)&&(ScalarProd(ghost.Velocity,outward)>0))||
+      ((dir_==out)&&(ScalarProd(ghost.Velocity,outward)<0)))
+    ghost.Velocity = Reflect(cells[other].Velocity, p);
+  Primitive left, right;
+  if(0==my_index)
+    {
+      left = ghost;
+      right = cells[other];
+    }
+  else
+    {
+      left = cells[other];
+      right = ghost;
+    }
+  return FluxInBulk(n,p,left,right,face_velocity,rs);
 }
 
 Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
@@ -68,12 +66,9 @@ vector<double> Ratchet::CalcTracerFlux
 	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {
 	const int other = (edge.neighbors.first==index) ?
-		edge.neighbors.second : edge.neighbors.first;
-	if(dir_==in)
-		return vector<double>(tracers[0].size(),0);
-	else
-		return termwise_product(trim_top(tracers[other],tess.GetPointNo()),
-		dm*dt*edge.GetLength());
+	  edge.neighbors.second : edge.neighbors.first;
+	return termwise_product(tracers[other],
+				dm*dt*edge.GetLength());
 }
 
 bool Ratchet::TimeStepRelevant(void)const
