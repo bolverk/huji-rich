@@ -1,3 +1,8 @@
+/*! \file hold_still.hpp
+  \brief Keeps a certain portion of the grid stationary
+  \author Almog Yalinewich
+ */
+
 #ifndef HOLD_STILL_HPP
 #define HOLD_STILL_HPP
 
