@@ -1,3 +1,8 @@
+/*! \file ConvexHull.hpp
+  \brief Calculates the convex hull from a set of points
+  \author Elad Steinberg
+ */
+
 #ifndef CONVEXHULL_HPP
 #define CONVEXHULL_HPP 1
 
