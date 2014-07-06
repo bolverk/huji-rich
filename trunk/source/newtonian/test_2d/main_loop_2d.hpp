@@ -49,7 +49,7 @@ public:
     \param sim Hydrodynamic simulation
     \return True is simulation should continue running
    */
-  virtual bool should_continue(hdsim const& sim) = 0;
+  virtual bool operator()(hdsim const& sim) = 0;
 
   //! \brief Virtual destructor
   virtual ~TerminationCondition(void) = 0;
@@ -67,7 +67,7 @@ public:
   SafeTimeTermination(double termination_time,
 		      int max_cycles);
 
-  bool should_continue(hdsim const& sim);
+  bool operator()(hdsim const& sim);
 
 private:
   const double termination_time_;
@@ -84,7 +84,7 @@ public:
    */
   CycleTermination(int max_cycles);
 
-  bool should_continue(hdsim const& sim);
+  bool operator()(hdsim const& sim);
 
 private:
 
