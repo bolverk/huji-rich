@@ -51,8 +51,14 @@ void PeriodicVelocityExchange(vector<Vector2D> &vel,
 
 #include <mpi.h>
 
+/*! \brief Returns the mpi rank of the current process
+  \return MPI rank
+ */
 int get_mpi_rank(void);
 
+/*! \brief Returns the mpi size of the current group
+  \return MPI size
+ */
 int get_mpi_size(void);
 
 int MPI_Send_Vector2D(Vector2D const& vec,int dest,int tag, MPI_Comm comm);
