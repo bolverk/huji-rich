@@ -1,4 +1,4 @@
-/*!
+/*! \file SetLoad.hpp
   \brief Function for setting the load balance based on equal cells per processor
   \author Elad Steinberg
 */
