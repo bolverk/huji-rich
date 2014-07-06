@@ -1,3 +1,8 @@
+/*! \file mpi_macro.hpp
+  \brief A collection of useful utilities for mpi
+  \author Elad Steinberg
+ */
+
 #ifndef MPI_MACRO
 #define MPI_MACRO 1
 
