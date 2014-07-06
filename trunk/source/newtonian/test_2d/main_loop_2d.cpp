@@ -41,7 +41,7 @@ Manipulate::~Manipulate(void) {}
 
 void simulation2d::main_loop(hdsim& sim,
 			     TerminationCondition& term_cond,
-			     int time_order,
+			     void (hdsim::*time_advance_method)(void),
 			     DiagnosticFunction* diagfunc,
 			     Manipulate* manipulate)
 {
@@ -49,12 +49,7 @@ void simulation2d::main_loop(hdsim& sim,
     {
       try
 	{
-	  if(1==time_order)
-	    sim.TimeAdvance();
-	  else if(2==time_order)
-	    sim.TimeAdvance2Mid();
-	  else
-	    throw UniversalError("Error in 2d main loop: unsupported time integration order");
+	  (sim.*time_advance_method)();
 	}
       catch(UniversalError const& eo)
 	{
