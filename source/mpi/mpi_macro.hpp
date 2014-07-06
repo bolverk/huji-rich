@@ -19,6 +19,13 @@
 
 using namespace std;
 
+/*! \brief Find the iterator of a certain value in an array
+  \param first First iterator
+  \param second Second iterator
+  \param val Value
+  \return Iterator of the cell that contains val
+  \todo Move this function to source/misc/utils.hpp
+ */
 template<class InputIterator, class T>
   InputIterator Find (InputIterator first, InputIterator last, const T& val)
 {
