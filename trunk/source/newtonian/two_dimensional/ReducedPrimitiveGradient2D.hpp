@@ -1,3 +1,8 @@
+/*! \file ReducedPrimitiveGradient2D.hpp
+  \brief A 2D gradient of the hydrodynamic variables
+  \author Almog Yalinewich
+ */
+
 #ifndef REDUCEDPRIMITIVEGRADIENT_HPP
 #define REDUCEDPRIMITIVEGRADIENT_HPP 1
 
