@@ -8,9 +8,9 @@ DiagnosticFunction::~DiagnosticFunction(void) {}
 WriteTime::WriteTime(string const& fname):
 fname_(fname) {}
 
-void WriteTime::diagnose(hdsim const& sim)
+void WriteTime::operator()(hdsim const& sim)
 {
-	write_number(sim.GetTime(),fname_);
+  write_number(sim.GetTime(),fname_);
 }
 
 TerminationCondition::~TerminationCondition(void) {}
@@ -58,6 +58,6 @@ void simulation2d::main_loop(hdsim& sim,
 		  DisplayError(eo);
 		}
 		if(diagfunc)
-			diagfunc->diagnose(sim);
+		  (*diagfunc)(sim);
 	}
 }

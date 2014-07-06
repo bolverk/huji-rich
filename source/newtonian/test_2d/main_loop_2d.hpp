@@ -19,7 +19,7 @@ public:
   /*! \brief Perform diagnostics
     \param sim Hydrodynamic simulation
    */
-  virtual void diagnose(hdsim const& sim) = 0;
+  virtual void operator()(hdsim const& sim) = 0;
 
   virtual ~DiagnosticFunction(void);
 };
@@ -34,7 +34,7 @@ public:
    */
   WriteTime(string const& fname);
 
-  void diagnose(hdsim const& sim);
+  void operator()(hdsim const& sim);
 
 private:
   string fname_;
