@@ -88,7 +88,7 @@ private:
     WriteTime diag("time.txt");
     main_loop(sim,
 	      term_cond,
-	      1,
+	      &hdsim::TimeAdvance2Mid,
 	      &diag);
   }
 }

@@ -115,7 +115,7 @@ namespace simulation2d{
    */
   void main_loop(hdsim& sim,
 		 TerminationCondition& term_cond,
-		 int time_order = 1,
+		 void (hdsim::*time_advance_method)(void),
 		 DiagnosticFunction* diagfunc = 0,
 		 Manipulate* manipulate = 0);
 }
