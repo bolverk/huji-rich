@@ -91,6 +91,19 @@ private:
   const int max_cycles_;
 };
 
+//! \brief Class for manual tweaking with the simulation data
+class Manipulate
+{
+public:
+
+  /*! \brief Modifies the simulation data
+    \param sim Hydrodynamic simulation
+   */
+  virtual void operator()(hdsim& sim) = 0;
+
+  virtual ~Manipulate(void);
+};
+
 //! \brief Functions for managing two dimensional simulations
 namespace simulation2d{
 
@@ -103,7 +116,8 @@ namespace simulation2d{
   void main_loop(hdsim& sim,
 		 TerminationCondition& term_cond,
 		 int time_order = 1,
-		 DiagnosticFunction* diagfunc = 0);
+		 DiagnosticFunction* diagfunc = 0,
+		 Manipulate* manipulate = 0);
 }
 
 #endif // MAIN_LOOP_2D_HPP
