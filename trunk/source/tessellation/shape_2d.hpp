@@ -17,7 +17,7 @@ public:
     \param r Point in 2d space
     \return True if r is inside the shape
    */
-  virtual bool is_in(Vector2D const& r) const = 0;
+  virtual bool operator()(Vector2D const& r) const = 0;
 
   //! \brief virtual destructor
   virtual ~Shape2D(void);
@@ -35,7 +35,7 @@ public:
   Circle(Vector2D const& center,
 	 double radius);
 
-  bool is_in(Vector2D const& r) const;
+  bool operator()(Vector2D const& r) const;
 
 private:
 
@@ -53,7 +53,7 @@ public:
    */
   Outside(Shape2D const& shape);
 
-  bool is_in(Vector2D const& r) const;
+  bool operator()(Vector2D const& r) const;
 
 private:
 
