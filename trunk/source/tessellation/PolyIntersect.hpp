@@ -1,3 +1,8 @@
+/*! \file PolyIntersect.hpp
+  \brief Finds the intersection points between two polygons
+  \author Elad Steinberg
+ */
+
 #include "geotests.hpp"
 #include "Edge.hpp"
 
