@@ -1,3 +1,8 @@
+/*! \file EdgeLengthCorrect.hpp
+  \brief Attempts to improve the accuracy of the simulation by taking into accout the change in the length of an edge during a time step
+  \author Elad Steinberg
+ */
+
 #include "tessellation.hpp"
 
 /*
