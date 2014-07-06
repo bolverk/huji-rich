@@ -8,6 +8,7 @@
 #include "ConstNumberPerProc.hpp"
 #include "../tessellation/VoronoiMesh.hpp"
 #include "../newtonian/two_dimensional/diagnostics.hpp"
+#include "../misc/simple_io.hpp"
 
 /*!
 	\brief Corrects the load between processors based on number of cells per processor
@@ -17,9 +18,10 @@
 	\param Nbest The ideal number of points per processor
 	\param Niter The number of correction iterations to use
 	\param speed How fast to make the correction each iteration in units of cpu cell size
+	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,int Niter=10,double speed=0.1);
+	outer,int Nbest,int Niter=100,double speed=0.1,int mode=1);
 
 /*!
 	\brief Corrects the load between processors based on number of cells per processor, continues until target load is reached
@@ -29,9 +31,10 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	\param Nbest The ideal number of points per processor
 	\param TargetLoad The target load balance, must be higher than 1, recommened to be 1.5
 	\param speed How fast to make the correction each iteration in units of cpu cell size
+	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,double TargetLoad,double speed=0.1);
+	outer,int Nbest,double TargetLoad,double speed=0.1,int mode=1);
 
 
 #endif //SETLOAD
