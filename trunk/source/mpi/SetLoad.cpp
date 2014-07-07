@@ -26,9 +26,9 @@ namespace
 		MPI_Comm_size(MPI_COMM_WORLD,&ws);
 		double round;
 		if(mode==1)
-			round=1.6;
-		else
 			round=2;
+		else
+			round=1.6;
 		ConstNumberPerProc procmove(outer,Nbest,speed,round,mode);
 		VoronoiMesh local(points,tproc,outer);
 		vector<double> loads;
@@ -110,7 +110,7 @@ namespace
 			cout<<"Finished setting load, the load balance is "<<load<<endl;
 		points=local.GetMeshPoints();
 		points.resize(local.GetPointNo());
-		write_vector(loads,"loads.txt");
+		//write_vector(loads,"loads.txt");
 	}
 }
 
