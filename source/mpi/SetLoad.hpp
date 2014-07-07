@@ -21,7 +21,7 @@
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,int Niter=100,double speed=0.1,int mode=1);
+	outer,int Nbest,int Niter=100,double speed=0.04,int mode=1);
 
 /*!
 	\brief Corrects the load between processors based on number of cells per processor, continues until target load is reached
@@ -34,7 +34,7 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,double TargetLoad,double speed=0.1,int mode=1);
+	outer,int Nbest,double TargetLoad,double speed=0.04,int mode=1);
 
 
 #endif //SETLOAD
