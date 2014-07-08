@@ -53,7 +53,23 @@ Delaunay::~Delaunay(void)
   cell_points.clear();
 }
 
-namespace{
+namespace
+{
+	// Checks if a point is inside a triangle
+	bool InTriangle(boost::array<Vector2D,3> const& tri,Vector2D const& point)
+	{
+		boost::array<Vector2D,3> tocheck;
+		tocheck[2]=point;
+		for(int i=0;i<3;++i)
+		{
+			tocheck[0]=tri[i];
+			tocheck[1]=tri[(i+1)%3];
+			if(orient2d(tocheck)<0)
+				return false;
+		}
+		return true;
+	}
+
   // Assume cell is orederd in convexhull counterclockwise
   bool InCell(vector<Vector2D> const& points,Vector2D const& p)
   {
@@ -101,6 +117,24 @@ namespace{
 
 void Delaunay::add_point(int index)
 {
+	// Check if point is inside big triangle
+	boost::array<Vector2D,3> tocheck;
+	tocheck[0]=cor[olength];
+	tocheck[1]=cor[olength+1];
+	tocheck[2]=cor[olength+2];
+	if(!InTriangle(tocheck,cor[index]))
+	{
+		UniversalError eo("Point not inside large triangle of Delaunay");
+		eo.AddEntry("Point x",cor[index].x);
+		eo.AddEntry("Point y",cor[index].y);
+		eo.AddEntry("Big tirangle point 1 x",tocheck[0].x);
+		eo.AddEntry("Big tirangle point 1 y",tocheck[0].y);
+		eo.AddEntry("Big tirangle point 2 x",tocheck[1].x);
+		eo.AddEntry("Big tirangle point 2 y",tocheck[1].y);
+		eo.AddEntry("Big tirangle point 3 x",tocheck[2].x);
+		eo.AddEntry("Big tirangle point 3 y",tocheck[2].y);
+		throw eo;
+	}
   int triangle=Walk(index);
   boost::array<int,3> outer,temp_friends;
   facet f_temp;
@@ -288,6 +322,8 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
   vector<double> cellsize=CellSize(cell_points);
   double width=cellsize[1]-cellsize[0];
   double height=cellsize[3]-cellsize[2];
+  width=max(width,height);
+  height=max(width,height);
   p_temp.x = cellsize[0]-100*width;
   p_temp.y = cellsize[2]-100*height;
   cor.push_back(p_temp);

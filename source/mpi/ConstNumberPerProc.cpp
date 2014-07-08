@@ -30,7 +30,7 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	}
 	// Find out how many points each proc has
 	vector<int> NPerProc(nproc);
-	int mypointnumber=tlocal.GetPointNo();
+	int mypointnumber=tlocal.GetPointNo()+1;
 	MPI_Gather(&mypointnumber,1,MPI_INT,&NPerProc[0],1,MPI_INT,0,MPI_COMM_WORLD);
 	MPI_Bcast(&NPerProc[0],nproc,MPI_INT,0,MPI_COMM_WORLD);
 	// Move point according to density
