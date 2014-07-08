@@ -8,7 +8,7 @@ ConsecutiveSnapshots::ConsecutiveSnapshots(double dt,double init_time,int counte
   dt_(dt),
   counter_(counter) {}
 
-void ConsecutiveSnapshots::diagnose(hdsim const& sim)
+void ConsecutiveSnapshots::operator()(hdsim const& sim)
 {
 #ifdef RICH_MPI
   const int rank = get_mpi_rank();

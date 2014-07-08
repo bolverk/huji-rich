@@ -20,7 +20,7 @@ public:
    */
   ConsecutiveSnapshots(double dt,double init_time=0,int counter=0);
 
-  void diagnose(hdsim const& sim);
+  void operator()(hdsim const& sim);
 
 private:
   double next_time_;
