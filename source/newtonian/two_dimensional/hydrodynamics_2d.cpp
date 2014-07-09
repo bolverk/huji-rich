@@ -1213,7 +1213,7 @@ namespace {
   public:
 
     TracerFluxCalculator(const Tessellation& tess,
-			 const vector<Conserved> fluxes,
+			 const vector<Conserved> & fluxes,
 			 const vector<CustomEvolution*>& cev,
 			 const CustomEvolutionManager& cem,
 			 const vector<vector<double> >& tracers,
