@@ -4,6 +4,21 @@
 
 namespace {
 
+	void CombineCorners(vector<vector<int> > &toduplicate,vector<vector<int> > const& corners)
+	{
+		int nsides=(int)corners.size();
+		for(int i=0;i<nsides;++i)
+		{
+			toduplicate[i]=join(toduplicate[i],corners[i]);
+			toduplicate[(i+1)%nsides]=join(toduplicate[(i+1)%nsides],corners[i]);
+		}
+		for(int i=0;i<nsides;++i)
+		{
+			sort(toduplicate[i].begin(),toduplicate[i].end());
+			toduplicate[i]=unique(toduplicate[i]);
+		}
+	}
+
 	void sortvectors(vector<vector<int> > &input)
 	{
 		int n=(int)input.size();
@@ -850,6 +865,11 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 	FindIntersectingPoints(box_edges,toduplicate);
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
+	if(_bc->GetBoundaryType()==Periodic)
+	{
+		GetCorners(toduplicate,corners);
+		CombineCorners(toduplicate,corners);
+	}
 	if(_bc->GetBoundaryType()==Rectengular)
 	{
 		for(int i=0;i<4;++i)
@@ -894,7 +914,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 
 	if(_bc->GetBoundaryType()==Periodic)
 	{
-		GetCorners(toduplicate,corners);
+		//GetCorners(toduplicate,corners);
 		for(int i=0;i<4;++i)
 			CornerBoundaryPoints(corners[i],i);
 		for(int i=0;i<4;++i)
@@ -1240,6 +1260,12 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	FindIntersectingPoints(box_edges,toduplicate);
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
+	if(obc->GetBoundaryType()==Periodic)
+	{
+		GetCorners(toduplicate,corners);
+		CombineCorners(toduplicate,corners);
+	}
+
 	if(obc->GetBoundaryType()==Rectengular)
 	{
 		for(int i=0;i<4;++i)
@@ -1273,7 +1299,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 			GetToTest(toduplicate,totest);
 			Nextra=(int)Tri->ChangeCor().size();
 
-			GetCorners(toduplicate,corners);
+			//GetCorners(toduplicate,corners);
 			for(int i=0;i<4;++i)
 				CornerBoundaryPoints(corners[i],i);
 			for(int i=0;i<4;++i)
