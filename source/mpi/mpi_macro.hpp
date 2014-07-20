@@ -21,7 +21,7 @@ using namespace std;
 
 /*! \brief Find the iterator of a certain value in an array
   \param first First iterator
-  \param second Second iterator
+  \param last Iterator pointing to last position
   \param val Value
   \return Iterator of the cell that contains val
   \todo Move this function to source/misc/utils.hpp
@@ -128,7 +128,7 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 \param tess The tessellation
 \param cell_index The index of the cell to check
 \param point The point to cehck
-\param True of false
+\return True of false
 */
 bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & point);
 
@@ -195,6 +195,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 \brief Send/recv the old mesh generating points
 \param points The mesh generating points
 \param sentcells The indeces of the cells to send
+\param sentprocs Process id's to which the message should be sent
 \param toadd The received mesh generating points
 */
 void SendRecvOldVector2D(vector<Vector2D> const& points,
@@ -292,7 +293,7 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 	vector<vector<int> > sentcells,vector<int> sentprocs,int totalpoints);
 /*!
 \brief Send/Recv a vector of velocities
-\param velc The original vector of velocities
+\param vel The original vector of velocities
 \param sentcells The indeces of the gradients to send
 \param sentprocs The ids of the cpus to talk with
 \param totalpoints The total number of points in the tessellation (including ghost)
@@ -303,7 +304,7 @@ void SendRecvVelocity(vector<Vector2D> &vel,
 \brief Resizes and modifies the vectors to retain only cells that are inside the local cpu domain
 \param cons The extensive cells
 \param tracers The extensive tracers
-\param cusomevolutions The custom evolution indeces
+\param customevolutions The custom evolution indeces
 \param localpoints The indeces of the points to keep
 */
 void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
