@@ -39,11 +39,11 @@ void Vector2D::Set(double ix, double iy)
 
 Vector2D& Vector2D::operator=(Vector2D const& v)
 {
-	if (this == &v)
-       return *this;
-	x=v.x;
-	y=v.y;
-	return *this;
+  if (this == &v)
+    return *this;
+  x=v.x;
+  y=v.y;
+  return *this;
 }
 
 Vector2D& Vector2D::operator*=(double s)
@@ -75,27 +75,18 @@ void Vector2D::Rotate(double a)
 
 Vector2D operator+(Vector2D const& v1, Vector2D const& v2)
 {
-  Vector2D res;
-  res.x = v1.x + v2.x;
-  res.y = v1.y + v2.y;
-  return res;
+  return Vector2D(v1.x+v2.x,v1.y+v2.y);
 }
 
 Vector2D operator-(Vector2D const& v1,
 		   Vector2D const& v2)
 {
-  Vector2D res;
-  res.x = v1.x - v2.x;
-  res.y = v1.y - v2.y;
-  return res;
+  return Vector2D(v1.x-v2.x,v1.y-v2.y);
 }
 
 Vector2D operator*(double d, Vector2D const& v)
 {
-  Vector2D res;
-  res.x = v.x * d;
-  res.y = v.y * d;
-  return res;
+  return Vector2D(v.x*d,v.y*d);
 }
 
 Vector2D operator*(Vector2D const& v, double d)
@@ -105,10 +96,7 @@ Vector2D operator*(Vector2D const& v, double d)
 
 Vector2D operator/(Vector2D const& v, double d)
 {
-  Vector2D res;
-  res.x = v.x / d;
-  res.y = v.y / d;
-  return res;
+  return Vector2D(v.x/d, v.y/d);
 }
 
 double ScalarProd(Vector2D const& v1,
@@ -135,7 +123,7 @@ Vector2D Reflect(Vector2D const& v, Vector2D const& axis)
 
 double distance(Vector2D const& v1, Vector2D const& v2)
 {
-	return abs(v1-v2);
+  return abs(v1-v2);
 }
 
 double CrossProduct(Vector2D const& v1, Vector2D const& v2)
@@ -146,7 +134,7 @@ double CrossProduct(Vector2D const& v1, Vector2D const& v2)
 
 Vector2D calc_mid_point(Vector2D const& v1, Vector2D const& v2)
 {
-	return Vector2D((v1.x+v2.x)*0.5, (v1.y+v2.y)*0.5);
+  return Vector2D((v1.x+v2.x)*0.5, (v1.y+v2.y)*0.5);
 }
 
 Vector2D zcross(Vector2D const& v)
