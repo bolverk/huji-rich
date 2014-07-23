@@ -1240,10 +1240,15 @@ namespace {
       const double dm = fluxes_[i].Mass;
       const int n1 = edge.neighbors.second;
       const int n0 = edge.neighbors.first;
-      if(hbc_.IsBoundary(edge,tess_))
+      if(hbc_.IsBoundary(edge,tess_)){
+	const bool b0 = hbc_.IsGhostCell(n0,tess_);
+	const bool b1 = hbc_.IsGhostCell(n1,tess_);
+	assert(b0!=b1 && "One cell must be a normal cell, and the other must be a ghost cell");
+	const int rci = b1 ? n0 : n1;
 	return hbc_.CalcTracerFlux
-	  (tess_,cells_,tracers_,dm,edge,i,dt_,time_,interp_,
+	  (tess_,cells_,tracers_,dm,edge,rci,dt_,time_,interp_,
 	   edge_velocities_[i]);
+      }
       else{
 	if(cev_[n0]||cev_[n1])
 	  return cev_[choose_special_cell_index(cev_,cem_,n0,n1)]->CalcTracerFlux
