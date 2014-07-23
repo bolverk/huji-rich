@@ -105,7 +105,6 @@ bool FreeFlow::IsGhostCell(int i,Tessellation const& Data) const
 		return false;
 }
 
-
 vector<double> FreeFlow::CalcTracerFlux(Tessellation const& /*tessellation*/,
 	vector<Primitive> const& /*cells*/,
 	vector<vector<double> > const& tracers,double dm,
@@ -113,8 +112,8 @@ vector<double> FreeFlow::CalcTracerFlux(Tessellation const& /*tessellation*/,
 	double /*time*/,SpatialReconstruction const& /*interp*/,
 	Vector2D const& /*edge_velocity*/) const
 {
-	vector<double> res=tracers[index];
-	transform(res.begin(),res.end(),res.begin(),
-		  bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
-	return res;
+  vector<double> res = tracers.at(index);
+  transform(res.begin(),res.end(),res.begin(),
+	    bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
+  return res;
 }

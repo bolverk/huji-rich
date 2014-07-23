@@ -8,7 +8,7 @@ CC := g++
 LINT_FLAGS = -Werror -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O3 -g -pg 
+	OPTIMIZATION_FLAGS := -O0 -g -pg 
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
