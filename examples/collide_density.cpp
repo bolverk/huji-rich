@@ -5,7 +5,7 @@ CollideDensity::CollideDensity(double density1,double density2,double background
 density1_(density1),density2_(density2),background_(background),x1_(x1),
 	y1_(y1),x2_(x2),y2_(y2),r1_(r1),r2_(r2){}
 
-double CollideDensity::EvalAt(Vector2D const& point) const
+double CollideDensity::operator()(Vector2D const& point) const
 {
 	if(point.distance(Vector2D(x1_,y1_))<r1_)
 		return density1_;

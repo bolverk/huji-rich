@@ -27,7 +27,7 @@ public:
 	CollideDensity(double density1,double density2,double background,
 		double x1,double y1,double x2,double y2,double r1,double r2);
 
-	double EvalAt(Vector2D const& point) const;
+  double operator()(Vector2D const& point) const;
 };
 
 #endif // COLLIDE_DENSITY_HPP
