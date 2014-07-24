@@ -113,7 +113,7 @@ namespace {
 	{
 		const Vector2D s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
-		return max(min(abs(s-r)/dt,abs(cells[index].Velocity)),cells[index].SoundSpeed);
+		return max(min(abs(s-r)/dt,3*abs(cells[index].Velocity)),cells[index].SoundSpeed);
 	}
 }
 

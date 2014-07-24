@@ -60,7 +60,8 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 			// Make sure not to close to any neighbor
 			const double R=tess.GetWidth(ToRefine[i]);
 			vector<int> neigh=tess.GetNeighbors(ToRefine[i]);
-			RemoveVal(neigh,-1);
+			vector<int> temp(1, -1);
+			neigh=RemoveList(neigh,temp);
 			const int nn=(int)neigh.size();
 			bool good=true;
 			for(int j=0;j<nn;++j)
