@@ -23,7 +23,7 @@ private:
 public:
 	xVel(double v):v_(v){};
 	~xVel(){};
-	double EvalAt(Vector2D const& point) const
+	double operator()(Vector2D const& point) const
 	{
 		double r=abs(point);
 		return -v_*point.x/r;;
@@ -37,7 +37,7 @@ private:
 public:
 	yVel(double v):v_(v){};
 	~yVel(){};
-	double EvalAt(Vector2D const& point) const
+	double operator()(Vector2D const& point) const
 	{
 		double r=abs(point);
 		return -v_*point.y/r;
