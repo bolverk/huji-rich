@@ -6,7 +6,6 @@
 #include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "source/newtonian/two_dimensional/linear_gauss_scalar.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
@@ -25,7 +24,7 @@ private:
 public:
   KT_Density(double M,double ROuter):M_(M),ROuter_(ROuter){};
   ~KT_Density(){};
-  double EvalAt(Vector2D const& point) const
+  double operator()(Vector2D const& point) const
   {
     if(abs(point)<ROuter_)
       return M_*pow(1+abs(point)*abs(point),-1.5)/(2*3.1415);
@@ -41,7 +40,7 @@ private:
 public:
   KT_xvel(double M):M_(M){};
   ~KT_xvel(){};
-  double EvalAt(Vector2D const& point) const
+  double operator()(Vector2D const& point) const
   {
     return -sqrt(M_*pow(1+abs(point)*abs(point),-1.5))*point.y;
   }
@@ -54,7 +53,7 @@ private:
 public:
   KT_yvel(double M):M_(M){};
   ~KT_yvel(){};
-  double EvalAt(Vector2D const& point) const
+  double operator()(Vector2D const& point) const
   {
     return sqrt(M_*pow(1+abs(point)*abs(point),-1.5))*point.x;
   }
@@ -135,8 +134,9 @@ int main(void)
 	
   // Give custom evolution to edge
   ConstantPrimitiveEvolution cp;
+  sim.custom_evolution_manager.addCustomEvolution(&cp);
   for(int i=0;i<4*np;++i)
-    sim.CellsEvolve[i]=&cp;
+    sim.custom_evolution_indices[i] = 1;
 
   // Choose the Courant number
   double cfl=0.7;

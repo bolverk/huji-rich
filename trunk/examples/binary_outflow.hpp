@@ -26,7 +26,7 @@ public:
 	*/
 	BinaryOutflowVelocity(double R,double val,Vector2D loc,Dir axis);
 
-	double EvalAt(Vector2D const& point) const;
+	double operator()(Vector2D const& point) const;
 };
 
 #endif // BINARY_OUTFLOW_HPP

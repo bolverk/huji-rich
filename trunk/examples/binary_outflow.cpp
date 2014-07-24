@@ -4,7 +4,7 @@ BinaryOutflowVelocity::BinaryOutflowVelocity(double R,double val,Vector2D loc,Di
 R_(R),val_(val),loc_(loc),axis_(axis)
 {}
 
-double BinaryOutflowVelocity::EvalAt(Vector2D const& point) const
+double BinaryOutflowVelocity::operator()(Vector2D const& point) const
 {
 	const double d=point.distance(loc_);
 	if(d<R_&&d>0)
