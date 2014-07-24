@@ -3,6 +3,8 @@ DUMP_FOLDER := temp_$(TARGET)
 LINT_FLAGS := -Wall -Wextra -pedantic -Werror -Wfatal-errors
 NUM_PROCESSES := 2
 PREXECUTE := 
+ENDEMIC_SOURCES := $(shell find $(TARGET) -name '*.cpp')
+ENDEMIC_OBJECTS := $(patsubst $(TARGET)/%.cpp,$(DUMP_FOLDER)/%.o,$(ENDEMIC_SOURCES))
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
 	LFLAGS := -pg
@@ -33,7 +35,8 @@ $(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
 	cp $(TARGET)/*.txt $(DUMP_FOLDER) 2> /dev/null; return 0
 	cd $(DUMP_FOLDER) && $(PREXECUTE) ./test.exe
 
-$(DUMP_FOLDER)/test.exe: $(DUMP_FOLDER)/test.o | ../library_$(MODE)/librich.a
+$(DUMP_FOLDER)/test.exe: $(ENDEMIC_OBJECTS) | ../library_$(MODE)/librich.a
+	echo "$(ENDEMIC_SOURCES)"
 	$(CC) $^ $| -o $@ $$LFLAGS -lhdf5 -lhdf5_cpp -L $$HDF5_LIB_PATH -lboost_serialization -lboost_mpi -L $$BOOST_LIB_PATH
 
 ../library_$(MODE)/librich.a:
@@ -41,7 +44,7 @@ $(DUMP_FOLDER)/test.exe: $(DUMP_FOLDER)/test.o | ../library_$(MODE)/librich.a
 	`cat ../set_environ_vars.sh` && \
 	$(MAKE) -C .. MODE=$(MODE)
 
-$(DUMP_FOLDER)/test.o: $(TARGET)/test.cpp
+$(ENDEMIC_OBJECTS): $(DUMP_FOLDER)/%.o: $(TARGET)/%.cpp
 	mkdir -p $(DUMP_FOLDER)
 	$(MAKE) -C .. set_environ_vars.sh
 	`cat ../set_environ_vars.sh` && \

@@ -8,7 +8,6 @@
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylinderical_geometry.hpp"
 #include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
-#include "source/newtonian/two_dimensional/linear_gauss_scalar.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/misc/mesh_generator.hpp"

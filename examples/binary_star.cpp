@@ -119,13 +119,14 @@ int main(void)
 	// Set the outflow cells to be constant
 	ConstantPrimitiveEvolution ouflow_evolve;
 	vector<int> sink_cells=FindCells(loc1,tess,npointsx);
-	for(size_t i=0;i<(int)sink_cells.size();++i)
-		sim.CellsEvolve[sink_cells[i]]=&ouflow_evolve;
+	sim.custom_evolution_manager.addCustomEvolution(&ouflow_evolve);
+	for(size_t i=0;i<sink_cells.size();++i)
+	  sim.custom_evolution_indices[sink_cells[i]] = 1;
 
 	// Set custom evolution for 2nd star in order to remove mass
 	sink_cells=FindCells(loc2,tess,npointsx);
-	for(size_t i=0;i<(int)sink_cells.size();++i)
-		sim.CellsEvolve[sink_cells[i]]=&ouflow_evolve;
+	for(size_t i=0;i<sink_cells.size();++i)
+	  sim.custom_evolution_indices[sink_cells[i]] = 1;
 
 	// Set the first time step
 	sim.SetTimeStepExternal(0.0001);
