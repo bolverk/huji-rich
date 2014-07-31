@@ -173,7 +173,7 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
 	\brief Returns the indeces of the points that where sent to other processors as ghost points
 	\return The sent points
 	*/
-  virtual vector<vector<int> > GetDuplicatedPoints(void)const=0;
+  virtual vector<vector<int> >const& GetDuplicatedPoints(void)const=0;
   	/*!
 	\brief Returns the indeces of the processors with whom ghost points where exchanged
 	\return The list of processors
@@ -183,7 +183,7 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
 	\brief Returns the indeces of the points that where sent to other processors
 	\return The sent points
 	*/
-  virtual vector<vector<int> > GetSentPoints(void)const=0;
+  virtual vector<vector<int> >const& GetSentPoints(void)const=0;
   	/*!
 	\brief Returns the indeces of the processors with whom points where exchanged
 	\return The list of processors
@@ -195,6 +195,12 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
   \return The indeces of the points
   */
   virtual vector<int> GetSelfPoint(void)const=0;
+
+  /*!
+  \brief Returns the indeces of each ghost point in the vector of points that the tessellation holds
+  \return The indeces where the outer index is the index of the sent processor
+  */
+  virtual vector<vector<int> >const& GetGhostIndeces(void)const=0;
   /*!
   \brief Returns the total number of points (including ghost)
   \return The total number of points

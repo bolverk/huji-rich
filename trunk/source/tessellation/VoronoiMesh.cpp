@@ -4,6 +4,79 @@
 
 namespace {
 
+	void GetBoundaryRemove(vector<vector<int> > &BoundaryIndeces,vector<vector<int> > 
+		const& GhostIndeces,vector<vector<int> > const& NGhostReceived)
+	{
+		int n=(int)NGhostReceived.size();
+		for(int i=0;i<n;++i)
+		{
+			if(GhostIndeces[i].empty())
+				continue;
+			int nn=(int)GhostIndeces[i].size();
+			for(int j=0;j<nn;++j)
+				BoundaryIndeces[i].push_back(NGhostReceived[i][GhostIndeces[i][j]]);
+		}
+	}
+
+	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
+		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
+		&neighpoints,vector<vector<int> > &newpoints)
+	{
+		sentprocs.clear();
+		neighpoints.clear();
+		vector<int> sentprocs2=V.GetDuplicatedProcs();
+		vector<vector<int> > sentpoints2=V.GetDuplicatedPoints();
+		// Consolidate points
+		vector<int> indeces(sentprocs2.size());
+		sort_index(sentprocs2,indeces);
+		sort(sentprocs2.begin(),sentprocs2.end());
+		sentprocs.push_back(sentprocs2[0]);
+		neighpoints.push_back(sentpoints2[indeces[0]]);
+		for(int i=1;i<(int)sentprocs2.size();++i)
+		{
+			if(sentprocs2[i]==sentprocs2[i-1])
+				neighpoints[neighpoints.size()-1].insert(neighpoints[neighpoints.size()-1].end(),
+				sentpoints2[indeces[i]].begin(),sentpoints2[indeces[i]].end());
+			else
+				neighpoints.push_back(sentpoints2[indeces[i]]);
+		}
+		int Npoints=V.GetPointNo();
+		int nremove=(int)ToRemove.size();
+		for(int i=0;i<nremove;++i)
+		{
+			vector<int> neigh=V.GetNeighbors(ToRemove[i]);
+			for(vector<int>::iterator it=neigh.begin();it!=neigh.end();++it)
+			{
+				if(*it>=Npoints)
+				{
+					BoundaryPoints.push_back(ToRemove[i]);
+					// Find out relevent neighbor
+					for(vector<int>::iterator it2=neigh.begin();it2!=neigh.end();++it2)
+					{
+						//if(*it2>=Npoints)
+						//neighpoints
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	int SentCPUIndex(vector<vector<int > > const& sentcells,vector<int> const& sentprocs,
+		int cellindex)
+	{
+		int n=(int)sentprocs.size();
+		for(int i=0;i<n;++i)
+		{
+			if(!sentcells[i].empty())
+				if(binary_search(sentcells[i].begin(),sentcells[i].end(),cellindex))
+					return i;
+		}
+		UniversalError eo("No sent point with given index");
+		eo.AddEntry("cell index",cellindex);
+		throw eo;
+	}
+
 	void CombineCorners(vector<vector<int> > &toduplicate,vector<vector<int> > const& corners)
 	{
 		int nsides=(int)corners.size();
@@ -168,10 +241,10 @@ namespace {
 						vtemp.push_back(i);
 						if(indexadd<nneigh)
 							sentpoints[indexadd].insert(sentpoints[indexadd].end(),vtemp.begin(),
-								vtemp.end());
+							vtemp.end());
 						else
 							sentpoints[indexadd+ncorner].insert(sentpoints[indexadd+ncorner].end(),vtemp.begin(),
-								vtemp.end());
+							vtemp.end());
 						vector<Vector2D> v2temp;
 						v2temp.push_back(temp);
 						neighsend[indexadd].insert(neighsend[indexadd].end(),v2temp.begin(),
@@ -222,7 +295,7 @@ namespace {
 			char temp;
 			for(int jj=0;jj<nsend;++jj)
 				MPI_Isend(&temp,1,MPI_CHAR,allsend[jj],1,MPI_COMM_WORLD,
-					&request[jj]);
+				&request[jj]);
 			MPI_Status status;
 			vector<int> newtalk;
 			for(int jj=0;jj<nrecv;++jj)
@@ -603,6 +676,7 @@ Nextra(0),
 	SentPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
 	selfindex(vector<int> ()),
+	NGhostReceived(vector<vector<int> > ()),
 	Tri(0)
 {
 	Initialise(points,&bc);
@@ -623,6 +697,7 @@ Nextra(0),
 	SentPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
 	selfindex(vector<int> ()),
+	NGhostReceived(vector<vector<int> > ()),
 	Tri(0)
 {
 	Initialise(points,proctess,&bc);
@@ -757,6 +832,7 @@ Nextra(0),
 	SentPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
 	selfindex(vector<int> ()),
+	NGhostReceived(vector<vector<int> > ()),
 	Tri(0)  {}
 
 VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
@@ -770,6 +846,7 @@ GhostPoints(other.GhostPoints),GhostProcs(other.GhostProcs),
 	edges(other.edges),
 	CM(other.CM),
 	mesh_vertices(other.mesh_vertices),
+	NGhostReceived(other.NGhostReceived),
 	Tri(new Delaunay(*other.Tri)) {}
 
 void VoronoiMesh::build_v()
@@ -967,6 +1044,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	OuterBoundary const* outer)
 {
 #ifdef RICH_MPI
+	NGhostReceived.clear();
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	obc=outer;
@@ -1059,7 +1137,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 
 
 	//write_vector(proclisttemp,"talked"+int2str(rank)+".txt");
-
+	NGhostReceived.resize(proclisttemp.size(),vector<int> ());
 	SendRecv(procorder,proclisttemp,toduptemp,vproc);
 	ndup=(int)toduplicate.size();
 	for(int i=0;i<(int)toduptemp.size();++i)
@@ -1076,7 +1154,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	FindIntersectingOuterPoints(bedge,boxduplicate,firstduplicated);
 	for(int i=0;i<4;++i)
 		RigidBoundaryPoints(boxduplicate[i],bedge[i]);
-	
+
 	vector<vector<int> > moreduplicate;
 
 	GetAdditionalBoundary(toduplicate,moreduplicate,totest);
@@ -1084,8 +1162,10 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	SendRecv(procorder,proclist,moreduplicate,vproc);
 	for(int i=0;i<ndup;++i)
 	{
-		GhostPoints.push_back(moreduplicate[i]);
-		GhostProcs.push_back(proclist[i]);
+		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[i])-
+			GhostProcs.begin();
+		GhostPoints[index].insert(GhostPoints[index].end(),moreduplicate[i].begin(),
+			moreduplicate[i].end());
 	}
 	sortvectors(toduplicate);
 	edges.clear();
@@ -1096,27 +1176,43 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	SendRecv(procorder,proclist,moreduplicate,vproc);
 	for(int i=0;i<ndup;++i)
 	{
-		GhostPoints.push_back(moreduplicate[i]);
-		GhostProcs.push_back(proclist[i]);
+		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[i])-
+			GhostProcs.begin();
+		GhostPoints[index].insert(GhostPoints[index].end(),moreduplicate[i].begin(),
+			moreduplicate[i].end());
 	}
 
-	/*	// Send/Recv the cornerpoints
-	SendRecv(procorder,cornerproc,corners,vproc);
+	// sort the points
+	vector<int> indeces;
+	sort_index(GhostProcs,indeces);
+	sort(GhostProcs.begin(),GhostProcs.end());
+	vector<vector<int> > temppoints,temppoints2;
+	temppoints.push_back(GhostPoints[indeces[0]]);
+	temppoints2.push_back(NGhostReceived[indeces[0]]);
+	for(int i=1;i<(int)GhostProcs.size();++i)
+		if(GhostProcs[i]==GhostProcs[i-1])
+		{
+			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
+				GhostPoints[indeces[i]].begin(),GhostPoints[indeces[i]].end());
+			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
+				NGhostReceived[indeces[i]].begin(),NGhostReceived[indeces[i]].end());
+		}
+		else
+		{
+			temppoints.push_back(GhostPoints[indeces[i]]);
+			temppoints2.push_back(NGhostReceived[indeces[i]]);
+		}
+		GhostProcs=unique(GhostProcs);
+		NGhostReceived=temppoints2;
+		GhostPoints=temppoints;
 
-	for(int i=0;i<(int)cornerproc.size();++i)
-	{
-	GhostPoints.push_back(corners[i]);
-	GhostProcs.push_back(cornerproc[i]);
-	}
-	*/
+		edges.clear();
+		build_v();
 
-	edges.clear();
-	build_v();
-
-	int n=GetPointNo();
-	CM.resize(n);
-	for(int i=0;i<n;++i)
-		CM[i]=CalcCellCM(i);
+		int n=GetPointNo();
+		CM.resize(n);
+		for(int i=0;i<n;++i)
+			CM[i]=CalcCellCM(i);
 #endif
 }
 
@@ -1368,6 +1464,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	GhostPoints.clear();
 	GhostProcs.clear();
 	selfindex.clear();
+	NGhostReceived.clear();
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	vector<int> cedges;
@@ -1467,6 +1564,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	proclisttemp.insert(proclisttemp.end(),cornerproc.begin(),cornerproc.end());
 	toduptemp.insert(toduptemp.end(),corners.begin(),corners.end());
 	//SendRecv(procorder,proclist,toduplicate,vproc);
+	NGhostReceived.resize(proclisttemp.size(),vector<int> ());
 	SendRecv(procorder,proclisttemp,toduptemp,vproc);
 	ndup=(int)toduplicate.size();
 	for(int i=0;i<(int)toduptemp.size();++i)
@@ -1483,8 +1581,10 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	SendRecv(procorder,proclist,moreduplicate,vproc);
 	for(int i=0;i<ndup;++i)
 	{
-		GhostPoints.push_back(moreduplicate[i]);
-		GhostProcs.push_back(proclist[i]);
+		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[i])-
+			GhostProcs.begin();
+		GhostPoints[index].insert(GhostPoints[index].end(),moreduplicate[i].begin(),
+			moreduplicate[i].end());
 	}
 	sortvectors(toduplicate);
 	edges.clear();
@@ -1495,17 +1595,43 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	SendRecv(procorder,proclist,moreduplicate,vproc);
 	for(int i=0;i<ndup;++i)
 	{
-		GhostPoints.push_back(moreduplicate[i]);
-		GhostProcs.push_back(proclist[i]);
+		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[i])-
+			GhostProcs.begin();
+		GhostPoints[index].insert(GhostPoints[index].end(),moreduplicate[i].begin(),
+			moreduplicate[i].end());
 	}
 
-	edges.clear();
-	build_v();
+	// sort the points
+	vector<int> indeces;
+	sort_index(GhostProcs,indeces);
+	sort(GhostProcs.begin(),GhostProcs.end());
+	vector<vector<int> > temppoints,temppoints2;
+	temppoints.push_back(GhostPoints[indeces[0]]);
+	temppoints2.push_back(NGhostReceived[indeces[0]]);
+	for(int i=1;i<(int)GhostProcs.size();++i)
+		if(GhostProcs[i]==GhostProcs[i-1])
+		{
+			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
+				GhostPoints[indeces[i]].begin(),GhostPoints[indeces[i]].end());
+			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
+				NGhostReceived[indeces[i]].begin(),NGhostReceived[indeces[i]].end());
+		}
+		else
+		{
+			temppoints.push_back(GhostPoints[indeces[i]]);
+			temppoints2.push_back(NGhostReceived[indeces[i]]);
+		}
+		GhostProcs=unique(GhostProcs);
+		NGhostReceived=temppoints2;
+		GhostPoints=temppoints;
 
-	int n=GetPointNo();
-	CM.resize(n);
-	for(int i=0;i<n;++i)
-		CM[i]=CalcCellCM(i);
+		edges.clear();
+		build_v();
+
+		int n=GetPointNo();
+		CM.resize(n);
+		for(int i=0;i<n;++i)
+			CM[i]=CalcCellCM(i);
 #endif
 }
 
@@ -1573,12 +1699,27 @@ void VoronoiMesh::RemoveCells(vector<int> &ToRemove,vector<vector<int> > &VolInd
 void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	vector<vector<int> > &VolIndex,vector<vector<double> > &Volratio)
 {
+	int Ntotal=V.GetPointNo();
 	VolIndex.clear();
 	Volratio.clear();
 	size_t n=ToRemove.size();
 	VolIndex.resize(n);
 	Volratio.resize(n);
 	vector<int> RemovedEdges;
+#ifdef RICH_MPI
+	// Send/Recv list of ghost neighbors indeces
+	vector<vector<int> > GhostIndeces;
+	vector<int> BoundaryPoints;
+	//GetBoundaryPoints(V,BoundaryPoints,ToRemove); 
+	//GetBoundaryNeighbors(V,BoundaryPoints// Get the list of my boundary neighbors that i need to send
+
+	SendRecvGhostIndeces(GhostIndeces,BoundaryPoints,V.SentPoints,V.SentProcs);
+	vector<vector<int> > BoundaryIndeces; // The indeces for each ghost point that is removed, who are that ghost points ghost neighbors
+	GetBoundaryRemove(BoundaryIndeces,GhostIndeces,V.NGhostReceived); 
+	vector<vector<int> > LocalBoundaryIndeces; // The indeces for each ghost point that is removed, who are that ghost points local neighbors
+	//GetLocalBoundaryremove(LocalBoundaryIndeces);
+	n+=(int)BoundaryIndeces.size();
+#endif
 	for(size_t i=0;i<n;++i)
 	{
 		double vol_inverse=1/V.GetVolume(ToRemove[i]);
@@ -1587,37 +1728,44 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		vector<Vector2D> neighcor;
 		//Remove The boundary points
 		vector<int> real_neigh; //Keeps track of the real points I copied
-		vector<int> period_points;// Keeps track of the points which were reflected
 		real_neigh.reserve(10);
-		period_points.reserve(10);
-		for(size_t j=0;j<neigh.size();++j)
+#ifdef RICH_MPI
+		if(i>=ToRemove.size())
+			real_neigh=LocalBoundaryIndeces[i];
+#endif
+		if(i<ToRemove.size())
 		{
-			if(neigh[j]>-1)
+			for(size_t j=0;j<neigh.size();++j)
 			{
-				real_neigh.push_back(V.GetOriginalIndex(
+				if(neigh[j]>-1)
+					real_neigh.push_back(V.GetOriginalIndex(
 					neigh[j]));	
-				period_points.push_back(neigh[j]);
 			}
 		}
 		vector<int> AllPoints=real_neigh;
 		for(size_t j=0;j<real_neigh.size();++j)
 		{
-			vector<int> temp_neigh=V.GetNeighbors(real_neigh[j]);
-			for(size_t jj=0;jj<temp_neigh.size();++jj)
-				if(temp_neigh[jj]>-1&&temp_neigh[jj]!=ToRemove[i])
-					AllPoints.push_back(temp_neigh[jj]);
+			if(real_neigh[j]<V.GetPointNo())
+			{
+				vector<int> temp_neigh=V.GetNeighbors(real_neigh[j]);
+				for(size_t jj=0;jj<temp_neigh.size();++jj)
+					if(temp_neigh[jj]>-1)
+						if(i>=ToRemove.size()||temp_neigh[jj]!=ToRemove[i])
+							AllPoints.push_back(temp_neigh[jj]);
+			}
 		}
+#ifdef RICH_MPI
+		if(i>=ToRemove.size())
+			AllPoints.insert(AllPoints.end(),BoundaryIndeces[i].begin(),
+			BoundaryIndeces[i].end());
+#endif
 		// save old volume
 		vector<double> old_vol(real_neigh.size());
 		vector<int> indeces;
-		vector<int> temp_period(period_points);
 		sort_index(real_neigh,indeces);
 		sort(real_neigh.begin(),real_neigh.end());
 		for(size_t j=0;j<real_neigh.size();++j)
-		{
 			old_vol[j]=V.GetVolume(real_neigh[j]);
-			period_points[j]=temp_period[indeces[j]];
-		}
 		sort(AllPoints.begin(),AllPoints.end());
 		AllPoints=unique(AllPoints);
 		AllPoints=RemoveList(AllPoints,real_neigh);
@@ -1639,6 +1787,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			}
 		}
 		// Check we did ok
+#ifndef RICH_MPI
 		double vol_sum=0;
 		for(size_t j=0;j<real_neigh.size();++j)
 		{
@@ -1651,6 +1800,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			eo.AddEntry("Removed cell",ToRemove[i]);
 			throw eo;
 		}
+#endif
 		Volratio[i]=old_vol;
 		VolIndex[i]=real_neigh;
 		// Fix the old Voronoi////////////////
@@ -1678,11 +1828,15 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		for(size_t j=0;j<NewEdges.size();++j)
 		{
 			int temp=NewEdges[j].neighbors.first;
-			if(temp>N)
+			if(temp>=N)
 			{
+#ifndef RICH_MPI
 				// New point add to tessellation
 				V.Tri->AddAditionalPoint(Vlocal.GetMeshPoint(temp));
 				NewEdges[j].neighbors.first = V.Tri->GetCorSize()-1;
+#else
+				NewEdges[j].neighbors.first=AllPoints[NewEdges[j].neighbors.first];
+#endif
 			}
 			else
 			{
@@ -1690,11 +1844,15 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 					NewEdges[j].neighbors.first = real_neigh[temp];
 			}
 			temp=NewEdges[j].neighbors.second;
-			if(temp>N)
+			if(temp>=N)
 			{
+#ifndef RICH_MPI
 				// New point add to tessellation
 				V.Tri->AddAditionalPoint(Vlocal.GetMeshPoint(temp));
 				NewEdges[j].neighbors.second = V.Tri->GetCorSize()-1;
+#else
+				NewEdges[j].neighbors.first=AllPoints[NewEdges[j].neighbors.first];
+#endif
 			}
 			else
 			{
@@ -1704,7 +1862,9 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		}
 		const int Npoints=V.GetPointNo();
 		//Remove bad edge reference from mesh vertices and outer edges
-		vector<int> oldedges=V.mesh_vertices[ToRemove[i]];
+		vector<int> oldedges;
+		if(i<ToRemove.size())
+			oldedges=V.mesh_vertices[ToRemove[i]];
 		for(int j=0;j<N;++j)
 		{
 			int temp1=real_neigh[j];
@@ -1715,7 +1875,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				if(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[i])
 				{
-					if(etemp.neighbors.first<0||etemp.neighbors.first>Npoints)
+					if(etemp.neighbors.first<0||etemp.neighbors.first>=Npoints)
 						oldedges.push_back(V.mesh_vertices[temp1][jj]);
 					V.mesh_vertices[temp1].erase(V.mesh_vertices[temp1].begin()
 						+jj);
@@ -1726,7 +1886,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				if(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 					==ToRemove[i])
 				{
-					if(etemp.neighbors.second<0||etemp.neighbors.second>Npoints)
+					if(etemp.neighbors.second<0||etemp.neighbors.second>=Npoints)
 						oldedges.push_back(V.mesh_vertices[temp1][jj]);
 					V.mesh_vertices[temp1].erase(V.mesh_vertices[temp1].begin()
 						+jj);
@@ -1749,7 +1909,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			{
 				temp=pair_member(NewEdges[j].neighbors,k);
 				other=pair_member(NewEdges[j].neighbors,(k+1)%2);
-				if(temp==-1||temp>Npoints)
+				if(temp==-1||temp>=Npoints)
 					continue;				
 				size_t jj=0;			
 				if(other!=-1)
@@ -1844,6 +2004,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	int NN=(int)V.CM.size();
 	for(int i=0;i<NN;++i)
 		V.CM[i]=V.CalcCellCM(i);
+	n=ToRemove.size();
 	// Fix point numer in Tri
 	V.Tri->ChangeOlength(V.Tri->get_length()-(int)n);
 	V.Tri->Changelength(V.Tri->get_length()-(int)n);
@@ -2186,7 +2347,7 @@ vector<Vector2D>& VoronoiMesh::GetAllCM(void)
 }
 
 void VoronoiMesh::FindIntersectingOuterPoints(vector<Edge> const&box_edges,vector<vector<int> >
-		&boxduplicate,vector<vector<int> > const&firstduplicated)
+	&boxduplicate,vector<vector<int> > const&firstduplicated)
 {
 	int n=(int)box_edges.size();
 	boxduplicate.resize(n);
@@ -2290,12 +2451,12 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	{
 		/*if(nintersect>3)
 		{
-			UniversalError eo("Too many intersections of boundary cell with box edges");
-			eo.AddEntry("Cell number",(double)cell);
-			Vector2D pp=Tri->get_point(cell);
-			eo.AddEntry("x cor",pp.x);
-			eo.AddEntry("y cor",pp.y);
-			throw eo;
+		UniversalError eo("Too many intersections of boundary cell with box edges");
+		eo.AddEntry("Cell number",(double)cell);
+		Vector2D pp=Tri->get_point(cell);
+		eo.AddEntry("x cor",pp.x);
+		eo.AddEntry("y cor",pp.y);
+		throw eo;
 		}*/
 		vector<Vector2D> cpoints;
 		ConvexHull(cpoints,this,cell);
@@ -2740,9 +2901,6 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	int index;
-	vector<int> realproclist(nlist);
-	for(int i=0;i<nlist;++i)
-		realproclist[i]=v.GetOriginalIndex(proclist[i]);
 	for(int i=0;i<n;++i)
 	{
 		index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
@@ -2815,6 +2973,9 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			// Add the points
 			if(!toadd.empty())
 			{
+				int Ntemp=Tri->GetTotalLength();
+				for(int j=0;j<(int)toadd.size();++j)
+					NGhostReceived[index].push_back(Ntemp+j);
 				Tri->DoMPIRigid(toadd);
 			}
 		}
@@ -2918,9 +3079,14 @@ void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 	}
 }
 
-vector<vector<int> > VoronoiMesh::GetDuplicatedPoints(void)const
+vector<vector<int> >const& VoronoiMesh::GetDuplicatedPoints(void)const
 {
 	return GhostPoints;
+}
+
+vector<vector<int> >const& VoronoiMesh::GetGhostIndeces(void)const
+{
+	return NGhostReceived;
 }
 
 int VoronoiMesh::GetTotalPointNumber(void)const
@@ -2938,7 +3104,7 @@ vector<int> VoronoiMesh::GetSentProcs(void)const
 	return SentProcs;
 }
 
-vector<vector<int> > VoronoiMesh::GetSentPoints(void)const
+vector<vector<int> >const& VoronoiMesh::GetSentPoints(void)const
 {
 	return SentPoints;
 }
