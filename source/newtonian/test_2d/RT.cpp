@@ -8,7 +8,7 @@ RT_velocityY::~RT_velocityY()
 {
 }
 
-double RT_velocityY::EvalAt(Vector2D const& r) const
+double RT_velocityY::operator()(Vector2D const& r) const
 {
 	return 0.0025*(1-cos(12.566370614359*r.x))*
 		(1-cos(12.566370614359*r.y/3));
@@ -28,7 +28,7 @@ RT_Pressure::~RT_Pressure()
 {
 }
 
-double RT_Pressure::EvalAt(Vector2D const& r) const
+double RT_Pressure::operator()(Vector2D const& r) const
 {
 	if(r.y>0.75)
 		return 2.5+g_*(r.y-0.75)*rhou_;
