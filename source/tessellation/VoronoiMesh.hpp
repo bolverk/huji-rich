@@ -179,13 +179,15 @@ public:
    */
   vector<Edge>& GetAllEdges(void);
 
-  vector<vector<int> > GetDuplicatedPoints(void)const;
+  vector<vector<int> >const& GetDuplicatedPoints(void)const;
 
   vector<int> GetDuplicatedProcs(void)const;
 
-  vector<vector<int> > GetSentPoints(void)const;
+  vector<vector<int> >const& GetSentPoints(void)const;
 
   vector<int> GetSentProcs(void)const;
+
+  vector<vector<int> >const& GetGhostIndeces(void)const;
 
   vector<int> GetSelfPoint(void)const;
 
@@ -206,6 +208,7 @@ private:
 	vector<int> SentProcs;
 	vector<vector<int> > SentPoints;
 	vector<int> selfindex;
+	vector<vector<int> > NGhostReceived;
 	int Nextra;
 
 	Vector2D get_center(int facet);

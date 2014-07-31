@@ -132,7 +132,8 @@ vector<Vector2D> RoundCells::calcAllVelocities
 			res.push_back(cevolve[i]->CalcVelocity(i,tess,cells,time));
 	}
 #ifdef RICH_MPI
-	SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+	SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),
+		tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 	FixRefinedCells(res,tess,hbc_,cevolve);
 	if(!coldflows_&&outer_==0)
@@ -176,7 +177,8 @@ vector<Vector2D> RoundCells::calcAllVelocities
 			}
 		}
 #ifdef RICH_MPI
-		SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+		SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),
+			tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 		FixRefinedCells(res,tess,hbc_,cevolve);
 		if(outer_!=0)

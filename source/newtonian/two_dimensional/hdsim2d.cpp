@@ -172,10 +172,12 @@ void hdsim::TimeAdvance(void)
 		      _tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
 #else
   SendRecvHydro(_cells,tracer_,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
-		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetTotalPointNumber());
+		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
 
   SendRecvVelocity(_tessellation.GetAllCM(),_tessellation.GetDuplicatedPoints(),
-		   _tessellation.GetDuplicatedProcs(),_tessellation.GetTotalPointNumber());
+		   _tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+		   ,_tessellation.GetTotalPointNumber());
 #endif
 
   vector<CustomEvolution*> custom_evolutions = 
@@ -190,7 +192,8 @@ void hdsim::TimeAdvance(void)
 			   _tessellation.GetTotalPointNumber());
 #else
   SendRecvVelocity(_pointvelocity,_tessellation.GetDuplicatedPoints(),
-		   _tessellation.GetDuplicatedProcs(),_tessellation.GetTotalPointNumber());
+		   _tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces(),
+		   _tessellation.GetTotalPointNumber());
 #endif
 
   _facevelocity=_tessellation.calc_edge_velocities

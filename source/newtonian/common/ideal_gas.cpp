@@ -35,7 +35,7 @@ namespace {
 
 double IdealGas::dp2c(double d, double p) const
 {
-  if(_g<0||p<0||d<0||is_nan(d)||is_nan(p))
+  if(_g<=0||p<=0||d<=0||is_nan(d)||is_nan(p))
     throw imaginary_speed_of_sound(_g,p,d);
   return sqrt(_g*p/d);
 }

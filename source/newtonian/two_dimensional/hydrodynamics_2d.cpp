@@ -633,7 +633,8 @@ void CalcFluxes
 			   tessellation.GetDuplicatedPoints(),tessellation.GetTotalPointNumber());
 #else
       SendRecvGrad(interpolation.GetGradients(),tessellation.GetDuplicatedPoints(),
-		   tessellation.GetDuplicatedProcs(),tessellation.GetTotalPointNumber());
+		   tessellation.GetDuplicatedProcs(),tessellation.GetGhostIndeces()
+		   ,tessellation.GetTotalPointNumber());
 #endif
     }
   catch(UniversalError& eo)
@@ -786,19 +787,17 @@ double TimeAdvance2mid
  double as,double bs,bool densityfloor,double densitymin,
  double pressuremin,bool EntropyCalc)
 {
-  /*	boost::scoped_ptr<Tessellation> sp_tess(tess.clone());
-	Tessellation& tess_temp = *sp_tess.get();*/
-
+ 
   // create ghost points if needed
 #ifndef RICH_MPI
   PeriodicUpdateCells(cells,tracers,custom_evolution_indices,tess.GetDuplicatedPoints(),
 		      tess.GetTotalPointNumber());
 #else
   SendRecvHydro(cells,tracers,custom_evolution_indices,tess.GetDuplicatedPoints(),
-		tess.GetDuplicatedProcs(),eos,tess.GetTotalPointNumber());
+		tess.GetDuplicatedProcs(),eos,tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 
   SendRecvVelocity(tess.GetAllCM(),tess.GetDuplicatedPoints(),
-		   tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+		   tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
   vector<CustomEvolution*> CellsEvolve=convert_indices_to_custom_evolution(
 									   custom_evolution_manager,custom_evolution_indices);
@@ -814,7 +813,7 @@ double TimeAdvance2mid
 			   tess.GetTotalPointNumber());
 #else
   SendRecvVelocity(point_velocities,tess.GetDuplicatedPoints(),
-		   tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+		   tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 
 
@@ -1011,10 +1010,10 @@ double TimeAdvance2mid
 		      tess.GetTotalPointNumber());
 #else
   SendRecvHydro(cells,tracers,custom_evolution_indices,tess.GetDuplicatedPoints(),
-		tess.GetDuplicatedProcs(),eos,tess.GetTotalPointNumber());
+		tess.GetDuplicatedProcs(),eos,tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 
   SendRecvVelocity(tess.GetAllCM(),tess.GetDuplicatedPoints(),
-		   tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+		   tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 
   CellsEvolve=convert_indices_to_custom_evolution(custom_evolution_manager,
@@ -1028,7 +1027,7 @@ double TimeAdvance2mid
 			   tess.GetTotalPointNumber());
 #else
   SendRecvVelocity(point_velocities,tess.GetDuplicatedPoints(),
-		   tess.GetDuplicatedProcs(),tess.GetTotalPointNumber());
+		   tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 
   edge_velocities = tess.calc_edge_velocities(&hbc,point_velocities,time);

@@ -27,7 +27,7 @@ using namespace std;
   \todo Move this function to source/misc/utils.hpp
  */
 template<class InputIterator, class T>
-  InputIterator Find (InputIterator first, InputIterator last, const T& val)
+  InputIterator Find (InputIterator first,InputIterator last, const T& val)
 {
   while (first!=last) {
     if (*first==val) return first;
@@ -171,11 +171,13 @@ vector<int> GetProcOrder(int rank,int worldsize);
 \param sentcells The indeces of the cells to send
 \param sentprocs The ids of the cpus to talk with
 \param eos The equation of state
+\param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
 \param totalpoints The total number of points in teh tessellation (including ghost)
 */
 void SendRecvHydro(vector<Primitive> &cells,vector<vector<double> > &tracers,
-	vector<size_t> &customevolutions,vector<vector<int> > sentcells,
-	vector<int> sentprocs,EquationOfState const& eos,int totalpoints);
+	vector<size_t> &customevolutions,vector<vector<int> >const& sentcells,
+	vector<int>const& sentprocs,EquationOfState const& eos,
+	vector<vector<int> > const& Nghost,int totalpoints);
 /*!
 \brief Sends and receives the extensive hydro, typically used for excahgning real (not ghost) points that are transfered between cpus
 \param cons The extensive cells
@@ -283,23 +285,27 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
 void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
 	tag,MPI_Comm comm,int gradlength);
 /*!
-\brief Send/Recv a vector of gradients
+\brief Send/Recv gradients of ghost cells
 \param grads The original vector of gradients
 \param sentcells The indeces of the gradients to send
 \param sentprocs The ids of the cpus to talk with
+\param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
 \param totalpoints The total number of points in the tessellation (including ghost)
 */
 void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
-	vector<vector<int> > sentcells,vector<int> sentprocs,int totalpoints);
+	vector<vector<int> >const& sentcells,vector<int> sentprocs,
+	vector<vector<int> > const& Nghost,int totalpoints);
 /*!
-\brief Send/Recv a vector of velocities
+\brief Send/Recv velocities of ghost cells
 \param vel The original vector of velocities
 \param sentcells The indeces of the gradients to send
 \param sentprocs The ids of the cpus to talk with
+\param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
 \param totalpoints The total number of points in the tessellation (including ghost)
 */
 void SendRecvVelocity(vector<Vector2D> &vel,
-	vector<vector<int> > sentcells,vector<int> sentprocs,int totalpoints);
+	vector<vector<int> >const& sentcells,vector<int> sentprocs,
+	vector<vector<int> > const& Nghost,int totalpoints);
 /*!
 \brief Resizes and modifies the vectors to retain only cells that are inside the local cpu domain
 \param cons The extensive cells
@@ -329,6 +335,17 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 void SendRecvVectorDouble(vector<double> const& vec,
 	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
 	vector<double> &toadd);
+
+/*! 
+\brief Send/Recv the list of points to remove that are on the edges between cpus
+\param GhostIndeces The indeces of the boundary points that were sent to current rank (this is recieved)
+\param BoundaryPoints The points in the boundary that current cpu sent, each vector should be sorted
+\param SentPoints The list of points that were sent to neighboring cpus
+\param SentProcs The list of neighboring cpus
+*/
+void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
+	const& BoundaryPoints,vector<vector<int> > const& SentPoints,vector<int> const&
+	SentProcs);
 
 #endif
 

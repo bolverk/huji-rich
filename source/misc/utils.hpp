@@ -530,4 +530,39 @@ template<class T> void set_pair_member(std::pair<T,T>& p, int index, const T& va
     p.second = val;
 }
 
+/*!
+\brief Calculates the total number of elements in the 2d vector
+		\param vec The vector to count
+\return The number of elements
+*/
+template<class T> int ElementNumber(vector<vector<T> > const&vec)
+{
+	int res=0;
+	int n=(int)vec.size();
+	for(int i=0;i<n;++i)
+		res+=(int)vec[i].size();
+	return res;
+}
+
+/*!
+	\brief Exchanges memebers in vec with indeces given by indeces and data given by data
+\param vec The vector to change
+	\param indeces The indeces in vec to change
+		\param data The data to put inside vec
+*/
+template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
+	vector<T> const& data)
+{
+	if(indeces.size()!=data.size())
+	{
+		UniversalError eo("Matching vectors are not the same length");
+		eo.AddEntry("indeces length",indeces.size());
+		eo.AddEntry("data length",data.size());
+		throw eo;
+	}
+	int n=(int)indeces.size();
+	for(int i=0;i<n;++i)
+		vec[indeces[i]]=data[i];
+}
+
 #endif // UTILS_HPP
