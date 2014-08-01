@@ -15,6 +15,15 @@ vector<double> linspace(double xl, double xh, int n)
   return res;
 }
 
+vector<double> arange(double x_min, double x_max, double dx)
+{
+  assert((x_max-x_min)/dx>0 && "dx has wrong sign");
+  vector<double> res;
+  for(double x=x_min;x<x_max;x+=dx)
+    res.push_back(x);
+  return res;
+}
+
 double min(vector<double> const& v)
 {
   double res = v[0];
