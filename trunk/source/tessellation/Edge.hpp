@@ -71,4 +71,10 @@ double DistanceToEdge(Vector2D const& point,Edge const& edge);
 bool SegmentIntersection(Edge const& edge1,Edge const& edge2,
 			 Vector2D &Intersection,double eps=1e-8);
 
+/*! \brief Calculates the centroid of an edge
+  \param edge An edge
+  \return Centroid
+ */
+Vector2D calc_centroid(const Edge& edge);
+
 #endif	// of #ifndef ___EDGE_HPP___

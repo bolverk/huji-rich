@@ -72,3 +72,7 @@ Vector2D Parallel(Edge const& edge)
 	return (edge.vertices.second - edge.vertices.first);
 }
 
+Vector2D calc_centroid(const Edge& edge)
+{
+  return 0.5*(edge.vertices.first+edge.vertices.second);
+}
