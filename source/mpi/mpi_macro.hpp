@@ -347,6 +347,10 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	const& BoundaryPoints,vector<vector<int> > const& SentPoints,vector<int> const&
 	SentProcs);
 
+void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
+	vector<vector<vector<int> > > &BoundaryNeigh,Tessellation const& tess,
+	vector<vector<int> > &ExtraNeighbors);
+
 #endif
 
 #endif //MPI_MACRO

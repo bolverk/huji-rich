@@ -1114,7 +1114,9 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 	vector<vector<int> >const& sentcells,vector<int> sentprocs,
 	vector<vector<int> > const& Nghost,int totalpoints)
 {
-int nlist=(int)sentprocs.size();
+	if(grads.empty())
+		return;
+	int nlist=(int)sentprocs.size();
 	// Talk with other procs
 	int rank,worldsize;
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
@@ -1147,7 +1149,8 @@ int nlist=(int)sentprocs.size();
 	// ReArrange the data
 	grads.resize(totalpoints);
 	for(int i=0;i<nlist;++i)
-		ListExchange(grads,Nghost[i],tadd[i]);}
+		ListExchange(grads,Nghost[i],tadd[i]);
+}
 
 
 int MPI_SendVectorConserved(vector<Conserved> const& vec,int dest,int tag,
@@ -1280,6 +1283,91 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 		int index=FindLoc(SentProcs,sentme[i],occur[loc]);
 		++occur[loc];
 		GhostIndeces[index]=torecv[i];
+	}
+}
+
+void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
+	vector<vector<vector<int> > > &BoundaryNeigh,Tessellation const& tess,
+	vector<vector<int> > &ExtraNeighbors)
+{
+	int rank,worldsize;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+	const vector<int> procorder=GetProcOrder(rank,worldsize);
+	vector<int> sentprocs=tess.GetDuplicatedProcs();
+	int nlist=(int)sentprocs.size();
+	int n=worldsize-1;
+	vector<int> proclist=tess.GetDuplicatedProcs();
+	ExtraNeighbors.clear();
+	vector<vector<int> > RemovedIndex(proclist.size());
+	int trash,trashr;
+	MPI_Status stat;
+	for(int i=0;i<n;++i)
+	{
+		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+			-sentprocs.begin();
+		if(index<nlist)
+		{
+			if(rank<procorder[i])
+			{
+				if(BoundaryRemove[i].empty())
+					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+				else
+					MPI_Send(&BoundaryRemove[index][0],(int)BoundaryRemove[index].size(),
+						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+				if(stat.MPI_TAG==1)
+					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				else
+				{
+					int count;
+					MPI_Get_count(&stat,MPI_INT,&count);
+					RemovedIndex[index].resize(count);
+					MPI_Recv(&RemovedIndex[index][0],count,MPI_INT,procorder[i],0,
+						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				}
+				// create the lengths of neighbors
+				vector<int> senddata,lengthr,recvdata;
+				if(BoundaryRemove[i].empty())
+					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+				else
+				{
+					vector<int> lengths(BoundaryRemove[index].size());
+					for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
+					{
+						lengths[j]=BoundaryNeigh[index][j].size();
+						for(int k=0;k<lengths[j];++k)
+							senddata.push_back(BoundaryNeigh[index][j][k]);
+					}
+					MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
+						MPI_COMM_WORLD);
+				}
+				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+				if(stat.MPI_TAG==1)
+					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				else
+				{
+					int count;
+					MPI_Get_count(&stat,MPI_INT,&count);
+					lengthr.resize(count);
+					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				}
+				if(!BoundaryRemove[i].empty())
+					MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+				if(!lengthr.empty())
+				{
+					int count;
+					MPI_Get_count(&stat,MPI_INT,&count);
+					recvdata.resize(count);
+					MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+				}
+				// Reorganize the data
+			}
+			else
+			{
+
+			}
+		}
 	}
 }
 
