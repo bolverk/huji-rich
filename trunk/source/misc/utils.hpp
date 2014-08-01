@@ -27,6 +27,14 @@ bool is_nan(double x);
 */
 vector<double> linspace(double xl, double xh, int n);
 
+/*! \brief Uniformly spaced array (line numpy function with the same name)
+  \param x_min Lower bound
+  \param x_max Upper bound
+  \param dx Difference between consecutive terms
+  \return Uniformly spaced array
+ */
+vector<double> arange(double x_min, double x_max, double dx);
+
 /*! \brief Term by term addition for vectors
 \param v1 Right argument
 \param v2 Left argument
