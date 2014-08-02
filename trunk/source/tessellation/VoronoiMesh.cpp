@@ -851,7 +851,7 @@ GhostPoints(other.GhostPoints),GhostProcs(other.GhostProcs),
 
 void VoronoiMesh::build_v()
 {
-	vector<int>::iterator it;
+  //	vector<int>::iterator it;
 	Vector2D center,center_temp;
 	int j;
 	facet *to_check;
@@ -1084,7 +1084,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 		log.output(vproc);
 		voronoi_loggers::BinLogger log2("verror.bin");
 		log2.output(*this);
-		throw eo;
+		throw;
 	}
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
@@ -1499,7 +1499,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		eo.AddEntry("Error in rank",rank);
 		voronoi_loggers::BinLogger log("verror"+int2str(rank)+".bin");
 		log.output(vproc);
-		throw eo;
+		throw;
 	}
 	build_v();
 
@@ -1516,7 +1516,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		log.output(vproc);
 		voronoi_loggers::BinLogger log2("verror.bin");
 		log2.output(*this);
-		throw eo;
+		throw;
 	}
 
 	vector<vector<int> > corners;
@@ -2410,7 +2410,7 @@ void VoronoiMesh::FindIntersectingPoints(vector<Edge> const &box_edges,
 		}
 		catch(UniversalError const& eo)
 		{
-			throw eo;
+			throw;
 		}
 		int j=(int)temp.size();
 		if(j>0)
