@@ -219,7 +219,7 @@ void Delaunay::flip(int i, int j)
   boost::array<int,2> other;
   boost::array<int,2> indexes;
   boost::array<Vector2D,4> circle_test;
-  while(flip_stack.size()>0)
+  while(!flip_stack.empty())
     {
       if(flip_stack.top()[1]==last_loc)
 	flip_stack.pop();

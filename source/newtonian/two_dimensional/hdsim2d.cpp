@@ -317,7 +317,7 @@ void hdsim::TimeAdvance(void)
     convert_indices_to_custom_evolution(custom_evolution_manager,
 					custom_evolution_indices);
 
-  vector<char> btoadd;
+  //  vector<char> btoadd;
   if(coldflows_flag_)
     {
       vector<char> btoadd;

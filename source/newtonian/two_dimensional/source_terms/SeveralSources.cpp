@@ -25,7 +25,7 @@ Conserved SeveralSources::Calculate(Tessellation const& tess,
 {
 	Conserved res;
 	vector<double> dtracer_local;
-	if(dtracer.size()>0)
+	if(!dtracer.empty())
 		dtracer_local.assign(dtracer.size(),0);
 	for(int i=0;i<(int)sources_.size();++i)
 	{

@@ -14,7 +14,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	double pi= 3.141592653;
 	double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
-	vector<Vector2D> cpoints;
+	//	vector<Vector2D> cpoints;
 	/*#ifdef RICH_MPI
 	int rank;
 	if(tproc!=0)
