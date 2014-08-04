@@ -29,6 +29,8 @@
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/mpi/mpi_macro.hpp"
 #include "source/mpi/MeshPointsMPI.hpp"
+#include "source/tessellation/shape_2d.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -71,10 +73,6 @@ namespace {
 #endif
       tess_(),
       interp_method_(),
-      density_(1),
-      pressure_(0,0.06,0,0.06,1e4,0.01),
-      xvelocity_(0),
-      yvelocity_(0),
       eos_(5./3.),
       point_motion_(),
       rs_(),
@@ -86,10 +84,12 @@ namespace {
 	   proc_tess_,
 #endif
 	   interp_method_,
-	   density_,
-	   pressure_,
-	   xvelocity_,
-	   yvelocity_,
+	   Uniform2D(1),
+	   Piecewise(Circle(Vector2D(0,0),0.06),
+		     Uniform2D(1e4),
+		     Uniform2D(0.01)),
+	   Uniform2D(0),
+	   Uniform2D(0),
 	   eos_,
 	   rs_,
 	   point_motion_,
@@ -111,10 +111,6 @@ namespace {
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
     PCM2D interp_method_;
-    const Uniform2D density_;
-    const Step2D pressure_;
-    const Uniform2D xvelocity_;
-    const Uniform2D yvelocity_;
     const IdealGas eos_;
     Lagrangian point_motion_;
     const Hllc rs_;
