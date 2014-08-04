@@ -539,11 +539,11 @@ template<class T> void set_pair_member(std::pair<T,T>& p, int index, const T& va
 }
 
 /*!
-\brief Calculates the total number of elements in the 2d vector
-		\param vec The vector to count
-\return The number of elements
+  \brief Calculates the total number of elements in the 2d vector
+  \param vec The vector to count
+  \return The number of elements
 */
-template<class T> int ElementNumber(vector<vector<T> > const&vec)
+template<class T> int ElementNumber(vector<vector<T> > const& vec)
 {
 	int res=0;
 	int n=(int)vec.size();
