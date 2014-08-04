@@ -14,7 +14,6 @@
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/spatial_distributions/step2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
@@ -25,6 +24,8 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/tessellation/right_rectangle.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -68,10 +69,6 @@ public:
     tess_(),
     eos_(5./3.),
     interpm_(eos_,outer_,hbc_,true,false),
-    density_(1),
-    pressure_(0,0.5,0,1,2,1),
-    xvelocity_(0),
-    yvelocity_(0),
     pm_naive_(),
     rs_(),
     hbc_(rs_),
@@ -83,10 +80,12 @@ public:
 	 proc_tess_,
 	 #endif
 	 interpm_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
+	 Uniform2D(1),
+	 Piecewise(RightRectangle(Vector2D(0,0),
+				  Vector2D(width_/2,width_)),
+		   Uniform2D(2), Uniform2D(1)),
+	 Uniform2D(0),
+	 Uniform2D(0),
 	 eos_,
 	 rs_,
 	 point_motion_,
@@ -109,10 +108,6 @@ private:
   VoronoiMesh tess_;
   const IdealGas eos_;
   LinearGaussConsistent interpm_;
-  const Uniform2D density_;
-  const Step2D pressure_;
-  const Uniform2D xvelocity_;
-  const Uniform2D yvelocity_;
   Lagrangian pm_naive_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
