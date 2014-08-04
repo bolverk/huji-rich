@@ -3,7 +3,6 @@
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
@@ -18,6 +17,8 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/tessellation/shape_2d.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -34,10 +35,6 @@ public:
     outer_(lower_left, upper_right),
     tess_(),
     interpm_(),
-    density_(1),
-    pressure_(0,0.5,0.05,1e5,1),
-    xvelocity_(0),
-    yvelocity_(0),
     eos_(5./3.),
     rs_(),
     hbc_(rs_),
@@ -48,10 +45,11 @@ public:
     sim_(mesh_,
 	 tess_,
 	 interpm_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
+	 Uniform2D(1),
+	 Piecewise(Circle(Vector2D(0,0.5),0.05),
+		   Uniform2D(1e5), Uniform2D(1)),
+	 Uniform2D(0),
+	 Uniform2D(0),
 	 eos_,
 	 rs_,
 	 point_motion_,
@@ -69,10 +67,6 @@ private:
   const SquareBox outer_;
   VoronoiMesh tess_;
   PCM2D interpm_;
-  const Uniform2D density_;
-  const Circle2D pressure_;
-  const Uniform2D xvelocity_;
-  const Uniform2D yvelocity_;
   const IdealGas eos_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
