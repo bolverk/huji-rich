@@ -3,7 +3,6 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylinderical_geometry.hpp"
@@ -13,6 +12,8 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/int2str.hpp"
+#include "source/tessellation/shape_2d.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
 
 int main(void)
 {
@@ -48,13 +49,16 @@ int main(void)
 
   // Set up the initial Hydro
   double rho=1;
-  double low_pressure=1;
-  double high_pressure=400;
   double high_radius=0.15;
   double x_velocity=0;
   double y_velocity=0;
   Uniform2D density(rho);
-  Circle2D pressure(0,0,high_radius,high_pressure,low_pressure);
+  Circle hot_spot(Vector2D(0,0),high_radius);
+  Uniform2D low_pressure(1);
+  Uniform2D high_pressure(100);
+  Piecewise pressure(hot_spot,
+		     high_pressure,
+		     low_pressure);
   Uniform2D xvelocity(x_velocity);
   Uniform2D yvelocity(y_velocity);
 
@@ -66,7 +70,11 @@ int main(void)
 	    yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
   // Add the tracer for following the mass
-  Circle2D tracer(0,0,high_radius,1,0);
+  Uniform2D tracer_inside(1);
+  Uniform2D tracer_outside(0);
+  Piecewise tracer(hot_spot,
+		   tracer_inside,
+		   tracer_outside);
   sim.addTracer(tracer);
 
   // Choose the Courant number
