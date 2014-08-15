@@ -12,18 +12,6 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 
-/*!
-  \brief Generates a rectangular grid around (0,0)
-  \param sidex The x length
-  \param sidey The y length
-  \param nx The number of points in the x direction
-  \param ny The number of points in the y direction
-  \param centerd If true then the mesh is centered around (0,0) else (0,0) is the lower left point
-  \return List of two dimensional points
-*/
-std::vector<Vector2D> SquareMesh(int nx,int ny,double sidex=1,double sidey=1,
-			    bool centerd=true);
-
 /*! \brief Generates a cartesian mesh
   \param nx Number of points along the x axis
   \param ny Number of points along the y axis

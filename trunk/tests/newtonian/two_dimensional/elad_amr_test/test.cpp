@@ -122,7 +122,10 @@ int main(void)
 	// Set up the initial grid points
 	int np = 30;
 	double width=1;
-	vector<Vector2D> InitPoints=SquareMesh(np,np,width,width);
+	//	vector<Vector2D> InitPoints=SquareMesh(np,np,width,width);
+	vector<Vector2D> InitPoints = 
+	  cartesian_mesh(np,np, Vector2D(-width/2,-width/2), 
+			 Vector2D(width/2,width/2));
 
 	// Set up the boundary type for the points
 	PeriodicBox outer(-width*0.5,width*0.5,width*0.5,-width*0.5);
