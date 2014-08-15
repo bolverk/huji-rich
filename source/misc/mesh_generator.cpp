@@ -224,29 +224,6 @@ vector<Vector2D> CirclePointsRmax(int PointNum,double Rmin,double Rmax,
 	return res;
 }
 
-vector<Vector2D> SquareMesh(int nx,int ny,double sidex,double sidey,bool centered)
-{
-	vector<Vector2D> res(size_t(nx*ny));
-	double widthx = sidex/(double)nx;
-	double widthy = sidey/(double)ny;
-	Vector2D point;
-	for(int i=0;i<nx;i++)
-	{
-		for(int j=0;j<ny;j++)
-		{
-			point.x = ((double)i+0.5)*widthx-sidex/2;
-			point.y = ((double)j+0.5)*widthy-sidey/2;
-			if(!centered)
-			{
-				point.x+=sidex/2;
-				point.y+=sidey/2;
-			}
-			res[size_t(i*ny+j)] = point;
-		}
-	}
-	return res;
-}
-
 vector<Vector2D> cartesian_mesh(int nx, int ny,
 	Vector2D const& lower_left,
 	Vector2D const& upper_right)

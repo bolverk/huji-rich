@@ -51,7 +51,9 @@ int main(void)
 	// Set up the initial grid points
 	int np = read_int("resolution.txt");
 	double width=2;
-	vector<Vector2D> InitPoints=SquareMesh(np,np,width,width);
+	//	vector<Vector2D> InitPoints=SquareMesh(np,np,width,width);
+	vector<Vector2D> InitPoints = 
+	  cartesian_mesh(np,np, Vector2D(-1,-1), Vector2D(1,1));
 
 	// Set up the boundary type for the points
 	SquareBox outer(-width*0.5,width*0.5,width*0.5,-width*0.5);
