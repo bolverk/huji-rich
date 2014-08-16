@@ -3,7 +3,6 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
@@ -16,6 +15,29 @@
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/int2str.hpp"
 #include "source/tessellation/RoundGrid.hpp"
+#include "source/tessellation/shape_2d.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
+#include "source/newtonian/test_2d/main_loop_2d.hpp"
+#include "source/newtonian/test_2d/consecutive_snapshots.hpp"
+#include "source/newtonian/test_2d/multiple_diagnostics.hpp"
+
+class ProgressReport: public DiagnosticFunction
+{
+public:
+
+  ProgressReport(int skip):
+    skip_(skip) {}
+
+  void operator()(const hdsim& sim)
+  {
+    if(sim.GetCycle()%skip_==0)
+      cout << "Sim time is " << sim.GetTime() << " Step number "
+	   << sim.GetCycle() << endl;
+  }
+
+private:
+  const int skip_;
+};
 
 class KT_Density :public SpatialDistribution
 {
@@ -81,11 +103,6 @@ int main(void)
     circle_circumference(np*2,
 			 OuterR*(1+0.75/np),
 			 Vector2D(0,0));
-  /*
-    vector<Vector2D> OuterCircle1=Circle(np*2,OuterR*(1+0.5/np));
-    vector<Vector2D> OuterCircle2=Circle(np*2,OuterR*(1+1.25/np));
-    vector<Vector2D> OuterCircle3=Circle(np*2,OuterR*(1+1.75/np));
-  */
   vector<Vector2D> InnerCircle=CirclePointsRmax(np,0.1*InnerR,InnerR);
   InitPoints.insert(InitPoints.begin(),InnerCircle.begin(),InnerCircle.end());
   InitPoints.insert(InitPoints.begin(),OuterCircle1.begin(),OuterCircle1.end());
@@ -119,7 +136,13 @@ int main(void)
   // Set up the initial Hydro
   double M=1;
   double p=0.02;
-  Circle2D pressure(0,0,OuterR*(1+1.5/np),p,p*0.001);
+  Circle inner_disk(Vector2D(0,0), OuterR*(1+1.5/np));
+  Uniform2D inner_pressure(p);
+  Uniform2D outer_pressure(p*0.001);
+  //  Circle2D pressure(0,0,OuterR*(1+1.5/np),p,p*0.001);
+  Piecewise pressure(inner_disk,
+		     inner_pressure,
+		     outer_pressure);
   KT_Density density(M,OuterR*(1+1.5/np));
   KT_xvel xvelocity(M);
   KT_yvel yvelocity(M);
@@ -139,50 +162,29 @@ int main(void)
     sim.custom_evolution_indices[i] = 1;
 
   // Choose the Courant number
-  double cfl=0.7;
-  sim.SetCfl(cfl);
+  sim.SetCfl(0.7);
 
   // How long shall we run the simulation?
-  double tend=25;
+  const double tend=25;
+  //  const double tend = 0.01;
   sim.SetEndTime(tend);
 
-  // Custom output criteria
-  double output_dt=0.3;
-  double last_dump_time=0;
-  int dump_number=0;
+  // Main loop
+  write_snapshot_to_hdf5(sim,"initial.h5");
 
-  write_snapshot_to_hdf5(sim,"c:\\sim_data\\output0.bin");
-
-  // Run main loop of the sim
-  while(sim.GetTime()<tend)
-    {
-      try
-	{
-	  // This purely for user feedback
-	  if(sim.GetCycle()%25==0)
-	    cout<<"Sim time is "<<sim.GetTime()<<" Step number "<<sim.GetCycle()<<endl;
-
-	  // Custom output criteria
-	  if((sim.GetTime()-last_dump_time)>output_dt)
-	    {
-	      last_dump_time=sim.GetTime();
-	      ++dump_number;
-	      write_snapshot_to_hdf5(sim,"c:\\sim_data\\output"+
-				     int2str(dump_number)+".bin");
-	    }
-
-	  // Advance one time step
-	  sim.TimeAdvance2Mid();
-	}
-      catch(UniversalError const& eo)
-	{
-	  DisplayError(eo);
-	}
-    }
+  SafeTimeTermination term_cond(tend, 1e6);
+  ProgressReport diag1(25);
+  ConsecutiveSnapshots diag2(0.3);
+  MultipleDiagnostics diag;
+  diag.diag_list.push_back(&diag1);
+  diag.diag_list.push_back(&diag2);
+  simulation2d::main_loop(sim,
+			  term_cond,
+			  &hdsim::TimeAdvance2Mid,
+			  &diag);
 
   // Done running the simulation, output the data
-  string filename="c:\\sim_data\\output.bin";
-  write_snapshot_to_hdf5(sim,filename);
+  write_snapshot_to_hdf5(sim,"final.h5");
 
   // We are done!!
   cout<<"Finished running the simulation"<<endl;
