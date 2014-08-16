@@ -3,7 +3,6 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/spatial_distributions/Circle2D.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
@@ -13,9 +12,33 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/int2str.hpp"
+#include "source/tessellation/shape_2d.hpp"
+#include "source/newtonian/test_2d/piecewise.hpp"
+#include "source/newtonian/test_2d/main_loop_2d.hpp"
+#include "source/newtonian/test_2d/consecutive_snapshots.hpp"
+#include "source/newtonian/test_2d/multiple_diagnostics.hpp"
 
 namespace {
-  void HeatCells(hdsim &sim,double minDensity,double newDensity,double newPressure,
+  class ProgressReport: public DiagnosticFunction
+  {
+  public:
+
+    ProgressReport(int skip):
+      skip_(skip) {}
+
+    void operator()(const hdsim& sim)
+    {
+      if(sim.GetCycle()%skip_==0)
+	cout << "Sim time is " << sim.GetTime() << " Step number "
+	     << sim.GetCycle() << endl;
+    }
+
+  private:
+    const int skip_;
+  };
+
+  void HeatCells(hdsim &sim,double minDensity,
+		 double newDensity,double newPressure, 
 		 EquationOfState const& eos)
   {
     vector<Primitive>& cells=sim.GetAllCells();
@@ -31,19 +54,45 @@ namespace {
 	  }
       }
   }
+
+  class CellHeater: public Manipulate
+  {
+  public:
+
+    CellHeater(double min_density,
+	       double new_density,
+	       double new_pressure,
+	       const EquationOfState& eos):
+      min_density_(min_density),
+      new_density_(new_density),
+      new_pressure_(new_pressure),
+      eos_(eos) {}
+
+    void operator()(hdsim& sim)
+    {
+      HeatCells(sim,min_density_,new_density_,new_pressure_,eos_);
+    }
+
+  private:
+    const double min_density_;
+    const double new_density_;
+    const double new_pressure_;
+    const EquationOfState& eos_;
+  };
 }
 
 int main(void)
 {
+  // Set up the boundary type for the points
+  SquareBox outer(Vector2D(-1,-1), Vector2D(1,1));
+
   // Set up the initial grid points
   int npointsx=50;
   int npointsy=50;
-  double widthx=2;
-  double widthy=2;
-  vector<Vector2D> InitPoints=SquareMesh(npointsx,npointsy,widthx,widthy);
-
-  // Set up the boundary type for the points
-  SquareBox outer(-widthx/2,widthx/2,widthy/2,-widthy/2);
+  vector<Vector2D> InitPoints=
+    cartesian_mesh(npointsx,npointsy,
+		   outer.getBoundary().first,
+		   outer.getBoundary().second);
 
   // Set up the tessellation
   VoronoiMesh tess;
@@ -66,16 +115,13 @@ int main(void)
   LinearGaussConsistent interpolation(eos,outer,hbc);
 
   // Set up the initial Hydro
-  double rho=1;
-  double low_pressure=1;
-  double high_pressure=100;
-  double high_radius=0.3;
-  double x_velocity=0;
-  double y_velocity=0;
-  Uniform2D density(rho);
-  Circle2D pressure(0,0,high_radius,high_pressure,low_pressure);
-  Uniform2D xvelocity(x_velocity);
-  Uniform2D yvelocity(y_velocity);
+  Uniform2D density(1);
+  Circle hot_spot(Vector2D(0,0),0.3);
+  Uniform2D low_pressure(1);
+  Uniform2D high_pressure(100);
+  Piecewise pressure(hot_spot, high_pressure, low_pressure);
+  Uniform2D xvelocity(0);
+  Uniform2D yvelocity(0);
 
   // Set up the external source term
   ZeroForce force;
@@ -85,54 +131,28 @@ int main(void)
 	    yvelocity,eos,rs,pointmotion,force,outer,hbc);
 
   // Choose the Courant number
-  double cfl=0.7;
-  sim.SetCfl(cfl);
+  sim.SetCfl(0.7);
 
   // How long shall we run the simulation?
-  double tend=0.05;
+  const double tend=0.05;
   sim.SetEndTime(tend);
 
-  // Custom output criteria
-  double output_dt=0.01;
-  double last_dump_time=0;
-  int dump_number=0;
-
-  // Run main loop of the sim
-  while(sim.GetTime()<tend)
-    {
-      try
-	{
-	  // This purely for user feedback
-	  if(sim.GetCycle()%25==0)
-	    cout<<"Sim time is "<<sim.GetTime()<<" Step number "<<sim.GetCycle()<<endl;
-
-	  // Custom output criteria
-	  if((sim.GetTime()-last_dump_time)>output_dt)
-	    {
-	      last_dump_time=sim.GetTime();
-	      ++dump_number;
-	      write_snapshot_to_hdf5(sim,"c:\\sim_data\\output"+
-				     int2str(dump_number)+".bin");
-	    }
-
-	  // Advance one time step
-	  sim.TimeAdvance2Mid();
-
-	  // Do change outside the time step
-	  double minDensity=0.5;
-	  double newDensity=1;
-	  double newPressure=10;
-	  HeatCells(sim,minDensity,newDensity,newPressure,eos);
-	}
-      catch(UniversalError const& eo)
-	{
-	  DisplayError(eo);
-	}
-    }
+  // Main simulation loop
+  SafeTimeTermination term_cond(tend,1e6);
+  ProgressReport diag1(25);
+  ConsecutiveSnapshots diag2(0.01);
+  MultipleDiagnostics diag;
+  diag.diag_list.push_back(&diag1);
+  diag.diag_list.push_back(&diag2);
+  CellHeater cell_heater(0.5,1,10,eos);
+  simulation2d::main_loop(sim,
+			  term_cond,
+			  &hdsim::TimeAdvance2Mid,
+			  &diag,
+			  &cell_heater);
 
   // Done running the simulation, output the data
-  string filename="c:\\sim_data\\output.bin";
-  write_snapshot_to_hdf5(sim,filename);
+  write_snapshot_to_hdf5(sim,"final.h5");
 
   // We are done!!
   cout<<"Finished running the simulation"<<endl;
