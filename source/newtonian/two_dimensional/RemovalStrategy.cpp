@@ -32,6 +32,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
  candidates,Tessellation const& tess) const
 {
 	vector<int> result;
+	vector<double> merits2;
 	if(merits.size()!=candidates.size())
 		throw UniversalError("Merits and Candidates don't have same size in RemovalStrategy");
 	// Make sure there are no neighbors
@@ -44,7 +45,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		vector<int> edges=tess.GetCellEdges(candidates[i]);
 		vector<int> neigh=tess.GetNeighbors(candidates[i]);
 		int nneigh=(int) neigh.size();
-		for(int j=0;j<nneigh;++j)
+		/*for(int j=0;j<nneigh;++j)
 		{
 			Edge const& edge=tess.GetEdge(edges[j]);
 			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
@@ -52,7 +53,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 				good=false;
 				break;
 			}
-		}
+		}*/
 		if(!good)
 			continue;
 		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[i])!=
@@ -81,8 +82,14 @@ vector<int> RemovalStrategy::RemoveNeighbors
 			}
 		}
 		if(good)
+		{
 			result.push_back(candidates[i]);
+			merits2.push_back(merits[i]);
+		}
 	}
+#ifdef RICH_MPI
+	result=RemoveMPINeighbors(result,merits2,tess);
+#endif
 	return result;
 }
 

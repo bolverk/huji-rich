@@ -218,10 +218,31 @@ template <class T> vector<T> unique(vector<T> const& v)
 }
 
 /*!
-  \brief Returns only elements from vector v which are not in vector list, assumes list is sorted
-  \param v The vector to change
-  \param list The values to be taken out of v
-  \return The new vector
+\brief Returns a vector containing only indeces of unique elements
+\param v The input vector, must be SORTED!!
+\return The unique vector indeces
+*/
+template <class T> vector<int> unique_index(vector<T> const& v)
+{
+	int n=(int)v.size();
+	vector<int> res;
+	if(n==0)
+		return res;
+	res.push_back(0);
+	for(int i=1;i<n;++i)
+		if(v[i]==v[i-1])
+			continue;
+		else
+			res.push_back(i);
+	return res;
+}
+
+
+/*!
+\brief Returns only elements from vector v which are not in vector list, assumes list is sorted
+\param v The vector to change
+\param list The values to be taken out of v
+\return The new vector
 */
 template <class T> vector<T> RemoveList(vector<T> const&v,vector<T> const&list)
 {

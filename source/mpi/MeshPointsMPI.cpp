@@ -293,7 +293,8 @@ namespace {
 		size_t start, size_t ending)
 	{
 		vector<vector<Vector2D> > res(process_tess.GetPointNo());
-		for(size_t i=start;i<ending;++i){
+		for(size_t i=start;i<ending;++i)
+		{
 			const Vector2D point = grid_generator(i);
 			res[sort_point(process_tess,point)].push_back(point);
 		}

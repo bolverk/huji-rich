@@ -179,6 +179,15 @@ public:
    */
   vector<Edge>& GetAllEdges(void);
 
+  /*!
+  \brief Calculates and send the ghost points that are needed for AMR with MPI
+  \param ToRemove The local list of points to remove
+  \param BoundaryRemove The list of points that are border points per proc that are removed
+  \param BoundaryNeigh The indeces in the Nghost list for each neighbor of the points in BoundaryRemove
+  */
+  void FindBoundaryRemoveSend(vector<int> const& ToRemove,vector<vector<int> > &BoundaryRemove,
+		vector<vector<vector<int> > > &BoundaryNeigh);
+
   vector<vector<int> >const& GetDuplicatedPoints(void)const;
 
   vector<int> GetDuplicatedProcs(void)const;
@@ -233,7 +242,7 @@ private:
 	void ConvexEdgeOrder(void);
 	vector<int> FindEdgeStartConvex(int point);
 	void SendRecv(vector<int> const& procorder,vector<int> const&
-		proclist,vector<vector<int> > &data,Tessellation const& v);
+		proclist,vector<vector<int> > &data);
 	void NonSendBoundary(vector<int> &	proclist,vector<vector<int> > &
 		data,Tessellation const& v,vector<vector<int> > &totest,
 		vector<Edge> const& boxedges);
@@ -246,6 +255,8 @@ private:
 	vector<int> CellIntersectOuterBoundary(vector<Edge> const&box_edges,int cell);
 	void FindIntersectingOuterPoints(vector<Edge> const&bedge,vector<vector<int> >
 		&boxduplicate,vector<vector<int> > const&firstduplicated);
+	void SendRecvRemove(vector<int> const& procorder,vector<int> const&
+		proclist,vector<vector<int> > &data);
 };
 /*! \brief Checks if a point is inside a Voronoi cell
 \param cpoints The points of the cell in convex order
