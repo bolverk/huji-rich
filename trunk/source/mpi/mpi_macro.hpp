@@ -346,10 +346,47 @@ void SendRecvVectorDouble(vector<double> const& vec,
 void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	const& BoundaryPoints,vector<vector<int> > const& SentPoints,vector<int> const&
 	SentProcs);
-
+/*! 
+\brief Send/Recv the list of points to remove that are on the edges between cpus
+\param BoundaryRemove The indeces of the boundary points that were sent to current rank, listed by proc index and then by their index in the sent vector
+\param BoundaryNeigh The indeces of the neighbors of the boundary points that were sent to current rank, listed by proc index and then by their index in the sent vector
+\param tess The tessellation
+\param localNeighbors The list per received boundary point to remove of its local neighbors, given as output
+\param ghostneigh The list per received boundary point to remove of its ghost neighbors, given as output
+*/
 void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 	vector<vector<vector<int> > > &BoundaryNeigh,Tessellation const& tess,
-	vector<vector<int> > &ExtraNeighbors);
+	vector<vector<int> > &localNeighbors,vector<vector<int> > &ghostneigh);
+
+/*!
+\brief Removes neighboring points in AMR removal across cpu boundaries
+\param toremove The list of points to remove
+\param merit The merits of the points to remove
+\param tess The tessellation
+\return The modified list of points to remove
+*/
+vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const& merit,
+	Tessellation const& tess);
+
+/*!
+\brief Send/Recv hydro for the boundary cells in AMR removal
+\param rescells The primitives of the ghost cells, given as output
+\param restracers The tracers of the ghost cells, given as output
+\param cells The primitives cells
+\param tracers The intensive tracers cells
+\param traceractive Flag if there are tracers
+\param ToSend A list per cpu which points to send given by their indeces in the duplicatedpoints
+\param proclist The list of cpus to talk with
+\param eos The equation of state
+\param DuplicatedPoints The ghost points
+\param Nghost The received ghost indeces
+\param ToRemove The list of points to remove
+*/
+void GetAMRExtensive(vector<Primitive> &rescells,vector<vector<double> > &restracer,
+	vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+	bool traceractive,vector<vector<int> > &ToSend,vector<int> const& 
+	proclist,EquationOfState const& eos,vector<vector<int> > const& DuplicatedPoints,int npoints,
+	vector<vector<int> > const& Nghost,vector<int> const& ToRemove);
 
 #endif
 
