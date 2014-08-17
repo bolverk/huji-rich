@@ -1,0 +1,11 @@
+#labels Phase-Deploy
+General information about the RICH project.
+
+= Introduction =
+
+RICH is a c++ code that solves the equations of newtonian compressible hydrodynamics on a moving mesh. It was written as part of our PhD research under the supervision of Professor Re'em Sari. The acronym stands for Racah Institute Compressible Hydrodynamics.
+
+
+= Details =
+
+This site is still under construction. For more information and support, visit our [http://huji-rich.freeforums.net/ forum].
