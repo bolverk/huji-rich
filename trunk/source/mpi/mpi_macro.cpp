@@ -527,7 +527,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 	    {
 	      vector<Conserved> ptemp=VectorValues(cons,sentcells[index]);
 	      MPI_SendVectorConserved(ptemp,procorder[i],0,MPI_COMM_WORLD);
-	      MPI_RecvVectorConserved(ptemp,procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD);
+	      MPI_RecvVectorConserved(ptemp,procorder[i],0,MPI_COMM_WORLD);
 	      if(!ptemp.empty())
 		{
 		  ptoadd.insert(ptoadd.end(),ptemp.begin(),ptemp.end());
@@ -571,7 +571,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 	  else
 	    {
 	      vector<Conserved> ptemp;
-	      MPI_RecvVectorConserved(ptemp,procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD);
+	      MPI_RecvVectorConserved(ptemp,procorder[i],0,MPI_COMM_WORLD);
 	      if(!ptemp.empty())
 		{
 		  ptoadd.insert(ptoadd.end(),ptemp.begin(),ptemp.end());
