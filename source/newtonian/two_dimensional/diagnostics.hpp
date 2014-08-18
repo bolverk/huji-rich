@@ -48,6 +48,14 @@ Conserved total_conserved(hdsim const& sim);
   \param eo Th UniversalError
 */
 void DisplayError(UniversalError const& eo);
+
+/*! \brief Writes all the error information to a file
+  \param fname File name
+  \param eo Error object
+ */
+void write_error(const string& fname,
+		 const UniversalError& eo);
+
 /*! \brief Writes a vector of Vector2D to a binary file
 \param vec The vector to write
 \param filename The path to the output file
