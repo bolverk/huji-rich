@@ -3,7 +3,7 @@ double const splitter = 134217729;
 
 double absolute(double const& a)
 {
-	return (a >= 0.0) ? a : -a;
+  return (a >= 0.0) ? a : -a;
 }
 
 namespace {
@@ -16,8 +16,8 @@ namespace {
 
 void fastTwoSum(double const a, double const b, double& res, double& err) 
 {
-	res = a + b;
-	fastTwoSumTail(a, b, res, err);
+  res = a + b;
+  fastTwoSumTail(a, b, res, err);
 }
 
 namespace {
@@ -30,8 +30,8 @@ namespace {
 
 void fastTwoDiff(double a, double b, double& res, double& err) 
 {
-	res = a - b;
-	fastTwoDiffTail(a, b, res, err);
+  res = a - b;
+  fastTwoDiffTail(a, b, res, err);
 }
 
 namespace {
@@ -47,8 +47,8 @@ namespace {
 
 void twoSum(double a, double b, double& res, double& err) 
 {
-	res = a + b;
-	twoSumTail(a, b, res, err);
+  res = a + b;
+  twoSumTail(a, b, res, err);
 }
 
 namespace {
@@ -64,16 +64,16 @@ namespace {
 
 void twoDiff(double a, double b, double& res, double& err)
 {
-	res = a - b;
-	twoDiffTail(a, b, res, err);
+  res = a - b;
+  twoDiffTail(a, b, res, err);
 }
 
 void split(double num, double& high, double& low)
 {
-	double c = splitter * num;
-	double temp = c - num;
-	high = c - temp;
-	low = num - high;
+  double c = splitter * num;
+  double temp = c - num;
+  high = c - temp;
+  low = num - high;
 }
 
 namespace {
@@ -91,8 +91,8 @@ namespace {
 
 void twoProduct(double a, double b, double& res, double& err) 
 {
-	res = a * b;
-	twoProductTail(a, b, res, err);
+  res = a * b;
+  twoProductTail(a, b, res, err);
 }
 
 namespace {
@@ -108,400 +108,397 @@ namespace {
 
 void square(double num, double& res, double& err) 
 {
-	res = num * num;
-	squareTail(num, res, err);
+  res = num * num;
+  squareTail(num, res, err);
 }
 
 boost::array<double,3> twoOneSum(boost::array<double,2> const& a, double b)
 {
-	boost::array<double,3> res;
-	double tmp;
-	twoSum(a[0], b, tmp, res[0]);
-	twoSum(a[1], tmp, res[2], res[1]);
-	return res;
+  boost::array<double,3> res;
+  double tmp;
+  twoSum(a[0], b, tmp, res[0]);
+  twoSum(a[1], tmp, res[2], res[1]);
+  return res;
 }
 
 boost::array<double,3> twoOneDiff(boost::array<double,2> const& a, double b)
 {
-	boost::array<double,3> res;
-	double tmp;
-	twoDiff(a[0], b, tmp, res[0]);
-	twoSum(a[1], tmp, res[2], res[1]);
-	return res;
+  boost::array<double,3> res;
+  double tmp;
+  twoDiff(a[0], b, tmp, res[0]);
+  twoSum(a[1], tmp, res[2], res[1]);
+  return res;
 }
 
 vector<double> twoTwoSum(boost::array<double,2> const& a, boost::array<double,2> const& b)
 {
-	vector<double> res(4);
-	double tmp1, tmp2, tmp3;
-	twoSum(a[0], b[0], tmp1, res[0]);
-	twoSum(a[1], tmp1, tmp2, tmp3);
-	twoSum(tmp3, b[1], tmp1, res[1]);
-	twoSum(tmp2, tmp1, res[3], res[2]);
-	return res;
+  vector<double> res(4);
+  double tmp1, tmp2, tmp3;
+  twoSum(a[0], b[0], tmp1, res[0]);
+  twoSum(a[1], tmp1, tmp2, tmp3);
+  twoSum(tmp3, b[1], tmp1, res[1]);
+  twoSum(tmp2, tmp1, res[3], res[2]);
+  return res;
 }
 
 vector<double> twoTwoDiff(boost::array<double,2> const& a, boost::array<double,2> const& b)
 {
-	vector<double> res(4);
-	double tmp1, tmp2, tmp3;
-	twoDiff(a[1], b[1], tmp1, res[0]);
-	twoSum(a[0], tmp1, tmp2, tmp3);
-	twoDiff(tmp3, b[0], tmp1, res[1]);
-	twoSum(tmp2, tmp1, res[3], res[2]);
-	return res;
+  vector<double> res(4);
+  double tmp1, tmp2, tmp3;
+  twoDiff(a[1], b[1], tmp1, res[0]);
+  twoSum(a[0], tmp1, tmp2, tmp3);
+  twoDiff(tmp3, b[0], tmp1, res[1]);
+  twoSum(tmp2, tmp1, res[3], res[2]);
+  return res;
 }
 
 vector<double> growExpansionZeroElim(vector<double> const& e, double b)
 {
-	vector<double> ans;
-	ans.reserve(8);
-	double R1, R2, res; //Temp variables to store values.
+  vector<double> ans;
+  ans.reserve(8);
+  double R1, R2, res; //Temp variables to store values.
 
-	R1 = b; //The remainder to add to the expansion.
-	for (unsigned int i = 0; i < (unsigned int)e.size(); i++)
-	{
-		twoSum(R1, e[i], R2, res); //Adding the remainder to the current number in the expansion.
-		R1 = R2; //Updating remainder.
-		if (res != 0.0)
-		{ //Ignoring 0.
-			ans.push_back(res); //Creating the result expansion.
-		}
+  R1 = b; //The remainder to add to the expansion.
+  for (unsigned int i = 0; i < (unsigned int)e.size(); i++)
+    {
+      twoSum(R1, e[i], R2, res); //Adding the remainder to the current number in the expansion.
+      R1 = R2; //Updating remainder.
+      if (res != 0.0)
+	{ //Ignoring 0.
+	  ans.push_back(res); //Creating the result expansion.
 	}
-	if ((R1 != 0.0) || ans.empty())
-	{ //No numbers were previously added to result expansion.
-		ans.push_back(R1);
-	}
-	return ans; //Returns the result vector.
+    }
+  if ((R1 != 0.0) || ans.empty())
+    { //No numbers were previously added to result expansion.
+      ans.push_back(R1);
+    }
+  return ans; //Returns the result vector.
 }
 
 vector<double> expansionSumZeroElim(vector<double> const& e, vector<double> const& f)
 {
-	vector<double> temp, ans;
-	temp.reserve(8);
-	ans.reserve(8);
-	double Q, Qnew, current;
+  vector<double> temp, ans;
+  temp.reserve(8);
+  ans.reserve(8);
+  double Q, Qnew, current;
 
-	Q = f[0];
-	for (unsigned int i = 0; i <(unsigned int) e.size(); i++)
+  Q = f[0];
+  for (unsigned int i = 0; i <(unsigned int) e.size(); i++)
+    {
+      twoSum(Q, e[i], Qnew, current);
+      temp.push_back(current);
+      Q = Qnew;
+    }
+  temp.push_back(Q);
+  for (unsigned int i = 1; i < (unsigned int)f.size(); i++)
+    {
+      Q = f[i];
+      for (unsigned int j = i; j <(unsigned int) temp.size(); j++) 
 	{
-		twoSum(Q, e[i], Qnew, current);
-		temp.push_back(current);
-		Q = Qnew;
+	  current = temp[j];
+	  twoSum(Q, current, Qnew, temp[j]);
+	  Q = Qnew;
 	}
-	temp.push_back(Q);
-	for (unsigned int i = 1; i < (unsigned int)f.size(); i++)
+      temp.push_back(Q);
+    }
+  for (unsigned int i = 0; i <(unsigned int) temp.size(); i++)
+    {
+      if (temp[i] != 0)
 	{
-		Q = f[i];
-		for (unsigned int j = i; j <(unsigned int) temp.size(); j++) 
-		{
-			current = temp[j];
-			twoSum(Q, current, Qnew, temp[j]);
-			Q = Qnew;
-		}
-		temp.push_back(Q);
+	  ans.push_back(temp[i]);
 	}
-	for (unsigned int i = 0; i <(unsigned int) temp.size(); i++)
-	{
-		if (temp[i] != 0)
-		{
-			ans.push_back(temp[i]);
-		}
-	}
-	if (ans.empty())
-	{
-		ans.push_back(0.0);
-	}
-	return ans;
+    }
+  if (ans.empty())
+    {
+      ans.push_back(0.0);
+    }
+  return ans;
 }
 
 vector<double> fastExpansionSumZeroElim(vector<double> const& e, vector<double> const& f)
 {
-	vector<double> ans;
-	ans.reserve(10);
-	double Q, Qnew;
-	double hh;
-	double eNow, fNow;
-	unsigned int eIndex, fIndex;
+  vector<double> ans;
+  ans.reserve(10);
+  double Q, Qnew;
+  double hh;
+  double eNow, fNow;
+  unsigned int eIndex, fIndex;
 
-	eNow = e[0];
-	fNow = f[0];
-	eIndex = fIndex = 0;
-	if ((fNow > eNow) == (fNow > -eNow))
+  eNow = e[0];
+  fNow = f[0];
+  eIndex = fIndex = 0;
+  if ((fNow > eNow) == (fNow > -eNow))
+    {
+      Q = eNow;
+      eIndex++;
+      if (eIndex <(unsigned int)e.size())
 	{
-		Q = eNow;
-		eIndex++;
-		if (eIndex <(unsigned int)e.size())
-		{
-			eNow = e[eIndex];
-		}
+	  eNow = e[eIndex];
 	}
-	else
+    }
+  else
+    {
+      Q = fNow;
+      fIndex++;
+      if (fIndex <f.size())
 	{
-		Q = fNow;
-		fIndex++;
-		if (fIndex <f.size())
-		{
-			fNow = f[fIndex];
-		}
+	  fNow = f[fIndex];
 	}
-	if ((eIndex < e.size()) && (fIndex < f.size()))
+    }
+  if ((eIndex < e.size()) && (fIndex < f.size()))
+    {
+      if ((fNow > eNow) == (fNow > -eNow))
 	{
-		if ((fNow > eNow) == (fNow > -eNow))
-		{
-			fastTwoSum(eNow, Q, Qnew, hh);
-			eIndex++;
-			if (eIndex <e.size())
-			{
-				eNow = e[eIndex];
-			}
-		}
-		else
-		{
-			fastTwoSum(fNow, Q, Qnew, hh);
-			fIndex++;
-			if (fIndex <f.size())
-			{
-				fNow = f[fIndex];
-			}
-		}
-		Q = Qnew;
-		if (hh != 0.0)
-		{
-			ans.push_back(hh);
-		}
-		while ((eIndex < e.size()) && (fIndex <f.size()))
-		{
-			if ((fNow > eNow) == (fNow > -eNow))
-			{
-				twoSum(Q, eNow, Qnew, hh);
-				eIndex++;
-				if (eIndex < e.size())
-				{
-					eNow = e[eIndex];
-				}
-			}
-			else
-			{
-				twoSum(Q, fNow, Qnew, hh);
-				fIndex++;
-				if (fIndex < f.size())
-				{
-					fNow = f[fIndex];
-				}
-			}
-			Q = Qnew;
-			if (hh != 0.0)
-			{
-				ans.push_back(hh);
-			}
-		}
+	  fastTwoSum(eNow, Q, Qnew, hh);
+	  eIndex++;
+	  if (eIndex <e.size())
+	    {
+	      eNow = e[eIndex];
+	    }
 	}
-	while (eIndex < e.size())
+      else
 	{
-		twoSum(Q, eNow, Qnew, hh);
-		eIndex++;
-		if (eIndex < e.size())
-		{
-			eNow = e[eIndex];
-		}
-		Q = Qnew;
-		if (hh != 0.0)
-		{
-			ans.push_back(hh);
-		}
+	  fastTwoSum(fNow, Q, Qnew, hh);
+	  fIndex++;
+	  if (fIndex <f.size())
+	    {
+	      fNow = f[fIndex];
+	    }
 	}
-	while (fIndex < f.size())
+      Q = Qnew;
+      if (hh != 0.0)
 	{
-		twoSum(Q, fNow, Qnew, hh);
-		fIndex++;
-		if (fIndex < f.size())
-		{
-			fNow = f[fIndex];
-		}
-		Q = Qnew;
-		if (hh != 0.0)
-		{
-			ans.push_back(hh);
-		}
+	  ans.push_back(hh);
 	}
-	if ((Q != 0.0) || ans.empty())
+      while ((eIndex < e.size()) && (fIndex <f.size()))
 	{
-		ans.push_back(Q);
+	  if ((fNow > eNow) == (fNow > -eNow))
+	    {
+	      twoSum(Q, eNow, Qnew, hh);
+	      eIndex++;
+	      if (eIndex < e.size())
+		{
+		  eNow = e[eIndex];
+		}
+	    }
+	  else
+	    {
+	      twoSum(Q, fNow, Qnew, hh);
+	      fIndex++;
+	      if (fIndex < f.size())
+		{
+		  fNow = f[fIndex];
+		}
+	    }
+	  Q = Qnew;
+	  if (hh != 0.0)
+	    {
+	      ans.push_back(hh);
+	    }
 	}
-	return ans;
+    }
+  while (eIndex < e.size())
+    {
+      twoSum(Q, eNow, Qnew, hh);
+      eIndex++;
+      if (eIndex < e.size())
+	{
+	  eNow = e[eIndex];
+	}
+      Q = Qnew;
+      if (hh != 0.0)
+	{
+	  ans.push_back(hh);
+	}
+    }
+  while (fIndex < f.size())
+    {
+      twoSum(Q, fNow, Qnew, hh);
+      fIndex++;
+      if (fIndex < f.size())
+	{
+	  fNow = f[fIndex];
+	}
+      Q = Qnew;
+      if (hh != 0.0)
+	{
+	  ans.push_back(hh);
+	}
+    }
+  if ((Q != 0.0) || ans.empty())
+    {
+      ans.push_back(Q);
+    }
+  return ans;
 }
 
 vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double> const& f)
 {
-	vector<double> ans;
-	ans.reserve(8);
-	double Q, q, hh;
-	double Qnew;
-	double R;
-	double enow, fnow;
-	double g0;
-	unsigned int eindex, findex;
+  vector<double> ans;
+  ans.reserve(8);
+  double Q, q, hh;
+  double Qnew;
+  double R;
+  double enow, fnow;
+  double g0;
+  unsigned int eindex, findex;
 
-	enow = e[0];
-	fnow = f[0];
-	eindex = findex = 0;
-	if ((fnow > enow) == (fnow > -enow))
+  enow = e[0];
+  fnow = f[0];
+  eindex = findex = 0;
+  if ((fnow > enow) == (fnow > -enow))
+    {
+      g0 = enow;
+      eindex++;
+      if (eindex < e.size())
 	{
-		g0 = enow;
-		eindex++;
-		if (eindex < e.size())
-		{
-			enow = e[eindex];
-		}
+	  enow = e[eindex];
 	}
-	else
+    }
+  else
+    {
+      g0 = fnow;
+      findex++;
+      if (findex < f.size())
 	{
-		g0 = fnow;
-		findex++;
-		if (findex < f.size())
-		{
-			fnow = f[findex];
-		}
+	  fnow = f[findex];
 	}
-	if ((eindex <e.size()) && ((findex >= f.size()) || ((fnow > enow) == (fnow > -enow))))
+    }
+  if ((eindex <e.size()) && ((findex >= f.size()) || ((fnow > enow) == (fnow > -enow))))
+    {
+      fastTwoSum(enow, g0, Qnew, q);
+      eindex++;
+      if (eindex < e.size())
 	{
-		fastTwoSum(enow, g0, Qnew, q);
-		eindex++;
-		if (eindex < e.size())
-		{
-			enow = e[eindex];
-		}
+	  enow = e[eindex];
 	}
-	else
+    }
+  else
+    {
+      fastTwoSum(fnow, g0, Qnew, q);
+      findex++;
+      if (findex <f.size())
 	{
-		fastTwoSum(fnow, g0, Qnew, q);
-		findex++;
-		if (findex <f.size())
-		{
-			fnow = f[findex];
-		}
+	  fnow = f[findex];
 	}
-	Q = Qnew;
-	for (unsigned int count = 2; count < e.size() + f.size(); count++)
+    }
+  Q = Qnew;
+  for (unsigned int count = 2; count < e.size() + f.size(); count++)
+    {
+      if ((eindex < e.size()) && ((findex >= f.size()) || ((fnow > enow) == (fnow > -enow))))
 	{
-		if ((eindex < e.size()) && ((findex >= f.size()) || ((fnow > enow) == (fnow > -enow))))
-		{
-			fastTwoSum(enow, q, R, hh);
-			eindex++;
-			if (eindex < e.size())
-			{
-				enow = e[eindex];
-			}
-		}
-		else
-		{
-			fastTwoSum(fnow, q, R, hh);
-			findex++;
-			if (findex < f.size())
-			{
-				fnow = f[findex];
-			}
-		}
-		twoSum(Q, R, Qnew, q);
-		Q = Qnew;
-		if (hh != 0)
-		{
-			ans.push_back(hh);
-		}
+	  fastTwoSum(enow, q, R, hh);
+	  eindex++;
+	  if (eindex < e.size())
+	    {
+	      enow = e[eindex];
+	    }
 	}
-	if (q != 0) {
-		ans.push_back(q);
+      else
+	{
+	  fastTwoSum(fnow, q, R, hh);
+	  findex++;
+	  if (findex < f.size())
+	    {
+	      fnow = f[findex];
+	    }
 	}
-	if ((Q != 0.0) || ans.empty()) {
-		ans.push_back(Q);
+      twoSum(Q, R, Qnew, q);
+      Q = Qnew;
+      if (hh != 0)
+	{
+	  ans.push_back(hh);
 	}
-	return ans;
+    }
+  if (q != 0) {
+    ans.push_back(q);
+  }
+  if ((Q != 0.0) || ans.empty()) {
+    ans.push_back(Q);
+  }
+  return ans;
 }
 
 void scaleExpansionZeroElim(vector<double> const& e, double b,vector<double>
-	&ans)
+			    &ans)
 {
-	ans.clear();
-	ans.reserve(10);
-	double Q, hh;
-	double product0, product1,sum;
-	int eindex;
+  ans.clear();
+  ans.reserve(10);
+  double Q, hh;
+  double product0, product1,sum;
+  int eindex;
 
-	twoProduct(e[0], b, Q, hh);
-	if (hh != 0)
+  twoProduct(e[0], b, Q, hh);
+  if (hh != 0)
+    {
+      ans.push_back(hh);
+    }
+  int n=(int)e.size();
+  for (eindex = 1; eindex<n; ++eindex)
+    {
+      twoProduct(e[eindex], b, product1, product0);
+      twoSum(Q, product0,sum, hh);
+      if (hh != 0)
 	{
-		ans.push_back(hh);
+	  ans.push_back(hh);
 	}
-	int n=(int)e.size();
-	for (eindex = 1; eindex<n; ++eindex)
+      fastTwoSum(product1,sum, Q, hh);
+      if (hh != 0)
 	{
-		twoProduct(e[eindex], b, product1, product0);
-		twoSum(Q, product0,sum, hh);
-		if (hh != 0)
-		{
-			ans.push_back(hh);
-		}
-		fastTwoSum(product1,sum, Q, hh);
-		if (hh != 0)
-		{
-			ans.push_back(hh);
-		}
+	  ans.push_back(hh);
 	}
-	if ((Q != 0.0) || ans.empty()) {
-		ans.push_back(Q);
-	}
+    }
+  if ((Q != 0.0) || ans.empty()) {
+    ans.push_back(Q);
+  }
 }
 
 vector<double> compress(vector<double> const& e)
 {
-	vector<double> temp, ans;
-	ans.reserve(8);
-	double Q, q;
-	double Qnew;
-	double enow, current;
-	int bottom;
-	int eindex;
+  vector<double> temp, ans;
+  ans.reserve(8);
 
-	bottom = (int)e.size() - 1;
-	Q = e[bottom];
-	for (eindex =(int) e.size() - 2; eindex >= 0; eindex--)
+  int bottom = (int)e.size() - 1;
+  double Q = e[bottom];
+  for (int eindex =(int) e.size() - 2; eindex >= 0; eindex--)
+    {
+      const double enow = e[eindex];
+      double q, Qnew;
+      fastTwoSum(Q, enow, Qnew, q);
+      if (q != 0)
 	{
-		enow = e[eindex];
-		fastTwoSum(Q, enow, Qnew, q);
-		if (q != 0)
-		{
-			temp.insert(temp.begin(), Qnew);
-			bottom--;
-			Q = q;
-		}
-		else
-		{
-			Q = Qnew;
-		}
+	  temp.insert(temp.begin(), Qnew);
+	  bottom--;
+	  Q = q;
 	}
-	for (unsigned int i = bottom + 1; i <e.size(); i++)
+      else
 	{
-		current = temp[i];
-		fastTwoSum(current, Q, Qnew, q);
-		if (q != 0)
-		{
-			ans.push_back(q);
-		}
-		Q = Qnew;
+	  Q = Qnew;
 	}
-	ans.push_back(Q);
-	return ans;
+    }
+  for (unsigned int i = bottom + 1; i <e.size(); i++)
+    {
+      const double current = temp[i];
+      double q, Qnew;
+      fastTwoSum(current, Q, Qnew, q);
+      if (q != 0)
+	{
+	  ans.push_back(q);
+	}
+      Q = Qnew;
+    }
+  ans.push_back(Q);
+  return ans;
 }
 
 double estimate(vector<double> const& e)
 {
-	double Q;
+  double Q;
 
-	Q = e[0];
-	for (unsigned int i = 1; i < e.size(); i++)
-	{
-		Q += e[i];
-	}
-	return Q;
+  Q = e[0];
+  for (unsigned int i = 1; i < e.size(); i++)
+    {
+      Q += e[i];
+    }
+  return Q;
 }
