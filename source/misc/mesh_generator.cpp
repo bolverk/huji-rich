@@ -271,29 +271,34 @@ vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,double ym
   return res;
 }
 
-vector<Vector2D> CirclePointsRmax_a(int PointNum,double Rmin,double Rmax,
-				    double xc,double yc,double xmax,double ymax,double xmin,double ymin,
+vector<Vector2D> CirclePointsRmax_a(int PointNum,
+				    double Rmin,
+				    double Rmax,
+				    double xc,
+				    double yc,
+				    double xmax,
+				    double ymax,
+				    double xmin,
+				    double ymin,
 				    double alpha)
 {
-  double N0=sqrt(PointNum*4*M_PI*(alpha+1)/(pow(Rmax,2*(alpha+1))-
-					    pow(Rmin,2*(alpha+1))));
-  int Nr=int(floor((pow(Rmax,alpha+1)-pow(Rmin,alpha+1))*N0/(2*M_PI*(alpha+1))));
-  double dphi;
-  int Nphi;
-  Vector2D pos;
+  const double N0 = sqrt(PointNum*4*M_PI*(alpha+1)/
+			 (pow(Rmax,2*(alpha+1))-
+			  pow(Rmin,2*(alpha+1))));
+  const int Nr = int(floor((pow(Rmax,alpha+1)-
+			    pow(Rmin,alpha+1))*N0/(2*M_PI*(alpha+1))));
   vector<Vector2D> res;
-  double r;
   for(int i=0;i<Nr;++i)
     {
-      r=pow(2*M_PI*i*(alpha+1)/N0+pow(Rmin,alpha+1),1.0/(alpha+1));
-      Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
-      dphi=2*M_PI/Nphi;
+      const double r=pow(2*M_PI*i*(alpha+1)/N0+
+			 pow(Rmin,alpha+1),1.0/(alpha+1));
+      const int Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
+      const double dphi=2*M_PI/Nphi;
       for(int j=0;j<Nphi;++j)
 	{
-	  pos.Set(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
-	  if(pos.x<xmax&&pos.x>xmin)
-	    if(pos.y<ymax&&pos.y>ymin)
-	      res.push_back(pos);
+	  const Vector2D pos(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
+	  if(pos.x<xmax&&pos.x>xmin && pos.y<ymax&&pos.y>ymin)
+	    res.push_back(pos);
 	}
     }
   return res;
