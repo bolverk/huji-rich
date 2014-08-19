@@ -2187,12 +2187,11 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
   copy(cortemp.begin(),cortemp.end(),cor.begin()+Npoints+n);
   cortemp.clear();
   // Fix the boundary point refrences if needed
-  bool mpion=false;
-#ifdef RICH_MPI
-  mpion=true;
-#endif
-  if(PeriodicBoundary||mpion)
+
+#ifndef RICH_MPI
+  if(PeriodicBoundary)
     {
+#endif
       for(int i=0;i<(int)V.edges.size();++i)
 	{
 	  int temp_neigh=V.edges[i].neighbors.first;
@@ -2205,7 +2204,9 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	  if(temp_neigh>Npoints)
 	    V.edges[i].neighbors.second = temp_neigh+n;
 	}
+#ifndef RICH_MPI
     }
+#endif
   // Update the lengths
   V.Tri->Changelength(Npoints+n);
   V.Tri->ChangeOlength(Npoints+n);
