@@ -6,8 +6,7 @@ namespace
 {
   double GetLoad(Tessellation const& tess)
   {
-    int ws;
-    MPI_Comm_size(MPI_COMM_WORLD,&ws);
+    const int ws = get_mpi_size();
     int n=tess.GetPointNo();
     int result=10;
     int total=n;

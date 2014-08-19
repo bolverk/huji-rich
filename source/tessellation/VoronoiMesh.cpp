@@ -1065,8 +1065,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 {
 #ifdef RICH_MPI
   NGhostReceived.clear();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   obc=outer;
   vector<int> cedges;
   ConvexEdges(cedges,&vproc,rank);
@@ -1113,8 +1112,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
   GetCorners(toduplicate,corners);
   GetToTest(toduplicate,totest);
 
-  int worldsize;
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int worldsize = get_mpi_size();
   vector<int> procorder=GetProcOrder(rank,worldsize);
 
   vector<int> proclist(vproc.GetCellEdges(rank).size());
@@ -1487,8 +1485,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
   GhostProcs.clear();
   selfindex.clear();
   NGhostReceived.clear();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   vector<int> cedges;
   ConvexEdges(cedges,&vproc,rank);
   cell_edges.clear();
@@ -1548,8 +1545,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
   GetCorners(toduplicate,corners);
   GetToTest(toduplicate,totest);
 
-  int worldsize;
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int worldsize = get_mpi_size();
   vector<int> procorder=GetProcOrder(rank,worldsize);
   vector<Edge> bedge=GetBoxEdges();
   vector<vector<int> > boxduplicate;
@@ -2975,8 +2971,7 @@ void VoronoiMesh::NonSendBoundary(vector<int> &
   vector<vector<int> > newtotest;
   int n=(int)proclist.size();
   int nproc=v.GetPointNo();
-  int rank=0;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   for(int i=0;i<n;++i)
     {
       if(proclist[i]==-1)
@@ -3016,8 +3011,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 #ifdef MPI_VERSION
   int n=(int)procorder.size();
   int nlist=(int)proclist.size();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   int index;
   for(int i=0;i<n;++i)
     {
@@ -3107,8 +3101,7 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 #ifdef MPI_VERSION
   int n=(int)procorder.size();
   int nlist=(int)proclist.size();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   int index;
   for(int i=0;i<n;++i)
     {
@@ -3247,8 +3240,7 @@ void VoronoiMesh::NonSendCorners(vector<int> &
   vector<vector<int> > newdata;
   int n=(int)proclist.size();
   int nproc=v.GetPointNo();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   for(int i=0;i<n;++i)
     {
       if(proclist[i]<nproc)
@@ -3360,9 +3352,8 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 					 vector<vector<vector<int> > > &BoundaryNeigh)
 {
 #ifdef RICH_MPI
-  int rank,ws;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&ws);
+  const int rank = get_mpi_rank();
+  const int ws = get_mpi_size();
   vector<int> procorder=GetProcOrder(rank,ws);
 
   int npoints=GetPointNo();
