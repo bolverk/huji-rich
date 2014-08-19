@@ -551,6 +551,8 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
 	_tessellation.RemoveCells(ToRemove,VolIndex,dv);
+	n=lower_bound(ToRemove.begin(),ToRemove.end(),(int)OldVol.size())-
+		ToRemove.begin();
 	// gather all the relevant neighbors
 	vector<Primitive> MPIcells;
 	vector<vector<double> > MPItracer;
@@ -561,7 +563,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	sort(TotalNeigh.begin(),TotalNeigh.end());
 	TotalNeigh=unique(TotalNeigh);
 #ifdef RICH_MPI
-
+	int rank=get_mpi_rank();
 	vector<vector<int> > MPI_AMR_Send; // the indeces in the Nghostpoints that I want to recv hydro from other procs
 	CreateGetPrimitiveList(ToRemove,_tessellation.GetGhostIndeces(),n,MPI_AMR_Send);
 	vector<int> ToRemoveReduced;
@@ -615,6 +617,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		}
 	}
 	// Update the primitives
+	sort(ToRemove.begin(),ToRemove.end());
 	for(int i=0;i<Nneigh;++i)
 	{
 		int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[i])-
