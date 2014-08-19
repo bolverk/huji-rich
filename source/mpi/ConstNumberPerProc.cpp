@@ -11,8 +11,7 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 {
 #ifdef RICH_MPI
 	int nproc=tproc.GetPointNo();
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	const int rank = get_mpi_rank();
 	vector<double> R(nproc);
 	double dx=0;
 	double dy=0;

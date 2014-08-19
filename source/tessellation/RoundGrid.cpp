@@ -14,15 +14,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	double pi= 3.141592653;
 	double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
-	//	vector<Vector2D> cpoints;
-	/*#ifdef RICH_MPI
-	int rank;
-	if(tproc!=0)
-	{
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	ConvexHull(cpoints,tproc,rank);
-	}
-	#endif*/
+
 	// Copy the points
 	vector<Vector2D> res(N);
 	for(int i=0;i<N;++i)
