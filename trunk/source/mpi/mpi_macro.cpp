@@ -1308,10 +1308,9 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 			// Find the relevant points
 			vector<int> temp(SentPoints[i]);
 			sort(temp.begin(),temp.end());
-			int index;
 			for(int j=0;j<nbound;++j)
 			{
-				index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
+			  const int index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
 					-temp.begin();
 				if(index<(int)temp.size())
 					tosend[i].push_back(index);
