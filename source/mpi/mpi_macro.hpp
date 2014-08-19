@@ -166,7 +166,6 @@ vector<int> GetProcOrder(int rank,int worldsize);
 /*!
 \brief Sends and receives the hydro for ghost cells
 \param cells The primitive cells
-\param tracers The intensive tracers
 \param customevolutions The custom evolution indeces
 \param sentcells The indeces of the cells to send
 \param sentprocs The ids of the cpus to talk with
@@ -174,10 +173,22 @@ vector<int> GetProcOrder(int rank,int worldsize);
 \param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
 \param totalpoints The total number of points in teh tessellation (including ghost)
 */
-void SendRecvHydro(vector<Primitive> &cells,vector<vector<double> > &tracers,
+void SendRecvHydro(vector<Primitive> &cells,
 	vector<size_t> &customevolutions,vector<vector<int> >const& sentcells,
 	vector<int>const& sentprocs,EquationOfState const& eos,
 	vector<vector<int> > const& Nghost,int totalpoints);
+/*!
+\brief Sends and receives the tracers for ghost cells
+\param tracers The intensive tracers
+\param sentcells The indeces of the cells to send
+\param sentprocs The ids of the cpus to talk with
+\param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
+\param totalpoints The total number of points in teh tessellation (including ghost)
+*/
+void SendRecvTracers(vector<vector<double> > &tracers,
+	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
+	vector<vector<int> > const& Nghost,int totalpoints);
+
 /*!
 \brief Sends and receives the extensive hydro, typically used for excahgning real (not ghost) points that are transfered between cpus
 \param cons The extensive cells
