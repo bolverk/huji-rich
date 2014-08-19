@@ -196,19 +196,18 @@ vector<Vector2D> CirclePointsRmax_2(int PointNum,double Rmin,double Rmax,
 vector<Vector2D> CirclePointsRmax(int PointNum,double Rmin,double Rmax,
 				  double xc,double yc)
 {
-  double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
-  int Nr=int((Rmax-Rmin)/A);
-  double dr=(Rmax-Rmin)/Nr;
-  Vector2D pos;
+  const double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
+  const int Nr=int((Rmax-Rmin)/A);
+  const double dr=(Rmax-Rmin)/Nr;
   vector<Vector2D> res;
   for(int i=0;i<Nr;++i)
     {
-      double r=Rmin+i*dr;
-      int Nphi=int(2*M_PI*r/A);
-      double dphi=A/r;
+      const double r=Rmin+i*dr;
+      const int Nphi=int(2*M_PI*r/A);
+      const double dphi=A/r;
       for(int j=0;j<Nphi;++j)
 	{
-	  pos.Set(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
+	  const Vector2D pos(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
 	  res.push_back(pos);
 	}
     }
