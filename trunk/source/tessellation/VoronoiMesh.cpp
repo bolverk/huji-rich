@@ -3012,10 +3012,9 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
   int n=(int)procorder.size();
   int nlist=(int)proclist.size();
   const int rank = get_mpi_rank();
-  int index;
   for(int i=0;i<n;++i)
     {
-      index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
+      const int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
       // Do we talk with this processor?
       if(index<nlist)
 	{
@@ -3102,10 +3101,9 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
   int n=(int)procorder.size();
   int nlist=(int)proclist.size();
   const int rank = get_mpi_rank();
-  int index;
   for(int i=0;i<n;++i)
     {
-      index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
+      const int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
       // Do we talk with this processor?
       if(index<nlist)
 	{
