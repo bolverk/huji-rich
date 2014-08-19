@@ -1767,7 +1767,6 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
       vector<int> real_neigh; //Keeps track of the real points I copied
       real_neigh.reserve(10);
       vector<int> AllPoints;
-      vector<int> mpi_real_neigh;
 #ifdef RICH_MPI
       if(i>=ToRemove.size())
 	{
@@ -1796,7 +1795,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	}
       AllPoints.insert(AllPoints.end(),real_neigh.begin(),real_neigh.end());
 #ifdef RICH_MPI
-      mpi_real_neigh=AllPoints;
+      vector<int> mpi_real_neigh=AllPoints;
       sort(mpi_real_neigh.begin(),mpi_real_neigh.end());
       mpi_real_neigh=unique(mpi_real_neigh);
 #endif
