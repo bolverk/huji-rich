@@ -8,8 +8,7 @@ namespace
   // result it : minx, maxx, miny, maxy
   boost::array<double,4> FindMaxEdges(Tessellation const& tess)
   {
-    int rank=0;
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+    const int rank = get_mpi_rank();
     const vector<int> edge_index=tess.GetCellEdges(rank);
     const int n=(int)edge_index.size();
     boost::array<double,4> res;
@@ -113,8 +112,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 {
   const double Area=(upperright.x-lowerleft.x)*(upperright.y-lowerleft.y);
   const boost::array<double,4> tessEdges=FindMaxEdges(tess);
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   const double myarea=tess.GetVolume(rank);
   int mypoints=(int)floor(npoints*myarea/Area+0.5);
   vector<Vector2D> res;
@@ -149,8 +147,7 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
   const int nx0=(int)floor((tessEdges[0]-lowerleft.x)/widthx+0.5);
   const int ny0=(int)floor((tessEdges[2]-lowerleft.y)/widthy+0.5);
   Vector2D point;
-  int rank=0;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  int rank=get_mpi_rank();
   vector<Vector2D> cpoints;
   ConvexHull(cpoints,&tess,rank);
   for(int i=0;i<nx;i++)
@@ -176,8 +173,7 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
   double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
   int Nr=int((Rmax-Rmin)/A);
   double dr=(Rmax-Rmin)/Nr;
-  int rank=0;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank= get_mpi_rank();
   vector<Vector2D> cpoints;
   ConvexHull(cpoints,&tess,rank);
   boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
@@ -214,8 +210,7 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
   int Nphi;
   Vector2D pos;
   vector<Vector2D> res;
-  int rank=0;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   vector<Vector2D> cpoints;
   ConvexHull(cpoints,&tess,rank);
   boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
@@ -249,8 +244,7 @@ vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 				       Vector2D const& center,Tessellation const& tproc)
 {
   vector<Vector2D> res;
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   vector<Vector2D> cpoints;
   ConvexHull(cpoints,&tproc,rank);
   for(int i=0;i<point_number;++i)
