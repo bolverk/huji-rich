@@ -1452,11 +1452,19 @@ namespace
 	}
 }
 
-void GetAMRExtensive(vector<Primitive> &rescells,vector<vector<double> > &restracer,
-	vector<Primitive> const& cells,vector<vector<double> > 
-	const& tracers,bool traceractive,vector<vector<int> > &ToSend,vector<int> const& 
-	proclist,EquationOfState const& eos,vector<vector<int> > const& DuplicatedPoints,int npoints,
-	vector<vector<int> > const& Nghost,vector<int> const& ToRemove)
+void GetAMRExtensive(vector<Primitive> &rescells,
+		     vector<vector<double> > &restracer,
+		     vector<Primitive> const& cells,
+		     vector<vector<double> > 
+		     const& tracers,
+		     bool traceractive,
+		     vector<vector<int> > &ToSend,
+		     vector<int> const& proclist,
+		     EquationOfState const& eos,
+		     vector<vector<int> > const& DuplicatedPoints,
+		     int npoints,
+		     vector<vector<int> > const& Nghost,
+		     vector<int> const& ToRemove)
 {
 	// ToSend is the index in the Nghost
 	// Send to other procs the list of points

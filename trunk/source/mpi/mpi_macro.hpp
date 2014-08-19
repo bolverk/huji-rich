@@ -382,7 +382,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 /*!
 \brief Send/Recv hydro for the boundary cells in AMR removal
 \param rescells The primitives of the ghost cells, given as output
-\param restracers The tracers of the ghost cells, given as output
+\param restracer The tracers of the ghost cells, given as output
 \param cells The primitives cells
 \param tracers The intensive tracers cells
 \param traceractive Flag if there are tracers
@@ -393,11 +393,18 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 \param Nghost The received ghost indeces
 \param ToRemove The list of points to remove
 */
-void GetAMRExtensive(vector<Primitive> &rescells,vector<vector<double> > &restracer,
-	vector<Primitive> const& cells,vector<vector<double> > const& tracers,
-	bool traceractive,vector<vector<int> > &ToSend,vector<int> const& 
-	proclist,EquationOfState const& eos,vector<vector<int> > const& DuplicatedPoints,int npoints,
-	vector<vector<int> > const& Nghost,vector<int> const& ToRemove);
+void GetAMRExtensive(vector<Primitive> &rescells,
+		     vector<vector<double> > &restracer,
+		     vector<Primitive> const& cells,
+		     vector<vector<double> > const& tracers,
+		     bool traceractive,
+		     vector<vector<int> > &ToSend,
+		     vector<int> const& proclist,
+		     EquationOfState const& eos,
+		     vector<vector<int> > const& DuplicatedPoints,
+		     int npoints,
+		     vector<vector<int> > const& Nghost,
+		     vector<int> const& ToRemove);
 
 #endif
 
