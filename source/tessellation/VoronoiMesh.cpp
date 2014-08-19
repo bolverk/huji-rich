@@ -1124,7 +1124,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	NonSendBoundary(proclist,toduplicate,vproc,totest,cell_edges);
 	NonSendCorners(cornerproc,corners,vproc);
 
-	vector<vector<int> > todup2,totest2;
+	vector<vector<int> > todup2,totest2,org2;
 	vector<int> proclist2;
 	int ndup=(int)toduplicate.size();
 	for(int i=0;i<ndup;++i)
@@ -1134,11 +1134,13 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 			todup2.push_back(toduplicate[i]);
 			totest2.push_back(totest[i]);
 			proclist2.push_back(proclist[i]);
+			org2.push_back(OrgCorner[i]);
 		}
 	}
 	toduplicate=todup2;
 	totest=totest2;
 	proclist=proclist2;
+	OrgCorner=org2;
 
 	RemoveDuplicateCorners(cornerproc,corners,proclist,toduplicate);
 	Nextra=Tri->GetCorSize()-Tri->GetOriginalLength();
@@ -1551,7 +1553,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	// Remove box boundaries from to duplicate
 	int ndup=(int)toduplicate.size();
 	int counter=0;
-	vector<vector<int> > todup2,totest2;
+	vector<vector<int> > todup2,totest2,org2;
 	vector<int> proclist2;
 	for(int i=0;i<ndup;++i)
 	{
@@ -1560,11 +1562,13 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 			todup2.push_back(toduplicate[i]);
 			totest2.push_back(totest[i]);
 			proclist2.push_back(proclist[i]);
+			org2.push_back(OrgCorner[i]);
 		}
 	}
 	toduplicate=todup2;
 	totest=totest2;
 	proclist=proclist2;
+	OrgCorner=org2;
 	for(int i=0;i<4;++i)
 		RigidBoundaryPoints(boxduplicate[i],bedge[i]);
 
@@ -1718,6 +1722,23 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	int rank=get_mpi_rank();
 	vector<vector<int> > BoundaryRemove;
 	vector<vector<vector<int> > > BoundaryNeigh;
+	// Get rid of corner points
+#ifdef RICH_MPI
+	vector<int> toremove2;
+	for(int i=0;i<(int)V.OrgCorner.size();++i)
+	{
+		if(V.OrgCorner[i].empty())
+			continue;
+		for(int j=0;j<(int)ToRemove.size();++j)
+		{
+			if(binary_search(V.OrgCorner[i].begin(),V.OrgCorner[i].end(),ToRemove[j]))
+				toremove2.push_back(ToRemove[j]);
+		}
+	}
+	sort(toremove2.begin(),toremove2.end());
+	toremove2=unique(toremove2);
+	ToRemove=RemoveList(ToRemove,toremove2);
+#endif
 	// BoundaryRemove is the list per proc what points are removed given by their indeces in the sent vector
 	// BoundaryNeigh, for each point in boundary remove, what are the indeces in sentvector of the local neighbors
 	V.FindBoundaryRemoveSend(ToRemove,BoundaryRemove,BoundaryNeigh);
@@ -1748,7 +1769,10 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		vector<int> mpi_real_neigh;
 #ifdef RICH_MPI
 		if(i>=ToRemove.size())
+		{
 			real_neigh=LocalNeighbors[i-(int)ToRemove.size()];
+			AllPoints=GhostNeighbors[i-(int)ToRemove.size()];
+		}
 #endif
 		if(i<ToRemove.size())
 		{
@@ -1787,9 +1811,9 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			}
 		}
 #ifdef RICH_MPI
-		if(i>=ToRemove.size()) // recheck here
-			AllPoints.insert(AllPoints.end(),GhostNeighbors[i-(int)ToRemove.size()].begin(),
-			GhostNeighbors[i-(int)ToRemove.size()].end());
+//		if(i>=ToRemove.size()) // recheck here
+	//		AllPoints.insert(AllPoints.end(),GhostNeighbors[i-(int)ToRemove.size()].begin(),
+	//		GhostNeighbors[i-(int)ToRemove.size()].end());
 #endif
 		// save old volume
 		vector<double> dv(real_neigh.size());
@@ -1806,17 +1830,18 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		AllPoints=RemoveList(AllPoints,real_neigh);
 #endif
 #ifdef RICH_MPI
+			AllPoints.insert(AllPoints.begin(),mpi_real_neigh.begin(),mpi_real_neigh.end());
+#else
+		AllPoints.insert(AllPoints.begin(),real_neigh.begin(),real_neigh.end());
+#endif
+#ifdef RICH_MPI
 		vector<int> remtemp;
 		if(i>=ToRemove.size())
 		{
 			remtemp.push_back(GhostNeighbors[i-(int)ToRemove.size()][0]);
 			AllPoints=RemoveList(AllPoints,remtemp);
+			mpi_real_neigh=RemoveList(mpi_real_neigh,remtemp);
 		}
-#endif
-#ifdef RICH_MPI
-			AllPoints.insert(AllPoints.begin(),mpi_real_neigh.begin(),mpi_real_neigh.end());
-#else
-		AllPoints.insert(AllPoints.begin(),real_neigh.begin(),real_neigh.end());
 #endif
 		neighcor.reserve(AllPoints.size());
 		for(size_t j=0;j<AllPoints.size();++j)
@@ -1827,8 +1852,9 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		// save the volume change
 		for(size_t j=0;j<real_neigh.size();++j)
 		{
-			dv[(int)j]=(Vlocal.GetVolume((int)j)-dv[(int)j]);
-			if(dv[(int)j]<0)
+			double vtemp=Vlocal.GetVolume((int)j);
+			dv[(int)j]=(vtemp-dv[(int)j]);
+			if(dv[(int)j]<(-vtemp*1e-6))
 			{
 				UniversalError eo("Negative volume difference in Remove cells");
 				throw eo;
@@ -2731,6 +2757,8 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 	// copied should be sorted already
 	int nsides=(int)copied.size();
 	result.clear();
+	OrgCorner.clear();
+	OrgCorner.resize(nsides);
 	result.resize(nsides);
 	vector<vector<int> > toadd(nsides);
 	for(int i=0;i<nsides;++i)
@@ -2747,6 +2775,11 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				temp=AddPointsAlongEdge(copied[i][j],copied,i);
 				toadd[(i+1)%nsides].insert(toadd[(i+1)%nsides].end(),temp.begin(),
 					temp.end());
+				temp=GetNeighbors(copied[i][j]);
+				for(vector<int>::iterator it=temp.begin();it!=temp.end();++it)
+					if(*it<GetPointNo()&&*it>-1)
+						OrgCorner[i].push_back(*it);
+				OrgCorner[i].push_back(copied[i][j]);
 			}
 			if(binary_search(copied[(i-1+nsides)%nsides].begin(),copied[(i-1+nsides)%nsides].end(),
 				copied[i][j]))
@@ -2758,6 +2791,11 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				temp=AddPointsAlongEdge(copied[i][j],copied,i);
 				toadd[(i-1+nsides)%nsides].insert(toadd[(i-1+nsides)%nsides].end(),
 					temp.begin(),temp.end());
+				temp=GetNeighbors(copied[i][j]);
+				for(vector<int>::iterator it=temp.begin();it!=temp.end();++it)
+					if(*it<GetPointNo()&&*it>-1)
+						OrgCorner[(i-1+nsides)%nsides].push_back(*it);
+				OrgCorner[(i-1+nsides)%nsides].push_back(copied[i][j]);
 			}
 		}
 	}
@@ -2768,6 +2806,11 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 		copied[i]=unique(copied[i]);
 		sort(result[i].begin(),result[i].end());
 		result[i]=unique(result[i]);
+		if(!OrgCorner[i].empty())
+		{
+			sort(OrgCorner[i].begin(),OrgCorner[i].end());
+			OrgCorner[i]=unique(OrgCorner[i]);
+		}
 	}
 }
 
@@ -3312,6 +3355,11 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 	vector<vector<vector<int> > > &BoundaryNeigh)
 {
 #ifdef RICH_MPI
+	int rank,ws;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	MPI_Comm_size(MPI_COMM_WORLD,&ws);
+	vector<int> procorder=GetProcOrder(rank,ws);
+
 	int npoints=GetPointNo();
 	int nremove=(int)ToRemove.size();
 	int nprocs=(int)GhostProcs.size();
@@ -3392,19 +3440,14 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 								}
 							}
 							BoundaryNeigh[j].push_back(temp);
+							break;
 						}
-						break;
 					}
 				}
 				break;
 			}
 		}
 	}
-	
-	int rank,ws;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	MPI_Comm_size(MPI_COMM_WORLD,&ws);
-	vector<int> procorder=GetProcOrder(rank,ws);
 	SendRecvRemove(procorder,GhostProcs,NewSend);
 #endif
 }

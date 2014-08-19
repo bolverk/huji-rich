@@ -218,6 +218,7 @@ private:
 	vector<vector<int> > SentPoints;
 	vector<int> selfindex;
 	vector<vector<int> > NGhostReceived;
+	vector<vector<int> > OrgCorner;
 	int Nextra;
 
 	Vector2D get_center(int facet);
