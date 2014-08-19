@@ -3,86 +3,88 @@
 
 namespace
 {
-	void SendRecvHydro(vector<int> const& sentprocs,vector<vector<int> > const&
-		sentcells,vector<Primitive> const& cells,vector<vector<double> > const& 
-		tracers,bool traceractive,EquationOfState const& eos,vector<vector<Primitive> > 
-		&padd,vector<vector<vector<double> > > &tadd)
-	{
-		int nlist=(int)sentprocs.size();
-		// Talk with other procs
-		int rank,worldsize;
-		MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-		MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
-		const vector<int> procorder=GetProcOrder(rank,worldsize);
-		int n=worldsize-1;
-		padd.resize(nlist);
-		tadd.resize(nlist);
-		// Send the data
-		for(int i=0;i<n;++i)
-		{
-			int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-				-sentprocs.begin();
-			if(index<nlist)
-			{
-				if(rank<procorder[i])
-				{
-					vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-					MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-					MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);	
-					if(traceractive)
-					{
-						vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-						MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-						MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-							(int)tracers[0].size());
-					}
-				}
-				else
-				{
-					MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
-					vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-					MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-					if(traceractive)
-					{
-						MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-							(int)tracers[0].size());
-						vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-						MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-					}
-				}
-			}
-		}
-	}
+  void SendRecvHydro(vector<int> const& sentprocs,
+		     vector<vector<int> > const&
+		     sentcells,vector<Primitive> const& cells,
+		     vector<vector<double> > const& tracers,
+		     bool traceractive,
+		     EquationOfState const& eos,
+		     vector<vector<Primitive> > &padd,
+		     vector<vector<vector<double> > > &tadd)
+  {
+    int nlist=(int)sentprocs.size();
+    const int rank = get_mpi_rank();
+    const int worldsize = get_mpi_size();
+    const vector<int> procorder=GetProcOrder(rank,worldsize);
+    int n=worldsize-1;
+    padd.resize(nlist);
+    tadd.resize(nlist);
+    // Send the data
+    for(int i=0;i<n;++i)
+      {
+	int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+	  -sentprocs.begin();
+	if(index<nlist)
+	  {
+	    if(rank<procorder[i])
+	      {
+		vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
+		MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
+		MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);	
+		if(traceractive)
+		  {
+		    vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
+		    MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
+		    MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
+					 (int)tracers[0].size());
+		  }
+	      }
+	    else
+	      {
+		MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
+		vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
+		MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
+		if(traceractive)
+		  {
+		    MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
+					 (int)tracers[0].size());
+		    vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
+		    MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
+		  }
+	      }
+	  }
+      }
+  }
 
-	void GradVectorToDouble(vector<ReducedPrimitiveGradient2D> const& vec,
-		vector<double> &res)
-	{
-		int n=(int)vec.size();
-		int gradlength=8;
-		if(!vec[0].tracers.empty())
-			gradlength+=vec[0].tracers.size();
-		if(n*gradlength!=(int)res.size())
-		{
-			UniversalError eo("Sizes do not match in GradVectorToDouble");
-			throw eo;
-		}
-		for(int i=0;i<n;++i)
-		{
-			res[gradlength*i]=vec[i].density.x;
-			res[gradlength*i+1]=vec[i].density.y;
-			res[gradlength*i+2]=vec[i].pressure.x;
-			res[gradlength*i+3]=vec[i].pressure.y;
-			res[gradlength*i+4]=vec[i].xvelocity.x;
-			res[gradlength*i+5]=vec[i].xvelocity.y;
-			res[gradlength*i+6]=vec[i].yvelocity.x;
-			res[gradlength*i+7]=vec[i].yvelocity.y;
-			for(int j=0;j<(gradlength-8)/2;++j)
-			{
-				res[gradlength*i+j*2+8]=vec[i].tracers[j].x;
-				res[gradlength*i+j*2+9]=vec[i].tracers[j].y;
-			}
-		}
-	}
+  void GradVectorToDouble(vector<ReducedPrimitiveGradient2D> const& vec,
+			  vector<double> &res)
+  {
+    int n=(int)vec.size();
+    int gradlength=8;
+    if(!vec[0].tracers.empty())
+      gradlength+=vec[0].tracers.size();
+    if(n*gradlength!=(int)res.size())
+      {
+	UniversalError eo("Sizes do not match in GradVectorToDouble");
+	throw eo;
+      }
+    for(int i=0;i<n;++i)
+      {
+	res[gradlength*i]=vec[i].density.x;
+	res[gradlength*i+1]=vec[i].density.y;
+	res[gradlength*i+2]=vec[i].pressure.x;
+	res[gradlength*i+3]=vec[i].pressure.y;
+	res[gradlength*i+4]=vec[i].xvelocity.x;
+	res[gradlength*i+5]=vec[i].xvelocity.y;
+	res[gradlength*i+6]=vec[i].yvelocity.x;
+	res[gradlength*i+7]=vec[i].yvelocity.y;
+	for(int j=0;j<(gradlength-8)/2;++j)
+	  {
+	    res[gradlength*i+j*2+8]=vec[i].tracers[j].x;
+	    res[gradlength*i+j*2+9]=vec[i].tracers[j].y;
+	  }
+      }
+  }
 
   void DoubleVectorToGrad(vector<ReducedPrimitiveGradient2D> &vec,
 			  vector<double> const& temp,int gradlength)
@@ -395,8 +397,7 @@ vector<Vector2D> MPI_MassSendRecvVectorVector2D
   vector<Vector2D> res;
   int n=(int)procorder.size();
   int nlist=(int)proclist.size();
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  const int rank = get_mpi_rank();
   for(int i=0;i<n;++i)
     {
       int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
@@ -511,9 +512,8 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
   ctoadd.clear();
 
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
 
   int n=worldsize-1;
@@ -628,9 +628,8 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
   btoadd.clear();
 
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
 
   int n=worldsize-1;
@@ -713,9 +712,8 @@ void SendRecvVectorDouble(vector<double> const& vec,
   toadd.clear();
 
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
 
   int n=worldsize-1;
@@ -799,9 +797,8 @@ void SendRecvOldVector2D(vector<Vector2D> const& points,
   toadd.clear();
 
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
 
   int n=worldsize-1;
@@ -859,9 +856,8 @@ void SendRecvHydro(vector<Primitive> &cells,vector<vector<double> > &tracers,
     traceractive=!tracers[0].empty();
   int nlist=(int)sentprocs.size();
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
   int n=worldsize-1;
   vector<vector<Primitive> > padd(nlist);
@@ -885,82 +881,82 @@ void SendRecvHydro(vector<Primitive> &cells,vector<vector<double> > &tracers,
 			 MPI_COMM_WORLD);
 	      else
 		{
-			if(rank<procorder[i])
+		  if(rank<procorder[i])
+		    {
+		      vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
+		      MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
+		      MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
+		      vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
+		      if(!ctemp.empty())
+			MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
+				 MPI_COMM_WORLD);
+		      else
 			{
-				vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-				MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-				MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
-				vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
-				if(!ctemp.empty())
-					MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
-					MPI_COMM_WORLD);
-				else
-				{
-					size_t temp;
-					MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
-				}
-				int count;
-				MPI_Status stat;
-				MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
-				MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-				if(stat.MPI_TAG==0)
-				{
-					cadd[index].resize(count);
-					MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				else
-				{
-					size_t temp;
-					MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
-						MPI_STATUS_IGNORE);
-				}
-				if(traceractive)
-				{
-					vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-					MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-					MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-						(int)tracers[0].size());
-				}
+			  size_t temp;
+			  MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
 			}
-			else
+		      int count;
+		      MPI_Status stat;
+		      MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
+		      MPI_Get_count(&stat,MPI_UNSIGNED,&count);
+		      if(stat.MPI_TAG==0)
 			{
-				MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
-				vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-				MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-				int count;
-				MPI_Status stat;
-				MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
-				MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-				if(stat.MPI_TAG==0)
-				{
-					cadd[index].resize(count);
-					MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				else
-				{
-					size_t temp;
-					MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
-						MPI_STATUS_IGNORE);
-				}
-				vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
-				if(ctemp.empty())
-				{
-					size_t temp;
-					MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
-				}
-				else
-					MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
-					MPI_COMM_WORLD);
-				if(traceractive)
-				{
-					MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-						(int)tracers[0].size());
-					vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-					MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-				}
+			  cadd[index].resize(count);
+			  MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
+				   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 			}
+		      else
+			{
+			  size_t temp;
+			  MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
+				   MPI_STATUS_IGNORE);
+			}
+		      if(traceractive)
+			{
+			  vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
+			  MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
+			  MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
+					       (int)tracers[0].size());
+			}
+		    }
+		  else
+		    {
+		      MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
+		      vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
+		      MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
+		      int count;
+		      MPI_Status stat;
+		      MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
+		      MPI_Get_count(&stat,MPI_UNSIGNED,&count);
+		      if(stat.MPI_TAG==0)
+			{
+			  cadd[index].resize(count);
+			  MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
+				   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+			}
+		      else
+			{
+			  size_t temp;
+			  MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
+				   MPI_STATUS_IGNORE);
+			}
+		      vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
+		      if(ctemp.empty())
+			{
+			  size_t temp;
+			  MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
+			}
+		      else
+			MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
+				 MPI_COMM_WORLD);
+		      if(traceractive)
+			{
+			  MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
+					       (int)tracers[0].size());
+			  vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
+			  MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
+			}
+		    }
 		}
 	      int count;
 	      MPI_Status stat;
@@ -1063,33 +1059,33 @@ int MPI_SendVectorPrimitive(vector<Primitive> const& vec,int dest,int tag,
 void MPI_RecvVectorPrimitive(vector<Primitive> &vec,int dest,int tag,
 			     MPI_Comm comm,EquationOfState const& eos)
 {
-	vec.clear();
-	MPI_Status status;
-	MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
-	if(status.MPI_TAG==1)
-	{
-		double temp;
-		MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
-		return;
-	}
-	if(status.MPI_TAG!=tag)
-	{
-		UniversalError eo("recveived wrong tag in MPI_RecvVectorPrimitive");
-		throw eo;
-	}
-	int nrecv;
-	MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-	vector<double> temp(nrecv);
-	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
-	int ntotal=nrecv/4;
-	vec.reserve(ntotal);
-	for(int i=0;i<ntotal;++i)
-	{
-		Primitive ptemp(temp[4*i],temp[4*i+1],Vector2D(temp[4*i+2],temp[4*i+3]),0,0);
-		ptemp.Energy=eos.dp2e(ptemp.Density,ptemp.Pressure);
-		ptemp.SoundSpeed=eos.dp2c(ptemp.Density,ptemp.Pressure);
-		vec.push_back(ptemp);
-	}
+  vec.clear();
+  MPI_Status status;
+  MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
+  if(status.MPI_TAG==1)
+    {
+      double temp;
+      MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
+      return;
+    }
+  if(status.MPI_TAG!=tag)
+    {
+      UniversalError eo("recveived wrong tag in MPI_RecvVectorPrimitive");
+      throw eo;
+    }
+  int nrecv;
+  MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
+  vector<double> temp(nrecv);
+  MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
+  int ntotal=nrecv/4;
+  vec.reserve(ntotal);
+  for(int i=0;i<ntotal;++i)
+    {
+      Primitive ptemp(temp[4*i],temp[4*i+1],Vector2D(temp[4*i+2],temp[4*i+3]),0,0);
+      ptemp.Energy=eos.dp2e(ptemp.Density,ptemp.Pressure);
+      ptemp.SoundSpeed=eos.dp2c(ptemp.Density,ptemp.Pressure);
+      vec.push_back(ptemp);
+    }
 }
 
 int MPI_SendVectorTracer(vector<vector<double> > const& vec,int dest,int tag,
@@ -1114,32 +1110,32 @@ int MPI_SendVectorTracer(vector<vector<double> > const& vec,int dest,int tag,
 void MPI_RecvVectorTracer(vector<vector<double> > &vec,int dest,int tag,
 			  MPI_Comm comm,int ntracer)
 {
-	vec.clear();
-	int nrecv;
-	MPI_Status status;
-	MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
-	if(status.MPI_TAG==1)
-	{
-		double temp;
-		MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
-		return;
-	}
-	if(status.MPI_TAG!=tag)
-	{
-		UniversalError eo("recveived wrong tag in MPI_RecvVectorTracer");
-		throw eo;
-	}
-	MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-	vector<double> temp(nrecv);
-	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,MPI_ANY_TAG,comm,&status);
-	int length=nrecv/ntracer;
-	vec.resize(length);
-	for(int i=0;i<length;++i)
-	{
-		vec[i].resize(ntracer);
-		for(int j=0;j<ntracer;++j)
-			vec[i][j]=temp[ntracer*i+j];
-	}
+  vec.clear();
+  int nrecv;
+  MPI_Status status;
+  MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
+  if(status.MPI_TAG==1)
+    {
+      double temp;
+      MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
+      return;
+    }
+  if(status.MPI_TAG!=tag)
+    {
+      UniversalError eo("recveived wrong tag in MPI_RecvVectorTracer");
+      throw eo;
+    }
+  MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
+  vector<double> temp(nrecv);
+  MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,MPI_ANY_TAG,comm,&status);
+  int length=nrecv/ntracer;
+  vec.resize(length);
+  for(int i=0;i<length;++i)
+    {
+      vec[i].resize(ntracer);
+      for(int j=0;j<ntracer;++j)
+	vec[i][j]=temp[ntracer*i+j];
+    }
 }
 
 int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
@@ -1175,41 +1171,41 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
 void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
 			tag,MPI_Comm comm,int gradlength)
 {
-	MPI_Status status;
-	MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
-	if(status.MPI_TAG==1)
+  MPI_Status status;
+  MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
+  if(status.MPI_TAG==1)
+    {
+      double temp;
+      MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+      return;
+    }
+  if(status.MPI_TAG!=tag)
+    {
+      UniversalError eo("recveived wrong tag in MPI_RecvVectorGrad");
+      throw eo;
+    }
+  int ntotal;
+  MPI_Get_count(&status,MPI_DOUBLE,&ntotal);
+  vector<double> temp(ntotal);
+  MPI_Recv(&temp[0],ntotal,MPI_DOUBLE,dest,tag,comm,&status);
+  int n=ntotal/gradlength;
+  vec.resize(n);
+  for(int i=0;i<n;++i)
+    {
+      vec[i].density.x=temp[gradlength*i];
+      vec[i].density.y=temp[gradlength*i+1];
+      vec[i].pressure.x=temp[gradlength*i+2];
+      vec[i].pressure.y=temp[gradlength*i+3];
+      vec[i].xvelocity.x=temp[gradlength*i+4];
+      vec[i].xvelocity.y=temp[gradlength*i+5];
+      vec[i].yvelocity.x=temp[gradlength*i+6];
+      vec[i].yvelocity.y=temp[gradlength*i+7];
+      for(int j=0;j<(gradlength-8)/2;++j)
 	{
-	  double temp;
-	  MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-	  return;
+	  Vector2D vtemp(temp[gradlength*i+2*j+8],temp[gradlength*i+2*j+9]);
+	  vec[i].tracers.push_back(vtemp);
 	}
-	if(status.MPI_TAG!=tag)
-	{
-		UniversalError eo("recveived wrong tag in MPI_RecvVectorGrad");
-		throw eo;
-	}
-	int ntotal;
-	MPI_Get_count(&status,MPI_DOUBLE,&ntotal);
-	vector<double> temp(ntotal);
-	MPI_Recv(&temp[0],ntotal,MPI_DOUBLE,dest,tag,comm,&status);
-	int n=ntotal/gradlength;
-	vec.resize(n);
-	for(int i=0;i<n;++i)
-	{
-		vec[i].density.x=temp[gradlength*i];
-		vec[i].density.y=temp[gradlength*i+1];
-		vec[i].pressure.x=temp[gradlength*i+2];
-		vec[i].pressure.y=temp[gradlength*i+3];
-		vec[i].xvelocity.x=temp[gradlength*i+4];
-		vec[i].xvelocity.y=temp[gradlength*i+5];
-		vec[i].yvelocity.x=temp[gradlength*i+6];
-		vec[i].yvelocity.y=temp[gradlength*i+7];
-		for(int j=0;j<(gradlength-8)/2;++j)
-		{
-			Vector2D vtemp(temp[gradlength*i+2*j+8],temp[gradlength*i+2*j+9]);
-			vec[i].tracers.push_back(vtemp);
-		}
-	}
+    }
 }
 
 void SendRecvVelocity(vector<Vector2D> &vel,vector<vector<int> >const& sentcells,
@@ -1217,9 +1213,8 @@ void SendRecvVelocity(vector<Vector2D> &vel,vector<vector<int> >const& sentcells
 {
   int nlist=(int)sentprocs.size();
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
   int n=worldsize-1;
   vector<vector<Vector2D> > tadd(nlist);
@@ -1258,9 +1253,8 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
     return;
   int nlist=(int)sentprocs.size();
   // Talk with other procs
-  int rank,worldsize;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
   const vector<int> procorder=GetProcOrder(rank,worldsize);
   int n=worldsize-1;
   vector<vector<ReducedPrimitiveGradient2D> > tadd(nlist);
@@ -1316,32 +1310,32 @@ int MPI_SendVectorConserved(vector<Conserved> const& vec,int dest,int tag,
 void MPI_RecvVectorConserved(vector<Conserved> &vec,int dest,int tag,
 			     MPI_Comm comm)
 {
-	vec.clear();
-	MPI_Status status;
-	MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
-	if(status.MPI_TAG==1)
-	{
-		double temp;
-		MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
-		return;
-	}
-	if(status.MPI_TAG!=tag)
-	{
-		UniversalError eo("recveived wrong tag in MPI_RecvVectorConserved");
-		throw eo;
-	}
+  vec.clear();
+  MPI_Status status;
+  MPI_Probe(dest,MPI_ANY_TAG,comm,&status);
+  if(status.MPI_TAG==1)
+    {
+      double temp;
+      MPI_Recv(&temp,1,MPI_DOUBLE,dest,1,comm,&status);
+      return;
+    }
+  if(status.MPI_TAG!=tag)
+    {
+      UniversalError eo("recveived wrong tag in MPI_RecvVectorConserved");
+      throw eo;
+    }
 
-	int nrecv;
-	MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-	vector<double> temp(nrecv);
-	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
-	int ntotal=nrecv/4;
-	vec.reserve(ntotal);
-	for(int i=0;i<ntotal;++i)
-	{
-		Conserved ctemp(temp[4*i],Vector2D(temp[4*i+2],temp[4*i+3]),temp[4*i+1]);
-		vec.push_back(ctemp);
-	}
+  int nrecv;
+  MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
+  vector<double> temp(nrecv);
+  MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
+  int ntotal=nrecv/4;
+  vec.reserve(ntotal);
+  for(int i=0;i<ntotal;++i)
+    {
+      Conserved ctemp(temp[4*i],Vector2D(temp[4*i+2],temp[4*i+3]),temp[4*i+1]);
+      vec.push_back(ctemp);
+    }
 }
 
 void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int> 
@@ -1350,9 +1344,8 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 {
   int nprocs=(int)SentProcs.size();
   int nbound=(int)BoundaryPoints.size();
-  int rank,ws;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&ws);
+  const int rank = get_mpi_rank();
+  const int ws = get_mpi_size();
   vector<MPI_Status> status(nprocs);
   vector<MPI_Request> req(nprocs);
   vector<int> procorder=GetProcOrder(rank,ws);
@@ -1434,517 +1427,514 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 
 namespace
 {
-	// Nghost is the NghostIndex
-	// ghost is the index in cor of the ghost removed points
-	// Sentindex is the index of the proc we are dealing with
-	// returns all of the local neighboring points of the removed ghost point
-	vector<vector<int> > FindLocalNeighbors(vector<int> const& Nghost,vector<int>  &ghost,
-		int SentIndex,Tessellation const& tess)
-	{
-		vector<vector<int> > const& duplicated=tess.GetDuplicatedPoints();
-		vector<int> const& Sent=duplicated[SentIndex];
-		vector<int> real;
-		int np=tess.GetPointNo();
-		vector<int> index;
-		sort_index(ghost,index);
-		sort(ghost.begin(),ghost.end());
-		int nreal=(int)ghost.size();
-		vector<vector<int> > res(ghost.size());
-		for(int i=0;i<(int)Sent.size();++i)
-		{ //do i need to check from other procs??????
-			vector<int> neigh=tess.GetNeighbors(Sent[i]);
-			for(int j=0;j<(int)neigh.size();++j)
-			{
-				if(binary_search(ghost.begin(),ghost.end(),neigh[j]))
-				{
-					int index2=lower_bound(ghost.begin(),ghost.end(),neigh[j])-
-						ghost.begin();
-					res[index[index2]].push_back(Sent[i]);
-				}
-			}
-		}
-		for(int i=0;i<nreal;++i)
-		{
-			if(res[i].empty())
-			{
-				UniversalError eo("empty vector in FindLocalNeighbors");
-				throw eo;
-			}
-			sort(res[i].begin(),res[i].end());
-			res[i]=unique(res[i]);
-		}
-		return res;
-	}
+  // Nghost is the NghostIndex
+  // ghost is the index in cor of the ghost removed points
+  // Sentindex is the index of the proc we are dealing with
+  // returns all of the local neighboring points of the removed ghost point
+  vector<vector<int> > FindLocalNeighbors(vector<int> const& Nghost,vector<int>  &ghost,
+					  int SentIndex,Tessellation const& tess)
+  {
+    vector<vector<int> > const& duplicated=tess.GetDuplicatedPoints();
+    vector<int> const& Sent=duplicated[SentIndex];
+    vector<int> real;
+    int np=tess.GetPointNo();
+    vector<int> index;
+    sort_index(ghost,index);
+    sort(ghost.begin(),ghost.end());
+    int nreal=(int)ghost.size();
+    vector<vector<int> > res(ghost.size());
+    for(int i=0;i<(int)Sent.size();++i)
+      { //do i need to check from other procs??????
+	vector<int> neigh=tess.GetNeighbors(Sent[i]);
+	for(int j=0;j<(int)neigh.size();++j)
+	  {
+	    if(binary_search(ghost.begin(),ghost.end(),neigh[j]))
+	      {
+		int index2=lower_bound(ghost.begin(),ghost.end(),neigh[j])-
+		  ghost.begin();
+		res[index[index2]].push_back(Sent[i]);
+	      }
+	  }
+      }
+    for(int i=0;i<nreal;++i)
+      {
+	if(res[i].empty())
+	  {
+	    UniversalError eo("empty vector in FindLocalNeighbors");
+	    throw eo;
+	  }
+	sort(res[i].begin(),res[i].end());
+	res[i]=unique(res[i]);
+      }
+    return res;
+  }
 
-	// converts indeces to real point location
-	// BoundaryRemove is the list per proc what points are removed given by their indeces in the Nghost vector
-	// BoundaryNeigh, for each point in boundary remove, what are the indeces in Nghost of the local neighbors
-	void GetRealNeighbors(Tessellation const& tess,vector<vector<int> > &BoundaryRemove,
-	vector<vector<vector<int> > > &BoundaryNeigh,vector<vector<int> > &localneigh,
-	vector<vector<int> > &ghostneigh)
-	{
-		int nprocs=(int)BoundaryRemove.size();
-		int npoints=tess.GetPointNo();
-		vector<vector<int> > const& Nghost=tess.GetGhostIndeces();
-		localneigh.clear();
-		ghostneigh.clear();
-		for(int i=0;i<nprocs;++i)
-		{
-			if(BoundaryRemove.empty())
-				continue;
-			vector<int> ghosts(BoundaryRemove[i].size());
-			for(int j=0;j<(int)BoundaryRemove[i].size();++j)
-			{
-				vector<int> itemp;
-				for(vector<int>::iterator it=BoundaryNeigh[i][j].begin();it!=
-					BoundaryNeigh[i][j].end();++it)
-					itemp.push_back(Nghost[i][*it]);
-				sort(itemp.begin(),itemp.end());
-				vector<int> rtemp(1,Nghost[i][BoundaryRemove[i][j]]);
-				RemoveList(itemp,rtemp);
-				itemp.insert(itemp.begin(),rtemp[0]);
-				ghostneigh.push_back(itemp);
-				ghosts[j]=Nghost[i][BoundaryRemove[i][j]];
-			}		
-			vector<vector<int> > temp=FindLocalNeighbors(Nghost[i],ghosts,i,tess);
-			for(int j=0;j<(int)BoundaryRemove[i].size();++j)
-				localneigh.push_back(temp[j]);
-		}
-	}
+  // converts indeces to real point location
+  // BoundaryRemove is the list per proc what points are removed given by their indeces in the Nghost vector
+  // BoundaryNeigh, for each point in boundary remove, what are the indeces in Nghost of the local neighbors
+  void GetRealNeighbors(Tessellation const& tess,vector<vector<int> > &BoundaryRemove,
+			vector<vector<vector<int> > > &BoundaryNeigh,vector<vector<int> > &localneigh,
+			vector<vector<int> > &ghostneigh)
+  {
+    int nprocs=(int)BoundaryRemove.size();
+    int npoints=tess.GetPointNo();
+    vector<vector<int> > const& Nghost=tess.GetGhostIndeces();
+    localneigh.clear();
+    ghostneigh.clear();
+    for(int i=0;i<nprocs;++i)
+      {
+	if(BoundaryRemove.empty())
+	  continue;
+	vector<int> ghosts(BoundaryRemove[i].size());
+	for(int j=0;j<(int)BoundaryRemove[i].size();++j)
+	  {
+	    vector<int> itemp;
+	    for(vector<int>::iterator it=BoundaryNeigh[i][j].begin();it!=
+		  BoundaryNeigh[i][j].end();++it)
+	      itemp.push_back(Nghost[i][*it]);
+	    sort(itemp.begin(),itemp.end());
+	    vector<int> rtemp(1,Nghost[i][BoundaryRemove[i][j]]);
+	    RemoveList(itemp,rtemp);
+	    itemp.insert(itemp.begin(),rtemp[0]);
+	    ghostneigh.push_back(itemp);
+	    ghosts[j]=Nghost[i][BoundaryRemove[i][j]];
+	  }		
+	vector<vector<int> > temp=FindLocalNeighbors(Nghost[i],ghosts,i,tess);
+	for(int j=0;j<(int)BoundaryRemove[i].size();++j)
+	  localneigh.push_back(temp[j]);
+      }
+  }
 }
 
 void GetAMRExtensive(vector<Primitive> &rescells,vector<vector<double> > &restracer,
-	vector<Primitive> const& cells,vector<vector<double> > 
-	const& tracers,bool traceractive,vector<vector<int> > &ToSend,vector<int> const& 
-	proclist,EquationOfState const& eos,vector<vector<int> > const& DuplicatedPoints,int npoints,
-	vector<vector<int> > const& Nghost,vector<int> const& ToRemove)
+		     vector<Primitive> const& cells,vector<vector<double> > 
+		     const& tracers,bool traceractive,vector<vector<int> > &ToSend,vector<int> const& 
+		     proclist,EquationOfState const& eos,vector<vector<int> > const& DuplicatedPoints,int npoints,
+		     vector<vector<int> > const& Nghost,vector<int> const& ToRemove)
 {
-	// ToSend is the index in the Nghost
-	// Send to other procs the list of points
-	int nlist=(int)proclist.size();
-	vector<vector<int> > recv(nlist);
-	// Talk with other procs
-	int rank,worldsize;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
-	const vector<int> procorder=GetProcOrder(rank,worldsize);
-	int n=worldsize-1;
-	int temp;
-	// Send the data
-	for(int i=0;i<n;++i)
+  // ToSend is the index in the Nghost
+  // Send to other procs the list of points
+  int nlist=(int)proclist.size();
+  vector<vector<int> > recv(nlist);
+  // Talk with other procs
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
+  const vector<int> procorder=GetProcOrder(rank,worldsize);
+  int n=worldsize-1;
+  int temp;
+  // Send the data
+  for(int i=0;i<n;++i)
+    {
+      int index=Find(proclist.begin(),proclist.end(),procorder[i])
+	-proclist.begin();
+      if(index<nlist)
 	{
-		int index=Find(proclist.begin(),proclist.end(),procorder[i])
-			-proclist.begin();
-		if(index<nlist)
+	  if(rank<procorder[i])
+	    {
+	      if(ToSend[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&ToSend[index][0],(int)ToSend[index].size(),MPI_INT,
+			 procorder[i],0,MPI_COMM_WORLD);
+	      MPI_Status stat;
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
 		{
-			if(rank<procorder[i])
-			{
-				if(ToSend[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&ToSend[index][0],(int)ToSend[index].size(),MPI_INT,
-						procorder[i],0,MPI_COMM_WORLD);
-				MPI_Status stat;
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					recv[index].resize(count);
-					MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-			}
-			else
-			{
-				MPI_Status stat;
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					recv[index].resize(count);
-					MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(ToSend[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&ToSend[index][0],(int)ToSend[index].size(),MPI_INT,
-						procorder[i],0,MPI_COMM_WORLD);
-			}
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  recv[index].resize(count);
+		  MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		}
+	    }
+	  else
+	    {
+	      MPI_Status stat;
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  recv[index].resize(count);
+		  MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(ToSend[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&ToSend[index][0],(int)ToSend[index].size(),MPI_INT,
+			 procorder[i],0,MPI_COMM_WORLD);
+	    }
 	}
-	vector<vector<int> > ToSend2(nlist);
-	for(int i=0;i<nlist;++i)
-		for(int j=0;j<(int)recv[i].size();++j)
-			ToSend2[i].push_back(DuplicatedPoints[i][recv[i][j]]);
-	// recv is the index in the duplicated that was recieved
-	vector<vector<Primitive> > padd;
-	vector<vector<vector<double> > > tadd;
-	SendRecvHydro(proclist,ToSend2,cells,tracers,traceractive,eos,padd,tadd);
-	// rearrange the data
-	int nadd=ElementNumber(padd);
-	rescells.reserve(nadd);
-	if(traceractive)
-		restracer.reserve(nadd);
-	// convert ToSend to their nghost value and sort them
-	for(int i=0;i<nlist;++i)
+    }
+  vector<vector<int> > ToSend2(nlist);
+  for(int i=0;i<nlist;++i)
+    for(int j=0;j<(int)recv[i].size();++j)
+      ToSend2[i].push_back(DuplicatedPoints[i][recv[i][j]]);
+  // recv is the index in the duplicated that was recieved
+  vector<vector<Primitive> > padd;
+  vector<vector<vector<double> > > tadd;
+  SendRecvHydro(proclist,ToSend2,cells,tracers,traceractive,eos,padd,tadd);
+  // rearrange the data
+  int nadd=ElementNumber(padd);
+  rescells.reserve(nadd);
+  if(traceractive)
+    restracer.reserve(nadd);
+  // convert ToSend to their nghost value and sort them
+  for(int i=0;i<nlist;++i)
+    {
+      if(!ToSend[i].empty())
 	{
-		if(!ToSend[i].empty())
-		{
-			for(int j=0;j<(int)ToSend[i].size();++j)
-				ToSend[i][j]=Nghost[i][ToSend[i][j]];
-			vector<int> indeces;
-			sort_index(ToSend[i],indeces);
-			sort(ToSend[i].begin(),ToSend[i].end());
-			ReArrangeVector(padd[i],indeces);
-			if(traceractive)
-				ReArrangeVector(tadd[i],indeces);
-		}
+	  for(int j=0;j<(int)ToSend[i].size();++j)
+	    ToSend[i][j]=Nghost[i][ToSend[i][j]];
+	  vector<int> indeces;
+	  sort_index(ToSend[i],indeces);
+	  sort(ToSend[i].begin(),ToSend[i].end());
+	  ReArrangeVector(padd[i],indeces);
+	  if(traceractive)
+	    ReArrangeVector(tadd[i],indeces);
 	}
-	// rearrange the data
-	for(int k=0;k<(int)ToRemove.size();++k)
+    }
+  // rearrange the data
+  for(int k=0;k<(int)ToRemove.size();++k)
+    {
+      for(int i=0;i<nlist;++i)
 	{
-		for(int i=0;i<nlist;++i)
-		{
-			if(binary_search(ToSend[i].begin(),ToSend[i].end(),ToRemove[k]))
-			{
-				int index2=lower_bound(ToSend[i].begin(),ToSend[i].end(),
-					ToRemove[k])-ToSend[i].begin();
-				rescells.push_back(padd[i][index2]);
-				if(traceractive)
-					restracer.push_back(tadd[i][index2]);
-				break;
-			}
-		}
-		if((int)rescells.size()!=(k+1))
-		{
-			UniversalError eo("couldn't find point to remove int GetAMRExtensive");
-			throw eo;
-		}
+	  if(binary_search(ToSend[i].begin(),ToSend[i].end(),ToRemove[k]))
+	    {
+	      int index2=lower_bound(ToSend[i].begin(),ToSend[i].end(),
+				     ToRemove[k])-ToSend[i].begin();
+	      rescells.push_back(padd[i][index2]);
+	      if(traceractive)
+		restracer.push_back(tadd[i][index2]);
+	      break;
+	    }
 	}
+      if((int)rescells.size()!=(k+1))
+	{
+	  UniversalError eo("couldn't find point to remove int GetAMRExtensive");
+	  throw eo;
+	}
+    }
 }
 
 // BoundaryRemove is the list per proc what points are removed given by their indeces in the sent vector
 // BoundaryNeigh, for each point in boundary remove, what are the indeces in sentvector of the local neighbors
 void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
-	vector<vector<vector<int> > > &BoundaryNeigh,Tessellation const& tess,
-	vector<vector<int> > &localNeighbors,vector<vector<int> > &ghostneigh)
+			    vector<vector<vector<int> > > &BoundaryNeigh,Tessellation const& tess,
+			    vector<vector<int> > &localNeighbors,vector<vector<int> > &ghostneigh)
 {
-	int rank,worldsize;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
-	const vector<int> procorder=GetProcOrder(rank,worldsize);
-	vector<int> sentprocs=tess.GetDuplicatedProcs();
-	int nlist=(int)sentprocs.size();
-	int n=worldsize-1;
-	vector<int> proclist=tess.GetDuplicatedProcs();
-	vector<vector<int> > RecvPoints(proclist.size());
-	vector<vector<vector<int> > > RecvNeigh(proclist.size());
-	int trash,trashr;
-	MPI_Status stat;
-	for(int i=0;i<n;++i)
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
+  const vector<int> procorder=GetProcOrder(rank,worldsize);
+  vector<int> sentprocs=tess.GetDuplicatedProcs();
+  int nlist=(int)sentprocs.size();
+  int n=worldsize-1;
+  vector<int> proclist=tess.GetDuplicatedProcs();
+  vector<vector<int> > RecvPoints(proclist.size());
+  vector<vector<vector<int> > > RecvNeigh(proclist.size());
+  int trash,trashr;
+  MPI_Status stat;
+  for(int i=0;i<n;++i)
+    {
+      //	cout<<"rank "<<rank<<" i "<<i<<" talk with "<<procorder[i]<<endl;
+      int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+	-sentprocs.begin();
+      if(index<nlist)
 	{
-	//	cout<<"rank "<<rank<<" i "<<i<<" talk with "<<procorder[i]<<endl;
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
-		if(index<nlist)
+	  if(rank<procorder[i])
+	    {
+	      if(BoundaryRemove[index].empty())
+		MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&BoundaryRemove[index][0],(int)BoundaryRemove[index].size(),
+			 MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
 		{
-			if(rank<procorder[i])
-			{
-				if(BoundaryRemove[index].empty())
-					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&BoundaryRemove[index][0],(int)BoundaryRemove[index].size(),
-						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					RecvPoints[index].resize(count);
-					MPI_Recv(&RecvPoints[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				// create the lengths of neighbors
-				vector<int> senddata,lengthr,recvdata;
-				if(BoundaryRemove[index].empty())
-					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-				{
-					vector<int> lengths(BoundaryRemove[index].size());
-					for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
-					{
-						lengths[j]=BoundaryNeigh[index][j].size();
-						for(int k=0;k<lengths[j];++k)
-							senddata.push_back(BoundaryNeigh[index][j][k]);
-					}
-					MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD);
-				}
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					lengthr.resize(count);
-					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(!BoundaryRemove[index].empty())
-					MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-				if(!lengthr.empty())
-				{
-					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					recvdata.resize(count);
-					MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				//	RecvNeigh[index].resize(lengthr.size());
-				}
-				int loc=0;
-				// Reorganize the data
-				for(int j=0;j<(int)lengthr.size();++j)
-				{
-					vector<int> itemp(recvdata.begin()+loc,recvdata.begin()+loc+
-						lengthr[j]);
-					loc+=lengthr[j];
-					RecvNeigh[index].push_back(itemp);
-				}
-			}
-			else
-			{
-				vector<int> senddata,lengthr,recvdata;
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					RecvPoints[index].resize(count);
-					MPI_Recv(&RecvPoints[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(BoundaryRemove[index].empty())
-					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&BoundaryRemove[index][0],(int)BoundaryRemove[index].size(),
-						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-				if(stat.MPI_TAG==1)
-					MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					lengthr.resize(count);
-					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(BoundaryRemove[index].empty())
-					MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-				{
-					vector<int> lengths(BoundaryRemove[index].size());
-					for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
-					{
-						lengths[j]=BoundaryNeigh[index][j].size();
-						for(int k=0;k<lengths[j];++k)
-							senddata.push_back(BoundaryNeigh[index][j][k]);
-					}
-					MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD);
-				}
-				if(!lengthr.empty())
-				{
-					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-					int count;
-					MPI_Get_count(&stat,MPI_INT,&count);
-					recvdata.resize(count);
-					MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-					//RecvNeigh[index].resize(lengthr.size());
-				}
-				if(!BoundaryRemove[index].empty())
-					MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-				int loc=0;
-				// Reorganize the data
-				for(int j=0;j<(int)lengthr.size();++j)
-				{
-					vector<int> itemp(recvdata.begin()+loc,recvdata.begin()+loc+
-						lengthr[j]);
-					loc+=lengthr[j];
-					RecvNeigh[index].push_back(itemp);
-				}
-			}
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  RecvPoints[index].resize(count);
+		  MPI_Recv(&RecvPoints[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		}
+	      // create the lengths of neighbors
+	      vector<int> senddata,lengthr,recvdata;
+	      if(BoundaryRemove[index].empty())
+		MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		{
+		  vector<int> lengths(BoundaryRemove[index].size());
+		  for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
+		    {
+		      lengths[j]=BoundaryNeigh[index][j].size();
+		      for(int k=0;k<lengths[j];++k)
+			senddata.push_back(BoundaryNeigh[index][j][k]);
+		    }
+		  MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD);
+		}
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  lengthr.resize(count);
+		  MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(!BoundaryRemove[index].empty())
+		MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+	      if(!lengthr.empty())
+		{
+		  MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  recvdata.resize(count);
+		  MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		  //	RecvNeigh[index].resize(lengthr.size());
+		}
+	      int loc=0;
+	      // Reorganize the data
+	      for(int j=0;j<(int)lengthr.size();++j)
+		{
+		  vector<int> itemp(recvdata.begin()+loc,recvdata.begin()+loc+
+				    lengthr[j]);
+		  loc+=lengthr[j];
+		  RecvNeigh[index].push_back(itemp);
+		}
+	    }
+	  else
+	    {
+	      vector<int> senddata,lengthr,recvdata;
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  RecvPoints[index].resize(count);
+		  MPI_Recv(&RecvPoints[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(BoundaryRemove[index].empty())
+		MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&BoundaryRemove[index][0],(int)BoundaryRemove[index].size(),
+			 MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+	      if(stat.MPI_TAG==1)
+		MPI_Recv(&trashr,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  lengthr.resize(count);
+		  MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(BoundaryRemove[index].empty())
+		MPI_Send(&trash,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		{
+		  vector<int> lengths(BoundaryRemove[index].size());
+		  for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
+		    {
+		      lengths[j]=BoundaryNeigh[index][j].size();
+		      for(int k=0;k<lengths[j];++k)
+			senddata.push_back(BoundaryNeigh[index][j][k]);
+		    }
+		  MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD);
+		}
+	      if(!lengthr.empty())
+		{
+		  MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
+		  int count;
+		  MPI_Get_count(&stat,MPI_INT,&count);
+		  recvdata.resize(count);
+		  MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		  //RecvNeigh[index].resize(lengthr.size());
+		}
+	      if(!BoundaryRemove[index].empty())
+		MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+	      int loc=0;
+	      // Reorganize the data
+	      for(int j=0;j<(int)lengthr.size();++j)
+		{
+		  vector<int> itemp(recvdata.begin()+loc,recvdata.begin()+loc+
+				    lengthr[j]);
+		  loc+=lengthr[j];
+		  RecvNeigh[index].push_back(itemp);
+		}
+	    }
 	}
-	GetRealNeighbors(tess,RecvPoints,RecvNeigh,localNeighbors,ghostneigh);
+    }
+  GetRealNeighbors(tess,RecvPoints,RecvNeigh,localNeighbors,ghostneigh);
 }
 
 vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const& merit,
-	Tessellation const& tess)
+			       Tessellation const& tess)
 {
-	// remove is sorted
-	// Find boundary cells
-	int nremove=(int)toremove.size();
-	int npoints=tess.GetPointNo();
-	vector<int> proclist=tess.GetDuplicatedProcs();
-	int rank,worldsize;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	MPI_Comm_size(MPI_COMM_WORLD,&worldsize);
-	const vector<int> procorder=GetProcOrder(rank,worldsize);
-	int nlist=(int)proclist.size();
-	vector<vector<int> > bremove(nlist);
-	vector<vector<double> > bmerit(nlist);
-	vector<vector<int> > sentpoints=tess.GetDuplicatedPoints();
-	vector<vector<int> > sort_indeces(nlist);
-	for(int i=0;i<nlist;++i)
-		if(!sentpoints[i].empty())
-		{
-			sort_index(sentpoints[i],sort_indeces[i]);
-			sort(sentpoints[i].begin(),sentpoints[i].end());
-		}
-	for(int i=0;i<nremove;++i)
+  // remove is sorted
+  // Find boundary cells
+  int nremove=(int)toremove.size();
+  int npoints=tess.GetPointNo();
+  vector<int> proclist=tess.GetDuplicatedProcs();
+  const int rank = get_mpi_rank();
+  const int worldsize = get_mpi_size();
+  const vector<int> procorder=GetProcOrder(rank,worldsize);
+  int nlist=(int)proclist.size();
+  vector<vector<int> > bremove(nlist);
+  vector<vector<double> > bmerit(nlist);
+  vector<vector<int> > sentpoints=tess.GetDuplicatedPoints();
+  vector<vector<int> > sort_indeces(nlist);
+  for(int i=0;i<nlist;++i)
+    if(!sentpoints[i].empty())
+      {
+	sort_index(sentpoints[i],sort_indeces[i]);
+	sort(sentpoints[i].begin(),sentpoints[i].end());
+      }
+  for(int i=0;i<nremove;++i)
+    {
+      for(int j=0;j<nlist;++j)
 	{
-		for(int j=0;j<nlist;++j)
-		{
-			if(!binary_search(sentpoints[j].begin(),sentpoints[j].end(),
-				toremove[i]))
-				continue;
-			int index=lower_bound(sentpoints[j].begin(),sentpoints[j].end(),
+	  if(!binary_search(sentpoints[j].begin(),sentpoints[j].end(),
+			    toremove[i]))
+	    continue;
+	  int index=lower_bound(sentpoints[j].begin(),sentpoints[j].end(),
 				toremove[i])-sentpoints[j].begin();
-			if(index<(int)sentpoints[j].size())
-					{
-						bremove[j].push_back(sort_indeces[j][index]);
-						bmerit[j].push_back(merit[i]);
-					}
-		}
+	  if(index<(int)sentpoints[j].size())
+	    {
+	      bremove[j].push_back(sort_indeces[j][index]);
+	      bmerit[j].push_back(merit[i]);
+	    }
 	}
+    }
 	
-	MPI_Status status;
-	// Send/Recv the data
-	vector<vector<int> > recvindex(nlist); // the index in the Nghost vector
-	vector<vector<double> > recvmerit(nlist);
-	int temp;
-	for(int i=0;i<(int)proclist.size();++i)
+  MPI_Status status;
+  // Send/Recv the data
+  vector<vector<int> > recvindex(nlist); // the index in the Nghost vector
+  vector<vector<double> > recvmerit(nlist);
+  int temp;
+  for(int i=0;i<(int)proclist.size();++i)
+    {
+      int index=Find(proclist.begin(),proclist.end(),procorder[i])
+	-proclist.begin();
+      if(index<nlist)
 	{
-		int index=Find(proclist.begin(),proclist.end(),procorder[i])
-			-proclist.begin();
-		if(index<nlist)
+	  if(rank<procorder[i])
+	    {
+	      if(bremove[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&bremove[index][0],(int)bremove[index].size(),
+			 MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+	      if(status.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
 		{
-			if(rank<procorder[i])
-			{
-				if(bremove[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&bremove[index][0],(int)bremove[index].size(),
-					MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				if(status.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&status,MPI_INT,&count);
-					recvindex[index].resize(count);
-					MPI_Recv(&recvindex[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(bmerit[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&bmerit[index][0],(int)bmerit[index].size(),
-					MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				if(status.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&status,MPI_DOUBLE,&count);
-					recvmerit[index].resize(count);
-					MPI_Recv(&recvmerit[index][0],count,MPI_DOUBLE,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-			}
-			else
-			{
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				if(status.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&status,MPI_INT,&count);
-					recvindex[index].resize(count);
-					MPI_Recv(&recvindex[index][0],count,MPI_INT,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(bremove[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&bremove[index][0],(int)bremove[index].size(),
-					MPI_INT,procorder[i],0,MPI_COMM_WORLD);		
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				if(status.MPI_TAG==1)
-					MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				else
-				{
-					int count;
-					MPI_Get_count(&status,MPI_DOUBLE,&count);
-					recvmerit[index].resize(count);
-					MPI_Recv(&recvmerit[index][0],count,MPI_DOUBLE,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				if(bmerit[index].empty())
-					MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
-				else
-					MPI_Send(&bmerit[index][0],(int)bmerit[index].size(),
-					MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
-			}
+		  int count;
+		  MPI_Get_count(&status,MPI_INT,&count);
+		  recvindex[index].resize(count);
+		  MPI_Recv(&recvindex[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		}
+	      if(bmerit[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&bmerit[index][0],(int)bmerit[index].size(),
+			 MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+	      if(status.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&status,MPI_DOUBLE,&count);
+		  recvmerit[index].resize(count);
+		  MPI_Recv(&recvmerit[index][0],count,MPI_DOUBLE,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	    }
+	  else
+	    {
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+	      if(status.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&status,MPI_INT,&count);
+		  recvindex[index].resize(count);
+		  MPI_Recv(&recvindex[index][0],count,MPI_INT,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(bremove[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&bremove[index][0],(int)bremove[index].size(),
+			 MPI_INT,procorder[i],0,MPI_COMM_WORLD);		
+	      MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+	      if(status.MPI_TAG==1)
+		MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	      else
+		{
+		  int count;
+		  MPI_Get_count(&status,MPI_DOUBLE,&count);
+		  recvmerit[index].resize(count);
+		  MPI_Recv(&recvmerit[index][0],count,MPI_DOUBLE,procorder[i],0,
+			   MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		}
+	      if(bmerit[index].empty())
+		MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+	      else
+		MPI_Send(&bmerit[index][0],(int)bmerit[index].size(),
+			 MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+	    }
 	}
+    }
 
-	vector<int> res,bad;
-	vector<vector<int> > const& Nghost=tess.GetGhostIndeces();
-	vector<vector<int> > const& DupPoints=tess.GetDuplicatedPoints();
-	for(int i=0;i<nlist;++i)
+  vector<int> res,bad;
+  vector<vector<int> > const& Nghost=tess.GetGhostIndeces();
+  vector<vector<int> > const& DupPoints=tess.GetDuplicatedPoints();
+  for(int i=0;i<nlist;++i)
+    {
+      if(recvindex[i].empty()||sentpoints[i].empty())
+	continue;
+      vector<int> Nghostindex(recvindex[i].size());
+      for(int j=0;j<(int)Nghostindex.size();++j)
+	Nghostindex[j]=Nghost[i][recvindex[i][j]];
+      vector<int> indeces;
+      sort_index(Nghostindex,indeces);
+      sort(Nghostindex.begin(),Nghostindex.end());
+      for(int j=0;j<(int)bremove[i].size();++j)
 	{
-		if(recvindex[i].empty()||sentpoints[i].empty())
-			continue;
-		vector<int> Nghostindex(recvindex[i].size());
-		for(int j=0;j<(int)Nghostindex.size();++j)
-			Nghostindex[j]=Nghost[i][recvindex[i][j]];
-		vector<int> indeces;
-		sort_index(Nghostindex,indeces);
-		sort(Nghostindex.begin(),Nghostindex.end());
-		for(int j=0;j<(int)bremove[i].size();++j)
-		{
-			vector<int> neigh=tess.GetNeighbors(DupPoints[i][bremove[i][j]]);
-			for(int k=0;k<(int)neigh.size();++k)
-			{
-				if(!binary_search(Nghostindex.begin(),Nghostindex.end(),neigh[k]))
-					continue;
-				int index=lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
-					Nghostindex.begin();
-				if(index<(int)Nghostindex.size())
-					if(recvmerit[i][indeces[index]]>=bmerit[i][j])
-						bad.push_back(DupPoints[i][bremove[i][j]]);
-			}
-		}
+	  vector<int> neigh=tess.GetNeighbors(DupPoints[i][bremove[i][j]]);
+	  for(int k=0;k<(int)neigh.size();++k)
+	    {
+	      if(!binary_search(Nghostindex.begin(),Nghostindex.end(),neigh[k]))
+		continue;
+	      int index=lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
+		Nghostindex.begin();
+	      if(index<(int)Nghostindex.size())
+		if(recvmerit[i][indeces[index]]>=bmerit[i][j])
+		  bad.push_back(DupPoints[i][bremove[i][j]]);
+	    }
 	}
-	sort(bad.begin(),bad.end());
-	bad=unique(bad);
-	res=RemoveList(toremove,bad);
-	return res;
+    }
+  sort(bad.begin(),bad.end());
+  bad=unique(bad);
+  res=RemoveList(toremove,bad);
+  return res;
 }
 
 #endif
