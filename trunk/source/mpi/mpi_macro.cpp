@@ -536,7 +536,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 				{
 					vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
 					MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-					MPI_RecvVectorTracer(ttemp,procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,
+					MPI_RecvVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD,
 						(int)tracers[0].size());
 					ttoadd.insert(ttoadd.end(),ttemp.begin(),ttemp.end());
 				}
@@ -581,7 +581,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 				if(traceractive)
 				{
 					vector<vector<double> > ttemp;
-					MPI_RecvVectorTracer(ttemp,procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,
+					MPI_RecvVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD,
 						(int)tracers[0].size());
 					ttoadd.insert(ttoadd.end(),ttemp.begin(),ttemp.end());
 					ttemp=VectorValues(tracers,sentcells[index]);
