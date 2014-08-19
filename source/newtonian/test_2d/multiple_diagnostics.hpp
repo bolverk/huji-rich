@@ -8,10 +8,12 @@
 
 #include "main_loop_2d.hpp"
 
+//! \brief A class that enables using multiple diagnostics simultaneously
 class MultipleDiagnostics: public DiagnosticFunction
 {
 public:
 
+  //! \brief List of diagnostics
   vector<DiagnosticFunction*> diag_list;
 
   MultipleDiagnostics(void);

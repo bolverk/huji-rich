@@ -110,8 +110,9 @@ namespace simulation2d{
   /*! \brief Simulation time advance loop
     \param sim Hydrodynamic simulation 
     \param term_cond Termination condition
-    \param time_order Time integration order
+    \param time_advance_method Method for time advance
     \param diagfunc Diagnostic function
+    \param manipulate Method for manual modification of the simulatino data
    */
   void main_loop(hdsim& sim,
 		 TerminationCondition& term_cond,
