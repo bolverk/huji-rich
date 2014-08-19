@@ -169,7 +169,7 @@ void hdsim::TimeAdvance(void)
 	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
 #else
-	SendRecvHydro(_cells,tracer_,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
+	SendRecvHydro(_cells,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
 		,_tessellation.GetTotalPointNumber());
 
@@ -215,16 +215,27 @@ void hdsim::TimeAdvance(void)
 
 	vector<double> Ek,Ef;
 	vector<char> shockedcells;
+
 	if(coldflows_flag_)
 	{
 		const int n=_tessellation.GetPointNo();
 		for(int i=0;i<n;++i)
 			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
+#ifdef RICH_MPI
+		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
+#endif
 		shockedcells.resize(n);
 		for(int i=0;i<n;++i)
 			shockedcells[i]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
 	}
-
+#ifdef RICH_MPI
+	if(tracer_flag_&&!coldflows_flag_)
+		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
+#endif
 	CalcFluxes(_tessellation, _cells, dt, _time,
 		_interpolation,
 		_facevelocity, _hbc, _rs,
