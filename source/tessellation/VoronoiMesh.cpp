@@ -1334,7 +1334,7 @@ Vector2D VoronoiMesh::CalcCellCM(int index) const
   double y1,y2;
   double xc=0,yc=0;
   Vector2D center=Tri->get_point(index);
-  double area=0,area_temp;
+  double area=0;
   for (int i=0;i<(int)mesh_vertices[index].size();i++)
     {
       int temp=mesh_vertices[index][i];
@@ -1342,7 +1342,7 @@ Vector2D VoronoiMesh::CalcCellCM(int index) const
       x2=edges[mesh_vertices[index][i]].vertices.second.x-center.x;
       y1=edges[mesh_vertices[index][i]].vertices.first.y-center.y;
       y2=edges[mesh_vertices[index][i]].vertices.second.y-center.y;
-      area_temp=abs(x2*y1-y2*x1)*0.5;
+      const double area_temp=abs(x2*y1-y2*x1)*0.5;
       area+=area_temp;
       xc+=area_temp*(center.x+edges[temp].vertices.first.x+edges[temp].vertices.second.x)/3;
       yc+=area_temp*(center.y+edges[temp].vertices.first.y+edges[temp].vertices.second.y)/3;
