@@ -262,8 +262,7 @@ template <class T> vector<T> RemoveList(vector<T> const&v,vector<T> const&list)
 
 template <class T> void RemoveVal(vector<T> &vec,T val)
 {
-  int n=(int)vec.size();
-  for(int i=0;i<n;++i)
+  for(int i=0;i<vec.size();++i)
     {
       if(vec[i]==val)
 	{
@@ -271,8 +270,6 @@ template <class T> void RemoveVal(vector<T> &vec,T val)
 	  return;
 	}
     }
-  return;
-  //throw UniversalError("Value not found in vector");
 }
 
 /*! 
