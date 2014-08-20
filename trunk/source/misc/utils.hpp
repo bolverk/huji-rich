@@ -552,11 +552,10 @@ template<class T> void set_pair_member(std::pair<T,T>& p, int index, const T& va
 */
 template<class T> int ElementNumber(vector<vector<T> > const& vec)
 {
-  int res=0;
-  int n=(int)vec.size();
-  for(int i=0;i<n;++i)
-    res+=(int)vec[i].size();
-  return res;
+  size_t res=0;
+  for(size_t i=0;i<vec.size();++i)
+    res+=vec[i].size();
+  return static_cast<int>(res);
 }
 
 /*!
@@ -575,8 +574,7 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
       eo.AddEntry("data length",data.size());
       throw eo;
     }
-  int n=(int)indeces.size();
-  for(int i=0;i<n;++i)
+  for(size_t i=0;i<indeces.size();++i)
     vec[indeces[i]]=data[i];
 }
 
