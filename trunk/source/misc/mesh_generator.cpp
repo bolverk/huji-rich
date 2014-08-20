@@ -76,7 +76,7 @@ vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double alpha,
   int counter=0;
   vector<Vector2D> res;
   Vector2D point;
-  res.reserve(PointNum);
+  res.reserve(static_cast<size_t>(PointNum));
   while(counter<PointNum)
     {
       ran[0]=pow(pow(Rmin,1-alpha)-dist(generator)*(alpha-1)/A,1.0/(1-alpha));
@@ -122,39 +122,12 @@ vector<Vector2D> RandPointsR(int PointNum,double xl,double xr,double yd,
   return res;
 }
 
-
-
-vector<Vector2D> SquarePertubed(int nx,int ny,double sidex,double sidey,
-				double mag)
-{
-  base_generator_type generator;
-  boost::random::uniform_real_distribution<> dist;
-  double ran[2];
-  vector<Vector2D> res(size_t(nx*ny));
-  double widthx = sidex/(double)nx;
-  double widthy = sidey/(double)ny;
-  Vector2D point;
-  for(int i=0;i<nx;i++)
-    {
-      for(int j=0;j<ny;j++)
-	{
-	  ran[0]=2*dist(generator)-1;
-	  ran[1]=2*dist(generator)-1;
-	  point.x = ((double)i+0.5+mag*ran[0])*widthx-sidex/2;
-	  point.y = ((double)j+0.5+mag*ran[1])*widthy-sidey/2;
-	  res[size_t(i*ny+j)] = point;
-	}
-    }
-  return res;
-}
-
-
 vector<Vector2D> CirclePointsRmax_1(int PointNum,double Rmin,double Rmax,
 				    double xc,double yc,double xmax,double ymax,double xmin,double ymin)
 {
   const double Nphid=sqrt(PointNum*2*M_PI/log(Rmax/Rmin));
-  const int Nr=(int)(Nphid*log(Rmax/Rmin)/(2*M_PI));
-  const int Nphi=(int)floor(Nphid+0.5);
+  const int Nr=static_cast<int>(Nphid*log(Rmax/Rmin)/(2*M_PI));
+  const int Nphi=static_cast<int>(floor(Nphid+0.5));
   const double dphi=2*M_PI/Nphi;
   vector<Vector2D> res;
   for(int i=0;i<Nr;++i)

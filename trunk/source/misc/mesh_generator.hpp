@@ -109,18 +109,6 @@ std::vector<Vector2D> CirclePointsRmax_a(int PointNum,double Rmin,double Rmax,
 				    double alpha);
 
 /*!
-  \brief Generates a rectangular grid around 0,0 with small pertubations
-  \param sidex The x length
-  \param sidey The y length
-  \param nx The number of points in the x direction
-  \param ny The number of points in the y direction
-  \param mag The magnitude of the small pertubations, should be less than 0.5
-  \return List of two dimensional points
-*/
-std::vector<Vector2D> SquarePertubed(int nx,int ny,double sidex=1,double sidey=1,
-				double mag=0.01);
-
-/*!
   \brief Generates a rectangular grid with random 1/r point density
   \param PointNum The number of points.
   \param xl The left boundary
