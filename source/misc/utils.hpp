@@ -311,11 +311,8 @@ template <class T> int IndexInVector(vector<T> const&vec,T val)
 */
 template <class T> void ReArrangeVector(vector<T> &v,vector<int> const& indeces)
 {
-  // create copy
-  vector<T> temp=v;
-  // Rearrange
-  int n=(int)v.size();
-  for(int i=0;i<n;++i)
+  const vector<T> temp=v;
+  for(size_t i=0;i<v.size();++i)
     v[i]=temp[indeces[i]];
 }
 namespace
