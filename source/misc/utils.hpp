@@ -141,7 +141,7 @@ template <class T> void RemoveVector
     return;
   sort(indeces.begin(),indeces.end());
   int n=int(indeces.size());
-  int N=int(v.size());
+  //  int N=int(v.size());
   vector<T> result;
   result.reserve(v.size()-indeces.size());
   int counter=0;
