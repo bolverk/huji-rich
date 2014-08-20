@@ -1682,12 +1682,12 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 {
   int n=(int)mesh_vertices[index].size();
-  int other;
   vector<int> res;
   res.reserve(n);
   for(int i=0;i<n;++i)
     {
-      if((other=edges[mesh_vertices[index][i]].neighbors.first)!=index)
+      int other = edges[mesh_vertices[index][i]].neighbors.first;
+      if(other!=index)
 	{
 	  if(other>-1)
 	    res.push_back(other);
@@ -2049,10 +2049,9 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
   //Fix edges
   size_t Nedges=V.edges.size();
   int toReduce;
-  int temp;
   for(size_t i=0;i<Nedges;++i)
     {
-      temp=V.edges[i].neighbors.first;
+      int temp=V.edges[i].neighbors.first;
       if(temp>-1)
 	{
 	  toReduce=int(lower_bound(ToRemove.begin(),ToRemove.end(),temp)-
