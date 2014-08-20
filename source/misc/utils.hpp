@@ -143,19 +143,16 @@ template <class T> void RemoveVector
   int n=int(indeces.size());
   int N=int(v.size());
   vector<T> result;
-  result.reserve(N-n);
+  result.reserve(v.size()-indeces.size());
   int counter=0;
-  for(size_t i=0;i<(size_t)indeces[size_t(n-1)];++i)
+  for(size_t i=0;i<(size_t)indeces.back();++i)
     {
       if(size_t(indeces[size_t(counter)])==i)
-	{
 	  ++counter;
-	  continue;
-	}
       else
 	result.push_back(v[i]);
     }
-  for(size_t i=(size_t)indeces[size_t(n-1)]+1;i<size_t(N);++i)
+  for(size_t i=static_cast<size_t>(indeces.back())+1;i<v.size();++i)
     result.push_back(v[i]);
   v=result;
 }
