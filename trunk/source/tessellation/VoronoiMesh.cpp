@@ -772,13 +772,12 @@ vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const
 
 bool VoronoiMesh::NearBoundary(int index) const
 {
-  int n=int(mesh_vertices[index].size());
-  int n1,n0;
-  int N=Tri->get_length();
+  const int n=int(mesh_vertices[index].size());
+  const int N=Tri->get_length();
   for(int i=0;i<n;++i)
     {
-      n0=edges[mesh_vertices[index][i]].neighbors.first;
-      n1=edges[mesh_vertices[index][i]].neighbors.second;
+      const int n0=edges[mesh_vertices[index][i]].neighbors.first;
+      const int n1=edges[mesh_vertices[index][i]].neighbors.second;
       if(n0<0||n1<0||n0>=N||n1>=N)
 	return true;
     }
