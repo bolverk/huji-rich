@@ -1330,25 +1330,20 @@ double VoronoiMesh::GetVolume(int index) const
 
 Vector2D VoronoiMesh::CalcCellCM(int index) const
 {
-  double xc=0,yc=0;
-  Vector2D center=Tri->get_point(index);
+  const Vector2D center=Tri->get_point(index);
+  Vector2D pc(0,0);
   double area=0;
   for (int i=0;i<(int)mesh_vertices[index].size();i++)
     {
-      int temp=mesh_vertices[index][i];
-      const double x1=edges[temp].vertices.first.x-center.x;
-      const double x2=edges[mesh_vertices[index][i]].vertices.second.x-
-	center.x;
-      const double y1=edges[mesh_vertices[index][i]].vertices.first.y-
-	center.y;
-      const double y2=edges[mesh_vertices[index][i]].vertices.second.y-
-	center.y;
-      const double area_temp=abs(x2*y1-y2*x1)*0.5;
-      area+=area_temp;
-      xc+=area_temp*(center.x+edges[temp].vertices.first.x+edges[temp].vertices.second.x)/3;
-      yc+=area_temp*(center.y+edges[temp].vertices.first.y+edges[temp].vertices.second.y)/3;
+      const int temp=mesh_vertices[index][i];
+      const Vector2D p1 = edges[temp].vertices.first - center;
+      const Vector2D p2 = edges[temp].vertices.second - center;
+      const double area_temp = 0.5*abs(ScalarProd(p1,zcross(p2)));
+      area += area_temp;
+      pc += area_temp*(center+edges[temp].vertices.first+
+		       edges[temp].vertices.second)/3;
     }
-  return Vector2D(xc,yc)/area;
+  return pc/area;
 }
 
 vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)

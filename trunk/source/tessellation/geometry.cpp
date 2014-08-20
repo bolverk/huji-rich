@@ -5,10 +5,8 @@ using namespace std;
 
 Vector2D Rotate(Vector2D const& v, double a)
 {
-  Vector2D res;
-  res.x = v.x*cos(a)-v.y*sin(a);
-  res.y = v.x*sin(a)+v.y*cos(a);
-  return res;
+  return Vector2D(v.x*cos(a)-v.y*sin(a),
+		  v.x*sin(a)+v.y*cos(a));
 }
 
 double Vector2D::distance(Vector2D const& v1) const
