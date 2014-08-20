@@ -336,10 +336,9 @@ namespace
 template<class T> void sort_index(const vector<T> & arr,vector<int>& res)
 {
   res.resize(arr.size());
-  for(int i=0;i<(int) res.size();++i)
-    res[size_t(i)]=i;
+  for(size_t i=0;i<res.size();++i)
+    res[i]=static_cast<int>(i);
   sort(res.begin(),res.end(),index_cmp<vector<T> >(arr));
-  return;
 }
 
 /*! \brief Concatenates two vectors
