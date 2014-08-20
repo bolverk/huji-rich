@@ -1313,17 +1313,15 @@ vector<int> const& VoronoiMesh::GetCellEdges(int index) const
 
 double VoronoiMesh::GetVolume(int index) const
 {
-  double x1,x2;
-  double y1,y2;
-  Vector2D center=Tri->get_point(index);
+  const Vector2D center=Tri->get_point(index);
   double area=0;
   for (size_t i=0;i<mesh_vertices[index].size();++i)
     {
-      x1=edges[mesh_vertices[index][i]].vertices.first.x-center.x;
-      x2=edges[mesh_vertices[index][i]].vertices.second.x-center.x;
-      y1=edges[mesh_vertices[index][i]].vertices.first.y-center.y;
-      y2=edges[mesh_vertices[index][i]].vertices.second.y-center.y;
-      area+=abs(x2*y1-y2*x1)*0.5;
+      const Vector2D p1 = edges[mesh_vertices[index][i]].vertices.first-
+	center;
+      const Vector2D p2 = edges[mesh_vertices[index][i]].vertices.second-
+	center;
+      area+=0.5*abs(ScalarProd(p1,zcross(p2)));
     }
   return area;
 }
