@@ -585,9 +585,17 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		for(int i=0;i<(int)ToRemoveReduced.size();++i)
 			ToRemoveReduced[i]-=n;
 	}
-	GetAMRExtensive(MPIcells,MPItracer,_cells,tracer_,traceractive,MPI_AMR_Send,
-		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetDuplicatedPoints(),
-		_tessellation.GetPointNo(),_tessellation.GetGhostIndeces(),ToRemoveReduced);
+	GetAMRExtensive(MPIcells,
+			MPItracer,
+			_cells,
+			tracer_,
+			traceractive,
+			MPI_AMR_Send,
+			_tessellation.GetDuplicatedProcs(),
+			_eos,
+			_tessellation.GetDuplicatedPoints(),
+			_tessellation.GetGhostIndeces(),
+			ToRemoveReduced);
 #endif
 	// Calculate the old extensive hydro
 	vector<Conserved> c_temp;

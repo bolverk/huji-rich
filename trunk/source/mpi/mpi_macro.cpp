@@ -1461,7 +1461,6 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 		     vector<int> const& proclist,
 		     EquationOfState const& eos,
 		     vector<vector<int> > const& DuplicatedPoints,
-		     int npoints,
 		     vector<vector<int> > const& Nghost,
 		     vector<int> const& ToRemove)
 {
