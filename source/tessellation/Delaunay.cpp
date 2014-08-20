@@ -431,19 +431,19 @@ int Delaunay::Walk(int point)
   return cur_facet;
 }
 
+vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
+{
+  vector<int> res;
+  FindContainingTetras(StartTetra, point, res);
+  return res;
+}
+
 double Delaunay::FindMaxRadius(int point)
 {
-  int startFacet=Walk(point);
-  vector<int> vec;
-  FindContainingTetras(startFacet,point,vec);
-  double r=0,temp;
-  int n=(int)vec.size();
-  for(int i=0;i<n;++i)
-    {
-      temp=radius[vec[i]];
-      if(temp>r)
-	r=temp;
-    }
+  const vector<int> vec = FindContainingTetras(Walk(point),point);
+  double r=0;
+  for(size_t i=0;i<vec.size();++i)
+    r = max(r,radius[vec[i]]);
   return 2*r;
 }
 

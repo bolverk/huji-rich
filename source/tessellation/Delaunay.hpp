@@ -58,6 +58,7 @@ private:
   int FindPointInFacet(int facet,int point);
   double FindMaxRadius(int point);
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
+  vector<int> FindContainingTetras(int StartTetra, int point);
 
   Delaunay& operator=(const Delaunay& origin);
 
