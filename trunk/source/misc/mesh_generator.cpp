@@ -223,18 +223,15 @@ vector<Vector2D> cartesian_mesh(int nx, int ny,
   assert(upper_right.x>lower_left.x);
   assert(upper_right.y>lower_left.y);
 
-  vector<Vector2D> res(size_t(nx*ny));
-  const double dx = (upper_right.x-lower_left.x)/(double)nx;
-  const double dy = (upper_right.y-lower_left.y)/(double)ny;
-  for(int i=0;i<nx;++i)
-    {
-      for(int j=0;j<ny;++j)
-	{
-	  Vector2D point(((double)i+0.5)*dx+lower_left.x,
-			 ((double)j+0.5)*dy+lower_left.y);
-	  res[size_t(i*ny+j)] = point;
-	}
-    }
+  vector<Vector2D> res;
+  const double dx = (upper_right.x-lower_left.x)/
+    static_cast<double>(nx);
+  const double dy = (upper_right.y-lower_left.y)/
+    static_cast<double>(ny);
+  for(double x=lower_left.x+0.5*dx;x<upper_right.x;x+=dx){
+    for(double y=lower_left.y+0.5*dy;y<upper_right.y;y+=dy)
+      res.push_back(Vector2D(x,y));
+  }
   return res;
 }
 
