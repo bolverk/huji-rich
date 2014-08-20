@@ -246,9 +246,8 @@ template <class T> vector<int> unique_index(vector<T> const& v)
 */
 template <class T> vector<T> RemoveList(vector<T> const&v,vector<T> const&list)
 {
-  int n=(int)v.size();
   vector<T> res;
-  for(int i=0;i<n;++i)
+  for(size_t i=0;i<v.size();++i)
     if(!binary_search(list.begin(),list.end(),v[i]))
       res.push_back(v[i]);
   return res;
