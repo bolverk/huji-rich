@@ -13,7 +13,7 @@ double Lagrangian1D::CalcVelocity
     else
       return hv[0].Velocity.x;
   }
-  else if(i==(int)hv.size()){
+  else if(i==static_cast<int>(hv.size())){
     if(rigid_walls_)
       return 0;
     else
