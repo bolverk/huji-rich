@@ -53,8 +53,9 @@ namespace
 		Edge etemp;
 		etemp.vertices.first=cpoints[0];
 		etemp.vertices.second=cpoints[1];
-		double mincellR=min(abs(cpoints[0]-center),DistanceToEdge(center,etemp));
+		double mincellR=abs(cpoints[0]-center);
 		double maxcellR(mincellR);
+		mincellR=min(mincellR,DistanceToEdge(center,etemp));
 		int npoints=(int)cpoints.size();
 		for(int i=1;i<npoints;++i)
 		{
