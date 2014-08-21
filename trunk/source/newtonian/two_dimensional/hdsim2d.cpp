@@ -751,9 +751,11 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		if(!toremove2.empty())
 			RemoveVector(ghostpoints[i],toremove2);
 		toremoveall[i]=toremove2;
+#ifdef RICH_MPI
 		nsent2=(int)nghost[i].size();
 		for(int j=0;j<nsent2;++j)
 			nghost[i][j]-=(int)ToRemove.size();
+#endif
 	}
 #ifdef RICH_MPI
 	RemoveNGhostAMR(nghost,_tessellation.GetDuplicatedProcs(),toremoveall);
