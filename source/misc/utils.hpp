@@ -43,10 +43,9 @@ vector<double> arange(double x_min, double x_max, double dx);
 template <class T> vector<T> operator+
 (vector<T> const& v1, vector<T> const& v2)
 {
-  if(v1.size()!=v2.size())
-    throw UniversalError("Vectors must have the same length");
+  assert(v1.size()==v2.size() && "Vectors must have the same length");
   vector<T> res(v1.size());
-  for(int i=0;i<(int)v1.size();++i)
+  for(size_t i=0;i<v1.size();++i)
     res[i] = v1[i]+v2[i];
   return res;
 }
@@ -63,7 +62,7 @@ template <class T> vector<T> operator-
     throw UniversalError("Vectors must have the same length");
 
   vector<T> res(v1.size());
-  for(int i=0;i<(int)v1.size();++i)
+  for(size_t i=0;i<v1.size();++i)
     res[i] = v1[i]-v2[i];
   return res;
 }
@@ -77,7 +76,7 @@ template <class T> vector<T> operator*
 (double d, vector<T> const& v)
 {
   vector<T> res(v.size());
-  for(int i=0;i<(int)v.size();++i)
+  for(size_t i=0;i<v.size();++i)
     res[i] = d*v[i];
   return res;
 }
