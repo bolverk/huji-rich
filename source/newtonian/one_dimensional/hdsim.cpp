@@ -64,7 +64,7 @@ vector<Conserved> const& hdsim1D::getFluxes(void) const
 
 int hdsim1D::GetVertexNo(void) const
 {
-  return (int)_Vertices.size();
+  return static_cast<int>(_Vertices.size());
 }
 
 double hdsim1D::GetVertexPosition(size_t i) const
@@ -74,7 +74,7 @@ double hdsim1D::GetVertexPosition(size_t i) const
 
 int hdsim1D::GetCellNo(void) const
 {
-  return (int)_Cells.size();
+  return static_cast<int>(_Cells.size());
 }
 
 Primitive hdsim1D::GetCell(size_t i) const
@@ -188,9 +188,9 @@ namespace {
     vector<Conserved> res(Vertices.size());
     for(size_t i = 1;i<Vertices.size()-1; i++){
       const Primitive left = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], static_cast<int>(i), 0,dt);
+	(Vertices, Cells, VertexVelocity[i], i, 0,dt);
       const Primitive right = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], static_cast<int>(i), 1,dt);
+	(Vertices, Cells, VertexVelocity[i], i, 1,dt);
       try{
 	res[i] = rs.Solve(left, right, VertexVelocity[i]);
       }
