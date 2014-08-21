@@ -529,15 +529,80 @@ namespace
 			for(int j=0;j<nprocs;++j)
 			{
 				if(binary_search(SortedNghost[j].begin(),SortedNghost[j].end(),
-					ToRemove[i]-nremoved))
+					ToRemove[i]))
 				{
 					int index2=lower_bound(SortedNghost[j].begin(),SortedNghost[j].end(),
-						ToRemove[i]-nremoved)-SortedNghost[j].begin();
+						ToRemove[i])-SortedNghost[j].begin();
 					MPI_AMR_Send[j].push_back(SortIndex[j][index2]);
 				}
 			}
 		}
 	}
+}
+
+namespace
+{
+#ifdef RICH_MPI
+	void RemoveNGhostAMR(vector<vector<int> > &nghost,vector<int> const& sentprocs,
+		vector<vector<int> > &toremove)
+	{
+		int nlist=(int)sentprocs.size();
+		int rank=get_mpi_rank();
+		int ws=get_mpi_size();
+		vector<int> procorder=GetProcOrder(rank,ws);
+		vector<vector<int> > recv(nlist);
+		int temp;
+		MPI_Status status;
+		for(int i=0;i<(int)procorder.size();++i)
+		{
+			int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				-sentprocs.begin();
+			if(index<nlist)
+			{
+				if(rank<procorder[i])
+				{
+					if(toremove[index].empty())
+						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+					else
+						MPI_Send(&toremove[index][0],(int)toremove[index].size(),
+						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+					if(status.MPI_TAG==1)
+						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					else
+					{
+						int count;
+						MPI_Get_count(&status,MPI_INT,&count);
+						recv[index].resize(count);
+						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					}
+				}
+				else
+				{
+					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+					if(status.MPI_TAG==1)
+						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					else
+					{
+						int count;
+						MPI_Get_count(&status,MPI_INT,&count);
+						recv[index].resize(count);
+						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					}
+					if(toremove[index].empty())
+						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+					else
+						MPI_Send(&toremove[index][0],(int)toremove[index].size(),
+						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+				}
+			}
+		}
+		for(int i=0;i<nlist;++i)
+			if(!recv[i].empty())
+				RemoveVector(nghost[i],recv[i]);
+	}
+#endif
+
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -582,8 +647,8 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	{
 		ToRemoveReduced.resize((int)ToRemove.size()-n);
 		copy(ToRemove.begin()+n,ToRemove.end(),ToRemoveReduced.begin());
-		for(int i=0;i<(int)ToRemoveReduced.size();++i)
-			ToRemoveReduced[i]-=n;
+		//for(int i=0;i<(int)ToRemoveReduced.size();++i)
+		//	ToRemoveReduced[i]-=n;
 	}
 	GetAMRExtensive(MPIcells,
 			MPItracer,
@@ -669,12 +734,41 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		}
 	}
 	if(n<(int)ToRemove.size())
-		ToRemove.erase(ToRemove.begin()+n-1,ToRemove.end());
+		ToRemove.erase(ToRemove.begin()+n,ToRemove.end());
 	//Remove the deleted cells
 	RemoveVector(_cells,ToRemove);
 	RemoveVector(custom_evolution_indices,ToRemove);
 	if(traceractive)
 		RemoveVector(tracer_,ToRemove);
+	// Fix the ghost points
+	int nprocs=(int)_tessellation.GetDuplicatedProcs().size();
+	sort(ToRemoveReduced.begin(),ToRemoveReduced.end());
+	vector<vector<int> > & ghostpoints=_tessellation.GetDuplicatedPoints();
+	vector<vector<int> > & nghost=_tessellation.GetGhostIndeces();
+	vector<vector<int> > toremoveall(nprocs); // the indeces in the ghost that are removed
+	for(int i=0;i<nprocs;++i)
+	{
+		vector<int> toremove2;
+		int nsent2=(int)ghostpoints[i].size();
+		for(int j=0;j<nsent2;++j)
+		{
+			int toReduce2=int(lower_bound(ToRemove.begin(),ToRemove.end(),ghostpoints[i][j])-
+				ToRemove.begin());
+			if(binary_search(ToRemove.begin(),ToRemove.end(),ghostpoints[i][j]))
+				toremove2.push_back(j);
+			else
+				ghostpoints[i][j]-=toReduce2;
+		}
+		if(!toremove2.empty())
+			RemoveVector(ghostpoints[i],toremove2);
+		toremoveall[i]=toremove2;
+		nsent2=(int)nghost[i].size();
+		for(int j=0;j<nsent2;++j)
+			nghost[i][j]-=(int)ToRemove.size();
+	}
+#ifdef RICH_MPI
+	RemoveNGhostAMR(nghost,_tessellation.GetDuplicatedProcs(),toremoveall);
+#endif
 	// If self gravity is needed change here
 	return ToRemove;
 }

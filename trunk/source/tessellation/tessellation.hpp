@@ -173,6 +173,11 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
 	\brief Returns the indeces of the points that where sent to other processors as ghost points
 	\return The sent points
 	*/
+  virtual vector<vector<int> >& GetDuplicatedPoints(void)=0;
+  /*!
+	\brief Returns the indeces of the points that where sent to other processors as ghost points
+	\return The sent points
+	*/
   virtual vector<vector<int> >const& GetDuplicatedPoints(void)const=0;
   	/*!
 	\brief Returns the indeces of the processors with whom ghost points where exchanged
@@ -196,6 +201,11 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
   */
   virtual vector<int> GetSelfPoint(void)const=0;
 
+  /*!
+  \brief Returns the indeces of each ghost point in the vector of points that the tessellation holds
+  \return The indeces where the outer index is the index of the sent processor
+  */
+  virtual vector<vector<int> >& GetGhostIndeces(void)=0;
   /*!
   \brief Returns the indeces of each ghost point in the vector of points that the tessellation holds
   \return The indeces where the outer index is the index of the sent processor
