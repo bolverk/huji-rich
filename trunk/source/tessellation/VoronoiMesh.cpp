@@ -2055,6 +2055,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				}
 			}
 		}
+		RemovedEdges.insert(RemovedEdges.end(),oldedges.begin(),oldedges.end());
 	}
 
 	// Done with all of the points to remove now start fixing

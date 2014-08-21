@@ -6,7 +6,7 @@
 using namespace std;
 
 void hdsim::SetData(vector<Primitive> const& cells,vector<Vector2D> const& points,
-	       double time,vector<vector<double> > const& tracers)
+	double time,vector<vector<double> > const& tracers)
 {
 	_cells=cells;
 	_tessellation.Update(points);
@@ -223,8 +223,8 @@ void hdsim::TimeAdvance(void)
 			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
-		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
-		,_tessellation.GetTotalPointNumber());
+			_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+			,_tessellation.GetTotalPointNumber());
 #endif
 		shockedcells.resize(n);
 		for(int i=0;i<n;++i)
@@ -326,27 +326,27 @@ void hdsim::TimeAdvance(void)
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
-  //  vector<char> btoadd;
-  if(coldflows_flag_)
-    {
-      vector<char> btoadd;
-      SendRecvShockedStatus(shockedcells,_tessellation.GetSentPoints(),
-			    _tessellation.GetSentProcs(),btoadd);
-      shockedcells=VectorValues(shockedcells,_tessellation.GetSelfPoint());
-      if(!btoadd.empty())
-	shockedcells.insert(shockedcells.end(),btoadd.begin(),btoadd.end());
-      vector<double> Ekadd;
-      SendRecvVectorDouble(Ek,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
-			   Ekadd);
-      Ek=VectorValues(Ek,_tessellation.GetSelfPoint());
-      if(!Ekadd.empty())
-	Ek.insert(Ek.end(),Ekadd.begin(),Ekadd.end());
-      SendRecvVectorDouble(Ef,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
-			   Ekadd);
-      Ef=VectorValues(Ef,_tessellation.GetSelfPoint());
-      if(!Ekadd.empty())
-	Ef.insert(Ef.end(),Ekadd.begin(),Ekadd.end());
-    }
+	//  vector<char> btoadd;
+	if(coldflows_flag_)
+	{
+		vector<char> btoadd;
+		SendRecvShockedStatus(shockedcells,_tessellation.GetSentPoints(),
+			_tessellation.GetSentProcs(),btoadd);
+		shockedcells=VectorValues(shockedcells,_tessellation.GetSelfPoint());
+		if(!btoadd.empty())
+			shockedcells.insert(shockedcells.end(),btoadd.begin(),btoadd.end());
+		vector<double> Ekadd;
+		SendRecvVectorDouble(Ek,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
+			Ekadd);
+		Ek=VectorValues(Ek,_tessellation.GetSelfPoint());
+		if(!Ekadd.empty())
+			Ek.insert(Ek.end(),Ekadd.begin(),Ekadd.end());
+		SendRecvVectorDouble(Ef,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
+			Ekadd);
+		Ef=VectorValues(Ef,_tessellation.GetSelfPoint());
+		if(!Ekadd.empty())
+			Ef.insert(Ef.end(),Ekadd.begin(),Ekadd.end());
+	}
 #endif
 
 	UpdateConservedIntensive(_tessellation, _conservedextensive, 
@@ -650,17 +650,9 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		//for(int i=0;i<(int)ToRemoveReduced.size();++i)
 		//	ToRemoveReduced[i]-=n;
 	}
-	GetAMRExtensive(MPIcells,
-			MPItracer,
-			_cells,
-			tracer_,
-			traceractive,
-			MPI_AMR_Send,
-			_tessellation.GetDuplicatedProcs(),
-			_eos,
-			_tessellation.GetDuplicatedPoints(),
-			_tessellation.GetGhostIndeces(),
-			ToRemoveReduced);
+	GetAMRExtensive(MPIcells,MPItracer,_cells,tracer_,traceractive,MPI_AMR_Send,
+		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetGhostIndeces(),ToRemoveReduced);
 #endif
 	// Calculate the old extensive hydro
 	vector<Conserved> c_temp;
@@ -680,16 +672,13 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	{
 		for(int j=0;j<(int)VolIndex[i].size();++j)
 		{
-			int index=int(lower_bound
-				(TotalNeigh.begin(),TotalNeigh.end(),
+			int index=int(lower_bound(TotalNeigh.begin(),TotalNeigh.end(),
 				VolIndex[i][j])-TotalNeigh.begin());
 			if(i<n)
-				c_temp[index]+=Primitive2Conserved(_cells[ToRemove[i]],
-					dv[i][j]);
+				c_temp[index]+=Primitive2Conserved(_cells[ToRemove[i]],dv[i][j]);
 			else
 			{
-				c_temp[index]+=Primitive2Conserved(MPIcells[i-n],
-					dv[i][j]);
+				c_temp[index]+=Primitive2Conserved(MPIcells[i-n],dv[i][j]);
 			}
 			if(traceractive)
 				if(i<n)
