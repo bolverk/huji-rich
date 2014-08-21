@@ -188,6 +188,8 @@ public:
   void FindBoundaryRemoveSend(vector<int> const& ToRemove,vector<vector<int> > &BoundaryRemove,
 		vector<vector<vector<int> > > &BoundaryNeigh);
 
+  vector<vector<int> >& GetDuplicatedPoints(void);
+
   vector<vector<int> >const& GetDuplicatedPoints(void)const;
 
   vector<int> GetDuplicatedProcs(void)const;
@@ -195,6 +197,8 @@ public:
   vector<vector<int> >const& GetSentPoints(void)const;
 
   vector<int> GetSentProcs(void)const;
+
+  vector<vector<int> >& GetGhostIndeces(void);
 
   vector<vector<int> >const& GetGhostIndeces(void)const;
 

@@ -1042,11 +1042,6 @@ double TimeAdvance2mid
 
 	edge_velocities = tess.calc_edge_velocities(&hbc,point_velocities,time);
 
-	fluxes = calc_fluxes
-		(tess, cells, dt, time, interpolation,
-		edge_velocities, hbc, rs,CellsEvolve,
-		custom_evolution_manager,tracers);
-
 	if(coldflows_flag&&EntropyCalc)
 	{
 		const int n=tess.GetPointNo();
@@ -1057,6 +1052,17 @@ double TimeAdvance2mid
 			tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 	}
+
+#ifdef RICH_MPI
+	if(traceflag&&(!coldflows_flag||!EntropyCalc))
+		SendRecvTracers(tracers,tess.GetDuplicatedPoints(),
+			tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
+#endif
+	fluxes = calc_fluxes
+		(tess, cells, dt, time, interpolation,
+		edge_velocities, hbc, rs,CellsEvolve,
+		custom_evolution_manager,tracers);
+
 
 	if(coldflows_flag)
 	{
