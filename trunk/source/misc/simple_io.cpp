@@ -17,8 +17,8 @@ void write_vector(vector<double> const& v,
 {
   ofstream f(fname.c_str());
   f.precision(prec);
-  for(int i=0;i<(int)v.size();++i)
-    f << v[size_t(i)] << endl;
+  for(size_t i=0;i<v.size();++i)
+    f << v[i] << "\n";
   f.close();
 }
 
@@ -26,8 +26,8 @@ void write_vector(vector<int> const& v,
 		  string const& fname)
 {
   ofstream f(fname.c_str());
-  for(int i=0;i<(int)v.size();++i)
-    f << v[size_t(i)] << endl;
+  for(size_t i=0;i<v.size();++i)
+    f << v[i] << endl;
   f.close();
 }
 
@@ -55,10 +55,12 @@ int read_int(string const& fname)
 
 void binary_write_single_int(int n, ofstream& fh)
 {
-  fh.write((const char*)&n,sizeof(int));
+  char buf(static_cast<char>(n));
+  fh.write(&buf,sizeof(int));
 }
 
 void binary_write_single_double(double d, ofstream& fh)
 {
-  fh.write((const char*)&d,sizeof(double));
+  char buf(static_cast<char>(d));
+  fh.write(&buf,sizeof(double));
 }
