@@ -49,9 +49,9 @@ void simulation2d::main_loop(hdsim& sim,
     {
       try
 	{
-		int rank=get_mpi_rank();
+/*		int rank=get_mpi_rank();
 		if(rank==0)
-			cout<<sim.GetCycle()<<endl;
+			cout<<sim.GetCycle()<<endl;*/
 	  (sim.*time_advance_method)();
 	}
       catch(UniversalError const& eo)

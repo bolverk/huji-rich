@@ -731,7 +731,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		RemoveVector(tracer_,ToRemove);
 	// Fix the ghost points
 	int nprocs=(int)_tessellation.GetDuplicatedProcs().size();
-	sort(ToRemoveReduced.begin(),ToRemoveReduced.end());
+	//sort(ToRemoveReduced.begin(),ToRemoveReduced.end());
 	vector<vector<int> > & ghostpoints=_tessellation.GetDuplicatedPoints();
 	vector<vector<int> > & nghost=_tessellation.GetGhostIndeces();
 	vector<vector<int> > toremoveall(nprocs); // the indeces in the ghost that are removed
