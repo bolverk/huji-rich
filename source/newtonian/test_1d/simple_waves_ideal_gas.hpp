@@ -11,7 +11,8 @@
 #include "../common/equation_of_state.hpp"
 #include "../common/ideal_gas.hpp"
 
-using namespace std;
+//using namespace std;
+using std::string;
 
 /*! \brief Calculates the entropy of an ideal gas
   \param d Density
