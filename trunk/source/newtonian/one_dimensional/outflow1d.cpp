@@ -12,7 +12,7 @@ Conserved Outflow::CalcFlux(vector<double> const& Vertices,
     double vv = vertex_velocity[0];
     return rs.Solve(ghost,Cells[0],vv);
   }
-  else if(i==(int)Vertices.size()-1){
+  else if(i==static_cast<int>(Vertices.size())-1){
     Primitive ghost = Cells[Vertices.size()-2];
     double vv = vertex_velocity[Vertices.size()-1];
     return rs.Solve(Cells[Vertices.size()-2],ghost,vv);

@@ -15,7 +15,7 @@ Conserved Periodic1D::CalcFlux(vector<double> const& Vertices,
 			       vector<double> const& vertex_velocity,
 			       int i) const
 {
-  if(i==0||i==(int)Vertices.size()-1){
+  if(i==0||i==static_cast<int>(Vertices.size())-1){
     if(!effectively_zero(vertex_velocity[0]-vertex_velocity[Vertices.size()-1]))
       throw UniversalError("Vertex velocity must be the same on both sides");
 

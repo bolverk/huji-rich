@@ -170,7 +170,7 @@ namespace {
     eo.AddEntry("right y velocity",right.Velocity.y);
     eo.AddEntry("right sound speed",right.SoundSpeed);
     eo.AddEntry("right energy",right.Energy);
-    eo.AddEntry("interface index",(double)idx);
+    eo.AddEntry("interface index",static_cast<double>(idx));
     eo.AddEntry("interface position",pos);
     eo.AddEntry("interface velocity",vertex_velocity);
     throw eo;
@@ -188,9 +188,9 @@ namespace {
     vector<Conserved> res(Vertices.size());
     for(size_t i = 1;i<Vertices.size()-1; i++){
       const Primitive left = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], int(i), 0,dt);
+	(Vertices, Cells, VertexVelocity[i], static_cast<int>(i), 0,dt);
       const Primitive right = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], int(i), 1,dt);
+	(Vertices, Cells, VertexVelocity[i], static_cast<int>(i), 1,dt);
       try{
 	res[i] = rs.Solve(left, right, VertexVelocity[i]);
       }
@@ -207,7 +207,7 @@ namespace {
 			 VertexVelocity,0);
     res[Vertices.size()-1] = 
       bc.CalcFlux(Vertices, Cells, rs, 
-		  VertexVelocity, (int)Vertices.size()-1);
+		  VertexVelocity, static_cast<int>(Vertices.size())-1);
     return res;
   }
 
