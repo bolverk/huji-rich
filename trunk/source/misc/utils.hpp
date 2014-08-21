@@ -143,7 +143,7 @@ template <class T> void RemoveVector
   vector<T> result;
   result.reserve(v.size()-indeces.size());
   int counter=0;
-  for(size_t i=0;i<(size_t)indeces.back();++i)
+  for(size_t i=0;i<static_cast<size_t>(indeces.back());++i)
     {
       if(size_t(indeces[size_t(counter)])==i)
 	  ++counter;
