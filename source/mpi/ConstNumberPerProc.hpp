@@ -20,7 +20,7 @@ public:
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 	*/
 	ConstNumberPerProc(OuterBoundary const& outer,int npercell,double speed=0.03,
-		double RoundSpeed=2,int mode=1);
+		double RoundSpeed=2,int mode=2);
 
 	void Update(Tessellation &tproc,Tessellation const& tlocal)const;
 
