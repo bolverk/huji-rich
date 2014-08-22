@@ -7,7 +7,8 @@
 #define RESTDUMP_HPP 1
 #include "../common/hydrodynamic_variables.hpp"
 #include <vector>
-using namespace std;
+
+using std::vector;
 
 //! \brief Container for grid and hydrodynamical cells
 class HydroSnapshot
