@@ -9,7 +9,7 @@
 #include <string>
 #include "../one_dimensional/hdsim.hpp"
 
-using namespace std;
+using std::string;
 
 //! \brief Functions and classes for managing simulation time advance loops
 namespace simulation1d{
