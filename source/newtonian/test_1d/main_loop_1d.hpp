@@ -25,7 +25,7 @@ namespace simulation1d{
      */
     virtual bool should_continue(hdsim1D const& sim) = 0;
 
-    virtual ~TerminationCondition(void) = 0;
+    virtual ~TerminationCondition(void);
 
   private:
   };
