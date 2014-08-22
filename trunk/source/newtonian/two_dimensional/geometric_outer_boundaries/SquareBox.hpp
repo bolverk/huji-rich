@@ -9,6 +9,8 @@
 //! \brief Square box outer boundary conditions
 #include "../OuterBoundary.hpp"
 
+using std::pair;
+
 //! \brief Square frame for the tessellation
 class SquareBox: public OuterBoundary
 {

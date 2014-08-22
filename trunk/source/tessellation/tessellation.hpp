@@ -11,7 +11,8 @@
 
 #include "Edge.hpp"
 
-using namespace std;
+using std::vector;
+
 class OuterBoundary;
 class HydroBoundaryConditions;
 
