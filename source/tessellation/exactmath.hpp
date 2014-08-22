@@ -10,8 +10,9 @@
 #include <cmath>
 #include <vector>
 #include <boost/array.hpp>
-using namespace std;
-using namespace boost;
+
+using std::vector;
+using std::min;
 
 /*! \brief Returns the absolute value of the number given.
  \param a Number
