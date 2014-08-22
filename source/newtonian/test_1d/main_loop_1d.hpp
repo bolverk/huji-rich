@@ -60,7 +60,7 @@ namespace simulation1d{
      */
     virtual void diagnose(hdsim1D const& sim) = 0;
     
-    virtual ~DiagnosticsFunction(void) = 0;
+    virtual ~DiagnosticsFunction(void);
   };
 
   //! \brief Writes the time to a file after each time advance cycle
