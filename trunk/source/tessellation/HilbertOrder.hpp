@@ -14,7 +14,12 @@
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif
-using namespace std;
+
+using std::vector;
+using std::pair;
+using std::stack;
+using std::max;
+using std::min;
 
 /*!
 \brief Returns the Hilber curve ordering
