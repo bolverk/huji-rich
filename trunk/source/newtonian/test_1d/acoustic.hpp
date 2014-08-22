@@ -11,7 +11,7 @@
 #include "../one_dimensional/spatial_distribution1d.hpp"
 #include "sine_wave.hpp"
 
-using namespace std;
+using std::string;
 
 /*! \brief Initial conditions giving rise to acoustic waves
  */
