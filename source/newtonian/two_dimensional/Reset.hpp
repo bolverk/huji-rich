@@ -10,6 +10,10 @@
 #include <fstream>
 #include <string>
 
+using std::string;
+using std::fstream;
+using std::ios;
+
 /*!
 \brief Outputs the simulation data into a restart file
 \param location The filename of the dump

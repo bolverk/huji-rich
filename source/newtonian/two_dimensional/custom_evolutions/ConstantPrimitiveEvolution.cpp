@@ -1,5 +1,7 @@
 #include "ConstantPrimitiveEvolution.hpp"
 
+using std::multiplies;
+
 bool ConstantPrimitiveEvolution::ShouldForceTracerReset(void)const
 {
 	return true;

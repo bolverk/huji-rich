@@ -1,5 +1,7 @@
 #include "hydrodynamics_2d.hpp"
 
+using std::max;
+
 namespace {
 	Vector2D calc_representing_point(Tessellation const& tess,
 		int index,

@@ -1,5 +1,7 @@
 #include "ConstantFluxEvolution.hpp"
 
+using std::multiplies;
+
 ConstantFluxEvolution::ConstantFluxEvolution(Primitive const& cell,
 	vector<double> const& tracer,EquationOfState const& eos,bool entropycalc)
 :cell_(cell),tracer_(tracer),eos_(eos),entropy_(entropycalc){}

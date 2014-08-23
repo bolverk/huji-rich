@@ -1,5 +1,7 @@
 #include "PeriodicHydro.hpp"
 
+using std::multiplies;
+
 PeriodicHydro::PeriodicHydro(RiemannSolver const& rs):
 rs_(rs) {}
 
