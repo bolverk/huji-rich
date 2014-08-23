@@ -221,9 +221,7 @@ public:
   */
   void SetTimeStepExternal(double dt);
 
-  /*! \brief Advances the simulation in time
-    \return Void
-  */
+  //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
   /*! \brief Advances the simulation in time, second order accuracy
