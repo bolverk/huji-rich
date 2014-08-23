@@ -1,6 +1,8 @@
 #include "FreeFlow.hpp"
 #include "../hydrodynamics_2d.hpp"
 
+using std::multiplies;
+
 double FreeFlow::GetMassFlux(void) const
 {
 	return mass_flux;

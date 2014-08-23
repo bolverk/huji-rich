@@ -22,8 +22,6 @@
 #include "../../mpi/mpi_macro.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 
-using namespace std;					      
-
 /*! \brief Initialize computational cells
   \param density Density distribution
   \param pressure Pressure distribution

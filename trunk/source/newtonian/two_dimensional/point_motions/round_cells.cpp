@@ -2,6 +2,8 @@
 #include <cstddef>
 #include "round_cells.hpp"
 
+using std::max;
+
 RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
 	double chi, 
 	double eta,bool coldflows,
