@@ -77,7 +77,7 @@ Conserved ConservativeForce::Calculate
 			first_time_=false;
 		}
 		else
-			dt_=min(dt_,sqrt(tess.GetWidth(point)/abs(acc)));
+		  dt_=std::min(dt_,sqrt(tess.GetWidth(point)/abs(acc)));
 	}
 	return res;
 }

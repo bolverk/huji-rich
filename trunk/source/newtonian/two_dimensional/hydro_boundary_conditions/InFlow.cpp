@@ -2,6 +2,8 @@
 #include "../../../misc/universal_error.hpp"
 #include "../../../misc/utils.hpp"
 
+using std::multiplies;
+
 Primitive InFlow::GetBoundaryPrimitive(Edge const& /*edge*/,
 	Tessellation const& /*Data*/,vector<Primitive> const& /*cells*/,
 	double /*time*/)const

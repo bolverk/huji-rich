@@ -4,7 +4,7 @@ ConstNumberPerProc::~ConstNumberPerProc(void){}
 
 ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
 	double speed,double RoundSpeed,int mode):
-outer_(outer),PointsPerProc_(max(npercell,1)),speed_(speed),RoundSpeed_(RoundSpeed),
+  outer_(outer),PointsPerProc_(std::max(npercell,1)),speed_(speed),RoundSpeed_(RoundSpeed),
 	mode_(mode){}
 
 void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)const

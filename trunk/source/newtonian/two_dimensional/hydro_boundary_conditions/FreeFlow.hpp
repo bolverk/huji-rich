@@ -9,6 +9,8 @@
 #include <string>
 #include "../HydroBoundaryConditions.hpp"
 
+using std::string;
+
 //! \brief Free Flow Hydro Boundary Conditions
 class FreeFlow: public HydroBoundaryConditions
 {
