@@ -1,5 +1,7 @@
 #include "noh_hbc.hpp"
 
+using std::multiplies;
+
 NohHBC::NohHBC(Vector2D const& center,double d0,double v0,double p0 ):
   center_(center), d0_(d0), v0_(v0),p0_(p0) {}
 

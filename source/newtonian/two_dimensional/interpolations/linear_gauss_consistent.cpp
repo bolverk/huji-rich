@@ -3,6 +3,8 @@
 #include "linear_gauss_consistent.hpp"
 #include "../../common/hydrodynamics.hpp"
 
+using std::min;
+using std::max;
 
 namespace {
   class ReducedPrimitive
@@ -500,7 +502,7 @@ namespace
 	double maxdiff = 0;
 	BOOST_FOREACH(double nv, neighbor_vals)
 	  {
-	    maxdiff = max(maxdiff,abs(nv-my_val));
+	    maxdiff = max(maxdiff,static_cast<double>(abs(nv-my_val)));
 	  }
 	for(int i=0;i<(int)edge_list.size();++i)
 	  {
@@ -535,7 +537,7 @@ namespace
 	    double maxdiff = 0;
 	    BOOST_FOREACH(double nv, neighbor_vals)
 	      {
-		maxdiff = max(maxdiff,abs(nv-my_val2));
+		maxdiff = max(maxdiff,static_cast<double>(abs(nv-my_val2)));
 	      }
 	    for(int j=0;j<n;++j)
 	      {
