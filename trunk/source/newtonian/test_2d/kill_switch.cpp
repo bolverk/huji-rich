@@ -1,6 +1,10 @@
 #include "kill_switch.hpp"
 #include <fstream>
 
+using std::ofstream;
+using std::ifstream;
+using std::endl;
+
 KillSwitch::KillSwitch(const string& fname,
 		       TerminationCondition& tc):
   fname_(fname), tc_(tc) 
