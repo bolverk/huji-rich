@@ -10,7 +10,7 @@
 #include <vector>
 #include "../../tessellation/geometry.hpp"
 
-using namespace std;
+using std::vector;
 
 /*! \brief Adds a random perturbation to the position of mesh generating points
   \param original Unperturbed mesh generating points

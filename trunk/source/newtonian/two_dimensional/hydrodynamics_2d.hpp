@@ -115,7 +115,7 @@ void UpdateConservedExtensive
 /*! \brief Move mesh points
   \param pointvelocity Velocities of all mesh points
   \param dt Time step
-  \param tessellation
+  \param tessellation Tessellation
   \param oldpoints Possible input for the location of the old points
 */
 void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
