@@ -8,7 +8,6 @@
 #include <vector>
 #include "geometry.hpp"
 #include "exactmath.hpp"
-using namespace boost;
 
 /*! \brief Checks whether 3 given points are on a counterclockwise circle, clockwise circle or colinear.
  \param points The three points to check
