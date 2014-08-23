@@ -17,8 +17,6 @@
 #include "../misc/utils.hpp"
 #include "../newtonian/two_dimensional/ReducedPrimitiveGradient2D.hpp"
 
-using namespace std;
-
 /*! \brief Find the iterator of a certain value in an array
   \param first First iterator
   \param last Iterator pointing to last position
