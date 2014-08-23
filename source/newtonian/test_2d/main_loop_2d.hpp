@@ -9,7 +9,7 @@
 #include <string>
 #include "../two_dimensional/hdsim2d.hpp"
 
-using namespace std;
+using std::string;
 
 //! \brief Abstract class for a diagnostic function
 class DiagnosticFunction
