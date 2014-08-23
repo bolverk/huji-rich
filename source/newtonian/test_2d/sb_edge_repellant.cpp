@@ -45,7 +45,7 @@ vector<Vector2D> SBEdgeRepellant::calcAllVelocities(Tessellation const& tess,
     (tess,cells,time,cevolve);
   for(int i=0;i<total_specials_;++i)
     result[i] = Vector2D(0,0);
-  for(size_t i=total_specials_;i<result.size();++i){
+  for(size_t i=static_cast<size_t>(total_specials_);i<result.size();++i){
     const Vector2D mp = tess.GetMeshPoint(i);
     const Vector2D vm = cells[i].Velocity;
     if(should_be_decelerated(mp,vm)){

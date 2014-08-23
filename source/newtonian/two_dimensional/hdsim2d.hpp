@@ -224,10 +224,9 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
-  /*! \brief Advances the simulation in time, second order accuracy
-    \return Void
-  */
+  //! \brief Advances the simulation in time, second order accuracy
   void TimeAdvance2Mid(void);
+
   /*! \brief Adds a tracer to the simulation
     \param tp The spatial distribution of the tracer to add
   */
