@@ -7,9 +7,9 @@ class Communication
 {
 public:
 
-  virtual void sendInfo(int address, int tag) = 0;
+  virtual void sendInfo(int address) = 0;
 
-  virtual void recvInfo(int addrress, int tag) = 0;
+  virtual void recvInfo(int addrress) = 0;
 
   virtual ~Communication(void);
 };
@@ -19,9 +19,9 @@ class SendRecvDouble: public Communication
 public:
   SendRecvDouble(double send_buf);
 
-  void sendInfo(int address, int tag);
+  void sendInfo(int address);
 
-  void recvInfo(int address, int tag);
+  void recvInfo(int address);
 
   double getReply(void) const;
 
@@ -31,8 +31,7 @@ private:
 };
 
 void marshal_communication(Communication& communication,
-			   int address, int tag,
-			   bool send_first);
+			   int address, bool send_first);
 
 #endif // RICH_MPI
 
