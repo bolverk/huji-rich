@@ -2118,7 +2118,11 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			ToRemove.begin());
 		V.selfindex[i]-=toReduce2;
 	}
-	RemoveVector(V.selfindex,ToRemove);
+	vector<int> ToRemovetemp;
+	for(vector<int>::iterator it=ToRemove.begin();it!=ToRemove.end();++it)
+		if(binary_search(V.selfindex.begin(),V.selfindex.end(),*it))
+			ToRemovetemp.push_back(*it);
+	RemoveVector(V.selfindex,ToRemovetemp);
 #endif
 	// Fix the sent cells, do i need this??
 	V.Nextra-=(int)ToRemove.size();
