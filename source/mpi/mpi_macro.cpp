@@ -1,6 +1,8 @@
 #include "mpi_macro.hpp"
 #ifdef RICH_MPI
 
+#include "marshal.hpp"
+
 namespace
 {
 	void SendRecvHydro(vector<int> const& sentprocs,
@@ -846,6 +848,77 @@ void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 	customevolutions=VectorValues(customevolutions,localpoints);
 }
 
+namespace {
+
+  template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
+  {
+    vector<T> res(source.size());
+    for(size_t i=0;i<source.size();++i)
+      res[i] = static_cast<T>(source[i]);
+    return res;
+  }
+
+  class HydroCommunicator: public Communication
+  {
+  public:
+
+    HydroCommunicator(const EquationOfState& eos,
+		      const vector<Primitive>& p_to_send,
+		      const vector<size_t>& cei_to_send):
+      eos_(eos), p_to_send_(p_to_send), 
+      cei_to_send_(cei_to_send),
+      p_received_(), cei_received_() {}
+
+    void sendInfo(int address)
+    {
+      MPI_SendVectorPrimitive(p_to_send_,address,0,MPI_COMM_WORLD);
+      if(!cei_to_send_.empty()){
+	vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
+	MPI_Send(&buf[0],static_cast<int>(buf.size()),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
+      }
+      else{
+	unsigned temp = 0;
+	MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
+      }
+    }
+
+    void recvInfo(int address)
+    {
+      MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
+      int count;
+      MPI_Status stat;
+      MPI_Probe(address,0,MPI_COMM_WORLD,&stat);
+      MPI_Get_count(&stat,MPI_UNSIGNED,&count);
+      if(stat.MPI_TAG==0){
+	vector<unsigned> buf(count);
+	MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	cei_received_ = mass_static_cast<size_t,unsigned>(buf);
+      }
+      else{
+	unsigned temp;
+	MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+      }
+    }
+
+    const vector<Primitive>& getReceivedPrimitives(void) const
+    {
+      return p_received_;
+    }
+
+    const vector<size_t> getReceivedCustomEvolutionIndices(void) const
+    {
+      return cei_received_;
+    }
+
+  private:
+    const EquationOfState& eos_;
+    const vector<Primitive> p_to_send_;
+    const vector<size_t> cei_to_send_;
+    vector<Primitive> p_received_;
+    vector<size_t> cei_received_;
+  };
+}
+
 void SendRecvHydro(vector<Primitive> &cells,
 	vector<size_t> &customevolutions,vector<vector<int> > const& sentcells,
 	vector<int> const& sentprocs,EquationOfState const& eos,vector<vector<int> > const& Nghost,
@@ -859,77 +932,18 @@ void SendRecvHydro(vector<Primitive> &cells,
 	int n=worldsize-1;
 	vector<vector<Primitive> > padd(nlist);
 	vector<vector<size_t> > cadd(nlist);
-	vector<vector<vector<double> > > tadd(nlist);
+
 	// Send the data
 	for(int i=0;i<n;++i)
 	{
 		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
 			-sentprocs.begin();
-		if(index<nlist)
-		{
-			if(rank<procorder[i])
-			{
-				vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-				MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-				MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
-				vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
-				if(!ctemp.empty())
-					MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
-					MPI_COMM_WORLD);
-				else
-				{
-					size_t temp;
-					MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
-				}
-				int count;
-				MPI_Status stat;
-				MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
-				MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-				if(stat.MPI_TAG==0)
-				{
-					cadd[index].resize(count);
-					MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				else
-				{
-					size_t temp;
-					MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
-						MPI_STATUS_IGNORE);
-				}
-			}
-			else
-			{
-				MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
-				vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
-				MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-				int count;
-				MPI_Status stat;
-				MPI_Probe(procorder[i],0,MPI_COMM_WORLD,&stat);
-				MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-				if(stat.MPI_TAG==0)
-				{
-					cadd[index].resize(count);
-					MPI_Recv(&cadd[index][0],count,MPI_UNSIGNED,procorder[i],0,
-						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-				}
-				else
-				{
-					size_t temp;
-					MPI_Recv(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD,
-						MPI_STATUS_IGNORE);
-				}
-				vector<size_t> ctemp=VectorValues(customevolutions,sentcells[index]);
-				if(ctemp.empty())
-				{
-					size_t temp;
-					MPI_Send(&temp,1,MPI_UNSIGNED,procorder[i],1,MPI_COMM_WORLD);
-				}
-				else
-					MPI_Send(&ctemp[0],(int)ctemp.size(),MPI_UNSIGNED,procorder[i],0,
-					MPI_COMM_WORLD);
-			}
-		}
+		HydroCommunicator hydro_communicator(eos,
+						     VectorValues(cells,sentcells[index]),
+						     VectorValues(customevolutions,sentcells[index]));
+		marshal_communication(hydro_communicator,procorder[i],rank<procorder[i]);
+		padd[index] = hydro_communicator.getReceivedPrimitives();
+		cadd[index] = hydro_communicator.getReceivedCustomEvolutionIndices();
 	}
 	// ReArrange the data
 	cells.resize(totalpoints);
