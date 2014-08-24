@@ -11,7 +11,7 @@ def unstructured_contour(x_list, y_list, z_list):
     res = plt.tricontourf(mtri, z_list)
     return res
 
-def consolidate_data(fname):
+def consolidate_data(fname, g = 5./3.):
 
     import h5py
     import numpy
@@ -20,6 +20,11 @@ def consolidate_data(fname):
     res = {}
     for field in f:
         res[field] = numpy.array(f[field])
+    res['log_density'] = numpy.log(res['density'])
+    res['log_pressure'] = numpy.log(res['pressure'])
+    res['sound_speed'] = numpy.sqrt(res['pressure']/res['density'])
+    res['speed'] = numpy.sqrt(res['x_velocity']**2+res['y_velocity']**2)
+    res['mach_number'] = res['speed']/res['sound_speed']
     return res
 
 def collect_snapshot_data(file_list):
@@ -48,6 +53,7 @@ def main():
     unstructured_contour(data['x_coordinate'],
                          data['y_coordinate'],
                          data[args.varname])
+    pylab.colorbar()
     pylab.show()
 
 if __name__ == '__main__':
