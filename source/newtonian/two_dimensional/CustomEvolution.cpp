@@ -6,6 +6,11 @@ bool CustomEvolution::ShouldForceTracerReset(void)const
 	return true;
 }
 
+bool CustomEvolution::isRelevantToInterpolation(void) const
+{
+  return false;
+}
+
 Vector2D CustomEvolution::CalcVelocity(int /*index*/,
 				Tessellation const& /*tessellation*/,
 				vector<Primitive> const& /*primitives*/,double /*time*/)
