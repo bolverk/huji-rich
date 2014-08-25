@@ -26,7 +26,7 @@ Conserved total_conserved(hdsim const& sim)
     res += Primitive2Conserved
       (sim.GetCell(i),
        sim.GetCellVolume(i));
-  
+
   #ifdef RICH_MPI
   double total_mass = 0;
   MPI_Allreduce(&res.Mass,&total_mass,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
@@ -136,7 +136,7 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
       else
 	myFile.write((char*)&P.Velocity.x,sizeof(double));
     }
-  for(int i=0;i<temp;++i) 
+  for(int i=0;i<temp;++i)
     {
       P=sim.GetCell(i);
       if(floatprecision)
@@ -150,7 +150,7 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
   // Do the convex hull for each point
   vector<Vector2D> convhull;
   vector<int> nedges(temp);
-  for(int i=0;i<temp;++i) 
+  for(int i=0;i<temp;++i)
     {
       ConvexHull(convhull,&V,i);
       nedges[i]=(int)convhull.size();

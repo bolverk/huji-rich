@@ -31,7 +31,7 @@ namespace {
   };
 }
 
-namespace 
+namespace
 {
   ReducedPrimitive RpMultScalar(double s,ReducedPrimitive const& rp)
   {
@@ -54,9 +54,6 @@ namespace
 			    rp1.xvelocity-rp2.xvelocity,	rp1.yvelocity-rp2.yvelocity,
 			    rp1.tracers-rp2.tracers);
   }
-
-
-
 
   vector<double> ScalarProd(Vector2D const&v,vector<Vector2D> const& vec)
   {
@@ -121,7 +118,7 @@ LinearGaussArepo::LinearGaussArepo
   _rigidflag(rigidflag),
   time_(0) {}
 
-namespace 
+namespace
 {
   ReducedPrimitive interp_all(Primitive const& cell,vector<double> const&
 			      cell_tracer,Vector2D const& cell_cm,ReducedPrimitiveGradient2D const& slope,
@@ -248,7 +245,6 @@ namespace
     return res;
   }
 
-
   ReducedPrimitiveGradient2D calc_naive_slope(Primitive const& cell,
 					      Vector2D const& center,double cell_volume,vector<Primitive> const& neighbors,
 					      vector<Vector2D> const& neighbor_centers,vector<Edge> const& edge_list,
@@ -366,7 +362,6 @@ namespace
     }
   };
 
-
   ReducedPrimitiveGradient2D slope_limit(Primitive const& cell,
 					 Vector2D const& center,vector<Primitive> const& neighbors,
 					 vector<Edge> const& edge_list,ReducedPrimitiveGradient2D const& slope,
@@ -465,7 +460,6 @@ namespace
     return res;
   }
 
-
   ReducedPrimitiveGradient2D shocked_slope_limit(Primitive const& cell,
 						 Vector2D const& center,vector<Primitive> const& neighbors,
 						 vector<Edge> const& edge_list,ReducedPrimitiveGradient2D const& slope,
@@ -532,7 +526,7 @@ namespace
 	    double psi = 1;
 	    boost::container::static_vector<double,17> neighbor_vals;
 	    for(int j=0;j<n;++j)
-	      neighbor_vals.push_back(neighbor_tracers[j][i]); 
+	      neighbor_vals.push_back(neighbor_tracers[j][i]);
 	    //const double my_val = cell_trace[i];
 	    const double my_val2 = cell_trace[i];
 	    double maxdiff = 0;
@@ -598,7 +592,7 @@ namespace
 		vector<Primitive> const& neighbor_list,
 		double pressure_ratio)
   {
-    const bool cond1 = 
+    const bool cond1 =
       (naive_slope.xvelocity.x+naive_slope.yvelocity.y)*
       cell_width<(-shock_ratio)*cell.SoundSpeed;
     const bool cond2 = PressureRatio(cell,neighbor_list)<pressure_ratio;
@@ -665,7 +659,6 @@ namespace
   }
 }
 
-
 void LinearGaussArepo::Prepare(Tessellation const& tessellation,
 			       vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 			       double /*dt*/,double time)
@@ -684,7 +677,6 @@ void LinearGaussArepo::Prepare(Tessellation const& tessellation,
 }
 
 namespace {
-
   Primitive CalcDtFlux(Primitive const&cell,
 		       ReducedPrimitiveGradient2D const& grad,double dt,Vector2D const& vface)
   {
@@ -714,7 +706,6 @@ namespace {
       res[i]=-0.5*dt*(grad.tracers[i].x*(cell.Velocity.x-vface.x)+
 		      grad.tracers[i].y*(cell.Velocity.y-vface.y));
     return res;
-
   }
 }
 

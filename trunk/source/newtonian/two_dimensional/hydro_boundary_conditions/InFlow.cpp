@@ -79,7 +79,6 @@ bool InFlow::IsGhostCell(int i,Tessellation const& Data) const
 		return false;
 }
 
-
 vector<double> InFlow::CalcTracerFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,
 	vector<vector<double> > const& tracers,double dm,

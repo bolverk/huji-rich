@@ -1,10 +1,8 @@
 #include "SineSepar.hpp"
 
-
 SineSepar::SineSepar(double Amp,double f,double off,double above,double under):
 Amplitude(Amp),freq(f),offset(off),above_(above),under_(under)
 {}
-
 
 SineSepar::~SineSepar(void)
 {}

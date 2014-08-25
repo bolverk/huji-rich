@@ -245,7 +245,6 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 	return res;
 }
 
-
 vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 	Vector2D const& center,Tessellation const& tproc)
 {
@@ -262,7 +261,6 @@ vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 	}
 	return res;
 }
-
 
 namespace {
 	vector<size_t> most_uniform_range_partition(size_t range,
@@ -313,7 +311,7 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 	for(size_t i=0;i<get_mpi_rank();++i)
 		start += range_list[i];
 	size_t ending = start + range_list[get_mpi_rank()];
-	const vector<vector<Vector2D> > sorted_points = 
+	const vector<vector<Vector2D> > sorted_points =
 		sort_points(process_tess, grid_generator, start, ending);
 	vector<Vector2D> res = sorted_points[get_mpi_rank()];
 	for(size_t i=0;i<get_mpi_rank();++i){

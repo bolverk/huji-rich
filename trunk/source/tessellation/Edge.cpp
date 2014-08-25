@@ -2,7 +2,7 @@
 #include <cmath>
 #include "../misc/universal_error.hpp"
 
-Edge::Edge(void): 
+Edge::Edge(void):
 vertices(Vector2D(), Vector2D()),
 	neighbors(0,0) {}
 

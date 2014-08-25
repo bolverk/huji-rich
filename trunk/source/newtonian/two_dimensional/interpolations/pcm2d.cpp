@@ -47,4 +47,3 @@ vector<double> PCM2D::interpolateTracers
     }
   return res;
 }
-

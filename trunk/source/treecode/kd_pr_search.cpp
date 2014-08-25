@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -190,7 +190,6 @@ void ANNkd_leaf::ann_pri_search(ANNdist /*box_dist*/)
 	min_dist = ANNprPointMK->max_key(); // k-th smallest distance so far
 
 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
-
 		pp = ANNprPts[bkt[i]];			// first coord of next data point
 		qq = ANNprQ;					// first coord of query point
 		dist = 0;

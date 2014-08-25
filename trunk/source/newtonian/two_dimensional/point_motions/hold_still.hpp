@@ -39,7 +39,7 @@ public:
    */
   HoldStill(PointMotion& raw, const Condition& cond);
 
-  Vector2D CalcVelocity(int index, 
+  Vector2D CalcVelocity(int index,
 			Tessellation const& tessellation,
 			vector<Primitive> const& primitives,double time);
 

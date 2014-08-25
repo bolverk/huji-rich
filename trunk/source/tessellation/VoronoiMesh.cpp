@@ -3,8 +3,6 @@
 #include "../misc/simple_io.hpp"
 
 namespace {
-
-
 	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
 		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
 		&neighpoints,vector<vector<int> > &newpoints)
@@ -94,11 +92,16 @@ namespace {
 	// Returns the new points as well as the self index of the points that where kept
 	// and the indeces of the sent points
 	vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc,int rank,
-		vector<int> const& cornerproc,vector<int> const& proclist,vector<Vector2D>
+		vector<int> cornerproc,vector<int> const& proclist,vector<Vector2D>
 		const& points,OuterBoundary const* obc,vector<int> &selfindex,
 		vector<int> &sentproc,vector<vector<int> > &sentpoints)
 	{
 		vector<Vector2D> res;
+		if(!cornerproc.empty())
+		{
+			sort(cornerproc.begin(),cornerproc.end());
+			cornerproc=unique(cornerproc);
+		}
 		res.reserve(points.size());
 		selfindex.clear();
 		int npoints=(int)points.size();
@@ -407,8 +410,7 @@ namespace {
 		return res;
 	}
 
-
-	void RemoveDuplicateCorners(vector<int> &cornerproc,vector<vector<int> > 
+	void RemoveDuplicateCorners(vector<int> &cornerproc,vector<vector<int> >
 		&corners,vector<int> const& proclist,vector<vector<int> > &toduplicate)
 	{
 		vector<int> newcornerproc;
@@ -675,7 +677,6 @@ namespace {
 	}
 }
 
-
 VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
 	OuterBoundary const& bc):
 Nextra(0),
@@ -856,7 +857,7 @@ VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
 GhostPoints(other.GhostPoints),GhostProcs(other.GhostProcs),
 	SentPoints(other.SentPoints),SentProcs(other.SentProcs),
 	selfindex(other.selfindex),
-	Nextra(other.Nextra),logger(other.logger),	
+	Nextra(other.Nextra),logger(other.logger),
 	eps(other.eps),
 	obc(other.obc),
 	cell_edges(other.cell_edges),
@@ -1058,7 +1059,6 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		CM[i]=CalcCellCM(i);
 }
 
-
 void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc,
 	OuterBoundary const* outer)
 {
@@ -1154,7 +1154,6 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	toduptemp.insert(toduptemp.end(),corners.begin(),corners.end());
 	//SendRecv(procorder,proclist,toduplicate,vproc);
 
-
 	//write_vector(proclisttemp,"talked"+int2str(rank)+".txt");
 	NGhostReceived.resize(proclisttemp.size(),vector<int> ());
 	SendRecv(procorder,proclisttemp,toduptemp);
@@ -1234,7 +1233,6 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 			CM[i]=CalcCellCM(i);
 #endif
 }
-
 
 Vector2D VoronoiMesh::get_center(int facet)
 	// This function calculates the center of the circle surrounding the Facet
@@ -1466,7 +1464,6 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		CM[i]=CalcCellCM(i);
 }
 
-
 void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 {
 #ifdef RICH_MPI
@@ -1531,7 +1528,6 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 
 	vector<vector<int> > corners;
 	vector<vector<int> > totest;
-
 
 	GetCorners(toduplicate,corners);
 	GetToTest(toduplicate,totest);
@@ -1664,11 +1660,10 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
 			other=edges[mesh_vertices[index][i]].neighbors.second;
 			//if(other!=-1)
 			res.push_back(other);
-		}	
+		}
 	}
 	return res;
 }
-
 
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 {
@@ -1688,13 +1683,10 @@ vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 			if(other>-1)
 				other=edges[mesh_vertices[index][i]].neighbors.second;
 			res.push_back(other);
-		}	
+		}
 	}
 	return res;
 }
-
-
-
 
 Tessellation* VoronoiMesh::clone(void)const
 {
@@ -1998,8 +1990,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			}
 		}
 
-		// copy the new edges	
-		Nedges=(int)NewEdges.size();	
+		// copy the new edges
+		Nedges=(int)NewEdges.size();
 		// Fix the mesh vertices to point to the correct edges
 		int temp,other;
 		for(int j=0;j<Nedges;++j)
@@ -2011,8 +2003,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				temp=pair_member(NewEdges[j].neighbors,k);
 				other=pair_member(NewEdges[j].neighbors,(k+1)%2);
 				if(temp==-1||temp>=Npoints)
-					continue;				
-				size_t jj=0;			
+					continue;
+				size_t jj=0;
 				if(other!=-1)
 				{
 					for(jj=0;jj<V.mesh_vertices[temp].size();++jj)
@@ -2160,13 +2152,12 @@ int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int NewIndex,
 	vector<Vector2D>& cor=V.Tri->ChangeCor();
 	cor.push_back(NewPoint);
 	int index= V.edges[loc].neighbors.second==other ? 0 : 1;
-	int& temp = V.edges[loc].neighbors.second==other ? 
+	int& temp = V.edges[loc].neighbors.second==other ?
 		V.edges[loc].neighbors.first :
 	V.edges[loc].neighbors.second;
 	temp = (int)cor.size();
 	return (int)cor.size();
 }
-
 
 void VoronoiMesh::RefineCells(vector<int> const& ToRefine,
 	vector<Vector2D> const& directions,double alpha)
@@ -2247,7 +2238,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		vector<int> old_ref;
 		vector<int> new_ref;
 		// Calculate the splitting edge
-		Edge splitedge(0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) - 
+		Edge splitedge(0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) -
 			normal*R*20,0.5*(NewPoint+V.GetMeshPoint(ToRefine[i])) +
 			normal*R*20,Npoints+i,ToRefine[i]);
 		Vector2D intersect;
@@ -2266,7 +2257,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 					if(vs1.distance(intersect)<R*1e-8)
 						continue;
 					else
-						vs2=intersect;			
+						vs2=intersect;
 				++counter_edges;
 				if(counter_edges==2)
 				{
@@ -2351,7 +2342,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 						V.GetMeshPoint(V.GetOriginalIndex(NewEdge.neighbors.second));
 					Edge temp(NewEdge.vertices.first-diff,
 						NewEdge.vertices.second-diff,
-						Npoints+i, 
+						Npoints+i,
 						V.GetOriginalIndex(NewEdge.neighbors.second));
 					V.mesh_vertices[temp.neighbors.second].push_back((int)V.edges.size());
 					V.edges.push_back(temp);
@@ -2436,12 +2427,12 @@ Vector2D VoronoiMesh::GetMeshPoint(int index) const
 	return Tri->get_point(index);
 }
 
-int VoronoiMesh::GetTotalSidesNumber(void) const 
+int VoronoiMesh::GetTotalSidesNumber(void) const
 {
 	return (int)edges.size();
 }
 
-Edge const& VoronoiMesh::GetEdge(int index) const 
+Edge const& VoronoiMesh::GetEdge(int index) const
 {
 	return edges[index];
 }
@@ -2494,7 +2485,6 @@ void VoronoiMesh::FindIntersectingOuterPoints(vector<Edge> const&box_edges,vecto
 			boxduplicate[i]=unique(boxduplicate[i]);
 		}
 	}
-
 }
 
 void VoronoiMesh::FindIntersectingPoints(vector<Edge> const &box_edges,
@@ -2590,7 +2580,7 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 	for(int i=0;i<ncell;++i)
 	{
 		for(int j=0;j<nbox;++j)
-		{	
+		{
 			if(SegmentIntersection(box_edges[j],edges[mesh_vertices[cell][i]],
 				intersect))
 			{
@@ -2620,8 +2610,6 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 	res=unique(res);
 	return res;
 }
-
-
 
 vector<Edge> VoronoiMesh::GetBoxEdges(void)
 {
@@ -2894,7 +2882,7 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
 		}
 		if(edges[mesh_vertices[point][i]].vertices.first.x<(min_point.x+R*eps)&&
 			edges[mesh_vertices[point][i]].vertices.first.y<min_point.y)
-		{	
+		{
 			min_point=edges[mesh_vertices[point][i]].vertices.first;
 			min_index=i;
 			p_index=0;
@@ -2902,7 +2890,7 @@ vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
 
 		if(edges[mesh_vertices[point][i]].vertices.second.x<(min_point.x+R*eps)&&
 			edges[mesh_vertices[point][i]].vertices.second.y<min_point.y)
-		{	
+		{
 			min_point=edges[mesh_vertices[point][i]].vertices.second;
 			min_index=i;
 			p_index=1;
@@ -2967,12 +2955,10 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 	}
 }
 
-
 vector<Edge>& VoronoiMesh::GetAllEdges(void)
 {
 	return edges;
 }
-
 
 void VoronoiMesh::NonSendBoundary(vector<int> &
 	proclist,vector<vector<int> > & data,Tessellation const& v,
@@ -3194,7 +3180,6 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 #endif
 }
 
-
 void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 {
 	int npoints=(int)points.size();
@@ -3330,7 +3315,6 @@ vector<vector<int> >const& VoronoiMesh::GetSentPoints(void)const
 	return SentPoints;
 }
 
-
 // cpoints must be convex hull, checks if vec is inside cpoints
 bool PointInCell(vector<Vector2D> const& cpoints,Vector2D const& vec)
 {
@@ -3359,7 +3343,7 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 	for(int i=1;i<n;++i)
 	{
 		res[0]=min(min(cell_edges[i].vertices.first.x,cell_edges[i].vertices.second.x),res[0]);
-		res[1]=max(max(cell_edges[i].vertices.first.x,cell_edges[i].vertices.second.x),res[1]);		
+		res[1]=max(max(cell_edges[i].vertices.first.x,cell_edges[i].vertices.second.x),res[1]);
 		res[2]=min(min(cell_edges[i].vertices.first.y,cell_edges[i].vertices.second.y),res[2]);
 		res[3]=max(max(cell_edges[i].vertices.first.y,cell_edges[i].vertices.second.y),res[3]);
 	}

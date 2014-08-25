@@ -15,11 +15,11 @@
 class RoundCells: public PointMotion
 {
 public:
-	
+
   Vector2D CalcVelocity
   (int index, Tessellation const& tessellation,
    vector<Primitive> const& primitives,double /*time*/);
-	
+
   /*! \brief Class constructor
     \param pm Base point motion
 	\param hbc The hydro boundary conditions

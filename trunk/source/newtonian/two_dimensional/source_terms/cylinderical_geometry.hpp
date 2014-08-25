@@ -1,7 +1,7 @@
 /*! \file cylinderical_geometry.hpp
   \brief Cylinderical geometry by means of source terms
   \author Almog Yalinewich
- */ 
+ */
 
 #ifndef CYLINDERICAL_GEOMETRY_HPP
 #define CYLINDERICAL_GEOMETRY_HPP 1

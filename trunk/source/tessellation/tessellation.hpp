@@ -57,19 +57,18 @@ virtual vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc
   virtual void Initialise(vector<Vector2D> const& points,Tessellation const& tess,
 	  OuterBoundary const* outer) = 0;
 
-  /*! 
+  /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
    */
   virtual void Update(vector<Vector2D> const& points) = 0;
 
-  /*! 
+  /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
    */
   virtual void Update(vector<Vector2D> const& points,Tessellation const& tess) = 0;
-
 
   /*! \brief Get Total number of mesh generating points
     \return Number of mesh generating points
@@ -87,7 +86,6 @@ virtual vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc
     \return Position of CM
    */
   virtual Vector2D const& GetCellCM(int index) const = 0;
-
 
   /*! \brief Returns the total number of faces
     \return Total number of faces
@@ -108,13 +106,13 @@ virtual vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc
 
   /*! \brief Returns the volume of a cell
     \param index Cell index
-    \return Cell volume 
+    \return Cell volume
    */
   virtual double GetVolume(int index) const = 0;
-  
+
   /*! \brief Returns the indexes of a cell's edges
     \param index Cell index
-    \return Cell edges 
+    \return Cell edges
    */
   virtual vector<int>const& GetCellEdges(int index) const =0;
 

@@ -12,7 +12,6 @@
 //! \brief HLLC Riemann solver for an Eulerian grid
 class Hllc: public RiemannSolver
 {
-
 public:
 
   Conserved Solve

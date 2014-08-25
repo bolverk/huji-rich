@@ -1,7 +1,7 @@
 /*! \file exactmath.hpp
   \brief Exact math
   \author Elad Steinberg
- */ 
+ */
 
 #ifndef EXACTMATH_HPP
 #define EXACTMATH_HPP 1

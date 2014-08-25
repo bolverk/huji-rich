@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -83,7 +83,7 @@ static ANNkd_ptr annReadTree(			// read tree-part of dump file
 //		<xxx> <xxx> ... <xxx>			(upper end of bounding box)
 //				If the tree is null, then a single line "null" is
 //				output.	 Otherwise the nodes of the tree are printed
-//				one per line in preorder.  Leaves and splitting nodes 
+//				one per line in preorder.  Leaves and splitting nodes
 //				have the following formats:
 //		Leaf node:
 //				leaf <n_pts> <bkt[0]> <bkt[1]> ... <bkt[n-1]>
@@ -389,7 +389,6 @@ static ANNkd_ptr annReadTree(
 	//	Read a leaf
 	//------------------------------------------------------------------
 	if (strcmp(tag, "leaf") == 0) {				// leaf node
-
 		in >> n_pts;							// input number of points
 		int old_idx = next_idx;					// save next_idx
 		if (n_pts == 0) {						// trivial leaf
@@ -406,7 +405,6 @@ static ANNkd_ptr annReadTree(
 	//	Read a splitting node
 	//------------------------------------------------------------------
 	else if (strcmp(tag, "split") == 0) {		// splitting node
-
 		in >> cd >> cv >> lb >> hb;
 
 												// read low and high subtrees

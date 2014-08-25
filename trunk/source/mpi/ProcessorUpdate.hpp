@@ -5,7 +5,7 @@
 #ifndef PROCUPDATE
 #define PROCUPDATE 1
 
-#define _USE_MATH_DEFINES 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 #include "../tessellation/tessellation.hpp"
@@ -25,6 +25,5 @@ public:
   //! \brief virtual destructor
   virtual ~ProcessorUpdate(void);
 };
-
 
 #endif //PROCUPDATE

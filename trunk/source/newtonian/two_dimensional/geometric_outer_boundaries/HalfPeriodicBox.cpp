@@ -8,7 +8,6 @@ bool HalfPeriodicBox::PointIsReflective(Vector2D const& point)const
 	return false;
 }
 
-
 HalfPeriodicBox::HalfPeriodicBox(double left, double right,double up, double down)
 	:_left(left),_right(right),_up(up),_down(down)
 {
@@ -48,4 +47,3 @@ bool HalfPeriodicBox::AreWeReflective(Edge const& edge) const
 	else
 		return false;
 }
-

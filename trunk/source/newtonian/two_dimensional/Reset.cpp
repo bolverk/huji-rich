@@ -52,7 +52,7 @@ void ResetOutput(string location,hdsim const& sim)
 	myFile.write((char*)&a,sizeof(double));
 	myFile.write((char*)&b,sizeof(double));
 	int itemp=sim.GetCycle();
-	myFile.write((char*)&itemp,sizeof(int));	
+	myFile.write((char*)&itemp,sizeof(int));
 	int n=0;
 	vector<vector<double> > tracers=sim.getTracers();
 	if(!tracers.empty())
@@ -102,7 +102,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		cortemp.Set(x,y);
 		dump.snapshot.mesh_points[i]=cortemp;
 	}
-	
+
 #ifdef RICH_MPI
 	int temp2;
 	myFile.read((char*)&temp2,sizeof (int));

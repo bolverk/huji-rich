@@ -3,8 +3,8 @@
 #include <cmath>
 
 BCSides::BCSides(double down1, double up1,
-		 double left1, double right1):	
-  up(up1),down(down1),left(left1),right(right1) 
+		 double left1, double right1):
+  up(up1),down(down1),left(left1),right(right1)
 {
   if(down>=up||left>=right){
     WrongBCSidesOrderException eo(down, up, left, right);

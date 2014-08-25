@@ -76,7 +76,6 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 	Vector2D const& center,Tessellation const& tproc);
 
-
 /*!
 \brief Creates a uniform random mesh for MPI
 \param npoints The total number of point

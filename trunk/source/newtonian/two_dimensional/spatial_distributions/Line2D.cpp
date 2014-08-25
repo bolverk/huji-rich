@@ -1,9 +1,7 @@
 #include "Line2D.hpp"
 
-
 Line2D::Line2D(double a,double b,double above,double under):
 _a(a),_b(b),_above(above),_under(under){}
-
 
 Line2D::~Line2D(void)
 {

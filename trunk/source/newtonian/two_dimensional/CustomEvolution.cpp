@@ -6,7 +6,7 @@ bool CustomEvolution::ShouldForceTracerReset(void)const
 	return true;
 }
 
-Vector2D CustomEvolution::CalcVelocity(int /*index*/, 
+Vector2D CustomEvolution::CalcVelocity(int /*index*/,
 				Tessellation const& /*tessellation*/,
 				vector<Primitive> const& /*primitives*/,double /*time*/)
 {
@@ -23,7 +23,7 @@ bool CustomEvolution::TimeStepRelevant(void)const
 CustomEvolutionManager::CustomEvolutionManager(void):
   vtable_(1,(CustomEvolution*)0) {}
 
-namespace 
+namespace
 {
   bool check_for_duplicates(const vector<CustomEvolution*>& vtable,
 			    CustomEvolution* cep)
@@ -57,4 +57,3 @@ CustomEvolution* CustomEvolutionManager::getFunction(size_t i) const
 {
   return vtable_[i];
 }
-

@@ -32,7 +32,6 @@ private:
   double k_;
   double ph_;
   double offset_;
-
 };
 
 #endif // SINE_WAVE_HPP

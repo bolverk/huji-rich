@@ -13,7 +13,7 @@ double Uniform::EvalAt(double /*x*/) const
   return _val;
 }
 
-Step::Step(double val1, double val2, 
+Step::Step(double val1, double val2,
 	   double steppos):
   _val1(val1), _val2(val2), _steppos(steppos) {}
 

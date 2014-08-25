@@ -1,7 +1,7 @@
 /*! \file noh_hbc.hpp
 \brief Hydrodynamic boundary conditions for the noh problem
 \author Elad Steinberg
-*/ 
+*/
 
 #ifndef NOH_HBC_HPP
 #define NOH_HBC_HPP 1
@@ -59,4 +59,4 @@ private:
 	const double p0_;
 };
 
-#endif // NOH_HBC_HPP         
+#endif // NOH_HBC_HPP

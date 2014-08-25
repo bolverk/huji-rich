@@ -27,7 +27,7 @@ private:
 
   vector<Vector2D> vv_;
   double vi_;
-  double vo_;    
+  double vo_;
 };
 
 #endif // TRIANGLE_HPP

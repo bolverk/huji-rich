@@ -26,7 +26,6 @@
 #include "ResetDump.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 
-
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
 {
@@ -37,7 +36,7 @@ private:
   #ifdef RICH_MPI
   Tessellation& _proctess;
   #endif
-  
+
   vector<Primitive> _cells;
 
   vector<Conserved> _fluxes;
@@ -90,7 +89,7 @@ private:
 
   // The purpose of these declarations is to disable copying
   hdsim(const hdsim& origin);
-  
+
   hdsim& operator=(const hdsim& origin);
 
 public:
@@ -112,7 +111,7 @@ public:
   */
   Tessellation const& GetProcTessellation(void)const;
 
-  /*! 
+  /*!
     \brief Sets the simulation data from an external source, rebuilds the grid and resizes the tracers if needed
     \param cells The primitive cells
     \param points The mesh points
@@ -129,7 +128,7 @@ public:
 
   //! \brief Assigns a common index to custom_evolutions and manges them
   CustomEvolutionManager custom_evolution_manager;
-  
+
   //! \brief container for the indices of the custom evolution
   vector<size_t> custom_evolution_indices;
 
@@ -310,7 +309,7 @@ public:
   void TracerReset(double alpha,SpatialDistribution const& originalD,
 		   SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
 		   SpatialDistribution const& originalVy,int tracerindex);
- 
+
   /*!
     \brief Returns the Courant number
     \return The courant number

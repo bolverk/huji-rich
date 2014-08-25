@@ -26,9 +26,8 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 	return res;
 }
 
-
 vector<int> RemovalStrategy::RemoveNeighbors
-(vector<double> const& merits,vector<int> const& 
+(vector<double> const& merits,vector<int> const&
  candidates,Tessellation const& tess) const
 {
 	vector<int> result;
@@ -93,7 +92,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	return result;
 }
 
-void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int> 
+void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int>
 	& ToRemove)const
 {
 	sort(ToRemove.begin(),ToRemove.end());

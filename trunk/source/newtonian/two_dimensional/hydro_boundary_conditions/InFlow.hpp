@@ -32,7 +32,7 @@ public:
   Vector2D CalcEdgeVelocity(Tessellation const& tessellation,
 			    vector<Vector2D> const& point_velocities,
 			    Edge const& edge, double time) const;
-  
+
   bool IsBoundary(Edge const& edge,Tessellation const& Data)const;
 
   bool IsGhostCell(int i,Tessellation const& Data) const;

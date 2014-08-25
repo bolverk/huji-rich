@@ -45,7 +45,6 @@ Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedi
 	return cells[index];
 }
 
-
 RigidBodyEvolve::RigidBodyEvolve()
 {}
 

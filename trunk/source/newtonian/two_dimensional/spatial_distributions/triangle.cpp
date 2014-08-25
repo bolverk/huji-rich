@@ -1,5 +1,5 @@
 #include "triangle.hpp"
-// Implementation based on 
+// Implementation based on
 // http://www.blackpawn.com/texts/pointinpoly/default.html
 
 namespace {

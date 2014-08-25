@@ -13,7 +13,6 @@
 //! \brief Custom evolution for a cell to act as a rigid body
 class NoMovement: public CustomEvolution
 {
-
 public:
 	//! \brief class constructor
 	NoMovement();
@@ -24,7 +23,7 @@ public:
 		Vector2D const& facevelocity,
 		RiemannSolver const& rs,int index,
 		HydroBoundaryConditions const& boundaryconditions,double time,
-		vector<vector<double> > const& tracers); 
+		vector<vector<double> > const& tracers);
 
 	Primitive UpdatePrimitive(vector<Conserved> const& conservedintensive,
 		EquationOfState const& eos,vector<Primitive>& cells,int index,

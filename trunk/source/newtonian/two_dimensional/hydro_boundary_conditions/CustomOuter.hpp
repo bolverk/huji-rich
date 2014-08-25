@@ -23,7 +23,6 @@ public:
 	CustomOuter(HydroBoundaryConditions& Left,HydroBoundaryConditions& Right,
 		HydroBoundaryConditions& Down,HydroBoundaryConditions& Up);
 
-
 	Conserved CalcFlux
 	(Tessellation const& tessellation,
 	 vector<Primitive> const& cells,

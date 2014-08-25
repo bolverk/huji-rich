@@ -32,7 +32,7 @@ namespace
 				{
 					vector<Primitive> ptemp=VectorValues(cells,sentcells[index]);
 					MPI_SendVectorPrimitive(ptemp,procorder[i],0,MPI_COMM_WORLD);
-					MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);	
+					MPI_RecvVectorPrimitive(padd[index],procorder[i],0,MPI_COMM_WORLD,eos);
 					if(traceractive)
 					{
 						vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
@@ -115,7 +115,7 @@ namespace
 		}
 	}
 
-	void DoubleVectorToTracer(vector<vector<double> > &tracer,vector<double> 
+	void DoubleVectorToTracer(vector<vector<double> > &tracer,vector<double>
 		const& data,int tracerlength)
 	{
 		int n=(int)data.size()/tracerlength;
@@ -132,7 +132,7 @@ namespace
 		}
 	}
 
-	void TracerVectorToDouble(vector<vector<double> > const& ttemp,vector<double> 
+	void TracerVectorToDouble(vector<vector<double> > const& ttemp,vector<double>
 		&dtracer)
 	{
 		int tracerlength=(int)ttemp[0].size();
@@ -360,7 +360,7 @@ void KillTree(ANNkd_tree *&tree,ANNpointArray &treePoints)
 {
 annDeallocPts(treePoints);
 delete tree;
-annClose();	
+annClose();
 }
 
 int FindContainingCell(ANNkd_tree *tree,Vector2D const& point)
@@ -499,7 +499,6 @@ vector<int> GetProcOrder(int rank,int worldsize)
 }
 
 namespace {
-
 	template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
 	{
 		vector<T> res(source.size());
@@ -545,7 +544,7 @@ namespace {
 			{
 				int temp;
 				MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,&status);
-			}      
+			}
 			else
 			{
 				int count;
@@ -791,12 +790,10 @@ void SendRecvVectorDouble(vector<double> const& vec,
 	}
 }
 
-
 void SendRecvOldVector2D(vector<Vector2D> const& points,
 	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
 	vector<Vector2D> &toadd)
 {
-
 	int nlist=(int)sentprocs.size();
 	toadd.clear();
 
@@ -832,11 +829,10 @@ void SendRecvOldVector2D(vector<Vector2D> const& points,
 				}
 				vtemp=VectorValues(points,sentcells[index]);
 				MPI_VectorSend_Vector2D(vtemp,procorder[i],0,MPI_COMM_WORLD);
-			}				
+			}
 		}
 	}
 }
-
 
 void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 	vector<size_t> &customevolutions,vector<int> const& localpoints)
@@ -851,7 +847,6 @@ void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 }
 
 namespace {
-
 	class HydroCommunicator: public Communication
 	{
 	public:
@@ -859,7 +854,7 @@ namespace {
 		HydroCommunicator(const EquationOfState& eos,
 			const vector<Primitive>& p_to_send,
 			const vector<size_t>& cei_to_send):
-		eos_(eos), p_to_send_(p_to_send), 
+		eos_(eos), p_to_send_(p_to_send),
 			cei_to_send_(cei_to_send),
 			p_received_(), cei_received_() {}
 
@@ -878,7 +873,15 @@ namespace {
 
 		void recvInfo(int address)
 		{
-			MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
+			try
+			{
+				MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
+			}
+			catch(UniversalError &eo)
+			{
+				eo.AddEntry("Error in HydroCommunicator while recv from cpu",address);
+				throw eo;
+			}
 			int count;
 			MPI_Status stat;
 			MPI_Probe(address,0,MPI_COMM_WORLD,&stat);
@@ -988,7 +991,6 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 	for(int i=0;i<nlist;++i)
 		ListExchange(tracers,Nghost[i],tadd[i]);
 }
-
 
 int MPI_SendVectorPrimitive(vector<Primitive> const& vec,int dest,int tag,
 	MPI_Comm comm)
@@ -1240,7 +1242,6 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 		ListExchange(grads,Nghost[i],tadd[i]);
 }
 
-
 int MPI_SendVectorConserved(vector<Conserved> const& vec,int dest,int tag,
 	MPI_Comm comm)
 {
@@ -1292,7 +1293,7 @@ void MPI_RecvVectorConserved(vector<Conserved> &vec,int dest,int tag,
 	}
 }
 
-void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int> 
+void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	const& BoundaryPoints,vector<vector<int> > const& SentPoints,vector<int> const&
 	SentProcs)
 {
@@ -1451,7 +1452,7 @@ namespace
 				itemp.insert(itemp.begin(),rtemp[0]);
 				ghostneigh.push_back(itemp);
 				ghosts[j]=Nghost[i][BoundaryRemove[i][j]];
-			}		
+			}
 			vector<vector<int> > temp=FindLocalNeighbors(Nghost[i],ghosts,i,tess);
 			for(int j=0;j<(int)BoundaryRemove[i].size();++j)
 				localneigh.push_back(temp[j]);
@@ -1462,7 +1463,7 @@ namespace
 void GetAMRExtensive(vector<Primitive> &rescells,
 	vector<vector<double> > &restracer,
 	vector<Primitive> const& cells,
-	vector<vector<double> > 
+	vector<vector<double> >
 	const& tracers,
 	bool traceractive,
 	vector<vector<int> > &ToSend,
@@ -1842,7 +1843,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
 					else
 						MPI_Send(&bremove[index][0],(int)bremove[index].size(),
-						MPI_INT,procorder[i],0,MPI_COMM_WORLD);		
+						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
 					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 					if(status.MPI_TAG==1)
 						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
@@ -1954,7 +1955,6 @@ void PeriodicVelocityExchange(vector<Vector2D> &vel,
 		if(!temp.empty())
 			vel.insert(vel.end(),temp.begin(),temp.end());
 	}
-
 }
 
 void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
@@ -1976,4 +1976,3 @@ void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 			grad.insert(grad.end(),ptemp.begin(),ptemp.end());
 	}
 }
-

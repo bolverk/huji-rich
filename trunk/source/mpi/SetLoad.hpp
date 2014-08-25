@@ -36,5 +36,4 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	outer,int Nbest,double TargetLoad,double speed=0.04,int mode=2);
 
-
 #endif //SETLOAD

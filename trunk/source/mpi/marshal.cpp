@@ -36,7 +36,7 @@ void marshal_communication(Communication& communication,
   else{
     communication.recvInfo(address);
     communication.sendInfo(address);
-  }    
+  }
 }
 
 #endif // RICH_MPI

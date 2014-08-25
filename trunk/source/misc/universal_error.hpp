@@ -13,7 +13,6 @@
  */
 class UniversalError
 {
-
 public:
 
   /*! \brief Class constructor
@@ -44,7 +43,7 @@ public:
   std::vector<double> const& GetValues(void) const;
 
   ~UniversalError(void);
-  
+
 private:
 
   std::string err_msg_;
@@ -52,7 +51,6 @@ private:
   std::vector<std::string> fields_;
 
   std::vector<double> values_;
-
 };
 
 #endif // UNIVERSAL_ERROR_HPP

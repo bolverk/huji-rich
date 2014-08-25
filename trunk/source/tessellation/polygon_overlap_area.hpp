@@ -26,7 +26,7 @@ public:
   \return The area
   */
   double PolyArea(vector<Vector2D> const& polygon);
-  /*! 
+  /*!
   \brief Calculates the area overlaped between two convex polygons
   \param ch1 The convex hull of the first polygon
   \param ch2 The convex hull of the second polygon

@@ -1,14 +1,11 @@
 #include "RotationForce.hpp"
 
-
 RotationForce::RotationForce(Vector2D const& origin,Vector2D const& direction,
 	int tracer_index):
 origin_(origin),direction_(direction/abs(direction)),tracer_index_(tracer_index)
 {}
 
-
 RotationForce::~RotationForce(){}
-
 
 Conserved RotationForce::Calculate
 	(Tessellation const& tess,

@@ -36,4 +36,3 @@ void marshal_communication(Communication& communication,
 #endif // RICH_MPI
 
 #endif // MARSHAL_HPP
-

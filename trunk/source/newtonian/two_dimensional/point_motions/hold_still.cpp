@@ -6,7 +6,7 @@ HoldStill::HoldStill(PointMotion& raw,
 		     const Condition& cond):
   raw_(raw), cond_(cond) {}
 
-Vector2D HoldStill::CalcVelocity(int index, 
+Vector2D HoldStill::CalcVelocity(int index,
 				 Tessellation const& tess,
 				 vector<Primitive> const& cells,
 				 double time)

@@ -27,7 +27,7 @@ public:
 	\param lengthes THe corrected length of the edges
 	\param t Time
     \param dt The time step size
-    \return The flux of conserved variables 
+    \return The flux of conserved variables
   */
   virtual Conserved Calculate
   (Tessellation const& tess,

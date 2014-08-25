@@ -23,7 +23,7 @@ public:
   Conserved(double mass,
 	    Vector2D const& momentum,
 	    double energy);
-  
+
   //! \brief Mass
   double Mass;
 
@@ -186,7 +186,7 @@ Conserved operator*(double d, Conserved const& c);
  */
 Conserved operator+(Conserved const& c1, Conserved const& c2);
 
-/*! \brief Term by term subtraction 
+/*! \brief Term by term subtraction
   \param c1 Conserved variables
   \param c2 Conserved variables
   \return Conserved variables

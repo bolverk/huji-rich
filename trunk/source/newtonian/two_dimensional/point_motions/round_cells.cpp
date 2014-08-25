@@ -5,13 +5,13 @@
 using std::max;
 
 RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
-	double chi, 
+	double chi,
 	double eta,bool coldflows,
 	int innerNum,
 	OuterBoundary const* outer):
 pm_(pm), hbc_(hbc),
 	chi_(chi*((int)!coldflows)+((int)coldflows)*((int)chi==0.4)
-	+chi*((int)coldflows)*((int)chi!=0.4)), 
+	+chi*((int)coldflows)*((int)chi!=0.4)),
 	eta_(eta),
 	inner_(innerNum),
 	outer_(outer),
@@ -95,7 +95,7 @@ Vector2D RoundCells::CalcVelocity(int index,Tessellation const& tessellation,
 	if(index<inner_)
 		return Vector2D(0,0);
 	else
-	{    
+	{
 		const Vector2D res = pm_.CalcVelocity
 			(index, tessellation, primitives,time);
 		if(coldflows_)
@@ -109,7 +109,6 @@ Vector2D RoundCells::CalcVelocity(int index,Tessellation const& tessellation,
 }
 
 namespace {
-
 	double numeric_velocity_scale(Tessellation const& tess,int index,double dt,
 		vector<Primitive> const& cells)
 	{
@@ -174,8 +173,8 @@ vector<Vector2D> RoundCells::calcAllVelocities
 			{
 				res[i]=pm_.CalcVelocity(i,tess,cells,time);
 				const double nvs = numeric_velocity_scale(tess,i,dt,cells);
-				const Vector2D dw = calc_dw(i,tess,nvs,nvs,eta_,chi_);   
-				res[i]=res[i]+dw; 
+				const Vector2D dw = calc_dw(i,tess,nvs,nvs,eta_,chi_);
+				res[i]=res[i]+dw;
 			}
 		}
 #ifdef RICH_MPI

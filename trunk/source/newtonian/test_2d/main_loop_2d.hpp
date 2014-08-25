@@ -106,9 +106,8 @@ public:
 
 //! \brief Functions for managing two dimensional simulations
 namespace simulation2d{
-
   /*! \brief Simulation time advance loop
-    \param sim Hydrodynamic simulation 
+    \param sim Hydrodynamic simulation
     \param term_cond Termination condition
     \param time_advance_method Method for time advance
     \param diagfunc Diagnostic function

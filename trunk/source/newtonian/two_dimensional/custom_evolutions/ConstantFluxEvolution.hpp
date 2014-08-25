@@ -37,7 +37,7 @@ public:
 		Vector2D const& facevelocity,
 		RiemannSolver const& rs,int index,
 		HydroBoundaryConditions const& boundaryconditions,double time,
-		vector<vector<double> > const& tracers); 
+		vector<vector<double> > const& tracers);
 
 	Primitive UpdatePrimitive(vector<Conserved> const& conservedintensive,
 		EquationOfState const& eos,vector<Primitive>& cells,int index,
@@ -51,7 +51,7 @@ public:
 		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 		double dm,Edge const& edge,int index,double dt,double time,
 		SpatialReconstruction const& interp,Vector2D const& vface);
-		
+
 private:
 	const Primitive cell_;
 	const vector<double> tracer_;

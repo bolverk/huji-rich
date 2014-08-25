@@ -10,7 +10,7 @@
 
 //! \brief Spatial distribution for initial conditions
 class SpatialDistribution
-{  
+{
 public:
 
   /*! \brief Evaluates the function

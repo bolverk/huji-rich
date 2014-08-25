@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -118,7 +118,6 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist)
 										// visit further child if in range
 		if (box_dist * ANNkdFRMaxErr <= ANNkdFRSqRad)
 			child[ANN_HI]->ann_FR_search(box_dist);
-
 	}
 	else {								// right of cutting plane
 		child[ANN_HI]->ann_FR_search(box_dist);// visit closer child first
@@ -133,12 +132,10 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist)
 										// visit further child if close enough
 		if (box_dist * ANNkdFRMaxErr <= ANNkdFRSqRad)
 			child[ANN_LO]->ann_FR_search(box_dist);
-
 	}
 	ANN_FLOP(13)						// increment floating ops
 	ANN_SPL(1)							// one more splitting node visited
 }
-
 
 //----------------------------------------------------------------------
 //	kd_leaf::ann_FR_search - search points in a leaf node
@@ -155,7 +152,6 @@ void ANNkd_leaf::ann_FR_search(ANNdist /*box_dist*/)
 	register int d;
 
 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
-
 		pp = ANNkdFRPts[bkt[i]];		// first coord of next data point
 		qq = ANNkdFRQ;					// first coord of query point
 		dist = 0;
@@ -182,4 +178,3 @@ void ANNkd_leaf::ann_FR_search(ANNdist /*box_dist*/)
 	ANN_PTS(n_pts)						// increment points visited
 	ANNkdFRPtsVisited += n_pts;			// increment number of points visited
 }
-

@@ -84,7 +84,7 @@ public:
 	vector<int> GetLiteralNeighbors(int index)const;
 
 	int GetOriginalIndex(int point) const;
-	
+
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
 		OuterBoundary const* outer);
 
@@ -149,13 +149,13 @@ public:
 
   /*! \brief Returns the volume of a cell
     \param index Cell index
-    \return Cell volume 
+    \return Cell volume
    */
   double GetVolume(int index) const;
-  
-//! \brief Returns a reference to a vector<int> containing the indexes of the edges related to a cell. \param index The index of the cell. \returns The reference to vector<int> 
+
+//! \brief Returns a reference to a vector<int> containing the indexes of the edges related to a cell. \param index The index of the cell. \returns The reference to vector<int>
   vector<int>const& GetCellEdges(int index) const;
-  
+
 /*! \brief Returns Position of Cell's CM
     \param index Mesh generating point index (the cell's index)
     \return Position of CM
@@ -168,7 +168,7 @@ public:
   \param filename The path to the output file
   */
   void output(string filename);
-	
+
   bool NearBoundary(int index) const;
 
   //! \brief Diagnostics method

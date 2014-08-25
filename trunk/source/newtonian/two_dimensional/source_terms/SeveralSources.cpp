@@ -1,6 +1,5 @@
 #include "SeveralSources.hpp"
 
-
 SeveralSources::SeveralSources(vector<SourceTerm*> forces):
 sources_(vector<SourceTerm*> ())
 {
@@ -8,11 +7,9 @@ sources_(vector<SourceTerm*> ())
 		sources_.push_back(forces[i]);
 }
 
-
 SeveralSources::~SeveralSources(void)
 {
 }
-
 
 Conserved SeveralSources::Calculate(Tessellation const& tess,
 	vector<Primitive> const& cells,int point,

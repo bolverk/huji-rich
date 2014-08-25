@@ -19,4 +19,3 @@ bool Outside::operator()(Vector2D const& r) const
 {
   return !shape_(r);
 }
-

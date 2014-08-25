@@ -7,28 +7,28 @@ double absolute(double const& a)
 }
 
 namespace {
-  void fastTwoSumTail(double const a, double const b, double const x, double& y) 
+  void fastTwoSumTail(double const a, double const b, double const x, double& y)
   {
     double bVirt = x - a;
     y = b - bVirt;
   }
 }
 
-void fastTwoSum(double const a, double const b, double& res, double& err) 
+void fastTwoSum(double const a, double const b, double& res, double& err)
 {
   res = a + b;
   fastTwoSumTail(a, b, res, err);
 }
 
 namespace {
-  void fastTwoDiffTail(double const a, double const b, double const x, double& y) 
+  void fastTwoDiffTail(double const a, double const b, double const x, double& y)
   {
     double bVirt = a - x;
     y = bVirt - b;
   }
 }
 
-void fastTwoDiff(double a, double b, double& res, double& err) 
+void fastTwoDiff(double a, double b, double& res, double& err)
 {
   res = a - b;
   fastTwoDiffTail(a, b, res, err);
@@ -45,7 +45,7 @@ namespace {
   }
 }
 
-void twoSum(double a, double b, double& res, double& err) 
+void twoSum(double a, double b, double& res, double& err)
 {
   res = a + b;
   twoSumTail(a, b, res, err);
@@ -89,7 +89,7 @@ namespace {
   }
 }
 
-void twoProduct(double a, double b, double& res, double& err) 
+void twoProduct(double a, double b, double& res, double& err)
 {
   res = a * b;
   twoProductTail(a, b, res, err);
@@ -106,7 +106,7 @@ namespace {
   }
 }
 
-void square(double num, double& res, double& err) 
+void square(double num, double& res, double& err)
 {
   res = num * num;
   squareTail(num, res, err);
@@ -193,7 +193,7 @@ vector<double> expansionSumZeroElim(vector<double> const& e, vector<double> cons
   for (unsigned int i = 1; i < (unsigned int)f.size(); i++)
     {
       Q = f[i];
-      for (unsigned int j = i; j <(unsigned int) temp.size(); j++) 
+      for (unsigned int j = i; j <(unsigned int) temp.size(); j++)
 	{
 	  current = temp[j];
 	  twoSum(Q, current, Qnew, temp[j]);

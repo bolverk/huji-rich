@@ -6,7 +6,7 @@
 #ifndef MPI_MACRO
 #define MPI_MACRO 1
 
-#define _USE_MATH_DEFINES 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 #include "../tessellation/tessellation.hpp"
@@ -198,7 +198,7 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 \param ttoadd The received extensive tracers
 \param ctoadd The received custom evolution indeces
 */
-void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > const& 
+void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > const&
 	tracers,vector<size_t> const& customevolutions,vector<vector<int> > const& sentcells,
 	vector<int> const& sentprocs,vector<Conserved> &ptoadd,vector<vector<double> >
 	 &ttoadd,vector<size_t> &ctoadd);
@@ -345,7 +345,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
 	vector<double> &toadd);
 
-/*! 
+/*!
 \brief Send/Recv the list of points to remove that are on the edges between cpus
 \param GhostIndeces The indeces of the boundary points that were sent to current rank (this is recieved)
 \param BoundaryPoints The points in the boundary that current cpu sent, each vector should be sorted
@@ -355,7 +355,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	const& BoundaryPoints,vector<vector<int> > const& SentPoints,vector<int> const&
 	SentProcs);
-/*! 
+/*!
 \brief Send/Recv the list of points to remove that are on the edges between cpus
 \param BoundaryRemove The indeces of the boundary points that were sent to current rank, listed by proc index and then by their index in the sent vector
 \param BoundaryNeigh The indeces of the neighbors of the boundary points that were sent to current rank, listed by proc index and then by their index in the sent vector
@@ -406,4 +406,3 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 #endif
 
 #endif //MPI_MACRO
-

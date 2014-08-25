@@ -19,7 +19,6 @@
 */
 class RemovalStrategy
 {
-
 public:
 	/*!
 		\brief Removal abstract class. Can't remove neighboring cells or cells near peiodic boundary. Use CheckOutput to check correctness
@@ -45,10 +44,10 @@ public:
 	\param tess The tessellation
 	\return The list of points to remove without neighboring points
 	*/
-	vector<int> RemoveNeighbors(vector<double> const& merits,vector<int> const& 
+	vector<int> RemoveNeighbors(vector<double> const& merits,vector<int> const&
 		candidates,Tessellation const& tess) const;
 	/*! \brief Removed from the list cells near periodic boundaries
-	\param ToRemove List of candidates 
+	\param ToRemove List of candidates
 	\param tess The tessellation
 	\return The corrected list
 	*/

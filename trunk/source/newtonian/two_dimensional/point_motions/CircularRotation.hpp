@@ -26,7 +26,7 @@ public:
 		   double w_outer,int Ninner,int Nouter,double t=0,
 		   Vector2D const& center=Vector2D(0,0));
 
-  Vector2D CalcVelocity(int index, 
+  Vector2D CalcVelocity(int index,
 			Tessellation const& tess,
 			vector<Primitive> const& cells,
 			double time);

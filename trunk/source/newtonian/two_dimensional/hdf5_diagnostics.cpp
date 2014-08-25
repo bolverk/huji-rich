@@ -3,7 +3,6 @@
 using namespace H5;
 
 namespace {
-
 	void write_std_vector_to_hdf5
   (H5File& file,
    vector<size_t> const& num_list,
@@ -30,7 +29,6 @@ namespace {
     const vector<unsigned> buf = list_static_cast<unsigned,size_t>(num_list);
     dataset.write(&buf[0],PredType::NATIVE_UINT);
   }
-
 
   void write_std_vector_to_hdf5
   (H5File& file,
@@ -82,7 +80,6 @@ namespace {
     return list_static_cast<size_t,unsigned>(result);
   }
 
-
   vector<int> read_int_vector_from_hdf5(H5File& file,string const& data_name)
   {
     DataSet dataset = file.openDataSet(data_name);
@@ -94,7 +91,6 @@ namespace {
     dataset.read(&result[0],PredType::NATIVE_INT);
     return result;
   }
-
 
   void write_std_vector_to_hdf5
   (H5File& file,
@@ -143,7 +139,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
     for(int i=0;i<sim.GetCellNo();++i){
       x_coordinate[i] = sim.GetMeshPoint(i).x;
       y_coordinate[i] = sim.GetMeshPoint(i).y;
-    } 
+    }
     write_std_vector_to_hdf5(file, x_coordinate, "x_coordinate");
     write_std_vector_to_hdf5(file, y_coordinate, "y_coordinate");
   }
@@ -185,7 +181,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   vector<int> nvert(sim.GetCellNo());
   xvert.reserve(7*sim.GetCellNo());
   yvert.reserve(7*sim.GetCellNo());
-  for(int i=0;i<sim.GetCellNo();++i) 
+  for(int i=0;i<sim.GetCellNo();++i)
     {
       ConvexHull(convhull,&sim.GetTessellation(),i);
       for(int j=0;j<(int)convhull.size();++j)

@@ -20,8 +20,7 @@ Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
   return *this;
 }
 
-
-Delaunay::Delaunay(void): 
+Delaunay::Delaunay(void):
   lastFacet(0),CalcRadius(false),
   radius(vector<double>()),cell_points(vector<Vector2D> ()),
   PointWasAdded(false),
@@ -188,7 +187,7 @@ void Delaunay::add_point(int index)
 	  radius.push_back(CalculateRadius(location_pointer+1));
 	  radius.push_back(CalculateRadius(location_pointer+2));
 	}
-      else 
+      else
 	if(n>m)
 	  {
 	    radius[location_pointer+1]=CalculateRadius(location_pointer+1);
@@ -208,7 +207,7 @@ void Delaunay::add_point(int index)
 
   // _update number of facets
   location_pointer+=2;
-}	
+}
 
 void Delaunay::flip(int i, int j)
 {
@@ -228,7 +227,7 @@ void Delaunay::flip(int i, int j)
 	  indexes[0]=flip_stack.top()[0];
 	  indexes[1]=flip_stack.top()[1];
 	  // Returns the index to the point to check in coordinates and the index of the point in the facet
-	  find_diff(&f[indexes[1]],&f[indexes[0]],&check[0]); 
+	  find_diff(&f[indexes[1]],&f[indexes[0]],&check[0]);
 	  find_diff(&f[indexes[0]],&f[indexes[1]],&other[0]);
 
 	  for(int k=0;k<3;++k)
@@ -563,9 +562,9 @@ facet* Delaunay::get_facet(int index)
 
 double Delaunay::get_facet_coordinate(int Facet,int vertice, int dim)
 {
-  if(dim==0) 
+  if(dim==0)
     return cor[f[Facet].vertices[vertice]].x;
-  else 
+  else
     return cor[f[Facet].vertices[vertice]].y;
 }
 

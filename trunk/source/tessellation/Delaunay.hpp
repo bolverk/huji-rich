@@ -30,7 +30,7 @@ private:
 
   class DataOnlyForBuild
   {
-  public:		
+  public:
     DataOnlyForBuild();
     DataOnlyForBuild(DataOnlyForBuild const& other);
     DataOnlyForBuild& operator=(DataOnlyForBuild const& other);
@@ -42,7 +42,7 @@ private:
   vector<Vector2D> cell_points;
   bool PointWasAdded;
   int last_facet_added;
-  vector<facet> f;	
+  vector<facet> f;
   vector<Vector2D> cor;
   int length,olength;
   int location_pointer;
@@ -90,13 +90,13 @@ public:
 
   //! \brief Default destructor.
   ~Delaunay(void);
-	
-  /*! \brief Builds the Delaunay tessellation.  
-    \param vp A refrence to a vector of points to be added. 
+
+  /*! \brief Builds the Delaunay tessellation.
+    \param vp A refrence to a vector of points to be added.
     \param cpoints The edges of the processor cell.
   */
   void build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& cpoints);
-	
+
   //! \brief Dumps the Delaunay tessellation into a binary file.
   void output(void);
 
@@ -106,28 +106,28 @@ public:
   */
   facet* get_facet(int index);
 
-  /*! \brief Returns a coordinate of a vertice. 
-    \param Facet The index of the facet to check. 
-    \param vertice The index of the vertice in the facet. 
-    \param dim If dim=0 returns the x-coordinate else returns the y-coordinate. 
+  /*! \brief Returns a coordinate of a vertice.
+    \param Facet The index of the facet to check.
+    \param vertice The index of the vertice in the facet.
+    \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
     \returns The chosen coordinate.
   */
   double get_facet_coordinate(int Facet,int vertice, int dim);
 
   /*! \brief Returns a point.
-    \param index The index of the point. 
+    \param index The index of the point.
     \returns The chosen point.
   */
   Vector2D get_point(int index) const;
 
   /*! \brief Returns a coordinate.
-    \param index The index of the point. 
-    \param dim If dim=0 returns the x-coordinate else returns the y-coordinate. 
+    \param index The index of the point.
+    \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
     \returns The chosen coordinate.
   */
   double get_cor(int index,int dim) const;
 
-  /*! \brief Returns the number of facets. 
+  /*! \brief Returns the number of facets.
     \returns The number of facets.
   */
   int get_num_facet(void);
@@ -137,19 +137,19 @@ public:
   */
   int get_length(void) const;
 
-  /*! \brief Returns the last location, a number used to identify the fact that the neighbor of a facet is empty. 
+  /*! \brief Returns the last location, a number used to identify the fact that the neighbor of a facet is empty.
     \returns The last location.
   */
   int get_last_loc(void) const;
 
-  /*! \brief Change Mesh point. 
-    \param index The index of the point to change. 
+  /*! \brief Change Mesh point.
+    \param index The index of the point to change.
     \param p The new point to set.
   */
   void set_point(int index, Vector2D p);
 
-  /*! \brief Returns the area of the triangle. Negative result means the triangle isn't right handed. 
-    \param index The index to the facet 
+  /*! \brief Returns the area of the triangle. Negative result means the triangle isn't right handed.
+    \param index The index to the facet
     \return The area
   */
   double triangle_area(int index);
@@ -160,7 +160,7 @@ public:
 	\param cpoints The points of the processor cell
   */
   void update(const vector<Vector2D>& points,vector<Vector2D> const& cpoints);
-	
+
   /*!
     \brief Returns the original index of the duplicated point in Periodic Boundary conditions
     \param NewPoint The index of the duplicated point
@@ -190,7 +190,7 @@ public:
     \return The facet's radius
   */
   double GetFacetRadius(int facet) const;
-  
+
   /*!
   \brief Adds a point to the cor vector. Used in periodic boundaries with AMR.
   \param vec The point to add.
@@ -206,7 +206,7 @@ public:
   \param points The points to add
   */
   void DoMPIRigid(vector<Vector2D> const& points);
-  
+
   /*!
   \brief Adds points to a periodic boundary
   \param points The points to add

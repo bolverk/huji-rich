@@ -60,9 +60,9 @@ public:
     \param val2 Value after the step
     \param steppos Position Step position
    */
-  Step(double val1, double val2, 
+  Step(double val1, double val2,
        double steppos);
-  
+
   /*! \brief Evaluates the distribution at a certain spot
     \param x Position
     \return Value of the distribution at x
@@ -99,7 +99,7 @@ public:
     \param x Position
     \return Value of the distribution at x
    */
-  double EvalAt(double x) const;  
+  double EvalAt(double x) const;
 };
 
 #endif // SPATIAL_DISTRIBUTION_1D_HPP

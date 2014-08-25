@@ -11,7 +11,6 @@
 //! \brief Piecewise constant method
 class PCM2D: public SpatialReconstruction
 {
-
 private:
 	vector<ReducedPrimitiveGradient2D> slopes_;
 
