@@ -10,7 +10,7 @@ namespace {
    string const& caption)
   {
     hsize_t dimsf[1];
-    dimsf[0] = (int)num_list.size();
+    dimsf[0] = static_cast<int>(num_list.size());
     DataSpace dataspace(1, dimsf);
 
     FloatType datatype(PredType::NATIVE_UINT);
@@ -27,7 +27,8 @@ namespace {
 					 datatype,
 					 dataspace,plist);
 
-    dataset.write(&num_list[0],PredType::NATIVE_UINT);
+    const vector<unsigned> buf = list_static_cast<unsigned,size_t>(num_list);
+    dataset.write(&buf[0],PredType::NATIVE_UINT);
   }
 
 
@@ -76,9 +77,9 @@ namespace {
     hsize_t dims_out[2];
     filespace.getSimpleExtentDims(dims_out,NULL);
     int NX = (int)dims_out[0];
-    vector<size_t> result(NX);
+    vector<unsigned> result(NX);
     dataset.read(&result[0],PredType::NATIVE_UINT);
-    return result;
+    return list_static_cast<size_t,unsigned>(result);
   }
 
 
