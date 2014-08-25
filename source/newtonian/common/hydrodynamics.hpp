@@ -1,4 +1,4 @@
-/*! \brief Hydrodynamical relations 
+/*! \brief Hydrodynamical relations
   \file hydrodynamics.hpp
   \author Almog Yalinewich
 */
@@ -18,7 +18,7 @@
   \return Primitive variables
  */
 Primitive CalcPrimitive(double density, double pressure,
-			Vector2D const& velocity, 
+			Vector2D const& velocity,
 			EquationOfState const& eos);
 
 /*! \brief Calculates the primitive variables from the conserved

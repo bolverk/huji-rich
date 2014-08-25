@@ -20,10 +20,9 @@ vector<Vector2D> RandPointsRmax(int PointNum,double Rmin,double Rmax,
       point.y=((Rmax-Rmin)*ran[0]+Rmin)*sin(ran[1]*2*M_PI)+yc;
       res.push_back(point);
       ++counter;
-    }	
+    }
   return res;
 }
-
 
 vector<Vector2D> RandSquare(int PointNum,double xl,double xr,double yd,
 			    double yu)
@@ -42,7 +41,7 @@ vector<Vector2D> RandSquare(int PointNum,double xl,double xr,double yd,
       point.x=ran[0]*xc+xl;
       point.y=ran[1]*yc+yd;
       res.push_back(point);
-    }	
+    }
   return res;
 }
 
@@ -62,7 +61,7 @@ vector<Vector2D> RandSquare(int PointNum,boost::random::mt19937 &eng,double xl,d
       point.x=ran[0]*xc+xl;
       point.y=ran[1]*yc+yd;
       res.push_back(point);
-    }	
+    }
   return res;
 }
 
@@ -118,7 +117,7 @@ vector<Vector2D> RandPointsR(int PointNum,double xl,double xr,double yd,
 		++counter;
 	      }
 	}
-    }	
+    }
   return res;
 }
 
@@ -142,7 +141,6 @@ vector<Vector2D> CirclePointsRmax_1(int PointNum,double Rmin,double Rmax,
     }
   return res;
 }
-
 
 vector<Vector2D> CirclePointsRmax_2(int PointNum,double Rmin,double Rmax,
 				    double xc,double yc,double xmax,double ymax,double xmin,double ymin)
@@ -272,4 +270,3 @@ vector<Vector2D> CirclePointsRmax_a(int PointNum,
     }
   return res;
 }
-

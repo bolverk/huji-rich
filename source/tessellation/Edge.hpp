@@ -1,7 +1,7 @@
 /*! \file Edge.hpp
   \brief Edge between cells
   \author Elad Steinberg
-*/ 
+*/
 
 #ifndef ___EDGE_HPP___
 #define ___EDGE_HPP___
@@ -26,7 +26,7 @@ public:
     \param neighbor1 Index of first neighbor cell
     \param neighbor2 Index of second neighbor cell
   */
-  Edge(Vector2D const& p1, Vector2D const& p2, 
+  Edge(Vector2D const& p1, Vector2D const& p2,
        int neighbor1, int neighbor2);
 
   Edge(void);

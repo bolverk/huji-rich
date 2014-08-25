@@ -133,7 +133,7 @@ _tessellation(tessellation),
 	custom_evolution_indices(dump.cevolve)
 {
 #ifdef RICH_MPI
-	assert(get_mpi_size()%2==0 && 
+	assert(get_mpi_size()%2==0 &&
 		"RICH only works with an even number of processes");
 #endif
 
@@ -194,7 +194,6 @@ namespace
 
 void hdsim::TimeAdvance(void)
 {
-
 #ifndef RICH_MPI
 	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
@@ -208,11 +207,11 @@ void hdsim::TimeAdvance(void)
 		,_tessellation.GetTotalPointNumber());
 #endif
 
-	vector<CustomEvolution*> custom_evolutions = 
+	vector<CustomEvolution*> custom_evolutions =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
-	CalcPointVelocities(_tessellation, _cells, 
+	CalcPointVelocities(_tessellation, _cells,
 		_pointmotion, _pointvelocity,_time,custom_evolutions);
 
 #ifndef RICH_MPI
@@ -262,12 +261,10 @@ void hdsim::TimeAdvance(void)
 		custom_evolution_manager,
 		tracer_);
 
-
 	int nn=_tessellation.GetTotalSidesNumber();
 	vector<double> lengths(nn);
 	for(int i=0;i<nn;++i)
 		lengths[i]=_tessellation.GetEdge(i).GetLength();
-
 
 	vector<vector<double> > tracer_extensive;
 	if(tracer_flag_)
@@ -301,7 +298,6 @@ void hdsim::TimeAdvance(void)
 		Ek =GetMaxKineticEnergy(_tessellation,_cells,custom_evolutions);
 		Ef = GetForceEnergy(_tessellation,g);
 	}
-
 
 	UpdateConservedExtensive(_tessellation, _fluxes, dt,
 		_conservedextensive,_hbc,lengths);
@@ -342,8 +338,7 @@ void hdsim::TimeAdvance(void)
 			ctoadd.end());
 	}
 
-
-	custom_evolutions = 
+	custom_evolutions =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
@@ -370,7 +365,7 @@ void hdsim::TimeAdvance(void)
 	}
 #endif
 
-	UpdateConservedIntensive(_tessellation, _conservedextensive, 
+	UpdateConservedIntensive(_tessellation, _conservedextensive,
 		_conservedintensive);
 
 	if(coldflows_flag_)
@@ -390,7 +385,7 @@ void hdsim::TimeAdvance(void)
 	}
 
 	_time += dt;
-	cycle_++;	
+	cycle_++;
 }
 
 Tessellation const& hdsim::GetTessellation(void) const
@@ -529,7 +524,6 @@ void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 	return;
 }
 
-
 namespace
 {
 	void CreateGetPrimitiveList(vector<int> const& ToRemove,vector<vector<int> >
@@ -623,7 +617,6 @@ namespace
 				RemoveVector(nghost[i],recv[i]);
 	}
 #endif
-
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -822,7 +815,6 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	}
 	return PointsToRefine;
 }
-
 
 double hdsim::GetCfl(void)const
 {

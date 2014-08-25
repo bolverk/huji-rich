@@ -36,7 +36,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			Vector2D dw;
 			if(d/eta_/R<0.95)
 				dw = 0*s;
-			else 
+			else
 				dw = chi_*0.5*(s-r);
 			/*#ifdef RICH_MPI
 			if(tproc!=0)

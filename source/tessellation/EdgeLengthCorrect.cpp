@@ -44,7 +44,6 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessnew,
 	}
 }
 
-
 void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 	Tessellation const& tessnew,vector<double> &lengths)
 {

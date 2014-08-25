@@ -162,7 +162,6 @@ void CalcPointVelocities(Tessellation const& tessellation,
 	pointvelocity=pointmotion.calcAllVelocities(tessellation,cells,time,cevolve);
 }
 
-
 double TimeStepForCell(Primitive const& cell,double width,
 	vector<Vector2D> const& face_velocites)
 {
@@ -209,7 +208,7 @@ double TimeStepForCellBoundary
 	{
 		const Edge edge=tess.GetEdge(edge_index[i]);
 		const double temp = calc_boundary_face_velocity
-			(hbc, edge, tess, face_velocities, cell, 
+			(hbc, edge, tess, face_velocities, cell,
 			cells, time, i);
 		max_fv = max(max_fv,temp);
 	}
@@ -318,7 +317,7 @@ namespace {
 void UpdateConservedExtensive
 	(Tessellation const& tessellation,
 	vector<Conserved> const& fluxes,
-	double dt, 
+	double dt,
 	vector<Conserved>& conserved_extensive,
 	HydroBoundaryConditions const& boundaryconditions,
 	vector<double> const& lengthes)
@@ -407,7 +406,6 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	}
 }
 
-
 void UpdateConservedIntensive(Tessellation const& tessellation,
 	vector<Conserved> const& conservedextensive,
 	vector<Conserved>& conservedintensive)
@@ -420,7 +418,6 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 }
 
 namespace {
-
 	Conserved density_floor_correction(double density_min,
 		EquationOfState const& eos,
 		Primitive const& old_cell)
@@ -431,7 +428,7 @@ namespace {
 		const double thermal_energy = density_min*
 			eos.dp2e(density_min, new_pressure);
 		const Vector2D momentum = density_min*old_cell.Velocity;
-		return Conserved(mass,momentum,kinetic_energy+thermal_energy);    
+		return Conserved(mass,momentum,kinetic_energy+thermal_energy);
 	}
 
 	Conserved calc_safe_conserved(Conserved const& raw,
@@ -543,7 +540,6 @@ Conserved FluxInBulk(Vector2D const& normaldir,
 }
 
 namespace {
-
 	Conserved calc_single_flux_in_bulk(Tessellation const& tess,
 		Edge const& edge,
 		SpatialReconstruction const& interpolation,
@@ -552,11 +548,11 @@ namespace {
 		RiemannSolver const& rs,
 		double dt)
 	{
-		const Vector2D normal_dir = 
+		const Vector2D normal_dir =
 			tess.GetMeshPoint(edge.neighbors.second)-
 			tess.GetMeshPoint(edge.neighbors.first);
 
-		const Vector2D paral_dir = 
+		const Vector2D paral_dir =
 			edge.vertices.second - edge.vertices.first;
 
 		const Primitive left = interpolation.Interpolate
@@ -568,7 +564,6 @@ namespace {
 		return FluxInBulk(normal_dir, paral_dir,
 			left, right,
 			face_velocity, rs);
-
 	}
 
 	int choose_special_cell_index
@@ -717,7 +712,6 @@ void ExternalForceContribution
 	}
 }
 
-
 vector<Vector2D> calc_point_velocities
 	(Tessellation const& tess,
 	vector<Primitive> const& cells,
@@ -768,7 +762,6 @@ vector<CustomEvolution*> convert_indices_to_custom_evolution
 	return res;
 }
 
-
 double TimeAdvance2mid
 	(Tessellation& tess,
 #ifdef RICH_MPI
@@ -789,7 +782,6 @@ double TimeAdvance2mid
 	double as,double bs,bool densityfloor,double densitymin,
 	double pressuremin,bool EntropyCalc)
 {
-
 	// create ghost points if needed
 #ifndef RICH_MPI
 	PeriodicUpdateCells(cells,tracers,custom_evolution_indices,tess.GetDuplicatedPoints(),
@@ -817,7 +809,6 @@ double TimeAdvance2mid
 	SendRecvVelocity(point_velocities,tess.GetDuplicatedPoints(),
 		tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
-
 
 	vector<Vector2D> edge_velocities =tess.calc_edge_velocities
 		(&hbc,point_velocities,time);
@@ -859,7 +850,6 @@ double TimeAdvance2mid
 		SendRecvTracers(tracers,tess.GetDuplicatedPoints(),
 		tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
-
 
 	vector<Conserved> fluxes = calc_fluxes
 		(tess, cells, 0.5*dt, time, interpolation,
@@ -919,7 +909,6 @@ double TimeAdvance2mid
 	MoveMeshPoints(point_velocities,0.5*dt, tess,proctess);
 #endif
 
-
 #ifdef RICH_MPI
 	vector<Conserved> ptoadd;
 	vector<vector<double> > ttoadd;
@@ -973,7 +962,7 @@ double TimeAdvance2mid
 	if(!vtoadd.empty())
 		oldpoints.insert(oldpoints.end(),vtoadd.begin(),vtoadd.end());
 
-	CellsEvolve = 
+	CellsEvolve =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
@@ -1000,7 +989,6 @@ double TimeAdvance2mid
 #endif
 
 	UpdateConservedIntensive(tess, extensive, intensive);
-
 
 	if(coldflows_flag)
 		FixPressure(intensive,tracer_extensive,eos,Ek,Ef,as,bs,CellsEvolve,
@@ -1064,7 +1052,6 @@ double TimeAdvance2mid
 		(tess, cells, dt, time, interpolation,
 		edge_velocities, hbc, rs,CellsEvolve,
 		custom_evolution_manager,tracers);
-
 
 	if(coldflows_flag)
 	{
@@ -1136,7 +1123,7 @@ double TimeAdvance2mid
 			ctoadd.end());
 	}
 
-	CellsEvolve = 
+	CellsEvolve =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
@@ -1161,7 +1148,6 @@ double TimeAdvance2mid
 			Ef.insert(Ef.end(),Ekadd.begin(),Ekadd.end());
 	}
 #endif
-
 
 	UpdateConservedIntensive(tess, old_extensive, intensive);
 
@@ -1191,7 +1177,6 @@ vector<Primitive> make_eos_consistent
 }
 
 namespace {
-
 	class ConditionalPlusMinus: public BinaryOperation<double>
 	{
 	public:
@@ -1247,7 +1232,7 @@ namespace {
 			const vector<double>& lengths):
 		tess_(tess), fluxes_(fluxes), cev_(cev), cem_(cem),
 			tracers_(tracers), cells_(cells), hbc_(hbc), dt_(dt),
-			time_(time), interp_(interp), 
+			time_(time), interp_(interp),
 			edge_velocities_(edge_velocities), lengths_(lengths) {}
 
 		size_t getLength(void) const
@@ -1304,7 +1289,7 @@ vector<vector<double> > CalcTraceChange
 	(vector<vector<double> > const& old_trace,
 	vector<Primitive> const& cells,
 	Tessellation const& tess,vector<Conserved> const& fluxes,double dt,
-	HydroBoundaryConditions const& hbc, 
+	HydroBoundaryConditions const& hbc,
 	SpatialReconstruction const& interp,
 	double time,vector<CustomEvolution*> const& CellsEvolve,
 	CustomEvolutionManager const& cem,
@@ -1314,7 +1299,7 @@ vector<vector<double> > CalcTraceChange
 	if(old_trace.empty())
 		return vector<vector<double> >();
 
-	const vector<vector<double> >& tracer_fluxes = 
+	const vector<vector<double> >& tracer_fluxes =
 		serial_generate(TracerFluxCalculator
 		(tess,fluxes,CellsEvolve,cem,
 		old_trace, cells, hbc, dt, time,
@@ -1489,7 +1474,7 @@ void TracerResetCalc
 	SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
 	SpatialDistribution const& originalVy, vector<Primitive> &cells,
 	Tessellation const& tess,vector<vector<double> > &tracer,
-	int tracerindex,EquationOfState const& eos,vector<CustomEvolution*> 
+	int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
 	const& cevolve)
 {
 	const int n = tess.GetPointNo();
@@ -1497,7 +1482,7 @@ void TracerResetCalc
 		return;
 	Vector2D velocity;
 	if(tracer.empty())
-		return;	
+		return;
 	if(tracerindex>=(int)tracer[0].size()||tracerindex<0)
 		throw UniversalError("Error in tracerReset, wrong dimension for tracer");
 	for(int i=0;i<n;++i)
@@ -1615,7 +1600,7 @@ bool IsShockedCell(Tessellation const& tess,int index,
 			if(edges[i].neighbors.first==index)
 				other=edges[i].neighbors.second;
 			else
-				other=edges[i].neighbors.first;	
+				other=edges[i].neighbors.first;
 			c_ij = CalcCentroid(edges[i])-
 				0.5*(tess.GetMeshPoint(other)+center);
 			r_ij = center-tess.GetMeshPoint(other);

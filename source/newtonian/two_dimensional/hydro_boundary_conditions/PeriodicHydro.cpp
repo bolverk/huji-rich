@@ -43,7 +43,7 @@ namespace {
 		}
 		return false;
 	}
-}      
+}
 
 Conserved PeriodicHydro::CalcFlux
 	(Tessellation const& tessellation,vector<Primitive> const& cells,

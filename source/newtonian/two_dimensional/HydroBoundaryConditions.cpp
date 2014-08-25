@@ -8,14 +8,14 @@ Vector2D HydroBoundaryConditions::Normal(Edge const& edge,
     return tessellation.GetMeshPoint(edge.neighbors.second)-
       tessellation.GetMeshPoint(edge.neighbors.first);
   }
-  else{ 
+  else{
     Vector2D v;
     if(!IsGhostCell(edge.neighbors.first,tessellation)){
-      v = edge.vertices.first - 
+      v = edge.vertices.first -
 	tessellation.GetMeshPoint(edge.neighbors.first);
     }
     else if(!IsGhostCell(edge.neighbors.second,tessellation)){
-      v = tessellation.GetMeshPoint(edge.neighbors.second) - 
+      v = tessellation.GetMeshPoint(edge.neighbors.second) -
 	edge.vertices.first;
     }
     else{

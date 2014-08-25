@@ -24,7 +24,7 @@ namespace {
 					Vector2D r=hbc.Normal(edge,tess);
 					dm-=2*lengthes[edge_index[i]]*fluxes[edge_index[i]].Mass*r;
 				}
-			else 
+			else
 				if(point==edge.neighbors.second)
 					if(edge.neighbors.first>-1)
 					{

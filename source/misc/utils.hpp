@@ -92,7 +92,7 @@ template <typename T>
 T LinearInterpolation(const vector<T> &x,const vector<T> &y,T xi)
 {
   typename vector<T>::const_iterator it=upper_bound(x.begin,x.end,xi);
-  assert(it!=x.end && it!=x.begin && 
+  assert(it!=x.end && it!=x.begin &&
 	 "X out of range in Linear Interpolation");
   if(*it==xi)
     return y[static_cast<size_t>(it-x.begin())];
@@ -146,7 +146,6 @@ template <class T> void RemoveVector
   v=result;
 }
 
-
 /*!
   \brief Returns only the values with indeces in index
   \param v The vector to check
@@ -181,7 +180,6 @@ template <class T> T VectorSum(vector<T> const&v)
     }
   return result;
 }
-
 
 /*!
   \brief Returns a vector containing only unique elements
@@ -221,7 +219,6 @@ template <class T> vector<int> unique_index(vector<T> const& v)
   return res;
 }
 
-
 /*!
   \brief Returns only elements from vector v which are not in vector list, assumes list is sorted
   \param v The vector to change
@@ -255,7 +252,7 @@ template <class T> void RemoveVal(vector<T> &vec,T val)
     }
 }
 
-/*! 
+/*!
   \brief checks if val is in the vector
   \param vec The vector to check
   \param val The value to check inside the vector
@@ -270,7 +267,7 @@ template <class T> bool InVector(vector<T> const&vec,T val)
   return false;
 }
 
-/*! 
+/*!
   \brief Returns the index of val in the vector
   \param vec The vector to check
   \param val The value to look for
@@ -297,7 +294,7 @@ template <class T> void ReArrangeVector(vector<T> &v,vector<int> const& indeces)
 }
 namespace
 {
-  template<class T> struct index_cmp 
+  template<class T> struct index_cmp
   {
     index_cmp(const T _arr) : arr(_arr) {}
     bool operator()(const size_t a, const size_t b) const

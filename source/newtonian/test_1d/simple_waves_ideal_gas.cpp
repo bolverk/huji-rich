@@ -51,7 +51,7 @@ SimpleWaveIdealGasInitCond::SimpleWaveIdealGasInitCond
 (SpatialDistribution1D const& density,
  double entropy, double adiabatic_index,
  double edge):
-  density_(density), 
+  density_(density),
   pressure_(density_,entropy,adiabatic_index),
   eos_(adiabatic_index),
   sound_speed_(pressure_,

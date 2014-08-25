@@ -56,7 +56,7 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 					mass_fluxt-=res.Mass*edge.GetLength()*dt*tracers[n0][1];
 				}
 			}
-		}		
+		}
 		return res;
 	}
 }
@@ -97,11 +97,11 @@ vector<double> ConstantPrimitiveEvolution::CalcTracerFlux
 {
 	vector<double> res(tracers[0].size());
 	if(dm>0)
-	{	
+	{
 		res=interp.interpolateTracers(tess,cells,tracers,dt,edge,0,
 			InBulk,vface);
 		transform(res.begin(),res.end(),res.begin(),
-			bind1st(multiplies<double>(),dm*dt*edge.GetLength()));	
+			bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
 	}
 	else
 	{

@@ -1,7 +1,6 @@
 #include "geotests.hpp"
 double const epsilon = 1.1102230246251565e-016;
 
-
 double orient2dAdapt(boost::array<Vector2D,3> const& points, double detsum)
 {
 	boost::array<double,2> A1,A2;

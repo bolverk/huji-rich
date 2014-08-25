@@ -1,7 +1,7 @@
 /*! \file hdf5_diagnostics.hpp
   \brief Simulation output to hdf5 file format
   \author Elad Steinberg
- */ 
+ */
 
 #ifndef HDF5_DIAG
 #define HDF5_DIAG 1

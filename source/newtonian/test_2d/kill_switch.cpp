@@ -7,7 +7,7 @@ using std::endl;
 
 KillSwitch::KillSwitch(const string& fname,
 		       TerminationCondition& tc):
-  fname_(fname), tc_(tc) 
+  fname_(fname), tc_(tc)
 {
   ofstream f(fname.c_str());
   f << '0' << endl;

@@ -11,7 +11,6 @@
 
 using namespace std;
 
-
 //! \brief Positions of boundaries
 class BCSides
 {
@@ -73,7 +72,6 @@ public:
 //! \brief Exception thrown if the boundaries are given in the wrong order
 class WrongBCSidesOrderException
 {
-
 private:
 
   double _up;
@@ -114,7 +112,5 @@ public:
    */
   double GetRight(void) const;
 };
-
-
 
 #endif	// of #ifndef ___BCSIDES_HPP___

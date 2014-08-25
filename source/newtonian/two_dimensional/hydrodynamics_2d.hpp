@@ -107,7 +107,7 @@ double CalcTimeStep
 void UpdateConservedExtensive
 (Tessellation const& tessellation,
  vector<Conserved> const& fluxes,
- double dt, 
+ double dt,
  vector<Conserved>& conserved_extensive,
  HydroBoundaryConditions const& boundaryconditions,
  vector<double> const& lengthes);
@@ -231,7 +231,7 @@ void ExternalForceContribution(Tessellation const& tess,
 			       HydroBoundaryConditions const& hbc,
 			       vector<Conserved> const& fluxes,
 			       vector<Vector2D> const& point_velocity,
-			       vector<double> &g, 
+			       vector<double> &g,
 			       bool coldflows_flag,vector<vector<double> > &tracers,
 				   vector<double> const& lengthes);
 
@@ -278,7 +278,7 @@ double TimeAdvance2mid
  SourceTerm& force,
  double time,
  double cfl,
- double endtime,		       
+ double endtime,
  vector<vector<double> >& tracers,
  double dt_external,
  vector<size_t>& custom_evolution_indices,
@@ -294,7 +294,7 @@ double TimeAdvance2mid
  double pressuremin=0.01,
  bool EntropyCalc=false);
 
-/*! 
+/*!
   \brief Essential data needed to advance a numerical simulation to the next time step
 */
 /*! \brief Calculates the velocities of the mesh generating points
@@ -524,6 +524,5 @@ void FixAdvection(vector<Conserved>& extensive,
 		  Tessellation const& tessnew,
 		  vector<Vector2D> const& facevelocity,
 		  double dt,vector<Vector2D> const& pointvelocity);
-
 
 #endif // HYDRODYNAMICS_2D_HPP

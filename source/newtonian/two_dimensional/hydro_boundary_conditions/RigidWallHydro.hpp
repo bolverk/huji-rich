@@ -66,7 +66,7 @@ public:
   vector<double> GetBoundaryTracers(Edge const& edge,
    Tessellation const& Data,
    vector<vector<double> > const& tracers,double time)const;
-  
+
   vector<double> CalcTracerFlux
   (Tessellation const& tessellation,vector<Primitive> const& cells,
    vector<vector<double> > const& tracers,double dm,
@@ -74,7 +74,7 @@ public:
    double time,SpatialReconstruction const& interp,Vector2D const& edge_velocity) const;
 
 private:
-  
+
   RiemannSolver const& rs_;
 };
 

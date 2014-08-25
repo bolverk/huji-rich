@@ -1,5 +1,5 @@
 /*! \file improved_center_gravity.hpp
-  \brief Point source gravity force 
+  \brief Point source gravity force
   \author Elad Steinberg
 */
 #ifndef CENTERGRAVITY_HPP
@@ -7,7 +7,7 @@
 
 #include "ConservativeForce.hpp"
 
-//! \brief Point source gravity force 
+//! \brief Point source gravity force
 class ImprovedCenterGravity: public Acceleration
 {
 public:

@@ -67,6 +67,6 @@ vector<double> ConstantFluxEvolution::CalcTracerFlux(Tessellation const& /*tess*
 	if(entropy_)
 		res[0]=eos_.dp2s(cell_.Density,cell_.Pressure);
 	transform(res.begin(),res.end(),res.begin(),
-		bind1st(multiplies<double>(),abs(dm)*dt*edge.GetLength()));	
+		bind1st(multiplies<double>(),abs(dm)*dt*edge.GetLength()));
 	return res;
 }

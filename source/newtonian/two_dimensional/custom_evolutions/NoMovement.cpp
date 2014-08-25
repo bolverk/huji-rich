@@ -17,11 +17,11 @@ Conserved NoMovement::CalcFlux(Tessellation const& tess,
 		HydroBoundaryConditions const& boundaryconditions,double time,
 		vector<vector<double> > const& tracers)
 {
-	const Vector2D normal_dir = 
+	const Vector2D normal_dir =
 			tess.GetMeshPoint(edge.neighbors.second)-
 			tess.GetMeshPoint(edge.neighbors.first);
 
-		const Vector2D paral_dir = 
+		const Vector2D paral_dir =
 			edge.vertices.second - edge.vertices.first;
 
 		const Primitive left = interpolation.Interpolate

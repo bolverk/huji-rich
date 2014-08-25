@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -50,7 +50,7 @@ static int				IDX_TRIVIAL[] = {0};	// trivial point index
 ANNkd_leaf				*KD_TRIVIAL = NULL;		// trivial leaf node
 
 //----------------------------------------------------------------------
-//	Printing the kd-tree 
+//	Printing the kd-tree
 //		These routines print a kd-tree in reverse inorder (high then
 //		root then low).  (This is so that if you look at the output
 //		from the right side it appear from left to right in standard
@@ -83,7 +83,6 @@ void ANNkd_leaf::print(					// print leaf node
 	int level,						// depth of node in tree
 	ostream &out)					// output stream
 {
-
 	out << "    ";
 	for (int i = 0; i < level; i++)		// print indentation
 		out << "..";
@@ -130,7 +129,7 @@ void ANNkd_tree::Print(					// print entire tree
 
 #define MAX(a,b)		((a) > (b) ? (a) : (b))
 
-void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child 
+void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child
 {
 	n_lf += st.n_lf;			n_tl += st.n_tl;
 	n_spl += st.n_spl;			n_shr += st.n_shr;
@@ -364,7 +363,7 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 //
 //		One of the arguments is a pointer to a splitting routine,
 //		whose prototype is:
-//		
+//
 //				void split(
 //						ANNpointArray pa,  // complete point array
 //						ANNidxArray pidx,  // point array (permuted on return)
@@ -380,7 +379,6 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 //		points on the low side of the cut.
 //----------------------------------------------------------------------
 
-
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray		pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
@@ -394,7 +392,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		if (n == 0)						// empty leaf node
 			return KD_TRIVIAL;			// return (canonical) empty leaf
 		else							// construct the node and return
-			return new ANNkd_leaf(dim,pa,n, pidx); 
+			return new ANNkd_leaf(dim,pa,n, pidx);
 	}
 	else {								// n large, make a splitting node
 		int cd;							// cutting dimension
@@ -425,8 +423,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 
 		return ptr;						// return pointer to this node
 	}
-} 
-
+}
 
 //----------------------------------------------------------------------
 // kd-tree constructor
@@ -474,7 +471,6 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 		annError("Illegal splitting method", ANNabort);
 	}
 }
-
 
 vector<double> ANNkd_tree::GetAcc(std::vector<double> const& qpoint,
 	double openAngle)
@@ -531,7 +527,6 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 	root->SetMass(masses,dd);
 }
 
-
 void ANNkd_split::getPot(vector<double> const& qpoint,
 	double openangle,double soft,double &res)
 {
@@ -579,7 +574,6 @@ double ANNkd_tree::GetPot(std::vector<double> const& qpoint,double openAngle,
 	root->getPot(qpoint,openAngle,soft,res);
 	return res;
 }
-
 
 void ANNkd_tree::SetH(std::vector<double> const& Hvec)
 {
@@ -705,7 +699,7 @@ double ANNkd_split::GetTimeStep(int index,vector<vector<double> >
 		double dt0=child[0]->GetTimeStep(index,vel,bnd_box,pa,c,dt,v_i);
 		bnd_box.hi[cut_dim] = hv;					// restore bound
 		hv= bnd_box.lo[cut_dim];			// save box bounds
-		bnd_box.lo[cut_dim] = cut_val;				// lower bound for high child	
+		bnd_box.lo[cut_dim] = cut_val;				// lower bound for high child
 		double dt1=child[0]->GetTimeStep(index,vel,bnd_box,pa,c,dt,v_i);
 		bnd_box.lo[cut_dim]=hv;
 		return min(dt0,dt1);

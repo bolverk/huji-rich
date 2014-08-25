@@ -17,13 +17,12 @@
 //! \brief Square box outer boundary conditions with two sides reflective and two periodic. The x direction is taken to be periodic.
 class HydroBoundaryConditions
 {
-	
 public:
 
   /*! \brief Calculates the flux on the boundary edge
     \param tessellation Point and edge positions
     \param cells Hydrodynamic variables
-    \param edge_velocity Velocity of the edge    
+    \param edge_velocity Velocity of the edge
     \param edge Boundary edge
 	\param interp The spatial reconstruction
 	\param dt The time step
@@ -38,7 +37,7 @@ public:
   /*! \brief Calculates the velocity of the boundary edge
     \param tessellation Point and edge positions
 	\param point_velocities Velocities of the mesh generating points
-    \param edge Boundary edge    
+    \param edge Boundary edge
     \param time The sim time
 	\return Velocity of edge
    */
@@ -48,7 +47,6 @@ public:
    Edge const& edge,
    double time) const = 0;
 
-  
   /*!
   \brief Checks if the edge is on a boundary
   \param tess The tessellation
@@ -56,7 +54,6 @@ public:
    \returns If it is on a boundary or not
    */
   virtual bool IsBoundary(Edge const& edge,Tessellation const& tess)const=0;
-
 
   /*!
   \brief Checks if the cell is a ghost cell

@@ -32,7 +32,6 @@ namespace
 	}
 }
 
-
 void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 {
 	vector<int> edge_index=tess->GetCellEdges(index);

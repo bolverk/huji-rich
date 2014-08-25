@@ -23,7 +23,6 @@ std::vector<Vector2D> cartesian_mesh(int nx, int ny,
 				Vector2D const& lower_left,
 				Vector2D const& upper_right);
 
-
 /*!
   \brief Generates a round grid with constant point density
   \param PointNum The number of points.
@@ -176,6 +175,5 @@ std::vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double a
 */
 std::vector<Vector2D> RandPointsRmax(int PointNum,double Rmin,double Rmax,
 				double xc=0,double yc=0);
-
 
 #endif //MESHGENERATOR_HPP

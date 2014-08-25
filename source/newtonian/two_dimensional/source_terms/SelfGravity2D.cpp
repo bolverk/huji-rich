@@ -29,7 +29,7 @@ Vector2D SelfGravity::Calculate(Tessellation const& tess,
 	  masses[i]=cell[i].Density*tess.GetVolume(i);
 	  h[i]=tess.GetWidth(i)*_Factor;
 	}
-      // Create the tree 
+      // Create the tree
       ANNkd_tree *tree;
       ANNpointArray treePoints;
       Vector2D pvec;

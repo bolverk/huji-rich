@@ -88,7 +88,7 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 		else
 			res.push_back(tracers[edge.neighbors.second][i]);
 	}
-		
+
 	return res;
 }
 
@@ -109,7 +109,7 @@ vector<double> NohHBC::CalcTracerFlux(Tessellation const& tessellation,
 				bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
 		}
 		else
-		{	
+		{
 			res=interp.interpolateTracers(tessellation,cells,tracers,dt,edge,1,
 				InBulk,vface);
 			transform(res.begin(),res.end(),res.begin(),

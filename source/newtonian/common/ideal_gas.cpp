@@ -46,8 +46,7 @@ double IdealGas::de2c(double d, double e) const
   return sqrt(_g*p/d);
 }
 
-
-double IdealGas::dp2s(double d, double p) const 
+double IdealGas::dp2s(double d, double p) const
 {
 	return p*pow(d,-_g);
 }

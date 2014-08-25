@@ -105,7 +105,7 @@ Conserved Hllc::Solve(Primitive const& left,
 
   local_left.Velocity -= velocity*normaldir;
   local_right.Velocity -= velocity*normaldir;
-  
+
   const Conserved ul = Primitive2Conserved(local_left);
   const Conserved ur = Primitive2Conserved(local_right);
 
@@ -135,7 +135,7 @@ Conserved Hllc::Solve(Primitive const& left,
 			      ws.center,
 			      ws.right);
 
-  f_gr.Energy += ScalarProd(f_gr.Momentum,velocity*normaldir) + 
+  f_gr.Energy += ScalarProd(f_gr.Momentum,velocity*normaldir) +
                 0.5*f_gr.Mass*velocity*velocity;
   f_gr.Momentum += velocity*f_gr.Mass*normaldir;
   return f_gr;

@@ -74,7 +74,6 @@ vector<Vector2D> GetParEdge(Vector2D const& p0,Vector2D const& p1,
 	return res;
 }
 
-
 vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 	const& poly1)
 {

@@ -105,4 +105,3 @@ void BinLogger::output(VoronoiMesh const& v)
 	}
 	file_handle.close();
 }
-

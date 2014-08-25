@@ -9,12 +9,10 @@ Primitive HalfPeriodicHydro::GetBoundaryPrimitive(Edge const& edge,
 		return periodic.GetBoundaryPrimitive(edge,Data,cells,time);
 }
 
-
 HalfPeriodicHydro::HalfPeriodicHydro(HalfPeriodicBox const& obc,RiemannSolver &rs)
 	:obc_(obc),rigid(rs),periodic(rs){}
 
 HalfPeriodicHydro::~HalfPeriodicHydro(){}
-
 
 Conserved HalfPeriodicHydro::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,Vector2D const& edge_velocity,
@@ -54,7 +52,6 @@ bool HalfPeriodicHydro::IsGhostCell(int i,Tessellation const& Data) const
 	else
 		return false;
 }
-
 
 vector<double> HalfPeriodicHydro::GetBoundaryTracers(Edge const& edge,Tessellation const& Data,
 	vector<vector<double> > const& tracers,double time)const

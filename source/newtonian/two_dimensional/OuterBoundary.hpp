@@ -18,7 +18,6 @@ enum BoundaryType{Rectengular, Periodic,HalfPeriodic};
 //! \brief Abstract class for geometric boundary conditions for the tessellation
 class OuterBoundary
 {
-	
 public:
 	/*!
 	\brief Returns the boundary type
@@ -48,6 +47,5 @@ public:
 
   virtual ~OuterBoundary(void);
 };
-  
 
 #endif // OUTERBOUNDARY_HPP

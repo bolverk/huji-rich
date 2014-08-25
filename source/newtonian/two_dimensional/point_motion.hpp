@@ -20,10 +20,10 @@ public:
     \param index Point index
     \param tessellation Positions of the points
     \param primitives Hydrodynamic variables
-    \param time The simulation time	
+    \param time The simulation time
     \return Velocity of the point
    */
-  virtual Vector2D CalcVelocity(int index, 
+  virtual Vector2D CalcVelocity(int index,
 				Tessellation const& tessellation,
 				vector<Primitive> const& primitives,double time)= 0;
 

@@ -2,7 +2,7 @@
 #include "bisection.hpp"
 #include "universal_error.hpp"
 
-namespace 
+namespace
 {
   bool is_effectively_zero(double x)
   {
@@ -43,7 +43,7 @@ double bisection(Func1Var const& f,
   double fl = f.eval(xl);
   if(is_effectively_zero(fl))
     return xl;
-  
+
   double fr = f.eval(xr);
   if(is_effectively_zero(fr))
     return xr;

@@ -45,7 +45,7 @@ public:
 		Tessellation const& tess);
 
 	/*! \brief Removed from the list cells near periodic boundaries
-	\param ToRefine List of candidates 
+	\param ToRefine List of candidates
 	\param directions The split directions, can be given empty
 	\param tess The tessellation
 	\return The corrected list

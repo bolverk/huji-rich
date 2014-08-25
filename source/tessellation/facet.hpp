@@ -10,7 +10,7 @@
 #include <boost/array.hpp>
 
 using namespace boost;
-/*! 
+/*!
 \brief Delanauy triangle data structure. Keeps the indexes of the vertices (right hand fashion) and the neighboring facets(triangles).
 \author Elad Steinberg
 */

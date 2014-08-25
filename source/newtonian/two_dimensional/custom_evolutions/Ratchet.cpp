@@ -23,7 +23,7 @@ Conserved Ratchet::CalcFlux(Tessellation const& tess,
   const Vector2D p = Parallel(edge);
   const Vector2D n = tess.GetMeshPoint(edge.neighbors.second)
     -tess.GetMeshPoint(edge.neighbors.first);
-  const Vector2D outward = 
+  const Vector2D outward =
     tess.GetMeshPoint(pair_member(edge.neighbors,1-my_index))
     - tess.GetMeshPoint(pair_member(edge.neighbors,my_index));
   Primitive ghost = cells[other];
@@ -51,7 +51,6 @@ Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
 {
 	return oldcells[index];
 }
-
 
 vector<double> Ratchet::UpdateTracer(int index,vector<vector<double> > const& tracers,
 	vector<vector<double> > const& tracerchange,vector<Primitive> const& /*cells*/,

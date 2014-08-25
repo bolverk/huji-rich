@@ -2,7 +2,7 @@
 #include "hydrodynamics.hpp"
 
 Primitive CalcPrimitive(double density, double pressure,
-			Vector2D const& velocity, 
+			Vector2D const& velocity,
 			EquationOfState const& eos)
 {
   return Primitive(density,
@@ -17,7 +17,7 @@ Primitive Conserved2Primitive
 {
   const double density = c.Mass;
   const Vector2D velocity = c.Momentum / c.Mass;
-  const double energy = c.Energy/c.Mass - 
+  const double energy = c.Energy/c.Mass -
     0.5*pow(abs(velocity),2);
   if(energy<0)
   {

@@ -134,7 +134,7 @@ public:
   SpatialDistribution1D const& getProfile(string pname) const;
 
 private:
-  
+
   SpatialDistribution1D const& density_;
   ConstEntropy pressure_;
   IdealGas eos_;

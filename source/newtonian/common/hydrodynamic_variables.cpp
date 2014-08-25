@@ -4,9 +4,9 @@
 #include "../../misc/utils.hpp"
 
 Primitive::Primitive(void):
-  Density(0), 
+  Density(0),
   Pressure(0),
-  Velocity(0,0), 
+  Velocity(0,0),
   Energy(0),
   SoundSpeed(0) {}
 
@@ -112,7 +112,6 @@ double Primitive::operator[](int index) const
 }
 
 namespace{
-
   Primitive binary_op_primitive(Primitive const& p1,
 				Primitive const& p2,
 				BinaryOperation<double> const& op)
@@ -149,7 +148,7 @@ Primitive operator+(Primitive const& p1,
     }
   } op;
   return binary_op_primitive(p1, p2, op);
-}		  
+}
 
 Primitive operator-(Primitive const& p1,
 		    Primitive const& p2)
@@ -267,13 +266,12 @@ Conserved Primitive2Conserved(Primitive const& p,double vol)
 		   vol*TotalEnergyDensity(p));
 }
 
-
-Conserved Primitive2Flux(Primitive const& p, 
+Conserved Primitive2Flux(Primitive const& p,
 			 Vector2D const& n)
 {
   const Vector2D nn = n/abs(n);
   return Conserved(p.Density*ScalarProd(p.Velocity, nn),
-		   p.Pressure*nn + 
+		   p.Pressure*nn +
 		   p.Density*ScalarProd(p.Velocity, nn)*p.Velocity,
 		   (TotalEnergyDensity(p)+p.Pressure)*
 		   ScalarProd(p.Velocity, nn));

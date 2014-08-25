@@ -1,5 +1,5 @@
 /*! \file CenterGravity.hpp
-  \brief Point source gravity force 
+  \brief Point source gravity force
   \author Elad Steinberg
 */
 

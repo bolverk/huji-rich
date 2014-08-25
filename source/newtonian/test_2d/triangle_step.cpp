@@ -6,7 +6,6 @@
 #include "../../misc/universal_error.hpp"
 
 namespace {
-
   #ifdef RICH_MPI
   class PointsOnCircle: public Index2Member<Vector2D>
   {

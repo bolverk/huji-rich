@@ -1,6 +1,6 @@
 #include "RigidWallHydro.hpp"
 
-RigidWallHydro::RigidWallHydro(RiemannSolver const& rs): 
+RigidWallHydro::RigidWallHydro(RiemannSolver const& rs):
 rs_(rs) {}
 
 RigidWallHydro::~RigidWallHydro(void) {}

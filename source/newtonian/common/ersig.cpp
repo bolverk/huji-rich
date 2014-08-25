@@ -18,9 +18,9 @@ namespace {
 	    sqrt(16*g*p1 + d1*pow(1 + g,2)*pow(v2,2)))/4.;
   }
 
-  double vhugo(double p2, 
-	       double d1, 
-	       double p1, 
+  double vhugo(double p2,
+	       double d1,
+	       double p1,
 	       double g)
   {
     return sqrt(2.)*(p2-p1)/sqrt(d1*(p2*(g+1)+p1*(g-1)));
@@ -37,8 +37,8 @@ namespace {
   }
 
   double vhydro(double p2,
-		double d1, 
-		double p1, 
+		double d1,
+		double p1,
 		double g)
   {
     if(p2>p1)
@@ -79,7 +79,7 @@ namespace {
   class TransEqn: public Func1Var
   {
   public:
-  
+
     /*! \brief Class constructor
       \param left Hydrodynamic variables on the left side
       \param right Hydrodynamic variables on the right side
@@ -118,14 +118,14 @@ namespace {
     const double dr = right.Density;
     const double pr = right.Pressure;
     const double vr = right.Velocity.x;
-    const double temp = 
+    const double temp =
       (2*(sqrt(g*dr*pl)+sqrt(g*dl*pr))+
        sqrt(dl*dr)*(g-1)*(vl-vr))/
       (2*(sqrt(g*dr)*pow(pl,1/g/2)+
 	  sqrt(g*dl)*pow(pr,1/g/2)));
     if(temp<0){
       throw UniversalError("Vacuum formed");
-    }    
+    }
     const double res = pow(temp,2*g/(g-1));
     return res;
   }
@@ -248,7 +248,7 @@ namespace {
 
     virtual ~HydroProf(void) {}
   };
-  
+
   Primitive x_rest_frame(Primitive const& source)
   {
     Primitive res =source;
@@ -272,7 +272,7 @@ namespace {
 		      upstream.Pressure,g)),
       upstream_(x_rest_frame(upstream)),
       downstream_
-      (move_on_hugoniot(p2,upstream,g)) {} 
+      (move_on_hugoniot(p2,upstream,g)) {}
 
     Primitive getHydroVars(double v) const
     {
@@ -302,7 +302,7 @@ namespace {
   upstream.Pressure,g)),
   upstream_(x_rest_frame(upstream)),
   downstream_
-  (move_on_hugoniot(p2,upstream,g)) {}				 
+  (move_on_hugoniot(p2,upstream,g)) {}
 
   Primitive getHydroVars(double v) const
   {
@@ -357,7 +357,7 @@ namespace {
       g_(g),
       upstream_(x_rest_frame(upstream)),
       downstream_
-      (move_on_isentrope(p2, upstream,g)) {} 
+      (move_on_isentrope(p2, upstream,g)) {}
 
     Primitive getHydroVars(double v) const
     {
@@ -376,8 +376,8 @@ namespace {
 			     Vector2D(u,upstream_.Velocity.y),
 			     IdealGas(g_));
       }
-    } 
-  
+    }
+
   private:
     const double g_;
     const Primitive upstream_;
@@ -395,7 +395,7 @@ namespace {
   g_(g),
   upstream_(x_rest_frame(upstream)),
   downstream_
-  (move_on_isentrope(p2, upstream,g)) {} 
+  (move_on_isentrope(p2, upstream,g)) {}
 
   Primitive getHydroVars(double v) const
   {
@@ -414,7 +414,7 @@ namespace {
   Vector2D(u,upstream_.Velocity.y),
   IdealGas(g_));
   }
-  }  
+  }
 
   private:
   const double g_;
@@ -488,7 +488,7 @@ namespace {
       left_prof_(contact_.pressure,
 		 left, g),
       right_prof_(contact_.pressure,
-		  right, g), 
+		  right, g),
       left_(left), right_(right) {}
 
     Primitive getHydroVars(double v) const
@@ -502,7 +502,7 @@ namespace {
       else{
 	Primitive res = left_prof_.getHydroVars
 	  (left_.Velocity.x - v);
-	res.Velocity.x = left_.Velocity.x - 
+	res.Velocity.x = left_.Velocity.x -
 	  res.Velocity.x;
 	return res;
       }
@@ -528,9 +528,9 @@ namespace {
   left_prof_(contact_.pressure,
   left, g),
   right_prof_(contact_.pressure,
-  right, g), 
+  right, g),
   left_(left), right_(right) {}
-  
+
   Primitive getHydroVars(double v) const
   {
   if(v>contact_.velocity){
@@ -542,7 +542,7 @@ namespace {
   else{
   Primitive res = left_prof_.getHydroVars
   (left_.Velocity.x - v);
-  res.Velocity.x = left_.Velocity.x - 
+  res.Velocity.x = left_.Velocity.x -
   res.Velocity.x;
   return res;
   }
@@ -566,16 +566,15 @@ Conserved ERSIG::Solve
  double velocity) const
 {
   try{
-    const Primitive inter = 
+    const Primitive inter =
       RiemannProfile(left,right,g_).getHydroVars(velocity);
 
-    const Conserved res = Primitive2Flux(inter,Vector2D(1,0)) - 
+    const Conserved res = Primitive2Flux(inter,Vector2D(1,0)) -
       velocity*Primitive2Conserved(inter);
 
     return res;
   }
   catch(UniversalError& eo){
-
     if(eo.GetErrorMessage()=="Vacuum formed"){
       if(vacuum_behaviour_=="zero flux")
 	return Conserved();

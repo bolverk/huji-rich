@@ -21,7 +21,7 @@ Vector2D CalcCentroid(Edge const& edge);
 
 /*! \brief Spatial reconstruction of the primitive functions
   \author Almog Yalinewich
-*/ 
+*/
 class SpatialReconstruction
 {
 public:
@@ -56,7 +56,7 @@ public:
    int side,
    InterpolationType interptype,
    Vector2D const& vface) const = 0;
- 
+
   /*! \brief Interpolates the scalar tracers near the edge
     \param tess Point and edge positions
     \param cells Hydrodynamic variables

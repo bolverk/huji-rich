@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -241,14 +241,14 @@ public:
 		ANNcoord cv,					// cutting value
 		ANNcoord lv, ANNcoord hv,				// low and high values
 		ANNkd_ptr lc=NULL, ANNkd_ptr hc=NULL)	// children
-		
+
 		{
 			cut_dim		= cd;					// cutting dimension
 			cut_val		= cv;					// cutting value
 			cd_bnds[ANN_LO] = lv;				// lower bound for rectangle
 			cd_bnds[ANN_HI] = hv;				// upper bound for rectangle
 			child[ANN_LO]	= lc;				// left child
-			child[ANN_HI]	= hc;				// right child			
+			child[ANN_HI]	= hc;				// right child
 		}
 
 	~ANNkd_split()						// destructor
@@ -308,6 +308,5 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	int					bsp,			// bucket space
 	ANNorthRect			&bnd_box,		// bounding box for current node
 	ANNkd_splitter		splitter);		// splitting routine
-
 
 #endif

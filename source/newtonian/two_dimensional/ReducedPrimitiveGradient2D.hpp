@@ -34,7 +34,7 @@ public:
    Vector2D const& vy,
    vector<Vector2D> const& trace);
 
-  //! \brief Density gradient  
+  //! \brief Density gradient
   Vector2D density;
 
   //! \brief Pressure gradient

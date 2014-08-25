@@ -12,7 +12,6 @@
 
 //! \brief Diagnostic functions for Delaunay triangulation
 namespace delaunay_loggers {
-
   using namespace std;
 
   //! \brief Diagnostic class for Delaunay triangulation

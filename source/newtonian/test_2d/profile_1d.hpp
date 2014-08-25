@@ -27,7 +27,6 @@ public:
 private:
 
   SpatialDistribution1D const& prof_1d_;
-
 };
 
 #endif // PROFILE_1D_HPP

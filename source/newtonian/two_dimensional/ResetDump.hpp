@@ -25,9 +25,8 @@ public:
   //! \brief The mesh points
   vector<Vector2D> mesh_points;
   //! \brief The primitive cells
-  vector<Primitive> cells;  
+  vector<Primitive> cells;
 };
-
 
 //! \brief Contains data required to restart a simulation run
 class ResetDump

@@ -1,7 +1,7 @@
 /*! \file noh_amr.hpp
   \brief AMR scheme for the noh problem
   \author Elad Steinberg
- */ 
+ */
 
 #ifndef NOH_AMR_HPP
 #define NOH_AMR_HPP 1
@@ -46,6 +46,4 @@ public:
 		double time)const;
 };
 
-
-
-#endif //NOH_AMR_HPP 
+#endif //NOH_AMR_HPP

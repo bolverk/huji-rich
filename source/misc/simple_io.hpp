@@ -30,7 +30,7 @@ void write_number(double num,
 \param v List of numbers
 \param fname Name of the file
 \param prec Precision
-*/		  
+*/
 void write_vector(vector<double> const& v,
 		  string const& fname,
 		  int prec=6);
