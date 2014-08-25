@@ -220,7 +220,6 @@ void hdsim::TimeAdvance(void)
 								_time,custom_evolutions),
 					      _dt_external, _time, _endtime);
 
-	vector<double> Ek,Ef;
 	vector<char> shockedcells;
 
 	if(coldflows_flag_)
@@ -282,6 +281,8 @@ void hdsim::TimeAdvance(void)
 		_conservedextensive,_hbc,_fluxes,_pointvelocity,g,coldflows_flag_,tracer_,
 		lengths);
 
+	vector<double> Ek;
+	vector<double> Ef;
 	if(coldflows_flag_)
 	{
 		Ek =GetMaxKineticEnergy(_tessellation,_cells,custom_evolutions);
