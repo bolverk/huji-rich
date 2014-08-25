@@ -55,12 +55,10 @@ int read_int(string const& fname)
 
 void binary_write_single_int(int n, ofstream& fh)
 {
-  char buf(static_cast<char>(n));
-  fh.write(&buf,sizeof(int));
+  fh.write((const char*)&n,sizeof(int));
 }
 
 void binary_write_single_double(double d, ofstream& fh)
 {
-  char buf(static_cast<char>(d));
-  fh.write(&buf,sizeof(double));
+  fh.write((const char*)&d,sizeof(double));
 }
