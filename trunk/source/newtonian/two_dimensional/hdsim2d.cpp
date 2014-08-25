@@ -179,6 +179,17 @@ namespace
 
     return dt;
   }
+
+  vector<char> calc_shocked_cells(const Tessellation& tess,
+				  const vector<Primitive>& cells,
+				  const HydroBoundaryConditions& hbc,
+				  double time)
+  {
+    vector<char> res(tess.GetPointNo());
+    for(size_t i=0;i<res.size();++i)
+      res[i] = IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0;
+    return res;
+  }
 }
 
 void hdsim::TimeAdvance(void)
@@ -220,8 +231,6 @@ void hdsim::TimeAdvance(void)
 								_time,custom_evolutions),
 					      _dt_external, _time, _endtime);
 
-	vector<char> shockedcells;
-
 	if(coldflows_flag_)
 	{
 		const int n=_tessellation.GetPointNo();
@@ -232,10 +241,14 @@ void hdsim::TimeAdvance(void)
 			_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
 			,_tessellation.GetTotalPointNumber());
 #endif
-		shockedcells.resize(n);
-		for(int i=0;i<n;++i)
-			shockedcells[i]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
 	}
+
+	vector<char> shockedcells;
+	if(coldflows_flag_)
+	  shockedcells = calc_shocked_cells(_tessellation,
+					    _cells,
+					    _hbc,
+					    _time);
 #ifdef RICH_MPI
 	if(tracer_flag_&&!coldflows_flag_)
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
