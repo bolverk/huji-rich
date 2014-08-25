@@ -580,12 +580,6 @@ namespace {
 		vector<vector<double> > t_received_;
 		vector<size_t> cei_received_;
 	};
-
-	template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
-	{
-		if(!addendum.empty())
-			subject.insert(subject.end(),addendum.begin(),addendum.end());
-	}
 }
 
 void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > const&

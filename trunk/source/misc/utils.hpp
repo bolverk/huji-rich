@@ -562,4 +562,10 @@ template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
   return res;
 }
 
+template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
+{
+  if(!addendum.empty())
+    subject.insert(subject.end(),addendum.begin(),addendum.end());
+}
+
 #endif // UTILS_HPP
