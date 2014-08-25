@@ -500,89 +500,92 @@ vector<int> GetProcOrder(int rank,int worldsize)
 
 namespace {
 
-  template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
-  {
-    vector<T> res(source.size());
-    for(size_t i=0;i<source.size();++i)
-      res[i] = static_cast<T>(source[i]);
-    return res;
-  }
+	template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
+	{
+		vector<T> res(source.size());
+		for(size_t i=0;i<source.size();++i)
+			res[i] = static_cast<T>(source[i]);
+		return res;
+	}
 
-  class ExtensiveCommunicator: public Communication
-  {
-  public:
+	class ExtensiveCommunicator: public Communication
+	{
+	public:
 
-    ExtensiveCommunicator(const vector<Conserved>& c_to_send,
-			  const vector<vector<double> >& t_to_send,
-			  const vector<size_t>& cei_to_send):
-      c_to_send_(c_to_send), t_to_send_(t_to_send),
-      cei_to_send_(cei_to_send), c_received_(),
-      t_received_(), cei_received_() {}
+		ExtensiveCommunicator(const vector<Conserved>& c_to_send,
+			const vector<vector<double> >& t_to_send,
+			const vector<size_t>& cei_to_send,int ntracer):
+		c_to_send_(c_to_send), t_to_send_(t_to_send),
+			cei_to_send_(cei_to_send), c_received_(),
+			t_received_(), cei_received_(),ntracer_(ntracer) {}
 
-    void sendInfo(int address)
-    {
-      MPI_SendVectorConserved(c_to_send_,address,0,MPI_COMM_WORLD);
-      if(!t_to_send_.empty())
-	MPI_SendVectorTracer(t_to_send_,address,0,MPI_COMM_WORLD);
-      if(!cei_to_send_.empty()){
-	vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
-	MPI_Send(&buf[0],buf.size(),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
-      }
-      else{
-	int temp = 0;
-	MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
-      }
-    }
+		void sendInfo(int address)
+		{
+			MPI_SendVectorConserved(c_to_send_,address,0,MPI_COMM_WORLD);
+			MPI_SendVectorTracer(t_to_send_,address,0,MPI_COMM_WORLD);
+			if(!cei_to_send_.empty())
+			{
+				vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
+				MPI_Send(&buf[0],buf.size(),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
+			}
+			else
+			{
+				int temp = 0;
+				MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
+			}
+		}
 
-    void recvInfo(int address)
-    {
-      MPI_RecvVectorConserved(c_received_,address,0,MPI_COMM_WORLD);
-      if(!t_to_send_.empty())
-	MPI_RecvVectorTracer(t_received_,address,0,MPI_COMM_WORLD,t_to_send_[0].size());
-      MPI_Status status;
-      MPI_Probe(address,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-      if(status.MPI_TAG==1){
-	int temp;
-	MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,&status);
-      }      
-      else{
-	int count;
-	MPI_Get_count(&status,MPI_UNSIGNED,&count);
-	vector<unsigned> buf(count);
-	MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD,&status);
-	cei_received_ = mass_static_cast<size_t,unsigned>(buf);
-      }
-    }
+		void recvInfo(int address)
+		{
+			MPI_RecvVectorConserved(c_received_,address,0,MPI_COMM_WORLD);
+			MPI_RecvVectorTracer(t_received_,address,0,MPI_COMM_WORLD,ntracer_);
+			MPI_Status status;
+			MPI_Probe(address,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+			if(status.MPI_TAG==1)
+			{
+				int temp;
+				MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,&status);
+			}      
+			else
+			{
+				int count;
+				MPI_Get_count(&status,MPI_UNSIGNED,&count);
+				vector<unsigned> buf(count);
+				MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD,&status);
+				cei_received_ = mass_static_cast<size_t,unsigned>(buf);
+			}
+		}
 
-    const vector<Conserved>& getReceivedConserved(void) const
-    {
-      return c_received_;
-    }
+		const vector<Conserved>& getReceivedConserved(void) const
+		{
+			return c_received_;
+		}
 
-    const vector<vector<double> >& getReceivedTracers(void) const
-    {
-      return t_received_;
-    }
+		const vector<vector<double> >& getReceivedTracers(void) const
+		{
+			return t_received_;
+		}
 
-    const vector<size_t>& getReceivedCustomEvolutionIndices(void) const
-    {
-      return cei_received_;
-    }
+		const vector<size_t>& getReceivedCustomEvolutionIndices(void) const
+		{
+			return cei_received_;
+		}
 
-  private:
-    const vector<Conserved> c_to_send_;
-    const vector<vector<double> > t_to_send_;
-    const vector<size_t> cei_to_send_;
-    vector<Conserved> c_received_;
-    vector<vector<double> > t_received_;
-    vector<size_t> cei_received_;
-  };
+	private:
+		const vector<Conserved> c_to_send_;
+		const vector<vector<double> > t_to_send_;
+		const vector<size_t> cei_to_send_;
+		const int ntracer_;
+		vector<Conserved> c_received_;
+		vector<vector<double> > t_received_;
+		vector<size_t> cei_received_;
+	};
 
-  template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
-  {
-    if(!addendum.empty())
-      subject.insert(subject.end(),addendum.begin(),addendum.end());
-  }
+	template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
+	{
+		if(!addendum.empty())
+			subject.insert(subject.end(),addendum.begin(),addendum.end());
+	}
 }
 
 void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > const&
@@ -591,8 +594,11 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 	&ttoadd,vector<size_t> &ctoadd)
 {
 	bool traceractive=!tracers.empty();
+	int ntracer=0;
 	if(traceractive)
 		traceractive=!tracers[0].empty();
+	if(traceractive)
+		ntracer=(int)tracers[0].size();
 
 	// Take care of self send hydro
 	int nlist=(int)sentprocs.size();
@@ -612,13 +618,13 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
-		  ExtensiveCommunicator extensive_communicator(VectorValues(cons,sentcells[index]),
-							       VectorValues(tracers,sentcells[index]),
-							       VectorValues(customevolutions,sentcells[index]));
-		  marshal_communication(extensive_communicator,procorder[i],rank<procorder[i]);
-		  insert_all_to_back(ptoadd,extensive_communicator.getReceivedConserved());
-		  insert_all_to_back(ttoadd,extensive_communicator.getReceivedTracers());
-		  insert_all_to_back(ctoadd,extensive_communicator.getReceivedCustomEvolutionIndices());
+			ExtensiveCommunicator extensive_communicator(VectorValues(cons,sentcells[index]),
+				VectorValues(tracers,sentcells[index]),
+				VectorValues(customevolutions,sentcells[index]),ntracer);
+			marshal_communication(extensive_communicator,procorder[i],rank<procorder[i]);
+			insert_all_to_back(ptoadd,extensive_communicator.getReceivedConserved());
+			insert_all_to_back(ttoadd,extensive_communicator.getReceivedTracers());
+			insert_all_to_back(ctoadd,extensive_communicator.getReceivedCustomEvolutionIndices());
 		}
 	}
 }
@@ -852,65 +858,65 @@ void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 
 namespace {
 
-  class HydroCommunicator: public Communication
-  {
-  public:
+	class HydroCommunicator: public Communication
+	{
+	public:
 
-    HydroCommunicator(const EquationOfState& eos,
-		      const vector<Primitive>& p_to_send,
-		      const vector<size_t>& cei_to_send):
-      eos_(eos), p_to_send_(p_to_send), 
-      cei_to_send_(cei_to_send),
-      p_received_(), cei_received_() {}
+		HydroCommunicator(const EquationOfState& eos,
+			const vector<Primitive>& p_to_send,
+			const vector<size_t>& cei_to_send):
+		eos_(eos), p_to_send_(p_to_send), 
+			cei_to_send_(cei_to_send),
+			p_received_(), cei_received_() {}
 
-    void sendInfo(int address)
-    {
-      MPI_SendVectorPrimitive(p_to_send_,address,0,MPI_COMM_WORLD);
-      if(!cei_to_send_.empty()){
-	vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
-	MPI_Send(&buf[0],static_cast<int>(buf.size()),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
-      }
-      else{
-	unsigned temp = 0;
-	MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
-      }
-    }
+		void sendInfo(int address)
+		{
+			MPI_SendVectorPrimitive(p_to_send_,address,0,MPI_COMM_WORLD);
+			if(!cei_to_send_.empty()){
+				vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
+				MPI_Send(&buf[0],static_cast<int>(buf.size()),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
+			}
+			else{
+				unsigned temp = 0;
+				MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
+			}
+		}
 
-    void recvInfo(int address)
-    {
-      MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
-      int count;
-      MPI_Status stat;
-      MPI_Probe(address,0,MPI_COMM_WORLD,&stat);
-      MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-      if(stat.MPI_TAG==0){
-	vector<unsigned> buf(count);
-	MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	cei_received_ = mass_static_cast<size_t,unsigned>(buf);
-      }
-      else{
-	unsigned temp;
-	MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-      }
-    }
+		void recvInfo(int address)
+		{
+			MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
+			int count;
+			MPI_Status stat;
+			MPI_Probe(address,0,MPI_COMM_WORLD,&stat);
+			MPI_Get_count(&stat,MPI_UNSIGNED,&count);
+			if(stat.MPI_TAG==0){
+				vector<unsigned> buf(count);
+				MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				cei_received_ = mass_static_cast<size_t,unsigned>(buf);
+			}
+			else{
+				unsigned temp;
+				MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+			}
+		}
 
-    const vector<Primitive>& getReceivedPrimitives(void) const
-    {
-      return p_received_;
-    }
+		const vector<Primitive>& getReceivedPrimitives(void) const
+		{
+			return p_received_;
+		}
 
-    const vector<size_t> getReceivedCustomEvolutionIndices(void) const
-    {
-      return cei_received_;
-    }
+		const vector<size_t> getReceivedCustomEvolutionIndices(void) const
+		{
+			return cei_received_;
+		}
 
-  private:
-    const EquationOfState& eos_;
-    const vector<Primitive> p_to_send_;
-    const vector<size_t> cei_to_send_;
-    vector<Primitive> p_received_;
-    vector<size_t> cei_received_;
-  };
+	private:
+		const EquationOfState& eos_;
+		const vector<Primitive> p_to_send_;
+		const vector<size_t> cei_to_send_;
+		vector<Primitive> p_received_;
+		vector<size_t> cei_received_;
+	};
 }
 
 void SendRecvHydro(vector<Primitive> &cells,
@@ -933,8 +939,8 @@ void SendRecvHydro(vector<Primitive> &cells,
 		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
 			-sentprocs.begin();
 		HydroCommunicator hydro_communicator(eos,
-						     VectorValues(cells,sentcells[index]),
-						     VectorValues(customevolutions,sentcells[index]));
+			VectorValues(cells,sentcells[index]),
+			VectorValues(customevolutions,sentcells[index]));
 		marshal_communication(hydro_communicator,procorder[i],rank<procorder[i]);
 		padd[index] = hydro_communicator.getReceivedPrimitives();
 		cadd[index] = hydro_communicator.getReceivedCustomEvolutionIndices();
@@ -1318,7 +1324,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 			sort(temp.begin(),temp.end());
 			for(int j=0;j<nbound;++j)
 			{
-			  const int index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
+				const int index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
 					-temp.begin();
 				if(index<(int)temp.size())
 					tosend[i].push_back(index);
@@ -1460,17 +1466,17 @@ namespace
 }
 
 void GetAMRExtensive(vector<Primitive> &rescells,
-		     vector<vector<double> > &restracer,
-		     vector<Primitive> const& cells,
-		     vector<vector<double> > 
-		     const& tracers,
-		     bool traceractive,
-		     vector<vector<int> > &ToSend,
-		     vector<int> const& proclist,
-		     EquationOfState const& eos,
-		     vector<vector<int> > const& DuplicatedPoints,
-		     vector<vector<int> > const& Nghost,
-		     vector<int> const& ToRemove)
+	vector<vector<double> > &restracer,
+	vector<Primitive> const& cells,
+	vector<vector<double> > 
+	const& tracers,
+	bool traceractive,
+	vector<vector<int> > &ToSend,
+	vector<int> const& proclist,
+	EquationOfState const& eos,
+	vector<vector<int> > const& DuplicatedPoints,
+	vector<vector<int> > const& Nghost,
+	vector<int> const& ToRemove)
 {
 	// ToSend is the index in the Nghost
 	// Send to other procs the list of points
