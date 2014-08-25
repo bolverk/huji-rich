@@ -217,6 +217,15 @@ namespace
 			    tess.GetSentProcs(),buf);
       insert_all_to_back(shocked_cells,buf);
     }
+
+  void herd_vector_double(const Tessellation& tess,
+			  vector<double>& values)
+  {
+    vector<double> buf;
+    SendRecvVectorDouble(values,tess.GetSentPoints(),tess.GetSentProcs(),buf);
+    values = VectorValues(values,tess.GetSelfPoint());
+    insert_all_to_back(values,buf);
+  }
     #endif
 }
 
@@ -373,12 +382,8 @@ void hdsim::TimeAdvance(void)
 	if(coldflows_flag_)
 	{
 	  herd_shocked_status(_tessellation,shockedcells);
+	  herd_vector_double(_tessellation,Ek);
 		vector<double> Ekadd;
-		SendRecvVectorDouble(Ek,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
-			Ekadd);
-		Ek=VectorValues(Ek,_tessellation.GetSelfPoint());
-		if(!Ekadd.empty())
-			Ek.insert(Ek.end(),Ekadd.begin(),Ekadd.end());
 		SendRecvVectorDouble(Ef,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
 			Ekadd);
 		Ef=VectorValues(Ef,_tessellation.GetSelfPoint());
