@@ -357,22 +357,9 @@ void hdsim::TimeAdvance(void)
 	KeepLocalPoints(_conservedextensive,tracer_extensive,custom_evolution_indices,
 		_tessellation.GetSelfPoint());
 
-	if(!ptoadd.empty())
-	{
-		_conservedextensive.insert(_conservedextensive.end(),ptoadd.begin(),
-			ptoadd.end());
-	}
-
-	if(!ttoadd.empty())
-	{
-		tracer_extensive.insert(tracer_extensive.end(),ttoadd.begin(),ttoadd.end());
-	}
-
-	if(!ctoadd.empty())
-	{
-		custom_evolution_indices.insert(custom_evolution_indices.end(),ctoadd.begin(),
-			ctoadd.end());
-	}
+	insert_all_to_back(_conservedextensive,ptoadd);
+	insert_all_to_back(tracer_extensive,ttoadd);
+	insert_all_to_back(custom_evolution_indices,ctoadd);
 
 	custom_evolutions =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
