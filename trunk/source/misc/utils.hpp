@@ -554,4 +554,12 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
     vec[indeces[i]]=data[i];
 }
 
+template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
+{
+  vector<T> res(source.size());
+  for(size_t i=0;i<res.size();++i)
+    res[i] = static_cast<T>(source[i]);
+  return res;
+}
+
 #endif // UTILS_HPP
