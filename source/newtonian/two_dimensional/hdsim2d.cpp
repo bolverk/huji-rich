@@ -383,12 +383,7 @@ void hdsim::TimeAdvance(void)
 	{
 	  herd_shocked_status(_tessellation,shockedcells);
 	  herd_vector_double(_tessellation,Ek);
-		vector<double> Ekadd;
-		SendRecvVectorDouble(Ef,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
-			Ekadd);
-		Ef=VectorValues(Ef,_tessellation.GetSelfPoint());
-		if(!Ekadd.empty())
-			Ef.insert(Ef.end(),Ekadd.begin(),Ekadd.end());
+	  herd_vector_double(_tessellation,Ef);
 	}
 #endif
 
