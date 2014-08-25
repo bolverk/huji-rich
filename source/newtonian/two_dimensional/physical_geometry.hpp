@@ -17,7 +17,7 @@ public:
 
   virtual double calcArea(const Edge& edge) const = 0;
 
-  virtual double calcVolume(const vector<Edge>& edge_list) = 0;
+  virtual double calcVolume(const vector<Edge>& edge_list) const = 0;
 
   virtual ~PhysicalGeometry(void);
 };

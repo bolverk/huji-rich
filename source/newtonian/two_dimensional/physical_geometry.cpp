@@ -30,7 +30,7 @@ double CylindricalSymmetry::calcArea(const Edge& edge_list) const
   const double x2 = ScalarProd(edge_list.vertices.second,axis_);
   const double y1 = abs(ScalarProd(edge_list.vertices.first,zcross(axis_)));
   const double y2 = abs(ScalarProd(edge_list.vertices.second,zcross(axis_)));
-  return M_PI*(y1+y2)*sqrt(pow(y2-y1,2)+pow(x2-x1,2));
+  return M_PI*(y1+y2)*sqrt(pow(y2-y1,2.)+pow(x2-x1,2.));
 }
 
 namespace {
@@ -42,7 +42,7 @@ namespace {
     const double x2 = ScalarProd(p2,axis);
     const double y1 = abs(ScalarProd(p1,zcross(axis)));
     const double y2 = abs(ScalarProd(p2,zcross(axis)));
-    return (M_PI/3)*(x2-x1)*(pow(y1,2)+pow(y2,2)+y1*y2);
+    return (M_PI/3.)*(x2-x1)*(pow(y1,2.)+pow(y2,2.)+y1*y2);
   }
 
   double calc_triangular_ring_volume(const Vector2D& p1,
@@ -50,9 +50,9 @@ namespace {
 				     const Vector2D& p3,
 				     const Vector2D& axis)
   {
-    return abs(calc_cone_segment_volume(p1,p2,axis)+
-	       calc_cone_segment_volume(p2,p3,axis)+
-	       calc_cone_segment_volume(p3,p1,axis));
+    return std::abs(calc_cone_segment_volume(p1,p2,axis)+
+		    calc_cone_segment_volume(p2,p3,axis)+
+		    calc_cone_segment_volume(p3,p1,axis));
   }
 }
 
