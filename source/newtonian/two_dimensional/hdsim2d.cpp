@@ -160,6 +160,25 @@ void hdsim::SetTimeStepExternal(double dt)
 
 namespace
 {
+  double determine_time_step(double hydro_time_step,
+			     double external_dt,
+			     double current_time,
+			     double end_time)
+  {
+    double dt = hydro_time_step;
+    if(external_dt>0)
+      dt = std::min(external_dt,dt);
+    if(end_time>0)
+      dt = std::min(end_time-current_time,dt);
+
+    #ifdef RICH_MPI
+    double dt_temp = dt;
+    MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+    MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    #endif
+
+    return dt;
+  }
 }
 
 void hdsim::TimeAdvance(void)
@@ -197,21 +216,9 @@ void hdsim::TimeAdvance(void)
 	_facevelocity=_tessellation.calc_edge_velocities
 		(&_hbc,_pointvelocity,_time);
 
-	double dt = _cfl*CalcTimeStep(_tessellation, _cells, _facevelocity,_hbc,
-		_time,custom_evolutions);
-
-	if(_dt_external>0)
-		dt=min(dt,_dt_external*_cfl);
-
-	if(_endtime>0)
-		if(_time+dt>_endtime)
-			dt=_endtime-_time;
-
-#ifdef RICH_MPI
-	double dt_temp=dt;
-	MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-	MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-#endif
+	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, _facevelocity,_hbc,
+								_time,custom_evolutions),
+					      _dt_external, _time, _endtime);
 
 	vector<double> Ek,Ef;
 	vector<char> shockedcells;
