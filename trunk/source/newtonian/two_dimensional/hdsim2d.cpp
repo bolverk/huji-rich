@@ -190,6 +190,34 @@ namespace
       res[i] = IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0;
     return res;
   }
+
+  class ColdFlows
+  {
+  public:
+
+    ColdFlows(bool active,
+	      const Tessellation& tess,
+	      const vector<Primitive>& cells,
+	      const HydroBoundaryConditions& hbc,
+	      double time):
+      active_(active),
+      shocked_cells_(active ? calc_shocked_cells(tess,cells,hbc,time) : vector<char>()) {}
+
+  private:
+    const bool active_;
+    vector<char> shocked_cells_;
+  };
+
+    #ifdef RICH_MPI
+    void herd_shocked_status(const Tessellation& tess,
+			     vector<char>& shocked_cells)
+    {
+      vector<char> buf;
+      SendRecvShockedStatus(shocked_cells, tess.GetSentPoints(),
+			    tess.GetSentProcs(),buf);
+      insert_all_to_back(shocked_cells,buf);
+    }
+    #endif
 }
 
 void hdsim::TimeAdvance(void)
@@ -232,8 +260,7 @@ void hdsim::TimeAdvance(void)
 
 	if(coldflows_flag_)
 	{
-		const int n=_tessellation.GetPointNo();
-		for(int i=0;i<n;++i)
+		for(int i=0;i<_tessellation.GetPointNo();++i)
 			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
@@ -345,12 +372,7 @@ void hdsim::TimeAdvance(void)
 	//  vector<char> btoadd;
 	if(coldflows_flag_)
 	{
-		vector<char> btoadd;
-		SendRecvShockedStatus(shockedcells,_tessellation.GetSentPoints(),
-			_tessellation.GetSentProcs(),btoadd);
-		shockedcells=VectorValues(shockedcells,_tessellation.GetSelfPoint());
-		if(!btoadd.empty())
-			shockedcells.insert(shockedcells.end(),btoadd.begin(),btoadd.end());
+	  herd_shocked_status(_tessellation,shockedcells);
 		vector<double> Ekadd;
 		SendRecvVectorDouble(Ek,_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),
 			Ekadd);
