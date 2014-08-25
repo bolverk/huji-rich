@@ -127,6 +127,8 @@ public:
   \return True or false
   */
   virtual bool ShouldForceTracerReset(void)const;
+
+  virtual bool isRelevantToInterpolation(void) const;
 };
 
 //! \brief Assigns indices to pointers to custom evolution methods
