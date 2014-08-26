@@ -389,8 +389,8 @@ void FixPressure
 (vector<Conserved> &intensive,vector<vector<double> > const& entropy,
  EquationOfState const& eos,vector<double> const& Ek,
  vector<double> const& Ef,double as,double bs,vector<CustomEvolution*>
- const& customevolve,Tessellation const& tess,vector<Conserved>
- &extensive,vector<char> const& shockedcells,bool densityfloor);
+ const& customevolve,Tessellation const& tess,/*vector<Conserved>
+ &extensive,*/vector<char> const& shockedcells,bool densityfloor);
 
 /*! \brief Returns true is a cell is near a boundary
   \param index Cell index

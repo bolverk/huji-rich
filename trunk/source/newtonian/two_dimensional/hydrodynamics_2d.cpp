@@ -984,7 +984,7 @@ double TimeAdvance2mid
 
 	if(coldflows_flag)
 		FixPressure(intensive,tracer_extensive,eos,Ek,Ef,as,bs,CellsEvolve,
-		tess,extensive,shockedcells,densityfloor);
+		tess,/*extensive,*/shockedcells,densityfloor);
 
 	cells.resize(tess.GetPointNo());
 	UpdatePrimitives(intensive, eos, cells,CellsEvolve,cells,densityfloor,
@@ -1145,7 +1145,7 @@ double TimeAdvance2mid
 
 	if(coldflows_flag)
 		FixPressure(intensive,old_trace,eos,Ek,Ef,as,bs,CellsEvolve,tess,
-		extensive,shockedcells,densityfloor);
+		/*extensive,*/shockedcells,densityfloor);
 
 	UpdatePrimitives
 		(intensive, eos, cells,CellsEvolve,cells,densityfloor,
@@ -1348,7 +1348,7 @@ vector<double> GetForceEnergy(Tessellation const& tess,
 void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& entropy,
 	EquationOfState const& eos,vector<double> const& Ek,
 	vector<double> const& Ef,double as,double bs,vector<CustomEvolution*>
-	const& customevolve,Tessellation const& tess,vector<Conserved> &extensive,
+	const& customevolve,Tessellation const& tess,//vector<Conserved> &extensive,
 	vector<char> const& shockedcells,bool densityfloor)
 {
 	int n=tess.GetPointNo();
@@ -1379,7 +1379,7 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 						throw eo;
 					}
 					intensive[i].Energy=intensive[i].Mass*(Et+Ek2);
-					extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
+					//extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
 				}
 			}
 		}
