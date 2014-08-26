@@ -817,21 +817,9 @@ double TimeAdvance2mid
 	vector<Vector2D> edge_velocities =tess.calc_edge_velocities
 		(&hbc,point_velocities,time);
 
-	double dt = cfl*CalcTimeStep
-		(tess,cells, edge_velocities,hbc,time,CellsEvolve);
-
-	if(dt_external>0)
-		dt=min(dt,dt_external*cfl);
-
-	if(endtime>0)
-		if(time+dt>endtime)
-			dt=endtime-time;
-
-#ifdef RICH_MPI
-	double dt_temp=dt;
-	MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-	MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-#endif
+	double dt = determine_time_step
+	  (cfl*CalcTimeStep(tess,cells,edge_velocities,hbc,time,CellsEvolve),
+	   dt_external,time,endtime);
 
 	// Entropy and tracers evolution
 	vector<double> g,Ek,Ef;
@@ -1726,3 +1714,23 @@ void FixAdvection(vector<Conserved>& extensive,
 				}
 	}
 }
+
+  double determine_time_step(double hydro_time_step,
+			     double external_dt,
+			     double current_time,
+			     double end_time)
+  {
+    double dt = hydro_time_step;
+    if(external_dt>0)
+      dt = std::min(external_dt,dt);
+    if(end_time>0)
+      dt = std::min(end_time-current_time,dt);
+
+    #ifdef RICH_MPI
+    double dt_temp = dt;
+    MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+    MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    #endif
+
+    return dt;
+  }
