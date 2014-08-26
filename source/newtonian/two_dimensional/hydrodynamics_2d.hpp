@@ -525,4 +525,9 @@ void FixAdvection(vector<Conserved>& extensive,
 		  vector<Vector2D> const& facevelocity,
 		  double dt,vector<Vector2D> const& pointvelocity);
 
+double determine_time_step(double hydro_time_step,
+			   double external_dt,
+			   double current_time,
+			   double end_time);
+
 #endif // HYDRODYNAMICS_2D_HPP

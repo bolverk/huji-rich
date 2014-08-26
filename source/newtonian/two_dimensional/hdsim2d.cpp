@@ -158,26 +158,6 @@ void hdsim::SetTimeStepExternal(double dt)
 
 namespace
 {
-  double determine_time_step(double hydro_time_step,
-			     double external_dt,
-			     double current_time,
-			     double end_time)
-  {
-    double dt = hydro_time_step;
-    if(external_dt>0)
-      dt = std::min(external_dt,dt);
-    if(end_time>0)
-      dt = std::min(end_time-current_time,dt);
-
-    #ifdef RICH_MPI
-    double dt_temp = dt;
-    MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-    MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    #endif
-
-    return dt;
-  }
-
   vector<char> calc_shocked_cells(const Tessellation& tess,
 				  const vector<Primitive>& cells,
 				  const HydroBoundaryConditions& hbc,
