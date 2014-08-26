@@ -332,15 +332,10 @@ void hdsim::TimeAdvance(void)
 	{
 		for(int i=0;i<_tessellation.GetPointNo();++i)
 			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
-#ifdef RICH_MPI
-		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
-			_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
-			,_tessellation.GetTotalPointNumber());
-#endif
 	}
 
 #ifdef RICH_MPI
-	if(tracer_flag_&&!coldflows_flag_)
+	if(tracer_flag_)
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
 		,_tessellation.GetTotalPointNumber());
