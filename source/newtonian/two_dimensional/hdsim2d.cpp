@@ -220,20 +220,27 @@ namespace
 	      const vector<Primitive>& cells,
 	      const HydroBoundaryConditions& hbc,
 	      double time,
-	      const vector<CustomEvolution*>& ce):
+	      const vector<CustomEvolution*>& ce,
+	      const vector<double>& g):
       active_(active),
       shocked_cells_(active ? 
 		     calc_shocked_cells(tess,cells,hbc,time) : 
 		     vector<char>()),
       kinetic_energy_(active ?
 		      GetMaxKineticEnergy(tess,cells,ce) :
-		      vector<double>()) {}
+		      vector<double>()),
+      potential_energy_(active ?
+			GetForceEnergy(tess,g) : 
+			vector<double>()) {}
 
     #ifdef RICH_MPI
     void herd_data(const Tessellation& tess)
     {
-      herd_shocked_status(tess,shocked_cells_);
-      herd_vector_double(tess,kinetic_energy_);
+      if(active_){
+	herd_shocked_status(tess,shocked_cells_);
+	herd_vector_double(tess,kinetic_energy_);
+	herd_vector_double(tess,potential_energy_);
+      }
     }
     #endif
 
@@ -247,10 +254,16 @@ namespace
       return kinetic_energy_;
     }
 
+    const vector<double>& getPotentialEnergy(void)
+    {
+      return potential_energy_;
+    }
+
   private:
     const bool active_;
     vector<char> shocked_cells_;
     vector<double> kinetic_energy_;
+    vector<double> potential_energy_;
   };
 }
 
@@ -303,13 +316,6 @@ void hdsim::TimeAdvance(void)
 #endif
 	}
 
-	ColdFlows cold_flows(coldflows_flag_,
-			     _tessellation,
-			     _cells,
-			     _hbc,
-			     _time,
-			     custom_evolutions);
-
 #ifdef RICH_MPI
 	if(tracer_flag_&&!coldflows_flag_)
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
@@ -353,13 +359,13 @@ void hdsim::TimeAdvance(void)
 		_conservedextensive,_hbc,_fluxes,_pointvelocity,g,coldflows_flag_,tracer_,
 		lengths);
 
-	//	vector<double> Ek;
-	vector<double> Ef;
-	if(coldflows_flag_)
-	{
-	  //		Ek =GetMaxKineticEnergy(_tessellation,_cells,custom_evolutions);
-		Ef = GetForceEnergy(_tessellation,g);
-	}
+	ColdFlows cold_flows(coldflows_flag_,
+			     _tessellation,
+			     _cells,
+			     _hbc,
+			     _time,
+			     custom_evolutions,
+			     g);
 
 	UpdateConservedExtensive(_tessellation, _fluxes, dt,
 		_conservedextensive,_hbc,lengths);
@@ -391,13 +397,7 @@ void hdsim::TimeAdvance(void)
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
-	//  vector<char> btoadd;
-	if(coldflows_flag_)
-	{
-	  cold_flows.herd_data(_tessellation);
-	  //	  herd_vector_double(_tessellation,Ek);
-	  herd_vector_double(_tessellation,Ef);
-	}
+	cold_flows.herd_data(_tessellation);
 #endif
 
 	UpdateConservedIntensive(_tessellation, _conservedextensive,
@@ -405,7 +405,7 @@ void hdsim::TimeAdvance(void)
 
 	if(coldflows_flag_)
 	{
-	  FixPressure(_conservedintensive,tracer_extensive,_eos,cold_flows.getKineticEnergy(),Ef,as_,bs_,
+	  FixPressure(_conservedintensive,tracer_extensive,_eos,cold_flows.getKineticEnergy(),cold_flows.getPotentialEnergy(),as_,bs_,
 			    custom_evolutions,_tessellation,_conservedextensive,cold_flows.getShockedStatus(),
 			densityfloor_);
 	}
