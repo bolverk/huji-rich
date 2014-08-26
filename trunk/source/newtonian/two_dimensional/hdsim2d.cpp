@@ -56,8 +56,7 @@ _tessellation(tessellation),
 	tracer_flag_(false),
 	coldflows_flag_(false),
 	densityfloor_(false),
-	as_(0),
-	bs_(0),
+        cfp_(0,0),
 	densityMin_(0),
 	pressureMin_(0),
 	EntropyReCalc_(EntropyCalc),
@@ -120,8 +119,7 @@ _tessellation(tessellation),
 	tracer_flag_(!tracer_.empty()),
 	coldflows_flag_(dump.coldflows),
 	densityfloor_(dump.densityfloor),
-	as_(dump.a),
-	bs_(dump.b),
+        cfp_(dump.a,dump.b),
 	densityMin_(dump.densitymin),
 	pressureMin_(dump.pressuremin),
 	EntropyReCalc_(EntropyCalc),
@@ -431,7 +429,7 @@ void hdsim::TimeAdvance(void)
 	cold_flows.fixPressure(_conservedintensive,
 			       tracer_extensive,
 			       _eos,
-			       as_, bs_,
+			       cfp_.as, cfp_.bs,
 			       custom_evolutions,
 			       _tessellation,
 			       _conservedextensive,
@@ -477,7 +475,7 @@ void hdsim::TimeAdvance2Mid(void)
 		procupdate_,
 #endif
 		tracer_flag_,
-		coldflows_flag_,as_,bs_,densityfloor_,densityMin_,pressureMin_,
+		coldflows_flag_,cfp_.as,cfp_.bs,densityfloor_,densityMin_,pressureMin_,
 		EntropyReCalc_);
 
 	_time += dt;
@@ -561,8 +559,8 @@ void hdsim::SetColdFlows(double as,double bs)
 
 	for(int i=0;i<n;++i)
 		tracer_[i].push_back(0);
-	as_=as;
-	bs_=bs;
+	cfp_.as=as;
+	cfp_.bs=bs;
 }
 
 vector<vector<double> > const& hdsim::getTracers(void) const
@@ -890,8 +888,8 @@ bool hdsim::GetColdFlowFlag(void)const
 
 void hdsim::GetColdFlowParm(double &a,double &b)const
 {
-	a=as_;
-	b=bs_;
+  a=cfp_.as;
+  b=cfp_.bs;
 }
 
 bool hdsim::GetDensityFloorFlag(void) const
@@ -971,8 +969,8 @@ void hdsim::load(const ResetDump& checkpoint)
 	tracer_flag_ = !tracer_.empty();
 	coldflows_flag_=checkpoint.coldflows;
 	densityfloor_ = checkpoint.densityfloor;
-	as_ = checkpoint.a;
-	bs_ = checkpoint.b;
+	cfp_.as = checkpoint.a;
+	cfp_.bs = checkpoint.b;
 	densityMin_ = checkpoint.densitymin;
 	pressureMin_ = checkpoint.pressuremin;
 }
@@ -994,8 +992,8 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
 	checkpoint.tracers = tracer_;
 	checkpoint.coldflows = coldflows_flag_;
 	checkpoint.densityfloor =  densityfloor_;
-	checkpoint.a = as_;
-	checkpoint.b = bs_;
+	checkpoint.a = cfp_.as;
+	checkpoint.b = cfp_.bs;
 	checkpoint.densitymin = densityMin_;
 	checkpoint.pressuremin = pressureMin_;
 }
