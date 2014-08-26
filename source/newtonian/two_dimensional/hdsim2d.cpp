@@ -257,7 +257,7 @@ namespace
 		    bs,
 		    ce,
 		    tess,
-		    extensive,
+		   // extensive,
 		    shocked_cells_,
 		    density_floor);
     }
@@ -665,15 +665,16 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	if(!remove)
 		throw UniversalError("No Removal strategy");
 	vector<int> ToRemove=remove->CellsToRemove(_tessellation,_cells,tracer_,_time);
-	if(ToRemove.empty())
-		return ToRemove;
+	//if(ToRemove.empty())
+	//	return ToRemove;
 	int n=int(ToRemove.size());
 	bool traceractive;
 	if(!tracer_.empty())
 		traceractive=true;
 	else
 		traceractive=false;
-	sort(ToRemove.begin(),ToRemove.end());
+	if(!ToRemove.empty())
+		sort(ToRemove.begin(),ToRemove.end());
 	// save the extensive of the removed cells
 	vector<double> OldVol(_tessellation.GetPointNo());
 	for(int i=0;i<(int)_tessellation.GetPointNo();++i)
