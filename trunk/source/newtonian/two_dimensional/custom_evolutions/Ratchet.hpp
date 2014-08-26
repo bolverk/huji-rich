@@ -48,8 +48,11 @@ public:
 		SpatialReconstruction const& interp,Vector2D const& vface);
 
 	bool TimeStepRelevant(void)const;
+
+	bool isRelevantToInterpolation(void)const;
 private:
 	const DIRECTION dir_;
+	const Primitive cell_;
 };
 
 #endif // RATCHET_HPP

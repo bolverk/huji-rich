@@ -4,9 +4,8 @@
 PCM2D::PCM2D(void): slopes_(vector<ReducedPrimitiveGradient2D> ()){}
 
 void PCM2D::Prepare(Tessellation const& /*tessellation*/,
-		    vector<Primitive> const& /*cells*/,
-		    vector<vector<double> > const& /*tracers*/,
-		    double /*dt*/,double /*time*/) {}
+	vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
+	vector<bool> const& /*isrelevant*/,double /*dt*/,double /*time*/) {}
 
 Primitive PCM2D::Interpolate
 (Tessellation const& tessellation,

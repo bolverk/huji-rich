@@ -2,7 +2,7 @@
 #include "../hydrodynamics_2d.hpp"
 
 Ratchet::Ratchet(DIRECTION dir):
-dir_(dir) {}
+dir_(dir),cell_(Primitive(1,1,Vector2D(0,0),1,1)) {}
 
 Conserved Ratchet::CalcFlux(Tessellation const& tess,
 			    vector<Primitive> const& cells,
@@ -49,7 +49,7 @@ Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
 	int index,Tessellation const& /*tess*/,double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
-	return oldcells[index];
+	return cell_;
 }
 
 vector<double> Ratchet::UpdateTracer(int index,vector<vector<double> > const& tracers,
@@ -71,6 +71,11 @@ vector<double> Ratchet::CalcTracerFlux
 }
 
 bool Ratchet::TimeStepRelevant(void)const
+{
+	return false;
+}
+
+bool Ratchet::isRelevantToInterpolation(void)const
 {
 	return false;
 }

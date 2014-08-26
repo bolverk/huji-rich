@@ -42,6 +42,8 @@ public:
 
 	bool TimeStepRelevant(void)const;
 
+	bool isRelevantToInterpolation(void)const;
+
 	~NoMovement(void);
 };
 

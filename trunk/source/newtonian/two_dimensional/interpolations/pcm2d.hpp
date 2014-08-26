@@ -18,10 +18,9 @@ public:
 
 	PCM2D(void);
 
-  void Prepare(Tessellation const& tessellation,
-	       vector<Primitive> const& cells,
-	       vector<vector<double> > const& tracers,
-	       double dt,double time);
+  void Prepare(Tessellation const& tessellation,vector<Primitive> const& cells,
+	  vector<vector<double> > const& tracers,vector<bool> const& isrelevant,
+	  double dt,double time);
 
   Primitive Interpolate(Tessellation const& /*tessellation*/,
 			vector<Primitive> const& cells,

@@ -44,7 +44,8 @@
      double delta_P=0.7,bool rigidflag=false);
 
     void Prepare(Tessellation const& tessellation,vector<Primitive> const& cells,
-		 vector<vector<double> > const& tracers,double dt,double time);
+		 vector<vector<double> > const& tracers,vector<bool> const& isrelevant,
+		 double dt,double time);
 
 	vector<ReducedPrimitiveGradient2D>& GetGradients(void);
 

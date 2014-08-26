@@ -37,15 +37,14 @@
       \param delta_P The pressure ratio for shock detection
       \param rigidflag Flag whether not to use reflected cell in rigid boundary for slope construction and limit
     */
-    LinearGaussArepo
-    (EquationOfState const& eos,
-     OuterBoundary const& obc,
+    LinearGaussArepo(EquationOfState const& eos,OuterBoundary const& obc,
      HydroBoundaryConditions const& hbc,Acceleration& acc,
      bool slf=true,double delta_v=0.2,double theta=0.5,
      double delta_P=0.7,bool rigidflag=false);
 
     void Prepare(Tessellation const& tessellation,vector<Primitive> const& cells,
-		 vector<vector<double> > const& tracers,double dt,double time);
+		 vector<vector<double> > const& tracers,vector<bool> const& isrelevant,
+		 double dt,double time);
 
     Primitive Interpolate(Tessellation const& tess,
 			  vector<Primitive> const& cells,double dt,Edge const& edge,
