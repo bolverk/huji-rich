@@ -191,23 +191,6 @@ namespace
     return res;
   }
 
-  class ColdFlows
-  {
-  public:
-
-    ColdFlows(bool active,
-	      const Tessellation& tess,
-	      const vector<Primitive>& cells,
-	      const HydroBoundaryConditions& hbc,
-	      double time):
-      active_(active),
-      shocked_cells_(active ? calc_shocked_cells(tess,cells,hbc,time) : vector<char>()) {}
-
-  private:
-    const bool active_;
-    vector<char> shocked_cells_;
-  };
-
     #ifdef RICH_MPI
     void herd_shocked_status(const Tessellation& tess,
 			     vector<char>& shocked_cells)
@@ -227,6 +210,37 @@ namespace
     insert_all_to_back(values,buf);
   }
     #endif
+
+  class ColdFlows
+  {
+  public:
+
+    ColdFlows(bool active,
+	      const Tessellation& tess,
+	      const vector<Primitive>& cells,
+	      const HydroBoundaryConditions& hbc,
+	      double time):
+      active_(active),
+      shocked_cells_(active ? 
+		     calc_shocked_cells(tess,cells,hbc,time) : 
+		     vector<char>()) {}
+
+    #ifdef RICH_MPI
+    void herd_data(const Tessellation& tess)
+    {
+      herd_shocked_status(tess,shocked_cells_);
+    }
+    #endif
+
+    const vector<char>& getShockedStatus(void)
+    {
+      return shocked_cells_;
+    }
+
+  private:
+    const bool active_;
+    vector<char> shocked_cells_;
+  };
 }
 
 void hdsim::TimeAdvance(void)
@@ -278,12 +292,20 @@ void hdsim::TimeAdvance(void)
 #endif
 	}
 
+	/*
 	vector<char> shockedcells;
 	if(coldflows_flag_)
 	  shockedcells = calc_shocked_cells(_tessellation,
 					    _cells,
 					    _hbc,
 					    _time);
+	*/
+	ColdFlows cold_flows(coldflows_flag_,
+			     _tessellation,
+			     _cells,
+			     _hbc,
+			     _time);
+
 #ifdef RICH_MPI
 	if(tracer_flag_&&!coldflows_flag_)
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
@@ -368,7 +390,7 @@ void hdsim::TimeAdvance(void)
 	//  vector<char> btoadd;
 	if(coldflows_flag_)
 	{
-	  herd_shocked_status(_tessellation,shockedcells);
+	  cold_flows.herd_data(_tessellation);
 	  herd_vector_double(_tessellation,Ek);
 	  herd_vector_double(_tessellation,Ef);
 	}
@@ -380,7 +402,7 @@ void hdsim::TimeAdvance(void)
 	if(coldflows_flag_)
 	{
 		FixPressure(_conservedintensive,tracer_extensive,_eos,Ek,Ef,as_,bs_,
-			custom_evolutions,_tessellation,_conservedextensive,shockedcells,
+			    custom_evolutions,_tessellation,_conservedextensive,cold_flows.getShockedStatus(),
 			densityfloor_);
 	}
 
