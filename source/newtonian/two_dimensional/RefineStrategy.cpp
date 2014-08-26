@@ -40,6 +40,29 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 	int Npoints,vector<Vector2D> &directions,vector<int> const& Removed,
 	Tessellation const& tess)
 {
+#ifdef RICH_MPI
+	if(!refined_old.empty())
+	{
+		vector<vector<int> > const& sentcells=tess.GetSentPoints();
+		vector<int> allsent;
+		for(size_t i=0;i<sentcells.size();++i)
+			if(!sentcells[i].empty())
+				allsent.insert(allsent.end(),sentcells[i].begin(),sentcells[i].end());
+		if(!allsent.empty())
+		{
+			sort(allsent.begin(),allsent.end());
+			allsent=unique(allsent);
+			size_t toAdd;
+			for(size_t i=0;i<refined_old.size();++i)
+			{
+				toAdd=lower_bound(allsent.begin(),allsent.end(),refined_old[i])-
+					allsent.begin();
+				refined_old[i]-=int(toAdd);
+			}
+		}
+		
+	}
+#endif
 	if(!Removed.empty())
 	{
 		// Update the refined_old list

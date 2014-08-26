@@ -49,9 +49,9 @@ Vector2D NohHBC::CalcEdgeVelocity
 
 bool NohHBC::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
 {
-	if((edge.neighbors.first<0)||(edge.neighbors.first>=tessellation.GetPointNo()))
+	if(edge.neighbors.first<0)
 		return true;
-	if((edge.neighbors.second<0)||(edge.neighbors.second>=tessellation.GetPointNo()))
+	if(edge.neighbors.second<0)
 		return true;
 	return false;
 }
