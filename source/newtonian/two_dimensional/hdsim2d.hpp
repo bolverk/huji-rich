@@ -26,6 +26,18 @@
 #include "ResetDump.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 
+class ColdflowParams
+{
+public:
+
+  double as;
+  double bs;
+
+  ColdflowParams(double as_i,
+		 double bs_i):
+    as(as_i), bs(bs_i) {}
+};
+
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
 {
@@ -75,7 +87,7 @@ private:
 
   bool tracer_flag_,coldflows_flag_,densityfloor_;
 
-  double as_,bs_;
+  ColdflowParams cfp_;
 
   double densityMin_,pressureMin_;
 
