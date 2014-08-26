@@ -20,10 +20,13 @@ class ConstantPrimitiveEvolution: public CustomEvolution
 public:
 	/*!
 	\brief Class constructor
+	\param prim The primitive to keep constant
+	\param tracer The tracer to keep constant
 	\param mass_count A flag to whether track the mass influx into the cell
 	\param n The number of cells with ConstantPrimitiveEvolution, the cells must be the first n in the cells vector
 	*/
-	ConstantPrimitiveEvolution(bool mass_count=false,int n=0);
+	ConstantPrimitiveEvolution(Primitive const& prim,vector<double> const& tracer,
+		bool mass_count=false,int n=0);
 	/*!
 	\brief Class destructor
 	*/
@@ -65,7 +68,11 @@ public:
 	*/
 	void SetMassFlux(double m);
 
+	bool isRelevantToInterpolation(void) const;
+
 private:
+	Primitive prim_;
+	vector<double> tracer_;
 	bool mass_count_;
 	double mass_flux,mass_fluxt;
 	int N_;

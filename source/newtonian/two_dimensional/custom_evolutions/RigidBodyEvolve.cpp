@@ -42,7 +42,7 @@ Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedi
 	EquationOfState const& /*eos*/,vector<Primitive>& cells,int index,
 	Tessellation const& /*tess*/,double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
-	return cells[index];
+	return Primitive(1,1,Vector2D(0,0),1,1);
 }
 
 RigidBodyEvolve::RigidBodyEvolve()

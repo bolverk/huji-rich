@@ -75,3 +75,8 @@ bool NoMovement::TimeStepRelevant(void)const
 {
 	return true;
 }
+
+bool NoMovement::isRelevantToInterpolation(void)const
+{
+	return true;
+}

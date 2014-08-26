@@ -624,7 +624,11 @@ void CalcFluxes
 
 	try
 	{
-		interpolation.Prepare(tessellation,cells,tracers,dt,time);
+		vector<bool> isrelevant(cells.size(),true);
+		for(size_t i=0;i<cells.size();++i)
+			if(CellsEvolve[i])
+				isrelevant[i]=CellsEvolve[i]->isRelevantToInterpolation();
+		interpolation.Prepare(tessellation,cells,tracers,isrelevant,dt,time);
 #ifndef RICH_MPI
 		PeriodicGradExchange(interpolation.GetGradients(),
 			tessellation.GetDuplicatedPoints(),tessellation.GetTotalPointNumber());

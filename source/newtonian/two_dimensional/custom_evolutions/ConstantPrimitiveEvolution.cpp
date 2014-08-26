@@ -2,13 +2,19 @@
 
 using std::multiplies;
 
+bool ConstantPrimitiveEvolution::isRelevantToInterpolation(void) const
+{
+	return true;
+}
+
 bool ConstantPrimitiveEvolution::ShouldForceTracerReset(void)const
 {
 	return true;
 }
 
-ConstantPrimitiveEvolution::ConstantPrimitiveEvolution(bool mass_count,int n):
-mass_count_(mass_count),mass_flux(0),mass_fluxt(0),N_(n)
+ConstantPrimitiveEvolution::ConstantPrimitiveEvolution(Primitive const& prim,
+	vector<double> const& tracer,bool mass_count,int n): prim_(prim),tracer_(tracer),
+	mass_count_(mass_count),mass_flux(0),mass_fluxt(0),N_(n)
 {}
 
 ConstantPrimitiveEvolution::~ConstantPrimitiveEvolution(void)
@@ -64,11 +70,10 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 Primitive ConstantPrimitiveEvolution::UpdatePrimitive
 	(vector<Conserved> const& /*conservedintensive*/,
 	EquationOfState const& /*eos*/,
-	vector<Primitive>& cells,int index,Tessellation const& /*tess*/,
+	vector<Primitive>& /*cells*/,int /*index*/,Tessellation const& /*tess*/,
 	double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
-	Primitive res=cells[index];
-	return res;
+	return prim_;
 }
 
 void ConstantPrimitiveEvolution::SetMassFlux(double m)
@@ -83,10 +88,10 @@ double ConstantPrimitiveEvolution::GetMassFlux(void) const
 
 vector<double> ConstantPrimitiveEvolution::UpdateTracer
 (int index,vector<vector<double> >
- const& tracers,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& /*cells*/,
- Tessellation const& /*tess*/,double /*time*/)
+ const& /*tracers*/,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& /*cells*/,
+ Tessellation const& tess,double /*time*/)
 {
-  return tracers[index];
+  return prim_.Density*tess.GetVolume(index)*tracer_;
 }
 
 vector<double> ConstantPrimitiveEvolution::CalcTracerFlux
@@ -115,5 +120,5 @@ vector<double> ConstantPrimitiveEvolution::CalcTracerFlux
 
 bool ConstantPrimitiveEvolution::TimeStepRelevant(void)const
 {
-	return false;
+	return true;
 }

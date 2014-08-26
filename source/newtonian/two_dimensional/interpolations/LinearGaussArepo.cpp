@@ -194,7 +194,7 @@ namespace
   (Tessellation const& tess,vector<Edge> const&
    edges,int cell_index,OuterBoundary const& /*obc*/,
    vector<Primitive> const& cells,HydroBoundaryConditions const& hbc,
-   double time)
+   double time,vector<bool> const& isrelevant)
   {
     int n=(int)edges.size();
     int neigh0,neigh1;
@@ -210,9 +210,15 @@ namespace
 	    neigh0=edges[i].neighbors.first;
 	    neigh1=edges[i].neighbors.second;
 	    if(neigh0==cell_index)
-	      res[i]=cells[neigh1];
+			if(isrelevant[neigh1])
+				res[i]=cells[neigh1];
+			else
+				res[i]=cells[neigh0];
 	    else
-	      res[i]=cells[neigh0];
+			if(isrelevant[neigh0])
+				res[i]=cells[neigh0];
+			else
+				res[i]=cells[neigh1];
 	  }
       }
     return res;
@@ -601,7 +607,7 @@ namespace
 
   ReducedPrimitiveGradient2D calc_slope(Tessellation const& tess,
 					vector<Primitive> const& cells,vector<vector<double> >
-					const& tracers,int cell_index,bool slf,
+					const& tracers,vector<bool> const& isrelevant,int cell_index,bool slf,
 					OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
 					double shockratio,double diffusecoeff,double pressure_ratio,
 					double time,bool /*rigidflag*/)
@@ -611,7 +617,7 @@ namespace
     vector<Vector2D> neighbor_mesh_list = GetNeighborMesh(tess,edge_list,
 							  cell_index,obc);
     vector<Primitive> neighbor_list = GetNeighborPrimitive(tess, edge_list, cell_index,
-							   obc, cells, hbc, time);
+							   obc, cells, hbc, time,isrelevant);
     vector<vector<double> > neighbor_tracers;
     if(!tracers.empty())
       neighbor_tracers=GetNeighborTracers(tess,edge_list,cell_index,tracers,
@@ -660,8 +666,8 @@ namespace
 }
 
 void LinearGaussArepo::Prepare(Tessellation const& tessellation,
-			       vector<Primitive> const& cells,vector<vector<double> > const& tracers,
-			       double /*dt*/,double time)
+	vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+	vector<bool> const& isrelevant,double /*dt*/,double time)
 {
   time_=time;
   if(tessellation.GetPointNo()!=(int)rslopes_.size())
@@ -671,7 +677,7 @@ void LinearGaussArepo::Prepare(Tessellation const& tessellation,
   for(int i=0;i<tessellation.GetPointNo();++i)
     {
       if(!hbc_.IsGhostCell(i,tessellation))
-	rslopes_[i] = calc_slope(tessellation,cells,tracers,i,slf_,obc_,hbc_,
+	rslopes_[i] = calc_slope(tessellation,cells,tracers,isrelevant,i,slf_,obc_,hbc_,
 				 shockratio_,diffusecoeff_,pressure_ratio_,time,_rigidflag);
     }
 }

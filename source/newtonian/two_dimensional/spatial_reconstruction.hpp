@@ -30,13 +30,13 @@ public:
     \param tessellation The tessellation
     \param cells The primitive cells
     \param tracers Tracers
+	\param isrelevant Flag for if the cell is relevant for the slope calculation
     \param dt The time step
     \param time The simulation time
   */
   virtual void Prepare(Tessellation const& tessellation,
-		       vector<Primitive> const& cells,
-		       vector<vector<double> > const& tracers,
-		       double dt,double time) = 0;
+	  vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+	  vector<bool> const& isrelevant,double dt,double time) = 0;
 
   /*! \brief Interpolates the hydrodynamic variables near the edge
     \param tessellation Point and edge positions

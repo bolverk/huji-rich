@@ -20,12 +20,11 @@ public:
 	/*!
 	\brief Class constructor
 	\param cell The primitive to convert to flux
-	\param tracer The tracer for the tracer flux
+	\param tracer The intensive tracer for the tracer flux
 	\param eos The equation of state
-	\param entropycalc A flag stating whether the cold flows settings is on or off
 	*/
 	ConstantFluxEvolution(Primitive const& cell,vector<double> const& tracer,
-		EquationOfState const& eos,bool entropycalc=false);
+		EquationOfState const& eos);
 	/*!
 	\brief Class destructor
 	*/
@@ -56,7 +55,6 @@ private:
 	const Primitive cell_;
 	const vector<double> tracer_;
 	const EquationOfState& eos_;
-	const bool entropy_;
 };
 
 #endif //COSNTANTFLUXEVOLUTION_HPP
