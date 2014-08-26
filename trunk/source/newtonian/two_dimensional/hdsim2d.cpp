@@ -288,6 +288,15 @@ namespace
     vector<double> kinetic_energy_;
     vector<double> potential_energy_;
   };
+
+  void substitute_entropy(const vector<Primitive>& cells,
+			  const EquationOfState& eos,
+			  size_t index,
+			  vector<vector<double> >& tracers)
+  {
+    for(size_t i=0;i<cells.size();++i)
+      tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
+  }
 }
 
 void hdsim::TimeAdvance(void)
@@ -329,10 +338,7 @@ void hdsim::TimeAdvance(void)
 					      _dt_external, _time, _endtime);
 
 	if(coldflows_flag_)
-	{
-		for(int i=0;i<_tessellation.GetPointNo();++i)
-			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
-	}
+	  substitute_entropy(_cells,_eos,0,tracer_);
 
 #ifdef RICH_MPI
 	if(tracer_flag_)
