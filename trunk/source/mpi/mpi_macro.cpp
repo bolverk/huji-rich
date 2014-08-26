@@ -952,6 +952,36 @@ void SendRecvHydro(vector<Primitive> &cells,
 	}
 }
 
+namespace {
+  class TracerCommunicator: public Communication
+  {
+  public:
+
+    TracerCommunicator(const vector<vector<double> >& to_send):
+      to_send_(to_send), reply_() {}
+
+    void sendInfo(int address)
+    {
+      MPI_SendVectorTracer(to_send_,address,0,MPI_COMM_WORLD);
+    }
+
+    void recvInfo(int address)
+    {
+      MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,
+			   static_cast<int>(to_send_[0].size()));
+    }
+
+    const vector<vector<double> >& getReply(void) const
+    {
+      return reply_;
+    }
+
+  private:
+    const vector<vector<double> > to_send_;
+    vector<vector<double> > reply_;
+  };
+}
+
 void SendRecvTracers(vector<vector<double> > &tracers,
 	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
 	vector<vector<int> > const& Nghost,int totalpoints)
@@ -961,29 +991,19 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 	const int rank = get_mpi_rank();
 	const int worldsize = get_mpi_size();
 	const vector<int> procorder=GetProcOrder(rank,worldsize);
-	int n=worldsize-1;
 	vector<vector<vector<double> > > tadd(nlist);
 	// Send the data
-	for(int i=0;i<n;++i)
+	for(int i=0;i<worldsize-1;++i)
 	{
 		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
 			-sentprocs.begin();
 		if(index<nlist)
 		{
-			if(rank<procorder[i])
-			{
-				vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-				MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-				MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-					(int)tracers[0].size());
-			}
-			else
-			{
-				MPI_RecvVectorTracer(tadd[index],procorder[i],0,MPI_COMM_WORLD,
-					(int)tracers[0].size());
-				vector<vector<double> > ttemp=VectorValues(tracers,sentcells[index]);
-				MPI_SendVectorTracer(ttemp,procorder[i],0,MPI_COMM_WORLD);
-			}
+		  TracerCommunicator tc(VectorValues(tracers,
+						     sentcells[index]));
+		  marshal_communication(tc,procorder[i],
+					rank<procorder[i]);
+		  tadd[index] = tc.getReply();
 		}
 	}
 	// ReArrange the data
