@@ -259,6 +259,31 @@ namespace
       return potential_energy_;
     }
 
+    void fixPressure(vector<Conserved>& intensive,
+		     vector<vector<double> >& tracers,
+		     const EquationOfState& eos,
+		     double as,
+		     double bs,
+		     vector<CustomEvolution*>& ce,
+		     Tessellation& tess,
+		     vector<Conserved>& extensive,
+		     bool density_floor)
+    {
+      if(active_)
+	FixPressure(intensive,
+		    tracers,
+		    eos,
+		    kinetic_energy_,
+		    potential_energy_,
+		    as,
+		    bs,
+		    ce,
+		    tess,
+		    extensive,
+		    shocked_cells_,
+		    density_floor);
+    }
+
   private:
     const bool active_;
     vector<char> shocked_cells_;
@@ -403,12 +428,14 @@ void hdsim::TimeAdvance(void)
 	UpdateConservedIntensive(_tessellation, _conservedextensive,
 		_conservedintensive);
 
-	if(coldflows_flag_)
-	{
-	  FixPressure(_conservedintensive,tracer_extensive,_eos,cold_flows.getKineticEnergy(),cold_flows.getPotentialEnergy(),as_,bs_,
-			    custom_evolutions,_tessellation,_conservedextensive,cold_flows.getShockedStatus(),
-			densityfloor_);
-	}
+	cold_flows.fixPressure(_conservedintensive,
+			       tracer_extensive,
+			       _eos,
+			       as_, bs_,
+			       custom_evolutions,
+			       _tessellation,
+			       _conservedextensive,
+			       densityfloor_);
 
 	UpdatePrimitives(_conservedintensive, _eos, _cells,custom_evolutions,_cells,
 		densityfloor_,densityMin_,pressureMin_,_tessellation,_time,
