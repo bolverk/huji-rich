@@ -77,6 +77,11 @@ void ResetOutput(string location,hdsim const& sim)
 	sim.GetDensityFloorParm(dtemp,dtemp2);
 	myFile.write((char*)&dtemp,sizeof(double));
 	myFile.write((char*)&dtemp2,sizeof(double));
+	for(int i=0;i<temp;++i)
+	{
+		unsigned int ctemp=(unsigned int)sim.custom_evolution_indices[i];
+		myFile.write ((char*)&ctemp,sizeof(unsigned int));
+	}
 	myFile.close();
 }
 
@@ -150,5 +155,8 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	dump.densityfloor=(bool)ctemp;
 	myFile.read((char*)&dump.densitymin,sizeof(double));
 	myFile.read((char*)&dump.pressuremin,sizeof(double));
+	dump.cevolve.resize(N);
+	for(int i=0;i<N;++i)
+		myFile.read((char*)&dump.cevolve[i],sizeof(unsigned int));
 	myFile.close();
 }
