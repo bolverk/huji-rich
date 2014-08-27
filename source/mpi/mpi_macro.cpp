@@ -935,6 +935,8 @@ void SendRecvHydro(vector<Primitive> &cells,
 	{
 		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
 			-sentprocs.begin();
+		if(index==nlist)
+			continue;
 		HydroCommunicator hydro_communicator(eos,
 			VectorValues(cells,sentcells[index]),
 			VectorValues(customevolutions,sentcells[index]));
