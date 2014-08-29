@@ -1,5 +1,8 @@
 #include "ConservativeForce.hpp"
 
+using std::min;
+using std::sqrt;
+
 namespace {
 	Vector2D MassFlux(Tessellation const& tess,int point,
 		vector<Conserved> const& fluxes,
