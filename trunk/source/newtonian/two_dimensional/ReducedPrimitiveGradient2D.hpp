@@ -10,7 +10,7 @@
 #include <vector>
 #include "../../tessellation/geometry.hpp"
 
-using std::vector;
+using namespace std;
 
 //! \brief Gradient of the hydrodynamic variables, without energy and sound speed
 class ReducedPrimitiveGradient2D

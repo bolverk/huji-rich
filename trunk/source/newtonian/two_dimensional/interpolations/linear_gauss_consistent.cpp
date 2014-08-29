@@ -5,6 +5,7 @@
 
 using std::min;
 using std::max;
+using std::abs;
 
 namespace {
 	class ReducedPrimitive
