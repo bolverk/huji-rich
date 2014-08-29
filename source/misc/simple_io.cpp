@@ -1,5 +1,6 @@
 #include "simple_io.hpp"
 #include "universal_error.hpp"
+#include <cassert>
 
 void write_number(double num,
 		  string const& fname,
@@ -35,8 +36,7 @@ double read_number(string const& fname)
 {
   double buf = 0;
   ifstream f(fname.c_str());
-  if(!f)
-    throw UniversalError("Could not find file "+fname);
+  assert(f && "Could not find file");
   f >> buf;
   f.close();
   return buf;
