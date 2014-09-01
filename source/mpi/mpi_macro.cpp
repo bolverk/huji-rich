@@ -227,6 +227,14 @@ namespace
 	}
 }
 
+int GetTotalPointNumber(Tessellation const& tess)
+{
+	int myN=tess.GetPointNo();
+	int res;
+	MPI_Allreduce(&myN,&res,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+	return res;
+}
+
 int get_mpi_rank(void)
 {
 	int rank = 0;

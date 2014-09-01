@@ -67,6 +67,13 @@ void PeriodicVelocityExchange(vector<Vector2D> &vel,
 
 #include <mpi.h>
 
+/*!
+\brief Calculates the total number of points in the simulation
+\param tess The local tessellation
+\return The total number of points combines from all the CPUs
+*/
+int GetTotalPointNumber(Tessellation const& tess);
+
 /*! \brief Returns the mpi rank of the current process
   \return MPI rank
  */

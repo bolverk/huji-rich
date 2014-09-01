@@ -2,6 +2,11 @@
 
 ConstNumberPerProc::~ConstNumberPerProc(void){}
 
+void ConstNumberPerProc::SetPointsPerProc(double points)
+{
+	PointsPerProc_=points;
+}
+
 ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
 	double speed,double RoundSpeed,int mode):
   outer_(outer),PointsPerProc_(std::max(npercell,1)),speed_(speed),RoundSpeed_(RoundSpeed),
