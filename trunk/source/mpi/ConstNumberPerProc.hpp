@@ -26,9 +26,15 @@ public:
 
 	//! \brief Class destructor
 	~ConstNumberPerProc(void);
+	/*!
+	\brief Sets the number of ideal points per proc
+	\param points
+	*/
+	void SetPointsPerProc(double points);
+
 private:
 	OuterBoundary const& outer_;
-	const double PointsPerProc_;
+	double PointsPerProc_;
 	const double speed_;
 	const double RoundSpeed_;
 	const int mode_;
