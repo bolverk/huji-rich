@@ -1,4 +1,5 @@
 #include "ConvexHull.hpp"
+using namespace std;
 
 namespace
 {
