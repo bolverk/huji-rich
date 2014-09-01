@@ -955,33 +955,33 @@ void SendRecvHydro(vector<Primitive> &cells,
 }
 
 namespace {
-  class TracerCommunicator: public Communication
-  {
-  public:
+	class TracerCommunicator: public Communication
+	{
+	public:
 
-    TracerCommunicator(const vector<vector<double> >& to_send):
-      to_send_(to_send), reply_() {}
+		TracerCommunicator(const vector<vector<double> >& to_send):
+		  to_send_(to_send), reply_() {}
 
-    void sendInfo(int address)
-    {
-      MPI_SendVectorTracer(to_send_,address,0,MPI_COMM_WORLD);
-    }
+		  void sendInfo(int address)
+		  {
+			  MPI_SendVectorTracer(to_send_,address,0,MPI_COMM_WORLD);
+		  }
 
-    void recvInfo(int address)
-    {
-      MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,
-			   static_cast<int>(to_send_[0].size()));
-    }
+		  void recvInfo(int address)
+		  {
+			  MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,
+				  static_cast<int>(to_send_[0].size()));
+		  }
 
-    const vector<vector<double> >& getReply(void) const
-    {
-      return reply_;
-    }
+		  const vector<vector<double> >& getReply(void) const
+		  {
+			  return reply_;
+		  }
 
-  private:
-    const vector<vector<double> > to_send_;
-    vector<vector<double> > reply_;
-  };
+	private:
+		const vector<vector<double> > to_send_;
+		vector<vector<double> > reply_;
+	};
 }
 
 void SendRecvTracers(vector<vector<double> > &tracers,
@@ -1001,11 +1001,11 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 			-sentprocs.begin();
 		if(index<nlist)
 		{
-		  TracerCommunicator tc(VectorValues(tracers,
-						     sentcells[index]));
-		  marshal_communication(tc,procorder[i],
-					rank<procorder[i]);
-		  tadd[index] = tc.getReply();
+			TracerCommunicator tc(VectorValues(tracers,
+				sentcells[index]));
+			marshal_communication(tc,procorder[i],
+				rank<procorder[i]);
+			tadd[index] = tc.getReply();
 		}
 	}
 	// ReArrange the data
@@ -1807,7 +1807,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 		vector<vector<int> > recvindex(nlist); // the index in the Nghost vector
 		vector<vector<double> > recvmerit(nlist);
 		int temp;
-		for(int i=0;i<(int)proclist.size();++i)
+		for(int i=0;i<(int)procorder.size();++i)
 		{
 			int index=Find(proclist.begin(),proclist.end(),procorder[i])
 				-proclist.begin();
