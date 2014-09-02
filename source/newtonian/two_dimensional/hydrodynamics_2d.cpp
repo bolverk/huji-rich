@@ -498,6 +498,13 @@ void UpdatePrimitives
 		{
 			eo.AddEntry("x momentum per unit volume",conservedintensive[i].Momentum.x);
 			eo.AddEntry("y momentum per unit volume",conservedintensive[i].Momentum.y);
+			eo.AddEntry("thermal energy per unit mass",conservedintensive[i].Energy);
+			eo.AddEntry("Cell volume",tess.GetVolume(i));
+			eo.AddEntry("Cell x location",tess.GetMeshPoint(i).x);
+			eo.AddEntry("Cell y location",tess.GetMeshPoint(i).y);
+#ifdef RICH_MPI
+			eo.AddEntry("Error in CPU",(double)get_mpi_rank());
+#endif
 			update_primitives_rethrow(i,eo);
 		}
 	}
