@@ -31,7 +31,7 @@ public:
   */
   RoundCells(PointMotion& pm,
 	     HydroBoundaryConditions const& hbc,
-	     double chi=0.3,
+	     double chi=0.15,
 	     double eta=0.02,
 	     bool coldflows=false,
 	     int innerNum=0,
