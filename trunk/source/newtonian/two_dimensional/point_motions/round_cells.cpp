@@ -74,17 +74,10 @@ namespace {
 		const Vector2D r = tess.GetMeshPoint(index);
 		const double d = abs(s-r);
 
-		if(d<(0.9*eta*R))
+		if(d<=(0.9*eta*R))
 			return Vector2D();
 		else
-		{
-			if((1.1*eta*R)<=d)
-			{
-				return chi*c*(s-r)/d;
-			}
-			else
-				return chi*c*(s-r)/d*(d-0.9*eta*R)/(0.2*eta*R);
-		}
+			return chi*c*(s-r)/d;
 	}
 }
 
