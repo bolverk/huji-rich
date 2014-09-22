@@ -47,7 +47,7 @@ elseif (nargin==4),
 elseif (nargin==5),
     % do nothing
 else
-    error('Illigal number of input arguments');
+    error('Illegal number of input arguments');
 end
 
 % Read the HDF5 data
