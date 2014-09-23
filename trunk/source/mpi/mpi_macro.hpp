@@ -8,10 +8,10 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <ANN/ANN.h>
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 #include "../tessellation/tessellation.hpp"
 #include "../tessellation/geotests.hpp"
-#include "../treecode/ANN.h"
 #include "../newtonian/common/hydrodynamic_variables.hpp"
 #include "../newtonian/common/equation_of_state.hpp"
 #include "../misc/utils.hpp"

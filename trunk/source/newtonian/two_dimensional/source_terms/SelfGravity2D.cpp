@@ -18,6 +18,8 @@ SelfGravity::~SelfGravity()
 Vector2D SelfGravity::Calculate(Tessellation const& tess,
 				vector<Primitive> const& cell,int point)
 {
+  throw "Class is not ready yet";
+  /*
   if(_counter==0)
     {
       int n=tess.GetPointNo();
@@ -65,6 +67,7 @@ Vector2D SelfGravity::Calculate(Tessellation const& tess,
       annClose();
     }
   return pvec;
+  */
 }
 
 Vector2D SelfGravity::Calculate

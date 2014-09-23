@@ -6,8 +6,8 @@
 #ifndef SELFGRAVITY_HPP
 #define SELFGRAVITY_HPP 1
 
+#include <ANN/ANN.h>
 #include "../source_terms/ConservativeForce.hpp"
-#include "../../../treecode/ANN.h"
 
 //! \brief Self gravity force module, just a simple Nbody tree code
 class SelfGravity: public Acceleration

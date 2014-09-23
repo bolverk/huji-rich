@@ -1,7 +1,5 @@
 SOURCE_DIR := source
 RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
-TREECODE_SOURCES := $(shell find $(SOURCE_DIR)/treecode -name '*.cpp')
-#SOURCES := $(filter-out $(TREECODE_SOURCES),$(RAW_SOURCES))
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
 CC := g++
@@ -54,14 +52,14 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_55_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
-	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH) > set_environ_vars.sh
+	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
+	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH):$(MY_ANN_PATH) > set_environ_vars.sh
 	echo export\ HDF5_LIB_PATH=`pwd`/external_libraries/lib >> set_environ_vars.sh
-	echo export\ BOOST_LIB_PATH=`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
-	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
-	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/boost_dump/boost_1_55_0/stage/lib >> set_environ_vars.sh
+	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
+	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
 
 external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h
@@ -76,6 +74,12 @@ external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h: | external_libraries/h
 external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_55_0.tar.bz2
 	cd external_libraries/boost_dump/ && tar xvf ./boost_1_55_0.tar.bz2
 
+external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
+	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
+
+external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
+	cd external_libraries/ann_tree_dump/ && tar xvf ./ann_1.1.2.tar.gz
+
 external_libraries/hdf5_dump/hdf5-1.8.13.tar.gz:
 	mkdir -p external_libraries/hdf5_dump
 	cd external_libraries/hdf5_dump && \
@@ -86,4 +90,9 @@ external_libraries/boost_dump/boost_1_55_0.tar.bz2:
 	cd external_libraries/boost_dump && \
 	wget 'http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.bz2/download'
 	cd external_libraries/boost_dump && mv download boost_1_55_0.tar.bz2
+
+external_libraries/ann_tree_dump/ann_1.1.2.tar.gz:
+	mkdir -p external_libraries/ann_tree_dump
+	cd external_libraries/ann_tree_dump && \
+	wget http://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
 
