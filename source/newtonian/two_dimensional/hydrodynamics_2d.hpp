@@ -443,6 +443,7 @@ void UpdateTracerExtensive
   \param originalP The original pressure distribution.
   \param originalVx The original x velocity distribution.
   \param originalVy The original y velocity distribution.
+  \param originalTracers The original tracers.
   \param cells The primitive cells
   \param tess The tessellation
   \param tracer The tracer field
@@ -452,10 +453,10 @@ void UpdateTracerExtensive
 */
 void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
 		     SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-			 SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& originalTracers,
+			 SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& ,
 			 vector<Primitive> &cells,Tessellation const& tess,vector<vector<double> > &tracer,
 		     int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
-			const& cevolve);
+			const& cevolve,bool coldflows);
 
 /*! \brief Makes a list of points to remove
   \param tess Tessellation

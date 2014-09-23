@@ -1474,7 +1474,7 @@ void TracerResetCalc
 	SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers,vector<Primitive> &cells,
 	Tessellation const& tess,vector<vector<double> > &tracer,
 	int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
-	const& cevolve)
+	const& cevolve,bool coldflows)
 {
 	const int n = tess.GetPointNo();
 	if(n<1)
@@ -1498,8 +1498,11 @@ void TracerResetCalc
 			if(tracer[i][tracerindex]<0)
 				tracer[i][tracerindex]=0;
 			for (size_t j = 0;j<tracer[i].size();++j)
-			if ((int)j != tracerindex)
-				tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
+			if (coldflows&&j == 0)
+				tracer[i][j] = eos.dp2s(cells[i].Density, cells[i].Pressure);
+			else
+				if ((int)j != tracerindex)
+					tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
 		}
 	}
 	return;
