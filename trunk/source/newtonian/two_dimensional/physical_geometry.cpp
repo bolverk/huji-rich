@@ -39,8 +39,8 @@ namespace {
   {
     const double x1 = ScalarProd(p1,axis);
     const double x2 = ScalarProd(p2,axis);
-    const double y1 = abs(ScalarProd(p1,zcross(axis)));
-    const double y2 = abs(ScalarProd(p2,zcross(axis)));
+    const double y1 = std::abs(ScalarProd(p1,zcross(axis)));
+    const double y2 = std::abs(ScalarProd(p2,zcross(axis)));
     return (M_PI/3.)*(x2-x1)*(pow(y1,2.)+pow(y2,2.)+y1*y2);
   }
 
