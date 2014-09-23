@@ -561,7 +561,7 @@ void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 	vector<CustomEvolution*> cevolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
 	TracerResetCalc(alpha,originalD,originalP,originalVx,originalVy,originalTracers,
-		_cells,_tessellation,tracer_,tracerindex,_eos,cevolve);
+		_cells,_tessellation,tracer_,tracerindex,_eos,cevolve,coldflows_flag_);
 	return;
 }
 
