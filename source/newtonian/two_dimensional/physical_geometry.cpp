@@ -1,4 +1,3 @@
-#include <cmath>
 #include "physical_geometry.hpp"
 #include "../../tessellation/triangle_area.hpp"
 

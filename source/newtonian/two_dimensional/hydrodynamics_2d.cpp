@@ -1471,7 +1471,7 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 void TracerResetCalc
 	(double alpha,SpatialDistribution const& originalD,
 	SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-	SpatialDistribution const& originalVy, vector<Primitive> &cells,
+	SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers,vector<Primitive> &cells,
 	Tessellation const& tess,vector<vector<double> > &tracer,
 	int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
 	const& cevolve)
@@ -1497,6 +1497,9 @@ void TracerResetCalc
 				originalP(tess.GetCellCM(i)),velocity,eos);
 			if(tracer[i][tracerindex]<0)
 				tracer[i][tracerindex]=0;
+			for (size_t j = 0;j<tracer[i].size();++j)
+			if ((int)j != tracerindex)
+				tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
 		}
 	}
 	return;
