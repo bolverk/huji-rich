@@ -316,11 +316,12 @@ public:
     \param originalP The original pressure distribution.
     \param originalVx The original x velocity distribution.
     \param originalVy The original y velocity distribution.
+	\param originalTracers The original tracers
     \param tracerindex The index in the tracer to consider
   */
   void TracerReset(double alpha,SpatialDistribution const& originalD,
 		   SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-		   SpatialDistribution const& originalVy,int tracerindex);
+		   SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers,int tracerindex);
 
   /*!
     \brief Returns the Courant number

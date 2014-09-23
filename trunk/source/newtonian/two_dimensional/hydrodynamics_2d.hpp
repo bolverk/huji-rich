@@ -452,8 +452,8 @@ void UpdateTracerExtensive
 */
 void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
 		     SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-		     SpatialDistribution const& originalVy, vector<Primitive> &cells,
-		     Tessellation const& tess,vector<vector<double> > &tracer,
+			 SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& originalTracers,
+			 vector<Primitive> &cells,Tessellation const& tess,vector<vector<double> > &tracer,
 		     int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
 			const& cevolve);
 

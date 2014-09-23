@@ -6,6 +6,8 @@
 #ifndef PHYSICAL_GEOMETRY_HPP
 #define PHYSICAL_GEOMETRY_HPP 1
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <vector>
 #include "../../tessellation/Edge.hpp"
 

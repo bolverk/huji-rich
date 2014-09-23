@@ -556,11 +556,11 @@ vector<vector<double> >& hdsim::getTracers(void)
 
 void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 	SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-	SpatialDistribution const& originalVy,int tracerindex)
+	SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers, int tracerindex)
 {
 	vector<CustomEvolution*> cevolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
-	TracerResetCalc(alpha,originalD,originalP,originalVx,originalVy,
+	TracerResetCalc(alpha,originalD,originalP,originalVx,originalVy,originalTracers,
 		_cells,_tessellation,tracer_,tracerindex,_eos,cevolve);
 	return;
 }
@@ -774,7 +774,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		if(traceractive)
 		{
 			double density_inv=1.0/_cells[TotalNeigh[i]].Density;
-			tracer_[TotalNeigh[i]]=density_inv*vol_inv*(density_inv*t_temp[i]+
+			tracer_[TotalNeigh[i]]=density_inv*vol_inv*(t_temp[i]+
 				OldVol[TotalNeigh[i]]*olddensity*tracer_[TotalNeigh[i]]);
 		}
 	}

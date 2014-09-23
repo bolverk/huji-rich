@@ -150,7 +150,7 @@ namespace {
     return res;
   }
 
-  __attribute__((noreturn)) void riemann_solver_rethrow
+  void riemann_solver_rethrow
   (Primitive const& left,
    Primitive const& right,
    size_t idx, 
