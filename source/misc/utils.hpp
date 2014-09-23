@@ -565,4 +565,12 @@ template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& a
     subject.insert(subject.end(),addendum.begin(),addendum.end());
 }
 
+template<class T> T lazy_sum(const Index2Member<T>& i2m)
+{
+  T res = i2m(0);
+  for(size_t i=1;i<i2m.getLength();++i)
+    res += i2m(i);
+  return res;
+}
+
 #endif // UTILS_HPP

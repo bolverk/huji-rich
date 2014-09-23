@@ -45,6 +45,53 @@ Conserved total_conserved(hdsim const& sim)
   return res;
 }
 
+namespace {
+
+  vector<Edge> get_edge_list(const Tessellation& tess,
+			     const int i)
+  {
+    const vector<int>& edge_indices = tess.GetCellEdges(i);
+    vector<Edge> res(edge_indices.size());
+    for(size_t j=0;j<res.size();++j)
+      res[j] = tess.GetEdge(edge_indices[j]);
+    return res;
+  }
+
+  class ExtensiveTracerCalculator: public Index2Member<double>
+  {
+  public:
+
+    ExtensiveTracerCalculator(const hdsim& sim,
+			      const int index,
+			      const PhysicalGeometry& pg):
+      sim_(sim), index_(index), pg_(pg) {}
+
+    size_t getLength(void) const
+    {
+      return sim_.GetCellNo();
+    }
+
+    double operator()(size_t i) const
+    {
+      return sim_.getTracers().at(i).at(index_)*
+	sim_.GetCell(i).Density*
+	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),i));
+    }
+
+  private:
+    const hdsim& sim_;
+    const int index_;
+    const PhysicalGeometry& pg_;
+  };
+}
+
+double total_tracer(const hdsim& sim,
+		    int index,
+		    const PhysicalGeometry& pg)
+{
+  return lazy_sum(ExtensiveTracerCalculator(sim,index,pg));
+}
+
 vector<Vector2D> ReadVector2DFromFile(string filename)
 {
   fstream myFile (filename.c_str(),ios::in | ios::binary);
