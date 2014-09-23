@@ -9,10 +9,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cmath>
 #include "hdsim2d.hpp"
 #include "../../misc/utils.hpp"
-#include <cmath>
 #include "../../tessellation/ConvexHull.hpp"
+#include "physical_geometry.hpp"
 
 using namespace std;
 
@@ -43,6 +44,16 @@ void BinOutput(string location,
   \return The total conserved of the simulation
 */
 Conserved total_conserved(hdsim const& sim);
+
+/*! \brief Calculates the total amount of tracer in computational domain
+  \param sim Hydrodynamic simulation
+  \param index Index of tracer
+  \param pg Physical geometry
+  \return Total amount of certain tracer
+ */
+double total_tracer(const hdsim& sim,
+		    const int index,
+		    const PhysicalGeometry& pg);
 
 /*! \brief Displays the UniversalError information
   \param eo Th UniversalError
