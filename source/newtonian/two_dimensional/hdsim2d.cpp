@@ -37,7 +37,6 @@ _tessellation(tessellation),
 	_proctess(proctess),
 #endif
 	_cells(vector<Primitive>()),
-	_fluxes(vector<Conserved>()),
 	_pointvelocity(vector<Vector2D>(points.size(),Vector2D(0,0))),
 	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(vector<Conserved>()),
@@ -99,7 +98,6 @@ _tessellation(tessellation),
 	_proctess(tproc),
 #endif
 	_cells(dump.snapshot.cells),
-	_fluxes(vector<Conserved>()),
 	_pointvelocity(vector<Vector2D>()),
 	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(CalcConservedIntensive(_cells)),
@@ -326,10 +324,11 @@ void hdsim::TimeAdvance(void)
 		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
 		,_tessellation.GetTotalPointNumber());
 #endif
+	vector<Conserved> fluxes;
 	CalcFluxes(_tessellation, _cells, dt, _time,
 		_interpolation,
 		_facevelocity, _hbc, _rs,
-		_fluxes,custom_evolutions,
+		fluxes,custom_evolutions,
 		custom_evolution_manager,
 		tracer_);
 
@@ -343,7 +342,7 @@ void hdsim::TimeAdvance(void)
 	{
 		vector<vector<double> > trace_change;
 		trace_change = CalcTraceChange
-			(tracer_,_cells,_tessellation,_fluxes,dt,_hbc,
+			(tracer_,_cells,_tessellation,fluxes,dt,_hbc,
 			_interpolation,_time,custom_evolutions,
 			custom_evolution_manager,
 			_facevelocity,lengths);
@@ -360,7 +359,7 @@ void hdsim::TimeAdvance(void)
 
 	vector<double> g;
 	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,
-		_conservedextensive,_hbc,_fluxes,_pointvelocity,g,coldflows_flag_,tracer_,
+		_conservedextensive,_hbc,fluxes,_pointvelocity,g,coldflows_flag_,tracer_,
 		lengths);
 
 	ColdFlows cold_flows(coldflows_flag_,
@@ -371,7 +370,7 @@ void hdsim::TimeAdvance(void)
 			     custom_evolutions,
 			     g);
 
-	UpdateConservedExtensive(_tessellation, _fluxes, dt,
+	UpdateConservedExtensive(_tessellation, fluxes, dt,
 		_conservedextensive,_hbc,lengths);
 
 #ifndef RICH_MPI
@@ -500,11 +499,6 @@ Primitive hdsim::GetCell(int i) const
 Vector2D hdsim::GetMeshPoint(int i) const
 {
 	return _tessellation.GetMeshPoint(i);
-}
-
-Conserved hdsim::GetFlux(int i) const
-{
-	return _fluxes[i];
 }
 
 double hdsim::GetTime(void) const
@@ -908,11 +902,6 @@ void hdsim::HilbertArrange(int innernum)
 	if(tracer_flag_)
 		ReArrangeVector(tracer_,order);
 	_tessellation.Update(cor);
-}
-
-vector<Conserved>const& hdsim::GetFluxes(void)const
-{
-	return _fluxes;
 }
 
 Vector2D hdsim::GetPointVelocity(int index)const
