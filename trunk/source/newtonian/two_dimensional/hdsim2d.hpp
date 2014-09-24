@@ -51,8 +51,6 @@ private:
 
   vector<Primitive> _cells;
 
-  vector<Conserved> _fluxes;
-
   vector<Vector2D> _pointvelocity;
 
   vector<Vector2D> _facevelocity;
@@ -278,12 +276,6 @@ public:
   */
   Vector2D GetMeshPoint(int i) const;
 
-  /*! \brief Returns the flux
-    \param i Edge index
-    \return Flux
-  */
-  Conserved GetFlux(int i) const;
-
   /*! \brief Returns the time
     \return Time
   */
@@ -378,11 +370,7 @@ public:
     \return The points removed
   */
   vector<int> RemoveCells(RemovalStrategy const* remove);
-  /*!
-    \brief Returns the flux vector
-    \return The flux vector
-  */
-  vector<Conserved>const& GetFluxes(void)const;
+
   /*!
     \brief Returns the velocity of a mesh point
     \param index The index of the mesh point
