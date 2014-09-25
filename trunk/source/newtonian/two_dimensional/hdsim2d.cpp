@@ -37,7 +37,6 @@ _tessellation(tessellation),
 	_proctess(proctess),
 #endif
 	_cells(vector<Primitive>()),
-	_conservedintensive(vector<Conserved>()),
 	_conservedextensive(vector<Conserved>()),
 	_eos(eos),
 	_rs(rs),
@@ -76,9 +75,8 @@ _tessellation(tessellation),
 	_cells = InitialiseCells(density, pressure,xvelocity, yvelocity,
 		eos, tessellation,CMvalue);
 
-	_conservedintensive = CalcConservedIntensive(_cells);
 	_conservedextensive = CalcConservedExtensive
-		(_conservedintensive,tessellation);
+	  (CalcConservedIntensive(_cells),tessellation);
 	_dt_external=-1;
 }
 
@@ -96,7 +94,6 @@ _tessellation(tessellation),
 	_proctess(tproc),
 #endif
 	_cells(dump.snapshot.cells),
-	_conservedintensive(CalcConservedIntensive(_cells)),
 	_conservedextensive(vector<Conserved>()),
 	_eos(eos),
 	_rs(rs),
@@ -135,7 +132,7 @@ _tessellation(tessellation),
 	_tessellation.Initialise(dump.snapshot.mesh_points,_proctess,&_obc);
 #endif
 	_conservedextensive = CalcConservedExtensive
-		(_conservedintensive,tessellation);
+	  (CalcConservedIntensive(_cells),tessellation);
 }
 
 hdsim::~hdsim(void) {}
@@ -352,9 +349,11 @@ void hdsim::TimeAdvance(void)
 			_cells, _tessellation,_time);
 	}
 
+	/*
 	_conservedintensive=CalcConservedIntensive(_cells);
 
 	_conservedextensive=CalcConservedExtensive(_conservedintensive,_tessellation);
+	*/
 
 	vector<double> g;
 	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,
@@ -402,10 +401,11 @@ void hdsim::TimeAdvance(void)
 	cold_flows.herd_data(_tessellation);
 #endif
 
-	UpdateConservedIntensive(_tessellation, _conservedextensive,
-		_conservedintensive);
+	vector<Conserved> intensive;
+	UpdateConservedIntensive
+	  (_tessellation, _conservedextensive, intensive);
 
-	cold_flows.fixPressure(_conservedintensive,
+	cold_flows.fixPressure(intensive,
 			       tracer_extensive,
 			       _eos,
 			       cfp_.as, cfp_.bs,
@@ -414,7 +414,8 @@ void hdsim::TimeAdvance(void)
 			       _conservedextensive,
 			       densityfloor_);
 
-	UpdatePrimitives(_conservedintensive, _eos, _cells,custom_evolutions,_cells,
+	UpdatePrimitives(intensive, 
+			 _eos, _cells,custom_evolutions,_cells,
 		densityfloor_,densityMin_,pressureMin_,_tessellation,_time,
 		tracer_extensive);
 
@@ -919,9 +920,8 @@ void hdsim::load(const ResetDump& checkpoint)
 	_tessellation.Update(checkpoint.snapshot.mesh_points);
 #endif
 	_cells = checkpoint.snapshot.cells;
-	_conservedintensive = CalcConservedIntensive(_cells);
 	_conservedextensive = CalcConservedExtensive
-		(_conservedintensive,_tessellation);
+	  (CalcConservedIntensive(_cells),_tessellation);
 	_cfl = checkpoint.cfl;
 	_time = checkpoint.time;
 	cycle_ = checkpoint.cycle;
