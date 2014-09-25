@@ -37,7 +37,6 @@ _tessellation(tessellation),
 	_proctess(proctess),
 #endif
 	_cells(vector<Primitive>()),
-	_pointvelocity(vector<Vector2D>(points.size(),Vector2D(0,0))),
 	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(vector<Conserved>()),
 	_conservedextensive(vector<Conserved>()),
@@ -98,7 +97,6 @@ _tessellation(tessellation),
 	_proctess(tproc),
 #endif
 	_cells(dump.snapshot.cells),
-	_pointvelocity(vector<Vector2D>()),
 	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(CalcConservedIntensive(_cells)),
 	_conservedextensive(vector<Conserved>()),
@@ -296,20 +294,21 @@ void hdsim::TimeAdvance(void)
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
 
-	CalcPointVelocities(_tessellation, _cells,
-		_pointmotion, _pointvelocity,_time,custom_evolutions);
+	vector<Vector2D> point_velocity = 
+	  _pointmotion.calcAllVelocities
+	  (_tessellation,_cells,_time,custom_evolutions);
 
 #ifndef RICH_MPI
-	PeriodicVelocityExchange(_pointvelocity,_tessellation.GetDuplicatedPoints(),
+	PeriodicVelocityExchange(point_velocity,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetTotalPointNumber());
 #else
-	SendRecvVelocity(_pointvelocity,_tessellation.GetDuplicatedPoints(),
+	SendRecvVelocity(point_velocity,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces(),
 		_tessellation.GetTotalPointNumber());
 #endif
 
 	_facevelocity=_tessellation.calc_edge_velocities
-		(&_hbc,_pointvelocity,_time);
+		(&_hbc,point_velocity,_time);
 
 	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, _facevelocity,_hbc,
 								_time,custom_evolutions),
@@ -360,7 +359,7 @@ void hdsim::TimeAdvance(void)
 
 	vector<double> g;
 	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,
-		_conservedextensive,_hbc,fluxes,_pointvelocity,g,coldflows_flag_,tracer_,
+		_conservedextensive,_hbc,fluxes,point_velocity,g,coldflows_flag_,tracer_,
 		lengths);
 
 	ColdFlows cold_flows(coldflows_flag_,
@@ -375,11 +374,11 @@ void hdsim::TimeAdvance(void)
 		_conservedextensive,_hbc,lengths);
 
 #ifndef RICH_MPI
-	MoveMeshPoints(_pointvelocity, dt, _tessellation);
+	MoveMeshPoints(point_velocity, dt, _tessellation);
 #else
 	if(procupdate_!=0)
 		procupdate_->Update(_proctess,_tessellation);
-	MoveMeshPoints(_pointvelocity, dt, _tessellation,_proctess);
+	MoveMeshPoints(point_velocity, dt, _tessellation,_proctess);
 #endif
 
 #ifdef RICH_MPI
@@ -903,16 +902,6 @@ void hdsim::HilbertArrange(int innernum)
 	if(tracer_flag_)
 		ReArrangeVector(tracer_,order);
 	_tessellation.Update(cor);
-}
-
-Vector2D hdsim::GetPointVelocity(int index)const
-{
-	return _pointvelocity[index];
-}
-
-vector<Vector2D> const& hdsim::getAllPointVelocities(void) const
-{
-	return _pointvelocity;
 }
 
 #ifdef RICH_MPI
