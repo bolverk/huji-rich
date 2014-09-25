@@ -613,6 +613,32 @@ n0 : n1;
 	}
 }
 
+namespace {
+  class InterpolationRelevancy: public Index2Member<bool>
+  {
+  public:
+
+    InterpolationRelevancy(const vector<CustomEvolution*>& ce):
+      ce_(ce) {}
+
+    size_t getLength(void) const
+    {
+      return ce_.size();
+    }
+
+    bool operator()(size_t i) const
+    {
+      if(ce_[i])
+	return ce_[i]->isRelevantToInterpolation();
+      else
+	return true;
+    }
+
+  private:
+    const vector<CustomEvolution*>& ce_;
+  };
+}
+
 void CalcFluxes
 	(Tessellation const& tessellation,
 	vector<Primitive> const& cells,
@@ -631,11 +657,9 @@ void CalcFluxes
 
 	try
 	{
-		vector<bool> isrelevant(cells.size(),true);
-		for(size_t i=0;i<cells.size();++i)
-			if(CellsEvolve[i])
-				isrelevant[i]=CellsEvolve[i]->isRelevantToInterpolation();
-		interpolation.Prepare(tessellation,cells,tracers,isrelevant,dt,time);
+		interpolation.Prepare(tessellation,cells,tracers,
+				      serial_generate(InterpolationRelevancy(CellsEvolve)),
+				      dt,time);
 #ifndef RICH_MPI
 		PeriodicGradExchange(interpolation.GetGradients(),
 			tessellation.GetDuplicatedPoints(),tessellation.GetTotalPointNumber());
