@@ -637,6 +637,99 @@ namespace {
   private:
     const vector<CustomEvolution*>& ce_;
   };
+
+  class FluxCalculator: public Index2Member<Conserved>
+  {
+  public:
+
+    FluxCalculator(SpatialReconstruction& interp,
+		   const Tessellation& tess,
+		   const vector<Primitive>& cells,
+		   const vector<vector<double> >& tracers,
+		   const vector<CustomEvolution*>& ce,
+		   const CustomEvolutionManager& cem,
+		   double time, double dt,
+		   const HydroBoundaryConditions& hbc,
+		   const vector<Vector2D>& fv,
+		   const RiemannSolver& rs):
+      interp_(interp),
+      tess_(tess),
+      cells_(cells),
+      tracers_(tracers),
+      hbc_(hbc),
+      ce_(ce),
+      cem_(cem),
+      fv_(fv),
+      rs_(rs),
+      time_(time),
+      dt_(dt)
+    {
+      interp_.Prepare(tess,cells,tracers,
+		      serial_generate(InterpolationRelevancy(ce)),
+		      dt,time);				      
+    }
+
+    size_t getLength(void) const
+    {
+      return tess_.GetTotalSidesNumber();
+    }
+
+    Conserved operator()(size_t i) const
+    {
+      const Edge edge = tess_.GetEdge(i);
+      const int n0 = edge.neighbors.first;
+      const int n1 = edge.neighbors.second;
+      if(!hbc_.IsBoundary(edge,tess_)){
+	if(!ce_[n0]&&!ce_[n1])
+	  return calc_single_flux_in_bulk(tess_,edge,interp_,cells_,fv_[i],rs_,dt_);
+	else{
+	  const int ns = choose_special_cell_index(ce_,cem_,n0,n1);
+	  return ce_[ns]->CalcFlux(tess_,cells_,dt_,interp_,edge,fv_[i],rs_,ns,hbc_,time_,tracers_);
+	}	
+      }
+      else
+	return hbc_.CalcFlux(tess_,cells_,fv_[i],edge,interp_,dt_,time_);
+    }
+
+  private:
+    SpatialReconstruction& interp_;
+    const Tessellation& tess_;
+    const vector<Primitive>& cells_;
+    const vector<vector<double> >& tracers_;
+    const HydroBoundaryConditions& hbc_;
+    const vector<CustomEvolution*>& ce_;
+    const CustomEvolutionManager& cem_;
+    const vector<Vector2D>& fv_;
+    const RiemannSolver& rs_;
+    const double time_;
+    const double dt_;
+  };
+}
+
+vector<Conserved> calc_fluxes2
+(Tessellation const& tessellation,
+ vector<Primitive> const& cells,
+ double dt,
+ double time,
+ SpatialReconstruction& interpolation,
+ vector<Vector2D> const& facevelocity,
+ HydroBoundaryConditions const& boundaryconditions,
+ RiemannSolver const& rs,
+ vector<CustomEvolution*> const& CellsEvolve,
+ CustomEvolutionManager const& cem,
+ vector<vector<double> > const& tracers)
+{
+  return serial_generate
+    (FluxCalculator(interpolation,
+		    tessellation,
+		    cells,
+		    tracers,
+		    CellsEvolve,
+		    cem,
+		    time, dt,
+		    boundaryconditions,
+		    facevelocity,
+		    rs));
 }
 
 void CalcFluxes

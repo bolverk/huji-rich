@@ -324,13 +324,14 @@ void hdsim::TimeAdvance(void)
 		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
 		,_tessellation.GetTotalPointNumber());
 #endif
-	vector<Conserved> fluxes;
-	CalcFluxes(_tessellation, _cells, dt, _time,
-		_interpolation,
-		_facevelocity, _hbc, _rs,
-		fluxes,custom_evolutions,
-		custom_evolution_manager,
-		tracer_);
+	vector<Conserved> fluxes = calc_fluxes2
+	  (_tessellation, _cells, dt, _time,
+	   _interpolation,
+	   _facevelocity, _hbc, _rs,
+	   custom_evolutions,
+	   custom_evolution_manager,
+	   tracer_);
+						
 
 	int nn=_tessellation.GetTotalSidesNumber();
 	vector<double> lengths(nn);
