@@ -666,7 +666,15 @@ namespace {
     {
       interp_.Prepare(tess,cells,tracers,
 		      serial_generate(InterpolationRelevancy(ce)),
-		      dt,time);				      
+		      dt,time);
+#ifndef RICH_MPI
+      PeriodicGradExchange(interp_.GetGradients(),
+			   tess_.GetDuplicatedPoints(),tess_.GetTotalPointNumber());
+#else
+      SendRecvGrad(interp_.GetGradients(),tess_.GetDuplicatedPoints(),
+		   tess_.GetDuplicatedProcs(),tess_.GetGhostIndeces(),
+		   tess_.GetTotalPointNumber());
+#endif
     }
 
     size_t getLength(void) const
@@ -706,7 +714,7 @@ namespace {
   };
 }
 
-vector<Conserved> calc_fluxes2
+vector<Conserved> calc_fluxes
 (Tessellation const& tessellation,
  vector<Primitive> const& cells,
  double dt,
@@ -730,79 +738,6 @@ vector<Conserved> calc_fluxes2
 		    boundaryconditions,
 		    facevelocity,
 		    rs));
-}
-
-void CalcFluxes
-	(Tessellation const& tessellation,
-	vector<Primitive> const& cells,
-	double dt,
-	double time,
-	SpatialReconstruction& interpolation,
-	vector<Vector2D> const& facevelocity,
-	HydroBoundaryConditions const& boundaryconditions,
-	RiemannSolver const& rs,
-	vector<Conserved>& fluxes,
-	vector<CustomEvolution*> const& CellsEvolve,
-	CustomEvolutionManager const& cem,
-	vector<vector<double> > const& tracers)
-{
-	fluxes.resize(tessellation.GetTotalSidesNumber());
-
-	try
-	{
-		interpolation.Prepare(tessellation,cells,tracers,
-				      serial_generate(InterpolationRelevancy(CellsEvolve)),
-				      dt,time);
-#ifndef RICH_MPI
-		PeriodicGradExchange(interpolation.GetGradients(),
-			tessellation.GetDuplicatedPoints(),tessellation.GetTotalPointNumber());
-#else
-		SendRecvGrad(interpolation.GetGradients(),tessellation.GetDuplicatedPoints(),
-			tessellation.GetDuplicatedProcs(),tessellation.GetGhostIndeces()
-			,tessellation.GetTotalPointNumber());
-#endif
-	}
-	catch(UniversalError& eo)
-	{
-		eo.AddEntry("Error in CalcFlux Interpolation prepare",0);
-		throw;
-	}
-	for(int i = 0; i < tessellation.GetTotalSidesNumber(); i++)
-	{
-		try
-		{
-			const Edge edge = tessellation.GetEdge(i);
-			const int n1=edge.neighbors.second;
-			const int n0=edge.neighbors.first;
-			if(!boundaryconditions.IsBoundary(edge,tessellation))
-			{
-				if(!CellsEvolve[n0]&&!CellsEvolve[n1])
-					fluxes[i] = calc_single_flux_in_bulk
-					(tessellation, edge, interpolation,
-					cells,facevelocity[i],rs,dt);
-				else
-				{
-					const int ns = choose_special_cell_index
-						(CellsEvolve, cem, n0, n1);
-					fluxes.at(i) = CellsEvolve.at(ns)->CalcFlux
-						(tessellation, cells,
-						dt,interpolation,edge,facevelocity[i],
-						rs,ns,boundaryconditions,time,tracers);
-				}
-			}
-			else
-			{
-				// Boundaries
-				fluxes[i] = boundaryconditions.CalcFlux
-					(tessellation, cells, facevelocity[i], edge,
-					interpolation,dt,time);
-			}
-		}
-		catch(UniversalError& eo)
-		{
-			calc_fluxes_rethrow(eo,i,tessellation);
-		}
-	}
 }
 
 void ExternalForceContribution
@@ -849,29 +784,6 @@ vector<Vector2D> calc_point_velocities
 	return point_motion.calcAllVelocities(tess,cells,time,cevolve);
 }
 
-namespace {
-	vector<Conserved> calc_fluxes
-		(Tessellation const& tess,
-		vector<Primitive> const& cells,
-		double dt,
-		double time,
-		SpatialReconstruction& interpolation,
-		vector<Vector2D> const& edge_velocities,
-		HydroBoundaryConditions const& hbc,
-		RiemannSolver const& rs,
-		vector<CustomEvolution*> const& CellsEvolve,
-		CustomEvolutionManager const& cem,
-		vector<vector<double> > const& tracers)
-	{
-		vector<Conserved> res;
-		CalcFluxes(tess, cells, dt,
-			time,
-			interpolation,
-			edge_velocities,
-			hbc, rs, res,CellsEvolve,cem,tracers);
-		return res;
-	}
-}
 vector<Vector2D> get_all_mesh_points
 	(Tessellation const& tess)
 {
