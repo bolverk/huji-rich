@@ -51,8 +51,6 @@ private:
 
   vector<Primitive> _cells;
 
-  vector<Conserved> _conservedintensive;
-
   vector<Conserved> _conservedextensive;
 
   EquationOfState const& _eos;
