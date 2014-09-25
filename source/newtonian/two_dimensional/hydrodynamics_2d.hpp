@@ -163,7 +163,7 @@ void UpdatePrimitives(vector<Conserved> const& conservedintensive,
 		      Tessellation const& tess,double time,
 		      vector<vector<double> > const& extensivetracers);
 
-vector<Conserved> calc_fluxes2
+vector<Conserved> calc_fluxes
 (Tessellation const& tessellation,
  vector<Primitive> const& cells,
  double dt,
@@ -172,34 +172,6 @@ vector<Conserved> calc_fluxes2
  vector<Vector2D> const& facevelocity,
  HydroBoundaryConditions const& boundaryconditions,
  RiemannSolver const& rs,
- vector<CustomEvolution*> const& CellsEvolve,
- CustomEvolutionManager const& cem,
- vector<vector<double> > const& tracers);
-
-/*! \brief Calculates the fluxes
-  \param tessellation Tessellation
-  \param cells Fluid elements
-  \param dt Time step
-  \param time Time
-  \param interpolation Spatial reconstruction
-  \param facevelocity Velocities of cell interfaces
-  \param boundaryconditions Hydrodynamic boundary conditions
-  \param rs Riemann solver
-  \param fluxes Hydrodynamic fluxes
-  \param CellsEvolve Custum evolution
-  \param cem Custom evolution manager
-  \param tracers Tracers
- */
-void CalcFluxes
-(Tessellation const& tessellation,
- vector<Primitive> const& cells,
- double dt,
- double time,
- SpatialReconstruction& interpolation,
- vector<Vector2D> const& facevelocity,
- HydroBoundaryConditions const& boundaryconditions,
- RiemannSolver const& rs,
- vector<Conserved>& fluxes,
  vector<CustomEvolution*> const& CellsEvolve,
  CustomEvolutionManager const& cem,
  vector<vector<double> > const& tracers);

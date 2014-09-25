@@ -324,7 +324,7 @@ void hdsim::TimeAdvance(void)
 		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
 		,_tessellation.GetTotalPointNumber());
 #endif
-	vector<Conserved> fluxes = calc_fluxes2
+	vector<Conserved> fluxes = calc_fluxes
 	  (_tessellation, _cells, dt, _time,
 	   _interpolation,
 	   _facevelocity, _hbc, _rs,
