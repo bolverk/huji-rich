@@ -163,6 +163,19 @@ void UpdatePrimitives(vector<Conserved> const& conservedintensive,
 		      Tessellation const& tess,double time,
 		      vector<vector<double> > const& extensivetracers);
 
+vector<Conserved> calc_fluxes2
+(Tessellation const& tessellation,
+ vector<Primitive> const& cells,
+ double dt,
+ double time,
+ SpatialReconstruction& interpolation,
+ vector<Vector2D> const& facevelocity,
+ HydroBoundaryConditions const& boundaryconditions,
+ RiemannSolver const& rs,
+ vector<CustomEvolution*> const& CellsEvolve,
+ CustomEvolutionManager const& cem,
+ vector<vector<double> > const& tracers);
+
 /*! \brief Calculates the fluxes
   \param tessellation Tessellation
   \param cells Fluid elements
