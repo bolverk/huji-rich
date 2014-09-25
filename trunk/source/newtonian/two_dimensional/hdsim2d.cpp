@@ -37,7 +37,6 @@ _tessellation(tessellation),
 	_proctess(proctess),
 #endif
 	_cells(vector<Primitive>()),
-	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(vector<Conserved>()),
 	_conservedextensive(vector<Conserved>()),
 	_eos(eos),
@@ -97,7 +96,6 @@ _tessellation(tessellation),
 	_proctess(tproc),
 #endif
 	_cells(dump.snapshot.cells),
-	_facevelocity(vector<Vector2D>()),
 	_conservedintensive(CalcConservedIntensive(_cells)),
 	_conservedextensive(vector<Conserved>()),
 	_eos(eos),
@@ -307,10 +305,11 @@ void hdsim::TimeAdvance(void)
 		_tessellation.GetTotalPointNumber());
 #endif
 
-	_facevelocity=_tessellation.calc_edge_velocities
-		(&_hbc,point_velocity,_time);
+	const vector<Vector2D> fv=
+	  _tessellation.calc_edge_velocities
+	  (&_hbc,point_velocity,_time);
 
-	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, _facevelocity,_hbc,
+	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv,_hbc,
 								_time,custom_evolutions),
 					      _dt_external, _time, _endtime);
 
@@ -326,7 +325,7 @@ void hdsim::TimeAdvance(void)
 	vector<Conserved> fluxes = calc_fluxes
 	  (_tessellation, _cells, dt, _time,
 	   _interpolation,
-	   _facevelocity, _hbc, _rs,
+	   fv, _hbc, _rs,
 	   custom_evolutions,
 	   custom_evolution_manager,
 	   tracer_);
@@ -345,7 +344,7 @@ void hdsim::TimeAdvance(void)
 			(tracer_,_cells,_tessellation,fluxes,dt,_hbc,
 			_interpolation,_time,custom_evolutions,
 			custom_evolution_manager,
-			_facevelocity,lengths);
+			fv,lengths);
 		MakeTracerExtensive(tracer_,
 			_tessellation,_cells,tracer_extensive);
 		UpdateTracerExtensive(tracer_extensive,

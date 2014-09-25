@@ -51,8 +51,6 @@ private:
 
   vector<Primitive> _cells;
 
-  vector<Vector2D> _facevelocity;
-
   vector<Conserved> _conservedintensive;
 
   vector<Conserved> _conservedextensive;
