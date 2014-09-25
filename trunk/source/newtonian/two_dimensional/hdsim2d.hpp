@@ -51,8 +51,6 @@ private:
 
   vector<Primitive> _cells;
 
-  vector<Vector2D> _pointvelocity;
-
   vector<Vector2D> _facevelocity;
 
   vector<Conserved> _conservedintensive;
@@ -370,18 +368,6 @@ public:
     \return The points removed
   */
   vector<int> RemoveCells(RemovalStrategy const* remove);
-
-  /*!
-    \brief Returns the velocity of a mesh point
-    \param index The index of the mesh point
-    \return The velocity of the point
-  */
-  Vector2D GetPointVelocity(int index)const;
-
-  /*! \brief Returns a list of all point velocities
-    \return A list of all point velocities
-  */
-  vector<Vector2D> const& getAllPointVelocities(void) const;
 
   /*! \brief Sets the initial time for the simulation
     \param t_start Start time
