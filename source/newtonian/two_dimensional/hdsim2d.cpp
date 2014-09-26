@@ -357,18 +357,18 @@ void hdsim::TimeAdvance(void)
 	vector<vector<double> > tracer_extensive = 
 	  calc_extensive_tracer(tracer_,
 				_tessellation,
-				_cells);				
-	if(tracer_flag_)
-	{
-	  const vector<vector<double> > trace_change = CalcTraceChange
-	    (tracer_,_cells,_tessellation,fluxes,dt,_hbc,
-	     _interpolation,_time,custom_evolutions,
-	     custom_evolution_manager,
-	     fv,lengths);
-		UpdateTracerExtensive(tracer_extensive,
-			trace_change,custom_evolutions,
-			_cells, _tessellation,_time);
-	}
+				_cells); 
+	really_update_extensive_tracers(tracer_extensive,
+					tracer_,
+					_cells,
+					_tessellation,
+					fluxes,
+					_time,dt,
+					_hbc,
+					_interpolation,
+					custom_evolutions,
+					custom_evolution_manager,
+					fv,lengths);
 
 	vector<double> g;
 	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,

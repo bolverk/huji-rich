@@ -1345,6 +1345,28 @@ namespace {
 	};
 }
 
+void really_update_extensive_tracers
+(vector<vector<double> >& extensive_tracers,
+ const vector<vector<double> >& tracers,
+ const vector<Primitive>& cells,
+ const Tessellation& tess,
+ const vector<Conserved>& fluxes,
+ double time, double dt,
+ const HydroBoundaryConditions& hbc,
+ const SpatialReconstruction& interp,
+ const vector<CustomEvolution*> ce,
+ const CustomEvolutionManager& cem,
+ const vector<Vector2D>& fv,
+ const vector<double>& lengths)
+{
+  const vector<vector<double> >& tracer_change = 
+    CalcTraceChange(tracers,cells,tess,fluxes,dt,hbc,
+		    interp,time,ce,cem,fv,lengths);
+  UpdateTracerExtensive
+    (extensive_tracers, tracer_change,
+     ce, cells, tess, time);
+}
+
 vector<vector<double> > CalcTraceChange
 	(vector<vector<double> > const& old_trace,
 	vector<Primitive> const& cells,
@@ -1552,20 +1574,13 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 	CellsEvolve,vector<Primitive> const& cells,Tessellation const& tess,
 	double time)
 {
-	int n=int(tracerextensive.size());
-	if(n==0)
-		return;
-	int dim=int(tracerextensive[0].size());
-	for(int i=0;i<n;++i)
-		if(CellsEvolve[i]!=0)
-		{
-			tracerextensive[i]=CellsEvolve[i]->UpdateTracer(
-				i,tracerextensive,tracerchange,cells,tess,time);
-		}
-		else
-			for(int j=0;j<dim;++j)
-				tracerextensive[i][j]+=tracerchange[i][j];
-	return;
+  for(size_t i=0;i<tracerextensive.size();++i)
+    if(CellsEvolve[i])
+      tracerextensive[i]=CellsEvolve[i]->UpdateTracer
+	(i,tracerextensive,tracerchange,cells,tess,time);
+    else
+      for(size_t j=0;j<tracerextensive[i].size();++j)
+	tracerextensive[i][j]+=tracerchange[i][j];
 }
 
 void TracerResetCalc
