@@ -57,6 +57,8 @@ _tessellation(tessellation),
 	pressureMin_(0),
 	EntropyReCalc_(EntropyCalc),
 	_dt_external(0),
+  default_pg_(),
+  pg_(&default_pg_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
@@ -115,6 +117,8 @@ _tessellation(tessellation),
 	pressureMin_(dump.pressuremin),
 	EntropyReCalc_(EntropyCalc),
 	_dt_external(-1),
+  default_pg_(),
+  pg_(&default_pg_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
@@ -268,6 +272,27 @@ namespace
     for(size_t i=0;i<cells.size();++i)
       tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
   }
+
+  class EdgeLengthCalculator: public Index2Member<double>
+  {
+  public:
+
+    EdgeLengthCalculator(const Tessellation& tess):
+      tess_(tess) {}
+
+    size_t getLength(void) const
+    {
+      return tess_.GetTotalSidesNumber();
+    }
+
+    double operator()(size_t i) const
+    {
+      return tess_.GetEdge(i).GetLength();
+    }
+
+  private:
+    const Tessellation& tess_;
+  };
 }
 
 void hdsim::TimeAdvance(void)
@@ -325,13 +350,9 @@ void hdsim::TimeAdvance(void)
 	   fv, _hbc, _rs,
 	   custom_evolutions,
 	   custom_evolution_manager,
-	   tracer_);
-						
+	   tracer_);					
 
-	int nn=_tessellation.GetTotalSidesNumber();
-	vector<double> lengths(nn);
-	for(int i=0;i<nn;++i)
-		lengths[i]=_tessellation.GetEdge(i).GetLength();
+	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation));
 
 	vector<vector<double> > tracer_extensive;
 	if(tracer_flag_)
@@ -348,12 +369,6 @@ void hdsim::TimeAdvance(void)
 			trace_change,custom_evolutions,
 			_cells, _tessellation,_time);
 	}
-
-	/*
-	_conservedintensive=CalcConservedIntensive(_cells);
-
-	_conservedextensive=CalcConservedExtensive(_conservedintensive,_tessellation);
-	*/
 
 	vector<double> g;
 	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,
