@@ -406,6 +406,38 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	}
 }
 
+namespace {
+  class IntensiveCalculator: public Index2Member<Conserved>
+  {
+  public:
+
+    IntensiveCalculator(const Tessellation& tess,
+			const vector<Conserved>& extensive):
+      tess_(tess), extensive_(extensive) {}
+
+    size_t getLength(void) const
+    {
+      return extensive_.size();
+    }
+
+    Conserved operator()(size_t i) const
+    {
+      return extensive_[i]/tess_.GetVolume(i);
+    }
+
+  private:
+    const Tessellation& tess_;
+    const vector<Conserved>& extensive_;
+  };
+}
+
+vector<Conserved> calc_conserved_intensive
+(const Tessellation& tess,
+ const vector<Conserved>& extensive)
+{
+  return serial_generate(IntensiveCalculator(tess,extensive));
+}
+
 void UpdateConservedIntensive(Tessellation const& tessellation,
 	vector<Conserved> const& conservedextensive,
 	vector<Conserved>& conservedintensive)
