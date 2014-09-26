@@ -418,6 +418,20 @@ void MakeTracerIntensive
  const& tracer_extensive,Tessellation const& tess,
  vector<Primitive> const& cells);
 
+void really_update_extensive_tracers
+(vector<vector<double> >& extensive_tracers,
+ const vector<vector<double> >& tracers,
+ const vector<Primitive>& cells,
+ const Tessellation& tess,
+ const vector<Conserved>& fluxes,
+ double time, double dt,
+ const HydroBoundaryConditions& hbc,
+ const SpatialReconstruction& interp,
+ const vector<CustomEvolution*> ce,
+ const CustomEvolutionManager& cem,
+ const vector<Vector2D>& fv,
+ const vector<double>& lengths);
+
 /*! \brief Updates the extensive tracers
   \param tracerextensive Extensive tracers
   \param tracerchange Change in extensive tracers
