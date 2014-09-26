@@ -1469,24 +1469,63 @@ bool NearBoundary(int index,Tessellation const& tess,
 	return false;
 }
 
+ namespace {
+   vector<double> scalar_mult(const vector<double>& v,
+			      double s)
+   {
+     vector<double> res(v.size());
+     for(size_t i=0;i<v.size();++i)
+       res[i] = s*v[i];
+     return res;
+   }
+ }
+
+ namespace {
+   class ExtensiveTracerCalculator: public Index2Member<vector<double> >
+   {
+   public:
+
+     ExtensiveTracerCalculator(const vector<vector<double> >& tracers,
+			       const Tessellation& tess,
+			       const vector<Primitive>& cells):
+       tracers_(tracers), tess_(tess), cells_(cells) {}
+
+     size_t getLength(void) const
+     {
+       return tracers_.size();
+     }
+
+     vector<double> operator()(size_t i) const
+     {
+       return scalar_mult(tracers_[i],
+			  tess_.GetVolume(i)*cells_[i].Density);
+     }
+
+   private:
+     const vector<vector<double> >& tracers_;
+     const Tessellation& tess_;
+     const vector<Primitive>& cells_;
+   };
+ }
+
+ vector<vector<double> > calc_extensive_tracer
+   (const vector<vector<double> >& intensive_tracer,
+    const Tessellation& tess,
+    const vector<Primitive>& cells)
+ {
+   return serial_generate(ExtensiveTracerCalculator(intensive_tracer,
+						    tess,
+						    cells));
+ }
+
 void MakeTracerExtensive(vector<vector<double> > const &tracer,
 	Tessellation const& tess,vector<Primitive> const& cells,vector<vector<double> >
 	&result)
 {
-	if(tracer.empty())
-		return;
-	int n=tess.GetPointNo();
-	int dim=int(tracer[0].size());
-	double mass;
-	result.resize(n);
-	for(int i=0;i<n;++i)
-	{
-		mass=tess.GetVolume(i)*cells[i].Density;
-		result[i].resize(dim);
-		for(int j=0;j<dim;++j)
-			result[i][j]=tracer[i][j]*mass;
-	}
-	return;
+  result.resize(tracer.size());
+  for(size_t i=0;i<result.size();++i)
+    result[i] = scalar_mult(tracer[i],
+			    tess.GetVolume(i)*cells[i].Density);
 }
 
 void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> >

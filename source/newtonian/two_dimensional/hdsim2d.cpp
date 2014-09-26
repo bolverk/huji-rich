@@ -354,17 +354,17 @@ void hdsim::TimeAdvance(void)
 
 	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation));
 
-	vector<vector<double> > tracer_extensive;
+	vector<vector<double> > tracer_extensive = 
+	  calc_extensive_tracer(tracer_,
+				_tessellation,
+				_cells);				
 	if(tracer_flag_)
 	{
-		vector<vector<double> > trace_change;
-		trace_change = CalcTraceChange
-			(tracer_,_cells,_tessellation,fluxes,dt,_hbc,
-			_interpolation,_time,custom_evolutions,
-			custom_evolution_manager,
-			fv,lengths);
-		MakeTracerExtensive(tracer_,
-			_tessellation,_cells,tracer_extensive);
+	  const vector<vector<double> > trace_change = CalcTraceChange
+	    (tracer_,_cells,_tessellation,fluxes,dt,_hbc,
+	     _interpolation,_time,custom_evolutions,
+	     custom_evolution_manager,
+	     fv,lengths);
 		UpdateTracerExtensive(tracer_extensive,
 			trace_change,custom_evolutions,
 			_cells, _tessellation,_time);
