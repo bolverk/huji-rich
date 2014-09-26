@@ -416,9 +416,9 @@ void hdsim::TimeAdvance(void)
 	cold_flows.herd_data(_tessellation);
 #endif
 
-	vector<Conserved> intensive;
-	UpdateConservedIntensive
-	  (_tessellation, _conservedextensive, intensive);
+	vector<Conserved> intensive = 
+	  calc_conserved_intensive(_tessellation,
+				   _conservedextensive);
 
 	cold_flows.fixPressure(intensive,
 			       tracer_extensive,
