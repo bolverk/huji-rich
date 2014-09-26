@@ -25,6 +25,7 @@
 #include "../../misc/utils.hpp"
 #include "ResetDump.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
+#include "physical_geometry.hpp"
 
 class ColdflowParams
 {
@@ -86,6 +87,9 @@ private:
   bool EntropyReCalc_;
 
   double _dt_external;
+
+  const SlabSymmetry default_pg_;
+  const PhysicalGeometry* pg_;
 
   #ifdef RICH_MPI
   ProcessorUpdate *procupdate_;
