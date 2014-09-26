@@ -391,6 +391,11 @@ void FixPressure
 bool NearBoundary(int index,Tessellation const& tess,
 		  vector<CustomEvolution*> const& customevolve);
 
+vector<vector<double> > calc_extensive_tracer
+(const vector<vector<double> > & intensive_tracer,
+ const Tessellation& tess,
+ const vector<Primitive>& cells);
+
 /*! \brief Calculates the extensive tracer
   \param tracer Intensive tracer
   \param tess Tessellation
