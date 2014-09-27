@@ -21,6 +21,7 @@
 #include "../../tessellation/EdgeLengthCorrect.hpp"
 #include "../../mpi/mpi_macro.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
+#include "physical_geometry.hpp"
 
 /*! \brief Initialize computational cells
   \param density Density distribution
@@ -53,8 +54,9 @@ vector<Conserved> CalcConservedIntensive
   \return List of conserved variables
 */
 vector<Conserved> CalcConservedExtensive
-(vector<Conserved> const& cons_int,
- Tessellation const& tess);
+(const vector<Conserved>& cons_int,
+ const Tessellation& tess,
+ const PhysicalGeometry& pg);
 
 /*! \brief Calculates the velocities of the mesh generating points
   \param tessellation Tessellation
@@ -272,6 +274,7 @@ double TimeAdvance2mid
  double dt_external,
  vector<size_t>& custom_evolution_indices,
  const CustomEvolutionManager& custom_evolution_manager,
+ const PhysicalGeometry& pg,
  #ifdef RICH_MPI
  ProcessorUpdate *procupdate,
  #endif
