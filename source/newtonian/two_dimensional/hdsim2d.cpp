@@ -78,7 +78,7 @@ _tessellation(tessellation),
 		eos, tessellation,CMvalue);
 
 	_conservedextensive = CalcConservedExtensive
-	  (CalcConservedIntensive(_cells),tessellation);
+	  (CalcConservedIntensive(_cells),tessellation,*pg_);
 	_dt_external=-1;
 }
 
@@ -136,7 +136,7 @@ _tessellation(tessellation),
 	_tessellation.Initialise(dump.snapshot.mesh_points,_proctess,&_obc);
 #endif
 	_conservedextensive = CalcConservedExtensive
-	  (CalcConservedIntensive(_cells),tessellation);
+	  (CalcConservedIntensive(_cells),tessellation,*pg_);
 }
 
 hdsim::~hdsim(void) {}
@@ -465,7 +465,7 @@ void hdsim::TimeAdvance2Mid(void)
 		_cells,_pointmotion,
 		_hbc,_interpolation,_rs,_eos,external_force_,_time,_cfl,_endtime,
 		tracer_,_dt_external,custom_evolution_indices,
-		custom_evolution_manager,
+		 custom_evolution_manager, *pg_,
 #ifdef RICH_MPI
 		procupdate_,
 #endif
@@ -936,7 +936,7 @@ void hdsim::load(const ResetDump& checkpoint)
 #endif
 	_cells = checkpoint.snapshot.cells;
 	_conservedextensive = CalcConservedExtensive
-	  (CalcConservedIntensive(_cells),_tessellation);
+	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
 	_cfl = checkpoint.cfl;
 	_time = checkpoint.time;
 	cycle_ = checkpoint.cycle;

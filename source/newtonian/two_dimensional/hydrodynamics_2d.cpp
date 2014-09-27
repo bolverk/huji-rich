@@ -123,35 +123,62 @@ vector<Conserved> CalcConservedIntensive
 }
 
 namespace {
-	class ExtensiveInitializer: public Index2Member<Conserved>
-	{
-	public:
 
-		ExtensiveInitializer(vector<Conserved> const& intensive,
-			Tessellation const& tess):
-		intensive_(intensive), tess_(tess) {}
+  class CellEdgesGetter: public Index2Member<Edge>
+  {
+  public:
+    
+    CellEdgesGetter(const Tessellation& tess, int n):
+      tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
 
-		Conserved operator()(size_t n) const
-		{
-			return tess_.GetVolume(n)*intensive_[n];
-		}
+    size_t getLength(void) const
+    {
+      return edge_indices_.size();
+    }
 
-		size_t getLength(void) const
-		{
-			return tess_.GetPointNo();
-		}
+    Edge operator()(size_t i) const
+    {
+      return tess_.GetEdge(edge_indices_[i]);
+    }
 
-	private:
-		vector<Conserved> const& intensive_;
-		Tessellation const& tess_;
-	};
+  private:
+    const Tessellation& tess_;
+    const vector<int> edge_indices_;
+  };
+
+  class ExtensiveInitializer: public Index2Member<Conserved>
+  {
+  public:
+
+    ExtensiveInitializer(const vector<Conserved>& intensive,
+			 const Tessellation& tess,
+			 const PhysicalGeometry& pg):
+      intensive_(intensive), tess_(tess), pg_(pg)  {}
+
+    Conserved operator()(size_t n) const
+    {
+      return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,n)))*
+	intensive_[n];
+    }
+
+    size_t getLength(void) const
+    {
+      return tess_.GetPointNo();
+    }
+
+  private:
+    const vector<Conserved>& intensive_;
+    const Tessellation& tess_;
+    const PhysicalGeometry& pg_;
+  };
 }
 
 vector<Conserved> CalcConservedExtensive
-	(vector<Conserved> const& cons_int,
-	Tessellation const& tess)
+	(const vector<Conserved>& cons_int,
+	 const Tessellation& tess,
+	 const PhysicalGeometry& pg)
 {
-	return serial_generate(ExtensiveInitializer(cons_int, tess));
+  return serial_generate(ExtensiveInitializer(cons_int, tess, pg));
 }
 
 void CalcPointVelocities(Tessellation const& tessellation,
@@ -847,6 +874,7 @@ double TimeAdvance2mid
 	double dt_external,
 	vector<size_t>& custom_evolution_indices,
 	const CustomEvolutionManager& custom_evolution_manager,
+	 const PhysicalGeometry& pg,
 #ifdef RICH_MPI
 	ProcessorUpdate *procupdate,
 #endif
@@ -941,7 +969,7 @@ double TimeAdvance2mid
 	vector<Conserved> intensive = CalcConservedIntensive(cells);
 
 	vector<Conserved> extensive = CalcConservedExtensive
-		(intensive, tess);
+	  (intensive, tess, pg);
 
 	// Save extensive variables of beginning of time step
 	// if(traceflag)
