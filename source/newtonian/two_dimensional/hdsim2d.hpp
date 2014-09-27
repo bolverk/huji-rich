@@ -231,6 +231,8 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
+  void changePhysicalGeometry(const PhysicalGeometry* pg);
+
   //! \brief Advances the simulation in time, second order accuracy
   void TimeAdvance2Mid(void);
 
