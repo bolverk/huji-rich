@@ -1091,7 +1091,7 @@ double TimeAdvance2mid
 		densitymin,pressuremin,tess,time+0.5*dt,tracers);
 	if(traceflag)
 	{
-		MakeTracerIntensive(tracers,tracer_extensive,tess,cells);
+	  MakeTracerIntensive(tracers,tracer_extensive,tess,cells,pg);
 	}
 
 	// End half step
@@ -1253,7 +1253,7 @@ double TimeAdvance2mid
 
 	if(traceflag)
 	{
-		MakeTracerIntensive(tracers,old_trace,tess,cells);
+	  MakeTracerIntensive(tracers,old_trace,tess,cells,pg);
 	}
 	return dt;
 }
@@ -1598,17 +1598,49 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 	  res[i] = v[i]/s;
 	return res;
       }
+
+      class IntensiveTracerCalculator: public Index2Member<vector<double> >
+      {
+      public:
+
+	IntensiveTracerCalculator
+	(const vector<vector<double> >& extensive,
+	 const Tessellation& tess,
+	 const vector<Primitive>& cells,
+	 const PhysicalGeometry& pg):
+	  extensive_(extensive),
+	  tess_(tess), cells_(cells), pg_(pg) {}
+
+	size_t getLength(void) const
+	{
+	  return extensive_.size();
+	}
+
+	vector<double> operator()(size_t i) const
+	{
+	  const double mass = cells_[i].Density*
+	    pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
+	  return scalar_div(extensive_[i],mass);
+	}
+
+      private:
+	const vector<vector<double> >& extensive_;
+	const Tessellation& tess_;
+	const vector<Primitive>& cells_;
+	const PhysicalGeometry& pg_;
+      };
     }
 
-void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> >
-	const& tracer_extensive,Tessellation const& tess,vector<Primitive> const& cells)
+void MakeTracerIntensive(vector<vector<double> > &tracer,
+			 const vector<vector<double> >& extensive,
+			 const Tessellation& tess,
+			 const vector<Primitive>& cells,
+			 const PhysicalGeometry& pg)
 {
-	if(tracer.empty())
-	  return;
-	tracer.resize(tracer_extensive.size());
-	for(int i=0;i<tess.GetPointNo();++i)
-	  tracer[i] = scalar_div(tracer_extensive[i],
-				 tess.GetVolume(i)*cells[i].Density);
+  tracer = serial_generate(IntensiveTracerCalculator(extensive,
+						     tess,
+						     cells,
+						     pg));
 }
 
 void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,

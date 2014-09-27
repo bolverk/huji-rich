@@ -421,7 +421,7 @@ void MakeTracerExtensive
 void MakeTracerIntensive
 (vector<vector<double> > &tracer,vector<vector<double> >
  const& tracer_extensive,Tessellation const& tess,
- vector<Primitive> const& cells);
+ vector<Primitive> const& cells, const PhysicalGeometry& pg);
 
 void really_update_extensive_tracers
 (vector<vector<double> >& extensive_tracers,

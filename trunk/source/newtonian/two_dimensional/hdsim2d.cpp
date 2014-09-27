@@ -439,7 +439,8 @@ void hdsim::TimeAdvance(void)
 		tracer_extensive);
 
 
-	MakeTracerIntensive(tracer_,tracer_extensive,_tessellation,_cells);
+	MakeTracerIntensive(tracer_,tracer_extensive,
+			    _tessellation,_cells, *pg_);
 
 	_time += dt;
 	cycle_++;
