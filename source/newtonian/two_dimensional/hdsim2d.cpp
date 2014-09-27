@@ -277,8 +277,9 @@ namespace
   {
   public:
 
-    EdgeLengthCalculator(const Tessellation& tess):
-      tess_(tess) {}
+    EdgeLengthCalculator(const Tessellation& tess,
+			 const PhysicalGeometry& pg):
+      tess_(tess), pg_(pg) {}
 
     size_t getLength(void) const
     {
@@ -287,11 +288,12 @@ namespace
 
     double operator()(size_t i) const
     {
-      return tess_.GetEdge(i).GetLength();
+      return pg_.calcArea(tess_.GetEdge(i));
     }
 
   private:
     const Tessellation& tess_;
+    const PhysicalGeometry& pg_;
   };
 }
 
@@ -352,7 +354,7 @@ void hdsim::TimeAdvance(void)
 	   custom_evolution_manager,
 	   tracer_);					
 
-	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation));
+	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation,*pg_));
 
 	vector<vector<double> > tracer_extensive = 
 	  calc_extensive_tracer(tracer_,
@@ -389,7 +391,7 @@ void hdsim::TimeAdvance(void)
 #ifndef RICH_MPI
 	MoveMeshPoints(point_velocity, dt, _tessellation);
 #else
-	if(procupdate_!=0)
+	if(procupdate_)
 		procupdate_->Update(_proctess,_tessellation);
 	MoveMeshPoints(point_velocity, dt, _tessellation,_proctess);
 #endif
@@ -434,10 +436,8 @@ void hdsim::TimeAdvance(void)
 		densityfloor_,densityMin_,pressureMin_,_tessellation,_time,
 		tracer_extensive);
 
-	if(tracer_flag_)
-	{
-		MakeTracerIntensive(tracer_,tracer_extensive,_tessellation,_cells);
-	}
+
+	MakeTracerIntensive(tracer_,tracer_extensive,_tessellation,_cells);
 
 	_time += dt;
 	cycle_++;
