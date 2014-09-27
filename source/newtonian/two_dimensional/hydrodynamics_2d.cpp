@@ -1579,8 +1579,9 @@ bool NearBoundary(int index,Tessellation const& tess,
  }
 
 void MakeTracerExtensive(vector<vector<double> > const &tracer,
-	Tessellation const& tess,vector<Primitive> const& cells,vector<vector<double> >
-	&result)
+			 Tessellation const& tess,
+			 vector<Primitive> const& cells,
+			 vector<vector<double> > &result)
 {
   result.resize(tracer.size());
   for(size_t i=0;i<result.size();++i)
@@ -1588,23 +1589,26 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 			    tess.GetVolume(i)*cells[i].Density);
 }
 
+    namespace {
+      vector<double> scalar_div(const vector<double>& v,
+				const double s)
+      {
+	vector<double> res(v.size());
+	for(size_t i=0;i<res.size();++i)
+	  res[i] = v[i]/s;
+	return res;
+      }
+    }
+
 void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> >
 	const& tracer_extensive,Tessellation const& tess,vector<Primitive> const& cells)
 {
-	int n=tess.GetPointNo();
 	if(tracer.empty())
-		return;
-	int dim=int(tracer[0].size());
-	double mass;
+	  return;
 	tracer.resize(tracer_extensive.size());
-	for(int i=0;i<n;++i)
-	{
-		mass=tess.GetVolume(i)*cells[i].Density;
-		tracer[i].resize(dim);
-		for(int j=0;j<dim;++j)
-			tracer[i][j]=tracer_extensive[i][j]/mass;
-	}
-	return;
+	for(int i=0;i<tess.GetPointNo();++i)
+	  tracer[i] = scalar_div(tracer_extensive[i],
+				 tess.GetVolume(i)*cells[i].Density);
 }
 
 void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
