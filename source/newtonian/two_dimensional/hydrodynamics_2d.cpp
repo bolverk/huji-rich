@@ -439,8 +439,9 @@ namespace {
   public:
 
     IntensiveCalculator(const Tessellation& tess,
-			const vector<Conserved>& extensive):
-      tess_(tess), extensive_(extensive) {}
+			const vector<Conserved>& extensive,
+			const PhysicalGeometry& pg):
+      tess_(tess), extensive_(extensive), pg_(pg) {}
 
     size_t getLength(void) const
     {
@@ -449,20 +450,23 @@ namespace {
 
     Conserved operator()(size_t i) const
     {
-      return extensive_[i]/tess_.GetVolume(i);
+      return extensive_[i]/
+	pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
     }
 
   private:
     const Tessellation& tess_;
     const vector<Conserved>& extensive_;
+    const PhysicalGeometry& pg_;
   };
 }
 
 vector<Conserved> calc_conserved_intensive
 (const Tessellation& tess,
- const vector<Conserved>& extensive)
+ const vector<Conserved>& extensive,
+ const PhysicalGeometry& pg)
 {
-  return serial_generate(IntensiveCalculator(tess,extensive));
+  return serial_generate(IntensiveCalculator(tess,extensive,pg));
 }
 
 void UpdateConservedIntensive(Tessellation const& tessellation,
