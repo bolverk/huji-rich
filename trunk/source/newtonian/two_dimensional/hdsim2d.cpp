@@ -455,6 +455,13 @@ Tessellation const& hdsim::GetProcTessellation(void) const
 }
 #endif
 
+void hdsim::changePhysicalGeometry(const PhysicalGeometry* pg)
+{
+  pg_ = pg;
+  _conservedextensive = CalcConservedExtensive
+    (CalcConservedIntensive(_cells),_tessellation,*pg_);
+}
+
 void hdsim::TimeAdvance2Mid(void)
 {
 	const double dt=TimeAdvance2mid
