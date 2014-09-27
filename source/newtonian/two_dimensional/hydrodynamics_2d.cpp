@@ -1537,8 +1537,9 @@ bool NearBoundary(int index,Tessellation const& tess,
 
      ExtensiveTracerCalculator(const vector<vector<double> >& tracers,
 			       const Tessellation& tess,
-			       const vector<Primitive>& cells):
-       tracers_(tracers), tess_(tess), cells_(cells) {}
+			       const vector<Primitive>& cells,
+			       const PhysicalGeometry& pg):
+       tracers_(tracers), tess_(tess), cells_(cells), pg_(pg) {}
 
      size_t getLength(void) const
      {
@@ -1547,25 +1548,30 @@ bool NearBoundary(int index,Tessellation const& tess,
 
      vector<double> operator()(size_t i) const
      {
-       return scalar_mult(tracers_[i],
-			  tess_.GetVolume(i)*cells_[i].Density);
+       return scalar_mult
+	 (tracers_[i],
+	  pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)))*
+	  cells_[i].Density);
      }
 
    private:
      const vector<vector<double> >& tracers_;
      const Tessellation& tess_;
      const vector<Primitive>& cells_;
+     const PhysicalGeometry& pg_;
    };
  }
 
  vector<vector<double> > calc_extensive_tracer
    (const vector<vector<double> >& intensive_tracer,
     const Tessellation& tess,
-    const vector<Primitive>& cells)
+    const vector<Primitive>& cells,
+    const PhysicalGeometry& pg)
  {
    return serial_generate(ExtensiveTracerCalculator(intensive_tracer,
 						    tess,
-						    cells));
+						    cells,
+						    pg));
  }
 
 void MakeTracerExtensive(vector<vector<double> > const &tracer,

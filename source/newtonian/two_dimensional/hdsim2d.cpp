@@ -359,7 +359,8 @@ void hdsim::TimeAdvance(void)
 	vector<vector<double> > tracer_extensive = 
 	  calc_extensive_tracer(tracer_,
 				_tessellation,
-				_cells); 
+				_cells,
+				*pg_); 
 	really_update_extensive_tracers(tracer_extensive,
 					tracer_,
 					_cells,
