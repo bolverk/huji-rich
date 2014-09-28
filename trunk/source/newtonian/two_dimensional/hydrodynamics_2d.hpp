@@ -215,6 +215,7 @@ Conserved FluxInBulk(Vector2D const& normaldir,
   \param lengthes The corrected length of the edges
  */
 void ExternalForceContribution(Tessellation const& tess,
+			       const PhysicalGeometry& pg,
 			       vector<Primitive> const& cells,
 			       SourceTerm& force,
 			       double t,

@@ -53,6 +53,7 @@ ConservativeForce::~ConservativeForce(void){}
 
 Conserved ConservativeForce::Calculate
 	(Tessellation const& tess,
+	 const PhysicalGeometry& pg,
 	vector<Primitive> const& cells,
 	int point,
 	vector<Conserved> const& fluxes,

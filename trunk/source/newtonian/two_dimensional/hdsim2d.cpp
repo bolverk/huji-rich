@@ -347,7 +347,7 @@ void hdsim::TimeAdvance(void)
 		,_tessellation.GetTotalPointNumber());
 #endif
 	vector<Conserved> fluxes = calc_fluxes
-	  (_tessellation, _cells, dt, _time,
+	  (_tessellation,  _cells, dt, _time,
 	   _interpolation,
 	   fv, _hbc, _rs,
 	   custom_evolutions,
@@ -374,7 +374,8 @@ void hdsim::TimeAdvance(void)
 					fv,lengths);
 
 	vector<double> g;
-	ExternalForceContribution(_tessellation,_cells,external_force_,_time,dt,
+	ExternalForceContribution(_tessellation,*pg_,
+				  _cells,external_force_,_time,dt,
 		_conservedextensive,_hbc,fluxes,point_velocity,g,coldflows_flag_,tracer_,
 		lengths);
 
@@ -446,7 +447,12 @@ void hdsim::TimeAdvance(void)
 	cycle_++;
 }
 
-Tessellation const& hdsim::GetTessellation(void) const
+const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const
+{
+  return *pg_;
+}
+
+const Tessellation& hdsim::GetTessellation(void) const
 {
 	return _tessellation;
 }

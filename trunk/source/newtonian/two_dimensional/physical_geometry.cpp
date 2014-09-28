@@ -20,34 +20,46 @@ double SlabSymmetry::calcVolume(const vector<Edge>& edge_list) const
   return res;
 }
 
-CylindricalSymmetry::CylindricalSymmetry(const Vector2D& axis):
-  axis_(axis/abs(axis)) {}
+Axis::Axis(const Vector2D& origin_i,
+	   const Vector2D& direction_i):
+  origin(origin_i), direction(direction_i/abs(direction_i)) {}
 
-double CylindricalSymmetry::calcArea(const Edge& edge_list) const
+namespace {
+  Vector2D change_coordinate(const Vector2D& v,
+			     const Axis& axis)
+  {
+    return Vector2D(ScalarProd(v-axis.origin,
+			       axis.direction),
+		    std::abs(ScalarProd(v-axis.origin,
+					zcross(axis.direction))));
+  }
+}
+
+CylindricalSymmetry::CylindricalSymmetry
+(const Vector2D& origin, const Vector2D& direction):
+  axis_(origin,direction) {}
+
+double CylindricalSymmetry::calcArea(const Edge& edge) const
 {
-  const double x1 = ScalarProd(edge_list.vertices.first,axis_);
-  const double x2 = ScalarProd(edge_list.vertices.second,axis_);
-  const double y1 = abs(ScalarProd(edge_list.vertices.first,zcross(axis_)));
-  const double y2 = abs(ScalarProd(edge_list.vertices.second,zcross(axis_)));
-  return M_PI*(y1+y2)*sqrt(pow(y2-y1,2.)+pow(x2-x1,2.));
+  const Vector2D p1 = change_coordinate(edge.vertices.first, axis_);
+  const Vector2D p2 = change_coordinate(edge.vertices.second, axis_);
+  return M_PI*(p1.y+p2.y)*sqrt(pow(p2.y-p1.y,2.)+pow(p2.x-p1.x,2.));
 }
 
 namespace {
   double calc_cone_segment_volume(const Vector2D& p1,
 				  const Vector2D& p2,
-				  const Vector2D& axis)
+				  const Axis& axis)
   {
-    const double x1 = ScalarProd(p1,axis);
-    const double x2 = ScalarProd(p2,axis);
-    const double y1 = std::abs(ScalarProd(p1,zcross(axis)));
-    const double y2 = std::abs(ScalarProd(p2,zcross(axis)));
-    return (M_PI/3.)*(x2-x1)*(pow(y1,2.)+pow(y2,2.)+y1*y2);
+    const Vector2D q1 = change_coordinate(p1, axis);
+    const Vector2D q2 = change_coordinate(p2, axis);
+    return (M_PI/3.)*(q2.x-q1.x)*(pow(q1.y,2.)+pow(q2.y,2.)+q1.y*q2.y);
   }
 
   double calc_triangular_ring_volume(const Vector2D& p1,
 				     const Vector2D& p2,
 				     const Vector2D& p3,
-				     const Vector2D& axis)
+				     const Axis& axis)
   {
     return std::abs(calc_cone_segment_volume(p1,p2,axis)+
 		    calc_cone_segment_volume(p2,p3,axis)+

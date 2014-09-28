@@ -9,6 +9,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "HydroBoundaryConditions.hpp"
 #include "../../misc/utils.hpp"
+#include "physical_geometry.hpp"
 
 //! \brief Abstract class for external forces
 class SourceTerm
@@ -31,6 +32,7 @@ public:
   */
   virtual Conserved Calculate
   (Tessellation const& tess,
+   const PhysicalGeometry& pg,
    vector<Primitive> const& cells,
    int point,
    vector<Conserved> const& fluxes,

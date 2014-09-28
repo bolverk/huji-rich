@@ -12,6 +12,7 @@ SeveralSources::~SeveralSources(void)
 }
 
 Conserved SeveralSources::Calculate(Tessellation const& tess,
+				    const PhysicalGeometry& pg,
 	vector<Primitive> const& cells,int point,
 	vector<Conserved> const& fluxes,
 	vector<Vector2D> const& point_velocity,
@@ -26,7 +27,7 @@ Conserved SeveralSources::Calculate(Tessellation const& tess,
 		dtracer_local.assign(dtracer.size(),0);
 	for(int i=0;i<(int)sources_.size();++i)
 	{
-		res+=sources_[i]->Calculate(tess,cells,point,fluxes,
+	  res+=sources_[i]->Calculate(tess,pg,cells,point,fluxes,
 		point_velocity,hbc,tracer_extensive,dtracer_local,lengthes,time,dt);
 		if(!dtracer.empty())
 			dtracer=dtracer+dtracer_local;

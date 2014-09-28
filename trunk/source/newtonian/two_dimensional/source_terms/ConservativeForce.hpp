@@ -56,6 +56,7 @@ public:
 	~ConservativeForce(void);
 
 	Conserved Calculate(Tessellation const& tess,
+			    const PhysicalGeometry& pg,
 			    vector<Primitive> const& cells,
 			    int point,
 			    vector<Conserved> const& fluxes,

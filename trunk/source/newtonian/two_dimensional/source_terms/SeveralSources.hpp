@@ -19,6 +19,7 @@ public:
 	~SeveralSources(void);
 
 	Conserved Calculate(Tessellation const& tess,
+			    const PhysicalGeometry& pg,
 			    vector<Primitive> const& cells,int point,
 			    vector<Conserved> const& fluxes,
 			    vector<Vector2D> const& point_velocity,

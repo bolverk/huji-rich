@@ -19,13 +19,53 @@ void write_error(const string& fname,
   f.close();
 }
 
-Conserved total_conserved(hdsim const& sim)
+namespace {
+
+  vector<Edge> get_edge_list(const Tessellation& tess,
+			     const int i)
+  {
+    const vector<int>& edge_indices = tess.GetCellEdges(i);
+    vector<Edge> res(edge_indices.size());
+    for(size_t j=0;j<res.size();++j)
+      res[j] = tess.GetEdge(edge_indices[j]);
+    return res;
+  }
+
+  class ExtensiveConservedCalculator: public Index2Member<Conserved>
+  {
+  public:
+
+    ExtensiveConservedCalculator(const hdsim& sim):
+      sim_(sim), pg_(sim.getPhysicalGeometry()) {}
+
+    size_t getLength(void) const
+    {
+      return sim_.GetCellNo();
+    }
+
+    Conserved operator()(size_t i) const
+    {
+      const double volume = 
+	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),i));
+      return Primitive2Conserved(sim_.GetCell(i), volume);
+    }
+
+  private:
+    const hdsim& sim_;
+    const PhysicalGeometry& pg_;
+  };
+}
+
+Conserved total_conserved(const hdsim& sim)
 {
+  /*
   Conserved res;
   for(int i=0;i<sim.GetCellNo();++i)
     res += Primitive2Conserved
       (sim.GetCell(i),
        sim.GetCellVolume(i));
+  */
+  Conserved res = lazy_sum(ExtensiveConservedCalculator(sim));
 
   #ifdef RICH_MPI
   double total_mass = 0;
@@ -47,24 +87,14 @@ Conserved total_conserved(hdsim const& sim)
 
 namespace {
 
-  vector<Edge> get_edge_list(const Tessellation& tess,
-			     const int i)
-  {
-    const vector<int>& edge_indices = tess.GetCellEdges(i);
-    vector<Edge> res(edge_indices.size());
-    for(size_t j=0;j<res.size();++j)
-      res[j] = tess.GetEdge(edge_indices[j]);
-    return res;
-  }
-
   class ExtensiveTracerCalculator: public Index2Member<double>
   {
   public:
 
     ExtensiveTracerCalculator(const hdsim& sim,
-			      const int index,
-			      const PhysicalGeometry& pg):
-      sim_(sim), index_(index), pg_(pg) {}
+			      const int index):
+    sim_(sim), index_(index),
+      pg_(sim.getPhysicalGeometry()) {}
 
     size_t getLength(void) const
     {
@@ -86,10 +116,9 @@ namespace {
 }
 
 double total_tracer(const hdsim& sim,
-		    int index,
-		    const PhysicalGeometry& pg)
+		    int index)
 {
-  return lazy_sum(ExtensiveTracerCalculator(sim,index,pg));
+  return lazy_sum(ExtensiveTracerCalculator(sim,index));
 }
 
 vector<Vector2D> ReadVector2DFromFile(string filename)

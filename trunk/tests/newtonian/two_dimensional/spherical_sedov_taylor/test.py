@@ -3,13 +3,24 @@ def l1_error_margin(a1,a2):
     abs_dif = [abs(x-y) for x,y in zip(a1,a2)]
     return sum(abs_dif)/len(abs_dif)
 
+def consolidate_data(fname):
+
+    import h5py
+    import numpy
+
+    f = h5py.File(fname)
+    data = {}
+    for field in f:
+        data[field] = numpy.array(f[field])
+    return data
+
 def main():
 
     graphic_flag = False
 
     if graphic_flag:
-        import matplotlib
-        matplotlib.use('Qt4Agg')
+        #import matplotlib
+        #matplotlib.use('Qt4Agg')
         import pylab
     
     import numpy
@@ -21,21 +32,18 @@ def main():
         'sedov_taylor',\
             os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
 
-    h5f = h5py.File('final.h5')
-    x_list = h5f['x_coordinate']
-    y_list = h5f['y_coordinate']
-    p_list = h5f['pressure']
+    numeric = consolidate_data('final.h5')
 
     x_c = 0
     y_c = 0.5
-    r_list = [math.sqrt((y-y_c)**2+(x-x_c)**2)
-              for x,y in zip(x_list,y_list)]
-    p_front = numpy.max(p_list)
-    r_front = r_list[numpy.argmax(p_list)]
-    p_back = p_list[numpy.argmin(r_list)]
+    r_list = numpy.sqrt((numeric['y_coordinate']-y_c)**2+
+                        (numeric['x_coordinate']-x_c)**2)
+    p_front = numpy.max(numeric['pressure'])
+    r_front = r_list[numpy.argmax(numeric['pressure'])]
+    p_back = numeric['pressure'][numpy.argmin(r_list)]
 
     r_relevant = [r for r in r_list if r<r_front]
-    p_relevant = [p_list[i] for i in range(len(r_list)) 
+    p_relevant = [numeric['pressure'][i] for i in range(len(r_list)) 
                   if r_list[i]<r_front]
 
     # Analytic results
@@ -59,7 +67,9 @@ def main():
     f.close()
 
     if graphic_flag:
+        pylab.subplot(211)
         pylab.plot(r_relevant, p_relevant,'.')
+        pylab.subplot(212)
         pylab.plot(r_for_interp,p_for_interp)
         pylab.show()
 

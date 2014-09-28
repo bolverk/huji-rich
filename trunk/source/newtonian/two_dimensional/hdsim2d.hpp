@@ -109,10 +109,12 @@ public:
   void SetProcessorMovement(ProcessorUpdate *procupdate);
   #endif
 
+  const PhysicalGeometry& getPhysicalGeometry(void) const;
+
   /*! \brief Returns the tessellation
     \return The tessellation
   */
-  Tessellation const& GetTessellation(void)const;
+  const Tessellation& GetTessellation(void) const;
 
    /*! \brief Returns the processor tessellation
     \return The tessellation
