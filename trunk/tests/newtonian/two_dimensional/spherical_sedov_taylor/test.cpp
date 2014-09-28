@@ -13,6 +13,7 @@
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylinderical_geometry.hpp"
+#include "source/newtonian/two_dimensional/source_terms/cylindrical_complementary.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
@@ -41,8 +42,11 @@ public:
     raw_point_motion_(),
     point_motion_(raw_point_motion_,hbc_),
     //    force_(),
+    /*
     force_(Vector2D(0,0),
 	   Vector2D(0,1)),
+    */
+    force_(Axis(Vector2D(0,0), Vector2D(0,1))),
     sim_(mesh_,
 	 tess_,
 	 interpm_,
@@ -56,13 +60,10 @@ public:
 	 point_motion_,
 	 force_,
 	 outer_,
-	 hbc_)
-  //    pg_(Vector2D(0,1)) 
+	 hbc_),
+    pg_(Vector2D(0,0), Vector2D(0,1))
   {
-    /*
     sim_.changePhysicalGeometry(&pg_);
-    sim_.SetCfl(0.01);
-    */
   }
 
   hdsim& getSim(void)
@@ -80,10 +81,11 @@ private:
   const RigidWallHydro hbc_;
   Lagrangian raw_point_motion_;
   RoundCells point_motion_;
-  CylindericalGeometry force_;
+  //CylindericalGeometry force_;
   //  ZeroForce force_;
+  CylindricalComplementary force_;
   hdsim sim_;
-  //const CylindricalSymmetry pg_;
+  const CylindricalSymmetry pg_;
 };
 
   namespace {
