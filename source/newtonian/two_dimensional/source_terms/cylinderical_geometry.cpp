@@ -21,6 +21,7 @@ Vector2D cross_z(Vector2D const& v)
 
 Conserved CylindericalGeometry::Calculate
 (Tessellation const& tess,
+ const PhysicalGeometry& pg,
  vector<Primitive> const& cells,
  int point,
  vector<Conserved> const& /*fluxes*/,

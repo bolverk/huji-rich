@@ -35,18 +35,32 @@ public:
   double calcVolume(const vector<Edge>& edge_list) const;
 };
 
+class Axis
+{
+public:
+
+  const Vector2D origin;
+  const Vector2D direction;
+
+  Axis(const Vector2D& origin_i,
+       const Vector2D& direction_i);
+};
+
 class CylindricalSymmetry: public PhysicalGeometry
 {
 public:
 
-  CylindricalSymmetry(const Vector2D& axis);
+  CylindricalSymmetry(const Vector2D& origin,
+		      const Vector2D& direction);
 
   double calcArea(const Edge& edge) const;
 
   double calcVolume(const vector<Edge>& edge_list) const;
 
+  const Axis& getAxis(void) const;
+
 private:
-  const Vector2D axis_;
+  const Axis axis_;
 };
 
 #endif // PHYSICAL_GEOMETRY_HPP

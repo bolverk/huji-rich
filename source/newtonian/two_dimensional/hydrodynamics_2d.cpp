@@ -805,6 +805,7 @@ vector<Conserved> calc_fluxes
 
 void ExternalForceContribution
 	(Tessellation const& tess,
+	const PhysicalGeometry& pg,
 	vector<Primitive> const& cells,
 	SourceTerm& force,
 	double t,
@@ -824,7 +825,7 @@ void ExternalForceContribution
 		if(!hbc.IsGhostCell(i,tess))
 		{
 			const Conserved cons(force.Calculate
-				(tess,cells,i,
+	(tess,pg,cells,i,
 				fluxes,point_velocity,hbc,tracers_extensive,
 				dtracer,lengthes,t,dt));
 			conserved_extensive[i]+=dt*cons;
@@ -984,7 +985,7 @@ double TimeAdvance2mid
 		extensive, hbc,lengths);
 
 	ExternalForceContribution
-		(tess, cells,force, time, 0.5*dt,
+	  (tess, pg, cells,force, time, 0.5*dt,
 		extensive, hbc,fluxes,point_velocities,g,coldflows_flag,tracers,lengths);
 
 	if(coldflows_flag)
@@ -1174,7 +1175,7 @@ double TimeAdvance2mid
 		old_extensive, hbc,lengths);
 
 	ExternalForceContribution
-		(tess, cells,force, time+0.5*dt,dt,
+	  (tess, pg, cells,force, time+0.5*dt,dt,
 		old_extensive, hbc,fluxes,point_velocities,g,coldflows_flag,tracers,lengths);
 
 	if(coldflows_flag)

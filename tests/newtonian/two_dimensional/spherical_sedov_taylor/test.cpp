@@ -29,8 +29,8 @@ class SimData
 {
 public:
 
-  SimData(Vector2D lower_left = Vector2D(0,0),
-	  Vector2D upper_right = Vector2D(1,1)):
+  SimData(Vector2D lower_left = Vector2D(0.02,0)+Vector2D(0,0),
+	  Vector2D upper_right = Vector2D(0.02,0)+Vector2D(1,1)):
     mesh_(cartesian_mesh(50,50,lower_left,upper_right)),
     outer_(lower_left, upper_right),
     tess_(),
@@ -40,6 +40,7 @@ public:
     hbc_(rs_),
     raw_point_motion_(),
     point_motion_(raw_point_motion_,hbc_),
+    //    force_(),
     force_(Vector2D(0,0),
 	   Vector2D(0,1)),
     sim_(mesh_,
@@ -55,7 +56,14 @@ public:
 	 point_motion_,
 	 force_,
 	 outer_,
-	 hbc_) {}
+	 hbc_)
+  //    pg_(Vector2D(0,1)) 
+  {
+    /*
+    sim_.changePhysicalGeometry(&pg_);
+    sim_.SetCfl(0.01);
+    */
+  }
 
   hdsim& getSim(void)
   {
@@ -73,16 +81,52 @@ private:
   Lagrangian raw_point_motion_;
   RoundCells point_motion_;
   CylindericalGeometry force_;
+  //  ZeroForce force_;
   hdsim sim_;
+  //const CylindricalSymmetry pg_;
 };
+
+  namespace {
+    class TotalConservedHistory: public DiagnosticFunction
+    {
+    public:
+
+      TotalConservedHistory(const string& fname):
+	fname_(fname), times_(), values_() {}
+
+      void operator()(const hdsim& sim)
+      {
+	times_.push_back(sim.GetTime());
+	values_.push_back(total_conserved(sim));
+      }
+
+      ~TotalConservedHistory(void)
+      {
+	ofstream f(fname_.c_str());
+	for(size_t i=0;i<times_.size();++i)
+	  f << times_[i] << " "
+	    << values_[i].Mass << " "
+	    << values_[i].Momentum.x << " "
+	    << values_[i].Momentum.y << " "
+	    << values_[i].Energy << "\n";
+	f.close();
+      }
+
+    private:
+      const string fname_;
+      mutable vector<double> times_;
+      mutable vector<Conserved> values_;
+    };
+  }
 
   void my_main_loop(hdsim& sim)
   {
     SafeTimeTermination term_cond(0.01,1e6);
     WriteTime diag("time.txt");
+    //TotalConservedHistory diag("history.txt");
     main_loop(sim,
 	      term_cond,
-	      &hdsim::TimeAdvance2Mid,
+	      &hdsim::TimeAdvance,
 	      &diag);
   }
 }

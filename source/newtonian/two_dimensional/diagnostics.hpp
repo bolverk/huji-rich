@@ -52,8 +52,7 @@ Conserved total_conserved(hdsim const& sim);
   \return Total amount of certain tracer
  */
 double total_tracer(const hdsim& sim,
-		    const int index,
-		    const PhysicalGeometry& pg);
+		    const int index);
 
 /*! \brief Displays the UniversalError information
   \param eo Th UniversalError
