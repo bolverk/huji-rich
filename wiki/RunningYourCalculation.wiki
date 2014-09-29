@@ -1,0 +1,48 @@
+#labels Phase-Deploy
+#Instruction on how to run your calculation
+
+= General Information =
+
+First of all, we highly recommend that you start out with one of the examples in the “tests” folder rather than trying to writing your calculation from scratch. The tests folder contains a large variety of problems, so there's a large chance that you will find something close to what you need. 
+
+If you've ever used a different simulation in the past, you'd expect to control the simulation using a plain text “data file” or “configuration file”. RICH is different from other simulations in that the calculation is defined in a C++ file, that also contains the main function. Another major difference is that the simulation is not the entire program, but only a class. 
+
+Usually, your calculation would consist of three parts:
+# Setup - where all the data is provided to the simulation
+# Main loop - where variables are advanced in time until a certain condition is met
+# Output - where the physical data is extracted and written to files.
+To demonstrate how this works, we will analyze the file
+{{{
+tests/newtonian/two_dimensional/sedov_taylor_messy_grid/test.cpp
+}}}
+Looking at the main function, we see that it's partitioned much like the list above. Detailed explanation on how to modify each of components is given in the next sections. Once the the main file is finished, you can use the existing infrastructure to build and run your code. Create a new folder inside the “runs” folder (let's call it “my_calculation”), save your cpp file as “runs/my_calculation/test.cpp”, navigate to runs and execute the following command in the terminal
+{{{
+make TARGET=my_calculation
+}}}
+In the next sections we will elaborate on the different components of the main file so that you will be able to setup and run your simulation. In addition, the documentation for the code can be generated using doxygen. To do so, navigate to the rich root folder and execute
+{{{
+doxygen Doxyfile
+}}}
+This will create a new folder called “docs” with all the documentation. To see the documentation, use
+{{{
+firefox ./docs/html/index.html
+}}}
+or use your favorite browser instead of firefox.
+
+= Compilation Flags =
+
+The default compile configuration is serial and optimized for speed using gcc (we call this mode “production”). The make file currently supports 4 other compilation configurations:
+
+* debug - Compiled with the appropriate flags to enable debugging and profiling
+* intel - Compilied with the interl compiler
+* parallel - Compiled with mpi
+* parallel_debug - Compiled with mpi and debug enabled
+To compile using one of these mode (debug, for example) use
+{{{
+make MODE=debug
+}}}
+If you want to use a configuration that is not on the list you will have to cutomize it yourself. For example, if you want to compile all the source code with the flags “-Wreorder -Weffc++” then you have to set the appropriate variable like so
+{{{
+make CFLAGS=”-Wreorder -Weffc++”
+}}}
+Refer to the makefile manual for more details.
