@@ -1,0 +1,69 @@
+#summary Describes native tools to analyze and display the output
+
+= Saving Snapshot Data as HDF5 =
+
+The default way to extract data from the simulation is to dump it to an HDF5 file. To create just one use the function “write_snapshot_to_hdf5”. To create a series of snapshots at regular time intervals, use “ConsecutiveSnapshots” diagnostic. In case of parallel runs, each process writes to a different file. ConsecutiveSnapshots is already prepared for parallel simulations, but in order to use “write_snapshot_to_hdf5”, you would have to append the process rank to the file name, such that each process would write to a different file. 
+
+= Structure of an HDF5 Snapshot =
+
+The data inside an HDF5 file is in binary format, and is divided into different labelled bins. It can be read using the h5py python package. In what follows we explain what is stored in each of the different fields inside an HDF5 file
+
+
+  * *time* Time of the simulation
+  * *x_coordinate* - X coordinate of the mesh generating points
+  * *y_coordinate* - Y coordinate of the mesh generating points
+  * *density* - Density
+  * *pressure* - Pressure
+  * *x_velocity* - X component of the material velocity
+  * *y_velocity* - Y component of the material velocity
+  * *x position of vertices* X component of the vertices of the cells
+  * *y position of vertices* Y component of the vertices of the cells
+  * *Number of vertices in cell* Number of vertices around each mesh generating point
+  * *Number of tracers* Number of passive tracers
+  * *Tracer number #* Values of all tracers of index # (replace # with relevant tracer number)
+  * *Cold Flow parameters* Values of the parameters a and b of the cold flows
+  * *Cfl number* Value of the CFL number
+  * *Cycle* number Number of times a time advance was called
+  * *Density floor parameter* Density floor parameters
+  * *Custom evolution indices* Indices of the custom evolution scheme
+
+In parallel mode, the file also contains the following fields
+
+  * *proc_x_coordinate* X coordinate of the process points
+  * *proc_y_coordinate* Y coordinate of the process points
+
+= Patch Plot =
+In this kind of plot, each cell is added to the plot area and painted individually. The advantage in using such plot is that it shows the tessellation, and the disadvantage is that it is very slow. We have implemented scripts in both python and matlab to draw such plots.
+
+== Python ==
+The script can be found at “visualisation/two_dimensional/python/hdf5_voronoi_plot.py”. The syntax is
+{{{
+python hdf5_voronoi_plot.py [hdf5 file name] [name of hydrodynamic variable]
+}}}
+Since such plot takes a long time for a large number of points, we've only implemented it for serial simulations.
+
+== Matlab == 
+In the visualization directory there are matlab files to view the output. All of the files are documented. 
+
+= Unstructured Contour =
+This is another way to visualize the data. It does not show the tessellation, but it is much faster than the patch plot. We've implemented this method for both python and Matlab.
+
+== Python ==
+The python script for unstructured contour plots can be found at “visualisation/two_dimensional/python/multiplot.py”. The syntax is
+{{{
+python mutliplot.py [file pattern] [variable name]
+}}}
+where [file pattern] is a globbing pattern used to identify all the files with the snapshot data, and [variable name] is the name of the variable to be plotted (z axis).
+
+In case of a serial run, suppose that the c++ line that created the snapshot was
+{{{
+write_snapshot_to_hdf5(sim,”snapshot.h5”);
+}}}
+then to display a contour map of the pressure, use
+{{{
+python multiplot.py snapshot.h5 pressure
+}}}
+where the Astrix {{{*}}} is a globbing wildcard.
+
+== Matlab ==
+TBA
