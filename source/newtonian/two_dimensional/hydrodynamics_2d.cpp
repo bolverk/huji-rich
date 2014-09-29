@@ -124,61 +124,61 @@ vector<Conserved> CalcConservedIntensive
 
 namespace {
 
-  class CellEdgesGetter: public Index2Member<Edge>
-  {
-  public:
-    
-    CellEdgesGetter(const Tessellation& tess, int n):
-      tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
+	class CellEdgesGetter: public Index2Member<Edge>
+	{
+	public:
 
-    size_t getLength(void) const
-    {
-      return edge_indices_.size();
-    }
+		CellEdgesGetter(const Tessellation& tess, int n):
+		  tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
 
-    Edge operator()(size_t i) const
-    {
-      return tess_.GetEdge(edge_indices_[i]);
-    }
+		  size_t getLength(void) const
+		  {
+			  return edge_indices_.size();
+		  }
 
-  private:
-    const Tessellation& tess_;
-    const vector<int> edge_indices_;
-  };
+		  Edge operator()(size_t i) const
+		  {
+			  return tess_.GetEdge(edge_indices_[i]);
+		  }
 
-  class ExtensiveInitializer: public Index2Member<Conserved>
-  {
-  public:
+	private:
+		const Tessellation& tess_;
+		const vector<int> edge_indices_;
+	};
 
-    ExtensiveInitializer(const vector<Conserved>& intensive,
-			 const Tessellation& tess,
-			 const PhysicalGeometry& pg):
-      intensive_(intensive), tess_(tess), pg_(pg)  {}
+	class ExtensiveInitializer: public Index2Member<Conserved>
+	{
+	public:
 
-    Conserved operator()(size_t n) const
-    {
-      return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,n)))*
-	intensive_[n];
-    }
+		ExtensiveInitializer(const vector<Conserved>& intensive,
+			const Tessellation& tess,
+			const PhysicalGeometry& pg):
+		intensive_(intensive), tess_(tess), pg_(pg)  {}
 
-    size_t getLength(void) const
-    {
-      return tess_.GetPointNo();
-    }
+		Conserved operator()(size_t n) const
+		{
+			return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,n)))*
+				intensive_[n];
+		}
 
-  private:
-    const vector<Conserved>& intensive_;
-    const Tessellation& tess_;
-    const PhysicalGeometry& pg_;
-  };
+		size_t getLength(void) const
+		{
+			return tess_.GetPointNo();
+		}
+
+	private:
+		const vector<Conserved>& intensive_;
+		const Tessellation& tess_;
+		const PhysicalGeometry& pg_;
+	};
 }
 
 vector<Conserved> CalcConservedExtensive
 	(const vector<Conserved>& cons_int,
-	 const Tessellation& tess,
-	 const PhysicalGeometry& pg)
+	const Tessellation& tess,
+	const PhysicalGeometry& pg)
 {
-  return serial_generate(ExtensiveInitializer(cons_int, tess, pg));
+	return serial_generate(ExtensiveInitializer(cons_int, tess, pg));
 }
 
 void CalcPointVelocities(Tessellation const& tessellation,
@@ -434,39 +434,39 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 }
 
 namespace {
-  class IntensiveCalculator: public Index2Member<Conserved>
-  {
-  public:
+	class IntensiveCalculator: public Index2Member<Conserved>
+	{
+	public:
 
-    IntensiveCalculator(const Tessellation& tess,
+		IntensiveCalculator(const Tessellation& tess,
 			const vector<Conserved>& extensive,
 			const PhysicalGeometry& pg):
-      tess_(tess), extensive_(extensive), pg_(pg) {}
+		tess_(tess), extensive_(extensive), pg_(pg) {}
 
-    size_t getLength(void) const
-    {
-      return extensive_.size();
-    }
+		size_t getLength(void) const
+		{
+			return extensive_.size();
+		}
 
-    Conserved operator()(size_t i) const
-    {
-      return extensive_[i]/
-	pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
-    }
+		Conserved operator()(size_t i) const
+		{
+			return extensive_[i]/
+				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
+		}
 
-  private:
-    const Tessellation& tess_;
-    const vector<Conserved>& extensive_;
-    const PhysicalGeometry& pg_;
-  };
+	private:
+		const Tessellation& tess_;
+		const vector<Conserved>& extensive_;
+		const PhysicalGeometry& pg_;
+	};
 }
 
 vector<Conserved> calc_conserved_intensive
-(const Tessellation& tess,
- const vector<Conserved>& extensive,
- const PhysicalGeometry& pg)
+	(const Tessellation& tess,
+	const vector<Conserved>& extensive,
+	const PhysicalGeometry& pg)
 {
-  return serial_generate(IntensiveCalculator(tess,extensive,pg));
+	return serial_generate(IntensiveCalculator(tess,extensive,pg));
 }
 
 void UpdateConservedIntensive(Tessellation const& tessellation,
@@ -677,130 +677,130 @@ n0 : n1;
 }
 
 namespace {
-  class InterpolationRelevancy: public Index2Member<bool>
-  {
-  public:
+	class InterpolationRelevancy: public Index2Member<bool>
+	{
+	public:
 
-    InterpolationRelevancy(const vector<CustomEvolution*>& ce):
-      ce_(ce) {}
+		InterpolationRelevancy(const vector<CustomEvolution*>& ce):
+		  ce_(ce) {}
 
-    size_t getLength(void) const
-    {
-      return ce_.size();
-    }
+		  size_t getLength(void) const
+		  {
+			  return ce_.size();
+		  }
 
-    bool operator()(size_t i) const
-    {
-      if(ce_[i])
-	return ce_[i]->isRelevantToInterpolation();
-      else
-	return true;
-    }
+		  bool operator()(size_t i) const
+		  {
+			  if(ce_[i])
+				  return ce_[i]->isRelevantToInterpolation();
+			  else
+				  return true;
+		  }
 
-  private:
-    const vector<CustomEvolution*>& ce_;
-  };
+	private:
+		const vector<CustomEvolution*>& ce_;
+	};
 
-  class FluxCalculator: public Index2Member<Conserved>
-  {
-  public:
+	class FluxCalculator: public Index2Member<Conserved>
+	{
+	public:
 
-    FluxCalculator(SpatialReconstruction& interp,
-		   const Tessellation& tess,
-		   const vector<Primitive>& cells,
-		   const vector<vector<double> >& tracers,
-		   const vector<CustomEvolution*>& ce,
-		   const CustomEvolutionManager& cem,
-		   double time, double dt,
-		   const HydroBoundaryConditions& hbc,
-		   const vector<Vector2D>& fv,
-		   const RiemannSolver& rs):
-      interp_(interp),
-      tess_(tess),
-      cells_(cells),
-      tracers_(tracers),
-      hbc_(hbc),
-      ce_(ce),
-      cem_(cem),
-      fv_(fv),
-      rs_(rs),
-      time_(time),
-      dt_(dt)
-    {
-      interp_.Prepare(tess,cells,tracers,
-		      serial_generate(InterpolationRelevancy(ce)),
-		      dt,time);
+		FluxCalculator(SpatialReconstruction& interp,
+			const Tessellation& tess,
+			const vector<Primitive>& cells,
+			const vector<vector<double> >& tracers,
+			const vector<CustomEvolution*>& ce,
+			const CustomEvolutionManager& cem,
+			double time, double dt,
+			const HydroBoundaryConditions& hbc,
+			const vector<Vector2D>& fv,
+			const RiemannSolver& rs):
+		interp_(interp),
+			tess_(tess),
+			cells_(cells),
+			tracers_(tracers),
+			hbc_(hbc),
+			ce_(ce),
+			cem_(cem),
+			fv_(fv),
+			rs_(rs),
+			time_(time),
+			dt_(dt)
+		{
+			interp_.Prepare(tess,cells,tracers,
+				serial_generate(InterpolationRelevancy(ce)),
+				dt,time);
 #ifndef RICH_MPI
-      PeriodicGradExchange(interp_.GetGradients(),
-			   tess_.GetDuplicatedPoints(),tess_.GetTotalPointNumber());
+			PeriodicGradExchange(interp_.GetGradients(),
+				tess_.GetDuplicatedPoints(),tess_.GetTotalPointNumber());
 #else
-      SendRecvGrad(interp_.GetGradients(),tess_.GetDuplicatedPoints(),
-		   tess_.GetDuplicatedProcs(),tess_.GetGhostIndeces(),
-		   tess_.GetTotalPointNumber());
+			SendRecvGrad(interp_.GetGradients(),tess_.GetDuplicatedPoints(),
+				tess_.GetDuplicatedProcs(),tess_.GetGhostIndeces(),
+				tess_.GetTotalPointNumber());
 #endif
-    }
+		}
 
-    size_t getLength(void) const
-    {
-      return tess_.GetTotalSidesNumber();
-    }
+		size_t getLength(void) const
+		{
+			return tess_.GetTotalSidesNumber();
+		}
 
-    Conserved operator()(size_t i) const
-    {
-      const Edge edge = tess_.GetEdge(i);
-      const int n0 = edge.neighbors.first;
-      const int n1 = edge.neighbors.second;
-      if(!hbc_.IsBoundary(edge,tess_)){
-	if(!ce_[n0]&&!ce_[n1])
-	  return calc_single_flux_in_bulk(tess_,edge,interp_,cells_,fv_[i],rs_,dt_);
-	else{
-	  const int ns = choose_special_cell_index(ce_,cem_,n0,n1);
-	  return ce_[ns]->CalcFlux(tess_,cells_,dt_,interp_,edge,fv_[i],rs_,ns,hbc_,time_,tracers_);
-	}	
-      }
-      else
-	return hbc_.CalcFlux(tess_,cells_,fv_[i],edge,interp_,dt_,time_);
-    }
+		Conserved operator()(size_t i) const
+		{
+			const Edge edge = tess_.GetEdge(i);
+			const int n0 = edge.neighbors.first;
+			const int n1 = edge.neighbors.second;
+			if(!hbc_.IsBoundary(edge,tess_)){
+				if(!ce_[n0]&&!ce_[n1])
+					return calc_single_flux_in_bulk(tess_,edge,interp_,cells_,fv_[i],rs_,dt_);
+				else{
+					const int ns = choose_special_cell_index(ce_,cem_,n0,n1);
+					return ce_[ns]->CalcFlux(tess_,cells_,dt_,interp_,edge,fv_[i],rs_,ns,hbc_,time_,tracers_);
+				}	
+			}
+			else
+				return hbc_.CalcFlux(tess_,cells_,fv_[i],edge,interp_,dt_,time_);
+		}
 
-  private:
-    SpatialReconstruction& interp_;
-    const Tessellation& tess_;
-    const vector<Primitive>& cells_;
-    const vector<vector<double> >& tracers_;
-    const HydroBoundaryConditions& hbc_;
-    const vector<CustomEvolution*>& ce_;
-    const CustomEvolutionManager& cem_;
-    const vector<Vector2D>& fv_;
-    const RiemannSolver& rs_;
-    const double time_;
-    const double dt_;
-  };
+	private:
+		SpatialReconstruction& interp_;
+		const Tessellation& tess_;
+		const vector<Primitive>& cells_;
+		const vector<vector<double> >& tracers_;
+		const HydroBoundaryConditions& hbc_;
+		const vector<CustomEvolution*>& ce_;
+		const CustomEvolutionManager& cem_;
+		const vector<Vector2D>& fv_;
+		const RiemannSolver& rs_;
+		const double time_;
+		const double dt_;
+	};
 }
 
 vector<Conserved> calc_fluxes
-(Tessellation const& tessellation,
- vector<Primitive> const& cells,
- double dt,
- double time,
- SpatialReconstruction& interpolation,
- vector<Vector2D> const& facevelocity,
- HydroBoundaryConditions const& boundaryconditions,
- RiemannSolver const& rs,
- vector<CustomEvolution*> const& CellsEvolve,
- CustomEvolutionManager const& cem,
- vector<vector<double> > const& tracers)
+	(Tessellation const& tessellation,
+	vector<Primitive> const& cells,
+	double dt,
+	double time,
+	SpatialReconstruction& interpolation,
+	vector<Vector2D> const& facevelocity,
+	HydroBoundaryConditions const& boundaryconditions,
+	RiemannSolver const& rs,
+	vector<CustomEvolution*> const& CellsEvolve,
+	CustomEvolutionManager const& cem,
+	vector<vector<double> > const& tracers)
 {
-  return serial_generate
-    (FluxCalculator(interpolation,
-		    tessellation,
-		    cells,
-		    tracers,
-		    CellsEvolve,
-		    cem,
-		    time, dt,
-		    boundaryconditions,
-		    facevelocity,
-		    rs));
+	return serial_generate
+		(FluxCalculator(interpolation,
+		tessellation,
+		cells,
+		tracers,
+		CellsEvolve,
+		cem,
+		time, dt,
+		boundaryconditions,
+		facevelocity,
+		rs));
 }
 
 void ExternalForceContribution
@@ -825,7 +825,7 @@ void ExternalForceContribution
 		if(!hbc.IsGhostCell(i,tess))
 		{
 			const Conserved cons(force.Calculate
-	(tess,pg,cells,i,
+				(tess,pg,cells,i,
 				fluxes,point_velocity,hbc,tracers_extensive,
 				dtracer,lengthes,t,dt));
 			conserved_extensive[i]+=dt*cons;
@@ -879,7 +879,7 @@ double TimeAdvance2mid
 	double dt_external,
 	vector<size_t>& custom_evolution_indices,
 	const CustomEvolutionManager& custom_evolution_manager,
-	 const PhysicalGeometry& pg,
+	const PhysicalGeometry& pg,
 #ifdef RICH_MPI
 	ProcessorUpdate *procupdate,
 #endif
@@ -919,8 +919,8 @@ double TimeAdvance2mid
 		(&hbc,point_velocities,time);
 
 	double dt = determine_time_step
-	  (cfl*CalcTimeStep(tess,cells,edge_velocities,hbc,time,CellsEvolve),
-	   dt_external,time,endtime);
+		(cfl*CalcTimeStep(tess,cells,edge_velocities,hbc,time,CellsEvolve),
+		dt_external,time,endtime);
 
 	// Entropy and tracers evolution
 	vector<double> g,Ek,Ef;
@@ -974,7 +974,7 @@ double TimeAdvance2mid
 	vector<Conserved> intensive = CalcConservedIntensive(cells);
 
 	vector<Conserved> extensive = CalcConservedExtensive
-	  (intensive, tess, pg);
+		(intensive, tess, pg);
 
 	// Save extensive variables of beginning of time step
 	// if(traceflag)
@@ -985,7 +985,7 @@ double TimeAdvance2mid
 		extensive, hbc,lengths);
 
 	ExternalForceContribution
-	  (tess, pg, cells,force, time, 0.5*dt,
+		(tess, pg, cells,force, time, 0.5*dt,
 		extensive, hbc,fluxes,point_velocities,g,coldflows_flag,tracers,lengths);
 
 	if(coldflows_flag)
@@ -1092,7 +1092,7 @@ double TimeAdvance2mid
 		densitymin,pressuremin,tess,time+0.5*dt,tracers);
 	if(traceflag)
 	{
-	  MakeTracerIntensive(tracers,tracer_extensive,tess,cells,pg);
+		MakeTracerIntensive(tracers,tracer_extensive,tess,cells,pg);
 	}
 
 	// End half step
@@ -1139,7 +1139,7 @@ double TimeAdvance2mid
 #ifdef RICH_MPI
 	if(traceflag&&(!coldflows_flag||!EntropyCalc))
 		SendRecvTracers(tracers,tess.GetDuplicatedPoints(),
-			tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
+		tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 	fluxes = calc_fluxes
 		(tess, cells, dt, time, interpolation,
@@ -1175,7 +1175,7 @@ double TimeAdvance2mid
 		old_extensive, hbc,lengths);
 
 	ExternalForceContribution
-	  (tess, pg, cells,force, time+0.5*dt,dt,
+		(tess, pg, cells,force, time+0.5*dt,dt,
 		old_extensive, hbc,fluxes,point_velocities,g,coldflows_flag,tracers,lengths);
 
 	if(coldflows_flag)
@@ -1254,7 +1254,7 @@ double TimeAdvance2mid
 
 	if(traceflag)
 	{
-	  MakeTracerIntensive(tracers,old_trace,tess,cells,pg);
+		MakeTracerIntensive(tracers,old_trace,tess,cells,pg);
 	}
 	return dt;
 }
@@ -1379,25 +1379,25 @@ namespace {
 }
 
 void really_update_extensive_tracers
-(vector<vector<double> >& extensive_tracers,
- const vector<vector<double> >& tracers,
- const vector<Primitive>& cells,
- const Tessellation& tess,
- const vector<Conserved>& fluxes,
- double time, double dt,
- const HydroBoundaryConditions& hbc,
- const SpatialReconstruction& interp,
- const vector<CustomEvolution*> ce,
- const CustomEvolutionManager& cem,
- const vector<Vector2D>& fv,
- const vector<double>& lengths)
+	(vector<vector<double> >& extensive_tracers,
+	const vector<vector<double> >& tracers,
+	const vector<Primitive>& cells,
+	const Tessellation& tess,
+	const vector<Conserved>& fluxes,
+	double time, double dt,
+	const HydroBoundaryConditions& hbc,
+	const SpatialReconstruction& interp,
+	const vector<CustomEvolution*> ce,
+	const CustomEvolutionManager& cem,
+	const vector<Vector2D>& fv,
+	const vector<double>& lengths)
 {
-  const vector<vector<double> >& tracer_change = 
-    CalcTraceChange(tracers,cells,tess,fluxes,dt,hbc,
-		    interp,time,ce,cem,fv,lengths);
-  UpdateTracerExtensive
-    (extensive_tracers, tracer_change,
-     ce, cells, tess, time);
+	const vector<vector<double> >& tracer_change = 
+		CalcTraceChange(tracers,cells,tess,fluxes,dt,hbc,
+		interp,time,ce,cem,fv,lengths);
+	UpdateTracerExtensive
+		(extensive_tracers, tracer_change,
+		ce, cells, tess, time);
 }
 
 vector<vector<double> > CalcTraceChange
@@ -1524,124 +1524,125 @@ bool NearBoundary(int index,Tessellation const& tess,
 	return false;
 }
 
- namespace {
-   vector<double> scalar_mult(const vector<double>& v,
-			      double s)
-   {
-     vector<double> res(v.size());
-     for(size_t i=0;i<v.size();++i)
-       res[i] = s*v[i];
-     return res;
-   }
- }
-
- namespace {
-   class ExtensiveTracerCalculator: public Index2Member<vector<double> >
-   {
-   public:
-
-     ExtensiveTracerCalculator(const vector<vector<double> >& tracers,
-			       const Tessellation& tess,
-			       const vector<Primitive>& cells,
-			       const PhysicalGeometry& pg):
-       tracers_(tracers), tess_(tess), cells_(cells), pg_(pg) {}
-
-     size_t getLength(void) const
-     {
-       return tracers_.size();
-     }
-
-     vector<double> operator()(size_t i) const
-     {
-       return scalar_mult
-	 (tracers_[i],
-	  pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)))*
-	  cells_[i].Density);
-     }
-
-   private:
-     const vector<vector<double> >& tracers_;
-     const Tessellation& tess_;
-     const vector<Primitive>& cells_;
-     const PhysicalGeometry& pg_;
-   };
- }
-
- vector<vector<double> > calc_extensive_tracer
-   (const vector<vector<double> >& intensive_tracer,
-    const Tessellation& tess,
-    const vector<Primitive>& cells,
-    const PhysicalGeometry& pg)
- {
-   return serial_generate(ExtensiveTracerCalculator(intensive_tracer,
-						    tess,
-						    cells,
-						    pg));
- }
-
-void MakeTracerExtensive(vector<vector<double> > const &tracer,
-			 Tessellation const& tess,
-			 vector<Primitive> const& cells,
-			 vector<vector<double> > &result)
-{
-  result.resize(tracer.size());
-  for(size_t i=0;i<result.size();++i)
-    result[i] = scalar_mult(tracer[i],
-			    tess.GetVolume(i)*cells[i].Density);
+namespace {
+	vector<double> scalar_mult(const vector<double>& v,
+		double s)
+	{
+		vector<double> res(v.size());
+		for(size_t i=0;i<v.size();++i)
+			res[i] = s*v[i];
+		return res;
+	}
 }
 
-    namespace {
-      vector<double> scalar_div(const vector<double>& v,
-				const double s)
-      {
-	vector<double> res(v.size());
-	for(size_t i=0;i<res.size();++i)
-	  res[i] = v[i]/s;
-	return res;
-      }
-
-      class IntensiveTracerCalculator: public Index2Member<vector<double> >
-      {
-      public:
-
-	IntensiveTracerCalculator
-	(const vector<vector<double> >& extensive,
-	 const Tessellation& tess,
-	 const vector<Primitive>& cells,
-	 const PhysicalGeometry& pg):
-	  extensive_(extensive),
-	  tess_(tess), cells_(cells), pg_(pg) {}
-
-	size_t getLength(void) const
+namespace {
+	class ExtensiveTracerCalculator: public Index2Member<vector<double> >
 	{
-	  return extensive_.size();
+	public:
+
+		ExtensiveTracerCalculator(const vector<vector<double> >& tracers,
+			const Tessellation& tess,
+			const vector<Primitive>& cells,
+			const PhysicalGeometry& pg):
+		tracers_(tracers), tess_(tess), cells_(cells), pg_(pg) {}
+
+		size_t getLength(void) const
+		{
+			return tracers_.size();
+		}
+
+		vector<double> operator()(size_t i) const
+		{
+			return scalar_mult
+				(tracers_[i],
+				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)))*
+				cells_[i].Density);
+		}
+
+	private:
+		const vector<vector<double> >& tracers_;
+		const Tessellation& tess_;
+		const vector<Primitive>& cells_;
+		const PhysicalGeometry& pg_;
+	};
+}
+
+vector<vector<double> > calc_extensive_tracer
+	(const vector<vector<double> >& intensive_tracer,
+	const Tessellation& tess,
+	const vector<Primitive>& cells,
+	const PhysicalGeometry& pg)
+{
+	return serial_generate(ExtensiveTracerCalculator(intensive_tracer,
+		tess,
+		cells,
+		pg));
+}
+
+void MakeTracerExtensive(vector<vector<double> > const &tracer,
+	Tessellation const& tess,
+	vector<Primitive> const& cells,
+	vector<vector<double> > &result)
+{
+	const size_t n=tess.GetPointNo();
+	result.resize(n);
+	for(size_t i=0;in;++i)
+		result[i] = scalar_mult(tracer[i],
+		tess.GetVolume(i)*cells[i].Density);
+}
+
+namespace {
+	vector<double> scalar_div(const vector<double>& v,
+		const double s)
+	{
+		vector<double> res(v.size());
+		for(size_t i=0;i<res.size();++i)
+			res[i] = v[i]/s;
+		return res;
 	}
 
-	vector<double> operator()(size_t i) const
+	class IntensiveTracerCalculator: public Index2Member<vector<double> >
 	{
-	  const double mass = cells_[i].Density*
-	    pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
-	  return scalar_div(extensive_[i],mass);
-	}
+	public:
 
-      private:
-	const vector<vector<double> >& extensive_;
-	const Tessellation& tess_;
-	const vector<Primitive>& cells_;
-	const PhysicalGeometry& pg_;
-      };
-    }
+		IntensiveTracerCalculator
+			(const vector<vector<double> >& extensive,
+			const Tessellation& tess,
+			const vector<Primitive>& cells,
+			const PhysicalGeometry& pg):
+		extensive_(extensive),
+			tess_(tess), cells_(cells), pg_(pg) {}
+
+		size_t getLength(void) const
+		{
+			return tess_.GetPointNo();
+		}
+
+		vector<double> operator()(size_t i) const
+		{
+			const double mass = cells_[i].Density*
+				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
+			return scalar_div(extensive_[i],mass);
+		}
+
+	private:
+		const vector<vector<double> >& extensive_;
+		const Tessellation& tess_;
+		const vector<Primitive>& cells_;
+		const PhysicalGeometry& pg_;
+	};
+}
 
 void MakeTracerIntensive(vector<vector<double> > &tracer,
-			 const vector<vector<double> >& extensive,
-			 const Tessellation& tess,
-			 const vector<Primitive>& cells,
-			 const PhysicalGeometry& pg)
+	const vector<vector<double> >& extensive,
+	const Tessellation& tess,
+	const vector<Primitive>& cells,
+	const PhysicalGeometry& pg)
 {
-  tracer = serial_generate(IntensiveTracerCalculator(extensive,
-						     tess,
-						     cells,
-						     pg));
+	tracer = serial_generate(IntensiveTracerCalculator(extensive,
+		tess,
+		cells,
+		pg));
 }
 
 void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
@@ -1649,13 +1650,13 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 	CellsEvolve,vector<Primitive> const& cells,Tessellation const& tess,
 	double time)
 {
-  for(size_t i=0;i<tracerextensive.size();++i)
-    if(CellsEvolve[i])
-      tracerextensive[i]=CellsEvolve[i]->UpdateTracer
-	(i,tracerextensive,tracerchange,cells,tess,time);
-    else
-      for(size_t j=0;j<tracerextensive[i].size();++j)
-	tracerextensive[i][j]+=tracerchange[i][j];
+	for(size_t i=0;i<tracerextensive.size();++i)
+		if(CellsEvolve[i])
+			tracerextensive[i]=CellsEvolve[i]->UpdateTracer
+			(i,tracerextensive,tracerchange,cells,tess,time);
+		else
+			for(size_t j=0;j<tracerextensive[i].size();++j)
+				tracerextensive[i][j]+=tracerchange[i][j];
 }
 
 void TracerResetCalc
@@ -1688,11 +1689,11 @@ void TracerResetCalc
 			if(tracer[i][tracerindex]<0)
 				tracer[i][tracerindex]=0;
 			for (size_t j = 0;j<tracer[i].size();++j)
-			if (coldflows&&j == 0)
-				tracer[i][j] = eos.dp2s(cells[i].Density, cells[i].Pressure);
-			else
-				if ((int)j != tracerindex)
-					tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
+				if (coldflows&&j == 0)
+					tracer[i][j] = eos.dp2s(cells[i].Density, cells[i].Pressure);
+				else
+					if ((int)j != tracerindex)
+						tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
 		}
 	}
 	return;
@@ -1918,22 +1919,22 @@ void FixAdvection(vector<Conserved>& extensive,
 	}
 }
 
-  double determine_time_step(double hydro_time_step,
-			     double external_dt,
-			     double current_time,
-			     double end_time)
-  {
-    double dt = hydro_time_step;
-    if(external_dt>0)
-      dt = std::min(external_dt,dt);
-    if(end_time>0)
-      dt = std::min(end_time-current_time,dt);
+double determine_time_step(double hydro_time_step,
+	double external_dt,
+	double current_time,
+	double end_time)
+{
+	double dt = hydro_time_step;
+	if(external_dt>0)
+		dt = std::min(external_dt,dt);
+	if(end_time>0)
+		dt = std::min(end_time-current_time,dt);
 
-    #ifdef RICH_MPI
-    double dt_temp = dt;
-    MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-    MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    #endif
+#ifdef RICH_MPI
+	double dt_temp = dt;
+	MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+	MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+#endif
 
-    return dt;
-  }
+	return dt;
+}
