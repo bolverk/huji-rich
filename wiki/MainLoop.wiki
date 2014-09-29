@@ -1,0 +1,29 @@
+#summary Controlling the simulation's time advance cycle
+
+= Introduction =
+
+In the main loop stage, the simulation is advanced in time iteratively until a certain condition is met. This is accomplished using the function main_loop declared in ./source/newtonian/test_2d/main_loop_2d.hpp. This function accepts five arguments. The first argument is a reference to the simulation. The second argument is a termination condition, which tells the simulation when to stop. The third argument is a pointer to the time advance scheme. At the moment only two schemes are available: first and second order. The fourth is a pointer to the diagnostic function, with which the user can write data to the disk or to the screen. The fifth and last one is a function for manual manipulation of the simulation data. This is mostly used, but not limited to, adaptive mesh refinement. We will discuss these components in the next subsections.
+
+= Stopping Condition =
+
+This class has only one virtual method. This method accepts a reference to the simulation and returns a boolean. True means that the simulation should continue, false means the simulation should end. The available stopping conditions are listed below.
+
+== SafeTimeTermination ==
+
+This class is initialized with two numbers. The first is the time, and the other is the maximum number of cycles. The simulation stops when it reaches the specified time, and an error is thrown if the number of cycles exceed the specified limit.
+
+== CycleTermination ==
+This class terminates the loop successfully after a specified number of cycles.
+
+= Diagnostic Function =
+
+This class has one virtual method that is called every cycle. The available diagnostics are listed below.
+
+== WriteTime ==
+This class writes the simulation time into a file every time step.
+
+== ConsecutiveSnapshots ==
+This class writes hdf5 snapshots of the simulation at regular time intervals.
+
+= Manipulation Function =
+This function is used to manually modify the simulation. It is called every time step.
