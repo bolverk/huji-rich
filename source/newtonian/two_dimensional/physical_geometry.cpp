@@ -78,3 +78,8 @@ double CylindricalSymmetry::calcVolume(const vector<Edge>& edge_list) const
 				       axis_);
   return res;
 }
+
+const Axis& CylindricalSymmetry::getAxis(void) const
+{
+  return axis_;
+}
