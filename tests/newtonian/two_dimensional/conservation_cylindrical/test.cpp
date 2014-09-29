@@ -106,6 +106,9 @@ namespace {
 	   outer_,
 	   hbc_) 
     {
+      sim_.addTracer(Piecewise(triangle_,
+			       Uniform2D(1),
+			       Uniform2D(0)));
       sim_.changePhysicalGeometry(&pg_);
     }
 
@@ -138,10 +141,11 @@ namespace {
   public:
 
     WriteConserved(string const& fname):
-      cons_(), fname_(fname) {}
+      tracer_(), cons_(), fname_(fname) {}
 
     void operator()(hdsim const& sim)
     {
+      tracer_.push_back(total_tracer(sim,0));
       cons_.push_back(total_conserved(sim));
     }
 
@@ -151,13 +155,12 @@ namespace {
       if(get_mpi_rank()==0){
 #endif
 	ofstream f(fname_.c_str());
-	BOOST_FOREACH(Conserved c,cons_)
-	  {
-	    f << c.Mass << " "
-	      << c.Momentum.x << " "
-	      << c.Momentum.y << " "
-	      << c.Energy << "\n";
-	  }
+	for(size_t i=0;i<cons_.size();++i)
+	  f << cons_[i].Mass << " "
+	    << cons_[i].Momentum.x << " "
+	    << cons_[i].Momentum.y << " "
+	    << cons_[i].Energy << " "
+	    << tracer_[i] << "\n";
 	f.close();
 #ifdef RICH_MPI
       }
@@ -165,7 +168,8 @@ namespace {
     }
 
   private:
-    vector<Conserved> cons_;
+    mutable vector<double> tracer_;
+    mutable vector<Conserved> cons_;
     const string fname_;
   };
 }
