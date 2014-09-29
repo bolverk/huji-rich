@@ -1,0 +1,30 @@
+#summary How to run your first calculation
+#labels Phase-Deploy
+
+= Linux =
+
+First, download a working copy into your computer. Create a folder where you want to keep the code, and run
+{{{
+svn checkout http://huji-rich.googlecode.com/svn/trunk/ huji-rich-read-only
+}}}
+The next command will download all the dependencies, install them, and set the environment variables accordingly.
+{{{
+make set_environ_vars.sh && `cat set_environ_vars.sh`
+}}}
+Note that this may take a long while the first time you run this command. If the dependencies installed successfully, running this command again should take just a few moments. Next, navigate to the tests folder
+{{{
+cd ./tests
+}}}
+To run one of the problems, for example, sedov taylor explosion, you will have to run a make script
+{{{
+make production/newtonian/two_dimensional/sedov_taylor_messy_grid/test_passed.res
+}}}
+This will copy, compile, link and run the code in a temporary folder. In order to view a snapshot of the density, use
+{{{
+python ../visualisation/two_dimensional/python/hdf5_voronoi_plot.py production/newtonian/two_dimensional/sedov_taylor_messy_grid/final.h5 pressure
+}}}
+This script loads the data in a hdf5 file and displays a map of the hydrodynamic variable defined in the second argument.
+
+= Windows =
+
+TBA
