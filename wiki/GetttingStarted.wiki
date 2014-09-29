@@ -3,6 +3,8 @@
 
 = Linux =
 
+== Automatic installation ==
+
 First, download a working copy into your computer. Create a folder where you want to keep the code, and run
 {{{
 svn checkout http://huji-rich.googlecode.com/svn/trunk/ huji-rich-read-only
@@ -25,6 +27,39 @@ python ../visualisation/two_dimensional/python/hdf5_voronoi_plot.py production/n
 }}}
 This script loads the data in a hdf5 file and displays a map of the hydrodynamic variable defined in the second argument.
 
+== Manual installation ==
+
+If you already have hdf5 and boost installed, and would not like to spend a few hours to install them again, you will have to install them manually. To complete a manual installtion, you will have to set the following environment variables
+
+  * CPLUS_INCLUDE_PATH - Add hdf5 and boost include folders to this variable, using a colon as a delimiter
+  * HDF5_LIB_PATH - Path to the hdf5 library
+  * BOOST_LIB_PATH - Path to the boost library
+  * RICH_ROOT - Path to the place where the code was checked out
+  * LD_LIBRARY_PATH - Add hdf5 and boost libraries to this variable
+  * LD_PATH - Add hdf5 and boost libraries to this variable
+
 = Windows =
 
-TBA
+== Installing RICH ==
+
+We recommend using the [http://tortoisesvn.net/ tortoise] svn client. Install the svn with the default settings. After the installation create a directory for the code (here we called it “HydroCode”). Inside the directory, right click and select Svn checkout
+
+https://photos-2.dropbox.com/t/1/AABiSjCbTTaLdIMqeXigbeZhWAhvP0mA7gGAJQAyFX2Iww/12/1115741/jpeg/1024x768/3/1411999200/0/2/windows1.jpg/GByAGiWEZN7o1Mv5ftv5s-JPf59EV5gkrF1ex9vImjw
+
+Next, type in the url of the repository and make sure that the checkout directory is your desired location. Leave the rest of the options unchanged. This will download the source code.
+
+https://photos-2.dropbox.com/t/1/AADJlrI7Z9UfDAi9uJ5Rb0YqNXz71d61JvBkWa40ChLy5A/12/1115741/jpeg/1024x768/3/1411999200/0/2/windows2.jpg/uxDXLaAPNJzkspbUqi_FAYzr4o-b5ACom6HOfH3sxo0
+
+== Installing HDF5 ==
+
+In order to install the HDF5 files, download the appropriate [http://www.hdfgroup.org/HDF5/release/obtain5.html#obtain Pre-built Binary Distributions] for your computer. Install the executable and do not worry if you get PATH too long error.
+
+== Installing boost ==
+Download the [http://sourceforge.net/projects/boost/files/boost/ Boost] source files and extract them to your desired directory. No building is necessary.
+
+== Installing boost ==
+We recommend using Visual Studio for running our code. Other environments should work as well but we do not provide installation instructions for them. In our youtube channel there are 2 videos showing how to set up Visual Studio to work with our code and 1 video showing how to run an example.
+
+== Installing DoxyWizard ==
+
+We recommend Using [http://www.stack.nl/~dimitri/doxygen/download.html DoxyWizard] for creating the doxygen documentation. A video in our youtube channel shows how to use it and create the documentation.
