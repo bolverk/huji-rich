@@ -1615,7 +1615,10 @@ namespace {
 
 		size_t getLength(void) const
 		{
-			return tess_.GetPointNo();
+			if(extensive_.empty())
+				return 0;
+			else
+				return tess_.GetPointNo();
 		}
 
 		vector<double> operator()(size_t i) const
