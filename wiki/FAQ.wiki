@@ -1,0 +1,7 @@
+#summary Frequently asked questions
+
+= Error Messages =
+
+_I got “mesh point outside domain” even though I used rigid wall as boundary conditions. Why does this happen and how do I solve it?_
+
+If the motion of the mesh point had been purely Lagrangian, this would never have happened. The small correction due to round cells is sometimes enough to push a point over the edge. In order to fix this, pass the outer boundary conditions as a pointer in the constructor of round cells.
