@@ -1,5 +1,5 @@
+#summary General information about the RICH project.
 #labels Phase-Deploy
-General information about the RICH project.
 
 = Introduction =
 
