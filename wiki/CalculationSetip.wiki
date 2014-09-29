@@ -1,0 +1,52 @@
+#summary Instruction on how to set up a calculation
+
+= Introduction =
+
+Setting up is equivalent to creating a new instance of the hdsim class using its constructor. As you will see, hdsim does not contain many functions it uses, so we recommend creating a wrapper class that contains all the data for hdsim. You can see an example for that in the Sedov Taylor test file. However, if you feel more comfortable with it, you can keep all the data as global variables. In the subsequent subsections we will review the various input parameters of the constructor.
+
+= Mesh Generating Points =
+
+This is a list of the initial mesh generating points, packed inside std::vector. The order in which they are given is physically irrelevant, but the simulation would work faster if neighbors would be next to each other in the list. Usually, you would want the mesh points to be arranged in a regular cartesian grid. To do that, use the square_grid function.
+
+= Tessellation =
+This is the function that partitions the grid into cells around each mesh generating point. The tessellation should be empty when it is passed to the simulation, because it recieves the mesh generating points inside the constructor. Note that the simulation only gets a reference to the tessellation, so its data should be kept elsewhere. The usual class we use is Voronoi Tessellation.
+
+= Interpolation =
+This is the function used for spatial interpolation of the hydrodynamic variables, used to achieve higher order accuracy. Note that if the space and time interpolation are not matched the scheme may not be stable (for example, second order in space and first order in time). In first order schemes we usually use PCM2D, and for second order schemes we use LinearGaussConsistent.
+
+= Initial conditions =
+Initial conditions are expressed as spatial distributions of the density, pressure and x and y components of the velocity, each of them inherits from SpatialDistribution. You basically write a function in C++ that accepts a coordinate and returns the value of the variable, and the simulation will evaluate it at the mesh generating points.
+
+= Equation of State =
+This function describes the properties of the material. The basic functionality needed is calculation of the thermal energy and the speed of sound, and the calculation of the primitive variables from the conserved variables. In order to use cold flows, the equation of state should also be able to calculate the entropy. We usually use the IdealGas equation of state.
+
+= Riemann Solver =
+This class calculates the flux between two computational cells. We usually use HLLC for flux calculation.
+
+= Point Motion =
+This class tells the mesh generating points how to move. We usually use either Eulerian (where the mesh generating point remain stationary) or Lagrangian (where the mesh generating points move along with the material). When Lagrangian point motion is used, we wrap it with RoundCells to make sure cells don't get too distorted and keep the simulation stable.
+
+= Source Term =
+This is a mechanism to inject non hydrodynamical effects into the simulation. External sources are represented by the abstract class SourceTerm and each different source is derived from it. If several source terms are to be included use the SeveralSources class. The class receives information from the simulation and return the change per unit time in the conserved variables of the cell. If a source is derived from a conservative force (like gravity) we recommend using the ConservedForce wrapper. If the source term is able to change the conserved values drastically in one time step, it is best to call it outside the hydrodynamical time advancement since the second order time advancement scheme can give erroneous results. The simulation class has methods that allow you to change its members from the outside. We suggest running a single time advancement step and then readjusting the hydrodynamical/tracers quantities.
+
+= Boundary Conditions =
+There are two types of boundary conditions, one on the Tessellation and another for the hydrodynamic variables. The tessellation boundary condition determines how to terminate the interfaces between cells, that would otherwise continue to infinity. The hydrodynamics boundary conditions determines the conditions just outside the computational grid.
+
+= Adaptive Mesh Refinement =
+In order to use the AMR option a refinement scheme that inherits from RefineStrategy and a removal scheme that inherits from RemovalStrategy must be declared. When removing cells it is important to make sure that two neighboring cells are not removed in the same time step. We strongly recommend using the CheckOutput method to make sure that there are no neighboring cells in the removal list. The removal/refinement is done by calling the RemoveCells/RefineCells after the timestep. Notice that RefineCells needs to accept a list of previously removed cells (if none are removed it can be empty). The refinement strategy by default tries to split cells as equally as possible but if a split in a given direction is wanted this can be done by supplying the refinement scheme a direction vector.
+
+= Passive Tracers =
+Our code has the option to advect passive tracers along with the flow. After the constructing the instance of the hdsim class, adding a scalar tracer is done by calling a hdsim::addTracer, which accepts a SpatialDistribution of the values of the tracers per mass.
+
+The following code snippet shows how to add a tracer layer to a simulation, where all points inside a circle is given the value 1, and all points outside the circle have the value 0. The circle is centered around (0,0) and its radius is 0.1
+{{{
+void add_tracer_circle(hdsim& sim)
+
+{
+
+   const Circle my_circle(Vector2D(0,0),0.1);
+
+   sim.addTracer(Piecewise(my_circle,Uniform2D(1),Uniform2D(0)));
+
+}
+}}} 
