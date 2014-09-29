@@ -1586,7 +1586,7 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 {
 	const size_t n=tess.GetPointNo();
 	result.resize(n);
-	for(size_t i=0;in;++i)
+	for(size_t i=0;i<n;++i)
 		result[i] = scalar_mult(tracer[i],
 		tess.GetVolume(i)*cells[i].Density);
 }
