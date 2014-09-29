@@ -1,0 +1,57 @@
+#summary Tools and methods for handling more difficult problems
+
+= Introduction =
+
+Some problems might require more than the tools presented so far. In this section we will present additional tools for more arduous tasks.
+
+
+= Cold Flows =
+
+In some cases the kinetic energy of a fluid element is much larger than the thermal energy. In those cases numerical errors can lead to negative thermal energy. In order to prevent this we've implemented an option to calculate the thermal energy through entropy conservation. In order to enable this option the SetColdFlows option must be set with two values. The first determines what fraction of the thermal energy compared to the kinetic energy necessitates the entropy fix and the other what fraction of the potential energy of the SourceTerm relative to the kinetic energy necessitates the entropy fix. If this option is turned on a scalar interpolation scheme must be given to the simulation. If you are interested in advecting other scalars besides the entropy, make sure you set the cold flows flag first since it is assumed that if the cold flows flag is on the first tracer is always the entropy.
+
+We recommend turning on the SetColdFlows option for RoundCells as well whenever turning on the option for the simulation. This allows cells to remain “round” even if the flow is slow/cold.
+
+= Convergence Runs =
+To create a convergence run, create a new subfolder inside the “convergence” directory. In this subfolder you should put your code, and name the file “test.cpp”. Modify your code so that it would accept the resolution from an external text file called “resolution.txt”. Add a new file called “resolution.txt” and write inside some reasonable low number for the points. When this is ready, go back to the folder resolution and use the script
+{{{
+python ./convergence_curve.py [test folder] [low res] [high res] [res step] [output file]
+}}}
+This will run the test in the test sub - folder multiple times with different resolutions. The resolutions would start out from low res, up to high res, in intervals of res step. Afterwards, the script would go through all the runs, collect the data and write it out to output file.
+
+= Restart =
+In many cases restarting the simulation from a snapshot is wanted. In order to save a snapshot of the simulation use the ResetOutput function. In order to restart a simulation from a given snapshot use the ResetRead function and then call the simulation constructor that is used for restarts. Notice that the restart files save the data of the simulation and tessellation but not data of other classes (like SourceTerm or other classes) so when starting a simulation from a restart file all of the other classes (like interpolation scheme e.g.) must be re declared.
+
+= Error Handling =
+In order to report an error in the code, we use the class UniversalError. This class contains a text message and two lists, one of field names, and another of values. When an error occurs, the program describes the error in the error message, fills in the relevant fields and values, and throws it. In subsequent catches and re - throws, other parts of the codes can add information to the lists, but cannot remove information from it. This help the user get relevant information from various code levels.
+
+= Parallel =
+Setting up a parallel calculation involve some additional overhead. Let's start with the easy part. First, mpi must be inialized at the beggining of the simulation using 
+{{{
+MPI_Init(NULL, NULL);
+}}}
+and finalized using
+{{{
+MPI_Finalize();
+}}}
+
+The user also has to create another tessellation with the position of each process point, and pass it to the constructor of the simulation. Each process has a copy of the tessellation of processes.
+
+Now comes the hard part. We need to pass to each process only those points that lie within its process cell. A naive way of doing this is to just pass all the points to all cells, and have each process keep only those that lie within. However, the problem with this approach is that that list could be very long, and even exceed a single machine's capacity. Instead, we pass to each process an object of the form Index2Member<Vector2D>, which converts indices to points. Each process evaluates an arbitrary portion of those points, figures out to whom they belong, and sends them to their respective process. All this is done in the function “distribute_grid”.
+
+Another challenge is to maintain load balance. In order to so do, one must instantiate an object of type ConstNumberPerProc and pass its pointer to hdsim using the method hdsim::SetProcessorMovement.
+
+One final subtlety is using diagnostics in parallel mode. If only one datum is required, one simple way to do it is inside a master clause
+
+{{{
+if(get_mpi_rank()==0)
+
+{
+
+      write_diagnostics(....);
+
+}
+}}}
+If information is needed from all processes, then the simplest way to do it is to have each process write the information to a different file, and unite the information with another program post mortem. ConsecutiveSnapshot and WriteTime diagnostics are already prepared for parallel execution, so no changes ought to be made when using them.
+
+= Cylindrical Symmetry =
+TBA
