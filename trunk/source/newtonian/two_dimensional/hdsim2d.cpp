@@ -764,7 +764,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 			if(traceractive)
 				if(i<n)
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
-						t_temp[index][jj]+=dv[i][j]*tracer_[i][jj]*_cells[ToRemove[i]].Density;
+						t_temp[index][jj]+=dv[i][j]*tracer_[ToRemove[i]][jj]*_cells[ToRemove[i]].Density;
 				else
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 						t_temp[index][jj]+=dv[i][j]*MPItracer[i-n][jj]*MPIcells[i-n].Density;
