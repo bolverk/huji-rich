@@ -922,6 +922,11 @@ vector<Primitive>& hdsim::GetAllCells(void)
 	return _cells;
 }
 
+vector<Conserved>& hdsim::getAllConserved(void)
+{
+  return _conservedextensive;
+}
+
 void hdsim::HilbertArrange(int innernum)
 {
 	vector<Vector2D> cor=_tessellation.GetMeshPoints();
