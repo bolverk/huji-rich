@@ -1481,6 +1481,8 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 	{
 		if(customevolve[i]==0||customevolve[i]->TimeStepRelevant())
 		{
+			if (intensive[i].Mass < 0)
+				continue;
 			//Make intensive
 			temp=entropy[i][0]/(tess.GetVolume(i)*intensive[i].Mass);
 			Ek2=0.5*pow(abs(intensive[i].Momentum)/intensive[i].Mass,2);
