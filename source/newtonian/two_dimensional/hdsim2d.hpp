@@ -355,6 +355,8 @@ public:
   */
   vector<Primitive>& GetAllCells(void);
 
+  vector<Conserved>& getAllConserved(void);
+
   /*!
     \brief Refines cells resolution
     \param refine The refine strategy class
