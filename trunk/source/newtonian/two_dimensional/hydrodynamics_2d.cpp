@@ -997,8 +997,8 @@ double TimeAdvance2mid
 #ifndef RICH_MPI
 	MoveMeshPoints(point_velocities, 0.5*dt, tess);
 #else
-	if(procupdate!=0)
-		procupdate->Update(proctess,tess);
+//	if(procupdate!=0)
+//		procupdate->Update(proctess,tess);
 	MoveMeshPoints(point_velocities,0.5*dt, tess,proctess);
 #endif
 
