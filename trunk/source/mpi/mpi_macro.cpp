@@ -967,8 +967,8 @@ namespace {
 	{
 	public:
 
-		TracerCommunicator(const vector<vector<double> >& to_send):
-		  to_send_(to_send), reply_() {}
+		TracerCommunicator(const vector<vector<double> >& to_send,int dim):
+		  to_send_(to_send),dim_(dim),reply_() {}
 
 		  void sendInfo(int address)
 		  {
@@ -977,8 +977,7 @@ namespace {
 
 		  void recvInfo(int address)
 		  {
-			  MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,
-				  static_cast<int>(to_send_[0].size()));
+			  MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,dim_);
 		  }
 
 		  const vector<vector<double> >& getReply(void) const
@@ -988,6 +987,7 @@ namespace {
 
 	private:
 		const vector<vector<double> > to_send_;
+		const int dim_;
 		vector<vector<double> > reply_;
 	};
 }
@@ -1009,8 +1009,8 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 			-sentprocs.begin();
 		if(index<nlist)
 		{
-			TracerCommunicator tc(VectorValues(tracers,
-				sentcells[index]));
+			TracerCommunicator tc(VectorValues(tracers,sentcells[index]),
+				(int)tracers[0].size());
 			marshal_communication(tc,procorder[i],
 				rank<procorder[i]);
 			tadd[index] = tc.getReply();
