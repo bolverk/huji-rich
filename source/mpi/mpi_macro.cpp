@@ -892,7 +892,7 @@ namespace {
 			}
 			int count;
 			MPI_Status stat;
-			MPI_Probe(address,0,MPI_COMM_WORLD,&stat);
+			MPI_Probe(address,MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
 			MPI_Get_count(&stat,MPI_UNSIGNED,&count);
 			if(stat.MPI_TAG==0){
 				vector<unsigned> buf(count);
