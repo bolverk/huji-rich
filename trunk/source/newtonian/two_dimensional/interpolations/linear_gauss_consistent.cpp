@@ -458,7 +458,10 @@ namespace
 								if(centroid_val==my_val)
 									psi = min(psi,1.0);
 								else
-									throw "Something bad happened in LinearGaussConsistent::Prepare";
+								{
+									UniversalError eo("Something bad happened in LinearGaussConsistent::Prepare");
+									throw eo;
+								}
 				}
 				res.tracers[i] *= psi;
 			}
