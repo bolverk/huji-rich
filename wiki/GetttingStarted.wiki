@@ -59,6 +59,15 @@ Next, type in the url of the repository and make sure that the checkout director
 
 https://photos-2.dropbox.com/t/1/AADJlrI7Z9UfDAi9uJ5Rb0YqNXz71d61JvBkWa40ChLy5A/12/1115741/jpeg/1024x768/3/1411999200/0/2/windows2.jpg/uxDXLaAPNJzkspbUqi_FAYzr4o-b5ACom6HOfH3sxo0
 
+Check out the following videos for a live demonstration
+
+<wiki:video url="https://www.youtube.com/watch?v=5wobH5DvGiI"/>
+
+<wiki:video url="https://www.youtube.com/watch?v=2N1vqvGR1GY"/>
+
+<wiki:video url="https://www.youtube.com/watch?v=4gMCboWb2bM"/>
+
+
 == Installing HDF5 ==
 
 In order to install the HDF5 files, download the appropriate [http://www.hdfgroup.org/HDF5/release/obtain5.html#obtain Pre-built Binary Distributions] for your computer. Install the executable and do not worry if you get PATH too long error.
@@ -72,3 +81,5 @@ We recommend using Visual Studio for running our code. Other environments should
 == Installing DoxyWizard ==
 
 We recommend Using [http://www.stack.nl/~dimitri/doxygen/download.html DoxyWizard] for creating the doxygen documentation. A video in our youtube channel shows how to use it and create the documentation.
+
+<wiki:video url="https://www.youtube.com/watch?v=4gMCboWb2bM"/>
