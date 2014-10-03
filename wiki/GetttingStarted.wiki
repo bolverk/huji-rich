@@ -26,6 +26,15 @@ This will copy, compile, link and run the code in a temporary folder. In order t
 python ../visualisation/two_dimensional/python/hdf5_voronoi_plot.py production/newtonian/two_dimensional/sedov_taylor_messy_grid/final.h5 pressure
 }}}
 This script loads the data in a hdf5 file and displays a map of the hydrodynamic variable defined in the second argument.
+Check out the following videos for a live demonstration
+
+<wiki:video url="https://www.youtube.com/watch?v=4D7yv0inUKU"/>
+
+<wiki:video url="https://www.youtube.com/watch?v=_jXzVAyIec8"/>
+
+<wiki:video url="https://www.youtube.com/watch?v=lWqJMXR10VI"/>
+
+<wiki:video url="https://www.youtube.com/watch?v=yEH7o-YhTDA"/>
 
 == Manual installation ==
 
