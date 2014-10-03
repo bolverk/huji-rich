@@ -559,10 +559,9 @@ namespace {
 						edge.neighbors.second==nextneigh)
 					{
 						// We have a mutual edge
-						Vector2D otherv=(abs(v.GetMeshPoint(rank)-
-							edge.vertices.first)<abs(v.GetMeshPoint(rank)-
-							edge.vertices.second)) ? edge.vertices.second :
-							edge.vertices.first;
+						Vector2D otherv = (abs(abs(v.GetMeshPoint(rank) - edge.vertices.first) - abs(v.GetMeshPoint(other) -
+							edge.vertices.first))<abs(abs(v.GetMeshPoint(rank) - edge.vertices.second) - abs(v.GetMeshPoint(other) -
+							edge.vertices.second))) ? edge.vertices.second : edge.vertices.first;
 						// Find mutual neighbors
 						vector<int> minremove2(1,-1);
 						minremove2.push_back(rank);
