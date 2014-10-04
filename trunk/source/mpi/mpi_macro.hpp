@@ -8,7 +8,6 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <ANN/ANN.h>
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 #include "../tessellation/tessellation.hpp"
 #include "../tessellation/geotests.hpp"
