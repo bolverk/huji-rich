@@ -269,8 +269,11 @@ namespace
 			  size_t index,
 			  vector<vector<double> >& tracers)
   {
-    for(size_t i=0;i<cells.size();++i)
+    if(tracers.empty())
+      tracers = vector<vector<double> >(cells.size(),vector<double>(1,0));
+    for(size_t i=0;i<cells.size();++i){
       tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
+    }
   }
 
   class EntropyCalculator: public Index2Member<double>
@@ -362,7 +365,8 @@ void hdsim::TimeAdvance(void)
 					      _dt_external, _time, _endtime);
 
 	if(coldflows_flag_)
-	  tracer_[0] = serial_generate(EntropyCalculator(_cells,_eos));
+	  substitute_entropy(_cells,_eos,0,tracer_);
+	  //	  tracer_[0] = serial_generate(EntropyCalculator(_cells,_eos));
 
 #ifdef RICH_MPI
 	if(tracer_flag_)
