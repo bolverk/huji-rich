@@ -273,6 +273,30 @@ namespace
       tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
   }
 
+  class EntropyCalculator: public Index2Member<double>
+  {
+  public:
+
+    EntropyCalculator(const vector<Primitive>& cells,
+		      const EquationOfState& eos):
+      cells_(cells), eos_(eos) {}
+
+    size_t getLength(void) const
+    {
+      return cells_.size();
+    }
+
+    double operator()(size_t i) const
+    {
+      return eos_.dp2s(cells_.at(i).Density,
+		       cells_.at(i).Pressure);
+    }
+
+  private:
+    const vector<Primitive>& cells_;
+    const EquationOfState& eos_;
+  };
+
   class EdgeLengthCalculator: public Index2Member<double>
   {
   public:
@@ -338,7 +362,7 @@ void hdsim::TimeAdvance(void)
 					      _dt_external, _time, _endtime);
 
 	if(coldflows_flag_)
-	  substitute_entropy(_cells,_eos,0,tracer_);
+	  tracer_[0] = serial_generate(EntropyCalculator(_cells,_eos));
 
 #ifdef RICH_MPI
 	if(tracer_flag_)
