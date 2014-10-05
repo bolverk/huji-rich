@@ -580,6 +580,17 @@ namespace {
 							result[i]=-1;
 							break;
 						}
+						if (size == 1)
+						{
+							const double d2 = abs(v.GetMeshPoint(other) - otherv);
+							const double d1 = abs(abs(v.GetMeshPoint(restemp[0]) - otherv) - d2);
+							const double eps2 = 1e-6;
+							if (d1 > eps2*d2)
+							{
+								result[i] = -1;
+								break;
+							}
+						}
 						vector<double> dist(size);
 						for(int kk=0;kk<size;++kk)
 							dist[kk]=abs(otherv-v.GetMeshPoint(restemp[kk]));
