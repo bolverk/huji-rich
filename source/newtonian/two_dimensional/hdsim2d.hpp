@@ -379,6 +379,8 @@ public:
     \param t_start Start time
    */
   void setStartTime(double t_start);
+
+  const EquationOfState& getEos(void) const;
 };
 
 #endif
