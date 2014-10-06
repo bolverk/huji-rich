@@ -1026,3 +1026,8 @@ void hdsim::setStartTime(double t_start)
 {
 	_time = t_start;
 }
+
+const EquationOfState& hdsim::getEos(void) const
+{
+  return _eos;
+}
