@@ -1530,10 +1530,12 @@ namespace {
 	vector<double> scalar_mult(const vector<double>& v,
 		double s)
 	{
-		vector<double> res(v.size());
-		for(size_t i=0;i<v.size();++i)
-			res[i] = s*v[i];
-		return res;
+	  if(v.empty())
+	    return vector<double>();
+	  vector<double> res(v.size());
+	  for(size_t i=0;i<v.size();++i)
+	    res[i] = s*v[i];
+	  return res;
 	}
 }
 
@@ -1550,7 +1552,10 @@ namespace {
 
 		size_t getLength(void) const
 		{
-			return tracers_.size();
+		  if(tracers_.empty())
+		    return 0;
+		  else
+		    return tess_.GetPointNo();
 		}
 
 		vector<double> operator()(size_t i) const

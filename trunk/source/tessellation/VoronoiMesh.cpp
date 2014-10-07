@@ -1315,7 +1315,7 @@ double VoronoiMesh::GetWidth(int index)const
 
 vector<int> const& VoronoiMesh::GetCellEdges(int index) const
 {
-	return mesh_vertices[index];
+  return mesh_vertices.at(index);
 }
 
 double VoronoiMesh::GetVolume(int index) const

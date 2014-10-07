@@ -264,14 +264,15 @@ namespace
     vector<double> potential_energy_;
   };
 
-  void substitute_entropy(const vector<Primitive>& cells,
+  void substitute_entropy(int num_cells,
+			  const vector<Primitive>& cells,
 			  const EquationOfState& eos,
 			  size_t index,
 			  vector<vector<double> >& tracers)
   {
     if(tracers.empty())
-      tracers = vector<vector<double> >(cells.size(),vector<double>(1,0));
-    for(size_t i=0;i<cells.size();++i){
+      tracers = vector<vector<double> >(num_cells,vector<double>(1,0));
+    for(size_t i=0;i<tracers.size();++i){
       tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
     }
   }
@@ -365,8 +366,8 @@ void hdsim::TimeAdvance(void)
 					      _dt_external, _time, _endtime);
 
 	if(coldflows_flag_)
-	  substitute_entropy(_cells,_eos,0,tracer_);
-	  //	  tracer_[0] = serial_generate(EntropyCalculator(_cells,_eos));
+	  substitute_entropy(_tessellation.GetPointNo(),
+			     _cells,_eos,0,tracer_);
 
 #ifdef RICH_MPI
 	if(tracer_flag_)
@@ -388,7 +389,8 @@ void hdsim::TimeAdvance(void)
 	  calc_extensive_tracer(tracer_,
 				_tessellation,
 				_cells,
-				*pg_); 
+				*pg_);
+ 
 	really_update_extensive_tracers(tracer_extensive,
 					tracer_,
 					_cells,
@@ -466,7 +468,6 @@ void hdsim::TimeAdvance(void)
 			 _eos, _cells,custom_evolutions,_cells,
 		densityfloor_,densityMin_,pressureMin_,_tessellation,_time,
 		tracer_extensive);
-
 
 	MakeTracerIntensive(tracer_,tracer_extensive,
 			    _tessellation,_cells, *pg_);
