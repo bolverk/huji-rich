@@ -65,9 +65,8 @@ vector<double> NoMovement::CalcTracerFlux(Tessellation const& tess,
 		edge,dm<0,InBulk,vface);
 	int n=(int)temp2.size();
 	vector<double> res(n);
-	int sign=(edge.neighbors.second==cell_index)? 1 : -1;
 	for(int i=0;i<n;++i)
-		res[i]=sign*dm*dt*edge.GetLength()*temp2[i];
+		res[i]=dm*dt*edge.GetLength()*temp2[i];
 	return res;
 }
 
