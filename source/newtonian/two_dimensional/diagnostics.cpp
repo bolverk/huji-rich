@@ -58,13 +58,6 @@ namespace {
 
 Conserved total_conserved(const hdsim& sim)
 {
-  /*
-  Conserved res;
-  for(int i=0;i<sim.GetCellNo();++i)
-    res += Primitive2Conserved
-      (sim.GetCell(i),
-       sim.GetCellVolume(i));
-  */
   Conserved res = lazy_sum(ExtensiveConservedCalculator(sim));
 
   #ifdef RICH_MPI
@@ -103,6 +96,7 @@ namespace {
 
     double operator()(size_t i) const
     {
+      assert(i<sim_.getTracers().size());
       return sim_.getTracers().at(i).at(index_)*
 	sim_.GetCell(i).Density*
 	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),i));
