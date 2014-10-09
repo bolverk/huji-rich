@@ -3,7 +3,7 @@ RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
 CC := g++
-LINT_FLAGS = -Werror -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
+LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg 

@@ -13,9 +13,9 @@ Conserved NoMovement::CalcFlux(Tessellation const& tess,
 		vector<Primitive> const& cells,	double dt,
 		SpatialReconstruction& interpolation,Edge const& edge,
 		Vector2D const& face_velocity,
-		RiemannSolver const& rs,int index,
-		HydroBoundaryConditions const& boundaryconditions,double time,
-		vector<vector<double> > const& tracers)
+			       RiemannSolver const& rs,int /*index*/,
+			       HydroBoundaryConditions const& /*boundaryconditions*/,double /*time*/,
+			       vector<vector<double> > const& /*tracers*/)
 {
 	const Vector2D normal_dir =
 			tess.GetMeshPoint(edge.neighbors.second)-
@@ -46,7 +46,7 @@ Primitive NoMovement::UpdatePrimitive(vector<Conserved> const& conservedintensiv
 
 vector<double> NoMovement::UpdateTracer(int index,vector<vector<double> >
 		const& tracers,vector<vector<double> > const& tracerchange,
-		vector<Primitive> const& cells,Tessellation const& /*tess*/,
+					vector<Primitive> const& /*cells*/,Tessellation const& /*tess*/,
 		double /*time*/)
 {
 	int dim=int(tracers[0].size());
@@ -58,7 +58,7 @@ vector<double> NoMovement::UpdateTracer(int index,vector<vector<double> >
 
 vector<double> NoMovement::CalcTracerFlux(Tessellation const& tess,
 		vector<Primitive> const& cells,vector<vector<double> > const& old_trace,
-		double dm,Edge const& edge,int cell_index,double dt,double time,
+					  double dm,Edge const& edge,int /*cell_index*/,double dt,double /*time*/,
 		SpatialReconstruction const& interp,Vector2D const& vface)
 {
 	const vector<double> temp2=interp.interpolateTracers(tess,cells,old_trace,dt,
