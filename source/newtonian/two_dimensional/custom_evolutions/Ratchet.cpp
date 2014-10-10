@@ -45,22 +45,22 @@ Conserved Ratchet::CalcFlux(Tessellation const& tess,
 }
 
 Primitive Ratchet::UpdatePrimitive(vector<Conserved> const& /*intensives*/,
-	EquationOfState const& /*eos*/,vector<Primitive>& oldcells,
-	int index,Tessellation const& /*tess*/,double /*time*/,
+				   EquationOfState const& /*eos*/,vector<Primitive>& /*oldcells*/,
+				   int /*index*/,Tessellation const& /*tess*/,double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
 	return cell_;
 }
 
 vector<double> Ratchet::UpdateTracer(int index,vector<vector<double> > const& tracers,
-	vector<vector<double> > const& tracerchange,vector<Primitive> const& /*cells*/,
+				     vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& /*cells*/,
 	Tessellation const& /*tess*/,double /*time*/)
 {
 	return tracers[index];
 }
 
 vector<double> Ratchet::CalcTracerFlux
-	(Tessellation const& tess,vector<Primitive> const& /*cells*/,vector<vector<double> > const& tracers,
+(Tessellation const& /*tess*/,vector<Primitive> const& /*cells*/,vector<vector<double> > const& tracers,
 	double dm,Edge const& edge,int index,double dt,double /*time*/,
 	SpatialReconstruction const& /*interp*/,Vector2D const& /*vface*/)
 {

@@ -90,7 +90,7 @@ Vector2D FreeFlow::CalcEdgeVelocity
 }
 
 bool FreeFlow::IsBoundary
-(Edge const& edge,Tessellation const& tessellation)const
+(Edge const& edge,Tessellation const& /*tessellation*/)const
 {
 	if(edge.neighbors.first<0)
 		return true;

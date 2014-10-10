@@ -1,6 +1,9 @@
 #include "RoundGrid.hpp"
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-	OuterBoundary const* bc,int NumberIt,int InnerNum,Tessellation const* tproc,
+			   OuterBoundary const* bc,int NumberIt,int InnerNum,
+			   #ifdef RICH_MPI
+			   Tessellation const* tproc,
+			   #endif
 	Tessellation *tess)
 {
 	VoronoiMesh default_tess;

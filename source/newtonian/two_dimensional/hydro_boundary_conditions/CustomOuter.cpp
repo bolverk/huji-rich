@@ -83,7 +83,7 @@ Vector2D CustomOuter::CalcEdgeVelocity
 	return res;
 }
 
-bool CustomOuter::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
+bool CustomOuter::IsBoundary(Edge const& edge,Tessellation const& /*tessellation*/)const
 {
 	if(edge.neighbors.first<0)
 		return true;

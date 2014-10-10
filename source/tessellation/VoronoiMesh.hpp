@@ -85,8 +85,10 @@ public:
 
 	int GetOriginalIndex(int point) const;
 
+#ifdef RICH_MPI
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
 		OuterBoundary const* outer);
+#endif
 
 	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc);
 
@@ -114,7 +116,9 @@ public:
 	*/
 	VoronoiMesh(VoronoiMesh const& other);
 
+  #ifdef RICH_MPI
 	void Update(vector<Vector2D> const& points,Tessellation const& vproc);
+#endif // RICH_MPI
 
 	void Update(vector<Vector2D> const& points);
 

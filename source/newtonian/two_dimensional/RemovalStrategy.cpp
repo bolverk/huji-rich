@@ -37,7 +37,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	// Make sure there are no neighbors
 	vector<int> bad_neigh;
 	int n=(int)merits.size();
-	int npoints=tess.GetPointNo();
+	//	int npoints=tess.GetPointNo();
 	for(int i=0;i<n;++i)
 	{
 		bool good=true;

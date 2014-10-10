@@ -12,9 +12,10 @@ ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
   outer_(outer),PointsPerProc_(std::max(npercell,1)),speed_(speed),RoundSpeed_(RoundSpeed),
 	mode_(mode){}
 
-void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)const
-{
 #ifdef RICH_MPI
+void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
+)const
+{
 	int nproc=tproc.GetPointNo();
 	const int rank = get_mpi_rank();
 	vector<double> R(nproc);
@@ -202,5 +203,5 @@ void ConstNumberPerProc::Update(Tessellation &tproc,Tessellation const& tlocal)c
 	for(int i=0;i<nproc;++i)
 		cor[i]=Vector2D(dxtemp[i],dytemp[i]);
 	tproc.Update(cor);
-#endif
 }
+#endif

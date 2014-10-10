@@ -17,12 +17,12 @@ else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI
-	LINT_FLAGS = -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
+	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
 else ifeq ($(MODE),debug_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
-	LINT_FLAGS :=
+	LINT_FLAGS := -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
 	LFLAGS := -pg
 else
 	MODE := production

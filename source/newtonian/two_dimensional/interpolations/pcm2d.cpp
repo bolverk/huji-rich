@@ -8,7 +8,7 @@ void PCM2D::Prepare(Tessellation const& /*tessellation*/,
 	vector<bool> const& /*isrelevant*/,double /*dt*/,double /*time*/) {}
 
 Primitive PCM2D::Interpolate
-(Tessellation const& tessellation,
+(Tessellation const& /*tessellation*/,
  vector<Primitive> const& cells,
  double /*dt*/,Edge const& edge, int side,
  InterpolationType interptype,Vector2D const& /*vface*/) const
@@ -25,7 +25,7 @@ vector<ReducedPrimitiveGradient2D>& PCM2D::GetGradients(void)
 }
 
 vector<double> PCM2D::interpolateTracers
-(Tessellation const& tess,vector<Primitive> const& /*cells*/,
+(Tessellation const& /*tess*/,vector<Primitive> const& /*cells*/,
  vector<vector<double> > const& tracers,
  double /*dt*/,
  Edge const& edge,

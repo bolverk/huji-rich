@@ -43,7 +43,7 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 		int n0=edge.neighbors.first;
 		int n1=edge.neighbors.second;
 		// Do not allow outflow from this region
-		if(((n0<N_&&res.Mass>0)||n1<N_&&res.Mass<0)&&(n0>=N_||n1>=N_))
+		if(((n0<N_&&res.Mass>0)||(n1<N_&&res.Mass<0))&&(n0>=N_||n1>=N_))
 		{
 		return Conserved();
 		}
