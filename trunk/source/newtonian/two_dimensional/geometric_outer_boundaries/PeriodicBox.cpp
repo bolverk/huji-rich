@@ -1,7 +1,7 @@
 #include "PeriodicBox.hpp"
 #include "../../../misc/universal_error.hpp"
 
-bool PeriodicBox::PointIsReflective(Vector2D const& point)const
+bool PeriodicBox::PointIsReflective(Vector2D const& /*point*/)const
 {
 	return false;
 }

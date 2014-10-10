@@ -19,5 +19,9 @@
 */
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	OuterBoundary const* bc,int NumberIt=10,
-	int InnerNum=0,Tessellation const* tproc=0,Tessellation *tess=0);
+	int InnerNum=0,
+			   #ifdef RICH_MPI
+			   Tessellation const* tproc=0,
+			   #endif
+			   Tessellation *tess=0);
 #endif //ROUNDGRID

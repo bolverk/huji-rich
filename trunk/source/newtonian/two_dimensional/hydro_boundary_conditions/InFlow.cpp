@@ -62,7 +62,7 @@ Vector2D InFlow::CalcEdgeVelocity(Tessellation const& /*tessellation*/,
 	return res;
 }
 
-bool InFlow::IsBoundary(Edge const& edge,Tessellation const& tessellation)const
+bool InFlow::IsBoundary(Edge const& edge,Tessellation const& /*tessellation*/)const
 {
 	if(edge.neighbors.first<0)
 		return true;

@@ -5,7 +5,7 @@
 namespace {
 	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
 		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
-		&neighpoints,vector<vector<int> > &newpoints)
+			       &neighpoints,vector<vector<int> >& /*newpoints*/)
 	{
 		sentprocs.clear();
 		neighpoints.clear();
@@ -689,7 +689,6 @@ namespace {
 
 VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
 	OuterBoundary const& bc):
-Nextra(0),
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -697,21 +696,22 @@ Nextra(0),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	GhostPoints(vector<vector<int> > ()),
+	Tri(0),
 	GhostProcs(vector<int> ()),
-	SentPoints(vector<vector<int> > ()),
+	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
+	SentPoints(vector<vector<int> > ()),
 	selfindex(vector<int> ()),
 	NGhostReceived(vector<vector<int> > ()),
 	OrgCorner(),
-	Tri(0)
+	Nextra(0)
 {
 	Initialise(points,&bc);
 }
 
+#ifdef RICH_MPI
 VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proctess,
 	OuterBoundary const& bc):
-Nextra(0),
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -719,17 +719,19 @@ Nextra(0),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	GhostPoints(vector<vector<int> > ()),
+	Tri(0),
 	GhostProcs(vector<int> ()),
-	SentPoints(vector<vector<int> > ()),
+	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
+	SentPoints(vector<vector<int> > ()),
 	selfindex(vector<int> ()),
 	NGhostReceived(vector<vector<int> > ()),
 	OrgCorner(),
-	Tri(0)
+	Nextra(0)
 {
 	Initialise(points,proctess,&bc);
 }
+#endif // RICH_MPI
 
 vector<int> VoronoiMesh::AddPointsAlongEdge(int point,vector<vector<int> > const&copied,
 	int side)
@@ -846,7 +848,6 @@ vector<int> VoronoiMesh::GetSelfPoint(void)const
 }
 
 VoronoiMesh::VoronoiMesh():
-Nextra(0),
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -854,29 +855,34 @@ Nextra(0),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	GhostPoints(vector<vector<int> > ()),
+	Tri(0),
 	GhostProcs(vector<int> ()),
-	SentPoints(vector<vector<int> > ()),
+	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
+	SentPoints(vector<vector<int> > ()),
 	selfindex(vector<int> ()),
 	NGhostReceived(vector<vector<int> > ()),
 	OrgCorner(),
-	Tri(0)  {}
+	Nextra(0) {}
 
 VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
-GhostPoints(other.GhostPoints),GhostProcs(other.GhostProcs),
-	SentPoints(other.SentPoints),SentProcs(other.SentProcs),
-	selfindex(other.selfindex),
-	Nextra(other.Nextra),logger(other.logger),
+  logger(other.logger),
 	eps(other.eps),
 	obc(other.obc),
 	cell_edges(other.cell_edges),
 	edges(other.edges),
 	CM(other.CM),
 	mesh_vertices(other.mesh_vertices),
+  Tri(new Delaunay(*other.Tri)),
+  GhostProcs(other.GhostProcs),
+  GhostPoints(other.GhostPoints),
+  SentProcs(other.SentProcs),
+  SentPoints(other.SentPoints),
+	selfindex(other.selfindex),
 	NGhostReceived(other.NGhostReceived),
 	OrgCorner(),
-	Tri(new Delaunay(*other.Tri)) {}
+	Nextra(other.Nextra)
+{}
 
 void VoronoiMesh::build_v()
 {
@@ -913,8 +919,8 @@ void VoronoiMesh::build_v()
 				edge_temp.neighbors.first = to_check->vertices[j];
 				edge_temp.neighbors.second = to_check->vertices[(j+1)%3];
 
-				int n0=edge_temp.neighbors.first;
-				int n1=edge_temp.neighbors.second;
+				//				int n0=edge_temp.neighbors.first;
+				//				int n1=edge_temp.neighbors.second;
 
 				if(legal_edge(&edge_temp))
 				{
@@ -1069,10 +1075,11 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		CM[i]=CalcCellCM(i);
 }
 
-void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc,
-	OuterBoundary const* outer)
-{
 #ifdef RICH_MPI
+void VoronoiMesh::Initialise(vector<Vector2D>const& pv,
+			       Tessellation const& vproc,
+			       OuterBoundary const* outer)
+{
 	NGhostReceived.clear();
 	const int rank = get_mpi_rank();
 	obc=outer;
@@ -1241,8 +1248,8 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 		CM.resize(n);
 		for(int i=0;i<n;++i)
 			CM[i]=CalcCellCM(i);
-#endif
 }
+#endif
 
 Vector2D VoronoiMesh::get_center(int facet)
 	// This function calculates the center of the circle surrounding the Facet
@@ -1474,9 +1481,9 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		CM[i]=CalcCellCM(i);
 }
 
+#ifdef RICH_MPI
 void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 {
-#ifdef RICH_MPI
 	// Clean_up last step
 	edges.clear();
 	GhostPoints.clear();
@@ -1649,8 +1656,8 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		CM.resize(n);
 		for(int i=0;i<n;++i)
 			CM[i]=CalcCellCM(i);
-#endif
 }
+#endif
 
 vector<int> VoronoiMesh::GetNeighbors(int index)const
 {
@@ -1770,8 +1777,9 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	SendRecvBoundaryRemove(BoundaryRemove,BoundaryNeigh,V,LocalNeighbors,
 		GhostNeighbors);
 	// First index in GhostNeighbors is the ghost point that is removed
-#endif
 	int Ntotal=V.GetPointNo();
+#endif
+
 	VolIndex.clear();
 	Volratio.clear();
 	size_t n=ToRemove.size();
@@ -2155,13 +2163,13 @@ namespace
 	}
 }
 
-int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int NewIndex,
+int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int /*NewIndex*/,
 	Vector2D const& NewPoint)
 {
 	int loc=FindEdge(V,ToRefine,other);
 	vector<Vector2D>& cor=V.Tri->ChangeCor();
 	cor.push_back(NewPoint);
-	int index= V.edges[loc].neighbors.second==other ? 0 : 1;
+	//	int index= V.edges[loc].neighbors.second==other ? 0 : 1;
 	int& temp = V.edges[loc].neighbors.second==other ?
 		V.edges[loc].neighbors.first :
 	V.edges[loc].neighbors.second;
@@ -2970,11 +2978,11 @@ vector<Edge>& VoronoiMesh::GetAllEdges(void)
 	return edges;
 }
 
-void VoronoiMesh::NonSendBoundary(vector<int> &
-	proclist,vector<vector<int> > & data,Tessellation const& v,
+#ifdef RICH_MPI
+void VoronoiMesh::NonSendBoundary(vector<int> & proclist,
+vector<vector<int> > & data,Tessellation const& v,
 	vector<vector<int> > &totest,vector<Edge> const& boxedges)
 {
-#ifdef RICH_MPI
 	vector<int> newproclist;
 	vector<vector<int> > newdata;
 	vector<vector<int> > newtotest;
@@ -3011,13 +3019,13 @@ void VoronoiMesh::NonSendBoundary(vector<int> &
 	proclist=newproclist;
 	data=newdata;
 	totest=newtotest;
-#endif
 }
+#endif
 
+#ifdef MPI_VERSION
 void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 	proclist,vector<vector<int> > &data)
 {
-#ifdef MPI_VERSION
 	int n=(int)procorder.size();
 	int nlist=(int)proclist.size();
 	const int rank = get_mpi_rank();
@@ -3100,13 +3108,13 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			}
 		}
 	}
-#endif
 }
+#endif
 
+#ifdef MPI_VERSION
 void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 	proclist,vector<vector<int> > &data)
 {
-#ifdef MPI_VERSION
 	int n=(int)procorder.size();
 	int nlist=(int)proclist.size();
 	const int rank = get_mpi_rank();
@@ -3187,8 +3195,8 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 			}
 		}
 	}
-#endif
 }
+#endif
 
 void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 {
@@ -3238,10 +3246,10 @@ void VoronoiMesh::PeriodicBoundaryPoints(vector<int> &points,int edge_number)
 	}
 }
 
+#ifdef RICH_MPI
 void VoronoiMesh::NonSendCorners(vector<int> &
 	proclist,vector<vector<int> > & data,Tessellation const& v)
 {
-#ifdef RICH_MPI
 	vector<int> newproclist;
 	vector<vector<int> > newdata;
 	int n=(int)proclist.size();
@@ -3266,8 +3274,8 @@ void VoronoiMesh::NonSendCorners(vector<int> &
 	}
 	proclist=newproclist;
 	data=newdata;
-#endif
 }
+#endif
 
 void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 {
@@ -3362,11 +3370,11 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 
 // BoundaryRemove is the list per proc what points are removed given by their indeces in the sent vector
 // BoundaryNeigh, for each point in boundary remove, what are the indeces in sentvector of the local neighbors
+#ifdef RICH_MPI
 void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 	vector<vector<int> > &BoundaryRemove,
 	vector<vector<vector<int> > > &BoundaryNeigh)
 {
-#ifdef RICH_MPI
 	const int rank = get_mpi_rank();
 	const int ws = get_mpi_size();
 	vector<int> procorder=GetProcOrder(rank,ws);
@@ -3460,5 +3468,5 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 		}
 	}
 	SendRecvRemove(procorder,GhostProcs,NewSend);
-#endif
 }
+#endif

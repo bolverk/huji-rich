@@ -49,7 +49,7 @@ Conserved CylindricalComplementary::Calculate
  vector<Conserved> const& /*fluxes*/,
  vector<Vector2D> const& /*point_velocity*/,
  HydroBoundaryConditions const& /*hbc*/,
- vector<vector<double> > const &tracer,
+ vector<vector<double> > const& /*tracer*/,
  vector<double>& /*dtracer*/,
  vector<double> const& /*lengthes*/,
  double /*t*/,

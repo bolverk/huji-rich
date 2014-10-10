@@ -86,7 +86,7 @@ Vector2D RigidWallHydro::CalcEdgeVelocity
 	return Vector2D(0,0);
 }
 
-bool RigidWallHydro::IsBoundary(Edge const& edge,Tessellation const& Data)const
+bool RigidWallHydro::IsBoundary(Edge const& edge,Tessellation const& /*Data*/)const
 {
 	if(edge.neighbors.first<0)
 		return true;

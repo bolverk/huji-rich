@@ -415,8 +415,11 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	}
 }
 
+#ifdef RICH_MPI
 void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-	double dt, Tessellation& tessellation,Tessellation const& vproc,
+	double dt, Tessellation& tessellation,
+
+		    Tessellation const& vproc,
 	vector<Vector2D> oldpoints)
 {
 	if(oldpoints.empty())
@@ -432,6 +435,7 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		tessellation.Update(oldpoints,vproc);
 	}
 }
+#endif // RICH_MPI
 
 namespace {
 	class IntensiveCalculator: public Index2Member<Conserved>
@@ -1433,7 +1437,7 @@ vector<vector<double> > CalcTraceChange
 }
 
 vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> const&
-	cells,vector<CustomEvolution*> const& customevolve)
+				   cells,vector<CustomEvolution*> const& /*customevolve*/)
 {
 	const int n=tess.GetPointNo();
 	vector<double> res;

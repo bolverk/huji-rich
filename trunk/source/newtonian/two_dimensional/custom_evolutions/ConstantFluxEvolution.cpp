@@ -37,14 +37,14 @@ Conserved ConstantFluxEvolution::CalcFlux(Tessellation const& tessellation,
 Primitive ConstantFluxEvolution::UpdatePrimitive
 	(vector<Conserved> const& /*conservedintensive*/,
 	EquationOfState const& /*eos*/,
-	vector<Primitive>& cells,int index,Tessellation const& /*tess*/,
+	 vector<Primitive>& /*cells*/,int /*index*/,Tessellation const& /*tess*/,
 	double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
 	return cell_;
 }
 
 vector<double> ConstantFluxEvolution::UpdateTracer(int index,vector<vector<double> >
-	const& /*tracers*/,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& cells,
+						   const& /*tracers*/,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& /*cells*/,
 	Tessellation const& tess,double /*time*/)
 {
 	return tess.GetVolume(index)*cell_.Density*tracer_;

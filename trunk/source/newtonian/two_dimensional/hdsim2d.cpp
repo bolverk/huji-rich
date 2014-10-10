@@ -239,7 +239,7 @@ namespace
 		     double bs,
 		     vector<CustomEvolution*>& ce,
 		     Tessellation& tess,
-		     vector<Conserved>& extensive,
+		     vector<Conserved>& /*extensive*/,
 		     bool density_floor)
     {
       if(active_)
@@ -622,7 +622,7 @@ void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 namespace
 {
 	void CreateGetPrimitiveList(vector<int> const& ToRemove,vector<vector<int> >
-		const& Nghost,int nremoved,vector<vector<int> > &MPI_AMR_Send)
+				    const& Nghost,int /*nremoved*/,vector<vector<int> > &MPI_AMR_Send)
 	{
 		int nprocs=(int)Nghost.size();
 		MPI_AMR_Send.resize(nprocs);
@@ -790,13 +790,14 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 			{
 				c_temp[index]+=Primitive2Conserved(MPIcells[i-n],dv[i][j]);
 			}
-			if(traceractive)
+			if(traceractive){
 				if(i<n)
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 						t_temp[index][jj]+=dv[i][j]*tracer_[ToRemove[i]][jj]*_cells[ToRemove[i]].Density;
 				else
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 						t_temp[index][jj]+=dv[i][j]*MPItracer[i-n][jj]*MPIcells[i-n].Density;
+			}
 		}
 	}
 	// Update the primitives
@@ -843,7 +844,9 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	int nprocs=(int)_tessellation.GetDuplicatedProcs().size();
 	//sort(ToRemoveReduced.begin(),ToRemoveReduced.end());
 	vector<vector<int> > & ghostpoints=_tessellation.GetDuplicatedPoints();
+	#ifdef RICH_MPI
 	vector<vector<int> > & nghost=_tessellation.GetGhostIndeces();
+#endif // RICH_MPI
 	vector<vector<int> > toremoveall(nprocs); // the indeces in the ghost that are removed
 	for(int i=0;i<nprocs;++i)
 	{
