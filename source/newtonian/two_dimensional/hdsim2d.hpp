@@ -118,6 +118,9 @@ public:
   void SetProcessorMovement(ProcessorUpdate *procupdate);
   #endif
 
+  /*! \brief Access to physical geometry
+    \return Physical geometry
+   */
   const PhysicalGeometry& getPhysicalGeometry(void) const;
 
   /*! \brief Returns the tessellation
@@ -154,6 +157,7 @@ public:
   /*! \brief Class constructor
     \param points Initial position of the mesh generating points
     \param tessellation Voronoi tessellation method
+    \param proctess Tessellation of the processes
     \param interpolation Interpolation method
     \param density Initial spatial density distribution
     \param pressure Initial spatial pressure distribution
@@ -242,6 +246,9 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
+  /*! \brief Change the physical geometry
+    \param pg New physical geometry
+   */
   void changePhysicalGeometry(const PhysicalGeometry* pg);
 
   //! \brief Advances the simulation in time, second order accuracy
@@ -364,6 +371,9 @@ public:
   */
   vector<Primitive>& GetAllCells(void);
 
+  /*! \brief Access to extensive conserved
+    \return List of extensive conserved
+   */
   vector<Conserved>& getAllConserved(void);
 
   /*!
@@ -389,6 +399,9 @@ public:
    */
   void setStartTime(double t_start);
 
+  /*! \brief Access to the equation of state
+    \return Equation of state
+   */
   const EquationOfState& getEos(void) const;
 };
 

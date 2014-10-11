@@ -21,7 +21,7 @@ public:
   /*! \brief Receive information
     \param address Sender rank
    */
-  virtual void recvInfo(int addrress) = 0;
+  virtual void recvInfo(int address) = 0;
 
   virtual ~Communication(void);
 };

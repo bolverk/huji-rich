@@ -65,10 +65,15 @@ public:
        const Vector2D& direction_i);
 };
 
+//! \brief Cylindrical symmetry
 class CylindricalSymmetry: public PhysicalGeometry
 {
 public:
 
+  /*! \brief Class constructor
+    \param origin Origin of the axis of rotation
+    \param direction Positive direction of rotation axis
+   */
   CylindricalSymmetry(const Vector2D& origin,
 		      const Vector2D& direction);
 
@@ -76,6 +81,9 @@ public:
 
   double calcVolume(const vector<Edge>& edge_list) const;
 
+  /*! \brief Returns the axis of revolution
+    \return Axis of revolution
+   */
   const Axis& getAxis(void) const;
 
 private:

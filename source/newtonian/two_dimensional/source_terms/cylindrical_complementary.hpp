@@ -5,11 +5,15 @@
 #include "../../../tessellation/geometry.hpp"
 #include "../physical_geometry.hpp"
 
+//! \brief Adds necessary correction to cylindrical geometry
 class CylindricalComplementary: public SourceTerm
 {
 
 public:
 
+  /*! \brief Class constructor
+    \param axis Rotation axis
+   */
   CylindricalComplementary(const Axis& axis);
 
   Conserved Calculate

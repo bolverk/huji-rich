@@ -7,6 +7,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 
+//! \brief Alias for random number generator
 typedef boost::mt19937_64 base_generator_type;
 
 using std::vector;
