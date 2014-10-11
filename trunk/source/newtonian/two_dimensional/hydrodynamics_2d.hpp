@@ -51,6 +51,7 @@ vector<Conserved> CalcConservedIntensive
 /*! \brief Calculates the extensive conserved variables
   \param cons_int Conserved intensive variables
   \param tess Tessellation
+  \param pg Physical geometry
   \return List of conserved variables
 */
 vector<Conserved> CalcConservedExtensive
@@ -134,6 +135,12 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	double dt, Tessellation& tessellation,Tessellation const& vproc,
 	vector<Vector2D> oldpoints=vector<Vector2D> ());
 
+/*! \brief Calculates the intensive conserved variables
+  \param tess Tessellation
+  \param extensive Extensive conserved variables
+  \param pg Physical geometry
+  \return List of intensive conserved variables
+ */
 vector<Conserved> calc_conserved_intensive
 (const Tessellation& tess,
  const vector<Conserved>& extensive,
@@ -170,6 +177,20 @@ void UpdatePrimitives(vector<Conserved> const& conservedintensive,
 		      Tessellation const& tess,double time,
 		      vector<vector<double> > const& extensivetracers);
 
+/*! \brief Calculates the fluxes
+  \param tessellation Tessellation
+  \param cell List of primitive variables
+  \param dt Time step
+  \param time Simulation time
+  \param interpolation Interpolation scheme
+  \param facevelocity Velocity of edges
+  \param boundaryconditions Hydrodynamic boundary conditions
+  \param rs Riemann solver
+  \param CellsEvolve Custom evolution schemes
+  \param cem Custom evolution manager
+  \param tracers Tracers
+  \return List of fluxes at each edge
+ */
 vector<Conserved> calc_fluxes
 (Tessellation const& tessellation,
  vector<Primitive> const& cells,
@@ -201,6 +222,7 @@ Conserved FluxInBulk(Vector2D const& normaldir,
 
 /*! \brief Adds force contribution to the extensive conserved variables
   \param tess Tessellation
+  \param pg Physical geometry
   \param cells Fluid elements
   \param force External force
   \param t Time
@@ -396,6 +418,13 @@ void FixPressure
 bool NearBoundary(int index,Tessellation const& tess,
 		  vector<CustomEvolution*> const& customevolve);
 
+/*! \brief Calculates extensive tracers
+  \param intensive_tracer Intensive tracers
+  \param tess Tessellation
+  \param cells List of primitive variables
+  \param pg Physical geometry
+  \return List of extensive tracers
+ */
 vector<vector<double> > calc_extensive_tracer
 (const vector<vector<double> > & intensive_tracer,
  const Tessellation& tess,
@@ -424,6 +453,21 @@ void MakeTracerIntensive
  const& tracer_extensive,Tessellation const& tess,
  vector<Primitive> const& cells, const PhysicalGeometry& pg);
 
+/*! \brief A more efficient version of update_extensive_tracers
+  \param extensive_tracers Extensive tracers
+  \param tracers Intensive tracers
+  \param cells List of primitive variables
+  \param tess Tessellation
+  \param fluxes Hydrodynamic fluxes
+  \param time Simulation time
+  \param dt Time step
+  \param hbc Hydrodynamic variabels
+  \param interp Interpolation scheme
+  \param ce Custom evolutions
+  \param cem Custom evolution manager
+  \param fv Face velocities
+  \param lengthes Edge lengths
+ */
 void really_update_extensive_tracers
 (vector<vector<double> >& extensive_tracers,
  const vector<vector<double> >& tracers,
@@ -540,6 +584,12 @@ void FixAdvection(vector<Conserved>& extensive,
 		  vector<Vector2D> const& facevelocity,
 		  double dt,vector<Vector2D> const& pointvelocity);
 
+/*! \brief Determines the time step
+  \param hydro_time_step Time step derived from hydrodynamics
+  \param external_dt Time step suggested by user
+  \param current_time Current simulation time
+  \param end_time Termination time
+ */
 double determine_time_step(double hydro_time_step,
 			   double external_dt,
 			   double current_time,
