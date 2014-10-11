@@ -13,21 +13,32 @@
 
 using std::vector;
 
+//! \brief Base class for physical geometry
 class PhysicalGeometry
 {
 public:
 
+  /*! \brief Calculates the physical area of an edge
+    \param edge Cell edge
+    \return Area of the edge
+   */
   virtual double calcArea(const Edge& edge) const = 0;
 
+  /*! \brief Calculates the physical volume of a cell
+    \param edge_list List of edges that bound the cell
+    \return volume of the cell
+   */
   virtual double calcVolume(const vector<Edge>& edge_list) const = 0;
 
   virtual ~PhysicalGeometry(void);
 };
 
+//! \brief Slab symmetry
 class SlabSymmetry: public PhysicalGeometry
 {
 public:
 
+  //! \brief Class constructor
   SlabSymmetry(void);
 
   double calcArea(const Edge& edge) const;
@@ -35,13 +46,21 @@ public:
   double calcVolume(const vector<Edge>& edge_list) const;
 };
 
+//! \brief Axis of revolution
 class Axis
 {
 public:
 
+  //! \brief Origin of the axis
   const Vector2D origin;
+
+  //! \brief Positive direction of the axis
   const Vector2D direction;
 
+  /*! \brief Class constructor
+    \param origin_i Origin of the axis
+    \param direction_i Positive direction of the axis
+   */
   Axis(const Vector2D& origin_i,
        const Vector2D& direction_i);
 };

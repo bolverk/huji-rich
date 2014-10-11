@@ -5,6 +5,10 @@
 
 using namespace std;
 
+ColdflowParams::ColdflowParams(const double as_i,
+			       const double bs_i):
+  as(as_i), bs(bs_i) {}
+
 void hdsim::SetData(vector<Primitive> const& cells,vector<Vector2D> const& points,
 	double time,vector<vector<double> > const& tracers)
 {
