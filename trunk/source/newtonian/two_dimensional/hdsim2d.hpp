@@ -27,16 +27,25 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 
+/*! \brief Parameters for cold flows correction
+  \details See equations 61 and 62 in the Arepo paper
+ */
 class ColdflowParams
 {
 public:
 
+  //! \brief Threshold ratio between thermal and kinetic energy
   double as;
+
+  //! \brief Threshold ratio between thermal and potential energy
   double bs;
 
+  /*! \brief Class constructor
+    \param as_i Threshold ratio between thermal and kinetic energy
+    \param bs_i Threshold ratio between thermal and potential energy
+   */
   ColdflowParams(double as_i,
-		 double bs_i):
-    as(as_i), bs(bs_i) {}
+		 double bs_i);
 };
 
 //! \brief Newtonian hydrodynamic simulation
