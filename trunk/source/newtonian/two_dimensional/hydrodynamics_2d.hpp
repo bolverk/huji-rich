@@ -179,7 +179,7 @@ void UpdatePrimitives(vector<Conserved> const& conservedintensive,
 
 /*! \brief Calculates the fluxes
   \param tessellation Tessellation
-  \param cell List of primitive variables
+  \param cells List of primitive variables
   \param dt Time step
   \param time Simulation time
   \param interpolation Interpolation scheme
@@ -267,6 +267,7 @@ void ExternalForceContribution(Tessellation const& tess,
   \param dt_external Extrnal time step
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
+  \param pg Physical geometry
   \param procupdate Scheme for updating the positions of the processes
   \param traceflag Determines whether tracers should be updated
   \param coldflows_flag Determines whether cold flows should be used
@@ -397,7 +398,6 @@ vector<double> GetForceEnergy(Tessellation const& tess,
   \param bs See Arepo paper
   \param customevolve Custom evolution
   \param tess Tessellation
-  \param extensive Extensive conserved variables
   \param shockedcells Flag whether the cell is shocked or not
   \param densityfloor Is the densityfllor on or off
  */
@@ -447,6 +447,7 @@ void MakeTracerExtensive
   \param tracer_extensive Extensive tracers
   \param tess Tessellation
   \param cells Fluid elements
+  \param pg Physical geometry
  */
 void MakeTracerIntensive
 (vector<vector<double> > &tracer,vector<vector<double> >
@@ -466,7 +467,7 @@ void MakeTracerIntensive
   \param ce Custom evolutions
   \param cem Custom evolution manager
   \param fv Face velocities
-  \param lengthes Edge lengths
+  \param lengths Edge lengths
  */
 void really_update_extensive_tracers
 (vector<vector<double> >& extensive_tracers,
@@ -501,13 +502,13 @@ void UpdateTracerExtensive
   \param originalP The original pressure distribution.
   \param originalVx The original x velocity distribution.
   \param originalVy The original y velocity distribution.
-  \param originalTracers The original tracers.
   \param cells The primitive cells
   \param tess The tessellation
   \param tracer The tracer field
   \param tracerindex The index in the tracer to consider
   \param eos The equation of state
   \param cevolve The custom evolution of cells
+  \param coldflows Toggles cold flows correction
 */
 void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
 		     SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
@@ -589,6 +590,7 @@ void FixAdvection(vector<Conserved>& extensive,
   \param external_dt Time step suggested by user
   \param current_time Current simulation time
   \param end_time Termination time
+  \return Time step
  */
 double determine_time_step(double hydro_time_step,
 			   double external_dt,

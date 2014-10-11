@@ -12,6 +12,7 @@
   \param p1 Vertex #1
   \param p2 Vertex #2
   \param p3 Vertex #3
+  \return Area of the triangle
  */
 double calc_triangle_area(const Vector2D& p1,
 			  const Vector2D& p2,

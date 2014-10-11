@@ -551,6 +551,10 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
     vec[indeces[i]]=data[i];
 }
 
+/*! \brief Performs type casting for an entire vector
+  \param source Source vector
+  \return Source vector converted to new type
+ */
 template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
 {
   vector<T> res(source.size());
@@ -559,12 +563,20 @@ template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
   return res;
 }
 
+/*! \brief Inserts all elements from one vector to the end of another
+  \param subject Vector that will be modifies
+  \param addendum Vector that will be added
+ */
 template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
 {
   if(!addendum.empty())
     subject.insert(subject.end(),addendum.begin(),addendum.end());
 }
 
+/*! \brief Sums terms of a lazy list
+  \param i2m lazy list
+  \return Sum of all terms of i2m
+ */
 template<class T> T lazy_sum(const Index2Member<T>& i2m)
 {
   T res = i2m(0);

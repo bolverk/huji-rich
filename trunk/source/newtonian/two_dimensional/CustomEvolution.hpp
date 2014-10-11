@@ -128,6 +128,9 @@ public:
   */
   virtual bool ShouldForceTracerReset(void)const;
 
+  /*! \brief Determine whether the cell should be taken into account by the interpolation
+    \return True if it is relevant for interpolation, false otherwise
+   */
   virtual bool isRelevantToInterpolation(void) const;
 };
 
