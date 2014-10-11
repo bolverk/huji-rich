@@ -24,7 +24,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 	for(int i=0;i<nproc;++i)
 		R[i]=tproc.GetWidth(i);
 	// Make cell rounder
-	const Vector2D CM=tproc.GetCellCM(rank);
+	const Vector2D& CM=tproc.GetCellCM(rank);
 	Vector2D point(CM);
 	const double d=abs(CM-tproc.GetMeshPoint(rank));
 	double dxround=0,dyround=0;
