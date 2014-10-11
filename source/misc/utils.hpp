@@ -573,6 +573,10 @@ template<class T> T lazy_sum(const Index2Member<T>& i2m)
   return res;
 }
 
+/*! \brief Finds the maximum of a lazy list
+  \param i2m Lazy list
+  \return Max term of lazy list
+ */
 template<class T> T lazy_max(const Index2Member<T>& i2m)
 {
   T res = i2m(0);

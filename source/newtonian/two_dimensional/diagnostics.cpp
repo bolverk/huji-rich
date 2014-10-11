@@ -60,7 +60,7 @@ Conserved total_conserved(const hdsim& sim)
 {
   Conserved res = lazy_sum(ExtensiveConservedCalculator(sim));
 
-  #ifdef RICH_MPI
+#ifdef RICH_MPI
   double total_mass = 0;
   MPI_Allreduce(&res.Mass,&total_mass,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
   double total_x_momentum = 0;
@@ -73,7 +73,7 @@ Conserved total_conserved(const hdsim& sim)
   res.Momentum.x = total_x_momentum;
   res.Momentum.y = total_y_momentum;
   res.Energy = total_energy;
-  #endif
+#endif
 
   return res;
 }
@@ -86,7 +86,7 @@ namespace {
 
     ExtensiveTracerCalculator(const hdsim& sim,
 			      const int index):
-    sim_(sim), index_(index),
+      sim_(sim), index_(index),
       pg_(sim.getPhysicalGeometry()) {}
 
     size_t getLength(void) const

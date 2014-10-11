@@ -48,7 +48,6 @@ Conserved total_conserved(hdsim const& sim);
 /*! \brief Calculates the total amount of tracer in computational domain
   \param sim Hydrodynamic simulation
   \param index Index of tracer
-  \param pg Physical geometry
   \return Total amount of certain tracer
  */
 double total_tracer(const hdsim& sim,
