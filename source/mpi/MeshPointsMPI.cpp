@@ -212,8 +212,6 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 {
 	double N0=sqrt(PointNum*4*M_PI*(alpha+1)/(pow(Rmax,2*(alpha+1))-
 		pow(Rmin,2*(alpha+1))));
-	double dphi;
-	int Nphi;
 	Vector2D pos;
 	vector<Vector2D> res;
 	const int rank = get_mpi_rank();
@@ -225,14 +223,13 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 	double maxcellR=max(min(arc[1],Rmax),Rmin);
 	double minangle=arc[2];
 	double maxangle=arc[3];
-	double r;
 	int nrmin=(int)((pow(max(mincellR,Rmin),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0));
 	int nrmax=(int)((pow(min(maxcellR,Rmax),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0)+0.5);
 	for(int i=nrmin;i<nrmax;++i)
 	{
-		r=pow(2*M_PI*i*(alpha+1)/N0+pow(Rmin,alpha+1),1.0/(alpha+1));
-		Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
-		dphi=2*M_PI/Nphi;
+		const double r=pow(2*M_PI*i*(alpha+1)/N0+pow(Rmin,alpha+1),1.0/(alpha+1));
+		const int Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
+		const double dphi=2*M_PI/Nphi;
 		int phimin=(int)(minangle/dphi);
 		int phimax=(int)(maxangle/dphi+0.5);
 		for(int j=phimin;j<phimax;++j)
