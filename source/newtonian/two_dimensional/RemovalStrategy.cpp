@@ -41,7 +41,6 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	for(int i=0;i<n;++i)
 	{
 		bool good=true;
-		vector<int> edges=tess.GetCellEdges(candidates[i]);
 		vector<int> neigh=tess.GetNeighbors(candidates[i]);
 		int nneigh=(int) neigh.size();
 		/*for(int j=0;j<nneigh;++j)
