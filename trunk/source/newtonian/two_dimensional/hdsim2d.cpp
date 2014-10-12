@@ -850,8 +850,8 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > & ghostpoints=_tessellation.GetDuplicatedPoints();
 	#ifdef RICH_MPI
 	vector<vector<int> > & nghost=_tessellation.GetGhostIndeces();
-#endif // RICH_MPI
 	vector<vector<int> > toremoveall(nprocs); // the indeces in the ghost that are removed
+#endif // RICH_MPI
 	for(int i=0;i<nprocs;++i)
 	{
 		vector<int> toremove2;
