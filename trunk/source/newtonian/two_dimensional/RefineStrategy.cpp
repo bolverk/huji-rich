@@ -52,10 +52,9 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 		{
 			sort(allsent.begin(),allsent.end());
 			allsent=unique(allsent);
-			size_t toAdd;
 			for(size_t i=0;i<refined_old.size();++i)
 			{
-				toAdd=lower_bound(allsent.begin(),allsent.end(),refined_old[i])-
+			  const size_t toAdd=lower_bound(allsent.begin(),allsent.end(),refined_old[i])-
 					allsent.begin();
 				refined_old[i]-=int(toAdd);
 			}
@@ -66,10 +65,9 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 	if(!Removed.empty())
 	{
 		// Update the refined_old list
-		size_t toAdd;
 		for(size_t i=0;i<refined_old.size();++i)
 		{
-			toAdd=lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
+			const size_t toAdd=lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
 				Removed.begin();
 			refined_old[i]-=int(toAdd);
 		}
