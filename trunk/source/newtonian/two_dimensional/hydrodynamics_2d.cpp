@@ -233,7 +233,7 @@ double TimeStepForCellBoundary
 	const vector<int> edge_index=tess.GetCellEdges(index);
 	for(int i=0;i<(int)face_velocities.size();++i)
 	{
-		const Edge edge=tess.GetEdge(edge_index[i]);
+		const Edge& edge=tess.GetEdge(edge_index[i]);
 		const double temp = calc_boundary_face_velocity
 			(hbc, edge, tess, face_velocities, cell,
 			cells, time, i);
@@ -354,7 +354,7 @@ void UpdateConservedExtensive
 		if(!boundaryconditions.IsGhostCell(i,tessellation)){
 			for(int j=0;j<(int)cell_edge_indices.size();++j){
 				const int edge_index = cell_edge_indices[j];
-				const Edge edge = tessellation.GetEdge(edge_index);
+				const Edge& edge = tessellation.GetEdge(edge_index);
 				const Conserved delta = dt*lengthes[edge_index]*fluxes[edge_index];
 				if(i==edge.neighbors.first)
 					conserved_extensive[i] -= delta;
@@ -671,7 +671,7 @@ n0 : n1;
 	{
 		eo.AddEntry("Error in CalcFlux",0);
 		eo.AddEntry("edge index",edge_index);
-		const Edge edge = tess.GetEdge(edge_index);
+		const Edge& edge = tess.GetEdge(edge_index);
 		eo.AddEntry("edge x1 location",edge.vertices.first.x);
 		eo.AddEntry("edge y1 location",edge.vertices.first.y);
 		eo.AddEntry("edge x2 location",edge.vertices.second.x);
@@ -751,7 +751,7 @@ namespace {
 
 		Conserved operator()(size_t i) const
 		{
-			const Edge edge = tess_.GetEdge(i);
+			const Edge& edge = tess_.GetEdge(i);
 			const int n0 = edge.neighbors.first;
 			const int n1 = edge.neighbors.second;
 			if(!hbc_.IsBoundary(edge,tess_)){
@@ -1391,7 +1391,7 @@ void really_update_extensive_tracers
 	double time, double dt,
 	const HydroBoundaryConditions& hbc,
 	const SpatialReconstruction& interp,
-	const vector<CustomEvolution*> ce,
+	const vector<CustomEvolution*>& ce,
 	const CustomEvolutionManager& cem,
 	const vector<Vector2D>& fv,
 	const vector<double>& lengths)

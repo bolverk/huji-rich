@@ -70,7 +70,7 @@ namespace {
 		double chi)
 	{
 		const double R = tess.GetWidth(index);
-		const Vector2D s = tess.GetCellCM(index);
+		const Vector2D& s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
 		const double d = abs(s-r);
 
@@ -105,7 +105,7 @@ namespace {
 	double numeric_velocity_scale(Tessellation const& tess,int index,double dt,
 		vector<Primitive> const& cells)
 	{
-		const Vector2D s = tess.GetCellCM(index);
+		const Vector2D& s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
 		return max(min(abs(s-r)/dt,3*abs(cells[index].Velocity)),cells[index].SoundSpeed);
 	}

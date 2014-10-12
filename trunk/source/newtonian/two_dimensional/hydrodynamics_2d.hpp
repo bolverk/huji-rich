@@ -478,7 +478,7 @@ void really_update_extensive_tracers
  double time, double dt,
  const HydroBoundaryConditions& hbc,
  const SpatialReconstruction& interp,
- const vector<CustomEvolution*> ce,
+ const vector<CustomEvolution*>& ce,
  const CustomEvolutionManager& cem,
  const vector<Vector2D>& fv,
  const vector<double>& lengths);
