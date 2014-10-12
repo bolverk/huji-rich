@@ -888,7 +888,7 @@ namespace {
 			catch(UniversalError &eo)
 			{
 				eo.AddEntry("Error in HydroCommunicator while recv from cpu",address);
-				throw eo;
+				throw;
 			}
 			int count;
 			MPI_Status stat;
@@ -1333,7 +1333,6 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	const int ws = get_mpi_size();
 	vector<MPI_Status> status(nprocs);
 	vector<MPI_Request> req(nprocs);
-	vector<int> procorder=GetProcOrder(rank,ws);
 
 	vector<vector<int> > tosend(nprocs),torecv(nprocs);
 	vector<int> sentme,flags(nprocs,0);
@@ -1420,8 +1419,6 @@ namespace
 	{
 		vector<vector<int> > const& duplicated=tess.GetDuplicatedPoints();
 		vector<int> const& Sent=duplicated[SentIndex];
-		vector<int> real;
-		int np=tess.GetPointNo();
 		vector<int> index;
 		sort_index(ghost,index);
 		sort(ghost.begin(),ghost.end());
@@ -1461,7 +1458,6 @@ namespace
 		vector<vector<int> > &ghostneigh)
 	{
 		int nprocs=(int)BoundaryRemove.size();
-		int npoints=tess.GetPointNo();
 		vector<vector<int> > const& Nghost=tess.GetGhostIndeces();
 		localneigh.clear();
 		ghostneigh.clear();
@@ -1777,7 +1773,6 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 	// remove is sorted
 	// Find boundary cells
 	int nremove=(int)toremove.size();
-	int npoints=tess.GetPointNo();
 	vector<int> proclist=tess.GetDuplicatedProcs();
 	const int rank = get_mpi_rank();
 	const int worldsize = get_mpi_size();
