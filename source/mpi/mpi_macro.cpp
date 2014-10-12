@@ -1329,8 +1329,10 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 {
 	int nprocs=(int)SentProcs.size();
 	int nbound=(int)BoundaryPoints.size();
+	/*
 	const int rank = get_mpi_rank();
 	const int ws = get_mpi_size();
+	*/
 	vector<MPI_Status> status(nprocs);
 	vector<MPI_Request> req(nprocs);
 
