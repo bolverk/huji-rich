@@ -1442,16 +1442,14 @@ vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> co
 	const int n=tess.GetPointNo();
 	vector<double> res;
 	res.resize(n);
-	double e;
 	for(int j=0;j<n;++j)
 	{
-		e=0;
 		vector<int> neightemp=tess.GetNeighbors(j);
 		vector<int> neigh;
 		for(size_t i=0;i<neightemp.size();++i)
 			if(neightemp[i]>=0)
 				neigh.push_back(neightemp[i]);
-		e=pow(abs(cells[j].Velocity-cells[neigh[0]].Velocity),2);
+		double e=pow(abs(cells[j].Velocity-cells[neigh[0]].Velocity),2);
 		for(int i=1;i<(int)neigh.size();++i)
 		{// This could be made much faster by writing the expression implicitly
 			e=max(e,pow(abs(cells[j].Velocity-cells[neigh[i]].Velocity),2));
@@ -1718,11 +1716,10 @@ void GetPointToRemove(Tessellation const& tess,Vector2D const& point,
 {
 	int n=tess.GetPointNo();
 	PointToRemove.clear();
-	bool test;
 	for(int i=Inner;i<n;++i)
 	{
 		// Check if point is completly engulfed
-		test=true;
+		bool test=true;
 		vector<int> neigh=tess.GetNeighbors(i);
 		for(int j=0;j<(int)neigh.size();++j)
 			if(neigh[j]>=Inner)

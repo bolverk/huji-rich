@@ -753,7 +753,6 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	sort(TotalNeigh.begin(),TotalNeigh.end());
 	TotalNeigh=unique(TotalNeigh);
 #ifdef RICH_MPI
-	int rank=get_mpi_rank();
 	vector<vector<int> > MPI_AMR_Send; // the indeces in the Nghostpoints that I want to recv hydro from other procs
 	CreateGetPrimitiveList(ToRemove,_tessellation.GetGhostIndeces(),n,MPI_AMR_Send);
 	vector<int> ToRemoveReduced;
