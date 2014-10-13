@@ -162,12 +162,11 @@ namespace
 		edges,int cell_index,OuterBoundary const& obc)
 	{
 		int n=(int)edges.size();
-		int neigh0,neigh1;
 		vector<Vector2D> res(n);
 		for(int i=0;i<n;++i)
 		{
-			neigh0=edges[i].neighbors.first;
-			neigh1=edges[i].neighbors.second;
+			const int neigh0=edges[i].neighbors.first;
+			const int neigh1=edges[i].neighbors.second;
 			if(neigh0==cell_index)
 				if(neigh1>-1) // we are not near rigid wall
 					res[i]=tess.GetMeshPoint(neigh1);
