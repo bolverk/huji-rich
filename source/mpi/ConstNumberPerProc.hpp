@@ -28,7 +28,7 @@ public:
 	~ConstNumberPerProc(void);
 	/*!
 	\brief Sets the number of ideal points per proc
-	\param points
+	\param points Number of points per process
 	*/
 	void SetPointsPerProc(double points);
 
