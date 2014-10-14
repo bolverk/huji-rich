@@ -16,6 +16,8 @@
 #include "geotests.hpp"
 #include "../misc/utils.hpp"
 #include "delaunay_logger.hpp"
+#include "Edge.hpp"
+#include "../newtonian/two_dimensional/OuterBoundary.hpp"
 
 using namespace std;
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
@@ -48,7 +50,7 @@ private:
   int location_pointer;
   int last_loc;
 
-  bool IsOuterFacet(int facet);
+  bool IsOuterFacet(int facet)const;
   void add_point(int index);
   void flip(int i,int j);
   void find_diff(facet *f1,facet *f2,int*) const;
@@ -59,7 +61,21 @@ private:
   double FindMaxRadius(int point);
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
   vector<int> FindContainingTetras(int StartTetra, int point);
-
+  vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
+  bool IsTripleOut(int index) const;
+  int FindTripleLoc(facet const& f)const;
+  void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
+	const& edges,vector<bool> &checked)const;
+  void AddOuterFacets(int tri,vector<vector<int> > &toduplicate,vector<Edge>
+	const& edges,vector<bool> &checked);
+  void AddRigid(OuterBoundary const* obc,vector<Edge> const& edges,
+	vector<vector<int> > &toduplicate);
+  vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
+	vector<vector<int> > &toduplicate);
+  void AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
+	vector<vector<int> > &toduplicate);
+  double GetMaxRadius(int point,int startfacet);
+  
   Delaunay& operator=(const Delaunay& origin);
 
 public:
@@ -201,20 +217,27 @@ public:
   \return The size of the cor vector.
   */
   int GetCorSize(void)const;
+  
   /*!
-  \brief Adds points to a rigid boundary
-  \param points The points to add
+  \brief Returns the center of the circumscribed circle of a facet
+  \param index The index of the facet
+  \returns The circumscribed circle's center
   */
-  void DoMPIRigid(vector<Vector2D> const& points);
-
-  /*!
-  \brief Adds points to a periodic boundary
-  \param points The points to add
-  \return The order of the added points
-  */
-  vector<int> DoMPIPeriodic(vector<Vector2D> const& points);
+  Vector2D GetCircleCenter(int index)const;
 
   //! \brief Diagnostics
   delaunay_loggers::DelaunayLogger* logger;
+  /*!
+  \brief Builds the boundary points
+  \param obc The geometrical boundary conditions
+  \param edges The edges of the domain
+  \return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
+  */
+  vector<vector<int> > BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges);
+  /*!
+  \brief Adds the points to the tessellation, used for boundary points
+  \param points The points to add
+  */
+  void AddBoundaryPoints(vector<Vector2D> const& points);
 };
 #endif //DELAUNAYMPI_HPP
