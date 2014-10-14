@@ -229,7 +229,6 @@ private:
 	vector<vector<int> > OrgCorner;
 	int Nextra;
 
-	Vector2D get_center(int facet);
 	bool legal_edge(Edge *e);
 	void build_v(void);//Builds the voronoi mesh
 	VoronoiMesh& operator=(const VoronoiMesh& origin);
