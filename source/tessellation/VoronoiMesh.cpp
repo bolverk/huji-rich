@@ -1670,25 +1670,12 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 
 vector<int> VoronoiMesh::GetNeighbors(int index)const
 {
-	int n=(int)mesh_vertices[index].size();
-	int other;
-	vector<int> res;
-	res.reserve(n);
-	for(int i=0;i<n;++i)
-	{
-		if((other=edges[mesh_vertices[index][i]].neighbors.first)!=index)
-		{
-			//if(other!=-1)
-			res.push_back(other);
-		}
-		else
-		{
-			other=edges[mesh_vertices[index][i]].neighbors.second;
-			//if(other!=-1)
-			res.push_back(other);
-		}
-	}
-	return res;
+  vector<int> res(mesh_vertices[index].size());
+  for(size_t i=0;i<res.size();++i)
+      res[i] = edges[mesh_vertices[index][i]].neighbors.first!=index ?
+	edges[mesh_vertices[index][i]].neighbors.first :
+	edges[mesh_vertices[index][i]].neighbors.second;
+  return res;
 }
 
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
