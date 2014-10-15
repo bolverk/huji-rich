@@ -2,6 +2,8 @@
 #include <cmath>
 #include "../misc/simple_io.hpp"
 
+using std::abs;
+
 namespace {
 	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
 		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
@@ -647,11 +649,7 @@ namespace {
 		vector<vector<T> > const& v2)
 	{
 		vector<vector<T> > res(v1);
-		if(v1.size()!=v2.size())
-		{
-			cout<<"Error in CombineVectorVector, vectors not same length"<<endl;
-			throw;
-		}
+		assert(v1.size()==v2.size());
 		int n=(int)v1.size();
 		for(int i=0;i<n;++i)
 		{
@@ -752,7 +750,7 @@ vector<int> VoronoiMesh::AddPointsAlongEdge(int point,vector<vector<int> > const
 Vector2D VoronoiMesh::CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL, Vector2D rR,
 	Vector2D f)const
 {
-	Vector2D wprime = ScalarProd(wl-wr,f-(rR+rL)/2)*	(rR-rL)/pow(abs(rR-rL),2);
+	const Vector2D wprime = ScalarProd(wl-wr,f-(rR+rL)/2)*(rR-rL)/pow(abs(rR-rL),2);
 	return 0.5*(wl+wr) + wprime;
 }
 
@@ -2916,7 +2914,7 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 		int p_loc=min_index[1];
 		int edge_loc=mesh_vertices[i][min_index[0]];
 		int nedges=(int)mesh_vertices[i].size();
-		list<int> elist;
+		std::list<int> elist;
 		for(int j=0;j<nedges;++j)
 		{
 			if(j!=min_index[0])
@@ -2930,7 +2928,7 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 			if(j==min_index[0])
 				continue;
 			int nlist=(int)elist.size();
-			list<int>::iterator it=elist.begin();
+			std::list<int>::iterator it=elist.begin();
 			for(int k=0;k<nlist;++k)
 			{
 				double temp0=pair_member(edges[edge_loc].vertices,(p_loc+1)%2).distance(edges[*it].vertices.first);

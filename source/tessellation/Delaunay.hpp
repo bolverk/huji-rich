@@ -19,7 +19,6 @@
 #include "Edge.hpp"
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 
-using namespace std;
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg
 */

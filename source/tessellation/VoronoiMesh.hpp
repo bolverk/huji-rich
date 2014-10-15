@@ -23,6 +23,8 @@
 #include "../mpi/mpi_macro.hpp"
 #endif
 
+using std::string;
+
 //! \brief Voronoi tessellation class
 class VoronoiMesh : public Tessellation
 {
