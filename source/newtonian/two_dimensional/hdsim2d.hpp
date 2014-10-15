@@ -157,7 +157,11 @@ public:
   /*! \brief Class constructor
     \param points Initial position of the mesh generating points
     \param tessellation Voronoi tessellation method
-    \param proctess Tessellation of the processes
+  */
+#ifdef RICH_MPI
+  //!    \param proctess Tessellation of the processes
+#endif //RICH_MPI
+  /*!
     \param interpolation Interpolation method
     \param density Initial spatial density distribution
     \param pressure Initial spatial pressure distribution
@@ -203,7 +207,11 @@ public:
     /*! \brief Class constructor from restart file for MPI
     \param dump The ResetDump file
     \param tessellation Voronoi tessellation method
-    \param tproc Tessellation of the processes
+    */
+#ifdef RICH_MPI
+  //!    \param tproc Tessellation of the processes
+#endif // RICH_MPI
+  /*!
     \param interpolation Interpolation method
     \param eos Equation of state
     \param rs Riemann solver
