@@ -741,7 +741,16 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
 	// We add the points in a counter clockwise fashion
 	vector<vector<int> > res(edges.size());
-	vector<vector<int> > res_corner(edges.size());
+	if(olength<100)
+	{
+		for(size_t j=0;j<edges.size();++j)
+		{
+			res[j].resize(olength);
+			for(int i=0;i<olength;++i)
+				res[j][i]=i;
+		}
+		return res;
+	}
 	vector<int> res_temp,outer_points,f_temp,f_add(f.size(),0);
 	res_temp.reserve((int)(20*sqrt(1.0*olength)));
 	f_temp.reserve((int)(10*sqrt(1.0*olength)));
