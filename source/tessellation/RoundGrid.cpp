@@ -10,7 +10,10 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	if(tess==0)
 		tess=&default_tess;
 #ifdef RICH_MPI
-	tess->Initialise(points,*tproc,bc);
+	if(tproc==0)
+		tess->Initialise(points,bc);
+	else
+		tess->Initialise(points,*tproc,bc);
 #else
 	tess->Initialise(points,bc);
 #endif
@@ -51,7 +54,10 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			res[i]=tess->GetMeshPoint(i)+dw;
 		}
 #ifdef RICH_MPI
-		tess->Update(res,*tproc);
+		if(tproc==0)
+			tess->Update(res);
+		else
+			tess->Update(res,*tproc);
 #else
 		tess->Update(res);
 #endif
