@@ -356,11 +356,10 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 
 void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
 {
-	bool counter;
 	int i=0;
 	for(;i<3;++i)
 	{
-		counter=false;
+		bool counter=false;
 		for(int j=0;j<3;++j)
 		{
 			if(f1->vertices[i]==f2->vertices[j])
