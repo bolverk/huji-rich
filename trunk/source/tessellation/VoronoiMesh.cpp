@@ -919,11 +919,6 @@ void VoronoiMesh::build_v()
 				edge_temp.neighbors.first = to_check->vertices[j];
 				edge_temp.neighbors.second = to_check->vertices[(j+1)%3];
 
-				#ifdef RICH_MPI
-				int n0=edge_temp.neighbors.first;
-				int n1=edge_temp.neighbors.second;
-				#endif
-
 				if(legal_edge(&edge_temp))
 				{
 					// I added a change here, if edge has zero length I don't add it.
@@ -1168,7 +1163,6 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 		proclist[i]=(vproc.GetOriginalIndex(cell_edges[i].neighbors.first)==rank)? vproc.GetOriginalIndex(
 		cell_edges[i].neighbors.second):vproc.GetOriginalIndex(cell_edges[i].neighbors.first);
 	// Remove box boundaries from to duplicate
-	int counter=0;
 	vector<Edge> bedge=GetBoxEdges();
 
 	vector<vector<int> > firstduplicated(toduplicate);
@@ -1566,7 +1560,6 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 
 	// Remove box boundaries from to duplicate
 	int ndup=(int)toduplicate.size();
-	int counter=0;
 	vector<vector<int> > todup2,totest2,org2;
 	vector<int> proclist2;
 	for(int i=0;i<ndup;++i)
@@ -1748,7 +1741,6 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	vector<vector<int> > &VolIndex,vector<vector<double> > &Volratio)
 {
 #ifdef RICH_MPI
-	int rank=get_mpi_rank();
 	vector<vector<int> > BoundaryRemove;
 	vector<vector<vector<int> > > BoundaryNeigh;
 	// Get rid of corner points
@@ -2164,9 +2156,6 @@ int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int /*NewIndex*/,
 	int loc=FindEdge(V,ToRefine,other);
 	vector<Vector2D>& cor=V.Tri->ChangeCor();
 	cor.push_back(NewPoint);
-	#ifdef RICH_MPI
-	int index= V.edges[loc].neighbors.second==other ? 0 : 1;
-	#endif
 	int& temp = V.edges[loc].neighbors.second==other ?
 		V.edges[loc].neighbors.first :
 	V.edges[loc].neighbors.second;
