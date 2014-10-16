@@ -1980,19 +1980,12 @@ void PeriodicVelocityExchange(vector<Vector2D> &vel,
 void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 	vector<vector<int> > const& sentcells,int npoints)
 {
-	int n=(int)sentcells.size();
-	int totalsent=0;
-	for(int i=0;i<n;++i)
-		if(!sentcells[i].empty())
-			totalsent+=(int)sentcells[i].size();
-	grad.resize(npoints-totalsent);
+	const int totalsent = (int)sum_sizes(sentcells);
+	grad.resize((size_t)(npoints-totalsent));
 
-	for(int i=0;i<n;++i)
+	for(size_t i=0;i<sentcells.size();++i)
 	{
-		if(sentcells[i].empty())
-			continue;
-		vector<ReducedPrimitiveGradient2D> ptemp=VectorValues(grad,sentcells[i]);
-		if(!ptemp.empty())
-			grad.insert(grad.end(),ptemp.begin(),ptemp.end());
+	  if(!sentcells[i].empty())
+	    insert_all_to_back(grad,VectorValues(grad,sentcells[i]));
 	}
 }
