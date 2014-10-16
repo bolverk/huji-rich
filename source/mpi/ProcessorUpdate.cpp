@@ -4,6 +4,7 @@ ProcessorUpdate::~ProcessorUpdate(void){}
 
 double ProcessorUpdate::GetLoadImbalance(Tessellation const& tlocal)const
 {
+#ifdef RICH_MPI
 	int ws=get_mpi_size();
 	vector<int> N0(ws,0),N(ws,0);
 	int n=tlocal.GetPointNo();
@@ -13,4 +14,5 @@ double ProcessorUpdate::GetLoadImbalance(Tessellation const& tlocal)const
 	for(size_t i=0;i<N.size();++i)
 		total+=N[i];
 	return 1.0*(*std::max_element(N.begin(),N.end())*ws)/(1.0*total);
+#endif
 }
