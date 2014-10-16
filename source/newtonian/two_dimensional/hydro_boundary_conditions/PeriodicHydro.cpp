@@ -23,7 +23,7 @@ vector<double> PeriodicHydro::GetBoundaryTracers
 	vector<vector<double> > const& tracers,double /*time*/)const
 {
 	const int n = calc_n(edge,tess);
-	return tracers[n];
+	return tracers[(size_t)n];
 }
 
 Primitive PeriodicHydro::GetBoundaryPrimitive
@@ -31,19 +31,21 @@ Primitive PeriodicHydro::GetBoundaryPrimitive
 	Tessellation const& tess,vector<Primitive> const& cells,double /*time*/)const
 {
 	const int n = calc_n(edge,tess);
-	return cells[n];
+	return cells[(size_t)n];
 }
 
+/*
 namespace {
 	bool has_nan(vector<Primitive> const& pl)
 	{
 		for(int i=0;i<(int)pl.size();++i){
-			if(primitive_has_nan(pl[i]))
+		  if(primitive_has_nan(pl[(size_t)i]))
 				return true;
 		}
 		return false;
 	}
 }
+*/
 
 Conserved PeriodicHydro::CalcFlux
 	(Tessellation const& tessellation,vector<Primitive> const& cells,
@@ -106,7 +108,7 @@ Vector2D PeriodicHydro::CalcEdgeVelocity
 	neigh0=edge.neighbors.first;
 	neigh1=edge.neighbors.second;
 	return tessellation.CalcFaceVelocity
-	  (point_velocities[neigh0],point_velocities[neigh1],
+	  (point_velocities[(size_t)neigh0],point_velocities[(size_t)neigh1],
 	   tessellation.GetMeshPoint(edge.neighbors.first),
 	   tessellation.GetMeshPoint(edge.neighbors.second),
 	   0.5*(edge.vertices.first+edge.vertices.second));

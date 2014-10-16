@@ -55,7 +55,7 @@ Conserved CylindricalComplementary::Calculate
  double /*t*/,
  double /*dt*/)
 {
-  const double p = cells[point].Pressure;
+  const double p = cells[(size_t)point].Pressure;
   const double r = distance_from_axis(tess.GetCellCM(point),
 				      axis_);
   const Vector2D r_hat = cross_z(axis_.direction);

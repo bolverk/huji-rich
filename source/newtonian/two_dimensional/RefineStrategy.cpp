@@ -13,12 +13,12 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 	vector<Vector2D> newdirections;
 	for(int i=0;i<nrefine;++i)
 	{
-		vector<int> const& edges=tess.GetCellEdges(ToRefine[i]);
+	  vector<int> const& edges=tess.GetCellEdges(ToRefine[(size_t)i]);
 		int nedge=(int) edges.size();
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
-			Edge const& edge=tess.GetEdge(edges[j]);
+		  Edge const& edge=tess.GetEdge(edges[(size_t)j]);
 			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
@@ -27,9 +27,9 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 		}
 		if(good)
 		{
-			res.push_back(ToRefine[i]);
+		  res.push_back(ToRefine[(size_t)i]);
 			if(!directions.empty())
-				newdirections.push_back(directions[i]);
+			  newdirections.push_back(directions[(size_t)i]);
 		}
 	}
 	directions=newdirections;
@@ -67,8 +67,8 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 		// Update the refined_old list
 		for(size_t i=0;i<refined_old.size();++i)
 		{
-			const size_t toAdd=lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
-				Removed.begin();
+		  const size_t toAdd=(size_t)(lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
+					      Removed.begin());
 			refined_old[i]-=int(toAdd);
 		}
 	}
@@ -86,7 +86,7 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 			const int nn=(int)neigh.size();
 			bool good=true;
 			for(int j=0;j<nn;++j)
-				if(tess.GetMeshPoint(neigh[j]).distance(
+			  if(tess.GetMeshPoint(neigh[(size_t)j]).distance(
 					tess.GetMeshPoint(ToRefine[i]))<0.2*R)
 					good=false;
 			if(good)
@@ -123,16 +123,16 @@ Vector2D FindBestSplit(Tessellation const* tess,int PointToRefine,
 		int min_edge=0;
 		for(int j=1;j<nedges;++j)
 		{
-			double temp=DistanceToEdge(point,edges[j]);
+		  double temp=DistanceToEdge(point,edges[(size_t)j]);
 			if(temp<dis)
 			{
 				dis=temp;
 				min_edge=j;
 			}
 		}
-		slope=Parallel(edges[min_edge]);
+		slope=Parallel(edges[(size_t)min_edge]);
 		slope=slope/abs(slope);
-		Vector2D v=point-edges[min_edge].vertices.first;
+		Vector2D v=point-edges[(size_t)min_edge].vertices.first;
 		normal=v-ScalarProd(slope,v)*slope;
 		normal=normal/abs(normal);
 	}

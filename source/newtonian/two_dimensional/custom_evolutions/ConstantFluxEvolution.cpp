@@ -3,8 +3,8 @@
 using std::multiplies;
 
 ConstantFluxEvolution::ConstantFluxEvolution(Primitive const& cell,
-	vector<double> const& tracer,EquationOfState const& eos)
-:cell_(cell),tracer_(tracer),eos_(eos){}
+					     vector<double> const& tracer,EquationOfState const& /*eos*/)
+  :cell_(cell),tracer_(tracer)/*,eos_(eos)*/{}
 
 ConstantFluxEvolution::~ConstantFluxEvolution(void)
 {}
@@ -57,7 +57,7 @@ vector<double> ConstantFluxEvolution::CalcTracerFlux(Tessellation const& /*tess*
 {
 	vector<double> res(tracer_);
 	transform(res.begin(),res.end(),res.begin(),
-		bind1st(multiplies<double>(),abs(dm)*dt*edge.GetLength()));
+		bind1st(multiplies<double>(),fabs(dm)*dt*edge.GetLength()));
 	return res;
 }
 

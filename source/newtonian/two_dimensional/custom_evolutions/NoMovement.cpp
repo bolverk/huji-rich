@@ -40,7 +40,7 @@ Primitive NoMovement::UpdatePrimitive(vector<Conserved> const& conservedintensiv
 		Tessellation const& /*tess*/,double /*time*/,
 		vector<vector<double> > const& /*tracers*/)
 {
-	Conserved res = conservedintensive[index];
+  Conserved res = conservedintensive[(size_t)index];
 	return Conserved2Primitive(res, eos);
 }
 
@@ -50,9 +50,9 @@ vector<double> NoMovement::UpdateTracer(int index,vector<vector<double> >
 		double /*time*/)
 {
 	int dim=int(tracers[0].size());
-	vector<double> res(tracers[index]);
+	vector<double> res(tracers[(size_t)index]);
 	for(int j=0;j<dim;++j)
-		res[j]+=tracerchange[index][j];
+	  res[(size_t)j]+=tracerchange[(size_t)index][(size_t)j];
 	return res;
 }
 
@@ -64,9 +64,9 @@ vector<double> NoMovement::CalcTracerFlux(Tessellation const& tess,
 	const vector<double> temp2=interp.interpolateTracers(tess,cells,old_trace,dt,
 		edge,dm<0,InBulk,vface);
 	int n=(int)temp2.size();
-	vector<double> res(n);
+	vector<double> res((size_t)n);
 	for(int i=0;i<n;++i)
-		res[i]=dm*dt*edge.GetLength()*temp2[i];
+	  res[(size_t)i]=dm*dt*edge.GetLength()*temp2[(size_t)i];
 	return res;
 }
 

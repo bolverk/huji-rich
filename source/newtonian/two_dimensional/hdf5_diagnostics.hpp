@@ -13,7 +13,6 @@
 #include "diagnostics.hpp"
 #include "Reset.hpp"
 
-using namespace std;
 /*!
 \brief Writes the simulation data into an HDF5 file
 \param sim The hdsim class of the simulation

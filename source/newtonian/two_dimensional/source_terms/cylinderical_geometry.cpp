@@ -10,7 +10,7 @@ double distance_from_line(Vector2D const& point,
 			  Vector2D const& direction)
 {
   const double hypotenuse = abs(point - origin);
-  const double side = abs(Projection(point-origin,direction));
+  const double side = fabs(Projection(point-origin,direction));
   return sqrt(pow(hypotenuse,2)-pow(side,2));
 }
 
@@ -32,14 +32,14 @@ Conserved CylindericalGeometry::Calculate
  double /*t*/,
  double /*dt*/)
 {
-  const double d = cells[point].Density;
-  const double vz = Projection(cells[point].Velocity,
+  const double d = cells[(size_t)point].Density;
+  const double vz = Projection(cells[(size_t)point].Velocity,
 			       direction_);
   const Vector2D r_hat = cross_z(direction_);
-  const double vr = Projection(cells[point].Velocity,
+  const double vr = Projection(cells[(size_t)point].Velocity,
 			       r_hat);
-  const double p = cells[point].Pressure;
-  const double e = cells[point].Energy;
+  const double p = cells[(size_t)point].Pressure;
+  const double e = cells[(size_t)point].Energy;
   const double r = distance_from_line(tess.GetCellCM(point),
 				      origin_,
 				      direction_);
@@ -47,7 +47,7 @@ Conserved CylindericalGeometry::Calculate
   const double z_mom = d*vr*vz/r;
   const double volume = tess.GetVolume(point);
   if(!dtracer.empty())
-	  dtracer=-d*volume*(vr/r)*tracer[point];
+	  dtracer=-d*volume*(vr/r)*tracer[(size_t)point];
   return -volume*Conserved
     (d*vr/r,
      r_mom*r_hat/abs(r_hat)+

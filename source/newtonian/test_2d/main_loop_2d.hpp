@@ -52,7 +52,7 @@ public:
   virtual bool operator()(hdsim const& sim) = 0;
 
   //! \brief Virtual destructor
-  virtual ~TerminationCondition(void) = 0;
+  virtual ~TerminationCondition(void);
 };
 
 //! \brief Terminates the simulation after a certain time was reached

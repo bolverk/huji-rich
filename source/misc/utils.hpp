@@ -159,7 +159,7 @@ template <class T> vector<T> VectorValues(vector<T> const&v,vector<int> const &i
 
   vector<T> result(index.size());
   for(size_t i=0;i<index.size();++i)
-    result.at(i) = v.at(index.at(i));
+    result.at(i) = v.at((size_t)index.at(i));
   return result;
 }
 
@@ -193,7 +193,7 @@ template <class T> vector<T> unique(vector<T> const& v)
   if(n==0)
     return res;
   res.push_back(v[0]);
-  for(int i=1;i<n;++i)
+  for(size_t i=1;i<v.size();++i)
     if(v[i]==v[i-1])
       continue;
     else
@@ -290,7 +290,7 @@ template <class T> void ReArrangeVector(vector<T> &v,vector<int> const& indeces)
 {
   const vector<T> temp=v;
   for(size_t i=0;i<v.size();++i)
-    v[i]=temp[indeces[i]];
+    v[i]=temp[(size_t)indeces[i]];
 }
 namespace
 {

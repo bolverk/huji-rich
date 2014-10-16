@@ -54,7 +54,7 @@ public:
 private:
 	const Primitive cell_;
 	const vector<double> tracer_;
-	const EquationOfState& eos_;
+  //	const EquationOfState& eos_;
 };
 
 #endif //COSNTANTFLUXEVOLUTION_HPP

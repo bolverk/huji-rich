@@ -14,9 +14,9 @@ vector<double> CustomOuter::GetBoundaryTracers(Edge const& edge,Tessellation con
 		return _right.GetBoundaryTracers(edge,Data,tracers,time);
 	if(angle<0.75*M_PI&&angle>0.25*M_PI)
 		return _up.GetBoundaryTracers(edge,Data,tracers,time);
-	if(abs(angle)>0.75*M_PI)
+	if(fabs(angle)>0.75*M_PI)
 		return _left.GetBoundaryTracers(edge,Data,tracers,time);
-	if(angle>-0.75*M_PI&&angle-0.25*M_PI)
+	if((angle>-0.75*M_PI)&&(angle<-0.25*M_PI))
 		return _down.GetBoundaryTracers(edge,Data,tracers,time);
 	throw UniversalError("error in custom Outer conditions GetTracer");
 }
@@ -35,7 +35,7 @@ Primitive CustomOuter::GetBoundaryPrimitive(Edge const& edge,
 		return _right.GetBoundaryPrimitive(edge,tessellation,cells,time);
 	if(angle<0.75*M_PI&&angle>=0.25*M_PI)
 		return _up.GetBoundaryPrimitive(edge,tessellation,cells,time);
-	if(abs(angle)>0.75*M_PI)
+	if(fabs(angle)>0.75*M_PI)
 		return _left.GetBoundaryPrimitive(edge,tessellation,cells,time);
 	if(angle>=-0.75*M_PI&&angle<-0.25*M_PI)
 		return _down.GetBoundaryPrimitive(edge,tessellation,cells,time);
@@ -65,10 +65,10 @@ Conserved CustomOuter::CalcFlux
 	if(angle<0.75*M_PI&&angle>0.25*M_PI)
 	  return _up.CalcFlux(tessellation,cells,edge_velocity,edge,
 			       interp,dt,time);
-	if(abs(angle)>0.75*M_PI)
+	if(fabs(angle)>0.75*M_PI)
 	  return _left.CalcFlux(tessellation,cells,edge_velocity,edge,
 				 interp,dt,time);
-	if(angle>-0.75*M_PI&&angle-0.25*M_PI)
+	if((angle>-0.75*M_PI)&&(angle<-0.25*M_PI))
 	  return _down.CalcFlux(tessellation,cells,edge_velocity,edge,
 				 interp,dt,time);
 	throw UniversalError("error in custom Outer conditions");
@@ -119,10 +119,10 @@ vector<double> CustomOuter::CalcTracerFlux
 	if(angle<0.75*M_PI&&angle>0.25*M_PI)
 		return _up.CalcTracerFlux(tessellation,cells,tracers,dm,edge,index,
 		dt,time,interp,edge_velocity);
-	if(abs(angle)>0.75*M_PI)
+	if(fabs(angle)>0.75*M_PI)
 		return _left.CalcTracerFlux(tessellation,cells,tracers,dm,edge,index,
 		dt,time,interp,edge_velocity);
-	if(angle>-0.75*M_PI&&angle-0.25*M_PI)
+	if((angle>-0.75*M_PI)&&(angle<-0.25*M_PI))
 		return _down.CalcTracerFlux(tessellation,cells,tracers,dm,edge,index,
 		dt,time,interp,edge_velocity);
 	throw UniversalError("error in custom Outer conditions");
