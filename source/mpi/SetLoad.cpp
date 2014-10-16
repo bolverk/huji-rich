@@ -71,8 +71,6 @@ namespace
 	    BestProc=tproc.GetMeshPoints();
 	    BestProc.resize(ws);
 	  }
-	if(rank==0&&i%10==0)
-	  cout<<"Setting the load balance, iteration="<<i<<" load="<<load<<endl;
 	if(load<tload)
 	  {
 	    break;
@@ -88,8 +86,6 @@ namespace
     local.Update(BestMesh,tproc);
     for(int i=0;i<3;++i)
       {
-	if(rank==0)
-	  cout<<"Making procs rounds iter="<<i<<endl;
 	MPI_Barrier(MPI_COMM_WORLD);
 	procmove2.Update(tproc,local);
 	vector<Vector2D> cp=local.GetMeshPoints();
@@ -104,8 +100,6 @@ namespace
 	  }
       }
     double load=GetLoad(local);
-    if(rank==0)
-      cout<<"Finished setting load, the load balance is "<<load<<endl;
     points=local.GetMeshPoints();
     points.resize(local.GetPointNo());
     //write_vector(loads,"loads.txt");

@@ -15,7 +15,7 @@
 #include "../../tessellation/ConvexHull.hpp"
 #include "physical_geometry.hpp"
 
-using namespace std;
+using std::string;
 
 /*!
   \brief Outputs the simulation data into a binary file (float precision) as follows:

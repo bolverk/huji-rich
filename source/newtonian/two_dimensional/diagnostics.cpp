@@ -1,6 +1,10 @@
 #include "../../misc/simple_io.hpp"
 #include "diagnostics.hpp"
 
+using std::cout;
+using std::fstream;
+using std::ios;
+
 void DisplayError(UniversalError const& eo)
 {
   cout << eo.GetErrorMessage() << endl;
