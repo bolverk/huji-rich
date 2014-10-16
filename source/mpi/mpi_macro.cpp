@@ -1927,20 +1927,25 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 
 #endif
 
+namespace {
+  size_t sum_sizes(const vector<vector<int> >& vvi)
+  {
+    size_t sum = 0;
+    for(size_t i=0;i<vvi.size();++i)
+      sum += vvi[i].size();
+    return sum;
+  }
+}
+
 void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &tracers,
 	vector<size_t> &customevolutions,vector<vector<int> > const& sentcells,
 	int npoints)
 {
 	if(sentcells.empty())
 		return;
-	bool traceractive=!tracers.empty();
-	if(traceractive)
-		traceractive=!tracers[0].empty();
+	const bool traceractive = !tracers.empty() && !tracers.at(0).empty();
 	int n=(int)sentcells.size();
-	int totalsent=0;
-	for(int i=0;i<n;++i)
-		if(!sentcells[i].empty())
-			totalsent+=(int)sentcells[i].size();
+	const int totalsent = (int)sum_sizes(sentcells);
 	cells.resize(npoints-totalsent);
 	customevolutions.resize(npoints-totalsent);
 	if(traceractive)

@@ -20,7 +20,6 @@ namespace
   {
     double BestLoad=100;
     vector<Vector2D> BestProc,BestMesh;
-    const int rank = get_mpi_rank();
     const int ws = get_mpi_size();
     double round;
     if(mode==1)
@@ -99,7 +98,6 @@ namespace
 	    DisplayError(eo);
 	  }
       }
-    double load=GetLoad(local);
     points=local.GetMeshPoints();
     points.resize(local.GetPointNo());
     //write_vector(loads,"loads.txt");
