@@ -1966,20 +1966,14 @@ void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &trace
 void PeriodicVelocityExchange(vector<Vector2D> &vel,
 	vector<vector<int> > const& sentcells,int npoints)
 {
-	int n=(int)sentcells.size();
-	int totalsent=0;
-	for(int i=0;i<n;++i)
-		if(!sentcells[i].empty())
-			totalsent+=(int)sentcells[i].size();
-	vel.resize(npoints-totalsent);
+	const int totalsent = (int)sum_sizes(sentcells);
+	vel.resize((size_t)(npoints-totalsent));
 
-	for(int i=0;i<n;++i)
+	for(size_t i=0;i<sentcells.size();++i)
 	{
-		if(sentcells[i].empty())
-			continue;
-		vector<Vector2D> temp=VectorValues(vel,sentcells[i]);
-		if(!temp.empty())
-			vel.insert(vel.end(),temp.begin(),temp.end());
+	  if(!sentcells[i].empty())
+	    insert_all_to_back(vel,
+			       VectorValues(vel,sentcells[i]));
 	}
 }
 
