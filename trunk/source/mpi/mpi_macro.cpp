@@ -1946,26 +1946,21 @@ void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &trace
 	const bool traceractive = !tracers.empty() && !tracers.at(0).empty();
 	int n=(int)sentcells.size();
 	const int totalsent = (int)sum_sizes(sentcells);
-	cells.resize(npoints-totalsent);
-	customevolutions.resize(npoints-totalsent);
+	cells.resize((size_t)(npoints-totalsent));
+	customevolutions.resize((size_t)(npoints-totalsent));
 	if(traceractive)
-		tracers.resize(npoints-totalsent);
+	  tracers.resize((size_t)(npoints-totalsent));
 	for(int i=0;i<n;++i)
 	{
 		if(sentcells[i].empty())
 			continue;
-		vector<Primitive> ptemp=VectorValues(cells,sentcells[i]);
-		vector<size_t> ctemp=VectorValues(customevolutions,sentcells[i]);
-		if(!ptemp.empty())
-			cells.insert(cells.end(),ptemp.begin(),ptemp.end());
-		if(!ctemp.empty())
-			customevolutions.insert(customevolutions.end(),ctemp.begin(),ctemp.end());
+		insert_all_to_back(cells,
+				   VectorValues(cells,sentcells[i]));
+		insert_all_to_back(customevolutions,
+				   VectorValues(customevolutions,sentcells[i]));
 		if(traceractive)
-		{
-			vector<vector<double> > temp=VectorValues(tracers,sentcells[i]);
-			if(!temp.empty())
-				tracers.insert(tracers.end(),temp.begin(),temp.end());
-		}
+		  insert_all_to_back(tracers,
+				     VectorValues(tracers,sentcells[i]));
 	}
 }
 
