@@ -10,7 +10,6 @@ void DisplayError(UniversalError const& eo)
   cout << eo.GetErrorMessage() << endl;
   for(size_t i=0;i<eo.GetFields().size();++i)
     cout << eo.GetFields()[i] << " = "<< eo.GetValues()[i] << endl;
-  throw;
 }
 
 void write_error(const string& fname,
@@ -44,14 +43,14 @@ namespace {
 
     size_t getLength(void) const
     {
-      return sim_.GetCellNo();
+      return (size_t)sim_.GetCellNo();
     }
 
     Conserved operator()(size_t i) const
     {
       const double volume = 
-	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),i));
-      return Primitive2Conserved(sim_.GetCell(i), volume);
+	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),(int)i));
+      return Primitive2Conserved(sim_.GetCell((int)i), volume);
     }
 
   private:
@@ -95,15 +94,15 @@ namespace {
 
     size_t getLength(void) const
     {
-      return sim_.GetCellNo();
+      return (size_t)sim_.GetCellNo();
     }
 
     double operator()(size_t i) const
     {
       assert(i<sim_.getTracers().size());
-      return sim_.getTracers().at(i).at(index_)*
-	sim_.GetCell(i).Density*
-	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),i));
+      return sim_.getTracers().at(i).at((size_t)index_)*
+	sim_.GetCell((int)i).Density*
+	pg_.calcVolume(get_edge_list(sim_.GetTessellation(),(int)i));
     }
 
   private:
@@ -126,13 +125,13 @@ vector<Vector2D> ReadVector2DFromFile(string filename)
     throw UniversalError("Error opening Vector2D file!!");
   int N;
   myFile.read((char*)&N,sizeof (int));
-  vector<Vector2D> res(N);
+  vector<Vector2D> res((size_t)N);
   for(int i=0;i<N;++i)
     {
       double x,y;
       myFile.read((char*)&x,sizeof(double));
       myFile.read((char*)&y,sizeof(double));
-      res[i]=Vector2D(x,y);
+      res[(size_t)i]=Vector2D(x,y);
     }
   myFile.close();
   return res;
@@ -147,8 +146,8 @@ void WriteVector2DToFile(vector<Vector2D> const& vec,string filename)
   myFile.write ((char*)&n,sizeof(int));
   for(int i=0;i<n;++i)
     {
-      myFile.write ((char*)&vec[i].x,sizeof(double));
-      myFile.write ((char*)&vec[i].y,sizeof(double));
+      myFile.write ((char*)&vec[(size_t)i].x,sizeof(double));
+      myFile.write ((char*)&vec[(size_t)i].y,sizeof(double));
     }
   myFile.close();
 }
@@ -223,12 +222,12 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
     }
   // Do the convex hull for each point
   vector<Vector2D> convhull;
-  vector<int> nedges(temp);
+  vector<int> nedges((size_t)temp);
   for(int i=0;i<temp;++i)
     {
       ConvexHull(convhull,&V,i);
-      nedges[i]=(int)convhull.size();
-      myFile.write((char*)&nedges[i],sizeof(int));
+      nedges[(size_t)i]=(int)convhull.size();
+      myFile.write((char*)&nedges[(size_t)i],sizeof(int));
       for(size_t j=0;j<convhull.size();++j)
 	{
 	  if(floatprecision)
@@ -270,12 +269,12 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
 	{
 	  if(floatprecision)
 	    {
-	      x=static_cast<float>(tracers[i][j]);
+	      x=static_cast<float>(tracers[(size_t)i][(size_t)j]);
 	      myFile.write ((char*)&x,sizeof(float));
 	    }
 	  else
 	    {
-	      double xx=tracers[i][j];
+	      double xx=tracers[(size_t)i][(size_t)j];
 	      myFile.write ((char*)&xx,sizeof(double));
 	    }
 	}

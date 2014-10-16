@@ -58,4 +58,4 @@ private:
   const vector<double> outer_tracer_;
 };
 
-#endif // FREEFLOW_HPP
+#endif // INFLOW_HPP

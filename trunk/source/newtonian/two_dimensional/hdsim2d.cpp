@@ -162,9 +162,9 @@ namespace
 				  const HydroBoundaryConditions& hbc,
 				  double time)
   {
-    vector<char> res(tess.GetPointNo());
+    vector<char> res((size_t)tess.GetPointNo());
     for(size_t i=0;i<res.size();++i)
-      res[i] = IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0;
+      res[i] = IsShockedCell(tess,(int)i,cells,hbc,time) ? 1 : 0;
     return res;
   }
 
@@ -221,20 +221,25 @@ namespace
     }
     #endif
 
+    /*
     const vector<char>& getShockedStatus(void)
     {
       return shocked_cells_;
     }
+    */
 
+    /*
     const vector<double>& getKineticEnergy(void)
     {
       return kinetic_energy_;
     }
+    */
 
+    /*
     const vector<double>& getPotentialEnergy(void)
     {
       return potential_energy_;
-    }
+      }*/
 
     void fixPressure(vector<Conserved>& intensive,
 		     vector<vector<double> >& tracers,
@@ -275,12 +280,13 @@ namespace
 			  vector<vector<double> >& tracers)
   {
     if(tracers.empty())
-      tracers = vector<vector<double> >(num_cells,vector<double>(1,0));
+      tracers = vector<vector<double> >((size_t)num_cells,vector<double>(1,0));
     for(size_t i=0;i<tracers.size();++i){
       tracers.at(i).at(index) = eos.dp2s(cells.at(i).Density,cells.at(i).Pressure);
     }
   }
 
+  /*
   class EntropyCalculator: public Index2Member<double>
   {
   public:
@@ -304,6 +310,7 @@ namespace
     const vector<Primitive>& cells_;
     const EquationOfState& eos_;
   };
+  */
 
   class EdgeLengthCalculator: public Index2Member<double>
   {
@@ -315,12 +322,12 @@ namespace
 
     size_t getLength(void) const
     {
-      return tess_.GetTotalSidesNumber();
+      return (size_t)tess_.GetTotalSidesNumber();
     }
 
     double operator()(size_t i) const
     {
-      return pg_.calcArea(tess_.GetEdge(i));
+      return pg_.calcArea(tess_.GetEdge((int)i));
     }
 
   private:
@@ -530,12 +537,12 @@ void hdsim::addTracer(SpatialDistribution const& tp)
 {
 	const int n = _tessellation.GetPointNo();
 	if(!tracer_flag_){
-		tracer_.resize(n);
+	  tracer_.resize((size_t)n);
 		tracer_flag_ = true;
 	}
 
 	for(int i=0;i<n;++i)
-		tracer_[i].push_back(tp(_tessellation.GetCellCM(i)));
+	  tracer_[(size_t)i].push_back(tp(_tessellation.GetCellCM(i)));
 }
 
 // Diagnostics
@@ -557,7 +564,7 @@ int hdsim::GetCellNo(void) const
 
 Primitive hdsim::GetCell(int i) const
 {
-	return _cells[i];
+  return _cells[(size_t)i];
 }
 
 Vector2D hdsim::GetMeshPoint(int i) const
@@ -592,12 +599,12 @@ void hdsim::SetColdFlows(double as,double bs)
 	coldflows_flag_=true;
 	if(!tracer_flag_)
 	{
-		tracer_.resize(n);
+	  tracer_.resize((size_t)n);
 		tracer_flag_ = true;
 	}
 
 	for(int i=0;i<n;++i)
-		tracer_[i].push_back(0);
+	  tracer_[(size_t)i].push_back(0);
 	cfp_.as=as;
 	cfp_.bs=bs;
 }
@@ -625,14 +632,15 @@ void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 
 namespace
 {
-	void CreateGetPrimitiveList(vector<int> const& ToRemove,vector<vector<int> >
-				    const& Nghost,int /*nremoved*/,vector<vector<int> > &MPI_AMR_Send)
+  #ifdef RICH_MPI
+  	void CreateGetPrimitiveList(vector<int> const& ToRemove,vector<vector<int> >
+  				    const& Nghost,int /*nremoved*/,vector<vector<int> > &MPI_AMR_Send)
 	{
 		int nprocs=(int)Nghost.size();
-		MPI_AMR_Send.resize(nprocs);
-		vector<vector<int> > SortedNghost(nprocs),SortIndex(nprocs);
+		MPI_AMR_Send.resize((size_t)nprocs);
+		vector<vector<int> > SortedNghost((size_t)nprocs),SortIndex((size_t)nprocs);
 		// sort Nghost
-		for(int i=0;i<nprocs;++i)
+		for(size_t i=0;i<(size_t)nprocs;++i)
 		{
 			SortedNghost[i]=Nghost[i];
 			sort_index(Nghost[i],SortIndex[i]);
@@ -642,16 +650,17 @@ namespace
 		{
 			for(int j=0;j<nprocs;++j)
 			{
-				if(binary_search(SortedNghost[j].begin(),SortedNghost[j].end(),
-					ToRemove[i]))
+			  if(binary_search(SortedNghost[(size_t)j].begin(),SortedNghost[(size_t)j].end(),
+					   ToRemove[(size_t)i]))
 				{
-					int index2=lower_bound(SortedNghost[j].begin(),SortedNghost[j].end(),
-						ToRemove[i])-SortedNghost[j].begin();
-					MPI_AMR_Send[j].push_back(SortIndex[j][index2]);
+				  int index2=lower_bound(SortedNghost[(size_t)j].begin(),SortedNghost[(size_t)j].end(),
+							 ToRemove[(size_t)i])-SortedNghost[(size_t)j].begin();
+				  MPI_AMR_Send[(size_t)j].push_back(SortIndex[(size_t)j][(size_t)index2]);
 				}
 			}
 		}
 	}
+#endif // RICH_MPI
 }
 
 namespace
@@ -734,9 +743,9 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	if(!ToRemove.empty())
 		sort(ToRemove.begin(),ToRemove.end());
 	// save the extensive of the removed cells
-	vector<double> OldVol(_tessellation.GetPointNo());
+	vector<double> OldVol((size_t)_tessellation.GetPointNo());
 	for(int i=0;i<(int)_tessellation.GetPointNo();++i)
-		OldVol[i]=_tessellation.GetVolume(i);
+	  OldVol[(size_t)i]=_tessellation.GetVolume(i);
 	// Change the tessellation
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
@@ -748,8 +757,8 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<double> > MPItracer;
 	vector<int> TotalNeigh;
 	for(int i=0;i<(int)dv.size();++i)
-		TotalNeigh.insert(TotalNeigh.end(),VolIndex[i].begin(),
-		VolIndex[i].end());
+	  TotalNeigh.insert(TotalNeigh.end(),VolIndex[(size_t)i].begin(),
+			    VolIndex[(size_t)i].end());
 	sort(TotalNeigh.begin(),TotalNeigh.end());
 	TotalNeigh=unique(TotalNeigh);
 #ifdef RICH_MPI
@@ -771,35 +780,35 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<Conserved> c_temp;
 	vector<vector<double> > t_temp;
 	int Nneigh=int(TotalNeigh.size());
-	c_temp.resize(Nneigh); // need to add hydro/tracer of removed ghost
+	c_temp.resize((size_t)Nneigh); // need to add hydro/tracer of removed ghost
 	if(traceractive)
 	{
-		t_temp.resize(Nneigh);
+	  t_temp.resize((size_t)Nneigh);
 		for(int i=0;i<Nneigh;++i)
 		{
-			t_temp[i].resize(tracer_[0].size());
+		  t_temp[(size_t)i].resize(tracer_[0].size());
 		}
 	}
 	// Change the extensive
 	for(int i=0;i<(int)dv.size();++i)
 	{
-		for(int j=0;j<(int)VolIndex[i].size();++j)
+	  for(int j=0;j<(int)VolIndex[(size_t)i].size();++j)
 		{
 			int index=int(lower_bound(TotalNeigh.begin(),TotalNeigh.end(),
-				VolIndex[i][j])-TotalNeigh.begin());
+						  VolIndex[(size_t)i][(size_t)j])-TotalNeigh.begin());
 			if(i<n)
-				c_temp[index]+=Primitive2Conserved(_cells[ToRemove[i]],dv[i][j]);
+			  c_temp[(size_t)index]+=Primitive2Conserved(_cells[(size_t)ToRemove[(size_t)i]],dv[(size_t)i][(size_t)j]);
 			else
 			{
-				c_temp[index]+=Primitive2Conserved(MPIcells[i-n],dv[i][j]);
+			  c_temp[(size_t)index]+=Primitive2Conserved(MPIcells[(size_t)(i-n)],dv[(size_t)i][(size_t)j]);
 			}
 			if(traceractive){
 				if(i<n)
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
-						t_temp[index][jj]+=dv[i][j]*tracer_[ToRemove[i]][jj]*_cells[ToRemove[i]].Density;
+					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*tracer_[(size_t)ToRemove[(size_t)i]][(size_t)jj]*_cells[(size_t)ToRemove[(size_t)i]].Density;
 				else
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
-						t_temp[index][jj]+=dv[i][j]*MPItracer[i-n][jj]*MPIcells[i-n].Density;
+					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*MPItracer[(size_t)(i-n)][(size_t)jj]*MPIcells[(size_t)(i-n)].Density;
 			}
 		}
 	}
@@ -807,22 +816,22 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	sort(ToRemove.begin(),ToRemove.end());
 	for(int i=0;i<Nneigh;++i)
 	{
-		int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[i])-
+	  int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[(size_t)i])-
 			ToRemove.begin());
-		double vol_inv=1.0/_tessellation.GetVolume(TotalNeigh[i]-index);
-		Conserved oldextensive=Primitive2Conserved(_cells[TotalNeigh[i]],
-			OldVol[TotalNeigh[i]]);
-		double olddensity=_cells[TotalNeigh[i]].Density;
+		double vol_inv=1.0/_tessellation.GetVolume(TotalNeigh[(size_t)i]-index);
+		Conserved oldextensive=Primitive2Conserved(_cells[(size_t)TotalNeigh[(size_t)i]],
+			OldVol[(size_t)TotalNeigh[(size_t)i]]);
+		double olddensity=_cells[(size_t)TotalNeigh[(size_t)i]].Density;
 		try
 		{
-			_cells[TotalNeigh[i]]=Conserved2Primitive(vol_inv*(c_temp[i]+
+			_cells[(size_t)TotalNeigh[(size_t)i]]=Conserved2Primitive(vol_inv*(c_temp[(size_t)i]+
 				oldextensive),_eos);
 		}
 		catch(UniversalError &eo)
 		{
 			eo.AddEntry("Error in cell derefine",0);
 			eo.AddEntry("volume of adjusted cell",1.0/vol_inv);
-			eo.AddEntry("Index of adjusted cell",(double)TotalNeigh[i]);
+			eo.AddEntry("Index of adjusted cell",(double)TotalNeigh[(size_t)i]);
 			eo.AddEntry("Index of adjusted cell in Totalneigh",(double)i);
 			eo.AddEntry("ToRemove size",(double)ToRemove.size());
 			eo.AddEntry("Index of adjusted cell in ToRemove",(double)index);
@@ -831,9 +840,9 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		}
 		if(traceractive)
 		{
-			double density_inv=1.0/_cells[TotalNeigh[i]].Density;
-			tracer_[TotalNeigh[i]]=density_inv*vol_inv*(t_temp[i]+
-				OldVol[TotalNeigh[i]]*olddensity*tracer_[TotalNeigh[i]]);
+		  double density_inv=1.0/_cells[(size_t)TotalNeigh[(size_t)i]].Density;
+			tracer_[(size_t)TotalNeigh[(size_t)i]]=density_inv*vol_inv*(t_temp[(size_t)i]+
+				OldVol[(size_t)TotalNeigh[(size_t)i]]*olddensity*tracer_[(size_t)TotalNeigh[(size_t)i]]);
 		}
 	}
 	if(n<(int)ToRemove.size())
@@ -854,23 +863,23 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	for(int i=0;i<nprocs;++i)
 	{
 		vector<int> toremove2;
-		int nsent2=(int)ghostpoints[i].size();
+		int nsent2=(int)ghostpoints[(size_t)i].size();
 		for(int j=0;j<nsent2;++j)
 		{
-			int toReduce2=int(lower_bound(ToRemove.begin(),ToRemove.end(),ghostpoints[i][j])-
+			int toReduce2=int(lower_bound(ToRemove.begin(),ToRemove.end(),ghostpoints[(size_t)i][(size_t)j])-
 				ToRemove.begin());
-			if(binary_search(ToRemove.begin(),ToRemove.end(),ghostpoints[i][j]))
+			if(binary_search(ToRemove.begin(),ToRemove.end(),ghostpoints[(size_t)i][(size_t)j]))
 				toremove2.push_back(j);
 			else
-				ghostpoints[i][j]-=toReduce2;
+				ghostpoints[(size_t)i][(size_t)j]-=toReduce2;
 		}
 #ifdef RICH_MPI
 		if(!toremove2.empty())
-			RemoveVector(ghostpoints[i],toremove2);
-		toremoveall[i]=toremove2;
-		nsent2=(int)nghost[i].size();
+			RemoveVector(ghostpoints[(size_t)i],toremove2);
+		toremoveall[(size_t)i]=toremove2;
+		nsent2=(int)nghost[(size_t)i].size();
 		for(int j=0;j<nsent2;++j)
-			nghost[i][j]-=(int)ToRemove.size();
+			nghost[(size_t)i][(size_t)j]-=(int)ToRemove.size();
 #endif
 	}
 #ifdef RICH_MPI
@@ -902,18 +911,18 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	int n=int(PointsToRefine.size());
 	const int N=_tessellation.GetPointNo();
 	// Resize vectors
-	_cells.resize(N+n);
-	custom_evolution_indices.resize(N+n);
+	_cells.resize((size_t)(N+n));
+	custom_evolution_indices.resize((size_t)(N+n));
 	if(traceractive)
-		tracer_.resize(N+n);
+	  tracer_.resize((size_t)(N+n));
 	// Change the mesh
 	_tessellation.RefineCells(PointsToRefine,directions,dr);
 	// Fill the new hydro
 	for(int i=N;i<N+n;++i)
 	{
-		_cells[i]=_cells[PointsToRefine[i-N]];
+	  _cells[(size_t)i]=_cells[(size_t)PointsToRefine[(size_t)(i-N)]];
 		if(traceractive)
-			tracer_[i]=tracer_[PointsToRefine[i-N]];
+		  tracer_[(size_t)i]=tracer_[(size_t)PointsToRefine[(size_t)(i-N)]];
 	}
 	return PointsToRefine;
 }
@@ -968,7 +977,7 @@ void hdsim::HilbertArrange(int innernum)
 	vector<int> order=HilbertOrder(cor,_tessellation.GetPointNo(),innernum);
 	ReArrangeVector(cor,order);
 	if(cor.size()>order.size())
-		cor.erase(cor.begin()+order.size(),cor.end());
+	  cor.erase(cor.begin()+(int)order.size(),cor.end());
 	ReArrangeVector(_cells,order);
 	if(tracer_flag_)
 		ReArrangeVector(tracer_,order);
@@ -1010,12 +1019,12 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
 {
 	checkpoint.snapshot.mesh_points = _tessellation.GetMeshPoints();
 	int n=_tessellation.GetPointNo();
-	checkpoint.snapshot.mesh_points.resize(n);
+	checkpoint.snapshot.mesh_points.resize((size_t)n);
 #ifdef RICH_MPI
 	checkpoint.procmesh=_proctess.GetMeshPoints();
 	n=_proctess.GetPointNo();
 #endif
-	checkpoint.procmesh.resize(n);
+	checkpoint.procmesh.resize((size_t)n);
 	checkpoint.snapshot.cells = _cells;
 	checkpoint.cfl = _cfl;
 	checkpoint.time = _time;

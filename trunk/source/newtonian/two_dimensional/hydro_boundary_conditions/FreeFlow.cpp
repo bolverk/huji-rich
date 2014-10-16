@@ -19,9 +19,9 @@ Primitive FreeFlow::GetBoundaryPrimitive
 	vector<Primitive> const& cells,double /*time*/)const
 {
 	if(edge.neighbors.first==-1)
-		return cells[edge.neighbors.second];
+	  return cells[(size_t)edge.neighbors.second];
 	else
-		return cells[edge.neighbors.first];
+	  return cells[(size_t)edge.neighbors.first];
 }
 
 vector<double> FreeFlow::GetBoundaryTracers
@@ -31,9 +31,9 @@ vector<double> FreeFlow::GetBoundaryTracers
 	/*time*/)const
 {
 	if(edge.neighbors.first==-1)
-		return tracers[edge.neighbors.second];
+	  return tracers[(size_t)edge.neighbors.second];
 	else
-		return tracers[edge.neighbors.first];
+	  return tracers[(size_t)edge.neighbors.first];
 }
 
 namespace {
@@ -60,13 +60,13 @@ Conserved FreeFlow::CalcFlux
 	const int ci = calc_ci(edge);
 	const Vector2D p = Parallel(edge);
 	const Vector2D n = Normal(edge, tessellation);
-	const Primitive ghost=cells[pair_member(edge.neighbors,ci)];
+	const Primitive ghost=cells[(size_t)pair_member(edge.neighbors,ci)];
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
-	  states[i] = ghost;
-		states[i].Velocity.Set
-			(Projection(states[i].Velocity, n),
-			Projection(states[i].Velocity, p));
+	  states[(size_t)i] = ghost;
+	  states[(size_t)i].Velocity.Set
+	    (Projection(states[(size_t)i].Velocity, n),
+	     Projection(states[(size_t)i].Velocity, p));
 	}
 	Conserved res = rs_.Solve(states[0], states[1],Projection(edge_velocity,n));
 	res.Momentum = res.Momentum.x*n/abs(n) +
@@ -114,7 +114,7 @@ vector<double> FreeFlow::CalcTracerFlux(Tessellation const& /*tessellation*/,
 	double /*time*/,SpatialReconstruction const& /*interp*/,
 	Vector2D const& /*edge_velocity*/) const
 {
-  vector<double> res = tracers.at(index);
+  vector<double> res = tracers.at((size_t)index);
   transform(res.begin(),res.end(),res.begin(),
 	    bind1st(multiplies<double>(),dm*dt*edge.GetLength()));
   return res;

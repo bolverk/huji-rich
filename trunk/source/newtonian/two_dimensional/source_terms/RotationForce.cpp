@@ -20,9 +20,9 @@ Conserved RotationForce::Calculate
 {
 	const Vector2D& point_vec = tess.GetCellCM(point);
 	const double r=ScalarProd(point_vec-origin_,direction_);
-	const double mass=tess.GetVolume(point)*cells[point].Density;
-	const Vector2D momentum=mass*tracer[point][tracer_index_]*
-		tracer[point][tracer_index_]*direction_/(r*r*r);
-	const double energy=ScalarProd(momentum,cells[point].Velocity);
+	const double mass=tess.GetVolume(point)*cells[(size_t)point].Density;
+	const Vector2D momentum=mass*tracer[(size_t)point][(size_t)tracer_index_]*
+	  tracer[(size_t)point][(size_t)tracer_index_]*direction_/(r*r*r);
+	const double energy=ScalarProd(momentum,cells[(size_t)point].Velocity);
 	return Conserved(0,momentum,energy);
 }

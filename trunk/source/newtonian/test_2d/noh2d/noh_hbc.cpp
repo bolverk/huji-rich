@@ -12,8 +12,11 @@ Conserved NohHBC::CalcFlux(Tessellation const& tess,vector<Primitive> const& /*c
 	const Vector2D edge_cen = 0.5*(edge.vertices.first+
 				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
+	assert(r>1e-9);
+	/*
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
+	*/
 	const double d = d0_*(1+time*v0_/r);
 	Primitive p;
 	p.Density = d;
@@ -28,8 +31,11 @@ Primitive NohHBC::GetBoundaryPrimitive(Edge const& edge,
 	const Vector2D edge_cen = 0.5*(edge.vertices.first+
 				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
+	assert(r>1e-9);
+	/*
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
+	*/
 	const double d = d0_*(1+time*v0_/r);
 	Primitive p;
 	p.Density = d;
@@ -74,8 +80,11 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	const Vector2D edge_cen = 0.5*(edge.vertices.first+
 				       edge.vertices.second);
 	const double r = abs(center_-edge_cen);
+	assert(r>1e-9);
+	/*
 	if(r==0)
 		throw UniversalError("Error in NohHBC. Radius is zero");
+	*/
 	const double d = d0_*(1+time*v0_/r);
 	Primitive p;
 	p.Density = d;
@@ -84,9 +93,9 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	for(size_t i=1;i<tracers[0].size();++i)
 	{
 		if(IsGhostCell(edge.neighbors.second,tess))
-			res.push_back(tracers[edge.neighbors.first][i]);
+		  res.push_back(tracers[(size_t)edge.neighbors.first][i]);
 		else
-			res.push_back(tracers[edge.neighbors.second][i]);
+		  res.push_back(tracers[(size_t)edge.neighbors.second][i]);
 	}
 
 	return res;

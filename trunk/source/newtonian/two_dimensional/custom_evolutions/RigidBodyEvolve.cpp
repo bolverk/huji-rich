@@ -19,18 +19,18 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 	Vector2D p = Parallel(edge);
 	Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
 		-tessellation.GetMeshPoint(edge.neighbors.first);
-	Primitive ghost = cells[other];
-	ghost.Velocity = Reflect(cells[other].Velocity, p);
+	Primitive ghost = cells[(size_t)other];
+	ghost.Velocity = Reflect(cells[(size_t)other].Velocity, p);
 
 	vector<Primitive> states(2);
 	for(int i=0;i<2;++i)
 	{
 	  if(pair_member(edge.neighbors,i)==index)
-			states[i] = ghost;
-		else
-			states[i] = cells[other];
-		states[i].Velocity.Set(Projection(states[i].Velocity, n),
-			Projection(states[i].Velocity, p));
+	    states[(size_t)i] = ghost;
+	  else
+	    states[(size_t)i] = cells[(size_t)other];
+	  states[(size_t)i].Velocity.Set(Projection(states[(size_t)i].Velocity, n),
+					 Projection(states[(size_t)i].Velocity, p));
 	}
 	res = rs.Solve(states[0], states[1],Projection(facevelocity,n));
 	res.Momentum = res.Momentum.x*n/abs(n) +
@@ -55,7 +55,7 @@ vector<double> RigidBodyEvolve::UpdateTracer(int index,vector<vector<double> >
 	const& tracers,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& cells,Tessellation const& tess,
 	double /*time*/)
 {
-	return tess.GetVolume(index)*cells[index].Density*tracers[index];
+  return tess.GetVolume(index)*cells[(size_t)index].Density*tracers[(size_t)index];
 }
 
 vector<double> RigidBodyEvolve::CalcTracerFlux(Tessellation const& /*tess*/,

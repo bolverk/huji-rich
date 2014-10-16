@@ -252,7 +252,11 @@ void ExternalForceContribution(Tessellation const& tess,
 
 /*! \brief Second order time advance
   \param tess Tessellation
-  \param proctess The tessellation of the processors (if no mpi pass the regular tesselation)
+*/
+#ifdef RICH_MPI
+//!  \param proctess The tessellation of the processors (if no mpi pass the regular tesselation)
+#endif // RICH_MPI
+/*!
   \param cells Fluid elements,
   \param point_motion Point motion scheme
   \param hbc Hydrodynamic boundary conditions
@@ -268,7 +272,11 @@ void ExternalForceContribution(Tessellation const& tess,
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
   \param pg Physical geometry
-  \param procupdate Scheme for updating the positions of the processes
+*/
+#ifdef RICH_MPI
+//!  \param procupdate Scheme for updating the positions of the processes
+#endif // RICH_MPI
+/*!
   \param traceflag Determines whether tracers should be updated
   \param coldflows_flag Determines whether cold flows should be used
   \param as Described in the Arepo paper
@@ -311,9 +319,6 @@ double TimeAdvance2mid
  double pressuremin=0.01,
  bool EntropyCalc=false);
 
-/*!
-  \brief Essential data needed to advance a numerical simulation to the next time step
-*/
 /*! \brief Calculates the velocities of the mesh generating points
   \param tess Tessellation
   \param cells Fluid elements

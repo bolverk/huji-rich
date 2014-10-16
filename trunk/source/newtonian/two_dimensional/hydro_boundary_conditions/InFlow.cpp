@@ -40,13 +40,13 @@ Conserved InFlow::CalcFlux
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
 	  if(IsGhostCell(pair_member(edge.neighbors,i),tessellation))
-			states[i] = outer_;
+	    states[(size_t)i] = outer_;
 		else
-			states[i] = interp.Interpolate(tessellation,cells,dt,edge,i,InBulk,
+		  states[(size_t)i] = interp.Interpolate(tessellation,cells,dt,edge,i,InBulk,
 			edge_velocity);
-		states[i].Velocity.Set
-			(Projection(states[i].Velocity, n),
-			Projection(states[i].Velocity, p));
+	  states[(size_t)i].Velocity.Set
+	    (Projection(states[(size_t)i].Velocity, n),
+	     Projection(states[(size_t)i].Velocity, p));
 	}
 	Conserved res = rs_.Solve(states[0], states[1],Projection(edge_velocity,n));
 	res.Momentum = res.Momentum.x*n/abs(n) +

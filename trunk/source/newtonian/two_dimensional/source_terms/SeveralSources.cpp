@@ -1,11 +1,13 @@
 #include "SeveralSources.hpp"
 
 SeveralSources::SeveralSources(vector<SourceTerm*> forces):
-sources_(vector<SourceTerm*> ())
+  sources_(forces) {}
+/*
 {
-	for(int i=0;i<(int)forces.size();++i)
-		sources_.push_back(forces[i]);
+  for(size_t i=0;i<forces.size();++i)
+    sources_.push_back(forces[i]);
 }
+*/
 
 SeveralSources::~SeveralSources(void)
 {
@@ -25,7 +27,7 @@ Conserved SeveralSources::Calculate(Tessellation const& tess,
 	vector<double> dtracer_local;
 	if(!dtracer.empty())
 		dtracer_local.assign(dtracer.size(),0);
-	for(int i=0;i<(int)sources_.size();++i)
+	for(size_t i=0;i<sources_.size();++i)
 	{
 	  res+=sources_[i]->Calculate(tess,pg,cells,point,fluxes,
 		point_velocity,hbc,tracer_extensive,dtracer_local,lengthes,time,dt);
