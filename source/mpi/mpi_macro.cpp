@@ -1944,13 +1944,12 @@ void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &trace
 	if(sentcells.empty())
 		return;
 	const bool traceractive = !tracers.empty() && !tracers.at(0).empty();
-	int n=(int)sentcells.size();
 	const int totalsent = (int)sum_sizes(sentcells);
 	cells.resize((size_t)(npoints-totalsent));
 	customevolutions.resize((size_t)(npoints-totalsent));
 	if(traceractive)
 	  tracers.resize((size_t)(npoints-totalsent));
-	for(int i=0;i<n;++i)
+	for(size_t i=0;i<sentcells.size();++i)
 	{
 		if(sentcells[i].empty())
 			continue;
