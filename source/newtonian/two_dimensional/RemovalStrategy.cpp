@@ -1,4 +1,5 @@
 #include "RemovalStrategy.hpp"
+#include <cmath>
 
 vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tessellation
 	const& tess)const
@@ -8,12 +9,12 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 	vector<int> res;
 	for(int i=0;i<nrefine;++i)
 	{
-		vector<int> const& edges=tess.GetCellEdges(ToRemove[i]);
+	  vector<int> const& edges=tess.GetCellEdges(ToRemove[(size_t)i]);
 		int nedge=(int) edges.size();
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
-			Edge const& edge=tess.GetEdge(edges[j]);
+		  Edge const& edge=tess.GetEdge(edges[(size_t)j]);
 			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
@@ -21,7 +22,7 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 			}
 		}
 		if(good)
-			res.push_back(ToRemove[i]);
+		  res.push_back(ToRemove[(size_t)i]);
 	}
 	return res;
 }
@@ -41,7 +42,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	for(int i=0;i<n;++i)
 	{
 		bool good=true;
-		vector<int> neigh=tess.GetNeighbors(candidates[i]);
+		vector<int> neigh=tess.GetNeighbors(candidates[(size_t)i]);
 		int nneigh=(int) neigh.size();
 		/*for(int j=0;j<nneigh;++j)
 		{
@@ -54,35 +55,35 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		}*/
 		if(!good)
 			continue;
-		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[i])!=
+		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[(size_t)i])!=
 			bad_neigh.end())
 			good=false;
 		else
 		{
 			for(int j=0;j<nneigh;++j)
 			{
-				if(binary_search(candidates.begin(),candidates.end(),neigh[j]))
+			  if(binary_search(candidates.begin(),candidates.end(),neigh[(size_t)j]))
 				{
-					if(merits[i]<merits[lower_bound(candidates.begin(),
-						candidates.end(),neigh[j])-candidates.begin()])
+				  if(merits[(size_t)i]<merits[(size_t)(lower_bound(candidates.begin(),
+										   candidates.end(),neigh[(size_t)j])-candidates.begin())])
 					{
 						good=false;
 						break;
 					}
-					if(merits[i]==merits[lower_bound(candidates.begin(),
-						candidates.end(),neigh[j])-candidates.begin()])
+				  if(fabs(merits[(size_t)i]-merits[(size_t)(lower_bound(candidates.begin(),
+											candidates.end(),neigh[(size_t)j])-candidates.begin())])<1e-9)
 					{
-						if(find(bad_neigh.begin(),bad_neigh.end(),neigh[j])==
+						if(find(bad_neigh.begin(),bad_neigh.end(),neigh[(size_t)j])==
 							bad_neigh.end())
-							bad_neigh.push_back(neigh[j]);
+							bad_neigh.push_back(neigh[(size_t)j]);
 					}
 				}
 			}
 		}
 		if(good)
 		{
-			result.push_back(candidates[i]);
-			merits2.push_back(merits[i]);
+			result.push_back(candidates[(size_t)i]);
+			merits2.push_back(merits[(size_t)i]);
 		}
 	}
 #ifdef RICH_MPI
@@ -98,14 +99,14 @@ void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int>
 	int n=int(ToRemove.size());
 	for(int i=0;i<n;++i)
 	{
-		vector<int> edges=tess.GetCellEdges(ToRemove[i]);
+		vector<int> edges=tess.GetCellEdges(ToRemove[(size_t)i]);
 		//check we are not near periodic boundary
 		for(int j=0;j<(int)edges.size();++j)
 		{
-			Edge temp=tess.GetEdge(edges[j]);
+			Edge temp=tess.GetEdge(edges[(size_t)j]);
 /*			if(temp.neighbors.first>N||temp.neighbors.second>N)
 				throw UniversalError("Bad removal, neighbor is periodic");*/
-			if(temp.neighbors.first==ToRemove[i])
+			if(temp.neighbors.first==ToRemove[(size_t)i])
 			{
 				if(binary_search(ToRemove.begin(),ToRemove.end(),temp.
 					neighbors.second))

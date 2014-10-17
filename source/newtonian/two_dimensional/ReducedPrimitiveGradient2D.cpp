@@ -34,7 +34,7 @@ ReducedPrimitiveGradient2D& ReducedPrimitiveGradient2D::operator+=
 	{
 	  int n=(int)tracers.size();
 	  for(int i=0;i<n;++i)
-	    tracers[i]+=source.tracers[i];
+	    tracers[(size_t)i]+=source.tracers[(size_t)i];
 	}
 	return *this;
 }
@@ -51,7 +51,7 @@ ReducedPrimitiveGradient2D& ReducedPrimitiveGradient2D::operator*=
 	{
 		int n=(int)tracers.size();
 		for(int i=0;i<n;++i)
-			tracers[i]*=s;
+		  tracers[(size_t)i]*=s;
 	}
 	return *this;
 }
