@@ -6,11 +6,11 @@ vector<Vector2D> PointMotion::calcAllVelocities
  double time,vector<CustomEvolution*> &cevolve)
 {
   vector<Vector2D> res((size_t)tess.GetPointNo());
-  for(int i=0;i<tess.GetPointNo();++i)
+  for(size_t i=0;i<(size_t)tess.GetPointNo();++i)
 	  if(cevolve[i]==0)
-		res[i] = CalcVelocity(i,tess,cells,time);
+	    res[i] = CalcVelocity((int)i,tess,cells,time);
 	  else
-		  res[i]=cevolve[i]->CalcVelocity(i,tess,cells,time);
+	    res[i]=cevolve[i]->CalcVelocity((int)i,tess,cells,time);
   return res;
 }
 
