@@ -51,7 +51,7 @@ namespace {
 		Primitive operator()(size_t n) const
 		{
 			return initialize_single_cell(tess_,
-				n,
+						      (int)n,
 				cm_flag_,
 				density_,
 				pressure_,
@@ -62,7 +62,7 @@ namespace {
 
 		size_t getLength(void) const
 		{
-			return tess_.GetPointNo();
+		  return (size_t)tess_.GetPointNo();
 		}
 
 		~CellInitializer(void) {}
@@ -157,13 +157,13 @@ namespace {
 
 		Conserved operator()(size_t n) const
 		{
-			return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,n)))*
+		  return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,(int)n)))*
 				intensive_[n];
 		}
 
 		size_t getLength(void) const
 		{
-			return tess_.GetPointNo();
+		  return (size_t)tess_.GetPointNo();
 		}
 
 	private:
@@ -193,7 +193,7 @@ double TimeStepForCell(Primitive const& cell,double width,
 	vector<Vector2D> const& face_velocites)
 {
 	double max_fv=0;
-	for(int i=0;i<(int)face_velocites.size();++i)
+	for(size_t i=0;i<face_velocites.size();++i)
 		max_fv = max(max_fv,abs(face_velocites[i]-cell.Velocity));
 	return width/(cell.SoundSpeed+max_fv);
 }
@@ -209,14 +209,14 @@ namespace {
 		int i)
 	{
 		if(hbc.IsBoundary(edge,tess))
-			return max(abs(face_velocities[i]-cell.Velocity),
-			abs(face_velocities[i]-
+		  return max(abs(face_velocities[(size_t)i]-cell.Velocity),
+			     abs(face_velocities[(size_t)i]-
 			hbc.GetBoundaryPrimitive(edge,
 			tess,
 			cells,
 			time).Velocity));
 		else
-			return abs(face_velocities[i]-cell.Velocity);
+		  return abs(face_velocities[(size_t)i]-cell.Velocity);
 	}
 }
 
@@ -233,7 +233,7 @@ double TimeStepForCellBoundary
 	const vector<int> edge_index=tess.GetCellEdges(index);
 	for(int i=0;i<(int)face_velocities.size();++i)
 	{
-		const Edge& edge=tess.GetEdge(edge_index[i]);
+	  const Edge& edge=tess.GetEdge(edge_index[(size_t)i]);
 		const double temp = calc_boundary_face_velocity
 			(hbc, edge, tess, face_velocities, cell,
 			cells, time, i);
@@ -247,8 +247,8 @@ namespace {
 		int i)
 	{
 		if(!cevolve.empty())
-			if(cevolve[i]!=0)
-				if(!cevolve[i]->TimeStepRelevant())
+		  if(cevolve[(size_t)i]!=0)
+		    if(!cevolve[(size_t)i]->TimeStepRelevant())
 					return true;
 		return false;
 	}
@@ -263,9 +263,9 @@ namespace {
 		int i)
 	{
 		if(!tess.NearBoundary(i))
-			return TimeStepForCell(cells[i],tess.GetWidth(i),face_vel);
+		  return TimeStepForCell(cells[(size_t)i],tess.GetWidth(i),face_vel);
 		else
-			return TimeStepForCellBoundary(cells[i],
+		  return TimeStepForCellBoundary(cells[(size_t)i],
 			cells,
 			tess.GetWidth(i),
 			face_vel,
@@ -286,7 +286,7 @@ namespace {
 
 		Vector2D operator()(size_t n) const
 		{
-			return face_velocity_[face_index_[n]];
+		  return face_velocity_[(size_t)face_index_[n]];
 		}
 
 		size_t getLength(void) const
@@ -353,13 +353,13 @@ void UpdateConservedExtensive
 		const vector<int> cell_edge_indices = tessellation.GetCellEdges(i);
 		if(!boundaryconditions.IsGhostCell(i,tessellation)){
 			for(int j=0;j<(int)cell_edge_indices.size();++j){
-				const int edge_index = cell_edge_indices[j];
+			  const int edge_index = cell_edge_indices[(size_t)j];
 				const Edge& edge = tessellation.GetEdge(edge_index);
-				const Conserved delta = dt*lengthes[edge_index]*fluxes[edge_index];
+				const Conserved delta = dt*lengthes[(size_t)edge_index]*fluxes[(size_t)edge_index];
 				if(i==edge.neighbors.first)
-					conserved_extensive[i] -= delta;
+				  conserved_extensive[(size_t)i] -= delta;
 				else if(i==edge.neighbors.second)
-					conserved_extensive[i] += delta;
+				  conserved_extensive[(size_t)i] += delta;
 				else
 					update_conserved_extensive_error(edge_index,i);
 			}
@@ -381,12 +381,12 @@ namespace {
 
 		Vector2D operator()(size_t n) const
 		{
-			return tess_.GetMeshPoint(n)+dt_*point_velocity_[n];
+		  return tess_.GetMeshPoint((int)n)+dt_*point_velocity_[n];
 		}
 
 		size_t getLength(void) const
 		{
-			return tess_.GetPointNo();
+		  return (size_t)tess_.GetPointNo();
 		}
 
 	private:
@@ -408,8 +408,7 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	}
 	else
 	{
-		int npoints=(int)oldpoints.size();
-		for(int i=0;i<npoints;++i)
+		for(size_t i=0;i<oldpoints.size();++i)
 			oldpoints[i]+=pointvelocity[i]*dt;
 		tessellation.Update(oldpoints);
 	}
@@ -455,7 +454,7 @@ namespace {
 		Conserved operator()(size_t i) const
 		{
 			return extensive_[i]/
-				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
+			  pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,(int)i)));
 		}
 
 	private:
@@ -479,7 +478,7 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 {
 	conservedintensive.resize(conservedextensive.size());
 	for(int i = 0; i<tessellation.GetPointNo(); i++){
-		conservedintensive[i] = conservedextensive[i]/
+	  conservedintensive[(size_t)i] = conservedextensive[(size_t)i]/
 			tessellation.GetVolume(i);
 	}
 }
@@ -552,20 +551,20 @@ void UpdatePrimitives
 	for(int i=0;i < tess.GetPointNo(); i++){
 		try
 		{
-			if(CellsEvolve[i]==0)
-				cells[i] = regular_cell_evolve
-				(conservedintensive[i], densityfloor,
-				densitymin, pressuremin, old_cells[i], eos);
+		  if(CellsEvolve[(size_t)i]==0)
+		    cells[(size_t)i] = regular_cell_evolve
+				  (conservedintensive[(size_t)i], densityfloor,
+				   densitymin, pressuremin, old_cells[(size_t)i], eos);
 			else
-				cells[i]=CellsEvolve[i]->UpdatePrimitive
+			  cells[(size_t)i]=CellsEvolve[(size_t)i]->UpdatePrimitive
 				(conservedintensive,
 				eos,old_cells,i,tess,time,tracers);
 		}
 		catch(UniversalError& eo)
 		{
-			eo.AddEntry("x momentum per unit volume",conservedintensive[i].Momentum.x);
-			eo.AddEntry("y momentum per unit volume",conservedintensive[i].Momentum.y);
-			eo.AddEntry("thermal energy per unit mass",conservedintensive[i].Energy);
+		  eo.AddEntry("x momentum per unit volume",conservedintensive[(size_t)i].Momentum.x);
+		  eo.AddEntry("y momentum per unit volume",conservedintensive[(size_t)i].Momentum.y);
+		  eo.AddEntry("thermal energy per unit mass",conservedintensive[(size_t)i].Energy);
 			eo.AddEntry("Cell volume",tess.GetVolume(i));
 			eo.AddEntry("Cell x location",tess.GetMeshPoint(i).x);
 			eo.AddEntry("Cell y location",tess.GetMeshPoint(i).y);
@@ -645,26 +644,27 @@ namespace {
 		const CustomEvolutionManager& cem,
 		int n0, int n1)
 	{
-		if(ce_list[n0]&&ce_list[n1]){
-			if(ce_list[n0]==ce_list[n1])
+	  if(ce_list[(size_t)n0]&&ce_list[(size_t)n1]){
+	    if(ce_list[(size_t)n0]==ce_list[(size_t)n1])
 				return n0;
-			const size_t priority_0 = cem.getIndex(ce_list[n0]);
-			const size_t priority_1 = cem.getIndex(ce_list[n1]);
+	    const size_t priority_0 = cem.getIndex(ce_list[(size_t)n0]);
+	    const size_t priority_1 = cem.getIndex(ce_list[(size_t)n1]);
 			assert(priority_0 != priority_1 &&
 				"Two methods have the same priority");
 			return priority_0 > priority_1 ?
 n0 : n1;
 		}
-		else if(!ce_list[n0]&&!ce_list[n1])
+	  else if(!ce_list[(size_t)n0]&&!ce_list[(size_t)n1])
 			throw UniversalError("Error in choose_special_cell_index: Both sides are regular cells");
-		else if(ce_list[n0]&&!ce_list[n1])
+	  else if(ce_list[(size_t)n0]&&!ce_list[(size_t)n1])
 			return n0;
-		else if(!ce_list[n0]&&ce_list[n1])
+	  else if(!ce_list[(size_t)n0]&&ce_list[(size_t)n1])
 			return n1;
 		else
 			throw UniversalError("Error in choose_special_cell_index: Something has gone terribly wrong if you've gotten here");
 	}
 
+  /*
 	void calc_fluxes_rethrow(UniversalError& eo,
 		int edge_index,
 		Tessellation const& tess)
@@ -678,6 +678,7 @@ n0 : n1;
 		eo.AddEntry("edge y2 location",edge.vertices.second.y);
 		throw eo;
 	}
+  */
 }
 
 namespace {
@@ -746,20 +747,20 @@ namespace {
 
 		size_t getLength(void) const
 		{
-			return tess_.GetTotalSidesNumber();
+		  return (size_t)tess_.GetTotalSidesNumber();
 		}
 
 		Conserved operator()(size_t i) const
 		{
-			const Edge& edge = tess_.GetEdge(i);
+		  const Edge& edge = tess_.GetEdge((int)i);
 			const int n0 = edge.neighbors.first;
 			const int n1 = edge.neighbors.second;
 			if(!hbc_.IsBoundary(edge,tess_)){
-				if(!ce_[n0]&&!ce_[n1])
-					return calc_single_flux_in_bulk(tess_,edge,interp_,cells_,fv_[i],rs_,dt_);
+			  if(!ce_[(size_t)n0]&&!ce_[(size_t)n1])
+			    return calc_single_flux_in_bulk(tess_,edge,interp_,cells_,fv_[i],rs_,dt_);
 				else{
 					const int ns = choose_special_cell_index(ce_,cem_,n0,n1);
-					return ce_[ns]->CalcFlux(tess_,cells_,dt_,interp_,edge,fv_[i],rs_,ns,hbc_,time_,tracers_);
+					return ce_[(size_t)ns]->CalcFlux(tess_,cells_,dt_,interp_,edge,fv_[i],rs_,ns,hbc_,time_,tracers_);
 				}	
 			}
 			else
@@ -823,7 +824,7 @@ void ExternalForceContribution
 	if(!tracers_extensive.empty())
 		dtracer.assign(tracers_extensive[0].size(),0);
 	if(coldflows_flag)
-		g.resize(tess.GetPointNo());
+	  g.resize((size_t)tess.GetPointNo());
 	for(int i=0;i<tess.GetPointNo();++i)
 	{
 		if(!hbc.IsGhostCell(i,tess))
@@ -832,13 +833,13 @@ void ExternalForceContribution
 				(tess,pg,cells,i,
 				fluxes,point_velocity,hbc,tracers_extensive,
 				dtracer,lengthes,t,dt));
-			conserved_extensive[i]+=dt*cons;
+			conserved_extensive[(size_t)i]+=dt*cons;
 			if(!tracers_extensive.empty())
 			{
-				tracers_extensive[i]=tracers_extensive[i]+dt*dtracer;
+			  tracers_extensive[(size_t)i]=tracers_extensive[(size_t)i]+dt*dtracer;
 			}
 			if(coldflows_flag)
-				g[i]=abs(cons.Momentum)/(cells[i].Density*tess.GetVolume(i));
+			  g[(size_t)i]=abs(cons.Momentum)/(cells[(size_t)i].Density*tess.GetVolume(i));
 		}
 	}
 }
@@ -855,9 +856,9 @@ vector<Vector2D> calc_point_velocities
 vector<Vector2D> get_all_mesh_points
 	(Tessellation const& tess)
 {
-	vector<Vector2D> res(tess.GetPointNo());
+  vector<Vector2D> res((size_t)tess.GetPointNo());
 	for(int i=0;i<(int)tess.GetPointNo();++i)
-		res[i] = tess.GetMeshPoint(i);
+	  res[(size_t)i] = tess.GetMeshPoint(i);
 	return res;
 }
 
@@ -905,7 +906,7 @@ double TimeAdvance2mid
 	vector<CustomEvolution*> CellsEvolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
 	vector<Vector2D> oldpoints=tess.GetMeshPoints();
-	oldpoints.resize(tess.GetPointNo());
+	oldpoints.resize((size_t)tess.GetPointNo());
 
 	//do half time step
 	vector<Vector2D> point_velocities = calc_point_velocities
@@ -933,14 +934,14 @@ double TimeAdvance2mid
 	{
 		const int n=tess.GetPointNo();
 		for(int i=0;i<n;++i)
-			tracers[i][0]=eos.dp2s(cells[i].Density,cells[i].Pressure);
+		  tracers[(size_t)i][0]=eos.dp2s(cells[(size_t)i].Density,cells[(size_t)i].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracers,tess.GetDuplicatedPoints(),
 			tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
-		shockedcells.resize(n);
+		shockedcells.resize((size_t)n);
 		for(int i=0;i<n;++i)
-			shockedcells[i]=IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0 ;
+		  shockedcells[(size_t)i]=IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0 ;
 	}
 #ifdef RICH_MPI
 	if(traceflag&&!coldflows_flag)
@@ -955,9 +956,9 @@ double TimeAdvance2mid
 
 	vector<double> lengths;
 	int nsides=tess.GetTotalSidesNumber();
-	lengths.resize(nsides);
+	lengths.resize((size_t)nsides);
 	for(int i=0;i<nsides;++i)
-		lengths[i]=tess.GetEdge(i).GetLength();
+	  lengths[(size_t)i]=tess.GetEdge(i).GetLength();
 
 	vector<vector<double> > old_trace;
 	vector<vector<double> > tracer_extensive;
@@ -1091,7 +1092,7 @@ double TimeAdvance2mid
 		FixPressure(intensive,tracer_extensive,eos,Ek,Ef,as,bs,CellsEvolve,
 		tess,/*extensive,*/shockedcells,densityfloor);
 
-	cells.resize(tess.GetPointNo());
+	cells.resize((size_t)tess.GetPointNo());
 	UpdatePrimitives(intensive, eos, cells,CellsEvolve,cells,densityfloor,
 		densitymin,pressuremin,tess,time+0.5*dt,tracers);
 	if(traceflag)
@@ -1132,8 +1133,8 @@ double TimeAdvance2mid
 	if(coldflows_flag&&EntropyCalc)
 	{
 		const int n=tess.GetPointNo();
-		for(int i=0;i<n;++i)
-			tracers[i][0]=eos.dp2s(cells[i].Density,cells[i].Pressure);
+		for(size_t i=0;i<(size_t)n;++i)
+		  tracers[i][0]=eos.dp2s(cells[i].Density,cells[i].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracers,tess.GetDuplicatedPoints(),
 			tess.GetDuplicatedProcs(),tess.GetGhostIndeces(),tess.GetTotalPointNumber());
@@ -1153,15 +1154,15 @@ double TimeAdvance2mid
 	if(coldflows_flag)
 	{
 		const int n=tess.GetPointNo();
-		shockedcells.resize(n);
+		shockedcells.resize((size_t)n);
 		for(int i=0;i<n;++i)
-			shockedcells[i]=IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0 ;
+		  shockedcells[(size_t)i]=IsShockedCell(tess,i,cells,hbc,time) ? 1 : 0 ;
 	}
 
 	nsides=tess.GetTotalSidesNumber();
-	lengths.resize(nsides);
+	lengths.resize((size_t)nsides);
 	for(int i=0;i<nsides;++i)
-		lengths[i]=tess.GetEdge(i).GetLength();
+	  lengths[(size_t)i]=tess.GetEdge(i).GetLength();
 
 	if(traceflag)
 	{
@@ -1269,11 +1270,12 @@ vector<Primitive> make_eos_consistent
 {
 	vector<Primitive> res = vp;
 	for(int i=0;i<(int)vp.size();++i)
-		res[i] = make_eos_consistent(vp[i],eos);
+	  res[(size_t)i] = make_eos_consistent(vp[(size_t)i],eos);
 	return res;
 }
 
 namespace {
+  /*
 	class ConditionalPlusMinus: public BinaryOperation<double>
 	{
 	public:
@@ -1292,6 +1294,7 @@ namespace {
 	private:
 		const bool flag_;
 	};
+  */
 
 	class ScalarMultiply: public UnaryOperation<double>
 	{
@@ -1334,12 +1337,12 @@ namespace {
 
 		size_t getLength(void) const
 		{
-			return tess_.GetTotalSidesNumber();
+		  return (size_t)tess_.GetTotalSidesNumber();
 		}
 
 		vector<double> operator()(size_t i) const
 		{
-			const Edge& edge = tess_.GetEdge(i);
+		  const Edge& edge = tess_.GetEdge((int)i);
 			const double dm = fluxes_[i].Mass;
 			const int n1 = edge.neighbors.second;
 			const int n0 = edge.neighbors.first;
@@ -1353,9 +1356,9 @@ namespace {
 					edge_velocities_[i]);
 			}
 			else{
-				if(cev_[n0]||cev_[n1])
-					return cev_[choose_special_cell_index(cev_,cem_,n0,n1)]->CalcTracerFlux
-					(tess_,cells_,tracers_,dm,edge,i,dt_,
+			  if(cev_[(size_t)n0]||cev_[(size_t)n1])
+			    return cev_[(size_t)choose_special_cell_index(cev_,cem_,n0,n1)]->CalcTracerFlux
+			      (tess_,cells_,tracers_,dm,edge,(int)i,dt_,
 					time_,interp_,edge_velocities_[i]);
 				else
 					return apply_to_each_term
@@ -1428,9 +1431,9 @@ vector<vector<double> > CalcTraceChange
 	for(int i=0;i<tess.GetTotalSidesNumber();++i){
 		for(size_t j=0;j<res[0].size();++j){
 			if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.first,tess))
-				res[tess.GetEdge(i).neighbors.first][j] -= tracer_fluxes[i][j];
+			  res[(size_t)tess.GetEdge(i).neighbors.first][j] -= tracer_fluxes[(size_t)i][j];
 			if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.second,tess))
-				res[tess.GetEdge(i).neighbors.second][j] += tracer_fluxes[i][j];
+			  res[(size_t)tess.GetEdge(i).neighbors.second][j] += tracer_fluxes[(size_t)i][j];
 		}
 	}
 	return res;
@@ -1441,7 +1444,7 @@ vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> co
 {
 	const int n=tess.GetPointNo();
 	vector<double> res;
-	res.resize(n);
+	res.resize((size_t)n);
 	for(int j=0;j<n;++j)
 	{
 		vector<int> neightemp=tess.GetNeighbors(j);
@@ -1449,12 +1452,12 @@ vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> co
 		for(size_t i=0;i<neightemp.size();++i)
 			if(neightemp[i]>=0)
 				neigh.push_back(neightemp[i]);
-		double e=pow(abs(cells[j].Velocity-cells[neigh[0]].Velocity),2);
+		double e=pow(abs(cells[(size_t)j].Velocity-cells[(size_t)neigh[0]].Velocity),2);
 		for(int i=1;i<(int)neigh.size();++i)
 		{// This could be made much faster by writing the expression implicitly
-			e=max(e,pow(abs(cells[j].Velocity-cells[neigh[i]].Velocity),2));
+		  e=max(e,pow(abs(cells[(size_t)j].Velocity-cells[(size_t)neigh[(size_t)i]].Velocity),2));
 		}
-		res[j]=0.5*e;
+		res[(size_t)j]=0.5*e;
 	}
 	return res;
 }
@@ -1464,9 +1467,9 @@ vector<double> GetForceEnergy(Tessellation const& tess,
 {
 	vector<double> res;
 	int n=int(g.size());
-	res.resize(n);
+	res.resize((size_t)n);
 	for(int i=0;i<n;++i)
-		res[i]=g[i]*tess.GetWidth(i);
+	  res[(size_t)i]=g[(size_t)i]*tess.GetWidth(i);
 	return res;
 }
 
@@ -1481,31 +1484,31 @@ void FixPressure(vector<Conserved> &intensive,vector<vector<double> > const& ent
 	double temp;
 	for(int i=0;i<n;++i)
 	{
-		if(customevolve[i]==0||customevolve[i]->TimeStepRelevant())
+	  if(customevolve[(size_t)i]==0||customevolve[(size_t)i]->TimeStepRelevant())
 		{
-			if (intensive[i].Mass < 0)
+			if (intensive[(size_t)i].Mass < 0)
 				continue;
 			//Make intensive
-			temp=entropy[i][0]/(tess.GetVolume(i)*intensive[i].Mass);
-			Ek2=0.5*pow(abs(intensive[i].Momentum)/intensive[i].Mass,2);
-			Et=intensive[i].Energy/intensive[i].Mass-Ek2;
-			if((Et<as*Ek[i])||(Et<bs*Ef[i]))
+			temp=entropy[(size_t)i][0]/(tess.GetVolume(i)*intensive[(size_t)i].Mass);
+			Ek2=0.5*pow(abs(intensive[(size_t)i].Momentum)/intensive[(size_t)i].Mass,2);
+			Et=intensive[(size_t)i].Energy/intensive[(size_t)i].Mass-Ek2;
+			if((Et<as*Ek[(size_t)i])||(Et<bs*Ef[(size_t)i]))
 			{
-				if((shockedcells[i]==0)||Et<0)
+				if((shockedcells[(size_t)i]==0)||Et<0)
 				{
-					Et=eos.dp2e(intensive[i].Mass,
-						eos.sd2p(temp,intensive[i].Mass));
+					Et=eos.dp2e(intensive[(size_t)i].Mass,
+						eos.sd2p(temp,intensive[(size_t)i].Mass));
 					if(Et<0&&!densityfloor)
 					{
 						UniversalError eo("Negative thermal enegry");
 						eo.AddEntry("Cell index",i);
 						eo.AddEntry("Thermal energy",Et);
-						eo.AddEntry("ShockedStatus",shockedcells[i]);
-						eo.AddEntry("Extensive entropy",entropy[i][0]);
-						eo.AddEntry("The density",intensive[i].Mass);
+						eo.AddEntry("ShockedStatus",shockedcells[(size_t)i]);
+						eo.AddEntry("Extensive entropy",entropy[(size_t)i][0]);
+						eo.AddEntry("The density",intensive[(size_t)i].Mass);
 						throw eo;
 					}
-					intensive[i].Energy=intensive[i].Mass*(Et+Ek2);
+					intensive[(size_t)i].Energy=intensive[(size_t)i].Mass*(Et+Ek2);
 					//extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
 				}
 			}
@@ -1520,7 +1523,7 @@ bool NearBoundary(int index,Tessellation const& tess,
 	int n=int(neigh.size());
 	for(int i=0;i<n;++i)
 	{
-		if(neigh[i]<0)
+	  if(neigh[(size_t)i]<0)
 			return true;
 		/*if(customevolve[neigh[i]]!=0)
 		return true;*/
@@ -1557,14 +1560,14 @@ namespace {
 		  if(tracers_.empty())
 		    return 0;
 		  else
-		    return tess_.GetPointNo();
+		    return (size_t)tess_.GetPointNo();
 		}
 
 		vector<double> operator()(size_t i) const
 		{
 			return scalar_mult
 				(tracers_[i],
-				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)))*
+				 pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,(int)i)))*
 				cells_[i].Density);
 		}
 
@@ -1593,11 +1596,11 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 	vector<Primitive> const& cells,
 	vector<vector<double> > &result)
 {
-	const size_t n=tess.GetPointNo();
+  const size_t n=(size_t)tess.GetPointNo();
 	result.resize(n);
 	for(size_t i=0;i<n;++i)
 		result[i] = scalar_mult(tracer[i],
-		tess.GetVolume(i)*cells[i].Density);
+					tess.GetVolume((int)i)*cells[i].Density);
 }
 
 namespace {
@@ -1627,13 +1630,13 @@ namespace {
 			if(extensive_.empty())
 				return 0;
 			else
-				return tess_.GetPointNo();
+			  return (size_t)tess_.GetPointNo();
 		}
 
 		vector<double> operator()(size_t i) const
 		{
 			const double mass = cells_[i].Density*
-				pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,i)));
+			  pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,(int)i)));
 			return scalar_div(extensive_[i],mass);
 		}
 
@@ -1665,7 +1668,7 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 	for(size_t i=0;i<tracerextensive.size();++i)
 		if(CellsEvolve[i])
 			tracerextensive[i]=CellsEvolve[i]->UpdateTracer
-			(i,tracerextensive,tracerchange,cells,tess,time);
+			  ((int)i,tracerextensive,tracerchange,cells,tess,time);
 		else
 			for(size_t j=0;j<tracerextensive[i].size();++j)
 				tracerextensive[i][j]+=tracerchange[i][j];
@@ -1690,22 +1693,22 @@ void TracerResetCalc
 	for(int i=0;i<n;++i)
 	{
 		bool customforce=false;
-		if(cevolve[i])
-			customforce=cevolve[i]->ShouldForceTracerReset();
-		if((tracer[i][tracerindex]<alpha)||customforce)
+		if(cevolve[(size_t)i])
+			customforce=cevolve[(size_t)i]->ShouldForceTracerReset();
+		if((tracer[(size_t)i][(size_t)tracerindex]<alpha)||customforce)
 		{
 			velocity.Set(originalVx(tess.GetCellCM(i)),
 				originalVy(tess.GetCellCM(i)));
-			cells[i]=CalcPrimitive(originalD(tess.GetCellCM(i)),
+			cells[(size_t)i]=CalcPrimitive(originalD(tess.GetCellCM(i)),
 				originalP(tess.GetCellCM(i)),velocity,eos);
-			if(tracer[i][tracerindex]<0)
-				tracer[i][tracerindex]=0;
-			for (size_t j = 0;j<tracer[i].size();++j)
+			if(tracer[(size_t)i][(size_t)tracerindex]<0)
+			  tracer[(size_t)i][(size_t)tracerindex]=0;
+			for (size_t j = 0;j<tracer[(size_t)i].size();++j)
 				if (coldflows&&j == 0)
-					tracer[i][j] = eos.dp2s(cells[i].Density, cells[i].Pressure);
+					tracer[(size_t)i][j] = eos.dp2s(cells[(size_t)i].Density, cells[(size_t)i].Pressure);
 				else
 					if ((int)j != tracerindex)
-						tracer[i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
+						tracer[(size_t)i][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
 		}
 	}
 	return;
@@ -1722,7 +1725,7 @@ void GetPointToRemove(Tessellation const& tess,Vector2D const& point,
 		bool test=true;
 		vector<int> neigh=tess.GetNeighbors(i);
 		for(int j=0;j<(int)neigh.size();++j)
-			if(neigh[j]>=Inner)
+		  if(neigh[(size_t)j]>=Inner)
 				test=false;
 		// Is point inside a radius?
 		if(abs(point-tess.GetMeshPoint(i))<R||test)
@@ -1737,7 +1740,7 @@ namespace {
 	{
 		Vector2D MeshPoint=tess.GetMeshPoint(point);
 		Vector2D par=edge.vertices.second-edge.vertices.first;
-		if(abs(par.x)>abs(par.y)){
+		if(fabs(par.x)>fabs(par.y)){
 			// We are in the x direction
 			if(MeshPoint.y>edge.vertices.first.y)
 				MeshPoint.y-=MeshPoint.y-edge.vertices.first.y;
@@ -1763,16 +1766,16 @@ bool IsShockedCell(Tessellation const& tess,int index,
 	double DivV=0;
 	vector<int> edges_loc=tess.GetCellEdges(index);
 	vector<Edge> edges(edges_loc.size());
-	for(int i=0;i<(int)edges.size();++i)
+	for(size_t i=0;i<edges.size();++i)
 		edges[i]=tess.GetEdge(edges_loc[i]);
 
 	// Calculate gradiant by gauss theorem
-	double vx_i = cells[index].Velocity.x;
-	double vy_i = cells[index].Velocity.y;
+	double vx_i = cells[(size_t)index].Velocity.x;
+	double vy_i = cells[(size_t)index].Velocity.y;
 	int other;
 	Vector2D center=tess.GetMeshPoint(index);
 	Vector2D c_ij,r_ij;
-	for(int i=0;i<(int)edges.size();i++)
+	for(size_t i=0;i<edges.size();i++)
 	{
 		if(hbc.IsBoundary(edges[i],tess))
 		{
@@ -1812,8 +1815,8 @@ bool IsShockedCell(Tessellation const& tess,int index,
 				0.5*(tess.GetMeshPoint(other)+center);
 			r_ij = center-tess.GetMeshPoint(other);
 			double rij_1=1/abs(r_ij);
-			double vx_j = cells[other].Velocity.x;
-			double vy_j = cells[other].Velocity.y;
+			double vx_j = cells[(size_t)other].Velocity.x;
+			double vy_j = cells[(size_t)other].Velocity.y;
 			DivV+=edges[i].GetLength()*((vx_j-vx_i)*c_ij.x-0.5*
 				(vx_i+vx_j)*r_ij.x+(vy_j-vy_i)*c_ij.y-0.5*
 				(vy_i+vy_j)*r_ij.y)*rij_1;
@@ -1832,14 +1835,14 @@ void FixAdvection(vector<Conserved>& extensive,
 {
 	int n=tessold.GetTotalSidesNumber();
 	int npoints=tessold.GetPointNo();
-	vector<double> Rold(npoints),Rnew(npoints);
-	vector<vector<Vector2D> > pold(npoints),pnew(npoints);
+	vector<double> Rold((size_t)npoints),Rnew((size_t)npoints);
+	vector<vector<Vector2D> > pold((size_t)npoints),pnew((size_t)npoints);
 	for(int i=0;i<npoints;++i)
 	{
-		Rold[i]=tessold.GetWidth(i);
-		Rnew[i]=tessnew.GetWidth(i);
-		ConvexHull(pold[i],&tessold,i);
-		ConvexHull(pnew[i],&tessnew,i);
+	  Rold[(size_t)i]=tessold.GetWidth(i);
+	  Rnew[(size_t)i]=tessnew.GetWidth(i);
+	  ConvexHull(pold[(size_t)i],&tessold,i);
+	  ConvexHull(pnew[(size_t)i],&tessnew,i);
 	}
 
 	PolygonOverlap polyoverlap;
@@ -1854,7 +1857,7 @@ void FixAdvection(vector<Conserved>& extensive,
 		Vector2D norm(tessold.GetMeshPoint(n1)-tessold.GetMeshPoint(n0));
 		norm=norm/abs(norm);
 		norm=norm*edge.GetLength();
-		double dv_dt=ScalarProd(facevelocity[i],norm)*dt;
+		double dv_dt=ScalarProd(facevelocity[(size_t)i],norm)*dt;
 		/*		vector<Vector2D> poly0,poly1;
 		ConvexHull(poly0,&tessold,tessold.GetOriginalIndex(n0));
 		ConvexHull(poly1,&tessnew,tessold.GetOriginalIndex(n1));
@@ -1874,10 +1877,11 @@ void FixAdvection(vector<Conserved>& extensive,
 		for(int j=0;j<N;++j)
 		poly1[j]-=diff;
 		}*/
-		double real_dv1=polyoverlap.polygon_overlap_area(pold[
-			tessold.GetOriginalIndex(n0)],pnew[tessold.GetOriginalIndex(n1)],
-				Rold[tessold.GetOriginalIndex(n0)]*eps,
-				Rnew[tessold.GetOriginalIndex(n1)]*eps);
+		double real_dv1=polyoverlap.polygon_overlap_area
+		      (pold[(size_t)tessold.GetOriginalIndex(n0)],
+		       pnew[(size_t)tessold.GetOriginalIndex(n1)],
+		       Rold[(size_t)tessold.GetOriginalIndex(n0)]*eps,
+		       Rnew[(size_t)tessold.GetOriginalIndex(n1)]*eps);
 			/*		ConvexHull(poly0,&tessnew,tessold.GetOriginalIndex(n0));
 			ConvexHull(poly1,&tessold,tessold.GetOriginalIndex(n1));
 			if(n0>=npoints)
@@ -1896,35 +1900,36 @@ void FixAdvection(vector<Conserved>& extensive,
 			for(int j=0;j<N;++j)
 			poly1[j]-=diff;
 			}*/
-			double real_dv0=polyoverlap.polygon_overlap_area(pnew[
-				tessold.GetOriginalIndex(n0)],pold[tessold.GetOriginalIndex(n1)],
-					Rnew[tessold.GetOriginalIndex(n0)]*eps,
-					Rold[tessold.GetOriginalIndex(n1)]*eps);
+			double real_dv0=polyoverlap.polygon_overlap_area
+		      (pnew[(size_t)tessold.GetOriginalIndex(n0)],
+		       pold[(size_t)tessold.GetOriginalIndex(n1)],
+		       Rnew[(size_t)tessold.GetOriginalIndex(n0)]*eps,
+		       Rold[(size_t)tessold.GetOriginalIndex(n1)]*eps);
 
 				if(dv_dt>0)
 				{
 					if(n0<npoints)
 					{
-						extensive[n0]+=(real_dv0-dv_dt)*intensive[tessold.GetOriginalIndex(n1)];
-						extensive[n0]-=real_dv1*intensive[tessold.GetOriginalIndex(n0)];
+					  extensive[(size_t)n0]+=(real_dv0-dv_dt)*intensive[(size_t)tessold.GetOriginalIndex(n1)];
+					  extensive[(size_t)n0]-=real_dv1*intensive[(size_t)tessold.GetOriginalIndex(n0)];
 					}
 					if(n1<npoints)
 					{
-						extensive[n1]+=(dv_dt-real_dv0)*intensive[tessold.GetOriginalIndex(n1)];
-						extensive[n1]+=real_dv1*intensive[tessold.GetOriginalIndex(n0)];
+					  extensive[(size_t)n1]+=(dv_dt-real_dv0)*intensive[(size_t)tessold.GetOriginalIndex(n1)];
+					  extensive[(size_t)n1]+=real_dv1*intensive[(size_t)tessold.GetOriginalIndex(n0)];
 					}
 				}
 				else
 				{
 					if(n0<npoints)
 					{
-						extensive[n0]-=(real_dv1+dv_dt)*intensive[tessold.GetOriginalIndex(n0)];
-						extensive[n0]+=real_dv0*intensive[tessold.GetOriginalIndex(n1)];
+					  extensive[(size_t)n0]-=(real_dv1+dv_dt)*intensive[(size_t)tessold.GetOriginalIndex(n0)];
+					  extensive[(size_t)n0]+=real_dv0*intensive[(size_t)tessold.GetOriginalIndex(n1)];
 					}
 					if(n1<npoints)
 					{
-						extensive[n1]-=(-dv_dt-real_dv1)*intensive[tessold.GetOriginalIndex(n0)];
-						extensive[n1]-=real_dv0*intensive[tessold.GetOriginalIndex(n1)];
+					  extensive[(size_t)n1]-=(-dv_dt-real_dv1)*intensive[(size_t)tessold.GetOriginalIndex(n0)];
+					  extensive[(size_t)n1]-=real_dv0*intensive[(size_t)tessold.GetOriginalIndex(n1)];
 					}
 				}
 	}
