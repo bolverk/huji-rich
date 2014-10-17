@@ -9,9 +9,15 @@ RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
 	double eta,bool coldflows,
 	int innerNum,
 	OuterBoundary const* outer):
-pm_(pm), hbc_(hbc),
+  pm_(pm), hbc_(hbc),
+  chi_(chi),
+/*
 	chi_(chi*((int)!coldflows)+((int)coldflows)*((int)chi==0.4)
 	+chi*((int)coldflows)*((int)chi!=0.4)),
+
+	huh?
+*/
+
 	eta_(eta),
 	inner_(innerNum),
 	outer_(outer),
@@ -51,10 +57,10 @@ namespace {
 						Vector2D n = r - tess.GetEdge(edge_index[j]).vertices.first;
 						n-=ScalarProd(n,p)*p;
 						n=n/abs(n);
-						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[other],p));
+						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[(size_t)other],p));
 						vel[i]=ScalarProd(vel[i],n)*n+v_avg*p;
-						if(other<tess.GetPointNo()&&(cevolve[other]==0))
-							vel[other]=ScalarProd(vel[other],n)*n+v_avg*p;
+						if(other<tess.GetPointNo()&&(cevolve[(size_t)other]==0))
+							vel[(size_t)other]=ScalarProd(vel[(size_t)other],n)*n+v_avg*p;
 						continue;
 					}
 				}
@@ -95,8 +101,8 @@ Vector2D RoundCells::CalcVelocity(int index,Tessellation const& tessellation,
 			return res;
 		Vector2D dw(0,0);
 		if(index<nreal)
-			dw = calc_dw(index,tessellation,primitives[index].SoundSpeed,
-			abs(primitives[index].Velocity),eta_,chi_);
+		  dw = calc_dw(index,tessellation,primitives[(size_t)index].SoundSpeed,
+			       abs(primitives[(size_t)index].Velocity),eta_,chi_);
 		return res + dw;
 	}
 }
@@ -107,7 +113,7 @@ namespace {
 	{
 		const Vector2D& s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
-		return max(min(abs(s-r)/dt,3*abs(cells[index].Velocity)),cells[index].SoundSpeed);
+		return max(min(abs(s-r)/dt,3*abs(cells[(size_t)index].Velocity)),cells[(size_t)index].SoundSpeed);
 	}
 }
 
@@ -117,13 +123,13 @@ vector<Vector2D> RoundCells::calcAllVelocities
 {
 	vector<Vector2D> res;
 	const int n=tess.GetPointNo();
-	res.reserve(n);
-	for(int i=0;i<n;++i)
+	res.reserve((size_t)n);
+	for(size_t i=0;i<(size_t)n;++i)
 	{
 		if(cevolve[i]==0)
-			res.push_back(CalcVelocity(i,tess,cells,time));
+		  res.push_back(CalcVelocity((int)i,tess,cells,time));
 		else
-			res.push_back(cevolve[i]->CalcVelocity(i,tess,cells,time));
+		  res.push_back(cevolve[i]->CalcVelocity((int)i,tess,cells,time));
 	}
 #ifdef RICH_MPI
 	SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),
@@ -154,19 +160,19 @@ vector<Vector2D> RoundCells::calcAllVelocities
 	{
 		if(external_dt_>0)
 			dt=min(dt,external_dt_);
-		for(int i=0;i<n;++i)
+		for(size_t i=0;i<(size_t)n;++i)
 		{
 			if(cevolve[i]!=0)
 				continue;
-			if(i<inner_)
+			if(i<(size_t)inner_)
 			{
 				res[i].Set(0,0);
 			}
 			else
 			{
-				res[i]=pm_.CalcVelocity(i,tess,cells,time);
-				const double nvs = numeric_velocity_scale(tess,i,dt,cells);
-				const Vector2D dw = calc_dw(i,tess,nvs,nvs,eta_,chi_);
+			  res[i]=pm_.CalcVelocity((int)i,tess,cells,time);
+				const double nvs = numeric_velocity_scale(tess,(int)i,dt,cells);
+				const Vector2D dw = calc_dw((int)i,tess,nvs,nvs,eta_,chi_);
 				res[i]=res[i]+dw;
 			}
 		}
@@ -194,7 +200,7 @@ namespace {
 			{
 				if(r.distance(tess.GetMeshPoint(neigh[i]))<0.1*R)
 				{
-					vel[neigh[i]]=vel[neigh[i]]*factor;
+				  vel[(size_t)neigh[i]]=vel[(size_t)neigh[i]]*factor;
 					return;
 				}
 			}
@@ -208,36 +214,36 @@ void RoundCells::CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
 	// check that we don't go outside grid
 	int n=tess.GetPointNo();
 	const double inv_dt=1.0/dt;
-	for(int i=inner_;i<n;++i)
+	for(size_t i=(size_t)inner_;i<(size_t)n;++i)
 	{
-		Vector2D point(tess.GetMeshPoint(i));
+	  Vector2D point(tess.GetMeshPoint((int)i));
 		if((v[i].x*dt*2+point.x)>outer_->GetGridBoundary(Right))
 		{
 			double factor=0.9*(outer_->GetGridBoundary(Right)-
 				point.x)*inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,i,factor);
+			LimitNeighborVelocity(v,tess,(int)i,factor);
 		}
 		if((v[i].x*dt*2+point.x)<outer_->GetGridBoundary(Left))
 		{
 			double factor=0.9*(point.x-
 				outer_->GetGridBoundary(Left))*inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,i,factor);
+			LimitNeighborVelocity(v,tess,(int)i,factor);
 		}
 		if((v[i].y*dt*2+point.y)>outer_->GetGridBoundary(Up))
 		{
 			double factor=0.9*(outer_->GetGridBoundary(Up)-point.y)*
 				inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,i,factor);
+			LimitNeighborVelocity(v,tess,(int)i,factor);
 		}
 		if((v[i].y*dt*2+point.y)<outer_->GetGridBoundary(Down))
 		{
 			double factor=0.9*(point.y-outer_->GetGridBoundary(Down))*
 				inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,i,factor);
+			LimitNeighborVelocity(v,tess,(int)i,factor);
 		}
 	}
 	return;

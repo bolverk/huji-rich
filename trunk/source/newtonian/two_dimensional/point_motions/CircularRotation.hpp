@@ -3,7 +3,9 @@
   \author Elad Steinberg
 */
 
-#define _USE_MATH_DEFINES
+#ifndef CIRCULAR_ROTATION_HPP
+#define CIRCULAR_ROTATION_HPP 1
+
 #include "../point_motion.hpp"
 #include <cmath>
 
@@ -49,3 +51,5 @@ private:
   vector<double> init_R_;
   bool first_time_;
 };
+
+#endif // CIRCULAR_ROTATION_HPP

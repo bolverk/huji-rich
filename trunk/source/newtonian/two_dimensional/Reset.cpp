@@ -67,7 +67,7 @@ void ResetOutput(string location,hdsim const& sim)
 	{
 		for(int j=0;j<n;++j)
 		{
-			x=tracers[i][j];
+		  x=tracers[(size_t)i][(size_t)j];
 			myFile.write ((char*)&x,sizeof(double));
 		}
 	}
@@ -79,7 +79,7 @@ void ResetOutput(string location,hdsim const& sim)
 	myFile.write((char*)&dtemp2,sizeof(double));
 	for(int i=0;i<temp;++i)
 	{
-		unsigned int ctemp=(unsigned int)sim.custom_evolution_indices[i];
+	  unsigned int ctemp=(unsigned int)sim.custom_evolution_indices[(size_t)i];
 		myFile.write ((char*)&ctemp,sizeof(unsigned int));
 	}
 	myFile.close();
@@ -93,8 +93,8 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	int N;
 	myFile.read((char*)&N,sizeof (int));
 	// Resize the vectors
-	dump.snapshot.cells.resize(N);
-	dump.snapshot.mesh_points.resize(N);
+	dump.snapshot.cells.resize((size_t)N);
+	dump.snapshot.mesh_points.resize((size_t)N);
 	dump.tracers.clear();
 	// Read the data
 	Vector2D cortemp;
@@ -105,7 +105,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		myFile.read((char*)&x,sizeof(double));
 		myFile.read((char*)&y,sizeof(double));
 		cortemp.Set(x,y);
-		dump.snapshot.mesh_points[i]=cortemp;
+		dump.snapshot.mesh_points[(size_t)i]=cortemp;
 	}
 
 #ifdef RICH_MPI
@@ -127,7 +127,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		myFile.read((char*)&d,sizeof(double));
 		myFile.read((char*)&cortemp.x,sizeof(double));
 		myFile.read((char*)&cortemp.y,sizeof(double));
-		dump.snapshot.cells[i]=CalcPrimitive(d,p,cortemp,*eos);
+		dump.snapshot.cells[(size_t)i]=CalcPrimitive(d,p,cortemp,*eos);
 	}
 	myFile.read((char*)&dump.time,sizeof(double));
 	char ctemp;
@@ -141,22 +141,22 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	myFile.read((char*)&n,sizeof(int));
 	if(n==0)
 		return;
-	dump.tracers.resize(N);
+	dump.tracers.resize((size_t)N);
 	for(int i=0;i<N;++i)
 	{
-		dump.tracers[i].resize(n);
+	  dump.tracers[(size_t)i].resize((size_t)n);
 		for(int j=0;j<n;++j)
 		{
 			myFile.read((char*)&x,sizeof(double));
-			dump.tracers[i][j]=x;
+			dump.tracers[(size_t)i][(size_t)j]=x;
 		}
 	}
 	myFile.read((char*)&ctemp,sizeof(char));
 	dump.densityfloor=(bool)ctemp;
 	myFile.read((char*)&dump.densitymin,sizeof(double));
 	myFile.read((char*)&dump.pressuremin,sizeof(double));
-	dump.cevolve.resize(N);
+	dump.cevolve.resize((size_t)N);
 	for(int i=0;i<N;++i)
-		myFile.read((char*)&dump.cevolve[i],sizeof(unsigned int));
+	  myFile.read((char*)&dump.cevolve[(size_t)i],sizeof(unsigned int));
 	myFile.close();
 }
