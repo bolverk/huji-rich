@@ -5,9 +5,10 @@ namespace
 {
 	bool VectorSort(Vector2D const& v1,Vector2D const& v2)
 	{
-		return ((v1.y<v2.y)||((v1.y==v2.y)&&(v1.x<v2.x)));
+	  return ((v1.y<v2.y)||((fabs(v1.y-v2.y)>0)&&(v1.x<v2.x)));
 	}
 
+  /*
 	bool AngleSort(Vector2D const& v1,Vector2D const& v2)
 	{
 		const double tol=1e-8;
@@ -22,6 +23,7 @@ namespace
 		else
 			return false;
 	}
+  */
 
 	Vector2D GetReflectedPoint(Edge const& edge,Vector2D const& point)
 	{
@@ -66,9 +68,9 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	sort(points.begin(),points.end(),VectorSort);
 	// Start building the convexhull
 	int n=(int)points.size();
-	vector<int> indeces(n-1);
-	vector<double> angles(n-1);
-	for(int i=0;i<n-1;++i)
+	vector<int> indeces((size_t)n-1);
+	vector<double> angles((size_t)n-1);
+	for(size_t i=0;i<(size_t)n-1;++i)
 		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);
 	sort_index(angles,indeces);
 	result.resize(points.size());
@@ -76,44 +78,44 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	// Check for colinear points
 	const double tol=1e-8;
 	vector<Vector2D> pfirst,plast;
-	for(int i=1;i<n-1;++i)
+	for(size_t i=1;i<(size_t)n-1;++i)
 	{
-		if(abs(angles[indeces[i]]-angles[indeces[0]])<tol)
-			pfirst.push_back(points[indeces[i]+1]);
-		if(abs(angles[indeces[n-i-2]]-angles[indeces[n-2]])<tol)
-			plast.push_back(points[indeces[n-i-2]+1]);
+	  if(abs(angles[(size_t)indeces[i]]-angles[(size_t)indeces[0]])<tol)
+	    pfirst.push_back(points[(size_t)indeces[i]+1]);
+	  if(abs(angles[(size_t)indeces[(size_t)n-i-2]]-angles[(size_t)indeces[(size_t)n-2]])<tol)
+	    plast.push_back(points[(size_t)indeces[(size_t)n-i-2]+1]);
 	}
 	result[0]=points[0];
 	if(!pfirst.empty())
 	{
-		pfirst.insert(pfirst.begin(),points[indeces[0]+1]);
+	  pfirst.insert(pfirst.begin(),points[(size_t)indeces[0]+1]);
 		int N=(int)pfirst.size();
-		vector<double> dist(N);
+		vector<double> dist((size_t)N);
 		for(int i=0;i<N;++i)
-			dist[i]=abs(pfirst[i]-points[0]);
-		vector<int> indeces2(N);
+		  dist[(size_t)i]=abs(pfirst[(size_t)i]-points[0]);
+		vector<int> indeces2((size_t)N);
 		sort_index(dist,indeces2);
 		ReArrangeVector(pfirst,indeces2);
-		for(int i=0;i<N;++i)
+		for(size_t i=0;i<(size_t)N;++i)
 			result[i+1]=pfirst[i];
 	}
 	if(!plast.empty())
 	{
-		plast.insert(plast.begin(),points[indeces[n-2]+1]);
+	  plast.insert(plast.begin(),points[(size_t)indeces[(size_t)n-2]+1]);
 		int N=(int)plast.size();
 		vector<double> dist;
 		for(int i=0;i<N;++i)
-			dist.push_back(abs(plast[i]-points[0]));
-		vector<int> indeces2(N);
+		  dist.push_back(abs(plast[(size_t)i]-points[0]));
+		vector<int> indeces2((size_t)N);
 		sort_index(dist,indeces2);
 		ReArrangeVector(plast,indeces2);
 		for(int i=0;i<N;++i)
-			result[n-1-i]=plast[i];
+		  result[(size_t)(n-1-i)]=plast[(size_t)i];
 	}
 	int loc1=(int)pfirst.size();
 	int loc2=(int)plast.size();
 	for(int i=loc1+1;i<n-loc2;++i)
-		result[i]=points[indeces[i-1]+1];
+	  result[(size_t)i]=points[(size_t)indeces[(size_t)i-1]+1];
 }
 
 void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
@@ -121,17 +123,17 @@ void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
 	vector<int> const& edges=tess->GetCellEdges(index);
 	const Vector2D mypoint=tess->GetMeshPoint(index);
 	int nedges=(int)edges.size();
-	result.resize(nedges);
-	vector<double> angles(nedges);
+	result.resize((size_t)nedges);
+	vector<double> angles((size_t)nedges);
 	for(int i=0;i<nedges;++i)
 	{
-		Edge const& edge=tess->GetEdge(edges[i]);
+	  Edge const& edge=tess->GetEdge(edges[(size_t)i]);
 		const int other=(edge.neighbors.first==index)? edge.neighbors.second : edge.neighbors.first;
 		Vector2D otherpoint=(other==-1) ? GetReflectedPoint(edge,mypoint) : tess->GetMeshPoint(other);
-		angles[i]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
+		angles[(size_t)i]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
 	}
 	vector<int> temp;
 	sort_index(angles,temp);
-	for(int i=0;i<nedges;++i)
-		result[i]=edges[temp[i]];
+	for(size_t i=0;i<(size_t)nedges;++i)
+	  result[i]=edges[(size_t)temp[i]];
 }

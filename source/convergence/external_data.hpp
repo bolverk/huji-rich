@@ -4,7 +4,8 @@
 #include <string>
 #include <fstream>
 
-using namespace std;
+using std::string;
+using std::ifstream;
 
 /*! \brief Manages data from an external file in convergence runs
  */ 

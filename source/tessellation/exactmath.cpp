@@ -203,7 +203,7 @@ vector<double> expansionSumZeroElim(vector<double> const& e, vector<double> cons
     }
   for (unsigned int i = 0; i <(unsigned int) temp.size(); i++)
     {
-      if (temp[i] != 0)
+      if (fabs(temp[i]) > 0)
 	{
 	  ans.push_back(temp[i]);
 	}
@@ -405,12 +405,12 @@ vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double
 	}
       twoSum(Q, R, Qnew, q);
       Q = Qnew;
-      if (hh != 0)
+      if (fabs(hh) > 0)
 	{
 	  ans.push_back(hh);
 	}
     }
-  if (q != 0) {
+  if (fabs(q) > 0) {
     ans.push_back(q);
   }
   if ((Q != 0.0) || ans.empty()) {
@@ -429,21 +429,21 @@ void scaleExpansionZeroElim(vector<double> const& e, double b,vector<double>
   int eindex;
 
   twoProduct(e[0], b, Q, hh);
-  if (hh != 0)
+  if (fabs(hh) > 0)
     {
       ans.push_back(hh);
     }
   int n=(int)e.size();
   for (eindex = 1; eindex<n; ++eindex)
     {
-      twoProduct(e[eindex], b, product1, product0);
+      twoProduct(e[(size_t)eindex], b, product1, product0);
       twoSum(Q, product0,sum, hh);
-      if (hh != 0)
+      if (fabs(hh) > 0)
 	{
 	  ans.push_back(hh);
 	}
       fastTwoSum(product1,sum, Q, hh);
-      if (hh != 0)
+      if (fabs(hh) > 0)
 	{
 	  ans.push_back(hh);
 	}
@@ -459,13 +459,13 @@ vector<double> compress(vector<double> const& e)
   ans.reserve(8);
 
   int bottom = (int)e.size() - 1;
-  double Q = e[bottom];
+  double Q = e[(size_t)bottom];
   for (int eindex =(int) e.size() - 2; eindex >= 0; eindex--)
     {
-      const double enow = e[eindex];
+      const double enow = e[(size_t)eindex];
       double q, Qnew;
       fastTwoSum(Q, enow, Qnew, q);
-      if (q != 0)
+      if (fabs(q) > 0)
 	{
 	  temp.insert(temp.begin(), Qnew);
 	  bottom--;
@@ -476,12 +476,12 @@ vector<double> compress(vector<double> const& e)
 	  Q = Qnew;
 	}
     }
-  for (unsigned int i = bottom + 1; i <e.size(); i++)
+  for (unsigned int i = (unsigned int)bottom + 1; i <e.size(); i++)
     {
       const double current = temp[i];
       double q, Qnew;
       fastTwoSum(current, Q, Qnew, q);
-      if (q != 0)
+      if (fabs(q) > 0)
 	{
 	  ans.push_back(q);
 	}
