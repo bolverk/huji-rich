@@ -329,7 +329,7 @@ template<class T> vector<T> join(vector<T> const& v1,
   if(!v1.empty())
     copy(v1.begin(),v1.end(),res.begin());
   if(!v2.empty())
-    copy(v2.begin(),v2.end(),res.begin()+v1.size());
+    copy(v2.begin(),v2.end(),res.begin()+(int)v1.size());
   return res;
 }
 

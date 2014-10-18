@@ -46,7 +46,7 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 		res=false;
 	double d=(edge1.vertices.first.x-edge1.vertices.second.x)*(edge2.vertices.first.y-edge2.vertices.second.y)
 		-(edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.y-edge1.vertices.second.y);
-	if(d==0)
+	if(fabs(d)<1e-9)
 		return false;
 	double xi=((edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.x*edge1.vertices.second.y-
 		edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.x-edge1.vertices.second.x)*
