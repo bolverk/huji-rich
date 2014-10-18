@@ -22,9 +22,9 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	int N=tess->GetPointNo();
 
 	// Copy the points
-	vector<Vector2D> res(N);
+	vector<Vector2D> res((size_t)N);
 	for(int i=0;i<N;++i)
-		res[i]=tess->GetMeshPoint(i);
+	  res[(size_t)i]=tess->GetMeshPoint(i);
 
 	for(int j=0;j<NumberIt;++j)
 	{
@@ -51,7 +51,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			dw=Vector2D(0,0);
 			}
 			#endif*/
-			res[i]=tess->GetMeshPoint(i)+dw;
+			res[(size_t)i]=tess->GetMeshPoint(i)+dw;
 		}
 #ifdef RICH_MPI
 		if(tproc==0)

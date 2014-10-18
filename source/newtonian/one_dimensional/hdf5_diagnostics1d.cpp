@@ -52,7 +52,7 @@ void diagnostics1d::write_snapshot_to_hdf5
   // Write grid
   {
     vector<double> grid_vector(size_t(sim.GetCellNo()));
-    for(int i=0;i<sim.GetCellNo();++i)
+    for(size_t i=0;i<(size_t)sim.GetCellNo();++i)
       grid_vector[size_t(i)] = sim.GetCellCenter(i);
     write_std_vector_to_hdf5(file, grid_vector, "grid");
   }
@@ -63,7 +63,7 @@ void diagnostics1d::write_snapshot_to_hdf5
     vector<double> pressure_vector(size_t(sim.GetCellNo()));
     vector<double> x_velocity_vector(size_t(sim.GetCellNo()));
     vector<double> y_velocity_vector(size_t(sim.GetCellNo()));
-    for(int i=0;i<sim.GetCellNo();++i){
+    for(size_t i=0;i<(size_t)sim.GetCellNo();++i){
       density_vector[size_t(i)] = sim.GetCell(i).Density;
       pressure_vector[size_t(i)] = sim.GetCell(i).Pressure;
       x_velocity_vector[size_t(i)] = sim.GetCell(i).Velocity.x;

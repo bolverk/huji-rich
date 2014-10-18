@@ -9,8 +9,6 @@
 #include <vector>
 #include "geometry.hpp"
 
-using namespace std;
-
 //! \brief Positions of boundaries
 class BCSides
 {

@@ -14,7 +14,11 @@
 	\param NumberIt The number of correction iterations
 	\param InnerNum The number of first points not to move
 	\param tess The tessellation
-	\param tproc The tessellation of processors
+*/
+#ifdef RICH_MPI
+//!	\param tproc The tessellation of processors
+#endif
+/*!
 	\return The points that give a rounder tessellation
 */
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
