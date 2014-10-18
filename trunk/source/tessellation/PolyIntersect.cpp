@@ -34,7 +34,7 @@ IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 	points[1]=p1-p0;
 	points[2]=q1-q0;
 	double d=orient2d(points);
-	if(d==0)
+	if(fabs(d)>0)
 		return Par;
 	double xi=((q0.x-q1.x)*(p0.x*p1.y-p1.x*p0.y)-(p0.x-p1.x)*
 		(q0.x*q1.y-q1.x*q0.y))/d;
@@ -88,18 +88,20 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 	int p0counter=0,p1counter=0;
 	do
 	{
-		AreaSignCheck[0]=poly0[(p0index+n-1)%n];
-		AreaSignCheck[1]=poly0[p0index];
-		AreaSignCheck[2]=poly1[p1index];
-		double bLeftOfa=orient2d(AreaSignCheck);
-		AreaSignCheck[0]=poly1[(p1index+m-1)%m];
-		AreaSignCheck[1]=poly1[p1index];
-		AreaSignCheck[2]=poly0[p0index];
+	  AreaSignCheck[0]=poly0[(size_t)((p0index+n-1)%n)];
+	  AreaSignCheck[1]=poly0[(size_t)p0index];
+	  AreaSignCheck[2]=poly1[(size_t)p1index];
+	  double bLeftOfa=orient2d(AreaSignCheck);
+	  AreaSignCheck[0]=poly1[(size_t)((p1index+m-1)%m)];
+	  AreaSignCheck[1]=poly1[(size_t)p1index];
+	  AreaSignCheck[2]=poly0[(size_t)p0index];
 		double aLeftOfb=orient2d(AreaSignCheck);
 
 		Vector2D intersect;
-		IntersectFlags inter=SegmentIntersection(poly0[(p0index+n-1)%n],
-			poly0[p0index],poly1[p1index],poly1[(p1index+m-1)%m],intersect);
+		IntersectFlags inter=SegmentIntersection(poly0[(size_t)((p0index+n-1)%n)],
+							 poly0[(size_t)p0index],
+							 poly1[(size_t)p1index],
+							 poly1[(size_t)((p1index+m-1)%m)],intersect);
 		if(inter==True)
 		{
 			res.push_back(intersect);
@@ -116,13 +118,13 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 		}
 
 		AreaSignCheck[0]=Vector2D(0,0);
-		AreaSignCheck[1]=poly0[p0index]-poly0[(p0index+n-1)%n];
-		AreaSignCheck[2]=poly1[p1index]-poly1[(p1index+m-1)%m];
+		AreaSignCheck[1]=poly0[(size_t)p0index]-poly0[(size_t)((p0index+n-1)%n)];
+		AreaSignCheck[2]=poly1[(size_t)p1index]-poly1[(size_t)((p1index+m-1)%m)];
 		double areasign=orient2d(AreaSignCheck);
 		if(inter==Par)
 		{
-			if(ScalarProd(poly0[p0index]-poly0[(p0index+n-1)%n],
-				poly1[p1index]-poly1[(p1index+m-1)%m])<0)
+		  if(ScalarProd(poly0[(size_t)p0index]-poly0[(size_t)((p0index+n-1)%n)],
+				poly1[(size_t)p1index]-poly1[(size_t)((p1index+m-1)%m)])<0)
 			{
 				// Do we need this? The area will be zero
 				/*res=GetParEdge(poly0[p0index],poly0[(p0index+n-1)%n],
@@ -130,9 +132,9 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 				return vector<Vector2D> ();
 			}
 		}
-		if((areasign==0)&&(aLeftOfb<0)&&(bLeftOfa<0))
-			return vector<Vector2D> ();
-		if((areasign==0)&&(aLeftOfb==0)&&(bLeftOfa==0))
+		if((fabs(areasign)<1e-9)&&(aLeftOfb<0)&&(bLeftOfa<0))
+		  return vector<Vector2D> ();
+		if((fabs(areasign)<1e-9)&&(fabs(aLeftOfb)<1e-9)&&(fabs(bLeftOfa)<1e-9))
 		{
 			if(flag==Pi)
 			{
@@ -150,14 +152,14 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 			if(bLeftOfa>0)
 			{
 				if(flag==Pi)
-					res.push_back(poly0[p0index]);
+				  res.push_back(poly0[(size_t)p0index]);
 				++p0counter;
 				p0index=(p0index+1)%n;
 			}
 			else
 			{
 				if(flag==Qi)
-					res.push_back(poly1[p1index]);
+				  res.push_back(poly1[(size_t)p1index]);
 				++p1counter;
 				p1index=(p1index+1)%m;
 			}
@@ -167,14 +169,14 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 			if(aLeftOfb>0)
 			{
 				if(flag==Qi)
-					res.push_back(poly1[p1index]);
+				  res.push_back(poly1[(size_t)p1index]);
 				++p1counter;
 				p1index=(p1index+1)%m;
 			}
 			else
 			{
 				if(flag==Pi)
-					res.push_back(poly0[p0index]);
+				  res.push_back(poly0[(size_t)p0index]);
 				++p0counter;
 				p0index=(p0index+1)%n;
 			}

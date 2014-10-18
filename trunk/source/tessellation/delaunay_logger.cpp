@@ -23,18 +23,18 @@ void BinaryLogger::output(vector<Vector2D> const& cor,
 
   binary_write_single_int((int)f.size(),file_handle);
 
-  for(int i=0;i<(int)cor.size();++i){
+  for(size_t i=0;i<cor.size();++i){
     binary_write_single_double(cor[i].x,file_handle);
     binary_write_single_double(cor[i].y,file_handle);
   }
 
-  for(int i=0;i<(int)f.size();++i){
-    for(int j=0;j<3;++j)
+  for(size_t i=0;i<f.size();++i){
+    for(size_t j=0;j<3;++j)
       binary_write_single_int(f[i].vertices[j],file_handle);
   }
 
-  for(int i=0;i<(int)f.size();++i){
-    for(int j=0;j<3;++j)
+  for(size_t i=0;i<f.size();++i){
+    for(size_t j=0;j<3;++j)
       binary_write_single_int(f[i].neighbors[j],file_handle);
   }
 
