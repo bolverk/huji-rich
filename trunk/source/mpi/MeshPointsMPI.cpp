@@ -75,31 +75,38 @@ namespace
 		}
 		else
 		{
+			const Vector2D tocenter=procpoint-center;
+			const double Rcenter=abs(tocenter);
 			boost::array<Vector2D,3> tocheck;
 			tocheck[0]=center;
 			tocheck[1]=procpoint;
-			tocheck[2]=cpoints[0];
-			double mintemp=orient2d(tocheck)/abs(cpoints[0]-center);
-			double maxtemp=mintemp;
-			int minloc=0,maxloc=0;
-			for(int i=1;i<npoints;++i)
+			double minusval=0,plusval=0;
+			int minusloc=0,plusloc=0;
+			for(int i=0;i<npoints;++i)
 			{
 				tocheck[2]=cpoints[i];
-				double temp=orient2d(tocheck)/abs(cpoints[i]-center);
-				if(temp<mintemp)
-				{
-					mintemp=temp;
-					minloc=i;
+				const Vector2D tocpoint=cpoints[i]-center;
+				const double angle=acos(ScalarProd(tocenter,tocpoint)/(abs(tocpoint)*Rcenter));
+				if(orient2d(tocheck)>0)
+				{	
+					if(angle>plusval)
+					{
+						plusloc=i;
+						plusval=angle;
+					}
 				}
-				if(temp>maxtemp)
+				else
 				{
-					maxtemp=temp;
-					maxloc=i;
+					if(angle>minusval)
+					{
+						minusloc=i;
+						minusval=angle;
+					}
 				}
 			}
-			minangle=atan2(cpoints[minloc].y-center.y,cpoints[minloc].x-center.x);
+			minangle=atan2(cpoints[minusloc].y-center.y,cpoints[minusloc].x-center.x);
 			minangle=(minangle<0) ? (minangle+2*M_PI) : minangle;
-			maxangle=atan2(cpoints[maxloc].y-center.y,cpoints[maxloc].x-center.x);
+			maxangle=atan2(cpoints[plusloc].y-center.y,cpoints[plusloc].x-center.x);
 			maxangle=(maxangle<0) ? (maxangle+2*M_PI) : maxangle;
 			if(maxangle<minangle)
 				minangle-=2*M_PI;
