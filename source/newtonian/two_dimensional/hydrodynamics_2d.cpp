@@ -331,8 +331,11 @@ double CalcTimeStep(Tessellation const& tessellation,
 }
 
 namespace {
-	void update_conserved_extensive_error(int edge_index,
-		int cell_number)
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    __attribute__((noreturn))
+#endif
+  void update_conserved_extensive_error
+  (int edge_index, int cell_number)
 	{
 		UniversalError eo("Error in UpdateConservedExtensive: cell and edge are not mutual neighbors");
 		eo.AddEntry("edge number",edge_index);
@@ -518,6 +521,9 @@ namespace {
 		return res;
 	}
 
+  #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    __attribute__((noreturn))
+#endif
 	void update_primitives_rethrow(int cell_index,
 		UniversalError& eo)
 	{

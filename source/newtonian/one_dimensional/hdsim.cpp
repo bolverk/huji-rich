@@ -150,6 +150,9 @@ namespace {
     return res;
   }
 
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    __attribute__((noreturn))
+#endif
   void riemann_solver_rethrow
   (Primitive const& left,
    Primitive const& right,
