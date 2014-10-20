@@ -1,5 +1,5 @@
-#include <cmath>
 #include "sine_wave.hpp"
+#include <cmath>
 
 SineWave::SineWave(double amplitude,
 		   double wavelength,

@@ -6,6 +6,7 @@
 #ifndef CIRCULAR_ROTATION_HPP
 #define CIRCULAR_ROTATION_HPP 1
 
+#define _USE_MATH_DEFINES
 #include "../point_motion.hpp"
 #include <cmath>
 

@@ -53,6 +53,7 @@ IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 	return True;
 }
 
+/*
 vector<Vector2D> GetParEdge(Vector2D const& p0,Vector2D const& p1,
 	Vector2D const& q0,Vector2D const& q1)
 {
@@ -73,6 +74,7 @@ vector<Vector2D> GetParEdge(Vector2D const& p0,Vector2D const& p1,
 	}
 	return res;
 }
+*/
 
 vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 	const& poly1)
