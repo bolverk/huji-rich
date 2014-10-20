@@ -5,7 +5,7 @@ namespace
 {
 	bool VectorSort(Vector2D const& v1,Vector2D const& v2)
 	{
-	  return ((v1.y<v2.y)||((fabs(v1.y-v2.y)>0)&&(v1.x<v2.x)));
+	  return ((v1.y<v2.y)||(((v1.y-v2.y)==0)&&(v1.x<v2.x)));
 	}
 
   /*
