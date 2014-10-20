@@ -6,7 +6,9 @@
 #include "geotests.hpp"
 #include "Edge.hpp"
 
+//! \brief Flags for if the segment is inner or outer
 enum InFlags {UnKnown,Pi,Qi};
+//! \brief Flags for there is an intersction or not or if the segments are parallel
 enum IntersectFlags {True,False,Par};
 
 /*!
