@@ -21,8 +21,9 @@ public:
 	\param tproc The tessellation of the processors
 	\param tlocal The tessellation of the local mesh points
 	*/
+#ifdef RICH_MPI
 	virtual void Update(Tessellation &tproc,Tessellation const& tlocal)const=0;
-
+#endif
 	//! \brief virtual destructor
 	virtual ~ProcessorUpdate(void);
 #ifdef RICH_MPI
