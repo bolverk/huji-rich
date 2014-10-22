@@ -295,7 +295,6 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
 \param tag The MPI msg tag
 \param comm The MPI communicator
 \param gradlength How many doubles does the gradient have? (Used for determining tracer number)
-\return The MPI error code
 */
 void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
 	tag,MPI_Comm comm,int gradlength);
