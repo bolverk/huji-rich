@@ -37,8 +37,14 @@ public:
 
   bool operator()(Vector2D const& r) const;
 
+  /*! \brief Returns the center of the circle
+    \return Center of the circle
+   */
   const Vector2D& getCenter(void) const;
 
+  /*! \brief Returns the radius of the circle
+    \return Radius
+   */
   double getRadius(void) const;
 
 private:
