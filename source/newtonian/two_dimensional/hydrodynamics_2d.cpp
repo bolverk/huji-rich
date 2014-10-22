@@ -431,8 +431,7 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		dt)),vproc);
 	else
 	{
-		int npoints=(int)oldpoints.size();
-		for(int i=0;i<npoints;++i)
+		for(size_t i=0;i<oldpoints.size();++i)
 			oldpoints[i]+=pointvelocity[i]*dt;
 		tessellation.Update(oldpoints,vproc);
 	}
