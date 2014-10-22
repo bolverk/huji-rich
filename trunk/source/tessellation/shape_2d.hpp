@@ -37,6 +37,10 @@ public:
 
   bool operator()(Vector2D const& r) const;
 
+  const Vector2D& getCenter(void) const;
+
+  double getRadius(void) const;
+
 private:
 
   const Vector2D center_;
