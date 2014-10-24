@@ -32,11 +32,19 @@ void write_vector(vector<int> const& v,
   f.close();
 }
 
+namespace {
+  bool missing_file_data(string const& fname)
+  {
+    std::cout << "Could not find file " << fname << std::endl;
+    return false;
+  }
+}
+
 double read_number(string const& fname)
 {
   double buf = 0;
   ifstream f(fname.c_str());
-  assert(f && "Could not find file");
+  assert(f || missing_file_data(fname));
   f >> buf;
   f.close();
   return buf;
