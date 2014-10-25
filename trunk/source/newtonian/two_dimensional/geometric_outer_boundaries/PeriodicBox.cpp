@@ -18,6 +18,22 @@ PeriodicBox::PeriodicBox(double left, double right,double up, double down)
 	  throw UniversalError("Invalid values for grid boundaries");
 }
 
+PeriodicBox::PeriodicBox(const Vector2D& lower_left,
+			 const Vector2D& upper_right):
+  _left(lower_left.x),
+  _right(upper_right.x),
+  _up(upper_right.y),
+  _down(lower_left.y)
+{
+  assert((_up>_down) && (_right>_left));
+}
+
+std::pair<Vector2D, Vector2D> PeriodicBox::getBoundaries(void) const
+{
+  return std::pair<Vector2D,Vector2D>(Vector2D(_left,_down),
+				      Vector2D(_right,_up));
+}
+
 BoundaryType PeriodicBox::GetBoundaryType(void) const
 {
 	return Periodic;
