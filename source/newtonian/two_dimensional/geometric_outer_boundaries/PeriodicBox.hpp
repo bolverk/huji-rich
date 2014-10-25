@@ -27,8 +27,21 @@ public:
 	\param down The down coordinate
 	*/
 	PeriodicBox(double left, double right,double up, double down);
+
+  /*! \brief Class constructor
+    \param lower_left Lower left corner
+    \param upper_right Upper right corner
+   */
+  PeriodicBox(const Vector2D& lower_left,
+	      const Vector2D& upper_right);
+
+  /*! \brief Returns the lower left and upper right corners
+    \return std::pair. first is lower left corner and second is upper right corner 
+   */
+  std::pair<Vector2D, Vector2D> getBoundaries(void) const;
+
 private:
-	double _left,_right,_up,_down;
+  const double _left,_right,_up,_down;
 };
 
 #endif // PERIODICBOX_HPP
