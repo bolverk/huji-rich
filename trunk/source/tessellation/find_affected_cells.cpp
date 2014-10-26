@@ -63,10 +63,15 @@ vector<int> find_affected_cells(const Tessellation& tess,
     vector<int> res(1,index);
     BOOST_FOREACH(int nbr, tess.GetNeighbors(index))
       {
-	res = join(res,find_affected_cells(tess,
-					   nbr,
-					   circle,
-					   join(visited,index)));
+	if(nbr!=-1)
+	  res = join(res,find_affected_cells(tess,
+					     nbr,
+					     circle,
+					     join(visited,index)));
+	else{
+	  if(!contains(visited,-1))
+	    res.push_back(-1);
+	}
       }
     return res;
   }
