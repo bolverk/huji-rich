@@ -7,7 +7,7 @@ namespace
 {
 	bool VectorSort(Vector2D const& v1,Vector2D const& v2)
 	{
-	  return ((v1.y<v2.y)||((fabs(v1.y-v2.y)<FLT_EPSILON)&&(v1.x<v2.x)));
+	  return ((v1.y<v2.y)||((fabs(v1.y-v2.y)<DBL_EPSILON)&&(v1.x<v2.x)));
 	}
 
   /*
