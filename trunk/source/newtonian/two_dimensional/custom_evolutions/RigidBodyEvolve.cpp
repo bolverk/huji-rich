@@ -10,6 +10,34 @@ namespace {
     else
       throw UniversalError("somethign wrong in RigidBodyEvolve::get_other_index");
   }
+
+  Primitive reflect(const Primitive& cell,
+		    const Vector2D& axis)
+  {
+    Primitive res = cell;
+    res.Velocity = Reflect(cell.Velocity, axis);
+    return res;
+  }
+
+  Primitive rotate(const Primitive& cell,
+		   const Vector2D& n,
+		   const Vector2D& p)
+  {
+    Primitive res = cell;
+    res.Velocity = Vector2D(Projection(res.Velocity, n),
+			    Projection(res.Velocity, p));
+    return res;
+  }
+
+  Conserved rotate(const Conserved& c,
+		   const Vector2D& n,
+		   const Vector2D& p)
+  {
+    Conserved res = c;
+    res.Momentum =  res.Momentum.x*n/abs(n) +
+      res.Momentum.y*p/abs(p);
+    return res;
+  }
 }
 
 Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
@@ -23,27 +51,15 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
   const int other = get_other_index(edge,index);
   if(boundaryconditions.IsGhostCell(other,tessellation))
     return Conserved();
-	Conserved res;
-	Vector2D p = Parallel(edge);
-	Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
-		-tessellation.GetMeshPoint(edge.neighbors.first);
-	Primitive ghost = cells[(size_t)other];
-	ghost.Velocity = Reflect(cells[(size_t)other].Velocity, p);
-
-	vector<Primitive> states(2);
-	for(int i=0;i<2;++i)
-	{
-	  if(pair_member(edge.neighbors,i)==index)
-	    states[(size_t)i] = ghost;
-	  else
-	    states[(size_t)i] = cells[(size_t)other];
-	  states[(size_t)i].Velocity.Set(Projection(states[(size_t)i].Velocity, n),
-					 Projection(states[(size_t)i].Velocity, p));
-	}
-	res = rs.Solve(states[0], states[1],Projection(facevelocity,n));
-	res.Momentum = res.Momentum.x*n/abs(n) +
-		res.Momentum.y*p/abs(p);
-	return res;
+  const Vector2D p = Parallel(edge);
+  const Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
+    -tessellation.GetMeshPoint(edge.neighbors.first);
+  const Primitive ghost = reflect(cells[(size_t)other],p);
+  const std::pair<Primitive, Primitive> states(rotate(edge.neighbors.first==index ?
+						      ghost : cells[(size_t)other],n,p),
+					       rotate(edge.neighbors.second==index ?
+						      ghost : cells[(size_t)other],n,p));
+  return rotate(rs.Solve(states.first, states.second, Projection(facevelocity,n)),n,p);
 }
 
 Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedintensive*/,
