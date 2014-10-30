@@ -1,5 +1,17 @@
 #include "RigidBodyEvolve.hpp"
 
+namespace {
+  int get_other_index(const Edge& edge, int index)
+  {
+    if(edge.neighbors.first==index && edge.neighbors.second!=index)
+      return edge.neighbors.second;
+    else if(edge.neighbors.second==index && edge.neighbors.first!=index)
+      return edge.neighbors.first;
+    else
+      throw UniversalError("somethign wrong in RigidBodyEvolve::get_other_index");
+  }
+}
+
 Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells,	double /*dt*/,
 	SpatialReconstruction& /*interpolation*/,Edge const& edge,
@@ -8,14 +20,10 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 	HydroBoundaryConditions const& boundaryconditions,double /*time*/,
 	vector<vector<double> > const& /*tracers*/)
 {
-	int other;
+  const int other = get_other_index(edge,index);
+  if(boundaryconditions.IsGhostCell(other,tessellation))
+    return Conserved();
 	Conserved res;
-	if(edge.neighbors.first==index)
-		other=edge.neighbors.second;
-	else
-		other=edge.neighbors.first;
-	if(boundaryconditions.IsGhostCell(other,tessellation))
-		return res;
 	Vector2D p = Parallel(edge);
 	Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
 		-tessellation.GetMeshPoint(edge.neighbors.first);
