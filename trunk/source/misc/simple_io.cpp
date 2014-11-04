@@ -54,8 +54,7 @@ int read_int(string const& fname)
 {
   int buf = 0;
   ifstream f(fname.c_str());
-  if(!f)
-    throw UniversalError("Could not find file "+fname);
+  assert(f || missing_file_data(fname));
   f >> buf;
   f.close();
   return buf;
