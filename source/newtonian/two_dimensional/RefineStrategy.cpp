@@ -87,7 +87,7 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 			bool good=true;
 			for(int j=0;j<nn;++j)
 			  if(tess.GetMeshPoint(neigh[(size_t)j]).distance(
-					tess.GetMeshPoint(ToRefine[i]))<0.2*R)
+					tess.GetMeshPoint(ToRefine[i]))<0.4*R)
 					good=false;
 			if(good)
 			{
