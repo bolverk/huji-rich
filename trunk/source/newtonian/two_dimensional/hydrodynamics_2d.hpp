@@ -23,6 +23,14 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 
+/*! \brief Given an edge and an index of one neighbor, returns the index of another neighbor
+  \param edge Voronoi edge
+  \param index Index of one neighbor
+  \return Index of the other neighbor
+ */
+int get_other_index(const Edge& edge,
+		    const int index);
+
 /*! \brief Initialize computational cells
   \param density Density distribution
   \param pressure Pressure distribution

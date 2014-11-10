@@ -1,15 +1,7 @@
 #include "RigidBodyEvolve.hpp"
+#include "../hydrodynamics_2d.hpp"
 
 namespace {
-  int get_other_index(const Edge& edge, int index)
-  {
-    if(edge.neighbors.first==index && edge.neighbors.second!=index)
-      return edge.neighbors.second;
-    else if(edge.neighbors.second==index && edge.neighbors.first!=index)
-      return edge.neighbors.first;
-    else
-      throw UniversalError("somethign wrong in RigidBodyEvolve::get_other_index");
-  }
 
   Primitive reflect(const Primitive& cell,
 		    const Vector2D& axis)
