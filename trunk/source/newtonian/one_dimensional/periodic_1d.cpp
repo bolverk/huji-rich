@@ -3,10 +3,12 @@
 #include <cmath>
 
 namespace {
+  /*
   bool effectively_zero(double x)
   {
     return std::fabs(x)<1e-14;
   }
+  */
 }
 
 Conserved Periodic1D::CalcFlux(vector<double> const& Vertices, 
