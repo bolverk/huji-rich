@@ -2,6 +2,16 @@
 
 using std::max;
 
+int get_other_index(const Edge& edge, const int index)
+{
+  if(edge.neighbors.first==index && edge.neighbors.second!=index)
+    return edge.neighbors.second;
+  else if(edge.neighbors.second==index && edge.neighbors.first!=index)
+    return edge.neighbors.first;
+  else
+    throw UniversalError("Something went wrong in Hydrodynamics2D::get_other_index");
+}
+
 namespace {
 	Vector2D calc_representing_point(Tessellation const& tess,
 		int index,
@@ -1806,7 +1816,6 @@ bool IsShockedCell(Tessellation const& tess,int index,
 	// Calculate gradiant by gauss theorem
 	double vx_i = cells[(size_t)index].Velocity.x;
 	double vy_i = cells[(size_t)index].Velocity.y;
-	int other;
 	Vector2D center=tess.GetMeshPoint(index);
 	Vector2D c_ij,r_ij;
 	for(size_t i=0;i<edges.size();i++)
@@ -1823,11 +1832,7 @@ bool IsShockedCell(Tessellation const& tess,int index,
 			}
 			else
 			{
-				int other_point;
-				if(edges[i].neighbors.first==index)
-					other_point=edges[i].neighbors.second;
-				else
-					other_point=edges[i].neighbors.first;
+			  const int other_point = get_other_index(edges[i],index);
 				c_ij = CalcCentroid(edges[i])-0.5*(
 					tess.GetMeshPoint(other_point)+center);
 				r_ij = center-tess.GetMeshPoint(other_point);
@@ -1841,10 +1846,7 @@ bool IsShockedCell(Tessellation const& tess,int index,
 		}
 		else
 		{
-			if(edges[i].neighbors.first==index)
-				other=edges[i].neighbors.second;
-			else
-				other=edges[i].neighbors.first;
+		  const int other = get_other_index(edges[i],index);
 			c_ij = CalcCentroid(edges[i])-
 				0.5*(tess.GetMeshPoint(other)+center);
 			r_ij = center-tess.GetMeshPoint(other);
