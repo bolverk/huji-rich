@@ -591,7 +591,6 @@ void UpdatePrimitives
 	}
 }
 
-namespace {
 	Primitive RotatePrimitive(Vector2D const& normaldir,
 		Vector2D const& paraldir,
 		Primitive const& p)
@@ -611,7 +610,6 @@ namespace {
 			c.Momentum.y*paraldir/abs(paraldir);
 		return res;
 	}
-}
 
 Conserved FluxInBulk(Vector2D const& normaldir,
 	Vector2D const& paraldir,

@@ -23,6 +23,25 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 
+/*! \brief Rotates primitive variables to align with edge
+  \param n Normal directions
+  \param p Parallel direction
+  \param cell Primitive variables
+  \return Rotated cell
+ */
+Primitive RotatePrimitive(const Vector2D& n,
+			  const Vector2D& p,
+			  const Primitive& cell);
+
+/*! \brief Rotates flux from the edge frame back to the lab frame
+  \param c Flux
+  \param n Normal direction
+  \param p Parallel direction
+ */
+Conserved RotateFluxBack(const Conserved& c,
+			 const Vector2D& n,
+			 const Vector2D& p);
+
 /*! \brief Given an edge and an index of one neighbor, returns the index of another neighbor
   \param edge Voronoi edge
   \param index Index of one neighbor
