@@ -48,8 +48,10 @@ def display_snapshot(fname,field):
     coll = PolyCollection(verts,array=raw[field],cmap=mpl.cm.jet,
                           edgecolors='none')
     fig, ax = plt.subplots()
+    fig.suptitle(field+' @ t = '+str(raw['time'][0]))
     ax.add_collection(coll)
     ax.autoscale_view()
+    ax.set_aspect('equal')
 
     fig.colorbar(coll, ax=ax)
     plt.show()
