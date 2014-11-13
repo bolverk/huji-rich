@@ -748,6 +748,17 @@ namespace {
   private:
     const Tessellation& tess_;
   };
+
+  vector<int> calc_TotalNeigh(const vector<vector<int> >& vol_index)
+  {
+    vector<int> res;
+    for(size_t i=0;i<vol_index.size();++i)
+      res.insert(res.end(),
+		 vol_index[i].begin(),
+		 vol_index[i].end());
+    sort(res.begin(),res.end());
+    return unique(res);
+  }
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -770,12 +781,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	// gather all the relevant neighbors
 	vector<Primitive> MPIcells;
 	vector<vector<double> > MPItracer;
-	vector<int> TotalNeigh;
-	for(int i=0;i<(int)dv.size();++i)
-	  TotalNeigh.insert(TotalNeigh.end(),VolIndex[(size_t)i].begin(),
-			    VolIndex[(size_t)i].end());
-	sort(TotalNeigh.begin(),TotalNeigh.end());
-	TotalNeigh=unique(TotalNeigh);
+	const vector<int> TotalNeigh = calc_TotalNeigh(VolIndex);
 #ifdef RICH_MPI
 	vector<vector<int> > MPI_AMR_Send; // the indeces in the Nghostpoints that I want to recv hydro from other procs
 	CreateGetPrimitiveList(ToRemove,_tessellation.GetGhostIndeces(),n,MPI_AMR_Send);
