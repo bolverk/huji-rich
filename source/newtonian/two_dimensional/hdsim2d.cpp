@@ -779,10 +779,10 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	n=lower_bound(ToRemove.begin(),ToRemove.end(),(int)OldVol.size())-
 		ToRemove.begin();
 	// gather all the relevant neighbors
-	vector<Primitive> MPIcells;
-	vector<vector<double> > MPItracer;
 	const vector<int> TotalNeigh = calc_TotalNeigh(VolIndex);
 #ifdef RICH_MPI
+	vector<Primitive> MPIcells;
+	vector<vector<double> > MPItracer;
 	vector<vector<int> > MPI_AMR_Send; // the indeces in the Nghostpoints that I want to recv hydro from other procs
 	CreateGetPrimitiveList(ToRemove,_tessellation.GetGhostIndeces(),n,MPI_AMR_Send);
 	vector<int> ToRemoveReduced;
@@ -819,17 +819,21 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 						  VolIndex[(size_t)i][(size_t)j])-TotalNeigh.begin());
 			if(i<n)
 			  c_temp[(size_t)index]+=Primitive2Conserved(_cells[(size_t)ToRemove[(size_t)i]],dv[(size_t)i][(size_t)j]);
+#ifdef RICH_MPI
 			else
 			{
 			  c_temp[(size_t)index]+=Primitive2Conserved(MPIcells[(size_t)(i-n)],dv[(size_t)i][(size_t)j]);
 			}
+#endif
 			if(traceractive){
 				if(i<n)
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*tracer_[(size_t)ToRemove[(size_t)i]][(size_t)jj]*_cells[(size_t)ToRemove[(size_t)i]].Density;
+#ifdef RICH_MPI
 				else
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*MPItracer[(size_t)(i-n)][(size_t)jj]*MPIcells[(size_t)(i-n)].Density;
+#endif
 			}
 		}
 	}
