@@ -37,6 +37,7 @@ Primitive RotatePrimitive(const Vector2D& n,
   \param c Flux
   \param n Normal direction
   \param p Parallel direction
+  \return Rotated flux
  */
 Conserved RotateFluxBack(const Conserved& c,
 			 const Vector2D& n,
