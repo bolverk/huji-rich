@@ -147,8 +147,8 @@ int main(void)
 
 	  #ifdef RICH_MPI
 	  if(get_mpi_rank()==0)
-	    write_number(sim.GetTime(),"time.txt");
 	  #endif
+	    write_number(sim.GetTime(),"time.txt");
 
 	  // Remove small cells
 	  vector<int> removed_cells=sim.RemoveCells(&remove);
