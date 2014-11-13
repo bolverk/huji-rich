@@ -824,13 +824,16 @@ namespace {
     return res;
   }
 
-  void remove_update_cells(const vector<int>& total_neigh,
-			   const vector<int>& to_remove,
-			   const Tessellation& tess,
-			   const vector<double>& old_volumes,
-			   const vector<Conserved>& c_temp,
-			   const EquationOfState& eos,
-			   vector<Primitive>& cells)
+  void remove_update_cells_tracers(const bool tracer_active,
+				   const vector<int>& total_neigh,
+				   const vector<int>& to_remove,
+				   const Tessellation& tess,
+				   const vector<double>& old_volumes,
+				   const vector<Conserved>& c_temp,
+				   const vector<vector<double> >& t_temp,
+				   const EquationOfState& eos,
+				   vector<Primitive>& cells,
+				   vector<vector<double> >& tracers)
   {
     for(size_t i=0;i<total_neigh.size();++i){
       const size_t index = (size_t)(lower_bound(to_remove.begin(),to_remove.end(),
@@ -838,7 +841,14 @@ namespace {
       const double volume = tess.GetVolume(total_neigh[i]-(int)index);
       const Conserved old_extensive = Primitive2Conserved(cells[(size_t)total_neigh[i]],
 							  old_volumes[(size_t)total_neigh[i]]);
+      const double old_density = cells[(size_t)total_neigh[i]].Density;
       cells[(size_t)total_neigh[i]] = Conserved2Primitive((c_temp[i]+old_extensive)/volume,eos);
+      if(tracer_active){
+	const double new_density = cells[(size_t)total_neigh[i]].Density;
+	tracers[(size_t)total_neigh[i]] = (1./(new_density*volume))*
+	  (t_temp[i]+old_volumes[(size_t)total_neigh[i]]*
+	   old_density*tracers[(size_t)total_neigh[i]]);	  
+      }
     }
   }
 }
@@ -903,26 +913,16 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	//	int Nneigh=int(TotalNeigh.size());
 	// Update the primitives
 	sort(ToRemove.begin(),ToRemove.end());
-	remove_update_cells(TotalNeigh,
-			    ToRemove,
-			    _tessellation,
-			    OldVol,
-			    c_temp,
-			    _eos,
-			    _cells);
-	for(size_t i=0;i<TotalNeigh.size();++i)
-	{
-	  int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[(size_t)i])-
-			ToRemove.begin());
-		double vol_inv=1.0/_tessellation.GetVolume(TotalNeigh[(size_t)i]-index);
-		double olddensity=_cells[(size_t)TotalNeigh[(size_t)i]].Density;
-		if(traceractive)
-		{
-		  double density_inv=1.0/_cells[(size_t)TotalNeigh[(size_t)i]].Density;
-			tracer_[(size_t)TotalNeigh[(size_t)i]]=density_inv*vol_inv*(t_temp[(size_t)i]+
-				OldVol[(size_t)TotalNeigh[(size_t)i]]*olddensity*tracer_[(size_t)TotalNeigh[(size_t)i]]);
-		}
-	}
+	remove_update_cells_tracers(traceractive,
+				    TotalNeigh,
+				    ToRemove,
+				    _tessellation,
+				    OldVol,
+				    c_temp,
+				    t_temp,
+				    _eos,
+				    _cells,
+				    tracer_);
 	if(n<(int)ToRemove.size())
 		ToRemove.erase(ToRemove.begin()+n,ToRemove.end());
 	//Remove the deleted cells
