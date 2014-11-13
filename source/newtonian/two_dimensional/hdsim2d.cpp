@@ -823,6 +823,24 @@ namespace {
     }
     return res;
   }
+
+  void remove_update_cells(const vector<int>& total_neigh,
+			   const vector<int>& to_remove,
+			   const Tessellation& tess,
+			   const vector<double>& old_volumes,
+			   const vector<Conserved>& c_temp,
+			   const EquationOfState& eos,
+			   vector<Primitive>& cells)
+  {
+    for(size_t i=0;i<total_neigh.size();++i){
+      const size_t index = (size_t)(lower_bound(to_remove.begin(),to_remove.end(),
+						total_neigh[i])-to_remove.begin());
+      const double volume = tess.GetVolume(total_neigh[i]-(int)index);
+      const Conserved old_extensive = Primitive2Conserved(cells[(size_t)total_neigh[i]],
+							  old_volumes[(size_t)total_neigh[i]]);
+      cells[(size_t)total_neigh[i]] = Conserved2Primitive((c_temp[i]+old_extensive)/volume,eos);
+    }
+  }
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -882,33 +900,22 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 #endif
 							   ToRemove,
 							   n);
-	int Nneigh=int(TotalNeigh.size());
+	//	int Nneigh=int(TotalNeigh.size());
 	// Update the primitives
 	sort(ToRemove.begin(),ToRemove.end());
-	for(int i=0;i<Nneigh;++i)
+	remove_update_cells(TotalNeigh,
+			    ToRemove,
+			    _tessellation,
+			    OldVol,
+			    c_temp,
+			    _eos,
+			    _cells);
+	for(size_t i=0;i<TotalNeigh.size();++i)
 	{
 	  int index=int(lower_bound(ToRemove.begin(),ToRemove.end(),TotalNeigh[(size_t)i])-
 			ToRemove.begin());
 		double vol_inv=1.0/_tessellation.GetVolume(TotalNeigh[(size_t)i]-index);
-		Conserved oldextensive=Primitive2Conserved(_cells[(size_t)TotalNeigh[(size_t)i]],
-			OldVol[(size_t)TotalNeigh[(size_t)i]]);
 		double olddensity=_cells[(size_t)TotalNeigh[(size_t)i]].Density;
-		try
-		{
-			_cells[(size_t)TotalNeigh[(size_t)i]]=Conserved2Primitive(vol_inv*(c_temp[(size_t)i]+
-				oldextensive),_eos);
-		}
-		catch(UniversalError &eo)
-		{
-			eo.AddEntry("Error in cell derefine",0);
-			eo.AddEntry("volume of adjusted cell",1.0/vol_inv);
-			eo.AddEntry("Index of adjusted cell",(double)TotalNeigh[(size_t)i]);
-			eo.AddEntry("Index of adjusted cell in Totalneigh",(double)i);
-			eo.AddEntry("ToRemove size",(double)ToRemove.size());
-			eo.AddEntry("Index of adjusted cell in ToRemove",(double)index);
-			eo.AddEntry("Totalneigh size",(double)TotalNeigh.size());
-			throw;
-		}
 		if(traceractive)
 		{
 		  double density_inv=1.0/_cells[(size_t)TotalNeigh[(size_t)i]].Density;
