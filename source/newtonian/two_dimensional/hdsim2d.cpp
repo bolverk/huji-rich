@@ -727,25 +727,40 @@ namespace
 #endif
 }
 
+namespace {
+  class VolumeExtractor: public Index2Member<double>
+  {
+  public:
+
+    VolumeExtractor(const Tessellation& tess):
+      tess_(tess) {}
+
+    size_t getLength(void) const
+    {
+      return (size_t)tess_.GetPointNo();
+    }
+
+    double operator()(size_t i) const
+    {
+      return tess_.GetVolume((int)i);
+    }
+
+  private:
+    const Tessellation& tess_;
+  };
+}
+
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 {
 	if(!remove)
 		throw UniversalError("No Removal strategy");
+	const bool traceractive = !tracer_.empty();
 	vector<int> ToRemove=remove->CellsToRemove(_tessellation,_cells,tracer_,_time);
-	//if(ToRemove.empty())
-	//	return ToRemove;
 	int n=int(ToRemove.size());
-	bool traceractive;
-	if(!tracer_.empty())
-		traceractive=true;
-	else
-		traceractive=false;
 	if(!ToRemove.empty())
 		sort(ToRemove.begin(),ToRemove.end());
-	// save the extensive of the removed cells
-	vector<double> OldVol((size_t)_tessellation.GetPointNo());
-	for(int i=0;i<(int)_tessellation.GetPointNo();++i)
-	  OldVol[(size_t)i]=_tessellation.GetVolume(i);
+	const vector<double> OldVol = serial_generate
+	  (VolumeExtractor(_tessellation));
 	// Change the tessellation
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
