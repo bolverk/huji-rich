@@ -971,19 +971,13 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	const& Removed,double dr)
 {
-	bool traceractive;
-	if(!tracer_.empty())
-		traceractive=true;
-	else
-		traceractive=false;
-	vector<int> PointsToRefine;
+  if(!refine)
+    throw UniversalError("Error in refine, NULL pointer");
+	const bool traceractive = !tracer_.empty();
 	vector<Vector2D> directions;
-	// Get the list of points to refine
-	if(refine!=0)
-		PointsToRefine=refine->CellsToRefine(_tessellation,_cells,
+	vector<int> PointsToRefine = refine->CellsToRefine(_tessellation,_cells,
 		tracer_,_time,directions,Removed);
-	else
-		throw UniversalError("Error in refine, NULL pointer");
+	// Get the list of points to refine
 	if(PointsToRefine.empty())
 		return PointsToRefine;
 	PointsToRefine=refine->RemoveNearBoundary(PointsToRefine,directions,_tessellation);
