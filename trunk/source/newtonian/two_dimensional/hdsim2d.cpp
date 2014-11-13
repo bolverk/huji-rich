@@ -997,6 +997,8 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 		if(traceractive)
 		  tracer_[(size_t)i]=tracer_[(size_t)PointsToRefine[(size_t)(i-N)]];
 	}
+	_conservedextensive = CalcConservedExtensive
+	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
 	return PointsToRefine;
 }
 
