@@ -759,6 +759,33 @@ namespace {
     sort(res.begin(),res.end());
     return unique(res);
   }
+
+  vector<Conserved> calc_c_temp(const vector<int>& total_neigh,
+				const vector<vector<int> >& vol_index,
+				const vector<vector<double> >& dv,
+				const vector<Primitive>& cells,
+				#ifdef RICH_MPI
+				const vector<Primitive>& mpi_cells,
+				#endif
+				const vector<int>& to_remove,
+				int n)
+  {
+    vector<Conserved> res(total_neigh.size());
+    for(size_t i=0;i<dv.size();++i){
+      for(size_t j=0;j<vol_index[i].size();++j){
+	const size_t index = (size_t)(lower_bound(total_neigh.begin(),total_neigh.end(),
+						  vol_index[i][j])-total_neigh.begin());
+	if(i<(size_t)n)
+	  res[index] += Primitive2Conserved(cells[(size_t)to_remove[i]],dv[i][j]);
+#ifdef RICH_MPI
+	else{
+	  res[index] += Primitive2Conserved(mpi_cells[i-(size_t)n],dv[i][j]);
+	}
+#endif
+      }
+    }
+    return res;
+  }
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -767,7 +794,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		throw UniversalError("No Removal strategy");
 	const bool traceractive = !tracer_.empty();
 	vector<int> ToRemove=remove->CellsToRemove(_tessellation,_cells,tracer_,_time);
-	int n=int(ToRemove.size());
+	//	int n=int(ToRemove.size());
 	if(!ToRemove.empty())
 		sort(ToRemove.begin(),ToRemove.end());
 	const vector<double> OldVol = serial_generate
@@ -776,7 +803,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
 	_tessellation.RemoveCells(ToRemove,VolIndex,dv);
-	n=lower_bound(ToRemove.begin(),ToRemove.end(),(int)OldVol.size())-
+	int n=lower_bound(ToRemove.begin(),ToRemove.end(),(int)OldVol.size())-
 		ToRemove.begin();
 	// gather all the relevant neighbors
 	const vector<int> TotalNeigh = calc_TotalNeigh(VolIndex);
@@ -797,36 +824,35 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetGhostIndeces(),ToRemoveReduced);
 #endif
-	// Calculate the old extensive hydro
-	vector<Conserved> c_temp;
+	const vector<Conserved> c_temp = calc_c_temp(TotalNeigh,
+						     VolIndex,
+						     dv,
+						     _cells,
+						     #ifdef RICH_MPI
+						     MPIcells,
+						     #endif
+						     ToRemove,
+						     n);
 	vector<vector<double> > t_temp;
 	int Nneigh=int(TotalNeigh.size());
-	c_temp.resize((size_t)Nneigh); // need to add hydro/tracer of removed ghost
+// need to add hydro/tracer of removed ghost
 	if(traceractive)
 	{
-	  t_temp.resize((size_t)Nneigh);
+	  t_temp.resize(TotalNeigh.size());
 		for(int i=0;i<Nneigh;++i)
 		{
 		  t_temp[(size_t)i].resize(tracer_[0].size());
 		}
 	}
 	// Change the extensive
-	for(int i=0;i<(int)dv.size();++i)
+	for(size_t i=0;i<dv.size();++i)
 	{
-	  for(int j=0;j<(int)VolIndex[(size_t)i].size();++j)
+	  for(size_t j=0;j<VolIndex[i].size();++j)
 		{
-			int index=int(lower_bound(TotalNeigh.begin(),TotalNeigh.end(),
-						  VolIndex[(size_t)i][(size_t)j])-TotalNeigh.begin());
-			if(i<n)
-			  c_temp[(size_t)index]+=Primitive2Conserved(_cells[(size_t)ToRemove[(size_t)i]],dv[(size_t)i][(size_t)j]);
-#ifdef RICH_MPI
-			else
-			{
-			  c_temp[(size_t)index]+=Primitive2Conserved(MPIcells[(size_t)(i-n)],dv[(size_t)i][(size_t)j]);
-			}
-#endif
+		  size_t index=(size_t)(lower_bound(TotalNeigh.begin(),TotalNeigh.end(),
+						    VolIndex[i][j])-TotalNeigh.begin());
 			if(traceractive){
-				if(i<n)
+			  if(i<(size_t)n)
 					for(int jj=0;jj<(int)t_temp[0].size();++jj)
 					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*tracer_[(size_t)ToRemove[(size_t)i]][(size_t)jj]*_cells[(size_t)ToRemove[(size_t)i]].Density;
 #ifdef RICH_MPI
