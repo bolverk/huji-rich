@@ -786,6 +786,43 @@ namespace {
     }
     return res;
   }
+
+  vector<vector<double> > calc_t_temp(bool traceractive,
+				      const vector<int>& total_neigh,
+				      const vector<vector<int> >& vol_index,
+				      const vector<vector<double> >& dv,
+				      const vector<Primitive>& cells,
+				      const vector<vector<double> >& tracers,
+#ifdef RICH_MPI
+				      const vector<Primitive> mpi_cells,
+				      const vector<vector<double> >& mpi_tracer,
+#endif
+				      const vector<int>& to_remove,
+				      int n)
+				      
+  {
+    if(!traceractive)
+      return vector<vector<double> >();
+    vector<vector<double> > res(total_neigh.size(),vector<double>(tracers[0].size(),0));
+    for(size_t i=0;i<dv.size();++i){
+      for(size_t j=0;j<vol_index[i].size();++j){
+	const size_t index = (size_t)(lower_bound(total_neigh.begin(),total_neigh.end(),
+						  vol_index[i][j])-total_neigh.begin());
+				      
+	if(i<(size_t)n){
+	  for(size_t k=0;k<res[0].size();++k)
+	    res[index][k] += dv[i][j]*tracers[(size_t)to_remove[i]][k]*cells[(size_t)to_remove[i]].Density;
+	}
+	#ifdef RICH_MPI
+	else{
+	  for(size_t k=0;k<res[0].size();++k)
+	    res[index][k] += dv[i][j]*mpi_tracer[i-(size_t)n][k]*mpi_cells[i-(size_t)n].Density;
+	}	  
+	#endif
+      }
+    }
+    return res;
+  }
 }
 
 vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
@@ -833,36 +870,19 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 						     #endif
 						     ToRemove,
 						     n);
-	vector<vector<double> > t_temp;
-	int Nneigh=int(TotalNeigh.size());
-// need to add hydro/tracer of removed ghost
-	if(traceractive)
-	{
-	  t_temp.resize(TotalNeigh.size());
-		for(int i=0;i<Nneigh;++i)
-		{
-		  t_temp[(size_t)i].resize(tracer_[0].size());
-		}
-	}
-	// Change the extensive
-	for(size_t i=0;i<dv.size();++i)
-	{
-	  for(size_t j=0;j<VolIndex[i].size();++j)
-		{
-		  size_t index=(size_t)(lower_bound(TotalNeigh.begin(),TotalNeigh.end(),
-						    VolIndex[i][j])-TotalNeigh.begin());
-			if(traceractive){
-			  if(i<(size_t)n)
-					for(int jj=0;jj<(int)t_temp[0].size();++jj)
-					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*tracer_[(size_t)ToRemove[(size_t)i]][(size_t)jj]*_cells[(size_t)ToRemove[(size_t)i]].Density;
+	const vector<vector<double> > t_temp = calc_t_temp(traceractive,
+							   TotalNeigh,
+							   VolIndex,
+							   dv,
+							   _cells,
+							   tracer_,
 #ifdef RICH_MPI
-				else
-					for(int jj=0;jj<(int)t_temp[0].size();++jj)
-					  t_temp[(size_t)index][(size_t)jj]+=dv[(size_t)i][(size_t)j]*MPItracer[(size_t)(i-n)][(size_t)jj]*MPIcells[(size_t)(i-n)].Density;
+							   MPIcells,
+							   MPItracer,
 #endif
-			}
-		}
-	}
+							   ToRemove,
+							   n);
+	int Nneigh=int(TotalNeigh.size());
 	// Update the primitives
 	sort(ToRemove.begin(),ToRemove.end());
 	for(int i=0;i<Nneigh;++i)
