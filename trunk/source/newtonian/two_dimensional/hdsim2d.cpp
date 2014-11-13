@@ -794,7 +794,7 @@ namespace {
 				      const vector<Primitive>& cells,
 				      const vector<vector<double> >& tracers,
 #ifdef RICH_MPI
-				      const vector<Primitive> mpi_cells,
+				      const vector<Primitive>& mpi_cells,
 				      const vector<vector<double> >& mpi_tracer,
 #endif
 				      const vector<int>& to_remove,
@@ -928,6 +928,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	//Remove the deleted cells
 	RemoveVector(_cells,ToRemove);
 	RemoveVector(custom_evolution_indices,ToRemove);
+	RemoveVector(_conservedextensive,ToRemove);
 	if(traceractive)
 		RemoveVector(tracer_,ToRemove);
 	// Fix the ghost points
