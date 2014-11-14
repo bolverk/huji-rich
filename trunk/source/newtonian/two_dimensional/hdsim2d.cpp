@@ -928,7 +928,9 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	//Remove the deleted cells
 	RemoveVector(_cells,ToRemove);
 	RemoveVector(custom_evolution_indices,ToRemove);
-	RemoveVector(_conservedextensive,ToRemove);
+	//	RemoveVector(_conservedextensive,ToRemove);
+	_conservedextensive = CalcConservedExtensive
+	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
 	if(traceractive)
 		RemoveVector(tracer_,ToRemove);
 	// Fix the ghost points
