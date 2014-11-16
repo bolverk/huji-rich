@@ -46,6 +46,11 @@ public:
   virtual bool PointIsReflective(Vector2D const& point)const=0;
 
   virtual ~OuterBoundary(void);
+  /*!
+  \brief Returns the outer box as a set of edges in the order: Right, Up, Left and Down. All neighbors are set to zero.
+  \return The edges of the boundary box.
+  */
+  vector<Edge> GetBoxEdges(void) const;
 };
 
 #endif // OUTERBOUNDARY_HPP

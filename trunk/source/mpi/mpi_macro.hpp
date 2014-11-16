@@ -150,6 +150,14 @@ bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & po
 void ConvertVector2DToDouble(vector<Vector2D> const& vec,vector<double> &res);
 
 /*!
+\brief Converts a vector of Vector2D into a vector of doubles
+\param res The vector of Vector2D given as output
+\param vec The vector of doubles 
+*/
+void ConvertDoubleToVector2D(vector<Vector2D> & res,vector<double> const& vec);
+
+
+/*!
 \brief Sends and receives data from several cpus, each cpu sends/recv a vector of Vector2D
 \param tosend The data to send, outermost vector labels the cpu
 \param proclist The id of cpus to talk with
@@ -312,7 +320,7 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 /*!
 \brief Send/Recv velocities of ghost cells
 \param vel The original vector of velocities
-\param sentcells The indeces of the gradients to send
+\param sentcells The indeces of the velocities to send
 \param sentprocs The ids of the cpus to talk with
 \param Nghost The indeces of each ghost point in the vector of points that the tessellation holds
 \param totalpoints The total number of points in the tessellation (including ghost)

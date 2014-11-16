@@ -18,7 +18,12 @@
 #include "delaunay_logger.hpp"
 #include "Edge.hpp"
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
-
+#include "shape_2d.hpp"
+#include "../misc/int2str.hpp"
+#ifdef RICH_MPI
+#include "../mpi/mpi_macro.hpp"
+#include "find_affected_cells.hpp"
+#endif
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg
 */
@@ -61,12 +66,16 @@ private:
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
   vector<int> FindContainingTetras(int StartTetra, int point);
   vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
+  vector<vector<int> > FindOuterPointsMPI(OuterBoundary const* obc,vector<Edge> const& edges,
+	  Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist);
   bool IsTripleOut(int index) const;
   int FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked)const;
   void AddOuterFacets(int tri,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked);
+  void AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
+	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc);
   void AddRigid(OuterBoundary const* obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
@@ -74,7 +83,10 @@ private:
   void AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   double GetMaxRadius(int point,int startfacet);
-  
+  void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
+	  vector<int> const& neigh,vector<vector<int> > &Nghost);
+  vector<int> GetOuterFacets(int cur_facet,int real_point,int olength);
+
   Delaunay& operator=(const Delaunay& origin);
 
 public:
@@ -233,6 +245,16 @@ public:
   \return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
   */
   vector<vector<int> > BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges);
+  /*!
+  \brief Builds the boundary points for parallel runs
+  \param obc The geometrical boundary conditions
+  \param tproc The tessellation of the processors
+  \param Nghost The indeces of the ghost cells (order by cpu) in the cor vector. Given as output.
+  \param proclist The list of cpus to talk with. Given as output.
+  \return The indeces of the boundary points sent to each cpu
+  */
+  vector<vector<int> > BuildBoundary(OuterBoundary const* obc,Tessellation const& tproc,
+	  vector<vector<int> > &Nghost,vector<int> &proclist);
   /*!
   \brief Adds the points to the tessellation, used for boundary points
   \param points The points to add

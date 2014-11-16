@@ -238,7 +238,6 @@ private:
 	void FindIntersectingPoints(vector<Edge> const& box_edges,
 		vector<vector<int> > &toduplicate);
 	vector<int> CellIntersectBoundary(vector<Edge> const&box_edges,int cell);
-	vector<Edge> GetBoxEdges(void);
 	void GetAdditionalBoundary(vector<vector<int> > &copied,
 		vector<vector<int> > &result,vector<vector<int> > &totest);
 	void GetCorners(vector<vector<int> > &copied,vector<vector<int> > &result);
