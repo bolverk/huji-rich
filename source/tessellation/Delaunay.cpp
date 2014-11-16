@@ -713,18 +713,18 @@ namespace
 	}
 }
 
-vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength)
+vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2)
 {
 	int cur_facet=start_facet;
 	vector<int> f_temp,containing_facets;
-	f_temp.reserve((size_t)(10*sqrt(1.0*olength)));
+	f_temp.reserve((size_t)(10*sqrt(1.0*olength2)));
 	int point_index=FindPointInFacet(cur_facet,real_point);
-	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength2))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
 	}
-	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength2))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
@@ -735,10 +735,10 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength)
 		int old_current=cur_facet;
 		for(size_t i=0;i<containing_facets.size();++i)
 		{
-			if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength)&&
+			if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength2)&&
 				containing_facets[(size_t)i]!=old_current)
 				cur_facet=containing_facets[(size_t)i];
-			if(!IsOuterQuick(f[(size_t)containing_facets[(size_t)i]],olength))
+			if(!IsOuterQuick(f[(size_t)containing_facets[(size_t)i]],olength2))
 				f_temp.push_back(containing_facets[(size_t)i]);
 		}
 		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
@@ -751,11 +751,13 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength)
 	return f_temp;
 }
 
-vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
-	vector<Edge> const& edges,Tessellation const& tproc,vector<vector<int> > &Nghost,
-	vector<int> &proclist)
-{
 #ifdef RICH_MPI
+vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
+						  vector<Edge> const& edges,
+						  Tessellation const& tproc,
+						  vector<vector<int> > &Nghost,
+						  vector<int> &proclist)
+{
 	// We add the points in a counter clockwise fashion
 	vector<vector<int> > res(edges.size());
 	if(olength<100)
@@ -1047,15 +1049,13 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			toduplicate[i].insert(toduplicate[i].begin(),oldres[i].begin(),oldres[i].end());
 	proclist=neigh;
 	return toduplicate;
-#else
-	return vector<vector<int> > ();
-#endif
 }
+#endif
 
+#ifdef RICH_MPI
 void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	vector<int> const& proclist,vector<vector<int> > &Nghost)
 {
-#ifdef RICH_MPI
 	const int rank = get_mpi_rank();
 	const int ws = get_mpi_size();
 	vector<int> procorder=GetProcOrder(rank,ws);
@@ -1126,8 +1126,8 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			}
 		}
 	}
-#endif
 }
+#endif
 
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
@@ -1428,11 +1428,10 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edge
 	}
 }
 
-
+#ifdef RICH_MPI
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,
 	Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist)
 {
-#ifdef RICH_MPI
 	vector<Edge> edges;
 	vector<int> edge_index=tproc.GetCellEdges(get_mpi_rank());
 	for(size_t i=0;i<edge_index.size();++i)
@@ -1440,10 +1439,8 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,
 //	delaunay_loggers::BinaryLogger log("del"+int2str(get_mpi_rank())+".bin");
 //	log.output(cor,f);
 	return FindOuterPointsMPI(obc,edges,tproc,Nghost,proclist);
-#else
-	return vector<vector<int> > ();
-#endif
 }
+#endif
 
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges)
 {
@@ -1574,10 +1571,10 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 	}
 }
 
+#ifdef RICH_MPI
 void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc)
 {
-#ifdef RICH_MPI
 	stack<int> tocheck;
 	vector<int> neightemp=FindContainingTetras(Walk(point),point);
 	for(size_t i=0;i<neightemp.size();++i)
@@ -1634,5 +1631,5 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 			}
 		}
 	}
-#endif
 }
+#endif
