@@ -62,14 +62,14 @@ set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boo
 	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
 
-external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h
-	cd external_libraries/hdf5_dump/hdf5-1.8.13 && \
+external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.14/c++/src/H5Cpp.h
+	cd external_libraries/hdf5_dump/hdf5-1.8.14 && \
 	./configure --enable-cxx --prefix=`cd ../.. && pwd`
-	cd external_libraries/hdf5_dump/hdf5-1.8.13 && make
-	cd external_libraries/hdf5_dump/hdf5-1.8.13 && make install
+	cd external_libraries/hdf5_dump/hdf5-1.8.14 && make
+	cd external_libraries/hdf5_dump/hdf5-1.8.14 && make install
 
-external_libraries/hdf5_dump/hdf5-1.8.13/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.13.tar.gz
-	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.13.tar.gz
+external_libraries/hdf5_dump/hdf5-1.8.14/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.14.tar.gz
+	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.14.tar.gz
 
 external_libraries/boost_dump/boost_1_55_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_55_0.tar.bz2
 	cd external_libraries/boost_dump/ && tar xvf ./boost_1_55_0.tar.bz2
@@ -80,10 +80,10 @@ external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/an
 external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
 	cd external_libraries/ann_tree_dump/ && tar xvf ./ann_1.1.2.tar.gz
 
-external_libraries/hdf5_dump/hdf5-1.8.13.tar.gz:
+external_libraries/hdf5_dump/hdf5-1.8.14.tar.gz:
 	mkdir -p external_libraries/hdf5_dump
 	cd external_libraries/hdf5_dump && \
-	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz
+	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.14.tar.gz
 
 external_libraries/boost_dump/boost_1_55_0.tar.bz2:
 	mkdir -p external_libraries/boost_dump
