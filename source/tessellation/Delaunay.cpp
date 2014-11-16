@@ -902,7 +902,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	{
 		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
 		{
-			cur_facet=containing_facets[(size_t)i];
+		  //			cur_facet=containing_facets[(size_t)i];
 			break;
 		}
 	}
