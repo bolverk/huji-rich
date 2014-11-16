@@ -389,6 +389,14 @@ annDeallocPt(queryPt);
 return res;
 }
 */
+
+void ConvertDoubleToVector2D(vector<Vector2D> & res,vector<double> const& vec)
+{
+	res.resize(vec.size()/2);
+	for(size_t i=0;i<res.size();++i)
+		res[i].Set(vec[2*i],vec[2*i+1]);
+}
+
 void ConvertVector2DToDouble(vector<Vector2D> const& vec,vector<double> &res)
 {
 	int n=(int) vec.size();

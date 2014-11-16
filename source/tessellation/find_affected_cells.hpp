@@ -16,12 +16,11 @@ using std::vector;
   \param tess Tessellation
   \param index Current cell index
   \param circle Circle
-  \param visited List of cell indices already visited
-  \return List of cell indices that intersect the circle
+  \param res List of cell indices that intersect the circle
  */
-vector<int> find_affected_cells(const Tessellation& tess,
+void find_affected_cells(const Tessellation& tess,
 				int index,
 				const Circle& circle,
-				const vector<int>& visited);
+				vector<int> & res);
 
 #endif // FIND_AFFECTED_CELLS

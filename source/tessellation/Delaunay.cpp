@@ -61,8 +61,8 @@ namespace
 		tocheck[2]=point;
 		for(int i=0;i<3;++i)
 		{
-		  tocheck[0]=tri[(size_t)i];
-		  tocheck[1]=tri[(size_t)((i+1)%3)];
+			tocheck[0]=tri[(size_t)i];
+			tocheck[1]=tri[(size_t)((i+1)%3)];
 			if(orient2d(tocheck)<0)
 				return false;
 		}
@@ -75,7 +75,7 @@ namespace
 		int n=(int)points.size();
 		for(int i=0;i<n;++i)
 		{
-		  if(CrossProduct(points[(size_t)i]-p,points[(size_t)((i+1)%n)]-p)<0)
+			if(CrossProduct(points[(size_t)i]-p,points[(size_t)((i+1)%n)]-p)<0)
 				return false;
 		}
 		return true;
@@ -90,10 +90,10 @@ namespace
 		double maxy=miny;
 		for(int i=1;i<n;++i)
 		{
-		  minx=min(points[(size_t)i].x,minx);
-		  miny=min(points[(size_t)i].y,miny);
-		  maxx=max(points[(size_t)i].x,maxx);
-		  maxy=max(points[(size_t)i].y,maxy);
+			minx=min(points[(size_t)i].x,minx);
+			miny=min(points[(size_t)i].y,miny);
+			maxx=max(points[(size_t)i].x,maxx);
+			maxy=max(points[(size_t)i].y,maxy);
 		}
 		vector<double> res(4);
 		res[0]=minx;
@@ -107,7 +107,7 @@ namespace
 	{
 		for(int j=0;j<3;++j)
 		{
-		  if(fc.neighbors[(size_t)j]==i)
+			if(fc.neighbors[(size_t)j]==i)
 				return j;
 		}
 		throw UniversalError("Error in find_index: Index not found");
@@ -415,8 +415,8 @@ int Delaunay::Walk(int point)
 		//Test friends
 		for(int i=0;i<3;++i)
 		{
-		  points[0]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]];
-		  points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]];
+			points[0]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]];
+			points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]];
 			if(orient2d(points)<0)
 			{
 				finish=0;
@@ -685,31 +685,6 @@ namespace
 			return false;
 	}
 
-  /*
-	void AddAllFacets(vector<facet> const& f,int olength,vector<int> const& tocheck,
-		vector<int> &res,vector<int> &res_facet)
-	{
-		vector<int> temp;
-		vector<int> ftemp;
-		temp.reserve(30);
-		for(size_t i=0;i<tocheck.size();++i)
-		{
-			for(size_t j=0;j<3;++j)
-				if(f[(size_t)tocheck[(size_t)i]].vertices[(size_t)j]<olength)
-				{
-					temp.push_back(f[(size_t)tocheck[(size_t)i]].vertices[(size_t)j]);
-					ftemp.push_back(tocheck[(size_t)i]);
-				}
-		}
-		sort(temp.begin(),temp.end());
-		sort(ftemp.begin(),ftemp.end());
-		temp=unique(temp);
-		ftemp=unique(ftemp);
-		res.insert(res.end(),temp.begin(),temp.end());
-		res_facet.insert(res_facet.end(),ftemp.begin(),ftemp.end());
-	}
-  */
-
 	bool CircleSegmentIntersect(Edge const& edge,Vector2D const& center,double R)
 	{
 		Vector2D AC=center-edge.vertices.first;
@@ -738,6 +713,422 @@ namespace
 	}
 }
 
+vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength)
+{
+	int cur_facet=start_facet;
+	vector<int> f_temp,containing_facets;
+	f_temp.reserve((size_t)(10*sqrt(1.0*olength)));
+	int point_index=FindPointInFacet(cur_facet,real_point);
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	{
+		point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	{
+		point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}
+	do
+	{
+		FindContainingTetras(cur_facet,real_point,containing_facets);
+		int old_current=cur_facet;
+		for(size_t i=0;i<containing_facets.size();++i)
+		{
+			if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength)&&
+				containing_facets[(size_t)i]!=old_current)
+				cur_facet=containing_facets[(size_t)i];
+			if(!IsOuterQuick(f[(size_t)containing_facets[(size_t)i]],olength))
+				f_temp.push_back(containing_facets[(size_t)i]);
+		}
+		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
+		if(IsTripleOut(cur_facet))
+			point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}while(start_facet!=cur_facet);
+	sort(f_temp.begin(),f_temp.end());
+	f_temp=unique(f_temp);
+	return f_temp;
+}
+
+vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
+	vector<Edge> const& edges,Tessellation const& tproc,vector<vector<int> > &Nghost,
+	vector<int> &proclist)
+{
+#ifdef RICH_MPI
+	// We add the points in a counter clockwise fashion
+	vector<vector<int> > res(edges.size());
+	if(olength<100)
+	{
+		for(size_t j=0;j<edges.size();++j)
+		{
+			res[(size_t)j].resize((size_t)olength);
+			for(int i=0;i<olength;++i)
+				res[(size_t)j][(size_t)i]=i;
+		}
+		return res;
+	}
+	vector<int> res_temp,outer_points,f_temp,f_add(f.size(),0);
+	res_temp.reserve((size_t)(20*sqrt(1.0*olength)));
+	outer_points.reserve((size_t)(10*sqrt(1.0*olength)));
+	// Walk to an outer point
+	int cur_facet=Walk(olength);
+	// Find the real point
+	int real_point = 0;
+	for(int i=0;i<3;++i)
+	{
+		if(f[(size_t)cur_facet].vertices[(size_t)i]<olength)
+		{
+			real_point=f[(size_t)cur_facet].vertices[(size_t)i];
+			break;
+		}
+	}
+	vector<int> containing_facets;
+	FindContainingTetras(cur_facet,real_point,containing_facets);
+	for(size_t i=0;i<containing_facets.size();++i)
+	{
+		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
+		{
+			cur_facet=containing_facets[(size_t)i];
+			break;
+		}
+	}
+	int start_facet=cur_facet;
+
+/*
+	int point_index=FindPointInFacet(cur_facet,real_point);
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	{
+		point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}
+	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	{
+		point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}
+	do
+	{
+		FindContainingTetras(cur_facet,real_point,containing_facets);
+		int old_current=cur_facet;
+		for(size_t i=0;i<containing_facets.size();++i)
+		{
+			if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength)&&
+				containing_facets[(size_t)i]!=old_current)
+				cur_facet=containing_facets[(size_t)i];
+			if(!IsOuterQuick(f[(size_t)containing_facets[(size_t)i]],olength))
+				f_temp.push_back(containing_facets[(size_t)i]);
+		}
+		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
+		if(IsTripleOut(cur_facet))
+			point_index=(point_index+1)%3;
+		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
+	}while(start_facet!=cur_facet);
+	sort(f_temp.begin(),f_temp.end());
+	f_temp=unique(f_temp);
+	*/
+	cur_facet=Walk(real_point);
+	FindContainingTetras(cur_facet,real_point,containing_facets);
+	for(size_t i=0;i<containing_facets.size();++i)
+	{
+		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
+		{
+			cur_facet=containing_facets[(size_t)i];
+			break;
+		}
+	}
+	f_temp=GetOuterFacets(cur_facet,real_point,olength);
+	// sort all the points and facets with the correct neighbors
+	vector<int> allpoints;
+	for(size_t i=0;i<f_temp.size();++i)
+		for(size_t j=0;j<3;++j)
+			allpoints.push_back(f[f_temp[i]].vertices[j]);
+	sort(allpoints.begin(),allpoints.end());
+	allpoints=unique(allpoints);
+	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),(int)allpoints.size()));
+	for(size_t i=0;i<allpoints.size();++i)
+	{
+		vector<int> neigh2=FindContainingTetras(Walk(allpoints[i]),allpoints[i]);
+		for(size_t k=0;k<neigh2.size();++k)
+		{
+			const Vector2D center=GetCircleCenter(neigh2[k]);
+			for(size_t j=0;j<edges.size();++j)
+				if(CircleSegmentIntersect(edges[j],center,radius[neigh2[k]]))
+					res[j].push_back(allpoints[i]);	
+		}
+	}
+	for(size_t i=0;i<res.size();++i)
+	{
+		sort(res[i].begin(),res[i].end());
+		res[i]=unique(res[i]);
+		res[i]=VectorValues(res[i],HilbertOrder(VectorValues(cor,res[i]),(int)res[i].size()));
+	}
+	// Send/Recv the data
+	vector<vector<Vector2D> > tosend;
+	vector<vector<int> > ownsend,oldres;
+	vector<Edge> ownedge;
+	vector<int> neigh;
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	for(size_t i=0;i<edges.size();++i)
+	{
+		const int temp=(edges[i].neighbors.first==rank) ? edges[i].neighbors.second : edges[i].neighbors.first;
+		if(temp<0)
+		{
+			ownsend.push_back(res[i]);
+			ownedge.push_back(edges[i]);
+		}
+		else
+		{
+			neigh.push_back(temp);
+			tosend.push_back(VectorValues(cor,res[i]));
+			oldres.push_back(res[i]);
+		}
+	}
+	// Do own send
+	AddRigid(obc,ownedge,ownsend);
+	// Send/Recv from neighbors
+	SendRecvFirstBatch(tosend,neigh,Nghost);
+	// Now find all other candidates
+	// Recursively look for more points
+	vector<bool> checked((size_t)olength,false);
+	vector<vector<int> > toduplicate(neigh.size());
+
+	cur_facet=Walk(real_point);
+	FindContainingTetras(cur_facet,real_point,containing_facets);
+	for(size_t i=0;i<containing_facets.size();++i)
+	{
+		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
+		{
+			cur_facet=containing_facets[(size_t)i];
+			break;
+		}
+	}
+	/*delaunay_loggers::BinaryLogger log("del"+int2str(get_mpi_rank())+".bin");
+	log.output(cor,f);
+	f_temp=GetOuterFacets(cur_facet,real_point,olength);
+	allpoints.clear();
+	for(size_t i=0;i<f_temp.size();++i)
+		for(size_t j=0;j<3;++j)
+			allpoints.push_back(f[f_temp[i]].vertices[j]);
+	sort(allpoints.begin(),allpoints.end());
+	allpoints=unique(allpoints);
+	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),(int)allpoints.size()));*/
+	for(size_t i=0;i<allpoints.size();++i)
+		AddOuterFacetsMPI(allpoints[i],toduplicate,neigh,checked,tproc);
+	for(size_t i=0;i<neigh.size();++i)
+	{
+		sort(toduplicate[i].begin(),toduplicate[i].end());
+		toduplicate[i]=unique(toduplicate[i]);
+	}
+	// Add the points
+	// Make sure not to send twice
+	for(size_t i=0;i<oldres.size();++i)
+	{
+		vector<int>  vtemp(oldres[i]);
+		sort(vtemp.begin(),vtemp.end());
+		toduplicate[i]=RemoveList(toduplicate[i],vtemp);
+	}
+	// Make sure not to send rigid walls twice, and find if point intersect more than one wall
+	vector<Edge> outeredges=obc->GetBoxEdges();
+	vector<Edge> etemp=ownedge;
+	// Rearrange the edges to agree with cell edges
+	for(size_t i=0;i<outeredges.size();++i)
+	{
+		bool good=true;
+		const double l1=outeredges[i].GetLength();
+		for(size_t j=0;j<ownedge.size();++j)
+		{
+			const double l2=ownedge[j].GetLength();
+			// are the edges parallel?
+			const double parvalue=std::abs(ScalarProd(outeredges[i].vertices.first-outeredges[i].vertices.second,
+				ownedge[j].vertices.first-ownedge[j].vertices.second));
+			if(parvalue>0.99*l1*l2)
+				if(DistanceToEdge(ownedge[j].vertices.first,outeredges[i])<l2*1e-8)
+				{
+					good=false;
+					break;
+				}
+		}
+		if(good)
+			etemp.push_back(outeredges[i]);
+	}
+	outeredges=etemp;
+	if(toduplicate.size()>oldres.size())
+	{
+		vector<vector<int> > extradd(outeredges.size());
+		for(size_t i=oldres.size();i<toduplicate.size();++i)
+		{
+			if(neigh[i]==-1)
+			{
+				for(size_t j=0;j<outeredges.size();++j)
+				{
+					vector<int> tempvec;
+					if(j<ownedge.size()&&!ownsend[j].empty())
+					{
+						tempvec=ownsend[j];
+						sort(tempvec.begin(),tempvec.end());
+					}
+					for(size_t k=0;k<toduplicate[i].size();++k)
+					{
+						if(tempvec.empty()||(!std::binary_search(tempvec.begin(),tempvec.end(),toduplicate[i][k])))
+						{
+							if(CircleSegmentIntersect(outeredges[j],cor[toduplicate[i][k]],
+								GetMaxRadius(toduplicate[i][k],Walk(toduplicate[i][k]))))
+								extradd[j].push_back(toduplicate[i][k]);
+						}
+					}
+				}
+			}
+		}
+		AddRigid(obc,outeredges,extradd);
+		// Remove the rigid points
+		vector<vector<int> > dtemp;
+		vector<int> ntemp;
+		for(size_t i=0;i<toduplicate.size();++i)
+		{
+			if(neigh[i]>=0)
+			{
+				dtemp.push_back(toduplicate[i]);
+				ntemp.push_back(neigh[i]);
+			}
+		}
+		neigh=ntemp;
+		toduplicate=dtemp;
+	}
+
+	// Make sure we have that all cpu talk with the relevent other and remove uneeded talks
+	vector<int> sendnumber(get_mpi_size(),0),scounts(get_mpi_size(),1);
+	int nrecv;
+	for(size_t i=0;i<neigh.size();++i)
+		sendnumber[neigh[i]]=1;
+	MPI_Reduce_scatter(&sendnumber[0],&nrecv,&scounts[0],MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+	char ctemp;
+	vector<MPI_Request> req(neigh.size());
+	for(size_t i=0;i<neigh.size();++i)
+		MPI_Isend(&ctemp,1,MPI_CHAR,neigh[i],2,MPI_COMM_WORLD,&req[i]);
+	vector<int> sentme;
+	for(size_t i=0;i<(size_t)nrecv;++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE,2,MPI_COMM_WORLD,&status);
+		MPI_Recv(&ctemp,1,MPI_CHAR,status.MPI_SOURCE,2,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		sentme.push_back(status.MPI_SOURCE);
+	}
+	sort(sentme.begin(),sentme.end());
+	MPI_Barrier(MPI_COMM_WORLD);
+	vector<vector<int> > toduptemp;
+	sendnumber.clear();
+	for(size_t i=0;i<neigh.size();++i)
+	{
+		if(std::binary_search(sentme.begin(),sentme.end(),neigh[i]))
+		{
+			toduptemp.push_back(toduplicate[i]);
+			sendnumber.push_back(neigh[i]);
+		}
+	}
+	neigh=sendnumber;
+	toduplicate=toduptemp;
+	vector<int> neightemp;
+	tosend.clear();
+	for(size_t i=0;i<neigh.size();++i)
+	{
+		if(neigh[i]>=0)
+		{
+			neightemp.push_back(neigh[i]);
+			tosend.push_back(VectorValues(cor,toduplicate[i]));
+		}
+	}
+	neigh=neightemp;
+
+	SendRecvFirstBatch(tosend,neigh,Nghost);
+	for(size_t i=0;i<oldres.size();++i)
+		if(!oldres[i].empty())
+			toduplicate[i].insert(toduplicate[i].begin(),oldres[i].begin(),oldres[i].end());
+	proclist=neigh;
+	return toduplicate;
+#else
+	return vector<vector<int> > ();
+#endif
+}
+
+void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
+	vector<int> const& proclist,vector<vector<int> > &Nghost)
+{
+#ifdef RICH_MPI
+	const int rank = get_mpi_rank();
+	const int ws = get_mpi_size();
+	vector<int> procorder=GetProcOrder(rank,ws);
+	int nlist=(int)proclist.size();
+	Nghost.resize(proclist.size());
+	for(size_t i=0;i<procorder.size();++i)
+	{
+		const int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
+		// Do we talk with this processor?
+		if(index<nlist)
+		{
+			// Create send data
+			vector<double> send;
+			ConvertVector2DToDouble(tosend[index],send);
+			// Send/Recv data
+			MPI_Status status;
+			vector<double> recv;
+			int nrecv;
+			if(rank<procorder[(size_t)i])
+			{
+				if(!send.empty())
+					MPI_Send(&send[0],(int)send.size(),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+				else
+				{
+					double temp=0;
+					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
+				}
+				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
+				recv.resize(nrecv);
+				int rtag=status.MPI_TAG;
+				if(rtag==0)
+					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
+				else
+				{
+					double temp=0;
+					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
+				}
+			}
+			else
+			{
+				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
+				recv.resize(nrecv);
+				if(status.MPI_TAG==0)
+					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
+				else
+				{
+					double temp=0;
+					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
+				}
+				if(!send.empty())
+					MPI_Send(&send[0],(int)send.size(),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+				else
+				{
+					double temp=0;
+					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
+				}
+			}
+			vector<Vector2D> toadd;
+			ConvertDoubleToVector2D(toadd,recv);
+			// Add the points
+			if(!toadd.empty())
+			{
+				for(size_t i=0;i<toadd.size();++i)
+					Nghost[index].push_back(cor.size()+i);
+				AddBoundaryPoints(toadd);
+			}
+		}
+	}
+#endif
+}
+
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
 	// We add the points in a counter clockwise fashion
@@ -746,7 +1137,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	{
 		for(size_t j=0;j<edges.size();++j)
 		{
-		  res[(size_t)j].resize((size_t)olength);
+			res[(size_t)j].resize((size_t)olength);
 			for(int i=0;i<olength;++i)
 				res[(size_t)j][(size_t)i]=i;
 		}
@@ -780,6 +1171,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	}
 	int start_facet=cur_facet;
 	int point_index=FindPointInFacet(cur_facet,real_point);
+	// Make sure we are at the right location in the triangle, we want to be in the last outer point
 	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
 	{
 		point_index=(point_index+1)%3;
@@ -816,7 +1208,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	// Recursively look for more points
 	vector<bool> checked((size_t)olength,false);
 	for(size_t i=0;i<f_temp.size();++i)
-		AddOuterFacets(f_temp[(size_t)i],toduplicate,edges,checked);
+		AddOuterFacets(f_temp[i],toduplicate,edges,checked);
 	for(size_t i=0;i<edges.size();++i)
 	{
 		sort(toduplicate[(size_t)i].begin(),toduplicate[(size_t)i].end());
@@ -834,7 +1226,6 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 			continue;
 		vector<Vector2D> toadd;
 		toadd.reserve(toduplicate[(size_t)i].size());
-		//vector<int> pointstemp(toduplicate[i].size());
 		Vector2D par(Parallel(edges[(size_t)i]));
 		par=par/abs(par);
 		for(size_t j=0;j<toduplicate[(size_t)i].size();++j)
@@ -842,34 +1233,32 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 			Vector2D temp=cor[(size_t)toduplicate[(size_t)i][(size_t)j]]-edges[(size_t)i].vertices.first;
 			temp=2*par*ScalarProd(par,temp)-temp+edges[(size_t)i].vertices.first;
 			toadd.push_back(temp);
-			//	pointstemp[(size_t)j]=j;
 		}
 		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
 		ReArrangeVector(toadd,order);
 		AddBoundaryPoints(toadd);
 		ReArrangeVector(toduplicate[(size_t)i],order);
-		//toduplicate[i]=pointstemp;
 	}
 }
 
 namespace
 {
-  /*
+	/*
 	vector<vector<int> > FindCorners(vector<vector<int> > const& toduplicate)
 	{
-		vector<vector<int> > res(toduplicate.size());
-		for(size_t i=0;i<toduplicate.size();++i)
-		{
-			for(size_t j=0;j<toduplicate[(size_t)i].size();++j)
-			{
-				if(binary_search(toduplicate[(size_t)(i+1)%4].begin(),toduplicate[(size_t)(i+1)%4].end(),
-					toduplicate[(size_t)i][(size_t)j]))
-					res[(size_t)i].push_back(toduplicate[(size_t)i][(size_t)j]);
-			}
-		}
-		return res;
+	vector<vector<int> > res(toduplicate.size());
+	for(size_t i=0;i<toduplicate.size();++i)
+	{
+	for(size_t j=0;j<toduplicate[(size_t)i].size();++j)
+	{
+	if(binary_search(toduplicate[(size_t)(i+1)%4].begin(),toduplicate[(size_t)(i+1)%4].end(),
+	toduplicate[(size_t)i][(size_t)j]))
+	res[(size_t)i].push_back(toduplicate[(size_t)i][(size_t)j]);
 	}
-  */
+	}
+	return res;
+	}
+	*/
 }
 namespace
 {
@@ -1039,8 +1428,27 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edge
 	}
 }
 
+
+vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,
+	Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist)
+{
+#ifdef RICH_MPI
+	vector<Edge> edges;
+	vector<int> edge_index=tproc.GetCellEdges(get_mpi_rank());
+	for(size_t i=0;i<edge_index.size();++i)
+		edges.push_back(tproc.GetEdge(edge_index[i]));
+//	delaunay_loggers::BinaryLogger log("del"+int2str(get_mpi_rank())+".bin");
+//	log.output(cor,f);
+	return FindOuterPointsMPI(obc,edges,tproc,Nghost,proclist);
+#else
+	return vector<vector<int> > ();
+#endif
+}
+
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges)
 {
+//	delaunay_loggers::BinaryLogger log("c:\\del.bin");
+//	log.output(cor,f);
 	vector<vector<int> > toduplicate=FindOuterPoints(edges);
 	if(obc->GetBoundaryType()==Rectengular)
 	{
@@ -1164,4 +1572,67 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 			}
 		}
 	}
+}
+
+void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
+	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc)
+{
+#ifdef RICH_MPI
+	stack<int> tocheck;
+	vector<int> neightemp=FindContainingTetras(Walk(point),point);
+	for(size_t i=0;i<neightemp.size();++i)
+		tocheck.push(neightemp[i]);
+	const int rank=get_mpi_rank();
+	while(!tocheck.empty())
+	{
+		int cur_facet=tocheck.top();
+		tocheck.pop();
+		for(size_t i=0;i<3;++i)
+		{
+			bool added=false;
+			if(f[(size_t)cur_facet].vertices[i]>=olength)
+				continue;
+			if(checked[(size_t)f[(size_t)cur_facet].vertices[i]])
+				continue;
+			vector<int> neighs=FindContainingTetras(cur_facet,f[(size_t)cur_facet].vertices[(size_t)i]);
+			for(size_t k=0;k<neighs.size();++k)
+			{
+				Circle circ(GetCircleCenter(neighs[k]),radius[(size_t)neighs[k]]);
+				vector<int> cputosendto;
+				find_affected_cells(tproc,rank,circ,cputosendto);
+				sort(cputosendto.begin(),cputosendto.end());
+				cputosendto=unique(cputosendto);
+				vector<int> toremove;
+				RemoveVal(cputosendto,rank);
+				if(!cputosendto.empty())
+				{
+					added=true;
+					for(size_t j=0;j<cputosendto.size();++j)
+					{
+						size_t index=find(neigh.begin(),neigh.end(),cputosendto[j])
+							-neigh.begin();
+						if(index<neigh.size())
+							toduplicate[index].push_back(f[(size_t)cur_facet].vertices[i]);
+						else
+						{
+							neigh.push_back(cputosendto[j]);
+							vector<int> tempvec;
+							tempvec.push_back(f[(size_t)cur_facet].vertices[i]);
+							toduplicate.push_back(tempvec);
+						}
+					}
+				}
+			}
+			checked[(size_t)f[(size_t)cur_facet].vertices[i]]=true;
+			if(added)
+			{
+				for(size_t j=0;j<neighs.size();++j)
+				{
+					if(!IsOuterQuick(f[(size_t)neighs[j]],olength))
+						tocheck.push(neighs[j]);
+				}
+			}
+		}
+	}
+#endif
 }

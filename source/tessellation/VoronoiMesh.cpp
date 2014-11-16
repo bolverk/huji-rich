@@ -964,7 +964,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 	procpoints.push_back(Vector2D(_bc->GetGridBoundary(Left),_bc->GetGridBoundary(Up)));
 	vector<Vector2D> points=UpdatePoints(pv,obc);
 	Tri->build_delaunay(points,procpoints);
-	vector<Edge> box_edges=GetBoxEdges();
+	vector<Edge> box_edges=obc->GetBoxEdges();
 
 	Nextra=(int)Tri->ChangeCor().size();
 	vector<vector<int> > toduplicate=Tri->BuildBoundary(_bc,box_edges);
@@ -1131,122 +1131,26 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	edges.clear();
 	GhostPoints.clear();
 	GhostProcs.clear();
+	NGhostReceived.clear();
+	OrgCorner.clear();
 	selfindex.resize(pv.size());
-	int npv=(int)pv.size();
-	for(int i=0;i<npv;++i)
-		selfindex[(size_t)i]=i;
+	size_t npv=pv.size();
+	for(size_t i=0;i<npv;++i)
+		selfindex[i]=i;
+
+	Nextra=(int) Tri->ChangeCor().size();
+	GhostPoints=Tri->BuildBoundary(outer,vproc,NGhostReceived,GhostProcs);
 	build_v();
+
+	vector<vector<int> > copied(GhostPoints),tempv;
+	for(size_t i=0;i<copied.size();++i)
+		if(!copied[i].empty())
+			sort(copied[i].begin(),copied[i].end());
+	GetCorners(copied,tempv);
 
 	if(logger)
 		logger->output(*this);
-	vector<vector<int> > toduplicate;
-	try
-	{
-		FindIntersectingPoints(cell_edges,toduplicate);
-	}
-	catch(UniversalError const& eo)
-	{
-		voronoi_loggers::BinLogger log("vprocerror.bin");
-		log.output(vproc);
-		voronoi_loggers::BinLogger log2("verror.bin");
-		log2.output(*this);
-		throw;
-	}
-	vector<vector<int> > corners;
-	vector<vector<int> > totest;
-	vector<int> cornerproc=GetCornerNeighbors(vproc,rank);
-
-	GetCorners(toduplicate,corners);
-	GetToTest(toduplicate,totest);
-
-	const int worldsize = get_mpi_size();
-	vector<int> procorder=GetProcOrder(rank,worldsize);
-
-	vector<int> proclist(vproc.GetCellEdges(rank).size());
-	for(int i=0;i<(int)proclist.size();++i)
-		proclist[(size_t)i]=(vproc.GetOriginalIndex(cell_edges[(size_t)i].neighbors.first)==rank)? vproc.GetOriginalIndex(
-		cell_edges[(size_t)i].neighbors.second):vproc.GetOriginalIndex(cell_edges[(size_t)i].neighbors.first);
-	// Remove box boundaries from to duplicate
-	vector<Edge> bedge=GetBoxEdges();
-
-	vector<vector<int> > firstduplicated(toduplicate);
-	NonSendBoundary(proclist,toduplicate,vproc,totest,cell_edges);
-	NonSendCorners(cornerproc,corners,vproc);
-
-	vector<vector<int> > todup2,totest2,org2;
-	vector<int> proclist2;
-	int ndup=(int)toduplicate.size();
-	for(int i=0;i<ndup;++i)
-	{
-		if(proclist[(size_t)i]!=-1)
-		{
-			todup2.push_back(toduplicate[(size_t)i]);
-			totest2.push_back(totest[(size_t)i]);
-			proclist2.push_back(proclist[(size_t)i]);
-			org2.push_back(OrgCorner[(size_t)i]);
-		}
-	}
-	toduplicate=todup2;
-	totest=totest2;
-	proclist=proclist2;
-	OrgCorner=org2;
-
-	RemoveDuplicateCorners(cornerproc,corners,proclist,toduplicate);
-	Nextra=Tri->GetCorSize()-Tri->GetOriginalLength();
-
-	// Send/Recv the boundary points
-	vector<int> proclisttemp(proclist);
-	vector<vector<int> > toduptemp(toduplicate);
-	proclisttemp.insert(proclisttemp.end(),cornerproc.begin(),cornerproc.end());
-	toduptemp.insert(toduptemp.end(),corners.begin(),corners.end());
-	//SendRecv(procorder,proclist,toduplicate,vproc);
-
-	//write_vector(proclisttemp,"talked"+int2str(rank)+".txt");
-	NGhostReceived.resize(proclisttemp.size(),vector<int> ());
-	SendRecv(procorder,proclisttemp,toduptemp);
-	ndup=(int)toduplicate.size();
-	for(int i=0;i<(int)toduptemp.size();++i)
-	{
-		GhostPoints.push_back(toduptemp[(size_t)i]);
-		GhostProcs.push_back(proclisttemp[(size_t)i]);
-	}
-	sortvectors(toduplicate);
-
-	edges.clear();
-	build_v();
-
-	vector<vector<int> > boxduplicate;
-	FindIntersectingOuterPoints(bedge,boxduplicate,firstduplicated);
-	for(int i=0;i<4;++i)
-		RigidBoundaryPoints(boxduplicate[(size_t)i],bedge[(size_t)i]);
-
-	vector<vector<int> > moreduplicate;
-
-	GetAdditionalBoundary(toduplicate,moreduplicate,totest);
-	GetToTest(moreduplicate,totest);
-	SendRecv(procorder,proclist,moreduplicate);
-	for(int i=0;i<ndup;++i)
-	{
-		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[(size_t)i])-
-			GhostProcs.begin();
-		GhostPoints[(size_t)index].insert(GhostPoints[(size_t)index].end(),moreduplicate[(size_t)i].begin(),
-			moreduplicate[(size_t)i].end());
-	}
-	sortvectors(toduplicate);
-	edges.clear();
-	build_v();
-
-	vector<vector<int> > temp(CombineVectorVector(toduplicate,moreduplicate));
-	GetAdditionalBoundary(temp,moreduplicate,totest);
-	SendRecv(procorder,proclist,moreduplicate);
-	for(int i=0;i<ndup;++i)
-	{
-		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[(size_t)i])-
-			GhostProcs.begin();
-		GhostPoints[(size_t)index].insert(GhostPoints[(size_t)index].end(),moreduplicate[(size_t)i].begin(),
-			moreduplicate[(size_t)i].end());
-	}
-
+	
 	// sort the points
 	vector<int> indeces;
 	sort_index(GhostProcs,indeces);
@@ -1270,9 +1174,6 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
 		GhostPoints=temppoints;
-
-		edges.clear();
-		build_v();
 
 		int n=GetPointNo();
 		CM.resize(n);
@@ -1354,7 +1255,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	Tri->update(points,procpoints);
 
 	Nextra=(int)Tri->ChangeCor().size();
-	vector<Edge> box_edges=GetBoxEdges();
+	vector<Edge> box_edges=obc->GetBoxEdges();
 	vector<vector<int> > toduplicate=Tri->BuildBoundary(obc,box_edges);
 
 	eps=1e-8;
@@ -1532,105 +1433,19 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		log.output(vproc);
 		throw;
 	}
+	Nextra=(int) Tri->ChangeCor().size();
+	GhostPoints=Tri->BuildBoundary(obc,vproc,NGhostReceived,GhostProcs);
 	build_v();
+
+	vector<vector<int> > copied(GhostPoints),tempv;
+	for(size_t i=0;i<copied.size();++i)
+		if(!copied[i].empty())
+			sort(copied[i].begin(),copied[i].end());
+	GetCorners(copied,tempv);
+
 
 	if(logger)
 		logger->output(*this);
-	vector<vector<int> > toduplicate;
-	try
-	{
-		FindIntersectingPoints(cell_edges,toduplicate);
-	}
-	catch(UniversalError const& eo)
-	{
-		voronoi_loggers::BinLogger log("vprocerror.bin");
-		log.output(vproc);
-		voronoi_loggers::BinLogger log2("verror.bin");
-		log2.output(*this);
-		throw;
-	}
-
-	vector<vector<int> > corners;
-	vector<vector<int> > totest;
-
-	GetCorners(toduplicate,corners);
-	GetToTest(toduplicate,totest);
-
-	const int worldsize = get_mpi_size();
-	vector<int> procorder=GetProcOrder(rank,worldsize);
-	vector<Edge> bedge=GetBoxEdges();
-	vector<vector<int> > boxduplicate;
-	FindIntersectingPoints(bedge,boxduplicate);
-
-	// Remove box boundaries from to duplicate
-	int ndup=(int)toduplicate.size();
-	vector<vector<int> > todup2,totest2,org2;
-	vector<int> proclist2;
-	for(int i=0;i<ndup;++i)
-	{
-		if(proclist[(size_t)i]!=-1)
-		{
-			todup2.push_back(toduplicate[(size_t)i]);
-			totest2.push_back(totest[(size_t)i]);
-			proclist2.push_back(proclist[(size_t)i]);
-			org2.push_back(OrgCorner[(size_t)i]);
-		}
-	}
-	toduplicate=todup2;
-	totest=totest2;
-	proclist=proclist2;
-	OrgCorner=org2;
-	for(int i=0;i<4;++i)
-		RigidBoundaryPoints(boxduplicate[(size_t)i],bedge[(size_t)i]);
-
-	NonSendBoundary(proclist,toduplicate,vproc,totest,bedge);
-	NonSendCorners(cornerproc,corners,vproc);
-	RemoveDuplicateCorners(cornerproc,corners,proclist,toduplicate);
-	Nextra=Tri->GetCorSize()-Tri->GetOriginalLength();
-
-	// Send/Recv boundaries
-	vector<int> proclisttemp(proclist);
-	vector<vector<int> > toduptemp(toduplicate);
-	proclisttemp.insert(proclisttemp.end(),cornerproc.begin(),cornerproc.end());
-	toduptemp.insert(toduptemp.end(),corners.begin(),corners.end());
-	//SendRecv(procorder,proclist,toduplicate,vproc);
-	NGhostReceived.resize(proclisttemp.size(),vector<int> ());
-	SendRecv(procorder,proclisttemp,toduptemp);
-	ndup=(int)toduplicate.size();
-	for(int i=0;i<(int)toduptemp.size();++i)
-	{
-		GhostPoints.push_back(toduptemp[(size_t)i]);
-		GhostProcs.push_back(proclisttemp[(size_t)i]);
-	}
-	sortvectors(toduplicate);
-	edges.clear();
-	build_v();
-	vector<vector<int> > moreduplicate;
-	GetAdditionalBoundary(toduplicate,moreduplicate,totest);
-	GetToTest(moreduplicate,totest);
-	SendRecv(procorder,proclist,moreduplicate);
-	for(int i=0;i<ndup;++i)
-	{
-		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[(size_t)i])-
-			GhostProcs.begin();
-		GhostPoints[(size_t)index].insert(GhostPoints[(size_t)index].end(),moreduplicate[(size_t)i].begin(),
-			moreduplicate[(size_t)i].end());
-	}
-	sortvectors(toduplicate);
-	edges.clear();
-	build_v();
-
-	vector<vector<int> > temp(CombineVectorVector(toduplicate,moreduplicate));
-	GetAdditionalBoundary(temp,moreduplicate,totest);
-	SendRecv(procorder,proclist,moreduplicate);
-	for(int i=0;i<ndup;++i)
-	{
-		int index=find(GhostProcs.begin(),GhostProcs.end(),proclist[(size_t)i])-
-			GhostProcs.begin();
-		GhostPoints[(size_t)index].insert(GhostPoints[(size_t)index].end(),moreduplicate[(size_t)i].begin(),
-			moreduplicate[(size_t)i].end());
-	}
-
 	// sort the points
 	vector<int> indeces;
 	sort_index(GhostProcs,indeces);
@@ -1654,10 +1469,6 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
 		GhostPoints=temppoints;
-
-		edges.clear();
-		build_v();
-
 		int n=GetPointNo();
 		CM.resize(n);
 		for(int i=0;i<n;++i)
@@ -2123,7 +1934,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	for(vector<int>::iterator it=ToRemove.begin();it!=ToRemove.end();++it)
 		if(binary_search(V.selfindex.begin(),V.selfindex.end(),*it))
 			ToRemovetemp.push_back(*it);
-	RemoveVector(V.selfindex,ToRemovetemp);
+	RemoveList(V.selfindex,ToRemovetemp);
 #endif
 	// Fix the sent cells, do i need this??
 	V.Nextra-=(int)ToRemove.size();
@@ -2612,31 +2423,6 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 	return res;
 }
 
-vector<Edge> VoronoiMesh::GetBoxEdges(void)
-{
-	vector<Edge> res(4);
-	res[1]=Edge(Vector2D(obc->GetGridBoundary(Left),
-		obc->GetGridBoundary(Up)),
-		Vector2D(obc->GetGridBoundary(Right),
-		obc->GetGridBoundary(Up)),
-		0,0);
-	res[3]=Edge(Vector2D(obc->GetGridBoundary(Left),
-		obc->GetGridBoundary(Down)),
-		Vector2D(obc->GetGridBoundary(Right),
-		obc->GetGridBoundary(Down)),
-		0,0);
-	res[0]=Edge(Vector2D(obc->GetGridBoundary(Right),
-		obc->GetGridBoundary(Up)),
-		Vector2D(obc->GetGridBoundary(Right),
-		obc->GetGridBoundary(Down)),
-		0,0);
-	res[2]=Edge(Vector2D(obc->GetGridBoundary(Left),
-		obc->GetGridBoundary(Up)),
-		Vector2D(obc->GetGridBoundary(Left),
-		obc->GetGridBoundary(Down)),
-		0,0);
-	return res;
-}
 
 bool VoronoiMesh::CloseToBorder(int point,int &border)
 {
