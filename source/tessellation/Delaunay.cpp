@@ -795,7 +795,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			break;
 		}
 	}
-	int start_facet=cur_facet;
+	//	int start_facet=cur_facet;
 
 /*
 	int point_index=FindPointInFacet(cur_facet,real_point);
@@ -898,24 +898,6 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 
 	cur_facet=Walk(real_point);
 	FindContainingTetras(cur_facet,real_point,containing_facets);
-	for(size_t i=0;i<containing_facets.size();++i)
-	{
-		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
-		{
-		  //			cur_facet=containing_facets[(size_t)i];
-			break;
-		}
-	}
-	/*delaunay_loggers::BinaryLogger log("del"+int2str(get_mpi_rank())+".bin");
-	log.output(cor,f);
-	f_temp=GetOuterFacets(cur_facet,real_point,olength);
-	allpoints.clear();
-	for(size_t i=0;i<f_temp.size();++i)
-		for(size_t j=0;j<3;++j)
-			allpoints.push_back(f[f_temp[i]].vertices[j]);
-	sort(allpoints.begin(),allpoints.end());
-	allpoints=unique(allpoints);
-	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),(int)allpoints.size()));*/
 	for(size_t i=0;i<allpoints.size();++i)
 		AddOuterFacetsMPI(allpoints[i],toduplicate,neigh,checked,tproc);
 	for(size_t i=0;i<neigh.size();++i)
@@ -1599,7 +1581,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 				find_affected_cells(tproc,rank,circ,cputosendto);
 				sort(cputosendto.begin(),cputosendto.end());
 				cputosendto=unique(cputosendto);
-				vector<int> toremove;
+				//				vector<int> toremove;
 				RemoveVal(cputosendto,rank);
 				if(!cputosendto.empty())
 				{
