@@ -111,11 +111,13 @@ vector<Vector2D> BinLogger::read(string location)
 	fstream myFile (location.c_str(),ios::in | ios::binary);
 	if(!myFile.good())
 		throw UniversalError("Error opening voronoi logger file!!");
-	int N;
+	int N,itemp;
 	myFile.read((char*)&N,sizeof (int));
 	double temp;
 	for(int i=0;i<N*4;++i)
 		myFile.read((char*)&temp,sizeof(double));
+	for (int i = 0; i<N *2; ++i)
+		myFile.read((char*)&itemp, sizeof(int));
 	myFile.read((char*)&N,sizeof (int));
 	vector<Vector2D> res((size_t)N);
 	for(size_t i=0;i<(size_t)N;++i)
