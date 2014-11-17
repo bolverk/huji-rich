@@ -14,6 +14,7 @@ namespace {
 		return false;
 	}
 
+  /*
 	vector<int> join(const vector<int>& v,
 		int n)
 	{
@@ -21,6 +22,7 @@ namespace {
 		res.push_back(n);
 		return res;
 	}
+  */
 
 	double bracket(double low, double num, double high)
 	{
