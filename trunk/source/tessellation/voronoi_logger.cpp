@@ -117,7 +117,7 @@ vector<Vector2D> BinLogger::read(string location)
 	for(int i=0;i<N*4;++i)
 		myFile.read((char*)&temp,sizeof(double));
 	myFile.read((char*)&N,sizeof (int));
-	vector<Vector2D> res(N);
+	vector<Vector2D> res((size_t)N);
 	for(size_t i=0;i<(size_t)N;++i)
 	{
 		myFile.read((char*)&res[i].x,sizeof(double));
