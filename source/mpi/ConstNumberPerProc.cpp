@@ -25,7 +25,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 		R[i]=tproc.GetWidth(i);
 	// Make cell rounder
 	const Vector2D& CM=tproc.GetCellCM(rank);
-	Vector2D point(CM);
+	Vector2D point = tproc.GetMeshPoint(rank);
 	const double d=abs(CM-tproc.GetMeshPoint(rank));
 	double dxround=0,dyround=0;
 	if(d>0.1*R[rank])
@@ -33,6 +33,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 		dxround=RoundSpeed_*speed_*(CM.x-point.x);
 		dyround=RoundSpeed_*speed_*(CM.y-point.y);
 	}
+	point = CM;
 	// Find out how many points each proc has
 	vector<int> NPerProc(nproc);
 	int mypointnumber=tlocal.GetPointNo()+1;

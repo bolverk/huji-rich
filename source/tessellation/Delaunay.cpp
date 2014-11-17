@@ -759,87 +759,80 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 						  vector<int> &proclist)
 {
 	// We add the points in a counter clockwise fashion
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res(edges.size());
 	if(olength<100)
 	{
+		vector<Edge> outeredges = obc->GetBoxEdges();
+		vector<vector<int> > rigidsend(outeredges.size());
+		for (size_t i = 0; i < outeredges.size(); ++i)
+		{
+			rigidsend[i].resize(olength);
+			for (size_t j = 0; j < olength; ++j)
+				rigidsend[i][j] = j;
+		}
 		for(size_t j=0;j<edges.size();++j)
 		{
+			const int neightemp=(edges[j].neighbors.first == rank) ? edges[j].neighbors.second : edges[j].neighbors.first;
+			if (neightemp>-1)
+				proclist.push_back(neightemp);
 			res[(size_t)j].resize((size_t)olength);
 			for(int i=0;i<olength;++i)
 				res[(size_t)j][(size_t)i]=i;
+			AddRigid(obc, outeredges, rigidsend);
 		}
 		return res;
 	}
-	vector<int> res_temp,outer_points,f_temp,f_add(f.size(),0);
-	res_temp.reserve((size_t)(20*sqrt(1.0*olength)));
-	outer_points.reserve((size_t)(10*sqrt(1.0*olength)));
-	// Walk to an outer point
-	int cur_facet=Walk(olength);
-	// Find the real point
-	int real_point = 0;
-	for(int i=0;i<3;++i)
-	{
-		if(f[(size_t)cur_facet].vertices[(size_t)i]<olength)
-		{
-			real_point=f[(size_t)cur_facet].vertices[(size_t)i];
-			break;
-		}
-	}
-	vector<int> containing_facets;
-	FindContainingTetras(cur_facet,real_point,containing_facets);
-	for(size_t i=0;i<containing_facets.size();++i)
-	{
-		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
-		{
-			cur_facet=containing_facets[(size_t)i];
-			break;
-		}
-	}
-	//	int start_facet=cur_facet;
 
-/*
-	int point_index=FindPointInFacet(cur_facet,real_point);
-	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
+	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
+	if (olength>100)
 	{
-		point_index=(point_index+1)%3;
-		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
-	}
-	if(IsOuterQuick(f[(size_t)f[(size_t)cur_facet].neighbors[(size_t)point_index]],olength))
-	{
-		point_index=(point_index+1)%3;
-		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
-	}
-	do
-	{
-		FindContainingTetras(cur_facet,real_point,containing_facets);
-		int old_current=cur_facet;
-		for(size_t i=0;i<containing_facets.size();++i)
+		res_temp.reserve((size_t)(20 * sqrt(1.0*olength)));
+		outer_points.reserve((size_t)(10 * sqrt(1.0*olength)));
+		// Walk to an outer point
+		int cur_facet = Walk(olength);
+		// Find the real point
+		int real_point = 0;
+		for (int i = 0; i < 3; ++i)
 		{
-			if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength)&&
-				containing_facets[(size_t)i]!=old_current)
-				cur_facet=containing_facets[(size_t)i];
-			if(!IsOuterQuick(f[(size_t)containing_facets[(size_t)i]],olength))
-				f_temp.push_back(containing_facets[(size_t)i]);
+			if (f[(size_t)cur_facet].vertices[(size_t)i] < olength)
+			{
+				real_point = f[(size_t)cur_facet].vertices[(size_t)i];
+				break;
+			}
 		}
-		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
-		if(IsTripleOut(cur_facet))
-			point_index=(point_index+1)%3;
-		real_point=f[(size_t)cur_facet].vertices[(size_t)point_index];
-	}while(start_facet!=cur_facet);
-	sort(f_temp.begin(),f_temp.end());
-	f_temp=unique(f_temp);
-	*/
-	cur_facet=Walk(real_point);
-	FindContainingTetras(cur_facet,real_point,containing_facets);
-	for(size_t i=0;i<containing_facets.size();++i)
-	{
-		if(IsEdgeFacet(f,f[(size_t)containing_facets[(size_t)i]],olength))
+		vector<int> containing_facets;
+		FindContainingTetras(cur_facet, real_point, containing_facets);
+		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-			cur_facet=containing_facets[(size_t)i];
-			break;
+			if (IsEdgeFacet(f, f[(size_t)containing_facets[(size_t)i]], olength))
+			{
+				cur_facet = containing_facets[(size_t)i];
+				break;
+			}
+		}
+
+		cur_facet = Walk(real_point);
+		FindContainingTetras(cur_facet, real_point, containing_facets);
+		for (size_t i = 0; i < containing_facets.size(); ++i)
+		{
+			if (IsEdgeFacet(f, f[(size_t)containing_facets[(size_t)i]], olength))
+			{
+				cur_facet = containing_facets[(size_t)i];
+				break;
+			}
+		}
+		f_temp = GetOuterFacets(cur_facet, real_point, olength);
+	}
+	else
+	{
+		for (size_t i = 0; i < f.size(); ++i)
+		{
+			if (!IsOuterQuick(f[i], olength))
+				f_temp.push_back(i);
 		}
 	}
-	f_temp=GetOuterFacets(cur_facet,real_point,olength);
 	// sort all the points and facets with the correct neighbors
 	vector<int> allpoints;
 	for(size_t i=0;i<f_temp.size();++i)
@@ -870,8 +863,6 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<vector<int> > ownsend,oldres;
 	vector<Edge> ownedge;
 	vector<int> neigh;
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	for(size_t i=0;i<edges.size();++i)
 	{
 		const int temp=(edges[i].neighbors.first==rank) ? edges[i].neighbors.second : edges[i].neighbors.first;
@@ -896,8 +887,8 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<bool> checked((size_t)olength,false);
 	vector<vector<int> > toduplicate(neigh.size());
 
-	cur_facet=Walk(real_point);
-	FindContainingTetras(cur_facet,real_point,containing_facets);
+	//cur_facet=Walk(real_point);
+	//FindContainingTetras(cur_facet,real_point,containing_facets);
 	for(size_t i=0;i<allpoints.size();++i)
 		AddOuterFacetsMPI(allpoints[i],toduplicate,neigh,checked,tproc);
 	for(size_t i=0;i<neigh.size();++i)
