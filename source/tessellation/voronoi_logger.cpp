@@ -105,3 +105,23 @@ void BinLogger::output(VoronoiMesh const& v)
 	}
 	file_handle.close();
 }
+
+vector<Vector2D> BinLogger::read(string location)
+{
+	fstream myFile (location.c_str(),ios::in | ios::binary);
+	if(!myFile.good())
+		throw UniversalError("Error opening voronoi logger file!!");
+	int N;
+	myFile.read((char*)&N,sizeof (int));
+	double temp;
+	for(int i=0;i<N*4;++i)
+		myFile.read((char*)&temp,sizeof(double));
+	myFile.read((char*)&N,sizeof (int));
+	vector<Vector2D> res(N);
+	for(size_t i=0;i<(size_t)N;++i)
+	{
+		myFile.read((char*)&res[i].x,sizeof(double));
+		myFile.read((char*)&res[i].y,sizeof(double));
+	}
+	return res;
+}

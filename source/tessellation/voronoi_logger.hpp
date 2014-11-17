@@ -53,6 +53,12 @@ namespace voronoi_loggers
 
 	void output(Tessellation const& v);
 
+	/*! \brief Reads the output information from the Voronoi tessellation
+      \param location Name of output file
+	  \return The mesh points
+     */
+	vector<Vector2D> read(string location);
+
   private:
     const std::string file_name_;
   };
