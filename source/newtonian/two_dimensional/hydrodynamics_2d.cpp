@@ -6,10 +6,14 @@ using std::max;
 FaceVertexVelocityCalculator::FaceVertexVelocityCalculator
 (const Tessellation& tess,
  const vector<Vector2D>& point_velocities,
- const Vector2D std::pair<Vector2D,Vector2D>::* const member):
+ const Vector2D std::pair<Vector2D,Vector2D>::* const member,
+ const vector<Vector2D>& control,
+ const HydroBoundaryConditions& hbc):
   tess_(tess),
   point_velocities_(point_velocities),
-  member_(member) {}
+  member_(member),
+  control_(control),
+  hbc_(hbc) {}
 
 size_t FaceVertexVelocityCalculator::getLength(void) const
 {
@@ -19,6 +23,8 @@ size_t FaceVertexVelocityCalculator::getLength(void) const
 Vector2D FaceVertexVelocityCalculator::operator()(size_t i) const
 {
   const Edge& edge = tess_.GetEdge((int)i);
+  if(hbc_.IsBoundary(edge,tess_))
+    return control_[i];
   return calc_face_vertex_velocity
     (tess_.GetMeshPoint(edge.neighbors.first),
      point_velocities_[(size_t)edge.neighbors.first],

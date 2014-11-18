@@ -112,10 +112,10 @@ def main():
     f.write(str(l1_azimuthal_velocity)+'\n')
     f.close()
 
-    return l1_density<2e-4 and \
-        l1_pressure<2e-3 and \
-        l1_radial_velocity<5e-4 and \
-        l1_azimuthal_velocity<1e-3
+    return l1_density<3.3e-4 and \
+        l1_pressure<2.9e-3 and \
+        l1_radial_velocity<1.3e-3 and \
+        l1_azimuthal_velocity<2.1e-3
 
 if __name__=='__main__':
     

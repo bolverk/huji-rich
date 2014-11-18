@@ -587,7 +587,8 @@ void hdsim::TimeAdvanceElad(void)
 	   (FaceVertexVelocityCalculator
 	    (_tessellation,
 	     point_velocity,
-	     &std::pair<Vector2D,Vector2D>::first)),
+	     &std::pair<Vector2D,Vector2D>::first,
+	     fv0,_hbc)),
 	   _hbc, _rs,
 	   custom_evolutions,
 	   custom_evolution_manager,
@@ -600,7 +601,8 @@ void hdsim::TimeAdvanceElad(void)
 	   (FaceVertexVelocityCalculator
 	    (_tessellation,
 	     point_velocity,
-	     &std::pair<Vector2D,Vector2D>::second)),
+	     &std::pair<Vector2D,Vector2D>::second,
+	     fv0,_hbc)),
 	   _hbc, _rs,
 	   custom_evolutions,
 	   custom_evolution_manager,

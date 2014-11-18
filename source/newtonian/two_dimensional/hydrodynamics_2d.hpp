@@ -30,13 +30,15 @@ public:
 
   /*! \brief Class constructor
     \param tess Tessellation
-    \param point_motion Velocities of mesh generating point
+    \param point_velocities Velocities of mesh generating point
     \param member Toggles on which vertex to calculate the velocity
    */
   FaceVertexVelocityCalculator
   (const Tessellation& tess,
    const vector<Vector2D>& point_velocities,
-   const Vector2D std::pair<Vector2D,Vector2D>::* const member);
+   const Vector2D std::pair<Vector2D,Vector2D>::* const member,
+   const vector<Vector2D>& control,
+   const HydroBoundaryConditions& hbc);
 
   size_t getLength(void) const;
 
@@ -46,6 +48,8 @@ private:
   const Tessellation& tess_;
   const vector<Vector2D>& point_velocities_;
   const Vector2D std::pair<Vector2D,Vector2D>::* const member_;
+  const vector<Vector2D>& control_;
+  const HydroBoundaryConditions& hbc_;
 };
 
 /*! \brief Rotates primitive variables to align with edge
