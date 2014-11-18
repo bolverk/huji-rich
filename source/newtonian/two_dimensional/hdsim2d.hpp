@@ -411,6 +411,8 @@ public:
     \return Equation of state
    */
   const EquationOfState& getEos(void) const;
+
+  const OuterBoundary& getOuterBoundary(void) const;
 };
 
 #endif

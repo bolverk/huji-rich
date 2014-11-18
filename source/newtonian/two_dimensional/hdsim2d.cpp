@@ -1124,3 +1124,8 @@ const EquationOfState& hdsim::getEos(void) const
 {
   return _eos;
 }
+
+const OuterBoundary& hdsim::getOuterBoundary(void) const
+{
+  return _obc;
+}
