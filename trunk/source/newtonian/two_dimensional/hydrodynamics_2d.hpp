@@ -23,6 +23,31 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 
+//! Calculates the velocities at the vertices of edges
+class FaceVertexVelocityCalculator: public Index2Member<Vector2D>
+{
+public:
+
+  /*! \brief Class constructor
+    \param tess Tessellation
+    \param point_motion Velocities of mesh generating point
+    \param member Toggles on which vertex to calculate the velocity
+   */
+  FaceVertexVelocityCalculator
+  (const Tessellation& tess,
+   const vector<Vector2D>& point_velocities,
+   const Vector2D std::pair<Vector2D,Vector2D>::* const member);
+
+  size_t getLength(void) const;
+
+  Vector2D operator()(size_t i) const;
+
+private:
+  const Tessellation& tess_;
+  const vector<Vector2D>& point_velocities_;
+  const Vector2D std::pair<Vector2D,Vector2D>::* const member_;
+};
+
 /*! \brief Rotates primitive variables to align with edge
   \param n Normal directions
   \param p Parallel direction

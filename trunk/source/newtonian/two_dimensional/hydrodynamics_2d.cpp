@@ -1,6 +1,31 @@
 #include "hydrodynamics_2d.hpp"
+#include "../../tessellation/calc_face_vertex_velocity.hpp"
 
 using std::max;
+
+FaceVertexVelocityCalculator::FaceVertexVelocityCalculator
+(const Tessellation& tess,
+ const vector<Vector2D>& point_velocities,
+ const Vector2D std::pair<Vector2D,Vector2D>::* const member):
+  tess_(tess),
+  point_velocities_(point_velocities),
+  member_(member) {}
+
+size_t FaceVertexVelocityCalculator::getLength(void) const
+{
+  return (size_t)tess_.GetTotalSidesNumber();
+}
+
+Vector2D FaceVertexVelocityCalculator::operator()(size_t i) const
+{
+  const Edge& edge = tess_.GetEdge((int)i);
+  return calc_face_vertex_velocity
+    (tess_.GetMeshPoint(edge.neighbors.first),
+     point_velocities_[(size_t)edge.neighbors.first],
+     tess_.GetMeshPoint(edge.neighbors.second),
+     point_velocities_[(size_t)edge.neighbors.second],
+     edge.vertices.*member_);
+}
 
 int get_other_index(const Edge& edge, const int index)
 {
