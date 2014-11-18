@@ -487,6 +487,221 @@ void hdsim::TimeAdvance(void)
 	cycle_++;
 }
 
+namespace {
+
+  template<class T> class AverageCalculator: public Index2Member<T>
+  {
+  public:
+
+    AverageCalculator(const vector<T>& ll1,
+		      const vector<T>& ll2):
+      ll1_(ll1), ll2_(ll2)
+    {
+      assert(ll1.size()==ll2.size());
+    }
+
+    size_t getLength(void) const
+    {
+      return ll1_.size();
+    }
+
+    T operator()(size_t i) const
+    {
+      return 0.5*(ll1_[i]+ll2_[i]);
+    }
+
+  private:
+    const vector<T>& ll1_;
+    const vector<T>& ll2_;
+  };
+
+  template<class T> vector<T> average(const vector<T>& v1,
+				      const vector<T>& v2)
+  {
+    return serial_generate(AverageCalculator<T>(v1,v2));
+  }
+}
+
+void hdsim::TimeAdvanceElad(void)
+{
+#ifndef RICH_MPI
+	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
+		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
+#else
+	SendRecvHydro(_cells,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
+
+	SendRecvVelocity(_tessellation.GetAllCM(),_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
+#endif
+
+	vector<CustomEvolution*> custom_evolutions =
+		convert_indices_to_custom_evolution(custom_evolution_manager,
+		custom_evolution_indices);
+
+	vector<Vector2D> point_velocity = 
+	  _pointmotion.calcAllVelocities
+	  (_tessellation,_cells,_time,custom_evolutions);
+
+#ifndef RICH_MPI
+	PeriodicVelocityExchange(point_velocity,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetTotalPointNumber());
+#else
+	SendRecvVelocity(point_velocity,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces(),
+		_tessellation.GetTotalPointNumber());
+#endif
+
+	const vector<Vector2D> fv0=
+	  _tessellation.calc_edge_velocities
+	  (&_hbc,point_velocity,_time);
+
+	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv0,_hbc,
+								_time,custom_evolutions),
+					      _dt_external, _time, _endtime);
+
+	if(coldflows_flag_)
+	  substitute_entropy(_tessellation.GetPointNo(),
+			     _cells,_eos,0,tracer_);
+
+#ifdef RICH_MPI
+	if(tracer_flag_)
+		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces()
+		,_tessellation.GetTotalPointNumber());
+#endif
+	vector<Conserved> fluxes_0 = calc_fluxes
+	  (_tessellation,  _cells, dt, _time,
+	   _interpolation,
+	   fv0, _hbc, _rs,
+	   custom_evolutions,
+	   custom_evolution_manager,
+	   tracer_);
+
+	vector<Conserved> fluxes_1 = calc_fluxes
+	  (_tessellation,  _cells, dt, _time,
+	   _interpolation,
+	   serial_generate
+	   (FaceVertexVelocityCalculator
+	    (_tessellation,
+	     point_velocity,
+	     &std::pair<Vector2D,Vector2D>::first)),
+	   _hbc, _rs,
+	   custom_evolutions,
+	   custom_evolution_manager,
+	   tracer_);
+
+	vector<Conserved> fluxes_2 = calc_fluxes
+	  (_tessellation,  _cells, dt, _time,
+	   _interpolation,
+	   serial_generate
+	   (FaceVertexVelocityCalculator
+	    (_tessellation,
+	     point_velocity,
+	     &std::pair<Vector2D,Vector2D>::second)),
+	   _hbc, _rs,
+	   custom_evolutions,
+	   custom_evolution_manager,
+	   tracer_);
+
+	vector<Conserved> fluxes = 
+	  average(fluxes_0,average(fluxes_1,fluxes_2));
+
+	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation,*pg_));
+
+	vector<vector<double> > tracer_extensive = 
+	  calc_extensive_tracer(tracer_,
+				_tessellation,
+				_cells,
+				*pg_);
+ 
+	really_update_extensive_tracers(tracer_extensive,
+					tracer_,
+					_cells,
+					_tessellation,
+					fluxes,
+					_time,dt,
+					_hbc,
+					_interpolation,
+					custom_evolutions,
+					custom_evolution_manager,
+					fv0,lengths);
+
+	vector<double> g;
+	ExternalForceContribution(_tessellation,*pg_,
+				  _cells,external_force_,_time,dt,
+		_conservedextensive,_hbc,fluxes,point_velocity,g,coldflows_flag_,tracer_,
+		lengths);
+
+	ColdFlows cold_flows(coldflows_flag_,
+			     _tessellation,
+			     _cells,
+			     _hbc,
+			     _time,
+			     custom_evolutions,
+			     g);
+
+	UpdateConservedExtensive(_tessellation, fluxes, dt,
+		_conservedextensive,_hbc,lengths);
+
+#ifndef RICH_MPI
+	MoveMeshPoints(point_velocity, dt, _tessellation);
+#else
+	if(procupdate_)
+		procupdate_->Update(_proctess,_tessellation);
+	MoveMeshPoints(point_velocity, dt, _tessellation,_proctess);
+#endif
+
+#ifdef RICH_MPI
+	vector<Conserved> ptoadd;
+	vector<vector<double> > ttoadd;
+	vector<size_t> ctoadd;
+	SendRecvExtensive(_conservedextensive,tracer_extensive,custom_evolution_indices,
+		_tessellation.GetSentPoints(),_tessellation.GetSentProcs(),ptoadd,ttoadd,
+		ctoadd);
+
+	KeepLocalPoints(_conservedextensive,tracer_extensive,custom_evolution_indices,
+		_tessellation.GetSelfPoint());
+
+	insert_all_to_back(_conservedextensive,ptoadd);
+	insert_all_to_back(tracer_extensive,ttoadd);
+	insert_all_to_back(custom_evolution_indices,ctoadd);
+
+	custom_evolutions =
+		convert_indices_to_custom_evolution(custom_evolution_manager,
+		custom_evolution_indices);
+
+	cold_flows.herd_data(_tessellation);
+#endif
+
+	vector<Conserved> intensive = 
+	  calc_conserved_intensive(_tessellation,
+				   _conservedextensive,
+				   *pg_);
+
+	cold_flows.fixPressure(intensive,
+			       tracer_extensive,
+			       _eos,
+			       cfp_.as, cfp_.bs,
+			       custom_evolutions,
+			       _tessellation,
+			       _conservedextensive,
+			       densityfloor_);
+
+	UpdatePrimitives(intensive, 
+			 _eos, _cells,custom_evolutions,_cells,
+		densityfloor_,densityMin_,pressureMin_,_tessellation,_time,
+		tracer_extensive);
+
+	MakeTracerIntensive(tracer_,tracer_extensive,
+			    _tessellation,_cells, *pg_);
+
+	_time += dt;
+	cycle_++;
+}
+
 const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const
 {
   return *pg_;
