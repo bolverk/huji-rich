@@ -412,6 +412,9 @@ public:
    */
   const EquationOfState& getEos(void) const;
 
+  /*! \brief Access to the geometric outer boundary 
+    \return Geometry outer boundary
+   */
   const OuterBoundary& getOuterBoundary(void) const;
 };
 
