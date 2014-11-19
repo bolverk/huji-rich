@@ -257,6 +257,9 @@ public:
   //! \brief Advances the time using Elad's scheme
   void TimeAdvanceElad(void);
 
+  //! \brief Advances the time using Elad's scheme, second order
+  void TimeAdvanceElad2(void);
+
   /*! \brief Change the physical geometry
     \param pg New physical geometry
    */
