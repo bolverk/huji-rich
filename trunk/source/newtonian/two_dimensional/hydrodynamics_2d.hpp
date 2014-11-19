@@ -32,6 +32,8 @@ public:
     \param tess Tessellation
     \param point_velocities Velocities of mesh generating point
     \param member Toggles on which vertex to calculate the velocity
+    \param control Face velocities at the centroid
+    \param hbc Hydrodynamic boundary conditions
    */
   FaceVertexVelocityCalculator
   (const Tessellation& tess,
