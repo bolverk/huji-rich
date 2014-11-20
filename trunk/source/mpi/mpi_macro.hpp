@@ -15,6 +15,7 @@
 #include "../newtonian/common/equation_of_state.hpp"
 #include "../misc/utils.hpp"
 #include "../newtonian/two_dimensional/ReducedPrimitiveGradient2D.hpp"
+#include "../tessellation/ConvexHull.hpp"
 
 /*! \brief Find the iterator of a certain value in an array
   \param first First iterator
