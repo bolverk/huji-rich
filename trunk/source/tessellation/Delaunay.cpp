@@ -888,7 +888,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	catch (UniversalError &eo)
 	{
 		eo.AddEntry("Error occured in first batch of MPI boundary creation", 0);
-		throw eo;
+		throw;
 	}
 	// Now find all other candidates
 	// Recursively look for more points
@@ -1071,7 +1071,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		}
 		delaunay_loggers::BinaryLogger log("del.bin");
 		log.output(cor, f);
-		throw eo;
+		throw;
 	}
 	return toduplicate;
 }
