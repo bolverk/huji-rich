@@ -340,14 +340,18 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 
 bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & point)
 {
-	boost::array<Vector2D,3> triangle;
-	vector<int>const& cell_edges=tess.GetCellEdges(cell_index);
-	triangle[0]=tess.GetEdge(cell_edges[0]).vertices.first;
-	triangle[1]=tess.GetEdge(cell_edges[0]).vertices.second;
-	triangle[2]=tess.GetCellCM(cell_index);
-	double temp=orient2d(triangle);
-	triangle[2]=point;
-	return (orient2d(triangle)*temp)>0;
+	vector<Vector2D> cpoints;
+	ConvexHull(cpoints, &tess, cell_index);
+	boost::array<Vector2D, 3> tocheck;
+	tocheck[2] = point;
+	for (size_t i = 0; i<cpoints.size(); ++i)
+	{
+		tocheck[0] = cpoints[i];
+		tocheck[1] = cpoints[(i + 1) % cpoints.size()];
+		if (orient2d(tocheck)<0)
+			return false;
+	}
+	return true;
 }
 
 /*void BuildTree(ANNkd_tree *&tree,ANNpointArray &treePoints,

@@ -878,10 +878,18 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			oldres.push_back(res[i]);
 		}
 	}
-	// Do own send
-	AddRigid(obc,ownedge,ownsend);
-	// Send/Recv from neighbors
-	SendRecvFirstBatch(tosend,neigh,Nghost);
+	try
+	{
+		// Do own send
+		AddRigid(obc, ownedge, ownsend);
+		// Send/Recv from neighbors
+		SendRecvFirstBatch(tosend, neigh, Nghost);
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Error occured in first batch of MPI boundary creation", 0);
+		throw eo;
+	}
 	// Now find all other candidates
 	// Recursively look for more points
 	vector<bool> checked((size_t)olength,false);
@@ -929,9 +937,9 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			etemp.push_back(outeredges[i]);
 	}
 	outeredges=etemp;
+	vector<vector<int> > extradd(outeredges.size());
 	if(toduplicate.size()>oldres.size())
 	{
-		vector<vector<int> > extradd(outeredges.size());
 		for(size_t i=oldres.size();i<toduplicate.size();++i)
 		{
 			if(neigh[i]==-1)
@@ -949,14 +957,13 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 						if(tempvec.empty()||(!std::binary_search(tempvec.begin(),tempvec.end(),toduplicate[i][k])))
 						{
 							if(CircleSegmentIntersect(outeredges[j],cor[toduplicate[i][k]],
-								GetMaxRadius(toduplicate[i][k],Walk(toduplicate[i][k]))))
+								2*GetMaxRadius(toduplicate[i][k],Walk(toduplicate[i][k]))))
 								extradd[j].push_back(toduplicate[i][k]);
 						}
 					}
 				}
 			}
 		}
-		AddRigid(obc,outeredges,extradd);
 		// Remove the rigid points
 		vector<vector<int> > dtemp;
 		vector<int> ntemp;
@@ -1002,6 +1009,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			sendnumber.push_back(neigh[i]);
 		}
 	}
+	vector<int> oldneigh = neigh;
 	neigh=sendnumber;
 	toduplicate=toduptemp;
 	vector<int> neightemp;
@@ -1021,6 +1029,50 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		if(!oldres[i].empty())
 			toduplicate[i].insert(toduplicate[i].begin(),oldres[i].begin(),oldres[i].end());
 	proclist=neigh;
+
+	// Add the second batch of rigid points, first make sure we need all of the points, we ddo not want points that are no longer needed
+	try
+	{
+/*		if (rank == 0)
+		{
+			delaunay_loggers::BinaryLogger log("del.bin");
+			log.output(cor, f);
+		}
+	*/	
+		vector<vector<int> > newadd(outeredges.size());
+		for (size_t i = 0; i < extradd.size(); ++i)
+		{
+			for (size_t j = 0; j < extradd[i].size(); ++j)
+			{
+				if (CircleSegmentIntersect(outeredges[i], cor[extradd[i][j]],
+					2*GetMaxRadius(extradd[i][j], Walk(extradd[i][j]))))
+					newadd[i].push_back(extradd[i][j]);
+			}
+		}
+		AddRigid(obc, outeredges, newadd);
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Error occured in second batch of MPI boundary creation of rigid points", 0);
+		for (size_t i = 0; i < neigh.size(); ++i)
+			eo.AddEntry("Talked to cpu=", neigh[i]);
+		for (size_t i = 0; i < oldneigh.size(); ++i)
+			eo.AddEntry("Wanted to talk with cpu=", oldneigh[i]);
+		for (size_t i = 0; i < outeredges.size(); ++i)
+		{
+			eo.AddEntry("Edge x0=", outeredges[i].vertices.first.x);
+			eo.AddEntry("Edge y0=", outeredges[i].vertices.first.y);
+			eo.AddEntry("Edge x1=", outeredges[i].vertices.second.x);
+			eo.AddEntry("Edge y1=", outeredges[i].vertices.second.y);
+			eo.AddEntry("Edge n0=", outeredges[i].neighbors.first);
+			eo.AddEntry("Edge n0=", outeredges[i].neighbors.second);
+			for (size_t j = 0; j < extradd[i].size(); ++j)
+				eo.AddEntry("Added point", extradd[i][j]);
+		}
+		delaunay_loggers::BinaryLogger log("del.bin");
+		log.output(cor, f);
+		throw eo;
+	}
 	return toduplicate;
 }
 #endif
