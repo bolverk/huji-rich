@@ -769,7 +769,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		for (size_t i = 0; i < outeredges.size(); ++i)
 		{
 			rigidsend[i].resize(olength);
-			for (size_t j = 0; j < olength; ++j)
+			for (size_t j = 0; j < (size_t)olength; ++j)
 				rigidsend[i][j] = j;
 		}
 		for(size_t j=0;j<edges.size();++j)
