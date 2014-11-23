@@ -13,13 +13,26 @@ def consolidate(fname,g=5./3.):
     f.close()
     return res
 
+def h5_unite(f_list, g=5./3.):
+
+    import numpy
+
+    temp = [consolidate(fname) for fname in f_list]
+    res = {}
+    for field in temp[0]:
+        res[field] = numpy.concatenate([itm[field] for itm in temp])
+
+    return res
+
 def get_user_args():
 
     from argparse import ArgumentParser
 
     parser = ArgumentParser(description='Displays a snapshot of a hydrodynamic simulation')
-    parser.add_argument('file_name',
-                        help='path to output file')
+    #parser.add_argument('file_name',
+    #                    help='path to output file')
+    parser.add_argument('file_names', metavar='fn', nargs='+',
+                        help='input files')
     parser.add_argument('field',
                         help='name of hydrodynamic variable')    
     return parser.parse_args()
@@ -33,7 +46,8 @@ def display_snapshot(fname,field):
     import matplotlib.pyplot as plt
     import matplotlib as mpl
 
-    raw = consolidate(fname)
+    #raw = consolidate(fname)
+    raw = h5_unite(fname)
     vert_idx_list = numpy.concatenate(([0],numpy.cumsum(raw['Number of vertices in cell'])))
 
     verts = []
@@ -60,7 +74,7 @@ def main():
 
     args = get_user_args()
 
-    display_snapshot(args.file_name, args.field)
+    display_snapshot(args.file_names, args.field)
 
 if __name__ == '__main__':
 
