@@ -125,8 +125,8 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 		double areasign=orient2d(AreaSignCheck);
 		if(inter==Par)
 		{
-		  if(ScalarProd(poly0[(size_t)p0index]-poly0[(size_t)((p0index+n-1)%n)],
-				poly1[(size_t)p1index]-poly1[(size_t)((p1index+m-1)%m)])<0)
+		  if(ScalarProd(poly0[static_cast<size_t>(p0index)]-poly0[static_cast<size_t>((p0index+n-1)%n)],
+				poly1[static_cast<size_t>(p1index)]-poly1[static_cast<size_t>((p1index+m-1)%m)])<0)
 			{
 				// Do we need this? The area will be zero
 				/*res=GetParEdge(poly0[p0index],poly0[(p0index+n-1)%n],
@@ -154,14 +154,14 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 			if(bLeftOfa>0)
 			{
 				if(flag==Pi)
-				  res.push_back(poly0[(size_t)p0index]);
+				  res.push_back(poly0[static_cast<size_t>(p0index)]);
 				++p0counter;
 				p0index=(p0index+1)%n;
 			}
 			else
 			{
 				if(flag==Qi)
-				  res.push_back(poly1[(size_t)p1index]);
+				  res.push_back(poly1[static_cast<size_t>(p1index)]);
 				++p1counter;
 				p1index=(p1index+1)%m;
 			}
@@ -171,14 +171,14 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 			if(aLeftOfb>0)
 			{
 				if(flag==Qi)
-				  res.push_back(poly1[(size_t)p1index]);
+				  res.push_back(poly1[static_cast<size_t>(p1index)]);
 				++p1counter;
 				p1index=(p1index+1)%m;
 			}
 			else
 			{
 				if(flag==Pi)
-				  res.push_back(poly0[(size_t)p0index]);
+				  res.push_back(poly0[static_cast<size_t>(p0index)]);
 				++p0counter;
 				p0index=(p0index+1)%n;
 			}
