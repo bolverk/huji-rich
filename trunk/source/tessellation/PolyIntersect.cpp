@@ -83,27 +83,27 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 	vector<Vector2D> res;
 	InFlags flag=UnKnown;
 	bool FirsPoint=true;
-	int n=(int)poly0.size();
-	int m=(int)poly1.size();
+	const int n=static_cast<int>(poly0.size());
+	const int m=static_cast<int>(poly1.size());
 	int p0index=0,p1index=0;
 	boost::array<Vector2D,3> AreaSignCheck;
 	int p0counter=0,p1counter=0;
 	do
 	{
-	  AreaSignCheck[0]=poly0[(size_t)((p0index+n-1)%n)];
-	  AreaSignCheck[1]=poly0[(size_t)p0index];
-	  AreaSignCheck[2]=poly1[(size_t)p1index];
+	  AreaSignCheck[0]=poly0[static_cast<size_t>((p0index+n-1)%n)];
+	  AreaSignCheck[1]=poly0[static_cast<size_t>(p0index)];
+	  AreaSignCheck[2]=poly1[static_cast<size_t>(p1index)];
 	  double bLeftOfa=orient2d(AreaSignCheck);
-	  AreaSignCheck[0]=poly1[(size_t)((p1index+m-1)%m)];
-	  AreaSignCheck[1]=poly1[(size_t)p1index];
-	  AreaSignCheck[2]=poly0[(size_t)p0index];
+	  AreaSignCheck[0]=poly1[static_cast<size_t>((p1index+m-1)%m)];
+	  AreaSignCheck[1]=poly1[static_cast<size_t>(p1index)];
+	  AreaSignCheck[2]=poly0[static_cast<size_t>(p0index)];
 		double aLeftOfb=orient2d(AreaSignCheck);
 
 		Vector2D intersect;
-		IntersectFlags inter=SegmentIntersection(poly0[(size_t)((p0index+n-1)%n)],
-							 poly0[(size_t)p0index],
-							 poly1[(size_t)p1index],
-							 poly1[(size_t)((p1index+m-1)%m)],intersect);
+		IntersectFlags inter=SegmentIntersection(poly0[static_cast<size_t>((p0index+n-1)%n)],
+							 poly0[static_cast<size_t>(p0index)],
+							 poly1[static_cast<size_t>(p1index)],
+							 poly1[static_cast<size_t>((p1index+m-1)%m)],intersect);
 		if(inter==True)
 		{
 			res.push_back(intersect);
@@ -120,8 +120,8 @@ vector<Vector2D> ConvexIntersect(vector<Vector2D> const& poly0,vector<Vector2D>
 		}
 
 		AreaSignCheck[0]=Vector2D(0,0);
-		AreaSignCheck[1]=poly0[(size_t)p0index]-poly0[(size_t)((p0index+n-1)%n)];
-		AreaSignCheck[2]=poly1[(size_t)p1index]-poly1[(size_t)((p1index+m-1)%m)];
+		AreaSignCheck[1]=poly0[static_cast<size_t>(p0index)]-poly0[static_cast<size_t>((p0index+n-1)%n)];
+		AreaSignCheck[2]=poly1[static_cast<size_t>(p1index)]-poly1[static_cast<size_t>((p1index+m-1)%m)];
 		double areasign=orient2d(AreaSignCheck);
 		if(inter==Par)
 		{

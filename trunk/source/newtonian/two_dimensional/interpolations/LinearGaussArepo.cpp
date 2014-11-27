@@ -774,9 +774,10 @@ Primitive LinearGaussArepo::Interpolate
 					  vector<vector<double> >(),
 					  time_,dt);
       res+=CalcDtFlux(cells[(size_t)cell_index],rslopes_[(size_t)cell_index],dt,vface);
-      res = CalcPrimitive(res.Density,res.Pressure,Vector2D(res.Velocity.x,
-							    res.Velocity.y),eos_);
-      return res;
+      if(res.Pressure<0)
+	return temp;
+      else
+	return CalcPrimitive(res.Density,res.Pressure,res.Velocity,eos_);
     }
   else
     if(interptype==Boundary)
