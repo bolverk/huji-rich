@@ -1145,8 +1145,8 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			// Add the points
 			if(!toadd.empty())
 			{
-				for(size_t i=0;i<toadd.size();++i)
-					Nghost[index].push_back(cor.size()+i);
+				for(size_t ii=0;ii<toadd.size();++ii)
+					Nghost[index].push_back(cor.size()+ii);
 				AddBoundaryPoints(toadd);
 			}
 		}
