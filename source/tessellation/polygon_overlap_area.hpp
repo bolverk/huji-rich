@@ -31,8 +31,8 @@ public:
   \brief Calculates the area overlaped between two convex polygons
   \param ch1 The convex hull of the first polygon
   \param ch2 The convex hull of the second polygon
-  \param R0 The effective radius of the first polygon
-  \param R1 The effective radius of the second polygon
+  \param R0 A fraction of the effective radius of the first polygon 
+  \param R1 A fraction of the effective radius of the second polygon
   \return The overlaped area
   */
   double polygon_overlap_area(vector<Vector2D> const& ch1,
