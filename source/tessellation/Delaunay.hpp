@@ -20,6 +20,7 @@
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
 #include "shape_2d.hpp"
 #include "../misc/int2str.hpp"
+#include "../newtonian/two_dimensional/diagnostics.hpp"
 #ifdef RICH_MPI
 #include "../mpi/mpi_macro.hpp"
 #include "find_affected_cells.hpp"
