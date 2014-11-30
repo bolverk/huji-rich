@@ -762,29 +762,6 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res(edges.size());
-	if(olength<100)
-	{
-		vector<Edge> outeredges = obc->GetBoxEdges();
-		vector<vector<int> > rigidsend(outeredges.size());
-		for (size_t i = 0; i < outeredges.size(); ++i)
-		{
-			rigidsend[i].resize(olength);
-			for (size_t j = 0; j < (size_t)olength; ++j)
-				rigidsend[i][j] = j;
-		}
-		for(size_t j=0;j<edges.size();++j)
-		{
-			const int neightemp=(edges[j].neighbors.first == rank) ? edges[j].neighbors.second : edges[j].neighbors.first;
-			if (neightemp>-1)
-				proclist.push_back(neightemp);
-			res[(size_t)j].resize((size_t)olength);
-			for(int i=0;i<olength;++i)
-				res[(size_t)j][(size_t)i]=i;
-			AddRigid(obc, outeredges, rigidsend);
-		}
-		return res;
-	}
-
 	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
 	if (olength>100)
 	{
@@ -890,10 +867,12 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		eo.AddEntry("Error occured in first batch of MPI boundary creation", 0);
 		throw;
 	}
+	vector<int> orgneigh = neigh;
 	// Now find all other candidates
 	// Recursively look for more points
 	vector<bool> checked((size_t)olength,false);
-	vector<vector<int> > toduplicate(neigh.size());
+	vector<vector<int> > toduplicate;
+	toduplicate.resize(neigh.size());
 
 	//cur_facet=Walk(real_point);
 	//FindContainingTetras(cur_facet,real_point,containing_facets);
@@ -979,16 +958,26 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		toduplicate=dtemp;
 	}
 
+	sort(orgneigh.begin(), orgneigh.end());
 	// Make sure we have that all cpu talk with the relevent other and remove uneeded talks
 	vector<int> sendnumber(get_mpi_size(),0),scounts(get_mpi_size(),1);
 	int nrecv;
-	for(size_t i=0;i<neigh.size();++i)
-		sendnumber[neigh[i]]=1;
+	const double R = tproc.GetWidth(rank);
+	vector<int> neightemp2;
+	for (size_t i = 0; i < neigh.size(); ++i)
+	{
+		if (tproc.GetMeshPoint(neigh[i]).distance(tproc.GetMeshPoint(rank)) <( 15 * R) || std::binary_search(orgneigh.begin(), orgneigh.end(), neigh[i]))
+		{
+			sendnumber[neigh[i]] = 1;
+			neightemp2.push_back(neigh[i]);
+		}
+	}
+	sort(neightemp2.begin(), neightemp2.end());
 	MPI_Reduce_scatter(&sendnumber[0],&nrecv,&scounts[0],MPI_INT,MPI_SUM,MPI_COMM_WORLD);
 	char ctemp;
-	vector<MPI_Request> req(neigh.size());
-	for(size_t i=0;i<neigh.size();++i)
-		MPI_Isend(&ctemp,1,MPI_CHAR,neigh[i],2,MPI_COMM_WORLD,&req[i]);
+	vector<MPI_Request> req(neightemp2.size());
+	for (size_t i = 0; i<neightemp2.size(); ++i)
+		MPI_Isend(&ctemp, 1, MPI_CHAR, neightemp2[i], 2, MPI_COMM_WORLD, &req[i]);
 	vector<int> sentme;
 	for(size_t i=0;i<(size_t)nrecv;++i)
 	{
@@ -1003,7 +992,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	sendnumber.clear();
 	for(size_t i=0;i<neigh.size();++i)
 	{
-		if(std::binary_search(sentme.begin(),sentme.end(),neigh[i]))
+		if (std::binary_search(sentme.begin(), sentme.end(), neigh[i]) && std::binary_search(neightemp2.begin(), neightemp2.end(), neigh[i]))
 		{
 			toduptemp.push_back(toduplicate[i]);
 			sendnumber.push_back(neigh[i]);
@@ -1024,7 +1013,22 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	}
 	neigh=neightemp;
 
-	SendRecvFirstBatch(tosend,neigh,Nghost);
+	try
+	{
+		SendRecvFirstBatch(tosend, neigh, Nghost);
+	}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error occured in second batch of MPI boundary creation", 0);
+			for (size_t i = 0; i < neigh.size(); ++i)
+				eo.AddEntry("Talked to cpu=", neigh[i]);
+			for (size_t i = 0; i < oldneigh.size(); ++i)
+				eo.AddEntry("Wanted to talk with cpu=", oldneigh[i]);
+			delaunay_loggers::BinaryLogger log("del.bin");
+			log.output(cor, f);
+			throw eo;
+	}
+	
 	for(size_t i=0;i<oldres.size();++i)
 		if(!oldres[i].empty())
 			toduplicate[i].insert(toduplicate[i].begin(),oldres[i].begin(),oldres[i].end());
@@ -1033,12 +1037,6 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	// Add the second batch of rigid points, first make sure we need all of the points, we ddo not want points that are no longer needed
 	try
 	{
-/*		if (rank == 0)
-		{
-			delaunay_loggers::BinaryLogger log("del.bin");
-			log.output(cor, f);
-		}
-	*/	
 		vector<vector<int> > newadd(outeredges.size());
 		for (size_t i = 0; i < extradd.size(); ++i)
 		{
@@ -1143,11 +1141,20 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			vector<Vector2D> toadd;
 			ConvertDoubleToVector2D(toadd,recv);
 			// Add the points
-			if(!toadd.empty())
+			try
 			{
-				for(size_t ii=0;ii<toadd.size();++ii)
-					Nghost[index].push_back(cor.size()+ii);
-				AddBoundaryPoints(toadd);
+
+				if (!toadd.empty())
+				{
+					for (size_t i = 0; i < toadd.size(); ++i)
+						Nghost[index].push_back(cor.size() + i);
+					AddBoundaryPoints(toadd);
+				}
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Error in SendRecvFirstBatch", 0);
+				throw eo;
 			}
 		}
 	}
@@ -1245,24 +1252,42 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate)
 {
+	boost::array<Vector2D, 3> tocheck;
+	tocheck[0] = cor[(size_t)olength];
+	tocheck[1] = cor[(size_t)olength + 1];
+	tocheck[2] = cor[(size_t)olength + 2];
+	vector<int> toremove;
 	for(size_t i=0;i<edges.size();++i)
 	{
-		if(toduplicate[(size_t)i].empty())
+		toremove.clear();
+		if(toduplicate[i].empty())
 			continue;
 		vector<Vector2D> toadd;
-		toadd.reserve(toduplicate[(size_t)i].size());
-		Vector2D par(Parallel(edges[(size_t)i]));
+		toadd.reserve(toduplicate[i].size());
+		Vector2D par(Parallel(edges[i]));
 		par=par/abs(par);
-		for(size_t j=0;j<toduplicate[(size_t)i].size();++j)
+		for(size_t j=0;j<toduplicate[i].size();++j)
 		{
-			Vector2D temp=cor[(size_t)toduplicate[(size_t)i][(size_t)j]]-edges[(size_t)i].vertices.first;
-			temp=2*par*ScalarProd(par,temp)-temp+edges[(size_t)i].vertices.first;
-			toadd.push_back(temp);
+			Vector2D temp=cor[(size_t)toduplicate[i][j]]-edges[i].vertices.first;
+			temp=2*par*ScalarProd(par,temp)-temp+edges[i].vertices.first;
+			if (InTriangle(tocheck, temp))
+				toadd.push_back(temp);
+			else
+				toremove.push_back((int)j);
 		}
+		RemoveVector(toduplicate[i], toremove);
 		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
 		ReArrangeVector(toadd,order);
-		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[(size_t)i],order);
+		try
+		{
+			AddBoundaryPoints(toadd);
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in AddRigid", 0);
+			throw eo;
+		}
+		ReArrangeVector(toduplicate[i],order);
 	}
 }
 
