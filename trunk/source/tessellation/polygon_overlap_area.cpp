@@ -23,15 +23,15 @@ double PolygonOverlap::polygon_overlap_area(vector<Vector2D> const& ch1,
 	boost::random::uniform_real_distribution<> dist(-1,1);
 	for(size_t i=0;i<(size_t)n;++i)
 	{
-		r[0]=dist(gen);
-		r[1]=dist(gen);
+		r[0]=2*dist(gen)-1;
+		r[1]=2*dist(gen)-1;
 		p[i].Set(p[i].x+r[0]*R0,p[i].y+r[1]*R0);
 	}
 	n=(int)q.size();
 	for(size_t i=0;i<(size_t)n;++i)
 	{
-		r[0]=dist(gen);
-		r[1]=dist(gen);
+		r[0]=2*dist(gen)-1;
+		r[1]=2*dist(gen)-1;
 		q[i].Set(q[i].x+r[0]*R1,q[i].y+r[1]*R1);
 	}
 	vector<Vector2D> poly=ConvexIntersect(p,q);

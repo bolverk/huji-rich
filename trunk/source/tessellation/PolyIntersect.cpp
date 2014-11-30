@@ -34,14 +34,15 @@ IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 	points[1]=p1-p0;
 	points[2]=q1-q0;
 	double d=orient2d(points);
-	if(fabs(d)>0)
+	double eps = 1e-7*abs(p1 - p0)*abs(q1 - q0);
+	if(fabs(d)<0)
 		return Par;
 	double xi=((q0.x-q1.x)*(p0.x*p1.y-p1.x*p0.y)-(p0.x-p1.x)*
 		(q0.x*q1.y-q1.x*q0.y))/d;
 	double yi=((q0.y-q1.y)*(p0.x*p1.y-p1.x*p0.y)-(p0.y-p1.y)*
 		(q0.x*q1.y-q1.x*q0.y))/d;
 	Intersection.Set(xi,yi);
-	double eps=1e-7*sqrt(abs(p1-p0)*abs(q1-q0));
+	eps=1e-7*sqrt(abs(p1-p0)*abs(q1-q0));
 	if((xi+eps)<min(p0.x,p1.x)||(xi-eps)>max(p0.x,p1.x))
 		return Par;
 	if((xi+eps)<min(q0.x,q1.x)||(xi-eps)>max(q0.x,q1.x))
