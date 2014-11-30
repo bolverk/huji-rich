@@ -142,21 +142,31 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 	// Moving according to pressure
 	if(mode_==1||mode_==2)
 	{
+		const double neigheps = 0.2;
 		vector<int> neigh=tproc.GetNeighbors(rank);
 		for(int i=0;i<(int)neigh.size();++i)
 		{
 			if(neigh[i]==-1)
 				continue;
-			//Vector2D otherpoint=tproc.GetMeshPoint(neigh[i]);
-			Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
-			dx+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
-				otherpoint.x-point.x);
-			dy+=PointsPerProc_*(1.0/NPerProc[rank]-1.0/NPerProc[neigh[i]])*(
-				otherpoint.y-point.y);
+			Vector2D otherpoint=tproc.GetMeshPoint(neigh[i]);
+			//Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
+			point = tproc.GetMeshPoint(rank);
+			const double dist = tproc.GetMeshPoint(rank).distance(tproc.GetMeshPoint(neigh[i]));
+			if (dist<neigheps*min(R[rank], R[neigh[i]]))
+			{
+				dx = neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*min(R[rank], R[neigh[i]])/dist;
+				dy = neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*min(R[rank], R[neigh[i]]) / dist;
+			}
+			else
+			{
+				dx -= (NPerProc[rank] - NPerProc[neigh[i]])*(otherpoint.x - point.x)*R[rank] / (PointsPerProc_*dist);
+				dy -= (NPerProc[rank] - NPerProc[neigh[i]])*(otherpoint.y - point.y)*R[rank] / (PointsPerProc_*dist);
+			}
 		}
 	}
-	old_dx=(old_dx>0) ? min(old_dx,speed_*R[rank]) : -min(-old_dx,speed_*R[rank]);
-	old_dy=(old_dy>0) ? min(old_dy,speed_*R[rank]) : -min(-old_dy,speed_*R[rank]);
+	const double FarFraction = 0.2;
+	old_dx = (old_dx>0) ? min(old_dx, FarFraction*speed_*R[rank]) : -min(-old_dx, FarFraction*speed_*R[rank]);
+	old_dy = (old_dy>0) ? min(old_dy, FarFraction*speed_*R[rank]) : -min(-old_dy, FarFraction*speed_*R[rank]);
 	dx=(dx>0) ? min(dx,speed_*R[rank]) : -min(-dx,speed_*R[rank]);
 	dy=(dy>0) ? min(dy,speed_*R[rank]) : -min(-dy,speed_*R[rank]);
 	//if(rank==0)
