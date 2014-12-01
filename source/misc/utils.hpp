@@ -159,7 +159,7 @@ template <class T> vector<T> VectorValues(vector<T> const&v,vector<int> const &i
 
   vector<T> result(index.size());
   for(size_t i=0;i<index.size();++i)
-    result.at(i) = v.at((size_t)index.at(i));
+    result.at(i) = v.at(static_cast<size_t>(index.at(i)));
   return result;
 }
 
