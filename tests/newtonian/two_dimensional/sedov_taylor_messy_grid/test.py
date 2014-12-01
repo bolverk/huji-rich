@@ -2,90 +2,124 @@
 
 def goodness_of_fit(a1, a2):
 
-    import math
+    import numpy
 
-    diff2 = [(x-y)**2 for x,y in zip(a1,a2)]
-    return math.sqrt(sum(diff2)/(max(a1)-min(a1))/len(a1))
+    return sum(numpy.abs(numpy.array(a1)-numpy.array(a2)))/len(a1)
+
+def consolidate_single(fname):
+
+    import h5py
+    import numpy
+
+    f = h5py.File(fname)
+    res = {key:numpy.array(f[key]) for key in f}
+    f.close()
+    return res
+
+def consolidate_multiple(f_list):
+
+    import numpy
+
+    parts_list = [consolidate_single(fname) for fname in f_list]
+    return {key:numpy.concatenate([part[key] for part in parts_list]) for key in parts_list[0]}
+
+def find_max_pos_par(x_list, y_list, window=2):
+
+    import numpy
+
+    mi = numpy.argmax(y_list)
+
+    fit_data = numpy.polyfit(x_list[mi-window:mi+window+1],
+                             y_list[mi-window:mi+window+1],
+                             2)
+    return -0.5*fit_data[1]/fit_data[0]
+
+def calc_shock_front(numeric):
+
+    import numpy
+
+    radially_sorted = {field:numpy.array([x for (y,x) in sorted(zip(numeric['radius'],numeric[field]))])
+                       for field in ['radius','density','pressure','velocity']}
+    res = {'radius':find_max_pos_par(radially_sorted['radius'],
+                                     radially_sorted['pressure'])}
+    for field in ['density','pressure','velocity']:
+        res[field] = numpy.interp(res['radius'],
+                                  radially_sorted['radius'],
+                                  radially_sorted[field])
+    return res
+
+class SedovTaylorProfiles:
+
+    def __init__(self, upstream, shock_front, g, w, n ,nip=1000):
+
+        import numpy
+        import imp
+        import os
+
+        sedov_taylor = imp.load_source('sedov_taylor',
+                                       os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
+
+        self.upstream = upstream
+        ssv_list = numpy.linspace(1e-6+1./g,
+                                  2./(g+1.),
+                                  num=nip)
+        self.shock_radius = shock_front['radius']
+        self.tables = {'radius':numpy.array([shock_front['radius']*sedov_taylor.vtoz(v,w,g,n) for v in ssv_list]),
+                       'density':numpy.array([shock_front['density']*sedov_taylor.vtod(v,w,g,n)/((g+1.)/(g-1.)) for v in ssv_list]),
+                       'pressure':numpy.array([shock_front['pressure']*sedov_taylor.vtop(v,w,g,n)/(2./(g+1.)) for v in ssv_list]),
+                       'velocity':numpy.array([shock_front['velocity']*sedov_taylor.vtoz(v,w,g,n)*v/(2./(g+1.)) for v in ssv_list])}
+
+    def calc(self, field, r):
+
+        import numpy
+
+        if r>self.shock_radius:
+            return self.upstream[field]
+        else:
+            return numpy.interp(r,
+                                self.tables['radius'],
+                                self.tables[field])
 
 def main():
 
     import numpy
-    import imp
-    import h5py
-    import os
     import glob
-
-    sedov_taylor = imp.load_source(\
-        'sedov_taylor',\
-            os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
-
-    # Simulation results
 
     np = len(glob.glob('process_*_final.h5'))
 
     if np>0:
-        x_numeric = []
-        y_numeric = []
-        vx_numeric = []
-        vy_numeric = []
-        dr = []
-        pr = []
-        for idx in range(np):
-            f = h5py.File('process_'+str(idx)+'_final.h5')
-            x_numeric.extend(f['x_coordinate'])
-            y_numeric.extend(f['y_coordinate'])
-            vx_numeric.extend(f['x_velocity'])
-            vy_numeric.extend(f['y_velocity'])
-            dr.extend(f['density'])
-            pr.extend(f['pressure'])
+        numeric = consolidate_multiple(glob.glob('process_*_final.h5'))
     else:
-        h5f = h5py.File('final.h5')
-        x_numeric = h5f['x_coordinate']
-        y_numeric = h5f['y_coordinate']
-        vx_numeric = h5f['x_velocity']
-        vy_numeric = h5f['y_velocity']
-        dr = h5f['density']
-        pr = h5f['pressure']
-    rr = [numpy.sqrt(x*x+y*y) for x,y in zip(x_numeric, y_numeric)]
-    vr = [numpy.sqrt(vx*vx+vy*vy) for vx, vy
-          in zip(vx_numeric, vy_numeric)]
+        numeric = consolidate_single('final.h5')
+    numeric['radius'] = numpy.sqrt(numeric['x_coordinate']**2+numeric['y_coordinate']**2)
+    numeric['velocity'] = (numeric['x_coordinate']*numeric['x_velocity']+
+                           numeric['y_coordinate']*numeric['y_velocity'])/numeric['radius']
 
-    rs = numpy.sort(rr)
-    ids = numpy.argsort(rr)
-    ds = [dr[i] for i in ids]
-    ps = [pr[i] for i in ids]
-    vs = [vr[i] for i in ids]
+    st_prof = SedovTaylorProfiles({'density':1,'pressure':0.01,'velocity':0},
+                                  calc_shock_front(numeric),
+                                  5./3.,0,2)
+    analytic = {field:numpy.array([st_prof.calc(field,r) for r in numeric['radius']]) for field in ['density','pressure','velocity']}
 
-    # Analytic results
-    R = rs[numpy.argmax(ps)]
-    vatsf = vs[numpy.argmax(ps)]
-    patsf = ps[numpy.argmax(ps)]
-    datsf = ds[numpy.argmax(ps)]
-    g = 5./3. 
-    w = 0
-    n = 2
-    v = numpy.linspace(1e-6+1./g,2/(g+1),num=1000)
-    ra = [R*sedov_taylor.vtoz(i,w,g,n) for i in v]
-    da = [datsf*sedov_taylor.vtod(i,w,g,n)/((g+1)/(g-1)) for i in v]
-    pa = [patsf*sedov_taylor.vtop(i,w,g,n)/(2/(g+1)) for i in v]
-    va = [vatsf*sedov_taylor.vtoz(i,w,g,n)*i/(2/(g+1)) for i in v]
-
-    df = numpy.interp(ra,rs,ds)
-    pf = numpy.interp(ra,rs,ps)
-    vf = numpy.interp(ra,rs,vs)
-
-    gof1 = goodness_of_fit(df,da)
-    gof2 = goodness_of_fit(pf,pa)
-    gof3 = goodness_of_fit(vf,va)
+    l1_data = {field:goodness_of_fit(analytic[field],
+                                     numeric[field])
+               for field in analytic}
 
     f = open('gradesheet.txt','w')
-    f.write(str(gof1)+'\n')
-    f.write(str(gof2)+'\n')
-    f.write(str(gof3)+'\n')
+    for field in ['density','pressure','velocity']:
+        f.write(str(l1_data[field])+'\n')
     f.close()
 
-    return gof1<0.09 and \
-        gof2<0.8 and gof3<0.11
+    if False:
+        import pylab
+        for n,f in enumerate(['density','pressure','velocity']):
+            pylab.subplot(3,1,n+1)
+            pylab.plot(numeric['radius'],
+                       numeric[f],'.')
+            pylab.plot(numeric['radius'],
+                       analytic[f],'.')
+        pylab.show()
+
+    return l1_data['density']<0.4 and l1_data['pressure']<12 and l1_data['velocity']<1.3
 
 import sys
 if __name__=='__main__':
