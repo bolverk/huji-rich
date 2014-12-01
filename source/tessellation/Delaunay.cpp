@@ -1026,7 +1026,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 				eo.AddEntry("Wanted to talk with cpu=", oldneigh[i]);
 			delaunay_loggers::BinaryLogger log("del.bin");
 			log.output(cor, f);
-			throw eo;
+			throw;
 	}
 	
 	for(size_t i=0;i<oldres.size();++i)
@@ -1154,7 +1154,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			catch (UniversalError &eo)
 			{
 				eo.AddEntry("Error in SendRecvFirstBatch", 0);
-				throw eo;
+				throw;
 			}
 		}
 	}
@@ -1285,7 +1285,7 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 		catch (UniversalError &eo)
 		{
 			eo.AddEntry("Error in AddRigid", 0);
-			throw eo;
+			throw;
 		}
 		ReArrangeVector(toduplicate[i],order);
 	}
