@@ -290,7 +290,7 @@ template <class T> void ReArrangeVector(vector<T> &v,vector<int> const& indeces)
 {
   const vector<T> temp=v;
   for(size_t i=0;i<v.size();++i)
-    v[i]=temp[(size_t)indeces[i]];
+    v[i]=temp[static_cast<size_t>(indeces[i])];
 }
 namespace
 {
@@ -329,7 +329,7 @@ template<class T> vector<T> join(vector<T> const& v1,
   if(!v1.empty())
     copy(v1.begin(),v1.end(),res.begin());
   if(!v2.empty())
-    copy(v2.begin(),v2.end(),res.begin()+(int)v1.size());
+    copy(v2.begin(),v2.end(),res.begin()+static_cast<int>(v1.size()));
   return res;
 }
 
