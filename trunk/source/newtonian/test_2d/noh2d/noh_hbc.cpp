@@ -93,9 +93,9 @@ vector<double> NohHBC::GetBoundaryTracers(Edge const& edge,
 	for(size_t i=1;i<tracers[0].size();++i)
 	{
 		if(IsGhostCell(edge.neighbors.second,tess))
-		  res.push_back(tracers[(size_t)edge.neighbors.first][i]);
+		  res.push_back(tracers[static_cast<size_t>(edge.neighbors.first)][i]);
 		else
-		  res.push_back(tracers[(size_t)edge.neighbors.second][i]);
+		  res.push_back(tracers[static_cast<size_t>(edge.neighbors.second)][i]);
 	}
 
 	return res;

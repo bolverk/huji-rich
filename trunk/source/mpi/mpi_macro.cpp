@@ -1956,11 +1956,11 @@ void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &trace
 	if(sentcells.empty())
 		return;
 	const bool traceractive = !tracers.empty() && !tracers.at(0).empty();
-	const int totalsent = (int)sum_sizes(sentcells);
-	cells.resize((size_t)(npoints-totalsent));
-	customevolutions.resize((size_t)(npoints-totalsent));
+	const int totalsent = static_cast<int>(sum_sizes(sentcells));
+	cells.resize(static_cast<size_t>(npoints-totalsent));
+	customevolutions.resize(static_cast<size_t>(npoints-totalsent));
 	if(traceractive)
-	  tracers.resize((size_t)(npoints-totalsent));
+	  tracers.resize(static_cast<size_t>(npoints-totalsent));
 	for(size_t i=0;i<sentcells.size();++i)
 	{
 		if(sentcells[i].empty())
@@ -1978,8 +1978,8 @@ void PeriodicUpdateCells(vector<Primitive> &cells,vector<vector<double> > &trace
 void PeriodicVelocityExchange(vector<Vector2D> &vel,
 	vector<vector<int> > const& sentcells,int npoints)
 {
-	const int totalsent = (int)sum_sizes(sentcells);
-	vel.resize((size_t)(npoints-totalsent));
+  const int totalsent = static_cast<int>(sum_sizes(sentcells));
+	vel.resize(static_cast<size_t>(npoints-totalsent));
 
 	for(size_t i=0;i<sentcells.size();++i)
 	{
@@ -1992,8 +1992,8 @@ void PeriodicVelocityExchange(vector<Vector2D> &vel,
 void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 	vector<vector<int> > const& sentcells,int npoints)
 {
-	const int totalsent = (int)sum_sizes(sentcells);
-	grad.resize((size_t)(npoints-totalsent));
+  const int totalsent = static_cast<int>(sum_sizes(sentcells));
+  grad.resize(static_cast<size_t>(npoints-totalsent));
 
 	for(size_t i=0;i<sentcells.size();++i)
 	{
