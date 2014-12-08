@@ -21,6 +21,15 @@ template<class T> class Triplet
     second(second_i),
     third(third_i) {}
 
+  void set(const T& first_i,
+	   const T& second_i,
+	   const T& third_i)
+  {
+    first = first_i;
+    second = second_i;
+    third = third_i;;
+  }
+
   const T& operator[](size_t i) const
   {
     if(i==0)

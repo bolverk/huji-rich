@@ -271,18 +271,25 @@ void Delaunay::flip(int i, int j)
 				const int f2=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
 				const int f22=f[(size_t)indexes.second].neighbors[(size_t)check.second];
 				const int f23=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
-				f[(size_t)indexes.first].vertices[0] = other.first;
-				f[(size_t)indexes.first].vertices[1] = v1;
-				f[(size_t)indexes.first].vertices[2] = check.first;
+				f[(size_t)indexes.first].vertices.set(other.first,v1,check.first);
+				f[(size_t)indexes.second].vertices.set(check.first,v2,other.first);
+				/*
 				f[(size_t)indexes.second].vertices[0] = check.first;
 				f[(size_t)indexes.second].vertices[1] = v2;
 				f[(size_t)indexes.second].vertices[2] = other.first;
+				*/
+				f[(size_t)indexes.first].neighbors.set(f1,f2,indexes.second);
+				/*
 				f[(size_t)indexes.first].neighbors[0] = f1;
 				f[(size_t)indexes.first].neighbors[1] = f2;
 				f[(size_t)indexes.first].neighbors[2] = indexes.second;
+				*/
+				f[(size_t)indexes.second].neighbors.set(f22,f12,indexes.first);
+				/*
 				f[(size_t)indexes.second].neighbors[0] = f22;
 				f[(size_t)indexes.second].neighbors[1] = f12;
 				f[(size_t)indexes.second].neighbors[2] = indexes.first;
+				*/
 				// change the friends of the friends if needed
 				if(f23!=last_loc)
 				{
