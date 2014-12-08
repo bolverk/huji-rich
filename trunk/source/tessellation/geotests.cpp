@@ -121,7 +121,11 @@ double orient2d(boost::array<Vector2D,3> const& points)
 	return orient2dAdapt(points, detsum);
 }
 
-double incircleadapt(boost::array<Vector2D,4> const& points, double permanent)
+double incircleadapt(const Vector2D& point_1,
+		     const Vector2D& point_2,
+		     const Vector2D& point_3,
+		     const Vector2D& point_4,
+		     double permanent)
 {
 	double adx, bdx, cdx, ady, bdy, cdy;
 	double adxtail, bdxtail, cdxtail, adytail, bdytail, cdytail;
@@ -138,12 +142,12 @@ double incircleadapt(boost::array<Vector2D,4> const& points, double permanent)
 	vector<double> B1, B2, B3, C1, C2, C3, D1, D2, D3, E1, E2, E3, F;
 	vector<double> tmp1, tmp2;
 
-	twoDiff(points[0].x, points[3].x, adx, adxtail);
-	twoDiff(points[1].x, points[3].x, bdx, bdxtail);
-	twoDiff(points[2].x, points[3].x, cdx, cdxtail);
-	twoDiff(points[0].y, points[3].y, ady, adytail);
-	twoDiff(points[1].y, points[3].y, bdy, bdytail);
-	twoDiff(points[2].y, points[3].y, cdy, cdytail);
+	twoDiff(point_1.x, point_4.x, adx, adxtail);
+	twoDiff(point_2.x, point_4.x, bdx, bdxtail);
+	twoDiff(point_3.x, point_4.x, cdx, cdxtail);
+	twoDiff(point_1.y, point_4.y, ady, adytail);
+	twoDiff(point_2.y, point_4.y, bdy, bdytail);
+	twoDiff(point_3.y, point_4.y, cdy, cdytail);
 
 	twoProduct(bdx, cdy, bdxcdy1, bdxcdy0);
 	twoProduct(cdx, bdy, cdxbdy1, cdxbdy0);
@@ -560,16 +564,19 @@ double incircleadapt(boost::array<Vector2D,4> const& points, double permanent)
 	return F.back();
 }
 
-double incircle(boost::array<Vector2D,4> const& points)
+double incircle(const Vector2D& point_1,
+		const Vector2D& point_2,
+		const Vector2D& point_3,
+		const Vector2D& point_4)
 {
 	const double errBoundA = (10.0 + 96.0 * epsilon) * epsilon; // Acceptable error range for this calculation precision.
 
-	const double adx = points[0].x - points[3].x;
-	const double bdx = points[1].x - points[3].x;
-	const double cdx = points[2].x - points[3].x;
-	const double ady = points[0].y - points[3].y;
-	const double bdy = points[1].y - points[3].y;
-	const double cdy = points[2].y - points[3].y;
+	const double adx = point_1.x - point_4.x;
+	const double bdx = point_2.x - point_4.x;
+	const double cdx = point_3.x - point_4.x;
+	const double ady = point_1.y - point_4.y;
+	const double bdy = point_2.y - point_4.y;
+	const double cdy = point_3.y - point_4.y;
 
 	const double alift = adx * adx + ady * ady;
 	const double blift = bdx * bdx + bdy * bdy;
@@ -592,5 +599,9 @@ double incircle(boost::array<Vector2D,4> const& points)
 	{ //Determinant is out of error bounds (accurate enough).
 		return det;
 	}
-	return incircleadapt(points, permanent); //calling the adaptive function.
+	return incircleadapt(point_1,
+			     point_2,
+			     point_3,
+			     point_4,
+			     permanent); //calling the adaptive function.
 }

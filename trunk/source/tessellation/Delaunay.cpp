@@ -251,24 +251,16 @@ void Delaunay::flip(int i, int j)
 		else
 		{
 		  const pair<int,int> indexes = flip_stack.top();
-		    /*
-		  indexes[0]=flip_stack.top().first;
-		  indexes[1]=flip_stack.top().second;
-		    */
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
 		  const pair<int,int> check = find_diff(f[(size_t)indexes.second],
 					  f[(size_t)indexes.first]);
 		  const pair<int,int> other = find_diff(f[(size_t)indexes.first],
 					  f[(size_t)indexes.second]);
 
-		  boost::array<Vector2D,4> circle_test;
-			for(int k=0;k<3;++k)
-			{
-				circle_test[(size_t)k]=cor[(size_t)f[(size_t)indexes.first].vertices[(size_t)k]];
-			}
-			circle_test[3]=cor[(size_t)check.first];
-
-			if(incircle(circle_test)>0)
+			if(incircle(cor[(size_t)f[(size_t)indexes.first].vertices.first],
+				    cor[(size_t)f[(size_t)indexes.first].vertices.second],
+				    cor[(size_t)f[(size_t)indexes.first].vertices.third],
+				    cor[(size_t)check.first])>0)
 			{
 				//The point is in a circle change the facets and their friends
 				const int v1=f[(size_t)indexes.first].vertices[(size_t)(other.second+1)%3];
