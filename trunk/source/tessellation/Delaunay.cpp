@@ -137,8 +137,7 @@ void Delaunay::add_point(int index)
 	int triangle=Walk(index);
 	boost::array<int,3> outer,temp_friends;
 	facet f_temp;
-	int i=0;
-	for(i=0;i<3;++i)
+	for(int i=0;i<3;++i)
 	{
 		outer[(size_t)i]=f[(size_t)triangle].vertices[(size_t)i];
 		temp_friends[(size_t)i]=f[(size_t)triangle].neighbors[(size_t)i];
@@ -168,12 +167,12 @@ void Delaunay::add_point(int index)
 	// _update the friends list of the friends
 	if(temp_friends[1]!=last_loc)
 	{
-		i=find_index(f[(size_t)temp_friends[1]],triangle);
+		const int i=find_index(f[(size_t)temp_friends[1]],triangle);
 		f[(size_t)temp_friends[1]].neighbors[(size_t)i] = location_pointer+2;
 	}
 	if(temp_friends[0]!=last_loc)
 	{
-		i=find_index(f[(size_t)temp_friends[0]],triangle);
+	  const int i=find_index(f[(size_t)temp_friends[0]],triangle);
 		f[(size_t)temp_friends[0]].neighbors[(size_t)i] = location_pointer+1;
 	}
 	// Calculate radius if needed
