@@ -3,6 +3,27 @@
 #include <cmath>
 #include "../misc/triplet.hpp"
 
+namespace {
+pair<int,int> find_diff(const facet& f1,const facet& f2)
+{
+	for(size_t i=0;i<3;++i)
+	{
+		bool counter=false;
+		for(int j=0;j<3;++j)
+		{
+			if(f1.vertices[(size_t)i]==f2.vertices[(size_t)j])
+			{
+				counter=true;
+				break;
+			}
+		}
+		if(counter==false)
+		  return pair<int,int>(f1.vertices[i],i);
+	}
+	throw UniversalError("Delaunay, Couldn't find difference bewteen two facets");
+}
+}
+
 Delaunay::DataOnlyForBuild::DataOnlyForBuild():insert_order(vector<int> ()),
 	copied(vector<vector<char> > ())
 {}
@@ -227,8 +248,8 @@ void Delaunay::flip(int i, int j)
 	flip_stack.push(array_temp);
   */
   flip_stack.push(std::pair<int,int>(i,j));
-	boost::array<int,2> check;
-	boost::array<int,2> other;
+  pair<int,int> check;
+  pair<int,int> other;
 	boost::array<int,2> indexes;
 	boost::array<Vector2D,4> circle_test;
 	while(!flip_stack.empty())
@@ -240,32 +261,34 @@ void Delaunay::flip(int i, int j)
 		  indexes[0]=flip_stack.top().first;
 		  indexes[1]=flip_stack.top().second;
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
-			find_diff(&f[(size_t)indexes[1]],&f[(size_t)indexes[0]],&check[0]);
-			find_diff(&f[(size_t)indexes[0]],&f[(size_t)indexes[1]],&other[0]);
+			check = find_diff(f[(size_t)indexes[1]],
+					  f[(size_t)indexes[0]]);
+			other = find_diff(f[(size_t)indexes[0]],
+					  f[(size_t)indexes[1]]);
 
 			for(int k=0;k<3;++k)
 			{
 				circle_test[(size_t)k]=cor[(size_t)f[(size_t)indexes[0]].vertices[(size_t)k]];
 			}
-			circle_test[3]=cor[(size_t)check[0]];
+			circle_test[3]=cor[(size_t)check.first];
 
 			if(incircle(circle_test)>0)
 			{
 				//The point is in a circle change the facets and their friends
-				const int v1=f[(size_t)indexes[0]].vertices[(size_t)(other[1]+1)%3];
-				const int f1=f[(size_t)indexes[0]].neighbors[(size_t)other[1]];
-				const int f12=f[(size_t)indexes[0]].neighbors[(size_t)(other[1]+2)%3];
-				const int f13=f[(size_t)indexes[0]].neighbors[(size_t)(other[1]+2)%3];
-				const int v2=f[(size_t)indexes[1]].vertices[(size_t)(check[1]+1)%3];
-				const int f2=f[(size_t)indexes[1]].neighbors[(size_t)(check[1]+2)%3];
-				const int f22=f[(size_t)indexes[1]].neighbors[(size_t)check[1]];
-				const int f23=f[(size_t)indexes[1]].neighbors[(size_t)(check[1]+2)%3];
-				f[(size_t)indexes[0]].vertices[0] = other[0];
+				const int v1=f[(size_t)indexes[0]].vertices[(size_t)(other.second+1)%3];
+				const int f1=f[(size_t)indexes[0]].neighbors[(size_t)other.second];
+				const int f12=f[(size_t)indexes[0]].neighbors[(size_t)(other.second+2)%3];
+				const int f13=f[(size_t)indexes[0]].neighbors[(size_t)(other.second+2)%3];
+				const int v2=f[(size_t)indexes[1]].vertices[(size_t)(check.second+1)%3];
+				const int f2=f[(size_t)indexes[1]].neighbors[(size_t)(check.second+2)%3];
+				const int f22=f[(size_t)indexes[1]].neighbors[(size_t)check.second];
+				const int f23=f[(size_t)indexes[1]].neighbors[(size_t)(check.second+2)%3];
+				f[(size_t)indexes[0]].vertices[0] = other.first;
 				f[(size_t)indexes[0]].vertices[1] = v1;
-				f[(size_t)indexes[0]].vertices[2] = check[0];
-				f[(size_t)indexes[1]].vertices[0] = check[0];
+				f[(size_t)indexes[0]].vertices[2] = check.first;
+				f[(size_t)indexes[1]].vertices[0] = check.first;
 				f[(size_t)indexes[1]].vertices[1] = v2;
-				f[(size_t)indexes[1]].vertices[2] = other[0];
+				f[(size_t)indexes[1]].vertices[2] = other.first;
 				f[(size_t)indexes[0]].neighbors[0] = f1;
 				f[(size_t)indexes[0]].neighbors[1] = f2;
 				f[(size_t)indexes[0]].neighbors[2] = indexes[1];
@@ -372,33 +395,6 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 	for(int i=0;i<n;++i)
 		radius[(size_t)i]=CalculateRadius(i);
 	CalcRadius=true;
-}
-
-void Delaunay::find_diff(facet *f1,facet *f2,int *p) const
-{
-	int i=0;
-	for(;i<3;++i)
-	{
-		bool counter=false;
-		for(int j=0;j<3;++j)
-		{
-			if(f1->vertices[(size_t)i]==f2->vertices[(size_t)j])
-			{
-				counter=true;
-				break;
-			}
-		}
-		if(counter==false)
-		{
-			p[0]=f1->vertices[(size_t)i];
-			p[1]=i;
-			return;
-		}
-	}
-	UniversalError eo("Delaunay, Couldn't find difference bewteen two facets");
-	eo.AddEntry("Facet 1",double(f1-&f[0]));
-	eo.AddEntry("Facet 2",double(f2-&f[0]));
-	throw eo;
 }
 
 double Delaunay::triangle_area(int index)
