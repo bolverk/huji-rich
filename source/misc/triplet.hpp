@@ -6,6 +6,8 @@
 #ifndef TRIPLET_HPP
 #define TRIPLET_HPP 1
 
+#include "universal_error.hpp"
+
 template<class T> class Triplet
 {
  public:
@@ -18,6 +20,30 @@ template<class T> class Triplet
     first(first_i),
     second(second_i),
     third(third_i) {}
+
+  const T& operator[](size_t i) const
+  {
+    if(i==0)
+      return first;
+    else if(i==1)
+      return second;
+    else if(i==2)
+      return third;
+    else
+      throw UniversalError("Access violation in triplet[]");
+  }
+
+  T& operator[](size_t i)
+  {
+    if(i==0)
+      return first;
+    else if(i==1)
+      return second;
+    else if(i==2)
+      return third;
+    else
+      throw UniversalError("Access violation in triplet[]");
+  }
 };
 
 template<class T> class TripleConstRef

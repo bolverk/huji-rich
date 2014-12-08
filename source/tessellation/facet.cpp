@@ -1,8 +1,8 @@
 #include "facet.hpp"
 
 facet::facet():
-  vertices(boost::array<int,3> ()),
-  neighbors(boost::array<int,3> ()) {}
+  vertices(0,0,0),
+  neighbors(0,0,0) {}
 
 facet::facet(const facet & other):
   vertices(other.vertices),

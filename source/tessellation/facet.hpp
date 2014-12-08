@@ -8,6 +8,7 @@
 
 #include "geometry.hpp"
 #include <boost/array.hpp>
+#include "../misc/triplet.hpp"
 
 //using namespace boost;
 
@@ -20,10 +21,10 @@ class facet
 public:
 
   //! \brief Indices of vertices
-  boost::array<int,3> vertices;
+  Triplet<int> vertices;
 
   //! \brief Indices of neighboring facets
-  boost::array<int,3> neighbors;
+  Triplet<int> neighbors;
 
 	//! \brief Defualt constructor. Sets vertices and friends to zero.
 	facet();
