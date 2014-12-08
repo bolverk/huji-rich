@@ -137,17 +137,22 @@ void Delaunay::add_point(int index)
 	}
 	int triangle=Walk(index);
 	//	boost::array<int,3> outer,temp_friends;
-	boost::array<int,3> temp_friends;
+	//	boost::array<int,3> temp_friends;
 	facet f_temp;
+	/*
 	for(int i=0;i<3;++i)
 	{
-	  //		outer[(size_t)i]=f[(size_t)triangle].vertices[(size_t)i];
 		temp_friends[(size_t)i]=f[(size_t)triangle].neighbors[(size_t)i];
 	}
+	*/
 	const Triplet<int> outer
 	  (f[static_cast<size_t>(triangle)].vertices[0],
 	   f[static_cast<size_t>(triangle)].vertices[1],
 	   f[static_cast<size_t>(triangle)].vertices[2]);
+	const Triplet<int> temp_friends
+	  (f[static_cast<size_t>(triangle)].neighbors[0],
+	   f[static_cast<size_t>(triangle)].neighbors[1],
+	   f[static_cast<size_t>(triangle)].neighbors[2]);
 	// create and _update the new facets
 	f.push_back(f_temp);
 	f.push_back(f_temp);
@@ -161,25 +166,25 @@ void Delaunay::add_point(int index)
 	f[(size_t)location_pointer+2].vertices[1] = outer.third;
 	f[(size_t)location_pointer+2].vertices[2] = index;
 
-	f[(size_t)triangle].neighbors[0] = temp_friends[2];
+	f[(size_t)triangle].neighbors[0] = temp_friends.third;
 	f[(size_t)triangle].neighbors[1] = location_pointer+1;;
 	f[(size_t)triangle].neighbors[2] = location_pointer+2;
-	f[(size_t)location_pointer+1].neighbors[0] = temp_friends[0];
+	f[(size_t)location_pointer+1].neighbors[0] = temp_friends.first;
 	f[(size_t)location_pointer+1].neighbors[1] = location_pointer+2;
 	f[(size_t)location_pointer+1].neighbors[2] = triangle;
-	f[(size_t)location_pointer+2].neighbors[0] = temp_friends[1];
+	f[(size_t)location_pointer+2].neighbors[0] = temp_friends.second;
 	f[(size_t)location_pointer+2].neighbors[1] = triangle;
 	f[(size_t)location_pointer+2].neighbors[2] = location_pointer+1;
 	// _update the friends list of the friends
-	if(temp_friends[1]!=last_loc)
+	if(temp_friends.second!=last_loc)
 	{
-		const int i=find_index(f[(size_t)temp_friends[1]],triangle);
-		f[(size_t)temp_friends[1]].neighbors[(size_t)i] = location_pointer+2;
+		const int i=find_index(f[(size_t)temp_friends.second],triangle);
+		f[(size_t)temp_friends.second].neighbors[(size_t)i] = location_pointer+2;
 	}
-	if(temp_friends[0]!=last_loc)
+	if(temp_friends.first!=last_loc)
 	{
-	  const int i=find_index(f[(size_t)temp_friends[0]],triangle);
-		f[(size_t)temp_friends[0]].neighbors[(size_t)i] = location_pointer+1;
+	  const int i=find_index(f[(size_t)temp_friends.first],triangle);
+		f[(size_t)temp_friends.first].neighbors[(size_t)i] = location_pointer+1;
 	}
 	// Calculate radius if needed
 	if(CalcRadius)
@@ -206,9 +211,9 @@ void Delaunay::add_point(int index)
 	}
 
 	// check if flipping is needed
-	flip(triangle,temp_friends[2]);
-	flip(location_pointer+1,temp_friends[0]);
-	flip(location_pointer+2,temp_friends[1]);
+	flip(triangle,temp_friends.third);
+	flip(location_pointer+1,temp_friends.first);
+	flip(location_pointer+2,temp_friends.second);
 
 	// _update number of facets
 	location_pointer+=2;
