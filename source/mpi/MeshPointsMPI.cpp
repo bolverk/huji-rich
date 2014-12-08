@@ -87,7 +87,9 @@ namespace
 				tocheck[2]=cpoints[i];
 				const Vector2D tocpoint=cpoints[i]-center;
 				const double angle=acos(ScalarProd(tocenter,tocpoint)/(abs(tocpoint)*Rcenter));
-				if(orient2d(tocheck)>0)
+				if(orient2d(TripleConstRef<Vector2D>(center,
+								     procpoint,
+								     cpoints[i]-center))>0)
 				{	
 					if(angle>plusval)
 					{

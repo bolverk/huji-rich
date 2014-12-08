@@ -14,12 +14,6 @@
 using std::vector;
 using std::min;
 
-/*! \brief Returns the absolute value of the number given.
- \param a Number
- \return Absolute value of a
- */
-double absolute(double const& a);
-
 /*! \brief Calculates the sum of two numbers
   \param a First number
   \param b Second number

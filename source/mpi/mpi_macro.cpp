@@ -348,7 +348,10 @@ bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & po
 	{
 		tocheck[0] = cpoints[i];
 		tocheck[1] = cpoints[(i + 1) % cpoints.size()];
-		if (orient2d(tocheck)<0)
+		if (orient2d(TripleConstRef<Vector2D>
+			     (cpoints[i],
+			      cpoints[(i+1)%cpoints.size()],
+			      point))<0)
 			return false;
 	}
 	return true;

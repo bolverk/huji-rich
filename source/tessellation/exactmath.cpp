@@ -1,11 +1,6 @@
 #include "exactmath.hpp"
 double const splitter = 134217729;
 
-double absolute(double const& a)
-{
-  return (a >= 0.0) ? a : -a;
-}
-
 namespace {
   void fastTwoSumTail(double const a, double const b, double const x, double& y)
   {
@@ -339,13 +334,12 @@ vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double
   double Q, q, hh;
   double Qnew;
   double R;
-  double enow, fnow;
   double g0;
-  unsigned int eindex, findex;
 
-  enow = e[0];
-  fnow = f[0];
-  eindex = findex = 0;
+  double enow = e.front();
+  double fnow = f.front();
+  double eindex = 0;
+  double findex = 0;
   if ((fnow > enow) == (fnow > -enow))
     {
       g0 = enow;
@@ -383,7 +377,7 @@ vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double
 	}
     }
   Q = Qnew;
-  for (unsigned int count = 2; count < e.size() + f.size(); count++)
+  for (size_t count = 2, endp=e.size() + f.size(); count < endp; count++)
     {
       if ((eindex < e.size()) && ((findex >= f.size()) || ((fnow > enow) == (fnow > -enow))))
 	{
