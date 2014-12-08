@@ -76,8 +76,19 @@ Delaunay::~Delaunay(void)
 namespace
 {
 	// Checks if a point is inside a triangle
-	bool InTriangle(boost::array<Vector2D,3> const& tri,Vector2D const& point)
+	bool InTriangle(const TripleConstRef<Vector2D>& tri,
+			const Vector2D& point)
 	{
+	  return (orient2d(TripleConstRef<Vector2D>(tri.first,
+						   tri.second,
+						    point))>0) &&
+	    (orient2d(TripleConstRef<Vector2D>(tri.second,
+					       tri.third,
+					       point))>0) &&
+	    (orient2d(TripleConstRef<Vector2D>(tri.third,
+					       tri.first,
+					       point))>0);
+	  /*
 		boost::array<Vector2D,3> tocheck;
 		tocheck[2]=point;
 		for(int i=0;i<3;++i)
@@ -88,6 +99,7 @@ namespace
 				return false;
 		}
 		return true;
+	  */
 	}
 
 	// Assume cell is orederd in convexhull counterclockwise
@@ -138,21 +150,20 @@ namespace
 void Delaunay::add_point(int index)
 {
 	// Check if point is inside big triangle
-	boost::array<Vector2D,3> tocheck;
-	tocheck[0]=cor[(size_t)olength];
-	tocheck[1]=cor[(size_t)olength+1];
-	tocheck[2]=cor[(size_t)olength+2];
+  const TripleConstRef<Vector2D> tocheck(cor[static_cast<size_t>(olength)],
+					 cor[static_cast<size_t>(olength+1)],
+					 cor[static_cast<size_t>(olength+2)]);
 	if(!InTriangle(tocheck,cor[(size_t)index]))
 	{
 		UniversalError eo("Point not inside large triangle of Delaunay");
 		eo.AddEntry("Point x",cor[(size_t)index].x);
 		eo.AddEntry("Point y",cor[(size_t)index].y);
-		eo.AddEntry("Big tirangle point 1 x",tocheck[0].x);
-		eo.AddEntry("Big tirangle point 1 y",tocheck[0].y);
-		eo.AddEntry("Big tirangle point 2 x",tocheck[1].x);
-		eo.AddEntry("Big tirangle point 2 y",tocheck[1].y);
-		eo.AddEntry("Big tirangle point 3 x",tocheck[2].x);
-		eo.AddEntry("Big tirangle point 3 y",tocheck[2].y);
+		eo.AddEntry("Big tirangle point 1 x",tocheck.first.x);
+		eo.AddEntry("Big tirangle point 1 y",tocheck.first.y);
+		eo.AddEntry("Big tirangle point 2 x",tocheck.second.x);
+		eo.AddEntry("Big tirangle point 2 y",tocheck.second.y);
+		eo.AddEntry("Big tirangle point 3 x",tocheck.third.x);
+		eo.AddEntry("Big tirangle point 3 y",tocheck.third.y);
 		throw eo;
 	}
 	int triangle=Walk(index);
@@ -165,14 +176,8 @@ void Delaunay::add_point(int index)
 		temp_friends[(size_t)i]=f[(size_t)triangle].neighbors[(size_t)i];
 	}
 	*/
-	const Triplet<int> outer
-	  (f[static_cast<size_t>(triangle)].vertices[0],
-	   f[static_cast<size_t>(triangle)].vertices[1],
-	   f[static_cast<size_t>(triangle)].vertices[2]);
-	const Triplet<int> temp_friends
-	  (f[static_cast<size_t>(triangle)].neighbors[0],
-	   f[static_cast<size_t>(triangle)].neighbors[1],
-	   f[static_cast<size_t>(triangle)].neighbors[2]);
+	const Triplet<int> outer(f[static_cast<size_t>(triangle)].vertices);
+	const Triplet<int> temp_friends(f[static_cast<size_t>(triangle)].neighbors);
 	// create and _update the new facets
 	f.push_back(f_temp);
 	f.push_back(f_temp);
@@ -419,7 +424,10 @@ int Delaunay::Walk(int point)
 		{
 			points[0]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]];
 			points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]];
-			if(orient2d(points)<0)
+			if(orient2d(TripleConstRef<Vector2D>
+				    (cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]],
+				     points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]],
+				     cor[(size_t)point]))<0)
 			{
 				finish=0;
 				cur_facet=f[(size_t)cur_facet].neighbors[(size_t)i];
@@ -1272,7 +1280,11 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 		{
 			Vector2D temp=cor[(size_t)toduplicate[i][j]]-edges[i].vertices.first;
 			temp=2*par*ScalarProd(par,temp)-temp+edges[i].vertices.first;
-			if (InTriangle(tocheck, temp))
+			if (InTriangle(TripleConstRef<Vector2D>
+				       (cor[static_cast<size_t>(olength)],
+					cor[static_cast<size_t>(olength+1)],
+					cor[static_cast<size_t>(olength+2)]), 
+				       temp))
 				toadd.push_back(temp);
 			else
 				toremove.push_back((int)j);

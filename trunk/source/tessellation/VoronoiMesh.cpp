@@ -2400,10 +2400,16 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 					box_edges[(size_t)j].GetLength());
 				double eps1=1e-7;
 				// are the two edges the same?
-				tocheck[(size_t)0]=box_edges[(size_t)j].vertices.second-box_edges[(size_t)j].vertices.first;
+				/*
+				tocheck[0]=box_edges[(size_t)j].vertices.second-box_edges[(size_t)j].vertices.first;
 				tocheck[1]=edges[(size_t)mesh_vertices[(size_t)cell][(size_t)i]].vertices.second-box_edges[(size_t)j].vertices.first;
 				tocheck[2]=edges[(size_t)mesh_vertices[(size_t)cell][(size_t)i]].vertices.first-box_edges[(size_t)j].vertices.first;
-				if(abs(orient2d(tocheck))<r*r*eps1)
+				*/
+				if(abs(orient2d(TripleConstRef<Vector2D>
+						(box_edges[(size_t)j].vertices.second-box_edges[(size_t)j].vertices.first,
+						 edges[(size_t)mesh_vertices[(size_t)cell][(size_t)i]].vertices.second-box_edges[(size_t)j].vertices.first,
+						 edges[(size_t)mesh_vertices[(size_t)cell][(size_t)i]].vertices.first-box_edges[(size_t)j].vertices.first)))
+				   <r*r*eps1)
 					continue;
 				if(DistanceToEdge(edges[(size_t)mesh_vertices[(size_t)cell][(size_t)i]].vertices.first,
 					box_edges[(size_t)j])<eps1*r)
@@ -3109,15 +3115,12 @@ vector<vector<int> >const& VoronoiMesh::GetSentPoints(void)const
 // cpoints must be convex hull, checks if vec is inside cpoints
 bool PointInCell(vector<Vector2D> const& cpoints,Vector2D const& vec)
 {
-	int n=(int)cpoints.size();
-	boost::array<Vector2D,3> tocheck;
-	tocheck[2]=vec;
-	for(int i=0;i<n;++i)
+	for(size_t i=0, endp=cpoints.size();i<endp;++i)
 	{
-	  tocheck[0]=cpoints[(size_t)i];
-	  tocheck[1]=cpoints[(size_t)((i+1)%n)];
-		if(orient2d(tocheck)<0)
-			return false;
+	  if(orient2d(TripleConstRef<Vector2D>(cpoints[i],
+					       cpoints[(i+1)%endp],
+					       vec))<0)
+	  return false;
 	}
 	return true;
 }

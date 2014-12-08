@@ -1,7 +1,7 @@
 #include "geotests.hpp"
 double const epsilon = 1.1102230246251565e-016;
 
-double orient2dAdapt(boost::array<Vector2D,3> const& points, double detsum)
+double orient2dAdapt(const TripleConstRef<Vector2D>& points, double detsum)
 {
 	boost::array<double,2> A1,A2;
 	vector<double> B1, B2;
@@ -14,10 +14,10 @@ double orient2dAdapt(boost::array<Vector2D,3> const& points, double detsum)
 	double errBoundB = (2.0 + 12.0 * epsilon) * epsilon;
 	double errBoundC = (9.0 + 64.0 * epsilon) * epsilon * epsilon;
 
-	twoDiff(points[0].x, points[2].x, acx, acxtail);
-	twoDiff(points[1].x, points[2].x, bcx, bcxtail);
-	twoDiff(points[0].y, points[2].y, acy, acytail);
-	twoDiff(points[1].y, points[2].y, bcy, bcytail);
+	twoDiff(points.first.x, points.third.x, acx, acxtail);
+	twoDiff(points.second.x, points.third.x, bcx, bcxtail);
+	twoDiff(points.first.y, points.third.y, acy, acytail);
+	twoDiff(points.second.y, points.third.y, bcy, bcytail);
 
 	twoProduct(acx, bcy, detLeft, detLeftErr);
 	twoProduct(acy, bcx, detRight, detRightErr);
@@ -37,7 +37,7 @@ double orient2dAdapt(boost::array<Vector2D,3> const& points, double detsum)
 	{
 		return det;
 	}
-	err = errBoundC * detsum + resultErrBound * absolute(det);
+	err = errBoundC * detsum + resultErrBound * abs(det);
 	det += (acx * bcytail + bcy * acxtail) - (acy * bcxtail + bcx * acytail);
 	if ((det >= err) || (-det >= err))
 	{
@@ -73,15 +73,15 @@ double orient2dAdapt(boost::array<Vector2D,3> const& points, double detsum)
 	return(C.back());
 }
 
-double orient2d(boost::array<Vector2D,3> const& points)
+double orient2d(const TripleConstRef<Vector2D>& points)
 {
 	double detleft, detright, det;
 	double detsum, errbound;
 	double errBoundA = (3.0 + 16.0 * epsilon) * epsilon; // Acceptable error range for this calculation precision.
 
 	// Calculating a 2x2 determinant.
-	detleft = (points[0].x - points[2].x) * (points[1].y - points[2].y);
-	detright = (points[0].y - points[2].y) * (points[1].x - points[2].x);
+	detleft = (points.first.x - points.third.x) * (points.second.y - points.third.y);
+	detright = (points.first.y - points.third.y) * (points.second.x - points.third.x);
 	det = detleft - detright;
 
 	if (detleft > 0.0)
@@ -202,7 +202,7 @@ double incircleadapt(const Vector2D& point_1,
 	{
 			return det;
 	}
-	errbound = errBoundC * permanent + resultErrBound * absolute(det);
+	errbound = errBoundC * permanent + resultErrBound * abs(det);
 	det += ((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail)
 		- (bdy * cdxtail + cdx * bdytail)) + 2.0 * (adx * adxtail + ady * adytail)
 		* (bdx * cdy - bdy * cdx)) + ((bdx * bdx + bdy * bdy) * ((cdx * adytail + ady * cdxtail)
@@ -591,9 +591,9 @@ double incircle(const Vector2D& point_1,
 	//Calculating regular 3x3 matrix determinant.
 	const double det = alift * (bdxcdy - cdxbdy) + blift * (cdxady - adxcdy) + clift * (adxbdy - bdxady);
 
-	const double permanent = (absolute(bdxcdy) + absolute(cdxbdy)) * alift
-	  + (absolute(cdxady) + absolute(adxcdy)) * blift
-	  + (absolute(adxbdy) + absolute(bdxady)) * clift;
+	const double permanent = (abs(bdxcdy) + abs(cdxbdy)) * alift
+	  + (abs(cdxady) + abs(adxcdy)) * blift
+	  + (abs(adxbdy) + abs(bdxady)) * clift;
 	const double errbound = errBoundA * permanent;
 	if ((det > errbound) || (-det > errbound))
 	{ //Determinant is out of error bounds (accurate enough).
