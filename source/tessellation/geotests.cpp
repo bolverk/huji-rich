@@ -562,37 +562,32 @@ double incircleadapt(boost::array<Vector2D,4> const& points, double permanent)
 
 double incircle(boost::array<Vector2D,4> const& points)
 {
-	double adx, bdx, cdx, ady, bdy, cdy;
-	double bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
-	double alift, blift, clift;
-	double det;
-	double permanent, errbound;
-	double errBoundA = (10.0 + 96.0 * epsilon) * epsilon; // Acceptable error range for this calculation precision.
+	const double errBoundA = (10.0 + 96.0 * epsilon) * epsilon; // Acceptable error range for this calculation precision.
 
-	adx = points[0].x - points[3].x;
-	bdx = points[1].x - points[3].x;
-	cdx = points[2].x - points[3].x;
-	ady = points[0].y - points[3].y;
-	bdy = points[1].y - points[3].y;
-	cdy = points[2].y - points[3].y;
+	const double adx = points[0].x - points[3].x;
+	const double bdx = points[1].x - points[3].x;
+	const double cdx = points[2].x - points[3].x;
+	const double ady = points[0].y - points[3].y;
+	const double bdy = points[1].y - points[3].y;
+	const double cdy = points[2].y - points[3].y;
 
-	alift = adx * adx + ady * ady;
-	blift = bdx * bdx + bdy * bdy;
-	clift = cdx * cdx + cdy * cdy;
-	bdxcdy = bdx * cdy;
-	cdxbdy = cdx * bdy;
-	cdxady = cdx * ady;
-	adxcdy = adx * cdy;
-	adxbdy = adx * bdy;
-	bdxady = bdx * ady;
+	const double alift = adx * adx + ady * ady;
+	const double blift = bdx * bdx + bdy * bdy;
+	const double clift = cdx * cdx + cdy * cdy;
+	const double bdxcdy = bdx * cdy;
+	const double cdxbdy = cdx * bdy;
+	const double cdxady = cdx * ady;
+	const double adxcdy = adx * cdy;
+	const double adxbdy = adx * bdy;
+	const double bdxady = bdx * ady;
 
 	//Calculating regular 3x3 matrix determinant.
-	det = alift * (bdxcdy - cdxbdy) + blift * (cdxady - adxcdy) + clift * (adxbdy - bdxady);
+	const double det = alift * (bdxcdy - cdxbdy) + blift * (cdxady - adxcdy) + clift * (adxbdy - bdxady);
 
-	permanent = (absolute(bdxcdy) + absolute(cdxbdy)) * alift
-			  + (absolute(cdxady) + absolute(adxcdy)) * blift
-			  + (absolute(adxbdy) + absolute(bdxady)) * clift;
-	errbound = errBoundA * permanent;
+	const double permanent = (absolute(bdxcdy) + absolute(cdxbdy)) * alift
+	  + (absolute(cdxady) + absolute(adxcdy)) * blift
+	  + (absolute(adxbdy) + absolute(bdxady)) * clift;
+	const double errbound = errBoundA * permanent;
 	if ((det > errbound) || (-det > errbound))
 	{ //Determinant is out of error bounds (accurate enough).
 		return det;

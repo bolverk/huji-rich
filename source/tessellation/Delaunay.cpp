@@ -211,21 +211,24 @@ void Delaunay::add_point(int index)
 
 void Delaunay::flip(int i, int j)
 {
-	stack<boost::array<int,2> > flip_stack;
+  stack<std::pair<int,int> > flip_stack;
+  /*
 	boost::array<int,2> array_temp={{i,j}};
 	flip_stack.push(array_temp);
+  */
+  flip_stack.push(std::pair<int,int>(i,j));
 	boost::array<int,2> check;
 	boost::array<int,2> other;
 	boost::array<int,2> indexes;
 	boost::array<Vector2D,4> circle_test;
 	while(!flip_stack.empty())
 	{
-		if(flip_stack.top()[1]==last_loc)
+		if(flip_stack.top().second==last_loc)
 			flip_stack.pop();
 		else
 		{
-			indexes[0]=flip_stack.top()[0];
-			indexes[1]=flip_stack.top()[1];
+		  indexes[0]=flip_stack.top().first;
+		  indexes[1]=flip_stack.top().second;
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
 			find_diff(&f[(size_t)indexes[1]],&f[(size_t)indexes[0]],&check[0]);
 			find_diff(&f[(size_t)indexes[0]],&f[(size_t)indexes[1]],&other[0]);
@@ -277,12 +280,19 @@ void Delaunay::flip(int i, int j)
 				// clear the checked facets
 				flip_stack.pop();
 				// push into the stack the new facets to check
+				/*
 				array_temp[0]=indexes[1];
 				array_temp[1]=f[(size_t)indexes[1]].neighbors[0];
-				flip_stack.push(array_temp);
+				*/
+				flip_stack.push(std::pair<int,int>(indexes[1],
+								   f[static_cast<size_t>(indexes[1])].neighbors[0]));
+				flip_stack.push(std::pair<int,int>(indexes[0],
+								   f[static_cast<size_t>(indexes[0])].neighbors[1]));
+				/*
 				array_temp[0]=indexes[0];
 				array_temp[1]=f[(size_t)indexes[0]].neighbors[1];
 				flip_stack.push(array_temp);
+				*/
 			}
 			else
 			{
