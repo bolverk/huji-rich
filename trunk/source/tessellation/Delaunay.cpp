@@ -241,90 +241,78 @@ void Delaunay::add_point(int index)
 
 void Delaunay::flip(int i, int j)
 {
-  stack<std::pair<int,int> > flip_stack;
-  /*
-	boost::array<int,2> array_temp={{i,j}};
-	flip_stack.push(array_temp);
-  */
-  flip_stack.push(std::pair<int,int>(i,j));
-  pair<int,int> check;
-  pair<int,int> other;
-	boost::array<int,2> indexes;
-	boost::array<Vector2D,4> circle_test;
+  stack<std::pair<int,int> > flip_stack
+    (std::deque<std::pair<int,int> >(1,std::pair<int,int>(i,j)));
+  //  flip_stack.push(std::pair<int,int>(i,j));
 	while(!flip_stack.empty())
 	{
 		if(flip_stack.top().second==last_loc)
 			flip_stack.pop();
 		else
 		{
+		  const pair<int,int> indexes = flip_stack.top();
+		    /*
 		  indexes[0]=flip_stack.top().first;
 		  indexes[1]=flip_stack.top().second;
+		    */
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
-			check = find_diff(f[(size_t)indexes[1]],
-					  f[(size_t)indexes[0]]);
-			other = find_diff(f[(size_t)indexes[0]],
-					  f[(size_t)indexes[1]]);
+		  const pair<int,int> check = find_diff(f[(size_t)indexes.second],
+					  f[(size_t)indexes.first]);
+		  const pair<int,int> other = find_diff(f[(size_t)indexes.first],
+					  f[(size_t)indexes.second]);
 
+		  boost::array<Vector2D,4> circle_test;
 			for(int k=0;k<3;++k)
 			{
-				circle_test[(size_t)k]=cor[(size_t)f[(size_t)indexes[0]].vertices[(size_t)k]];
+				circle_test[(size_t)k]=cor[(size_t)f[(size_t)indexes.first].vertices[(size_t)k]];
 			}
 			circle_test[3]=cor[(size_t)check.first];
 
 			if(incircle(circle_test)>0)
 			{
 				//The point is in a circle change the facets and their friends
-				const int v1=f[(size_t)indexes[0]].vertices[(size_t)(other.second+1)%3];
-				const int f1=f[(size_t)indexes[0]].neighbors[(size_t)other.second];
-				const int f12=f[(size_t)indexes[0]].neighbors[(size_t)(other.second+2)%3];
-				const int f13=f[(size_t)indexes[0]].neighbors[(size_t)(other.second+2)%3];
-				const int v2=f[(size_t)indexes[1]].vertices[(size_t)(check.second+1)%3];
-				const int f2=f[(size_t)indexes[1]].neighbors[(size_t)(check.second+2)%3];
-				const int f22=f[(size_t)indexes[1]].neighbors[(size_t)check.second];
-				const int f23=f[(size_t)indexes[1]].neighbors[(size_t)(check.second+2)%3];
-				f[(size_t)indexes[0]].vertices[0] = other.first;
-				f[(size_t)indexes[0]].vertices[1] = v1;
-				f[(size_t)indexes[0]].vertices[2] = check.first;
-				f[(size_t)indexes[1]].vertices[0] = check.first;
-				f[(size_t)indexes[1]].vertices[1] = v2;
-				f[(size_t)indexes[1]].vertices[2] = other.first;
-				f[(size_t)indexes[0]].neighbors[0] = f1;
-				f[(size_t)indexes[0]].neighbors[1] = f2;
-				f[(size_t)indexes[0]].neighbors[2] = indexes[1];
-				f[(size_t)indexes[1]].neighbors[0] = f22;
-				f[(size_t)indexes[1]].neighbors[1] = f12;
-				f[(size_t)indexes[1]].neighbors[2] = indexes[0];
+				const int v1=f[(size_t)indexes.first].vertices[(size_t)(other.second+1)%3];
+				const int f1=f[(size_t)indexes.first].neighbors[(size_t)other.second];
+				const int f12=f[(size_t)indexes.first].neighbors[(size_t)(other.second+2)%3];
+				const int f13=f[(size_t)indexes.first].neighbors[(size_t)(other.second+2)%3];
+				const int v2=f[(size_t)indexes.second].vertices[(size_t)(check.second+1)%3];
+				const int f2=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
+				const int f22=f[(size_t)indexes.second].neighbors[(size_t)check.second];
+				const int f23=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
+				f[(size_t)indexes.first].vertices[0] = other.first;
+				f[(size_t)indexes.first].vertices[1] = v1;
+				f[(size_t)indexes.first].vertices[2] = check.first;
+				f[(size_t)indexes.second].vertices[0] = check.first;
+				f[(size_t)indexes.second].vertices[1] = v2;
+				f[(size_t)indexes.second].vertices[2] = other.first;
+				f[(size_t)indexes.first].neighbors[0] = f1;
+				f[(size_t)indexes.first].neighbors[1] = f2;
+				f[(size_t)indexes.first].neighbors[2] = indexes.second;
+				f[(size_t)indexes.second].neighbors[0] = f22;
+				f[(size_t)indexes.second].neighbors[1] = f12;
+				f[(size_t)indexes.second].neighbors[2] = indexes.first;
 				// change the friends of the friends if needed
 				if(f23!=last_loc)
 				{
-					f[(size_t)f23].neighbors[(size_t)find_index(f[(size_t)f23],indexes[1])] = indexes[0];
+					f[(size_t)f23].neighbors[(size_t)find_index(f[(size_t)f23],indexes.second)] = indexes.first;
 				}
 				if(f13!=last_loc)
 				{
-					f[(size_t)f13].neighbors[(size_t)find_index(f[(size_t)f13],indexes[0])] = indexes[1];
+					f[(size_t)f13].neighbors[(size_t)find_index(f[(size_t)f13],indexes.first)] = indexes.second;
 				}
 				// Calculate the new radius if needed
 				if(CalcRadius)
 				{
-					radius[(size_t)indexes[0]]=CalculateRadius(indexes[0]);
-					radius[(size_t)indexes[1]]=CalculateRadius(indexes[1]);
+					radius[(size_t)indexes.first]=CalculateRadius(indexes.first);
+					radius[(size_t)indexes.second]=CalculateRadius(indexes.second);
 				}
 				// clear the checked facets
 				flip_stack.pop();
 				// push into the stack the new facets to check
-				/*
-				array_temp[0]=indexes[1];
-				array_temp[1]=f[(size_t)indexes[1]].neighbors[0];
-				*/
-				flip_stack.push(std::pair<int,int>(indexes[1],
-								   f[static_cast<size_t>(indexes[1])].neighbors[0]));
-				flip_stack.push(std::pair<int,int>(indexes[0],
-								   f[static_cast<size_t>(indexes[0])].neighbors[1]));
-				/*
-				array_temp[0]=indexes[0];
-				array_temp[1]=f[(size_t)indexes[0]].neighbors[1];
-				flip_stack.push(array_temp);
-				*/
+				flip_stack.push(std::pair<int,int>(indexes.second,
+								   f[static_cast<size_t>(indexes.second)].neighbors[0]));
+				flip_stack.push(std::pair<int,int>(indexes.first,
+								   f[static_cast<size_t>(indexes.first)].neighbors[1]));
 			}
 			else
 			{
