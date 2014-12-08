@@ -6,21 +6,20 @@
 namespace {
 pair<int,int> find_diff(const facet& f1,const facet& f2)
 {
-	for(size_t i=0;i<3;++i)
-	{
-		bool counter=false;
-		for(int j=0;j<3;++j)
-		{
-			if(f1.vertices[(size_t)i]==f2.vertices[(size_t)j])
-			{
-				counter=true;
-				break;
-			}
-		}
-		if(counter==false)
-		  return pair<int,int>(f1.vertices[i],i);
-	}
-	throw UniversalError("Delaunay, Couldn't find difference bewteen two facets");
+  if(f1.vertices.first!=f2.vertices.first &&
+     f1.vertices.first!=f2.vertices.second &&
+     f1.vertices.first!=f2.vertices.third)
+    return pair<int,int>(f1.vertices.first,0);
+  else if(f1.vertices.second!=f2.vertices.first &&
+	  f1.vertices.second!=f2.vertices.second &&
+	  f1.vertices.second!=f2.vertices.third)
+    return pair<int,int>(f1.vertices.second,1);
+  else if(f1.vertices.third!=f2.vertices.first &&
+	  f1.vertices.third!=f2.vertices.second &&
+	  f1.vertices.third!=f2.vertices.third)
+    return pair<int,int>(f1.vertices.third,2);
+  else
+    throw UniversalError("Delaunay, Couldn't find difference bewteen two facets");
 }
 }
 
