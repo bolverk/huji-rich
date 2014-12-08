@@ -1,6 +1,7 @@
 #include "Delaunay.hpp"
 #include <vector>
 #include <cmath>
+#include "../misc/triplet.hpp"
 
 Delaunay::DataOnlyForBuild::DataOnlyForBuild():insert_order(vector<int> ()),
 	copied(vector<vector<char> > ())
@@ -135,24 +136,29 @@ void Delaunay::add_point(int index)
 		throw eo;
 	}
 	int triangle=Walk(index);
-	boost::array<int,3> outer,temp_friends;
+	//	boost::array<int,3> outer,temp_friends;
+	boost::array<int,3> temp_friends;
 	facet f_temp;
 	for(int i=0;i<3;++i)
 	{
-		outer[(size_t)i]=f[(size_t)triangle].vertices[(size_t)i];
+	  //		outer[(size_t)i]=f[(size_t)triangle].vertices[(size_t)i];
 		temp_friends[(size_t)i]=f[(size_t)triangle].neighbors[(size_t)i];
 	}
+	const Triplet<int> outer
+	  (f[static_cast<size_t>(triangle)].vertices[0],
+	   f[static_cast<size_t>(triangle)].vertices[1],
+	   f[static_cast<size_t>(triangle)].vertices[2]);
 	// create and _update the new facets
 	f.push_back(f_temp);
 	f.push_back(f_temp);
-	f[(size_t)triangle].vertices[0] = outer[2];
-	f[(size_t)triangle].vertices[1] = outer[0];
+	f[(size_t)triangle].vertices[0] = outer.third;
+	f[(size_t)triangle].vertices[1] = outer.first;
 	f[(size_t)triangle].vertices[2] = index;
-	f[(size_t)location_pointer+1].vertices[0] = outer[0];
-	f[(size_t)location_pointer+1].vertices[1] = outer[1];
+	f[(size_t)location_pointer+1].vertices[0] = outer.first;
+	f[(size_t)location_pointer+1].vertices[1] = outer.second;
 	f[(size_t)location_pointer+1].vertices[2] = index;
-	f[(size_t)location_pointer+2].vertices[0] = outer[1];
-	f[(size_t)location_pointer+2].vertices[1] = outer[2];
+	f[(size_t)location_pointer+2].vertices[0] = outer.second;
+	f[(size_t)location_pointer+2].vertices[1] = outer.third;
 	f[(size_t)location_pointer+2].vertices[2] = index;
 
 	f[(size_t)triangle].neighbors[0] = temp_friends[2];
