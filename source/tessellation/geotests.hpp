@@ -24,7 +24,10 @@ double orient2d(const TripleConstRef<Vector2D>& points);
 double orient2dAdapt(const TripleConstRef<Vector2D>& points, double detsum);
 
 /*!\brief Checks whether the 4th point is inside, outside or on the counterclockwise circle created by the first 3 points.
-  \param points The points to check
+  \param point_1 First point
+  \param point_2 Second point
+  \param point_3 Third point
+  \param point_4 Fourth point
   \return The result will be positive, negative or 0 respectively.
  */
 double incircle(const Vector2D& point_1,
@@ -33,7 +36,10 @@ double incircle(const Vector2D& point_1,
 		const Vector2D& point_4);
 
 /*!\brief Checks whether the 4th point is inside, outside or on the counterclockwise circle created by the first 3 points using adaptive math.
-  \param points The points to check
+  \param point_1 First point
+  \param point_2 Second point
+  \param point_3 Third point
+  \param point_4 Fourth point
   \param permanent The error estimate
   \return The result will be positive, negative or 0 respectively.
  */
