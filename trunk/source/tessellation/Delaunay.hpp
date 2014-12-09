@@ -58,7 +58,7 @@ private:
 
   bool IsOuterFacet(int facet)const;
   void add_point(size_t index);
-  void flip(int i,int j);
+  void flip(size_t i,size_t j);
   size_t Walk(size_t point);
   void CheckInput();
   double CalculateRadius(int facet);
