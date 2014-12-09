@@ -88,18 +88,6 @@ namespace
 	    (orient2d(TripleConstRef<Vector2D>(tri.third,
 					       tri.first,
 					       point))>0);
-	  /*
-		boost::array<Vector2D,3> tocheck;
-		tocheck[2]=point;
-		for(int i=0;i<3;++i)
-		{
-			tocheck[0]=tri[(size_t)i];
-			tocheck[1]=tri[(size_t)((i+1)%3)];
-			if(orient2d(tocheck)<0)
-				return false;
-		}
-		return true;
-	  */
 	}
 
 	// Assume cell is orederd in convexhull counterclockwise
@@ -167,15 +155,7 @@ void Delaunay::add_point(int index)
 		throw eo;
 	}
 	int triangle=Walk(index);
-	//	boost::array<int,3> outer,temp_friends;
-	//	boost::array<int,3> temp_friends;
 	facet f_temp;
-	/*
-	for(int i=0;i<3;++i)
-	{
-		temp_friends[(size_t)i]=f[(size_t)triangle].neighbors[(size_t)i];
-	}
-	*/
 	const Triplet<int> outer(f[static_cast<size_t>(triangle)].vertices);
 	const Triplet<int> temp_friends(f[static_cast<size_t>(triangle)].neighbors);
 	// create and _update the new facets
@@ -271,38 +251,22 @@ void Delaunay::flip(int i, int j)
 				const int v1=f[(size_t)indexes.first].vertices[(size_t)(other.second+1)%3];
 				const int f1=f[(size_t)indexes.first].neighbors[(size_t)other.second];
 				const int f12=f[(size_t)indexes.first].neighbors[(size_t)(other.second+2)%3];
-				const int f13=f[(size_t)indexes.first].neighbors[(size_t)(other.second+2)%3];
 				const int v2=f[(size_t)indexes.second].vertices[(size_t)(check.second+1)%3];
 				const int f2=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
 				const int f22=f[(size_t)indexes.second].neighbors[(size_t)check.second];
-				const int f23=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
+				//				const int f23=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
 				f[(size_t)indexes.first].vertices.set(other.first,v1,check.first);
 				f[(size_t)indexes.second].vertices.set(check.first,v2,other.first);
-				/*
-				f[(size_t)indexes.second].vertices[0] = check.first;
-				f[(size_t)indexes.second].vertices[1] = v2;
-				f[(size_t)indexes.second].vertices[2] = other.first;
-				*/
 				f[(size_t)indexes.first].neighbors.set(f1,f2,indexes.second);
-				/*
-				f[(size_t)indexes.first].neighbors[0] = f1;
-				f[(size_t)indexes.first].neighbors[1] = f2;
-				f[(size_t)indexes.first].neighbors[2] = indexes.second;
-				*/
 				f[(size_t)indexes.second].neighbors.set(f22,f12,indexes.first);
-				/*
-				f[(size_t)indexes.second].neighbors[0] = f22;
-				f[(size_t)indexes.second].neighbors[1] = f12;
-				f[(size_t)indexes.second].neighbors[2] = indexes.first;
-				*/
 				// change the friends of the friends if needed
-				if(f23!=last_loc)
+				if(f2!=last_loc)
 				{
-					f[(size_t)f23].neighbors[(size_t)find_index(f[(size_t)f23],indexes.second)] = indexes.first;
+					f[(size_t)f2].neighbors[(size_t)find_index(f[(size_t)f2],indexes.second)] = indexes.first;
 				}
-				if(f13!=last_loc)
+				if(f12!=last_loc)
 				{
-					f[(size_t)f13].neighbors[(size_t)find_index(f[(size_t)f13],indexes.first)] = indexes.second;
+					f[(size_t)f12].neighbors[(size_t)find_index(f[(size_t)f12],indexes.first)] = indexes.second;
 				}
 				// Calculate the new radius if needed
 				if(CalcRadius)
@@ -314,9 +278,9 @@ void Delaunay::flip(int i, int j)
 				flip_stack.pop();
 				// push into the stack the new facets to check
 				flip_stack.push(std::pair<int,int>(indexes.second,
-								   f[static_cast<size_t>(indexes.second)].neighbors[0]));
+								   f[static_cast<size_t>(indexes.second)].neighbors.first));
 				flip_stack.push(std::pair<int,int>(indexes.first,
-								   f[static_cast<size_t>(indexes.first)].neighbors[1]));
+								   f[static_cast<size_t>(indexes.first)].neighbors.second));
 			}
 			else
 			{
@@ -390,14 +354,14 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 
 double Delaunay::triangle_area(int index)
 {
-	boost::array<Vector2D,3> p;
-	p[0]=cor[(size_t)f[(size_t)index].vertices[0]];
-	p[1]=cor[(size_t)f[(size_t)index].vertices[1]];
-	p[2]=cor[(size_t)f[(size_t)index].vertices[2]];
-	double x1=p[2].x-p[0].x;
-	double x2=p[1].x-p[0].x;
-	double y1=p[2].y-p[0].y;
-	double y2=p[1].y-p[0].y;
+  const TripleConstRef<Vector2D> p
+    (cor[(size_t)f[(size_t)index].vertices.first],
+     cor[(size_t)f[(size_t)index].vertices.second],
+     cor[(size_t)f[(size_t)index].vertices.third]);
+  const double x1=p.third.x-p.first.x;
+	const double x2=p.second.x-p.first.x;
+	const double y1=p.third.y-p.first.y;
+	const double y2=p.second.y-p.first.y;
 	return -0.5*(x1*y2-x2*y1);
 }
 
@@ -414,19 +378,15 @@ int Delaunay::Walk(int point)
 	//returns the index of the facet that contains point;
 	int cur_facet=lastFacet;
 	int finish=0;
-	boost::array<Vector2D,3> points;
-	points[2]=cor[(size_t)point];
 	while(finish==0)
 	{
 		finish=1;
 		//Test friends
 		for(int i=0;i<3;++i)
 		{
-			points[0]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]];
-			points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]];
 			if(orient2d(TripleConstRef<Vector2D>
 				    (cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]],
-				     points[1]=cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]],
+				     cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]],
 				     cor[(size_t)point]))<0)
 			{
 				finish=0;
@@ -1262,10 +1222,6 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate)
 {
-	boost::array<Vector2D, 3> tocheck;
-	tocheck[0] = cor[(size_t)olength];
-	tocheck[1] = cor[(size_t)olength + 1];
-	tocheck[2] = cor[(size_t)olength + 2];
 	vector<int> toremove;
 	for(size_t i=0;i<edges.size();++i)
 	{
