@@ -51,15 +51,15 @@ private:
   int last_facet_added;
   vector<facet> f;
   vector<Vector2D> cor;
-  int length,olength;
+  int length;
+  size_t olength;
   int location_pointer;
   int last_loc;
 
   bool IsOuterFacet(int facet)const;
-  void add_point(int index);
+  void add_point(size_t index);
   void flip(int i,int j);
-  //  void find_diff(facet *f1,facet *f2,int*) const;
-  int Walk(int point);
+  size_t Walk(size_t point);
   void CheckInput();
   double CalculateRadius(int facet);
   int FindPointInFacet(int facet,int point);
@@ -146,7 +146,7 @@ public:
     \param index The index of the point.
     \returns The chosen point.
   */
-  Vector2D get_point(int index) const;
+  Vector2D get_point(size_t index) const;
 
   /*! \brief Returns a coordinate.
     \param index The index of the point.
