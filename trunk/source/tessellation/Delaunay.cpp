@@ -135,12 +135,12 @@ namespace
 	}
 }
 
-void Delaunay::add_point(int index)
+void Delaunay::add_point(size_t index)
 {
 	// Check if point is inside big triangle
-  const TripleConstRef<Vector2D> tocheck(cor[static_cast<size_t>(olength)],
-					 cor[static_cast<size_t>(olength+1)],
-					 cor[static_cast<size_t>(olength+2)]);
+  const TripleConstRef<Vector2D> tocheck(cor[olength],
+					 cor[olength+1],
+					 cor[olength+2]);
 	if(!InTriangle(tocheck,cor[(size_t)index]))
 	{
 		UniversalError eo("Point not inside large triangle of Delaunay");
@@ -254,7 +254,6 @@ void Delaunay::flip(int i, int j)
 				const int v2=f[(size_t)indexes.second].vertices[(size_t)(check.second+1)%3];
 				const int f2=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
 				const int f22=f[(size_t)indexes.second].neighbors[(size_t)check.second];
-				//				const int f23=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
 				f[(size_t)indexes.first].vertices.set(other.first,v1,check.first);
 				f[(size_t)indexes.second].vertices.set(check.first,v2,other.first);
 				f[(size_t)indexes.first].neighbors.set(f1,f2,indexes.second);
@@ -373,30 +372,62 @@ void Delaunay::update(const vector<Vector2D>& points,vector<Vector2D>
 	build_delaunay(points,cpoints);
 }
 
-int Delaunay::Walk(int point)
-{ //This method starts from the last added facet and walks to the facet that contains point
-	//returns the index of the facet that contains point;
-	int cur_facet=lastFacet;
-	int finish=0;
-	while(finish==0)
-	{
-		finish=1;
-		//Test friends
-		for(int i=0;i<3;++i)
-		{
-			if(orient2d(TripleConstRef<Vector2D>
-				    (cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]],
-				     cor[(size_t)f[(size_t)cur_facet].vertices[(size_t)((i+1)%3)]],
-				     cor[(size_t)point]))<0)
-			{
-				finish=0;
-				cur_facet=f[(size_t)cur_facet].neighbors[(size_t)i];
-				break;
-			}
-		}
-	}
-	lastFacet=cur_facet;
-	return cur_facet;
+namespace {
+
+  int Triplet<int>::* walk_condition(const vector<Vector2D>& cor,
+				     const Triplet<int>& vertices,
+				     size_t point)
+  {
+    if(orient2d(TripleConstRef<Vector2D>
+		(cor[(size_t)vertices.first],
+		 cor[(size_t)vertices.second],
+		 cor[point]))<0)
+      return &Triplet<int>::first;
+    else if(orient2d(TripleConstRef<Vector2D>
+		     (cor[(size_t)vertices.second],
+		      cor[(size_t)vertices.third],
+		      cor[point]))<0)
+      return &Triplet<int>::second;
+    else if(orient2d(TripleConstRef<Vector2D>
+		     (cor[(size_t)vertices.third],
+		      cor[(size_t)vertices.first],
+		      cor[point]))<0)
+      return &Triplet<int>::third;
+    else
+      return 0;
+  }
+
+  class WalkBookkeeper
+  {
+  public:
+
+  private:
+    
+  };
+
+  size_t find_new_facet(const vector<Vector2D>& cor,
+			const vector<facet>& f,
+			size_t point,
+			size_t last_facet)
+  {
+    size_t res = last_facet;
+    int Triplet<int>::* next = walk_condition(cor,
+					 f[res].vertices,
+					 point);
+    while(next){
+      res = f[res].neighbors.*next;
+      next = walk_condition(cor,
+			    f[res].vertices,
+			    point);
+    }
+    return res;
+  }
+}
+
+size_t Delaunay::Walk(size_t point)
+{
+  lastFacet = find_new_facet(cor,f,point,lastFacet);
+  return lastFacet;
 }
 
 vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
@@ -445,8 +476,8 @@ bool Delaunay::IsOuterFacet(int facet)const
 {
 	//int PointNum=length-1;
 	for(int i=0;i<3;++i)
-		for(int j=0;j<3;++j)
-			if(f[(size_t)facet].vertices[(size_t)i]==(olength+j))
+		for(size_t j=0;j<3;++j)
+		  if(f[(size_t)facet].vertices[(size_t)i]==(int)(olength+j))
 				return true;
 	return false;
 }
@@ -538,9 +569,9 @@ double Delaunay::get_facet_coordinate(int Facet,int vertice, int dim)
 		return cor[(size_t)f[(size_t)Facet].vertices[(size_t)vertice]].y;
 }
 
-Vector2D Delaunay::get_point(int index) const
+Vector2D Delaunay::get_point(size_t index) const
 {
-	return cor[(size_t)index];
+	return cor[index];
 }
 
 double Delaunay::get_cor(int index, int dim) const
@@ -1140,8 +1171,8 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 		for(size_t j=0;j<edges.size();++j)
 		{
 			res[(size_t)j].resize((size_t)olength);
-			for(int i=0;i<olength;++i)
-				res[(size_t)j][(size_t)i]=i;
+			for(size_t i=0;i<olength;++i)
+			  res[(size_t)j][i]=(int)i;
 		}
 		return res;
 	}
@@ -1155,7 +1186,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	int real_point = 0;
 	for(int i=0;i<3;++i)
 	{
-		if(f[(size_t)cur_facet].vertices[(size_t)i]<olength)
+	  if(f[(size_t)cur_facet].vertices[(size_t)i]<(int)olength)
 		{
 			real_point=f[(size_t)cur_facet].vertices[(size_t)i];
 			break;
@@ -1563,7 +1594,7 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 		for(size_t i=0;i<3;++i)
 		{
 			bool added=false;
-			if(checked[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]]||(f[(size_t)cur_facet].vertices[(size_t)i]>=olength))
+			if(checked[(size_t)f[(size_t)cur_facet].vertices[(size_t)i]]||(f[(size_t)cur_facet].vertices[(size_t)i]>=(int)olength))
 				continue;
 			vector<int> neigh=FindContainingTetras(cur_facet,f[(size_t)cur_facet].vertices[(size_t)i]);
 			for(size_t k=0;k<neigh.size();++k)

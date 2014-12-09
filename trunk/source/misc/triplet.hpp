@@ -32,6 +32,7 @@ template<class T> class Triplet
 
   const T& operator[](size_t i) const
   {
+    assert(i<3);
     if(i==0)
       return first;
     else if(i==1)
