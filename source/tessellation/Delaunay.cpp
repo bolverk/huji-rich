@@ -224,40 +224,42 @@ void Delaunay::add_point(size_t index)
 	location_pointer+=2;
 }
 
-void Delaunay::flip(int i, int j)
+void Delaunay::flip(size_t i, size_t j)
 {
-  stack<std::pair<int,int> > flip_stack
-    (std::deque<std::pair<int,int> >(1,std::pair<int,int>(i,j)));
+  stack<std::pair<size_t,size_t> > flip_stack
+    (std::deque<std::pair<size_t,size_t> >(1,std::pair<size_t,size_t>(i,j)));
   //  flip_stack.push(std::pair<int,int>(i,j));
 	while(!flip_stack.empty())
 	{
-		if(flip_stack.top().second==last_loc)
+	  if(flip_stack.top().second==(size_t)last_loc)
 			flip_stack.pop();
 		else
 		{
-		  const pair<int,int> indexes = flip_stack.top();
+		  const pair<size_t,size_t> indexes = flip_stack.top();
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
-		  const pair<int,int> check = find_diff(f[(size_t)indexes.second],
-					  f[(size_t)indexes.first]);
-		  const pair<int,int> other = find_diff(f[(size_t)indexes.first],
-					  f[(size_t)indexes.second]);
+		  const pair<int,int> check = find_diff(f[indexes.second],
+					  f[indexes.first]);
+		  const pair<int,int> other = find_diff(f[indexes.first],
+					  f[indexes.second]);
 
-			if(incircle(cor[(size_t)f[(size_t)indexes.first].vertices.first],
-				    cor[(size_t)f[(size_t)indexes.first].vertices.second],
-				    cor[(size_t)f[(size_t)indexes.first].vertices.third],
+		  facet& prefetch_1 = f[indexes.first];
+			if(incircle(cor[(size_t)prefetch_1.vertices.first],
+				    cor[(size_t)prefetch_1.vertices.second],
+				    cor[(size_t)prefetch_1.vertices.third],
 				    cor[(size_t)check.first])>0)
 			{
 				//The point is in a circle change the facets and their friends
-				const int v1=f[(size_t)indexes.first].vertices[(size_t)(other.second+1)%3];
-				const int f1=f[(size_t)indexes.first].neighbors[(size_t)other.second];
-				const int f12=f[(size_t)indexes.first].neighbors[(size_t)(other.second+2)%3];
-				const int v2=f[(size_t)indexes.second].vertices[(size_t)(check.second+1)%3];
-				const int f2=f[(size_t)indexes.second].neighbors[(size_t)(check.second+2)%3];
-				const int f22=f[(size_t)indexes.second].neighbors[(size_t)check.second];
-				f[(size_t)indexes.first].vertices.set(other.first,v1,check.first);
-				f[(size_t)indexes.second].vertices.set(check.first,v2,other.first);
-				f[(size_t)indexes.first].neighbors.set(f1,f2,indexes.second);
-				f[(size_t)indexes.second].neighbors.set(f22,f12,indexes.first);
+				const int v1=prefetch_1.vertices[(size_t)(other.second+1)%3];
+				const int f1=prefetch_1.neighbors[(size_t)other.second];
+				const int f12=prefetch_1.neighbors[(size_t)(other.second+2)%3];
+				facet& prefetch_2 = f[indexes.second];
+				const int v2=prefetch_2.vertices[(size_t)(check.second+1)%3];
+				const int f2=prefetch_2.neighbors[(size_t)(check.second+2)%3];
+				const int f22=prefetch_2.neighbors[(size_t)check.second];
+				prefetch_1.vertices.set(other.first,v1,check.first);
+				prefetch_2.vertices.set(check.first,v2,other.first);
+				prefetch_1.neighbors.set(f1,f2,indexes.second);
+				prefetch_2.neighbors.set(f22,f12,indexes.first);
 				// change the friends of the friends if needed
 				if(f2!=last_loc)
 				{
@@ -270,16 +272,16 @@ void Delaunay::flip(int i, int j)
 				// Calculate the new radius if needed
 				if(CalcRadius)
 				{
-					radius[(size_t)indexes.first]=CalculateRadius(indexes.first);
-					radius[(size_t)indexes.second]=CalculateRadius(indexes.second);
+				  radius[indexes.first]=CalculateRadius(indexes.first);
+				  radius[indexes.second]=CalculateRadius(indexes.second);
 				}
 				// clear the checked facets
 				flip_stack.pop();
 				// push into the stack the new facets to check
-				flip_stack.push(std::pair<int,int>(indexes.second,
-								   f[static_cast<size_t>(indexes.second)].neighbors.first));
-				flip_stack.push(std::pair<int,int>(indexes.first,
-								   f[static_cast<size_t>(indexes.first)].neighbors.second));
+				flip_stack.push(std::pair<size_t,size_t>(indexes.second,
+									 prefetch_2.neighbors.first));
+				flip_stack.push(std::pair<size_t,size_t>(indexes.first,
+									 prefetch_1.neighbors.second));
 			}
 			else
 			{
