@@ -4,8 +4,8 @@ double const splitter = 134217729;
 namespace {
   void fastTwoSumTail(double const a, double const b, double const x, double& y)
   {
-    double bVirt = x - a;
-    y = b - bVirt;
+    //    const double bVirt = x - a;
+    y = b - (x - a);
   }
 }
 
@@ -18,7 +18,7 @@ void fastTwoSum(double const a, double const b, double& res, double& err)
 namespace {
   void fastTwoDiffTail(double const a, double const b, double const x, double& y)
   {
-    double bVirt = a - x;
+    const double bVirt = a - x;
     y = bVirt - b;
   }
 }
@@ -30,20 +30,20 @@ void fastTwoDiff(double a, double b, double& res, double& err)
 }
 
 namespace {
-  void twoSumTail(double const a, double const b, double const x, double& y)
+  double twoSumTail(double const a, double const b, double const x)
   {
     double bVirt = x - a;
     double aVirt = x - bVirt;
     bVirt = b - bVirt;
     aVirt = a - aVirt;
-    y = aVirt + bVirt;
+    return aVirt + bVirt;
   }
 }
 
 void twoSum(double a, double b, double& res, double& err)
 {
   res = a + b;
-  twoSumTail(a, b, res, err);
+  err = twoSumTail(a, b, res);
 }
 
 namespace {
@@ -346,7 +346,7 @@ vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double
       eindex++;
       if (eindex < e.size())
 	{
-	  enow = e[eindex];
+	  enow = static_cast<double>(e[eindex]);
 	}
     }
   else
