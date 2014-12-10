@@ -138,6 +138,11 @@ namespace
 void Delaunay::add_point(size_t index)
 {
 	// Check if point is inside big triangle
+  assert(InTriangle(TripleConstRef<Vector2D>(cor[olength],
+					     cor[olength+1],
+					     cor[olength+2]),
+		    cor[index]));
+  /*
   const TripleConstRef<Vector2D> tocheck(cor[olength],
 					 cor[olength+1],
 					 cor[olength+2]);
@@ -154,10 +159,11 @@ void Delaunay::add_point(size_t index)
 		eo.AddEntry("Big tirangle point 3 y",tocheck.third.y);
 		throw eo;
 	}
-	int triangle=Walk(index);
+  */
+	const size_t triangle=Walk(index);
 	facet f_temp;
-	const Triplet<int> outer(f[static_cast<size_t>(triangle)].vertices);
-	const Triplet<int> temp_friends(f[static_cast<size_t>(triangle)].neighbors);
+	const Triplet<int> outer(f[triangle].vertices);
+	const Triplet<int> temp_friends(f[triangle].neighbors);
 	// create and _update the new facets
 	f.push_back(f_temp);
 	f.push_back(f_temp);

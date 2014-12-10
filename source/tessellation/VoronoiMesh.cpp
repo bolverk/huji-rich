@@ -963,10 +963,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 	obc=_bc;
 	Tri.build_delaunay(UpdatePoints(pv,obc),
 			   calc_procpoints(*obc));
-	vector<Edge> box_edges=obc->GetBoxEdges();
 
 	Nextra=(int)Tri.ChangeCor().size();
-	vector<vector<int> > toduplicate=Tri.BuildBoundary(_bc,box_edges);
+	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
 
 	eps=1e-8;
 	edges.clear();
@@ -979,9 +978,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 
 	if(_bc->GetBoundaryType()==Periodic)
 	{
-		for(int i=0;i<8;++i)
+		for(size_t i=0;i<8;++i)
 		{
-			GhostPoints.push_back(toduplicate[(size_t)i]);
+			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
 		}
 	}
