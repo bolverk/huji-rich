@@ -50,6 +50,43 @@ template <class T> vector<T> operator+
   return res;
 }
 
+/*! \brief Adds the same thing to all terms in a vector
+  \param v Vector
+  \param t Addition
+  \return New vector with sums as terms
+ */
+template<class T> vector<T> operator+
+(const vector<T>& v, const T& t)
+{
+  vector<T> res(v.size());
+  for(size_t i=0, endp=v.size();i<endp;++i)
+    res[i] = v[i] + t;
+  return res;
+}
+
+/*! \brief Adds the same thing to all terms in a vector
+  \param v Vector
+  \param t Addition
+  \return New vector with sums as terms
+ */
+template<class T> vector<T> operator+
+(const T& t, const vector<T>& v)
+{
+  return v+t;
+}
+
+/*! \brief Adds the same thing to all terms in a vector
+  \param v Vector
+  \param t Addition
+ */
+template<class T> vector<T>& operator+=
+(vector<T>& v, const T& t)
+{
+  for(size_t i=0, endp=v.size();i<endp;++i)
+    v[i] += t;
+  return v;
+}
+
 /*! \brief Term by term vector subtraction
   \param v1 Left argument
   \param v2 Right argument
