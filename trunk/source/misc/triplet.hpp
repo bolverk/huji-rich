@@ -8,6 +8,33 @@
 
 #include "universal_error.hpp"
 
+//! \brief A collection of three identical references
+template<class T> class TripleConstRef
+{
+ public:
+
+  //! \brief Reference to first item
+  const T& first;
+
+  //! \brief Reference to second item
+  const T& second;
+
+  //! \brief Reference to third item
+  const T& third;
+
+  /*! \brief Class constructor
+    \param first_i Reference to first item
+    \param second_i Reference to second item
+    \param third_i Reference to third item
+   */
+  TripleConstRef(const T& first_i,
+		 const T& second_i,
+		 const T& third_i):
+    first(first_i),
+    second(second_i),
+    third(third_i) {}
+};
+
 //! \brief A collection of 3 items of the same type
 template<class T> class Triplet
 {
@@ -33,6 +60,11 @@ template<class T> class Triplet
     first(first_i),
     second(second_i),
     third(third_i) {}
+
+  Triplet(const TripleConstRef<int>& tcr):
+    first(tcr.first),
+    second(tcr.second),
+    third(tcr.third) {}
 
   /*! \brief Changle all items
     \param first_i First item
@@ -80,33 +112,6 @@ template<class T> class Triplet
     else
       throw UniversalError("Access violation in triplet[]");
   }
-};
-
-//! \brief A collection of three identical references
-template<class T> class TripleConstRef
-{
- public:
-
-  //! \brief Reference to first item
-  const T& first;
-
-  //! \brief Reference to second item
-  const T& second;
-
-  //! \brief Reference to third item
-  const T& third;
-
-  /*! \brief Class constructor
-    \param first_i Reference to first item
-    \param second_i Reference to second item
-    \param third_i Reference to third item
-   */
-  TripleConstRef(const T& first_i,
-		 const T& second_i,
-		 const T& third_i):
-    first(first_i),
-    second(second_i),
-    third(third_i) {}
 };
 
 #endif // TRIPLET_HPP

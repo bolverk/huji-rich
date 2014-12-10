@@ -165,27 +165,24 @@ void Delaunay::add_point(size_t index)
 	const Triplet<int> outer(f[triangle].vertices);
 	const Triplet<int> temp_friends(f[triangle].neighbors);
 	// create and _update the new facets
-	f.push_back(f_temp);
-	f.push_back(f_temp);
-	f[(size_t)triangle].vertices[0] = outer.third;
-	f[(size_t)triangle].vertices[1] = outer.first;
-	f[(size_t)triangle].vertices[2] = index;
-	f[(size_t)location_pointer+1].vertices[0] = outer.first;
-	f[(size_t)location_pointer+1].vertices[1] = outer.second;
-	f[(size_t)location_pointer+1].vertices[2] = index;
-	f[(size_t)location_pointer+2].vertices[0] = outer.second;
-	f[(size_t)location_pointer+2].vertices[1] = outer.third;
-	f[(size_t)location_pointer+2].vertices[2] = index;
-
-	f[(size_t)triangle].neighbors[0] = temp_friends.third;
-	f[(size_t)triangle].neighbors[1] = location_pointer+1;;
-	f[(size_t)triangle].neighbors[2] = location_pointer+2;
-	f[(size_t)location_pointer+1].neighbors[0] = temp_friends.first;
-	f[(size_t)location_pointer+1].neighbors[1] = location_pointer+2;
-	f[(size_t)location_pointer+1].neighbors[2] = triangle;
-	f[(size_t)location_pointer+2].neighbors[0] = temp_friends.second;
-	f[(size_t)location_pointer+2].neighbors[1] = triangle;
-	f[(size_t)location_pointer+2].neighbors[2] = location_pointer+1;
+	//	f.push_back(f_temp);
+	//	f.push_back(f_temp);
+	f[triangle].vertices.set(outer.third,outer.first,index);
+	f[triangle].neighbors.set(temp_friends.third,
+				  location_pointer+1,
+				  location_pointer+2);
+	f.push_back(facet(TripleConstRef<int>(outer.first,
+					      outer.second,
+					      index),
+			  TripleConstRef<int>(temp_friends.first,
+					      location_pointer+2,
+					      triangle)));
+	f.push_back(facet(TripleConstRef<int>(outer.second,
+					      outer.third,
+					      index),
+			  TripleConstRef<int>(temp_friends.second,
+					      triangle,
+					      location_pointer+1)));
 	// _update the friends list of the friends
 	if(temp_friends.second!=last_loc)
 	{
