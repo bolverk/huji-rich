@@ -221,7 +221,7 @@ private:
 	vector<Edge> edges;
 	vector<Vector2D> CM;
 	vector<vector<int> > mesh_vertices; // Which edges does each mesh point have
-	Delaunay *Tri;
+	Delaunay Tri;
 	vector<int> GhostProcs;
 	vector<vector<int> > GhostPoints;
 	vector<int> SentProcs;

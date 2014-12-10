@@ -107,6 +107,11 @@ public:
   */
   vector<Vector2D>& ChangeCor(void);
 
+  /*! \brief \brief Access to coordinates
+    \return Reference to coordinates vector
+   */
+  const vector<Vector2D>& getCor(void) const;
+
   //! \brief Class constructor.
   Delaunay(void);
 
