@@ -37,7 +37,7 @@ $(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
 
 $(DUMP_FOLDER)/test.exe: $(ENDEMIC_OBJECTS) | ../library_$(MODE)/librich.a
 	echo "$(ENDEMIC_SOURCES)"
-	$(CC) $^ $| -o $@ $$LFLAGS -lhdf5 -lhdf5_cpp -L $$HDF5_LIB_PATH 
+	$(CC) $^ $| -o $@ $(LFLAGS) -lhdf5 -lhdf5_cpp -L $(HDF5_LIB_PATH)
 
 ../library_$(MODE)/librich.a:
 	$(MAKE) -C .. set_environ_vars.sh
