@@ -338,15 +338,15 @@ vector<double> linearExpansionSumZeroElim(vector<double> const& e, vector<double
 
   double enow = e.front();
   double fnow = f.front();
-  double eindex = 0;
-  double findex = 0;
+  size_t eindex = 0;
+  size_t findex = 0;
   if ((fnow > enow) == (fnow > -enow))
     {
       g0 = enow;
       eindex++;
       if (eindex < e.size())
 	{
-	  enow = static_cast<double>(e[eindex]);
+	  enow = e[eindex];
 	}
     }
   else

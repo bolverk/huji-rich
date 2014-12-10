@@ -993,118 +993,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		GhostProcs.push_back(-1);
 		GhostProcs.push_back(-1);
 	}
-	
-/*
-	if(_bc->GetBoundaryType()==Rectengular)
-	{
-		Nextra=(int)Tri->ChangeCor().size();
-	}
-	else
-	{
-		if(_bc->GetBoundaryType()==Periodic)
-		{
-	vector<vector<int> > toduplicate;
-
-	cell_edges=box_edges;
-	FindIntersectingPoints(box_edges,toduplicate);
-	vector<vector<int> > corners;
-	vector<vector<int> > totest;
-	if(_bc->GetBoundaryType()==Periodic)
-	{
-		GetCorners(toduplicate,corners);
-		CombineCorners(toduplicate,corners);
-	}
-	if(_bc->GetBoundaryType()==Rectengular)
-	{
-		for(int i=0;i<4;++i)
-			RigidBoundaryPoints(toduplicate[i],box_edges[i]);
-		Nextra=(int)Tri->ChangeCor().size();
-	}
-	else
-	{
-		if(_bc->GetBoundaryType()==HalfPeriodic)
-		{
-			for(int i=0;i<2;++i)
-				RigidBoundaryPoints(toduplicate[i],box_edges[i]);
-			Nextra=(int)Tri->ChangeCor().size();
-			vector<vector<int> > tempduplicate;
-			tempduplicate.push_back(toduplicate[2]);
-			tempduplicate.push_back(toduplicate[3]);
-			for(int i=0;i<2;++i)
-			{
-				PeriodicBoundaryPoints(tempduplicate[i],i);
-				GhostPoints.push_back(tempduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-			toduplicate[2]=tempduplicate[0];
-			toduplicate[3]=tempduplicate[1];
-			sortvectors(toduplicate);
-			GetToTest(toduplicate,totest);
-		}
-		else
-		{
-			GetToTest(toduplicate,totest);
-			Nextra=(int)Tri->ChangeCor().size();
-			for(int i=0;i<4;++i)
-				PeriodicBoundaryPoints(toduplicate[i],i);
-			for(int i=0;i<4;++i)
-			{
-				GhostPoints.push_back(toduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-			sortvectors(toduplicate);
-		}
-	}
-
-	if(_bc->GetBoundaryType()==Periodic)
-	{
-		//GetCorners(toduplicate,corners);
-		for(int i=0;i<4;++i)
-			CornerBoundaryPoints(corners[i],i);
-		for(int i=0;i<4;++i)
-		{
-			GhostPoints.push_back(corners[i]);
-			GhostProcs.push_back(-1);
-		}
-	}
-	edges.clear();
-	build_v();
-	vector<vector<int> > moreduplicate;
-	if(_bc->GetBoundaryType()!=Rectengular)
-	{
-		// toduplicate is what I've copied
-		GetAdditionalBoundary(toduplicate,moreduplicate,totest);
-		GetToTest(moreduplicate,totest);
-		for(int i=0;i<(int)totest.size();++i)
-			PeriodicBoundaryPoints(moreduplicate[i],i);
-		for(int i=0;i<(int)totest.size();++i)
-		{
-			GhostPoints.push_back(moreduplicate[i]);
-			GhostProcs.push_back(-1);
-		}
-		sortvectors(moreduplicate);
-		edges.clear();
-		build_v();
-		if(!EmptyVectorVector(moreduplicate))
-		{
-			vector<vector<int> > temp(CombineVectorVector(toduplicate,moreduplicate));
-			GetAdditionalBoundary(temp,moreduplicate,totest);
-			for(int i=0;i<(int)totest.size();++i)
-				PeriodicBoundaryPoints(moreduplicate[i],i);
-			for(int i=0;i<(int)totest.size();++i)
-			{
-				GhostPoints.push_back(moreduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-			edges.clear();
-			build_v();
-		}
-	}
-	*/
-	int n=GetPointNo();
-	CM.resize((size_t)n);
-	for(int i=0;i<n;++i)
-		CM[(size_t)i]=CalcCellCM(i);
+	CM.resize(GetPointNo());
+	for(size_t i=0;i<CM.size();++i)
+	  CM[i]=CalcCellCM(i);
 }
 
 #ifdef RICH_MPI
@@ -1217,20 +1108,19 @@ double VoronoiMesh::GetVolume(int index) const
 	return area;
 }
 
-Vector2D VoronoiMesh::CalcCellCM(int index) const
+Vector2D VoronoiMesh::CalcCellCM(size_t index) const
 {
 	const Vector2D center=Tri->get_point(index);
 	Vector2D pc(0,0);
 	double area=0;
-	for (int i=0;i<(int)mesh_vertices[(size_t)index].size();i++)
+	for (size_t i=0;i<mesh_vertices[index].size();i++)
 	{
-		const int temp=mesh_vertices[(size_t)index][(size_t)i];
-		const Vector2D p1 = edges[(size_t)temp].vertices.first - center;
-		const Vector2D p2 = edges[(size_t)temp].vertices.second - center;
+		const Edge& edge = edges[mesh_vertices[index][i]];
+		const Vector2D p1 = edge.vertices.first - center;
+		const Vector2D p2 = edge.vertices.second - center;
 		const double area_temp = 0.5*abs(ScalarProd(p1,zcross(p2)));
 		area += area_temp;
-		pc += area_temp*(center+edges[(size_t)temp].vertices.first+
-			edges[(size_t)temp].vertices.second)/3;
+		pc += (area_temp/3.)*(center+edge.vertices.first+edge.vertices.second);
 	}
 	return pc/area;
 }

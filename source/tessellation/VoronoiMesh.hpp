@@ -234,7 +234,7 @@ private:
 	bool legal_edge(Edge *e);
 	void build_v(void);//Builds the voronoi mesh
 	VoronoiMesh& operator=(const VoronoiMesh& origin);
-	Vector2D CalcCellCM(int index) const;
+	Vector2D CalcCellCM(size_t index) const;
 	void FindIntersectingPoints(vector<Edge> const& box_edges,
 		vector<vector<int> > &toduplicate);
 	vector<int> CellIntersectBoundary(vector<Edge> const&box_edges,int cell);
