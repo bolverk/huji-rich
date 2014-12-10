@@ -558,6 +558,11 @@ vector<Vector2D>& Delaunay::ChangeCor(void)
 	return cor;
 }
 
+const vector<Vector2D>& Delaunay::getCor(void) const
+{
+  return cor;
+}
+
 facet* Delaunay::get_facet(int index)
 {
 	return &f[(size_t)index];

@@ -700,7 +700,7 @@ VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	Tri(0),
+	Tri(),
 	GhostProcs(vector<int> ()),
 	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
@@ -723,7 +723,7 @@ VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proc
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	Tri(0),
+	Tri(),
 	GhostProcs(vector<int> ()),
 	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
@@ -741,10 +741,10 @@ vector<int> VoronoiMesh::AddPointsAlongEdge(int point,vector<vector<int> > const
 	int side)
 {
 	int ncopy=(int)copied[(size_t)side].size();
-	Vector2D vec=Tri->get_point(point);
+	Vector2D vec=Tri.get_point(point);
 	vector<double> dist((size_t)ncopy);
 	for(int i=0;i<ncopy;++i)
-		dist[(size_t)i]=vec.distance(Tri->get_point(copied[(size_t)side][(size_t)i]));
+		dist[(size_t)i]=vec.distance(Tri.get_point(copied[(size_t)side][(size_t)i]));
 	const int copylength=min(7,(int)copied[(size_t)side].size()-1);
 	vector<int> index,toadd((size_t)copylength);
 	sort_index(dist,index);
@@ -790,7 +790,7 @@ vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const
 bool VoronoiMesh::NearBoundary(int index) const
 {
 	const int n=int(mesh_vertices[(size_t)index].size());
-	const int N=Tri->get_length();
+	const int N=Tri.get_length();
 	for(int i=0;i<n;++i)
 	{
 		const int n0=edges[(size_t)mesh_vertices[(size_t)index][(size_t)i]].neighbors.first;
@@ -801,12 +801,7 @@ bool VoronoiMesh::NearBoundary(int index) const
 	return false;
 }
 
-VoronoiMesh::~VoronoiMesh(void)
-{
-	delete Tri;
-	edges.clear();
-	mesh_vertices.clear();
-}
+VoronoiMesh::~VoronoiMesh(void) {}
 
 int VoronoiMesh::GetOriginalIndex(int point) const
 {
@@ -825,7 +820,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 			eo.AddEntry("Tried accessing cell",point);
 			throw eo;
 		}
-		int maxcor=(int)Tri->ChangeCor().size();
+		int maxcor=(int)Tri.getCor().size();
 		int cumulative=Nextra;
 		while(cumulative<maxcor)
 		{
@@ -859,7 +854,7 @@ VoronoiMesh::VoronoiMesh():
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
 	mesh_vertices(vector<vector<int> >()),
-	Tri(0),
+	Tri(),
 	GhostProcs(vector<int> ()),
 	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
@@ -877,7 +872,7 @@ VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
   edges(other.edges),
   CM(other.CM),
   mesh_vertices(other.mesh_vertices),
-  Tri(new Delaunay(*other.Tri)),
+  Tri(other.Tri),
   GhostProcs(other.GhostProcs),
   GhostPoints(other.GhostPoints),
   SentProcs(other.SentProcs),
@@ -897,22 +892,22 @@ void VoronoiMesh::build_v()
 	Edge edge_temp;
 	Vector2D p_temp;
 	mesh_vertices.clear();
-	mesh_vertices.resize((size_t)Tri->get_length());
-	edges.reserve((size_t)(Tri->get_length()*3.5));
-	int N=Tri->GetOriginalLength();
+	mesh_vertices.resize((size_t)Tri.get_length());
+	edges.reserve((size_t)(Tri.get_length()*3.5));
+	int N=Tri.GetOriginalLength();
 	for(int i=0;i<N;++i)
 		mesh_vertices[(size_t)i].reserve(7);
-	int Nfacets=Tri->get_num_facet();
+	int Nfacets=Tri.get_num_facet();
 	vector<Vector2D> centers((size_t)Nfacets);
 	for(int i=0;i<Nfacets;++i)
-		centers[(size_t)i]=Tri->GetCircleCenter(i);
+		centers[(size_t)i]=Tri.GetCircleCenter(i);
 	for(int i=0;i<Nfacets;++i)
 	{
 		center=centers[(size_t)i];
-		to_check=Tri->get_facet(i);
+		to_check=Tri.get_facet(i);
 		for(j=0;j<3;++j)
 		{
-			if(to_check->neighbors[(size_t)j]==Tri->get_last_loc())
+			if(to_check->neighbors[(size_t)j]==Tri.get_last_loc())
 				continue;
 			if(to_check->neighbors[(size_t)j]<i)
 				continue;
@@ -926,20 +921,20 @@ void VoronoiMesh::build_v()
 				if(legal_edge(&edge_temp))
 				{
 					// I added a change here, if edge has zero length I don't add it.
-					if(edge_temp.GetLength()>eps*sqrt(Tri->GetFacetRadius(i)*
-						Tri->GetFacetRadius(to_check->neighbors[(size_t)j])))
+					if(edge_temp.GetLength()>eps*sqrt(Tri.GetFacetRadius(i)*
+						Tri.GetFacetRadius(to_check->neighbors[(size_t)j])))
 					{
 						{
-							if(edge_temp.neighbors.first<Tri->GetOriginalLength())
+							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
 								mesh_vertices[(size_t)edge_temp.neighbors.first].push_back((int)edges.size());
 							else
-								if(obc->PointIsReflective(Tri->get_point(
+								if(obc->PointIsReflective(Tri.get_point(
 									edge_temp.neighbors.first)))
 									edge_temp.neighbors.first = -1;
-							if(edge_temp.neighbors.second<Tri->GetOriginalLength())
+							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
 								mesh_vertices[(size_t)edge_temp.neighbors.second].push_back((int)edges.size());
 							else
-								if(obc->PointIsReflective(Tri->get_point(
+								if(obc->PointIsReflective(Tri.get_point(
 									edge_temp.neighbors.second)))
 									edge_temp.neighbors.second = -1;
 							edges.push_back(edge_temp);
@@ -951,23 +946,27 @@ void VoronoiMesh::build_v()
 	}
 }
 
+namespace {
+  vector<Vector2D> calc_procpoints(const OuterBoundary& bc)
+  {
+    vector<Vector2D> res(4);
+    res[0] = Vector2D(bc.GetGridBoundary(Left),bc.GetGridBoundary(Down));
+    res[1] = Vector2D(bc.GetGridBoundary(Right),bc.GetGridBoundary(Down));
+    res[2] = Vector2D(bc.GetGridBoundary(Right),bc.GetGridBoundary(Up));
+    res[3] = Vector2D(bc.GetGridBoundary(Left),bc.GetGridBoundary(Up));
+    return res;
+  }
+}
+
 void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 {
 	obc=_bc;
-	//Build the delaunay
-	delete Tri;
-	Tri=new Delaunay;
-	vector<Vector2D> procpoints;
-	procpoints.push_back(Vector2D(_bc->GetGridBoundary(Left),_bc->GetGridBoundary(Down)));
-	procpoints.push_back(Vector2D(_bc->GetGridBoundary(Right),_bc->GetGridBoundary(Down)));
-	procpoints.push_back(Vector2D(_bc->GetGridBoundary(Right),_bc->GetGridBoundary(Up)));
-	procpoints.push_back(Vector2D(_bc->GetGridBoundary(Left),_bc->GetGridBoundary(Up)));
-	vector<Vector2D> points=UpdatePoints(pv,obc);
-	Tri->build_delaunay(points,procpoints);
+	Tri.build_delaunay(UpdatePoints(pv,obc),
+			   calc_procpoints(*obc));
 	vector<Edge> box_edges=obc->GetBoxEdges();
 
-	Nextra=(int)Tri->ChangeCor().size();
-	vector<vector<int> > toduplicate=Tri->BuildBoundary(_bc,box_edges);
+	Nextra=(int)Tri.ChangeCor().size();
+	vector<vector<int> > toduplicate=Tri.BuildBoundary(_bc,box_edges);
 
 	eps=1e-8;
 	edges.clear();
@@ -1015,9 +1014,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,&vproc,rank);
 	//Build the delaunay
-	delete Tri;
-	Tri=new Delaunay;
-	Tri->build_delaunay(pv,cpoints);
+	Tri.build_delaunay(pv,cpoints);
 	eps=1e-8;
 	edges.clear();
 	GhostPoints.clear();
@@ -1029,8 +1026,8 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	for(size_t i=0;i<npv;++i)
 		selfindex[i]=i;
 
-	Nextra=(int) Tri->ChangeCor().size();
-	GhostPoints=Tri->BuildBoundary(outer,vproc,NGhostReceived,GhostProcs);
+	Nextra=(int) Tri.ChangeCor().size();
+	GhostPoints=Tri.BuildBoundary(outer,vproc,NGhostReceived,GhostProcs);
 	build_v();
 
 	vector<vector<int> > copied(GhostPoints),tempv;
@@ -1076,8 +1073,8 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 
 bool VoronoiMesh::legal_edge(Edge *e) //checks if both ends of the edge are outside the grid and that the edge doesn't cross the grid
 {
-	if((e->neighbors.first<Tri->get_length())||
-		(e->neighbors.second<Tri->get_length()))
+	if((e->neighbors.first<Tri.get_length())||
+		(e->neighbors.second<Tri.get_length()))
 		return true;
 	else
 		return false;
@@ -1095,7 +1092,7 @@ vector<int> const& VoronoiMesh::GetCellEdges(int index) const
 
 double VoronoiMesh::GetVolume(int index) const
 {
-	const Vector2D center=Tri->get_point(index);
+	const Vector2D center=Tri.get_point(index);
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[(size_t)index].size();++i)
 	{
@@ -1110,7 +1107,7 @@ double VoronoiMesh::GetVolume(int index) const
 
 Vector2D VoronoiMesh::CalcCellCM(size_t index) const
 {
-	const Vector2D center=Tri->get_point(index);
+	const Vector2D center=Tri.get_point(index);
 	Vector2D pc(0,0);
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[index].size();i++)
@@ -1127,7 +1124,7 @@ Vector2D VoronoiMesh::CalcCellCM(size_t index) const
 
 vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)
 {
-	return Tri->GetMeshPoints();
+	return Tri.GetMeshPoints();
 }
 
 void VoronoiMesh::Update(vector<Vector2D> const& p)
@@ -1142,11 +1139,11 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Up)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Left),obc->GetGridBoundary(Up)));
 	vector<Vector2D> points=UpdatePoints(p,obc);
-	Tri->update(points,procpoints);
+	Tri.update(points,procpoints);
 
-	Nextra=(int)Tri->ChangeCor().size();
+	Nextra=(int)Tri.ChangeCor().size();
 	vector<Edge> box_edges=obc->GetBoxEdges();
-	vector<vector<int> > toduplicate=Tri->BuildBoundary(obc,box_edges);
+	vector<vector<int> > toduplicate=Tri.BuildBoundary(obc,box_edges);
 
 	eps=1e-8;
 	edges.clear();
@@ -1173,106 +1170,6 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		GhostProcs.push_back(-1);
 	}
 	
-
-	/*build_v();
-	vector<vector<int> > toduplicate;
-	vector<Edge> box_edges=GetBoxEdges();
-	FindIntersectingPoints(box_edges,toduplicate);
-	vector<vector<int> > corners;
-	vector<vector<int> > totest;
-	if(obc->GetBoundaryType()==Periodic)
-	{
-		GetCorners(toduplicate,corners);
-		CombineCorners(toduplicate,corners);
-	}
-
-	if(obc->GetBoundaryType()==Rectengular)
-	{
-		for(int i=0;i<4;++i)
-			RigidBoundaryPoints(toduplicate[i],box_edges[i]);
-		sortvectors(toduplicate);
-		Nextra=(int)Tri->ChangeCor().size();
-	}
-	else
-	{
-		if(obc->GetBoundaryType()==HalfPeriodic)
-		{
-			for(int i=0;i<2;++i)
-				RigidBoundaryPoints(toduplicate[i],box_edges[i]);
-			Nextra=(int)Tri->ChangeCor().size();
-			vector<vector<int> > tempduplicate;
-			tempduplicate.push_back(toduplicate[2]);
-			tempduplicate.push_back(toduplicate[3]);
-			for(int i=0;i<2;++i)
-			{
-				PeriodicBoundaryPoints(tempduplicate[i],i);
-				GhostPoints.push_back(tempduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-			toduplicate[2]=tempduplicate[0];
-			toduplicate[3]=tempduplicate[1];
-			sortvectors(toduplicate);
-			GetToTest(toduplicate,totest);
-		}
-		else
-		{
-			GetToTest(toduplicate,totest);
-			Nextra=(int)Tri->ChangeCor().size();
-
-			//GetCorners(toduplicate,corners);
-			for(int i=0;i<4;++i)
-				CornerBoundaryPoints(corners[i],i);
-			for(int i=0;i<4;++i)
-			{
-				GhostPoints.push_back(corners[i]);
-				GhostProcs.push_back(-1);
-			}
-			sortvectors(toduplicate);
-			for(int i=0;i<4;++i)
-				PeriodicBoundaryPoints(toduplicate[i],i);
-			for(int i=0;i<4;++i)
-			{
-				GhostPoints.push_back(toduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-			sortvectors(toduplicate);
-		}
-	}
-
-	edges.clear();
-	build_v();
-	vector<vector<int> > moreduplicate;
-	if(obc->GetBoundaryType()!=Rectengular)
-	{
-		// toduplicate is what I've copied
-		GetAdditionalBoundary(toduplicate,moreduplicate,totest);
-		GetToTest(moreduplicate,totest);
-		for(int i=0;i<(int)totest.size();++i)
-			PeriodicBoundaryPoints(moreduplicate[i],i);
-		for(int i=0;i<(int)totest.size();++i)
-		{
-			GhostPoints.push_back(moreduplicate[i]);
-			GhostProcs.push_back(-1);
-		}
-		sortvectors(moreduplicate);
-		edges.clear();
-		build_v();
-		if(!EmptyVectorVector(moreduplicate))
-		{
-			vector<vector<int> > temp(CombineVectorVector(toduplicate,moreduplicate));
-			GetAdditionalBoundary(temp,moreduplicate,totest);
-			for(int i=0;i<(int)totest.size();++i)
-				PeriodicBoundaryPoints(moreduplicate[i],i);
-			for(int i=0;i<(int)totest.size();++i)
-			{
-				GhostPoints.push_back(moreduplicate[i]);
-				GhostProcs.push_back(-1);
-			}
-
-			edges.clear();
-			build_v();
-		}
-	}*/
 	int n=GetPointNo();
 	CM.resize((size_t)n);
 	for(int i=0;i<n;++i)
@@ -1308,7 +1205,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 
 	try
 	{
-		Tri->update(points,cproc);
+		Tri.update(points,cproc);
 	}
 	catch(UniversalError &eo)
 	{
@@ -1323,8 +1220,8 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		log.output(vproc);
 		throw;
 	}
-	Nextra=(int) Tri->ChangeCor().size();
-	GhostPoints=Tri->BuildBoundary(obc,vproc,NGhostReceived,GhostProcs);
+	Nextra=(int) Tri.ChangeCor().size();
+	GhostPoints=Tri.BuildBoundary(obc,vproc,NGhostReceived,GhostProcs);
 	build_v();
 
 	vector<vector<int> > copied(GhostPoints),tempv;
@@ -1563,7 +1460,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #endif
 		neighcor.reserve(AllPoints.size());
 		for(size_t j=0;j<AllPoints.size();++j)
-			neighcor.push_back(V.Tri->get_point(AllPoints[(size_t)j]));
+			neighcor.push_back(V.Tri.get_point(AllPoints[(size_t)j]));
 		// build new local tessellation
 		VoronoiMesh Vlocal;
 		Vlocal.Initialise(neighcor,V.obc);
@@ -1617,8 +1514,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			{
 #ifndef RICH_MPI
 				// New point add to tessellation
-				V.Tri->AddAditionalPoint(Vlocal.GetMeshPoint(temp));
-				NewEdges[(size_t)j].neighbors.first = V.Tri->GetCorSize()-1;
+				V.Tri.AddAditionalPoint(Vlocal.GetMeshPoint(temp));
+				NewEdges[(size_t)j].neighbors.first = V.Tri.GetCorSize()-1;
 				// add it to the DuplicatedPoints
 				V.GhostPoints[(size_t)V.GhostPoints.size()-1].push_back(AllPoints[(size_t)
 					Vlocal.GetOriginalIndex(temp)]);
@@ -1636,8 +1533,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			{
 #ifndef RICH_MPI
 				// New point add to tessellation
-				V.Tri->AddAditionalPoint(Vlocal.GetMeshPoint(temp));
-				NewEdges[(size_t)j].neighbors.second = V.Tri->GetCorSize()-1;
+				V.Tri.AddAditionalPoint(Vlocal.GetMeshPoint(temp));
+				NewEdges[(size_t)j].neighbors.second = V.Tri.GetCorSize()-1;
 				// add it to the DuplicatedPoints
 				V.GhostPoints[(size_t)V.GhostPoints.size()-1].push_back(AllPoints[(size_t)
 					Vlocal.GetOriginalIndex(temp)]);
@@ -1802,7 +1699,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	}
 
 	// Fix cor in Tri
-	RemoveVector(V.Tri->ChangeCor(),ToRemove);
+	RemoveVector(V.Tri.ChangeCor(),ToRemove);
 	// Fix CM
 	V.CM.resize(V.CM.size()-ToRemove.size());
 	int NN=(int)V.CM.size();
@@ -1810,8 +1707,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		V.CM[(size_t)i]=V.CalcCellCM(i);
 	n=ToRemove.size();
 	// Fix point numer in Tri
-	V.Tri->ChangeOlength(V.Tri->get_length()-(int)n);
-	V.Tri->Changelength(V.Tri->get_length()-(int)n);
+	V.Tri.ChangeOlength(V.Tri.get_length()-(int)n);
+	V.Tri.Changelength(V.Tri.get_length()-(int)n);
 #ifdef RICH_MPI
 	// Fix the self index
 	for(int i=0;i<(int)V.selfindex.size();++i)
@@ -1859,7 +1756,7 @@ int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int /*NewIndex*/,
 	Vector2D const& NewPoint)
 {
 	int loc=FindEdge(V,ToRefine,other);
-	vector<Vector2D>& cor=V.Tri->ChangeCor();
+	vector<Vector2D>& cor=V.Tri.ChangeCor();
 	cor.push_back(NewPoint);
 	int& temp = V.edges[(size_t)loc].neighbors.second==other ?
 		V.edges[(size_t)loc].neighbors.first :
@@ -1882,7 +1779,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	if(n==0)
 		return;
 	int Npoints=V.GetPointNo();
-	vector<Vector2D>& cor=V.Tri->ChangeCor();
+	vector<Vector2D>& cor=V.Tri.ChangeCor();
 	vector<Vector2D> cortemp(cor.size()-(size_t)Npoints);
 	// copy the ghost points into cortemp
 	copy(cor.begin()+Npoints,cor.end(),cortemp.begin());
@@ -1913,8 +1810,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	}
 #endif
 	// Update the lengths
-	V.Tri->Changelength(Npoints+n);
-	V.Tri->ChangeOlength(Npoints+n);
+	V.Tri.Changelength(Npoints+n);
+	V.Tri.ChangeOlength(Npoints+n);
 	V.Nextra+=(int)ToRefine.size();
 	// reserve space for mesh_vertices
 	V.mesh_vertices.resize((size_t)(Npoints+n));
@@ -2128,12 +2025,12 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 
 int VoronoiMesh::GetPointNo(void) const
 {
-	return Tri->get_length();
+	return Tri.get_length();
 }
 
 Vector2D VoronoiMesh::GetMeshPoint(int index) const
 {
-	return Tri->get_point(index);
+	return Tri.get_point(index);
 }
 
 int VoronoiMesh::GetTotalSidesNumber(void) const
@@ -2251,15 +2148,6 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	int nintersect=(int)res.size();
 	if(nintersect>1)
 	{
-		/*if(nintersect>3)
-		{
-		UniversalError eo("Too many intersections of boundary cell with box edges");
-		eo.AddEntry("Cell number",(double)cell);
-		Vector2D pp=Tri->get_point(cell);
-		eo.AddEntry("x cor",pp.x);
-		eo.AddEntry("y cor",pp.y);
-		throw eo;
-		}*/
 		vector<Vector2D> cpoints;
 		ConvexHull(cpoints,this,cell);
 		for(int i=0;i<nbox;++i)
@@ -2322,7 +2210,7 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 
 bool VoronoiMesh::CloseToBorder(int point,int &border)
 {
-	int olength=Tri->GetOriginalLength();
+	int olength=Tri.GetOriginalLength();
 	int n=(int)mesh_vertices[(size_t)point].size();
 	for(int i=0;i<n;++i)
 	{
@@ -2340,7 +2228,7 @@ vector<int> VoronoiMesh::GetBorderingCells(vector<int> const& copied,
 	vector<int> const& totest,int tocheck,vector<int> tempresult,int outer)
 {
 	int border,test;
-	int olength=Tri->GetOriginalLength();
+	int olength=Tri.GetOriginalLength();
 	tempresult.push_back(tocheck);
 	sort(tempresult.begin(),tempresult.end());
 	int n=(int)mesh_vertices[(size_t)tocheck].size();
@@ -2398,7 +2286,7 @@ void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point)
 {
 	result.reserve(7);
 	int n=(int)mesh_vertices[(size_t)point].size();
-	int olength=Tri->GetOriginalLength();
+	int olength=Tri.GetOriginalLength();
 	for(int i=0;i<n;++i)
 	{
 		if(edges[(size_t)mesh_vertices[(size_t)point][(size_t)i]].neighbors.first==point)
@@ -2502,7 +2390,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &totest)
 {
 	int nsides=(int) copied.size();
-	int olength=Tri->GetOriginalLength();
+	int olength=Tri.GetOriginalLength();
 	// sort the vectors
 	for(int i=0;i<nsides;++i)
 		sort(copied[(size_t)i].begin(),copied[(size_t)i].end());
@@ -2704,13 +2592,11 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			int nsend=(int)data[(size_t)index].size();
 			vector<double> send(2*nsend);
 			// Arrange the points to send in Hilbert order
-			vector<Vector2D> cortemp=VectorValues(Tri->ChangeCor(),data[(size_t)index]);
+			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[(size_t)index]);
 			vector<int> order=HilbertOrder(cortemp,(int)cortemp.size());
 			ReArrangeVector(data[(size_t)index],order);
 			for(int j=0;j<nsend;++j)
 			{
-				//send[2*j]=Tri->get_point(data[index][j]).x;
-				//send[2*j+1]=Tri->get_point(data[index][j]).y;
 				send[2*j]=cortemp[order[(size_t)j]].x;
 				send[2*j+1]=cortemp[(size_t)order[(size_t)j]].y;
 			}
@@ -2766,10 +2652,10 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			// Add the points
 			if(!toadd.empty())
 			{
-				int Ntemp=Tri->GetTotalLength();
+				int Ntemp=Tri.GetTotalLength();
 				for(int j=0;j<(int)toadd.size();++j)
 					NGhostReceived[(size_t)index].push_back(Ntemp+j);
-				Tri->AddBoundaryPoints(toadd);
+				Tri.AddBoundaryPoints(toadd);
 			}
 		}
 	}
@@ -2794,7 +2680,7 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 			// Create send data
 			int nsend=(int)data[(size_t)index].size();
 			vector<double> send(2*nsend);
-			vector<Vector2D> cortemp=VectorValues(Tri->ChangeCor(),data[(size_t)index]);
+			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[(size_t)index]);
 			for(int j=0;j<nsend;++j)
 			{
 				send[2*j]=cortemp[(size_t)j].x;
@@ -2852,10 +2738,10 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 			// Add the points
 			if(!toadd.empty())
 			{
-				int Ntemp=Tri->GetTotalLength();
+				int Ntemp=Tri.GetTotalLength();
 				for(int j=0;j<(int)toadd.size();++j)
 					NGhostReceived[(size_t)index].push_back(Ntemp+j);
-				vector<Vector2D>& cor=Tri->ChangeCor();
+				vector<Vector2D>& cor=Tri.ChangeCor();
 				cor.insert(cor.end(),toadd.begin(),toadd.end());
 			}
 		}
@@ -2878,7 +2764,7 @@ void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 	double dy=maxedges[3]-maxedges[(size_t)2];
 	for(int i=0;i<npoints;++i)
 	{
-		Vector2D point=Tri->get_point(points[(size_t)i]);
+		Vector2D point=Tri.get_point(points[(size_t)i]);
 		Vector2D temp=point-edge0;
 		temp=2*par*ScalarProd(par,temp)-temp+edge0;
 		if((abs(point.x-temp.x)<2*dx)&&(abs(point.y-temp.y)<2*dy))
@@ -2891,7 +2777,7 @@ void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 	{
 		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
 		ReArrangeVector(toadd,order);
-		Tri->AddBoundaryPoints(toadd);
+		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(pointstemp,order);
 		points=pointstemp;
 	}
@@ -2903,12 +2789,12 @@ void VoronoiMesh::PeriodicBoundaryPoints(vector<int> &points,int edge_number)
 	vector<Vector2D> toadd((size_t)npoints);
 	Vector2D diff=GetPeriodicDiff(cell_edges[(size_t)edge_number],obc);
 	for(int i=0;i<npoints;++i)
-		toadd[(size_t)i]=Tri->get_point(points[(size_t)i])+diff;
+		toadd[(size_t)i]=Tri.get_point(points[(size_t)i])+diff;
 	if(!toadd.empty())
 	{
 		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
 		ReArrangeVector(toadd,order);
-		Tri->AddBoundaryPoints(toadd);
+		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(points,order);
 	}
 }
@@ -2952,12 +2838,12 @@ void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 	int npoints=(int)points.size();
 	vector<Vector2D> toadd((size_t)npoints);
 	for(int i=0;i<npoints;++i)
-		toadd[(size_t)i]=Tri->get_point(points[(size_t)i])+diff1+diff2;
+		toadd[(size_t)i]=Tri.get_point(points[(size_t)i])+diff1+diff2;
 	if(!toadd.empty())
 	{
 		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
 		ReArrangeVector(toadd,order);
-		Tri->AddBoundaryPoints(toadd);
+		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(points,order);
 	}
 }
@@ -2984,7 +2870,7 @@ vector<vector<int> >const& VoronoiMesh::GetGhostIndeces(void)const
 
 int VoronoiMesh::GetTotalPointNumber(void)const
 {
-	return (int)Tri->ChangeCor().size();
+	return (int)Tri.getCor().size();
 }
 
 vector<int> VoronoiMesh::GetDuplicatedProcs(void)const
