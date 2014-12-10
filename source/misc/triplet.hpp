@@ -87,14 +87,10 @@ template<class T> class Triplet
   const T& operator[](size_t i) const
   {
     assert(i<3);
-    if(i==0)
-      return first;
-    else if(i==1)
-      return second;
-    else if(i==2)
-      return third;
-    else
-      throw UniversalError("Access violation in triplet[]");
+    static const T Triplet<T>::* temp [3] = {&Triplet<T>::first,
+					    &Triplet<T>::second,
+					    &Triplet<T>::third};
+    return this->*temp[i];
   }
 
   /*! \brief Random access operator
@@ -103,14 +99,11 @@ template<class T> class Triplet
    */
   T& operator[](size_t i)
   {
-    if(i==0)
-      return first;
-    else if(i==1)
-      return second;
-    else if(i==2)
-      return third;
-    else
-      throw UniversalError("Access violation in triplet[]");
+    assert(i<3);
+    static T Triplet<T>::* temp [] = {&Triplet<T>::first,
+					    &Triplet<T>::second,
+					    &Triplet<T>::third};
+    return this->*temp[i];
   }
 };
 
