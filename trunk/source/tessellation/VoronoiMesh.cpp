@@ -1106,10 +1106,10 @@ double VoronoiMesh::GetVolume(int index) const
 
 Vector2D VoronoiMesh::CalcCellCM(size_t index) const
 {
-	const Vector2D center=Tri.get_point(index);
+  const Vector2D center=edges[mesh_vertices[index].front()].vertices.first;
 	Vector2D pc(0,0);
 	double area=0;
-	for (size_t i=0;i<mesh_vertices[index].size();i++)
+	for (size_t i=1;i<mesh_vertices[index].size();i++)
 	{
 		const Edge& edge = edges[mesh_vertices[index][i]];
 		const Vector2D p1 = edge.vertices.first - center;
