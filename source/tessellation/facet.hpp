@@ -30,6 +30,10 @@ public:
 	facet();
 	//! \brief Copy constructor.
 	facet(const facet & other);
+
+  facet(const TripleConstRef<int>& vertices_i,
+	const TripleConstRef<int>& neighbors_i);
+  
 	//! \brief Class destructor
 	~facet();
 };
