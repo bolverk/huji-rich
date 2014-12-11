@@ -142,31 +142,9 @@ void Delaunay::add_point(size_t index)
 					     cor[olength+1],
 					     cor[olength+2]),
 		    cor[index]));
-  /*
-  const TripleConstRef<Vector2D> tocheck(cor[olength],
-					 cor[olength+1],
-					 cor[olength+2]);
-	if(!InTriangle(tocheck,cor[(size_t)index]))
-	{
-		UniversalError eo("Point not inside large triangle of Delaunay");
-		eo.AddEntry("Point x",cor[(size_t)index].x);
-		eo.AddEntry("Point y",cor[(size_t)index].y);
-		eo.AddEntry("Big tirangle point 1 x",tocheck.first.x);
-		eo.AddEntry("Big tirangle point 1 y",tocheck.first.y);
-		eo.AddEntry("Big tirangle point 2 x",tocheck.second.x);
-		eo.AddEntry("Big tirangle point 2 y",tocheck.second.y);
-		eo.AddEntry("Big tirangle point 3 x",tocheck.third.x);
-		eo.AddEntry("Big tirangle point 3 y",tocheck.third.y);
-		throw eo;
-	}
-  */
 	const size_t triangle=Walk(index);
-	facet f_temp;
 	const Triplet<int> outer(f[triangle].vertices);
 	const Triplet<int> temp_friends(f[triangle].neighbors);
-	// create and _update the new facets
-	//	f.push_back(f_temp);
-	//	f.push_back(f_temp);
 	f[triangle].vertices.set(outer.third,outer.first,index);
 	f[triangle].neighbors.set(temp_friends.third,
 				  location_pointer+1,
@@ -186,13 +164,13 @@ void Delaunay::add_point(size_t index)
 	// _update the friends list of the friends
 	if(temp_friends.second!=last_loc)
 	{
-		const int i=find_index(f[(size_t)temp_friends.second],triangle);
-		f[(size_t)temp_friends.second].neighbors[(size_t)i] = location_pointer+2;
+		const size_t i=find_index(f[(size_t)temp_friends.second],triangle);
+		f[(size_t)temp_friends.second].neighbors[i] = location_pointer+2;
 	}
 	if(temp_friends.first!=last_loc)
 	{
-	  const int i=find_index(f[(size_t)temp_friends.first],triangle);
-		f[(size_t)temp_friends.first].neighbors[(size_t)i] = location_pointer+1;
+	  const size_t i=find_index(f[(size_t)temp_friends.first],triangle);
+		f[(size_t)temp_friends.first].neighbors[i] = location_pointer+1;
 	}
 	// Calculate radius if needed
 	if(CalcRadius)
@@ -229,8 +207,10 @@ void Delaunay::add_point(size_t index)
 
 void Delaunay::flip(size_t i, size_t j)
 {
-  stack<std::pair<size_t,size_t> > flip_stack
-    (std::deque<std::pair<size_t,size_t> >(1,std::pair<size_t,size_t>(i,j)));
+  if(j==(size_t)last_loc)
+    return;
+  stack<std::pair<size_t,size_t> > flip_stack(std::deque<std::pair<size_t,size_t> >(1,std::pair<size_t,size_t>(i,j)));
+  //    (std::deque<std::pair<size_t,size_t> >(1,std::pair<size_t,size_t>(i,j)));
   //  flip_stack.push(std::pair<int,int>(i,j));
 	while(!flip_stack.empty())
 	{
