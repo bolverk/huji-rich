@@ -214,10 +214,10 @@ void Delaunay::flip(size_t i, size_t j)
   //  flip_stack.push(std::pair<int,int>(i,j));
 	while(!flip_stack.empty())
 	{
-	  if(flip_stack.top().second==(size_t)last_loc)
-			flip_stack.pop();
-		else
-		{
+	  //	  if(flip_stack.top().second==(size_t)last_loc)
+	  //			flip_stack.pop();
+	  //		else
+	  //		{
 		  const pair<size_t,size_t> indexes = flip_stack.top();
 			// Returns the index to the point to check in coordinates and the index of the point in the facet
 		  const pair<int,int> check = find_diff(f[indexes.second],
@@ -261,17 +261,18 @@ void Delaunay::flip(size_t i, size_t j)
 				// clear the checked facets
 				flip_stack.pop();
 				// push into the stack the new facets to check
-				flip_stack.push(std::pair<size_t,size_t>(indexes.second,
-									 prefetch_2.neighbors.first));
-				flip_stack.push(std::pair<size_t,size_t>(indexes.first,
-									 prefetch_1.neighbors.second));
+				if(prefetch_2.neighbors.first!=last_loc)
+				  flip_stack.push(std::pair<size_t,size_t>(indexes.second,
+									   prefetch_2.neighbors.first));
+				if(prefetch_1.neighbors.second!=last_loc)
+				  flip_stack.push(std::pair<size_t,size_t>(indexes.first,
+									   prefetch_1.neighbors.second));
 			}
 			else
 			{
 				// clear the checked facets
 				flip_stack.pop();
 			}
-		}
 	}
 }
 
