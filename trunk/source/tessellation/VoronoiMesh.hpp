@@ -241,7 +241,7 @@ private:
 	void GetAdditionalBoundary(vector<vector<int> > &copied,
 		vector<vector<int> > &result,vector<vector<int> > &totest);
 	void GetCorners(vector<vector<int> > &copied,vector<vector<int> > &result);
-	vector<int> AddPointsAlongEdge(int point,vector<vector<int> > const&copied,int side);
+	vector<int> AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,int side);
 	void GetNeighborNeighbors(vector<int> &result,int point);
 	void GetRealNeighbor(vector<int> &result,int point);
 	vector<int> GetBorderingCells(vector<int> const& copied,

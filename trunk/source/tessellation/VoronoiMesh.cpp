@@ -737,7 +737,7 @@ VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proc
 }
 #endif
 
-vector<int> VoronoiMesh::AddPointsAlongEdge(int point,vector<vector<int> > const&copied,
+vector<int> VoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,
 	int side)
 {
 	int ncopy=(int)copied[(size_t)side].size();
