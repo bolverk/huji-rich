@@ -37,7 +37,7 @@ double orient2dAdapt(const TripleConstRef<Vector2D>& points, double detsum)
 	{
 		return det;
 	}
-	err = errBoundC * detsum + resultErrBound * abs(det);
+	err = errBoundC * detsum + resultErrBound * fabs(det);
 	det += (acx * bcytail + bcy * acxtail) - (acy * bcxtail + bcx * acytail);
 	if ((det >= err) || (-det >= err))
 	{
@@ -202,7 +202,7 @@ double incircleadapt(const Vector2D& point_1,
 	{
 			return det;
 	}
-	errbound = errBoundC * permanent + resultErrBound * abs(det);
+	errbound = errBoundC * permanent + resultErrBound * fabs(det);
 	det += ((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail)
 		- (bdy * cdxtail + cdx * bdytail)) + 2.0 * (adx * adxtail + ady * adytail)
 		* (bdx * cdy - bdy * cdx)) + ((bdx * bdx + bdy * bdy) * ((cdx * adytail + ady * cdxtail)
@@ -591,9 +591,9 @@ double incircle(const Vector2D& point_1,
 	//Calculating regular 3x3 matrix determinant.
 	const double det = alift * (bdxcdy - cdxbdy) + blift * (cdxady - adxcdy) + clift * (adxbdy - bdxady);
 
-	const double permanent = (abs(bdxcdy) + abs(cdxbdy)) * alift
-	  + (abs(cdxady) + abs(adxcdy)) * blift
-	  + (abs(adxbdy) + abs(bdxady)) * clift;
+	const double permanent = (fabs(bdxcdy) + fabs(cdxbdy)) * alift
+	  + (fabs(cdxady) + fabs(adxcdy)) * blift
+	  + (fabs(adxbdy) + fabs(bdxady)) * clift;
 	const double errbound = errBoundA * permanent;
 	if ((det > errbound) || (-det > errbound))
 	{ //Determinant is out of error bounds (accurate enough).

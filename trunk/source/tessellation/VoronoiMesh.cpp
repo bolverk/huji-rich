@@ -743,8 +743,8 @@ vector<int> VoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > co
 	int ncopy=(int)copied[(size_t)side].size();
 	Vector2D vec=Tri.get_point(point);
 	vector<double> dist((size_t)ncopy);
-	for(int i=0;i<ncopy;++i)
-		dist[(size_t)i]=vec.distance(Tri.get_point(copied[(size_t)side][(size_t)i]));
+	for(size_t i=0;i<copied[side].size();++i)
+		dist[i]=vec.distance(Tri.get_point(copied[(size_t)side][i]));
 	const int copylength=min(7,(int)copied[(size_t)side].size()-1);
 	vector<int> index,toadd((size_t)copylength);
 	sort_index(dist,index);
