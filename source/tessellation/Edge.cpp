@@ -39,6 +39,12 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 	Vector2D &Intersection,double eps)
 {
 	bool res=true;
+	const double areascale=std::min((edge1.vertices.first.x-edge1.vertices.second.x)*
+		(edge1.vertices.first.x-edge1.vertices.second.x)+(edge1.vertices.first.y-
+		edge1.vertices.second.y)*(edge1.vertices.first.y-edge1.vertices.second.y),
+		(edge2.vertices.first.x-edge2.vertices.second.x)*
+		(edge2.vertices.first.x-edge2.vertices.second.x)+(edge2.vertices.first.y-
+		edge2.vertices.second.y)*(edge2.vertices.first.y-edge2.vertices.second.y));
 	if(std::min(edge1.vertices.second.x,edge1.vertices.first.x)>std::max(edge2.vertices.second.x,edge2.vertices.first.x)||
 	   std::min(edge2.vertices.second.x,edge2.vertices.first.x)>std::max(edge1.vertices.second.x,edge1.vertices.first.x)||
 	   std::min(edge1.vertices.second.y,edge1.vertices.first.y)>std::max(edge2.vertices.second.y,edge2.vertices.first.y)||
@@ -46,7 +52,7 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 		res=false;
 	double d=(edge1.vertices.first.x-edge1.vertices.second.x)*(edge2.vertices.first.y-edge2.vertices.second.y)
 		-(edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.y-edge1.vertices.second.y);
-	if(fabs(d)<1e-9)
+	if(fabs(d)<1e-8*areascale)
 		return false;
 	double xi=((edge2.vertices.first.x-edge2.vertices.second.x)*(edge1.vertices.first.x*edge1.vertices.second.y-
 		edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.x-edge1.vertices.second.x)*
@@ -55,7 +61,7 @@ bool SegmentIntersection(Edge const&edge1,Edge const&edge2,
 		edge1.vertices.second.x*edge1.vertices.first.y)-(edge1.vertices.first.y-edge1.vertices.second.y)*
 		(edge2.vertices.first.x*edge2.vertices.second.y-edge2.vertices.second.x*edge2.vertices.first.y))/d;
 	Intersection.Set(xi,yi);
-	eps=eps*std::min(edge1.GetLength(),edge2.GetLength());
+	eps=eps*sqrt(areascale);
 	if((xi+eps)<std::min(edge1.vertices.first.x,edge1.vertices.second.x)||(xi-eps)>std::max(edge1.vertices.first.x,edge1.vertices.second.x))
 		return false;
 	if((xi+eps)<std::min(edge2.vertices.first.x,edge2.vertices.second.x)||(xi-eps)>std::max(edge2.vertices.first.x,edge2.vertices.second.x))
