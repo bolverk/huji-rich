@@ -211,6 +211,8 @@ public:
   vector<int> GetSelfPoint(void)const;
 
   int GetTotalPointNumber(void)const;
+  
+  const vector<Edge>& getAllEdges(void) const;
 
   vector<Vector2D>& GetAllCM(void);
 
