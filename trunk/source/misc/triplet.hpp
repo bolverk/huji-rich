@@ -61,6 +61,9 @@ template<class T> class Triplet
     second(second_i),
     third(third_i) {}
 
+  /*! \brief Class constructor
+    \param tcr References to three items
+   */
   Triplet(const TripleConstRef<int>& tcr):
     first(tcr.first),
     second(tcr.second),

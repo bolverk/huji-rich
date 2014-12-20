@@ -96,6 +96,9 @@ virtual vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc
    */
   virtual int GetTotalSidesNumber(void) const = 0;
 
+  /*! \brief Returns reference to the list of all edges
+    \return Reference to the list of all edges
+   */
   virtual const vector<Edge>& getAllEdges(void) const = 0; 
 
   /*! \brief Returns edge (interface between cells)

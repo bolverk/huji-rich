@@ -78,6 +78,7 @@ template<class T> vector<T> operator+
 /*! \brief Adds the same thing to all terms in a vector
   \param v Vector
   \param t Addition
+  \return Reference to united vector
  */
 template<class T> vector<T>& operator+=
 (vector<T>& v, const T& t)
