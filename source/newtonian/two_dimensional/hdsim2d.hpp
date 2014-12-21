@@ -422,6 +422,8 @@ public:
     \return Geometry outer boundary
    */
   const OuterBoundary& getOuterBoundary(void) const;
+
+  const HydroBoundaryConditions& getHydroBoundaryCondition(void) const;
 };
 
 #endif
