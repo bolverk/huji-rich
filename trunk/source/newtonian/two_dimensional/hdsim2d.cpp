@@ -1216,7 +1216,8 @@ int hdsim::GetCellNo(void) const
 
 Primitive hdsim::GetCell(int i) const
 {
-  return _cells[(size_t)i];
+  assert(i>=0);
+  return _cells.at((size_t)i);
 }
 
 Vector2D hdsim::GetMeshPoint(int i) const
@@ -1780,4 +1781,9 @@ const EquationOfState& hdsim::getEos(void) const
 const OuterBoundary& hdsim::getOuterBoundary(void) const
 {
   return _obc;
+}
+
+const HydroBoundaryConditions& hdsim::getHydroBoundaryCondition(void) const
+{
+  return _hbc;
 }
