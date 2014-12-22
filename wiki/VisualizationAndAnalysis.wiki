@@ -65,5 +65,101 @@ python multiplot.py snapshot.h5 pressure
 }}}
 where the Astrix {{{*}}} is a globbing wildcard.
 
+Now, suppose for example that you would like to plot something that isn't covered by the existing tools. Let's say that you want to see a map of the entropy (assuming an ideal gas equation of state with adiabatic index 5/3). If the name of the snapshot file is "snapshot.h5", the appropriate python script would be
+{{{
+import pylab
+import h5py
+import numpy
+
+h5_file_name = 'snapshot.h5'
+g = 5./3. # Adiabatic index
+
+f = h5py.File(h5_file_name)
+pylab.tricontourf(f['x_coordinate'],
+                  f['y_coordinate'],
+                  numpy.log(f['pressure'])-g*numpy.log(f['density']))
+f.close()
+pylab.show()
+}}}
+
+== Function Fitting ==
+This section will demonstrate how to use the lmfit python package to fit data to some multivariate function. In this example we start out with some 2D profile which we denote as "original" (in this case, it is a Gaussian). We then add random noise to obscure the original image. This profile we denote as "measured". Finally, we use function fitting to reconstruct the original image.
+{{{
+class MyFunc:
+    
+    def __init__(self, var_list):
+
+        self.var_list = var_list
+
+    def eval(self, x):
+
+        import math
+
+        mu_x = self.var_list['mu_x']
+        mu_y = self.var_list['mu_y']
+        sig_x = self.var_list['sig_x']
+        sig_y = self.var_list['sig_y']
+
+        return math.exp(-(x[0]-mu_x)**2/sig_x**2-(x[1]-mu_y)**2/sig_y)
+
+def residual(params, x_list, data, eps_data):
+
+    import numpy
+
+    my_func = MyFunc(dict((key,params[key].value) 
+                          for key in ['mu_x','mu_y','sig_x','sig_y']))
+
+    model = numpy.array([my_func.eval(x) for x in x_list])
+
+    return (data-model)/eps_data
+
+def main():
+
+    import numpy
+    import pylab
+    import random
+    from lmfit import minimize, Parameters
+
+    orig_func = MyFunc({'mu_x':1,'mu_y':2,'sig_x':3,'sig_y':4})
+
+    coord_list = [[random.uniform(-10,10),random.uniform(-10,10)]
+                   for i in range(10000)]
+    z_exact = [orig_func.eval(coord) for coord in coord_list]
+    z_measured = [z+random.gauss(0,0.1) for z in z_exact]
+
+    params = Parameters()
+    params.add('mu_x',value=5)
+    params.add('mu_y',value=1)
+    params.add('sig_x',value=1)
+    params.add('sig_y',value=1)
+
+    out = minimize(residual,params, 
+                   args=(coord_list, z_measured,[1 for x in coord_list]))
+    print out.values
+
+    z_reconstructed = numpy.array([MyFunc(out.values).eval(point)
+                                   for point in coord_list])
+
+    z_data = {'Original':z_exact,
+              'Measured':z_measured,
+              'Reconstructed':z_reconstructed,
+              'Difference':z_exact-z_reconstructed}
+    for n, field in enumerate(['Original','Measured','Reconstructed','Difference']):
+        pylab.subplot(2,2,n+1)
+        pylab.title(field)
+        pylab.tricontourf([itm[0] for itm in coord_list],
+                          [itm[1] for itm in coord_list],
+                          z_data[field])
+        pylab.colorbar()
+    pylab.show()
+
+if __name__ == '__main__':
+
+    main()
+}}}
+Here's an example of the output (actual results may change due to random numbers)
+
+https://www.dropbox.com/s/qk4beaoncd9l374/lmfit_example.png?dl=0
+
 == Matlab ==
 TBA
