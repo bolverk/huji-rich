@@ -396,13 +396,12 @@ void ConvertHDF5toBinary(string const& input, string const& output)
 	// read the cycle number
 	vector<int> cycle_number = read_int_vector_from_hdf5(file, "Cycle number");
 	myFile.write((char*)&cycle_number[0], sizeof(int));
-
 	// read tracers if needed
 	vector<int> TracerNumber = read_int_vector_from_hdf5(file, "Number of tracers");
 	myFile.write((char*)&TracerNumber[0], sizeof(int));
 	// read the density floor parameters
 	vector<double> densityfloor = read_double_vector_from_hdf5(file,"Density floor parameters");
-	cold = (char)densityfloor[0];
+	cold = (densityfloor[0]>0) ? '1' : '0';
 	myFile.write((char*)&cold, sizeof(char));
 	myFile.write((char*)&densityfloor[1], sizeof(double));
 	myFile.write((char*)&densityfloor[2], sizeof(double));

@@ -43,7 +43,7 @@ void ResetOutput(string location,hdsim const& sim)
 	}
 	double dtemp=sim.GetTime();
 	myFile.write ((char*)&dtemp,sizeof(double));
-	char cold=(char)sim.GetColdFlowFlag();
+	char cold= sim.GetColdFlowFlag() ? '1' : '0';
 	myFile.write((char*)&cold,sizeof(char));
 	dtemp=sim.GetCfl();
 	myFile.write((char*)&dtemp,sizeof(double));
@@ -135,7 +135,10 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	myFile.read((char*)&dump.time,sizeof(double));
 	char ctemp;
 	myFile.read((char*)&ctemp,sizeof(char));
-	dump.coldflows=(bool)ctemp;
+	if (ctemp == '1')
+		dump.coldflows = true;
+	else
+		dump.coldflows = false;
 	myFile.read((char*)&dump.cfl,sizeof(double));
 	myFile.read((char*)&dump.a,sizeof(double));
 	myFile.read((char*)&dump.b,sizeof(double));
