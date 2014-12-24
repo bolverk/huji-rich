@@ -341,3 +341,88 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
   // read the custom evolution indeces
   dump.cevolve= read_sizet_vector_from_hdf5(file,"Custom evolution indeces");
 }
+
+void ConvertHDF5toBinary(string const& input, string const& output)
+{
+	H5File file(input, H5F_ACC_RDONLY);
+	fstream myFile(output.c_str(), ios::out | ios::binary);
+	// Get the mesh points
+	vector<double> x = read_double_vector_from_hdf5(file, "x_coordinate");
+	vector<double> y = read_double_vector_from_hdf5(file, "y_coordinate");
+	int temp = (int) x.size();
+	myFile.write((char*)&temp, sizeof (int));
+	for (int i = 0; i<temp; ++i)
+	{
+		myFile.write((char*)&x[(size_t)i], sizeof(double));
+		myFile.write((char*)&y[(size_t)i], sizeof(double));
+	}
+	// Get the processor mesh points
+#ifdef RICH_MPI
+	vector<double> xproc = read_double_vector_from_hdf5(file, "proc_x_coordinate");
+	vector<double> yproc = read_double_vector_from_hdf5(file, "proc_y_coordinate");
+	int temp2 = (int) xproc.size();
+	myFile.write((char*)&temp2, sizeof (int));
+	for (int i = 0; i<temp2; ++i)
+	{
+		myFile.write((char*)&x[(size_t)i], sizeof(double));
+		myFile.write((char*)&y[(size_t)i], sizeof(double));
+	}
+#endif
+
+	// Get the hydro variables
+	vector<double> density = read_double_vector_from_hdf5(file, "density");
+	vector<double> pressure = read_double_vector_from_hdf5(file, "pressure");
+	vector<double> x_velocity = read_double_vector_from_hdf5(file, "x_velocity");
+	vector<double> y_velocity = read_double_vector_from_hdf5(file, "y_velocity");
+	for (int i = 0; i<temp; ++i)
+	{
+		myFile.write((char*)&pressure[(size_t)i], sizeof(double));
+		myFile.write((char*)&density[(size_t)i], sizeof(double));
+		myFile.write((char*)&x_velocity[(size_t)i], sizeof(double));
+		myFile.write((char*)&y_velocity[(size_t)i], sizeof(double));
+	}
+	// read time
+	vector<double> time_vector = read_double_vector_from_hdf5(file, "time");
+	myFile.write((char*)&time_vector[0], sizeof(double));
+	// read the coldflows parameters
+	vector<double> coldflows = read_double_vector_from_hdf5(file,"Cold Flow parameters");
+	char cold = (char)coldflows[0];
+	myFile.write((char*)&cold, sizeof(char));
+	// read the cfl
+	vector<double> cfl = read_double_vector_from_hdf5(file, "Cfl number");
+	myFile.write((char*)&cfl[0], sizeof(double));
+	myFile.write((char*)&coldflows[1], sizeof(double));
+	myFile.write((char*)&coldflows[2], sizeof(double));
+	// read the cycle number
+	vector<int> cycle_number = read_int_vector_from_hdf5(file, "Cycle number");
+	myFile.write((char*)&cycle_number[0], sizeof(int));
+
+	// read tracers if needed
+	vector<int> TracerNumber = read_int_vector_from_hdf5(file, "Number of tracers");
+	myFile.write((char*)&TracerNumber[0], sizeof(int));
+	// read the density floor parameters
+	vector<double> densityfloor = read_double_vector_from_hdf5(file,"Density floor parameters");
+	cold = (char)densityfloor[0];
+	myFile.write((char*)&cold, sizeof(char));
+	myFile.write((char*)&densityfloor[1], sizeof(double));
+	myFile.write((char*)&densityfloor[2], sizeof(double));
+	// read the custom evolution indeces
+	vector<size_t> cevolve = read_sizet_vector_from_hdf5(file, "Custom evolution indeces");
+	for (int i = 0; i<temp; ++i)
+	{
+		myFile.write((char*)&cevolve[(size_t)i], sizeof(unsigned int));
+	}
+	if (TracerNumber[0]>0)
+	{
+		// read the data
+		for (int i = 0; i<TracerNumber[0]; ++i)
+		{
+			vector<double> tracer = read_double_vector_from_hdf5(file, "Tracer number " + int2str(i + 1));
+			if (tracer.size() != x.size())
+				throw UniversalError("Tracer size not equal to mesh size");
+			for (size_t j = 0; j<tracer.size(); ++j)
+				myFile.write((char*)&tracer[j], sizeof(double));
+		}
+	}
+	myFile.close();
+}

@@ -58,29 +58,32 @@ void ResetOutput(string location,hdsim const& sim)
 	if(!tracers.empty())
 		n=(int)tracers[0].size();
 	myFile.write ((char*)&n,sizeof(int));
-	if(n==0)
+	cold = (char)sim.GetDensityFloorFlag();
+	myFile.write((char*)&cold, sizeof(char));
+	double dtemp2;
+	sim.GetDensityFloorParm(dtemp, dtemp2);
+	myFile.write((char*)&dtemp, sizeof(double));
+	myFile.write((char*)&dtemp2, sizeof(double));
+	for (int i = 0; i<temp; ++i)
+	{
+		unsigned int ctemp = (unsigned int)sim.custom_evolution_indices[(size_t)i];
+		myFile.write((char*)&ctemp, sizeof(unsigned int));
+	}
+	if (n == 0)
+	{
+		myFile.close();
 		return;
+	}
 	if((int)tracers.size()!=temp)
 		throw UniversalError("Error in ResetDump, length of mesh points and tracers do not match");
 	double x;
-	for(int i=0;i<temp;++i)
+	for(int i=0;i<n;++i)
 	{
-		for(int j=0;j<n;++j)
+		for(int j=0;j<temp;++j)
 		{
-		  x=tracers[(size_t)i][(size_t)j];
+		  x=tracers[(size_t)j][(size_t)i];
 			myFile.write ((char*)&x,sizeof(double));
 		}
-	}
-	cold=(char)sim.GetDensityFloorFlag();
-	myFile.write((char*)&cold,sizeof(char));
-	double dtemp2;
-	sim.GetDensityFloorParm(dtemp,dtemp2);
-	myFile.write((char*)&dtemp,sizeof(double));
-	myFile.write((char*)&dtemp2,sizeof(double));
-	for(int i=0;i<temp;++i)
-	{
-	  unsigned int ctemp=(unsigned int)sim.custom_evolution_indices[(size_t)i];
-		myFile.write ((char*)&ctemp,sizeof(unsigned int));
 	}
 	myFile.close();
 }
@@ -139,24 +142,27 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	myFile.read((char*)&dump.cycle,sizeof(int));
 	int n;
 	myFile.read((char*)&n,sizeof(int));
-	if(n==0)
+	myFile.read((char*)&ctemp, sizeof(char));
+	dump.densityfloor = (bool)ctemp;
+	myFile.read((char*)&dump.densitymin, sizeof(double));
+	myFile.read((char*)&dump.pressuremin, sizeof(double));
+	dump.cevolve.resize((size_t)N);
+	for (int i = 0; i<N; ++i)
+		myFile.read((char*)&dump.cevolve[(size_t)i], sizeof(unsigned int));
+	if (n == 0)
+	{
+		myFile.close();
 		return;
+	}
 	dump.tracers.resize((size_t)N);
-	for(int i=0;i<N;++i)
+	for(int i=0;i<n;++i)
 	{
 	  dump.tracers[(size_t)i].resize((size_t)n);
-		for(int j=0;j<n;++j)
+		for(int j=0;j<N;++j)
 		{
 			myFile.read((char*)&x,sizeof(double));
-			dump.tracers[(size_t)i][(size_t)j]=x;
+			dump.tracers[(size_t)j][(size_t)i]=x;
 		}
 	}
-	myFile.read((char*)&ctemp,sizeof(char));
-	dump.densityfloor=(bool)ctemp;
-	myFile.read((char*)&dump.densitymin,sizeof(double));
-	myFile.read((char*)&dump.pressuremin,sizeof(double));
-	dump.cevolve.resize((size_t)N);
-	for(int i=0;i<N;++i)
-	  myFile.read((char*)&dump.cevolve[(size_t)i],sizeof(unsigned int));
 	myFile.close();
 }

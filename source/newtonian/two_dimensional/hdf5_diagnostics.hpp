@@ -27,5 +27,11 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname);
 */
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
 	const* eos);
+/*!
+\brief Converts an HDF5 snapshot file to the RICH custom reset binary format
+\param input The path to the HDF5 file
+\param output The path to the new binary file
+*/
+void ConvertHDF5toBinary(string const& input, string const& output);
 
 #endif // HDF5_DIAG
