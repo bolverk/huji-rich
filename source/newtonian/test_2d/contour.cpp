@@ -1,6 +1,7 @@
 #include <boost/foreach.hpp>
 #include "contour.hpp"
 #include <fstream>
+#include "../../misc/simple_io.hpp"
 
 namespace 
 {
@@ -45,6 +46,7 @@ void SequentialContour::operator()(const hdsim& sim)
 {
   if((*p_trigger_.get())(sim)){
     ascii_write((*p_i2f_.get())(count_),calc_contour_points(sim,*p_lcc_.get()));
+    write_number(sim.GetTime(),"timestamp_"+(*p_i2f_.get())(count_));
     ++count_;
   }
 }
