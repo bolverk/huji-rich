@@ -10,7 +10,7 @@ simulation1d::SafeTimeTermination::SafeTimeTermination
 termination_time_(termination_time),
   max_cycles_(max_cycles) {}
 
-bool simulation1d::SafeTimeTermination::should_continue(hdsim1D const& sim)
+bool simulation1d::SafeTimeTermination::operator()(hdsim1D const& sim)
 {
   if(sim.GetCycle()>max_cycles_)
     throw UniversalError("Maximum number of time steps exceeded");
@@ -34,7 +34,7 @@ void simulation1d::main_loop(hdsim1D& sim,
 			     int time_order,
 			     DiagnosticsFunction* diag)
 {
-  while(term_cond.should_continue(sim)){
+  while(term_cond(sim)){
     if(1==time_order)
       sim.TimeAdvance();
     else if(2==time_order)

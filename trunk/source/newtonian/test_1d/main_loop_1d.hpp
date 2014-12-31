@@ -23,7 +23,7 @@ namespace simulation1d{
       \param sim Hydrodynamic simulation
       \return True if the simulation should run more
      */
-    virtual bool should_continue(hdsim1D const& sim) = 0;
+    virtual bool operator()(hdsim1D const& sim) = 0;
 
     virtual ~TerminationCondition(void);
 
@@ -42,7 +42,7 @@ namespace simulation1d{
     SafeTimeTermination(double termination_time,
 			int max_cycles);
 
-    bool should_continue(hdsim1D const&  sim);
+    bool operator()(hdsim1D const&  sim);
 
   private:
     
