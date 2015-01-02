@@ -15,6 +15,8 @@ class Index2FileName
 public:
 
   virtual string operator()(int index) = 0;
+
+  virtual ~Index2FileName(void);
 };
 
 class Rubric: public Index2FileName

@@ -13,6 +13,8 @@ class Trigger
 public:
 
   virtual bool operator()(const hdsim& sim) = 0;
+
+  virtual ~Trigger(void);
 };
 
 class ConstantTimeInterval: public Trigger
