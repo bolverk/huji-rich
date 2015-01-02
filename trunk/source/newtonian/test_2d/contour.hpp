@@ -17,6 +17,8 @@ public:
 
   virtual std::pair<bool,Vector2D> operator()
   (const Edge& edge, const hdsim& sim) const = 0;
+
+  virtual ~LocalContourCriterion(void);
 };
 
 class SequentialContour: public DiagnosticFunction
