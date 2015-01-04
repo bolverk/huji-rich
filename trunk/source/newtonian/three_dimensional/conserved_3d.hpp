@@ -24,4 +24,6 @@ public:
 	      const vector<double>& tracers_i);
 };
 
+Conserved3D operator*(double s, const Conserved3D& c);
+
 #endif // CONSERVED_3D_HPP
