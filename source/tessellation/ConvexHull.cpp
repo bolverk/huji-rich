@@ -74,10 +74,10 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	// Find the bottom point
 	sort(points.begin(),points.end(),VectorSort);
 	// Start building the convexhull
-	int n=(int)points.size();
-	vector<int> indeces((size_t)n-1);
-	vector<double> angles((size_t)n-1);
-	for(size_t i=0;i<(size_t)n-1;++i)
+	size_t n=points.size();
+	vector<int> indeces(n-1);
+	vector<double> angles(n-1);
+	for(size_t i=0;i<n-1;++i)
 		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);
 	sort_index(angles,indeces);
 	result.resize(points.size());
@@ -121,8 +121,8 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	}
 	int loc1=(int)pfirst.size();
 	int loc2=(int)plast.size();
-	for(int i=loc1+1;i<n-loc2;++i)
-		result[(size_t)i]=points[(size_t)indeces[(size_t)i-1]+1];
+	for(size_t i=loc1+1;i<n-loc2;++i)
+	  result[i]=points[static_cast<size_t>(indeces[i-1])+1];
 }
 
 void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
