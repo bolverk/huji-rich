@@ -58,7 +58,7 @@ private:
 	// Rotate a shape according to a given rotation scheme (in-place):
 	void RotateShape(int iShapeIndex, vector<int> vAxes);
 	// Rotate a shape according to rotation index, and return the rotated shape:
-	void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCurve3D_shape & roShapeOut, int iRotationIndex);
+	void RotateShape(HilbertCurve3D_shape const & roShape, HilbertCurve3D_shape & roShapeOut, int iRotationIndex);
 	/*!
 	\brief Returns the rotation scheme, according to a rotation index
 	\param piRotation - a pointer to the output rotation scheme vector
