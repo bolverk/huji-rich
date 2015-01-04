@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "HilbertOrder3D.hpp"
+#include "Face.hpp"
 
 using std::vector;
 
