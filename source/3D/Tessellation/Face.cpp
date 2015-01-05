@@ -2,24 +2,17 @@
 
 using namespace std;
  
-  Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2)
-  {
-	  neighbors.first=neighbor1;
-	  neighbors.second=neighbor2;
-	  vertices=vert;
-  }
+Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2):
+  vertices(vert),neighbors(neighbor1,neighbor2) {}
 
-  Face::Face(void)
-  {}
+Face::Face(void): vertices(), neighbors() {}
 
   Face::~Face(void)
   {}
 
-  Face::Face(Face const& other)
-  {
-	  neighbors=other.neighbors;
-	  vertices=other.vertices;
-  }
+Face::Face(Face const& other):
+  vertices(other.vertices),
+  neighbors(other.neighbors) {}
 
   double Face::GetArea(void) const
   {

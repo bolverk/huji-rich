@@ -25,9 +25,9 @@ class SequentialContour: public DiagnosticFunction
 {
 public:
 
-  SequentialContour(std::auto_ptr<Trigger> p_trigger,
-		    std::auto_ptr<Index2FileName> p_i2f,
-		    std::auto_ptr<LocalContourCriterion> p_lcc);
+  SequentialContour(Trigger* p_trigger,
+		    Index2FileName* p_i2f,
+		    LocalContourCriterion* p_lcc);
 
   void operator()(const hdsim& sim);
 

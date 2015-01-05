@@ -21,9 +21,9 @@ namespace
 }
 
 SequentialContour::SequentialContour
-(std::auto_ptr<Trigger> p_trigger,
- std::auto_ptr<Index2FileName> p_i2f,
- std::auto_ptr<LocalContourCriterion> p_lcc):
+(Trigger* p_trigger,
+ Index2FileName* p_i2f,
+ LocalContourCriterion* p_lcc):
   p_trigger_(p_trigger),
   count_(0),
   p_i2f_(p_i2f),

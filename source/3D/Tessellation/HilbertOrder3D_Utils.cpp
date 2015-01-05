@@ -1,3 +1,4 @@
+#include <cmath>
 #include "HilbertOrder3D_Utils.hpp"
 
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
@@ -87,7 +88,7 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 	return;
 }
 
-void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<vector<size_t>> & vOut)
+void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<vector<size_t> > & vOut)
 {
 	vector<unsigned long long int> vD_sorted_cpy = vD_sorted;
 	vector<unsigned long long int> vD_sorted_unq = vD_sorted;
@@ -149,7 +150,7 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 		vOut.push_back(vInd);
 	}
 
-	int x = 0;
+	//	int x = 0;
 
 	return;
 }
