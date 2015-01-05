@@ -6,13 +6,14 @@
 #ifndef CUBE3D_HPP
 #define CUBE3D_HPP 1
 
-#include "Tessellation3D.hpp"
-#include "OuterBoundary3D.hpp"
+#include "../Tessellation/Tessellation3D.hpp"
+#include "../Tessellation/OuterBoundary3D.hpp"
 #include "../../misc/utils.hpp"
 
 class CubeGrid : public Tessellation3D
 {
 private:
+  CubeGrid& operator=(const CubeGrid& origin);
 	size_t nx_,ny_,nz_;
 	double dx_,dy_,dz_;
 	OuterBoundary3D const* obc_;

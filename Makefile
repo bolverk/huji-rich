@@ -3,7 +3,7 @@ RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
 CC := g++
-LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
+LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -std=c++11
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg 
@@ -23,7 +23,7 @@ else ifeq ($(MODE),intel)
 	ARCHIVER_FUNC := xiar
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O2 -std=c++11
+	OPTIMIZATION_FLAGS := -O2
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))

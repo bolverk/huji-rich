@@ -14,13 +14,32 @@ class HDSim3D
 {
 public:
 
-HDSim3D(const Tessellation3D& tess,
-	const vector<ComputationalCell>& cells,
-	const EquationOfState& eos,
-	const PointMotion3D& pm,
-	const TimeStepCalculator& tsc,
-	const FluxCalculator& fc,
-	const CellUpdater& cu);
+  class ProgressTracker
+  {
+  public:
+
+    ProgressTracker(void);
+
+    void update(double dt);
+
+    double getTime(void) const;
+
+    double getCycle(void) const;
+
+  private:
+    double time_;
+    int cycle_;
+  };
+
+  HDSim3D(const Tessellation3D& tess,
+	  const vector<ComputationalCell>& cells,
+	  const EquationOfState& eos,
+	  const PointMotion3D& pm,
+	  const TimeStepCalculator& tsc,
+	  const FluxCalculator& fc,
+	  const CellUpdater& cu);
+
+  void timeAdvance();
 
 private:
   const Tessellation3D& tess_;

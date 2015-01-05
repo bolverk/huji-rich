@@ -2,7 +2,9 @@
 
 using namespace std;
  
-Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2):
+Face::Face(vector<Vector3D> const& vert,
+	   const NeighborIndex& neighbor1,
+	   const NeighborIndex& neighbor2):
   vertices(vert),neighbors(neighbor1,neighbor2) {}
 
 Face::Face(void): vertices(), neighbors() {}
