@@ -53,7 +53,7 @@ void BinLogger::output(Tessellation const& v)
 
 	for(int i=0;i<(int)v.GetPointNo();++i)
 	{
-		const vector<int> indices = v.GetCellEdges(i);
+		const vector<int>& indices = v.GetCellEdges(i);
 		binary_write_single_int((int)indices.size(),file_handle);
 		for(int j=0;j<(int)indices.size();++j)
 		  binary_write_single_int(indices[(size_t)j],file_handle);
@@ -98,7 +98,7 @@ void BinLogger::output(VoronoiMesh const& v)
 
 	for(int i=0;i<(int)v.GetPointNo();++i)
 	{
-		const vector<int> indices = v.GetCellEdges(i);
+		const vector<int>& indices = v.GetCellEdges(i);
 		binary_write_single_int((int)indices.size(),file_handle);
 		for(int j=0;j<(int)indices.size();++j)
 		  binary_write_single_int(indices[(size_t)j],file_handle);
