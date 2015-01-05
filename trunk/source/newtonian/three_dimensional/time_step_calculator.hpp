@@ -3,6 +3,7 @@
 
 #include "../../3D/Tessellation/Tessellation3D.hpp"
 #include "computational_cell.hpp"
+#include "../common/equation_of_state.hpp"
 
 class TimeStepCalculator
 {
@@ -10,7 +11,8 @@ public:
 
   virtual double operator()
   (const Tessellation3D& tess,
-   const vector<ComputationalCell>& cells) const = 0;
+   const vector<ComputationalCell>& cells,
+   const EquationOfState& eos) const = 0;
 
   virtual ~TimeStepCalculator(void);
 };

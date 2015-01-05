@@ -30,7 +30,7 @@ void CubeGrid::Initialise(vector<Vector3D> const& points, OuterBoundary3D const*
 		cellfaces_[i].resize(6);
 
 	// Do the z direction
-	size_t ntemp=(nx_+1)*ny_+(ny_+1)*nx_;
+	//	size_t ntemp=(nx_+1)*ny_+(ny_+1)*nx_;
 	vector<Vector3D> side(4);
 	side[0]=backlowerleft_;
 	side[1]=backlowerleft_+Vector3D(dx_,0,0);
@@ -59,7 +59,7 @@ Vector3D CubeGrid::GetMeshPoint(size_t index) const
 
 Vector3D const& CubeGrid::GetCellCM(size_t index) const
 {
-	return GetMeshPoint(index);
+  return cor_[index];
 }
 
 size_t CubeGrid::GetTotalFacesNumber(void) const
@@ -77,7 +77,7 @@ double CubeGrid::GetVolume(size_t /*index*/) const
 	return dx_*dy_*dz_;
 }
 
-vector<size_t>const& CubeGrid::GetCellFaces(int index) const
+vector<size_t>const& CubeGrid::GetCellFaces(int /*index*/) const
 {
-
+  throw;
 }

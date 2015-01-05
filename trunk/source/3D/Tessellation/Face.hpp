@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "Vector3D.hpp"
+#include "neighbor_index.hpp"
 
 //! \brief Interface between two cells
 class Face
@@ -18,14 +19,16 @@ public:
   std::vector<Vector3D> vertices;
 
   //! \brief Neighboring cells
-  std::pair<size_t,size_t> neighbors;
+  std::pair<NeighborIndex,NeighborIndex> neighbors;
 
   /*! \brief Class constructor
     \param vert Position of the vertices
     \param neighbor1 Index of first neighbor cell
     \param neighbor2 Index of second neighbor cell
   */
-  Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2);
+  Face(vector<Vector3D> const& vert,
+       const NeighborIndex& neighbor1, 
+       const NeighborIndex& neighbor2);
 
   Face(void);
 

@@ -22,8 +22,14 @@ public:
 	      const Vector3D& momentum_i,
 	      double energy_i,
 	      const vector<double>& tracers_i);
+
+  Conserved3D& operator-=(const Conserved3D& diff);
+
+  Conserved3D& operator+=(const Conserved3D& diff);
 };
 
 Conserved3D operator*(double s, const Conserved3D& c);
+
+Conserved3D operator/(const Conserved3D& c, double s);
 
 #endif // CONSERVED_3D_HPP

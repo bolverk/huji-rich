@@ -11,7 +11,8 @@ public:
 
   virtual vector<Conserved3D> operator()
   (const Tessellation3D& tess,
-   const vector<ComputationalCell>& cells) = 0;
+     const vector<ComputationalCell>& cells,
+     const vector<Vector3D>& point_velocities) const = 0;
 
   virtual ~FluxCalculator(void);
 };
