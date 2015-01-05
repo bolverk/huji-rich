@@ -21,7 +21,7 @@ double HDSim3D::ProgressTracker::getCycle(void) const
   return cycle_;
 }
 
-HDSim3D::HDSim3D(const Tessellation3D& tess,
+HDSim3D::HDSim3D(Tessellation3D& tess,
 		 const vector<ComputationalCell>& cells,
 		 const EquationOfState& eos,
 		 const PointMotion3D& pm,
@@ -30,7 +30,7 @@ HDSim3D::HDSim3D(const Tessellation3D& tess,
 		 const CellUpdater& cu):
   tess_(tess), eos_(eos), cells_(cells),
   extensive_(serial_generate(ExtensiveGenerator(cells,tess,eos))),
-  pm_(pm), tsc_(tsc), fc_(fc), cu_(cu)
+  pm_(pm), tsc_(tsc), fc_(fc), cu_(cu), pt_()
 {
   assert(tess.GetPointNo()==cells.size());
 }
@@ -99,6 +99,31 @@ namespace {
     const EquationOfState& eos_;
     const CellUpdater& cu_;
   };
+
+  class PointPositionUpdater: public Index2Member<Vector3D>
+  {
+  public:
+    
+    PointPositionUpdater(const Tessellation3D& tess,
+			 const vector<Vector3D>& velocities,
+			 double dt):
+      tess_(tess), velocities_(velocities), dt_(dt) {}
+
+    size_t getLength(void) const
+    {
+      return velocities_.size();
+    }
+
+    Vector3D operator()(size_t i) const
+    {
+      return tess_.GetMeshPoint(i)+dt_*velocities_[i];
+    }
+
+  private:
+    const Tessellation3D& tess_;
+    const vector<Vector3D>& velocities_;
+    const double dt_;
+  };
 }
 
 void HDSim3D::timeAdvance(void)
@@ -108,6 +133,9 @@ void HDSim3D::timeAdvance(void)
     serial_generate(PointVelocitiesCalculator(pm_,tess_));
   update_extensive(fc_(tess_,cells_,point_velocities),
 		   dt,tess_,extensive_);
+  tess_.Update(serial_generate(PointPositionUpdater(tess_,
+						    point_velocities,
+						    dt)));
   cells_ = serial_generate(AllCellsUpdater(tess_,extensive_,eos_,cu_));  
-  
+  pt_.update(dt);
 }
