@@ -94,10 +94,9 @@ HilbertCurve3D::HilbertCurve3D():
   m_vShapeRecursion()
 {
 	int rot[MAX_ROTATION_LENGTH];
-	int iRotLength;
 	for (int iRotIndex = 1; iRotIndex < NUMBER_OF_SHAPES; ++iRotIndex)
 	{
-		iRotLength = GetRotation(rot, iRotIndex);
+	  const int iRotLength = GetRotation(rot, iRotIndex);
 		m_vRotations[iRotIndex].assign(rot, rot + iRotLength);
 	}
 
@@ -389,19 +388,13 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 
 	// The current shape index:
 	int iCurrentShape = 0;
-	// The octant number:
-	int iOctantNum = 0;
-	// A temp variable - storing the current (negative) power of 2
-	double dbPow2;
-	// Variables indicating the current octant:
-	bool bX, bY, bZ;
 	for (int iN = 1; iN <= numOfIterations; ++iN)
 	{
 		// Calculate the current power of 0.5:
-		dbPow2 = ((double)1) / (1 << iN);
-		bX = x > dbPow2;
-		bY = y > dbPow2;
-		bZ = z > dbPow2;
+	  const double dbPow2 = ((double)1) / (1 << iN);
+	  const bool bX = x > dbPow2;
+	  const bool bY = y > dbPow2;
+	  const bool bZ = z > dbPow2;
 
 		x -= dbPow2*bX;
 		y -= dbPow2*bY;
@@ -409,7 +402,7 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 
 		// Multiply the distance by 8 (for every recursion iteration):
 		d = d << 3;
-		iOctantNum = m_mShapeOrder[iCurrentShape][bX][bY][bZ];
+		const int iOctantNum = m_mShapeOrder[iCurrentShape][bX][bY][bZ];
 		d = d + iOctantNum;
 		iCurrentShape = m_vShapeRecursion[iCurrentShape][iOctantNum];
 	}

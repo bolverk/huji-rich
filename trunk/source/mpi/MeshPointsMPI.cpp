@@ -9,7 +9,7 @@ namespace
 	boost::array<double,4> FindMaxEdges(Tessellation const& tess)
 	{
 		const int rank = get_mpi_rank();
-		const vector<int> edge_index=tess.GetCellEdges(rank);
+		const vector<int>& edge_index=tess.GetCellEdges(rank);
 		const int n=(int)edge_index.size();
 		boost::array<double,4> res;
 		res[0]=min(tess.GetEdge(edge_index[0]).vertices.first.x,
