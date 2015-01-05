@@ -635,4 +635,16 @@ template<class T> T lazy_max(const Index2Member<T>& i2m)
   return res;
 }
 
+/*! \brief Finds the minimum of a lazy list
+  \param i2m Lazy list
+  \return Min term of lazy list
+ */
+template<class T> T lazy_min(const Index2Member<T>& i2m)
+{
+  T res = i2m(0);
+  for(size_t i=1;i<i2m.getLength();++i)
+    res = min(res,i2m(i));
+  return res;
+}
+
 #endif // UTILS_HPP
