@@ -31,7 +31,7 @@ public:
     int cycle_;
   };
 
-  HDSim3D(const Tessellation3D& tess,
+  HDSim3D(Tessellation3D& tess,
 	  const vector<ComputationalCell>& cells,
 	  const EquationOfState& eos,
 	  const PointMotion3D& pm,
@@ -42,7 +42,7 @@ public:
   void timeAdvance();
 
 private:
-  const Tessellation3D& tess_;
+  Tessellation3D& tess_;
   const EquationOfState& eos_;
   vector<ComputationalCell> cells_;
   vector<Conserved3D> extensive_;
@@ -50,6 +50,7 @@ private:
   const TimeStepCalculator& tsc_;
   const FluxCalculator& fc_;
   const CellUpdater& cu_;
+  ProgressTracker pt_;
 };
 
 #endif // HDSIM_3D_HPP
