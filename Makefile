@@ -23,7 +23,7 @@ else ifeq ($(MODE),intel)
 	ARCHIVER_FUNC := xiar
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O2 -std=c++0x
+	OPTIMIZATION_FLAGS := -O2 -std=c++11
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
