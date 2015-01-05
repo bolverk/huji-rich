@@ -11,7 +11,7 @@ ifeq ($(MODE),debug)
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI
-	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
+	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -std=c++11
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
@@ -23,7 +23,7 @@ else ifeq ($(MODE),intel)
 	ARCHIVER_FUNC := xiar
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O2
+	OPTIMIZATION_FLAGS := -O2 -std=c++0x
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
@@ -36,7 +36,7 @@ $(LIBRARY_FOLDER)/$(LIB_FILE): $(OBJECTS)
 $(OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
 	$(CC) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
-	$(CC) -MM $(CFLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CC) -MM $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$@,g' -i $(LIBRARY_FOLDER)/$*.d
 
 $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp

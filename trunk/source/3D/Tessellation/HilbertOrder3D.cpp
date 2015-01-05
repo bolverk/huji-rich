@@ -22,7 +22,8 @@ public:
 
 };
 // Constructor - uses the reference Hilbert curve shape:
-HilbertCurve3D_shape::HilbertCurve3D_shape()
+HilbertCurve3D_shape::HilbertCurve3D_shape():
+  m_vShapePoints()
 {
 	m_vShapePoints[0] = Vector3D(0, 0, -1);
 	m_vShapePoints[1] = Vector3D(0, 1, 0);
@@ -87,7 +88,10 @@ private:
 };
 
 // Constructor - performs all required initiallizations and preprocessing:
-HilbertCurve3D::HilbertCurve3D()
+HilbertCurve3D::HilbertCurve3D():
+  m_vRotatedShapes(),
+  m_vRotations(),
+  m_vShapeRecursion()
 {
 	int rot[MAX_ROTATION_LENGTH];
 	int iRotLength;
@@ -410,7 +414,7 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 		iCurrentShape = m_vShapeRecursion[iCurrentShape][iOctantNum];
 	}
 
-	int a = 0;
+	//	int a = 0;
 	return d;
 }
 
