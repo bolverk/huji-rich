@@ -85,12 +85,12 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	// Check for colinear points
 	const double tol=1e-8;
 	vector<Vector2D> pfirst,plast;
-	for(size_t i=1;i<(size_t)n-1;++i)
+	for(size_t i=1;i<n-1;++i)
 	{
-		if(abs(angles[(size_t)indeces[i]]-angles[(size_t)indeces[0]])<tol)
-			pfirst.push_back(points[(size_t)indeces[i]+1]);
-		if(abs(angles[(size_t)indeces[(size_t)n-i-2]]-angles[(size_t)indeces[(size_t)n-2]])<tol)
-			plast.push_back(points[(size_t)indeces[(size_t)n-i-2]+1]);
+		if(abs(angles[indeces[i]]-angles[indeces[0]])<tol)
+			pfirst.push_back(points[indeces[i]+1]);
+		if(abs(angles[indeces[n-i-2]]-angles[indeces[n-2]])<tol)
+			plast.push_back(points[indeces[n-i-2]+1]);
 	}
 	result[0]=points[0];
 	if(!pfirst.empty())
