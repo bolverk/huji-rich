@@ -60,7 +60,7 @@ public:
 	\param index Face index
 	\return Interface between cells
 	*/
-	virtual Face const& GetEdge(size_t index) const = 0;
+	virtual Face const& GetFace(size_t index) const = 0;
 
 	/*! \brief Returns the effective width of a cell
 	\param index Cell index
@@ -134,7 +134,15 @@ public:
 	\param point The index of the cell to calculate for
 	\param result The neighbors and their neighbors indeces
 	*/
-	virtual void GetNeighborNeighbors(vector<size_t> &result, int point)const = 0;
+	virtual void GetNeighborNeighbors(vector<size_t> &result,size_t point)const = 0;
+
+
+	/*!
+	\brief Returns a vector normal to the face whose magnitude is the seperation between the neighboring points
+	\param faceindex The index of the face
+	\return The vector normal to the face whose magnitude is the seperation between the neighboring points pointing from the first neighbor to the second
+	*/
+	virtual Vector3D Normal(size_t faceindex)const=0;
 };
 
 #endif // TESSELLATION3D_HPP
