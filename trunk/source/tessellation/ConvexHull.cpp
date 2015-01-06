@@ -96,15 +96,15 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	result[0]=points[0];
 	if(!pfirst.empty())
 	{
-		pfirst.insert(pfirst.begin(),points[(size_t)indeces[0]+1]);
-		int N=(int)pfirst.size();
-		vector<double> dist((size_t)N);
-		for(int i=0;i<N;++i)
-			dist[(size_t)i]=abs(pfirst[(size_t)i]-points[0]);
-		vector<int> indeces2((size_t)N);
+		pfirst.insert(pfirst.begin(),points[indeces[0]+1]);
+		//		int N=(int)pfirst.size();
+		vector<double> dist(pfirst.size());
+		for(size_t i=0;i<pfirst.size();++i)
+			dist[i]=abs(pfirst[i]-points[0]);
+		vector<int> indeces2(pfirst.size());
 		sort_index(dist,indeces2);
 		ReArrangeVector(pfirst,indeces2);
-		for(size_t i=0;i<(size_t)N;++i)
+		for(size_t i=0;i<pfirst.size();++i)
 			result[i+1]=pfirst[i];
 	}
 	if(!plast.empty())
