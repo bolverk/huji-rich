@@ -1,27 +1,31 @@
 #include "CubeGrid.hpp"
 
-CubeGrid::CubeGrid(void):nx_(0),ny_(0),nz_(0),dx_(0),dy_(0),dz_(0),obc_(0),
-	backlowerleft_(Vector3D()),frontupperright_(Vector3D()),cor_(vector<Vector3D> ()),
-	faces_(vector<Face> ()),cellfaces_(vector<vector<size_t> > ()){}
-
-CubeGrid::CubeGrid(CubeGrid const& other):nx_(other.nx_),ny_(other.ny_),nz_(other.nz_),
-	dx_(other.dx_),dy_(other.dy_),dz_(other.dz_),obc_(other.obc_),
-	backlowerleft_(other.backlowerleft_),frontupperright_(other.frontupperright_),
-	cor_(other.cor_),faces_(other.faces_),cellfaces_(other.cellfaces_){}
-
-void CubeGrid::Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc)
+namespace
 {
-	obc_=bc;
-	backlowerleft_=obc_->GetGridBoundary(BackLowerLeft);
-	frontupperright_=obc_->GetGridBoundary(FrontUpperRight);
+	void ConvertIndexToSubindex(size_t index,size_t &i,size_t &j,size_t &k,
+		size_t nx_,size_t ny_,size_t nz_)
+	{
+		k=index%(nz_);
+		i=index/(nz_*ny_);
+		j=(index-i*nz_*ny_)/nz_;
+	}
 
-/*	const size_t nz=index%(nz_);
-	const size_t nx=index/(nz_*ny_);
-	const size_t ny=(index-nx*nz_*ny_)/nz_;
-	return Vector3D(backlowerleft_.x+(nx_+0.5)*dx_,backlowerleft_.y+(ny_+0.5)*dy_,
-		backlowerleft_.z+(nz_+0.5)*dz_);
-		*/
-	cor_=points;
+	size_t ConvertSubindexToIndex(size_t i,size_t j,size_t k,
+		size_t nx_,size_t ny_,size_t nz_)
+	{
+		return i*ny_*nz_+j*nz_+k;
+	}
+}
+
+CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerleft,
+	Vector3D const& frontupperright):nx_(nx),ny_(ny),nz_(nz),
+	maxsize_(std::numeric_limits<std::size_t>::max()),
+	dx_((frontupperright.x-backlowerleft.x)/nx),
+	dy_((frontupperright.y-backlowerleft.y)/ny),
+	dz_((frontupperright.z-backlowerleft.z)/nz),
+	obc_(0),backlowerleft_(backlowerleft),frontupperright_(frontupperright),
+	cor_(vector<Vector3D> ()),faces_(vector<Face> ()),cellfaces_(vector<vector<size_t> > ())
+{
 	// Create the faces
 	size_t nfaces=GetTotalFacesNumber();
 	faces_.resize(nfaces);
@@ -30,18 +34,126 @@ void CubeGrid::Initialise(vector<Vector3D> const& points, OuterBoundary3D const*
 		cellfaces_[i].resize(6);
 
 	// Do the z direction
-	//	size_t ntemp=(nx_+1)*ny_+(ny_+1)*nx_;
 	vector<Vector3D> side(4);
 	side[0]=backlowerleft_;
 	side[1]=backlowerleft_+Vector3D(dx_,0,0);
 	side[2]=backlowerleft_+Vector3D(dx_,dy_,0);
 	side[3]=backlowerleft_+Vector3D(0,dy_,0);
 
-	for(size_t i=0;i<ny_+1;++i)
-	for(size_t j=0;j<nx_+1;++j)
+	for(size_t k=0;k<nz_+1;++k)
 	{
-		faces_[i*(nx_+1)+j].vertices=side+Vector3D(dx_*j,0,0)+Vector3D(0,dy_*i,0);
+		for(size_t i=0;i<ny_;++i)
+		{
+			for(size_t j=0;j<nx_;++j)
+			{
+				faces_[i*nx_+j+k*ny_*nx_].vertices=side+Vector3D(dx_*j,0,dz_*k)
+					+Vector3D(0,dy_*i,dz_*k);
+				if(k==0)
+					faces_[i*nx_+j+k*ny_*nx_].neighbors.first=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_].neighbors.first=ConvertSubindexToIndex(j,i,k-1,nx_,ny_,nz_);
+				if(k==nz_)
+					faces_[i*nx_+j+k*ny_*nx_].neighbors.second=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+			}
+		}
 	}
+
+	// Do the y direction
+	side[0]=backlowerleft_;
+	side[1]=backlowerleft_+Vector3D(dx_,0,0);
+	side[2]=backlowerleft_+Vector3D(dx_,0,dz_);
+	side[3]=backlowerleft_+Vector3D(0,0,dz_);
+
+	for(size_t k=0;k<nz_;++k)
+	{
+		for(size_t i=0;i<ny_+1;++i)
+		{
+			for(size_t j=0;j<nx_;++j)
+			{
+				faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].vertices=side+Vector3D(dx_*j,dy_*i,0)
+					+Vector3D(0,dy_*i,dz_*k);
+				if(i==0)
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.first=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.first=ConvertSubindexToIndex(j,i-1,k,nx_,ny_,nz_);
+				if(i==ny_)
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.second=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+			}
+		}
+	}
+	// Do the x direction
+	side[0]=backlowerleft_;
+	side[1]=backlowerleft_+Vector3D(0,dy_,0);
+	side[2]=backlowerleft_+Vector3D(0,dy_,dz_);
+	side[3]=backlowerleft_+Vector3D(0,0,dz_);
+
+	for(size_t k=0;k<nz_;++k)
+	{
+		for(size_t i=0;i<ny_;++i)
+		{
+			for(size_t j=0;j<nx_+1;++j)
+			{
+				faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].vertices=side
+					+Vector3D(dx_*j,dy_*i,0)+Vector3D(dx_*j,0,dz_*k);
+				if(j==0)
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.first=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.first=ConvertSubindexToIndex(j-1,i,k,nx_,ny_,nz_);
+				if(j==nx_)
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.second=maxsize_;
+				else
+					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+			}
+		}
+	}
+	// Add the faces for the points
+	for(size_t i=0;i<cellfaces_.size();++i)
+		cellfaces_[i].reserve(6);
+	for(size_t k=0;k<nz_;++k)
+	{
+		for(size_t i=0;i<ny_;++i)
+		{
+			for(size_t j=0;j<nx_;++j)
+			{
+				size_t index=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_);
+				cellfaces_[index].push_back((i+1)*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_);
+
+				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1));
+				cellfaces_[index].push_back(i*nx_+j+1+k*ny_*nx_+nx_*(nz_+1)*(ny_+1));
+
+				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_);
+				cellfaces_[index].push_back(i*nx_+j+(k+1)*ny_*nx_);
+			}
+		}
+	}
+	// Create the points
+	cor_.resize(nx_*ny_*nz_);
+	for(size_t i=0;i<nx_;++i)
+	{
+		for(size_t j=0;j<ny_;++j)
+		{
+			for(size_t k=0;k<nz_;++k)
+			{
+				cor_[ConvertSubindexToIndex(i,j,k,nx_,ny_,nz_)]=backlowerleft+
+					Vector3D(i*dx_+0.5*dx_,j*dy_+0.5*dy_,k*dz_+0.5*dz_);
+			}
+		}
+	}
+}
+
+CubeGrid::CubeGrid(CubeGrid const& other):nx_(other.nx_),ny_(other.ny_),nz_(other.nz_),
+	maxsize_(other.maxsize_),dx_(other.dx_),dy_(other.dy_),dz_(other.dz_),obc_(other.obc_),
+	backlowerleft_(other.backlowerleft_),frontupperright_(other.frontupperright_),
+	cor_(other.cor_),faces_(other.faces_),cellfaces_(other.cellfaces_){}
+
+void CubeGrid::Initialise(vector<Vector3D> const& /*points*/, OuterBoundary3D const* bc)
+{
+	obc_=bc;
 }
 
 void CubeGrid::Update(vector<Vector3D> const& /*points*/)
@@ -59,12 +171,17 @@ Vector3D CubeGrid::GetMeshPoint(size_t index) const
 
 Vector3D const& CubeGrid::GetCellCM(size_t index) const
 {
-  return cor_[index];
+	return GetMeshPoint(index);
 }
 
 size_t CubeGrid::GetTotalFacesNumber(void) const
 {
-	return (nz_+1)*nx_*ny_+(nx_+1)*nz_*ny_+(ny_+1)*nx_*nz_;
+	return faces_.size();
+}
+
+Face const& CubeGrid::GetFace(size_t index) const
+{
+	return faces_[index];
 }
 
 double CubeGrid::GetWidth(size_t /*index*/) const
@@ -77,7 +194,89 @@ double CubeGrid::GetVolume(size_t /*index*/) const
 	return dx_*dy_*dz_;
 }
 
-vector<size_t>const& CubeGrid::GetCellFaces(int /*index*/) const
+vector<size_t>const& CubeGrid::GetCellFaces(int index) const
 {
-  throw;
+	return cellfaces_[index];
+}
+
+vector<Vector3D>& CubeGrid::GetMeshPoints(void)
+{
+	return cor_;
+}
+
+vector<size_t> CubeGrid::GetNeighbors(size_t index)const
+{
+	vector<size_t> res(6);
+	for(size_t i=0;i<6;++i)
+	{
+		res[i]=(faces_[cellfaces_[index][i]].neighbors.first==index) ?
+			faces_[cellfaces_[index][i]].neighbors.second :
+			faces_[cellfaces_[index][i]].neighbors.first;
+	}
+	return res;
+}
+
+Tessellation3D* CubeGrid::clone(void) const
+{
+	return new CubeGrid(*this);
+}
+
+CubeGrid::~CubeGrid(void)
+{}
+
+bool CubeGrid::NearBoundary(size_t index) const
+{
+	for(size_t i=0;i<6;++i)
+	{
+		if(faces_[cellfaces_[index][i]].neighbors.first==maxsize_)
+			return true;
+		if(faces_[cellfaces_[index][i]].neighbors.second==maxsize_)
+			return true;
+	}
+	return false;
+}
+
+vector<vector<size_t> >& CubeGrid::GetDuplicatedPoints(void)
+{
+	return vector<vector<size_t> > ();
+}
+
+vector<vector<size_t> >const& CubeGrid::GetDuplicatedPoints(void)const
+{
+	return vector<vector<size_t> > ();
+}
+
+size_t CubeGrid::GetTotalPointNumber(void)const
+{
+	return cor_.size();
+}
+
+vector<Vector3D>& CubeGrid::GetAllCM(void)
+{
+	return cor_;
+}
+
+void CubeGrid::GetNeighborNeighbors(vector<size_t> &result, size_t point)const
+{
+	result.clear();
+	vector<size_t> neigh=GetNeighbors(point);
+	for(size_t i=0;i<neigh.size();++i)
+	{
+		if(neigh[i]==maxsize_)
+			continue;
+		vector<size_t> temp=GetNeighbors(neigh[i]);
+		result.insert(result.end(),temp.begin(),temp.end());
+	}
+	sort(result.begin(),result.end());
+	result=unique(result);
+}
+
+Vector3D CubeGrid::Normal(size_t faceindex)const
+{
+	if(faceindex<(nx_*ny_*(nz_+1)))
+		return Vector3D(0,0,dz_);
+	if(faceindex<(nx_*(ny_+1)*(nz_+1)))
+		return Vector3D(0,dy_,0);
+	else
+		return Vector3D(dx_,0,0);
 }

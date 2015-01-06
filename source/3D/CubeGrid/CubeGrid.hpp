@@ -6,23 +6,31 @@
 #ifndef CUBE3D_HPP
 #define CUBE3D_HPP 1
 
-#include "../Tessellation/Tessellation3D.hpp"
-#include "../Tessellation/OuterBoundary3D.hpp"
+#include "../GeometryCommon/Tessellation3D.hpp"
+#include "../GeometryCommon/OuterBoundary3D.hpp"
 #include "../../misc/utils.hpp"
 
 class CubeGrid : public Tessellation3D
 {
 private:
-  CubeGrid& operator=(const CubeGrid& origin);
-	size_t nx_,ny_,nz_;
-	double dx_,dy_,dz_;
+	const size_t nx_,ny_,nz_,maxsize_;
+	const double dx_,dy_,dz_;
 	OuterBoundary3D const* obc_;
 	Vector3D backlowerleft_,frontupperright_;
 	vector<Vector3D> cor_;
 	vector<Face> faces_;
 	vector<vector<size_t> > cellfaces_;
 public:
-	CubeGrid(void);
+	/*!
+	\brief Class constructor
+	\param nx Number of points in the x direction
+	\param ny Number of points in the y direction
+	\param nz Number of points in the z direction
+	\param backlowerleft The boundary of the domain with the lowest x,y,z
+	\param frontupperright The boundary of the domain with the highest x,y,z
+	*/
+	CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerleft,
+		Vector3D const& frontupperright);
 
 	CubeGrid(CubeGrid const& other);
 
@@ -38,7 +46,7 @@ public:
 
 	size_t GetTotalFacesNumber(void) const;
 
-	Face const& GetEdge(size_t index) const;
+	Face const& GetFace(size_t index) const;
 
 	double GetWidth(size_t index) const;
 
@@ -50,7 +58,7 @@ public:
 
 	vector<size_t> GetNeighbors(size_t index)const;
 
-	CubeGrid* clone(void) const;
+	Tessellation3D* clone(void) const;
 
 	~CubeGrid(void);
 
@@ -64,7 +72,9 @@ public:
 
 	vector<Vector3D>& GetAllCM(void);
 
-	void GetNeighborNeighbors(vector<size_t> &result, int point)const;
+	void GetNeighborNeighbors(vector<size_t> &result, size_t point)const;
+
+	Vector3D Normal(size_t faceindex)const;
 };
 
 

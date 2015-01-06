@@ -7,6 +7,7 @@
 #define Vector3D_HPP 1
 
 #include <vector>
+#include <cmath>
 using namespace std;
 
 //! \brief 3D Mathematical vector
