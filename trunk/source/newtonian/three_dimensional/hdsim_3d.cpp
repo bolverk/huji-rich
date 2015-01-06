@@ -131,7 +131,7 @@ void HDSim3D::timeAdvance(void)
   const double dt = tsc_(tess_,cells_,eos_);
   const vector<Vector3D> point_velocities = 
     serial_generate(PointVelocitiesCalculator(pm_,tess_));
-  update_extensive(fc_(tess_,cells_,point_velocities),
+  update_extensive(fc_(tess_,cells_,eos_,point_velocities),
 		   dt,tess_,extensive_);
   tess_.Update(serial_generate(PointPositionUpdater(tess_,
 						    point_velocities,
