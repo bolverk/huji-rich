@@ -69,3 +69,8 @@ void binary_write_single_double(double d, ofstream& fh)
 {
   fh.write((const char*)&d,sizeof(double));
 }
+
+void binary_write_single_size_t(size_t n,ofstream& fh)
+{
+	fh.write((const char*)&n,sizeof(size_t));
+}

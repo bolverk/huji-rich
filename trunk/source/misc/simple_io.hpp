@@ -66,4 +66,11 @@ void binary_write_single_int(int n,ofstream& fh);
  */
 void binary_write_single_double(double d,ofstream& fh);
 
+/*! \brief Writes a single size_t to a binary file
+  \param n size_t
+  \param fh File handle
+ */
+void binary_write_single_size_t(size_t n,ofstream& fh);
+
+
 #endif // SIMPLE_IO_HPP
