@@ -1,6 +1,6 @@
 #include "HilbertOrder3D.hpp"
 #include "HilbertOrder3D_Utils.hpp"
-#include <array>
+#include <vector>
 #include <algorithm>
 #include <ctime>
 #include <iostream>
@@ -18,13 +18,14 @@ public:
 	// Comparison:
 	bool operator==(HilbertCurve3D_shape & shape);
 	// An array of the 7 unit vector steps defining the shape:
-	array<Vector3D, 7> m_vShapePoints;
+	vector<Vector3D> m_vShapePoints;
 
 };
 // Constructor - uses the reference Hilbert curve shape:
 HilbertCurve3D_shape::HilbertCurve3D_shape():
-  m_vShapePoints()
+  m_vShapePoints(vector<Vector3D> ())
 {
+	m_vShapePoints.resize(7);
 	m_vShapePoints[0] = Vector3D(0, 0, -1);
 	m_vShapePoints[1] = Vector3D(0, 1, 0);
 	m_vShapePoints[2] = Vector3D(0, 0, 1);
@@ -75,12 +76,12 @@ private:
 	void BuildShapeOrder();
 
 	// Stores all rotated shapes:
-	array<HilbertCurve3D_shape, NUMBER_OF_SHAPES> m_vRotatedShapes;
+	vector<HilbertCurve3D_shape> m_vRotatedShapes;
 	// Stores all rotation schemes:
-	array < vector<int>, NUMBER_OF_SHAPES > m_vRotations;
+	vector < vector<int> > m_vRotations;
 
 	// An array of the 8 integers defining the recursion rule of the shape:
-	array< array<int, 8> , NUMBER_OF_SHAPES> m_vShapeRecursion;
+	vector< vector<int> > m_vShapeRecursion;
 
 	// A 2x2x2 matrix indicating the 3 dimensional shape order
 	// array< array<int , 8 > , NUMBER_OF_SHAPES > m_mShapeOrder;
@@ -93,6 +94,11 @@ HilbertCurve3D::HilbertCurve3D():
   m_vRotations(),
   m_vShapeRecursion()
 {
+	m_vRotatedShapes.resize(NUMBER_OF_SHAPES);
+	m_vRotations.resize(NUMBER_OF_SHAPES);
+	m_vShapeRecursion.resize(NUMBER_OF_SHAPES);
+	for(size_t i=0;i<NUMBER_OF_SHAPES;++i)
+		m_vShapeRecursion[i].resize(8);
 	int rot[MAX_ROTATION_LENGTH];
 	for (int iRotIndex = 1; iRotIndex < NUMBER_OF_SHAPES; ++iRotIndex)
 	{
@@ -126,7 +132,14 @@ int HilbertCurve3D::FindShapeIndex(HilbertCurve3D_shape & roShape)
 void HilbertCurve3D::BuildRecursionRule()
 {
 	// Reference recursion rule:
-	m_vShapeRecursion[0] = { 12, 16, 16, 2, 2, 14, 14, 10 };
+	m_vShapeRecursion[0][0] = 12;
+	m_vShapeRecursion[0][1] = 16;
+	m_vShapeRecursion[0][2] = 16;
+	m_vShapeRecursion[0][3] = 2;
+	m_vShapeRecursion[0][4] = 2;
+	m_vShapeRecursion[0][5] = 14;
+	m_vShapeRecursion[0][6] = 14;
+	m_vShapeRecursion[0][7] = 10;
 
 	HilbertCurve3D_shape oTempShape;
 	// What about ii=0? not necessary 
@@ -339,9 +352,9 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 
 void HilbertCurve3D::BuildShapeOrder()
 {
-	array<int, 8> vShapeVerticesX;
-	array<int, 8> vShapeVerticesY;
-	array<int, 8> vShapeVerticesZ;
+	vector<int> vShapeVerticesX(8);
+	vector<int> vShapeVerticesY(8);
+	vector<int> vShapeVerticesZ(8);
 
 	vShapeVerticesX[0] = 0;
 	vShapeVerticesY[0] = 0;
