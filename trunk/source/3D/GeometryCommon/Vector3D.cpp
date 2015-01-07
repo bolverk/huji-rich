@@ -6,6 +6,14 @@
 
 using namespace std;
 
+namespace
+{
+	static inline double round(double val)
+	{    
+		return floor(val + 0.5);
+	}
+}
+
 Vector3D RotateX(Vector3D const& v, double a)
 {
 	Vector3D res;
