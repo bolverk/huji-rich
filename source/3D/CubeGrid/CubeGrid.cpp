@@ -278,3 +278,11 @@ Vector3D CubeGrid::Normal(size_t faceindex)const
 	else
 		return Vector3D(dx_,0,0);
 }
+
+bool CubeGrid::IsGhostPoint(size_t index)const
+{
+	if(index<nz_*ny_*nx_)
+		return true;
+	else
+		return false;
+}

@@ -144,6 +144,12 @@ public:
 	\return The vector normal to the face whose magnitude is the seperation between the neighboring points pointing from the first neighbor to the second
 	*/
 	virtual Vector3D Normal(size_t faceindex)const=0;
+
+	/*!
+	\brief Checks if a point is a ghost point or not
+	\return True if is a ghost point, false otherwise
+	*/
+	virtual bool IsGhostPoint(size_t index)const=0;
 };
 
 #endif // TESSELLATION3D_HPP
