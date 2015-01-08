@@ -5,7 +5,7 @@
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
 #include "../../misc/utils.hpp"
-#include "../../3D/Tessellation/Tessellation3D.hpp"
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
 
 Conserved3D calc_intensive(const ComputationalCell& cell,
 			 const EquationOfState& eos);

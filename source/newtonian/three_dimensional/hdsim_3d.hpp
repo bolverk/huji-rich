@@ -2,7 +2,7 @@
 #define HDSIM_3D_HPP 1
 
 #include "computational_cell.hpp"
-#include "../../3D/Tessellation/Tessellation3D.hpp"
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
 #include "conserved_3d.hpp"
 #include "../common/equation_of_state.hpp"
 #include "point_motion_3d.hpp"
