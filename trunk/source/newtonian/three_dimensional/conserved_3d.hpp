@@ -1,7 +1,7 @@
 #ifndef CONSERVED_3D_HPP
 #define CONSERVED_3D_HPP 1
 
-#include "../../3D/Tessellation/Vector3D.hpp"
+#include "../../3D/GeometryCommon/Vector3D.hpp"
 
 class Conserved3D
 {

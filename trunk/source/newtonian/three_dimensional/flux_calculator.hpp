@@ -7,7 +7,7 @@
 #define FLUX_CALCULATOR_HPP 1
 
 #include "conserved_3d.hpp"
-#include "../../3D/Tessellation/Tessellation3D.hpp"
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
 

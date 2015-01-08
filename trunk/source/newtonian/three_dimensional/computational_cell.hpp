@@ -6,7 +6,7 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include "../../3D/Tessellation/Vector3D.hpp"
+#include "../../3D/GeometryCommon/Vector3D.hpp"
 
 //! \brief Container for the hydrodynamic variables
 class ComputationalCell

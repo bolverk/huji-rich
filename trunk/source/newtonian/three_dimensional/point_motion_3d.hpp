@@ -6,7 +6,7 @@
 #ifndef POINT_MOTION_HPP
 #define POINT_MOTION_HPP 1
 
-#include "../../3D/Tessellation/Vector3D.hpp"
+#include "../../3D/GeometryCommon/Vector3D.hpp"
 
 //! \brief Abstract class for point motion
 class PointMotion3D
