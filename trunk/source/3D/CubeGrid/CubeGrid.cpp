@@ -27,11 +27,9 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 	cor_(vector<Vector3D> ()),faces_(vector<Face> ()),cellfaces_(vector<vector<size_t> > ())
 {
 	// Create the faces
-	size_t nfaces=GetTotalFacesNumber();
+	size_t nfaces=(nx_+1)*ny_*nz_+(ny_+1)*nx_*nz_+(nz_+1)*ny_*nx_;
 	faces_.resize(nfaces);
-	cellfaces_.resize(cor_.size());
-	for(size_t i=0;i<cellfaces_.size();++i)
-		cellfaces_[i].resize(6);
+	cellfaces_.resize(nx_*ny_*nz_);
 
 	// Do the z direction
 	vector<Vector3D> side(4);
@@ -47,7 +45,7 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 			for(size_t j=0;j<nx_;++j)
 			{
 				faces_[i*nx_+j+k*ny_*nx_].vertices=side+Vector3D(dx_*j,0,dz_*k)
-					+Vector3D(0,dy_*i,dz_*k);
+					+Vector3D(0,dy_*i,0);
 				if(k==0)
 					faces_[i*nx_+j+k*ny_*nx_].neighbors.first=maxsize_;
 				else
@@ -72,16 +70,16 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 		{
 			for(size_t j=0;j<nx_;++j)
 			{
-				faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].vertices=side+Vector3D(dx_*j,dy_*i,0)
-					+Vector3D(0,dy_*i,dz_*k);
+				faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].vertices=side+Vector3D(dx_*j,dy_*i,0)
+					+Vector3D(0,0,dz_*k);
 				if(i==0)
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.first=maxsize_;
+					faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].neighbors.first=maxsize_;
 				else
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.first=ConvertSubindexToIndex(j,i-1,k,nx_,ny_,nz_);
+					faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].neighbors.first=ConvertSubindexToIndex(j,i-1,k,nx_,ny_,nz_);
 				if(i==ny_)
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.second=maxsize_;
+					faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].neighbors.second=maxsize_;
 				else
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+					faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
 			}
 		}
 	}
@@ -97,16 +95,16 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 		{
 			for(size_t j=0;j<nx_+1;++j)
 			{
-				faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].vertices=side
-					+Vector3D(dx_*j,dy_*i,0)+Vector3D(dx_*j,0,dz_*k);
+				faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].vertices=side
+					+Vector3D(0,dy_*i,0)+Vector3D(dx_*j,0,dz_*k);
 				if(j==0)
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.first=maxsize_;
+					faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].neighbors.first=maxsize_;
 				else
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.first=ConvertSubindexToIndex(j-1,i,k,nx_,ny_,nz_);
+					faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].neighbors.first=ConvertSubindexToIndex(j-1,i,k,nx_,ny_,nz_);
 				if(j==nx_)
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.second=maxsize_;
+					faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].neighbors.second=maxsize_;
 				else
-					faces_[i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1)].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
+					faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].neighbors.second=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
 			}
 		}
 	}
@@ -120,11 +118,11 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 			for(size_t j=0;j<nx_;++j)
 			{
 				size_t index=ConvertSubindexToIndex(j,i,k,nx_,ny_,nz_);
-				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_);
-				cellfaces_[index].push_back((i+1)*nx_+j+k*ny_*nx_+nx_*(nz_+1)*ny_);
+				cellfaces_[index].push_back(i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_+nx_*(nz_+1)*ny_);
+				cellfaces_[index].push_back((i+1)*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_+nx_*(nz_+1)*ny_);
 
-				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_+nx_*(nz_+1)*(ny_+1));
-				cellfaces_[index].push_back(i*nx_+j+1+k*ny_*nx_+nx_*(nz_+1)*(ny_+1));
+				cellfaces_[index].push_back(i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_);
+				cellfaces_[index].push_back(i*nz_+(j+1)*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_);
 
 				cellfaces_[index].push_back(i*nx_+j+k*ny_*nx_);
 				cellfaces_[index].push_back(i*nx_+j+(k+1)*ny_*nx_);

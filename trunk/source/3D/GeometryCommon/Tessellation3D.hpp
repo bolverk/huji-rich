@@ -99,6 +99,7 @@ public:
 	*/
 	virtual Tessellation3D* clone(void) const = 0;
 
+	//! \brief Virtual destructor
 	virtual ~Tessellation3D(void) = 0;
 
 	/*! \brief Returns if the cell is adjacent to a boundary
