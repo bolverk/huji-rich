@@ -75,6 +75,8 @@ public:
 	void GetNeighborNeighbors(vector<size_t> &result, size_t point)const;
 
 	Vector3D Normal(size_t faceindex)const;
+
+	bool IsGhostPoint(size_t index)const;
 };
 
 
