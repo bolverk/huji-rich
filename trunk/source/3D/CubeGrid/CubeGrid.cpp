@@ -282,6 +282,20 @@ Vector3D CubeGrid::Normal(size_t faceindex)const
 bool CubeGrid::IsGhostPoint(size_t index)const
 {
 	if(index<nz_*ny_*nx_)
+		return false;
+	else
+		return true;
+}
+
+Vector3D CubeGrid::CalcFaceVelocity(size_t /*p0*/,size_t /*p1*/,Vector3D const& /*v0*/,
+		Vector3D const& /*v1*/)const
+{
+	return Vector3D();
+}
+
+bool CubeGrid::BoundaryFace(size_t index) const
+{
+	if(faces_[index].neighbors.first==maxsize_||faces_[index].neighbors.second==maxsize_)
 		return true;
 	else
 		return false;

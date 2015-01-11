@@ -77,6 +77,11 @@ public:
 	Vector3D Normal(size_t faceindex)const;
 
 	bool IsGhostPoint(size_t index)const;
+
+	Vector3D CalcFaceVelocity(size_t p0,size_t p1,Vector3D const& v0,
+		Vector3D const& v1)const;
+
+	bool BoundaryFace(size_t index) const;
 };
 
 
