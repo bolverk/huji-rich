@@ -102,11 +102,19 @@ public:
 	//! \brief Virtual destructor
 	virtual ~Tessellation3D(void) = 0;
 
-	/*! \brief Returns if the cell is adjacent to a boundary
+	/*! 
+	\brief Returns if the cell is adjacent to a boundary
 	\param index The cell to check
 	\return If near boundary
 	*/
 	virtual bool NearBoundary(size_t index) const = 0;
+
+	/*! 
+	\brief Returns if the face is a boundary one
+	\param index The face to check
+	\return True if boundary false otherwise
+	*/
+	virtual bool BoundaryFace(size_t index) const = 0;
 
 	/*!
 	\brief Returns the indeces of the points that where sent to other processors as ghost points (or to same cpu for single thread) ad boundary points
@@ -150,6 +158,17 @@ public:
 	\return True if is a ghost point, false otherwise
 	*/
 	virtual bool IsGhostPoint(size_t index)const=0;
+
+	/*!
+	\brief Calculates the velocity of a face
+	\param p0 The index of the first neighbor
+	\param p1 The index of the second neighbor
+	\param v0 The velocity of the first neighbor
+	\param v1 The velocity of the second neighbor
+	\return The velocity of the face
+	*/
+	virtual Vector3D CalcFaceVelocity(size_t p0,size_t p1,Vector3D const& v0,
+		Vector3D const& v1)const=0;
 };
 
 #endif // TESSELLATION3D_HPP
