@@ -382,7 +382,7 @@ void HilbertCurve3D::BuildShapeOrder()
 
 		for (size_t kk = 0; kk < vShapeVerticesX.size(); ++kk)
 		{
-			m_mShapeOrder[iShapeInd][vShapeVerticesX[kk]][vShapeVerticesY[kk]][vShapeVerticesZ[kk]] = kk;
+			m_mShapeOrder[iShapeInd][vShapeVerticesX[kk]][vShapeVerticesY[kk]][vShapeVerticesZ[kk]] = (int) kk;
 		}
 	}
 
@@ -440,7 +440,7 @@ vector<size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 	HilbertCurve3D oHilbert;
 
 	// Allocate an output vector:
-	int N = cor.size();
+	int N = (int) cor.size();
 	vector<unsigned long long int> vOut;
 	vOut.reserve(N);
 	
@@ -459,7 +459,8 @@ vector<size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 		//vOut.push_back(oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], 2));
 	}
 	// Get the sorting indices:
-	vector<size_t> vIndSort = ordered(vOut);
+	vector<size_t> vIndSort;
+	sort_index(vOut,vIndSort);
 	// Reorder the Hilbert distances vector (according to the sorting indices):
 	reorder( vOut, vIndSort );
 

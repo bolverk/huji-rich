@@ -8,6 +8,7 @@
 #ifndef HILBERTORDER3D_HPP
 #define HILBERTORDER3D_HPP 1
 #include <vector>
+#include "../../misc/utils.hpp"
 #include "Vector3D.hpp"
 using namespace std;
 
