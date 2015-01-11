@@ -355,6 +355,19 @@ template<class T> void sort_index(const vector<T> & arr,vector<int>& res)
 
 /*! \brief Returns the indeces of a sort
   \param arr The array to sort
+  \param res The indeces of the sort that is given as the output
+*/
+template<class T> void sort_index(const vector<T> & arr,vector<size_t>& res)
+{
+  res.resize(arr.size());
+  for(size_t i=0;i<res.size();++i)
+    res[i]=i;
+  sort(res.begin(),res.end(),index_cmp<vector<T> >(arr));
+}
+
+
+/*! \brief Returns the indeces of a sort
+  \param arr The array to sort
   \return The indeces of the sort that is given as the output
 */
 template<class T> vector<size_t> sort_index(const vector<T> & arr)

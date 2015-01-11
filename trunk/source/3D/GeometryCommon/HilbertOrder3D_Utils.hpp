@@ -33,24 +33,6 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 */
 void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<vector<size_t> > & vOut);
 
-// Return indices order after sorting of the values vector:
-template <typename T>
-vector<size_t> ordered(vector<T> const& values) {
-	vector<size_t> indices(values.size());
-
-	for (size_t ii = 0; ii < indices.size(); ++ii)
-	{
-		indices[ii] = ii;
-	}
-
-	sort(
-	     //		begin(indices), end(indices),
-	     indices.begin(),indices.end(),
-		[&](size_t a, size_t b) { return values[a] < values[b]; }
-	);
-	return indices;
-}
-
 // Reorder a vector according to an index vector (obtained from the 'ordered' function)
 template< class T >
 void reorder(vector<T> & v, vector<size_t> const & order)
