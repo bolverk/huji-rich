@@ -78,7 +78,7 @@ public:
 	\param index Cell index
 	\return Cell edges
 	*/
-	virtual vector<size_t>const& GetCellFaces(int index) const = 0;
+	virtual vector<size_t>const& GetCellFaces(size_t index) const = 0;
 
 		/*!
 	\brief Returns a reference to the point vector
