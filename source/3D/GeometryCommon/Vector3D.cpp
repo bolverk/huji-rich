@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-	static inline double round(double val)
+	static inline double my_round(double val)
 	{    
 		return floor(val + 0.5);
 	}
@@ -135,9 +135,9 @@ void Vector3D::RotateZ(double a)
 
 void Vector3D::Round()
 {
-	x = round(x);
-	y = round(y);
-	z = round(z);
+	x = my_round(x);
+	y = my_round(y);
+	z = my_round(z);
 }
 
 Vector3D operator+(Vector3D const& v1, Vector3D const& v2)
