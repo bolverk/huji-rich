@@ -68,9 +68,9 @@ namespace
 		for(size_t i=0;i<tess.GetTotalFacesNumber();++i)
 		{
 			const Conserved3D delta = dt*tess.GetFace(i).GetArea()*fluxes[i];
-			if(tess.IsGhostPoint(tess.GetFace(i).neighbors.first))
+			if(!tess.IsGhostPoint(tess.GetFace(i).neighbors.first))
 				extensive[tess.GetFace(i).neighbors.first] -= delta;
-			if(tess.IsGhostPoint(tess.GetFace(i).neighbors.second))
+			if(!tess.IsGhostPoint(tess.GetFace(i).neighbors.second))
 				extensive[tess.GetFace(i).neighbors.second] += delta;
 		}
 	}
