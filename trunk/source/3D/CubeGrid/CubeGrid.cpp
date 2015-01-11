@@ -2,14 +2,14 @@
 
 namespace
 {
-	void ConvertIndexToSubindex(size_t index,size_t &i,size_t &j,size_t &k,
+	/*void ConvertIndexToSubindex(size_t index,size_t &i,size_t &j,size_t &k,
 		size_t ny_,size_t nz_)
 	{
 		k=index%(nz_);
 		i=index/(nz_*ny_);
 		j=(index-i*nz_*ny_)/nz_;
 	}
-
+	*/
 	size_t ConvertSubindexToIndex(size_t i,size_t j,size_t k,
 		size_t ny_,size_t nz_)
 	{
@@ -194,7 +194,7 @@ double CubeGrid::GetVolume(size_t /*index*/) const
 	return dx_*dy_*dz_;
 }
 
-vector<size_t>const& CubeGrid::GetCellFaces(int index) const
+vector<size_t>const& CubeGrid::GetCellFaces(size_t index) const
 {
 	return cellfaces_[index];
 }

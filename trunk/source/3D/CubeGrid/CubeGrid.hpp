@@ -54,7 +54,7 @@ public:
 
 	double GetVolume(size_t index) const;
 
-	vector<size_t>const& GetCellFaces(int index) const;
+	vector<size_t>const& GetCellFaces(size_t index) const;
 
 	vector<Vector3D>& GetMeshPoints(void);
 
