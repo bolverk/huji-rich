@@ -20,6 +20,7 @@ private:
 	vector<Vector3D> cor_;
 	vector<Face> faces_;
 	vector<vector<size_t> > cellfaces_;
+	vector<vector<size_t> > temp_;
 
 	CubeGrid(CubeGrid const& other);
 	CubeGrid& operator=(CubeGrid const& other);
