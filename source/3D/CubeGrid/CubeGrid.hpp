@@ -20,6 +20,9 @@ private:
 	vector<Vector3D> cor_;
 	vector<Face> faces_;
 	vector<vector<size_t> > cellfaces_;
+
+	CubeGrid(CubeGrid const& other);
+	CubeGrid& operator=(CubeGrid const& other);
 public:
 	/*!
 	\brief Class constructor
@@ -31,8 +34,6 @@ public:
 	*/
 	CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerleft,
 		Vector3D const& frontupperright);
-
-	CubeGrid(CubeGrid const& other);
 
 	void Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc);
 
