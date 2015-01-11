@@ -465,7 +465,7 @@ vector<size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 	reorder( vOut, vIndSort );
 
 	// Find indices with repeated Hilbert distance:
-	vector<vector<size_t>> vEqualIndices;
+	vector<vector<size_t> > vEqualIndices;
 	FindEqualIndices(vOut, vEqualIndices);
 	
 	// If all points have different Hilbert distances, return the sorting indices:

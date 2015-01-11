@@ -41,6 +41,10 @@ public:
 
   void timeAdvance();
 
+  const Tessellation3D& getTesselation(void) const;
+
+  const vector<ComputationalCell>& getCells(void) const;
+
 private:
   Tessellation3D& tess_;
   const EquationOfState& eos_;

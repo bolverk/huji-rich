@@ -669,7 +669,7 @@ template<class T> T lazy_min(const Index2Member<T>& i2m)
 {
   T res = i2m(0);
   for(size_t i=1;i<i2m.getLength();++i)
-    res = min(res,i2m(i));
+    res = std::min(res,i2m(i));
   return res;
 }
 

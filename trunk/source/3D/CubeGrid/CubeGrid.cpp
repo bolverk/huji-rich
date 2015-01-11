@@ -1,4 +1,5 @@
 #include "CubeGrid.hpp"
+#include <limits>
 
 namespace
 {

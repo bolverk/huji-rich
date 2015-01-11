@@ -141,3 +141,13 @@ void HDSim3D::timeAdvance(void)
 	cells_ = serial_generate(AllCellsUpdater(tess_,extensive_,eos_,cu_));  
 	pt_.update(dt);
 }
+
+const Tessellation3D& HDSim3D::getTesselation(void) const
+{
+  return tess_;
+}
+
+const vector<ComputationalCell>& HDSim3D::getCells(void) const
+{
+  return cells_;
+}

@@ -16,5 +16,7 @@ public:
 	\param tess The tessellation to log
 	*/
 	virtual void Log(Tessellation3D const& tess)const=0;
+
+  virtual ~TessLogger(void);
 };
 #endif //TESSLOGGER_HPP
