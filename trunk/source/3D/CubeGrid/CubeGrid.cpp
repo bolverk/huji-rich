@@ -113,7 +113,14 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 	// Add the faces for the points
 	for(size_t i=0;i<cellfaces_.size();++i)
 		cellfaces_[i].reserve(6);
-	for(size_t k=0;k<nz_;++k)
+	for(size_t i=0;i<faces_.size();++i)
+	{
+		if(faces_[i].neighbors.first<maxsize_)
+			cellfaces_[faces_[i].neighbors.first].push_back(i);
+		if(faces_[i].neighbors.second<maxsize_)
+			cellfaces_[faces_[i].neighbors.second].push_back(i);
+	}
+/*	for(size_t k=0;k<nz_;++k)
 	{
 		for(size_t i=0;i<ny_;++i)
 		{
@@ -130,7 +137,7 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 				cellfaces_[index].push_back(i*nx_+j+(k+1)*ny_*nx_);
 			}
 		}
-	}
+	}*/
 	// Create the points
 	cor_.resize(nx_*ny_*nz_);
 	for(size_t i=0;i<nx_;++i)
@@ -276,7 +283,7 @@ Vector3D CubeGrid::Normal(size_t faceindex)const
 {
 	if(faceindex<(nx_*ny_*(nz_+1)))
 		return Vector3D(0,0,dz_);
-	if(faceindex<(nx_*(ny_+1)*(nz_+1)))
+	if(faceindex<(nx_*ny_*(nz_+1)+nx_*(ny_+1)*nz_))
 		return Vector3D(0,dy_,0);
 	else
 		return Vector3D(dx_,0,0);
