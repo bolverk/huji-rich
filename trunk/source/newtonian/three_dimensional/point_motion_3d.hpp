@@ -3,8 +3,8 @@
   \author Almog Yalinewich
  */
 
-#ifndef POINT_MOTION_HPP
-#define POINT_MOTION_HPP 1
+#ifndef POINT_MOTION3D_HPP
+#define POINT_MOTION3D_HPP 1
 
 #include "../../3D/GeometryCommon/Vector3D.hpp"
 
@@ -23,4 +23,4 @@ public:
   virtual ~PointMotion3D(void);
 };
 
-#endif // POINT_MOTION_HPP
+#endif // POINT_MOTION3D_HPP
