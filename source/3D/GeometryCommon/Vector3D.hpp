@@ -183,10 +183,10 @@ Vector3D RotateZ(Vector3D const& v, double a);
 
 /*! \brief Reflect vector
 \param v Vector
-\param axis Axis of reflection
+\param axis Normal to the reflection plane
 \return Reflection of v about axis
 */
-Vector3D Reflect(Vector3D const& v, Vector3D const& axis);
+Vector3D Reflect(Vector3D const& v, Vector3D const& normal);
 
 /*! \brief Calculates the distance between two vectors
 \param v1 First vector

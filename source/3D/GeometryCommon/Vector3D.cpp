@@ -200,9 +200,9 @@ double CalcAngle(Vector3D const& v1, Vector3D const& v2)
 	return acos(ScalarProd(v1, v2) / abs(v1) / abs(v2));
 }
 
-Vector3D Reflect(Vector3D const& v, Vector3D const& axis)
+Vector3D Reflect(Vector3D const& v, Vector3D const& normal)
 {
-	return 2 * ScalarProd(v, axis)*axis / pow(abs(axis), 2) - v;
+	return v - 2 * ScalarProd(v, normal)*normal / pow(abs(normal), 2);
 }
 
 double distance(Vector3D const& v1, Vector3D const& v2)
