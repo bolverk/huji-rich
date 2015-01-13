@@ -82,7 +82,6 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	sort(points.begin(),points.end(),VectorSort);
 	// Start building the convexhull
 	size_t n=points.size();
-	vector<int> indeces(n-1);
 	vector<double> angles(n-1);
 	for(size_t i=0;i<n-1;++i)
 		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);
