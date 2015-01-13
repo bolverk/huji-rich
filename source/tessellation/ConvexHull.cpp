@@ -54,7 +54,6 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	// Remove identical points
 	for(size_t i=1;i<edge_index.size();++i)
 	{
-		size_t n=points.size();
 		bool samepoint=false;
 		Edge const& edge = tess->GetEdge(edge_index[i]);
 		for (vector<Vector2D>::iterator it = points.begin(); it != points.end();++it)
