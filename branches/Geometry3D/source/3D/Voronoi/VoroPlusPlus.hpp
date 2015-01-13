@@ -7,6 +7,9 @@
 #define VOROPLUSPLUS_HPP
 
 #include "../GeometryCommon/Tessellation3D.hpp"
+#include "../GeometryCommon/Face.hpp"
+
+#include <voro++.hh>
 
 class VoroPlusPlus : Tessellation3D
 {
@@ -158,6 +161,40 @@ public:
 	*/
 	virtual Vector3D CalcFaceVelocity(size_t p0, size_t p1, Vector3D const& v0,
 		Vector3D const& v1)const;
+
+private:
+	// A Voro++ specific Cell class
+	class Cell
+	{
+	private:
+		Vector3D _center, _centerOfMass;
+		double _volume, _width;
+		std::vector<size_t> _faces;
+
+	public:
+		Vector3D GetCenterOfMass() const
+		{
+			return _centerOfMass;
+		}
+		double GetVolume() const
+		{
+			return _volume;
+		}
+		double GetWidth() const
+		{
+			return _width;
+		}
+		const std::vector<size_t> GetFaces() const
+		{
+			return _faces;
+		}
+
+		Cell(std::vector<Face> &allFaces, voro::c_loop_base &looper, voro::container &container);
+	};
+
+	std::vector<Cell> _cells;
+	std::vector<Face> _faces;
+	std::vector<Vector3D> _meshPoints;
 };
 
 #endif // VOROPLUSPLUS_HPP
