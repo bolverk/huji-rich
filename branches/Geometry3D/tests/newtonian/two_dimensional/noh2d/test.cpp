@@ -1,0 +1,175 @@
+#include "source/tessellation/VoronoiMesh.hpp"
+#include "source/newtonian/two_dimensional/hdsim2d.hpp"
+#include "source/newtonian/common/hllc.hpp"
+#include "source/newtonian/common/ideal_gas.hpp"
+#include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
+#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
+#include "source/newtonian/two_dimensional/hydro_boundary_conditions/CustomOuter.hpp"
+#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
+#include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
+#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
+#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
+#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/misc/mesh_generator.hpp"
+#include "source/misc/simple_io.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/misc/int2str.hpp"
+#include "source/newtonian/test_2d/noh2d/noh_hbc.hpp"
+#include "source/newtonian/test_2d/noh2d/noh_amr.hpp"
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#include "source/mpi/mpi_macro.hpp"
+#include "source/mpi/SetLoad.hpp"
+#endif
+
+class xVel :public SpatialDistribution
+{
+private:
+  double v_;
+public:
+  xVel(double v):v_(v){};
+  ~xVel(){};
+  double operator()(Vector2D const& point) const
+  {
+    double r=abs(point);
+    return -v_*point.x/r;;
+  }
+};
+
+class yVel :public SpatialDistribution
+{
+private:
+  double v_;
+public:
+  yVel(double v):v_(v){};
+  ~yVel(){};
+  double operator()(Vector2D const& point) const
+  {
+    double r=abs(point);
+    return -v_*point.y/r;
+  }
+};
+
+
+int main(void)
+{
+#ifdef RICH_MPI
+  MPI_Init(NULL,NULL);
+#endif
+  // Set up the initial grid points
+  int np = read_int("resolution.txt");
+  double width=2;
+  // Set up the boundary type for the points
+  SquareBox outer(-width*0.5,width*0.5,width*0.5,-width*0.5);
+
+  //vector<Vector2D> InitPoints=SquareMesh(np,np,width,width);
+#ifdef RICH_MPI
+  int rank=get_mpi_rank();
+  int ws=get_mpi_size();
+  np*=sqrt(1.0*ws);
+  vector<Vector2D> procmesh=RandSquare(ws,-1,1,-1,1);
+  VoronoiMesh proctess(procmesh,outer);
+  vector<Vector2D> InitPoints = SquareMeshM(np,np,proctess,Vector2D(-1,-1), Vector2D(1,1));
+  SetLoad(proctess,InitPoints,outer,np*np/ws,1.2);
+#else
+  vector<Vector2D> InitPoints = cartesian_mesh(np,np, Vector2D(-1,-1), Vector2D(1,1));
+#endif
+
+  // Set up the tessellation
+  VoronoiMesh tess;
+
+  // Set up the Riemann solver
+  Hllc rs;
+
+  // Set the hydro boundary conditions
+  Vector2D center(0,0);
+  double rho=1;
+  double v_in=1;
+  double p=1e-6;
+  NohHBC hbc(center,rho,v_in,p);
+
+  // Set up the equation of state
+  IdealGas eos(read_number("adiabatic_index.txt"));
+
+  // Set up the point motion scheme
+  Lagrangian l_motion;
+  RoundCells pointmotion(l_motion,hbc,1,0.02,true);
+
+  // Set up the interpolation
+  LinearGaussConsistent interpolation(eos,outer,hbc);
+
+  // Set up the initial Hydro
+  Uniform2D density(rho);
+  Uniform2D pressure(p);
+  xVel xvelocity(v_in);
+  yVel yvelocity(v_in);
+
+  // Set up the external source term
+  ZeroForce force;
+
+  // Set up the simulation
+#ifdef RICH_MPI
+  hdsim sim(InitPoints,tess,proctess,interpolation,density,pressure,xvelocity,
+	    yvelocity,eos,rs,pointmotion,force,outer,hbc);
+  ConstNumberPerProc load(outer,np*np/ws);
+  sim.SetProcessorMovement(&load);
+#else
+  hdsim sim(InitPoints,tess,interpolation,density,pressure,xvelocity,
+	    yvelocity,eos,rs,pointmotion,force,outer,hbc);
+#endif
+
+  // Set cold flows on
+  double kineticfraction=0.01;
+  double gravityfraction=0.01;
+  sim.SetColdFlows(kineticfraction,gravityfraction);
+
+  // Define the AMR classes
+  double Vmax=2*width*width/(np*np);
+  double Vmin=0.25*width*width/(np*np);
+  NohRefine refine(Vmax);
+  NohRemove remove(Vmin);
+  
+  // Choose the Courant number
+  double cfl=0.3;
+  sim.SetCfl(cfl);
+
+  // How long shall we run the simulation?
+  double tend=2;
+  sim.SetEndTime(tend);
+
+  // Run main loop of the sim
+  while(sim.GetTime()<tend)
+    {
+      try
+	{
+	  // Advance one time step
+	  sim.TimeAdvance2Mid();
+
+	  #ifdef RICH_MPI
+	  if(get_mpi_rank()==0)
+	  #endif
+	    write_number(sim.GetTime(),"time.txt");
+
+	  // Remove small cells
+	  vector<int> removed_cells=sim.RemoveCells(&remove);
+	  // Refine big cells
+	  sim.RefineCells(&refine,removed_cells);
+	}
+      catch(UniversalError const& eo)
+	{
+	  DisplayError(eo);
+	}
+    }
+
+  // Done running the simulation, output the data
+#ifdef RICH_MPI
+  string filename="final"+int2str(rank)+".h5";
+#else
+  string filename="final.h5";
+#endif
+  write_snapshot_to_hdf5(sim,filename);
+#ifdef RICH_MPI
+  MPI_Finalize();
+#endif
+  return 0;
+}
