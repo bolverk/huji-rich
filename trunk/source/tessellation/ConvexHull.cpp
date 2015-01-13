@@ -45,8 +45,9 @@ namespace
 void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 {
 	vector<int> edge_index=tess->GetCellEdges(index);
-	const double eps=1e-7;
+	const double eps=1e-14;
 	vector<Vector2D> points;
+	points.reserve(10);
 	double R=tess->GetWidth(index);
 	points.push_back(tess->GetEdge(edge_index[0]).vertices.first);
 	points.push_back(tess->GetEdge(edge_index[0]).vertices.second);
@@ -55,18 +56,25 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	{
 		size_t n=points.size();
 		bool samepoint=false;
-		for(size_t j=0;j<n;++j)
+		Edge const& edge = tess->GetEdge(edge_index[i]);
+		for (vector<Vector2D>::iterator it = points.begin(); it != points.end();++it)
 		{
-			if(tess->GetEdge(edge_index[i]).vertices.first.distance(points[j])<eps*R)
-				samepoint=true;
+			if (((edge.vertices.first.x - it->x)*(edge.vertices.first.x - it->x) + (edge.vertices.first.y - it->y)*(edge.vertices.first.y - it->y)) < eps*R*R)
+			{
+				samepoint = true;
+				break;
+			}				
 		}
 		if(!samepoint)
 			points.push_back(tess->GetEdge(edge_index[i]).vertices.first);
 		samepoint=false;
-		for(size_t j=0;j<n;++j)
+		for (vector<Vector2D>::iterator it = points.begin(); it != points.end(); ++it)
 		{
-			if(tess->GetEdge(edge_index[i]).vertices.second.distance(points[j])<eps*R)
-				samepoint=true;
+			if (((edge.vertices.second.x - it->x)*(edge.vertices.second.x - it->x) + (edge.vertices.second.y - it->y)*(edge.vertices.second.y - it->y))<eps*R*R)
+			{
+				samepoint = true;
+				break;
+			}
 		}
 		if(!samepoint)
 			points.push_back(tess->GetEdge(edge_index[i]).vertices.second);
@@ -75,7 +83,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	sort(points.begin(),points.end(),VectorSort);
 	// Start building the convexhull
 	size_t n=points.size();
-	//	vector<int> indeces(n-1);
+	vector<int> indeces(n-1);
 	vector<double> angles(n-1);
 	for(size_t i=0;i<n-1;++i)
 		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);

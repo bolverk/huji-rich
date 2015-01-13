@@ -139,7 +139,7 @@ virtual int GetOriginalIndex(int point) const;
 virtual vector<Vector2D>& GetMeshPoints(void)=0;
 
 /*!
-	\brief Returns the indeces of the neighbors not including -1
+	\brief Returns the indeces of the neighbors
 	\param index The cell to check
 	\return The neighbors
 */
@@ -230,6 +230,8 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
   \return The CM's
   */
   virtual vector<Vector2D>& GetAllCM(void)=0;
+
+  virtual void GetNeighborNeighbors(vector<int> &result, int point)const =0;
 };
 
 #endif // TESSELLATION_HPP

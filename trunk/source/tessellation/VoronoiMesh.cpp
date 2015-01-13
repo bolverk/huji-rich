@@ -1266,9 +1266,9 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
 {
   vector<int> res(mesh_vertices[(size_t)index].size());
   for(size_t i=0;i<res.size();++i)
-      res[(size_t)i] = edges[(size_t)mesh_vertices[(size_t)index][(size_t)i]].neighbors.first!=index ?
-	edges[(size_t)mesh_vertices[(size_t)index][(size_t)i]].neighbors.first :
-	edges[(size_t)mesh_vertices[(size_t)index][(size_t)i]].neighbors.second;
+      res[i] = edges[(size_t)mesh_vertices[(size_t)index][i]].neighbors.first!=index ?
+	edges[(size_t)mesh_vertices[(size_t)index][i]].neighbors.first :
+	edges[(size_t)mesh_vertices[(size_t)index][i]].neighbors.second;
   return res;
 }
 
@@ -2286,7 +2286,7 @@ void VoronoiMesh::GetAdditionalBoundary(vector<vector<int> > &copied,
 	}
 }
 
-void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point)
+void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point) const
 {
 	result.reserve(7);
 	int n=(int)mesh_vertices[(size_t)point].size();
@@ -2307,25 +2307,29 @@ void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point)
 		}
 	}
 	sort(result.begin(),result.end());
-	unique(result);
+	result=unique(result);
 }
 
-void VoronoiMesh::GetNeighborNeighbors(vector<int> &result,int point)
+void VoronoiMesh::GetNeighborNeighbors(vector<int> &result,int point) const
 {
-	vector<int> neigh;
+	vector<int> neigh=GetNeighbors(point);
 	result.clear();
-	GetRealNeighbor(neigh,point);
+	result.reserve(25);
+	//GetRealNeighbor(neigh,point);
 	int n=(int)neigh.size();
 	for(int i=0;i<n;++i)
 	{
-		vector<int> temp;
-		GetRealNeighbor(temp,neigh[(size_t)i]);
-		int N=(int)temp.size();
-		for(int j=0;j<N;++j)
-			result.push_back(temp[(size_t)j]);
+		if (neigh[i] < 0)
+			continue;
+		vector<int> temp=GetNeighbors(GetOriginalIndex(neigh[i]));
+		//GetRealNeighbor(temp,neigh[(size_t)i]);
+		for(size_t j=0;j<temp.size();++j)
+			result.push_back(GetOriginalIndex(temp[j]));
 	}
 	sort(result.begin(),result.end());
-	unique(result);
+	result=unique(result);
+	// Remove self point
+	RemoveVal(result, point);
 }
 
 void VoronoiMesh::GetCorners(vector<vector<int> > &copied,

@@ -226,16 +226,17 @@ template <class T> T VectorSum(vector<T> const&v)
 */
 template <class T> vector<T> unique(vector<T> const& v)
 {
-  int n=int(v.size());
+  size_t n=v.size();
   vector<T> res;
+  res.reserve(n);
   if(n==0)
     return res;
   res.push_back(v[0]);
-  for(size_t i=1;i<v.size();++i)
-    if(v[i]==v[i-1])
-      continue;
-    else
-      res.push_back(v[i]);
+  for (typename vector<T>::const_iterator it = v.begin() + 1; it != v.end();++it)
+  if (*it == *(it - 1))
+	  continue;
+  else
+	  res.push_back(*it);
   return res;
 }
 

@@ -216,6 +216,7 @@ public:
 
   vector<Vector2D>& GetAllCM(void);
 
+  void GetNeighborNeighbors(vector<int> &result, int point)const;
 private:
 	double eps;
 	OuterBoundary const* obc;
@@ -244,8 +245,7 @@ private:
 		vector<vector<int> > &result,vector<vector<int> > &totest);
 	void GetCorners(vector<vector<int> > &copied,vector<vector<int> > &result);
 	vector<int> AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,int side);
-	void GetNeighborNeighbors(vector<int> &result,int point);
-	void GetRealNeighbor(vector<int> &result,int point);
+	void GetRealNeighbor(vector<int> &result,int point)const;
 	vector<int> GetBorderingCells(vector<int> const& copied,
 		vector<int> const& totest,int tocheck,vector<int> tempresult,int outer);
 	bool CloseToBorder(int point,int &border);
