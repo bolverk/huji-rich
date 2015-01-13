@@ -45,7 +45,7 @@ namespace
 void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 {
 	vector<int> edge_index=tess->GetCellEdges(index);
-	const double eps=1e-14;
+	const double eps=1e-7;
 	vector<Vector2D> points;
 	points.reserve(10);
 	double R=tess->GetWidth(index);
