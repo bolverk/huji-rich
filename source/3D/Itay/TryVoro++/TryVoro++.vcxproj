@@ -41,11 +41,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\Developments\ScientificProjects\Rich\source\3D\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\Developments\ScientificProjects\Rich\source\3D\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

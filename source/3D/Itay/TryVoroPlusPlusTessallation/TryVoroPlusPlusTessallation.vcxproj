@@ -11,19 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0EDF2F0B-198A-4FCC-84D1-4F463F70DD93}</ProjectGuid>
+    <ProjectGuid>{5072B470-2BAB-4DF1-B292-D798D17A6E70}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Geometry3D</RootNamespace>
+    <RootNamespace>TryVoroPlusPlusTessallation</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -39,18 +39,24 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\..;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\..;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -62,36 +68,28 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\CubeGrid\CubeGrid.cpp" />
-    <ClCompile Include="..\GeometryCommon\BinaryLogger.cpp" />
-    <ClCompile Include="..\GeometryCommon\Face.cpp" />
-    <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
-    <ClCompile Include="..\GeometryCommon\HilbertOrder3D_Utils.cpp" />
-    <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
-    <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CubeGrid\CubeGrid.hpp" />
-    <ClInclude Include="..\GeometryCommon\BinaryLogger.hpp" />
-    <ClInclude Include="..\GeometryCommon\Face.hpp" />
-    <ClInclude Include="..\GeometryCommon\HilbertOrder3D.hpp" />
-    <ClInclude Include="..\GeometryCommon\HilbertOrder3D_Utils.hpp" />
-    <ClInclude Include="..\GeometryCommon\OuterBoundary3D.hpp" />
-    <ClInclude Include="..\GeometryCommon\Tessellation3D.hpp" />
-    <ClInclude Include="..\GeometryCommon\TessLogger.hpp" />
-    <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
-    <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
+    <ClCompile Include="TryVoroPlusPlusTessallation.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\3rdParty\voro++-0.4.6\msvc\voro++.vcxproj">
+      <Project>{ec858e24-556f-4f50-9030-a836dae266ae}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\msvc\Geometry3D.vcxproj">
+      <Project>{0edf2f0b-198a-4fcc-84d1-4f463f70dd93}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
