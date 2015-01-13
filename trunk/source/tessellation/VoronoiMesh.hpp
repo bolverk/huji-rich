@@ -268,6 +268,7 @@ private:
 		&boxduplicate,vector<vector<int> > const&firstduplicated);
 	void SendRecvRemove(vector<int> const& procorder,vector<int> const&
 		proclist,vector<vector<int> > &data);
+	void GetNeighborNeighborsMPI(vector<int> &result,int point);
 };
 /*! \brief Checks if a point is inside a Voronoi cell
 \param cpoints The points of the cell in convex order

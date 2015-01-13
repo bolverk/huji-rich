@@ -2332,6 +2332,24 @@ void VoronoiMesh::GetNeighborNeighbors(vector<int> &result,int point) const
 	RemoveVal(result, point);
 }
 
+void VoronoiMesh::GetNeighborNeighborsMPI(vector<int> &result,int point)
+{
+	vector<int> neigh;
+	result.clear();
+	GetRealNeighbor(neigh,point);
+	int n=(int)neigh.size();
+	for(int i=0;i<n;++i)
+	{
+		vector<int> temp;
+		GetRealNeighbor(temp,neigh[(size_t)i]);
+		int N=(int)temp.size();
+		for(int j=0;j<N;++j)
+			result.push_back(temp[(size_t)j]);
+	}
+	sort(result.begin(),result.end());
+	unique(result);
+}
+
 void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 	vector<vector<int> > &result)
 {
@@ -2351,7 +2369,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				copied[(size_t)i][(size_t)j]))
 			{
 				vector<int> temp;
-				GetNeighborNeighbors(temp,copied[(size_t)i][(size_t)j]);
+				GetNeighborNeighborsMPI(temp,copied[(size_t)i][(size_t)j]);
 				result[(size_t)i].insert(result[(size_t)i].end(),temp.begin(),temp.end());
 				temp=AddPointsAlongEdge(copied[(size_t)i][(size_t)j],copied,i);
 				toadd[(size_t)((i+1)%nsides)].insert(toadd[(size_t)((i+1)%nsides)].end(),temp.begin(),
@@ -2366,7 +2384,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				copied[(size_t)i][(size_t)j]))
 			{
 				vector<int> temp;
-				GetNeighborNeighbors(temp,copied[(size_t)i][(size_t)j]);
+				GetNeighborNeighborsMPI(temp,copied[(size_t)i][(size_t)j]);
 				result[(size_t)((i-1+nsides)%nsides)].insert(result[(size_t)((i-1+nsides)%nsides)].end()
 					,temp.begin(),temp.end());
 				temp=AddPointsAlongEdge(copied[(size_t)i][(size_t)j],copied,i);
