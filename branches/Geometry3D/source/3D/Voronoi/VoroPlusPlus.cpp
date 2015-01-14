@@ -236,3 +236,8 @@ voro::container VoroPlusPlus::BuildContainer()
 
 	return container;
 }
+
+void VoroPlusPlus::ExtractResults(voro::container container)
+{
+	// TODO: Extract Results
+}
