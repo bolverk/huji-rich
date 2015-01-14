@@ -103,7 +103,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	if(!pfirst.empty())
 	{
 		pfirst.insert(pfirst.begin(),points[indeces[0]+1]);
-		//		int N=(int)pfirst.size();
+		//		int N=static_cast<int>(pfirst.size());
 		vector<double> dist(pfirst.size());
 		for(size_t i=0;i<pfirst.size();++i)
 			dist[i]=abs(pfirst[i]-points[0]);
@@ -115,19 +115,19 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	}
 	if(!plast.empty())
 	{
-		plast.insert(plast.begin(),points[(size_t)indeces[(size_t)n-2]+1]);
-		int N=(int)plast.size();
+		plast.insert(plast.begin(),points[(size_t)indeces[static_cast<size_t>(n)-2]+1]);
+		int N=static_cast<int>(plast.size());
 		vector<double> dist;
 		for(int i=0;i<N;++i)
-			dist.push_back(abs(plast[(size_t)i]-points[0]));
-		vector<int> indeces2((size_t)N);
+			dist.push_back(abs(plast[static_cast<size_t>(i)]-points[0]));
+		vector<int> indeces2(static_cast<size_t>(N));
 		sort_index(dist,indeces2);
 		ReArrangeVector(plast,indeces2);
 		for(int i=0;i<N;++i)
-			result[(size_t)(n-1-i)]=plast[(size_t)i];
+			result[(size_t)(n-1-i)]=plast[static_cast<size_t>(i)];
 	}
-	int loc1=(int)pfirst.size();
-	int loc2=(int)plast.size();
+	int loc1=static_cast<int>(pfirst.size());
+	int loc2=static_cast<int>(plast.size());
 	for(size_t i=loc1+1;i<n-loc2;++i)
 	  result[i]=points[static_cast<size_t>(indeces[i-1])+1];
 }
@@ -136,18 +136,18 @@ void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
 {
 	vector<int> const& edges=tess->GetCellEdges(index);
 	const Vector2D mypoint=tess->GetMeshPoint(index);
-	int nedges=(int)edges.size();
-	result.resize((size_t)nedges);
-	vector<double> angles((size_t)nedges);
+	int nedges=static_cast<int>(edges.size());
+	result.resize(static_cast<size_t>(nedges));
+	vector<double> angles(static_cast<size_t>(nedges));
 	for(int i=0;i<nedges;++i)
 	{
-		Edge const& edge=tess->GetEdge(edges[(size_t)i]);
+		Edge const& edge=tess->GetEdge(edges[static_cast<size_t>(i)]);
 		const int other=(edge.neighbors.first==index)? edge.neighbors.second : edge.neighbors.first;
 		Vector2D otherpoint=(other==-1) ? GetReflectedPoint(edge,mypoint) : tess->GetMeshPoint(other);
-		angles[(size_t)i]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
+		angles[static_cast<size_t>(i)]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
 	}
 	vector<int> temp;
 	sort_index(angles,temp);
-	for(size_t i=0;i<(size_t)nedges;++i)
+	for(size_t i=0;i<static_cast<size_t>(nedges);++i)
 		result[i]=edges[(size_t)temp[i]];
 }
