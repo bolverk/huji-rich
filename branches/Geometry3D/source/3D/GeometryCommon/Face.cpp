@@ -1,7 +1,7 @@
 #include "Face.hpp"
 
 using namespace std;
- 
+
 Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2):
   vertices(vert),neighbors(neighbor1,neighbor2) {}
 
@@ -14,13 +14,39 @@ Face::Face(Face const& other):
   vertices(other.vertices),
   neighbors(other.neighbors) {}
 
-  double Face::GetArea(void) const
-  {
-	  double res=0;
-	  for(size_t i=0;i<vertices.size()-2;++i)
-		  res+=0.5*abs(CrossProduct(vertices[i+1]-vertices[0],vertices[i+2]-vertices[0]));
-	  return res;
-  }
+double Face::GetArea(void) const
+{
+	double res=0;
+	for(size_t i=0;i<vertices.size()-2;++i)
+		res+=0.5*abs(CrossProduct(vertices[i+1]-vertices[0],vertices[i+2]-vertices[0]));
+	return res;
+}
+
+bool Face::IdenticalTo(const vector<Vector3D> otherVertices) const
+{
+	if (vertices.size() != otherVertices.size())
+		return false;
+
+	// This implemenation is O(N^2), but since faces contain just a few vertices, it should be fine.
+	// To be more efficient (O(NlogN)) we need to be able to compare vectors.
+	// Using a hash is problematic, as doubles make lousy hash keys, and the performance gain to O(N) is most
+	// certainly not worh it.
+
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		bool found = false;
+		for (size_t j = 0; j < otherVertices.size(); j++)
+			if (vertices[i] == otherVertices[j])
+			{
+				found = true;
+				break;
+			}
+		if (!found)
+			return false;
+	}
+
+	return true;
+}
 
 Vector3D calc_centroid(const Face& face)
 {

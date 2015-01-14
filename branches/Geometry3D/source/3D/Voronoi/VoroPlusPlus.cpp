@@ -19,9 +19,11 @@ void VoroPlusPlus::Initialise(vector<Vector3D> const& points, OuterBoundary3D co
 	// TODO: Store boundry conditions
 	Update(points);
 }
+
 void VoroPlusPlus::Update(vector<Vector3D> const& points)
 {
 	_meshPoints = points;
+	RunVoronoi();
 }
 
 size_t VoroPlusPlus::GetPointNo(void) const
@@ -44,12 +46,12 @@ Vector3D const& VoroPlusPlus::GetCellCM(size_t index) const
 */
 size_t VoroPlusPlus::GetTotalFacesNumber(void) const
 {
-	return _faces.size();
+	return _faces.NumFaces();
 }
 
-Face const& VoroPlusPlus::GetFace(size_t index) const
+const Face& VoroPlusPlus::GetFace(size_t index) const
 {
-	return _faces[index];
+	return _faces.GetFace(index);
 }
 
 double VoroPlusPlus::GetWidth(size_t index) const
@@ -78,9 +80,15 @@ vector<size_t> VoroPlusPlus::GetNeighbors(size_t index) const
 	vector<size_t> neighbors;
 
 	auto faceIndices = _cells[index].GetFaces();
-	for (int i = 0; i < faceIndices.size(); i++)
+	for (size_t i = 0; i < faceIndices.size(); i++)
 	{
-		auto face = _faces[i];
+		auto face = GetFace(i);
+		if (face.neighbors.first == index)
+			neighbors.push_back(face.neighbors.second);
+		else if (face.neighbors.second == index)
+			neighbors.push_back(face.neighbors.first);
+		else
+			assert(false); // One of the neighbors must be us!
 	}
 
 	return neighbors;
@@ -105,13 +113,13 @@ bool VoroPlusPlus::BoundaryFace(size_t index) const
 
 vector<vector<size_t> >& VoroPlusPlus::GetDuplicatedPoints()
 {
-	vector<vector<size_t>> v;
+	static vector<vector<size_t>> v;
 	return v;
 }
 
 vector<vector<size_t> >const& VoroPlusPlus::GetDuplicatedPoints(void) const
 {
-	vector<vector<size_t>> v;
+	static vector<vector<size_t>> v;
 	return v;
 }
 
@@ -122,11 +130,7 @@ size_t VoroPlusPlus::GetTotalPointNumber(void)const
 
 vector<Vector3D>& VoroPlusPlus::GetAllCM()
 {
-	vector<Vector3D> vec(_cells.size());
-	for (int i = 0; i < vec.size(); i++)
-		vec[i] = _cells[i].GetCenterOfMass();
-
-	return vec;
+	return _allCMs;
 }
 
 void VoroPlusPlus::GetNeighborNeighbors(vector<size_t> &result, size_t point) const
@@ -146,9 +150,9 @@ void VoroPlusPlus::GetNeighborNeighbors(vector<size_t> &result, size_t point) co
 }
 
 
-Vector3D VoroPlusPlus::Normal(size_t faceindex) const
+Vector3D VoroPlusPlus::Normal(size_t faceIndex) const
 {
-	Face face = _faces[faceindex];
+	Face face = GetFace(faceIndex);
 	Cell cell1 = _cells[face.neighbors.first];
 	Cell cell2 = _cells[face.neighbors.second];
 
@@ -173,4 +177,62 @@ Vector3D VoroPlusPlus::CalcFaceVelocity(size_t p0, size_t p1, Vector3D const& v0
 	Vector3D const& v1) const
 {
 	return Vector3D(); // TODO: Calculate the velocity properly
+}
+
+/*
+ * The FaceStore
+ */
+
+bool VoroPlusPlus::FaceStore::FindFace(const vector<Vector3D> &vertices, size_t &index) const
+{
+	for (index = 0; index < _faces.size(); index++)
+		if (_faces[index].IdenticalTo(vertices))
+			return true;
+
+	return false;
+}
+
+size_t VoroPlusPlus::FaceStore::StoreFace(const vector<Vector3D> &vertices)
+{
+	size_t index;
+	bool exists = FindFace(vertices, index);
+	if (exists)
+		return index;
+
+	Face face(vertices, (size_t)-1, (size_t)-1);
+	index = _faces.size();
+	_faces.push_back(face);
+	return index;
+}
+
+void VoroPlusPlus::RunVoronoi()
+{
+	auto container = BuildContainer();
+	ExtractResults(container);
+}
+
+voro::container VoroPlusPlus::BuildContainer()
+{
+	Vector3D min, max;
+
+	min = _meshPoints[0];
+	max = _meshPoints[0];
+
+	// Find the boundry
+	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
+	{
+		min.x = std::min(min.x, it->x);
+		min.y = std::min(min.y, it->y);
+		min.z = std::min(min.z, it->z);
+		max.x = std::max(max.x, it->x);
+		max.y = std::max(max.y, it->y);
+		max.z = std::max(max.z, it->z);
+	}
+
+	voro::container container(min.x, max.x, min.y, max.y, min.z, max.z, 20, 20, 20, false, false, false, 20);
+	int num = 0;
+	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
+		container.put(num++, it->x, it->y, it->z);
+
+	return container;
 }

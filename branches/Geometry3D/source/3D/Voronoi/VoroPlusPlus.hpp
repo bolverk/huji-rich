@@ -163,6 +163,21 @@ public:
 		Vector3D const& v1)const;
 
 private:
+	// A simple face store that manages the vector of faces, making sure faces aren't duplicate
+	class FaceStore
+	{
+	private:
+		std::vector<Face> _faces;
+		bool FindFace(const std::vector<Vector3D> &vertices, size_t &index) const;
+
+	public:
+		size_t StoreFace(const std::vector<Vector3D>& vertices);
+
+		const Face& GetFace(size_t index) const { return _faces[index];  }
+		Face& GetFace(size_t index) { return _faces[index]; }
+		size_t NumFaces() const { return _faces.size(); }
+	};
+
 	// A Voro++ specific Cell class
 	class Cell
 	{
@@ -184,17 +199,22 @@ private:
 		{
 			return _width;
 		}
-		const std::vector<size_t> GetFaces() const
+		const std::vector<size_t>& GetFaces() const
 		{
 			return _faces;
 		}
 
-		Cell(std::vector<Face> &allFaces, voro::c_loop_base &looper, voro::container &container);
+		Cell(FaceStore &faces, voro::c_loop_base &looper, voro::container &container);
 	};
 
 	std::vector<Cell> _cells;
-	std::vector<Face> _faces;
+	FaceStore _faces;
 	std::vector<Vector3D> _meshPoints;
+	std::vector<Vector3D> _allCMs;
+
+	void RunVoronoi();
+	voro::container BuildContainer();
+	void ExtractResults(voro::container container);
 };
 
 #endif // VOROPLUSPLUS_HPP

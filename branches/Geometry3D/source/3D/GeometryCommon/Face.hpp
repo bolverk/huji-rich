@@ -26,7 +26,6 @@ public:
     \param neighbor2 Index of second neighbor cell
   */
   Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2);
-
   Face(void);
 
   ~Face(void);
@@ -40,6 +39,16 @@ public:
     \return Length
   */
   double GetArea(void) const;
+
+
+  /*! \brief Sees if the face is identical to a list of vertices
+    \param List of vertices
+	\return True if this is the same face
+	\remark
+		We just make sure the list of vertices is identical to our list. Since we assume faces are
+		convex, as long as all the vertices appear in both, it's the same face.
+  */
+  bool IdenticalTo(const vector<Vector3D> vertices) const;
 };
 
 /*! \brief Calculates the centroid of aa face

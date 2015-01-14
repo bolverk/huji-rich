@@ -76,7 +76,7 @@ public:
 	\param v Vector to be compared to
 	\return True/False - according to the comparison results.
 	*/
-	bool operator==(Vector3D const& v);
+	bool operator==(const Vector3D &v) const;
 
 	/*! \brief Rotates the vector around the X axes
 	\param a Angle of rotation (in radians)
@@ -209,5 +209,4 @@ Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2);
 \param vZ Vector of z coordinates (out)
 */
 void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & vY, vector<double> & vZ);
-
 #endif // Vector3D_HPP
