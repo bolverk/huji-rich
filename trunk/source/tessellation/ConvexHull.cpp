@@ -115,7 +115,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	}
 	if(!plast.empty())
 	{
-		plast.insert(plast.begin(),points[(size_t)indeces[static_cast<size_t>(n)-2]+1]);
+	  plast.insert(plast.begin(),points[static_cast<size_t>(indeces[static_cast<size_t>(n)-2])+1]);
 		int N=static_cast<int>(plast.size());
 		vector<double> dist;
 		for(int i=0;i<N;++i)
@@ -124,7 +124,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 		sort_index(dist,indeces2);
 		ReArrangeVector(plast,indeces2);
 		for(int i=0;i<N;++i)
-			result[(size_t)(n-1-i)]=plast[static_cast<size_t>(i)];
+			result[static_cast<size_t>(n-1-i)]=plast[static_cast<size_t>(i)];
 	}
 	int loc1=static_cast<int>(pfirst.size());
 	int loc2=static_cast<int>(plast.size());
@@ -149,5 +149,5 @@ void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
 	vector<int> temp;
 	sort_index(angles,temp);
 	for(size_t i=0;i<static_cast<size_t>(nedges);++i)
-		result[i]=edges[(size_t)temp[i]];
+	  result[i]=edges[static_cast<size_t>(temp[i])];
 }
