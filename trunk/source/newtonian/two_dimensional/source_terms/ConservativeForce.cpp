@@ -11,33 +11,33 @@ namespace {
 		Vector2D dm;
 		vector<int> edge_index=tess.GetCellEdges(point);
 		Vector2D center=tess.GetMeshPoint(point);
-		int n=(int)edge_index.size();
+		int n=static_cast<int>(edge_index.size());
 		Edge edge;
 		for(int i=0;i<n;++i)
 		{
-		  edge=tess.GetEdge(edge_index[(size_t)i]);
+		  edge=tess.GetEdge(edge_index[static_cast<size_t>(i)]);
 			if(point==edge.neighbors.first)
 				if(edge.neighbors.second>-1)
 				{
-				  dm-=lengthes[(size_t)edge_index[(size_t)i]]*fluxes[(size_t)edge_index[(size_t)i]].Mass*
+				  dm-=lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*
 						(center-tess.GetMeshPoint(edge.neighbors.second));
 				}
 				else
 				{
 					Vector2D r=hbc.Normal(edge,tess);
-					dm-=2*lengthes[(size_t)edge_index[(size_t)i]]*fluxes[(size_t)edge_index[(size_t)i]].Mass*r;
+					dm-=2*lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*r;
 				}
 			else
 				if(point==edge.neighbors.second)
 					if(edge.neighbors.first>-1)
 					{
-					  dm+=lengthes[(size_t)edge_index[(size_t)i]]*fluxes[(size_t)edge_index[(size_t)i]].Mass*
+					  dm+=lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*
 							(center-tess.GetMeshPoint(edge.neighbors.first));
 					}
 					else
 					{
 						Vector2D r=hbc.Normal(edge,tess);
-						dm+=2*lengthes[(size_t)edge_index[(size_t)i]]*fluxes[(size_t)edge_index[(size_t)i]].Mass*r;
+						dm+=2*lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*r;
 					}
 				else
 					throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
@@ -70,8 +70,8 @@ Conserved ConservativeForce::Calculate
 		 tracer_extensive,
 		 time, dt);
 	double volume=tess.GetVolume(point);
-	res.Momentum=volume*cells[(size_t)point].Density*acc;
-	res.Energy=cells[(size_t)point].Density*volume*ScalarProd(point_velocity[(size_t)point],acc)+
+	res.Momentum=volume*cells[static_cast<size_t>(point)].Density*acc;
+	res.Energy=cells[static_cast<size_t>(point)].Density*volume*ScalarProd(point_velocity[static_cast<size_t>(point)],acc)+
 		0.5*ScalarProd(MassFlux(tess,point,fluxes,hbc,lengthes),acc);
 	if(DtCalc_)
 	{

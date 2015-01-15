@@ -10,7 +10,7 @@ namespace
 	{
 		const int rank = get_mpi_rank();
 		const vector<int>& edge_index=tess.GetCellEdges(rank);
-		const int n=(int)edge_index.size();
+		const int n=static_cast<int>(edge_index.size());
 		boost::array<double,4> res;
 		res[0]=min(tess.GetEdge(edge_index[0]).vertices.first.x,
 			tess.GetEdge(edge_index[0]).vertices.second.x);
@@ -56,7 +56,7 @@ namespace
 		double mincellR=abs(cpoints[0]-center);
 		double maxcellR(mincellR);
 		mincellR=min(mincellR,DistanceToEdge(center,etemp));
-		int npoints=(int)cpoints.size();
+		int npoints=static_cast<int>(cpoints.size());
 		for(int i=1;i<npoints;++i)
 		{
 			double temp=abs(cpoints[i]-center);
@@ -152,8 +152,8 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	Vector2D const&lowerleft,Vector2D const&upperright)
 {
-	const double widthx = (upperright.x-lowerleft.x)/(double)nx;
-	const double widthy = (upperright.y-lowerleft.y)/(double)ny;
+	const double widthx = (upperright.x-lowerleft.x)/static_cast<double>(nx);
+	const double widthy = (upperright.y-lowerleft.y)/static_cast<double>(ny);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
 	nx=(int)floor((tessEdges[1]-tessEdges[0])/widthx+0.5);
 	ny=(int)floor((tessEdges[3]-tessEdges[2])/widthy+0.5);
@@ -351,8 +351,8 @@ Vector2D CartesianGridGenerator::operator()(size_t idx) const
 	const size_t i = idx%nx_;
 	const size_t j = idx/nx_;
 	return lower_left_ +
-		Vector2D((upper_right_-lower_left_).x*(0.5+(double)i)/(double)nx_,
-		(upper_right_-lower_left_).y*(0.5+(double)j)/(double)ny_);
+		Vector2D((upper_right_-lower_left_).x*(0.5+static_cast<double>(i))/(double)nx_,
+		(upper_right_-lower_left_).y*(0.5+static_cast<double>(j))/static_cast<double>(ny_));
 }
 
 #endif

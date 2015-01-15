@@ -58,9 +58,9 @@ namespace
   vector<double> ScalarProd(Vector2D const&v,vector<Vector2D> const& vec)
   {
     vector<double> res(vec.size());
-    int n=(int)vec.size();
+    int n=static_cast<int>(vec.size());
     for(int i=0;i<n;++i)
-      res[(size_t)i]=ScalarProd(v,vec[(size_t)i]);
+      res[static_cast<size_t>(i)]=ScalarProd(v,vec[static_cast<size_t>(i)]);
     return res;
   }
 
@@ -86,8 +86,8 @@ namespace
     if(vec.empty())
       return vector<Vector2D> ();
     vector<Vector2D> res(vec.size());
-    int n=(int)vec.size();
-    for(size_t i=0;i<(size_t)n;++i)
+    int n=static_cast<int>(vec.size());
+    for(size_t i=0;i<static_cast<size_t>(n);++i)
       res[i]=v*vec[i];
     return res;
   }
@@ -141,8 +141,8 @@ namespace
   vector<double> operator*(Vector2D const&v,vector<Vector2D> const&vec)
   {
     vector<double> res(vec.size());
-    int n=(int)vec.size();
-    for(size_t i=0;i<(size_t)n;++i)
+    int n=static_cast<int>(vec.size());
+    for(size_t i=0;i<static_cast<size_t>(n);++i)
       res[i]=ScalarProd(v,vec[i]);
     return res;
   }
@@ -169,22 +169,22 @@ namespace
   (Tessellation const& tess,vector<Edge> const&
    edges,int cell_index,OuterBoundary const& obc)
   {
-    int n=(int)edges.size();
-    vector<Vector2D> res((size_t)n);
+    int n=static_cast<int>(edges.size());
+    vector<Vector2D> res(static_cast<size_t>(n));
     for(int i=0;i<n;++i)
       {
-	const int neigh0=edges[(size_t)i].neighbors.first;
-	const  int neigh1=edges[(size_t)i].neighbors.second;
+	const int neigh0=edges[static_cast<size_t>(i)].neighbors.first;
+	const  int neigh1=edges[static_cast<size_t>(i)].neighbors.second;
 	if(neigh0==cell_index)
 	  if(neigh1>-1) // we are not near rigid wall
-	    res[(size_t)i]=tess.GetMeshPoint(neigh1);
+	    res[static_cast<size_t>(i)]=tess.GetMeshPoint(neigh1);
 	  else
-	    res[(size_t)i]=GetReflectedPoint(tess,neigh0,obc,edges[(size_t)i]);
+	    res[static_cast<size_t>(i)]=GetReflectedPoint(tess,neigh0,obc,edges[static_cast<size_t>(i)]);
 	else
 	  if(neigh0>-1)
-	    res[(size_t)i]=tess.GetMeshPoint(neigh0);
+	    res[static_cast<size_t>(i)]=tess.GetMeshPoint(neigh0);
 	  else
-	    res[(size_t)i]=GetReflectedPoint(tess,neigh1,obc,edges[(size_t)i]);
+	    res[static_cast<size_t>(i)]=GetReflectedPoint(tess,neigh1,obc,edges[static_cast<size_t>(i)]);
       }
     return res;
   }
@@ -195,29 +195,29 @@ namespace
    vector<Primitive> const& cells,HydroBoundaryConditions const& hbc,
    double time,vector<bool> const& isrelevant)
   {
-    int n=(int)edges.size();
+    int n=static_cast<int>(edges.size());
     int neigh0,neigh1;
-    vector<Primitive> res((size_t)n);
+    vector<Primitive> res(static_cast<size_t>(n));
     for(int i=0;i<n;++i)
       {
-	if(hbc.IsBoundary(edges[(size_t)i],tess))
+	if(hbc.IsBoundary(edges[static_cast<size_t>(i)],tess))
 	  {
-	    res[(size_t)i]=hbc.GetBoundaryPrimitive(edges[(size_t)i],tess,cells,time);
+	    res[static_cast<size_t>(i)]=hbc.GetBoundaryPrimitive(edges[static_cast<size_t>(i)],tess,cells,time);
 	  }
 	else
 	  {
-	    neigh0=edges[(size_t)i].neighbors.first;
-	    neigh1=edges[(size_t)i].neighbors.second;
+	    neigh0=edges[static_cast<size_t>(i)].neighbors.first;
+	    neigh1=edges[static_cast<size_t>(i)].neighbors.second;
 	    if(neigh0==cell_index)
-	      if(isrelevant[(size_t)neigh1])
-		res[(size_t)i]=cells[(size_t)neigh1];
+	      if(isrelevant[static_cast<size_t>(neigh1)])
+		res[static_cast<size_t>(i)]=cells[static_cast<size_t>(neigh1)];
 			else
-			  res[(size_t)i]=cells[(size_t)neigh0];
+			  res[static_cast<size_t>(i)]=cells[static_cast<size_t>(neigh0)];
 	    else
-	      if(isrelevant[(size_t)neigh0])
-		res[(size_t)i]=cells[(size_t)neigh0];
+	      if(isrelevant[static_cast<size_t>(neigh0)])
+		res[static_cast<size_t>(i)]=cells[static_cast<size_t>(neigh0)];
 	      else
-		res[(size_t)i]=cells[(size_t)neigh1];
+		res[static_cast<size_t>(i)]=cells[static_cast<size_t>(neigh1)];
 	  }
       }
     return res;
@@ -228,23 +228,23 @@ namespace
 					     vector<vector<double> > const& tracers,
 					     HydroBoundaryConditions const& hbc,double time)
   {
-    int n=(int)edges.size();
+    int n=static_cast<int>(edges.size());
     int neigh0,neigh1;
-    vector<vector<double> > res((size_t)n);
+    vector<vector<double> > res(static_cast<size_t>(n));
     for(int i=0;i<n;++i)
       {
-	if(hbc.IsBoundary(edges[(size_t)i],tess))
+	if(hbc.IsBoundary(edges[static_cast<size_t>(i)],tess))
 	  {
-	    res[(size_t)i]=hbc.GetBoundaryTracers(edges[(size_t)i],tess,tracers,time);
+	    res[static_cast<size_t>(i)]=hbc.GetBoundaryTracers(edges[static_cast<size_t>(i)],tess,tracers,time);
 	  }
 	else
 	  {
-	    neigh0=edges[(size_t)i].neighbors.first;
-	    neigh1=edges[(size_t)i].neighbors.second;
+	    neigh0=edges[static_cast<size_t>(i)].neighbors.first;
+	    neigh1=edges[static_cast<size_t>(i)].neighbors.second;
 	    if(neigh0==cell_index)
-	      res[(size_t)i]=tracers[(size_t)neigh1];
+	      res[static_cast<size_t>(i)]=tracers[static_cast<size_t>(neigh1)];
 	    else
-	      res[(size_t)i]=tracers[(size_t)neigh0];
+	      res[static_cast<size_t>(i)]=tracers[static_cast<size_t>(neigh0)];
 	  }
       }
     return res;
@@ -258,18 +258,18 @@ namespace
   {
     ReducedPrimitiveGradient2D res;
     const ReducedPrimitive phi_i(cell,cell_tracer);
-    int n=(int)edge_list.size();
+    int n=static_cast<int>(edge_list.size());
     for(int i=0;i<n;++i)
       {
-	const Vector2D c_ij = CalcCentroid(edge_list[(size_t)i])-
-	  0.5*(neighbor_centers[(size_t)i]+center);
-	const Vector2D r_ij = center - neighbor_centers[(size_t)i];
+	const Vector2D c_ij = CalcCentroid(edge_list[static_cast<size_t>(i)])-
+	  0.5*(neighbor_centers[static_cast<size_t>(i)]+center);
+	const Vector2D r_ij = center - neighbor_centers[static_cast<size_t>(i)];
 	ReducedPrimitive phi_j;
 	if(cell_tracer.empty())
-	  phi_j=ReducedPrimitive(neighbors[(size_t)i]);
+	  phi_j=ReducedPrimitive(neighbors[static_cast<size_t>(i)]);
 	else
-	  phi_j=ReducedPrimitive(neighbors[(size_t)i],neighbor_tracers[(size_t)i]);
-	const double temp=edge_list[(size_t)i].GetLength()/cell_volume;
+	  phi_j=ReducedPrimitive(neighbors[static_cast<size_t>(i)],neighbor_tracers[static_cast<size_t>(i)]);
+	const double temp=edge_list[static_cast<size_t>(i)].GetLength()/cell_volume;
 	res += RpMultScalar(temp,MinusRp(phi_j,phi_i))*(c_ij/abs(r_ij))
 	  -RpMultScalar(0.5*temp,AddRp(phi_i,phi_j))*(r_ij/abs(r_ij));
       }
@@ -375,11 +375,11 @@ namespace
   {
     ReducedPrimitiveGradient2D res = slope;
     vector<ReducedPrimitive> centroid_vars(edge_list.size());
-    int n=(int)edge_list.size();
+    int n=static_cast<int>(edge_list.size());
     for(int i=0;i<n;++i)
       {
-	centroid_vars[(size_t)i] = interp_all(cell,cell_trace,center,slope,
-				      CalcCentroid(edge_list[(size_t)i]));
+	centroid_vars[static_cast<size_t>(i)] = interp_all(cell,cell_trace,center,slope,
+				      CalcCentroid(edge_list[static_cast<size_t>(i)]));
       }
     DensityGetter density_getter;
     PressureGetter pressure_getter;
@@ -408,7 +408,7 @@ namespace
 				    my_val-min_val);
 	for(int i=0;i<n;++i)
 	  {
-	    const double centroid_val = pg.get_property(centroid_vars[(size_t)i]);
+	    const double centroid_val = pg.get_property(centroid_vars[static_cast<size_t>(i)]);
 	    const double dphi = centroid_val - my_val;
 	    if(fabs(dphi)<0.1*max_diff&&centroid_val*my_val>0)
 	      continue;
@@ -426,14 +426,14 @@ namespace
     // Deal with tracers
     if(!res.tracers.empty())
       {
-	int tracer_number=(int)res.tracers.size();
+	int tracer_number=static_cast<int>(res.tracers.size());
 	for(int i=0;i<tracer_number;++i)
 	  {
 	    double psi = 1;
 	    boost::container::static_vector<double,17> neighbor_vals;
 	    for(int j=0;j<n;++j)
-	      neighbor_vals.push_back(neighbor_tracers[(size_t)j][(size_t)i]);
-	    const double my_val = cell_trace[(size_t)i];
+	      neighbor_vals.push_back(neighbor_tracers[static_cast<size_t>(j)][static_cast<size_t>(i)]);
+	    const double my_val = cell_trace[static_cast<size_t>(i)];
 	    const double min_val = min(*std::min_element(neighbor_vals.begin(),
 							 neighbor_vals.end()),my_val);
 	    const double max_val = max(*std::max_element(neighbor_vals.begin(),
@@ -442,7 +442,7 @@ namespace
 					my_val-min_val);
 	    for(int k=0;k<n;++k)
 	      {
-		const double centroid_val =centroid_vars[(size_t)k].tracers[(size_t)i];
+		const double centroid_val =centroid_vars[static_cast<size_t>(k)].tracers[static_cast<size_t>(i)];
 		const double dphi = centroid_val - my_val;
 		if(fabs(dphi)<0.1*max_diff&&centroid_val*my_val>0)
 		  continue;
@@ -459,7 +459,7 @@ namespace
 		      else
 			throw "Something bad happened in LinearGaussConsistent::Prepare";
 	      }
-	    res.tracers[(size_t)i] *= psi;
+	    res.tracers[static_cast<size_t>(i)] *= psi;
 	  }
       }
     return res;
@@ -474,11 +474,11 @@ namespace
   {
     ReducedPrimitiveGradient2D res = slope;
     vector<ReducedPrimitive> centroid_vars(edge_list.size());
-    int n=(int)edge_list.size();
+    int n=static_cast<int>(edge_list.size());
     for(int i=0;i<n;++i)
       {
-	centroid_vars[(size_t)i] = interp_all(cell,cell_trace,center,slope,
-				      CalcCentroid(edge_list[(size_t)i]));
+	centroid_vars[static_cast<size_t>(i)] = interp_all(cell,cell_trace,center,slope,
+				      CalcCentroid(edge_list[static_cast<size_t>(i)]));
       }
     DensityGetter density_getter;
     PressureGetter pressure_getter;
@@ -504,16 +504,16 @@ namespace
 	  {
 	    maxdiff = max(maxdiff,fabs(nv-my_val));
 	  }
-	for(int i=0;i<(int)edge_list.size();++i)
+	for(int i=0;i<static_cast<int>(edge_list.size());++i)
 	  {
-	    const double centroid_val = pg.get_property(centroid_vars[(size_t)i]);
+	    const double centroid_val = pg.get_property(centroid_vars[static_cast<size_t>(i)]);
 	    const double dphi = centroid_val - my_val;
 	    if(fabs(dphi)<0.1*maxdiff&&centroid_val*my_val>0)
 	      continue;
 	    else if(dphi>0)
-	      psi = min(psi,diffusecoeff*max((neighbor_vals[(size_t)i]-my_val)/dphi,0.0));
+	      psi = min(psi,diffusecoeff*max((neighbor_vals[static_cast<size_t>(i)]-my_val)/dphi,0.0));
 	    else if(dphi<0)
-	      psi = min(psi,diffusecoeff*max((neighbor_vals[(size_t)i]-my_val)/dphi,0.0));
+	      psi = min(psi,diffusecoeff*max((neighbor_vals[static_cast<size_t>(i)]-my_val)/dphi,0.0));
 	    else if(fabs(dphi)<1e-9)
 	      psi = min(psi,1.0);
 	    else
@@ -525,15 +525,15 @@ namespace
     // Deal with tracers
     if(!res.tracers.empty())
       {
-	int tracer_number=(int)res.tracers.size();
+	int tracer_number=static_cast<int>(res.tracers.size());
 	for(int i=0;i<tracer_number;++i)
 	  {
 	    double psi = 1;
 	    boost::container::static_vector<double,17> neighbor_vals;
 	    for(int j=0;j<n;++j)
-	      neighbor_vals.push_back(neighbor_tracers[(size_t)j][(size_t)i]);
-	    //const double my_val = cell_trace[(size_t)i];
-	    const double my_val2 = cell_trace[(size_t)i];
+	      neighbor_vals.push_back(neighbor_tracers[static_cast<size_t>(j)][static_cast<size_t>(i)]);
+	    //const double my_val = cell_trace[static_cast<size_t>(i)];
+	    const double my_val2 = cell_trace[static_cast<size_t>(i)];
 	    double maxdiff = 0;
 	    BOOST_FOREACH(double nv, neighbor_vals)
 	      {
@@ -541,25 +541,25 @@ namespace
 	      }
 	    for(int j=0;j<n;++j)
 	      {
-		const double centroid_val = centroid_vars[(size_t)j].tracers[(size_t)i];
+		const double centroid_val = centroid_vars[static_cast<size_t>(j)].tracers[static_cast<size_t>(i)];
 		const double dphi = centroid_val - my_val2;
 		if(fabs(dphi)<0.1*maxdiff&&centroid_val*my_val2>0)
 		  continue;
 		else
 		  if(dphi>0)
 		    psi = min(psi,diffusecoeff*
-			      max((neighbor_vals[(size_t)i]-my_val2)/dphi,0.0));
+			      max((neighbor_vals[static_cast<size_t>(i)]-my_val2)/dphi,0.0));
 		  else
 		    if(dphi<0)
 		      psi = min(psi,diffusecoeff*
-				max((neighbor_vals[(size_t)i]-my_val2)/dphi,0.0));
+				max((neighbor_vals[static_cast<size_t>(i)]-my_val2)/dphi,0.0));
 		    else
 		      if(fabs(dphi)<1e-9)
 			psi = min(psi,1.0);
 		      else
 			throw "Something bad happened in LinearGaussConsistent::Prepare";
 	      }
-	    res.tracers[(size_t)i] *= psi;
+	    res.tracers[static_cast<size_t>(i)] *= psi;
 	  }
       }
     return res;
@@ -569,23 +569,23 @@ namespace
 			   vector<int> const& edge_indices)
   {
     vector<Edge> res(edge_indices.size());
-    for(int i=0;i<(int)edge_indices.size();++i){
-      res[(size_t)i] = tess.GetEdge(edge_indices[(size_t)i]);
+    for(int i=0;i<static_cast<int>(edge_indices.size());++i){
+      res[static_cast<size_t>(i)] = tess.GetEdge(edge_indices[static_cast<size_t>(i)]);
     }
     return res;
   }
 
   double PressureRatio(Primitive cell,vector<Primitive> const& neigh)
   {
-    int n=(int)neigh.size();
+    int n=static_cast<int>(neigh.size());
     double res=1;
     double p=cell.Pressure;
     for(int i=0;i<n;++i)
       {
-	if(p>neigh[(size_t)i].Pressure)
-	  res=min(res,neigh[(size_t)i].Pressure/p);
+	if(p>neigh[static_cast<size_t>(i)].Pressure)
+	  res=min(res,neigh[static_cast<size_t>(i)].Pressure/p);
 	else
-	  res=min(res,p/neigh[(size_t)i].Pressure);
+	  res=min(res,p/neigh[static_cast<size_t>(i)].Pressure);
       }
     return res;
   }
@@ -624,35 +624,35 @@ namespace
     ReducedPrimitiveGradient2D naive_slope;
     if(!tracers.empty())
       naive_slope=calc_naive_slope
-	(cells[(size_t)cell_index],tess.GetMeshPoint(cell_index),
+	(cells[static_cast<size_t>(cell_index)],tess.GetMeshPoint(cell_index),
 		  tess.GetVolume(cell_index),	neighbor_list,
-	 neighbor_mesh_list,edge_list,tracers[(size_t)cell_index],neighbor_tracers);
+	 neighbor_mesh_list,edge_list,tracers[static_cast<size_t>(cell_index)],neighbor_tracers);
     else
       naive_slope=calc_naive_slope
-	(cells[(size_t)cell_index],tess.GetMeshPoint(cell_index),
+	(cells[static_cast<size_t>(cell_index)],tess.GetMeshPoint(cell_index),
 	 tess.GetVolume(cell_index),	neighbor_list,
 	 neighbor_mesh_list,edge_list);
     if(slf)
       {
 	if(!is_shock(naive_slope,tess.GetWidth(cell_index),shockratio,
-		     cells[(size_t)cell_index],neighbor_list,pressure_ratio))
+		     cells[static_cast<size_t>(cell_index)],neighbor_list,pressure_ratio))
 	  {
 	    if(!tracers.empty())
-	      return slope_limit(cells[(size_t)cell_index],tess.GetCellCM(cell_index),
+	      return slope_limit(cells[static_cast<size_t>(cell_index)],tess.GetCellCM(cell_index),
 				 neighbor_list,edge_list,naive_slope,neighbor_tracers,
-				 tracers[(size_t)cell_index]);
+				 tracers[static_cast<size_t>(cell_index)]);
 	    else
-	      return slope_limit(cells[(size_t)cell_index],tess.GetCellCM(cell_index),
+	      return slope_limit(cells[static_cast<size_t>(cell_index)],tess.GetCellCM(cell_index),
 				 neighbor_list,edge_list,naive_slope);
 	  }
 	else
 	  {
 	    if(!tracers.empty())
-	      return shocked_slope_limit(cells[(size_t)cell_index],
+	      return shocked_slope_limit(cells[static_cast<size_t>(cell_index)],
 					 tess.GetCellCM(cell_index),	neighbor_list,edge_list,
-					 naive_slope,diffusecoeff,neighbor_tracers,tracers[(size_t)cell_index]);
+					 naive_slope,diffusecoeff,neighbor_tracers,tracers[static_cast<size_t>(cell_index)]);
 	    else
-	      return shocked_slope_limit(cells[(size_t)cell_index],
+	      return shocked_slope_limit(cells[static_cast<size_t>(cell_index)],
 					 tess.GetCellCM(cell_index),	neighbor_list,edge_list,
 					 naive_slope,diffusecoeff);
 	  }
@@ -676,7 +676,7 @@ void LinearGaussArepo::Prepare(Tessellation const& tessellation,
   for(int i=0;i<tessellation.GetPointNo();++i)
     {
       if(!hbc_.IsGhostCell(i,tessellation))
-	rslopes_[(size_t)i] = calc_slope(tessellation,cells,tracers,isrelevant,i,slf_,obc_,hbc_,
+	rslopes_[static_cast<size_t>(i)] = calc_slope(tessellation,cells,tracers,isrelevant,i,slf_,obc_,hbc_,
 				 shockratio_,diffusecoeff_,pressure_ratio_,time,_rigidflag);
     }
 }
@@ -706,10 +706,10 @@ namespace {
 			    ReducedPrimitiveGradient2D const& grad,double dt,Vector2D const& vface)
   {
     vector<double> res(tracer.size());
-    int n=(int)tracer.size();
+    int n=static_cast<int>(tracer.size());
     for(int i=0;i<n;++i)
-      res[(size_t)i]=-0.5*dt*(grad.tracers[(size_t)i].x*(cell.Velocity.x-vface.x)+
-		      grad.tracers[(size_t)i].y*(cell.Velocity.y-vface.y));
+      res[static_cast<size_t>(i)]=-0.5*dt*(grad.tracers[static_cast<size_t>(i)].x*(cell.Velocity.x-vface.x)+
+		      grad.tracers[static_cast<size_t>(i)].y*(cell.Velocity.y-vface.y));
     return res;
   }
 }
@@ -728,26 +728,26 @@ vector<double> LinearGaussArepo::interpolateTracers
   Vector2D target = CalcCentroid(edge);
   if(interptype==InBulk)
     {
-      vector<double> res=interp_tracer(tracers[(size_t)cell_index],
-				       tess.GetCellCM(cell_index),rslopes_[(size_t)cell_index],target);
-      vector<double> temp=CalcDtFlux(tracers[(size_t)cell_index],cells[(size_t)cell_index],
-				     rslopes_[(size_t)cell_index],dt,vface);
-      int n=(int)temp.size();
+      vector<double> res=interp_tracer(tracers[static_cast<size_t>(cell_index)],
+				       tess.GetCellCM(cell_index),rslopes_[static_cast<size_t>(cell_index)],target);
+      vector<double> temp=CalcDtFlux(tracers[static_cast<size_t>(cell_index)],cells[static_cast<size_t>(cell_index)],
+				     rslopes_[static_cast<size_t>(cell_index)],dt,vface);
+      int n=static_cast<int>(temp.size());
       for(int i=0;i<n;++i)
-	res[(size_t)i]+=temp[(size_t)i];
+	res[static_cast<size_t>(i)]+=temp[static_cast<size_t>(i)];
       return res;
     }
   else
     if(interptype==Boundary)
       {
 	int other = pair_member(edge.neighbors,(side+1)%2);
-	vector<double> res=interp_tracer(tracers[(size_t)other],tess.GetMeshPoint(other),
-					 rslopes_[(size_t)other],target);
-	vector<double> temp=CalcDtFlux(tracers[(size_t)other],cells[(size_t)other],rslopes_[(size_t)other],
+	vector<double> res=interp_tracer(tracers[static_cast<size_t>(other)],tess.GetMeshPoint(other),
+					 rslopes_[static_cast<size_t>(other)],target);
+	vector<double> temp=CalcDtFlux(tracers[static_cast<size_t>(other)],cells[static_cast<size_t>(other)],rslopes_[static_cast<size_t>(other)],
 		dt,vface);
-	int n=(int)temp.size();
+	int n=static_cast<int>(temp.size());
 	for(int i=0;i<n;++i)
-	  res[(size_t)i]+=temp[(size_t)i];
+	  res[static_cast<size_t>(i)]+=temp[static_cast<size_t>(i)];
 	return res;
       }
     else
@@ -765,15 +765,15 @@ Primitive LinearGaussArepo::Interpolate
   vector<Vector2D> pv(1);
   if(interptype==InBulk)
     {
-      const Primitive temp = interp_primitive(cells[(size_t)cell_index],
-					      tess.GetCellCM(cell_index),rslopes_[(size_t)cell_index],target);
+      const Primitive temp = interp_primitive(cells[static_cast<size_t>(cell_index)],
+					      tess.GetCellCM(cell_index),rslopes_[static_cast<size_t>(cell_index)],target);
       Primitive res = CalcPrimitive(temp.Density,temp.Pressure,
 				    temp.Velocity,eos_);
       res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,cell_index,
 					  fluxes,pv,hbc_,
 					  vector<vector<double> >(),
 					  time_,dt);
-      res+=CalcDtFlux(cells[(size_t)cell_index],rslopes_[(size_t)cell_index],dt,vface);
+      res+=CalcDtFlux(cells[static_cast<size_t>(cell_index)],rslopes_[static_cast<size_t>(cell_index)],dt,vface);
       if(res.Pressure<0)
 	return temp;
       else
@@ -783,11 +783,11 @@ Primitive LinearGaussArepo::Interpolate
     if(interptype==Boundary)
       {
 	const int other=pair_member(edge.neighbors,(side+1)%2);
-	const Primitive temp = interp_primitive(cells[(size_t)other],tess.GetMeshPoint(other),
-						rslopes_[(size_t)other],target);
+	const Primitive temp = interp_primitive(cells[static_cast<size_t>(other)],tess.GetMeshPoint(other),
+						rslopes_[static_cast<size_t>(other)],target);
 	Primitive res = CalcPrimitive(temp.Density,temp.Pressure,temp.Velocity,eos_);
 	res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,other,fluxes,pv,hbc_,vector<vector<double> >(), time_,dt);
-	res+=CalcDtFlux(cells[(size_t)other],rslopes_[(size_t)other],
+	res+=CalcDtFlux(cells[static_cast<size_t>(other)],rslopes_[static_cast<size_t>(other)],
 		dt,vface);
 	res = CalcPrimitive(res.Density,res.Pressure,res.Velocity,eos_);
 	return res;

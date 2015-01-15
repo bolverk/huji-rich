@@ -5,16 +5,16 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessnew,
 {
 	int n=tessold.GetTotalSidesNumber();
 	int npoints=tessold.GetPointNo();
-	lengths.resize((size_t)n);
+	lengths.resize(static_cast<size_t>(n));
 	for(int i=0;i<npoints;++i)
 	{
 		vector<int> edgesold=tessold.GetCellEdges(i);
 		vector<int> edgesnew=tessnew.GetCellEdges(i);
-		int nedges=(int)edgesold.size();
-		int nedgesnew=(int)edgesnew.size();
+		int nedges=static_cast<int>(edgesold.size());
+		int nedgesnew=static_cast<int>(edgesnew.size());
 		for(int j=0;j<nedges;++j)
 		{
-		  Edge const& edge=tessold.GetEdge(edgesold[(size_t)j]);
+		  Edge const& edge=tessold.GetEdge(edgesold[static_cast<size_t>(j)]);
 			int n0=edge.neighbors.first;
 			int n1=edge.neighbors.second;
 			bool found=false;
@@ -33,13 +33,13 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessnew,
 					(tessold.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
 					edgenew.neighbors.first))))
 				{
-				  lengths[(size_t)edgesold[(size_t)j]]=0.5*(edge.GetLength()+edgenew.GetLength());
+				  lengths[(size_t)edgesold[static_cast<size_t>(j)]]=0.5*(edge.GetLength()+edgenew.GetLength());
 					found=true;
 					break;
 				}
 			}
 			if(!found)
-			  lengths[(size_t)edgesold[(size_t)j]]=0.5*edge.GetLength();
+			  lengths[(size_t)edgesold[static_cast<size_t>(j)]]=0.5*edge.GetLength();
 		}
 	}
 }
@@ -49,24 +49,24 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 {
 	int n=tessmid.GetTotalSidesNumber();
 	int npoints=tessmid.GetPointNo();
-	lengths.resize((size_t)n);
+	lengths.resize(static_cast<size_t>(n));
 	for(int i=0;i<npoints;++i)
 	{
 		vector<int> edgesold=tessold.GetCellEdges(i);
 		vector<int> edgesnew=tessnew.GetCellEdges(i);
 		vector<int> edgesmid=tessmid.GetCellEdges(i);
-		int nedges=(int)edgesold.size();
-		int nedgesnew=(int)edgesnew.size();
-		int nedgesmid=(int)edgesmid.size();
+		int nedges=static_cast<int>(edgesold.size());
+		int nedgesnew=static_cast<int>(edgesnew.size());
+		int nedgesmid=static_cast<int>(edgesmid.size());
 		for(int j=0;j<nedgesmid;++j)
 		{
-		  Edge const& edge=tessmid.GetEdge(edgesmid[(size_t)j]);
+		  Edge const& edge=tessmid.GetEdge(edgesmid[static_cast<size_t>(j)]);
 			int n0=edge.neighbors.first;
 			int n1=edge.neighbors.second;
 			// Don't do double work
 			if((n0<i&&n0>=0)||(n1<i&&n1>=0))
 				continue;
-			lengths[(size_t)edgesmid[(size_t)j]]=0.5*edge.GetLength();
+			lengths[(size_t)edgesmid[static_cast<size_t>(j)]]=0.5*edge.GetLength();
 			for(int k=0;k<nedgesnew;++k)
 			{
 			  Edge const& edgenew=tessnew.GetEdge(edgesnew[(size_t)((k+j)%nedgesnew)]);
@@ -79,7 +79,7 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 					(tessmid.GetOriginalIndex(n1)==tessnew.GetOriginalIndex(
 					edgenew.neighbors.first))))
 				{
-				  lengths[(size_t)edgesmid[(size_t)j]]+=0.25*edgenew.GetLength();
+				  lengths[(size_t)edgesmid[static_cast<size_t>(j)]]+=0.25*edgenew.GetLength();
 					break;
 				}
 			}
@@ -95,7 +95,7 @@ void CorrectEdgeLength(Tessellation const& tessold,Tessellation const& tessmid,
 					(tessmid.GetOriginalIndex(n1)==tessold.GetOriginalIndex(
 					edgeold.neighbors.first))))
 				{
-					lengths[(size_t)edgesmid[(size_t)j]]+=0.25*edgeold.GetLength();
+					lengths[(size_t)edgesmid[static_cast<size_t>(j)]]+=0.25*edgeold.GetLength();
 					break;
 				}
 			}

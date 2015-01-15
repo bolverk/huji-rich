@@ -9,9 +9,9 @@ vector<double> RigidWallHydro::GetBoundaryTracers(Edge const& edge,Tessellation 
 	vector<vector<double> > const& tracers,double /*time*/)const
 {
 	if(edge.neighbors.first==-1)
-	  return tracers[(size_t)edge.neighbors.second];
+	  return tracers[static_cast<size_t>(edge.neighbors.second)];
 	else
-	  return tracers[(size_t)edge.neighbors.first];
+	  return tracers[static_cast<size_t>(edge.neighbors.first)];
 }
 
 Primitive RigidWallHydro::GetBoundaryPrimitive(Edge const& edge,
@@ -53,12 +53,12 @@ Conserved RigidWallHydro::CalcFluxCi
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
 	  if(IsGhostCell(pair_member(edge.neighbors,i),tessellation))
-	    states[(size_t)i] = ghost;
+	    states[static_cast<size_t>(i)] = ghost;
 		else
-		  states[(size_t)i] = othercell;
-	  states[(size_t)i].Velocity.Set
-	    (Projection(states[(size_t)i].Velocity, n),
-	     Projection(states[(size_t)i].Velocity, p));
+		  states[static_cast<size_t>(i)] = othercell;
+	  states[static_cast<size_t>(i)].Velocity.Set
+	    (Projection(states[static_cast<size_t>(i)].Velocity, n),
+	     Projection(states[static_cast<size_t>(i)].Velocity, p));
 	}
 	Conserved res = rs.Solve(states[0], states[1],Projection(edge_velocity,n));
 	res.Momentum = res.Momentum.x*n/abs(n) +

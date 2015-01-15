@@ -12,8 +12,8 @@ RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
   pm_(pm), hbc_(hbc),
   chi_(chi),
 /*
-	chi_(chi*((int)!coldflows)+((int)coldflows)*((int)chi==0.4)
-	+chi*((int)coldflows)*((int)chi!=0.4)),
+	chi_(chi*((int)!coldflows)+(static_cast<int>(coldflows))*((int)chi==0.4)
+	+chi*(static_cast<int>(coldflows))*((int)chi!=0.4)),
 
 	huh?
 */
@@ -35,9 +35,9 @@ namespace {
 		{
 			if(cevolve[i]!=0)
 				continue;
-			const vector<int> edge_index(tess.GetCellEdges((int)i));
-			double R=tess.GetWidth((int)i);
-			Vector2D r=tess.GetMeshPoint((int)i);
+			const vector<int> edge_index(tess.GetCellEdges(static_cast<int>(i)));
+			double R=tess.GetWidth(static_cast<int>(i));
+			Vector2D r=tess.GetMeshPoint(static_cast<int>(i));
 			for(size_t j=0;j<edge_index.size();++j)
 			{
 				if(DistanceToEdge(r,tess.GetEdge(edge_index[j]))<0.2*R)
@@ -57,10 +57,10 @@ namespace {
 						Vector2D n = r - tess.GetEdge(edge_index[j]).vertices.first;
 						n-=ScalarProd(n,p)*p;
 						n=n/abs(n);
-						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[(size_t)other],p));
+						double v_avg=0.5*(ScalarProd(vel[i],p)+ScalarProd(vel[static_cast<size_t>(other)],p));
 						vel[i]=ScalarProd(vel[i],n)*n+v_avg*p;
-						if(other<tess.GetPointNo()&&(cevolve[(size_t)other]==0))
-							vel[(size_t)other]=ScalarProd(vel[(size_t)other],n)*n+v_avg*p;
+						if(other<tess.GetPointNo()&&(cevolve[static_cast<size_t>(other)]==0))
+							vel[static_cast<size_t>(other)]=ScalarProd(vel[static_cast<size_t>(other)],n)*n+v_avg*p;
 						continue;
 					}
 				}
@@ -101,8 +101,8 @@ Vector2D RoundCells::CalcVelocity(int index,Tessellation const& tessellation,
 			return res;
 		Vector2D dw(0,0);
 		if(index<nreal)
-		  dw = calc_dw(index,tessellation,primitives[(size_t)index].SoundSpeed,
-			       abs(primitives[(size_t)index].Velocity),eta_,chi_);
+		  dw = calc_dw(index,tessellation,primitives[static_cast<size_t>(index)].SoundSpeed,
+			       abs(primitives[static_cast<size_t>(index)].Velocity),eta_,chi_);
 		return res + dw;
 	}
 }
@@ -113,7 +113,7 @@ namespace {
 	{
 		const Vector2D& s = tess.GetCellCM(index);
 		const Vector2D r = tess.GetMeshPoint(index);
-		return max(min(abs(s-r)/dt,3*abs(cells[(size_t)index].Velocity)),cells[(size_t)index].SoundSpeed);
+		return max(min(abs(s-r)/dt,3*abs(cells[static_cast<size_t>(index)].Velocity)),cells[static_cast<size_t>(index)].SoundSpeed);
 	}
 }
 
@@ -123,8 +123,8 @@ vector<Vector2D> RoundCells::calcAllVelocities
 {
 	vector<Vector2D> res;
 	const int n=tess.GetPointNo();
-	res.reserve((size_t)n);
-	for(size_t i=0;i<(size_t)n;++i)
+	res.reserve(static_cast<size_t>(n));
+	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		if(cevolve[i]==0)
 		  res.push_back(CalcVelocity((int)i,tess,cells,time));
@@ -160,11 +160,11 @@ vector<Vector2D> RoundCells::calcAllVelocities
 	{
 		if(external_dt_>0)
 			dt=min(dt,external_dt_);
-		for(size_t i=0;i<(size_t)n;++i)
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
 			if(cevolve[i]!=0)
 				continue;
-			if(i<(size_t)inner_)
+			if(i<static_cast<size_t>(inner_))
 			{
 				res[i].Set(0,0);
 			}
@@ -214,9 +214,9 @@ void RoundCells::CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
 	// check that we don't go outside grid
 	int n=tess.GetPointNo();
 	const double inv_dt=1.0/dt;
-	for(size_t i=(size_t)inner_;i<(size_t)n;++i)
+	for(size_t i=static_cast<size_t>(inner_);i<static_cast<size_t>(n);++i)
 	{
-	  Vector2D point(tess.GetMeshPoint((int)i));
+	  Vector2D point(tess.GetMeshPoint(static_cast<int>(i)));
 		if((v[i].x*dt*2+point.x)>outer_->GetGridBoundary(Right))
 		{
 			double factor=0.9*(outer_->GetGridBoundary(Right)-

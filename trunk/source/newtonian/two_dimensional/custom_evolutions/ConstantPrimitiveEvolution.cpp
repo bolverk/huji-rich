@@ -49,17 +49,17 @@ Conserved ConstantPrimitiveEvolution::CalcFlux(Tessellation const& tessellation,
 		}
 		if(mass_count_)
 		{
-		  if((n0>=N_&&tracers[(size_t)n0][1]>1e-6)||(n1>=N_&&tracers[(size_t)n1][1]>1e-6))
+		  if((n0>=N_&&tracers[static_cast<size_t>(n0)][1]>1e-6)||(n1>=N_&&tracers[static_cast<size_t>(n1)][1]>1e-6))
 			{
 				if(n0==index)
 				{
 					mass_flux+=res.Mass*edge.GetLength()*dt;
-					mass_fluxt+=res.Mass*edge.GetLength()*dt*tracers[(size_t)n1][1];
+					mass_fluxt+=res.Mass*edge.GetLength()*dt*tracers[static_cast<size_t>(n1)][1];
 				}
 				else
 				{
 					mass_flux-=res.Mass*edge.GetLength()*dt;
-					mass_fluxt-=res.Mass*edge.GetLength()*dt*tracers[(size_t)n0][1];
+					mass_fluxt-=res.Mass*edge.GetLength()*dt*tracers[static_cast<size_t>(n0)][1];
 				}
 			}
 		}
