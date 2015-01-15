@@ -32,9 +32,9 @@ ReducedPrimitiveGradient2D& ReducedPrimitiveGradient2D::operator+=
 
 	if(!tracers.empty())
 	{
-	  int n=(int)tracers.size();
+	  int n=static_cast<int>(tracers.size());
 	  for(int i=0;i<n;++i)
-	    tracers[(size_t)i]+=source.tracers[(size_t)i];
+	    tracers[static_cast<size_t>(i)]+=source.tracers[static_cast<size_t>(i)];
 	}
 	return *this;
 }
@@ -49,9 +49,9 @@ ReducedPrimitiveGradient2D& ReducedPrimitiveGradient2D::operator*=
 
 	if(!tracers.empty())
 	{
-		int n=(int)tracers.size();
+		int n=static_cast<int>(tracers.size());
 		for(int i=0;i<n;++i)
-		  tracers[(size_t)i]*=s;
+		  tracers[static_cast<size_t>(i)]*=s;
 	}
 	return *this;
 }

@@ -58,7 +58,7 @@ void ResetOutput(string location,hdsim const& sim)
 	if(!tracers.empty())
 		n=(int)tracers[0].size();
 	myFile.write ((char*)&n,sizeof(int));
-	cold = (char)sim.GetDensityFloorFlag();
+	cold = static_cast<char>(sim.GetDensityFloorFlag());
 	myFile.write((char*)&cold, sizeof(char));
 	double dtemp2;
 	sim.GetDensityFloorParm(dtemp, dtemp2);
@@ -66,7 +66,7 @@ void ResetOutput(string location,hdsim const& sim)
 	myFile.write((char*)&dtemp2, sizeof(double));
 	for (int i = 0; i<temp; ++i)
 	{
-		unsigned int ctemp = (unsigned int)sim.custom_evolution_indices[(size_t)i];
+		unsigned int ctemp = (unsigned int)sim.custom_evolution_indices[static_cast<size_t>(i)];
 		myFile.write((char*)&ctemp, sizeof(unsigned int));
 	}
 	if (n == 0)
@@ -81,7 +81,7 @@ void ResetOutput(string location,hdsim const& sim)
 	{
 		for(int j=0;j<temp;++j)
 		{
-		  x=tracers[(size_t)j][(size_t)i];
+		  x=tracers[static_cast<size_t>(j)][static_cast<size_t>(i)];
 			myFile.write ((char*)&x,sizeof(double));
 		}
 	}
@@ -96,8 +96,8 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	int N;
 	myFile.read((char*)&N,sizeof (int));
 	// Resize the vectors
-	dump.snapshot.cells.resize((size_t)N);
-	dump.snapshot.mesh_points.resize((size_t)N);
+	dump.snapshot.cells.resize(static_cast<size_t>(N));
+	dump.snapshot.mesh_points.resize(static_cast<size_t>(N));
 	dump.tracers.clear();
 	// Read the data
 	Vector2D cortemp;
@@ -108,7 +108,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		myFile.read((char*)&x,sizeof(double));
 		myFile.read((char*)&y,sizeof(double));
 		cortemp.Set(x,y);
-		dump.snapshot.mesh_points[(size_t)i]=cortemp;
+		dump.snapshot.mesh_points[static_cast<size_t>(i)]=cortemp;
 	}
 
 #ifdef RICH_MPI
@@ -130,7 +130,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		myFile.read((char*)&d,sizeof(double));
 		myFile.read((char*)&cortemp.x,sizeof(double));
 		myFile.read((char*)&cortemp.y,sizeof(double));
-		dump.snapshot.cells[(size_t)i]=CalcPrimitive(d,p,cortemp,*eos);
+		dump.snapshot.cells[static_cast<size_t>(i)]=CalcPrimitive(d,p,cortemp,*eos);
 	}
 	myFile.read((char*)&dump.time,sizeof(double));
 	char ctemp;
@@ -146,25 +146,25 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	int n;
 	myFile.read((char*)&n,sizeof(int));
 	myFile.read((char*)&ctemp, sizeof(char));
-	dump.densityfloor = (bool)ctemp;
+	dump.densityfloor = static_cast<bool>(ctemp);
 	myFile.read((char*)&dump.densitymin, sizeof(double));
 	myFile.read((char*)&dump.pressuremin, sizeof(double));
-	dump.cevolve.resize((size_t)N);
+	dump.cevolve.resize(static_cast<size_t>(N));
 	for (int i = 0; i<N; ++i)
-		myFile.read((char*)&dump.cevolve[(size_t)i], sizeof(unsigned int));
+		myFile.read((char*)&dump.cevolve[static_cast<size_t>(i)], sizeof(unsigned int));
 	if (n == 0)
 	{
 		myFile.close();
 		return;
 	}
-	dump.tracers.resize((size_t)N);
+	dump.tracers.resize(static_cast<size_t>(N));
 	for(int i=0;i<n;++i)
 	{
-	  dump.tracers[(size_t)i].resize((size_t)n);
+	  dump.tracers[static_cast<size_t>(i)].resize(static_cast<size_t>(n));
 		for(int j=0;j<N;++j)
 		{
 			myFile.read((char*)&x,sizeof(double));
-			dump.tracers[(size_t)j][(size_t)i]=x;
+			dump.tracers[static_cast<size_t>(j)][static_cast<size_t>(i)]=x;
 		}
 	}
 	myFile.close();

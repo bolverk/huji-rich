@@ -33,16 +33,16 @@ vector<double> PCM2D::interpolateTracers
  InterpolationType interp_type,Vector2D const& /*vface*/) const
 {
   const int n = (int)tracers[(size_t)pair_member(edge.neighbors,side)].size();
-  vector<double> res((size_t)n);
+  vector<double> res(static_cast<size_t>(n));
   if(interp_type==InBulk)
     {
       for(int i=0;i<n;++i)
-	res[(size_t)i] = tracers[(size_t)pair_member(edge.neighbors,side)][(size_t)i];
+	res[static_cast<size_t>(i)] = tracers[(size_t)pair_member(edge.neighbors,side)][static_cast<size_t>(i)];
     }
   else
     {
       for(int i=0;i<n;++i)
-	res[(size_t)i] = tracers[(size_t)pair_member(edge.neighbors,(side+1)%2)][(size_t)i];
+	res[static_cast<size_t>(i)] = tracers[(size_t)pair_member(edge.neighbors,(side+1)%2)][static_cast<size_t>(i)];
     }
   return res;
 }

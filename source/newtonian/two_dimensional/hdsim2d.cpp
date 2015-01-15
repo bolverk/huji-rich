@@ -296,12 +296,12 @@ namespace
 
     size_t getLength(void) const
     {
-      return (size_t)tess_.GetTotalSidesNumber();
+      return static_cast<size_t>(tess_.GetTotalSidesNumber());
     }
 
     double operator()(size_t i) const
     {
-      return pg_.calcArea(tess_.GetEdge((int)i));
+      return pg_.calcArea(tess_.GetEdge(static_cast<int>(i)));
     }
 
   private:
@@ -771,8 +771,8 @@ void hdsim::TimeAdvanceElad2(void)
 	{
 		const int n=_tessellation.GetPointNo();
 		for(int i=0;i<n;++i)
-			tracer_[(size_t)i][0]=_eos.dp2s(_cells[(size_t)i].Density,
-							_cells[(size_t)i].Pressure);
+			tracer_[static_cast<size_t>(i)][0]=_eos.dp2s(_cells[static_cast<size_t>(i)].Density,
+							_cells[static_cast<size_t>(i)].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
 			_tessellation.GetDuplicatedProcs(),_tessellation.GetGhostIndeces(),_tessellation.GetTotalPointNumber());
@@ -783,9 +783,9 @@ void hdsim::TimeAdvanceElad2(void)
 			throw eo;
 		}
 #endif
-		shockedcells.resize((size_t)n);
+		shockedcells.resize(static_cast<size_t>(n));
 		for(int i=0;i<n;++i)
-			shockedcells[(size_t)i]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
+			shockedcells[static_cast<size_t>(i)]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
 	}
 #ifdef RICH_MPI
 	if(tracer_flag_&&!coldflows_flag_)
@@ -833,9 +833,9 @@ void hdsim::TimeAdvanceElad2(void)
 	
 	vector<double> lengths;
 	int nsides=_tessellation.GetTotalSidesNumber();
-	lengths.resize((size_t)nsides);
+	lengths.resize(static_cast<size_t>(nsides));
 	for(int i=0;i<nsides;++i)
-		lengths[(size_t)i]=_tessellation.GetEdge(i).GetLength();
+		lengths[static_cast<size_t>(i)]=_tessellation.GetEdge(i).GetLength();
 
 	vector<vector<double> > old_trace;
 	vector<vector<double> > tracer_extensive;
@@ -1011,7 +1011,7 @@ void hdsim::TimeAdvanceElad2(void)
 	if(coldflows_flag_&&EntropyReCalc_)
 	{
 		const int n=_tessellation.GetPointNo();
-		for(size_t i=0;i<(size_t)n;++i)
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
 			tracer_[i][0]=_eos.dp2s(_cells[i].Density,_cells[i].Pressure);
 #ifdef RICH_MPI
 		SendRecvTracers(tracer_,_tessellation.GetDuplicatedPoints(),
@@ -1073,15 +1073,15 @@ void hdsim::TimeAdvanceElad2(void)
 	if(coldflows_flag_)
 	{
 		const int n=_tessellation.GetPointNo();
-		shockedcells.resize((size_t)n);
+		shockedcells.resize(static_cast<size_t>(n));
 		for(int i=0;i<n;++i)
-			shockedcells[(size_t)i]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
+			shockedcells[static_cast<size_t>(i)]=IsShockedCell(_tessellation,i,_cells,_hbc,_time) ? 1 : 0 ;
 	}
 
 	nsides=_tessellation.GetTotalSidesNumber();
-	lengths.resize((size_t)nsides);
+	lengths.resize(static_cast<size_t>(nsides));
 	for(int i=0;i<nsides;++i)
-		lengths[(size_t)i]=_tessellation.GetEdge(i).GetLength();
+		lengths[static_cast<size_t>(i)]=_tessellation.GetEdge(i).GetLength();
 
 	if(tracer_flag_)
 	{
@@ -1189,12 +1189,12 @@ void hdsim::addTracer(SpatialDistribution const& tp)
 {
 	const int n = _tessellation.GetPointNo();
 	if(!tracer_flag_){
-	  tracer_.resize((size_t)n);
+	  tracer_.resize(static_cast<size_t>(n));
 		tracer_flag_ = true;
 	}
 
 	for(int i=0;i<n;++i)
-	  tracer_[(size_t)i].push_back(tp(_tessellation.GetCellCM(i)));
+	  tracer_[static_cast<size_t>(i)].push_back(tp(_tessellation.GetCellCM(i)));
 }
 
 // Diagnostics
@@ -1217,7 +1217,7 @@ int hdsim::GetCellNo(void) const
 Primitive hdsim::GetCell(int i) const
 {
   assert(i>=0);
-  return _cells.at((size_t)i);
+  return _cells.at(static_cast<size_t>(i));
 }
 
 Vector2D hdsim::GetMeshPoint(int i) const
@@ -1252,12 +1252,12 @@ void hdsim::SetColdFlows(double as,double bs)
 	coldflows_flag_=true;
 	if(!tracer_flag_)
 	{
-	  tracer_.resize((size_t)n);
+	  tracer_.resize(static_cast<size_t>(n));
 		tracer_flag_ = true;
 	}
 
 	for(int i=0;i<n;++i)
-	  tracer_[(size_t)i].push_back(0);
+	  tracer_[static_cast<size_t>(i)].push_back(0);
 	cfp_.as=as;
 	cfp_.bs=bs;
 }
@@ -1289,26 +1289,26 @@ namespace
   	void CreateGetPrimitiveList(vector<int> const& ToRemove,vector<vector<int> >
   				    const& Nghost,int /*nremoved*/,vector<vector<int> > &MPI_AMR_Send)
 	{
-		int nprocs=(int)Nghost.size();
-		MPI_AMR_Send.resize((size_t)nprocs);
-		vector<vector<int> > SortedNghost((size_t)nprocs),SortIndex((size_t)nprocs);
+		int nprocs=static_cast<int>(Nghost.size());
+		MPI_AMR_Send.resize(static_cast<size_t>(nprocs));
+		vector<vector<int> > SortedNghost(static_cast<size_t>(nprocs)),SortIndex(static_cast<size_t>(nprocs));
 		// sort Nghost
-		for(size_t i=0;i<(size_t)nprocs;++i)
+		for(size_t i=0;i<static_cast<size_t>(nprocs);++i)
 		{
 			SortedNghost[i]=Nghost[i];
 			sort_index(Nghost[i],SortIndex[i]);
 			sort(SortedNghost[i].begin(),SortedNghost[i].end());
 		}
-		for(int i=0;i<(int)ToRemove.size();++i)
+		for(int i=0;i<static_cast<int>(ToRemove.size());++i)
 		{
 			for(int j=0;j<nprocs;++j)
 			{
-			  if(binary_search(SortedNghost[(size_t)j].begin(),SortedNghost[(size_t)j].end(),
-					   ToRemove[(size_t)i]))
+			  if(binary_search(SortedNghost[static_cast<size_t>(j)].begin(),SortedNghost[static_cast<size_t>(j)].end(),
+					   ToRemove[static_cast<size_t>(i)]))
 				{
-				  int index2=lower_bound(SortedNghost[(size_t)j].begin(),SortedNghost[(size_t)j].end(),
-							 ToRemove[(size_t)i])-SortedNghost[(size_t)j].begin();
-				  MPI_AMR_Send[(size_t)j].push_back(SortIndex[(size_t)j][(size_t)index2]);
+				  int index2=lower_bound(SortedNghost[static_cast<size_t>(j)].begin(),SortedNghost[static_cast<size_t>(j)].end(),
+							 ToRemove[static_cast<size_t>(i)])-SortedNghost[static_cast<size_t>(j)].begin();
+				  MPI_AMR_Send[static_cast<size_t>(j)].push_back(SortIndex[static_cast<size_t>(j)][static_cast<size_t>(index2)]);
 				}
 			}
 		}
@@ -1322,14 +1322,14 @@ namespace
 	void RemoveNGhostAMR(vector<vector<int> > &nghost,vector<int> const& sentprocs,
 		vector<vector<int> > &toremove)
 	{
-		int nlist=(int)sentprocs.size();
+		int nlist=static_cast<int>(sentprocs.size());
 		int rank=get_mpi_rank();
 		int ws=get_mpi_size();
 		vector<int> procorder=GetProcOrder(rank,ws);
 		vector<vector<int> > recv(nlist);
 		int temp;
 		MPI_Status status;
-		for(int i=0;i<(int)procorder.size();++i)
+		for(int i=0;i<static_cast<int>(procorder.size());++i)
 		{
 			int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
 				-sentprocs.begin();
@@ -1390,12 +1390,12 @@ namespace {
 
     size_t getLength(void) const
     {
-      return (size_t)tess_.GetPointNo();
+      return static_cast<size_t>(tess_.GetPointNo());
     }
 
     double operator()(size_t i) const
     {
-      return tess_.GetVolume((int)i);
+      return tess_.GetVolume(static_cast<int>(i));
     }
 
   private:
@@ -1428,11 +1428,11 @@ namespace {
       for(size_t j=0;j<vol_index[i].size();++j){
 	const size_t index = (size_t)(lower_bound(total_neigh.begin(),total_neigh.end(),
 						  vol_index[i][j])-total_neigh.begin());
-	if(i<(size_t)n)
+	if(i<static_cast<size_t>(n))
 	  res[index] += Primitive2Conserved(cells[(size_t)to_remove[i]],dv[i][j]);
 #ifdef RICH_MPI
 	else{
-	  res[index] += Primitive2Conserved(mpi_cells[i-(size_t)n],dv[i][j]);
+	  res[index] += Primitive2Conserved(mpi_cells[i-static_cast<size_t>(n)],dv[i][j]);
 	}
 #endif
       }
@@ -1462,14 +1462,14 @@ namespace {
 	const size_t index = (size_t)(lower_bound(total_neigh.begin(),total_neigh.end(),
 						  vol_index[i][j])-total_neigh.begin());
 				      
-	if(i<(size_t)n){
+	if(i<static_cast<size_t>(n)){
 	  for(size_t k=0;k<res[0].size();++k)
 	    res[index][k] += dv[i][j]*tracers[(size_t)to_remove[i]][k]*cells[(size_t)to_remove[i]].Density;
 	}
 	#ifdef RICH_MPI
 	else{
 	  for(size_t k=0;k<res[0].size();++k)
-	    res[index][k] += dv[i][j]*mpi_tracer[i-(size_t)n][k]*mpi_cells[i-(size_t)n].Density;
+	    res[index][k] += dv[i][j]*mpi_tracer[i-static_cast<size_t>(n)][k]*mpi_cells[i-static_cast<size_t>(n)].Density;
 	}	  
 	#endif
       }
@@ -1491,7 +1491,7 @@ namespace {
     for(size_t i=0;i<total_neigh.size();++i){
       const size_t index = (size_t)(lower_bound(to_remove.begin(),to_remove.end(),
 						total_neigh[i])-to_remove.begin());
-      const double volume = tess.GetVolume(total_neigh[i]-(int)index);
+      const double volume = tess.GetVolume(total_neigh[i]-static_cast<int>(index));
       const Conserved old_extensive = Primitive2Conserved(cells[(size_t)total_neigh[i]],
 							  old_volumes[(size_t)total_neigh[i]]);
       const double old_density = cells[(size_t)total_neigh[i]].Density;
@@ -1535,7 +1535,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	{
 		ToRemoveReduced.resize((int)ToRemove.size()-n);
 		copy(ToRemove.begin()+n,ToRemove.end(),ToRemoveReduced.begin());
-		//for(int i=0;i<(int)ToRemoveReduced.size();++i)
+		//for(int i=0;i<static_cast<int>(ToRemoveReduced.size());++i)
 		//	ToRemoveReduced[i]-=n;
 	}
 	GetAMRExtensive(MPIcells,MPItracer,_cells,tracer_,traceractive,MPI_AMR_Send,
@@ -1597,23 +1597,23 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	for(int i=0;i<nprocs;++i)
 	{
 		vector<int> toremove2;
-		int nsent2=(int)ghostpoints[(size_t)i].size();
+		int nsent2=(int)ghostpoints[static_cast<size_t>(i)].size();
 		for(int j=0;j<nsent2;++j)
 		{
-			int toReduce2=int(lower_bound(ToRemove.begin(),ToRemove.end(),ghostpoints[(size_t)i][(size_t)j])-
+			int toReduce2=int(lower_bound(ToRemove.begin(),ToRemove.end(),ghostpoints[static_cast<size_t>(i)][static_cast<size_t>(j)])-
 				ToRemove.begin());
-			if(binary_search(ToRemove.begin(),ToRemove.end(),ghostpoints[(size_t)i][(size_t)j]))
+			if(binary_search(ToRemove.begin(),ToRemove.end(),ghostpoints[static_cast<size_t>(i)][static_cast<size_t>(j)]))
 				toremove2.push_back(j);
 			else
-				ghostpoints[(size_t)i][(size_t)j]-=toReduce2;
+				ghostpoints[static_cast<size_t>(i)][static_cast<size_t>(j)]-=toReduce2;
 		}
 #ifdef RICH_MPI
 		if(!toremove2.empty())
-			RemoveVector(ghostpoints[(size_t)i],toremove2);
-		toremoveall[(size_t)i]=toremove2;
-		nsent2=(int)nghost[(size_t)i].size();
+			RemoveVector(ghostpoints[static_cast<size_t>(i)],toremove2);
+		toremoveall[static_cast<size_t>(i)]=toremove2;
+		nsent2=(int)nghost[static_cast<size_t>(i)].size();
 		for(int j=0;j<nsent2;++j)
-			nghost[(size_t)i][(size_t)j]-=(int)ToRemove.size();
+			nghost[static_cast<size_t>(i)][static_cast<size_t>(j)]-=static_cast<int>(ToRemove.size());
 #endif
 	}
 #ifdef RICH_MPI
@@ -1648,9 +1648,9 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	// Fill the new hydro
 	for(int i=N;i<N+n;++i)
 	{
-	  _cells[(size_t)i]=_cells[(size_t)PointsToRefine[(size_t)(i-N)]];
+	  _cells[static_cast<size_t>(i)]=_cells[(size_t)PointsToRefine[(size_t)(i-N)]];
 		if(traceractive)
-		  tracer_[(size_t)i]=tracer_[(size_t)PointsToRefine[(size_t)(i-N)]];
+		  tracer_[static_cast<size_t>(i)]=tracer_[(size_t)PointsToRefine[(size_t)(i-N)]];
 	}
 	_conservedextensive = CalcConservedExtensive
 	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
@@ -1749,12 +1749,12 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
 {
 	checkpoint.snapshot.mesh_points = _tessellation.GetMeshPoints();
 	int n=_tessellation.GetPointNo();
-	checkpoint.snapshot.mesh_points.resize((size_t)n);
+	checkpoint.snapshot.mesh_points.resize(static_cast<size_t>(n));
 #ifdef RICH_MPI
 	checkpoint.procmesh=_proctess.GetMeshPoints();
 	n=_proctess.GetPointNo();
 #endif
-	checkpoint.procmesh.resize((size_t)n);
+	checkpoint.procmesh.resize(static_cast<size_t>(n));
 	checkpoint.snapshot.cells = _cells;
 	checkpoint.cfl = _cfl;
 	checkpoint.time = _time;

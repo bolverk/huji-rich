@@ -144,7 +144,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 	{
 		const double neigheps = 0.2;
 		vector<int> neigh=tproc.GetNeighbors(rank);
-		for(int i=0;i<(int)neigh.size();++i)
+		for(int i=0;i<static_cast<int>(neigh.size());++i)
 		{
 			if(neigh[i]==-1)
 				continue;

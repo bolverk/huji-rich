@@ -26,19 +26,19 @@ Conserved Ratchet::CalcFlux(Tessellation const& tess,
   const Vector2D outward =
     tess.GetMeshPoint(pair_member(edge.neighbors,1-my_index))
     - tess.GetMeshPoint(pair_member(edge.neighbors,my_index));
-  Primitive ghost = cells[(size_t)other];
+  Primitive ghost = cells[static_cast<size_t>(other)];
   if (((dir_==in)&&(ScalarProd(ghost.Velocity,outward)>0))||
       ((dir_==out)&&(ScalarProd(ghost.Velocity,outward)<0)))
-    ghost.Velocity = Reflect(cells[(size_t)other].Velocity, p);
+    ghost.Velocity = Reflect(cells[static_cast<size_t>(other)].Velocity, p);
   Primitive left, right;
   if(0==my_index)
     {
       left = ghost;
-      right = cells[(size_t)other];
+      right = cells[static_cast<size_t>(other)];
     }
   else
     {
-      left = cells[(size_t)other];
+      left = cells[static_cast<size_t>(other)];
       right = ghost;
     }
   return FluxInBulk(n,p,left,right,face_velocity,rs);
@@ -56,7 +56,7 @@ vector<double> Ratchet::UpdateTracer(int index,vector<vector<double> > const& tr
 				     vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& /*cells*/,
 	Tessellation const& /*tess*/,double /*time*/)
 {
-  return tracers[(size_t)index];
+  return tracers[static_cast<size_t>(index)];
 }
 
 vector<double> Ratchet::CalcTracerFlux
@@ -66,7 +66,7 @@ vector<double> Ratchet::CalcTracerFlux
 {
 	const int other = (edge.neighbors.first==index) ?
 	  edge.neighbors.second : edge.neighbors.first;
-	return termwise_product(tracers[(size_t)other],
+	return termwise_product(tracers[static_cast<size_t>(other)],
 				dm*dt*edge.GetLength());
 }
 

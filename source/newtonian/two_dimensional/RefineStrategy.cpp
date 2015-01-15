@@ -7,18 +7,18 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 	&directions,Tessellation
 	const& tess)
 {
-	int nrefine=(int)ToRefine.size();
+	int nrefine=static_cast<int>(ToRefine.size());
 	int npoints=tess.GetPointNo();
 	vector<int> res;
 	vector<Vector2D> newdirections;
 	for(int i=0;i<nrefine;++i)
 	{
-	  vector<int> const& edges=tess.GetCellEdges(ToRefine[(size_t)i]);
+	  vector<int> const& edges=tess.GetCellEdges(ToRefine[static_cast<size_t>(i)]);
 		int nedge=(int) edges.size();
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
-		  Edge const& edge=tess.GetEdge(edges[(size_t)j]);
+		  Edge const& edge=tess.GetEdge(edges[static_cast<size_t>(j)]);
 			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
@@ -27,9 +27,9 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 		}
 		if(good)
 		{
-		  res.push_back(ToRefine[(size_t)i]);
+		  res.push_back(ToRefine[static_cast<size_t>(i)]);
 			if(!directions.empty())
-			  newdirections.push_back(directions[(size_t)i]);
+			  newdirections.push_back(directions[static_cast<size_t>(i)]);
 		}
 	}
 	directions=newdirections;
@@ -83,10 +83,10 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 			vector<int> neigh=tess.GetNeighbors(ToRefine[i]);
 			vector<int> temp(1, -1);
 			neigh=RemoveList(neigh,temp);
-			const int nn=(int)neigh.size();
+			const int nn=static_cast<int>(neigh.size());
 			bool good=true;
 			for(int j=0;j<nn;++j)
-			  if(tess.GetMeshPoint(neigh[(size_t)j]).distance(
+			  if(tess.GetMeshPoint(neigh[static_cast<size_t>(j)]).distance(
 					tess.GetMeshPoint(ToRefine[i]))<0.4*R)
 					good=false;
 			if(good)
@@ -123,16 +123,16 @@ Vector2D FindBestSplit(Tessellation const* tess,int PointToRefine,
 		int min_edge=0;
 		for(int j=1;j<nedges;++j)
 		{
-		  double temp=DistanceToEdge(point,edges[(size_t)j]);
+		  double temp=DistanceToEdge(point,edges[static_cast<size_t>(j)]);
 			if(temp<dis)
 			{
 				dis=temp;
 				min_edge=j;
 			}
 		}
-		slope=Parallel(edges[(size_t)min_edge]);
+		slope=Parallel(edges[static_cast<size_t>(min_edge)]);
 		slope=slope/abs(slope);
-		Vector2D v=point-edges[(size_t)min_edge].vertices.first;
+		Vector2D v=point-edges[static_cast<size_t>(min_edge)].vertices.first;
 		normal=v-ScalarProd(slope,v)*slope;
 		normal=normal/abs(normal);
 	}
