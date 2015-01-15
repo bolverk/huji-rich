@@ -124,11 +124,11 @@ namespace
 		return res;
 	}
 
-	int find_index(facet const& fc, int i)
+  size_t find_index(facet const& fc, int i)
 	{
-		for(int j=0;j<3;++j)
+		for(size_t j=0;j<3;++j)
 		{
-			if(fc.neighbors[static_cast<size_t>(j)]==i)
+			if(fc.neighbors[j]==i)
 				return j;
 		}
 		throw UniversalError("Error in find_index: Index not found");
