@@ -96,7 +96,7 @@ namespace
 		int n=static_cast<int>(points.size());
 		for(int i=0;i<n;++i)
 		{
-			if(CrossProduct(points[static_cast<size_t>(i)]-p,points[(size_t)((i+1)%n)]-p)<0)
+			if(CrossProduct(points[static_cast<size_t>(i)]-p,points[static_cast<size_t>((i+1)%n)]-p)<0)
 				return false;
 		}
 		return true;
@@ -186,13 +186,13 @@ void Delaunay::add_point(size_t index)
 		else
 			if(n>m)
 			{
-				radius[(size_t)location_pointer+1]=CalculateRadius(location_pointer+1);
+			  radius[static_cast<size_t>(location_pointer)+1]=CalculateRadius(location_pointer+1);
 				radius.push_back(CalculateRadius(location_pointer+2));
 			}
 			else
 			{
-				radius[(size_t)location_pointer+1]=CalculateRadius(location_pointer+1);
-				radius[(size_t)location_pointer+2]=CalculateRadius(location_pointer+2);
+			  radius[static_cast<size_t>(location_pointer)+1]=CalculateRadius(location_pointer+1);
+			  radius[static_cast<size_t>(location_pointer)+2]=CalculateRadius(location_pointer+2);
 			}
 	}
 
@@ -232,12 +232,12 @@ void Delaunay::flip(size_t i, size_t j)
 				    cor[static_cast<size_t>(check.first)])>0)
 			{
 				//The point is in a circle change the facets and their friends
-				const int v1=prefetch_1.vertices[(size_t)(other.second+1)%3];
+				const int v1=prefetch_1.vertices[static_cast<size_t>(other.second+1)%3];
 				const int f1=prefetch_1.neighbors[static_cast<size_t>(other.second)];
-				const int f12=prefetch_1.neighbors[(size_t)(other.second+2)%3];
+				const int f12=prefetch_1.neighbors[static_cast<size_t>(other.second+2)%3];
 				facet& prefetch_2 = f[indexes.second];
-				const int v2=prefetch_2.vertices[(size_t)(check.second+1)%3];
-				const int f2=prefetch_2.neighbors[(size_t)(check.second+2)%3];
+				const int v2=prefetch_2.vertices[static_cast<size_t>(check.second+1)%3];
+				const int f2=prefetch_2.neighbors[static_cast<size_t>(check.second+2)%3];
 				const int f22=prefetch_2.neighbors[static_cast<size_t>(check.second)];
 				prefetch_1.vertices.set(other.first,v1,check.first);
 				prefetch_2.vertices.set(check.first,v2,other.first);
@@ -246,11 +246,11 @@ void Delaunay::flip(size_t i, size_t j)
 				// change the friends of the friends if needed
 				if(f2!=last_loc)
 				{
-					f[static_cast<size_t>(f2)].neighbors[(size_t)find_index(f[static_cast<size_t>(f2)],indexes.second)] = indexes.first;
+				  f[static_cast<size_t>(f2)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f2)],indexes.second))] = indexes.first;
 				}
 				if(f12!=last_loc)
 				{
-					f[static_cast<size_t>(f12)].neighbors[(size_t)find_index(f[static_cast<size_t>(f12)],indexes.first)] = indexes.second;
+				  f[static_cast<size_t>(f12)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f12)],indexes.first))] = indexes.second;
 				}
 				// Calculate the new radius if needed
 				if(CalcRadius)
@@ -287,8 +287,8 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 	olength=len;
 	f.clear();
 	cor.clear();
-	f.reserve((size_t)(2*length+1+(int)(17*sqrt(1.*length))));
-	cor.reserve((size_t)(length+9*(int)sqrt(1.*length)));
+	f.reserve(static_cast<size_t>(2*length+1+static_cast<int>(17*sqrt(1.*length))));
+	cor.reserve(static_cast<size_t>(length+9*static_cast<int>(sqrt(1.*length))));
 	last_loc=INT_MAX;
 	for(int i=0;i<len;i++)
 	{
@@ -340,9 +340,9 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 double Delaunay::triangle_area(int index)
 {
   const TripleConstRef<Vector2D> p
-    (cor[(size_t)f[static_cast<size_t>(index)].vertices.first],
-     cor[(size_t)f[static_cast<size_t>(index)].vertices.second],
-     cor[(size_t)f[static_cast<size_t>(index)].vertices.third]);
+    (cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.first)],
+     cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.second)],
+     cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.third)]);
   const double x1=p.third.x-p.first.x;
 	const double x2=p.second.x-p.first.x;
 	const double y1=p.third.y-p.first.y;
@@ -428,7 +428,7 @@ double Delaunay::FindMaxRadius(int point)
 	const vector<int> vec = FindContainingTetras(Walk(point),point);
 	double r=0;
 	for(size_t i=0;i<vec.size();++i)
-		r = max(r,radius[(size_t)vec[static_cast<size_t>(i)]]);
+	  r = max(r,radius[static_cast<size_t>(vec[static_cast<size_t>(i)])]);
 	return 2*r;
 }
 
@@ -463,7 +463,7 @@ bool Delaunay::IsOuterFacet(int facet)const
 	//int PointNum=length-1;
 	for(int i=0;i<3;++i)
 		for(size_t j=0;j<3;++j)
-		  if(f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)]==(int)(olength+j))
+		  if(f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)]==static_cast<int>(olength+j))
 				return true;
 	return false;
 }
@@ -471,9 +471,9 @@ bool Delaunay::IsOuterFacet(int facet)const
 double Delaunay::CalculateRadius(int facet)
 {
 	const double big=1e10;
-	const double a=cor[(size_t)f[static_cast<size_t>(facet)].vertices[0]].distance(cor[(size_t)f[static_cast<size_t>(facet)].vertices[1]]);
-	const double b=cor[(size_t)f[static_cast<size_t>(facet)].vertices[0]].distance(cor[(size_t)f[static_cast<size_t>(facet)].vertices[2]]);
-	const double c=cor[(size_t)f[static_cast<size_t>(facet)].vertices[2]].distance(cor[(size_t)f[static_cast<size_t>(facet)].vertices[1]]);
+	const double a=cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
+	const double b=cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])]);
+	const double c=cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
 	const double temp1=b+c-a;
 	if(temp1<=0)
 	{
@@ -555,9 +555,9 @@ facet* Delaunay::get_facet(int index)
 double Delaunay::get_facet_coordinate(int Facet,int vertice, int dim)
 {
 	if(dim==0)
-		return cor[(size_t)f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)]].x;
+	  return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])].x;
 	else
-		return cor[(size_t)f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)]].y;
+	  return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])].y;
 }
 
 Vector2D Delaunay::get_point(size_t index) const
@@ -617,7 +617,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	for(int i=0;i<n;++i)
 	{
 		cor.push_back(points[static_cast<size_t>(i)]);
-		add_point((int)cor.size()-1);
+		add_point(static_cast<int>(cor.size())-1);
 	}
 }
 
@@ -668,7 +668,7 @@ namespace
 		{
 			if(f.vertices[static_cast<size_t>(i)]>=olength)
 				return false;
-			if(IsOuterQuick(facets[(size_t)f.neighbors[static_cast<size_t>(i)]],olength))
+			if(IsOuterQuick(facets[static_cast<size_t>(f.neighbors[static_cast<size_t>(i)])],olength))
 				++counter;
 		}
 		if(counter>0)
