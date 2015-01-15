@@ -1585,7 +1585,7 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 		for(size_t i=0;i<3;++i)
 		{
 			bool added=false;
-			if(checked[(size_t)f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]]||(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]>=static_cast<int>(olength)))
+			if(checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])]||(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]>=static_cast<int>(olength)))
 				continue;
 			vector<int> neigh=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 			for(size_t k=0;k<neigh.size();++k)
@@ -1593,19 +1593,19 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 				Vector2D center=GetCircleCenter(neigh[static_cast<size_t>(k)]);
 				for(size_t l=0;l<edges.size();++l)
 				{
-					if(CircleSegmentIntersect(edges[static_cast<size_t>(l)],center,radius[(size_t)neigh[static_cast<size_t>(k)]]))
+				  if(CircleSegmentIntersect(edges[static_cast<size_t>(l)],center,radius[static_cast<size_t>(neigh[static_cast<size_t>(k)])]))
 					{
 						toduplicate[static_cast<size_t>(l)].push_back(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 						added=true;
 					}
 				}
 			}
-			checked[(size_t)f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]]=true;
+			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])]=true;
 			if(added)
 			{
 				for(size_t j=0;j<neigh.size();++j)
 				{
-					if(!IsOuterQuick(f[(size_t)neigh[static_cast<size_t>(j)]],olength))
+				  if(!IsOuterQuick(f[static_cast<size_t>(neigh[static_cast<size_t>(j)])],olength))
 						tocheck.push(neigh[static_cast<size_t>(j)]);
 				}
 			}
@@ -1631,7 +1631,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 			bool added=false;
 			if(f[static_cast<size_t>(cur_facet)].vertices[i]>=olength)
 				continue;
-			if(checked[(size_t)f[static_cast<size_t>(cur_facet)].vertices[i]])
+			if(checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
 			vector<int> neighs=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 			for(size_t k=0;k<neighs.size();++k)
