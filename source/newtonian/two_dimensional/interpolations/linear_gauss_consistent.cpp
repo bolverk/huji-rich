@@ -665,9 +665,9 @@ void LinearGaussConsistent::Prepare(Tessellation const& tessellation,
 	vector<Primitive> const& cells,vector<vector<double> > const& tracers,
 	vector<bool> const& isrelevant,double /*dt*/,double time)
 {
-	if(tessellation.GetPointNo()!=(int)rslopes_.size())
+	if(tessellation.GetPointNo()!=static_cast<int>(rslopes_.size()))
 	{
-	  rslopes_.resize((size_t)tessellation.GetPointNo());
+	  rslopes_.resize(static_cast<size_t>(tessellation.GetPointNo()));
 	}
 	for(size_t i=0;i<static_cast<size_t>(tessellation.GetPointNo());++i)
 	{

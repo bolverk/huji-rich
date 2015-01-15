@@ -159,10 +159,10 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 
   // Write hydrodynamic variables
   {
-    vector<double> density_list((size_t)sim.GetCellNo());
-    vector<double> pressure_list((size_t)sim.GetCellNo());
-    vector<double> x_velocity_list((size_t)sim.GetCellNo());
-    vector<double> y_velocity_list((size_t)sim.GetCellNo());
+    vector<double> density_list(static_cast<size_t>(sim.GetCellNo()));
+    vector<double> pressure_list(static_cast<size_t>(sim.GetCellNo()));
+    vector<double> x_velocity_list(static_cast<size_t>(sim.GetCellNo()));
+    vector<double> y_velocity_list(static_cast<size_t>(sim.GetCellNo()));
     for(int i=0;i<sim.GetCellNo();++i){
       density_list[static_cast<size_t>(i)] = sim.GetCell(i).Density;
       pressure_list[static_cast<size_t>(i)] = sim.GetCell(i).Pressure;
@@ -178,7 +178,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   // Do the convex hull for each point
   vector<Vector2D> convhull;
   vector<double> xvert,yvert;
-  vector<int> nvert((size_t)sim.GetCellNo());
+  vector<int> nvert(static_cast<size_t>(sim.GetCellNo()));
   xvert.reserve((size_t)(7*sim.GetCellNo()));
   yvert.reserve((size_t)(7*sim.GetCellNo()));
   for(int i=0;i<sim.GetCellNo();++i)

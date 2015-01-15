@@ -211,7 +211,7 @@ namespace {
 					{
 						indexadd=find(realneighproc.begin()+nneigh,
 							realneighproc.end(),j)-realneighproc.begin();
-						if(indexadd==(int)realneighproc.size())
+						if(indexadd==static_cast<int>(realneighproc.size()))
 							notadded=true;
 					}
 					if(notadded)
@@ -312,7 +312,7 @@ namespace {
 			{
 				int index=find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
 					-realneighproc.begin();
-				if(index<(int)realneighproc.size())
+				if(index<static_cast<int>(realneighproc.size()))
 				{
 					senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[i+nneigh].begin(),
 						sentpoints[i+nneigh].end());
@@ -353,7 +353,7 @@ namespace {
 			{
 				int index=find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
 					-realneighproc.begin();
-				if(index<(int)realneighproc.size())
+				if(index<static_cast<int>(realneighproc.size()))
 				{
 					senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[(size_t)i+nneigh].begin(),
 						sentpoints[(size_t)i+nneigh].end());
@@ -892,7 +892,7 @@ void VoronoiMesh::build_v()
 	Edge edge_temp;
 	Vector2D p_temp;
 	mesh_vertices.clear();
-	mesh_vertices.resize((size_t)Tri.get_length());
+	mesh_vertices.resize(static_cast<size_t>(Tri.get_length()));
 	edges.reserve((size_t)(Tri.get_length()*3.5));
 	int N=Tri.GetOriginalLength();
 	for(int i=0;i<N;++i)
@@ -926,13 +926,13 @@ void VoronoiMesh::build_v()
 					{
 						{
 							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
-								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back((int)edges.size());
+								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
 									edge_temp.neighbors.first)))
 									edge_temp.neighbors.first = -1;
 							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
-								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back((int)edges.size());
+								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
 									edge_temp.neighbors.second)))
@@ -1490,7 +1490,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifndef RICH_MPI
 				if(temp1<N||temp1<0||Vlocal.GetOriginalIndex(temp1)<N)
 #else
-				if(temp1<N||temp1<0||temp1<(int)mpi_real_neigh.size())
+				if(temp1<N||temp1<0||temp1<static_cast<int>(mpi_real_neigh.size()))
 #endif
 				{
 					NewEdges.push_back(Vlocal.edges[static_cast<size_t>(j)]);
@@ -1501,7 +1501,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifndef RICH_MPI
 				if(temp0<0||Vlocal.GetOriginalIndex(temp0)<N)
 #else
-				if(temp0<0||temp0<(int)mpi_real_neigh.size())
+				if(temp0<0||temp0<static_cast<int>(mpi_real_neigh.size()))
 #endif
 					NewEdges.push_back(Vlocal.edges[static_cast<size_t>(j)]);
 		}
@@ -1633,7 +1633,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				}
 				else
 				{
-					V.mesh_vertices[static_cast<size_t>(temp)].push_back((int)V.edges.size());
+					V.mesh_vertices[static_cast<size_t>(temp)].push_back(static_cast<int>(V.edges.size()));
 					V.edges.push_back(NewEdges[static_cast<size_t>(j)]);
 				}
 				// We made New neighbors
@@ -1647,7 +1647,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 					}
 					else
 					{
-						V.mesh_vertices[static_cast<size_t>(temp)].push_back((int)V.edges.size());
+						V.mesh_vertices[static_cast<size_t>(temp)].push_back(static_cast<int>(V.edges.size()));
 						V.edges.push_back(NewEdges[static_cast<size_t>(j)]);
 					}
 				}
@@ -1879,8 +1879,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 			throw eo;
 		}
 		// add the splitting edge
-		old_ref.push_back((int)V.edges.size());
-		new_ref.push_back((int)V.edges.size());
+		old_ref.push_back(static_cast<int>(V.edges.size()));
+		new_ref.push_back(static_cast<int>(V.edges.size()));
 		V.edges.push_back(splitedge);
 		// make the new edges
 		for(int j=0;j<nedges;++j)
@@ -1949,7 +1949,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 						NewEdge.vertices.second-diff,
 						Npoints+i,
 						V.GetOriginalIndex(NewEdge.neighbors.second));
-					V.mesh_vertices[static_cast<size_t>(temp.neighbors.second)].push_back((int)V.edges.size());
+					V.mesh_vertices[static_cast<size_t>(temp.neighbors.second)].push_back(static_cast<int>(V.edges.size()));
 					V.edges.push_back(temp);
 					int loc=FindEdge(V,ToRefine[static_cast<size_t>(i)],temp.neighbors.second);
 					int index2;
@@ -1964,8 +1964,8 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 				}
 				else
 					if(NewEdge.neighbors.second>-1)
-						V.mesh_vertices[static_cast<size_t>(NewEdge.neighbors.second)].push_back((int)V.edges.size());
-				new_ref.push_back((int)V.edges.size());
+						V.mesh_vertices[static_cast<size_t>(NewEdge.neighbors.second)].push_back(static_cast<int>(V.edges.size()));
+				new_ref.push_back(static_cast<int>(V.edges.size()));
 				V.edges.push_back(NewEdge);
 				// Do the other split
 				NewEdge.vertices.first = pair_member(edges[static_cast<size_t>(j)].vertices,(index+1)%2);
@@ -2619,7 +2619,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			vector<double> send(2*nsend);
 			// Arrange the points to send in Hilbert order
 			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[static_cast<size_t>(index)]);
-			vector<int> order=HilbertOrder(cortemp,(int)cortemp.size());
+			vector<int> order=HilbertOrder(cortemp,static_cast<int>(cortemp.size()));
 			ReArrangeVector(data[static_cast<size_t>(index)],order);
 			for(int j=0;j<nsend;++j)
 			{
@@ -2801,7 +2801,7 @@ void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 	}
 	if(!toadd.empty())
 	{
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(pointstemp,order);
@@ -2818,7 +2818,7 @@ void VoronoiMesh::PeriodicBoundaryPoints(vector<int> &points,int edge_number)
 		toadd[static_cast<size_t>(i)]=Tri.get_point(points[static_cast<size_t>(i)])+diff;
 	if(!toadd.empty())
 	{
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(points,order);
@@ -2867,7 +2867,7 @@ void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 		toadd[static_cast<size_t>(i)]=Tri.get_point(points[static_cast<size_t>(i)])+diff1+diff2;
 	if(!toadd.empty())
 	{
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		Tri.AddBoundaryPoints(toadd);
 		ReArrangeVector(points,order);

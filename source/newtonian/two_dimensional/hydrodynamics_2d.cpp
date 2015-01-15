@@ -615,7 +615,7 @@ void UpdatePrimitives
 			eo.AddEntry("Cell x location",tess.GetMeshPoint(i).x);
 			eo.AddEntry("Cell y location",tess.GetMeshPoint(i).y);
 #ifdef RICH_MPI
-			eo.AddEntry("Error in CPU",(double)get_mpi_rank());
+			eo.AddEntry("Error in CPU",static_cast<double>(get_mpi_rank()));
 #endif
 			update_primitives_rethrow(i,eo);
 		}
@@ -868,7 +868,7 @@ void ExternalForceContribution
 	if(!tracers_extensive.empty())
 		dtracer.assign(tracers_extensive[0].size(),0);
 	if(coldflows_flag)
-		g.resize((size_t)tess.GetPointNo());
+		g.resize(static_cast<size_t>(tess.GetPointNo()));
 	for(int i=0;i<tess.GetPointNo();++i)
 	{
 		if(!hbc.IsGhostCell(i,tess))
@@ -900,7 +900,7 @@ vector<Vector2D> calc_point_velocities
 vector<Vector2D> get_all_mesh_points
 	(Tessellation const& tess)
 {
-	vector<Vector2D> res((size_t)tess.GetPointNo());
+	vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
 	for(int i=0;i<static_cast<int>(tess.GetPointNo());++i)
 		res[static_cast<size_t>(i)] = tess.GetMeshPoint(i);
 	return res;
@@ -950,7 +950,7 @@ double TimeAdvance2mid
 	vector<CustomEvolution*> CellsEvolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
 	vector<Vector2D> oldpoints=tess.GetMeshPoints();
-	oldpoints.resize((size_t)tess.GetPointNo());
+	oldpoints.resize(static_cast<size_t>(tess.GetPointNo()));
 
 	//do half time step
 	vector<Vector2D> point_velocities = calc_point_velocities
@@ -1150,7 +1150,7 @@ double TimeAdvance2mid
 		FixPressure(intensive,tracer_extensive,eos,Ek,Ef,as,bs,CellsEvolve,
 		tess,/*extensive,*/shockedcells,densityfloor);
 
-	cells.resize((size_t)tess.GetPointNo());
+	cells.resize(static_cast<size_t>(tess.GetPointNo()));
 	UpdatePrimitives(intensive, eos, cells,CellsEvolve,cells,densityfloor,
 		densitymin,pressuremin,tess,time+0.5*dt,tracers);
 	if(traceflag)
