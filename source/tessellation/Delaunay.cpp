@@ -1411,7 +1411,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 		//		vector<int> pointstemp(corners[i].size());
 		for(size_t j=0;j<corners[static_cast<size_t>(i)].size();++j)
 		{
-			toadd.push_back(cor[(size_t)corners[static_cast<size_t>(i)][static_cast<size_t>(j)]]+change);
+		  toadd.push_back(cor[static_cast<size_t>(corners[static_cast<size_t>(i)][static_cast<size_t>(j)])]+change);
 			//		pointstemp[j]=j;
 		}
 		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
@@ -1453,7 +1453,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edge
 		par=par/abs(par);
 		for(size_t j=0;j<toduplicate[static_cast<size_t>(i)].size();++j)
 		{
-			Vector2D temp=cor[(size_t)toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]];
+		  Vector2D temp=cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
 			if(i%2==1)
 			{
 				temp-=edges[static_cast<size_t>(i)].vertices.first;
