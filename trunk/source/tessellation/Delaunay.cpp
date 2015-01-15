@@ -1092,7 +1092,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			if(rank<procorder[static_cast<size_t>(i)])
 			{
 				if(!send.empty())
-					MPI_Send(&send[0],(int)send.size(),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+					MPI_Send(&send[0],static_cast<int>(send.size()),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
 				else
 				{
 					double temp=0;
@@ -1123,7 +1123,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
 				}
 				if(!send.empty())
-					MPI_Send(&send[0],(int)send.size(),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
+					MPI_Send(&send[0],static_cast<int>(send.size()),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
 				else
 				{
 					double temp=0;
