@@ -17,8 +17,8 @@ def main(fname):
                           r'\1static_cast<\2>(\3());',line)
         new_line = re.sub(r'([^a-zA-Z0-9_>])\(([a-zA-Z0-9_]+)\)([a-zA-Z0-9_.]+)\(\),',
                           r'\1static_cast<\2>(\3()),',line)
-        #new_line = re.sub(r'([^a-zA-Z0-9_>])\(([a-zA-Z0-9_]+)\)([a-zA-Z0-9_.]+)\(\)\)',
-        #                  r'\1static_cast<\2>(\3()))',line)
+        new_line = re.sub(r'([^a-zA-Z0-9_>])\(([a-zA-Z0-9_]+)\)([a-zA-Z0-9_.]+)\(\)\)',
+                          r'\1static_cast<\2>(\3()))',line)
         new_line = re.sub(r'([^a-zA-Z0-9_>])\(([a-zA-Z0-9_]+)\)([a-zA-Z0-9_.]+);',
                           r'\1static_cast<\2>(\3);',new_line)
         new_line = re.sub(r'([^a-zA-Z0-9_>])\(([a-zA-Z0-9_]+)\)([a-zA-Z0-9_.]+)\)',
