@@ -20,7 +20,7 @@ void BinLogger::output(Tessellation const& v)
 {
 	ofstream file_handle(file_name_.c_str(),ios::binary);
 
-	binary_write_single_int((int)v.GetTotalSidesNumber(),file_handle);
+	binary_write_single_int(static_cast<int>(v.GetTotalSidesNumber()),file_handle);
 
 	for(int i=0;i<static_cast<int>(v.GetTotalSidesNumber());++i)
 	{
@@ -54,7 +54,7 @@ void BinLogger::output(Tessellation const& v)
 	for(int i=0;i<static_cast<int>(v.GetPointNo());++i)
 	{
 		const vector<int>& indices = v.GetCellEdges(i);
-		binary_write_single_int((int)indices.size(),file_handle);
+		binary_write_single_int(static_cast<int>(indices.size()),file_handle);
 		for(int j=0;j<static_cast<int>(indices.size());++j)
 		  binary_write_single_int(indices[static_cast<size_t>(j)],file_handle);
 	}
@@ -65,7 +65,7 @@ void BinLogger::output(VoronoiMesh const& v)
 {
 	ofstream file_handle(file_name_.c_str(),ios::binary);
 
-	binary_write_single_int((int)v.GetTotalSidesNumber(),file_handle);
+	binary_write_single_int(static_cast<int>(v.GetTotalSidesNumber()),file_handle);
 
 	for(int i=0;i<static_cast<int>(v.GetTotalSidesNumber());++i)
 	{
@@ -99,7 +99,7 @@ void BinLogger::output(VoronoiMesh const& v)
 	for(int i=0;i<static_cast<int>(v.GetPointNo());++i)
 	{
 		const vector<int>& indices = v.GetCellEdges(i);
-		binary_write_single_int((int)indices.size(),file_handle);
+		binary_write_single_int(static_cast<int>(indices.size()),file_handle);
 		for(int j=0;j<static_cast<int>(indices.size());++j)
 		  binary_write_single_int(indices[static_cast<size_t>(j)],file_handle);
 	}

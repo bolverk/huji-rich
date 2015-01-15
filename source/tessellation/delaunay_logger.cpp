@@ -19,9 +19,9 @@ void BinaryLogger::output(vector<Vector2D> const& cor,
 {
   ofstream file_handle(file_name_.c_str(),std::ostream::binary);
 
-  binary_write_single_int((int)cor.size(),file_handle);
+  binary_write_single_int(static_cast<int>(cor.size()),file_handle);
 
-  binary_write_single_int((int)f.size(),file_handle);
+  binary_write_single_int(static_cast<int>(f.size()),file_handle);
 
   for(size_t i=0;i<cor.size();++i){
     binary_write_single_double(cor[i].x,file_handle);

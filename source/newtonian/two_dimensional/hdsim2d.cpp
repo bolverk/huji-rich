@@ -1707,7 +1707,7 @@ void hdsim::HilbertArrange(int innernum)
 	vector<int> order=HilbertOrder(cor,_tessellation.GetPointNo(),innernum);
 	ReArrangeVector(cor,order);
 	if(cor.size()>order.size())
-	  cor.erase(cor.begin()+(int)order.size(),cor.end());
+	  cor.erase(cor.begin()+static_cast<int>(order.size()),cor.end());
 	ReArrangeVector(_cells,order);
 	if(tracer_flag_)
 		ReArrangeVector(tracer_,order);

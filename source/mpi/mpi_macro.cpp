@@ -669,7 +669,7 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 			{
 				vector<char> btemp=VectorValues(shockedcells,sentcells[index]);
 				if(!btemp.empty())
-					MPI_Send(&btemp[0],(int)btemp.size(),MPI_CHAR,procorder[i],0,
+					MPI_Send(&btemp[0],static_cast<int>(btemp.size()),MPI_CHAR,procorder[i],0,
 					MPI_COMM_WORLD);
 				else
 				{
@@ -716,7 +716,7 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 				}
 				vector<char> btemp=VectorValues(shockedcells,sentcells[index]);
 				if(!btemp.empty())
-					MPI_Send(&btemp[0],(int)btemp.size(),MPI_CHAR,procorder[i],0,
+					MPI_Send(&btemp[0],static_cast<int>(btemp.size()),MPI_CHAR,procorder[i],0,
 					MPI_COMM_WORLD);
 				else
 				{
@@ -753,7 +753,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 			{
 				vector<double> temp=VectorValues(vec,sentcells[index]);
 				if(!temp.empty())
-					MPI_Send(&temp[0],(int)temp.size(),MPI_DOUBLE,procorder[i],0,
+					MPI_Send(&temp[0],static_cast<int>(temp.size()),MPI_DOUBLE,procorder[i],0,
 					MPI_COMM_WORLD);
 				else
 				{
@@ -800,7 +800,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 				}
 				vector<double> temp=VectorValues(vec,sentcells[index]);
 				if(!temp.empty())
-					MPI_Send(&temp[0],(int)temp.size(),MPI_DOUBLE,procorder[i],0,
+					MPI_Send(&temp[0],static_cast<int>(temp.size()),MPI_DOUBLE,procorder[i],0,
 					MPI_COMM_WORLD);
 				else
 				{
@@ -1370,7 +1370,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 				if(index<(int)temp.size())
 					tosend[i].push_back(index);
 			}
-			MPI_Isend(&tosend[i][0],(int)tosend.size(),MPI_INT,SentProcs[i],0,
+			MPI_Isend(&tosend[i][0],static_cast<int>(tosend.size()),MPI_INT,SentProcs[i],0,
 				MPI_COMM_WORLD,&req[i]);
 		}
 		else
@@ -1681,7 +1681,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 						for(int k=0;k<lengths[j];++k)
 							senddata.push_back(BoundaryNeigh[index][j][k]);
 					}
-					MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
+					MPI_Send(&lengths[0],static_cast<int>(lengths.size()),MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD);
 				}
 				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
@@ -1695,7 +1695,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				if(!BoundaryRemove[index].empty())
-					MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+					MPI_Send(&senddata[0],static_cast<int>(senddata.size()),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
 				if(!lengthr.empty())
 				{
 					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
@@ -1755,7 +1755,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 						for(int k=0;k<lengths[j];++k)
 							senddata.push_back(BoundaryNeigh[index][j][k]);
 					}
-					MPI_Send(&lengths[0],(int)lengths.size(),MPI_INT,procorder[i],0,
+					MPI_Send(&lengths[0],static_cast<int>(lengths.size()),MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD);
 				}
 				if(!lengthr.empty())
@@ -1768,7 +1768,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					//RecvNeigh[index].resize(lengthr.size());
 				}
 				if(!BoundaryRemove[index].empty())
-					MPI_Send(&senddata[0],(int)senddata.size(),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+					MPI_Send(&senddata[0],static_cast<int>(senddata.size()),MPI_INT,procorder[i],0,MPI_COMM_WORLD);
 				int loc=0;
 				// Reorganize the data
 				for(int j=0;j<static_cast<int>(lengthr.size());++j)
