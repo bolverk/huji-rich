@@ -124,11 +124,9 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 		sort_index(dist,indeces2);
 		ReArrangeVector(plast,indeces2);
 		for(int i=0;i<N;++i)
-			result[static_cast<size_t>(n-1-i)]=plast[static_cast<size_t>(i)];
+			result[n-1-static_cast<size_t>(i)]=plast[static_cast<size_t>(i)];
 	}
-	int loc1=static_cast<int>(pfirst.size());
-	int loc2=static_cast<int>(plast.size());
-	for(size_t i=loc1+1;i<n-loc2;++i)
+	for(size_t i=pfirst.size()+1;i<n-plast.size();++i)
 	  result[i]=points[static_cast<size_t>(indeces[i-1])+1];
 }
 
