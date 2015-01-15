@@ -709,14 +709,14 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2
 {
 	int cur_facet=start_facet;
 	vector<int> f_temp,containing_facets;
-	f_temp.reserve((size_t)(10*sqrt(1.0*olength2)));
+	f_temp.reserve(static_cast<size_t>(10*sqrt(1.0*olength2)));
 	int point_index=FindPointInFacet(cur_facet,real_point);
-	if(IsOuterQuick(f[(size_t)f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)]],olength2))
+	if(IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])],olength2))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
 	}
-	if(IsOuterQuick(f[(size_t)f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)]],olength2))
+	if(IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])],olength2))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
@@ -727,10 +727,10 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2
 		int old_current=cur_facet;
 		for(size_t i=0;i<containing_facets.size();++i)
 		{
-			if(IsEdgeFacet(f,f[(size_t)containing_facets[static_cast<size_t>(i)]],olength2)&&
+		  if(IsEdgeFacet(f,f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])],olength2)&&
 				containing_facets[static_cast<size_t>(i)]!=old_current)
 				cur_facet=containing_facets[static_cast<size_t>(i)];
-			if(!IsOuterQuick(f[(size_t)containing_facets[static_cast<size_t>(i)]],olength2))
+			if(!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])],olength2))
 				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
 		}
 		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
@@ -757,8 +757,8 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
 	if (olength>100)
 	{
-		res_temp.reserve((size_t)(20 * sqrt(1.0*olength)));
-		outer_points.reserve((size_t)(10 * sqrt(1.0*olength)));
+		res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*olength)));
+		outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*olength)));
 		// Walk to an outer point
 		int cur_facet = Walk(olength);
 		// Find the real point
@@ -775,7 +775,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-			if (IsEdgeFacet(f, f[(size_t)containing_facets[static_cast<size_t>(i)]], olength))
+		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength))
 			{
 				cur_facet = containing_facets[static_cast<size_t>(i)];
 				break;
@@ -786,7 +786,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-			if (IsEdgeFacet(f, f[(size_t)containing_facets[static_cast<size_t>(i)]], olength))
+		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength))
 			{
 				cur_facet = containing_facets[static_cast<size_t>(i)];
 				break;
@@ -825,7 +825,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	{
 		sort(res[i].begin(),res[i].end());
 		res[i]=unique(res[i]);
-		res[i]=VectorValues(res[i],HilbertOrder(VectorValues(cor,res[i]),(int)res[i].size()));
+		res[i]=VectorValues(res[i],HilbertOrder(VectorValues(cor,res[i]),static_cast<int>(res[i].size())));
 	}
 	// Send/Recv the data
 	vector<vector<Vector2D> > tosend;
@@ -862,7 +862,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<int> orgneigh = neigh;
 	// Now find all other candidates
 	// Recursively look for more points
-	vector<bool> checked((size_t)olength,false);
+	vector<bool> checked(static_cast<size_t>(olength),false);
 	vector<vector<int> > toduplicate;
 	toduplicate.resize(neigh.size());
 
@@ -1168,9 +1168,9 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 		return res;
 	}
 	vector<int> res_temp,outer_points,f_temp,f_add(f.size(),0);
-	res_temp.reserve((size_t)(20*sqrt(1.0*olength)));
-	f_temp.reserve((size_t)(10*sqrt(1.0*olength)));
-	outer_points.reserve((size_t)(10*sqrt(1.0*olength)));
+	res_temp.reserve(static_cast<size_t>(20*sqrt(1.0*olength)));
+	f_temp.reserve(static_cast<size_t>(10*sqrt(1.0*olength)));
+	outer_points.reserve(static_cast<size_t>(10*sqrt(1.0*olength)));
 	// Walk to an outer point
 	int cur_facet=Walk(olength);
 	// Find the real point
@@ -1187,7 +1187,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	FindContainingTetras(cur_facet,real_point,containing_facets);
 	for(size_t i=0;i<containing_facets.size();++i)
 	{
-		if(IsEdgeFacet(f,f[(size_t)containing_facets[static_cast<size_t>(i)]],olength))
+	  if(IsEdgeFacet(f,f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])],olength))
 		{
 			cur_facet=containing_facets[static_cast<size_t>(i)];
 			break;
@@ -1196,12 +1196,12 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	int start_facet=cur_facet;
 	int point_index=FindPointInFacet(cur_facet,real_point);
 	// Make sure we are at the right location in the triangle, we want to be in the last outer point
-	if(IsOuterQuick(f[(size_t)f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)]],olength))
+	if(IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])],olength))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
 	}
-	if(IsOuterQuick(f[(size_t)f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)]],olength))
+	if(IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])],olength))
 	{
 		point_index=(point_index+1)%3;
 		real_point=f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
@@ -1212,10 +1212,10 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 		int old_current=cur_facet;
 		for(size_t i=0;i<containing_facets.size();++i)
 		{
-			if(IsEdgeFacet(f,f[(size_t)containing_facets[static_cast<size_t>(i)]],olength)&&
+		  if(IsEdgeFacet(f,f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])],olength)&&
 				containing_facets[static_cast<size_t>(i)]!=old_current)
 				cur_facet=containing_facets[static_cast<size_t>(i)];
-			if(!IsOuterQuick(f[(size_t)containing_facets[static_cast<size_t>(i)]],olength))
+			if(!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])],olength))
 				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
 		}
 		point_index=(1+FindPointInFacet(cur_facet,real_point))%3;
@@ -1230,7 +1230,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	//Find the points in the outer facets
 	vector<vector<int> > toduplicate(edges.size());
 	// Recursively look for more points
-	vector<bool> checked((size_t)olength,false);
+	vector<bool> checked(static_cast<size_t>(olength),false);
 	for(size_t i=0;i<f_temp.size();++i)
 		AddOuterFacets(f_temp[i],toduplicate,edges,checked);
 	for(size_t i=0;i<edges.size();++i)
@@ -1256,7 +1256,7 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 		par=par/abs(par);
 		for(size_t j=0;j<toduplicate[i].size();++j)
 		{
-			Vector2D temp=cor[(size_t)toduplicate[i][j]]-edges[i].vertices.first;
+		  Vector2D temp=cor[static_cast<size_t>(toduplicate[i][j])]-edges[i].vertices.first;
 			temp=2*par*ScalarProd(par,temp)-temp+edges[i].vertices.first;
 			if (InTriangle(TripleConstRef<Vector2D>
 				       (cor[static_cast<size_t>(olength)],
@@ -1283,25 +1283,6 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 	}
 }
 
-namespace
-{
-	/*
-	vector<vector<int> > FindCorners(vector<vector<int> > const& toduplicate)
-	{
-	vector<vector<int> > res(toduplicate.size());
-	for(size_t i=0;i<toduplicate.size();++i)
-	{
-	for(size_t j=0;j<toduplicate[static_cast<size_t>(i)].size();++j)
-	{
-	if(binary_search(toduplicate[(size_t)(i+1)%4].begin(),toduplicate[(size_t)(i+1)%4].end(),
-	toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]))
-	res[static_cast<size_t>(i)].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-	}
-	}
-	return res;
-	}
-	*/
-}
 namespace
 {
 	vector<Edge> GetCornerEdges(OuterBoundary const* obc)
