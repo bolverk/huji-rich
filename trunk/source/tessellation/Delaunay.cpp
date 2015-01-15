@@ -1513,12 +1513,12 @@ Vector2D Delaunay::GetCircleCenter(int index)const
 {
 	Vector2D center;
 	facet const& F=f[static_cast<size_t>(index)];
-	double x1=cor[(size_t)F.vertices[0]].x;
-	double x2=cor[(size_t)F.vertices[1]].x;
-	double x3=cor[(size_t)F.vertices[2]].x;
-	double y1=cor[(size_t)F.vertices[0]].y;
-	double y2=cor[(size_t)F.vertices[1]].y;
-	double y3=cor[(size_t)F.vertices[2]].y;
+	double x1=cor[static_cast<size_t>(F.vertices[0])].x;
+	double x2=cor[static_cast<size_t>(F.vertices[1])].x;
+	double x3=cor[static_cast<size_t>(F.vertices[2])].x;
+	double y1=cor[static_cast<size_t>(F.vertices[0])].y;
+	double y2=cor[static_cast<size_t>(F.vertices[1])].y;
+	double y3=cor[static_cast<size_t>(F.vertices[2])].y;
 	// Do we have a case where two point are very close compared to the third?
 	double d12=(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
 	double d23=(x3-x2)*(x3-x2)+(y3-y2)*(y3-y2);
@@ -1569,7 +1569,7 @@ double Delaunay::GetMaxRadius(int point,int startfacet)
 	double res=0;
 	vector<int> neigh=FindContainingTetras(startfacet,point);
 	for(size_t i=0;i<neigh.size();++i)
-		res=max(res,radius[(size_t)neigh[static_cast<size_t>(i)]]);
+	  res=max(res,radius[static_cast<size_t>(neigh[static_cast<size_t>(i)])]);
 	return res;
 }
 
