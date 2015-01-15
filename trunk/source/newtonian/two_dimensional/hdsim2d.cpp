@@ -162,7 +162,7 @@ namespace
 				  const HydroBoundaryConditions& hbc,
 				  double time)
   {
-    vector<char> res((size_t)tess.GetPointNo());
+    vector<char> res(static_cast<size_t>(tess.GetPointNo()));
     for(size_t i=0;i<res.size();++i)
       res[i] = IsShockedCell(tess,(int)i,cells,hbc,time) ? 1 : 0;
     return res;
@@ -741,7 +741,7 @@ void hdsim::TimeAdvanceElad2(void)
 	vector<CustomEvolution*> CellsEvolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
 	vector<Vector2D> oldpoints=_tessellation.GetMeshPoints();
-	oldpoints.resize((size_t)_tessellation.GetPointNo());
+	oldpoints.resize(static_cast<size_t>(_tessellation.GetPointNo()));
 
 	//do half time step
 	vector<Vector2D> point_velocities = calc_point_velocities
@@ -970,7 +970,7 @@ void hdsim::TimeAdvanceElad2(void)
 			    cfp_.as,cfp_.bs,CellsEvolve,
 			    _tessellation,/*extensive,*/shockedcells,densityfloor_);
 
-	_cells.resize((size_t)_tessellation.GetPointNo());
+	_cells.resize(static_cast<size_t>(_tessellation.GetPointNo()));
 	UpdatePrimitives(intensive, _eos, _cells,CellsEvolve,_cells,densityfloor_,
 			 densityMin_,pressureMin_,_tessellation,_time+0.5*dt,tracer_);
 	if(tracer_flag_)
@@ -1521,7 +1521,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
 	_tessellation.RemoveCells(ToRemove,VolIndex,dv);
-	int n=lower_bound(ToRemove.begin(),ToRemove.end(),(int)OldVol.size())-
+	int n=lower_bound(ToRemove.begin(),ToRemove.end(),static_cast<int>(OldVol.size()))-
 		ToRemove.begin();
 	// gather all the relevant neighbors
 	const vector<int> TotalNeigh = calc_TotalNeigh(VolIndex);
@@ -1531,7 +1531,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > MPI_AMR_Send; // the indeces in the Nghostpoints that I want to recv hydro from other procs
 	CreateGetPrimitiveList(ToRemove,_tessellation.GetGhostIndeces(),n,MPI_AMR_Send);
 	vector<int> ToRemoveReduced;
-	if(n<(int)ToRemove.size())
+	if(n<static_cast<int>(ToRemove.size()))
 	{
 		ToRemoveReduced.resize((int)ToRemove.size()-n);
 		copy(ToRemove.begin()+n,ToRemove.end(),ToRemoveReduced.begin());
@@ -1576,7 +1576,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 				    _eos,
 				    _cells,
 				    tracer_);
-	if(n<(int)ToRemove.size())
+	if(n<static_cast<int>(ToRemove.size()))
 		ToRemove.erase(ToRemove.begin()+n,ToRemove.end());
 	//Remove the deleted cells
 	RemoveVector(_cells,ToRemove);

@@ -65,7 +65,7 @@ namespace
 		int gradlength=8;
 		if(!vec[0].tracers.empty())
 			gradlength+=vec[0].tracers.size();
-		if(n*gradlength!=(int)res.size())
+		if(n*gradlength!=static_cast<int>(res.size()))
 		{
 			UniversalError eo("Sizes do not match in GradVectorToDouble");
 			throw eo;
@@ -92,7 +92,7 @@ namespace
 		vector<double> const& temp,int gradlength)
 	{
 		int n=(int)temp.size()/gradlength;
-		if(n!=(int)vec.size())
+		if(n!=static_cast<int>(vec.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToGrad");
 			throw eo;
@@ -119,7 +119,7 @@ namespace
 		const& data,int tracerlength)
 	{
 		int n=(int)data.size()/tracerlength;
-		if(n!=(int)tracer.size())
+		if(n!=static_cast<int>(tracer.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToTracer");
 			throw eo;
@@ -137,7 +137,7 @@ namespace
 	{
 		int tracerlength=(int)ttemp[0].size();
 		int n=static_cast<int>(ttemp.size());
-		if(n*tracerlength!=(int)dtracer.size())
+		if(n*tracerlength!=static_cast<int>(dtracer.size()))
 		{
 			UniversalError eo("Sizes do not match in TracerVectorToDouble");
 			throw eo;
@@ -151,7 +151,7 @@ namespace
 		EquationOfState const& eos)
 	{
 		int ntotal=(int) (temp.size()/4);
-		if(ntotal!=(int)vec.size())
+		if(ntotal!=static_cast<int>(vec.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToPrimitve");
 			throw eo;
@@ -168,7 +168,7 @@ namespace
 	void PrimitiveVectorToDouble(vector<Primitive> const& vec,vector<double> &res)
 	{
 		int n=static_cast<int>(vec.size());
-		if(n*4!=(int)res.size())
+		if(n*4!=static_cast<int>(res.size()))
 		{
 			UniversalError eo("Sizes do not match in PrimitiveVectorToDouble");
 			throw eo;
@@ -186,7 +186,7 @@ namespace
 		data)
 	{
 		int n=(int)data.size()/2;
-		if(n!=(int)vec.size())
+		if(n!=static_cast<int>(vec.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToVector2D");
 			throw eo;
@@ -198,7 +198,7 @@ namespace
 	void Vector2DVectorToDouble(vector<double> &res,vector<Vector2D> const& data)
 	{
 		int n=static_cast<int>(data.size());
-		if(n*2!=(int)res.size())
+		if(n*2!=static_cast<int>(res.size()))
 		{
 			UniversalError eo("Sizes do not match in Vector2DVectorToDouble");
 			throw eo;
@@ -1367,7 +1367,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 			{
 				const int index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
 					-temp.begin();
-				if(index<(int)temp.size())
+				if(index<static_cast<int>(temp.size()))
 					tosend[i].push_back(index);
 			}
 			MPI_Isend(&tosend[i][0],static_cast<int>(tosend.size()),MPI_INT,SentProcs[i],0,
@@ -1928,7 +1928,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 						continue;
 					int index=lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
 						Nghostindex.begin();
-					if(index<(int)Nghostindex.size())
+					if(index<static_cast<int>(Nghostindex.size()))
 						if(recvmerit[i][indeces[index]]>=bmerit[i][j])
 							bad.push_back(DupPoints[i][bremove[i][j]]);
 				}

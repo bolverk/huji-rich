@@ -809,7 +809,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			allpoints.push_back(f[f_temp[i]].vertices[j]);
 	sort(allpoints.begin(),allpoints.end());
 	allpoints=unique(allpoints);
-	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),(int)allpoints.size()));
+	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),static_cast<int>(allpoints.size())));
 	for(size_t i=0;i<allpoints.size();++i)
 	{
 		vector<int> neigh2=FindContainingTetras(Walk(allpoints[i]),allpoints[i]);
@@ -1268,7 +1268,7 @@ void Delaunay::AddRigid(OuterBoundary const* /*obc*/,vector<Edge> const& edges,
 				toremove.push_back(static_cast<int>(j));
 		}
 		RemoveVector(toduplicate[i], toremove);
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		try
 		{
@@ -1358,7 +1358,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 			toadd.push_back(cor[(size_t)toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]]+change);
 			//	pointstemp[j]=j;
 		}
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		AddBoundaryPoints(toadd);
 		ReArrangeVector(toduplicate[static_cast<size_t>(i)],order);
@@ -1414,7 +1414,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 			toadd.push_back(cor[(size_t)corners[static_cast<size_t>(i)][static_cast<size_t>(j)]]+change);
 			//		pointstemp[j]=j;
 		}
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		AddBoundaryPoints(toadd);
 		ReArrangeVector(corners[static_cast<size_t>(i)],order);
@@ -1462,7 +1462,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edge
 			toadd.push_back(temp+change);
 			//pointstemp[j]=j;
 		}
-		vector<int> order=HilbertOrder(toadd,(int)toadd.size());
+		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd,order);
 		AddBoundaryPoints(toadd);
 		ReArrangeVector(toduplicate[static_cast<size_t>(i)],order);

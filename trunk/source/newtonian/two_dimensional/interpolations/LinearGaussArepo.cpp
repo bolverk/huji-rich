@@ -669,9 +669,9 @@ void LinearGaussArepo::Prepare(Tessellation const& tessellation,
 	vector<bool> const& isrelevant,double /*dt*/,double time)
 {
   time_=time;
-  if(tessellation.GetPointNo()!=(int)rslopes_.size())
+  if(tessellation.GetPointNo()!=static_cast<int>(rslopes_.size()))
     {
-      rslopes_.resize((size_t)tessellation.GetPointNo());
+      rslopes_.resize(static_cast<size_t>(tessellation.GetPointNo()));
     }
   for(int i=0;i<tessellation.GetPointNo();++i)
     {
