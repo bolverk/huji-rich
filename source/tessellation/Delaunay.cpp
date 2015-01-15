@@ -1355,7 +1355,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
 		for(size_t j=0;j<toduplicate[static_cast<size_t>(i)].size();++j)
 		{
-			toadd.push_back(cor[(size_t)toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]]+change);
+		  toadd.push_back(cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])]+change);
 			//	pointstemp[j]=j;
 		}
 		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
@@ -1372,12 +1372,12 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 		for(size_t j=0;j<toduplicate[static_cast<size_t>(i)].size();++j)
 		{
 			const int facet_loc=Walk(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-			const Vector2D center=cor[(size_t)toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]];
+			const Vector2D center=cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
 			const double R=2*GetMaxRadius(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)],facet_loc);
-			if(CircleSegmentIntersect(corneredges[(size_t)2*i],center,R))
+			if(CircleSegmentIntersect(corneredges[2*static_cast<size_t>(i)],center,R))
 				corners[static_cast<size_t>(i)].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-			if(CircleSegmentIntersect(corneredges[(size_t)(2*i+7)%8],center,R))
-				corners[(size_t)(i+3)%4].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
+			if(CircleSegmentIntersect(corneredges[(2*static_cast<size_t>(i)+7)%8],center,R))
+			  corners[(static_cast<size_t>(i)+3)%4].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 		}
 	}
 	for(size_t i=0;i<corners.size();++i)
