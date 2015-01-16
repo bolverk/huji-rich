@@ -1772,7 +1772,12 @@ void VoronoiMesh::RefineCells(vector<int> const& ToRefine,
 }
 
 void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
-	vector<Vector2D> const& directions,bool PeriodicBoundary)
+		  vector<Vector2D> const& directions,
+		  #ifndef RICH_MPI
+		  bool PeriodicBoundary)
+                  #else
+                  bool /*PeriodicBoundary*/)
+		  #endif
 {
 	int n=static_cast<int>(ToRefine.size());
 	if(n==0)

@@ -1431,7 +1431,7 @@ namespace
 	// ghost is the index in cor of the ghost removed points
 	// Sentindex is the index of the proc we are dealing with
 	// returns all of the local neighboring points of the removed ghost point
-	vector<vector<int> > FindLocalNeighbors(vector<int> const& Nghost,vector<int>  &ghost,
+  vector<vector<int> > FindLocalNeighbors(vector<int> const& /*Nghost*/,vector<int>  &ghost,
 		int SentIndex,Tessellation const& tess)
 	{
 		vector<vector<int> > const& duplicated=tess.GetDuplicatedPoints();

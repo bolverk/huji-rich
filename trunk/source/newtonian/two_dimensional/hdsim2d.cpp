@@ -1521,8 +1521,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > VolIndex;
 	vector<vector<double> > dv;
 	_tessellation.RemoveCells(ToRemove,VolIndex,dv);
-	int n=lower_bound(ToRemove.begin(),ToRemove.end(),static_cast<int>(OldVol.size()))-
-		ToRemove.begin();
+	int n=static_cast<int>(lower_bound(ToRemove.begin(),ToRemove.end(),static_cast<int>(OldVol.size()))- ToRemove.begin());
 	// gather all the relevant neighbors
 	const vector<int> TotalNeigh = calc_TotalNeigh(VolIndex);
 #ifdef RICH_MPI
