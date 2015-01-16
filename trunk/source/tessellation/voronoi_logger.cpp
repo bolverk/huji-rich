@@ -112,18 +112,18 @@ vector<Vector2D> BinLogger::read(string location)
 	if(!myFile.good())
 		throw UniversalError("Error opening voronoi logger file!!");
 	int N,itemp;
-	myFile.read((char*)&N,sizeof (int));
+	myFile.read(reinterpret_cast<char*>(&N),sizeof (int));
 	double temp;
 	for(int i=0;i<N*4;++i)
-		myFile.read((char*)&temp,sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&temp),sizeof(double));
 	for (int i = 0; i<N *2; ++i)
-		myFile.read((char*)&itemp, sizeof(int));
-	myFile.read((char*)&N,sizeof (int));
+	  myFile.read(reinterpret_cast<char*>(&itemp), sizeof(int));
+	myFile.read(reinterpret_cast<char*>(&N),sizeof (int));
 	vector<Vector2D> res(static_cast<size_t>(N));
 	for(size_t i=0;i<static_cast<size_t>(N);++i)
 	{
-		myFile.read((char*)&res[i].x,sizeof(double));
-		myFile.read((char*)&res[i].y,sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&res[i].x),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&res[i].y),sizeof(double));
 	}
 	return res;
 }
