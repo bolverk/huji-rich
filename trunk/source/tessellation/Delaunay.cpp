@@ -198,8 +198,8 @@ void Delaunay::add_point(size_t index)
 
 	// check if flipping is needed
 	flip(triangle,static_cast<size_t>(temp_friends.third));
-	flip(location_pointer+1,static_cast<size_t>(temp_friends.first));
-	flip(location_pointer+2,static_cast<size_t>(temp_friends.second));
+	flip(static_cast<size_t>(location_pointer)+1,static_cast<size_t>(temp_friends.first));
+	flip(static_cast<size_t>(location_pointer)+2,static_cast<size_t>(temp_friends.second));
 
 	// _update number of facets
 	location_pointer+=2;
@@ -327,7 +327,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 	// add the points
 	for(size_t i=0;i<static_cast<size_t>(length)-3;i++)
 	{
-		add_point(data.insert_order[i]);
+	  add_point(static_cast<size_t>(data.insert_order[i]));
 	}
 	// Calculate radius
 	radius.resize(f.size());
@@ -401,7 +401,7 @@ namespace {
 					 f[res].vertices,
 					 point);
     while(next){
-      res = f[res].neighbors.*next;
+      res = static_cast<size_t>(f[res].neighbors.*next);
       next = walk_condition(cor,
 			    f[res].vertices,
 			    point);
@@ -412,8 +412,8 @@ namespace {
 
 size_t Delaunay::Walk(size_t point)
 {
-  lastFacet = static_cast<int>(find_new_facet(cor,f,static_cast<int>(point),lastFacet));
-  return lastFacet;
+  lastFacet = static_cast<int>(find_new_facet(cor,f,point,lastFacet));
+  return static_cast<size_t>(lastFacet);
 }
 
 vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
