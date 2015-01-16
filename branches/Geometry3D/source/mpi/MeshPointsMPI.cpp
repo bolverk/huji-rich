@@ -10,7 +10,7 @@ namespace
 	{
 		const int rank = get_mpi_rank();
 		const vector<int>& edge_index=tess.GetCellEdges(rank);
-		const int n=(int)edge_index.size();
+		const int n=static_cast<int>(edge_index.size());
 		boost::array<double,4> res;
 		res[0]=min(tess.GetEdge(edge_index[0]).vertices.first.x,
 			tess.GetEdge(edge_index[0]).vertices.second.x);
@@ -56,7 +56,7 @@ namespace
 		double mincellR=abs(cpoints[0]-center);
 		double maxcellR(mincellR);
 		mincellR=min(mincellR,DistanceToEdge(center,etemp));
-		int npoints=(int)cpoints.size();
+		int npoints=static_cast<int>(cpoints.size());
 		for(int i=1;i<npoints;++i)
 		{
 			double temp=abs(cpoints[i]-center);
@@ -152,8 +152,8 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	Vector2D const&lowerleft,Vector2D const&upperright)
 {
-	const double widthx = (upperright.x-lowerleft.x)/(double)nx;
-	const double widthy = (upperright.y-lowerleft.y)/(double)ny;
+	const double widthx = (upperright.x-lowerleft.x)/static_cast<double>(nx);
+	const double widthy = (upperright.y-lowerleft.y)/static_cast<double>(ny);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
 	nx=(int)floor((tessEdges[1]-tessEdges[0])/widthx+0.5);
 	ny=(int)floor((tessEdges[3]-tessEdges[2])/widthy+0.5);
@@ -182,7 +182,8 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 }
 
 vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
-	Vector2D const& bottomleft,Vector2D const& topright,
+				   Vector2D const& /*bottomleft*/,
+				   Vector2D const& /*topright*/,
 	Tessellation const& tess,double xc,double yc)
 {
 	double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
@@ -282,7 +283,7 @@ namespace {
 	size_t sort_point(Tessellation const& tess,
 		Vector2D const& point)
 	{
-		for(size_t i=0;i<tess.GetPointNo();++i){
+	  for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i){
 			vector<Vector2D> vertices;
 			ConvexHull(vertices,&tess,i);
 			if(PointInCell(vertices,point))
@@ -314,20 +315,21 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 	const vector<size_t> range_list = most_uniform_range_partition
 		(grid_generator.getLength(), process_tess.GetPointNo());
 	size_t start = 0;
-	for(size_t i=0;i<get_mpi_rank();++i)
+	for(size_t i=0;i<static_cast<size_t>(get_mpi_rank());++i)
 		start += range_list[i];
 	size_t ending = start + range_list[get_mpi_rank()];
 	const vector<vector<Vector2D> > sorted_points =
 		sort_points(process_tess, grid_generator, start, ending);
 	vector<Vector2D> res = sorted_points[get_mpi_rank()];
-	for(size_t i=0;i<get_mpi_rank();++i){
+	for(size_t i=0;i<static_cast<size_t>(get_mpi_rank());++i){
 		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
 		res.reserve(res.size()+distance(buf.begin(),buf.end()));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}
-	for(size_t i=get_mpi_rank()+1;i<get_mpi_size();++i){
+	for(size_t i=static_cast<size_t>(get_mpi_rank())+1;
+	    i<static_cast<size_t>(get_mpi_size());++i){
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
 		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
@@ -351,8 +353,8 @@ Vector2D CartesianGridGenerator::operator()(size_t idx) const
 	const size_t i = idx%nx_;
 	const size_t j = idx/nx_;
 	return lower_left_ +
-		Vector2D((upper_right_-lower_left_).x*(0.5+(double)i)/(double)nx_,
-		(upper_right_-lower_left_).y*(0.5+(double)j)/(double)ny_);
+		Vector2D((upper_right_-lower_left_).x*(0.5+static_cast<double>(i))/(double)nx_,
+		(upper_right_-lower_left_).y*(0.5+static_cast<double>(j))/static_cast<double>(ny_));
 }
 
 #endif

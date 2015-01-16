@@ -4,17 +4,17 @@
 vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tessellation
 	const& tess)const
 {
-	int nrefine=(int)ToRemove.size();
+	int nrefine=static_cast<int>(ToRemove.size());
 	int npoints=tess.GetPointNo();
 	vector<int> res;
 	for(int i=0;i<nrefine;++i)
 	{
-	  vector<int> const& edges=tess.GetCellEdges(ToRemove[(size_t)i]);
+	  vector<int> const& edges=tess.GetCellEdges(ToRemove[static_cast<size_t>(i)]);
 		int nedge=(int) edges.size();
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
-		  Edge const& edge=tess.GetEdge(edges[(size_t)j]);
+		  Edge const& edge=tess.GetEdge(edges[static_cast<size_t>(j)]);
 			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
 			{
 				good=false;
@@ -22,7 +22,7 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 			}
 		}
 		if(good)
-		  res.push_back(ToRemove[(size_t)i]);
+		  res.push_back(ToRemove[static_cast<size_t>(i)]);
 	}
 	return res;
 }
@@ -37,12 +37,12 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		throw UniversalError("Merits and Candidates don't have same size in RemovalStrategy");
 	// Make sure there are no neighbors
 	vector<int> bad_neigh;
-	int n=(int)merits.size();
+	int n=static_cast<int>(merits.size());
 	//	int npoints=tess.GetPointNo();
 	for(int i=0;i<n;++i)
 	{
 		bool good=true;
-		vector<int> neigh=tess.GetNeighbors(candidates[(size_t)i]);
+		vector<int> neigh=tess.GetNeighbors(candidates[static_cast<size_t>(i)]);
 		int nneigh=(int) neigh.size();
 		/*for(int j=0;j<nneigh;++j)
 		{
@@ -55,35 +55,35 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		}*/
 		if(!good)
 			continue;
-		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[(size_t)i])!=
+		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[static_cast<size_t>(i)])!=
 			bad_neigh.end())
 			good=false;
 		else
 		{
 			for(int j=0;j<nneigh;++j)
 			{
-			  if(binary_search(candidates.begin(),candidates.end(),neigh[(size_t)j]))
+			  if(binary_search(candidates.begin(),candidates.end(),neigh[static_cast<size_t>(j)]))
 				{
-				  if(merits[(size_t)i]<merits[(size_t)(lower_bound(candidates.begin(),
-										   candidates.end(),neigh[(size_t)j])-candidates.begin())])
+				  if(merits[static_cast<size_t>(i)]<merits[(size_t)(lower_bound(candidates.begin(),
+										   candidates.end(),neigh[static_cast<size_t>(j)])-candidates.begin())])
 					{
 						good=false;
 						break;
 					}
-				  if(fabs(merits[(size_t)i]-merits[(size_t)(lower_bound(candidates.begin(),
-											candidates.end(),neigh[(size_t)j])-candidates.begin())])<1e-9)
+				  if(fabs(merits[static_cast<size_t>(i)]-merits[(size_t)(lower_bound(candidates.begin(),
+											candidates.end(),neigh[static_cast<size_t>(j)])-candidates.begin())])<1e-9)
 					{
-						if(find(bad_neigh.begin(),bad_neigh.end(),neigh[(size_t)j])==
+						if(find(bad_neigh.begin(),bad_neigh.end(),neigh[static_cast<size_t>(j)])==
 							bad_neigh.end())
-							bad_neigh.push_back(neigh[(size_t)j]);
+							bad_neigh.push_back(neigh[static_cast<size_t>(j)]);
 					}
 				}
 			}
 		}
 		if(good)
 		{
-			result.push_back(candidates[(size_t)i]);
-			merits2.push_back(merits[(size_t)i]);
+			result.push_back(candidates[static_cast<size_t>(i)]);
+			merits2.push_back(merits[static_cast<size_t>(i)]);
 		}
 	}
 #ifdef RICH_MPI
@@ -99,14 +99,14 @@ void RemovalStrategy::CheckOutput(Tessellation const& tess,vector<int>
 	int n=int(ToRemove.size());
 	for(int i=0;i<n;++i)
 	{
-		vector<int> edges=tess.GetCellEdges(ToRemove[(size_t)i]);
+		vector<int> edges=tess.GetCellEdges(ToRemove[static_cast<size_t>(i)]);
 		//check we are not near periodic boundary
-		for(int j=0;j<(int)edges.size();++j)
+		for(int j=0;j<static_cast<int>(edges.size());++j)
 		{
-			Edge temp=tess.GetEdge(edges[(size_t)j]);
+			Edge temp=tess.GetEdge(edges[static_cast<size_t>(j)]);
 /*			if(temp.neighbors.first>N||temp.neighbors.second>N)
 				throw UniversalError("Bad removal, neighbor is periodic");*/
-			if(temp.neighbors.first==ToRemove[(size_t)i])
+			if(temp.neighbors.first==ToRemove[static_cast<size_t>(i)])
 			{
 				if(binary_search(ToRemove.begin(),ToRemove.end(),temp.
 					neighbors.second))

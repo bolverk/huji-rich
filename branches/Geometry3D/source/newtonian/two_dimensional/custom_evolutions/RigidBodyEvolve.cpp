@@ -46,11 +46,11 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
   const Vector2D p = Parallel(edge);
   const Vector2D n = tessellation.GetMeshPoint(edge.neighbors.second)
     -tessellation.GetMeshPoint(edge.neighbors.first);
-  const Primitive ghost = reflect(cells[(size_t)other],p);
+  const Primitive ghost = reflect(cells[static_cast<size_t>(other)],p);
   const std::pair<Primitive, Primitive> states(rotate(edge.neighbors.first==index ?
-						      ghost : cells[(size_t)other],n,p),
+						      ghost : cells[static_cast<size_t>(other)],n,p),
 					       rotate(edge.neighbors.second==index ?
-						      ghost : cells[(size_t)other],n,p));
+						      ghost : cells[static_cast<size_t>(other)],n,p));
   return rotate(rs.Solve(states.first, states.second, Projection(facevelocity,n)),n,p);
 }
 
@@ -71,7 +71,7 @@ vector<double> RigidBodyEvolve::UpdateTracer(int index,vector<vector<double> >
 	const& tracers,vector<vector<double> > const& /*tracerchange*/,vector<Primitive> const& cells,Tessellation const& tess,
 	double /*time*/)
 {
-  return tess.GetVolume(index)*cells[(size_t)index].Density*tracers[(size_t)index];
+  return tess.GetVolume(index)*cells[static_cast<size_t>(index)].Density*tracers[static_cast<size_t>(index)];
 }
 
 vector<double> RigidBodyEvolve::CalcTracerFlux(Tessellation const& /*tess*/,

@@ -427,10 +427,10 @@ void scaleExpansionZeroElim(vector<double> const& e, double b,vector<double>
     {
       ans.push_back(hh);
     }
-  int n=(int)e.size();
+  int n=static_cast<int>(e.size());
   for (eindex = 1; eindex<n; ++eindex)
     {
-      twoProduct(e[(size_t)eindex], b, product1, product0);
+      twoProduct(e[static_cast<size_t>(eindex)], b, product1, product0);
       twoSum(Q, product0,sum, hh);
       if (fabs(hh) > 0)
 	{
@@ -453,10 +453,10 @@ vector<double> compress(vector<double> const& e)
   ans.reserve(8);
 
   int bottom = (int)e.size() - 1;
-  double Q = e[(size_t)bottom];
+  double Q = e[static_cast<size_t>(bottom)];
   for (int eindex =(int) e.size() - 2; eindex >= 0; eindex--)
     {
-      const double enow = e[(size_t)eindex];
+      const double enow = e[static_cast<size_t>(eindex)];
       double q, Qnew;
       fastTwoSum(Q, enow, Qnew, q);
       if (fabs(q) > 0)

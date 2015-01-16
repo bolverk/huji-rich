@@ -73,15 +73,15 @@ namespace
 namespace {
   vector<int> range(int n)
   {
-    vector<int> res((size_t)n);
+    vector<int> res(static_cast<size_t>(n));
     for(size_t i=0;i<res.size();++i)
-      res[i] = (int)i;
+      res[i] = static_cast<int>(i);
     return res;
   }
 
   template<class T> void zero_pad_start(vector<T>& v,int n)
   {
-    const vector<int> temp((size_t)n);
+    const vector<int> temp(static_cast<size_t>(n));
     v.insert(v.begin(),temp.begin(),temp.end());
   }
 
@@ -94,8 +94,8 @@ namespace {
       return 0;
 
     const pair<int, int> index
-      (dxdy.first <=0 ? 0 : (int)((cor.x-xminymin.first)/dxdy.first),
-       dxdy.second <=0 ? 0 : (int)((cor.y-xminymin.second)/dxdy.second));
+      (dxdy.first <=0 ? 0 : static_cast<int>((cor.x-xminymin.first)/dxdy.first),
+       dxdy.second <=0 ? 0 : static_cast<int>((cor.y-xminymin.second)/dxdy.second));
     return xy2d(pow2,index.first,index.second);
   }
 }
@@ -107,11 +107,11 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
   const int N=num-innernum;
   vector<int> insert_order;
 
-  insert_order.reserve((size_t)N);
+  insert_order.reserve(static_cast<size_t>(N));
   stack<Context*> context_list;
   stack<vector<int>*> IndexTableStack;
-  const int temp_n=max((int)sqrt((double)N),2);
-  const int temp_pow2=max((int) pow(2.0,(int)(log(1.0*temp_n)/log(2.0))),2);
+  const int temp_n=max(static_cast<int>(sqrt(static_cast<double>(N))),2);
+  const int temp_pow2=max(static_cast<int>(pow(2.0,static_cast<int>(log(1.0*temp_n)/log(2.0)))),2);
   AllLocalData d_local_data(0,N,temp_n,temp_pow2);
   vector<int> p = range(N);
   vector<int>* param = &p;
@@ -128,7 +128,7 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
       int i=context->_i;
       context_list.pop();
       delete context;
-      if((int)context_list.size()>N)
+      if(static_cast<int>(context_list.size())>N)
 	{
 	  UniversalError eo("Error in creating the hilbert order, probably two points are identical");
 #ifdef RICH_MPI
@@ -138,9 +138,9 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	}
       if(i==0)
 	{
-	  vector<Vector2D> p_cor((size_t)local_data.N);
-	  for(int j=0;j<local_data.N;j++)
-	    p_cor[(size_t)j] = cortemp[(size_t)param->at((size_t)j)];
+	  vector<Vector2D> p_cor(static_cast<size_t>(local_data.N));
+	  for(size_t j=0;j<static_cast<size_t>(local_data.N);++j)
+	    p_cor[j] = cortemp[static_cast<size_t>(param->at(j))];
 	  const double xmin=(*min_element(p_cor.begin(),
 					  p_cor.end(),
 					  point_compare_x)).x;
@@ -153,15 +153,15 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	  const double ymax=(*max_element(p_cor.begin(),
 					  p_cor.end(),
 					  point_compare_y)).y;
-	  const double dx=(double)(xmax-xmin)/(local_data.pow2-1);
-	  const double dy=(double)(ymax-ymin)/(local_data.pow2-1);
+	  const double dx=static_cast<double>(xmax-xmin)/(local_data.pow2-1);
+	  const double dy=static_cast<double>(ymax-ymin)/(local_data.pow2-1);
 	  local_data.IndexTable=new vector<int>[local_data.pow2*local_data.pow2];
 	  for(int j=0;j<local_data.N;j++){
 	    const int d = calc_d
 	      (pair<double,double>(dx,dy),
 	       pair<double,double>(xmin,ymin),
-	       p_cor[(size_t)j],local_data.pow2);
-	    local_data.IndexTable[d].push_back(param->at((size_t)j));
+	       p_cor[static_cast<size_t>(j)],local_data.pow2);
+	    local_data.IndexTable[d].push_back(param->at(static_cast<size_t>(j)));
 	  }
 	}
       if(i<(local_data.pow2*local_data.pow2-1))
@@ -169,24 +169,23 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	  context = new Context(param, local_data,i+1);	// i+1 is the for loop increment
 	  context_list.push(context);
 	}
-      if((int)local_data.IndexTable[i].size()<2)
+      if(local_data.IndexTable[i].size()<2)
 	{
 	  expand=false;
-	  for(int k=0;k<(int)local_data.IndexTable[i].size();k++)
-	    insert_order.push_back(local_data.IndexTable[i][(size_t)k]);
+	  for(size_t k=0;k<local_data.IndexTable[i].size();k++)
+	    insert_order.push_back(local_data.IndexTable[i][k]);
 	}
       else
 	{
 	  expand=true;
-	  int temp_n2=max((int)sqrt(double(local_data.IndexTable[i].size())),2);
+	  int temp_n2=max(static_cast<int>(sqrt(double(local_data.IndexTable[i].size()))),2);
 	  context=new Context
 	    (&local_data.IndexTable[i],
 	     AllLocalData
 	     (0,
-	      (int)local_data.IndexTable[i].size(),
+	      static_cast<int>(local_data.IndexTable[i].size()),
 	      temp_n2,
-	      max((int) pow(2.0,(int)(log(1.0*temp_n2)/log(2.0))),2)),
-	     0);
+	      max(static_cast<int>(pow(2.0,static_cast<int>(log(1.0*temp_n2)/log(2.0)))),2)), 0);
 	  context_list.push(context);
 	}
       if(i==(local_data.pow2*local_data.pow2-1))
@@ -208,9 +207,9 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
       for(int i=0;i<num;++i)
 	{
 	  if(i<innernum)
-	    insert_order[(size_t)i]=i;
+	    insert_order[static_cast<size_t>(i)]=i;
 	  else
-	    insert_order[(size_t)i]+=innernum;
+	    insert_order[static_cast<size_t>(i)]+=innernum;
 	}
     }
   return insert_order;

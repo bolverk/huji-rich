@@ -6,8 +6,8 @@ using std::max;
 IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 	Vector2D const& q0,Vector2D const& q1,Vector2D &Intersection)
 {
-	/*int n=(int)p.size();
-	int m=(int)q.size();
+	/*int n=static_cast<int>(p.size());
+	int m=static_cast<int>(q.size());
 	Vector2D p0(p[ploc]);
 	Vector2D p1(p[(ploc+1)%n]);
 	Vector2D q0(q[qloc]);
