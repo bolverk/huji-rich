@@ -11,6 +11,10 @@
 
 #include <voro++.hh>
 
+#ifdef GTEST
+#include "gtest/gtest.h"
+#endif
+
 class VoroPlusPlus : Tessellation3D
 {
 public:
@@ -163,6 +167,10 @@ public:
 		Vector3D const& v1)const;
 
 private:
+#ifdef GTEST
+	FRIEND_TEST(VoroPlusPlus, FaceStore);
+#endif
+
 	// A simple face store that manages the vector of faces, making sure faces aren't duplicate
 	class FaceStore
 	{
