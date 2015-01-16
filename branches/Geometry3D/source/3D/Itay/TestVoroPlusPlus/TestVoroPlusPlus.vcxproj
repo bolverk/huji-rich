@@ -84,8 +84,8 @@
     <ClCompile Include="TestVoroPlusPlus.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\3rdParty\gtest-1.7.0\msvc\gtest_main-md.vcxproj">
-      <Project>{3af54c8a-10bf-4332-9147-f68ed9862033}</Project>
+    <ProjectReference Include="..\..\3rdParty\gtest-1.7.0\msvc\gtest-md.vcxproj">
+      <Project>{c8f6c172-56f2-4e76-b5fa-c3b423b31be8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\3rdParty\voro++-0.4.6\msvc\voro++.vcxproj">
       <Project>{ec858e24-556f-4f50-9030-a836dae266ae}</Project>
