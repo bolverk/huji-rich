@@ -412,7 +412,7 @@ namespace {
 
 size_t Delaunay::Walk(size_t point)
 {
-  lastFacet = static_cast<int>(find_new_facet(cor,f,point,lastFacet));
+  lastFacet = static_cast<int>(find_new_facet(cor,f,point,static_cast<size_t>(lastFacet)));
   return static_cast<size_t>(lastFacet);
 }
 
@@ -425,7 +425,7 @@ vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
 
 double Delaunay::FindMaxRadius(int point)
 {
-  const vector<int> vec = FindContainingTetras(static_cast<int>(Walk(point)),point);
+  const vector<int> vec = FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))),point);
 	double r=0;
 	for(size_t i=0;i<vec.size();++i)
 	  r = max(r,radius[static_cast<size_t>(vec[static_cast<size_t>(i)])]);
@@ -529,7 +529,7 @@ double Delaunay::GetFacetRadius(int facet) const
 
 void Delaunay::ChangeOlength(int n)
 {
-	olength=n;
+  olength=static_cast<size_t>(n);
 }
 
 void Delaunay::Changelength(int n)
@@ -617,7 +617,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	for(int i=0;i<n;++i)
 	{
 		cor.push_back(points[static_cast<size_t>(i)]);
-		add_point(static_cast<int>(cor.size())-1);
+		add_point(cor.size()-1);
 	}
 }
 
@@ -1352,7 +1352,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc,vector<Edge>
 	{
 		for(size_t j=0;j<toduplicate[static_cast<size_t>(i)].size();++j)
 		{
-		  const int facet_loc=static_cast<int>(Walk(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]));
+		  const int facet_loc=static_cast<int>(Walk(static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])));
 			const Vector2D center=cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
 			const double R=2*GetMaxRadius(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)],facet_loc);
 			if(CircleSegmentIntersect(corneredges[2*static_cast<size_t>(i)],center,R))
