@@ -197,8 +197,8 @@ void Delaunay::add_point(size_t index)
 	}
 
 	// check if flipping is needed
-	flip(triangle,temp_friends.third);
-	flip(location_pointer+1,temp_friends.first);
+	flip(triangle,static_cast<size_t>(temp_friends.third));
+	flip(location_pointer+1,static_cast<size_t>(temp_friends.first));
 	flip(location_pointer+2,static_cast<size_t>(temp_friends.second));
 
 	// _update number of facets
@@ -263,10 +263,10 @@ void Delaunay::flip(size_t i, size_t j)
 				// push into the stack the new facets to check
 				if(prefetch_2.neighbors.first!=last_loc)
 				  flip_stack.push(std::pair<size_t,size_t>(indexes.second,
-									   prefetch_2.neighbors.first));
+									   static_cast<size_t>(prefetch_2.neighbors.first)));
 				if(prefetch_1.neighbors.second!=last_loc)
 				  flip_stack.push(std::pair<size_t,size_t>(indexes.first,
-									   prefetch_1.neighbors.second));
+									   static_cast<size_t>(prefetch_1.neighbors.second)));
 			}
 			else
 			{
@@ -284,7 +284,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 	CalcRadius=false;
 	length=int(vp.size()+3);
 	int len=length-3;
-	olength=len;
+	olength=static_cast<size_t>(len);
 	f.clear();
 	cor.clear();
 	f.reserve(static_cast<size_t>(2*length+1+static_cast<int>(17*sqrt(1.*length))));
@@ -325,9 +325,9 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp,vector<Vector2D> const& 
 		f[0].neighbors[i] = last_loc;
 	location_pointer=0;
 	// add the points
-	for(int i=0;i<length-3;i++)
+	for(size_t i=0;i<static_cast<size_t>(length)-3;i++)
 	{
-		add_point(data.insert_order[static_cast<size_t>(i)]);
+		add_point(data.insert_order[i]);
 	}
 	// Calculate radius
 	radius.resize(f.size());
