@@ -740,7 +740,7 @@ VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proc
 vector<int> VoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,
 	int side)
 {
-	int ncopy=(int)copied[static_cast<size_t>(side)].size();
+  int ncopy=static_cast<int>(copied[static_cast<size_t>(side)].size());
 	Vector2D vec=Tri.get_point(point);
 	vector<double> dist(static_cast<size_t>(ncopy));
 	for(size_t i=0;i<copied[static_cast<size_t>(side)].size();++i)
@@ -2541,7 +2541,7 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 					break;
 				}
 				double temp1=pair_member(edges[static_cast<size_t>(edge_loc)].vertices,(p_loc+1)%2).distance(
-														edges[(size_t)(*it)].vertices.second);
+														edges[static_cast<size_t>(*it)].vertices.second);
 				if(temp1<eps*R)
 				{
 					p_loc=1;
@@ -2620,7 +2620,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 		if(index<nlist)
 		{
 			// Create send data
-			int nsend=(int)data[static_cast<size_t>(index)].size();
+		  int nsend=static_cast<int>(data[static_cast<size_t>(index)].size());
 			vector<double> send(2*nsend);
 			// Arrange the points to send in Hilbert order
 			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[static_cast<size_t>(index)]);
@@ -2629,7 +2629,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			for(int j=0;j<nsend;++j)
 			{
 				send[2*j]=cortemp[order[static_cast<size_t>(j)]].x;
-				send[2*j+1]=cortemp[(size_t)order[static_cast<size_t>(j)]].y;
+				send[2*j+1]=cortemp[static_cast<size_t>(order[static_cast<size_t>(j)])].y;
 			}
 			// Recv data
 			MPI_Status status;
@@ -2709,7 +2709,7 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 			GhostPoints[static_cast<size_t>(index)].insert(GhostPoints[static_cast<size_t>(index)].end(),data[static_cast<size_t>(index)].begin(),
 				data[static_cast<size_t>(index)].end());
 			// Create send data
-			int nsend=(int)data[static_cast<size_t>(index)].size();
+			int nsend=static_cast<int>(data[static_cast<size_t>(index)].size());
 			vector<double> send(2*nsend);
 			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[static_cast<size_t>(index)]);
 			for(int j=0;j<nsend;++j)
@@ -2865,7 +2865,7 @@ void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 {
 	int n=static_cast<int>(cell_edges.size());
 	Vector2D diff1=GetPeriodicDiff(cell_edges[static_cast<size_t>(edge_number)],obc);
-	Vector2D diff2=GetPeriodicDiff(cell_edges[(size_t)((edge_number+1)%n)],obc);
+	Vector2D diff2=GetPeriodicDiff(cell_edges[static_cast<size_t>(((edge_number+1)%n))],obc);
 	int npoints=static_cast<int>(points.size());
 	vector<Vector2D> toadd(static_cast<size_t>(npoints));
 	for(int i=0;i<npoints;++i)
@@ -2901,7 +2901,7 @@ vector<vector<int> >const& VoronoiMesh::GetGhostIndeces(void)const
 
 int VoronoiMesh::GetTotalPointNumber(void)const
 {
-	return (int)Tri.getCor().size();
+  return static_cast<int>(Tri.getCor().size());
 }
 
 vector<int> VoronoiMesh::GetDuplicatedProcs(void)const
@@ -3023,15 +3023,15 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 									if(NewSend[static_cast<size_t>(j)].empty())
 									{
 										NewSend[static_cast<size_t>(j)].push_back(localneigh[static_cast<size_t>(k)]);
-										temp.push_back((int)SortedGhostPoints[static_cast<size_t>(j)].size());
+										temp.push_back(static_cast<int>(SortedGhostPoints[static_cast<size_t>(j)].size()));
 									}
 									else
 									{
 										int index=find(NewSend[static_cast<size_t>(j)].begin(),NewSend[static_cast<size_t>(j)].end(),
 											localneigh[static_cast<size_t>(k)])-NewSend[static_cast<size_t>(j)].begin();
-										if(index>=(int)NewSend[static_cast<size_t>(j)].size())
+										if(index>=static_cast<int>(NewSend[static_cast<size_t>(j)].size()))
 											NewSend[static_cast<size_t>(j)].push_back(localneigh[static_cast<size_t>(k)]);
-										temp.push_back((int)SortedGhostPoints[static_cast<size_t>(j)].size()+index);
+										temp.push_back(static_cast<int>(SortedGhostPoints[static_cast<size_t>(j)].size())+index);
 									}
 								}
 								else
