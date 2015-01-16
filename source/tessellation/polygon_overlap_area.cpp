@@ -4,7 +4,7 @@ PolygonOverlap::PolygonOverlap(void):gen(0){}
 
 double PolygonOverlap::PolyArea(vector<Vector2D> const& polygon)
 {
-	int ntriangles=(int)polygon.size()-2;
+  int ntriangles=static_cast<int>(polygon.size())-2;
 	if(ntriangles<1)
 		return 0;
 	double res=0;
