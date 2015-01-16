@@ -404,7 +404,7 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 	for (int iN = 1; iN <= numOfIterations; ++iN)
 	{
 		// Calculate the current power of 0.5:
-	  const double dbPow2 = ((double)1) / (1 << iN);
+	  const double dbPow2 = (static_cast<double>(1)) / (1 << iN);
 	  const bool bX = x > dbPow2;
 	  const bool bY = y > dbPow2;
 	  const bool bZ = z > dbPow2;
