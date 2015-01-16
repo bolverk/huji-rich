@@ -21,9 +21,9 @@ namespace
 CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerleft,
 	Vector3D const& frontupperright):nx_(nx),ny_(ny),nz_(nz),
 	maxsize_(std::numeric_limits<std::size_t>::max()),
-	dx_((frontupperright.x-backlowerleft.x)/nx),
-	dy_((frontupperright.y-backlowerleft.y)/ny),
-	dz_((frontupperright.z-backlowerleft.z)/nz),
+					 dx_((frontupperright.x-backlowerleft.x)/static_cast<double>(nx)),
+					 dy_((frontupperright.y-backlowerleft.y)/static_cast<double>(ny)),
+					 dz_((frontupperright.z-backlowerleft.z)/static_cast<double>(nz)),
 	obc_(0),backlowerleft_(backlowerleft),frontupperright_(frontupperright),
 	cor_(vector<Vector3D> ()),faces_(vector<Face> ()),cellfaces_(vector<vector<size_t> > ()),
 	temp_(vector<vector<size_t> > ())
@@ -46,8 +46,8 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 		{
 			for(size_t j=0;j<nx_;++j)
 			{
-				faces_[i*nx_+j+k*ny_*nx_].vertices=side+Vector3D(dx_*j,0,dz_*k)
-					+Vector3D(0,dy_*i,0);
+			  faces_[i*nx_+j+k*ny_*nx_].vertices=side+Vector3D(dx_*static_cast<double>(j),0,dz_*static_cast<double>(k))
+			    +Vector3D(0,dy_*static_cast<double>(i),0);
 				if(k==0)
 					faces_[i*nx_+j+k*ny_*nx_].neighbors.first=maxsize_;
 				else
@@ -72,8 +72,8 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 		{
 			for(size_t j=0;j<nx_;++j)
 			{
-				faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].vertices=side+Vector3D(dx_*j,dy_*i,0)
-					+Vector3D(0,0,dz_*k);
+			  faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].vertices=side+Vector3D(dx_*static_cast<double>(j),dy_*static_cast<double>(i),0)
+			    +Vector3D(0,0,dz_*static_cast<double>(k));
 				if(i==0)
 					faces_[i*nx_*nz_+k+j*nz_+nx_*(nz_+1)*ny_].neighbors.first=maxsize_;
 				else
@@ -98,7 +98,7 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 			for(size_t j=0;j<nx_+1;++j)
 			{
 				faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].vertices=side
-					+Vector3D(0,dy_*i,0)+Vector3D(dx_*j,0,dz_*k);
+				  +Vector3D(0,dy_*static_cast<double>(i),0)+Vector3D(dx_*static_cast<double>(j),0,dz_*static_cast<double>(k));
 				if(j==0)
 					faces_[i*nz_+j*ny_*nz_+k+nx_*(nz_+1)*ny_+nx_*(ny_+1)*nz_].neighbors.first=maxsize_;
 				else
@@ -147,7 +147,7 @@ CubeGrid::CubeGrid(size_t nx, size_t ny, size_t nz, Vector3D const& backlowerlef
 			for(size_t k=0;k<nz_;++k)
 			{
 				cor_[ConvertSubindexToIndex(i,j,k,ny_,nz_)]=backlowerleft+
-					Vector3D(i*dx_+0.5*dx_,j*dy_+0.5*dy_,k*dz_+0.5*dz_);
+				  Vector3D(static_cast<double>(i)*dx_+0.5*dx_,static_cast<double>(j)*dy_+0.5*dy_,static_cast<double>(k)*dz_+0.5*dz_);
 			}
 		}
 	}

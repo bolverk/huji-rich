@@ -182,7 +182,8 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 }
 
 vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
-	Vector2D const& bottomleft,Vector2D const& topright,
+				   Vector2D const& /*bottomleft*/,
+				   Vector2D const& /*topright*/,
 	Tessellation const& tess,double xc,double yc)
 {
 	double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
@@ -282,7 +283,7 @@ namespace {
 	size_t sort_point(Tessellation const& tess,
 		Vector2D const& point)
 	{
-		for(size_t i=0;i<tess.GetPointNo();++i){
+	  for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i){
 			vector<Vector2D> vertices;
 			ConvexHull(vertices,&tess,i);
 			if(PointInCell(vertices,point))
@@ -314,20 +315,21 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 	const vector<size_t> range_list = most_uniform_range_partition
 		(grid_generator.getLength(), process_tess.GetPointNo());
 	size_t start = 0;
-	for(size_t i=0;i<get_mpi_rank();++i)
+	for(size_t i=0;i<static_cast<size_t>(get_mpi_rank());++i)
 		start += range_list[i];
 	size_t ending = start + range_list[get_mpi_rank()];
 	const vector<vector<Vector2D> > sorted_points =
 		sort_points(process_tess, grid_generator, start, ending);
 	vector<Vector2D> res = sorted_points[get_mpi_rank()];
-	for(size_t i=0;i<get_mpi_rank();++i){
+	for(size_t i=0;i<static_cast<size_t>(get_mpi_rank());++i){
 		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
 		res.reserve(res.size()+distance(buf.begin(),buf.end()));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}
-	for(size_t i=get_mpi_rank()+1;i<get_mpi_size();++i){
+	for(size_t i=static_cast<size_t>(get_mpi_rank())+1;
+	    i<static_cast<size_t>(get_mpi_size());++i){
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
 		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
