@@ -1,6 +1,8 @@
 #include "CubeGrid.hpp"
 #include <limits>
 
+using std::min;
+
 namespace
 {
 	/*void ConvertIndexToSubindex(size_t index,size_t &i,size_t &j,size_t &k,

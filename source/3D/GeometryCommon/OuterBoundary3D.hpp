@@ -6,7 +6,6 @@
 #ifndef OUTERBOUNDARY3D_HPP
 #define OUTERBOUNDARY3D_HPP 1
 
-#include "Tessellation3D.hpp"
 #include <cmath>
 
 //! \brief Type of boundary
