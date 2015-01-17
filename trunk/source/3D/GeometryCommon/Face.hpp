@@ -9,6 +9,8 @@
 #include <vector>
 #include "Vector3D.hpp"
 
+using std::size_t;
+
 //! \brief Interface between two cells
 class Face
 {

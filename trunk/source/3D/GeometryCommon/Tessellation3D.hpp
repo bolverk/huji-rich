@@ -9,10 +9,9 @@
 #include <vector>
 #include "HilbertOrder3D.hpp"
 #include "Face.hpp"
+#include "OuterBoundary3D.hpp"
 
 using std::vector;
-
-class OuterBoundary3D;
 
 /*! \brief Abstract class for tessellation in 3D
 \author Elad Steinberg

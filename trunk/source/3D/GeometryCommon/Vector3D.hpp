@@ -8,7 +8,8 @@
 
 #include <vector>
 #include <cmath>
-using namespace std;
+
+using std::vector;
 
 //! \brief 3D Mathematical vector
 class Vector3D
@@ -183,7 +184,7 @@ Vector3D RotateZ(Vector3D const& v, double a);
 
 /*! \brief Reflect vector
 \param v Vector
-\param axis Normal to the reflection plane
+\param normal Normal to the reflection plane
 \return Reflection of v about axis
 */
 Vector3D Reflect(Vector3D const& v, Vector3D const& normal);

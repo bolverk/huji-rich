@@ -1,5 +1,7 @@
 #include "conserved_3d.hpp"
 
+using std::size_t;
+
 Conserved3D::Conserved3D(void):
   mass(0), momentum(), energy(0), tracers() {}
 
