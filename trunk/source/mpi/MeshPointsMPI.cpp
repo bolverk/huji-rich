@@ -285,7 +285,7 @@ namespace {
 	{
 	  for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i){
 			vector<Vector2D> vertices;
-			ConvexHull(vertices,&tess,i);
+			ConvexHull(vertices,&tess,static_cast<int>(i));
 			if(PointInCell(vertices,point))
 				return i;
 		}
@@ -322,17 +322,17 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 		sort_points(process_tess, grid_generator, start, ending);
 	vector<Vector2D> res = sorted_points[get_mpi_rank()];
 	for(size_t i=0;i<static_cast<size_t>(get_mpi_rank());++i){
-		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
+	  MPI_VectorSend_Vector2D(sorted_points[i],static_cast<int>(i),0,MPI_COMM_WORLD);
 		vector<Vector2D> buf;
-		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
+		MPI_VectorRecv_Vector2D(buf,static_cast<int>(i),0,MPI_COMM_WORLD);
 		res.reserve(res.size()+distance(buf.begin(),buf.end()));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}
 	for(size_t i=static_cast<size_t>(get_mpi_rank())+1;
 	    i<static_cast<size_t>(get_mpi_size());++i){
 		vector<Vector2D> buf;
-		MPI_VectorRecv_Vector2D(buf,i,0,MPI_COMM_WORLD);
-		MPI_VectorSend_Vector2D(sorted_points[i],i,0,MPI_COMM_WORLD);
+		MPI_VectorRecv_Vector2D(buf,static_cast<int>(i),0,MPI_COMM_WORLD);
+		MPI_VectorSend_Vector2D(sorted_points[i],static_cast<int>(i),0,MPI_COMM_WORLD);
 		res.reserve(res.size()+distance(buf.begin(),buf.end()));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}

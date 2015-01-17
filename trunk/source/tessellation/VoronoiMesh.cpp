@@ -209,8 +209,8 @@ namespace {
 						notadded=true;
 					if(!notadded)
 					{
-						indexadd=find(realneighproc.begin()+nneigh,
-							realneighproc.end(),j)-realneighproc.begin();
+					  indexadd=static_cast<int>(find(realneighproc.begin()+nneigh,
+									 realneighproc.end(),j)-realneighproc.begin());
 						if(indexadd==static_cast<int>(realneighproc.size()))
 							notadded=true;
 					}
@@ -310,8 +310,8 @@ namespace {
 			ntemp=static_cast<int>(realcornerproc.size());
 			for(int i=0;i<ntemp;++i)
 			{
-				int index=find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
-					-realneighproc.begin();
+			  int index=static_cast<int>(find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
+						     -realneighproc.begin());
 				if(index<static_cast<int>(realneighproc.size()))
 				{
 					senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[i+nneigh].begin(),
@@ -351,8 +351,8 @@ namespace {
 			ntemp=static_cast<int>(realcornerproc.size());
 			for(int i=0;i<ntemp;++i)
 			{
-				int index=find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
-					-realneighproc.begin();
+			  int index=static_cast<int>(find(realneighproc.begin(),realneighproc.end(),realcornerproc[static_cast<size_t>(i)])
+						     -realneighproc.begin());
 				if(index<static_cast<int>(realneighproc.size()))
 				{
 				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i)+nneigh].begin(),
@@ -424,7 +424,7 @@ namespace {
 		{
 			if(cornerproc[static_cast<size_t>(i)]==-1)
 				continue;
-			int index=find(proclist.begin(),proclist.end(),cornerproc[static_cast<size_t>(i)])-proclist.begin();
+			int index=static_cast<int>(find(proclist.begin(),proclist.end(),cornerproc[static_cast<size_t>(i)])-proclist.begin());
 			if(index<nproc)
 			{
 				// Add unduplicated data
@@ -462,7 +462,7 @@ namespace {
 			vector<vector<int> > cornerstemp(temp.size());
 			for(int i=0;i<n;++i)
 			{
-				int place=find(temp.begin(),temp.end(),newcornerproc[static_cast<size_t>(i)])-temp.begin();
+			  int place=static_cast<int>(find(temp.begin(),temp.end(),newcornerproc[static_cast<size_t>(i)])-temp.begin());
 				cornerstemp[static_cast<size_t>(place)].insert(cornerstemp[static_cast<size_t>(place)].begin(),
 									       newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].begin(),newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].end());
 			}
@@ -579,7 +579,7 @@ namespace {
 						vector<int> restemp(10,-1);
 						vector<int>::iterator it=set_intersection(neighbors1.begin(),
 							neighbors1.end(),neighbors2.begin(),neighbors2.end(),restemp.begin());
-						int size=it-restemp.begin();
+						int size=static_cast<int>(it-restemp.begin());
 						if(size==0)
 						{
 							result[static_cast<size_t>(i)]=-1;
@@ -1023,7 +1023,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	selfindex.resize(pv.size());
 	size_t npv=pv.size();
 	for(size_t i=0;i<npv;++i)
-		selfindex[i]=i;
+	  selfindex[i]=static_cast<int>(i);
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	GhostPoints=Tri.BuildBoundary(outer,vproc,NGhostReceived,GhostProcs);
@@ -1459,7 +1459,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #endif
 		neighcor.reserve(AllPoints.size());
 		for(size_t j=0;j<AllPoints.size();++j)
-			neighcor.push_back(V.Tri.get_point(AllPoints[static_cast<size_t>(j)]));
+		  neighcor.push_back(V.Tri.get_point(static_cast<size_t>(AllPoints[static_cast<size_t>(j)])));
 		// build new local tessellation
 		VoronoiMesh Vlocal;
 		Vlocal.Initialise(neighcor,V.obc);
@@ -1701,9 +1701,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	RemoveVector(V.Tri.ChangeCor(),ToRemove);
 	// Fix CM
 	V.CM.resize(V.CM.size()-ToRemove.size());
-	int NN=static_cast<int>(V.CM.size());
-	for(int i=0;i<NN;++i)
-		V.CM[static_cast<size_t>(i)]=V.CalcCellCM(i);
+	for(size_t i=0;i<V.CM.size();++i)
+		V.CM[i]=V.CalcCellCM(i);
 	n=ToRemove.size();
 	// Fix point numer in Tri
 	V.Tri.ChangeOlength(V.Tri.get_length()-static_cast<int>(n));
@@ -2318,7 +2317,7 @@ void VoronoiMesh::GetNeighborNeighbors(vector<int> &result,int point) const
 	int n=static_cast<int>(neigh.size());
 	for(int i=0;i<n;++i)
 	{
-		if (neigh[i] < 0)
+	  if (neigh[static_cast<size_t>(i)] < 0)
 			continue;
 		vector<int> temp=GetNeighbors(GetOriginalIndex(neigh[i]));
 		//GetRealNeighbor(temp,neigh[static_cast<size_t>(i)]);
@@ -2370,7 +2369,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				vector<int> temp;
 				GetNeighborNeighborsMPI(temp,copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 				result[static_cast<size_t>(i)].insert(result[static_cast<size_t>(i)].end(),temp.begin(),temp.end());
-				temp=AddPointsAlongEdge(copied[static_cast<size_t>(i)][static_cast<size_t>(j)],copied,i);
+				temp=AddPointsAlongEdge(static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]),copied,i);
 				toadd[static_cast<size_t>((i+1)%nsides)].insert(toadd[static_cast<size_t>((i+1)%nsides)].end(),temp.begin(),
 					temp.end());
 				temp=GetNeighbors(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
@@ -2386,7 +2385,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 				GetNeighborNeighborsMPI(temp,copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 				result[static_cast<size_t>((i-1+nsides)%nsides)].insert(result[static_cast<size_t>((i-1+nsides)%nsides)].end()
 					,temp.begin(),temp.end());
-				temp=AddPointsAlongEdge(copied[static_cast<size_t>(i)][static_cast<size_t>(j)],copied,i);
+				temp=AddPointsAlongEdge(static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]),copied,i);
 				toadd[static_cast<size_t>((i-1+nsides)%nsides)].insert(toadd[static_cast<size_t>((i-1+nsides)%nsides)].end(),
 					temp.begin(),temp.end());
 				temp=GetNeighbors(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
@@ -2609,7 +2608,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 	const int rank = get_mpi_rank();
 	for(int i=0;i<n;++i)
 	{
-		const int index=find(proclist.begin(),proclist.end(),procorder[static_cast<size_t>(i)])-proclist.begin();
+	  const int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[static_cast<size_t>(i)])-proclist.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -2696,7 +2695,7 @@ void VoronoiMesh::SendRecvRemove(vector<int> const& procorder,vector<int> const&
 	const int rank = get_mpi_rank();
 	for(int i=0;i<n;++i)
 	{
-		const int index=find(proclist.begin(),proclist.end(),procorder[static_cast<size_t>(i)])-proclist.begin();
+	  const int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[static_cast<size_t>(i)])-proclist.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -3001,9 +3000,9 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 						if(binary_search(SortedNGhostPoints[static_cast<size_t>(j)].begin(),SortedNGhostPoints[static_cast<size_t>(j)].end(),
 							ghostneigh[static_cast<size_t>(ii)]))
 						{
-							int index=lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
+						  int index=static_cast<int>(lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
 								SortedGhostPoints[static_cast<size_t>(j)].end(),ToRemove[static_cast<size_t>(i)])
-								-SortedGhostPoints[static_cast<size_t>(j)].begin();
+									     -SortedGhostPoints[static_cast<size_t>(j)].begin());
 							BoundaryRemove[static_cast<size_t>(j)].push_back(sort_indecesg[static_cast<size_t>(j)][static_cast<size_t>(index)]);
 							// What are the indeces of the sent points?
 							// Is there a local point not already sent?
@@ -3021,8 +3020,8 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 									}
 									else
 									{
-										int index=find(NewSend[static_cast<size_t>(j)].begin(),NewSend[static_cast<size_t>(j)].end(),
-											localneigh[static_cast<size_t>(k)])-NewSend[static_cast<size_t>(j)].begin();
+									  int index=static_cast<int>(find(NewSend[static_cast<size_t>(j)].begin(),NewSend[static_cast<size_t>(j)].end(),
+													  localneigh[static_cast<size_t>(k)])-NewSend[static_cast<size_t>(j)].begin());
 										if(index>=static_cast<int>(NewSend[static_cast<size_t>(j)].size()))
 											NewSend[static_cast<size_t>(j)].push_back(localneigh[static_cast<size_t>(k)]);
 										temp.push_back(static_cast<int>(SortedGhostPoints[static_cast<size_t>(j)].size())+index);
@@ -3030,8 +3029,8 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 								}
 								else
 								{
-									int index=lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
-										SortedGhostPoints[static_cast<size_t>(j)].end(),localneigh[static_cast<size_t>(k)])-SortedGhostPoints[static_cast<size_t>(j)].begin();
+								  int index=static_cast<int>(lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
+													 SortedGhostPoints[static_cast<size_t>(j)].end(),localneigh[static_cast<size_t>(k)])-SortedGhostPoints[static_cast<size_t>(j)].begin());
 									temp.push_back(sort_indecesg[static_cast<size_t>(j)][static_cast<size_t>(index)]);
 								}
 							}

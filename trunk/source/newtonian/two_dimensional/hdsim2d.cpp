@@ -1306,8 +1306,8 @@ namespace
 			  if(binary_search(SortedNghost[static_cast<size_t>(j)].begin(),SortedNghost[static_cast<size_t>(j)].end(),
 					   ToRemove[static_cast<size_t>(i)]))
 				{
-				  int index2=lower_bound(SortedNghost[static_cast<size_t>(j)].begin(),SortedNghost[static_cast<size_t>(j)].end(),
-							 ToRemove[static_cast<size_t>(i)])-SortedNghost[static_cast<size_t>(j)].begin();
+				  int index2=static_cast<int>(lower_bound(SortedNghost[static_cast<size_t>(j)].begin(),SortedNghost[static_cast<size_t>(j)].end(),
+									  ToRemove[static_cast<size_t>(i)])-SortedNghost[static_cast<size_t>(j)].begin());
 				  MPI_AMR_Send[static_cast<size_t>(j)].push_back(SortIndex[static_cast<size_t>(j)][static_cast<size_t>(index2)]);
 				}
 			}
@@ -1331,8 +1331,8 @@ namespace
 		MPI_Status status;
 		for(int i=0;i<static_cast<int>(procorder.size());++i)
 		{
-			int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-				-sentprocs.begin();
+		  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+					     -sentprocs.begin());
 			if(index<nlist)
 			{
 				if(rank<procorder[i])
