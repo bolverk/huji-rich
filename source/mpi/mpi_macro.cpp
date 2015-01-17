@@ -24,8 +24,8 @@ namespace
 		// Send the data
 		for(int i=0;i<n;++i)
 		{
-			int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-				-sentprocs.begin();
+		  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+					     -sentprocs.begin());
 			if(index<nlist)
 			{
 				if(rank<procorder[i])
@@ -64,7 +64,7 @@ namespace
 		int n=static_cast<int>(vec.size());
 		int gradlength=8;
 		if(!vec[0].tracers.empty())
-			gradlength+=vec[0].tracers.size();
+		  gradlength+=static_cast<int>(vec[0].tracers.size());
 		if(n*gradlength!=static_cast<int>(res.size()))
 		{
 			UniversalError eo("Sizes do not match in GradVectorToDouble");
@@ -425,7 +425,7 @@ vector<Vector2D> MPI_MassSendRecvVectorVector2D
 	const int rank = get_mpi_rank();
 	for(int i=0;i<n;++i)
 	{
-		int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
+	  int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -548,7 +548,7 @@ namespace {
 			if(!cei_to_send_.empty())
 			{
 				vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
-				MPI_Send(&buf[0],buf.size(),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
+				MPI_Send(&buf[0],static_cast<int>(buf.size()),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
 			}
 			else
 			{
@@ -630,7 +630,7 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 	int n=worldsize-1;
 	for(int i=0;i<n;++i)
 	{
-		int index=find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin();
+	  int index=static_cast<int>(find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -661,7 +661,7 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 	int n=worldsize-1;
 	for(int i=0;i<n;++i)
 	{
-		int index=find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin();
+	  int index=static_cast<int>(find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -745,7 +745,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 	int n=worldsize-1;
 	for(int i=0;i<n;++i)
 	{
-		int index=find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin();
+	  int index=static_cast<int>(find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -828,7 +828,7 @@ void SendRecvOldVector2D(vector<Vector2D> const& points,
 	int n=worldsize-1;
 	for(int i=0;i<n;++i)
 	{
-		int index=find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin();
+	  int index=static_cast<int>(find(sentprocs.begin(),sentprocs.end(),procorder[i])-sentprocs.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -956,8 +956,8 @@ void SendRecvHydro(vector<Primitive> &cells,
 	// Send the data
 	for(int i=0;i<n;++i)
 	{
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
+	  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				     -sentprocs.begin());
 		if(index==nlist)
 			continue;
 		HydroCommunicator hydro_communicator(eos,
@@ -1020,8 +1020,8 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 	// Send the data
 	for(int i=0;i<worldsize-1;++i)
 	{
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
+	  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				     -sentprocs.begin());
 		if(index<nlist)
 		{
 			TracerCommunicator tc(VectorValues(tracers,sentcells[index]),
@@ -1222,8 +1222,8 @@ void SendRecvVelocity(vector<Vector2D> &vel,vector<vector<int> >const& sentcells
 	// Send the data
 	for(int i=0;i<n;++i)
 	{
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
+	  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				     -sentprocs.begin());
 		if(index<nlist)
 		{
 			if(rank<procorder[i])
@@ -1263,8 +1263,8 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 	// Send the data
 	for(int i=0;i<n;++i)
 	{
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
+	  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				     -sentprocs.begin());
 		if(index<nlist)
 		{
 			if(rank<procorder[i])
@@ -1365,8 +1365,8 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 			sort(temp.begin(),temp.end());
 			for(int j=0;j<nbound;++j)
 			{
-				const int index=lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
-					-temp.begin();
+			  const int index=static_cast<int>(lower_bound(temp.begin(),temp.end(),BoundaryPoints[j])
+							   -temp.begin());
 				if(index<static_cast<int>(temp.size()))
 					tosend[i].push_back(index);
 			}
@@ -1418,7 +1418,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	GhostIndeces.resize(nprocs);
 	for(int i=0;i<nprocs;++i)
 	{
-		int loc=lower_bound(occur.begin(),occur.end(),sentme[i])-occur.begin();
+	  int loc=static_cast<int>(lower_bound(occur.begin(),occur.end(),sentme[i])-occur.begin());
 		int index=FindLoc(SentProcs,sentme[i],occur[loc]);
 		++occur[loc];
 		GhostIndeces[index]=torecv[i];
@@ -1448,8 +1448,8 @@ namespace
 			{
 				if(binary_search(ghost.begin(),ghost.end(),neigh[j]))
 				{
-					int index2=lower_bound(ghost.begin(),ghost.end(),neigh[j])-
-						ghost.begin();
+				  int index2=static_cast<int>(lower_bound(ghost.begin(),ghost.end(),neigh[j])-
+							      ghost.begin());
 					res[index[index2]].push_back(Sent[i]);
 				}
 			}
@@ -1529,8 +1529,8 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 	// Send the data
 	for(int i=0;i<n;++i)
 	{
-		int index=Find(proclist.begin(),proclist.end(),procorder[i])
-			-proclist.begin();
+	  int index=static_cast<int>(Find(proclist.begin(),proclist.end(),procorder[i])
+				     -proclist.begin());
 		if(index<nlist)
 		{
 			if(rank<procorder[i])
@@ -1610,8 +1610,8 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 		{
 			if(binary_search(ToSend[i].begin(),ToSend[i].end(),ToRemove[k]))
 			{
-				int index2=lower_bound(ToSend[i].begin(),ToSend[i].end(),
-					ToRemove[k])-ToSend[i].begin();
+			  int index2=static_cast<int>(lower_bound(ToSend[i].begin(),ToSend[i].end(),
+								  ToRemove[k])-ToSend[i].begin());
 				rescells.push_back(padd[i][index2]);
 				if(traceractive)
 					restracer.push_back(tadd[i][index2]);
@@ -1646,8 +1646,8 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 	for(int i=0;i<n;++i)
 	{
 		//	cout<<"rank "<<rank<<" i "<<i<<" talk with "<<procorder[i]<<endl;
-		int index=Find(sentprocs.begin(),sentprocs.end(),procorder[i])
-			-sentprocs.begin();
+	  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+				     -sentprocs.begin());
 		if(index<nlist)
 		{
 			if(rank<procorder[i])
@@ -1677,7 +1677,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					vector<int> lengths(BoundaryRemove[index].size());
 					for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
 					{
-						lengths[j]=BoundaryNeigh[index][j].size();
+					  lengths[j]=static_cast<int>(BoundaryNeigh[index][j].size());
 						for(int k=0;k<lengths[j];++k)
 							senddata.push_back(BoundaryNeigh[index][j][k]);
 					}
@@ -1751,7 +1751,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					vector<int> lengths(BoundaryRemove[index].size());
 					for(int j=0;j<(int)BoundaryNeigh[index].size();++j)
 					{
-						lengths[j]=BoundaryNeigh[index][j].size();
+					  lengths[j]=static_cast<int>(BoundaryNeigh[index][j].size());
 						for(int k=0;k<lengths[j];++k)
 							senddata.push_back(BoundaryNeigh[index][j][k]);
 					}
@@ -1812,8 +1812,8 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 				if(!binary_search(sentpoints[j].begin(),sentpoints[j].end(),
 					toremove[i]))
 					continue;
-				int index=lower_bound(sentpoints[j].begin(),sentpoints[j].end(),
-					toremove[i])-sentpoints[j].begin();
+				int index=static_cast<int>(lower_bound(sentpoints[j].begin(),sentpoints[j].end(),
+								       toremove[i])-sentpoints[j].begin());
 				if(index<(int)sentpoints[j].size())
 				{
 					bremove[j].push_back(sort_indeces[j][index]);
@@ -1829,8 +1829,8 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 		int temp;
 		for(int i=0;i<static_cast<int>(procorder.size());++i)
 		{
-			int index=Find(proclist.begin(),proclist.end(),procorder[i])
-				-proclist.begin();
+		  int index=static_cast<int>(Find(proclist.begin(),proclist.end(),procorder[i])
+					     -proclist.begin());
 			if(index<nlist)
 			{
 				if(rank<procorder[i])
@@ -1926,8 +1926,8 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 				{
 					if(!binary_search(Nghostindex.begin(),Nghostindex.end(),neigh[k]))
 						continue;
-					int index=lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
-						Nghostindex.begin();
+					int index=static_cast<int>(lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
+								   Nghostindex.begin());
 					if(index<static_cast<int>(Nghostindex.size()))
 						if(recvmerit[i][indeces[index]]>=bmerit[i][j])
 							bad.push_back(DupPoints[i][bremove[i][j]]);

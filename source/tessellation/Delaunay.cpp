@@ -757,10 +757,10 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
 	if (olength>100)
 	{
-		res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*olength)));
-		outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*olength)));
+	  res_temp.reserve(static_cast<size_t>(20 * sqrt(static_cast<double>(olength))));
+	  outer_points.reserve(static_cast<size_t>(10 * sqrt(static_cast<double>(olength))));
 		// Walk to an outer point
-		int cur_facet = Walk(olength);
+	  int cur_facet = static_cast<int>(Walk(olength));
 		// Find the real point
 		int real_point = 0;
 		for (int i = 0; i < 3; ++i)
@@ -775,31 +775,31 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength))
+		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], static_cast<int>(olength)))
 			{
 				cur_facet = containing_facets[static_cast<size_t>(i)];
 				break;
 			}
 		}
 
-		cur_facet = Walk(real_point);
+		cur_facet = static_cast<int>(Walk(real_point));
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength))
+		  if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], static_cast<int>(olength)))
 			{
 				cur_facet = containing_facets[static_cast<size_t>(i)];
 				break;
 			}
 		}
-		f_temp = GetOuterFacets(cur_facet, real_point, olength);
+		f_temp = GetOuterFacets(cur_facet, real_point, static_cast<int>(olength));
 	}
 	else
 	{
 		for (size_t i = 0; i < f.size(); ++i)
 		{
-			if (!IsOuterQuick(f[i], olength))
-				f_temp.push_back(i);
+		  if (!IsOuterQuick(f[i], static_cast<int>(olength)))
+		    f_temp.push_back(static_cast<int>(i));
 		}
 	}
 	// sort all the points and facets with the correct neighbors
@@ -812,7 +812,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),static_cast<int>(allpoints.size())));
 	for(size_t i=0;i<allpoints.size();++i)
 	{
-		vector<int> neigh2=FindContainingTetras(Walk(allpoints[i]),allpoints[i]);
+	  vector<int> neigh2=FindContainingTetras(static_cast<int>(Walk(allpoints[i])),allpoints[i]);
 		for(size_t k=0;k<neigh2.size();++k)
 		{
 			const Vector2D center=GetCircleCenter(neigh2[k]);
@@ -928,7 +928,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 						if(tempvec.empty()||(!std::binary_search(tempvec.begin(),tempvec.end(),toduplicate[i][k])))
 						{
 							if(CircleSegmentIntersect(outeredges[j],cor[toduplicate[i][k]],
-								2*GetMaxRadius(toduplicate[i][k],Walk(toduplicate[i][k]))))
+										  2*GetMaxRadius(toduplicate[i][k],static_cast<int>(Walk(toduplicate[i][k])))))
 								extradd[j].push_back(toduplicate[i][k]);
 						}
 					}
@@ -1035,7 +1035,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			for (size_t j = 0; j < extradd[i].size(); ++j)
 			{
 				if (CircleSegmentIntersect(outeredges[i], cor[extradd[i][j]],
-					2*GetMaxRadius(extradd[i][j], Walk(extradd[i][j]))))
+							   2*GetMaxRadius(extradd[i][j], static_cast<int>(Walk(extradd[i][j])))))
 					newadd[i].push_back(extradd[i][j]);
 			}
 		}
@@ -1078,7 +1078,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	Nghost.resize(proclist.size());
 	for(size_t i=0;i<procorder.size();++i)
 	{
-		const int index=find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin();
+	  const int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin());
 		// Do we talk with this processor?
 		if(index<nlist)
 		{
@@ -1139,7 +1139,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 				if (!toadd.empty())
 				{
 					for (size_t i = 0; i < toadd.size(); ++i)
-						Nghost[index].push_back(cor.size() + i);
+					  Nghost[index].push_back(static_cast<int>(cor.size() + i));
 					AddBoundaryPoints(toadd);
 				}
 			}
@@ -1599,7 +1599,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc)
 {
 	stack<int> tocheck;
-	vector<int> neightemp=FindContainingTetras(Walk(point),point);
+	vector<int> neightemp=FindContainingTetras(static_cast<int>(Walk(point)),point);
 	for(size_t i=0;i<neightemp.size();++i)
 		tocheck.push(neightemp[i]);
 	const int rank=get_mpi_rank();
@@ -1648,7 +1648,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 			{
 				for(size_t j=0;j<neighs.size();++j)
 				{
-				  if(!IsOuterQuick(f[static_cast<size_t>(neighs[j])],olength))
+				  if(!IsOuterQuick(f[static_cast<size_t>(neighs[j])],static_cast<int>(olength)))
 						tocheck.push(neighs[j]);
 				}
 			}
