@@ -1467,7 +1467,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		for(size_t j=0;j<real_neigh.size();++j)
 		{
 			double vtemp=Vlocal.GetVolume(static_cast<int>(j));
-			dv[j]=(vtemp-dv[(size_t)static_cast<int>(j)]);
+			dv[j]=(vtemp-dv[j]);
 			if(dv[j]<(-vtemp*1e-6))
 			{
 				UniversalError eo("Negative volume difference in Remove cells");
@@ -1516,10 +1516,10 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				V.Tri.AddAditionalPoint(Vlocal.GetMeshPoint(temp));
 				NewEdges[static_cast<size_t>(j)].neighbors.first = V.Tri.GetCorSize()-1;
 				// add it to the DuplicatedPoints
-				V.GhostPoints[(size_t)V.GhostPoints.size()-1].push_back(AllPoints[(size_t)
-					Vlocal.GetOriginalIndex(temp)]);
+				V.GhostPoints[static_cast<size_t>(V.GhostPoints.size())-1].push_back(AllPoints[static_cast<size_t>
+												  (Vlocal.GetOriginalIndex(temp))]);
 #else
-				NewEdges[static_cast<size_t>(j)].neighbors.first=AllPoints[(size_t)NewEdges[static_cast<size_t>(j)].neighbors.first];
+				NewEdges[static_cast<size_t>(j)].neighbors.first=AllPoints[static_cast<size_t>(NewEdges[static_cast<size_t>(j)].neighbors.first)];
 #endif
 			}
 			else
@@ -1535,10 +1535,10 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				V.Tri.AddAditionalPoint(Vlocal.GetMeshPoint(temp));
 				NewEdges[static_cast<size_t>(j)].neighbors.second = V.Tri.GetCorSize()-1;
 				// add it to the DuplicatedPoints
-				V.GhostPoints[(size_t)V.GhostPoints.size()-1].push_back(AllPoints[(size_t)
-					Vlocal.GetOriginalIndex(temp)]);
+				V.GhostPoints[static_cast<size_t>(V.GhostPoints.size())-1].push_back(AllPoints[static_cast<size_t>
+												  (Vlocal.GetOriginalIndex(temp))]);
 #else
-				NewEdges[static_cast<size_t>(j)].neighbors.second=AllPoints[(size_t)NewEdges[static_cast<size_t>(j)].neighbors.second];
+				NewEdges[static_cast<size_t>(j)].neighbors.second=AllPoints[static_cast<size_t>(NewEdges[static_cast<size_t>(j)].neighbors.second)];
 #endif
 			}
 			else
@@ -1551,18 +1551,18 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		//Remove bad edge reference from mesh vertices and outer edges
 		vector<int> oldedges;
 		if(i<ToRemove.size())
-			oldedges=V.mesh_vertices[(size_t)ToRemove[static_cast<size_t>(i)]];
+		  oldedges=V.mesh_vertices[static_cast<size_t>(ToRemove[static_cast<size_t>(i)])];
 		for(int j=0;j<N;++j)
 		{
 			int temp1=real_neigh[static_cast<size_t>(j)];
-			int NN=(int)V.mesh_vertices[static_cast<size_t>(temp1)].size();
+			int NN=static_cast<int>(V.mesh_vertices[static_cast<size_t>(temp1)].size());
 			for(int jj=0;jj<NN;++jj)
 			{
 			  Edge etemp=V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp1)][static_cast<size_t>(jj)])];
 #ifdef RICH_MPI
 				if((i<ToRemove.size()&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[static_cast<size_t>(i)]))||((i>=ToRemove.size())&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
-					==GhostNeighbors[static_cast<size_t>(i)-(int)ToRemove.size()][0])))
+												      ==GhostNeighbors[static_cast<size_t>(i)-static_cast<int>(ToRemove.size())][0])))
 #else
 				if(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[i])
