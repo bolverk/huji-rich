@@ -745,11 +745,11 @@ vector<int> VoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > co
 	vector<double> dist(static_cast<size_t>(ncopy));
 	for(size_t i=0;i<copied[static_cast<size_t>(side)].size();++i)
 		dist[i]=vec.distance(Tri.get_point(copied[static_cast<size_t>(side)][i]));
-	const int copylength=min(7,(int)copied[static_cast<size_t>(side)].size()-1);
+	const int copylength=min(7,static_cast<int>(copied[static_cast<size_t>(side)].size())-1);
 	vector<int> index,toadd(static_cast<size_t>(copylength));
 	sort_index(dist,index);
 	for(int i=0;i<copylength;++i)
-		toadd[static_cast<size_t>(i)]=copied[static_cast<size_t>(side)][(size_t)index[(size_t)i+1]];
+	  toadd[static_cast<size_t>(i)]=copied[static_cast<size_t>(side)][static_cast<size_t>(index[static_cast<size_t>(i)+1])];
 	return toadd;
 }
 
@@ -777,8 +777,8 @@ vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const
 		{
 			// Bulk
 			facevelocity[static_cast<size_t>(i)] = CalcFaceVelocity(
-				point_velocities[(size_t)edges[static_cast<size_t>(i)].neighbors.first],
-				point_velocities[(size_t)edges[static_cast<size_t>(i)].neighbors.second],
+										point_velocities[static_cast<size_t>(edges[static_cast<size_t>(i)].neighbors.first)],
+				point_velocities[static_cast<size_t>(edges[static_cast<size_t>(i)].neighbors.second)],
 				GetMeshPoint(edges[static_cast<size_t>(i)].neighbors.first),
 				GetMeshPoint(edges[static_cast<size_t>(i)].neighbors.second),
 				0.5*(edges[static_cast<size_t>(i)].vertices.first+edges[static_cast<size_t>(i)].vertices.second));
@@ -793,8 +793,8 @@ bool VoronoiMesh::NearBoundary(int index) const
 	const int N=Tri.get_length();
 	for(int i=0;i<n;++i)
 	{
-		const int n0=edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].neighbors.first;
-		const int n1=edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].neighbors.second;
+	  const int n0=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.first;
+		const int n1=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.second;
 		if(n0<0||n1<0||n0>=N||n1>=N)
 			return true;
 	}
@@ -820,11 +820,11 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 			eo.AddEntry("Tried accessing cell",point);
 			throw eo;
 		}
-		int maxcor=(int)Tri.getCor().size();
+		int maxcor=static_cast<int>(Tri.getCor().size());
 		int cumulative=Nextra;
 		while(cumulative<maxcor)
 		{
-			int temp=(int)GhostPoints[static_cast<size_t>(counter)].size();
+		  int temp=static_cast<int>(GhostPoints[static_cast<size_t>(counter)].size());
 			if((cumulative+temp)<=point)
 			{
 				cumulative+=temp;
@@ -832,7 +832,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 			}
 			else
 			{
-			  return GhostPoints[static_cast<size_t>(counter)][(size_t)(point-cumulative)];
+			  return GhostPoints[static_cast<size_t>(counter)][static_cast<size_t>(point-cumulative)];
 			}
 		}
 		UniversalError eo("Tried to get original index of non exsistent cell");
@@ -893,7 +893,7 @@ void VoronoiMesh::build_v()
 	Vector2D p_temp;
 	mesh_vertices.clear();
 	mesh_vertices.resize(static_cast<size_t>(Tri.get_length()));
-	edges.reserve((size_t)(Tri.get_length()*3.5));
+	edges.reserve(static_cast<size_t>(Tri.get_length()*3.5));
 	int N=Tri.GetOriginalLength();
 	for(int i=0;i<N;++i)
 		mesh_vertices[static_cast<size_t>(i)].reserve(7);
@@ -911,12 +911,12 @@ void VoronoiMesh::build_v()
 				continue;
 			if(to_check->neighbors[static_cast<size_t>(j)]<i)
 				continue;
-			center_temp=centers[(size_t)to_check->neighbors[static_cast<size_t>(j)]];
+			center_temp=centers[static_cast<size_t>(to_check->neighbors[static_cast<size_t>(j)])];
 			{
 				edge_temp.vertices.first = center;
 				edge_temp.vertices.second = center_temp;
 				edge_temp.neighbors.first = to_check->vertices[static_cast<size_t>(j)];
-				edge_temp.neighbors.second = to_check->vertices[(size_t)(j+1)%3];
+				edge_temp.neighbors.second = to_check->vertices[static_cast<size_t>(j+1)%3];
 
 				if(legal_edge(&edge_temp))
 				{
@@ -964,7 +964,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 	Tri.build_delaunay(UpdatePoints(pv,obc),
 			   calc_procpoints(*obc));
 
-	Nextra=(int)Tri.ChangeCor().size();
+	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
 
 	eps=1e-8;
@@ -1025,7 +1025,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	for(size_t i=0;i<npv;++i)
 		selfindex[i]=i;
 
-	Nextra=(int) Tri.ChangeCor().size();
+	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	GhostPoints=Tri.BuildBoundary(outer,vproc,NGhostReceived,GhostProcs);
 	build_v();
 
@@ -1043,20 +1043,20 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	sort_index(GhostProcs,indeces);
 	sort(GhostProcs.begin(),GhostProcs.end());
 	vector<vector<int> > temppoints,temppoints2;
-	temppoints.push_back(GhostPoints[(size_t)indeces[0]]);
-	temppoints2.push_back(NGhostReceived[(size_t)indeces[0]]);
+	temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[0])]);
+	temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[0])]);
 	for(int i=1;i<static_cast<int>(GhostProcs.size());++i)
 		if(GhostProcs[static_cast<size_t>(i)]==GhostProcs[static_cast<size_t>(i)-1])
 		{
-			temppoints[(size_t)temppoints.size()-1].insert(temppoints[(size_t)temppoints.size()-1].end(),
-				GhostPoints[(size_t)indeces[static_cast<size_t>(i)]].begin(),GhostPoints[(size_t)indeces[static_cast<size_t>(i)]].end());
-			temppoints2[(size_t)temppoints2.size()-1].insert(temppoints2[(size_t)temppoints2.size()-1].end(),
-				NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]].begin(),NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]].end());
+			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
+								       GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
+									 NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 		}
 		else
 		{
-			temppoints.push_back(GhostPoints[(size_t)indeces[static_cast<size_t>(i)]]);
-			temppoints2.push_back(NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]]);
+		  temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
+			temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 		}
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
@@ -1095,9 +1095,9 @@ double VoronoiMesh::GetVolume(int index) const
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[static_cast<size_t>(index)].size();++i)
 	{
-		const Vector2D p1 = edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].vertices.first-
+	  const Vector2D p1 = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].vertices.first-
 			center;
-		const Vector2D p2 = edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].vertices.second-
+		const Vector2D p2 = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].vertices.second-
 			center;
 		area+=0.5*abs(ScalarProd(p1,zcross(p2)));
 	}
@@ -1140,7 +1140,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	vector<Vector2D> points=UpdatePoints(p,obc);
 	Tri.update(points,procpoints);
 
-	Nextra=(int)Tri.ChangeCor().size();
+	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges=obc->GetBoxEdges();
 	vector<vector<int> > toduplicate=Tri.BuildBoundary(obc,box_edges);
 
@@ -1219,7 +1219,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		log.output(vproc);
 		throw;
 	}
-	Nextra=(int) Tri.ChangeCor().size();
+	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	GhostPoints=Tri.BuildBoundary(obc,vproc,NGhostReceived,GhostProcs);
 	build_v();
 
