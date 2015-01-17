@@ -2240,13 +2240,13 @@ vector<int> VoronoiMesh::GetBorderingCells(vector<int> const& copied,
 	int olength=Tri.GetOriginalLength();
 	tempresult.push_back(tocheck);
 	sort(tempresult.begin(),tempresult.end());
-	int n=(int)mesh_vertices[static_cast<size_t>(tocheck)].size();
+	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(tocheck)].size());
 	for(int i=0;i<n;++i)
 	{
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)]].neighbors.second==tocheck)
-			test=edges[(size_t)mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)]].neighbors.first;
+	  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)])].neighbors.second==tocheck)
+		  test=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)])].neighbors.first;
 		else
-			test=edges[(size_t)mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)]].neighbors.second;
+		  test=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(tocheck)][static_cast<size_t>(i)])].neighbors.second;
 		if(test>=olength)
 			continue;
 		if(test<0)
@@ -2264,7 +2264,7 @@ vector<int> VoronoiMesh::GetBorderingCells(vector<int> const& copied,
 void VoronoiMesh::GetAdditionalBoundary(vector<vector<int> > &copied,
 	vector<vector<int> > &neighbors,vector<vector<int> > &totest)
 {
-	int nsides=(int) copied.size();
+  int nsides=static_cast<int>(copied.size());
 	// Get all the neighbors
 	neighbors.clear();
 	neighbors.resize(static_cast<size_t>(nsides));
@@ -2272,7 +2272,7 @@ void VoronoiMesh::GetAdditionalBoundary(vector<vector<int> > &copied,
 	{
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());
 		// look if there are boundary points neighbors
-		int n=(int)totest[static_cast<size_t>(i)].size();
+		int n=static_cast<int>(totest[static_cast<size_t>(i)].size());
 		for(int j=0;j<n;++j)
 		{
 			if(totest[static_cast<size_t>(i)][static_cast<size_t>(j)]==-1)
