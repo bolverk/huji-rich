@@ -2033,7 +2033,7 @@ int VoronoiMesh::GetPointNo(void) const
 
 Vector2D VoronoiMesh::GetMeshPoint(int index) const
 {
-  return Tri.get_point(static_cast<int>(index));
+  return Tri.get_point(static_cast<size_t>(index));
 }
 
 int VoronoiMesh::GetTotalSidesNumber(void) const
