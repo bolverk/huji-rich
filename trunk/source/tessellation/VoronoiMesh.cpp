@@ -2294,21 +2294,21 @@ void VoronoiMesh::GetAdditionalBoundary(vector<vector<int> > &copied,
 void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point) const
 {
 	result.reserve(7);
-	int n=(int)mesh_vertices[static_cast<size_t>(point)].size();
+	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
 	int olength=Tri.GetOriginalLength();
 	for(int i=0;i<n;++i)
 	{
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.first==point)
+	  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first==point)
 		{
-			if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.second>-1&&
-				edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.second<olength)
-				result.push_back(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.second);
+		  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.second>-1&&
+			   edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.second<olength)
+			  result.push_back(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.second);
 		}
 		else
 		{
-			if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.first>-1&&
-				edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.first<olength)
-				result.push_back(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.first);
+		  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first>-1&&
+			   edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first<olength)
+			  result.push_back(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first);
 		}
 	}
 	sort(result.begin(),result.end());
@@ -2367,17 +2367,17 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 	vector<vector<int> > toadd(static_cast<size_t>(nsides));
 	for(int i=0;i<nsides;++i)
 	{
-		int n=(int)copied[static_cast<size_t>(i)].size();
+	  int n=static_cast<int>(copied[static_cast<size_t>(i)].size());
 		for(int j=0;j<n;++j)
 		{
-		  if(binary_search(copied[(size_t)((i+1)%nsides)].begin(),copied[(size_t)((i+1)%nsides)].end(),
+		  if(binary_search(copied[static_cast<size_t>((i+1)%nsides)].begin(),copied[static_cast<size_t>((i+1)%nsides)].end(),
 				copied[static_cast<size_t>(i)][static_cast<size_t>(j)]))
 			{
 				vector<int> temp;
 				GetNeighborNeighborsMPI(temp,copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 				result[static_cast<size_t>(i)].insert(result[static_cast<size_t>(i)].end(),temp.begin(),temp.end());
 				temp=AddPointsAlongEdge(copied[static_cast<size_t>(i)][static_cast<size_t>(j)],copied,i);
-				toadd[(size_t)((i+1)%nsides)].insert(toadd[(size_t)((i+1)%nsides)].end(),temp.begin(),
+				toadd[static_cast<size_t>((i+1)%nsides)].insert(toadd[static_cast<size_t>((i+1)%nsides)].end(),temp.begin(),
 					temp.end());
 				temp=GetNeighbors(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 				for(vector<int>::iterator it=temp.begin();it!=temp.end();++it)
@@ -2385,21 +2385,21 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 						OrgCorner[static_cast<size_t>(i)].push_back(*it);
 				OrgCorner[static_cast<size_t>(i)].push_back(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 			}
-		  if(binary_search(copied[(size_t)((i-1+nsides)%nsides)].begin(),copied[(size_t)((i-1+nsides)%nsides)].end(),
+		  if(binary_search(copied[static_cast<size_t>((i-1+nsides)%nsides)].begin(),copied[static_cast<size_t>((i-1+nsides)%nsides)].end(),
 				copied[static_cast<size_t>(i)][static_cast<size_t>(j)]))
 			{
 				vector<int> temp;
 				GetNeighborNeighborsMPI(temp,copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-				result[(size_t)((i-1+nsides)%nsides)].insert(result[(size_t)((i-1+nsides)%nsides)].end()
+				result[static_cast<size_t>((i-1+nsides)%nsides)].insert(result[static_cast<size_t>((i-1+nsides)%nsides)].end()
 					,temp.begin(),temp.end());
 				temp=AddPointsAlongEdge(copied[static_cast<size_t>(i)][static_cast<size_t>(j)],copied,i);
-				toadd[(size_t)((i-1+nsides)%nsides)].insert(toadd[(size_t)((i-1+nsides)%nsides)].end(),
+				toadd[static_cast<size_t>((i-1+nsides)%nsides)].insert(toadd[static_cast<size_t>((i-1+nsides)%nsides)].end(),
 					temp.begin(),temp.end());
 				temp=GetNeighbors(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 				for(vector<int>::iterator it=temp.begin();it!=temp.end();++it)
 					if(*it<GetPointNo()&&*it>-1)
-					  OrgCorner[(size_t)((i-1+nsides)%nsides)].push_back(*it);
-				OrgCorner[(size_t)((i-1+nsides)%nsides)].push_back(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
+					  OrgCorner[static_cast<size_t>((i-1+nsides)%nsides)].push_back(*it);
+				OrgCorner[static_cast<size_t>((i-1+nsides)%nsides)].push_back(copied[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 			}
 		}
 	}
@@ -2420,7 +2420,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 
 void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &totest)
 {
-	int nsides=(int) copied.size();
+  int nsides=static_cast<int>(copied.size());
 	int olength=Tri.GetOriginalLength();
 	// sort the vectors
 	for(int i=0;i<nsides;++i)
@@ -2430,13 +2430,13 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &t
 	for(int i=0;i<nsides;++i)
 	{
 		vector<int> totest2;
-		int ncopy=(int)copied[static_cast<size_t>(i)].size();
+		int ncopy=static_cast<int>(copied[static_cast<size_t>(i)].size());
 		for(int j=0;j<ncopy;++j)
 		{
-			int n=(int)mesh_vertices[(size_t)copied[static_cast<size_t>(i)][static_cast<size_t>(j)]].size();
+		  int n=static_cast<int>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])].size());
 			for(int k=0;k<n;++k)
 			{
-				if(edges[(size_t)mesh_vertices[(size_t)copied[static_cast<size_t>(i)][static_cast<size_t>(j)]][static_cast<size_t>(k)]].neighbors.first==
+			  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.first==
 					copied[static_cast<size_t>(i)][static_cast<size_t>(j)])
 				  test=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.second;
 				else
