@@ -1842,7 +1842,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 		else
 			slope=FindBestSplit(&V,ToRefine[static_cast<size_t>(i)],edges,R,normal);
 		NewPoint+=alpha*R*slope;
-		cor[(size_t)(Npoints+i)]=NewPoint;
+		cor[static_cast<size_t>(Npoints+i)]=NewPoint;
 		Vector2D v(V.GetMeshPoint(ToRefine[static_cast<size_t>(i)]));
 		// Split edges and update neighbors
 		vector<int> old_ref;
@@ -1916,7 +1916,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 					}
 					else
 						NewEdge.neighbors.second=Npoints+i;
-					V.edges[(size_t)edge_index[static_cast<size_t>(j)]]=NewEdge;
+					V.edges[static_cast<size_t>(edge_index[static_cast<size_t>(j)])]=NewEdge;
 					new_ref.push_back(edge_index[static_cast<size_t>(j)]);
 					const Vector2D diff(V.GetMeshPoint(pair_member(NewEdge.neighbors,(rindex+1)%2))-V.GetMeshPoint(V.GetOriginalIndex(pair_member(NewEdge.neighbors,(rindex+1)%2))));
 					if(pair_member(NewEdge.neighbors,(rindex+1)%2)>(n+Npoints))
@@ -1975,7 +1975,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 				// Do the other split
 				NewEdge.vertices.first = pair_member(edges[static_cast<size_t>(j)].vertices,(index+1)%2);
 				NewEdge.neighbors.first=ToRefine[static_cast<size_t>(i)];
-				V.edges[(size_t)edge_index[static_cast<size_t>(j)]]=NewEdge;
+				V.edges[static_cast<size_t>(edge_index[static_cast<size_t>(j)])]=NewEdge;
 				old_ref.push_back(edge_index[static_cast<size_t>(j)]);
 				continue;
 			}
@@ -1989,13 +1989,13 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 				if(edges[static_cast<size_t>(j)].neighbors.first==ToRefine[static_cast<size_t>(i)])
 				{
 					index=0;
-					V.edges[(size_t)edge_index[static_cast<size_t>(j)]].neighbors.first=Npoints+i;
+					V.edges[static_cast<size_t>(edge_index[static_cast<size_t>(j)])].neighbors.first=Npoints+i;
 				}
 				else
-					V.edges[(size_t)edge_index[static_cast<size_t>(j)]].neighbors.second=Npoints+i;
+				  V.edges[static_cast<size_t>(edge_index[static_cast<size_t>(j)])].neighbors.second=Npoints+i;
 				// add new reference
 				new_ref.push_back(edge_index[static_cast<size_t>(j)]);
-				if(pair_member(V.edges[(size_t)edge_index[static_cast<size_t>(j)]].neighbors,(index+1)%2)>(n+Npoints))
+				if(pair_member(V.edges[static_cast<size_t>(edge_index[static_cast<size_t>(j)])].neighbors,(index+1)%2)>(n+Npoints))
 				{
 					int other=pair_member(edges[static_cast<size_t>(j)].neighbors,(index+1)%2);
 					const Vector2D diff=V.GetMeshPoint(other)-V.GetMeshPoint(
@@ -2007,21 +2007,21 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 			else
 				old_ref.push_back(edge_index[static_cast<size_t>(j)]);
 		}
-		V.mesh_vertices[(size_t)(Npoints+i)]=new_ref;
-		V.mesh_vertices[(size_t)ToRefine[static_cast<size_t>(i)]]=old_ref;
+		V.mesh_vertices[static_cast<size_t>(Npoints+i)]=new_ref;
+		V.mesh_vertices[static_cast<size_t>(ToRefine[static_cast<size_t>(i)])]=old_ref;
 	}
 
 	// Calculate the new CM
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
 		V.CM.push_back(V.CalcCellCM(Npoints+i));
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
-		V.CM[(size_t)ToRefine[static_cast<size_t>(i)]]=V.CalcCellCM(ToRefine[static_cast<size_t>(i)]);
+	  V.CM[static_cast<size_t>(ToRefine[static_cast<size_t>(i)])]=V.CalcCellCM(ToRefine[static_cast<size_t>(i)]);
 	// Fix the self send
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
 		V.selfindex.push_back(Npoints+i);
 	// Fix the Nghost
 	for(int i=0;i<static_cast<int>(V.NGhostReceived.size());++i)
-		for(int j=0;j<(int)V.NGhostReceived[static_cast<size_t>(i)].size();++j)
+	  for(int j=0;j<static_cast<int>(V.NGhostReceived[static_cast<size_t>(i)].size());++j)
 			V.NGhostReceived[static_cast<size_t>(i)][static_cast<size_t>(j)]+=static_cast<int>(ToRefine.size());
 	return;
 	// Reset Tree if self gravity is needed
@@ -2079,7 +2079,7 @@ void VoronoiMesh::FindIntersectingOuterPoints(vector<Edge> const&box_edges,vecto
 	N=static_cast<int>(firstduplicated.size());
 	for(int i=0;i<N;++i)
 	{
-		n=(int)firstduplicated[static_cast<size_t>(i)].size();
+	  n=static_cast<int>(firstduplicated[static_cast<size_t>(i)].size());
 		for(int j=0;j<n;++j)
 		{
 			vector<int> temp=CellIntersectOuterBoundary(box_edges,firstduplicated[static_cast<size_t>(i)][static_cast<size_t>(j)]);
@@ -2087,7 +2087,7 @@ void VoronoiMesh::FindIntersectingOuterPoints(vector<Edge> const&box_edges,vecto
 			if(jj>0)
 			{
 				for(int k=0;k<jj;++k)
-					boxduplicate[(size_t)temp[static_cast<size_t>(k)]].push_back(firstduplicated[static_cast<size_t>(i)][static_cast<size_t>(j)]);
+				  boxduplicate[static_cast<size_t>(temp[static_cast<size_t>(k)])].push_back(firstduplicated[static_cast<size_t>(i)][static_cast<size_t>(j)]);
 			}
 		}
 	}
@@ -2124,7 +2124,7 @@ void VoronoiMesh::FindIntersectingPoints(vector<Edge> const &box_edges,
 		if(j>0)
 		{
 			for(int k=0;k<j;++k)
-				toduplicate[(size_t)temp[static_cast<size_t>(k)]].push_back(i);
+			  toduplicate[static_cast<size_t>(temp[static_cast<size_t>(k)])].push_back(i);
 		}
 	}
 	for(int i=0;i<n;++i)
@@ -2139,15 +2139,15 @@ void VoronoiMesh::FindIntersectingPoints(vector<Edge> const &box_edges,
 
 vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int cell)
 {
-	int ncell=(int)mesh_vertices[static_cast<size_t>(cell)].size();
-	int nbox=(int) box_edges.size();
+  int ncell=static_cast<int>(mesh_vertices[static_cast<size_t>(cell)].size());
+	int nbox=static_cast<int>(box_edges.size());
 	vector<int> res;
 	Vector2D intersect;
 	for(int i=0;i<ncell;++i)
 	{
 		for(int j=0;j<nbox;++j)
 		{
-			if(SegmentIntersection(box_edges[static_cast<size_t>(j)],edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]],
+		  if(SegmentIntersection(box_edges[static_cast<size_t>(j)],edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])],
 				intersect))
 				res.push_back(j);
 		}
