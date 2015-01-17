@@ -1237,20 +1237,20 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	sort_index(GhostProcs,indeces);
 	sort(GhostProcs.begin(),GhostProcs.end());
 	vector<vector<int> > temppoints,temppoints2;
-	temppoints.push_back(GhostPoints[(size_t)indeces[0]]);
-	temppoints2.push_back(NGhostReceived[(size_t)indeces[0]]);
+	temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[0])]);
+	temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[0])]);
 	for(int i=1;i<static_cast<int>(GhostProcs.size());++i)
 		if(GhostProcs[static_cast<size_t>(i)]==GhostProcs[static_cast<size_t>(i)-1])
 		{
-			temppoints[(size_t)temppoints.size()-1].insert(temppoints[(size_t)temppoints.size()-1].end(),
-				GhostPoints[(size_t)indeces[static_cast<size_t>(i)]].begin(),GhostPoints[(size_t)indeces[static_cast<size_t>(i)]].end());
-			temppoints2[(size_t)temppoints2.size()-1].insert(temppoints2[(size_t)temppoints2.size()-1].end(),
-				NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]].begin(),NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]].end());
+			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
+							       GhostPoints[indeces[static_cast<size_t>(i)]].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
+									 NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 		}
 		else
 		{
-			temppoints.push_back(GhostPoints[(size_t)indeces[static_cast<size_t>(i)]]);
-			temppoints2.push_back(NGhostReceived[(size_t)indeces[static_cast<size_t>(i)]]);
+		  temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
+			temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 		}
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
@@ -1266,20 +1266,20 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
 {
   vector<int> res(mesh_vertices[static_cast<size_t>(index)].size());
   for(size_t i=0;i<res.size();++i)
-      res[i] = edges[(size_t)mesh_vertices[static_cast<size_t>(index)][i]].neighbors.first!=index ?
-	edges[(size_t)mesh_vertices[static_cast<size_t>(index)][i]].neighbors.first :
-	edges[(size_t)mesh_vertices[static_cast<size_t>(index)][i]].neighbors.second;
+    res[i] = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first!=index ?
+	edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first :
+	edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.second;
   return res;
 }
 
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 {
-	int n=(int)mesh_vertices[static_cast<size_t>(index)].size();
+  int n=static_cast<int>(mesh_vertices[static_cast<size_t>(index)].size());
 	vector<int> res;
 	res.reserve(static_cast<size_t>(n));
 	for(int i=0;i<n;++i)
 	{
-		int other = edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].neighbors.first;
+	  int other = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.first;
 		if(other!=index)
 		{
 			if(other>-1)
@@ -1288,7 +1288,7 @@ vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 		else
 		{
 			if(other>-1)
-				other=edges[(size_t)mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)]].neighbors.second;
+			  other=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.second;
 			res.push_back(other);
 		}
 	}
@@ -1389,8 +1389,8 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifdef RICH_MPI
 		if(i>=ToRemove.size())
 		{
-			real_neigh=LocalNeighbors[static_cast<size_t>(i)-(int)ToRemove.size()];
-			AllPoints=GhostNeighbors[static_cast<size_t>(i)-(int)ToRemove.size()];
+			real_neigh=LocalNeighbors[static_cast<size_t>(i)-ToRemove.size()];
+			AllPoints=GhostNeighbors[static_cast<size_t>(i)-ToRemove.size()];
 		}
 #endif
 		if(i<ToRemove.size())
@@ -1452,7 +1452,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 		vector<int> remtemp;
 		if(i>=ToRemove.size())
 		{
-			remtemp.push_back(GhostNeighbors[static_cast<size_t>(i)-(int)ToRemove.size()][0]);
+			remtemp.push_back(GhostNeighbors[static_cast<size_t>(i)-ToRemove.size()][0]);
 			AllPoints=RemoveList(AllPoints,remtemp);
 			mpi_real_neigh=RemoveList(mpi_real_neigh,remtemp);
 		}
