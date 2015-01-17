@@ -744,7 +744,7 @@ vector<int> VoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > co
 	Vector2D vec=Tri.get_point(point);
 	vector<double> dist(static_cast<size_t>(ncopy));
 	for(size_t i=0;i<copied[static_cast<size_t>(side)].size();++i)
-		dist[i]=vec.distance(Tri.get_point(copied[static_cast<size_t>(side)][i]));
+	  dist[i]=vec.distance(Tri.get_point(static_cast<size_t>(copied[static_cast<size_t>(side)][i])));
 	const int copylength=min(7,static_cast<int>(copied[static_cast<size_t>(side)].size())-1);
 	vector<int> index,toadd(static_cast<size_t>(copylength));
 	sort_index(dist,index);
@@ -929,13 +929,13 @@ void VoronoiMesh::build_v()
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
-									edge_temp.neighbors.first)))
+													static_cast<size_t>(edge_temp.neighbors.first))))
 									edge_temp.neighbors.first = -1;
 							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
-									edge_temp.neighbors.second)))
+													static_cast<size_t>(edge_temp.neighbors.second))))
 									edge_temp.neighbors.second = -1;
 							edges.push_back(edge_temp);
 						}
@@ -991,7 +991,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		GhostProcs.push_back(-1);
 		GhostProcs.push_back(-1);
 	}
-	CM.resize(GetPointNo());
+	CM.resize(static_cast<size_t>(GetPointNo()));
 	for(size_t i=0;i<CM.size();++i)
 	  CM[i]=CalcCellCM(i);
 }
@@ -1091,7 +1091,7 @@ vector<int> const& VoronoiMesh::GetCellEdges(int index) const
 
 double VoronoiMesh::GetVolume(int index) const
 {
-	const Vector2D center=Tri.get_point(index);
+  const Vector2D center=Tri.get_point(static_cast<size_t>(index));
 	double area=0;
 	for (size_t i=0;i<mesh_vertices[static_cast<size_t>(index)].size();++i)
 	{
@@ -1106,12 +1106,12 @@ double VoronoiMesh::GetVolume(int index) const
 
 Vector2D VoronoiMesh::CalcCellCM(size_t index) const
 {
-  const Vector2D center=edges[mesh_vertices[index].front()].vertices.first;
+  const Vector2D center=edges[static_cast<size_t>(mesh_vertices[index].front())].vertices.first;
 	Vector2D pc(0,0);
 	double area=0;
 	for (size_t i=1;i<mesh_vertices[index].size();i++)
 	{
-		const Edge& edge = edges[mesh_vertices[index][i]];
+	  const Edge& edge = edges[static_cast<size_t>(mesh_vertices[index][i])];
 		const Vector2D p1 = edge.vertices.first - center;
 		const Vector2D p2 = edge.vertices.second - center;
 		const double area_temp = 0.5*abs(ScalarProd(p1,zcross(p2)));
@@ -1169,7 +1169,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		GhostProcs.push_back(-1);
 	}
 	
-	const size_t n=GetPointNo();
+	const size_t n= static_cast<size_t>(GetPointNo());
 	CM.resize(n);
 	for(size_t i=0;i<n;++i)
 		CM[i]=CalcCellCM(i);
