@@ -1169,10 +1169,10 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		GhostProcs.push_back(-1);
 	}
 	
-	int n=GetPointNo();
-	CM.resize(static_cast<size_t>(n));
-	for(int i=0;i<n;++i)
-		CM[static_cast<size_t>(i)]=CalcCellCM(i);
+	const size_t n=GetPointNo();
+	CM.resize(n);
+	for(size_t i=0;i<n;++i)
+		CM[i]=CalcCellCM(i);
 }
 
 #ifdef RICH_MPI
