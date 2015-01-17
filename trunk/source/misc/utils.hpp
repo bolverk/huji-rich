@@ -278,7 +278,7 @@ template <class T> vector<T> RemoveList(vector<T> const&v,vector<T> const&list)
 
 template <class T> void RemoveVal(vector<T> &vec,T val)
 {
-  for(int i=0;i<vec.size();++i)
+  for(size_t i=0;i<vec.size();++i)
     {
       if(vec[i]==val)
 	{

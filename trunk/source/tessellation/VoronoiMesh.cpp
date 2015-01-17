@@ -2788,7 +2788,7 @@ void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
 	double dy=maxedges[3]-maxedges[static_cast<size_t>(2)];
 	for(int i=0;i<npoints;++i)
 	{
-		Vector2D point=Tri.get_point(points[static_cast<size_t>(i)]);
+	  Vector2D point=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]));
 		Vector2D temp=point-edge0;
 		temp=2*par*ScalarProd(par,temp)-temp+edge0;
 		if((abs(point.x-temp.x)<2*dx)&&(abs(point.y-temp.y)<2*dy))
@@ -2813,7 +2813,7 @@ void VoronoiMesh::PeriodicBoundaryPoints(vector<int> &points,int edge_number)
 	vector<Vector2D> toadd(static_cast<size_t>(npoints));
 	Vector2D diff=GetPeriodicDiff(cell_edges[static_cast<size_t>(edge_number)],obc);
 	for(int i=0;i<npoints;++i)
-		toadd[static_cast<size_t>(i)]=Tri.get_point(points[static_cast<size_t>(i)])+diff;
+	  toadd[static_cast<size_t>(i)]=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]))+diff;
 	if(!toadd.empty())
 	{
 		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
@@ -2862,7 +2862,7 @@ void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
 	int npoints=static_cast<int>(points.size());
 	vector<Vector2D> toadd(static_cast<size_t>(npoints));
 	for(int i=0;i<npoints;++i)
-		toadd[static_cast<size_t>(i)]=Tri.get_point(points[static_cast<size_t>(i)])+diff1+diff2;
+	  toadd[static_cast<size_t>(i)]=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]))+diff1+diff2;
 	if(!toadd.empty())
 	{
 		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
