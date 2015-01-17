@@ -2319,7 +2319,7 @@ void VoronoiMesh::GetNeighborNeighbors(vector<int> &result,int point) const
 	{
 	  if (neigh[static_cast<size_t>(i)] < 0)
 			continue;
-		vector<int> temp=GetNeighbors(GetOriginalIndex(neigh[i]));
+	  vector<int> temp=GetNeighbors(GetOriginalIndex(neigh[static_cast<size_t>(i)]));
 		//GetRealNeighbor(temp,neigh[static_cast<size_t>(i)]);
 		for(size_t j=0;j<temp.size();++j)
 			result.push_back(GetOriginalIndex(temp[j]));
