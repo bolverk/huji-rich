@@ -2012,9 +2012,9 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 
 	// Calculate the new CM
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
-		V.CM.push_back(V.CalcCellCM(Npoints+i));
+	  V.CM.push_back(V.CalcCellCM(static_cast<size_t>(Npoints+i)));
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
-	  V.CM[static_cast<size_t>(ToRefine[static_cast<size_t>(i)])]=V.CalcCellCM(ToRefine[static_cast<size_t>(i)]);
+	  V.CM[static_cast<size_t>(ToRefine[static_cast<size_t>(i)])]=V.CalcCellCM(static_cast<size_t>(ToRefine[static_cast<size_t>(i)]));
 	// Fix the self send
 	for(int i=0;i<static_cast<int>(ToRefine.size());++i)
 		V.selfindex.push_back(Npoints+i);
@@ -2033,7 +2033,7 @@ int VoronoiMesh::GetPointNo(void) const
 
 Vector2D VoronoiMesh::GetMeshPoint(int index) const
 {
-	return Tri.get_point(index);
+  return Tri.get_point(static_cast<int>(index));
 }
 
 int VoronoiMesh::GetTotalSidesNumber(void) const
