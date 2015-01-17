@@ -8,7 +8,7 @@
 
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "../GeometryCommon/Face.hpp"
-
+#include <boost/shared_ptr.hpp>
 #include <voro++.hh>
 
 #ifdef GTEST
@@ -184,6 +184,8 @@ private:
 		const Face& GetFace(size_t index) const { return _faces[index];  }
 		Face& GetFace(size_t index) { return _faces[index]; }
 		size_t NumFaces() const { return _faces.size(); }
+
+		void Clear();
 	};
 
 	// A Voro++ specific Cell class
@@ -212,7 +214,13 @@ private:
 			return _faces;
 		}
 
-		Cell(FaceStore &faces, voro::c_loop_base &looper, voro::container &container);
+		Cell(Vector3D meshPoint, voro::voronoicell &vcell, FaceStore &faces);
+		Cell() { _volume = -1; }
+
+		bool empty() const { return _volume < 0; }
+
+	private:
+		vector<Vector3D> ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell);
 	};
 
 	std::vector<Cell> _cells;
@@ -221,8 +229,10 @@ private:
 	std::vector<Vector3D> _allCMs;
 
 	void RunVoronoi();
-	voro::container BuildContainer();
-	void ExtractResults(voro::container container);
+	void ClearData();
+	int FindMeshPoint(voro::c_loop_all looper);
+	boost::shared_ptr<voro::container> BuildContainer();
+	void ExtractResults(voro::container &container);
 };
 
 #endif // VOROPLUSPLUS_HPP

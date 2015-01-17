@@ -5,9 +5,11 @@
 #include "GeometryCommon/Face.hpp"
 #include "GeometryCommon/Vector3D.hpp"
 #include "Voronoi/VoroPlusPlus.hpp"
+#include "Utilities/assert.hpp"
 
 #include <vector>
 #include <cstdlib>
+#include <cassert>
 
 #ifdef _DEBUG
 #include <iostream>
@@ -75,6 +77,23 @@ TEST(Geometry3D, Face_Area)
 	ASSERT_EQ(triangle.GetArea(), 2);
 }
 
+TEST(Geometry3D, Face_Neighbors)
+{
+	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
+	vector<Vector3D> vertices{ v1, v2, v3, v4 };
+	Face face1(vertices), face2(vertices, 1, 2), face3(vertices, 1);
+
+	ASSERT_TRUE(face1.AddNeighbor(1));
+	ASSERT_TRUE(face1.AddNeighbor(2));
+	ASSERT_TRUE(face1.AddNeighbor(2));
+	ASSERT_TRUE(face1.AddNeighbor(1));
+	ASSERT_DEATH(face1.AddNeighbor(3), "");
+	ASSERT_DEATH(face2.AddNeighbor(3), "");
+	ASSERT_TRUE(face3.AddNeighbor(1));
+	ASSERT_TRUE(face3.AddNeighbor(2));
+	ASSERT_DEATH(face3.AddNeighbor(3), "");
+}
+
 TEST(Geometry3D, Face_Indentical)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
@@ -112,8 +131,50 @@ TEST(VoroPlusPlus, FaceStore)
 	}
 }
 
+TEST(VoroPlusPlus, Cube)
+{
+	const int perSide = 5;
+
+	vector<Vector3D> mesh;
+	for (int x = 0; x < perSide; x++)
+		for (int y = 0; y < perSide; y++)
+			for (int z = 0; z < perSide; z++)
+				mesh.push_back(Vector3D(x, y, z));
+
+	VoroPlusPlus tes;
+	tes.Initialise(mesh, nullptr);
+
+	ASSERT_EQ(tes.GetPointNo(), mesh.size());
+	for (int pt = 0; pt < mesh.size(); pt++)
+	{
+//		cout << mesh[pt].x << ", " << mesh[pt].y << ", " << mesh[pt].z << ": " << endl;
+		auto faces = tes.GetCellFaces(pt);
+		EXPECT_EQ(faces.size(), 6);
+		for (int fc = 0; fc < faces.size(); fc++)
+		{
+//			cout << "\t";
+			auto face = tes.GetFace(fc);
+			EXPECT_EQ(face.vertices.size(), 4);
+/*			for (int i = 0; i < 4; i++)
+				cout << "(" << face.vertices[i].x << ", " << face.vertices[i].y << ", " << face.vertices[i].z << ") ";
+			cout << endl << "\t" << "Area : " << face.GetArea() << endl; */
+			EXPECT_NEAR(face.GetArea(), 1.0, 1e-12);
+		}
+		auto CoM = tes.GetCellCM(pt);
+		EXPECT_EQ(CoM, mesh[pt]);
+		EXPECT_NEAR(tes.GetVolume(pt), 1.0, 1e-12);
+//		cout << "Center: " << CoM.x << ", " << CoM.y << ", " << CoM.z << endl;
+	}
+}
+
+void assertion_gtest_bridge(const char *expr, const char *function, const char *file, long line)
+{
+	EXPECT_FALSE(expr);
+}
+
 int main(int argc, char *argv[])
 {
+	BOOST_ASSERT_HANDLER = assertion_gtest_bridge;
 	testing::InitGoogleTest(&argc, argv);
 	int rc = RUN_ALL_TESTS();
 

@@ -67,16 +67,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -149,6 +149,7 @@
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D_Utils.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
+    <ClCompile Include="..\Utilities\assert.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="..\GeometryCommon\Tessellation3D.hpp" />
     <ClInclude Include="..\GeometryCommon\TessLogger.hpp" />
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
+    <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,9 @@
 #include "VoroPlusPlus.hpp"
 #include <vector>
 #include <set>
+#include <boost/shared_ptr.hpp>
+#include <iostream>
+#include "../Utilities/assert.hpp"
 
 using namespace std;
 
@@ -88,7 +91,7 @@ vector<size_t> VoroPlusPlus::GetNeighbors(size_t index) const
 		else if (face.neighbors.second == index)
 			neighbors.push_back(face.neighbors.first);
 		else
-			assert(false); // One of the neighbors must be us!
+			BOOST_ASSERT(false); // One of the neighbors must be us!
 	}
 
 	return neighbors;
@@ -205,14 +208,30 @@ size_t VoroPlusPlus::FaceStore::StoreFace(const vector<Vector3D> &vertices)
 	return index;
 }
 
-void VoroPlusPlus::RunVoronoi()
+void VoroPlusPlus::FaceStore::Clear()
 {
-	auto container = BuildContainer();
-	ExtractResults(container);
+	_faces.clear();
 }
 
-voro::container VoroPlusPlus::BuildContainer()
+void VoroPlusPlus::RunVoronoi()
 {
+	ClearData();
+	auto container = BuildContainer();
+	ExtractResults(*container);
+}
+
+void VoroPlusPlus::ClearData()
+{
+	_faces.Clear();
+	_cells.clear();
+	_cells.resize(_meshPoints.size());
+	_allCMs.clear();
+	_allCMs.resize(_meshPoints.size());
+}
+
+boost::shared_ptr<voro::container> VoroPlusPlus::BuildContainer()
+{
+	// The voro++ container has a faulty copy constructor - it doesn't like being copied around, so we use pointers.
 	Vector3D min, max;
 
 	min = _meshPoints[0];
@@ -229,15 +248,97 @@ voro::container VoroPlusPlus::BuildContainer()
 		max.z = std::max(max.z, it->z);
 	}
 
-	voro::container container(min.x, max.x, min.y, max.y, min.z, max.z, 20, 20, 20, false, false, false, 20);
+	boost::shared_ptr<voro::container> container(new voro::container(min.x - 0.5, max.x + 0.5, min.y - 0.5, max.y + 0.5, min.z - 0.5, max.z + 0.5, 
+		20, 20, 20, false, false, false, 20));
 	int num = 0;
 	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
-		container.put(num++, it->x, it->y, it->z);
-
+		container->put(num++, it->x, it->y, it->z);
 	return container;
 }
 
-void VoroPlusPlus::ExtractResults(voro::container container)
+void VoroPlusPlus::ExtractResults(voro::container &container)
 {
-	// TODO: Extract Results
+	int cellNum;
+	voro::c_loop_all looper(container);
+
+	cellNum = 0;
+	looper.start();
+	do
+	{
+		int cellIndex;
+		double x, y, z, r;
+		looper.pos(cellIndex, x, y, z, r);
+
+		// Create the Cell object
+		voro::voronoicell v_cell;
+		container.compute_cell(v_cell, looper);
+		Cell cell(_meshPoints[cellIndex], v_cell, _faces);
+		_cells[cellIndex] = cell;
+
+		// Set the face neighbors
+		auto faceIndices = cell.GetFaces();
+		for (auto it = faceIndices.begin(); it != faceIndices.end(); it++)
+			_faces.GetFace(*it).AddNeighbor(cellIndex); // asserts if fails, no need to add our own assertion
+
+		// And finally, the center of mass
+		_allCMs[cellIndex] = cell.GetCenterOfMass();
+
+		cellNum++;
+	} while (looper.inc());
+	
+	BOOST_ASSERT(cellNum == _meshPoints.size());
+#ifdef _DEBUG
+	for (auto it = _cells.begin(); it != _cells.end(); it++)
+		BOOST_ASSERT(!it->empty()); // Make sure we've touched every cell
+#endif
+}
+
+VoroPlusPlus::Cell::Cell(Vector3D meshPoint, voro::voronoicell &vcell, FaceStore &store)
+{
+	auto vertices = ExtractAllVertices(meshPoint, vcell);
+
+	vector<int> f_verts;
+	vcell.face_vertices(f_verts);
+	// f_verts contains a list of faces, each face starts with the number of vertices in the face, followed by
+	// the indices of each of the vertices.
+
+	int index = 0;
+	for (int faceNum = 0; faceNum < vcell.number_of_faces(); faceNum++)
+	{
+		int numVertices = f_verts[index++];
+		vector<Vector3D> faceVertices;
+		for (int i = 0; i < numVertices; i++)
+			faceVertices.push_back(vertices[f_verts[index++]]);
+		size_t faceIndex = store.StoreFace(faceVertices);
+		_faces.push_back(faceIndex);
+	}
+	BOOST_ASSERT(index == f_verts.size());
+
+	_volume = vcell.volume();
+	double cx, cy, cz;
+	vcell.centroid(cx, cy, cz);
+	_centerOfMass = Vector3D(cx, cy, cz) + meshPoint;
+	_center = meshPoint;
+	// Volume = (4/3) * Width ^ 3
+	_width = pow(3 / 4 * _volume, 1 / 3);
+}
+
+vector<Vector3D> VoroPlusPlus::Cell::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)
+{
+	vector<double> voro_vertices;
+	vector<Vector3D> our_vertices;
+
+	// Extract the vertices
+	vcell.vertices(voro_vertices);
+	BOOST_ASSERT(voro_vertices.size() % 3 == 0);
+
+	our_vertices.reserve(voro_vertices.size() / 3);
+	for (int i = 0; i < voro_vertices.size(); i += 3)
+	{
+		Vector3D v(voro_vertices[i], voro_vertices[i + 1], voro_vertices[i + 2]);
+		v += meshPoint;
+		our_vertices.push_back(v);
+	}
+
+	return our_vertices;
 }

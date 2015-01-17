@@ -1,4 +1,5 @@
 #include "Face.hpp"
+#include <cassert>
 
 using namespace std;
 
@@ -44,6 +45,21 @@ bool Face::IdenticalTo(const vector<Vector3D> otherVertices) const
 		if (!found)
 			return false;
 	}
+
+	return true;
+}
+
+bool Face::AddNeighbor(size_t cell)
+{
+	if (neighbors.first == cell || neighbors.second == cell)
+		return true;
+	assert(neighbors.first == NO_NEIGHBOR || neighbors.second == NO_NEIGHBOR);
+	if (neighbors.first == NO_NEIGHBOR)
+		neighbors.first = cell;
+	else if (neighbors.second == NO_NEIGHBOR)
+		neighbors.second = cell;
+	else
+		return false;
 
 	return true;
 }

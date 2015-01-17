@@ -68,19 +68,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0;..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0;..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0;..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0;..\..\3rdParty\gtest-1.7.0\include;..\..;..\..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
