@@ -2171,8 +2171,8 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 
 vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges,int cell)
 {
-	int ncell=(int)mesh_vertices[static_cast<size_t>(cell)].size();
-	int nbox=(int) box_edges.size();
+  int ncell=static_cast<int>(mesh_vertices[static_cast<size_t>(cell)].size());
+	int nbox=static_cast<int>(box_edges.size());
 	vector<int> res;
 	Vector2D intersect;
 	boost::array<Vector2D,3> tocheck;
@@ -2180,32 +2180,26 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 	{
 		for(int j=0;j<nbox;++j)
 		{
-			if(SegmentIntersection(box_edges[static_cast<size_t>(j)],edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]],
+		  if(SegmentIntersection(box_edges[static_cast<size_t>(j)],edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])],
 				intersect))
 			{
-				double r=sqrt(edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].GetLength()*
+			  double r=sqrt(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].GetLength()*
 					box_edges[static_cast<size_t>(j)].GetLength());
 				double eps1=1e-7;
-				// are the two edges the same?
-				/*
-				tocheck[0]=box_edges[static_cast<size_t>(j)].vertices.second-box_edges[static_cast<size_t>(j)].vertices.first;
-				tocheck[1]=edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.second-box_edges[static_cast<size_t>(j)].vertices.first;
-				tocheck[2]=edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.first-box_edges[static_cast<size_t>(j)].vertices.first;
-				*/
 				if(abs(orient2d(TripleConstRef<Vector2D>
 						(box_edges[static_cast<size_t>(j)].vertices.second-box_edges[static_cast<size_t>(j)].vertices.first,
-						 edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.second-box_edges[static_cast<size_t>(j)].vertices.first,
-						 edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.first-box_edges[static_cast<size_t>(j)].vertices.first)))
+						 edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.second-box_edges[static_cast<size_t>(j)].vertices.first,
+						 edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.first-box_edges[static_cast<size_t>(j)].vertices.first)))
 				   <r*r*eps1)
 					continue;
-				if(DistanceToEdge(edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.first,
+				if(DistanceToEdge(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.first,
 					box_edges[static_cast<size_t>(j)])<eps1*r)
 					continue;
-				if(DistanceToEdge(edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.second,
+				if(DistanceToEdge(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.second,
 					box_edges[static_cast<size_t>(j)])<eps1*r)
 					continue;
-				if((intersect.distance(edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.first)
-					>eps1*r)&&(intersect.distance(edges[(size_t)mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)]].vertices.second)
+				if((intersect.distance(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.first)
+				    >eps1*r)&&(intersect.distance(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(cell)][static_cast<size_t>(i)])].vertices.second)
 					>eps1*r))
 					res.push_back(j);
 			}
