@@ -282,7 +282,7 @@ template <class T> void RemoveVal(vector<T> &vec,T val)
     {
       if(vec[i]==val)
 	{
-	  vec.erase(vec.begin()+i);
+	  vec.erase(vec.begin()+static_cast<long>(i));
 	  return;
 	}
     }
