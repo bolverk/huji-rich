@@ -19,14 +19,14 @@ namespace {
 		sort_index(sentprocs2,indeces);
 		sort(sentprocs2.begin(),sentprocs2.end());
 		sentprocs.push_back(sentprocs2[0]);
-		neighpoints.push_back(sentpoints2[(size_t)indeces[0]]);
+		neighpoints.push_back(sentpoints2[static_cast<size_t>(indeces[0])]);
 		for(int i=1;i<static_cast<int>(sentprocs2.size());++i)
 		{
 		  if(sentprocs2[static_cast<size_t>(i)]==sentprocs2[static_cast<size_t>(i)-1])
-		    neighpoints[(size_t)neighpoints.size()-1].insert(neighpoints[neighpoints.size()-1].end(),
-								     sentpoints2[(size_t)indeces[static_cast<size_t>(i)]].begin(),sentpoints2[(size_t)indeces[static_cast<size_t>(i)]].end());
+		    neighpoints[static_cast<size_t>(neighpoints.size())-1].insert(neighpoints[neighpoints.size()-1].end(),
+										  sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 			else
-				neighpoints.push_back(sentpoints2[(size_t)indeces[static_cast<size_t>(i)]]);
+			  neighpoints.push_back(sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 		}
 		int Npoints=V.GetPointNo();
 		int nremove=static_cast<int>(ToRemove.size());
@@ -71,7 +71,7 @@ namespace {
 		for(int i=0;i<nsides;++i)
 		{
 			toduplicate[static_cast<size_t>(i)]=join(toduplicate[static_cast<size_t>(i)],corners[static_cast<size_t>(i)]);
-			toduplicate[(size_t)((i+1)%nsides)]=join(toduplicate[(size_t)((i+1)%nsides)],corners[static_cast<size_t>(i)]);
+			toduplicate[static_cast<size_t>((i+1)%nsides)]=join(toduplicate[static_cast<size_t>((i+1)%nsides)],corners[static_cast<size_t>(i)]);
 		}
 		for(int i=0;i<nsides;++i)
 		{
@@ -190,7 +190,7 @@ namespace {
 				if(PointInCell(cornerpoints[static_cast<size_t>(j)],temp))
 				{
 					cornersend[static_cast<size_t>(j)].push_back(temp);
-					sentpoints[(size_t)j+nneigh].push_back(i);
+					sentpoints[static_cast<size_t>(j)+nneigh].push_back(i);
 					good=true;
 					break;
 				}
@@ -205,7 +205,7 @@ namespace {
 				{
 					bool notadded=false;
 					int indexadd=0;
-					if((int)realneighproc.size()==nneigh)
+					if(static_cast<int>(realneighproc.size())==nneigh)
 						notadded=true;
 					if(!notadded)
 					{
@@ -235,7 +235,7 @@ namespace {
 							sentpoints[static_cast<size_t>(indexadd)].insert(sentpoints[static_cast<size_t>(indexadd)].end(),vtemp.begin(),
 							vtemp.end());
 						else
-							sentpoints[(size_t)indexadd+ncorner].insert(sentpoints[(size_t)indexadd+ncorner].end(),vtemp.begin(),
+						  sentpoints[static_cast<size_t>(indexadd)+ncorner].insert(sentpoints[static_cast<size_t>(indexadd)+ncorner].end(),vtemp.begin(),
 							vtemp.end());
 						vector<Vector2D> v2temp;
 						v2temp.push_back(temp);
@@ -258,10 +258,10 @@ namespace {
 			eo.AddEntry("Point y cor",points[static_cast<size_t>(i)].y);
 			for(int k=0;k<nneigh;++k)
 				eo.AddEntry("Neighbor "+int2str(k)+" is cpu "
-				,(double)realneighproc[static_cast<size_t>(k)]);
+					    ,static_cast<double>(realneighproc[static_cast<size_t>(k)]));
 			for(int k=0;k<ncorner;++k)
 				eo.AddEntry("Corner "+int2str(k)+" is cpu "
-				,(double)realcornerproc[static_cast<size_t>(k)]);
+					    ,static_cast<double>(realcornerproc[static_cast<size_t>(k)]));
 			throw eo;
 		}
 		// Send/Recv the points
@@ -279,7 +279,7 @@ namespace {
 			vector<int> sendnumber(nproc,0),scounts(nproc,1);
 			int nsend=static_cast<int>(allsend.size());
 			for(int jj=0;jj<nsend;++jj)
-				sendnumber[(size_t)allsend[static_cast<size_t>(jj)]]+=1;
+			  sendnumber[static_cast<size_t>(allsend[static_cast<size_t>(jj)])]+=1;
 			int nrecv;
 			MPI_Reduce_scatter(&sendnumber[0],&nrecv,&scounts[0],MPI_INT,MPI_SUM,
 				MPI_COMM_WORLD);
@@ -355,15 +355,15 @@ namespace {
 					-realneighproc.begin();
 				if(index<static_cast<int>(realneighproc.size()))
 				{
-					senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[(size_t)i+nneigh].begin(),
-						sentpoints[(size_t)i+nneigh].end());
+				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i)+nneigh].begin(),
+										    sentpoints[static_cast<size_t>(i)+nneigh].end());
 					tosend[static_cast<size_t>(index)].insert(tosend[static_cast<size_t>(index)].end(),cornersend[static_cast<size_t>(i)].begin(),
 						cornersend[static_cast<size_t>(i)].end());
 				}
 				else
 				{
 					neightemp.push_back(realcornerproc[static_cast<size_t>(i)]);
-					senttemp.push_back(sentpoints[(size_t)i+nneigh]);
+					senttemp.push_back(sentpoints[static_cast<size_t>(i)+nneigh]);
 					tosend.push_back(cornersend[static_cast<size_t>(i)]);
 				}
 			}
@@ -429,7 +429,7 @@ namespace {
 			{
 				// Add unduplicated data
 				vector<int> toadd;
-				int npoints=(int)corners[static_cast<size_t>(i)].size();
+				int npoints=static_cast<int>(corners[static_cast<size_t>(i)].size());
 				for(int j=0;j<npoints;++j)
 				{
 					if(!binary_search(toduplicate[static_cast<size_t>(index)].begin(),toduplicate[static_cast<size_t>(index)].end(),
@@ -464,7 +464,7 @@ namespace {
 			{
 				int place=find(temp.begin(),temp.end(),newcornerproc[static_cast<size_t>(i)])-temp.begin();
 				cornerstemp[static_cast<size_t>(place)].insert(cornerstemp[static_cast<size_t>(place)].begin(),
-					newcorners[(size_t)index[static_cast<size_t>(i)]].begin(),newcorners[(size_t)index[static_cast<size_t>(i)]].end());
+									       newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].begin(),newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].end());
 			}
 			for(int i=0;i<nuinq;++i)
 			{
@@ -519,9 +519,9 @@ namespace {
 			int other=v.GetEdge(edgeindex[static_cast<size_t>(i)]).neighbors.first;
 			if(other==rank)
 				other=v.GetEdge(edgeindex[static_cast<size_t>(i)]).neighbors.second;
-			int nextneigh=v.GetEdge(edgeindex[(size_t)((i+1)%n)]).neighbors.first;
+			int nextneigh=v.GetEdge(edgeindex[static_cast<size_t>((i+1)%n)]).neighbors.first;
 			if(nextneigh==rank)
-			  nextneigh=v.GetEdge(edgeindex[(size_t)((i+1)%n)]).neighbors.second;
+			  nextneigh=v.GetEdge(edgeindex[static_cast<size_t>((i+1)%n)]).neighbors.second;
 			if(other==-1&&nextneigh==-1)
 			{
 				result[static_cast<size_t>(i)]=-1;
@@ -531,7 +531,7 @@ namespace {
 			{
 				vector<int> nextedges;
 				(nextneigh==-1)?ConvexEdges(nextedges,&v,other):ConvexEdges(nextedges,&v,nextneigh);
-				int nedges=(int) nextedges.size();
+				int nedges=static_cast<int>(nextedges.size());
 				int counter=0;
 				for(int k=0;k<nedges;++k)
 				{
@@ -542,8 +542,8 @@ namespace {
 						break;
 					}
 				}
-				Edge nextedge=(other==-1)?v.GetEdge(nextedges[(size_t)((counter+2)%nedges)])
-				  :v.GetEdge(nextedges[(size_t)((counter-2+nedges)%nedges)]);
+				Edge nextedge=(other==-1)?v.GetEdge(nextedges[static_cast<size_t>((counter+2)%nedges)])
+				  :v.GetEdge(nextedges[static_cast<size_t>((counter-2+nedges)%nedges)]);
 				if(nextneigh==-1)
 					result[static_cast<size_t>(i)]=(nextedge.neighbors.first==other)?
 					nextedge.neighbors.second:nextedge.neighbors.first;
@@ -599,7 +599,7 @@ namespace {
 						vector<double> dist(static_cast<size_t>(size));
 						for(int kk=0;kk<size;++kk)
 							dist[static_cast<size_t>(kk)]=abs(otherv-v.GetMeshPoint(restemp[static_cast<size_t>(kk)]));
-						result[static_cast<size_t>(i)]=restemp[(size_t)(min_element(dist.begin(),dist.end())
+						result[static_cast<size_t>(i)]=restemp[static_cast<size_t>(min_element(dist.begin(),dist.end())
 										   -dist.begin())];
 						break;
 					}
@@ -630,7 +630,7 @@ namespace {
 		int n=static_cast<int>(v.size());
 		for(int i=0;i<n;++i)
 		{
-			res+=(int)v[static_cast<size_t>(i)].size();
+		  res+=static_cast<int>(v[static_cast<size_t>(i)].size());
 		}
 		return res;
 	}
