@@ -2220,13 +2220,13 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 bool VoronoiMesh::CloseToBorder(int point,int &border)
 {
 	int olength=Tri.GetOriginalLength();
-	int n=(int)mesh_vertices[static_cast<size_t>(point)].size();
+	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
 	for(int i=0;i<n;++i)
 	{
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.second==point)
-			border=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.first;
+	  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.second==point)
+		  border=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first;
 		else
-			border=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].neighbors.second;
+		  border=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.second;
 		if(border>olength)
 			return true;
 	}
