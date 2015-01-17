@@ -1558,7 +1558,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 			int NN=(int)V.mesh_vertices[static_cast<size_t>(temp1)].size();
 			for(int jj=0;jj<NN;++jj)
 			{
-				Edge etemp=V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp1)][static_cast<size_t>(jj)]];
+			  Edge etemp=V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp1)][static_cast<size_t>(jj)])];
 #ifdef RICH_MPI
 				if((i<ToRemove.size()&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[static_cast<size_t>(i)]))||((i>=ToRemove.size())&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
@@ -1579,7 +1579,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifdef RICH_MPI
 				if(((i<ToRemove.size())&&(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 					==ToRemove[static_cast<size_t>(i)]))||((i>=ToRemove.size())&&(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
-					==GhostNeighbors[static_cast<size_t>(i)-(int)ToRemove.size()][0])))
+												      ==GhostNeighbors[static_cast<size_t>(i)-static_cast<int>(ToRemove.size())][0])))
 #else
 				if(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 					==ToRemove[static_cast<size_t>(i)])
@@ -1615,18 +1615,18 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				{
 					for(jj=0;jj<V.mesh_vertices[static_cast<size_t>(temp)].size();++jj)
 					{
-						if(V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]].neighbors.first>-1)
-							if(V.GetMeshPoint(V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]].
+					  if(V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])].neighbors.first>-1)
+						  if(V.GetMeshPoint(V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])].
 								neighbors.first).distance(V.GetMeshPoint(other))<eps*R)
 							{
-								V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]]=NewEdges[static_cast<size_t>(j)];
+							  V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])]=NewEdges[static_cast<size_t>(j)];
 								break;
 							}
-							if(V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]].neighbors.second>-1)
-								if(V.GetMeshPoint(V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]].
+						if(V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])].neighbors.second>-1)
+							  if(V.GetMeshPoint(V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])].
 									neighbors.second).distance(V.GetMeshPoint(other))<eps*R)
 								{
-									V.edges[(size_t)V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)]]=NewEdges[static_cast<size_t>(j)];
+								  V.edges[static_cast<size_t>(V.mesh_vertices[static_cast<size_t>(temp)][static_cast<size_t>(jj)])]=NewEdges[static_cast<size_t>(j)];
 									break;
 								}
 					}
@@ -1641,7 +1641,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 				{
 					if(other<Npoints)
 					{
-						V.mesh_vertices[static_cast<size_t>(temp)].push_back((int)V.edges.size()-k);
+					  V.mesh_vertices[static_cast<size_t>(temp)].push_back(static_cast<int>(V.edges.size())-k);
 						if(k==0)
 							V.edges.push_back(NewEdges[static_cast<size_t>(j)]);
 					}
@@ -1789,7 +1789,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	copy(cor.begin()+Npoints,cor.end(),cortemp.begin());
 	int N=static_cast<int>(cor.size());
 	// Expand the cor vector to include the new points
-	cor.resize((size_t)(N+n));
+	cor.resize(static_cast<size_t>(N+n));
 	copy(cortemp.begin(),cortemp.end(),cor.begin()+Npoints+n);
 	cortemp.clear();
 	// Fix the boundary point refrences if needed
@@ -1818,7 +1818,7 @@ void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,double alpha,
 	V.Tri.ChangeOlength(Npoints+n);
 	V.Nextra+=static_cast<int>(ToRefine.size());
 	// reserve space for mesh_vertices
-	V.mesh_vertices.resize((size_t)(Npoints+n));
+	V.mesh_vertices.resize(static_cast<size_t>(Npoints+n));
 	// Refine the points
 	for(int i=0;i<n;++i)
 	{
