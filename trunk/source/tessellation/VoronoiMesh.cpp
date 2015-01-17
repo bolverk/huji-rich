@@ -2438,9 +2438,9 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &t
 			{
 				if(edges[(size_t)mesh_vertices[(size_t)copied[static_cast<size_t>(i)][static_cast<size_t>(j)]][static_cast<size_t>(k)]].neighbors.first==
 					copied[static_cast<size_t>(i)][static_cast<size_t>(j)])
-					test=edges[(size_t)mesh_vertices[(size_t)copied[static_cast<size_t>(i)][static_cast<size_t>(j)]][static_cast<size_t>(k)]].neighbors.second;
+				  test=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.second;
 				else
-					test=edges[(size_t)mesh_vertices[(size_t)copied[static_cast<size_t>(i)][static_cast<size_t>(j)]][static_cast<size_t>(k)]].neighbors.first;
+				  test=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.first;
 				if(test<olength)
 					totest2.push_back(test);
 			}
@@ -2453,47 +2453,47 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &t
 
 vector<int> VoronoiMesh::FindEdgeStartConvex(int point)
 {
-	int n=(int)mesh_vertices[static_cast<size_t>(point)].size();
+  int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
 	Vector2D min_point;
 	int min_index=0,p_index;
-	if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(0)]].vertices.first.x<
-		edges[(size_t)mesh_vertices[static_cast<size_t>(point)][0]].vertices.second.x)
+	if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(0)])].vertices.first.x<
+	   edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][0])].vertices.second.x)
 	{
-		min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][0]].vertices.first;
+	  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][0])].vertices.first;
 		p_index=0;
 	}
 	else
 	{
-		min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][0]].vertices.second;
+	  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][0])].vertices.second;
 		p_index=1;
 	}
 	for(int i=1;i<n;++i)
 	{
-		double R=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].GetLength();
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.first.x<(min_point.x-R*eps))
+	  double R=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].GetLength();
+		if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.first.x<(min_point.x-R*eps))
 		{
-			min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.first;
+		  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.first;
 			min_index=i;
 			p_index=0;
 		}
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.second.x<(min_point.x-R*eps))
+		if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.second.x<(min_point.x-R*eps))
 		{
-			min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.second;
+		  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.second;
 			min_index=i;
 			p_index=1;
 		}
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.first.x<(min_point.x+R*eps)&&
-			edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.first.y<min_point.y)
+		if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.first.x<(min_point.x+R*eps)&&
+		   edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.first.y<min_point.y)
 		{
-			min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.first;
+		  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.first;
 			min_index=i;
 			p_index=0;
 		}
 
-		if(edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.second.x<(min_point.x+R*eps)&&
-			edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.second.y<min_point.y)
+		if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.second.x<(min_point.x+R*eps)&&
+		   edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.second.y<min_point.y)
 		{
-			min_point=edges[(size_t)mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)]].vertices.second;
+		  min_point=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].vertices.second;
 			min_index=i;
 			p_index=1;
 		}
@@ -2512,8 +2512,8 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 		double R=GetWidth(i);
 		vector<int> min_index=FindEdgeStartConvex(i);
 		int p_loc=min_index[1];
-		int edge_loc=mesh_vertices[static_cast<size_t>(i)][(size_t)min_index[0]];
-		int nedges=(int)mesh_vertices[static_cast<size_t>(i)].size();
+		int edge_loc=mesh_vertices[static_cast<size_t>(i)][static_cast<size_t>(min_index[0])];
+		int nedges=static_cast<int>(mesh_vertices[static_cast<size_t>(i)].size());
 		std::list<int> elist;
 		for(int j=0;j<nedges;++j)
 		{
@@ -2531,7 +2531,7 @@ void VoronoiMesh::ConvexEdgeOrder(void)
 			std::list<int>::iterator it=elist.begin();
 			for(int k=0;k<nlist;++k)
 			{
-			  double temp0=pair_member(edges[static_cast<size_t>(edge_loc)].vertices,(p_loc+1)%2).distance(edges[(size_t)(*it)].vertices.first);
+			  double temp0=pair_member(edges[static_cast<size_t>(edge_loc)].vertices,(p_loc+1)%2).distance(edges[static_cast<size_t>(*it)].vertices.first);
 				if(temp0<eps*R)
 				{
 					p_loc=0;
