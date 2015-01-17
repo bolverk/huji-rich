@@ -154,7 +154,7 @@ vector<double> growExpansionZeroElim(vector<double> const& e, double b)
   double R1, R2, res; //Temp variables to store values.
 
   R1 = b; //The remainder to add to the expansion.
-  for (unsigned int i = 0; i < (unsigned int)e.size(); i++)
+  for (size_t i = 0; i < e.size(); ++i)
     {
       twoSum(R1, e[i], R2, res); //Adding the remainder to the current number in the expansion.
       R1 = R2; //Updating remainder.
@@ -178,17 +178,17 @@ vector<double> expansionSumZeroElim(vector<double> const& e, vector<double> cons
   double Q, Qnew, current;
 
   Q = f[0];
-  for (unsigned int i = 0; i <(unsigned int) e.size(); i++)
+  for (size_t i = 0; i < e.size(); i++)
     {
       twoSum(Q, e[i], Qnew, current);
       temp.push_back(current);
       Q = Qnew;
     }
   temp.push_back(Q);
-  for (unsigned int i = 1; i < (unsigned int)f.size(); i++)
+  for (size_t i = 1; i < f.size(); i++)
     {
       Q = f[i];
-      for (unsigned int j = i; j <(unsigned int) temp.size(); j++)
+      for (size_t j = i; j < temp.size(); j++)
 	{
 	  current = temp[j];
 	  twoSum(Q, current, Qnew, temp[j]);
@@ -196,7 +196,7 @@ vector<double> expansionSumZeroElim(vector<double> const& e, vector<double> cons
 	}
       temp.push_back(Q);
     }
-  for (unsigned int i = 0; i <(unsigned int) temp.size(); i++)
+  for (size_t i = 0; i < temp.size(); i++)
     {
       if (fabs(temp[i]) > 0)
 	{
@@ -226,7 +226,7 @@ vector<double> fastExpansionSumZeroElim(vector<double> const& e, vector<double> 
     {
       Q = eNow;
       eIndex++;
-      if (eIndex <(unsigned int)e.size())
+      if (eIndex <e.size())
 	{
 	  eNow = e[eIndex];
 	}
@@ -452,9 +452,9 @@ vector<double> compress(vector<double> const& e)
   vector<double> temp, ans;
   ans.reserve(8);
 
-  int bottom = (int)e.size() - 1;
+  int bottom = static_cast<int>(e.size()) - 1;
   double Q = e[static_cast<size_t>(bottom)];
-  for (int eindex =(int) e.size() - 2; eindex >= 0; eindex--)
+  for (int eindex =static_cast<int>(e.size()) - 2; eindex >= 0; eindex--)
     {
       const double enow = e[static_cast<size_t>(eindex)];
       double q, Qnew;
@@ -470,7 +470,7 @@ vector<double> compress(vector<double> const& e)
 	  Q = Qnew;
 	}
     }
-  for (unsigned int i = (unsigned int)bottom + 1; i <e.size(); i++)
+  for (size_t i = static_cast<size_t>(bottom) + 1; i <e.size(); i++)
     {
       const double current = temp[i];
       double q, Qnew;
@@ -490,7 +490,7 @@ double estimate(vector<double> const& e)
   double Q;
 
   Q = e[0];
-  for (unsigned int i = 1; i < e.size(); i++)
+  for (size_t i = 1; i < e.size(); i++)
     {
       Q += e[i];
     }
