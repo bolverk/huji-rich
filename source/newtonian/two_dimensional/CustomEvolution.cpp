@@ -26,7 +26,7 @@ bool CustomEvolution::TimeStepRelevant(void)const
 }
 
 CustomEvolutionManager::CustomEvolutionManager(void):
-  vtable_(1,(CustomEvolution*)0) {}
+  vtable_(1,NULL) {}
 
 namespace
 {
