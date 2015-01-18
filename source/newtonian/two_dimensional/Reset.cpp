@@ -5,19 +5,19 @@ void ResetOutput(string location,hdsim const& sim)
 	ResetDump dump;
 	fstream myFile (location.c_str(),ios::out | ios::binary);
 	int temp=sim.GetCellNo();
-	myFile.write ((char*)&temp, sizeof (int));
+	myFile.write (reinterpret_cast<char*>(&temp), sizeof (int));
 	Vector2D p;
 	for(int i=0;i<temp;i++)
 	{
 		p=sim.GetMeshPoint(i);
 		double x=(p.x);
 		double y=(p.y);
-		myFile.write ((char*)&x,sizeof(double));
-		myFile.write ((char*)&y,sizeof(double));
+		myFile.write (reinterpret_cast<char*>(&x),sizeof(double));
+		myFile.write (reinterpret_cast<char*>(&y),sizeof(double));
 	}
 #ifdef RICH_MPI
 	int temp2=sim.GetProcTessellation().GetPointNo();
-	myFile.write ((char*)&temp2, sizeof (int));
+	myFile.write (reinterpret_cast<char*>(&temp2), sizeof (int));
 	for(int i=0;i<temp2;i++)
 	{
 		p=sim.GetProcTessellation().GetMeshPoint(i);
@@ -56,7 +56,7 @@ void ResetOutput(string location,hdsim const& sim)
 	int n=0;
 	vector<vector<double> > tracers=sim.getTracers();
 	if(!tracers.empty())
-		n=(int)tracers[0].size();
+	  n=static_cast<int>(tracers[0].size());
 	myFile.write ((char*)&n,sizeof(int));
 	cold = static_cast<char>(sim.GetDensityFloorFlag());
 	myFile.write((char*)&cold, sizeof(char));
@@ -74,7 +74,7 @@ void ResetOutput(string location,hdsim const& sim)
 		myFile.close();
 		return;
 	}
-	if((int)tracers.size()!=temp)
+	if(static_cast<int>(tracers.size())!=temp)
 		throw UniversalError("Error in ResetDump, length of mesh points and tracers do not match");
 	double x;
 	for(int i=0;i<n;++i)
@@ -94,7 +94,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	if(!myFile.good())
 		throw UniversalError("Error opening reset file!!");
 	int N;
-	myFile.read((char*)&N,sizeof (int));
+	myFile.read(reinterpret_cast<char*>(&N),sizeof (int));
 	// Resize the vectors
 	dump.snapshot.cells.resize(static_cast<size_t>(N));
 	dump.snapshot.mesh_points.resize(static_cast<size_t>(N));
@@ -113,7 +113,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 
 #ifdef RICH_MPI
 	int temp2;
-	myFile.read((char*)&temp2,sizeof (int));
+	myFile.read(reinterpret_cast<char*>(&temp2),sizeof (int));
 	dump.procmesh.resize(temp2);
 	for(int i=0;i<temp2;i++)
 	{
