@@ -92,7 +92,7 @@ namespace {
 		Primitive operator()(size_t n) const
 		{
 			return initialize_single_cell(tess_,
-				(int)n,
+						      static_cast<int>(n),
 				cm_flag_,
 				density_,
 				pressure_,
@@ -327,7 +327,7 @@ namespace {
 
 		Vector2D operator()(size_t n) const
 		{
-			return face_velocity_[(size_t)face_index_[n]];
+		  return face_velocity_[static_cast<size_t>(face_index_[n])];
 		}
 
 		size_t getLength(void) const
@@ -1430,8 +1430,8 @@ namespace {
 			}
 			else{
 				if(cev_[static_cast<size_t>(n0)]||cev_[static_cast<size_t>(n1)])
-					return cev_[(size_t)choose_special_cell_index(cev_,cem_,n0,n1)]->CalcTracerFlux
-					(tess_,cells_,tracers_,dm,edge,(int)i,dt_,
+				  return cev_[static_cast<size_t>(choose_special_cell_index(cev_,cem_,n0,n1))]->CalcTracerFlux
+					  (tess_,cells_,tracers_,dm,edge,static_cast<int>(i),dt_,
 					time_,interp_,edge_velocities_[i]);
 				else
 					return apply_to_each_term
@@ -1504,9 +1504,9 @@ vector<vector<double> > CalcTraceChange
 	for(int i=0;i<tess.GetTotalSidesNumber();++i){
 		for(size_t j=0;j<res[0].size();++j){
 			if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.first,tess))
-				res[(size_t)tess.GetEdge(i).neighbors.first][j] -= tracer_fluxes[static_cast<size_t>(i)][j];
+			  res[static_cast<size_t>(tess.GetEdge(i).neighbors.first)][j] -= tracer_fluxes[static_cast<size_t>(i)][j];
 			if(!hbc.IsGhostCell(tess.GetEdge(i).neighbors.second,tess))
-				res[(size_t)tess.GetEdge(i).neighbors.second][j] += tracer_fluxes[static_cast<size_t>(i)][j];
+			  res[static_cast<size_t>(tess.GetEdge(i).neighbors.second)][j] += tracer_fluxes[static_cast<size_t>(i)][j];
 		}
 	}
 	return res;
@@ -1525,10 +1525,10 @@ vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> co
 		for(size_t i=0;i<neightemp.size();++i)
 			if(neightemp[i]>=0)
 				neigh.push_back(neightemp[i]);
-		double e=pow(abs(cells[static_cast<size_t>(j)].Velocity-cells[(size_t)neigh[0]].Velocity),2);
+		double e=pow(abs(cells[static_cast<size_t>(j)].Velocity-cells[static_cast<size_t>(neigh[0])].Velocity),2);
 		for(int i=1;i<static_cast<int>(neigh.size());++i)
 		{// This could be made much faster by writing the expression implicitly
-			e=max(e,pow(abs(cells[static_cast<size_t>(j)].Velocity-cells[(size_t)neigh[static_cast<size_t>(i)]].Velocity),2));
+		  e=max(e,pow(abs(cells[static_cast<size_t>(j)].Velocity-cells[static_cast<size_t>(neigh[static_cast<size_t>(i)])].Velocity),2));
 		}
 		res[static_cast<size_t>(j)]=0.5*e;
 	}
@@ -1741,7 +1741,7 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 	for(size_t i=0;i<tracerextensive.size();++i)
 		if(CellsEvolve[i])
 			tracerextensive[i]=CellsEvolve[i]->UpdateTracer
-			((int)i,tracerextensive,tracerchange,cells,tess,time);
+			  (static_cast<int>(i),tracerextensive,tracerchange,cells,tess,time);
 		else
 			for(size_t j=0;j<tracerextensive[i].size();++j)
 				tracerextensive[i][j]+=tracerchange[i][j];
@@ -1761,7 +1761,7 @@ void TracerResetCalc
 	Vector2D velocity;
 	if(tracer.empty())
 		return;
-	if(tracerindex>=(int)tracer[0].size()||tracerindex<0)
+	if(tracerindex>=static_cast<int>(tracer[0].size())||tracerindex<0)
 		throw UniversalError("Error in tracerReset, wrong dimension for tracer");
 	for(int i=0;i<n;++i)
 	{
@@ -1780,7 +1780,7 @@ void TracerResetCalc
 				if (coldflows&&j == 0)
 					tracer[static_cast<size_t>(i)][j] = eos.dp2s(cells[static_cast<size_t>(i)].Density, cells[static_cast<size_t>(i)].Pressure);
 				else
-					if ((int)j != tracerindex)
+				  if (static_cast<int>(j) != tracerindex)
 						tracer[static_cast<size_t>(i)][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
 		}
 	}
@@ -1943,58 +1943,40 @@ void FixAdvection(vector<Conserved>& extensive,
 		poly1[j]-=diff;
 		}*/
 		double real_dv1=polyoverlap.polygon_overlap_area
-			(pold[(size_t)tessold.GetOriginalIndex(n0)],
-			pnew[(size_t)tessold.GetOriginalIndex(n1)],
-			Rold[(size_t)tessold.GetOriginalIndex(n0)]*eps,
-			Rnew[(size_t)tessold.GetOriginalIndex(n1)]*eps);
-		/*		ConvexHull(poly0,&tessnew,tessold.GetOriginalIndex(n0));
-		ConvexHull(poly1,&tessold,tessold.GetOriginalIndex(n1));
-		if(n0>=npoints)
-		{
-		const Vector2D diff(tessnew.GetMeshPoint(tessnew.GetOriginalIndex(n0))
-		-tessnew.GetMeshPoint(n0));
-		int N=static_cast<int>(poly0.size());
-		for(int j=0;j<N;++j)
-		poly0[j]-=diff;
-		}
-		if(n1>=npoints)
-		{
-		const Vector2D diff(tessold.GetMeshPoint(tessold.GetOriginalIndex(n1))
-		-tessold.GetMeshPoint(n1));
-		int N=static_cast<int>(poly1.size());
-		for(int j=0;j<N;++j)
-		poly1[j]-=diff;
-		}*/
+		      (pold[static_cast<size_t>(tessold.GetOriginalIndex(n0))],
+		       pnew[static_cast<size_t>(tessold.GetOriginalIndex(n1))],
+		       Rold[static_cast<size_t>(tessold.GetOriginalIndex(n0))]*eps,
+		       Rnew[static_cast<size_t>(tessold.GetOriginalIndex(n1))]*eps);
 		double real_dv0=polyoverlap.polygon_overlap_area
-			(pnew[(size_t)tessold.GetOriginalIndex(n0)],
-			pold[(size_t)tessold.GetOriginalIndex(n1)],
-			Rnew[(size_t)tessold.GetOriginalIndex(n0)]*eps,
-			Rold[(size_t)tessold.GetOriginalIndex(n1)]*eps);
+		      (pnew[static_cast<size_t>(tessold.GetOriginalIndex(n0))],
+			 pold[static_cast<size_t>(tessold.GetOriginalIndex(n1))],
+			 Rnew[static_cast<size_t>(tessold.GetOriginalIndex(n0))]*eps,
+			 Rold[static_cast<size_t>(tessold.GetOriginalIndex(n1))]*eps);
 
 		if(dv_dt>0)
 		{
 			if(n0<npoints)
 			{
-				extensive[static_cast<size_t>(n0)]+=(real_dv0-dv_dt)*intensive[(size_t)tessold.GetOriginalIndex(n1)];
-				extensive[static_cast<size_t>(n0)]-=real_dv1*intensive[(size_t)tessold.GetOriginalIndex(n0)];
+			  extensive[static_cast<size_t>(n0)]+=(real_dv0-dv_dt)*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n1))];
+				extensive[static_cast<size_t>(n0)]-=real_dv1*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n0))];
 			}
 			if(n1<npoints)
 			{
-				extensive[static_cast<size_t>(n1)]+=(dv_dt-real_dv0)*intensive[(size_t)tessold.GetOriginalIndex(n1)];
-				extensive[static_cast<size_t>(n1)]+=real_dv1*intensive[(size_t)tessold.GetOriginalIndex(n0)];
+			  extensive[static_cast<size_t>(n1)]+=(dv_dt-real_dv0)*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n1))];
+				extensive[static_cast<size_t>(n1)]+=real_dv1*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n0))];
 			}
 		}
 		else
 		{
 			if(n0<npoints)
 			{
-				extensive[static_cast<size_t>(n0)]-=(real_dv1+dv_dt)*intensive[(size_t)tessold.GetOriginalIndex(n0)];
-				extensive[static_cast<size_t>(n0)]+=real_dv0*intensive[(size_t)tessold.GetOriginalIndex(n1)];
+			  extensive[static_cast<size_t>(n0)]-=(real_dv1+dv_dt)*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n0))];
+				extensive[static_cast<size_t>(n0)]+=real_dv0*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n1))];
 			}
 			if(n1<npoints)
 			{
-				extensive[static_cast<size_t>(n1)]-=(-dv_dt-real_dv1)*intensive[(size_t)tessold.GetOriginalIndex(n0)];
-				extensive[static_cast<size_t>(n1)]-=real_dv0*intensive[(size_t)tessold.GetOriginalIndex(n1)];
+			  extensive[static_cast<size_t>(n1)]-=(-dv_dt-real_dv1)*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n0))];
+			  extensive[static_cast<size_t>(n1)]-=real_dv0*intensive[static_cast<size_t>(tessold.GetOriginalIndex(n1))];
 			}
 		}
 	}
