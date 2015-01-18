@@ -2963,11 +2963,11 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 	BoundaryRemove.clear();
 	NewSend.clear();
 	BoundaryNeigh.clear();
-	BoundaryRemove.resize(nprocs);
-	NewSend.resize(nprocs);
+	BoundaryRemove.resize(static_cast<size_t>(nprocs));
+	NewSend.resize(static_cast<size_t>(nprocs));
 	BoundaryNeigh.resize(nprocs);
-	vector<vector<int> > sort_indeces(nprocs),sort_indecesg(nprocs);
-	vector<vector<int> > SortedNGhostPoints(nprocs),SortedGhostPoints(nprocs);
+	vector<vector<int> > sort_indeces(static_cast<size_t>(nprocs)),sort_indecesg(static_cast<size_t>(nprocs));
+	vector<vector<int> > SortedNGhostPoints(static_cast<size_t>(nprocs)),SortedGhostPoints(static_cast<size_t>(nprocs));
 	for(int i=0;i<nprocs;++i)
 	{
 		sort_index(NGhostReceived[static_cast<size_t>(i)],sort_indeces[static_cast<size_t>(i)]);
@@ -3021,18 +3021,18 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 									}
 									else
 									{
-									  int index=static_cast<int>(find(NewSend[static_cast<size_t>(j)].begin(),NewSend[static_cast<size_t>(j)].end(),
+									  int index2=static_cast<int>(find(NewSend[static_cast<size_t>(j)].begin(),NewSend[static_cast<size_t>(j)].end(),
 													  localneigh[static_cast<size_t>(k)])-NewSend[static_cast<size_t>(j)].begin());
-										if(index>=static_cast<int>(NewSend[static_cast<size_t>(j)].size()))
+										if(index2>=static_cast<int>(NewSend[static_cast<size_t>(j)].size()))
 											NewSend[static_cast<size_t>(j)].push_back(localneigh[static_cast<size_t>(k)]);
-										temp.push_back(static_cast<int>(SortedGhostPoints[static_cast<size_t>(j)].size())+index);
+										temp.push_back(static_cast<int>(SortedGhostPoints[static_cast<size_t>(j)].size())+index2);
 									}
 								}
 								else
 								{
-								  int index=static_cast<int>(lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
+								  int index2=static_cast<int>(lower_bound(SortedGhostPoints[static_cast<size_t>(j)].begin(),
 													 SortedGhostPoints[static_cast<size_t>(j)].end(),localneigh[static_cast<size_t>(k)])-SortedGhostPoints[static_cast<size_t>(j)].begin());
-									temp.push_back(sort_indecesg[static_cast<size_t>(j)][static_cast<size_t>(index)]);
+									temp.push_back(sort_indecesg[static_cast<size_t>(j)][static_cast<size_t>(index2)]);
 								}
 							}
 							BoundaryNeigh[static_cast<size_t>(j)].push_back(temp);
