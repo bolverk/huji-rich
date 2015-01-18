@@ -3,7 +3,14 @@
 
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
 {
-	return (int)ceil(log(pow(static_cast<double>(cor.size()), (1.0 / 3.0))) / log(2.0));
+  return static_cast<int>(ceil(log(pow(static_cast<double>(cor.size()), (1.0 / 3.0))) / log(2.0)));
+}
+
+namespace {
+  bool approx_equal(double a, double b, double thres=1e-9)
+  {
+    return thres>std::abs(a-b);
+  }
 }
 
 
@@ -31,9 +38,9 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 	double dbScaleY = dbMaxY - dbMinY;
 	double dbScaleZ = dbMaxZ - dbMinZ;
 	// To prevent division by zero (very unlikely - double precision!)
-	bool bFlagX = dbScaleX == 0;
-	bool bFlagY = dbScaleY == 0;
-	bool bFlagZ = dbScaleZ == 0;
+	bool bFlagX = approx_equal(dbScaleX,0); // dbScaleX == 0;
+	bool bFlagY = approx_equal(dbScaleY,0); // dbScaleY == 0;
+	bool bFlagZ = approx_equal(dbScaleZ,0); // dbScaleZ == 0;
 
 	// X coordinate:
 	if (!bFlagX)
