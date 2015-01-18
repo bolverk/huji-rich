@@ -88,13 +88,13 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 	return;
 }
 
-void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<vector<size_t> > & vOut)
+void FindEqualIndices(vector<size_t> const & vD_sorted, vector<vector<size_t> > & vOut)
 {
-	vector<unsigned long long int> vD_sorted_cpy = vD_sorted;
-	vector<unsigned long long int> vD_sorted_unq = vD_sorted;
-	//vector<unsigned long long int>::iterator it = adjacent_find(vD_sorted.begin(), vD_sorted.end());
+	vector<size_t> vD_sorted_cpy = vD_sorted;
+	vector<size_t> vD_sorted_unq = vD_sorted;
+	//vector<size_t>::iterator it = adjacent_find(vD_sorted.begin(), vD_sorted.end());
 
-	vector<unsigned long long int>::iterator it1, itPrev, itCur;
+	vector<size_t>::iterator it1, itPrev, itCur;
 	it1 = unique(vD_sorted_unq.begin(), vD_sorted_unq.end());
 
 	vD_sorted_unq.resize(distance(vD_sorted_unq.begin(), it1));
