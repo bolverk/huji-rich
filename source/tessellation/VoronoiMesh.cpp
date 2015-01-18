@@ -190,7 +190,7 @@ namespace {
 				if(PointInCell(cornerpoints[static_cast<size_t>(j)],temp))
 				{
 					cornersend[static_cast<size_t>(j)].push_back(temp);
-					sentpoints[static_cast<size_t>(j)+nneigh].push_back(i);
+					sentpoints[static_cast<size_t>(j+nneigh)].push_back(i);
 					good=true;
 					break;
 				}
@@ -235,7 +235,7 @@ namespace {
 							sentpoints[static_cast<size_t>(indexadd)].insert(sentpoints[static_cast<size_t>(indexadd)].end(),vtemp.begin(),
 							vtemp.end());
 						else
-						  sentpoints[static_cast<size_t>(indexadd)+ncorner].insert(sentpoints[static_cast<size_t>(indexadd)+ncorner].end(),vtemp.begin(),
+						  sentpoints[static_cast<size_t>(indexadd+ncorner)].insert(sentpoints[static_cast<size_t>(indexadd+ncorner)].end(),vtemp.begin(),
 							vtemp.end());
 						vector<Vector2D> v2temp;
 						v2temp.push_back(temp);
@@ -314,7 +314,7 @@ namespace {
 						     -realneighproc.begin());
 				if(index<static_cast<int>(realneighproc.size()))
 				{
-					senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[i+nneigh].begin(),
+				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i+nneigh)].begin(),
 						sentpoints[i+nneigh].end());
 					tosend[static_cast<size_t>(index)].insert(tosend[static_cast<size_t>(index)].end(),cornersend[static_cast<size_t>(i)].begin(),
 						cornersend[static_cast<size_t>(i)].end());
@@ -322,14 +322,14 @@ namespace {
 				else
 				{
 					neightemp.push_back(realcornerproc[static_cast<size_t>(i)]);
-					senttemp.push_back(sentpoints[i+nneigh]);
+					senttemp.push_back(sentpoints[static_cast<size_t>(i+nneigh)]);
 					tosend.push_back(cornersend[static_cast<size_t>(i)]);
 				}
 			}
 			for(int i=nneigh;i<static_cast<int>(realneighproc.size());++i)
 			{
 				neightemp.push_back(realneighproc[static_cast<size_t>(i)]);
-				senttemp.push_back(sentpoints[i+ntemp]);
+				senttemp.push_back(sentpoints[static_cast<size_t>(i+ntemp)]);
 				tosend.push_back(neighsend[static_cast<size_t>(i)]);
 			}
 			ntemp=static_cast<int>(newtalk.size());
@@ -355,8 +355,8 @@ namespace {
 						     -realneighproc.begin());
 				if(index<static_cast<int>(realneighproc.size()))
 				{
-				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i)+nneigh].begin(),
-										    sentpoints[static_cast<size_t>(i)+nneigh].end());
+				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i+nneigh)].begin(),
+									      sentpoints[static_cast<size_t>(i+nneigh)].end());
 					tosend[static_cast<size_t>(index)].insert(tosend[static_cast<size_t>(index)].end(),cornersend[static_cast<size_t>(i)].begin(),
 						cornersend[static_cast<size_t>(i)].end());
 				}
