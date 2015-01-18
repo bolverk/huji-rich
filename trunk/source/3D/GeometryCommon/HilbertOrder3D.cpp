@@ -108,7 +108,7 @@ HilbertCurve3D::HilbertCurve3D():
 
 	for (int ii = 1; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-	  RotateShape(static_cast<size_t>(ii), m_vRotations[ii]);
+	  RotateShape(static_cast<size_t>(ii), m_vRotations[static_cast<size_t>(ii)]);
 	}
 
 	BuildRecursionRule();
@@ -148,9 +148,9 @@ void HilbertCurve3D::BuildRecursionRule()
 		for (int jj = 0; jj < 8; ++jj)
 		{
 			// Rotate the appropriate block of the reference recursion rule, according to the ii rotation scheme:
-		  RotateShape(m_vRotatedShapes[static_cast<size_t>(m_vShapeRecursion[0][jj])], oTempShape, ii);
+		  RotateShape(m_vRotatedShapes[static_cast<size_t>(m_vShapeRecursion[0][static_cast<size_t>(jj)])], oTempShape, ii);
 			// Find the shape index of the rotated shape:
-			m_vShapeRecursion[ii][jj] = FindShapeIndex(oTempShape);
+		  m_vShapeRecursion[static_cast<size_t>(ii)][static_cast<size_t>(jj)] = FindShapeIndex(oTempShape);
 		}
 	}
 
@@ -278,7 +278,7 @@ int HilbertCurve3D::GetRotation(int * piRotation, int iRotationIndex)
 
 	default:
 		return 0;
-		break;
+		//		break;
 	}
 }
 
@@ -297,13 +297,13 @@ void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 			switch (abs(vAxes[iAx]))
 			{
 			case 1:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateX( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateX( iSign * PI / 2 );
 				break;
 			case 2:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateY( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateY( iSign * PI / 2 );
 				break;
 			case 3:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateZ( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateZ( iSign * PI / 2 );
 				break;
 			default:
 				break;
