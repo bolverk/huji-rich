@@ -2,6 +2,12 @@
 
 namespace
 {
+
+  bool approx_equal(double a, double b, double thres=1e-9)
+  {
+    return thres>std::abs(a-b);
+  }
+
 	Vector3D normalize(const Vector3D& v)
 	{
 		return v/abs(v);
@@ -12,7 +18,7 @@ namespace
 		Vector3D parallel = vel-ScalarProd(vel,normal)*normal;
 		const double p=abs(parallel);
 		const double v=abs(vel);
-		if(v==0||v==-0)
+		if(approx_equal(v,0))
 			return parallel;
 		if(p<1e-8*v)
 			parallel=parallel/v;
@@ -107,3 +113,4 @@ vector<Conserved3D> FirstOrderHydroFlux::operator()(const Tessellation3D& tess,
 	}
 	return res;
 }
+
