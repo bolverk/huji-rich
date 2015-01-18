@@ -114,13 +114,13 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 #ifdef RICH_MPI
 	int temp2;
 	myFile.read(reinterpret_cast<char*>(&temp2),sizeof (int));
-	dump.procmesh.resize(temp2);
+	dump.procmesh.resize(static_cast<size_t>(temp2));
 	for(int i=0;i<temp2;i++)
 	{
 	  myFile.read(reinterpret_cast<char*>(&x),sizeof(double));
 	  myFile.read(reinterpret_cast<char*>(&y),sizeof(double));
 		cortemp.Set(x,y);
-		dump.procmesh[i]=cortemp;
+		dump.procmesh[static_cast<size_t>(i)]=cortemp;
 	}
 #endif
 
