@@ -1326,23 +1326,23 @@ namespace
 		int rank=get_mpi_rank();
 		int ws=get_mpi_size();
 		vector<int> procorder=GetProcOrder(rank,ws);
-		vector<vector<int> > recv(nlist);
+		vector<vector<int> > recv(static_cast<size_t>(nlist));
 		int temp;
 		MPI_Status status;
 		for(int i=0;i<static_cast<int>(procorder.size());++i)
 		{
-		  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[i])
+		  int index=static_cast<int>(Find(sentprocs.begin(),sentprocs.end(),procorder[static_cast<size_t>(i)])
 					     -sentprocs.begin());
 			if(index<nlist)
 			{
 				if(rank<procorder[i])
 				{
-					if(toremove[index].empty())
-						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+				  if(toremove[static_cast<size_t>(index)].empty())
+					  MPI_Send(&temp,1,MPI_INT,procorder[static_cast<size_t>(i)],1,MPI_COMM_WORLD);
 					else
-					  MPI_Send(&toremove[index][0],static_cast<int>(toremove[index].size()),
-						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
-					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+					  MPI_Send(&toremove[index][0],static_cast<int>(toremove[static_cast<size_t>(index)].size()),
+						   MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD);
+					MPI_Probe(procorder[static_cast<size_t>(i)],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 					if(status.MPI_TAG==1)
 						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					else
