@@ -315,7 +315,7 @@ namespace {
 				if(index<static_cast<int>(realneighproc.size()))
 				{
 				  senttemp[static_cast<size_t>(index)].insert(senttemp[static_cast<size_t>(index)].begin(),sentpoints[static_cast<size_t>(i+nneigh)].begin(),
-						sentpoints[i+nneigh].end());
+									      sentpoints[static_cast<size_t>(i+nneigh)].end());
 					tosend[static_cast<size_t>(index)].insert(tosend[static_cast<size_t>(index)].end(),cornersend[static_cast<size_t>(i)].begin(),
 						cornersend[static_cast<size_t>(i)].end());
 				}
@@ -363,7 +363,7 @@ namespace {
 				else
 				{
 					neightemp.push_back(realcornerproc[static_cast<size_t>(i)]);
-					senttemp.push_back(sentpoints[static_cast<size_t>(i)+nneigh]);
+					senttemp.push_back(sentpoints[static_cast<size_t>(i+nneigh)]);
 					tosend.push_back(cornersend[static_cast<size_t>(i)]);
 				}
 			}
@@ -812,7 +812,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 	{
 #ifdef RICH_MPI
 		return point;
-#endif
+#else
 		int counter=0;
 		if(point<Nextra)
 		{
@@ -838,6 +838,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 		UniversalError eo("Tried to get original index of non exsistent cell");
 		eo.AddEntry("Tried accessing cell",point);
 		throw eo;
+		#endif
 	}
 }
 
@@ -1063,9 +1064,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 		GhostPoints=temppoints;
 
 		int n=GetPointNo();
-		CM.resize(n);
+		CM.resize(static_cast<size_t>(n));
 		for(int i=0;i<n;++i)
-			CM[static_cast<size_t>(i)]=CalcCellCM(i);
+		  CM[static_cast<size_t>(i)]=CalcCellCM(static_cast<size_t>(i));
 }
 #endif
 
@@ -1243,7 +1244,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		if(GhostProcs[static_cast<size_t>(i)]==GhostProcs[static_cast<size_t>(i)-1])
 		{
 			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
-							       GhostPoints[indeces[static_cast<size_t>(i)]].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+							       GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
 									 NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 		}
@@ -1256,9 +1257,9 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 		NGhostReceived=temppoints2;
 		GhostPoints=temppoints;
 		int n=GetPointNo();
-		CM.resize(n);
+		CM.resize(static_cast<size_t>(n));
 		for(int i=0;i<n;++i)
-			CM[static_cast<size_t>(i)]=CalcCellCM(i);
+		  CM[static_cast<size_t>(i)]=CalcCellCM(static_cast<size_t>(i));
 }
 #endif
 
@@ -1562,7 +1563,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifdef RICH_MPI
 				if((i<ToRemove.size()&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[static_cast<size_t>(i)]))||((i>=ToRemove.size())&&(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
-												      ==GhostNeighbors[static_cast<size_t>(i)-static_cast<int>(ToRemove.size())][0])))
+												      ==GhostNeighbors[static_cast<size_t>(i)-static_cast<size_t>(ToRemove.size())][0])))
 #else
 				if(etemp.neighbors.first==-1||V.GetOriginalIndex(etemp.neighbors.first)
 					==ToRemove[i])
