@@ -417,7 +417,7 @@ size_t HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterat
 		d = d << 3;
 	const int iOctantNum = m_mShapeOrder[iCurrentShape][bX][bY][bZ];
 	d = d + static_cast<size_t>(iOctantNum);
-	iCurrentShape = m_vShapeRecursion[static_cast<size_t>(iCurrentShape)][iOctantNum];
+	iCurrentShape = m_vShapeRecursion[static_cast<size_t>(iCurrentShape)][static_cast<size_t>(iOctantNum)];
 	}
 
 	//	int a = 0;
@@ -455,7 +455,7 @@ vector<size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 	// Run throught the points, and calculate the Hilbert distance of each:
 	for (int ii = 0; ii < N; ++ii)
 	{
-		vOut.push_back(oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], numOfIterations+6));
+	  vOut.push_back(oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[static_cast<size_t>(ii)], numOfIterations+6));
 		//vOut.push_back(oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], 2));
 	}
 	// Get the sorting indices:
