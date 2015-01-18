@@ -24,7 +24,7 @@ vector<Vector2D> HoldStill::calcAllVelocities(Tessellation const& tess,
 {
   vector<Vector2D> res = raw_.calcAllVelocities(tess,cells,time,cevolve);
   for(size_t i=0;i<res.size();++i){
-    if(cond_((int)i,tess,cells,time))
+    if(cond_(static_cast<int>(i),tess,cells,time))
       res[i] = Vector2D(0,0);
   }
   return res;
