@@ -20,9 +20,9 @@ vector<Vector2D> CircularRotation::calcAllVelocities(Tessellation const& tess,
 	if(first_time_)
 	{
 		first_time_=false;
-		init_angles_.resize((size_t)(Ninner_+Nouter_));
-		init_R_.resize((size_t)(Ninner_+Nouter_));
-		for(size_t i=0;i<(size_t)(Ninner_+Nouter_);++i)
+		init_angles_.resize(static_cast<size_t>(Ninner_+Nouter_));
+		init_R_.resize(static_cast<size_t>(Ninner_+Nouter_));
+		for(size_t i=0;i<static_cast<size_t>(Ninner_+Nouter_);++i)
 		{
 		  const Vector2D point=tess.GetMeshPoint(static_cast<int>(i))-center_;
 			init_angles_[i]=atan2(point.y,point.x);
@@ -32,7 +32,7 @@ vector<Vector2D> CircularRotation::calcAllVelocities(Tessellation const& tess,
 		}
 	}
 	vector<Vector2D> result = naive_.calcAllVelocities(tess,cells,time,cevolve);
-	for(size_t i=0;i<(size_t)(Ninner_+Nouter_);++i)
+	for(size_t i=0;i<static_cast<size_t>(Ninner_+Nouter_);++i)
 	{
 	  const Vector2D point=tess.GetMeshPoint(static_cast<int>(i))-center_;
 		const double r=abs(point);
