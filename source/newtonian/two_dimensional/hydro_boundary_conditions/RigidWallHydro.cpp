@@ -19,7 +19,7 @@ Primitive RigidWallHydro::GetBoundaryPrimitive(Edge const& edge,
 	double /*time*/)const
 {
 	const Vector2D p = Parallel(edge);
-	Primitive res =cells[(size_t)pair_member(edge.neighbors,GetRealCell(edge))];
+	Primitive res =cells[static_cast<size_t>(pair_member(edge.neighbors,GetRealCell(edge)))];
 	res.Velocity = Reflect(res.Velocity,p);
 	return res;
 }
