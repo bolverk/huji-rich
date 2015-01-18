@@ -144,7 +144,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\misc\universal_error.cpp" />
-    <ClCompile Include="..\CubeGrid\CubeGrid.cpp" />
     <ClCompile Include="..\GeometryCommon\BinaryLogger.cpp" />
     <ClCompile Include="..\GeometryCommon\Face.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
@@ -156,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\misc\universal_error.hpp" />
-    <ClInclude Include="..\CubeGrid\CubeGrid.hpp" />
     <ClInclude Include="..\GeometryCommon\BinaryLogger.hpp" />
     <ClInclude Include="..\GeometryCommon\Face.hpp" />
     <ClInclude Include="..\GeometryCommon\HilbertOrder3D.hpp" />

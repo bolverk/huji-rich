@@ -15,3 +15,9 @@ OuterBoundary3D::OuterBoundary3D(OuterBoundary3D::Kinds kind, Vector3D frontUppe
 	if (diff.x <= 0 || diff.y <= 0 || diff.z <= 0)
 		throw invalid_argument("In OuterBoundary3D FrontUpperRight must be ahead, above and to the right of BackLowerLeft");
 }
+
+OuterBoundary3D::OuterBoundary3D() :
+	_kind(RECTANGULAR), _frontUpperRight(Vector3D(1, 1, 1)), _backLowerLeft(Vector3D(0, 0, 0))
+{
+
+}

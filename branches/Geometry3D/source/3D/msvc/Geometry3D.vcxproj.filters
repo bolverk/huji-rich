@@ -27,9 +27,6 @@
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CubeGrid\CubeGrid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\GeometryCommon\BinaryLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,9 +60,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CubeGrid\CubeGrid.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\GeometryCommon\BinaryLogger.hpp">

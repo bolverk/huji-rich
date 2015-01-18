@@ -6,6 +6,7 @@
 #ifndef VOROPLUSPLUS_HPP
 #define VOROPLUSPLUS_HPP
 
+#include "../GeometryCommon/OuterBoundary3D.hpp"
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "../GeometryCommon/Face.hpp"
 #include <boost/shared_ptr.hpp>
@@ -25,7 +26,7 @@ public:
 	\param points Initial position of mesh generating points
 	\param bc Boundary conditions of the computational domain
 	*/
-	virtual void Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc);
+	virtual void Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc);
 
 	/*!
 	\brief Update the tessellation
@@ -223,6 +224,7 @@ private:
 		vector<Vector3D> ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell);
 	};
 
+	OuterBoundary3D _boundary;
 	std::vector<Cell> _cells;
 	FaceStore _faces;
 	std::vector<Vector3D> _meshPoints;

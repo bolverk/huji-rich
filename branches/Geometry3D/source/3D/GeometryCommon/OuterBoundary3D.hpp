@@ -25,6 +25,9 @@ public:
 	//! \param fromtUpperRight Front Upper Right coordinate of bounding box.
 	//! \oaram backLowerLeft Back Lower Left coordinate of bounding box
 	OuterBoundary3D(Kinds kind, Vector3D frontUpperRight, Vector3D backLowerLeft);
+	
+	//! \brief Default constructor - a 1x1x1 cube - rectangular boundry
+	OuterBoundary3D();
 
 	const Vector3D &FrontUpperRight() const { return _frontUpperRight; }
 	const Vector3D &BackLowerLeft() const { return _backLowerLeft; }

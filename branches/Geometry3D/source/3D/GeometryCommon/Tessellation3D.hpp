@@ -25,7 +25,7 @@ public:
 	\param points Initial position of mesh generating points
 	\param bc Boundary conditions of the computational domain
 	*/
-	virtual void Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc) = 0;
+	virtual void Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc) = 0;
 
 	/*!
 	\brief Update the tessellation

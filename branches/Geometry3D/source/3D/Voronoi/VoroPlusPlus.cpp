@@ -17,9 +17,9 @@ VoroPlusPlus::~VoroPlusPlus()
 
 }
 
-void VoroPlusPlus::Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc)
+void VoroPlusPlus::Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc)
 {
-	// TODO: Store boundry conditions
+	_boundary = bc;
 	Update(points);
 }
 
@@ -231,24 +231,10 @@ void VoroPlusPlus::ClearData()
 
 boost::shared_ptr<voro::container> VoroPlusPlus::BuildContainer()
 {
-	// The voro++ container has a faulty copy constructor - it doesn't like being copied around, so we use pointers.
-	Vector3D min, max;
-
-	min = _meshPoints[0];
-	max = _meshPoints[0];
-
-	// Find the boundry
-	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
-	{
-		min.x = std::min(min.x, it->x);
-		min.y = std::min(min.y, it->y);
-		min.z = std::min(min.z, it->z);
-		max.x = std::max(max.x, it->x);
-		max.y = std::max(max.y, it->y);
-		max.z = std::max(max.z, it->z);
-	}
-
-	boost::shared_ptr<voro::container> container(new voro::container(min.x - 0.5, max.x + 0.5, min.y - 0.5, max.y + 0.5, min.z - 0.5, max.z + 0.5, 
+	boost::shared_ptr<voro::container> container(new voro::container(
+		_boundary.BackLowerLeft().x, _boundary.FrontUpperRight().x,
+		_boundary.BackLowerLeft().y, _boundary.FrontUpperRight().y,
+		_boundary.BackLowerLeft().z, _boundary.FrontUpperRight().z,
 		20, 20, 20, false, false, false, 20));
 	int num = 0;
 	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
