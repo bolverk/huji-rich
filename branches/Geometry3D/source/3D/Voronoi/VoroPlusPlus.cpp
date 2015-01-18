@@ -86,10 +86,10 @@ vector<size_t> VoroPlusPlus::GetNeighbors(size_t index) const
 	for (size_t i = 0; i < faceIndices.size(); i++)
 	{
 		auto face = GetFace(i);
-		if (face.neighbors.first == index)
-			neighbors.push_back(face.neighbors.second);
-		else if (face.neighbors.second == index)
-			neighbors.push_back(face.neighbors.first);
+		if (face.Neighbor1()->GetCell() == index)
+			neighbors.push_back(face.Neighbor2()->GetCell());
+		else if (face.Neighbor2()->GetCell() == index)
+			neighbors.push_back(face.Neighbor1()->GetCell());
 		else
 			BOOST_ASSERT(false); // One of the neighbors must be us!
 	}
@@ -156,8 +156,8 @@ void VoroPlusPlus::GetNeighborNeighbors(vector<size_t> &result, size_t point) co
 Vector3D VoroPlusPlus::Normal(size_t faceIndex) const
 {
 	Face face = GetFace(faceIndex);
-	Cell cell1 = _cells[face.neighbors.first];
-	Cell cell2 = _cells[face.neighbors.second];
+	Cell cell1 = _cells[face.Neighbor1()->GetCell()];
+	Cell cell2 = _cells[face.Neighbor2()->GetCell()];
 
 	return cell1.GetCenterOfMass() - cell2.GetCenterOfMass();
 }
@@ -202,7 +202,7 @@ size_t VoroPlusPlus::FaceStore::StoreFace(const vector<Vector3D> &vertices)
 	if (exists)
 		return index;
 
-	Face face(vertices, (size_t)-1, (size_t)-1);
+	Face face(vertices);
 	index = _faces.size();
 	_faces.push_back(face);
 	return index;

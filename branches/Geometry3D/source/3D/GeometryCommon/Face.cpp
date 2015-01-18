@@ -4,17 +4,19 @@
 
 using namespace std;
 
-Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2):
-  vertices(vert),neighbors(neighbor1,neighbor2) {}
+Face::Face(vector<Vector3D> const& vert):
+  vertices(vert),_neighbors() 
+{
+}
 
-Face::Face(void): vertices(), neighbors() {}
+Face::Face(void): vertices(), _neighbors() {}
 
   Face::~Face(void)
   {}
 
 Face::Face(Face const& other):
   vertices(other.vertices),
-  neighbors(other.neighbors) {}
+  _neighbors(other._neighbors) {}
 
 double Face::GetArea(void) const
 {
@@ -50,21 +52,33 @@ bool Face::IdenticalTo(const vector<Vector3D> otherVertices) const
 	return true;
 }
 
-void Face::AddNeighbor(size_t cell)
+void Face::AddNeighbor(size_t cell, bool overlapping)
 {
-	if (neighbors.first == cell || neighbors.second == cell)
-		return;
+	// See if the neighbor already exists and overlapping hasn't changed, return gracefully
+	for (auto it = _neighbors.begin(); it != _neighbors.end(); it++)
+	{
+		if (it->GetCell() == cell)
+		{
+			if (it->IsOverlapping() != overlapping)
+			{
+				stringstream strm;
+				strm << "Can't change overlapping of neighbor " << cell << " to " << overlapping;
+				throw UniversalError(strm.str());
+			}
+			else
+				return;
+		}
+	}
 
-	if (neighbors.first == NO_NEIGHBOR)
-		neighbors.first = cell;
-	else if (neighbors.second == NO_NEIGHBOR)
-		neighbors.second = cell;
-	else
+	// If we get here, we need to add a new neighbor
+	if (_neighbors.size() == 2)
 	{
 		stringstream strm;
 		strm << "Can't add third neighrbor to cell " << cell;
 		throw UniversalError(strm.str());
 	}
+
+	_neighbors.push_back(NeighborInfo(cell, overlapping));
 }
 
 Vector3D calc_centroid(const Face& face)

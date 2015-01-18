@@ -8,26 +8,37 @@
 
 #include <vector>
 #include "Vector3D.hpp"
+#include <boost/optional.hpp>
 
 //! \brief Interface between two cells
 class Face
 {
 public:
+	class NeighborInfo
+	{
+	private:
+		size_t _cell;
+		bool _overlapping;
 
+	public:
+		NeighborInfo(size_t cell, bool overlapping) : _cell(cell), _overlapping(overlapping) { }
+
+		size_t GetCell() const { return _cell;  }
+		bool IsOverlapping() const { return _overlapping; }
+	};
+
+private:
+	std::vector<NeighborInfo> _neighbors;
+
+public:
 	//! \brief Points at the ends of the edge
 	std::vector<Vector3D> vertices;
 
-	//! \brief Neighboring cells
-	std::pair<size_t,size_t> neighbors;
-
-	const static size_t NO_NEIGHBOR = (size_t)-1;
-
 	/*! \brief Class constructor
 	\param vert Position of the vertices
-	\param neighbor1 Index of first neighbor cell
-	\param neighbor2 Index of second neighbor cell
 	*/
-	Face(vector<Vector3D> const& vert,size_t neighbor1 = NO_NEIGHBOR,size_t neighbor2 = NO_NEIGHBOR);
+	Face(vector<Vector3D> const& vert);
+	//! \brief Default constructor
 	Face();
 
 	~Face(void);
@@ -43,8 +54,22 @@ public:
 		\remark Adding an already existing neighbor is legal
 		\throws UniversalError { if the cell already has two neighbors }
 	*/
-	void AddNeighbor(size_t cell);
+	void AddNeighbor(size_t cell, bool overlapping=false);
 
+	int NumNeighbors() const { return _neighbors.size(); }
+	boost::optional<const NeighborInfo> Neighbor1() const 
+	{
+		if (_neighbors.size() > 0)
+			return _neighbors[0];
+		return boost::none;
+	}
+	boost::optional<const NeighborInfo> Neighbor2() const
+	{
+		if (_neighbors.size() > 1)
+			return _neighbors[1];
+		return boost::none;
+	}
+	
 	/*! \brief Returns the area of the face
 	\return Length
 	*/

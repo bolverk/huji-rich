@@ -58,26 +58,30 @@ TEST(Geometry3D, Face_Basic)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
 	vector<Vector3D> vertices{ v1, v2, v3, v4 };
-	Face face(vertices, -1, -1);
+	Face face(vertices);
 
 	ASSERT_EQ(vertices, face.vertices);
 
-	Face face2(vertices, 5, 3);
+	Face face2(vertices);
+	face2.AddNeighbor(5, false);
+	face2.AddNeighbor(3, true);
 	ASSERT_EQ(vertices, face2.vertices);
-	ASSERT_EQ(face2.neighbors.first, 5);
-	ASSERT_EQ(face2.neighbors.second, 3);
+	ASSERT_EQ(face2.Neighbor1()->GetCell(), 5);
+	ASSERT_EQ(face2.Neighbor1()->IsOverlapping(), false);
+	ASSERT_EQ(face2.Neighbor2()->GetCell(), 3);
+	ASSERT_EQ(face2.Neighbor2()->IsOverlapping(), true);
 }
 
 TEST(Geometry3D, Face_Area)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
 	vector<Vector3D> vertices{ v1, v2, v3, v4 };
-	Face square(vertices, -1, -1);
+	Face square(vertices);
 	ASSERT_EQ(square.GetArea(), 1);
 
 	Vector3D v5(0, 0, 0), v6(0, 2, 0), v7(2, 0, 0);
 	vector<Vector3D> vertices2{ v5, v6, v7 };
-	Face triangle(vertices2, -1, -1);
+	Face triangle(vertices2);
 	ASSERT_EQ(triangle.GetArea(), 2);
 }
 
@@ -85,24 +89,21 @@ TEST(Geometry3D, Face_Neighbors)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
 	vector<Vector3D> vertices{ v1, v2, v3, v4 };
-	Face face1(vertices), face2(vertices, 1, 2), face3(vertices, 1);
+	Face face1(vertices);
 
-	face1.AddNeighbor(1);
-	face1.AddNeighbor(2);
-	face1.AddNeighbor(2);
-	face1.AddNeighbor(1);
+	face1.AddNeighbor(1, true);
+	face1.AddNeighbor(2, true);
+	face1.AddNeighbor(2, true);
+	face1.AddNeighbor(1, true);
 	ASSERT_THROW(face1.AddNeighbor(3), UniversalError);
-	ASSERT_THROW(face2.AddNeighbor(3), UniversalError);
-	face3.AddNeighbor(1);
-	face3.AddNeighbor(2);
-	ASSERT_THROW(face3.AddNeighbor(3), UniversalError);
+	ASSERT_THROW(face1.AddNeighbor(1, false), UniversalError);
 }
 
 TEST(Geometry3D, Face_Indentical)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
 	vector<Vector3D> vertices1{ v1, v2, v3, v4 }, vertices2{ v2, v3, v4, v1 }, vertices3{ v4, v3, v2, v1 }, vertices4{ v1, v2, v3 };
-	Face face1(vertices1, 0, 0), face2(vertices2, 0, 0), face3(vertices3, 0, 0), face4(vertices4, 0, 0);
+	Face face1(vertices1), face2(vertices2), face3(vertices3), face4(vertices4);
 
 	ASSERT_TRUE(face1.IdenticalTo(vertices2));
 	ASSERT_TRUE(face1.IdenticalTo(vertices3));

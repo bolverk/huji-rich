@@ -31,8 +31,8 @@ void BinaryLogger::Log(Tessellation3D const& tess)const
 	{
 		Face const& f=tess.GetFace(i);
 		// write neighbors
-		binary_write_single_size_t(f.neighbors.first,file_handle);
-		binary_write_single_size_t(f.neighbors.second,file_handle);
+		binary_write_single_size_t(f.Neighbor1()->GetCell(),file_handle);
+		binary_write_single_size_t(f.Neighbor2()->GetCell(),file_handle);
 		// write the vertices
 		binary_write_single_size_t(f.vertices.size(),file_handle);
 		for(size_t j=0;j<f.vertices.size();++j)
