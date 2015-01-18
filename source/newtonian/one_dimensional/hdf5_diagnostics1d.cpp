@@ -26,7 +26,7 @@ namespace {
 
     /* To do: Replace raw pointers with smart pointers
      */
-    double *data = new double[(int)num_list.size()];
+    double *data = new double[static_cast<int>(num_list.size())];
     for(size_t i=0;i<num_list.size();++i)
       data[i] = num_list[i];
     dataset.write(data, PredType::NATIVE_DOUBLE);
