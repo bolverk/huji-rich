@@ -149,6 +149,7 @@
     <ClCompile Include="..\GeometryCommon\Face.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D_Utils.cpp" />
+    <ClCompile Include="..\GeometryCommon\OuterBoundary3D.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />

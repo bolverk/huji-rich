@@ -1,45 +1,33 @@
 /*! \file OuterBoundary3D.hpp
   \brief Outer Boundary Conditions
-  \author Elad Steinberg
+  \author Itat Zandbank
  */
 
 #ifndef OUTERBOUNDARY3D_HPP
 #define OUTERBOUNDARY3D_HPP 1
 
 #include "Tessellation3D.hpp"
-#include <cmath>
 
-//! \brief Type of boundary
-enum BoundaryType{Rectengular, Periodic,HalfPeriodic};
-
-//! \brief Type of boundary point
-enum BoundaryPoint{BackLowerLeft,FrontUpperRight};
-
-
-//! \brief Abstract class for geometric boundary conditions for the tessellation
+//! \brief Class describing the boundry of the Voronoi Tessallation.
 class OuterBoundary3D
 {
 public:
-	/*!
-	\brief Returns the boundary type
-	\return The boundary type
-	*/
-  virtual BoundaryType GetBoundaryType(void) const = 0;
-  /*!
-	\brief Returns the boundary point
-	\param point The point of the boundary
-	\return The boundary point
-	*/
-  virtual Vector3D const& GetGridBoundary(BoundaryPoint point) const = 0;
+	//! \brief The kind of boundry - rectangular and rigid or period.
+	enum Kinds { RECTANGULAR, PERIODIC };
 
-	/*!
-	\brief Return whether an face is reflective or not
-	\param face The Face to check
-	\returns Is the Face reflective
-	*/
-  virtual bool AreWeReflective(Face const& face)const=0;
-  //! \brief Virtual destructor
-   virtual ~OuterBoundary3D(void);
+private:
+	Vector3D _frontUpperRight, _backLowerLeft;
+	Kinds _kind;
+
+public:
+	//! \brief Constructs a Boundray instance
+	//! \param kind Kind of boundry (rectangular or periodic)
+	//! \param fromtUpperRight Front Upper Right coordinate of bounding box.
+	//! \oaram backLowerLeft Back Lower Left coordinate of bounding box
+	OuterBoundary3D(Kinds kind, Vector3D frontUpperRight, Vector3D backLowerLeft);
+
+	const Vector3D &FrontUpperRight() const { return _frontUpperRight; }
+	const Vector3D &BackLowerLeft() const { return _backLowerLeft; }
+	Kinds Kind() const { return _kind; }
 };
-
 #endif // OUTERBOUNDARY3D_HPP
