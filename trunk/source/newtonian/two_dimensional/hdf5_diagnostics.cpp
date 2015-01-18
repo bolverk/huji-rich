@@ -147,11 +147,11 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   // write processor grid
 #ifdef RICH_MPI
   const int nproc=sim.GetProcTessellation().GetPointNo();
-  vector<double> xproc(nproc),yproc(nproc);
+  vector<double> xproc(static_cast<size_t>(nproc)),yproc(static_cast<size_t>(nproc));
   for(int i=0;i<nproc;++i)
   {
-	  xproc[i]=sim.GetProcTessellation().GetMeshPoint(i).x;
-	  yproc[i]=sim.GetProcTessellation().GetMeshPoint(i).y;
+    xproc[static_cast<size_t>(i)]=sim.GetProcTessellation().GetMeshPoint(i).x;
+    yproc[static_cast<size_t>(i)]=sim.GetProcTessellation().GetMeshPoint(i).y;
   }
   write_std_vector_to_hdf5(file,xproc, "proc_x_coordinate");
   write_std_vector_to_hdf5(file,yproc, "proc_y_coordinate");
@@ -269,7 +269,7 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
   vector<double> yproc=read_double_vector_from_hdf5(file,"proc_y_coordinate");
   dump.procmesh.resize(xproc.size());
   for(int i=0;i<static_cast<int>(xproc.size());++i)
-      dump.procmesh[i].Set(xproc[i],yproc[i]);
+    dump.procmesh[static_cast<size_t>(i)].Set(xproc[static_cast<size_t>(i)],yproc[i]);
 #endif
 
   // Get the hydro variables
