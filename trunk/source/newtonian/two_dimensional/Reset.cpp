@@ -23,8 +23,8 @@ void ResetOutput(string location,hdsim const& sim)
 		p=sim.GetProcTessellation().GetMeshPoint(i);
 		double x=(p.x);
 		double y=(p.y);
-		myFile.write ((char*)&x,sizeof(double));
-		myFile.write ((char*)&y,sizeof(double));
+		myFile.write (reinterpret_cast<char*>(&x),sizeof(double));
+		myFile.write (reinterpret_cast<char*>(&y),sizeof(double));
 	}
 #endif
 
@@ -105,8 +105,8 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	Primitive ptemp;
 	for(int i=0;i<N;++i)
 	{
-		myFile.read((char*)&x,sizeof(double));
-		myFile.read((char*)&y,sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&x),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&y),sizeof(double));
 		cortemp.Set(x,y);
 		dump.snapshot.mesh_points[static_cast<size_t>(i)]=cortemp;
 	}
@@ -117,8 +117,8 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	dump.procmesh.resize(temp2);
 	for(int i=0;i<temp2;i++)
 	{
-		myFile.read((char*)&x,sizeof(double));
-		myFile.read((char*)&y,sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&x),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&y),sizeof(double));
 		cortemp.Set(x,y);
 		dump.procmesh[i]=cortemp;
 	}
@@ -126,32 +126,32 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 
 	for(int i=0;i<N;++i)
 	{
-		myFile.read((char*)&p,sizeof(double));
-		myFile.read((char*)&d,sizeof(double));
-		myFile.read((char*)&cortemp.x,sizeof(double));
-		myFile.read((char*)&cortemp.y,sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&p),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&d),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&cortemp.x),sizeof(double));
+	  myFile.read(reinterpret_cast<char*>(&cortemp.y),sizeof(double));
 		dump.snapshot.cells[static_cast<size_t>(i)]=CalcPrimitive(d,p,cortemp,*eos);
 	}
-	myFile.read((char*)&dump.time,sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.time),sizeof(double));
 	char ctemp;
-	myFile.read((char*)&ctemp,sizeof(char));
+	myFile.read(reinterpret_cast<char*>(&ctemp),sizeof(char));
 	if (ctemp == '1')
 		dump.coldflows = true;
 	else
 		dump.coldflows = false;
-	myFile.read((char*)&dump.cfl,sizeof(double));
-	myFile.read((char*)&dump.a,sizeof(double));
-	myFile.read((char*)&dump.b,sizeof(double));
-	myFile.read((char*)&dump.cycle,sizeof(int));
+	myFile.read(reinterpret_cast<char*>(&dump.cfl),sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.a),sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.b),sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.cycle),sizeof(int));
 	int n;
-	myFile.read((char*)&n,sizeof(int));
-	myFile.read((char*)&ctemp, sizeof(char));
+	myFile.read(reinterpret_cast<char*>(&n),sizeof(int));
+	myFile.read(reinterpret_cast<char*>(&ctemp), sizeof(char));
 	dump.densityfloor = static_cast<bool>(ctemp);
-	myFile.read((char*)&dump.densitymin, sizeof(double));
-	myFile.read((char*)&dump.pressuremin, sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.densitymin), sizeof(double));
+	myFile.read(reinterpret_cast<char*>(&dump.pressuremin), sizeof(double));
 	dump.cevolve.resize(static_cast<size_t>(N));
 	for (int i = 0; i<N; ++i)
-		myFile.read((char*)&dump.cevolve[static_cast<size_t>(i)], sizeof(unsigned int));
+	  myFile.read(reinterpret_cast<char*>(&dump.cevolve[static_cast<size_t>(i)]), sizeof(unsigned int));
 	if (n == 0)
 	{
 		myFile.close();
@@ -163,7 +163,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 	  dump.tracers[static_cast<size_t>(i)].resize(static_cast<size_t>(n));
 		for(int j=0;j<N;++j)
 		{
-			myFile.read((char*)&x,sizeof(double));
+		  myFile.read(reinterpret_cast<char*>(&x),sizeof(double));
 			dump.tracers[static_cast<size_t>(j)][static_cast<size_t>(i)]=x;
 		}
 	}
