@@ -19,25 +19,25 @@ namespace {
 			if(point==edge.neighbors.first)
 				if(edge.neighbors.second>-1)
 				{
-				  dm-=lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*
+				  dm-=lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*
 						(center-tess.GetMeshPoint(edge.neighbors.second));
 				}
 				else
 				{
 					Vector2D r=hbc.Normal(edge,tess);
-					dm-=2*lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*r;
+					dm-=2*lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*r;
 				}
 			else
 				if(point==edge.neighbors.second)
 					if(edge.neighbors.first>-1)
 					{
-					  dm+=lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*
+					  dm+=lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*
 							(center-tess.GetMeshPoint(edge.neighbors.first));
 					}
 					else
 					{
 						Vector2D r=hbc.Normal(edge,tess);
-						dm+=2*lengthes[(size_t)edge_index[static_cast<size_t>(i)]]*fluxes[(size_t)edge_index[static_cast<size_t>(i)]].Mass*r;
+						dm+=2*lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*r;
 					}
 				else
 					throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
