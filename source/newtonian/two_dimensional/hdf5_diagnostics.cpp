@@ -269,7 +269,7 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
   vector<double> yproc=read_double_vector_from_hdf5(file,"proc_y_coordinate");
   dump.procmesh.resize(xproc.size());
   for(int i=0;i<static_cast<int>(xproc.size());++i)
-    dump.procmesh[static_cast<size_t>(i)].Set(xproc[static_cast<size_t>(i)],yproc[i]);
+    dump.procmesh[static_cast<size_t>(i)].Set(xproc[static_cast<size_t>(i)],yproc[static_cast<size_t>(i)]);
 #endif
 
   // Get the hydro variables
