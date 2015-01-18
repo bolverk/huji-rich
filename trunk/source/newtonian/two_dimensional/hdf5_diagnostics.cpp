@@ -62,7 +62,7 @@ namespace {
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
     filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX = (int)dims_out[0];
+    int NX = static_cast<int>(dims_out[0]);
     vector<double> result(static_cast<size_t>(NX));
     dataset.read(&result[0],PredType::NATIVE_DOUBLE);
     return result;
@@ -74,7 +74,7 @@ namespace {
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
     filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX = (int)dims_out[0];
+    int NX = static_cast<int>(dims_out[0]);
     vector<unsigned> result(static_cast<size_t>(NX));
     dataset.read(&result[0],PredType::NATIVE_UINT);
     return list_static_cast<size_t,unsigned>(result);
@@ -86,7 +86,7 @@ namespace {
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
     filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX=(int)dims_out[0];
+    int NX=static_cast<int>(dims_out[0]);
     vector<int> result(static_cast<size_t>(NX));
     dataset.read(&result[0],PredType::NATIVE_INT);
     return result;
@@ -179,8 +179,8 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   vector<Vector2D> convhull;
   vector<double> xvert,yvert;
   vector<int> nvert(static_cast<size_t>(sim.GetCellNo()));
-  xvert.reserve((size_t)(7*sim.GetCellNo()));
-  yvert.reserve((size_t)(7*sim.GetCellNo()));
+  xvert.reserve(static_cast<size_t>(7*sim.GetCellNo()));
+  yvert.reserve(static_cast<size_t>(7*sim.GetCellNo()));
   for(int i=0;i<sim.GetCellNo();++i)
     {
       ConvexHull(convhull,&sim.GetTessellation(),i);
@@ -200,11 +200,11 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
   vector<int> number_of_tracers;
   number_of_tracers.push_back(0);
   if(!tracers.empty())
-    number_of_tracers[0]=(int)tracers[0].size();
+    number_of_tracers[0]=static_cast<int>(tracers[0].size());
   write_std_vector_to_hdf5(file,number_of_tracers,"Number of tracers");
   if(!tracers.empty())
     {
-      for(int i=0;i<(int)tracers[0].size();++i)
+      for(int i=0;i<static_cast<int>(tracers[0].size());++i)
 	{
 	  vector<double> tracer_temp(tracers.size(),0);
 	  for(int j=0;j<static_cast<int>(tracers.size());++j)
@@ -301,7 +301,7 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
       dump.tracers.resize(x.size());
       for(size_t i=0;i<x.size();++i)
 	{
-	  dump.tracers[i].resize((size_t)TracerNumber[0]);
+	  dump.tracers[i].resize(static_cast<size_t>(TracerNumber[0]));
 	}
       // read the data
       for(int i=0;i<TracerNumber[0];++i)
@@ -349,23 +349,23 @@ void ConvertHDF5toBinary(string const& input, string const& output)
 	// Get the mesh points
 	vector<double> x = read_double_vector_from_hdf5(file, "x_coordinate");
 	vector<double> y = read_double_vector_from_hdf5(file, "y_coordinate");
-	int temp = (int) x.size();
-	myFile.write((char*)&temp, sizeof (int));
+	int temp = static_cast<int>(x.size());
+	myFile.write(reinterpret_cast<char*>(&temp), sizeof (int));
 	for (int i = 0; i<temp; ++i)
 	{
-		myFile.write((char*)&x[static_cast<size_t>(i)], sizeof(double));
-		myFile.write((char*)&y[static_cast<size_t>(i)], sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&x[static_cast<size_t>(i)]), sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&y[static_cast<size_t>(i)]), sizeof(double));
 	}
 	// Get the processor mesh points
 #ifdef RICH_MPI
 	vector<double> xproc = read_double_vector_from_hdf5(file, "proc_x_coordinate");
 	vector<double> yproc = read_double_vector_from_hdf5(file, "proc_y_coordinate");
-	int temp2 = (int) xproc.size();
-	myFile.write((char*)&temp2, sizeof (int));
+	int temp2 = static_cast<int>(xproc.size());
+	myFile.write(reinterpret_cast<char*>(&temp2), sizeof (int));
 	for (int i = 0; i<temp2; ++i)
 	{
-		myFile.write((char*)&x[static_cast<size_t>(i)], sizeof(double));
-		myFile.write((char*)&y[static_cast<size_t>(i)], sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&x[static_cast<size_t>(i)]), sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&y[static_cast<size_t>(i)]), sizeof(double));
 	}
 #endif
 
@@ -376,40 +376,40 @@ void ConvertHDF5toBinary(string const& input, string const& output)
 	vector<double> y_velocity = read_double_vector_from_hdf5(file, "y_velocity");
 	for (int i = 0; i<temp; ++i)
 	{
-		myFile.write((char*)&pressure[static_cast<size_t>(i)], sizeof(double));
-		myFile.write((char*)&density[static_cast<size_t>(i)], sizeof(double));
-		myFile.write((char*)&x_velocity[static_cast<size_t>(i)], sizeof(double));
-		myFile.write((char*)&y_velocity[static_cast<size_t>(i)], sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&pressure[static_cast<size_t>(i)]), sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&density[static_cast<size_t>(i)]), sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&x_velocity[static_cast<size_t>(i)]), sizeof(double));
+	  myFile.write(reinterpret_cast<char*>(&y_velocity[static_cast<size_t>(i)]), sizeof(double));
 	}
 	// read time
 	vector<double> time_vector = read_double_vector_from_hdf5(file, "time");
-	myFile.write((char*)&time_vector[0], sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&time_vector[0]), sizeof(double));
 	// read the coldflows parameters
 	vector<double> coldflows = read_double_vector_from_hdf5(file,"Cold Flow parameters");
-	char cold = (char)coldflows[0];
-	myFile.write((char*)&cold, sizeof(char));
+	char cold = static_cast<char>(coldflows[0]);
+	myFile.write(reinterpret_cast<char*>(&cold), sizeof(char));
 	// read the cfl
 	vector<double> cfl = read_double_vector_from_hdf5(file, "Cfl number");
-	myFile.write((char*)&cfl[0], sizeof(double));
-	myFile.write((char*)&coldflows[1], sizeof(double));
-	myFile.write((char*)&coldflows[2], sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&cfl[0]), sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&coldflows[1]), sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&coldflows[2]), sizeof(double));
 	// read the cycle number
 	vector<int> cycle_number = read_int_vector_from_hdf5(file, "Cycle number");
-	myFile.write((char*)&cycle_number[0], sizeof(int));
+	myFile.write(reinterpret_cast<char*>(&cycle_number[0]), sizeof(int));
 	// read tracers if needed
 	vector<int> TracerNumber = read_int_vector_from_hdf5(file, "Number of tracers");
-	myFile.write((char*)&TracerNumber[0], sizeof(int));
+	myFile.write(reinterpret_cast<char*>(&TracerNumber[0]), sizeof(int));
 	// read the density floor parameters
 	vector<double> densityfloor = read_double_vector_from_hdf5(file,"Density floor parameters");
 	cold = (densityfloor[0]>0) ? '1' : '0';
-	myFile.write((char*)&cold, sizeof(char));
-	myFile.write((char*)&densityfloor[1], sizeof(double));
-	myFile.write((char*)&densityfloor[2], sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&cold), sizeof(char));
+	myFile.write(reinterpret_cast<char*>(&densityfloor[1]), sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&densityfloor[2]), sizeof(double));
 	// read the custom evolution indeces
 	vector<size_t> cevolve = read_sizet_vector_from_hdf5(file, "Custom evolution indeces");
 	for (int i = 0; i<temp; ++i)
 	{
-		myFile.write((char*)&cevolve[static_cast<size_t>(i)], sizeof(unsigned int));
+	  myFile.write(reinterpret_cast<char*>(&cevolve[static_cast<size_t>(i)]), sizeof(unsigned int));
 	}
 	if (TracerNumber[0]>0)
 	{
@@ -420,7 +420,7 @@ void ConvertHDF5toBinary(string const& input, string const& output)
 			if (tracer.size() != x.size())
 				throw UniversalError("Tracer size not equal to mesh size");
 			for (size_t j = 0; j<tracer.size(); ++j)
-				myFile.write((char*)&tracer[j], sizeof(double));
+			  myFile.write(reinterpret_cast<char*>(&tracer[j]), sizeof(double));
 		}
 	}
 	myFile.close();
