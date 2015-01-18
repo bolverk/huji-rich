@@ -6,6 +6,7 @@ using std::abs;
 
 namespace {
   #ifdef RICH_MPI
+  /*
 	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
 		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
 		&neighpoints)
@@ -64,6 +65,7 @@ namespace {
 		eo.AddEntry("cell index",cellindex);
 		throw eo;
 	}
+  
 
 	void CombineCorners(vector<vector<int> > &toduplicate,vector<vector<int> > const& corners)
 	{
@@ -89,6 +91,7 @@ namespace {
 				sort(input[static_cast<size_t>(i)].begin(),input[static_cast<size_t>(i)].end());
 		}
 	}
+*/
 
 	// Send/Recv points from other processors and moves periodic points.
 	// Returns the new points as well as the self index of the points that where kept
@@ -413,6 +416,7 @@ namespace {
 	}
 
 #ifdef RICH_MPI
+		  /*
 	void RemoveDuplicateCorners(vector<int> &cornerproc,vector<vector<int> >
 		&corners,vector<int> const& proclist,vector<vector<int> > &toduplicate)
 	{
@@ -477,6 +481,7 @@ namespace {
 		cornerproc=newcornerproc;
 		corners=newcorners;
 	}
+		  */
 #endif // RICH_MPI
 
 	Vector2D GetPeriodicDiff(Edge const& edge,OuterBoundary const* obc)
@@ -624,6 +629,7 @@ namespace {
 		return result;
 	}
 
+			  /*
 	int SumV(vector<vector<int> > const& v)
 	{
 		int res=0;
@@ -634,6 +640,7 @@ namespace {
 		}
 		return res;
 	}
+			  */
 #endif // RICH_MPI
 
 	template <typename T>
@@ -664,6 +671,7 @@ namespace {
 	}
 
 #ifdef RICH_MPI
+	/*
 	UniversalError negative_volume_ratio(VoronoiMesh const& V,int index,
 		vector<int> const& ToRemove)
 	{
@@ -688,6 +696,7 @@ namespace {
 		}
 		return eo;
 	}
+	*/
 #endif // RICH_MPI
 }
 
