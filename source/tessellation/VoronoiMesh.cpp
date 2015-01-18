@@ -6,92 +6,6 @@ using std::abs;
 
 namespace {
   #ifdef RICH_MPI
-  /*
-	void GetBoundaryPoints(VoronoiMesh const& V,vector<int> const& ToRemove,
-		vector<int> &BoundaryPoints,vector<int> &sentprocs,vector<vector<int> >
-		&neighpoints)
-	{
-		sentprocs.clear();
-		neighpoints.clear();
-		vector<int> sentprocs2=V.GetDuplicatedProcs();
-		vector<vector<int> > sentpoints2=V.GetDuplicatedPoints();
-		// Consolidate points
-		vector<int> indeces(sentprocs2.size());
-		sort_index(sentprocs2,indeces);
-		sort(sentprocs2.begin(),sentprocs2.end());
-		sentprocs.push_back(sentprocs2[0]);
-		neighpoints.push_back(sentpoints2[static_cast<size_t>(indeces[0])]);
-		for(int i=1;i<static_cast<int>(sentprocs2.size());++i)
-		{
-		  if(sentprocs2[static_cast<size_t>(i)]==sentprocs2[static_cast<size_t>(i)-1])
-		    neighpoints[static_cast<size_t>(neighpoints.size())-1].insert(neighpoints[neighpoints.size()-1].end(),
-										  sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
-			else
-			  neighpoints.push_back(sentpoints2[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
-		}
-		int Npoints=V.GetPointNo();
-		int nremove=static_cast<int>(ToRemove.size());
-		for(int i=0;i<nremove;++i)
-		{
-			vector<int> neigh=V.GetNeighbors(ToRemove[static_cast<size_t>(i)]);
-			for(vector<int>::iterator it=neigh.begin();it!=neigh.end();++it)
-			{
-				if(*it>=Npoints)
-				{
-					BoundaryPoints.push_back(ToRemove[static_cast<size_t>(i)]);
-					// Find out relevent neighbor
-					for(vector<int>::iterator it2=neigh.begin();it2!=neigh.end();++it2)
-					{
-						//if(*it2>=Npoints)
-						//neighpoints
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	int SentCPUIndex(vector<vector<int > > const& sentcells,vector<int> const& sentprocs,
-		int cellindex)
-	{
-		int n=static_cast<int>(sentprocs.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!sentcells[static_cast<size_t>(i)].empty())
-				if(binary_search(sentcells[static_cast<size_t>(i)].begin(),sentcells[static_cast<size_t>(i)].end(),cellindex))
-					return i;
-		}
-		UniversalError eo("No sent point with given index");
-		eo.AddEntry("cell index",cellindex);
-		throw eo;
-	}
-  
-
-	void CombineCorners(vector<vector<int> > &toduplicate,vector<vector<int> > const& corners)
-	{
-		int nsides=static_cast<int>(corners.size());
-		for(int i=0;i<nsides;++i)
-		{
-			toduplicate[static_cast<size_t>(i)]=join(toduplicate[static_cast<size_t>(i)],corners[static_cast<size_t>(i)]);
-			toduplicate[static_cast<size_t>((i+1)%nsides)]=join(toduplicate[static_cast<size_t>((i+1)%nsides)],corners[static_cast<size_t>(i)]);
-		}
-		for(int i=0;i<nsides;++i)
-		{
-			sort(toduplicate[static_cast<size_t>(i)].begin(),toduplicate[static_cast<size_t>(i)].end());
-			toduplicate[static_cast<size_t>(i)]=unique(toduplicate[static_cast<size_t>(i)]);
-		}
-	}
-
-	void sortvectors(vector<vector<int> > &input)
-	{
-		int n=static_cast<int>(input.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!input[static_cast<size_t>(i)].empty())
-				sort(input[static_cast<size_t>(i)].begin(),input[static_cast<size_t>(i)].end());
-		}
-	}
-*/
 
 	// Send/Recv points from other processors and moves periodic points.
 	// Returns the new points as well as the self index of the points that where kept
@@ -669,35 +583,6 @@ namespace {
 		}
 		return res;
 	}
-
-#ifdef RICH_MPI
-	/*
-	UniversalError negative_volume_ratio(VoronoiMesh const& V,int index,
-		vector<int> const& ToRemove)
-	{
-		UniversalError eo("Negative volume ratio in cell refine");
-		vector<int> bad_edgesindex=V.GetCellEdges(index);
-		for(int jj=0;jj<static_cast<int>(bad_edgesindex.size());++jj)
-		{
-			Edge e=V.GetEdge(bad_edgesindex[static_cast<size_t>(jj)]);
-			eo.AddEntry("Edge X cor",e.vertices.first.x);
-			eo.AddEntry("Edge Y cor",e.vertices.first.y);
-			eo.AddEntry("Edge X cor",e.vertices.second.x);
-			eo.AddEntry("Edge Y cor",e.vertices.second.y);
-			eo.AddEntry("Edge length",e.GetLength());
-			eo.AddEntry("Edge neighbor 0",e.neighbors.first);
-			eo.AddEntry("Edge neighbor 1",e.neighbors.second);
-		}
-		for(int i=0;i<static_cast<int>(ToRemove.size());++i)
-		{
-			eo.AddEntry("ToRemove Index",ToRemove[static_cast<size_t>(i)]);
-			eo.AddEntry("ToRemove x cor",V.GetMeshPoint(ToRemove[static_cast<size_t>(i)]).x);
-			eo.AddEntry("ToRemove y cor",V.GetMeshPoint(ToRemove[static_cast<size_t>(i)]).y);
-		}
-		return eo;
-	}
-	*/
-#endif // RICH_MPI
 }
 
 VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
