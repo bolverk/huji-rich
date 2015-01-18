@@ -2965,7 +2965,7 @@ void VoronoiMesh::FindBoundaryRemoveSend(vector<int> const& ToRemove,
 	BoundaryNeigh.clear();
 	BoundaryRemove.resize(static_cast<size_t>(nprocs));
 	NewSend.resize(static_cast<size_t>(nprocs));
-	BoundaryNeigh.resize(nprocs);
+	BoundaryNeigh.resize(static_cast<size_t>(nprocs));
 	vector<vector<int> > sort_indeces(static_cast<size_t>(nprocs)),sort_indecesg(static_cast<size_t>(nprocs));
 	vector<vector<int> > SortedNGhostPoints(static_cast<size_t>(nprocs)),SortedGhostPoints(static_cast<size_t>(nprocs));
 	for(int i=0;i<nprocs;++i)
