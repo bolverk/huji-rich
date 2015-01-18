@@ -83,15 +83,15 @@ TEST(Geometry3D, Face_Neighbors)
 	vector<Vector3D> vertices{ v1, v2, v3, v4 };
 	Face face1(vertices), face2(vertices, 1, 2), face3(vertices, 1);
 
-	ASSERT_TRUE(face1.AddNeighbor(1));
-	ASSERT_TRUE(face1.AddNeighbor(2));
-	ASSERT_TRUE(face1.AddNeighbor(2));
-	ASSERT_TRUE(face1.AddNeighbor(1));
-	ASSERT_DEATH(face1.AddNeighbor(3), "");
-	ASSERT_DEATH(face2.AddNeighbor(3), "");
-	ASSERT_TRUE(face3.AddNeighbor(1));
-	ASSERT_TRUE(face3.AddNeighbor(2));
-	ASSERT_DEATH(face3.AddNeighbor(3), "");
+	face1.AddNeighbor(1);
+	face1.AddNeighbor(2);
+	face1.AddNeighbor(2);
+	face1.AddNeighbor(1);
+	ASSERT_THROW(face1.AddNeighbor(3), UniversalError);
+	ASSERT_THROW(face2.AddNeighbor(3), UniversalError);
+	face3.AddNeighbor(1);
+	face3.AddNeighbor(2);
+	ASSERT_THROW(face3.AddNeighbor(3), UniversalError);
 }
 
 TEST(Geometry3D, Face_Indentical)

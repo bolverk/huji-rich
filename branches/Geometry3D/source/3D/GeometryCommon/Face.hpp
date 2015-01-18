@@ -39,11 +39,11 @@ public:
 
 	/*! \brief Add a neighbor cell
 		\param cell - the neighbor cell's index
-		\returns true if the neighbor was set, false it it couldn't be set (this will need to change into an exception)
 		\remark For now this method asserts if two neighbors already exist. An exception may be added later.
 		\remark Adding an already existing neighbor is legal
+		\throws UniversalError { if the cell already has two neighbors }
 	*/
-	bool AddNeighbor(size_t cell);
+	void AddNeighbor(size_t cell);
 
 	/*! \brief Returns the area of the face
 	\return Length

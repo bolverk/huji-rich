@@ -39,6 +39,9 @@
     <ClCompile Include="..\Utilities\assert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\misc\universal_error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GeometryCommon\Face.hpp">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Utilities\assert.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\universal_error.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
