@@ -22,7 +22,7 @@ else ifeq ($(MODE),intel)
 	LINT_FLAGS :=
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O2
+	OPTIMIZATION_FLAGS := -O3 -march=native
 	LFLAGS :=
 endif
 CFLAGS = $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
