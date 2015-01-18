@@ -54,7 +54,7 @@ public:
 	// Constructor
 	HilbertCurve3D(void);
 	// Calculate the Hilbert curve distance of a given point, given a required number of iterations:
-	unsigned long long int Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations);
+	size_t Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations);
 
 private:
 	// Rotate a shape according to a given rotation scheme (in-place):
@@ -103,12 +103,12 @@ HilbertCurve3D::HilbertCurve3D():
 	for (int iRotIndex = 1; iRotIndex < NUMBER_OF_SHAPES; ++iRotIndex)
 	{
 	  const int iRotLength = GetRotation(rot, iRotIndex);
-		m_vRotations[iRotIndex].assign(rot, rot + iRotLength);
+	  m_vRotations[static_cast<size_t>(iRotIndex)].assign(rot, rot + iRotLength);
 	}
 
 	for (int ii = 1; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-		RotateShape(ii, m_vRotations[ii]);
+	  RotateShape(static_cast<size_t>(ii), m_vRotations[ii]);
 	}
 
 	BuildRecursionRule();
@@ -120,7 +120,7 @@ int HilbertCurve3D::FindShapeIndex(HilbertCurve3D_shape & roShape)
 {
 	for (int ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-		if (roShape == m_vRotatedShapes[ii])
+	  if (roShape == m_vRotatedShapes[static_cast<size_t>(ii)])
 		{
 			return ii;
 		}
@@ -148,7 +148,7 @@ void HilbertCurve3D::BuildRecursionRule()
 		for (int jj = 0; jj < 8; ++jj)
 		{
 			// Rotate the appropriate block of the reference recursion rule, according to the ii rotation scheme:
-			RotateShape(m_vRotatedShapes[m_vShapeRecursion[0][jj]], oTempShape, ii);
+		  RotateShape(m_vRotatedShapes[static_cast<size_t>(m_vShapeRecursion[0][jj])], oTempShape, ii);
 			// Find the shape index of the rotated shape:
 			m_vShapeRecursion[ii][jj] = FindShapeIndex(oTempShape);
 		}
@@ -389,7 +389,7 @@ void HilbertCurve3D::BuildShapeOrder()
 	return;
 }
 
-unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations)
+size_t HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations)
 {
 	// Extract the coordinates:
 	double x = rvPoint.x;
