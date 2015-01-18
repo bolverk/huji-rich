@@ -14,7 +14,7 @@ vector<int> RefineStrategy::RemoveNearBoundary(vector<int> const& ToRefine,vecto
 	for(int i=0;i<nrefine;++i)
 	{
 	  vector<int> const& edges=tess.GetCellEdges(ToRefine[static_cast<size_t>(i)]);
-		int nedge=(int) edges.size();
+	  int nedge=static_cast<int>(edges.size());
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
@@ -67,7 +67,7 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 		// Update the refined_old list
 		for(size_t i=0;i<refined_old.size();++i)
 		{
-		  const size_t toAdd=(size_t)(lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
+		  const size_t toAdd=static_cast<size_t>(lower_bound(Removed.begin(),Removed.end(),refined_old[i])-
 					      Removed.begin());
 			refined_old[i]-=int(toAdd);
 		}
@@ -115,7 +115,7 @@ Vector2D FindBestSplit(Tessellation const* tess,int PointToRefine,
 {
 	Vector2D slope;
 	Vector2D point(tess->GetMeshPoint(PointToRefine));
-	int nedges=(int) edges.size();
+	int nedges=static_cast<int>(edges.size());
 	if(point.distance(tess->GetCellCM(PointToRefine))<0.1*R)
 	{
 		// Do Nearest edge
