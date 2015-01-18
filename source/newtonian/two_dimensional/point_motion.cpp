@@ -8,9 +8,9 @@ vector<Vector2D> PointMotion::calcAllVelocities
   vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
   for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i)
 	  if(cevolve[i]==0)
-	    res[i] = CalcVelocity((int)i,tess,cells,time);
+	    res[i] = CalcVelocity(static_cast<int>(i),tess,cells,time);
 	  else
-	    res[i]=cevolve[i]->CalcVelocity((int)i,tess,cells,time);
+	    res[i]=cevolve[i]->CalcVelocity(static_cast<int>(i),tess,cells,time);
   return res;
 }
 
