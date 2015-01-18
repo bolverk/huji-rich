@@ -782,7 +782,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 			}
 		}
 
-		cur_facet = static_cast<int>(Walk(real_point));
+		cur_facet = static_cast<int>(Walk(static_cast<size_t>(real_point)));
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
@@ -806,18 +806,18 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	vector<int> allpoints;
 	for(size_t i=0;i<f_temp.size();++i)
 		for(size_t j=0;j<3;++j)
-			allpoints.push_back(f[f_temp[i]].vertices[j]);
+		  allpoints.push_back(f[static_cast<size_t>(f_temp[i])].vertices[j]);
 	sort(allpoints.begin(),allpoints.end());
 	allpoints=unique(allpoints);
 	allpoints=VectorValues(allpoints,HilbertOrder(VectorValues(cor,allpoints),static_cast<int>(allpoints.size())));
 	for(size_t i=0;i<allpoints.size();++i)
 	{
-	  vector<int> neigh2=FindContainingTetras(static_cast<int>(Walk(allpoints[i])),allpoints[i]);
+	  vector<int> neigh2=FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(allpoints[i]))),allpoints[i]);
 		for(size_t k=0;k<neigh2.size();++k)
 		{
 			const Vector2D center=GetCircleCenter(neigh2[k]);
 			for(size_t j=0;j<edges.size();++j)
-				if(CircleSegmentIntersect(edges[j],center,radius[neigh2[k]]))
+			  if(CircleSegmentIntersect(edges[j],center,radius[static_cast<size_t>(neigh2[k])]))
 					res[j].push_back(allpoints[i]);	
 		}
 	}
@@ -927,8 +927,8 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 					{
 						if(tempvec.empty()||(!std::binary_search(tempvec.begin(),tempvec.end(),toduplicate[i][k])))
 						{
-							if(CircleSegmentIntersect(outeredges[j],cor[toduplicate[i][k]],
-										  2*GetMaxRadius(toduplicate[i][k],static_cast<int>(Walk(toduplicate[i][k])))))
+						  if(CircleSegmentIntersect(outeredges[j],cor[static_cast<size_t>(toduplicate[i][k])],
+									    2*GetMaxRadius(toduplicate[i][k],static_cast<int>(Walk(static_cast<size_t>(toduplicate[i][k]))))))
 								extradd[j].push_back(toduplicate[i][k]);
 						}
 					}
@@ -960,7 +960,7 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 	{
 		if (tproc.GetMeshPoint(neigh[i]).distance(tproc.GetMeshPoint(rank)) <( 15 * R) || std::binary_search(orgneigh.begin(), orgneigh.end(), neigh[i]))
 		{
-			sendnumber[neigh[i]] = 1;
+		  sendnumber[static_cast<size_t>(neigh[i])] = 1;
 			neightemp2.push_back(neigh[i]);
 		}
 	}
@@ -1034,8 +1034,8 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
 		{
 			for (size_t j = 0; j < extradd[i].size(); ++j)
 			{
-				if (CircleSegmentIntersect(outeredges[i], cor[extradd[i][j]],
-							   2*GetMaxRadius(extradd[i][j], static_cast<int>(Walk(extradd[i][j])))))
+			  if (CircleSegmentIntersect(outeredges[i], cor[static_cast<size_t>(extradd[i][j])],
+						     2*GetMaxRadius(extradd[i][j], static_cast<int>(Walk(static_cast<size_t>(extradd[i][j]))))))
 					newadd[i].push_back(extradd[i][j]);
 			}
 		}
