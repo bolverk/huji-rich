@@ -1084,7 +1084,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 		{
 			// Create send data
 			vector<double> send;
-			ConvertVector2DToDouble(tosend[index],send);
+			ConvertVector2DToDouble(tosend[static_cast<size_t>(index)],send);
 			// Send/Recv data
 			MPI_Status status;
 			vector<double> recv;
@@ -1100,7 +1100,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 				}
 				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(nrecv);
+				recv.resize(static_cast<size_t>(nrecv));
 				int rtag=status.MPI_TAG;
 				if(rtag==0)
 					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
@@ -1138,8 +1138,8 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 
 				if (!toadd.empty())
 				{
-					for (size_t i = 0; i < toadd.size(); ++i)
-					  Nghost[index].push_back(static_cast<int>(cor.size() + i));
+					for (size_t iii = 0; iii < toadd.size(); ++iii)
+					  Nghost[index].push_back(static_cast<int>(cor.size() + iii));
 					AddBoundaryPoints(toadd);
 				}
 			}
