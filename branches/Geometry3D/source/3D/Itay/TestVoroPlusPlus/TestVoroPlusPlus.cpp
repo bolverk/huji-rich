@@ -34,6 +34,9 @@ TEST(Geometry3D, Vector3D_Construction)
 	ASSERT_EQ(vec1.x, vec2.x);
 	ASSERT_EQ(vec1.y, vec2.y);
 	ASSERT_EQ(vec1.z, vec2.z);
+
+	Vector3D vec3 = vec2;
+	ASSERT_EQ(vec3, vec2);
 }
 
 TEST(Geometry3D, Vector3D_Operations)

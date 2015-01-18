@@ -197,7 +197,7 @@ private:
 		std::vector<size_t> _faces;
 
 	public:
-		Vector3D GetCenterOfMass() const
+		const Vector3D &GetCenterOfMass() const
 		{
 			return _centerOfMass;
 		}
