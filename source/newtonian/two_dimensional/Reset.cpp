@@ -33,41 +33,41 @@ void ResetOutput(string location,hdsim const& sim)
 	{
 		P=sim.GetCell(i);
 		double Pressure=(P.Pressure);
-		myFile.write((char*)&Pressure,sizeof(double));
+		myFile.write(reinterpret_cast<char*>(&Pressure),sizeof(double));
 		double Density=(P.Density);
-		myFile.write((char*)&Density,sizeof(double));
+		myFile.write(reinterpret_cast<char*>(&Density),sizeof(double));
 		double xVelocity=(P.Velocity.x);
-		myFile.write((char*)&xVelocity,sizeof(double));
+		myFile.write(reinterpret_cast<char*>(&xVelocity),sizeof(double));
 		double yVelocity=(P.Velocity.y);
-		myFile.write((char*)&yVelocity,sizeof(double));
+		myFile.write(reinterpret_cast<char*>(&yVelocity),sizeof(double));
 	}
 	double dtemp=sim.GetTime();
-	myFile.write ((char*)&dtemp,sizeof(double));
+	myFile.write (reinterpret_cast<char*>(&dtemp),sizeof(double));
 	char cold= sim.GetColdFlowFlag() ? '1' : '0';
-	myFile.write((char*)&cold,sizeof(char));
+	myFile.write(reinterpret_cast<char*>(&cold),sizeof(char));
 	dtemp=sim.GetCfl();
-	myFile.write((char*)&dtemp,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&dtemp),sizeof(double));
 	double a,b;
 	sim.GetColdFlowParm(a,b);
-	myFile.write((char*)&a,sizeof(double));
-	myFile.write((char*)&b,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&a),sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&b),sizeof(double));
 	int itemp=sim.GetCycle();
-	myFile.write((char*)&itemp,sizeof(int));
+	myFile.write(reinterpret_cast<char*>(&itemp),sizeof(int));
 	int n=0;
 	vector<vector<double> > tracers=sim.getTracers();
 	if(!tracers.empty())
 	  n=static_cast<int>(tracers[0].size());
-	myFile.write ((char*)&n,sizeof(int));
+	myFile.write (reinterpret_cast<char*>(&n),sizeof(int));
 	cold = static_cast<char>(sim.GetDensityFloorFlag());
-	myFile.write((char*)&cold, sizeof(char));
+	myFile.write(reinterpret_cast<char*>(&cold), sizeof(char));
 	double dtemp2;
 	sim.GetDensityFloorParm(dtemp, dtemp2);
-	myFile.write((char*)&dtemp, sizeof(double));
-	myFile.write((char*)&dtemp2, sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&dtemp), sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&dtemp2), sizeof(double));
 	for (int i = 0; i<temp; ++i)
 	{
-		unsigned int ctemp = (unsigned int)sim.custom_evolution_indices[static_cast<size_t>(i)];
-		myFile.write((char*)&ctemp, sizeof(unsigned int));
+	  unsigned int ctemp = static_cast<unsigned int>(sim.custom_evolution_indices[static_cast<size_t>(i)]);
+	  myFile.write(reinterpret_cast<char*>(&ctemp), sizeof(unsigned int));
 	}
 	if (n == 0)
 	{
@@ -82,7 +82,7 @@ void ResetOutput(string location,hdsim const& sim)
 		for(int j=0;j<temp;++j)
 		{
 		  x=tracers[static_cast<size_t>(j)][static_cast<size_t>(i)];
-			myFile.write ((char*)&x,sizeof(double));
+		  myFile.write(reinterpret_cast<char*>(&x),sizeof(double));
 		}
 	}
 	myFile.close();
