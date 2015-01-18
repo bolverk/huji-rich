@@ -124,13 +124,13 @@ vector<Vector2D> ReadVector2DFromFile(string filename)
   if(!myFile.good())
     throw UniversalError("Error opening Vector2D file!!");
   int N;
-  myFile.read((char*)&N,sizeof (int));
+  myFile.read(reinterpret_cast<char*>(&N),sizeof (int));
   vector<Vector2D> res(static_cast<size_t>(N));
   for(int i=0;i<N;++i)
     {
       double x,y;
-      myFile.read((char*)&x,sizeof(double));
-      myFile.read((char*)&y,sizeof(double));
+      myFile.read(reinterpret_cast<char*>(&x),sizeof(double));
+      myFile.read(reinterpret_cast<char*>(&y),sizeof(double));
       res[static_cast<size_t>(i)]=Vector2D(x,y);
     }
   myFile.close();
@@ -143,11 +143,13 @@ void WriteVector2DToFile(vector<Vector2D> const& vec,string filename)
     throw UniversalError("Attempted to write a vector of Vector2D to file with zero length");
   fstream myFile (filename.c_str(),ios::out | ios::binary);
   int n=static_cast<int>(vec.size());
-  myFile.write ((char*)&n,sizeof(int));
+  myFile.write (reinterpret_cast<char*>(&n),sizeof(int));
   for(int i=0;i<n;++i)
     {
-      myFile.write ((char*)&vec[static_cast<size_t>(i)].x,sizeof(double));
-      myFile.write ((char*)&vec[static_cast<size_t>(i)].y,sizeof(double));
+      myFile.write (reinterpret_cast<const char*>(&vec[static_cast<size_t>(i)].x),
+		    sizeof(double));
+      myFile.write (reinterpret_cast<const char*>(&vec[static_cast<size_t>(i)].y),
+		    sizeof(double));
     }
   myFile.close();
 }
@@ -157,7 +159,7 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
 {
   fstream myFile (location.c_str(),ios::out | ios::binary);
   int temp=V.GetPointNo();
-  myFile.write ((char*)&temp, sizeof (int));
+  myFile.write (reinterpret_cast<char*>(&temp), sizeof (int));
   Vector2D p;
   for(int i=0;i<temp;++i)
     {
@@ -166,13 +168,13 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
 	{
 	  float x=static_cast<float>(p.x);
 	  float y=static_cast<float>(p.y);
-	  myFile.write ((char*)&x,sizeof(float));
-	  myFile.write ((char*)&y,sizeof(float));
+	  myFile.write (reinterpret_cast<char*>(&x),sizeof(float));
+	  myFile.write (reinterpret_cast<char*>(&y),sizeof(float));
 	}
       else
 	{
-	  myFile.write ((char*)&p.x,sizeof(double));
-	  myFile.write ((char*)&p.y,sizeof(double));
+	  myFile.write (reinterpret_cast<char*>(&p.x),sizeof(double));
+	  myFile.write (reinterpret_cast<char*>(&p.y),sizeof(double));
 	}
     }
   Primitive P;
@@ -182,10 +184,10 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
       if(floatprecision)
 	{
 	  float Pressure=static_cast<float>(P.Pressure);
-	  myFile.write((char*)&Pressure,sizeof(float));
+	  myFile.write(reinterpret_cast<char*>(&Pressure),sizeof(float));
 	}
       else
-	myFile.write((char*)&P.Pressure,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&P.Pressure),sizeof(double));
     }
   for(int i=0;i<temp;++i)
     {
@@ -193,10 +195,10 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
       if(floatprecision)
 	{
 	  float Density=static_cast<float>(P.Density);
-	  myFile.write((char*)&Density,sizeof(float));
+	  myFile.write(reinterpret_cast<char*>(&Density),sizeof(float));
 	}
       else
-	myFile.write((char*)&P.Density,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&P.Density),sizeof(double));
     }
   for(int i=0;i<temp;++i)
     {
@@ -204,10 +206,10 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
       if(floatprecision)
 	{
 	  float xVelocity=static_cast<float>(P.Velocity.x);
-	  myFile.write((char*)&xVelocity,sizeof(float));
+	  myFile.write(reinterpret_cast<char*>(&xVelocity),sizeof(float));
 	}
       else
-	myFile.write((char*)&P.Velocity.x,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&P.Velocity.x),sizeof(double));
     }
   for(int i=0;i<temp;++i)
     {
@@ -215,10 +217,10 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
       if(floatprecision)
 	{
 	  float yVelocity=static_cast<float>(P.Velocity.y);
-	  myFile.write((char*)&yVelocity,sizeof(float));
+	  myFile.write(reinterpret_cast<char*>(&yVelocity),sizeof(float));
 	}
       else
-	myFile.write((char*)&P.Velocity.y,sizeof(double));
+	myFile.write(reinterpret_cast<char*>(&P.Velocity.y),sizeof(double));
     }
   // Do the convex hull for each point
   vector<Vector2D> convhull;
@@ -227,41 +229,44 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
     {
       ConvexHull(convhull,&V,i);
       nedges[static_cast<size_t>(i)]=static_cast<int>(convhull.size());
-      myFile.write((char*)&nedges[static_cast<size_t>(i)],sizeof(int));
+      myFile.write(reinterpret_cast<char*>(&nedges[static_cast<size_t>(i)]),
+		   sizeof(int));
       for(size_t j=0;j<convhull.size();++j)
 	{
 	  if(floatprecision)
 	    {
 	      float x=static_cast<float>(convhull[j].x);
 	      float y=static_cast<float>(convhull[j].y);
-	      myFile.write((char*)&x,sizeof(float));
-	      myFile.write((char*)&y,sizeof(float));
+	      myFile.write(reinterpret_cast<char*>(&x),sizeof(float));
+	      myFile.write(reinterpret_cast<char*>(&y),sizeof(float));
 	    }
 	  else
 	    {
-	      myFile.write((char*)&convhull[j].x,sizeof(double));
-	      myFile.write((char*)&convhull[j].y,sizeof(double));
+	      myFile.write(reinterpret_cast<char*>(&convhull[j].x),
+			   sizeof(double));
+	      myFile.write(reinterpret_cast<char*>(&convhull[j].y),
+			   sizeof(double));
 	    }
 	}
     }
   if(floatprecision)
     {
       float time=static_cast<float>(sim.GetTime());
-      myFile.write ((char*)&time,sizeof(float));
+      myFile.write (reinterpret_cast<char*>(&time),sizeof(float));
     }
   else
     {
       double time=sim.GetTime();
-      myFile.write ((char*)&time,sizeof(double));
+      myFile.write (reinterpret_cast<char*>(&time),sizeof(double));
     }
   const vector<vector<double> > tracers=sim.getTracers();
   int TracerLength=static_cast<int>(tracers.size());
-  myFile.write ((char*)&TracerLength,sizeof(int));
+  myFile.write (reinterpret_cast<char*>(&TracerLength),sizeof(int));
   if(TracerLength>0)
-    temp=(int)tracers[0].size();
+    temp=static_cast<int>(tracers[0].size());
   else
     temp=0;
-  myFile.write ((char*)&temp,sizeof(int));
+  myFile.write (reinterpret_cast<char*>(&temp),sizeof(int));
   float x;
   for(int i=0;i<TracerLength;++i)
     {
@@ -270,12 +275,12 @@ void BinOutput(string location,hdsim const& sim,Tessellation const& V,bool
 	  if(floatprecision)
 	    {
 	      x=static_cast<float>(tracers[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-	      myFile.write ((char*)&x,sizeof(float));
+	      myFile.write (reinterpret_cast<char*>(&x),sizeof(float));
 	    }
 	  else
 	    {
 	      double xx=tracers[static_cast<size_t>(i)][static_cast<size_t>(j)];
-	      myFile.write ((char*)&xx,sizeof(double));
+	      myFile.write (reinterpret_cast<char*>(&xx),sizeof(double));
 	    }
 	}
     }
