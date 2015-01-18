@@ -1580,7 +1580,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 #ifdef RICH_MPI
 				if(((i<ToRemove.size())&&(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 					==ToRemove[static_cast<size_t>(i)]))||((i>=ToRemove.size())&&(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
-												      ==GhostNeighbors[static_cast<size_t>(i)-static_cast<int>(ToRemove.size())][0])))
+												      ==GhostNeighbors[static_cast<size_t>(i)-ToRemove.size()][0])))
 #else
 				if(etemp.neighbors.second==-1||V.GetOriginalIndex(etemp.neighbors.second)
 					==ToRemove[static_cast<size_t>(i)])
@@ -2615,15 +2615,15 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 		{
 			// Create send data
 		  int nsend=static_cast<int>(data[static_cast<size_t>(index)].size());
-			vector<double> send(2*nsend);
+		  vector<double> send(2*static_cast<int>(nsend));
 			// Arrange the points to send in Hilbert order
 			vector<Vector2D> cortemp=VectorValues(Tri.ChangeCor(),data[static_cast<size_t>(index)]);
 			vector<int> order=HilbertOrder(cortemp,static_cast<int>(cortemp.size()));
 			ReArrangeVector(data[static_cast<size_t>(index)],order);
 			for(int j=0;j<nsend;++j)
 			{
-				send[2*j]=cortemp[order[static_cast<size_t>(j)]].x;
-				send[2*j+1]=cortemp[static_cast<size_t>(order[static_cast<size_t>(j)])].y;
+			  send[2*static_cast<size_t>(j)]=cortemp[order[static_cast<size_t>(j)]].x;
+			  send[2*static_cast<size_t>(j)+1]=cortemp[static_cast<size_t>(order[static_cast<size_t>(j)])].y;
 			}
 			// Recv data
 			MPI_Status status;
@@ -2640,7 +2640,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 				}
 				MPI_Probe(procorder[static_cast<size_t>(i)],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(nrecv);
+				recv.resize(static_cast<size_t>(nrecv));
 				int rtag=status.MPI_TAG;
 				if(rtag==0)
 					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,&status);
@@ -2654,7 +2654,7 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 			{
 				MPI_Probe(procorder[static_cast<size_t>(i)],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(nrecv);
+				recv.resize(static_cast<size_t>(nrecv));
 				if(status.MPI_TAG==0)
 					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,&status);
 				else
@@ -2671,9 +2671,9 @@ void VoronoiMesh::SendRecv(vector<int> const& procorder,vector<int> const&
 				}
 			}
 			nrecv/=2;
-			vector<Vector2D> toadd(nrecv);
+			vector<Vector2D> toadd(static_cast<size_t>(nrecv));
 			for(int j=0;j<nrecv;++j)
-				toadd[static_cast<size_t>(j)]=Vector2D(recv[2*j],recv[2*j+1]);
+			  toadd[static_cast<size_t>(j)]=Vector2D(recv[2*static_cast<size_t>(j)],recv[2*static_cast<size_t>(j)+1]);
 			// Add the points
 			if(!toadd.empty())
 			{
