@@ -671,8 +671,8 @@ void LinearGaussConsistent::Prepare(Tessellation const& tessellation,
 	}
 	for(size_t i=0;i<static_cast<size_t>(tessellation.GetPointNo());++i)
 	{
-	  if(!hbc_.IsGhostCell((int)i,tessellation))
-	    rslopes_[i] = calc_slope(tessellation,cells,tracers,isrelevant,(int)i,slf_,obc_,hbc_,
+	  if(!hbc_.IsGhostCell(static_cast<int>(i),tessellation))
+	    rslopes_[i] = calc_slope(tessellation,cells,tracers,isrelevant,static_cast<int>(i),slf_,obc_,hbc_,
 			shockratio_,diffusecoeff_,pressure_ratio_,time,_rigidflag);
 	}
 }
