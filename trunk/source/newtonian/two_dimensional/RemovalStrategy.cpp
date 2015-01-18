@@ -10,7 +10,7 @@ vector<int> RemovalStrategy::RemoveNearBoundary(vector<int> const& ToRemove,Tess
 	for(int i=0;i<nrefine;++i)
 	{
 	  vector<int> const& edges=tess.GetCellEdges(ToRemove[static_cast<size_t>(i)]);
-		int nedge=(int) edges.size();
+	  int nedge=static_cast<int>(edges.size());
 		bool good=true;
 		for(int j=0;j<nedge;++j)
 		{
@@ -43,16 +43,7 @@ vector<int> RemovalStrategy::RemoveNeighbors
 	{
 		bool good=true;
 		vector<int> neigh=tess.GetNeighbors(candidates[static_cast<size_t>(i)]);
-		int nneigh=(int) neigh.size();
-		/*for(int j=0;j<nneigh;++j)
-		{
-			Edge const& edge=tess.GetEdge(edges[j]);
-			if(edge.neighbors.first>npoints||edge.neighbors.second>npoints)
-			{
-				good=false;
-				break;
-			}
-		}*/
+		int nneigh=static_cast<int>(neigh.size());
 		if(!good)
 			continue;
 		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[static_cast<size_t>(i)])!=
@@ -64,13 +55,13 @@ vector<int> RemovalStrategy::RemoveNeighbors
 			{
 			  if(binary_search(candidates.begin(),candidates.end(),neigh[static_cast<size_t>(j)]))
 				{
-				  if(merits[static_cast<size_t>(i)]<merits[(size_t)(lower_bound(candidates.begin(),
+				  if(merits[static_cast<size_t>(i)]<merits[static_cast<size_t>(lower_bound(candidates.begin(),
 										   candidates.end(),neigh[static_cast<size_t>(j)])-candidates.begin())])
 					{
 						good=false;
 						break;
 					}
-				  if(fabs(merits[static_cast<size_t>(i)]-merits[(size_t)(lower_bound(candidates.begin(),
+				  if(fabs(merits[static_cast<size_t>(i)]-merits[static_cast<size_t>(lower_bound(candidates.begin(),
 											candidates.end(),neigh[static_cast<size_t>(j)])-candidates.begin())])<1e-9)
 					{
 						if(find(bad_neigh.begin(),bad_neigh.end(),neigh[static_cast<size_t>(j)])==
