@@ -11,13 +11,6 @@ RoundCells::RoundCells(PointMotion& pm,HydroBoundaryConditions const& hbc,
 	OuterBoundary const* outer):
   pm_(pm), hbc_(hbc),
   chi_(chi),
-/*
-	chi_(chi*((int)!coldflows)+(static_cast<int>(coldflows))*((int)chi==0.4)
-	+chi*(static_cast<int>(coldflows))*((int)chi!=0.4)),
-
-	huh?
-*/
-
 	eta_(eta),
 	inner_(innerNum),
 	outer_(outer),
@@ -31,7 +24,7 @@ namespace {
 	void FixRefinedCells(vector<Vector2D> &vel,Tessellation const& tess,
 		HydroBoundaryConditions const& hbc,vector<CustomEvolution*> const& cevolve)
 	{
-		for(size_t i=0;(int)i<tess.GetPointNo();++i)
+	  for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i)
 		{
 			if(cevolve[i]!=0)
 				continue;
@@ -42,7 +35,7 @@ namespace {
 			{
 				if(DistanceToEdge(r,tess.GetEdge(edge_index[j]))<0.2*R)
 				{
-					if((int)i==tess.GetEdge(edge_index[j]).neighbors.first||
+				  if(static_cast<int>(i)==tess.GetEdge(edge_index[j]).neighbors.first||
 						hbc.IsGhostCell(tess.GetEdge(edge_index[j]).neighbors.second,
 						tess))
 					{
@@ -127,9 +120,9 @@ vector<Vector2D> RoundCells::calcAllVelocities
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		if(cevolve[i]==0)
-		  res.push_back(CalcVelocity((int)i,tess,cells,time));
+		  res.push_back(CalcVelocity(static_cast<int>(i),tess,cells,time));
 		else
-		  res.push_back(cevolve[i]->CalcVelocity((int)i,tess,cells,time));
+		  res.push_back(cevolve[i]->CalcVelocity(static_cast<int>(i),tess,cells,time));
 	}
 #ifdef RICH_MPI
 	SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),
@@ -170,9 +163,9 @@ vector<Vector2D> RoundCells::calcAllVelocities
 			}
 			else
 			{
-			  res[i]=pm_.CalcVelocity((int)i,tess,cells,time);
-				const double nvs = numeric_velocity_scale(tess,(int)i,dt,cells);
-				const Vector2D dw = calc_dw((int)i,tess,nvs,nvs,eta_,chi_);
+			  res[i]=pm_.CalcVelocity(static_cast<int>(i),tess,cells,time);
+			  const double nvs = numeric_velocity_scale(tess,static_cast<int>(i),dt,cells);
+				const Vector2D dw = calc_dw(static_cast<int>(i),tess,nvs,nvs,eta_,chi_);
 				res[i]=res[i]+dw;
 			}
 		}
@@ -200,7 +193,7 @@ namespace {
 			{
 				if(r.distance(tess.GetMeshPoint(neigh[i]))<0.1*R)
 				{
-				  vel[(size_t)neigh[i]]=vel[(size_t)neigh[i]]*factor;
+				  vel[static_cast<size_t>(neigh[i])]=vel[static_cast<size_t>(neigh[i])]*factor;
 					return;
 				}
 			}
@@ -222,28 +215,28 @@ void RoundCells::CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
 			double factor=0.9*(outer_->GetGridBoundary(Right)-
 				point.x)*inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,(int)i,factor);
+			LimitNeighborVelocity(v,tess,static_cast<int>(i),factor);
 		}
 		if((v[i].x*dt*2+point.x)<outer_->GetGridBoundary(Left))
 		{
 			double factor=0.9*(point.x-
 				outer_->GetGridBoundary(Left))*inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,(int)i,factor);
+			LimitNeighborVelocity(v,tess,static_cast<int>(i),factor);
 		}
 		if((v[i].y*dt*2+point.y)>outer_->GetGridBoundary(Up))
 		{
 			double factor=0.9*(outer_->GetGridBoundary(Up)-point.y)*
 				inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,(int)i,factor);
+			LimitNeighborVelocity(v,tess,static_cast<int>(i),factor);
 		}
 		if((v[i].y*dt*2+point.y)<outer_->GetGridBoundary(Down))
 		{
 			double factor=0.9*(point.y-outer_->GetGridBoundary(Down))*
 				inv_dt/abs(v[i]);
 			v[i]=v[i]*factor;
-			LimitNeighborVelocity(v,tess,(int)i,factor);
+			LimitNeighborVelocity(v,tess,static_cast<int>(i),factor);
 		}
 	}
 	return;
