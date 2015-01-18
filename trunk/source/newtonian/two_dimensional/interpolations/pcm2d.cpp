@@ -14,9 +14,9 @@ Primitive PCM2D::Interpolate
  InterpolationType interptype,Vector2D const& /*vface*/) const
 {
   if(interptype==InBulk)
-    return cells[(size_t)pair_member(edge.neighbors,side)];
+    return cells[static_cast<size_t>(pair_member(edge.neighbors,side))];
   else
-    return cells[(size_t)pair_member(edge.neighbors,(side+1)%2)];
+    return cells[static_cast<size_t>(pair_member(edge.neighbors,(side+1)%2))];
 }
 
 vector<ReducedPrimitiveGradient2D>& PCM2D::GetGradients(void)
@@ -32,17 +32,17 @@ vector<double> PCM2D::interpolateTracers
  int side,
  InterpolationType interp_type,Vector2D const& /*vface*/) const
 {
-  const int n = (int)tracers[(size_t)pair_member(edge.neighbors,side)].size();
+  const int n = static_cast<int>(tracers[static_cast<size_t>(pair_member(edge.neighbors,side))].size());
   vector<double> res(static_cast<size_t>(n));
   if(interp_type==InBulk)
     {
       for(int i=0;i<n;++i)
-	res[static_cast<size_t>(i)] = tracers[(size_t)pair_member(edge.neighbors,side)][static_cast<size_t>(i)];
+	res[static_cast<size_t>(i)] = tracers[static_cast<size_t>(pair_member(edge.neighbors,side))][static_cast<size_t>(i)];
     }
   else
     {
       for(int i=0;i<n;++i)
-	res[static_cast<size_t>(i)] = tracers[(size_t)pair_member(edge.neighbors,(side+1)%2)][static_cast<size_t>(i)];
+	res[static_cast<size_t>(i)] = tracers[static_cast<size_t>(pair_member(edge.neighbors,(side+1)%2))][static_cast<size_t>(i)];
     }
   return res;
 }
