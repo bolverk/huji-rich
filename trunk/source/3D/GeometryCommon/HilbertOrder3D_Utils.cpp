@@ -136,7 +136,7 @@ void FindEqualIndices(vector<size_t> const & vD_sorted, vector<vector<size_t> > 
 			// iota(vInd.begin(), vInd.end(), iBase);
 			for (int ii = 0; ii < iCurPrevDist; ++ii)
 			{
-			  vInd[static_cast<size_t>(ii)] = iBase + ii;
+			  vInd[static_cast<size_t>(ii)] = static_cast<size_t>(iBase + ii);
 			}
 			vOut.push_back(vInd);
 		}
