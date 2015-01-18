@@ -1373,7 +1373,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	size_t n=ToRemove.size();
 	vector<int> RemovedEdges;
 #ifdef RICH_MPI
-	n+=static_cast<int>(LocalNeighbors.size());
+	n+=LocalNeighbors.size();
 #endif
 	VolIndex.resize(n);
 	Volratio.resize(n);
