@@ -60,7 +60,7 @@ Conserved FreeFlow::CalcFlux
 	const int ci = calc_ci(edge);
 	const Vector2D p = Parallel(edge);
 	const Vector2D n = Normal(edge, tessellation);
-	const Primitive ghost=cells[(size_t)pair_member(edge.neighbors,ci)];
+	const Primitive ghost=cells[static_cast<size_t>(pair_member(edge.neighbors,ci))];
 	vector<Primitive> states(2);
 	for(int i=0;i<2;i++){
 	  states[static_cast<size_t>(i)] = ghost;
