@@ -108,7 +108,7 @@ HilbertCurve3D::HilbertCurve3D():
 
 	for (int ii = 1; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-	  RotateShape(static_cast<size_t>(ii), m_vRotations[static_cast<size_t>(ii)]);
+	  RotateShape(ii, m_vRotations[static_cast<size_t>(ii)]);
 	}
 
 	BuildRecursionRule();
@@ -310,7 +310,7 @@ void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 			}
 		}
 		// Round off the results:
-		m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].Round();
+		m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].Round();
 	}
 }
 
@@ -318,7 +318,7 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 {
 	int iSign = 0;
 
-	vector<int> vAxes = m_vRotations[iRotationIndex];
+	vector<int> vAxes = m_vRotations[static_cast<size_t>(iRotationIndex)];
 	roShapeOut = roShape;
 
 	for (int ii = 0; ii < 7; ++ii)
@@ -331,20 +331,20 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 			switch (abs(vAxes[iAx]))
 			{
 			case 1:
-				roShapeOut.m_vShapePoints[ii].RotateX(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateX(iSign * PI / 2);
 				break;
 			case 2:
-				roShapeOut.m_vShapePoints[ii].RotateY(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateY(iSign * PI / 2);
 				break;
 			case 3:
-				roShapeOut.m_vShapePoints[ii].RotateZ(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateZ(iSign * PI / 2);
 				break;
 			default:
 				break;
 			}
 		}
 		// Round off the results:
-		roShapeOut.m_vShapePoints[ii].Round();
+		roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].Round();
 	}
 
 	return;
@@ -364,9 +364,9 @@ void HilbertCurve3D::BuildShapeOrder()
 	{
 		for (size_t ii = 0; ii < m_vRotatedShapes[iShapeInd].m_vShapePoints.size(); ++ii)
 		{
-			vShapeVerticesX[ii + 1] = (int)(vShapeVerticesX[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].x);
-			vShapeVerticesY[ii + 1] = (int)(vShapeVerticesY[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].y);
-			vShapeVerticesZ[ii + 1] = (int)(vShapeVerticesZ[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].z);
+			vShapeVerticesX[ii + 1] = static_cast<int>(vShapeVerticesX[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].x);
+			vShapeVerticesY[ii + 1] = static_cast<int>(vShapeVerticesY[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].y);
+			vShapeVerticesZ[ii + 1] = static_cast<int>(vShapeVerticesZ[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].z);
 		}
 
 		int iMinX = *min_element(vShapeVerticesX.begin(), vShapeVerticesX.end());
