@@ -1114,7 +1114,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 			{
 				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(nrecv);
+				recv.resize(static_cast<size_t>(nrecv));
 				if(status.MPI_TAG==0)
 					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
 				else
@@ -1139,7 +1139,7 @@ void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 				if (!toadd.empty())
 				{
 					for (size_t iii = 0; iii < toadd.size(); ++iii)
-					  Nghost[index].push_back(static_cast<int>(cor.size() + iii));
+					  Nghost[static_cast<size_t>(index)].push_back(static_cast<int>(cor.size() + iii));
 					AddBoundaryPoints(toadd);
 				}
 			}
@@ -1599,7 +1599,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc)
 {
 	stack<int> tocheck;
-	vector<int> neightemp=FindContainingTetras(static_cast<int>(Walk(point)),point);
+	vector<int> neightemp=FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))),point);
 	for(size_t i=0;i<neightemp.size();++i)
 		tocheck.push(neightemp[i]);
 	const int rank=get_mpi_rank();
@@ -1629,8 +1629,8 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 					added=true;
 					for(size_t j=0;j<cputosendto.size();++j)
 					{
-						size_t index=find(neigh.begin(),neigh.end(),cputosendto[j])
-							-neigh.begin();
+					  size_t index=static_cast<size_t>(find(neigh.begin(),neigh.end(),cputosendto[j])
+									   -neigh.begin());
 						if(index<neigh.size())
 							toduplicate[index].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
 						else
