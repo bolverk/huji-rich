@@ -382,7 +382,7 @@ void HilbertCurve3D::BuildShapeOrder()
 
 		for (size_t kk = 0; kk < vShapeVerticesX.size(); ++kk)
 		{
-			m_mShapeOrder[iShapeInd][vShapeVerticesX[kk]][vShapeVerticesY[kk]][vShapeVerticesZ[kk]] = (int) kk;
+		  m_mShapeOrder[iShapeInd][vShapeVerticesX[kk]][vShapeVerticesY[kk]][vShapeVerticesZ[kk]] = static_cast<int>(kk);
 		}
 	}
 
@@ -397,7 +397,7 @@ size_t HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterat
 	double z = rvPoint.z;
 
 	// The output distance along the 3D-Hilbert Curve:
-	unsigned long long int d = 0;
+	size_t d = 0;
 
 	// The current shape index:
 	int iCurrentShape = 0;
@@ -416,8 +416,8 @@ size_t HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterat
 		// Multiply the distance by 8 (for every recursion iteration):
 		d = d << 3;
 	const int iOctantNum = m_mShapeOrder[iCurrentShape][bX][bY][bZ];
-		d = d + iOctantNum;
-		iCurrentShape = m_vShapeRecursion[iCurrentShape][iOctantNum];
+	d = d + static_cast<size_t>(iOctantNum);
+	iCurrentShape = m_vShapeRecursion[static_cast<size_t>(iCurrentShape)][iOctantNum];
 	}
 
 	//	int a = 0;
@@ -440,9 +440,9 @@ vector<size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 	HilbertCurve3D oHilbert;
 
 	// Allocate an output vector:
-	int N = (int) cor.size();
-	vector<unsigned long long int> vOut;
-	vOut.reserve(N);
+	int N = static_cast<int>(cor.size());
+	vector<size_t> vOut;
+	vOut.reserve(cor.size());
 	
 	// Estimate the number of required iterations:
 	int numOfIterations = EstimateHilbertIterationNum(cor);
