@@ -43,6 +43,15 @@ public:
     int cycle_;
   };
 
+  /*! \brief Class constructor
+    \param tess Tessellation
+    \param cells Initial computational cells
+    \param eos Equation of state
+    \param pm Point motion scheme
+    \param tsc Time step calculator
+    \param fc Flux calculator
+    \param cu Cell updater
+   */
   HDSim3D(Tessellation3D& tess,
 	  const vector<ComputationalCell>& cells,
 	  const EquationOfState& eos,
@@ -51,10 +60,17 @@ public:
 	  const FluxCalculator& fc,
 	  const CellUpdater& cu);
 
+  //! \brief Advances the simulation in time (first order)
   void timeAdvance();
 
+  /*! \brief Access to tessellation
+    \return Tessellation
+   */
   const Tessellation3D& getTesselation(void) const;
 
+  /*! \brief Access to computational cells
+    \return Computational cells
+   */
   const vector<ComputationalCell>& getCells(void) const;
 
 private:
