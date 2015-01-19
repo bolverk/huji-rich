@@ -1575,9 +1575,9 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 			{
 			  int index2=static_cast<int>(lower_bound(ToSend[i].begin(),ToSend[i].end(),
 								  ToRemove[k])-ToSend[i].begin());
-				rescells.push_back(padd[i][index2]);
+			  rescells.push_back(padd[i][static_cast<size_t>(index2)]);
 				if(traceractive)
-					restracer.push_back(tadd[i][index2]);
+				  restracer.push_back(tadd[i][static_cast<size_t>(index2)]);
 				break;
 			}
 		}
@@ -1641,7 +1641,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					for(size_t j=0;j<BoundaryNeigh[static_cast<size_t>(index)].size();++j)
 					{
 					  lengths[j]=static_cast<int>(BoundaryNeigh[static_cast<size_t>(index)][j].size());
-						for(int k=0;k<lengths[j];++k)
+					  for(size_t k=0;k<static_cast<size_t>(lengths[j]);++k)
 							senddata.push_back(BoundaryNeigh[static_cast<size_t>(index)][j][k]);
 					}
 					MPI_Send(&lengths[0],static_cast<int>(lengths.size()),MPI_INT,procorder[i],0,
@@ -1714,7 +1714,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					for(size_t j=0;j<BoundaryNeigh[static_cast<size_t>(index)].size();++j)
 					{
 					  lengths[j]=static_cast<int>(BoundaryNeigh[static_cast<size_t>(index)][j].size());
-						for(int k=0;k<lengths[j];++k)
+					  for(size_t k=0;k<static_cast<size_t>(lengths[j]);++k)
 							senddata.push_back(BoundaryNeigh[static_cast<size_t>(index)][j][k]);
 					}
 					MPI_Send(&lengths[0],static_cast<int>(lengths.size()),MPI_INT,procorder[i],0,
@@ -1785,7 +1785,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 
 		MPI_Status status;
 		// Send/Recv the data
-		vector<vector<int> > recvindex(nlist); // the index in the Nghost vector
+		vector<vector<int> > recvindex(static_cast<size_t>(nlist)); // the index in the Nghost vector
 		vector<vector<double> > recvmerit(static_cast<size_t>(nlist));
 		int temp;
 		for(size_t i=0;i<procorder.size();++i)
@@ -1876,14 +1876,14 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 				continue;
 			vector<int> Nghostindex(recvindex[i].size());
 			for(size_t j=0;j<Nghostindex.size();++j)
-				Nghostindex[j]=Nghost[i][recvindex[i][j]];
+			  Nghostindex[j]=Nghost[i][static_cast<size_t>(recvindex[i][j])];
 			vector<int> indeces;
 			sort_index(Nghostindex,indeces);
 			sort(Nghostindex.begin(),Nghostindex.end());
 			for(size_t j=0;j<bremove[i].size();++j)
 			{
 				vector<int> neigh=tess.GetNeighbors(DupPoints[i][bremove[i][j]]);
-				for(int k=0;k<static_cast<int>(neigh.size());++k)
+				for(size_t k=0;k<neigh.size();++k)
 				{
 					if(!binary_search(Nghostindex.begin(),Nghostindex.end(),neigh[k]))
 						continue;
