@@ -1890,7 +1890,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 					int index=static_cast<int>(lower_bound(Nghostindex.begin(),Nghostindex.end(),neigh[k])-
 								   Nghostindex.begin());
 					if(index<static_cast<int>(Nghostindex.size()))
-						if(recvmerit[i][indeces[static_cast<size_t>(index)]]>=bmerit[i][j])
+					  if(recvmerit[i][static_cast<size_t>(indeces[static_cast<size_t>(index)])]>=bmerit[i][j])
 						  bad.push_back(DupPoints[i][static_cast<size_t>(bremove[i][j])]);
 				}
 			}
