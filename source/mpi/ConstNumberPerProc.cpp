@@ -209,7 +209,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 	}
 	vector<Vector2D> cor=tproc.GetMeshPoints();
 	cor[static_cast<size_t>(rank)]=cor[static_cast<size_t>(rank)]+Vector2D(dx,dy);
-	cor.resize(nproc);
+	cor.resize(static_cast<size_t>(nproc));
 	// Have all processors have the same points
 	vector<double> dxtemp(static_cast<size_t>(nproc)),dytemp(static_cast<size_t>(nproc));
 	MPI_Gather(&cor[static_cast<size_t>(rank)].x,1,MPI_DOUBLE,&dxtemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
