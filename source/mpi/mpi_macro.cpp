@@ -80,7 +80,7 @@ namespace
 			res[static_cast<size_t>(gradlength*i)+5]=vec[static_cast<size_t>(i)].xvelocity.y;
 			res[static_cast<size_t>(gradlength*i)+6]=vec[static_cast<size_t>(i)].yvelocity.x;
 			res[static_cast<size_t>(gradlength*i)+7]=vec[static_cast<size_t>(i)].yvelocity.y;
-			for(int j=0;j<(gradlength-8)/2;++j)
+			for(size_t j=0;j<static_cast<size_t>(gradlength-8)/2;++j)
 			{
 				res[static_cast<size_t>(gradlength*i)+j*2+8]=vec[static_cast<size_t>(i)].tracers[j].x;
 				res[static_cast<size_t>(gradlength*i)+j*2+9]=vec[static_cast<size_t>(i)].tracers[j].y;
@@ -91,7 +91,7 @@ namespace
 	void DoubleVectorToGrad(vector<ReducedPrimitiveGradient2D> &vec,
 		vector<double> const& temp,int gradlength)
 	{
-	  int n=static_cast<int>(temp.size()/gradlength);
+	  int n=static_cast<int>(temp.size())/gradlength;
 		if(n!=static_cast<int>(vec.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToGrad");
@@ -107,7 +107,7 @@ namespace
 			vec[static_cast<size_t>(i)].xvelocity.y=temp[static_cast<size_t>(gradlength*i)+5];
 			vec[static_cast<size_t>(i)].yvelocity.x=temp[static_cast<size_t>(gradlength*i)+6];
 			vec[static_cast<size_t>(i)].yvelocity.y=temp[static_cast<size_t>(gradlength*i)+7];
-			for(int j=0;j<(gradlength-8)/2;++j)
+			for(size_t j=0;j<static_cast<size_t>(gradlength-8)/2;++j)
 			{
 				Vector2D vtemp(temp[static_cast<size_t>(gradlength*i)+2*j+8],temp[static_cast<size_t>(gradlength*i)+2*j+9]);
 				vec[static_cast<size_t>(i)].tracers.push_back(vtemp);
@@ -118,16 +118,16 @@ namespace
 	void DoubleVectorToTracer(vector<vector<double> > &tracer,vector<double>
 		const& data,int tracerlength)
 	{
-	  int n=static_cast<int>(data.size()/tracerlength);
+	  int n=static_cast<int>(data.size())/tracerlength;
 		if(n!=static_cast<int>(tracer.size()))
 		{
 			UniversalError eo("Sizes do not match in DoubleVectorToTracer");
 			throw eo;
 		}
-		for(int i=0;i<n;++i)
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
-			tracer[static_cast<size_t>(i)].resize(tracerlength);
-			for(int j=0;j<tracerlength;++j)
+		  tracer[static_cast<size_t>(i)].resize(static_cast<size_t>(tracerlength));
+		  for(size_t j=0;j<static_cast<size_t>(tracerlength);++j)
 				tracer[static_cast<size_t>(i)][j]=data[i*tracerlength+j];
 		}
 	}
