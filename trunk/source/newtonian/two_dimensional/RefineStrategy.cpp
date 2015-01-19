@@ -54,8 +54,8 @@ vector<int> RefineStrategy::RemoveDuplicatedLately(vector<int> const& ToRefine,
 			allsent=unique(allsent);
 			for(size_t i=0;i<refined_old.size();++i)
 			{
-			  const size_t toAdd=lower_bound(allsent.begin(),allsent.end(),refined_old[i])-
-					allsent.begin();
+			  const size_t toAdd=static_cast<size_t>(lower_bound(allsent.begin(),allsent.end(),refined_old[i])-
+								 allsent.begin());
 				refined_old[i]-=int(toAdd);
 			}
 		}
