@@ -1413,7 +1413,7 @@ namespace
 				{
 				  const size_t index2=static_cast<size_t>(lower_bound(ghost.begin(),ghost.end(),neigh[j])-
 									  ghost.begin());
-				  res[index[static_cast<size_t>(index2)]].push_back(Sent[i]);
+				  res[static_cast<size_t>(index[static_cast<size_t>(index2)])].push_back(Sent[i]);
 				}
 			}
 		}
@@ -1557,7 +1557,7 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 		if(!ToSend[i].empty())
 		{
 		  for(size_t j=0;j<ToSend[i].size();++j)
-				ToSend[i][j]=Nghost[i][ToSend[i][j]];
+		    ToSend[i][j]=Nghost[i][static_cast<size_t>(ToSend[i][j])];
 			vector<int> indeces;
 			sort_index(ToSend[i],indeces);
 			sort(ToSend[i].begin(),ToSend[i].end());
@@ -1567,7 +1567,7 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 		}
 	}
 	// rearrange the data
-	for(int k=0;k<static_cast<int>(ToRemove.size());++k)
+	for(size_t k=0;k<ToRemove.size();++k)
 	{
 	  for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 		{
@@ -1581,7 +1581,7 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 				break;
 			}
 		}
-		if(static_cast<int>(rescells.size())!=(k+1))
+		if(rescells.size()!=(k+1))
 		{
 			UniversalError eo("couldn't find point to remove int GetAMRExtensive");
 			throw eo;
