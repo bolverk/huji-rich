@@ -126,9 +126,9 @@ namespace
 		}
 		for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
-		  tracer[static_cast<size_t>(i)].resize(static_cast<size_t>(tracerlength));
+		  tracer[i].resize(static_cast<size_t>(tracerlength));
 		  for(size_t j=0;j<static_cast<size_t>(tracerlength);++j)
-				tracer[static_cast<size_t>(i)][j]=data[i*tracerlength+j];
+		    tracer[i][j]=data[i*static_cast<size_t>(tracerlength)+j];
 		}
 	}
 
@@ -142,9 +142,9 @@ namespace
 			UniversalError eo("Sizes do not match in TracerVectorToDouble");
 			throw eo;
 		}
-		for(int i=0;i<n;++i)
-			for(int j=0;j<tracerlength;++j)
-				dtracer[i*tracerlength+j]=ttemp[static_cast<size_t>(i)][j];
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
+		  for(size_t j=0;j<static_cast<size_t>(tracerlength);++j)
+		    dtracer[i*static_cast<size_t>(tracerlength)+j]=ttemp[i][j];
 	}
 
 	void DoubleVectorToPrimitve(vector<double> const& temp,vector<Primitive> &vec,
@@ -156,12 +156,12 @@ namespace
 			UniversalError eo("Sizes do not match in DoubleVectorToPrimitve");
 			throw eo;
 		}
-		for(int i=0;i<ntotal;++i)
+		for(size_t i=0;i<static_cast<size_t>(ntotal);++i)
 		{
 			Primitive ptemp(temp[4*i],temp[4*i+1],Vector2D(temp[4*i+2],temp[4*i+3]),0,0);
 			ptemp.Energy=eos.dp2e(ptemp.Density,ptemp.Pressure);
 			ptemp.SoundSpeed=eos.dp2c(ptemp.Density,ptemp.Pressure);
-			vec[static_cast<size_t>(i)]=ptemp;
+			vec[i]=ptemp;
 		}
 	}
 
@@ -173,12 +173,12 @@ namespace
 			UniversalError eo("Sizes do not match in PrimitiveVectorToDouble");
 			throw eo;
 		}
-		for(int i=0;i<n;++i)
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
-			res[4*i]=vec[static_cast<size_t>(i)].Density;
-			res[4*i+1]=vec[static_cast<size_t>(i)].Pressure;
-			res[4*i+2]=vec[static_cast<size_t>(i)].Velocity.x;
-			res[4*i+3]=vec[static_cast<size_t>(i)].Velocity.y;
+			res[4*i]=vec[i].Density;
+			res[4*i+1]=vec[i].Pressure;
+			res[4*i+2]=vec[i].Velocity.x;
+			res[4*i+3]=vec[i].Velocity.y;
 		}
 	}
 
