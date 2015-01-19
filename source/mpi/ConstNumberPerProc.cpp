@@ -152,15 +152,15 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 			//Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
 			point = tproc.GetMeshPoint(rank);
 			const double dist = tproc.GetMeshPoint(rank).distance(tproc.GetMeshPoint(neigh[i]));
-			if (dist<neigheps*min(R[static_cast<size_t>(rank)], R[neigh[i]]))
+			if (dist<neigheps*min(R[static_cast<size_t>(rank)], R[static_cast<size_t>(neigh[i])]))
 			{
-				dx = neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*min(R[static_cast<size_t>(rank)], R[neigh[i]])/dist;
-				dy = neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*min(R[static_cast<size_t>(rank)], R[neigh[i]]) / dist;
+				dx = neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*min(R[static_cast<size_t>(rank)], R[static_cast<size_t>(neigh[i])])/dist;
+				dy = neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*min(R[static_cast<size_t>(rank)], R[static_cast<size_t>(neigh[i])]) / dist;
 			}
 			else
 			{
-				dx -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
-				dy -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
+				dx -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[static_cast<size_t>(neigh[i])])*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
+				dy -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[static_cast<size_t>(neigh[i])])*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
 			}
 		}
 	}
