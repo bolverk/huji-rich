@@ -131,7 +131,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	const double myarea=tess.GetVolume(rank);
 	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
-	res.reserve(mypoints);
+	res.reserve(static_cast<size_t>(mypoints));
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,&tess,rank);
 	double ran[2];
