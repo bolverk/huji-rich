@@ -330,7 +330,7 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 	int err=MPI_Bcast(&temp[0],n*2,MPI_DOUBLE,root,comm);
 	if(rank!=root)
 	{
-		for(int i=0;i<n;++i)
+	  for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
 			vec[i].x=temp[2*i];
 			vec[i].y=temp[2*i+1];
@@ -384,7 +384,7 @@ vector<Vector2D> MPI_MassSendRecvVectorVector2D
 	int n=static_cast<int>(procorder.size());
 	int nlist=static_cast<int>(proclist.size());
 	const int rank = get_mpi_rank();
-	for(int i=0;i<n;++i)
+	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 	  int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin());
 		// Do we talk with this processor?
