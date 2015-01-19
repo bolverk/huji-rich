@@ -652,7 +652,7 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 				{
 					int count;
 					MPI_Get_count(&status,MPI_CHAR,&count);
-					vector<char> toadd(count);
+					vector<char> toadd(static_cast<size_t>(count));
 					MPI_Recv(&toadd[0],count,MPI_CHAR,procorder[i],0,
 						MPI_COMM_WORLD,&status);
 					btoadd.insert(btoadd.end(),toadd.begin(),toadd.end());
@@ -672,7 +672,7 @@ void SendRecvShockedStatus(vector<char> const& shockedcells,
 				{
 					int count;
 					MPI_Get_count(&status,MPI_CHAR,&count);
-					vector<char> toadd(count);
+					vector<char> toadd(static_cast<size_t>(count));
 					MPI_Recv(&toadd[0],count,MPI_CHAR,procorder[i],0,
 						MPI_COMM_WORLD,&status);
 					btoadd.insert(btoadd.end(),toadd.begin(),toadd.end());
@@ -736,7 +736,7 @@ void SendRecvVectorDouble(vector<double> const& vec,
 				{
 					int count;
 					MPI_Get_count(&status,MPI_DOUBLE,&count);
-					vector<double> ttoadd(count);
+					vector<double> ttoadd(static_cast<size_t>(count));
 					MPI_Recv(&ttoadd[0],count,MPI_DOUBLE,procorder[i],0,
 						MPI_COMM_WORLD,&status);
 					toadd.insert(toadd.end(),ttoadd.begin(),ttoadd.end());
@@ -873,7 +873,7 @@ namespace {
 			MPI_Probe(address,MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
 			MPI_Get_count(&stat,MPI_UNSIGNED,&count);
 			if(stat.MPI_TAG==0){
-				vector<unsigned> buf(count);
+			  vector<unsigned> buf(static_cast<size_t>(count));
 				MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 				cei_received_ = mass_static_cast<size_t,unsigned>(buf);
 			}
@@ -913,8 +913,8 @@ void SendRecvHydro(vector<Primitive> &cells,
 	const int worldsize = get_mpi_size();
 	const vector<int> procorder=GetProcOrder(rank,worldsize);
 	int n=worldsize-1;
-	vector<vector<Primitive> > padd(nlist);
-	vector<vector<size_t> > cadd(nlist);
+	vector<vector<Primitive> > padd(static_cast<size_t>(nlist));
+	vector<vector<size_t> > cadd(static_cast<size_t>(nlist));
 
 	// Send the data
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
@@ -931,8 +931,8 @@ void SendRecvHydro(vector<Primitive> &cells,
 		cadd[static_cast<size_t>(index)] = hydro_communicator.getReceivedCustomEvolutionIndices();
 	}
 	// ReArrange the data
-	cells.resize(totalpoints);
-	customevolutions.resize(totalpoints);
+	cells.resize(static_cast<size_t>(totalpoints));
+	customevolutions.resize(static_cast<size_t>(totalpoints));
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 	{
 		ListExchange(cells,Nghost[i],padd[i]);
@@ -995,7 +995,7 @@ void SendRecvTracers(vector<vector<double> > &tracers,
 		}
 	}
 	// ReArrange the data
-	tracers.resize(totalpoints);
+	tracers.resize(static_cast<size_t>(totalpoints));
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 		ListExchange(tracers,Nghost[i],tadd[i]);
 }
@@ -1093,10 +1093,10 @@ void MPI_RecvVectorTracer(vector<vector<double> > &vec,int dest,int tag,
 	vector<double> temp(nrecv);
 	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,MPI_ANY_TAG,comm,&status);
 	int length=nrecv/ntracer;
-	vec.resize(length);
+	vec.resize(static_cast<size_t>(length));
 	for(size_t i=0;i<static_cast<size_t>(length);++i)
 	{
-		vec[i].resize(ntracer);
+	  vec[i].resize(static_cast<size_t>(ntracer));
 		for(size_t j=0;j<static_cast<size_t>(ntracer);++j)
 			vec[i][j]=temp[ntracer*i+j];
 	}
@@ -1153,7 +1153,7 @@ void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
 	vector<double> temp(ntotal);
 	MPI_Recv(&temp[0],ntotal,MPI_DOUBLE,dest,tag,comm,&status);
 	int n=ntotal/gradlength;
-	vec.resize(n);
+	vec.resize(static_cast<size_t>(n));
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		vec[i].density.x=temp[static_cast<size_t>(gradlength)*i];
@@ -1204,7 +1204,7 @@ void SendRecvVelocity(vector<Vector2D> &vel,vector<vector<int> >const& sentcells
 		}
 	}
 	// ReArrange the data
-	vel.resize(totalpoints);
+	vel.resize(static_cast<size_t>(totalpoints));
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 		ListExchange(vel,Nghost[i],tadd[i]);
 }
@@ -1245,7 +1245,7 @@ void SendRecvGrad(vector<ReducedPrimitiveGradient2D> &grads,
 		}
 	}
 	// ReArrange the data
-	grads.resize(totalpoints);
+	grads.resize(static_cast<size_t>(totalpoints));
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 		ListExchange(grads,Nghost[i],tadd[i]);
 }
@@ -1364,7 +1364,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 					{
 						int count;
 						MPI_Get_count(&status[i],MPI_INT,&count);
-						torecv[i].resize(count);
+						torecv[i].resize(static_cast<size_t>(count));
 						MPI_Irecv(&torecv[i][0],count,MPI_INT,status[i].MPI_SOURCE,0,
 							MPI_COMM_WORLD,&req[i]);
 						sentme.push_back(status[i].MPI_SOURCE);
@@ -1378,7 +1378,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	vector<int> occur(SentProcs);
 	sort(occur.begin(),occur.end());
 	occur=unique(occur);
-	GhostIndeces.resize(nprocs);
+	GhostIndeces.resize(static_cast<size_t>(nprocs));
 	for(size_t i=0;i<static_cast<size_t>(nprocs);++i)
 	{
 	  int loc=static_cast<int>(lower_bound(occur.begin(),occur.end(),sentme[i])-occur.begin());
@@ -1511,7 +1511,7 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					recv[static_cast<size_t>(index)].resize(count);
+					recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 					MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
@@ -1526,7 +1526,7 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					recv[static_cast<size_t>(index)].resize(count);
+					recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 					MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
@@ -1627,7 +1627,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					RecvPoints[static_cast<size_t>(index)].resize(count);
+					RecvPoints[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 					MPI_Recv(&RecvPoints[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
@@ -1654,7 +1654,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					lengthr.resize(count);
+					lengthr.resize(static_cast<size_t>(count));
 					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				if(!BoundaryRemove[static_cast<size_t>(index)].empty())
@@ -1664,7 +1664,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					recvdata.resize(count);
+					recvdata.resize(static_cast<size_t>(count));
 					MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				int loc=0;
@@ -1687,7 +1687,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					RecvPoints[static_cast<size_t>(index)].resize(count);
+					RecvPoints[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 					MPI_Recv(&RecvPoints[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 						MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
@@ -1703,7 +1703,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 				{
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					lengthr.resize(count);
+					lengthr.resize(static_cast<size_t>(count));
 					MPI_Recv(&lengthr[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				if(BoundaryRemove[static_cast<size_t>(index)].empty())
@@ -1725,7 +1725,7 @@ void SendRecvBoundaryRemove(vector<vector<int> > &BoundaryRemove,
 					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
 					int count;
 					MPI_Get_count(&stat,MPI_INT,&count);
-					recvdata.resize(count);
+					recvdata.resize(static_cast<size_t>(count));
 					MPI_Recv(&recvdata[0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 				}
 				if(!BoundaryRemove[static_cast<size_t>(index)].empty())
@@ -1808,7 +1808,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 					{
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
-						recvindex[static_cast<size_t>(index)].resize(count);
+						recvindex[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 						MPI_Recv(&recvindex[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 							MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
@@ -1824,7 +1824,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 					{
 						int count;
 						MPI_Get_count(&status,MPI_DOUBLE,&count);
-						recvmerit[static_cast<size_t>(index)].resize(count);
+						recvmerit[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 						MPI_Recv(&recvmerit[static_cast<size_t>(index)][0],count,MPI_DOUBLE,procorder[i],0,
 							MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
@@ -1838,7 +1838,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 					{
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
-						recvindex[static_cast<size_t>(index)].resize(count);
+						recvindex[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 						MPI_Recv(&recvindex[static_cast<size_t>(index)][0],count,MPI_INT,procorder[i],0,
 							MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
@@ -1854,7 +1854,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 					{
 						int count;
 						MPI_Get_count(&status,MPI_DOUBLE,&count);
-						recvmerit[static_cast<size_t>(index)].resize(count);
+						recvmerit[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 						MPI_Recv(&recvmerit[static_cast<size_t>(index)][0],count,MPI_DOUBLE,procorder[i],0,
 							MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
