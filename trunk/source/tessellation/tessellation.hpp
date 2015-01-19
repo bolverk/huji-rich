@@ -231,6 +231,10 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
   */
   virtual vector<Vector2D>& GetAllCM(void)=0;
 
+  /*! \brief Retrieves vicarious neighbors
+    \param result Output
+    \param point Mesh generating point index
+   */
   virtual void GetNeighborNeighbors(vector<int> &result, int point)const =0;
 };
 

@@ -8,12 +8,18 @@
 
 #include "../two_dimensional/hdsim2d.hpp"
 
+//! \brief Abstract class for triggering events
 class Trigger
 {
 public:
 
+  /*! \brief Returns true if event happened
+    \param sim Reference to the simulation
+    \return True if event happened, false otherwise
+   */
   virtual bool operator()(const hdsim& sim) = 0;
 
+  //! \brief Class destructor
   virtual ~Trigger(void);
 };
 
