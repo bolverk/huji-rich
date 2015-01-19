@@ -57,7 +57,7 @@ namespace
 		double maxcellR(mincellR);
 		mincellR=min(mincellR,DistanceToEdge(center,etemp));
 		int npoints=static_cast<int>(cpoints.size());
-		for(int i=1;i<npoints;++i)
+		for(size_t i=1;i<static_cast<size_t>(npoints);++i)
 		{
 			double temp=abs(cpoints[i]-center);
 			maxcellR=max(maxcellR,temp);
