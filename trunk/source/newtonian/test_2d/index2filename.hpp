@@ -10,12 +10,18 @@
 
 using std::string;
 
+//! \brief Class for generating sequential file names
 class Index2FileName
 {
 public:
 
+  /*! \brief Generate a file name
+    \param index Index
+    \return File name
+   */
   virtual string operator()(int index) = 0;
 
+  //! \brief class destructor
   virtual ~Index2FileName(void);
 };
 

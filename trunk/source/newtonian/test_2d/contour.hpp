@@ -11,6 +11,7 @@
 #include "index2filename.hpp"
 #include "trigger.hpp"
 
+//! \brief Recipe for creating a contour from the simulation
 class LocalContourCriterion
 {
 public:

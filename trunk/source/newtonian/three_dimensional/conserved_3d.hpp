@@ -3,6 +3,7 @@
 
 #include "../../3D/GeometryCommon/Vector3D.hpp"
 
+//! \brief Conserved variables for a 3D computational cell
 class Conserved3D
 {
 public:

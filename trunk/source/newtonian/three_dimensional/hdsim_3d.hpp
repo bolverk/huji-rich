@@ -10,6 +10,7 @@
 #include "flux_calculator.hpp"
 #include "cell_updater.hpp"
 
+//! \brief Three dimensional simulation
 class HDSim3D
 {
 public:
@@ -19,12 +20,22 @@ public:
   {
   public:
 
+    //! \brief Class constructor
     ProgressTracker(void);
 
+    /*! \brief Update the progress tracker
+      \param dt Time step
+     */
     void update(double dt);
 
+    /*! \brief Returns the current time of the simulation
+      \return Time of the simulation
+     */
     double getTime(void) const;
 
+    /*! \brief Returns the number of times time advance was called
+      \return Cycle number
+     */
     double getCycle(void) const;
 
   private:
