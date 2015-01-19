@@ -1335,21 +1335,21 @@ namespace
 					     -sentprocs.begin());
 			if(index<nlist)
 			{
-				if(rank<procorder[i])
+			  if(rank<procorder[static_cast<size_t>(i)])
 				{
 				  if(toremove[static_cast<size_t>(index)].empty())
 					  MPI_Send(&temp,1,MPI_INT,procorder[static_cast<size_t>(i)],1,MPI_COMM_WORLD);
 					else
-					  MPI_Send(&toremove[index][0],static_cast<int>(toremove[static_cast<size_t>(index)].size()),
+					  MPI_Send(&toremove[static_cast<size_t>(index)][0],static_cast<int>(toremove[static_cast<size_t>(index)].size()),
 						   MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD);
 					MPI_Probe(procorder[static_cast<size_t>(i)],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 					if(status.MPI_TAG==1)
-						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					  MPI_Recv(&temp,1,MPI_INT,procorder[static_cast<size_t>(i)],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					else
 					{
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
-						recv[index].resize(count);
+						recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
 						MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
 				}
@@ -1362,20 +1362,20 @@ namespace
 					{
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
-						recv[index].resize(count);
-						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+						recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
+						MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
-					if(toremove[index].empty())
+					if(toremove[static_cast<size_t>(index)].empty())
 						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
 					else
-					  MPI_Send(&toremove[index][0],static_cast<int>(toremove[index].size()),
-						MPI_INT,procorder[i],0,MPI_COMM_WORLD);
+					  MPI_Send(&toremove[static_cast<size_t>(index)][0],static_cast<int>(toremove[static_cast<size_t>(index)].size()),
+						   MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD);
 				}
 			}
 		}
 		for(int i=0;i<nlist;++i)
-			if(!recv[i].empty())
-				RemoveVector(nghost[i],recv[i]);
+		  if(!recv[static_cast<size_t>(i)].empty())
+		    RemoveVector(nghost[static_cast<size_t>(i)],recv[static_cast<size_t>(i)]);
 	}
 #endif
 }
@@ -1532,7 +1532,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<int> ToRemoveReduced;
 	if(n<static_cast<int>(ToRemove.size()))
 	{
-	  ToRemoveReduced.resize(static_cast<int>(ToRemove.size())-n);
+	  ToRemoveReduced.resize(static_cast<int>(ToRemove.size())-static_cast<size_t>(n));
 		copy(ToRemove.begin()+n,ToRemove.end(),ToRemoveReduced.begin());
 		//for(int i=0;i<static_cast<int>(ToRemoveReduced.size());++i)
 		//	ToRemoveReduced[i]-=n;
@@ -1591,7 +1591,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<vector<int> > & ghostpoints=_tessellation.GetDuplicatedPoints();
 	#ifdef RICH_MPI
 	vector<vector<int> > & nghost=_tessellation.GetGhostIndeces();
-	vector<vector<int> > toremoveall(nprocs); // the indeces in the ghost that are removed
+	vector<vector<int> > toremoveall(static_cast<size_t>(nprocs)); // the indeces in the ghost that are removed
 #endif // RICH_MPI
 	for(int i=0;i<nprocs;++i)
 	{
