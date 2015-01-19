@@ -1882,7 +1882,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 			sort(Nghostindex.begin(),Nghostindex.end());
 			for(size_t j=0;j<bremove[i].size();++j)
 			{
-				vector<int> neigh=tess.GetNeighbors(DupPoints[i][bremove[i][j]]);
+			  vector<int> neigh=tess.GetNeighbors(DupPoints[i][static_cast<size_t>(bremove[i][j])]);
 				for(size_t k=0;k<neigh.size();++k)
 				{
 					if(!binary_search(Nghostindex.begin(),Nghostindex.end(),neigh[k]))
@@ -1891,7 +1891,7 @@ vector<int> RemoveMPINeighbors(vector<int> const& toremove,vector<double> const&
 								   Nghostindex.begin());
 					if(index<static_cast<int>(Nghostindex.size()))
 						if(recvmerit[i][indeces[static_cast<size_t>(index)]]>=bmerit[i][j])
-							bad.push_back(DupPoints[i][bremove[i][j]]);
+						  bad.push_back(DupPoints[i][static_cast<size_t>(bremove[i][j])]);
 				}
 			}
 		}

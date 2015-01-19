@@ -610,7 +610,7 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
       throw eo;
     }
   for(size_t i=0;i<indeces.size();++i)
-    vec[indeces[i]]=data[i];
+    vec[static_cast<size_t>(indeces[i])]=data[i];
 }
 
 /*! \brief Performs type casting for an entire vector
