@@ -32,6 +32,10 @@ public:
 	//! \brief class destructor
 	~BinaryLogger(void);
 
+	/*!
+	\brief Creates a log file of the tessellation
+	\param tess The tessellation to log
+	*/
 	void Log(Tessellation3D const& tess)const;
 };
 #endif //BINARYLOGGER_HPP
