@@ -119,6 +119,26 @@ namespace {
   }
 }
 
+HDF5Shortcut::HDF5Shortcut(const string& fname):
+  fname_(fname), data_() {}
+
+void HDF5Shortcut::operator()(const string& field_name,
+			      const vector<double>& array)
+{
+  data_.push_back(std::pair<string,vector<double> >
+		  (field_name, array));
+		  
+}
+
+HDF5Shortcut::~HDF5Shortcut(void)
+{
+  H5File file(H5std_string(fname_),
+	      H5F_ACC_TRUNC);
+
+  for(size_t i=0;i<data_.size();++i)
+    write_std_vector_to_hdf5(file,data_[i].second, data_[i].first);
+}
+
 void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 {
   // Create file
