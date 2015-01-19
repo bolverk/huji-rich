@@ -129,7 +129,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
 	const int rank = get_mpi_rank();
 	const double myarea=tess.GetVolume(rank);
-	int mypoints=(int)floor(npoints*myarea/Area+0.5);
+	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
 	res.reserve(mypoints);
 	vector<Vector2D> cpoints;
@@ -138,7 +138,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	gen_type gen(rank);
 	boost::random::uniform_real_distribution<> dist;
 	// change aboev to have seed==rank
-	while((int)res.size()<mypoints)
+	while(static_cast<int>(res.size())<mypoints)
 	{
 		ran[0]=dist(gen)*(tessEdges[1]-tessEdges[0])+tessEdges[0];
 		ran[1]=dist(gen)*(tessEdges[3]-tessEdges[2])+tessEdges[2];
@@ -155,12 +155,12 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	const double widthx = (upperright.x-lowerleft.x)/static_cast<double>(nx);
 	const double widthy = (upperright.y-lowerleft.y)/static_cast<double>(ny);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
-	nx=(int)floor((tessEdges[1]-tessEdges[0])/widthx+0.5);
-	ny=(int)floor((tessEdges[3]-tessEdges[2])/widthy+0.5);
+	nx=static_cast<int>(floor((tessEdges[1]-tessEdges[0])/widthx+0.5));
+	ny=static_cast<int>(floor((tessEdges[3]-tessEdges[2])/widthy+0.5));
 	vector<Vector2D> res;
 	res.reserve(nx*ny);
-	const int nx0=(int)floor((tessEdges[0]-lowerleft.x)/widthx+0.5);
-	const int ny0=(int)floor((tessEdges[2]-lowerleft.y)/widthy+0.5);
+	const int nx0=static_cast<int>(floor((tessEdges[0]-lowerleft.x)/widthx+0.5));
+	const int ny0=static_cast<int>(floor((tessEdges[2]-lowerleft.y)/widthy+0.5));
 	Vector2D point;
 	int rank=get_mpi_rank();
 	vector<Vector2D> cpoints;
@@ -198,15 +198,15 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
 	double maxcellR=max(min(arc[1],Rmax),Rmin);
 	double minangle=arc[2];
 	double maxangle=arc[3];
-	int nrmin=(int)((mincellR-Rmin)/dr);
-	int nrmax=(int)((maxcellR-Rmin)/dr+0.5);
+	int nrmin=static_cast<int>((mincellR-Rmin)/dr);
+	int nrmax=static_cast<int>((maxcellR-Rmin)/dr+0.5);
 	vector<Vector2D> res;
 	for(int i=nrmin;i<nrmax;++i)
 	{
 		double r=Rmin+i*dr;
 		double dphi=A/r;
-		int phimin=(int)(minangle/dphi);
-		int phimax=(int)(maxangle/dphi+0.5);
+		int phimin=static_cast<int>(minangle/dphi);
+		int phimax=static_cast<int>(maxangle/dphi+0.5);
 		for(int j=phimin;j<phimax;++j)
 		{
 			Vector2D temp(Vector2D(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc));
@@ -233,15 +233,15 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 	double maxcellR=max(min(arc[1],Rmax),Rmin);
 	double minangle=arc[2];
 	double maxangle=arc[3];
-	int nrmin=(int)((pow(max(mincellR,Rmin),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0));
-	int nrmax=(int)((pow(min(maxcellR,Rmax),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0)+0.5);
+	int nrmin=static_cast<int>((pow(max(mincellR,Rmin),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0));
+	int nrmax=static_cast<int>((pow(min(maxcellR,Rmax),alpha+1)-pow(Rmin,alpha+1))/(2*M_PI*(alpha+1)/N0)+0.5);
 	for(int i=nrmin;i<nrmax;++i)
 	{
 		const double r=pow(2*M_PI*i*(alpha+1)/N0+pow(Rmin,alpha+1),1.0/(alpha+1));
 		const int Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
 		const double dphi=2*M_PI/Nphi;
-		int phimin=(int)(minangle/dphi);
-		int phimax=(int)(maxangle/dphi+0.5);
+		int phimin=static_cast<int>(minangle/dphi);
+		int phimax=static_cast<int>(maxangle/dphi+0.5);
 		for(int j=phimin;j<phimax;++j)
 		{
 			pos.Set(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
