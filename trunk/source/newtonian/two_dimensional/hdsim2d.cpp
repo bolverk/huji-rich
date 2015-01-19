@@ -1366,7 +1366,7 @@ namespace
 						MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
 					if(toremove[static_cast<size_t>(index)].empty())
-						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
+					  MPI_Send(&temp,1,MPI_INT,procorder[static_cast<size_t>(i)],1,MPI_COMM_WORLD);
 					else
 					  MPI_Send(&toremove[static_cast<size_t>(index)][0],static_cast<int>(toremove[static_cast<size_t>(index)].size()),
 						   MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD);
@@ -1532,7 +1532,7 @@ vector<int> hdsim::RemoveCells(RemovalStrategy const* remove)
 	vector<int> ToRemoveReduced;
 	if(n<static_cast<int>(ToRemove.size()))
 	{
-	  ToRemoveReduced.resize(static_cast<int>(ToRemove.size())-static_cast<size_t>(n));
+	  ToRemoveReduced.resize(ToRemove.size()-static_cast<size_t>(n));
 		copy(ToRemove.begin()+n,ToRemove.end(),ToRemoveReduced.begin());
 		//for(int i=0;i<static_cast<int>(ToRemoveReduced.size());++i)
 		//	ToRemoveReduced[i]-=n;
