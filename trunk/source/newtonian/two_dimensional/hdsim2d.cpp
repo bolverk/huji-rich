@@ -1350,20 +1350,20 @@ namespace
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
 						recv[index].resize(count);
-						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+						MPI_Recv(&recv[static_cast<size_t>(index)][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
 				}
 				else
 				{
-					MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
+				  MPI_Probe(procorder[static_cast<size_t>(i)],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
 					if(status.MPI_TAG==1)
-						MPI_Recv(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+					  MPI_Recv(&temp,1,MPI_INT,procorder[static_cast<size_t>(i)],1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					else
 					{
 						int count;
 						MPI_Get_count(&status,MPI_INT,&count);
 						recv[index].resize(count);
-						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[i],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+						MPI_Recv(&recv[index][0],count,MPI_INT,procorder[static_cast<size_t>(i)],0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 					}
 					if(toremove[index].empty())
 						MPI_Send(&temp,1,MPI_INT,procorder[i],1,MPI_COMM_WORLD);
