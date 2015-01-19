@@ -82,7 +82,7 @@ namespace
 			tocheck[1]=procpoint;
 			double minusval=0,plusval=0;
 			int minusloc=0,plusloc=0;
-			for(int i=0;i<npoints;++i)
+			for(size_t i=0;i<static_cast<size_t>(npoints);++i)
 			{
 				tocheck[2]=cpoints[i];
 				const Vector2D tocpoint=cpoints[i]-center;
@@ -93,7 +93,7 @@ namespace
 				{	
 					if(angle>plusval)
 					{
-						plusloc=i;
+					  plusloc=static_cast<int>(i);
 						plusval=angle;
 					}
 				}
@@ -101,7 +101,7 @@ namespace
 				{
 					if(angle>minusval)
 					{
-						minusloc=i;
+					  minusloc=static_cast<int>(i);
 						minusval=angle;
 					}
 				}
