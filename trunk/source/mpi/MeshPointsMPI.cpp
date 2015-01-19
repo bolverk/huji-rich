@@ -34,18 +34,6 @@ namespace
 		return res;
 	}
 
-	vector<Vector2D> polygon_clip(vector<Vector2D> const& points,
-		vector<Vector2D> const& vertices)
-	{
-		vector<Vector2D> res;
-		for(vector<Vector2D>::const_iterator point=points.begin(), end_position=points.end();
-			point!=end_position;++point){
-				if(PointInCell(vertices,*point))
-					res.push_back(*point);
-		}
-		return res;
-	}
-
 	//returns minr,maxr,minangle,maxangle
 	boost::array<double,4> GetBindingArc(vector<Vector2D> const& cpoints,
 		Vector2D const& center,Vector2D const& procpoint)
