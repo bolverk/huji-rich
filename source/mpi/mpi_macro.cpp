@@ -1009,7 +1009,7 @@ int MPI_SendVectorPrimitive(vector<Primitive> const& vec,int dest,int tag,
 		return MPI_Send(&temp,1,MPI_DOUBLE,dest,1,comm);
 	}
 	int n=static_cast<int>(vec.size());
-	vector<double> tosend(n*4);
+	vector<double> tosend(static_cast<size_t>(n)*4);
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		tosend[4*i]=vec[i].Density;
@@ -1042,7 +1042,7 @@ void MPI_RecvVectorPrimitive(vector<Primitive> &vec,int dest,int tag,
 	vector<double> temp(static_cast<size_t>(nrecv));
 	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
 	int ntotal=nrecv/4;
-	vec.reserve(ntotal);
+	vec.reserve(static_cast<size_t>(ntotal));
 	for(size_t i=0;i<static_cast<size_t>(ntotal);++i)
 	{
 		Primitive ptemp(temp[4*i],temp[4*i+1],Vector2D(temp[4*i+2],temp[4*i+3]),0,0);
@@ -1062,7 +1062,7 @@ int MPI_SendVectorTracer(vector<vector<double> > const& vec,int dest,int tag,
 	}
 	int n=static_cast<int>(vec.size());
 	int ntracer=static_cast<int>(vec[0].size());
-	vector<double> tosend(n*ntracer);
+	vector<double> tosend(static_cast<size_t>(n*ntracer));
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 	  for(size_t j=0;j<static_cast<size_t>(ntracer);++j)
@@ -1098,7 +1098,7 @@ void MPI_RecvVectorTracer(vector<vector<double> > &vec,int dest,int tag,
 	{
 	  vec[i].resize(static_cast<size_t>(ntracer));
 		for(size_t j=0;j<static_cast<size_t>(ntracer);++j)
-			vec[i][j]=temp[ntracer*i+j];
+		  vec[i][j]=temp[static_cast<size_t>(ntracer)*i+j];
 	}
 }
 
@@ -1112,7 +1112,7 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
 	}
 	int n=static_cast<int>(vec.size());
 	int gradlength=2*static_cast<int>(vec[0].tracers.size())+8;
-	vector<double> tosend(n*gradlength);
+	vector<double> tosend(static_cast<size_t>(n*gradlength));
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		tosend[static_cast<size_t>(gradlength)*i]=vec[i].density.x;
@@ -1259,7 +1259,7 @@ int MPI_SendVectorConserved(vector<Conserved> const& vec,int dest,int tag,
 		return MPI_Send(&temp,1,MPI_DOUBLE,dest,1,comm);
 	}
 	int n=static_cast<int>(vec.size());
-	vector<double> tosend(n*4);
+	vector<double> tosend(static_cast<size_t>(n)*4);
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		tosend[4*i]=vec[i].Mass;
@@ -1293,7 +1293,7 @@ void MPI_RecvVectorConserved(vector<Conserved> &vec,int dest,int tag,
 	vector<double> temp(static_cast<size_t>(nrecv));
 	MPI_Recv(&temp[0],nrecv,MPI_DOUBLE,dest,tag,comm,&status);
 	int ntotal=nrecv/4;
-	vec.reserve(ntotal);
+	vec.reserve(static_cast<size_t>(ntotal));
 	for(size_t i=0;i<static_cast<size_t>(ntotal);++i)
 	{
 		Conserved ctemp(temp[4*i],Vector2D(temp[4*i+2],temp[4*i+3]),temp[4*i+1]);
@@ -1382,7 +1382,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	for(size_t i=0;i<static_cast<size_t>(nprocs);++i)
 	{
 	  int loc=static_cast<int>(lower_bound(occur.begin(),occur.end(),sentme[i])-occur.begin());
-		int index=FindLoc(SentProcs,sentme[i],occur[loc]);
+	  int index=FindLoc(SentProcs,sentme[i],occur[static_cast<size_t>(loc)]);
 		++occur[loc];
 		GhostIndeces[static_cast<size_t>(index)]=torecv[i];
 	}
