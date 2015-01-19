@@ -62,7 +62,7 @@ namespace
 			double temp=abs(cpoints[i]-center);
 			maxcellR=max(maxcellR,temp);
 			etemp.vertices.first=cpoints[i];
-			etemp.vertices.second=cpoints[(i+1)%npoints];
+			etemp.vertices.second=cpoints[(i+1)%static_cast<size_t>(npoints)];
 			mincellR=min(min(mincellR,temp),DistanceToEdge(center,etemp));
 		}
 		// Get the maximum and minimum angles
