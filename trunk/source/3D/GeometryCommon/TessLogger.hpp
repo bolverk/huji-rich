@@ -1,4 +1,4 @@
-/*! \file TesseLogger.hpp
+/*! \file TessLogger.hpp
 \brief Abstract class for a logger for the tessellation in 3D
 \author Elad Steinberg
 */
@@ -8,6 +8,7 @@
 
 #include "Tessellation3D.hpp"
 
+//! \brief Abstract class for debug diagnostics for the tessellation
 class TessLogger
 {
 public:
@@ -17,6 +18,7 @@ public:
 	*/
 	virtual void Log(Tessellation3D const& tess)const=0;
 
+  //! \brief class destructor
   virtual ~TessLogger(void);
 };
 #endif //TESSLOGGER_HPP

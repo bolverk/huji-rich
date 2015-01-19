@@ -19,10 +19,15 @@ public:
   virtual ~Index2FileName(void);
 };
 
+//! \brief Class for creating files names using the pattern prefix+index+postfix
 class Rubric: public Index2FileName
 {
 public:
 
+  /*! \brief Class constructor
+    \param prefix Prefix
+    \param postfix Postfix
+   */
   Rubric(const string& prefix,
 	 const string& postfix);
 

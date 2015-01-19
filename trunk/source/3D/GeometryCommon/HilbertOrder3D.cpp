@@ -47,7 +47,7 @@ bool HilbertCurve3D_shape::operator==(HilbertCurve3D_shape & shape)
 	return b;
 }
 
-// The Hilbert Curve class:
+//! \brief Hilbert Curve
 class HilbertCurve3D
 {
 public:
