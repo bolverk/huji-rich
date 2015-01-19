@@ -698,6 +698,11 @@ template<class T> class ContiguousChunk: public Index2Member<T>
 {
 public:
 
+  /*! \brief Class constructor
+    \param i2m Source list
+    \param low Lower boundary of chunk
+    \param high Higher boundary of chunk
+   */
   ContiguousChunk(const Index2Member<T>& i2m,
 		  size_t low,
 		  size_t high):
