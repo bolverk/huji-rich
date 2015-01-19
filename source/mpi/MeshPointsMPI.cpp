@@ -106,9 +106,9 @@ namespace
 					}
 				}
 			}
-			minangle=atan2(cpoints[minusloc].y-center.y,cpoints[minusloc].x-center.x);
+			minangle=atan2(cpoints[static_cast<size_t>(minusloc)].y-center.y,cpoints[static_cast<size_t>(minusloc)].x-center.x);
 			minangle=(minangle<0) ? (minangle+2*M_PI) : minangle;
-			maxangle=atan2(cpoints[plusloc].y-center.y,cpoints[plusloc].x-center.x);
+			maxangle=atan2(cpoints[static_cast<size_t>(plusloc)].y-center.y,cpoints[static_cast<size_t>(plusloc)].x-center.x);
 			maxangle=(maxangle<0) ? (maxangle+2*M_PI) : maxangle;
 			if(maxangle<minangle)
 				minangle-=2*M_PI;
