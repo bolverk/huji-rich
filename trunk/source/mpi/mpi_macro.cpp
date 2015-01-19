@@ -72,18 +72,18 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 		{
-			res[gradlength*i]=vec[i].density.x;
-			res[gradlength*i+1]=vec[i].density.y;
-			res[gradlength*i+2]=vec[i].pressure.x;
-			res[gradlength*i+3]=vec[i].pressure.y;
-			res[gradlength*i+4]=vec[i].xvelocity.x;
-			res[gradlength*i+5]=vec[i].xvelocity.y;
-			res[gradlength*i+6]=vec[i].yvelocity.x;
-			res[gradlength*i+7]=vec[i].yvelocity.y;
+			res[static_cast<size_t>(gradlength*i)]=vec[static_cast<size_t>(i)].density.x;
+			res[static_cast<size_t>(gradlength*i)+1]=vec[static_cast<size_t>(i)].density.y;
+			res[static_cast<size_t>(gradlength*i)+2]=vec[static_cast<size_t>(i)].pressure.x;
+			res[static_cast<size_t>(gradlength*i)+3]=vec[static_cast<size_t>(i)].pressure.y;
+			res[static_cast<size_t>(gradlength*i)+4]=vec[static_cast<size_t>(i)].xvelocity.x;
+			res[static_cast<size_t>(gradlength*i)+5]=vec[static_cast<size_t>(i)].xvelocity.y;
+			res[static_cast<size_t>(gradlength*i)+6]=vec[static_cast<size_t>(i)].yvelocity.x;
+			res[static_cast<size_t>(gradlength*i)+7]=vec[static_cast<size_t>(i)].yvelocity.y;
 			for(int j=0;j<(gradlength-8)/2;++j)
 			{
-				res[gradlength*i+j*2+8]=vec[i].tracers[j].x;
-				res[gradlength*i+j*2+9]=vec[i].tracers[j].y;
+				res[static_cast<size_t>(gradlength*i)+j*2+8]=vec[static_cast<size_t>(i)].tracers[j].x;
+				res[static_cast<size_t>(gradlength*i)+j*2+9]=vec[static_cast<size_t>(i)].tracers[j].y;
 			}
 		}
 	}
@@ -99,18 +99,18 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 		{
-			vec[i].density.x=temp[gradlength*i];
-			vec[i].density.y=temp[gradlength*i+1];
-			vec[i].pressure.x=temp[gradlength*i+2];
-			vec[i].pressure.y=temp[gradlength*i+3];
-			vec[i].xvelocity.x=temp[gradlength*i+4];
-			vec[i].xvelocity.y=temp[gradlength*i+5];
-			vec[i].yvelocity.x=temp[gradlength*i+6];
-			vec[i].yvelocity.y=temp[gradlength*i+7];
+			vec[static_cast<size_t>(i)].density.x=temp[static_cast<size_t>(gradlength*i)];
+			vec[static_cast<size_t>(i)].density.y=temp[static_cast<size_t>(gradlength*i)+1];
+			vec[static_cast<size_t>(i)].pressure.x=temp[static_cast<size_t>(gradlength*i)+2];
+			vec[static_cast<size_t>(i)].pressure.y=temp[static_cast<size_t>(gradlength*i)+3];
+			vec[static_cast<size_t>(i)].xvelocity.x=temp[static_cast<size_t>(gradlength*i)+4];
+			vec[static_cast<size_t>(i)].xvelocity.y=temp[static_cast<size_t>(gradlength*i)+5];
+			vec[static_cast<size_t>(i)].yvelocity.x=temp[static_cast<size_t>(gradlength*i)+6];
+			vec[static_cast<size_t>(i)].yvelocity.y=temp[static_cast<size_t>(gradlength*i)+7];
 			for(int j=0;j<(gradlength-8)/2;++j)
 			{
-				Vector2D vtemp(temp[gradlength*i+2*j+8],temp[gradlength*i+2*j+9]);
-				vec[i].tracers.push_back(vtemp);
+				Vector2D vtemp(temp[static_cast<size_t>(gradlength*i)+2*j+8],temp[static_cast<size_t>(gradlength*i)+2*j+9]);
+				vec[static_cast<size_t>(i)].tracers.push_back(vtemp);
 			}
 		}
 	}
@@ -126,9 +126,9 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 		{
-			tracer[i].resize(tracerlength);
+			tracer[static_cast<size_t>(i)].resize(tracerlength);
 			for(int j=0;j<tracerlength;++j)
-				tracer[i][j]=data[i*tracerlength+j];
+				tracer[static_cast<size_t>(i)][j]=data[i*tracerlength+j];
 		}
 	}
 
@@ -144,7 +144,7 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 			for(int j=0;j<tracerlength;++j)
-				dtracer[i*tracerlength+j]=ttemp[i][j];
+				dtracer[i*tracerlength+j]=ttemp[static_cast<size_t>(i)][j];
 	}
 
 	void DoubleVectorToPrimitve(vector<double> const& temp,vector<Primitive> &vec,
@@ -161,7 +161,7 @@ namespace
 			Primitive ptemp(temp[4*i],temp[4*i+1],Vector2D(temp[4*i+2],temp[4*i+3]),0,0);
 			ptemp.Energy=eos.dp2e(ptemp.Density,ptemp.Pressure);
 			ptemp.SoundSpeed=eos.dp2c(ptemp.Density,ptemp.Pressure);
-			vec[i]=ptemp;
+			vec[static_cast<size_t>(i)]=ptemp;
 		}
 	}
 
@@ -175,10 +175,10 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 		{
-			res[4*i]=vec[i].Density;
-			res[4*i+1]=vec[i].Pressure;
-			res[4*i+2]=vec[i].Velocity.x;
-			res[4*i+3]=vec[i].Velocity.y;
+			res[4*i]=vec[static_cast<size_t>(i)].Density;
+			res[4*i+1]=vec[static_cast<size_t>(i)].Pressure;
+			res[4*i+2]=vec[static_cast<size_t>(i)].Velocity.x;
+			res[4*i+3]=vec[static_cast<size_t>(i)].Velocity.y;
 		}
 	}
 
@@ -192,7 +192,7 @@ namespace
 			throw eo;
 		}
 		for(int i=0;i<n;++i)
-			vec[i]=Vector2D(data[2*i],data[2*i+1]);
+			vec[static_cast<size_t>(i)]=Vector2D(data[2*i],data[2*i+1]);
 	}
 
 	void Vector2DVectorToDouble(vector<double> &res,vector<Vector2D> const& data)
@@ -205,8 +205,8 @@ namespace
 		}
 		for(int i=0;i<n;++i)
 		{
-			res[2*i]=data[i].x;
-			res[2*i+1]=data[i].y;
+			res[2*i]=data[static_cast<size_t>(i)].x;
+			res[2*i+1]=data[static_cast<size_t>(i)].y;
 		}
 	}
 
@@ -214,7 +214,7 @@ namespace
 	{
 		for(int i=0;i<static_cast<int>(vec.size());++i)
 		{
-			if(vec[i]==data)
+			if(vec[static_cast<size_t>(i)]==data)
 				if(occur==0)
 					return i;
 				else
@@ -270,8 +270,8 @@ int MPI_VectorSend_Vector2D(vector<Vector2D> const& vec,int dest,int tag, MPI_Co
 	vector<double> temp(n*2);
 	for(int i=0;i<n;++i)
 	{
-		temp[2*i]=vec[i].x;
-		temp[2*i+1]=vec[i].y;
+		temp[2*i]=vec[static_cast<size_t>(i)].x;
+		temp[2*i+1]=vec[static_cast<size_t>(i)].y;
 	}
 	int err;
 	err=MPI_Send(&temp[0],2*n,MPI_DOUBLE,dest,tag,comm);
@@ -308,8 +308,8 @@ int MPI_VectorRecv_Vector2D(vector<Vector2D> &vec,int source, int tag, MPI_Comm 
 	err=MPI_Recv(&temp[0],2*n,MPI_DOUBLE,source,tag,comm,MPI_STATUS_IGNORE);
 	for(int i=0;i<n;++i)
 	{
-		vec[i].x=temp[2*i];
-		vec[i].y=temp[2*i+1];
+		vec[static_cast<size_t>(i)].x=temp[2*i];
+		vec[static_cast<size_t>(i)].y=temp[2*i+1];
 	}
 	return err;
 }
@@ -322,8 +322,8 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 	{
 		for(int i=0;i<n;++i)
 		{
-			temp[2*i]=vec[i].x;
-			temp[2*i+1]=vec[i].y;
+			temp[2*i]=vec[static_cast<size_t>(i)].x;
+			temp[2*i+1]=vec[static_cast<size_t>(i)].y;
 		}
 	}
 	int err=MPI_Bcast(&temp[0],n*2,MPI_DOUBLE,root,comm);
@@ -331,8 +331,8 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 	{
 		for(int i=0;i<n;++i)
 		{
-			vec[i].x=temp[2*i];
-			vec[i].y=temp[2*i+1];
+			vec[static_cast<size_t>(i)].x=temp[2*i];
+			vec[static_cast<size_t>(i)].y=temp[2*i+1];
 		}
 	}
 	return err;
@@ -356,46 +356,6 @@ bool PointInsideCell(Tessellation const& tess,int cell_index,Vector2D const & po
 	}
 	return true;
 }
-
-/*void BuildTree(ANNkd_tree *&tree,ANNpointArray &treePoints,
-Tessellation const& tess)
-{
-int N=tess.GetPointNo();
-treePoints=annAllocPts(N,2);
-for(int i=0;i<N;++i)
-{
-treePoints[i][0]=tess.GetMeshPoint(i).x;
-treePoints[i][1]=tess.GetMeshPoint(i).y;
-}
-tree=new ANNkd_tree(treePoints,N,2,1,ANN_KD_SUGGEST);
-return;
-}
-
-void KillTree(ANNkd_tree *&tree,ANNpointArray &treePoints)
-{
-annDeallocPts(treePoints);
-delete tree;
-annClose();
-}
-
-int FindContainingCell(ANNkd_tree *tree,Vector2D const& point)
-{
-ANNpoint queryPt;
-queryPt=annAllocPt(2);
-queryPt[0]=point.x;
-queryPt[1]=point.y;
-ANNidxArray nnIdx; // near neighbor indices
-ANNdistArray dists; // near neighbor distances
-nnIdx = new ANNidx[1]; // allocate near neigh indices
-dists = new ANNdist[1]; // allocate near neighbor dists
-tree->annkSearch(queryPt,1,nnIdx,dists);
-int res=nnIdx[0];
-delete [] nnIdx;
-delete [] dists;
-annDeallocPt(queryPt);
-return res;
-}
-*/
 
 void ConvertDoubleToVector2D(vector<Vector2D> & res,vector<double> const& vec)
 {
@@ -1152,18 +1112,18 @@ int MPI_SendVectorGrad(vector<ReducedPrimitiveGradient2D> const&vec,int dest,int
 	vector<double> tosend(n*gradlength);
 	for(int i=0;i<n;++i)
 	{
-		tosend[gradlength*i]=vec[i].density.x;
-		tosend[gradlength*i+1]=vec[i].density.y;
-		tosend[gradlength*i+2]=vec[i].pressure.x;
-		tosend[gradlength*i+3]=vec[i].pressure.y;
-		tosend[gradlength*i+4]=vec[i].xvelocity.x;
-		tosend[gradlength*i+5]=vec[i].xvelocity.y;
-		tosend[gradlength*i+6]=vec[i].yvelocity.x;
-		tosend[gradlength*i+7]=vec[i].yvelocity.y;
+		tosend[static_cast<size_t>(gradlength*i)]=vec[i].density.x;
+		tosend[static_cast<size_t>(gradlength*i)+1]=vec[i].density.y;
+		tosend[static_cast<size_t>(gradlength*i)+2]=vec[i].pressure.x;
+		tosend[static_cast<size_t>(gradlength*i)+3]=vec[i].pressure.y;
+		tosend[static_cast<size_t>(gradlength*i)+4]=vec[i].xvelocity.x;
+		tosend[static_cast<size_t>(gradlength*i)+5]=vec[i].xvelocity.y;
+		tosend[static_cast<size_t>(gradlength*i)+6]=vec[i].yvelocity.x;
+		tosend[static_cast<size_t>(gradlength*i)+7]=vec[i].yvelocity.y;
 		for(int j=0;j<(gradlength-8)/2;++j)
 		{
-			tosend[gradlength*i+j*2+8]=vec[i].tracers[j].x;
-			tosend[gradlength*i+j*2+9]=vec[i].tracers[j].y;
+			tosend[static_cast<size_t>(gradlength*i)+j*2+8]=vec[i].tracers[j].x;
+			tosend[static_cast<size_t>(gradlength*i)+j*2+9]=vec[i].tracers[j].y;
 		}
 	}
 	return MPI_Send(&tosend[0],gradlength*n,MPI_DOUBLE,dest,tag,comm);
@@ -1193,17 +1153,17 @@ void MPI_RecvVectorGrad(vector<ReducedPrimitiveGradient2D> &vec,int dest,int
 	vec.resize(n);
 	for(int i=0;i<n;++i)
 	{
-		vec[i].density.x=temp[gradlength*i];
-		vec[i].density.y=temp[gradlength*i+1];
-		vec[i].pressure.x=temp[gradlength*i+2];
-		vec[i].pressure.y=temp[gradlength*i+3];
-		vec[i].xvelocity.x=temp[gradlength*i+4];
-		vec[i].xvelocity.y=temp[gradlength*i+5];
-		vec[i].yvelocity.x=temp[gradlength*i+6];
-		vec[i].yvelocity.y=temp[gradlength*i+7];
+		vec[i].density.x=temp[static_cast<size_t>(gradlength*i)];
+		vec[i].density.y=temp[static_cast<size_t>(gradlength*i)+1];
+		vec[i].pressure.x=temp[static_cast<size_t>(gradlength*i)+2];
+		vec[i].pressure.y=temp[static_cast<size_t>(gradlength*i)+3];
+		vec[i].xvelocity.x=temp[static_cast<size_t>(gradlength*i)+4];
+		vec[i].xvelocity.y=temp[static_cast<size_t>(gradlength*i)+5];
+		vec[i].yvelocity.x=temp[static_cast<size_t>(gradlength*i)+6];
+		vec[i].yvelocity.y=temp[static_cast<size_t>(gradlength*i)+7];
 		for(int j=0;j<(gradlength-8)/2;++j)
 		{
-			Vector2D vtemp(temp[gradlength*i+2*j+8],temp[gradlength*i+2*j+9]);
+			Vector2D vtemp(temp[static_cast<size_t>(gradlength*i)+2*j+8],temp[static_cast<size_t>(gradlength*i)+2*j+9]);
 			vec[i].tracers.push_back(vtemp);
 		}
 	}
