@@ -19,6 +19,7 @@ public:
   /*! \brief Calculates the fluxes
     \param tess Tessellation
     \param cells Computational cells
+    \param eos Equation of state
     \param point_velocities Velocities of the mesh generating point
     \return Fluxes
    */

@@ -423,6 +423,9 @@ public:
    */
   const OuterBoundary& getOuterBoundary(void) const;
 
+  /*! \brief Returns hydro boundary conditions
+    \return Hydro boundary conditions
+   */
   const HydroBoundaryConditions& getHydroBoundaryCondition(void) const;
 };
 

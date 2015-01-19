@@ -676,6 +676,9 @@ template<class T> class Echo: public Index2Member<T>
 {
 public:
 
+  /*! \brief Class constructor
+    \param v Source vector
+   */
   Echo(const vector<T>& v):
     v_(v) {}
 
