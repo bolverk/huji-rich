@@ -325,7 +325,7 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 	  MPI_VectorSend_Vector2D(sorted_points[i],static_cast<int>(i),0,MPI_COMM_WORLD);
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,static_cast<int>(i),0,MPI_COMM_WORLD);
-		res.reserve(static_cast<size_t>(res.size()+distance(buf.begin(),buf.end())));
+		res.reserve(res.size()+static_cast<size_t>(distance(buf.begin(),buf.end())));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}
 	for(size_t i=static_cast<size_t>(get_mpi_rank())+1;
@@ -333,7 +333,7 @@ vector<Vector2D> distribute_grid(Tessellation const& process_tess,
 		vector<Vector2D> buf;
 		MPI_VectorRecv_Vector2D(buf,static_cast<int>(i),0,MPI_COMM_WORLD);
 		MPI_VectorSend_Vector2D(sorted_points[i],static_cast<int>(i),0,MPI_COMM_WORLD);
-		res.reserve(res.size()+distance(buf.begin(),buf.end()));
+		res.reserve(res.size()+static_cast<size_t>(distance(buf.begin(),buf.end())));
 		res.insert(res.end(),buf.begin(),buf.end());
 	}
 	return res;
@@ -353,7 +353,7 @@ Vector2D CartesianGridGenerator::operator()(size_t idx) const
 	const size_t i = idx%nx_;
 	const size_t j = idx/nx_;
 	return lower_left_ +
-		Vector2D((upper_right_-lower_left_).x*(0.5+static_cast<double>(i))/(double)nx_,
+	  Vector2D((upper_right_-lower_left_).x*(0.5+static_cast<double>(i))/static_cast<double>(nx_),
 		(upper_right_-lower_left_).y*(0.5+static_cast<double>(j))/static_cast<double>(ny_));
 }
 
