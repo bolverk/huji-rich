@@ -1066,7 +1066,7 @@ int MPI_SendVectorTracer(vector<vector<double> > const& vec,int dest,int tag,
 	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 	  for(size_t j=0;j<static_cast<size_t>(ntracer);++j)
-			tosend[ntracer*i+j]=vec[i][j];
+	    tosend[static_cast<size_t>(ntracer)*i+j]=vec[i][j];
 	}
 	return MPI_Send(&tosend[0],ntracer*n,MPI_DOUBLE,dest,tag,comm);
 }
@@ -1383,7 +1383,7 @@ void SendRecvGhostIndeces(vector<vector<int> > &GhostIndeces,vector<int>
 	{
 	  int loc=static_cast<int>(lower_bound(occur.begin(),occur.end(),sentme[i])-occur.begin());
 	  int index=FindLoc(SentProcs,sentme[i],occur[static_cast<size_t>(loc)]);
-		++occur[loc];
+	  ++occur[static_cast<size_t>(loc)];
 		GhostIndeces[static_cast<size_t>(index)]=torecv[i];
 	}
 }
@@ -1398,7 +1398,7 @@ namespace
 		int SentIndex,Tessellation const& tess)
 	{
 		vector<vector<int> > const& duplicated=tess.GetDuplicatedPoints();
-		vector<int> const& Sent=duplicated[SentIndex];
+		vector<int> const& Sent=duplicated[static_cast<size_t>(SentIndex)];
 		vector<int> index;
 		sort_index(ghost,index);
 		sort(ghost.begin(),ghost.end());
@@ -1413,7 +1413,7 @@ namespace
 				{
 				  const size_t index2=static_cast<size_t>(lower_bound(ghost.begin(),ghost.end(),neigh[j])-
 									  ghost.begin());
-				  res[index[index2]].push_back(Sent[i]);
+				  res[index[static_cast<size_t>(index2)]].push_back(Sent[i]);
 				}
 			}
 		}
@@ -1451,13 +1451,13 @@ namespace
 				vector<int> itemp;
 				for(vector<int>::iterator it=BoundaryNeigh[i][j].begin();it!=
 					BoundaryNeigh[i][j].end();++it)
-					itemp.push_back(Nghost[i][*it]);
+				  itemp.push_back(Nghost[i][static_cast<size_t>(*it)]);
 				sort(itemp.begin(),itemp.end());
-				vector<int> rtemp(1,Nghost[i][BoundaryRemove[i][j]]);
+				vector<int> rtemp(1,Nghost[i][static_cast<size_t>(BoundaryRemove[i][j])]);
 				RemoveList(itemp,rtemp);
 				itemp.insert(itemp.begin(),rtemp[0]);
 				ghostneigh.push_back(itemp);
-				ghosts[j]=Nghost[i][BoundaryRemove[i][j]];
+				ghosts[j]=Nghost[i][static_cast<size_t>(BoundaryRemove[i][j])];
 			}
 			vector<vector<int> > temp=FindLocalNeighbors(Nghost[i],ghosts,static_cast<int>(i),tess);
 			for(size_t j=0;j<BoundaryRemove[i].size();++j)
@@ -1541,16 +1541,16 @@ void GetAMRExtensive(vector<Primitive> &rescells,
 	vector<vector<int> > ToSend2(static_cast<size_t>(nlist));
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 	  for(size_t j=0;j<recv[i].size();++j)
-			ToSend2[i].push_back(DuplicatedPoints[i][recv[i][j]]);
+	    ToSend2[i].push_back(DuplicatedPoints[i][static_cast<size_t>(recv[i][j])]);
 	// recv is the index in the duplicated that was recieved
 	vector<vector<Primitive> > padd;
 	vector<vector<vector<double> > > tadd;
 	SendRecvHydro(proclist,ToSend2,cells,tracers,traceractive,eos,padd,tadd);
 	// rearrange the data
 	int nadd=ElementNumber(padd);
-	rescells.reserve(nadd);
+	rescells.reserve(static_cast<size_t>(nadd));
 	if(traceractive)
-		restracer.reserve(nadd);
+	  restracer.reserve(static_cast<size_t>(nadd));
 	// convert ToSend to their nghost value and sort them
 	for(size_t i=0;i<static_cast<size_t>(nlist);++i)
 	{
