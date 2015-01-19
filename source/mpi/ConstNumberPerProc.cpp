@@ -56,81 +56,81 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 			// Right side
 			otherpoint.x=2*outer_.GetGridBoundary(Right)-otherpoint.x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Right Up side
 			otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Right Down side
 			otherpoint.y=2*outer_.GetGridBoundary(Down)-tproc.GetCellCM(static_cast<int>(i)).y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Center bottom side
 			otherpoint.x=tproc.GetCellCM(static_cast<int>(i)).x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Left Bottom side
 			otherpoint.x=2*outer_.GetGridBoundary(Left)-otherpoint.x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Left side
 			otherpoint.y=tproc.GetCellCM(static_cast<int>(i)).y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Left top side
 			otherpoint.y=2*outer_.GetGridBoundary(Up)-otherpoint.y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Top side
 			otherpoint.x=tproc.GetCellCM(static_cast<int>(i)).x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.x-otherpoint.x)/(dist*dist*dist);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
+			temp=M_PI*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*R[static_cast<size_t>(rank)]*(PointsPerProc_/NPerProc[i]-1)*
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 		}
@@ -152,25 +152,25 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 			//Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
 			point = tproc.GetMeshPoint(rank);
 			const double dist = tproc.GetMeshPoint(rank).distance(tproc.GetMeshPoint(neigh[i]));
-			if (dist<neigheps*min(R[rank], R[neigh[i]]))
+			if (dist<neigheps*min(R[static_cast<size_t>(rank)], R[neigh[i]]))
 			{
-				dx = neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*min(R[rank], R[neigh[i]])/dist;
-				dy = neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*min(R[rank], R[neigh[i]]) / dist;
+				dx = neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*min(R[static_cast<size_t>(rank)], R[neigh[i]])/dist;
+				dy = neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*min(R[static_cast<size_t>(rank)], R[neigh[i]]) / dist;
 			}
 			else
 			{
-				dx -= (NPerProc[rank] - NPerProc[neigh[i]])*(otherpoint.x - point.x)*R[rank] / (PointsPerProc_*dist);
-				dy -= (NPerProc[rank] - NPerProc[neigh[i]])*(otherpoint.y - point.y)*R[rank] / (PointsPerProc_*dist);
+				dx -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
+				dy -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)] / (PointsPerProc_*dist);
 			}
 		}
 	}
 	const double FarFraction = 0.2;
-	old_dx = (old_dx>0) ? min(old_dx, FarFraction*speed_*R[rank]) : -min(-old_dx, FarFraction*speed_*R[rank]);
-	old_dy = (old_dy>0) ? min(old_dy, FarFraction*speed_*R[rank]) : -min(-old_dy, FarFraction*speed_*R[rank]);
-	dx=(dx>0) ? min(dx,speed_*R[rank]) : -min(-dx,speed_*R[rank]);
-	dy=(dy>0) ? min(dy,speed_*R[rank]) : -min(-dy,speed_*R[rank]);
+	old_dx = (old_dx>0) ? min(old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -min(-old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]);
+	old_dy = (old_dy>0) ? min(old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -min(-old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]);
+	dx=(dx>0) ? min(dx,speed_*R[static_cast<size_t>(rank)]) : -min(-dx,speed_*R[static_cast<size_t>(rank)]);
+	dy=(dy>0) ? min(dy,speed_*R[static_cast<size_t>(rank)]) : -min(-dy,speed_*R[static_cast<size_t>(rank)]);
 	//if(rank==0)
-	//	cout<<"Unlimited dx="<<dx<<" dy="<<dy<<" old_dx="<<old_dx<<" old_dy="<<old_dy<<" max allowed="<<speed_*R[rank]<<endl;
+	//	cout<<"Unlimited dx="<<dx<<" dy="<<dy<<" old_dx="<<old_dx<<" old_dy="<<old_dy<<" max allowed="<<speed_*R[static_cast<size_t>(rank)]<<endl;
 	// Combine the two additions
 	dx+=old_dx;
 	dy+=old_dy;
@@ -203,13 +203,13 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 		else
 			dy=0.5*(outer_.GetGridBoundary(Down)-point.y);
 	vector<Vector2D> cor=tproc.GetMeshPoints();
-	cor[rank]=cor[rank]+Vector2D(dx,dy);
+	cor[static_cast<size_t>(rank)]=cor[static_cast<size_t>(rank)]+Vector2D(dx,dy);
 	cor.resize(nproc);
 	// Have all processors have the same points
 	vector<double> dxtemp(nproc),dytemp(nproc);
-	MPI_Gather(&cor[rank].x,1,MPI_DOUBLE,&dxtemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Gather(&cor[static_cast<size_t>(rank)].x,1,MPI_DOUBLE,&dxtemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dxtemp[0],nproc,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	MPI_Gather(&cor[rank].y,1,MPI_DOUBLE,&dytemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Gather(&cor[static_cast<size_t>(rank)].y,1,MPI_DOUBLE,&dytemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dytemp[0],nproc,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	for(int i=0;i<nproc;++i)
 		cor[i]=Vector2D(dxtemp[i],dytemp[i]);
