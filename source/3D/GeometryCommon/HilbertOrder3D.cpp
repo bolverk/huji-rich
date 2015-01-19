@@ -9,15 +9,15 @@
 #define MAX_ROTATION_LENGTH 5
 #define PI 3.14159
 
-// The elementary Hilbert Curve shape:
+//! \brief The elementary Hilbert Curve shape
 class HilbertCurve3D_shape
 {
 public:
-	// Constructor
+	//! \brief Class constructor
 	HilbertCurve3D_shape();
-	// Comparison:
+	//! \brief Comparison
 	bool operator==(HilbertCurve3D_shape & shape);
-	// An array of the 7 unit vector steps defining the shape:
+	//! \brief An array of the 7 unit vector steps defining the shape
 	vector<Vector3D> m_vShapePoints;
 
 };
@@ -51,9 +51,9 @@ bool HilbertCurve3D_shape::operator==(HilbertCurve3D_shape & shape)
 class HilbertCurve3D
 {
 public:
-	// Constructor
+	//! \brief Constructor
 	HilbertCurve3D(void);
-	// Calculate the Hilbert curve distance of a given point, given a required number of iterations:
+	//! \brief Calculate the Hilbert curve distance of a given point, given a required number of iterations
 	size_t Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations);
 
 private:
