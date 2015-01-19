@@ -1,4 +1,4 @@
-/*! \file defualt_cell_updter.hpp
+/*! \file default_cell_updater.hpp
   \brief Default cell update scheme
   \author Almog Yalinewich
  */
@@ -8,6 +8,7 @@
 
 #include "cell_updater.hpp"
 
+//! \brief Default scheme for cell update
 class DefaultCellUpdater: public CellUpdater
 {
 public:

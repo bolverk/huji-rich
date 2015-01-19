@@ -14,6 +14,7 @@ class HDSim3D
 {
 public:
 
+  //! \brief Tracks the progress of a simulation
   class ProgressTracker
   {
   public:

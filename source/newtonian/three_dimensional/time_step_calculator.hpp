@@ -10,6 +10,7 @@
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
 
+//! \brief Abstract class for time step calculator
 class TimeStepCalculator
 {
 public:
