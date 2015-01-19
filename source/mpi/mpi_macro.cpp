@@ -392,13 +392,13 @@ vector<Vector2D> MPI_MassSendRecvVectorVector2D
 		{
 			if(rank<procorder[i])
 			{
-				if(tosend[index].empty())
+			  if(tosend[static_cast<size_t>(index)].empty())
 				{
 					double temp=0;
 					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
 				}
 				else
-					MPI_VectorSend_Vector2D(tosend[index],procorder[i],0,
+				  MPI_VectorSend_Vector2D(tosend[static_cast<size_t>(index)],procorder[i],0,
 					MPI_COMM_WORLD);
 				MPI_Status status;
 				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
@@ -429,13 +429,13 @@ vector<Vector2D> MPI_MassSendRecvVectorVector2D
 					double temp;
 					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
 				}
-				if(tosend[index].empty())
+				if(tosend[static_cast<size_t>(index)].empty())
 				{
 					double temp=0;
 					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
 				}
 				else
-					MPI_VectorSend_Vector2D(tosend[index],procorder[i],0,
+				  MPI_VectorSend_Vector2D(tosend[static_cast<size_t>(index)],procorder[i],0,
 					MPI_COMM_WORLD);
 			}
 		}
@@ -447,17 +447,17 @@ vector<int> GetProcOrder(int rank,int worldsize)
 {
 	if(worldsize==1)
 		return vector<int> ();
-	vector<int> procorder(worldsize-1);
+	vector<int> procorder(static_cast<size_t>(worldsize)-1);
 	if(rank==0)
 	{
-		for(int i=0;i<(worldsize-1);++i)
-			procorder[i]=i+1;
+		for(size_t i=0;i<static_cast<size_t>(worldsize-1);++i)
+		  procorder[i]=static_cast<int>(i)+1;
 	}
 	if(rank!=(worldsize-1))
 	{
-		for(int i=0;i<(worldsize-1);++i)
+		for(size_t i=0;i<static_cast<size_t>(worldsize-1);++i)
 		{
-			int temp=(i-rank+worldsize)%(worldsize-1);
+		  int temp=(static_cast<int>(i)-rank+worldsize)%(worldsize-1);
 			if(temp!=rank)
 				procorder[i]=temp;
 			else
@@ -469,10 +469,10 @@ vector<int> GetProcOrder(int rank,int worldsize)
 		if(worldsize>1)
 		{
 			int half=static_cast<int>(worldsize/2);
-			for(int i=0;i<(worldsize-1);++i)
+			for(size_t i=0;i<static_cast<size_t>(worldsize-1);++i)
 			{
 				if(i%2==0)
-					procorder[i]=half+i/2;
+				  procorder[i]=half+static_cast<int>(i)/2;
 				else
 					procorder[i]=static_cast<int>(i/2)+1;
 			}

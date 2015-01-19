@@ -10,7 +10,7 @@ ifeq ($(MODE),debug)
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
