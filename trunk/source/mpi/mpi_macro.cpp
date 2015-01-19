@@ -191,8 +191,8 @@ namespace
 			UniversalError eo("Sizes do not match in DoubleVectorToVector2D");
 			throw eo;
 		}
-		for(int i=0;i<n;++i)
-			vec[static_cast<size_t>(i)]=Vector2D(data[2*i],data[2*i+1]);
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
+			vec[i]=Vector2D(data[2*i],data[2*i+1]);
 	}
 
 	void Vector2DVectorToDouble(vector<double> &res,vector<Vector2D> const& data)
@@ -203,10 +203,10 @@ namespace
 			UniversalError eo("Sizes do not match in Vector2DVectorToDouble");
 			throw eo;
 		}
-		for(int i=0;i<n;++i)
+		for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
-			res[2*i]=data[static_cast<size_t>(i)].x;
-			res[2*i+1]=data[static_cast<size_t>(i)].y;
+			res[2*i]=data[i].x;
+			res[2*i+1]=data[i].y;
 		}
 	}
 
@@ -214,11 +214,12 @@ namespace
 	{
 		for(int i=0;i<static_cast<int>(vec.size());++i)
 		{
-			if(vec[static_cast<size_t>(i)]==data)
+		  if(vec[static_cast<size_t>(i)]==data){
 				if(occur==0)
 					return i;
 				else
 					--occur;
+		  }
 		}
 		UniversalError eo("Couldn't find number in vector in mpi_macro::FindLoc");
 		eo.AddEntry("data to find",data);
@@ -267,11 +268,11 @@ int MPI_VectorSend_Vector2D(vector<Vector2D> const& vec,int dest,int tag, MPI_Co
 		int err=MPI_Send(&temp,1,MPI_DOUBLE,dest,1,comm);
 		return err;
 	}
-	vector<double> temp(n*2);
-	for(int i=0;i<n;++i)
+	vector<double> temp(static_cast<size_t>(n)*2);
+	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
-		temp[2*i]=vec[static_cast<size_t>(i)].x;
-		temp[2*i+1]=vec[static_cast<size_t>(i)].y;
+		temp[2*i]=vec[i].x;
+		temp[2*i+1]=vec[i].y;
 	}
 	int err;
 	err=MPI_Send(&temp[0],2*n,MPI_DOUBLE,dest,tag,comm);
@@ -301,8 +302,8 @@ int MPI_VectorRecv_Vector2D(vector<Vector2D> &vec,int source, int tag, MPI_Comm 
 	}
 	int n=0;
 	MPI_Get_count(&status,MPI_DOUBLE,&n);
-	vector<double> temp(n);
-	vec.resize(n/2);
+	vector<double> temp(static_cast<size_t>(n));
+	vec.resize(static_cast<size_t>(n)/2);
 	n/=2;
 	int err=0;
 	err=MPI_Recv(&temp[0],2*n,MPI_DOUBLE,source,tag,comm,MPI_STATUS_IGNORE);
