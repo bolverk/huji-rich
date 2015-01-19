@@ -31,7 +31,10 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 */
 void FindEqualIndices(vector<size_t> const & vD_sorted, vector<vector<size_t> > & vOut);
 
-// Reorder a vector according to an index vector (obtained from the 'ordered' function)
+/*! \brief Reorder a vector according to an index vector (obtained from the 'ordered' function)
+  \param v Output
+  \param order New order given by a series of indices
+ */
 template< class T >
 void reorder(vector<T> & v, vector<size_t> const & order)
 {

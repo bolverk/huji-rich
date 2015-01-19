@@ -31,6 +31,10 @@ public:
   Rubric(const string& prefix,
 	 const string& postfix);
 
+  /*! \brief Constructs a file name
+    \param index File index
+    \return File name
+   */
   string operator()(int index);
 
 private:

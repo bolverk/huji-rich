@@ -154,6 +154,7 @@ public:
 
 	/*!
 	\brief Checks if a point is a ghost point or not
+	\param index Point index
 	\return True if is a ghost point, false otherwise
 	*/
 	virtual bool IsGhostPoint(size_t index)const=0;

@@ -19,6 +19,7 @@ public:
     \param tess Tessellation
     \param cells Computational cells
     \param eos Equation of state
+    \return Time step
    */
   virtual double operator()
   (const Tessellation3D& tess,
