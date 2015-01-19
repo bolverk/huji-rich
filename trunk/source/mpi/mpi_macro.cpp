@@ -307,10 +307,10 @@ int MPI_VectorRecv_Vector2D(vector<Vector2D> &vec,int source, int tag, MPI_Comm 
 	n/=2;
 	int err=0;
 	err=MPI_Recv(&temp[0],2*n,MPI_DOUBLE,source,tag,comm,MPI_STATUS_IGNORE);
-	for(int i=0;i<n;++i)
+	for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
-		vec[static_cast<size_t>(i)].x=temp[2*i];
-		vec[static_cast<size_t>(i)].y=temp[2*i+1];
+		vec[i].x=temp[2*i];
+		vec[i].y=temp[2*i+1];
 	}
 	return err;
 }
@@ -318,13 +318,13 @@ int MPI_VectorRecv_Vector2D(vector<Vector2D> &vec,int source, int tag, MPI_Comm 
 int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int rank)
 {
 	int n=static_cast<int>(vec.size());
-	vector<double> temp(n*2);
+	vector<double> temp(static_cast<size_t>(n)*2);
 	if(rank==root)
 	{
-		for(int i=0;i<n;++i)
+	  for(size_t i=0;i<static_cast<size_t>(n);++i)
 		{
-			temp[2*i]=vec[static_cast<size_t>(i)].x;
-			temp[2*i+1]=vec[static_cast<size_t>(i)].y;
+			temp[2*i]=vec[i].x;
+			temp[2*i+1]=vec[i].y;
 		}
 	}
 	int err=MPI_Bcast(&temp[0],n*2,MPI_DOUBLE,root,comm);
@@ -332,8 +332,8 @@ int MPI_VectorBcast_Vector2D(vector<Vector2D> &vec,int root, MPI_Comm comm,int r
 	{
 		for(int i=0;i<n;++i)
 		{
-			vec[static_cast<size_t>(i)].x=temp[2*i];
-			vec[static_cast<size_t>(i)].y=temp[2*i+1];
+			vec[i].x=temp[2*i];
+			vec[i].y=temp[2*i+1];
 		}
 	}
 	return err;
@@ -368,8 +368,8 @@ void ConvertDoubleToVector2D(vector<Vector2D> & res,vector<double> const& vec)
 void ConvertVector2DToDouble(vector<Vector2D> const& vec,vector<double> &res)
 {
   int n=static_cast<int>(vec.size());
-	res.resize(n*2);
-	for(int i=0;i<n;++i)
+  res.resize(static_cast<size_t>(n)*2);
+  for(size_t i=0;i<static_cast<size_t>(n);++i)
 	{
 		res[2*i]=vec[i].x;
 		res[2*i+1]=vec[i].y;
