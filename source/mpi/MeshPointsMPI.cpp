@@ -20,7 +20,7 @@ namespace
 			tess.GetEdge(edge_index[0]).vertices.second.y);
 		res[3]=max(tess.GetEdge(edge_index[0]).vertices.first.y,
 			tess.GetEdge(edge_index[0]).vertices.second.y);
-		for(int i=1;i<n;++i)
+		for(size_t i=1;i<static_cast<size_t>(n);++i)
 		{
 			res[0]=min(min(tess.GetEdge(edge_index[i]).vertices.first.x,
 				tess.GetEdge(edge_index[i]).vertices.second.x),res[0]);

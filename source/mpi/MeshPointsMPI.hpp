@@ -13,8 +13,6 @@
 #include "../tessellation/VoronoiMesh.hpp"
 #include "../misc/utils.hpp"
 
-using namespace std;
-
 /*! \brief Distributes mesh points to the processes
   \param process_tess Tessellation of the processes
   \param grid_generator A function that generates the mesh points
