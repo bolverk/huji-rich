@@ -182,36 +182,41 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 	const double close=0.99999;
 	const double wx=outer_.GetGridBoundary(Right)-outer_.GetGridBoundary(Left);
 	const double wy=outer_.GetGridBoundary(Up)-outer_.GetGridBoundary(Down);
-	if(point.x+dx>close*outer_.GetGridBoundary(Right))
+	if(point.x+dx>close*outer_.GetGridBoundary(Right)){
 		if(outer_.GetGridBoundary(Right)-point.x<(1-close)*wx)
 			dx=-wx*(1-close);
 		else
 			dx=0.5*(outer_.GetGridBoundary(Right)-point.x);
-	if(point.x+dx<close*outer_.GetGridBoundary(Left))
+	}
+	if(point.x+dx<close*outer_.GetGridBoundary(Left)){
 		if(-outer_.GetGridBoundary(Left)+point.x<(1-close)*wx)
 			dx=wx*(1-close);
 		else
 			dx=-0.5*(-outer_.GetGridBoundary(Left)+point.x);
+	}
 	if(point.y+dy>close*outer_.GetGridBoundary(Up))
+	  {
 		if(outer_.GetGridBoundary(Up)-point.y<(1-close)*wy)
 			dy=-wy*(1-close);
 		else
 			dy=0.5*(outer_.GetGridBoundary(Up)-point.y);
-	if(point.y+dy<close*outer_.GetGridBoundary(Down))
+	  }
+	if(point.y+dy<close*outer_.GetGridBoundary(Down)){
 		if(-outer_.GetGridBoundary(Down)+point.y<(1-close)*wy)
 			dy=wy*(1-close);
 		else
 			dy=0.5*(outer_.GetGridBoundary(Down)-point.y);
+	}
 	vector<Vector2D> cor=tproc.GetMeshPoints();
 	cor[static_cast<size_t>(rank)]=cor[static_cast<size_t>(rank)]+Vector2D(dx,dy);
 	cor.resize(nproc);
 	// Have all processors have the same points
-	vector<double> dxtemp(nproc),dytemp(nproc);
+	vector<double> dxtemp(static_cast<size_t>(nproc)),dytemp(static_cast<size_t>(nproc));
 	MPI_Gather(&cor[static_cast<size_t>(rank)].x,1,MPI_DOUBLE,&dxtemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dxtemp[0],nproc,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Gather(&cor[static_cast<size_t>(rank)].y,1,MPI_DOUBLE,&dytemp[0],1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	MPI_Bcast(&dytemp[0],nproc,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	for(int i=0;i<nproc;++i)
+	for(size_t i=0;i<static_cast<size_t>(nproc);++i)
 		cor[i]=Vector2D(dxtemp[i],dytemp[i]);
 	tproc.Update(cor);
 }
