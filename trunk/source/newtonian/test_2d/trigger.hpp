@@ -23,9 +23,15 @@ public:
   virtual ~Trigger(void);
 };
 
+//! \brief Triggers at constant time intervals
 class ConstantTimeInterval: public Trigger
 {
 public:
+
+  /*! \brief Class constructor
+    \param dt Time step
+    \param t_next First trigger time
+   */
   ConstantTimeInterval(double dt, double t_next=0);
 
   bool operator()(const hdsim& sim);

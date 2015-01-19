@@ -17,6 +17,7 @@
 #include "../../misc/universal_error.hpp"
 #include "../../misc/simple_io.hpp"
 
+//! \brief Tessellation debugging diagnostic that writes the data to a binary file
 class BinaryLogger
 {
 private:

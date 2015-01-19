@@ -15,16 +15,28 @@ class LocalContourCriterion
 {
 public:
 
+  /*! \brief Calculates the intersection of the contour with the line between neighboring mesh generating points
+    \param edge Edge between neighbors
+    \param sim Simulation
+    \return A pair. First member is true if the contour intersect the line, and second member is the position of the intersection
+   */
   virtual std::pair<bool,Vector2D> operator()
   (const Edge& edge, const hdsim& sim) const = 0;
 
+  //! \brief Class destructor
   virtual ~LocalContourCriterion(void);
 };
 
+//! \brief Write contour files at consecutive times
 class SequentialContour: public DiagnosticFunction
 {
 public:
 
+  /*! \brief Class constructor
+    \param p_trigger Trigger function
+    \param p_i2f File name generator
+    \param p_lcc Contour function
+   */
   SequentialContour(Trigger* p_trigger,
 		    Index2FileName* p_i2f,
 		    LocalContourCriterion* p_lcc);
