@@ -18,40 +18,40 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 {
 	int nproc=tproc.GetPointNo();
 	const int rank = get_mpi_rank();
-	vector<double> R(nproc);
+	vector<double> R(static_cast<size_t>(nproc));
 	double dx=0;
 	double dy=0;
-	for(int i=0;i<nproc;++i)
-		R[i]=tproc.GetWidth(i);
+	for(size_t i=0;i<static_cast<size_t>(nproc);++i)
+	  R[i]=tproc.GetWidth(static_cast<int>(i));
 	// Make cell rounder
 	const Vector2D& CM=tproc.GetCellCM(rank);
 	Vector2D point = tproc.GetMeshPoint(rank);
 	const double d=abs(CM-tproc.GetMeshPoint(rank));
 	double dxround=0,dyround=0;
-	if(d>0.1*R[rank])
+	if(d>0.1*R[static_cast<size_t>(rank)])
 	{
 		dxround=RoundSpeed_*speed_*(CM.x-point.x);
 		dyround=RoundSpeed_*speed_*(CM.y-point.y);
 	}
 	point = CM;
 	// Find out how many points each proc has
-	vector<int> NPerProc(nproc);
+	vector<int> NPerProc(static_cast<size_t>(nproc));
 	int mypointnumber=tlocal.GetPointNo()+1;
 	MPI_Gather(&mypointnumber,1,MPI_INT,&NPerProc[0],1,MPI_INT,0,MPI_COMM_WORLD);
 	MPI_Bcast(&NPerProc[0],nproc,MPI_INT,0,MPI_COMM_WORLD);
 	// Move point according to density
 	if(mode_==1||mode_==3)
 	{
-		for(int i=0;i<nproc;++i)
+	  for(size_t i=0;i<static_cast<size_t>(nproc);++i)
 		{
-			Vector2D otherpoint=tproc.GetCellCM(i);
+		  Vector2D otherpoint=tproc.GetCellCM(static_cast<int>(i));
 			double dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
-				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
-			double temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-				(point.x-otherpoint.x)/(dist*dist*dist);
+					 (point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[static_cast<size_t>(rank)]*R[i]);
+			double temp=M_PI*pow(R[static_cast<size_t>(rank)],3)*(PointsPerProc_/NPerProc[i]-1)*
+			  (point.x-otherpoint.x)/pow(dist,3);
 			dx+=temp;
-			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
-				(point.y-otherpoint.y)/(dist*dist*dist);
+			temp=M_PI*pow(R[static_cast<size_t>(rank)],3)*(PointsPerProc_/NPerProc[i]-1)*
+			  (point.y-otherpoint.y)/pow(dist,3);
 			dy+=temp;
 			// Right side
 			otherpoint.x=2*outer_.GetGridBoundary(Right)-otherpoint.x;
@@ -74,7 +74,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Right Down side
-			otherpoint.y=2*outer_.GetGridBoundary(Down)-tproc.GetCellCM(i).y;
+			otherpoint.y=2*outer_.GetGridBoundary(Down)-tproc.GetCellCM(static_cast<int>(i)).y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
 				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
 			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
@@ -84,7 +84,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Center bottom side
-			otherpoint.x=tproc.GetCellCM(i).x;
+			otherpoint.x=tproc.GetCellCM(static_cast<int>(i)).x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
 				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
 			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
@@ -104,7 +104,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Left side
-			otherpoint.y=tproc.GetCellCM(i).y;
+			otherpoint.y=tproc.GetCellCM(static_cast<int>(i)).y;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
 				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
 			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
@@ -124,7 +124,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal
 				(point.y-otherpoint.y)/(dist*dist*dist);
 			dy+=temp;
 			// Top side
-			otherpoint.x=tproc.GetCellCM(i).x;
+			otherpoint.x=tproc.GetCellCM(static_cast<int>(i)).x;
 			dist=sqrt((point.x-otherpoint.x)*(point.x-otherpoint.x)+
 				(point.y-otherpoint.y)*(point.y-otherpoint.y)+0.2*R[rank]*R[i]);
 			temp=M_PI*R[rank]*R[rank]*R[rank]*(PointsPerProc_/NPerProc[i]-1)*
