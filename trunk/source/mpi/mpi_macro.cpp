@@ -58,21 +58,6 @@ namespace
 		}
 	}
 
-	void Vector2DVectorToDouble(vector<double> &res,vector<Vector2D> const& data)
-	{
-		int n=static_cast<int>(data.size());
-		if(n*2!=static_cast<int>(res.size()))
-		{
-			UniversalError eo("Sizes do not match in Vector2DVectorToDouble");
-			throw eo;
-		}
-		for(size_t i=0;i<static_cast<size_t>(n);++i)
-		{
-			res[2*i]=data[i].x;
-			res[2*i+1]=data[i].y;
-		}
-	}
-
 	int FindLoc(vector<int> const& vec,int data,int occur)
 	{
 		for(size_t i=0;i<vec.size();++i)
