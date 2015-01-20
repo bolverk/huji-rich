@@ -1,4 +1,5 @@
 #include "hdf5_diagnostics.hpp"
+#include "../../misc/hdf5_utils.hpp"
 
 using namespace H5;
 
@@ -119,155 +120,208 @@ namespace {
   }
 }
 
-HDF5Shortcut::HDF5Shortcut(const string& fname):
-  fname_(fname), data_() {}
+namespace {
+  class MeshGeneratingPointCoordinate: public Index2Member<double>
+  {
+  public:
 
-void HDF5Shortcut::operator()(const string& field_name,
-			      const vector<double>& array)
-{
-  data_.push_back(std::pair<string,vector<double> >
-		  (field_name, array));
-		  
-}
+    MeshGeneratingPointCoordinate(const Tessellation& tess,
+				  double Vector2D::* component):
+      tess_(tess), component_(component) {}
 
-HDF5Shortcut::~HDF5Shortcut(void)
-{
-  H5File file(H5std_string(fname_),
-	      H5F_ACC_TRUNC);
+    size_t getLength(void) const
+    {
+      return static_cast<size_t>(tess_.GetPointNo());
+    }
 
-  for(size_t i=0;i<data_.size();++i)
-    write_std_vector_to_hdf5(file,data_[i].second, data_[i].first);
+    double operator()(size_t i) const
+    {
+      return tess_.GetMeshPoint(static_cast<int>(i)).*component_;
+    }
+
+  private:
+    const Tessellation& tess_;
+    double Vector2D::* component_;
+  };
+
+  class SingleCellPropertyExtractor
+  {
+  public:
+
+    virtual double operator()(const Primitive& p) const = 0;
+  };
+
+  class ThermalPropertyExtractor: public SingleCellPropertyExtractor
+  {
+  public:
+
+    ThermalPropertyExtractor(double Primitive::* var):
+      var_(var) {}
+
+    double operator()(const Primitive& p) const
+    {
+      return p.*var_;
+    }
+
+  private:
+    double Primitive::* var_;
+  };
+
+  class CellVelocityComponentExtractor: public SingleCellPropertyExtractor
+  {
+  public:
+
+    CellVelocityComponentExtractor(double Vector2D::* component):
+      component_(component) {}
+
+    double operator()(const Primitive& p) const
+    {
+      return p.Velocity.*component_;
+    }
+
+  private:
+    double Vector2D::* component_;
+  };
+
+  class CellsPropertyExtractor: public Index2Member<double>
+  {
+  public:
+
+    CellsPropertyExtractor(const hdsim& sim,
+			   const SingleCellPropertyExtractor& scpe):
+      sim_(sim), scpe_(scpe) {}
+
+    size_t getLength(void) const
+    {
+      return static_cast<size_t>(sim_.GetCellNo());
+    }
+
+    double operator()(size_t i) const
+    {
+      return scpe_(sim_.GetCell(static_cast<int>(i)));
+    }
+
+  private:
+    const hdsim& sim_;
+    const SingleCellPropertyExtractor& scpe_;
+  };
+
+  class ConvexHullData
+  {
+  public:
+    
+    vector<double> xvert;
+    vector<double> yvert;
+    vector<double> nvert;
+
+    ConvexHullData(const Tessellation& tess):
+      xvert(),
+      yvert(),
+      nvert(static_cast<size_t>(tess.GetPointNo()))
+    {
+      xvert.reserve(7*static_cast<size_t>(tess.GetPointNo()));
+      yvert.reserve(7*static_cast<size_t>(tess.GetPointNo()));
+      for(int i=0;i<tess.GetPointNo();++i){
+	vector<Vector2D> convhull;
+	ConvexHull(convhull,&tess,i);
+	for(size_t j=0;j<convhull.size();++j){
+	  xvert.push_back(convhull[j].x);
+	  yvert.push_back(convhull[j].y);
+	}
+	nvert[static_cast<size_t>(i)]= static_cast<int>(convhull.size());
+      }
+    }
+  };
+
+  class TracerSlice: public Index2Member<double>
+  {
+  public:
+
+    TracerSlice(const vector<vector<double> >& tracers,
+		size_t index):
+      tracers_(tracers), index_(index) {}
+
+    size_t getLength(void) const
+    {
+      return tracers_.size();
+    }
+		
+    double operator()(size_t i) const
+    {
+      return tracers_[i][index_];
+    }
+
+  private:
+    const vector<vector<double> >& tracers_;
+    const size_t index_;
+  };
+
+  vector<double> cold_flows_block(const hdsim& sim)
+  {
+    vector<double> res(3,0);
+    if(sim.GetColdFlowFlag()){
+      res[0] = 1;
+      sim.GetColdFlowParm(res[1],res[2]);
+    }
+    else
+      res[0] = -1;
+    return res;
+  }
+
+  vector<double> density_floor_block(const hdsim& sim)
+  {
+    vector<double> res(3,0);
+    if(sim.GetDensityFloorFlag()){
+      res[0] = 1;
+      sim.GetDensityFloorParm(res[1],res[2]);
+    }
+    else
+      res[0] = -1;
+    return res;
+  }
 }
 
 void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 {
-  // Create file
-  H5File file(H5std_string(fname),
-	      H5F_ACC_TRUNC);
-
-  // Write time
-  {
-    vector<double> time_vector(1,0);
-    time_vector[0] = sim.GetTime();
-    write_std_vector_to_hdf5(file, time_vector, "time");
-  }
-
-  // Write grid
-  {
-    vector<double> x_coordinate(sim.GetCellNo(),0);
-    vector<double> y_coordinate(sim.GetCellNo(),0);
-    for(int i=0;i<sim.GetCellNo();++i){
-      x_coordinate[static_cast<size_t>(i)] = sim.GetMeshPoint(i).x;
-      y_coordinate[static_cast<size_t>(i)] = sim.GetMeshPoint(i).y;
-    }
-    write_std_vector_to_hdf5(file, x_coordinate, "x_coordinate");
-    write_std_vector_to_hdf5(file, y_coordinate, "y_coordinate");
-  }
-
-  // write processor grid
+  ConvexHullData chd(sim.GetTessellation());
+  HDF5Shortcut h5sc(fname);
+  h5sc("time",vector<double>(1,sim.GetTime()))
+    ("x_coordinate",serial_generate
+     (MeshGeneratingPointCoordinate(sim.GetTessellation(),&Vector2D::x)))
+    ("y_coordinate",serial_generate
+     (MeshGeneratingPointCoordinate(sim.GetTessellation(),&Vector2D::y)))
 #ifdef RICH_MPI
-  const int nproc=sim.GetProcTessellation().GetPointNo();
-  vector<double> xproc(static_cast<size_t>(nproc)),yproc(static_cast<size_t>(nproc));
-  for(int i=0;i<nproc;++i)
-  {
-    xproc[static_cast<size_t>(i)]=sim.GetProcTessellation().GetMeshPoint(i).x;
-    yproc[static_cast<size_t>(i)]=sim.GetProcTessellation().GetMeshPoint(i).y;
-  }
-  write_std_vector_to_hdf5(file,xproc, "proc_x_coordinate");
-  write_std_vector_to_hdf5(file,yproc, "proc_y_coordinate");
+    ("proc_x_coordinate",serial_generate
+     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::x)))
+    ("proc_y_coordinate", serial_generate
+     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::y)))
 #endif
+    ("density",serial_generate
+     (CellsPropertyExtractor(sim,ThermalPropertyExtractor(&Primitive::Density))))
+    ("pressure",serial_generate
+     (CellsPropertyExtractor(sim,ThermalPropertyExtractor(&Primitive::Pressure))))
+    ("x_velocity",serial_generate
+     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::x))))
+    ("y_velocity",serial_generate
+     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::y))))
+    ("x position of vertices",chd.xvert)
+    ("y position of vertices",chd.yvert)
+    ("Number of vertices in cell",chd.nvert)
+    ("Cold Flow parameters",cold_flows_block(sim))
+    ("Cfl Number",vector<double>(1,sim.GetCfl()))
+    ("Cycle number",vector<int>(1,sim.GetCycle()))
+    ("Density floor parameters",density_floor_block(sim))
+    ("Custom evolution indices",
+     list_static_cast<int,size_t>(sim.custom_evolution_indices));
 
-  // Write hydrodynamic variables
-  {
-    vector<double> density_list(static_cast<size_t>(sim.GetCellNo()));
-    vector<double> pressure_list(static_cast<size_t>(sim.GetCellNo()));
-    vector<double> x_velocity_list(static_cast<size_t>(sim.GetCellNo()));
-    vector<double> y_velocity_list(static_cast<size_t>(sim.GetCellNo()));
-    for(int i=0;i<sim.GetCellNo();++i){
-      density_list[static_cast<size_t>(i)] = sim.GetCell(i).Density;
-      pressure_list[static_cast<size_t>(i)] = sim.GetCell(i).Pressure;
-      x_velocity_list[static_cast<size_t>(i)] = sim.GetCell(i).Velocity.x;
-      y_velocity_list[static_cast<size_t>(i)] = sim.GetCell(i).Velocity.y;
-    }
-    write_std_vector_to_hdf5(file,density_list,"density");
-    write_std_vector_to_hdf5(file,pressure_list,"pressure");
-    write_std_vector_to_hdf5(file,x_velocity_list,"x_velocity");
-    write_std_vector_to_hdf5(file,y_velocity_list,"y_velocity");
+  if(!sim.getTracers().empty()){
+    h5sc("Number of tracers",vector<int>(1,static_cast<int>(sim.getTracers()[0].size())));
+    for(size_t i=0;i<sim.getTracers()[0].size();++i)
+      h5sc("Tracer number "+int2str(static_cast<int>(i)+1),
+	   serial_generate(TracerSlice(sim.getTracers(),i)));
   }
-  // write cell vertices
-  // Do the convex hull for each point
-  vector<Vector2D> convhull;
-  vector<double> xvert,yvert;
-  vector<int> nvert(static_cast<size_t>(sim.GetCellNo()));
-  xvert.reserve(static_cast<size_t>(7*sim.GetCellNo()));
-  yvert.reserve(static_cast<size_t>(7*sim.GetCellNo()));
-  for(int i=0;i<sim.GetCellNo();++i)
-    {
-      ConvexHull(convhull,&sim.GetTessellation(),i);
-      for(int j=0;j<static_cast<int>(convhull.size());++j)
-	{
-	  xvert.push_back(convhull[static_cast<size_t>(j)].x);
-	  yvert.push_back(convhull[static_cast<size_t>(j)].y);
-	}
-      nvert[static_cast<size_t>(i)]=static_cast<int>(convhull.size());
-    }
-  write_std_vector_to_hdf5(file,xvert,"x position of vertices");
-  write_std_vector_to_hdf5(file,yvert,"y position of vertices");
-  write_std_vector_to_hdf5(file,nvert,"Number of vertices in cell");
-
-  // write tracers if needed
-  vector<vector<double> > tracers=sim.getTracers();
-  vector<int> number_of_tracers;
-  number_of_tracers.push_back(0);
-  if(!tracers.empty())
-    number_of_tracers[0]=static_cast<int>(tracers[0].size());
-  write_std_vector_to_hdf5(file,number_of_tracers,"Number of tracers");
-  if(!tracers.empty())
-    {
-      for(int i=0;i<static_cast<int>(tracers[0].size());++i)
-	{
-	  vector<double> tracer_temp(tracers.size(),0);
-	  for(int j=0;j<static_cast<int>(tracers.size());++j)
-	    tracer_temp[static_cast<size_t>(j)]=tracers[static_cast<size_t>(j)][static_cast<size_t>(i)];
-	  write_std_vector_to_hdf5(file,tracer_temp,"Tracer number "+int2str(i+1));
-	}
-    }
-  // write the coldflows parameters
-  vector<double> coldflows(3,0);
-  if(sim.GetColdFlowFlag())
-    {
-      coldflows[0]=1;
-      double a,b;
-      sim.GetColdFlowParm(a,b);
-      coldflows[1]=a;
-      coldflows[2]=b;
-    }
   else
-    coldflows[0]=-1;
-  write_std_vector_to_hdf5(file,coldflows,"Cold Flow parameters");
-  // write the cfl
-  vector<double> cfl(1,0);
-  cfl[0]=sim.GetCfl();
-  write_std_vector_to_hdf5(file,cfl,"Cfl number");
-  // write the cycle number
-  vector<int> cycle_number(1,0);
-  cycle_number[0]=sim.GetCycle();
-  write_std_vector_to_hdf5(file,cycle_number,"Cycle number");
-  // write the density floor parameters
-  vector<double> densityfloor(3,0);
-  if(sim.GetDensityFloorFlag())
-    {
-      densityfloor[0]=1;
-      double d_min,p_min;
-      sim.GetDensityFloorParm(d_min,p_min);
-      densityfloor[1]=d_min;
-      densityfloor[2]=p_min;
-    }
-  else
-    densityfloor[0]=-1;
-  write_std_vector_to_hdf5(file,densityfloor,"Density floor parameters");
-  // write the custom evolution indeces
-  write_std_vector_to_hdf5(file,sim.custom_evolution_indices,"Custom evolution indeces");
+    h5sc("Number of tracers",vector<int>(1,0));
 }
 
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState

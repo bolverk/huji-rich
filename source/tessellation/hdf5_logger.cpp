@@ -1,7 +1,7 @@
 #include "hdf5_logger.hpp"
 #include "../misc/utils.hpp"
 #include "tessellation.hpp"
-#include "../newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "../misc/hdf5_utils.hpp"
 
 HDF5Logger::HDF5Logger(const string& fname):
   fname_(fname) {}
