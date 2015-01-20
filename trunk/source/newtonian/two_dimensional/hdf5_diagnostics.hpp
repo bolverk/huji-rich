@@ -13,31 +13,6 @@
 #include "diagnostics.hpp"
 #include "Reset.hpp"
 
-//! \brief High level function for writing hdf5 files
-class HDF5Shortcut
-{
-public:
-
-  /*! \brief Class constructor
-    \param fname Name of hdf5 file
-   */
-  HDF5Shortcut(const string& fname);
-
-  /*! \brief Adds data set
-    \param field_name Name of dataset
-    \param array Data
-   */
-  void operator()(const string& field_name,
-		  const vector<double>& array);
-
-  //! \brief Class destructor. Dumps data to file
-  ~HDF5Shortcut(void);
-
-private:
-  const string fname_;
-  vector<std::pair<string, vector<double> > > data_;
-};
-
 /*!
 \brief Writes the simulation data into an HDF5 file
 \param sim The hdsim class of the simulation
