@@ -134,10 +134,10 @@ public:
   void output(void);
 
   /*! \brief Returns a facet.
-    \param index The faet to return.
-    \returns A pointer to the selected facet.
+    \param index Facet index
+    \returns A reference to the selected facet.
   */
-  facet* get_facet(int index);
+  const facet& get_facet(int index) const;
 
   /*! \brief Returns a coordinate of a vertice.
     \param Facet The index of the facet to check.

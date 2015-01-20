@@ -547,9 +547,9 @@ const vector<Vector2D>& Delaunay::getCor(void) const
   return cor;
 }
 
-facet* Delaunay::get_facet(int index)
+const facet& Delaunay::get_facet(int index) const
 {
-	return &f[static_cast<size_t>(index)];
+	return f[static_cast<size_t>(index)];
 }
 
 double Delaunay::get_facet_coordinate(int Facet,int vertice, int dim)
