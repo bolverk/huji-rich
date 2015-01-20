@@ -588,6 +588,7 @@ namespace {
 VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
 	OuterBoundary const& bc):
 	logger(0),
+	vertices_(),
 	eps(1e-8),
 	obc(0),
 	cell_edges(vector<Edge> ()),
@@ -743,6 +744,7 @@ vector<int> VoronoiMesh::GetSelfPoint(void)const
 
 VoronoiMesh::VoronoiMesh():
 	logger(0),
+	vertices_(),
 	eps(1e-8),
 	obc(0),
 	cell_edges(vector<Edge> ()),
@@ -761,6 +763,7 @@ VoronoiMesh::VoronoiMesh():
 
 VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
   logger(other.logger),
+  vertices_(other.vertices_),
   eps(other.eps),
   obc(other.obc),
   cell_edges(other.cell_edges),

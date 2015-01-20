@@ -218,6 +218,7 @@ public:
 
   void GetNeighborNeighbors(vector<int> &result, int point)const;
 private:
+  vector<Vector2D> vertices_;
 	double eps;
 	OuterBoundary const* obc;
 	vector<Edge> cell_edges;
