@@ -786,7 +786,7 @@ void VoronoiMesh::build_v()
 	//	vector<int>::iterator it;
 	Vector2D center,center_temp;
 	int j;
-	facet *to_check;
+	facet to_check;
 	Edge edge_temp;
 	Vector2D p_temp;
 	mesh_vertices.clear();
@@ -805,22 +805,22 @@ void VoronoiMesh::build_v()
 		to_check=Tri.get_facet(i);
 		for(j=0;j<3;++j)
 		{
-			if(to_check->neighbors[static_cast<size_t>(j)]==Tri.get_last_loc())
+			if(to_check.neighbors[static_cast<size_t>(j)]==Tri.get_last_loc())
 				continue;
-			if(to_check->neighbors[static_cast<size_t>(j)]<i)
+			if(to_check.neighbors[static_cast<size_t>(j)]<i)
 				continue;
-			center_temp=centers[static_cast<size_t>(to_check->neighbors[static_cast<size_t>(j)])];
+			center_temp=centers[static_cast<size_t>(to_check.neighbors[static_cast<size_t>(j)])];
 			{
 				edge_temp.vertices.first = center;
 				edge_temp.vertices.second = center_temp;
-				edge_temp.neighbors.first = to_check->vertices[static_cast<size_t>(j)];
-				edge_temp.neighbors.second = to_check->vertices[static_cast<size_t>(j+1)%3];
+				edge_temp.neighbors.first = to_check.vertices[static_cast<size_t>(j)];
+				edge_temp.neighbors.second = to_check.vertices[static_cast<size_t>(j+1)%3];
 
 				if(legal_edge(&edge_temp))
 				{
 					// I added a change here, if edge has zero length I don't add it.
 					if(edge_temp.GetLength()>eps*sqrt(Tri.GetFacetRadius(i)*
-						Tri.GetFacetRadius(to_check->neighbors[static_cast<size_t>(j)])))
+						Tri.GetFacetRadius(to_check.neighbors[static_cast<size_t>(j)])))
 					{
 						{
 							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
