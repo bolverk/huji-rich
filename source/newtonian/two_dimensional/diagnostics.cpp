@@ -7,6 +7,7 @@ using std::ios;
 
 void DisplayError(UniversalError const& eo)
 {
+  cout.precision(14);
   cout << eo.GetErrorMessage() << endl;
   for(size_t i=0;i<eo.GetFields().size();++i)
     cout << eo.GetFields()[i] << " = "<< eo.GetValues()[i] << endl;
