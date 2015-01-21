@@ -1,11 +1,28 @@
 #include "VoronoiMesh.hpp"
 #include <cmath>
 #include "../misc/simple_io.hpp"
+#include "hdf5_logger.hpp"
 
 using std::abs;
 
 namespace {
-  #ifdef RICH_MPI
+#ifdef RICH_MPI
+
+  template<class T> void tidy(vector<T>& v)
+  {
+    if(!v.empty()){
+      sort(v.begin(),v.end());
+      v = unique(v);
+    }
+  }
+
+  vector<Vector2D> my_convex_hull(const Tessellation& tess,
+				  int index)
+  {
+    vector<Vector2D> res;
+    ConvexHull(res,&tess,index);
+    return res;
+  }
 
 	// Send/Recv points from other processors and moves periodic points.
 	// Returns the new points as well as the self index of the points that where kept
@@ -15,20 +32,15 @@ namespace {
 		const& points,OuterBoundary const* obc,vector<int> &selfindex,
 		vector<int> &sentproc,vector<vector<int> > &sentpoints)
 	{
+	  tidy(cornerproc);
 		vector<Vector2D> res;
-		if(!cornerproc.empty())
-		{
-			sort(cornerproc.begin(),cornerproc.end());
-			cornerproc=unique(cornerproc);
-		}
 		res.reserve(points.size());
 		selfindex.clear();
 		int npoints=static_cast<int>(points.size());
 		int nproc=vproc.GetPointNo();
 		const double dx=obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left);
 		const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
-		vector<Vector2D> cproc;
-		ConvexHull(cproc,&vproc,rank);
+		const vector<Vector2D> cproc = my_convex_hull(vproc,rank);
 		int ncorner=static_cast<int>(cornerproc.size());
 		vector<vector<Vector2D> > cornerpoints;
 		vector<int> realcornerproc;
@@ -166,16 +178,21 @@ namespace {
 			}
 			if(good)
 				continue;
-			voronoi_loggers::BinLogger log("verror.bin");
+			HDF5Logger log("verror"+int2str(get_mpi_rank())+".h5");
 			log.output(vproc);
 			UniversalError eo("Point is not inside any processor");
 			eo.AddEntry("CPU rank",rank);
 			eo.AddEntry("Point number",i);
 			eo.AddEntry("Point x cor",points[static_cast<size_t>(i)].x);
 			eo.AddEntry("Point y cor",points[static_cast<size_t>(i)].y);
-			for(int k=0;k<nneigh;++k)
+			for(int k=0;k<nneigh;++k){
 				eo.AddEntry("Neighbor "+int2str(k)+" is cpu "
 					    ,static_cast<double>(realneighproc[static_cast<size_t>(k)]));
+				for(size_t l=0;l<neighpoints[k].size();++l){
+				  eo.AddEntry("neighbor point x",neighpoints[k][l].x);
+				  eo.AddEntry("neighbor point y",neighpoints[k][l].y);
+				}
+			}			
 			for(int k=0;k<ncorner;++k)
 				eo.AddEntry("Corner "+int2str(k)+" is cpu "
 					    ,static_cast<double>(realcornerproc[static_cast<size_t>(k)]));
