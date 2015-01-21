@@ -149,6 +149,8 @@ namespace {
   public:
 
     virtual double operator()(const Primitive& p) const = 0;
+
+    virtual ~SingleCellPropertyExtractor(void) {}
   };
 
   class ThermalPropertyExtractor: public SingleCellPropertyExtractor
