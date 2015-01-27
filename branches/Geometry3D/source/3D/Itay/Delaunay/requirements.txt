@@ -1,1 +1,2 @@
-You must give at least one requirement to install (see "pip help install")
+numpy==1.9.1
+scipy==0.15.1
