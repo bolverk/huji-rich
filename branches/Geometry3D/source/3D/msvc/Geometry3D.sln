@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rdParty", "3rdParty", "{EE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tetgenutil", "..\3rdParty\tetgen-1.5.0\msvc\tetgenutil\tetgenutil.vcxproj", "{BE52FDC7-95D7-456D-93AD-DEB67DB67144}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voronoi", "..\Itay\Delaunay\Voronoi\Voronoi.vcxproj", "{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -87,6 +89,14 @@ Global
 		{BE52FDC7-95D7-456D-93AD-DEB67DB67144}.Release|Win32.Build.0 = Release|Win32
 		{BE52FDC7-95D7-456D-93AD-DEB67DB67144}.Release|x64.ActiveCfg = Release|x64
 		{BE52FDC7-95D7-456D-93AD-DEB67DB67144}.Release|x64.Build.0 = Release|x64
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Debug|Win32.Build.0 = Debug|Win32
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Debug|x64.ActiveCfg = Debug|x64
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Debug|x64.Build.0 = Debug|x64
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Release|Win32.ActiveCfg = Release|Win32
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Release|Win32.Build.0 = Release|Win32
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Release|x64.ActiveCfg = Release|x64
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,5 +108,6 @@ Global
 		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE8} = {65C6C835-9DB6-43A8-A034-F6EB11207A02}
 		{49FC313B-D9DF-4366-A33F-FF8831B8BEE1} = {EE2AE410-6B22-4F15-9086-FEA8246097D7}
 		{BE52FDC7-95D7-456D-93AD-DEB67DB67144} = {EE2AE410-6B22-4F15-9086-FEA8246097D7}
+		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B} = {E9D2AE5B-9B70-493B-A294-52201A193E56}
 	EndGlobalSection
 EndGlobal

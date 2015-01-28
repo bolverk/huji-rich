@@ -141,14 +141,14 @@ TEST(VoroPlusPlus, FaceStore)
 		int numVertices = rand() % 6 + 2;
 		for (int j = 0; j < numVertices; j++)
 			vertices.push_back(Vector3D(rand(), rand(), rand()));
-		int index = store.StoreFace(vertices);
+		size_t index = store.StoreFace(vertices);
 		ASSERT_EQ(index, i);
 		faces.push_back(store.GetFace(index));
 	}
 
 	for (int i = 99; i >= 0; i--)
 	{
-		int index = store.StoreFace(faces[i].vertices);
+		size_t index = store.StoreFace(faces[i].vertices);
 		ASSERT_EQ(index, i);
 	}
 }

@@ -138,7 +138,7 @@ vector<Vector3D>& VoroPlusPlus::GetAllCM()
 
 void VoroPlusPlus::GetNeighborNeighbors(vector<size_t> &result, size_t point) const
 {
-	set<int> allNeighbors;
+	set<size_t> allNeighbors;
 	auto neighbors = GetNeighbors(point);
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++)
 	{

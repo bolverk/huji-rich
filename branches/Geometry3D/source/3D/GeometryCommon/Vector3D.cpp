@@ -1,6 +1,8 @@
 #include <cmath>
 #include <math.h>
 #include "Vector3D.hpp"
+#include <iostream>
+#include <string>
 
 #define EPSILON 1e-12
 
@@ -44,6 +46,11 @@ Vector3D RotateZ(Vector3D const& v, double a)
 double abs(Vector3D const& v)
 {
 	return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
+double abs2(Vector3D const &v)
+{
+	return v.x*v.x + v.y*v.y + v.z*v.z;
 }
 
 Vector3D::Vector3D(void) :
@@ -232,4 +239,30 @@ void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & v
 		vZ[ii] = vIn[ii].z;
 	}
 	return;
+}
+
+ostream& operator<< (ostream& output, const Vector3D& v)
+{
+	output << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+	return output;
+}
+
+bool Vector3D::operator<(const Vector3D &other) const
+{
+	double diff = x - other.x;
+	if (diff < -EPSILON)
+		return false;
+	if (diff > EPSILON)
+		return true;
+	diff = y - other.y;
+	if (diff < -EPSILON)
+		return false;
+	if (diff > EPSILON)
+		return true;
+	diff = z - other.z;
+	if (diff < -EPSILON)
+		return false;
+	if (diff > EPSILON)
+		return true;
+	return false;
 }

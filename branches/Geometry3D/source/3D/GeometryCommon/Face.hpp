@@ -56,7 +56,7 @@ public:
 	*/
 	void AddNeighbor(size_t cell, bool overlapping=false);
 
-	int NumNeighbors() const { return _neighbors.size(); }
+	size_t NumNeighbors() const { return _neighbors.size(); }
 	boost::optional<const NeighborInfo> Neighbor1() const 
 	{
 		if (_neighbors.size() > 0)
