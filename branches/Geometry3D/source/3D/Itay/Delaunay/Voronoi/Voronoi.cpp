@@ -8,12 +8,14 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include "Tetrahedron.hpp"
 
 using namespace std;
 
 void UseVoroPlusPlus(const vector<Vector3D>& points);
+
+void RunTetGen(const vector<Vector3D> &points, tetgenio &out);
 void UseTetGen(const vector<Vector3D>& points);
-Vector3D FindCircumcenter(const vector<Vector3D>& vertices);
 
 int main()
 {
@@ -25,7 +27,7 @@ int main()
 		Vector3D(59, 92, 5),
 		Vector3D(84, 0, 32) };
 
-	// UseVoroPlusPlus(vertices);
+	UseVoroPlusPlus(vertices);
 	UseTetGen(vertices);
 
 #ifdef _DEBUG
@@ -62,9 +64,10 @@ void UseVoroPlusPlus(const vector<Vector3D>& points)
 		cout << *it << endl;
 }
 
-void UseTetGen(const vector<Vector3D>& points)
+
+void RunTetGen(const vector<Vector3D> &points, tetgenio &out)
 {
-	tetgenio in, out;
+	tetgenio in;
 
 	in.firstnumber = 0;
 	in.pointlist = new REAL[points.size() * 3];
@@ -76,80 +79,32 @@ void UseTetGen(const vector<Vector3D>& points)
 		in.pointlist[index++] = it->z;
 	}
 	in.numberofpoints = (int)points.size();
-	
-	tetgenbehavior b;
-	b.parse_commandline("-efn");
-	tetrahedralize(&b, &in, &out);
 
+	tetgenbehavior b;
+	b.parse_commandline("efn");
+	tetrahedralize(&b, &in, &out);
+}
+
+void UseTetGen(const vector<Vector3D>& points)
+{
+	tetgenio out;
+
+	RunTetGen(points, out);
 	cout << "Calculated " << out.numberoftetrahedra << " tetrahedra" << endl;
-	vector<vector<int>> tetrahedra;
+	vector<Tetrahedron> tetrahedra;
 	int offset = 0;
 	for (int i = 0; i < out.numberoftetrahedra; i++)
 	{
-		vector<int> indices(4);
-		for (int j = 0; j < 4; j++)
-			indices[j] = out.tetrahedronlist[offset++];
-		tetrahedra.push_back(indices);
-	}
-
-	for (int i = 0; i < tetrahedra.size(); i++)
-	{
-		vector<Vector3D> vertices(4);
+		vector<Vector3D> vertices;
 		for (int j = 0; j < 4; j++)
 		{
-			vertices[j] = points[tetrahedra[i][j]];
-			cout << vertices[j] << " ";
+			int ptIndex = out.tetrahedronlist[offset++];
+			vertices.push_back(points[ptIndex]);
 		}
-		Vector3D center = FindCircumcenter(vertices);
-		cout << ": " << center << endl;
+		Tetrahedron t(vertices);
+		tetrahedra.push_back(t);
+		// cout << t << ": " << t.center() << endl;
+		cout << t.center() << endl;
 	}
-}
-
-// \brief Find the circumcenter of a tetrahedron
-// \param vertices - a vector of the 4 corners
-// \returns The circumcenter
-// \remark Taken from here: http://mathworld.wolfram.com/Circumsphere.html
-Vector3D FindCircumcenter(const vector<Vector3D>& vertices)
-{
-	if (vertices.size() != 4)
-		throw invalid_argument("Only tetrahedra are supported");
-
-	Vector3D v1 = vertices[0];
-	Vector3D v2 = vertices[1];
-	Vector3D v3 = vertices[2];
-	Vector3D v4 = vertices[3];
-
-	
-	Mat44<double> m_a{ v1.x, v1.y, v1.z, 1,
-		v2.x, v2.y, v2.z, 1,
-		v3.x, v3.y, v3.z, 1,
-		v4.x, v4.y, v4.z, 1 };
-	double a = m_a.determinant();
-
-	Mat44<double> m_Dx = { abs2(v1), v1.y, v1.z, 1,
-		abs2(v2), v2.y, v2.z, 1,
-		abs2(v3), v3.y, v3.z, 1,
-		abs2(v4), v4.y, v4.z, 1 };
-	double Dx = m_Dx.determinant();
-
-	Mat44<double> m_Dy = { abs2(v1), v1.x, v1.z, 1,
-		abs2(v2), v2.x, v2.z, 1,
-		abs2(v3), v3.x, v3.z, 1,
-		abs2(v4), v4.x, v4.z, 1 };
-	double Dy = -m_Dy.determinant();
-
-	Mat44<double> m_Dz = { abs2(v1), v1.x, v1.y, 1,
-		abs2(v2), v2.x, v2.y, 1,
-		abs2(v3), v3.x, v3.y, 1,
-		abs2(v4), v4.x, v4.y, 1 };
-	double Dz = m_Dz.determinant();
-
-	Mat44<double> m_c = { abs2(v1), v1.x, v1.y, v1.z,
-		abs2(v2), v2.x, v2.y, v2.z,
-		abs2(v3), v3.x, v3.y, v3.z,
-		abs2(v4), v4.x, v4.y, v4.z };
-	double c = m_c.determinant();
-
-	return Vector3D(Dx / (2 * a), Dy / (2 * a), Dz / (2 * a));
 }
 
