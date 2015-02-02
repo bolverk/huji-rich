@@ -94,3 +94,11 @@ Vector3D calc_centroid(const Face& face)
 	}
 	return res;
 }
+
+std::ostream& operator<<(std::ostream& output, const Face::NeighborInfo& neighbor)
+{
+	output << neighbor.GetCell();
+	if (neighbor.IsOverlapping())
+		output << "-O";
+	return output;
+}

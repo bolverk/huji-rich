@@ -12,8 +12,8 @@ points = pickle.load(open('points.pickle', 'rb'))
 print(points[:7])
 
 dt = Delaunay(points[:7])
-#for simplex in dt.simplices:
-#    print("%d,%d,%d,%d" % tuple(simplex))
-
-for neighbor in dt.neighbors:
-    print("%d,%d,%d,%d" % tuple(neighbor))
+for i in range(len(dt.simplices)):
+    print(i)
+    print("\t%d,%d,%d,%d" % tuple(dt.simplices[i]))
+    print("\t%d,%d,%d,%d" % tuple(dt.neighbors[i]))
+    print()
