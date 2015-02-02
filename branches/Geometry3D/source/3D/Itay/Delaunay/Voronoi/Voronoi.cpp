@@ -16,6 +16,7 @@ void UseVoroPlusPlus(const vector<Vector3D>& points);
 
 void RunTetGen(const vector<Vector3D> &points, tetgenio &out);
 void UseTetGen(const vector<Vector3D>& points);
+Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary);
 
 int main()
 {
@@ -64,6 +65,36 @@ void UseVoroPlusPlus(const vector<Vector3D>& points)
 		cout << *it << endl;
 }
 
+Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary)
+{
+	// A big tetrahedron that will contain the bounding box, as well as the 8 adjacent boundary boxes,
+	// and with room to spare.
+
+	const Vector3D fur = boundary.FrontUpperRight();
+	const Vector3D bll = boundary.BackLowerLeft();
+	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
+	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
+
+	absFrontUpperRight *= 10;
+	absBackLowerLeft *= -10;
+
+	// The top of the tetrahedron will be on the Y axis
+	vector<Vector3D> tetrahedron;
+	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
+
+	// The bottom face is parallel to the x-z plane
+	double bottomY = absBackLowerLeft.y;
+
+	// The bottom face is a triangle whose lower edge is parallel to the x axis
+	double backZ = absBackLowerLeft.z;
+	tetrahedron.push_back(Vector3D(absBackLowerLeft.x, bottomY, backZ));
+	tetrahedron.push_back(Vector3D(absFrontUpperRight.x, bottomY, backZ));
+
+	// The last triangle edge is on x=0
+	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
+
+	return Tetrahedron(tetrahedron);
+}
 
 void RunTetGen(const vector<Vector3D> &points, tetgenio &out)
 {
@@ -81,12 +112,13 @@ void RunTetGen(const vector<Vector3D> &points, tetgenio &out)
 	in.numberofpoints = (int)points.size();
 
 	tetgenbehavior b;
-	b.parse_commandline("efn");
+	b.parse_commandline("efnQ");
 	tetrahedralize(&b, &in, &out);
 }
 
 void UseTetGen(const vector<Vector3D>& points)
 {
+	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tetgenio out;
 
 	RunTetGen(points, out);

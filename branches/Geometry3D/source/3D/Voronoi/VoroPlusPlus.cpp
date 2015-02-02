@@ -17,85 +17,12 @@ VoroPlusPlus::~VoroPlusPlus()
 
 }
 
-void VoroPlusPlus::Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc)
-{
-	_boundary = bc;
-	Update(points);
-}
-
 void VoroPlusPlus::Update(vector<Vector3D> const& points)
 {
 	_meshPoints = points;
 	RunVoronoi();
 }
 
-size_t VoroPlusPlus::GetPointNo(void) const
-{
-	return _meshPoints.size();
-}
-
-Vector3D VoroPlusPlus::GetMeshPoint(size_t index) const
-{
-	return _meshPoints[index];
-}
-
-Vector3D const& VoroPlusPlus::GetCellCM(size_t index) const
-{
-	return _cells[index].GetCenterOfMass();
-}
-
-/*! \brief Returns the total number of faces
-\return Total number of faces
-*/
-size_t VoroPlusPlus::GetTotalFacesNumber(void) const
-{
-	return _faces.NumFaces();
-}
-
-const Face& VoroPlusPlus::GetFace(size_t index) const
-{
-	return _faces.GetFace(index);
-}
-
-double VoroPlusPlus::GetWidth(size_t index) const
-{
-	return _cells[index].GetWidth();
-}
-
-double VoroPlusPlus::GetVolume(size_t index) const
-{
-	return _cells[index].GetVolume();
-}
-
-vector<size_t>const& VoroPlusPlus::GetCellFaces(size_t index) const
-{
-	return _cells[index].GetFaces();
-}
-
-vector<Vector3D>& VoroPlusPlus::GetMeshPoints(void)
-{
-	return _meshPoints;
-}
-
-vector<size_t> VoroPlusPlus::GetNeighbors(size_t index) const
-{
-	const Cell& cell = _cells[index];
-	vector<size_t> neighbors;
-
-	auto faceIndices = _cells[index].GetFaces();
-	for (size_t i = 0; i < faceIndices.size(); i++)
-	{
-		auto face = GetFace(i);
-		if (face.Neighbor1()->GetCell() == index)
-			neighbors.push_back(face.Neighbor2()->GetCell());
-		else if (face.Neighbor2()->GetCell() == index)
-			neighbors.push_back(face.Neighbor1()->GetCell());
-		else
-			BOOST_ASSERT(false); // One of the neighbors must be us!
-	}
-
-	return neighbors;
-}
 
 Tessellation3D* VoroPlusPlus::clone(void) const
 {
@@ -131,36 +58,6 @@ size_t VoroPlusPlus::GetTotalPointNumber(void)const
 	return _meshPoints.size();
 }
 
-vector<Vector3D>& VoroPlusPlus::GetAllCM()
-{
-	return _allCMs;
-}
-
-void VoroPlusPlus::GetNeighborNeighbors(vector<size_t> &result, size_t point) const
-{
-	set<size_t> allNeighbors;
-	auto neighbors = GetNeighbors(point);
-	for (auto it = neighbors.begin(); it != neighbors.end(); it++)
-	{
-		allNeighbors.insert(*it);
-		auto neighbors2 = GetNeighbors(*it);
-		allNeighbors.insert(neighbors2.begin(), neighbors2.end());
-	}
-
-	// See here: http://stackoverflow.com/a/5034274/871910
-	result.clear();
-	copy(allNeighbors.begin(), allNeighbors.end(), back_inserter(result));
-}
-
-
-Vector3D VoroPlusPlus::Normal(size_t faceIndex) const
-{
-	Face face = GetFace(faceIndex);
-	Cell cell1 = _cells[face.Neighbor1()->GetCell()];
-	Cell cell2 = _cells[face.Neighbor2()->GetCell()];
-
-	return cell1.GetCenterOfMass() - cell2.GetCenterOfMass();
-}
 
 bool VoroPlusPlus::IsGhostPoint(size_t index) const
 {
@@ -168,65 +65,11 @@ bool VoroPlusPlus::IsGhostPoint(size_t index) const
 	return false;
 }
 
-/*!
-\brief Calculates the velocity of a face
-\param p0 The index of the first neighbor
-\param p1 The index of the second neighbor
-\param v0 The velocity of the first neighbor
-\param v1 The velocity of the second neighbor
-\return The velocity of the face
-*/
-Vector3D VoroPlusPlus::CalcFaceVelocity(size_t p0, size_t p1, Vector3D const& v0,
-	Vector3D const& v1) const
-{
-	return Vector3D(); // TODO: Calculate the velocity properly
-}
-
-/*
- * The FaceStore
- */
-
-bool VoroPlusPlus::FaceStore::FindFace(const vector<Vector3D> &vertices, size_t &index) const
-{
-	for (index = 0; index < _faces.size(); index++)
-		if (_faces[index].IdenticalTo(vertices))
-			return true;
-
-	return false;
-}
-
-size_t VoroPlusPlus::FaceStore::StoreFace(const vector<Vector3D> &vertices)
-{
-	size_t index;
-	bool exists = FindFace(vertices, index);
-	if (exists)
-		return index;
-
-	Face face(vertices);
-	index = _faces.size();
-	_faces.push_back(face);
-	return index;
-}
-
-void VoroPlusPlus::FaceStore::Clear()
-{
-	_faces.clear();
-}
-
 void VoroPlusPlus::RunVoronoi()
 {
 	ClearData();
 	auto container = BuildContainer();
 	ExtractResults(*container);
-}
-
-void VoroPlusPlus::ClearData()
-{
-	_faces.Clear();
-	_cells.clear();
-	_cells.resize(_meshPoints.size());
-	_allCMs.clear();
-	_allCMs.resize(_meshPoints.size());
 }
 
 boost::shared_ptr<voro::container> VoroPlusPlus::BuildContainer()
@@ -258,7 +101,8 @@ void VoroPlusPlus::ExtractResults(voro::container &container)
 		// Create the Cell object
 		voro::voronoicell v_cell;
 		container.compute_cell(v_cell, looper);
-		Cell cell(_meshPoints[cellIndex], v_cell, _faces);
+		// Cell cell(_meshPoints[cellIndex], v_cell, _faces);
+		Cell cell = CreateCell(_meshPoints[cellIndex], v_cell);
 		_cells[cellIndex] = cell;
 
 		// Set the face neighbors
@@ -279,7 +123,7 @@ void VoroPlusPlus::ExtractResults(voro::container &container)
 #endif
 }
 
-VoroPlusPlus::Cell::Cell(Vector3D meshPoint, voro::voronoicell &vcell, FaceStore &store)
+TessellationBase::Cell VoroPlusPlus::CreateCell(Vector3D meshPoint, voro::voronoicell &vcell)
 {
 	auto vertices = ExtractAllVertices(meshPoint, vcell);
 
@@ -289,27 +133,30 @@ VoroPlusPlus::Cell::Cell(Vector3D meshPoint, voro::voronoicell &vcell, FaceStore
 	// the indices of each of the vertices.
 
 	int index = 0;
+	vector<size_t> faces;
 	for (int faceNum = 0; faceNum < vcell.number_of_faces(); faceNum++)
 	{
 		int numVertices = f_verts[index++];
 		vector<Vector3D> faceVertices;
 		for (int i = 0; i < numVertices; i++)
 			faceVertices.push_back(vertices[f_verts[index++]]);
-		size_t faceIndex = store.StoreFace(faceVertices);
-		_faces.push_back(faceIndex);
+		size_t faceIndex = _faces.StoreFace(faceVertices);
+		faces.push_back(faceIndex);
 	}
 	BOOST_ASSERT(index == f_verts.size());
 
-	_volume = vcell.volume();
+	double volume = vcell.volume();
 	double cx, cy, cz;
 	vcell.centroid(cx, cy, cz);
-	_centerOfMass = Vector3D(cx, cy, cz) + meshPoint;
-	_center = meshPoint;
+	auto centerOfMass = Vector3D(cx, cy, cz) + meshPoint;
+	//_center = meshPoint;
 	// Volume = (4/3) * Width ^ 3
-	_width = pow(3 / 4 * _volume, 1 / 3);
+	double width = pow(3 / 4 * volume, 1 / 3);
+
+	return Cell(faces, volume, width, meshPoint, centerOfMass);
 }
 
-vector<Vector3D> VoroPlusPlus::Cell::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)
+vector<Vector3D> VoroPlusPlus::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)
 {
 	vector<double> voro_vertices;
 	vector<Vector3D> our_vertices;

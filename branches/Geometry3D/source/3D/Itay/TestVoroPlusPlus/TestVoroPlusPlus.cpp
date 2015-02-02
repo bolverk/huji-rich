@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include "GeometryCommon/Face.hpp"
 #include "GeometryCommon/Vector3D.hpp"
+#include "Voronoi/TessellationBase.hpp"
 #include "Voronoi/VoroPlusPlus.hpp"
 #include "Utilities/assert.hpp"
 #include "GeometryCommon/OuterBoundary3D.hpp"
@@ -132,7 +133,7 @@ TEST(Geometry3D, OuterBoundry3D)
 
 TEST(VoroPlusPlus, FaceStore)
 {
-	VoroPlusPlus::FaceStore store;
+	TessellationBase::FaceStore store;
 	vector<Face> faces;
 
 	for (int i = 0; i < 100; i++)

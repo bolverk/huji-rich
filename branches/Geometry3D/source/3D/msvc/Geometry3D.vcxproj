@@ -151,6 +151,7 @@
     <ClCompile Include="..\GeometryCommon\OuterBoundary3D.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
+    <ClCompile Include="..\Voronoi\TessellationBase.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@
     <ClInclude Include="..\GeometryCommon\TessLogger.hpp" />
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
     <ClInclude Include="..\Utilities\assert.hpp" />
+    <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
   </ItemGroup>
   <ItemGroup>
