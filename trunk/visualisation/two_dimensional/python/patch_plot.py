@@ -10,6 +10,8 @@ def consolidate(fname,g=5./3.):
     res['sound_speed'] = numpy.sqrt(g*res['pressure']/res['density'])
     res['abs_velocity'] = numpy.sqrt(res['x_velocity']**2+res['y_velocity']**2)
     res['mach_number'] = res['abs_velocity']/res['sound_speed']
+    res['log_pressure'] = numpy.log(res['pressure'])
+    res['log_density'] = numpy.log(res['density'])
     f.close()
     return res
 
