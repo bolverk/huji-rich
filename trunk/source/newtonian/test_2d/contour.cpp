@@ -2,6 +2,9 @@
 #include "contour.hpp"
 #include <fstream>
 #include "../../misc/simple_io.hpp"
+#include "../../misc/hdf5_utils.hpp"
+
+LocalContourCriterion::~LocalContourCriterion(void) {}
 
 namespace 
 {
@@ -40,13 +43,48 @@ namespace {
       }
     f.close();
   }
+
+  class ComponentExtractor: public Index2Member<double>
+  {
+  public:
+
+    ComponentExtractor(const vector<Vector2D>& source,
+		       double Vector2D::* component):
+      source_(source), component_(component) {}
+
+    size_t getLength(void) const
+    {
+      return source_.size();
+    }
+
+    double operator()(size_t i) const
+    {
+      return source_[i].*component_;
+    }
+
+  private:
+    const vector<Vector2D>& source_;
+    double Vector2D::* component_;
+  };
+
+  void hdf5_write(const string& output_file,
+		  const vector<Vector2D>& data,
+		  const double time)
+  {
+    if(!data.empty())
+      (HDF5Shortcut(output_file))
+	("time",vector<double>(1,time))
+	("x",serial_generate(ComponentExtractor(data, &Vector2D::x)))
+	("y",serial_generate(ComponentExtractor(data, &Vector2D::y)));
+  }
 }
 
 void SequentialContour::operator()(const hdsim& sim)
 {
   if((*p_trigger_.get())(sim)){
-    ascii_write((*p_i2f_.get())(count_),calc_contour_points(sim,*p_lcc_.get()));
-    write_number(sim.GetTime(),"timestamp_"+(*p_i2f_.get())(count_));
+    hdf5_write((*p_i2f_.get())(count_),
+	       calc_contour_points(sim,*p_lcc_.get()),
+	       sim.GetTime());
     ++count_;
   }
 }

@@ -4,6 +4,8 @@
 #include "../../mpi/mpi_macro.hpp"
 #endif
 
+Index2FileName::~Index2FileName(void) {}
+
 Rubric::Rubric(const string& prefix,
 	       const string& postfix):
   prefix_(prefix), postfix_(postfix) {}

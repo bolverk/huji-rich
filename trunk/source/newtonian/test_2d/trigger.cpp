@@ -1,5 +1,7 @@
 #include "trigger.hpp"
 
+Trigger::~Trigger(void) {}
+
 ConstantTimeInterval::ConstantTimeInterval(double dt, double t_next):
   dt_(dt), t_next_(t_next) {}
 
