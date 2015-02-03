@@ -2,13 +2,13 @@
 //
 
 #include "tetgen.h"
-#include "Mat44.hpp"
+#include "GeometryCommon/Mat44.hpp"
 #include "GeometryCommon/Vector3D.hpp"
 #include "Voronoi/VoroPlusPlus.hpp"
 #include <vector>
 #include <iostream>
 #include <set>
-#include "Tetrahedron.hpp"
+#include "GeometryCommon/Tetrahedron.hpp"
 #include <map>
 #include <sstream>
 #include <string>
