@@ -4,8 +4,29 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include "../Utilities/assert.hpp"
+#include <voro++.hh>
 
 using namespace std;
+
+// This class contains all the voro++ references. This means callers to this library don't need to include voro++.hh,
+// they just need to link against the Voro++ library.
+class VoroPlusPlusImpl
+{
+private:
+	VoroPlusPlus &_voro;
+
+public:
+	VoroPlusPlusImpl(VoroPlusPlus &voro);
+	void Run();
+
+private:
+	int FindMeshPoint(voro::c_loop_all looper);
+	boost::shared_ptr<voro::container> BuildContainer();
+	void ExtractResults(voro::container &container);
+
+	TessellationBase::Cell CreateCell(Vector3D meshPoint, voro::voronoicell &vcell);
+	vector<Vector3D> ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell);
+};
 
 VoroPlusPlus::VoroPlusPlus()
 {
@@ -68,24 +89,32 @@ bool VoroPlusPlus::IsGhostPoint(size_t index) const
 void VoroPlusPlus::RunVoronoi()
 {
 	ClearData();
+	VoroPlusPlusImpl impl(*this);
+	impl.Run();
+}
+
+VoroPlusPlusImpl::VoroPlusPlusImpl(VoroPlusPlus &voro) : _voro(voro) { }
+
+void VoroPlusPlusImpl::Run()
+{
 	auto container = BuildContainer();
 	ExtractResults(*container);
 }
 
-boost::shared_ptr<voro::container> VoroPlusPlus::BuildContainer()
+boost::shared_ptr<voro::container> VoroPlusPlusImpl::BuildContainer()
 {
 	boost::shared_ptr<voro::container> container(new voro::container(
-		_boundary.BackLowerLeft().x, _boundary.FrontUpperRight().x,
-		_boundary.BackLowerLeft().y, _boundary.FrontUpperRight().y,
-		_boundary.BackLowerLeft().z, _boundary.FrontUpperRight().z,
+		_voro._boundary.BackLowerLeft().x, _voro._boundary.FrontUpperRight().x,
+		_voro._boundary.BackLowerLeft().y, _voro._boundary.FrontUpperRight().y,
+		_voro._boundary.BackLowerLeft().z, _voro._boundary.FrontUpperRight().z,
 		20, 20, 20, false, false, false, 20));
 	int num = 0;
-	for (auto it = _meshPoints.begin(); it != _meshPoints.end(); it++)
+	for (auto it = _voro._meshPoints.begin(); it != _voro._meshPoints.end(); it++)
 		container->put(num++, it->x, it->y, it->z);
 	return container;
 }
 
-void VoroPlusPlus::ExtractResults(voro::container &container)
+void VoroPlusPlusImpl::ExtractResults(voro::container &container)
 {
 	int cellNum;
 	voro::c_loop_all looper(container);
@@ -102,28 +131,28 @@ void VoroPlusPlus::ExtractResults(voro::container &container)
 		voro::voronoicell v_cell;
 		container.compute_cell(v_cell, looper);
 		// Cell cell(_meshPoints[cellIndex], v_cell, _faces);
-		Cell cell = CreateCell(_meshPoints[cellIndex], v_cell);
-		_cells[cellIndex] = cell;
+		VoroPlusPlus::Cell cell = CreateCell(_voro._meshPoints[cellIndex], v_cell);
+		_voro._cells[cellIndex] = cell;
 
 		// Set the face neighbors
 		auto faceIndices = cell.GetFaces();
 		for (auto it = faceIndices.begin(); it != faceIndices.end(); it++)
-			_faces.GetFace(*it).AddNeighbor(cellIndex); // asserts if fails, no need to add our own assertion
+			_voro._faces.GetFace(*it).AddNeighbor(cellIndex); // asserts if fails, no need to add our own assertion
 
 		// And finally, the center of mass
-		_allCMs[cellIndex] = cell.GetCenterOfMass();
+		_voro._allCMs[cellIndex] = cell.GetCenterOfMass();
 
 		cellNum++;
 	} while (looper.inc());
 	
-	BOOST_ASSERT(cellNum == _meshPoints.size());
+	BOOST_ASSERT(cellNum == _voro._meshPoints.size());
 #ifdef _DEBUG
-	for (auto it = _cells.begin(); it != _cells.end(); it++)
+	for (auto it = _voro._cells.begin(); it != _voro._cells.end(); it++)
 		BOOST_ASSERT(!it->empty()); // Make sure we've touched every cell
 #endif
 }
 
-TessellationBase::Cell VoroPlusPlus::CreateCell(Vector3D meshPoint, voro::voronoicell &vcell)
+TessellationBase::Cell VoroPlusPlusImpl::CreateCell(Vector3D meshPoint, voro::voronoicell &vcell)
 {
 	auto vertices = ExtractAllVertices(meshPoint, vcell);
 
@@ -140,7 +169,7 @@ TessellationBase::Cell VoroPlusPlus::CreateCell(Vector3D meshPoint, voro::vorono
 		vector<Vector3D> faceVertices;
 		for (int i = 0; i < numVertices; i++)
 			faceVertices.push_back(vertices[f_verts[index++]]);
-		size_t faceIndex = _faces.StoreFace(faceVertices);
+		size_t faceIndex = _voro._faces.StoreFace(faceVertices);
 		faces.push_back(faceIndex);
 	}
 	BOOST_ASSERT(index == f_verts.size());
@@ -153,10 +182,10 @@ TessellationBase::Cell VoroPlusPlus::CreateCell(Vector3D meshPoint, voro::vorono
 	// Volume = (4/3) * Width ^ 3
 	double width = pow(3 / 4 * volume, 1 / 3);
 
-	return Cell(faces, volume, width, meshPoint, centerOfMass);
+	return TessellationBase::Cell(faces, volume, width, meshPoint, centerOfMass);
 }
 
-vector<Vector3D> VoroPlusPlus::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)
+vector<Vector3D> VoroPlusPlusImpl::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)
 {
 	vector<double> voro_vertices;
 	vector<Vector3D> our_vertices;

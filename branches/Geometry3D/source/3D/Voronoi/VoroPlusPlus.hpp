@@ -10,12 +10,12 @@
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "TessellationBase.hpp"
 #include "../GeometryCommon/Face.hpp"
-#include <boost/shared_ptr.hpp>
-#include <voro++.hh>
 
 #ifdef GTEST
 #include "gtest/gtest.h"
 #endif
+
+class VoroPlusPlusImpl;
 
 class VoroPlusPlus : public TessellationBase
 {
@@ -72,13 +72,10 @@ public:
 	virtual bool IsGhostPoint(size_t index)const;
 
 private:
-	void RunVoronoi();
-	int FindMeshPoint(voro::c_loop_all looper);
-	boost::shared_ptr<voro::container> BuildContainer();
-	void ExtractResults(voro::container &container);
+	friend class VoroPlusPlusImpl; // The PIMPL pattern: Hides the voro++ dependencies. 
+								   // The class is used only in RunVoronoi, so we don't keep a pointer to it here.
 
-	Cell CreateCell(Vector3D meshPoint, voro::voronoicell &vcell);
-	vector<Vector3D> ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell);
+	void RunVoronoi();
 };
 
 #endif // VOROPLUSPLUS_HPP

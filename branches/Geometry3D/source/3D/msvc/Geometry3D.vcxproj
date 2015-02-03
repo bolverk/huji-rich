@@ -67,16 +67,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;..\3rdParty\tetgen-1.5.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;..\3rdParty\tetgen-1.5.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;..\3rdParty\tetgen-1.5.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;$(IncludePath)</IncludePath>
+    <IncludePath>c:\boost\1_57_0\;..\3rdParty\voro++-0.4.6\src;..\3rdParty\tetgen-1.5.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -152,7 +152,9 @@
     <ClCompile Include="..\GeometryCommon\Tetrahedron.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
+    <ClCompile Include="..\Voronoi\Delaunay.cpp" />
     <ClCompile Include="..\Voronoi\TessellationBase.cpp" />
+    <ClCompile Include="..\Voronoi\TetGenDelaunay.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,9 +172,13 @@
     <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\Delaunay.hpp" />
     <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
+    <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\3rdParty\tetgen-1.5.0\msvc\tetgen.vcxproj">
+      <Project>{49fc313b-d9df-4366-a33f-ff8831b8bee1}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rdParty\voro++-0.4.6\msvc\voro++.vcxproj">
       <Project>{ec858e24-556f-4f50-9030-a836dae266ae}</Project>
     </ProjectReference>

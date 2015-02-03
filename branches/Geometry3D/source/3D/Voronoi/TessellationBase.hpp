@@ -9,7 +9,6 @@
 
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "../GeometryCommon/OuterBoundary3D.hpp"
-#include <voro++.hh>
 
 class TessellationBase : public Tessellation3D
 {

@@ -163,8 +163,6 @@ void UseTetGen(const vector<Vector3D>& points)
 	vector<Tetrahedron> tetrahedra;
 	vector<vector<int>> tetrahedra_neighbors;
 
-	out.vedgelist;
-	
 	int offset = 0;
 	for (int i = 0; i < out.numberoftetrahedra; i++)
 	{
