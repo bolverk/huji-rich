@@ -35,6 +35,13 @@ double Tetrahedron::volume() const
 	return _volume.value();
 }
 
+double Tetrahedron::radius() const
+{
+	if (!_radius.is_initialized())
+		_radius = CalculateRadius();
+	return _radius.value();
+}
+
 // \brief Find the circumcenter of a tetrahedron
 // \param vertices - a vector of the 4 corners
 // \returns The circumcenter
@@ -88,7 +95,14 @@ Vector3D Tetrahedron::CalculateCenter() const
 double Tetrahedron::CalculateVolume() const
 {
 	// TODO: Calculate volume
+	BOOST_ASSERT(false);  // No volume yet!
 	return -1;
+}
+
+double Tetrahedron::CalculateRadius() const
+{
+	// The radius is the distance between the center and any of the vertices.
+	return abs(center() - _vertices[0]);
 }
 
 std::ostream& operator<<(std::ostream &output, const Tetrahedron &tetrahedron)

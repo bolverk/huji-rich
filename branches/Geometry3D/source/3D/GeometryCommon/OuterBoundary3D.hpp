@@ -6,7 +6,8 @@
 #ifndef OUTERBOUNDARY3D_HPP
 #define OUTERBOUNDARY3D_HPP 1
 
-#include "Tessellation3D.hpp"
+#include "Subcube.hpp"
+//#include "Tessellation3D.hpp"
 
 //! \brief Class describing the boundry of the Voronoi Tessallation.
 class OuterBoundary3D
@@ -31,6 +32,16 @@ public:
 
 	const Vector3D &FrontUpperRight() const { return _frontUpperRight; }
 	const Vector3D &BackLowerLeft() const { return _backLowerLeft; }
-	Kinds Kind() const { return _kind; }
+
+	//\brief Returns the distance from the point, taking the subcube into account
+	//\param pt The point
+	//\param subcube The subcube - from '---' to '+++'.
+	double distance(const Vector3D &pt, const Subcube subcube) const;
+
+private:
+	double distance_face(const Vector3D &pt, const Subcube subcube) const;
+	double distance_edge(const Vector3D &pt, const Subcube subcube) const;
+	double distance_point(const Vector3D &pt, const Subcube subcube) const;
+
 };
 #endif // OUTERBOUNDARY3D_HPP

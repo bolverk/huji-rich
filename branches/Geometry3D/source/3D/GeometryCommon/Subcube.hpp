@@ -7,9 +7,9 @@
 #ifndef SUBCUBE_H
 #define SUBCUBE_H
 
-#include "Utilities/assert.hpp"
-#include "GeometryCommon/Vector3D.hpp"
-#include "GeometryCommon/OuterBoundary3D.hpp"
+#include "../Utilities/assert.hpp"
+#include "../GeometryCommon/Vector3D.hpp"
+#include <set>
 
 //\brief A subcube is determined by its three offsets - one per axis. An offset can be '-', ' ' or '+' for minus, center and plus respectively
 class Subcube
@@ -31,6 +31,9 @@ private:
 		BOOST_ASSERT(false); // This value is illegal
 		return 9999;
 	}
+
+	static std::set<Subcube> _all;
+
 public:
 	Subcube(const char offsets[3]);
 	const char operator[](int i) { return _offsets[i]; }
@@ -48,6 +51,9 @@ public:
 	{
 		return (int)(_offsets[0] != CENTER) + (int)(_offsets[1] != CENTER) + (int)(_offsets[2] != CENTER);
 	}
+
+	//\brief Returns all the subcubes (without the main cube '   ')
+	static const std::set<Subcube>& all();
 };
 
 bool operator<(const Subcube &sc1, const Subcube &sc2);
@@ -56,22 +62,16 @@ bool operator==(const Subcube &sc1, const Subcube &sc2);
 namespace std
 {
 	template<>
-	struct hash < Subcube >
+	struct hash<Subcube>
 	{
 		typedef Subcube argument_type;
 		typedef std::size_t result_type;
 
-		result_type operator()(const argument_type &sc)
+		result_type operator()(const argument_type &sc) const
 		{
 			return sc.Num();
 		}
 	};
 }
-
-//\brief Calculates the distance of a point from the boundary, taking the subcube into account.
-//\param pt The point
-//\param boundary The boundary
-//\param subcube The subcube - from '---' to '+++'.
-double distance(const Vector3D &pt, const OuterBoundary3D &boundary, Subcube subcube);
 
 #endif

@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "Voronoi/TetGenDelaunay.hpp"
-#include "Voronoi/Subcube.hpp"
+#include "GeometryCommon/Subcube.hpp"
+#include "GeometryCommon/OuterBoundary3D.hpp"
 #include "Utilities/assert.hpp"
 
 #include <unordered_set>
@@ -34,6 +35,8 @@ TEST(Subcube, Sets)
 	hash.insert(Subcube("+++"));
 	hash.insert(Subcube("   "));
 	ASSERT_EQ(hash.size(), 4); 
+
+	ASSERT_EQ(Subcube::all().size(), 26);
 }
 
 OuterBoundary3D InitBoundary()
@@ -46,12 +49,12 @@ TEST(SubCube, DistanceToFace)
 	OuterBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
-	ASSERT_NEAR(distance(pt, boundary, "-  "), 0.2, 1e-8);
-	ASSERT_NEAR(distance(pt, boundary, "+  "), 0.8, 1e-8);
-	ASSERT_NEAR(distance(pt, boundary, " - "), 0.5, 1e-8);
-	ASSERT_NEAR(distance(pt, boundary, " + "), 0.5, 1e-8);
-	ASSERT_NEAR(distance(pt, boundary, "  -"), 0.9, 1e-8);
-	ASSERT_NEAR(distance(pt, boundary, "  +"), 0.1, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, "-  "), 0.2, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, "+  "), 0.8, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, " - "), 0.5, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, " + "), 0.5, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, "  -"), 0.9, 1e-8);
+	ASSERT_NEAR(boundary.distance(pt, "  +"), 0.1, 1e-8);
 }
 
 TEST(SubCube, DistanceToPoint)
@@ -59,11 +62,11 @@ TEST(SubCube, DistanceToPoint)
 	OuterBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
-	ASSERT_NEAR(distance(pt, boundary, "---"), 1.0488, 1e-4);
-	ASSERT_NEAR(distance(pt, boundary, "+++"), 0.94868, 1e-5);
-	ASSERT_NEAR(distance(pt, boundary, "-+-"), 1.0488, 1e-4);  // Same distance because y is 0.5
-	ASSERT_NEAR(distance(pt, boundary, "+-+"), 0.94868, 1e-4); // Ditto
-	ASSERT_NEAR(distance(pt, boundary, "--+"), 0.54772, 1e-5);
+	ASSERT_NEAR(boundary.distance(pt, "---"), 1.0488, 1e-4);
+	ASSERT_NEAR(boundary.distance(pt, "+++"), 0.94868, 1e-5);
+	ASSERT_NEAR(boundary.distance(pt, "-+-"), 1.0488, 1e-4);  // Same distance because y is 0.5
+	ASSERT_NEAR(boundary.distance(pt, "+-+"), 0.94868, 1e-4); // Ditto
+	ASSERT_NEAR(boundary.distance(pt, "--+"), 0.54772, 1e-5);
 }
 
 TEST(SubCube, DistanceEdge)
@@ -71,7 +74,7 @@ TEST(SubCube, DistanceEdge)
 	OuterBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
-	ASSERT_NEAR(distance(pt, boundary, "-- "), 0.53851, 1e-5);
-	ASSERT_NEAR(distance(pt, boundary, "+ +"), 0.80623, 1e-5);
-	ASSERT_NEAR(distance(pt, boundary, " -+"), 0.50990, 1e-5);
+	ASSERT_NEAR(boundary.distance(pt, "-- "), 0.53851, 1e-5);
+	ASSERT_NEAR(boundary.distance(pt, "+ +"), 0.80623, 1e-5);
+	ASSERT_NEAR(boundary.distance(pt, " -+"), 0.50990, 1e-5);
 }

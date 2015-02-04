@@ -15,7 +15,7 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include "Voronoi/Subcube.hpp"
+#include "GeometryCommon/Subcube.hpp"
 
 using namespace std;
 

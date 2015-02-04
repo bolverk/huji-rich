@@ -149,11 +149,11 @@
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D_Utils.cpp" />
     <ClCompile Include="..\GeometryCommon\OuterBoundary3D.cpp" />
+    <ClCompile Include="..\GeometryCommon\Subcube.cpp" />
     <ClCompile Include="..\GeometryCommon\Tetrahedron.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
     <ClCompile Include="..\Voronoi\Delaunay.cpp" />
-    <ClCompile Include="..\Voronoi\Subcube.cpp" />
     <ClCompile Include="..\Voronoi\TessellationBase.cpp" />
     <ClCompile Include="..\Voronoi\TetGenDelaunay.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
@@ -166,13 +166,13 @@
     <ClInclude Include="..\GeometryCommon\HilbertOrder3D_Utils.hpp" />
     <ClInclude Include="..\GeometryCommon\Mat44.hpp" />
     <ClInclude Include="..\GeometryCommon\OuterBoundary3D.hpp" />
+    <ClInclude Include="..\GeometryCommon\Subcube.hpp" />
     <ClInclude Include="..\GeometryCommon\Tessellation3D.hpp" />
     <ClInclude Include="..\GeometryCommon\TessLogger.hpp" />
     <ClInclude Include="..\GeometryCommon\Tetrahedron.hpp" />
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
     <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\Delaunay.hpp" />
-    <ClInclude Include="..\Voronoi\Subcube.hpp" />
     <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />

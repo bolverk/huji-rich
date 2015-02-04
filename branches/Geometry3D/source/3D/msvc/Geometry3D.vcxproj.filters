@@ -54,7 +54,7 @@
     <ClCompile Include="..\Voronoi\TetGenDelaunay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Voronoi\Subcube.cpp">
+    <ClCompile Include="..\GeometryCommon\Subcube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,7 +107,7 @@
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Voronoi\Subcube.hpp">
+    <ClInclude Include="..\GeometryCommon\Subcube.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

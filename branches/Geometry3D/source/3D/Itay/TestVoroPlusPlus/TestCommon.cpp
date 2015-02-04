@@ -3,6 +3,7 @@
 #include "GeometryCommon/Vector3D.hpp"
 #include "Utilities/assert.hpp"
 #include "GeometryCommon/OuterBoundary3D.hpp"
+#include "../misc/universal_error.hpp"
 
 TEST(Geometry3D, Vector3D_Construction)
 {
