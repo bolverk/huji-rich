@@ -5,13 +5,17 @@
 #include "GeometryCommon/Mat44.hpp"
 #include "GeometryCommon/Vector3D.hpp"
 #include "Voronoi/VoroPlusPlus.hpp"
+#include "Voronoi/TetGenDelaunay.hpp"
 #include <vector>
 #include <iostream>
 #include <set>
+#include <hash_set>
+#include <algorithm>
 #include "GeometryCommon/Tetrahedron.hpp"
 #include <map>
 #include <sstream>
 #include <string>
+#include "Subcube.h"
 
 using namespace std;
 
@@ -48,6 +52,14 @@ void UseVoroPlusPlus(const vector<Vector3D>& points);
 void RunTetGen(const vector<Vector3D> &points, tetgenio &out);
 void UseTetGen(const vector<Vector3D>& points);
 Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary);
+hash_set<int> FindOuterTetrahedra(const Delaunay &del);
+hash_set<int> FindEdgeTetrahedra(const Delaunay &del, const hash_set<int>& outerTetrahedra);
+
+template<typename T>
+bool contains(const hash_set<T> &set, const T &val)
+{
+	return set.find(val) != set.end();
+}
 
 VectorNamer namer;
 
@@ -63,7 +75,7 @@ int main()
 	for (auto vec : vertices)
 		namer.GetName(vec, "C");
 
-	UseVoroPlusPlus(vertices);
+	// UseVoroPlusPlus(vertices);
 	UseTetGen(vertices);
 
 	cout << "\nVertices:\n==========\n";
@@ -83,7 +95,7 @@ void UseVoroPlusPlus(const vector<Vector3D>& points)
 	VoroPlusPlus tes;
 	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tes.Initialise(points, boundary);
-	set<Vector3D> vertices;
+//	hash_set<Vector3D> vertices;
 
 	cout << "Voronoi:\n========" << endl;
 	for (unsigned i = 0; i < tes.GetPointNo(); i++)
@@ -152,41 +164,80 @@ void RunTetGen(const vector<Vector3D> &points, tetgenio &out)
 	tetrahedralize(&b, &in, &out);
 }
 
+//\brief Find all the Outer Tetrahedra
+//\remark An Outer Tetrahedron is a tetrahedron that has a vertex in the big tetrahedron
+hash_set<int> FindOuterTetrahedra(const Delaunay &del)
+{
+	hash_set<int> result;
+
+	for (int i = 0; i < 4; i++)
+	{
+		Vector3D pt = del.BigTetrahedron()[i];
+		vector<int> tetrahedra = del.VertexNeighbors(pt);
+		result.insert(tetrahedra.begin(), tetrahedra.end());
+	}
+
+	return result;
+}
+
+//\brief Find all the Edge Tetrahedra
+//\remark An Edge Tetrahedron has a vertex that belongs to an Outer Tetrahedron. Edge Tetrahedra are not Outer Tetrahedra
+hash_set<int> FindEdgeTetrahedra(const Delaunay &del, const hash_set<int>& outerTetrahedra)
+{
+	hash_set<int> edgeTetrahedra;
+
+	// Go over all the outer tetrahedra
+	for (hash_set<int>::const_iterator it = outerTetrahedra.begin(); it != outerTetrahedra.end(); it++)
+	{
+		Tetrahedron t = del[*it];
+		// And all their vertices
+		for (int i = 0; i < 4; i++)
+		{
+			Vector3D pt = t[i];
+			if (del.IsBigTetrahedron(pt))  // Ignore the BigTetrahedron - all tetrahedra touching this vertex are Outer and not Edge
+				continue;
+			// Find all the neighbor tetrahedra of pt
+			vector<int> tetrahedra = del.VertexNeighbors(pt);
+			// Add them to the set
+			for (vector<int>::iterator ptIt = tetrahedra.begin(); ptIt != tetrahedra.end(); ptIt++)
+				if (!contains(outerTetrahedra, *ptIt))  // But only if their not Outer
+					edgeTetrahedra.insert(*ptIt);
+		}
+	}
+
+	return edgeTetrahedra;
+}
+
+
 void UseTetGen(const vector<Vector3D>& points)
 {
 	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tetgenio out;
 
-	cout << "TetGen:\n=======" << endl;
+	cout << "TetGen:\n=======\n";
 
-	RunTetGen(points, out);
-	vector<Tetrahedron> tetrahedra;
-	vector<vector<int>> tetrahedra_neighbors;
+	auto bigTetrahedron = FindBigTetrahedron(boundary);
+	cout << "Big Tetrahedron is " << bigTetrahedron << endl;
+	for (int i = 0; i < 4; i++)
+		namer.GetName(bigTetrahedron[i], "B");
+	TetGenDelaunay tetgen(points, bigTetrahedron);
+	tetgen.Run();
 
-	int offset = 0;
-	for (int i = 0; i < out.numberoftetrahedra; i++)
+	auto outer = FindOuterTetrahedra(tetgen);
+	auto edge = FindEdgeTetrahedra(tetgen, outer);
+
+	for (int i = 0; i < tetgen.NumTetrahedra(); i++)
 	{
-		vector<Vector3D> vertices;
-		vector<int> neighbors;
-		for (int j = 0; j < 4; j++)
-		{
-			int ptIndex = out.tetrahedronlist[offset];
-			vertices.push_back(points[ptIndex]);
+		auto t = tetgen[i];
+		BOOST_ASSERT(!contains(outer, i) || !contains(edge, i)); // Can't be both;
+		if (contains(outer, i))
+			cout << "OUTER ";
+		else if (contains(edge, i))
+			cout << "EDGE ";
 
-			neighbors.push_back(out.neighborlist[offset]);
-			offset++;
-		}
-		Tetrahedron t(vertices);
-		tetrahedra.push_back(t);
-		tetrahedra_neighbors.push_back(neighbors);
-
-		cout << "Vertex " <<i << ": " << namer.GetName(t.center()) << "(" << t.center() << ")" << endl << "\t";
+		cout << "Vertex " << i << ": " << namer.GetName(t.center()) << "(" << t.center() << ")" << endl << "\t";
 		for (auto v : t.vertices())
 			cout << namer.GetName(v) << " ";
-		cout << endl << "\t";
-		for (int n : neighbors)
-			cout << n << " ";
 		cout << endl;
 	}
 }
-

@@ -35,8 +35,12 @@ protected:
 	std::vector<Tetrahedron> _tetrahedra;
 	
 	typedef std::map<Edge, std::vector<int>> EdgeMap;
-	EdgeMap _edges;
+	EdgeMap _edges;  // Edge -> list of tetrahedra it appears in
 
+	typedef std::map < Vector3D, std::vector<int>> VertexMap;
+	VertexMap _vertices; // Vector->list of tetrahedra it appears in
+
+	virtual void FillVertices();
 	virtual void FillEdges();
 	virtual void RunDelaunay() = 0;
 
@@ -44,7 +48,7 @@ public:
 	Delaunay(const std::vector<Vector3D> &points, const Tetrahedron &bigTetrahedron);
 	void Run();
 
-	bool IsBigTetrahedron(const Vector3D &pt)
+	bool IsBigTetrahedron(const Vector3D &pt) const
 	{
 		return std::find(_bigTetrahedron.vertices().begin(), 
 			_bigTetrahedron.vertices().end(), pt) != _bigTetrahedron.vertices().end();
@@ -52,6 +56,13 @@ public:
 
 	const std::vector<Tetrahedron> &Tetrahedra() const { return _tetrahedra; }
 	const std::vector<int> &EdgeNeighbors(const Vector3D &vec1, const Vector3D &vec2) const;
+	const std::vector<int> &VertexNeighbors(const Vector3D &v) const;
+
+	size_t NumTetrahedra() const { return _tetrahedra.size(); }
+	const Tetrahedron& operator[](int index) const { return _tetrahedra[index]; }
+
+	const Tetrahedron& BigTetrahedron() const { return _bigTetrahedron; }
+	const std::vector<Vector3D> &InputPoints() const { return _points; }
 };
 
 bool operator==(const Delaunay::Edge &edge1, const Delaunay::Edge &edge2);

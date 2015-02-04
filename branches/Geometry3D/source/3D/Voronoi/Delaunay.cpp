@@ -33,11 +33,35 @@ void Delaunay::FillEdges()
 	}
 }
 
+void Delaunay::FillVertices()
+{
+	_vertices.clear();
+
+	for (int i = 0; i < _tetrahedra.size(); i++)
+		for (int j = 0; j < 4; j++)
+		{
+			Vector3D v = _tetrahedra[i][j];
+			VertexMap::iterator existing = _vertices.find(v);
+			if (existing == _vertices.end())
+				_vertices[v] = vector<int>();
+
+			_vertices[v].push_back(i);
+		}
+}
+
 const std::vector<int> &Delaunay::EdgeNeighbors(const Vector3D &vec1, const Vector3D &vec2) const
 {
 	Edge edge(vec1, vec2);
 	EdgeMap::const_iterator it = _edges.find(edge);
 	BOOST_ASSERT(it != _edges.end());
+
+	return it->second;
+}
+
+const std::vector<int> &Delaunay::VertexNeighbors(const Vector3D &v) const
+{
+	VertexMap::const_iterator it = _vertices.find(v);
+	BOOST_ASSERT(it != _vertices.end());
 
 	return it->second;
 }
@@ -61,7 +85,9 @@ void Delaunay::Run()
 {
 	_tetrahedra.clear();
 	_edges.clear();
+	_vertices.clear();
 	RunDelaunay();
-	BOOST_ASSERT(_edges.size() == 0); // You're not supposed to fill those without override FillEdges
+	BOOST_ASSERT(_edges.size() == 0 && _vertices.size() == 0); // You're not supposed to fill those
+	FillVertices();
 	FillEdges();
 }

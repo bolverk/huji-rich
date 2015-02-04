@@ -3,6 +3,9 @@
  \author Itay Zandbank
 */
 
+#ifndef TETRAHEDRON_HPP
+#define TETRAHEDRON_HPP
+
 #include <vector>
 #include "Vector3D.hpp"
 #include <boost/optional.hpp>
@@ -23,8 +26,10 @@ public:
 	Vector3D center() const;
 	double volume() const;
 
-	const vector<Vector3D> vertices() const { return _vertices;  }
-	const Vector3D operator[](int index) const { return _vertices[index]; }
+	const vector<Vector3D>& vertices() const { return _vertices;  }
+	const Vector3D& operator[](size_t index) const { return _vertices[index]; }
 };
 
 std::ostream& operator<<(std::ostream &output, const Tetrahedron &tetrahedron);
+
+#endif // TETRAHEDRON_HPP

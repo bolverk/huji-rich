@@ -22,7 +22,7 @@ private:
 	void CallTetGen();
 	void CopyResults();
 
-	const Vector3D &GetPoint(int offset);
+	const Vector3D &GetPoint(size_t offset);
 
 public:
 	TetGenImpl(TetGenDelaunay &delaunay) : _delaunay(delaunay) { }
@@ -40,14 +40,15 @@ void TetGenDelaunay::RunDelaunay()
 	impl.Run();
 }
 
-const Vector3D &TetGenImpl::GetPoint(int offset)
+const Vector3D &TetGenImpl::GetPoint(size_t offset)
 {
 	BOOST_ASSERT(offset >= 0);
 	BOOST_ASSERT(offset < _delaunay._points.size() + 4);
 
 	if (offset < _delaunay._points.size())
 		return _delaunay._points[offset];
-	return _delaunay._bigTetrahedron[offset - _delaunay._points.size()];
+	offset -= _delaunay._points.size();
+	return _delaunay._bigTetrahedron[offset];
 }
 
 void TetGenImpl::Run()
@@ -60,7 +61,7 @@ void TetGenImpl::Run()
 void TetGenImpl::InitInput()
 {
 	in.firstnumber = 0;
-	in.numberofpoints = 4 + _delaunay._points.size();  // 4 for the Big Tetrahedron
+	in.numberofpoints = (int)(4 + _delaunay._points.size());  // 4 for the Big Tetrahedron
 	in.pointlist = new REAL[3 * in.numberofpoints];
 
 	int offset = 0;

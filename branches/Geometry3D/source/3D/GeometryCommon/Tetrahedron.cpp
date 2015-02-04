@@ -76,7 +76,10 @@ Vector3D Tetrahedron::CalculateCenter() const
 		abs2(v4), v4.x, v4.y, v4.z };
 	double c = m_c.determinant();
 
-#undef v1, v2, v3, v4
+#undef v1
+#undef v2
+#undef v3
+#undef v4
 
 	return Vector3D(Dx / (2 * a), Dy / (2 * a), Dz / (2 * a));
 
