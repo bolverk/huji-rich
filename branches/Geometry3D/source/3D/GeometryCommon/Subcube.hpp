@@ -54,10 +54,13 @@ public:
 
 	//\brief Returns all the subcubes (without the main cube '   ')
 	static const std::set<Subcube>& all();
+
+	friend std::ostream& operator<<(std::ostream& output, const Subcube &sc);
 };
 
 bool operator<(const Subcube &sc1, const Subcube &sc2);
 bool operator==(const Subcube &sc1, const Subcube &sc2);
+std::ostream& operator<<(std::ostream& output, const Subcube &sc);
 
 namespace std
 {

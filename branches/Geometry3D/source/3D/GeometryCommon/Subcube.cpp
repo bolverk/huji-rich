@@ -4,6 +4,8 @@
 
 #include "Subcube.hpp"
 #include <set>
+#include <iostream>
+#include <string>
 using namespace std;
 
 Subcube::Subcube(const char offsets[3])
@@ -27,6 +29,11 @@ bool operator==(const Subcube &sc1, const Subcube &sc2)
 	return sc1.Num() == sc2.Num();
 }
 
+ostream& operator<<(ostream &output, const Subcube &sc)
+{
+	output << "'" << sc._offsets[0] << sc._offsets[1] << sc._offsets[2] << "'";
+	return output;
+}
 
 set<Subcube> Subcube::_all;
 const set<Subcube> &Subcube::all()
