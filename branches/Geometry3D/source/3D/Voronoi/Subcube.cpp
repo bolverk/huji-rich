@@ -2,7 +2,7 @@
 //\brief Implementation of the subcube class - representing one of the 27 subcubes
 //\author Itay Zandbank
 
-#include "Subcube.h"
+#include "Subcube.hpp"
 
 using namespace std;
 
@@ -10,7 +10,9 @@ Subcube::Subcube(const char offsets[3])
 {
 	for (int i = 0; i < 3; i++)
 	{
-		BOOST_ASSERT(offsets[i] == MINUS || offsets[i] == CENTER || offsets[i] == PLUS);
+		if (offsets[i] != MINUS && offsets[i] != CENTER && offsets[i] != PLUS)
+			throw invalid_argument("Offset must be either '-', ' ' or '+'");
+
 		_offsets[i] = offsets[i];
 	}
 }

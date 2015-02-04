@@ -146,6 +146,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="TestCommon.cpp" />
+    <ClCompile Include="TestDelaunay.cpp" />
     <ClCompile Include="TestVoroPlusPlus.cpp" />
   </ItemGroup>
   <ItemGroup>

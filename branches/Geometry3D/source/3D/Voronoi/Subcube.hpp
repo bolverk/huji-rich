@@ -56,12 +56,12 @@ bool operator==(const Subcube &sc1, const Subcube &sc2);
 namespace std
 {
 	template<>
-	struct hash < Subcube >
+	struct hash<Subcube>
 	{
 		typedef Subcube argument_type;
 		typedef std::size_t result_type;
 
-		result_type operator()(const argument_type &sc)
+		result_type operator()(const argument_type &sc) const
 		{
 			return sc.Num();
 		}

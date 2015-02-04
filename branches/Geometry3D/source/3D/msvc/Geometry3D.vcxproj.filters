@@ -107,7 +107,7 @@
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Voronoi\Subcube.h">
+    <ClInclude Include="..\Voronoi\Subcube.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

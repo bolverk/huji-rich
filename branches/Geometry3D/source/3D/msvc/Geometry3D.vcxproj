@@ -172,7 +172,7 @@
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
     <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\Delaunay.hpp" />
-    <ClInclude Include="..\Voronoi\Subcube.h" />
+    <ClInclude Include="..\Voronoi\Subcube.hpp" />
     <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
