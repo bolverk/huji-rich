@@ -54,6 +54,9 @@
     <ClCompile Include="..\Voronoi\TetGenDelaunay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Voronoi\Subcube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GeometryCommon\Face.hpp">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Voronoi\Subcube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

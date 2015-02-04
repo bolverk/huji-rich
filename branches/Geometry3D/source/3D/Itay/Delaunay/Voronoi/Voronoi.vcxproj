@@ -146,7 +146,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Subcube.cpp" />
     <ClCompile Include="Voronoi.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,9 +158,6 @@
     <ProjectReference Include="..\..\..\msvc\Geometry3D.vcxproj">
       <Project>{0edf2f0b-198a-4fcc-84d1-4f463f70dd93}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Subcube.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

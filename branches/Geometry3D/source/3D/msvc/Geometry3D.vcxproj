@@ -153,6 +153,7 @@
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
     <ClCompile Include="..\Voronoi\Delaunay.cpp" />
+    <ClCompile Include="..\Voronoi\Subcube.cpp" />
     <ClCompile Include="..\Voronoi\TessellationBase.cpp" />
     <ClCompile Include="..\Voronoi\TetGenDelaunay.cpp" />
     <ClCompile Include="..\Voronoi\VoroPlusPlus.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
     <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\Delaunay.hpp" />
+    <ClInclude Include="..\Voronoi\Subcube.h" />
     <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
