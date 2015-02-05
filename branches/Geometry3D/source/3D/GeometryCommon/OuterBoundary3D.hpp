@@ -47,6 +47,12 @@ public:
 	//\remarks How the ghost point is calculated depends on the boundary type
 	virtual Vector3D ghost(const Vector3D &pt, const Subcube subcube) const = 0;
 
+	//\brief Checks if a point is inside the boundary
+	//\param pt Point
+	//\returns true if the point is inside the boundary
+	//\remarks Points on the boundary are considered inside
+	bool inside(const Vector3D &pt) const;
+
 private:
 	/*double distance_face(const Vector3D &pt, const Subcube subcube) const;
 	double distance_edge(const Vector3D &pt, const Subcube subcube) const;

@@ -47,13 +47,15 @@ public:
 	map<Vector3D, string>::const_iterator end() const { return _vectors.cend(); }
 };
 
-void UseVoroPlusPlus(const vector<Vector3D>& points);
+set<Vector3D> UseVoroPlusPlus(const vector<Vector3D>& points, const OuterBoundary3D &boundary);
+set<Vector3D> UseTetGen(const vector<Vector3D>& points, const OuterBoundary3D &boundary);
 
-void UseTetGen(const vector<Vector3D>& points);
 Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary);
 unordered_set<int> FindOuterTetrahedra(const Delaunay &del);
 unordered_set<int> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<int>& outerTetrahedra);
 map<Vector3D, unordered_set<Subcube>> FindHullBreaches(const Delaunay &del, const unordered_set<int>& edgeTetrahedra, const unordered_set<int> &outerTetrahedra, const OuterBoundary3D &boundary);
+set<Vector3D> GetGhostPoints(const Delaunay &del, const OuterBoundary3D &boundary);
+set<Vector3D> BruteForceGhosts(const Delaunay &del, const OuterBoundary3D &boundary);
 
 template<typename T>
 bool contains(const unordered_set<T> &set, const T &val)
@@ -72,15 +74,29 @@ int main()
 		Vector3D(65, 60, 22),
 		Vector3D(59, 92, 5),
 		Vector3D(84, 0, 32) };
+	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
+
 	for (auto vec : vertices)
 		namer.GetName(vec, "C");
 
-	// UseVoroPlusPlus(vertices);
-	UseTetGen(vertices);
+	auto voroVertices = UseVoroPlusPlus(vertices, boundary);
+	auto delaunayVertices = UseTetGen(vertices, boundary);
 
-	cout << "\nVertices:\n==========\n";
+	cout << "There are " << voroVertices.size() << " Voronoi vertices" << endl;
+	cout << "There are " << delaunayVertices.size() << " Delaunay vertices" << endl;
+	vector<Vector3D> diff;
+	set_difference(voroVertices.begin(), voroVertices.end(), delaunayVertices.begin(), delaunayVertices.end(), back_inserter(diff));
+
+	cout << endl << "The difference is: " << endl;
+	for (auto v : diff)
+	{
+		bool inside = boundary.inside(v);
+		cout << namer.GetName(v) << v << ": " << (inside ? "inside" : "outside") << endl;
+	}
+
+/*	cout << "\nVertices:\n==========\n";
 	for(auto pair: namer)
-		cout << pair.first << ": " << pair.second << endl;
+		cout << pair.first << ": " << pair.second << endl; */
 
 #ifdef _DEBUG
 	string s;
@@ -90,14 +106,13 @@ int main()
 	return 0;
 }
 
-void UseVoroPlusPlus(const vector<Vector3D>& points)
+set<Vector3D> UseVoroPlusPlus(const vector<Vector3D>& points, const OuterBoundary3D &boundary)
 {
 	VoroPlusPlus tes;
-	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tes.Initialise(points, boundary);
-//	unordered_set<Vector3D> vertices;
 
 	cout << "Voronoi:\n========" << endl;
+	set<Vector3D> vertices;
 	for (unsigned i = 0; i < tes.GetPointNo(); i++)
 	{
 		cout << "Cell " << namer.GetName(points[i]) << " at " << points[i] << endl;
@@ -107,10 +122,15 @@ void UseVoroPlusPlus(const vector<Vector3D>& points)
 			auto face = tes.GetFace(faces[j]);
 			cout << "\tFace " << j << " with neighbor " << face.OtherNeighbor(i) << endl << "\t\t";
 			for (auto it = face.vertices.begin(); it != face.vertices.end(); it++)
+			{
 				cout << namer.GetName(*it) << " ";
+				vertices.insert(*it);
+			}
 			cout << endl;
 		}
 	}
+
+	return vertices;
 }
 
 Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary)
@@ -123,8 +143,8 @@ Tetrahedron FindBigTetrahedron(const OuterBoundary3D &boundary)
 	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
 	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
 
-	absFrontUpperRight *= 10;
-	absBackLowerLeft *= -10;
+	absFrontUpperRight *= 1000;
+	absBackLowerLeft *= -1000;
 
 	// The top of the tetrahedron will be on the Y axis
 	vector<Vector3D> tetrahedron;
@@ -189,49 +209,46 @@ unordered_set<int> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<i
 }
 
 
-void UseTetGen(const vector<Vector3D>& points)
+set<Vector3D> UseTetGen(const vector<Vector3D>& points, const OuterBoundary3D &boundary)
 {
-	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
-	tetgenio out;
-
 	cout << "TetGen:\n=======\n";
 
 	auto bigTetrahedron = FindBigTetrahedron(boundary);
 	cout << "Big Tetrahedron is " << bigTetrahedron << endl;
 	for (int i = 0; i < 4; i++)
 		namer.GetName(bigTetrahedron[i], "B");
-	TetGenDelaunay tetgen(points, bigTetrahedron);
-	tetgen.Run();
 
-	auto outer = FindOuterTetrahedra(tetgen);
-	auto edge = FindEdgeTetrahedra(tetgen, outer);
+	cout << "Running Delaunay for the first time" << endl;
+	TetGenDelaunay tetgen1(points, bigTetrahedron);
+	tetgen1.Run();
+	cout << "Delaunay returned " << tetgen1.NumTetrahedra() << " tetrahedra" << endl;
 
-	for (int i = 0; i < tetgen.NumTetrahedra(); i++)
+	cout << "Calculating ghost points..." << endl;
+	//auto ghosts = GetGhostPoints(tetgen1, boundary);
+	auto ghosts = BruteForceGhosts(tetgen1, boundary);
+
+	cout << "There are " << ghosts.size() << " ghost points" << endl;
+	cout << "Running the second Delaunay..." << endl;
+	vector<Vector3D> allPoints(points);
+	allPoints.insert(allPoints.end(), ghosts.begin(), ghosts.end());
+	TetGenDelaunay tetgen2(allPoints, bigTetrahedron);
+	tetgen2.Run();
+	cout << "Second Delaunay returned " << tetgen2.NumTetrahedra() << " tetrahedra" << endl;
+
+	set<Vector3D> realVertices;
+	for (int i = 0; i < tetgen2.NumTetrahedra(); i++)
 	{
-		auto t = tetgen[i];
-		BOOST_ASSERT(!contains(outer, i) || !contains(edge, i)); // Can't be both;
-		if (contains(outer, i))
-			cout << "OUTER ";
-		else if (contains(edge, i))
-			cout << "EDGE ";
-
-		cout << "Tetrahedron " << i << ": " << namer.GetName(t.center()) << "(" << t.center() << ")" << endl << "\t";
-		for (auto v : t.vertices())
-			cout << namer.GetName(v) << " ";
-		cout << endl;
+		Tetrahedron t = tetgen2[i];
+		Vector3D center = t.center();
+		string name = namer.GetName(center, "D");
+		cout << "Tetrahedron " << i << " centered at " << name << center << endl;
+		if (boundary.inside(center))
+		{
+			realVertices.insert(center);
+		}
 	}
 
-	map<Vector3D, unordered_set<Subcube>> breaches = FindHullBreaches(tetgen, edge, outer, boundary);
-	if (breaches.empty())
-		cout << "No hull breaches encountered" << endl;
-
-	for (auto it = breaches.begin(); it != breaches.end(); it++)
-	{
-		cout << "Vertex " << namer.GetName(it->first) << " " << it->first << " breaches at ";
-		for (auto itBreach = it->second.begin(); itBreach != it->second.end(); itBreach++)
-			cout << *itBreach << " ";
-		cout << endl;
-	}
+	return realVertices;
 }
 
 map<Vector3D, unordered_set<Subcube>> FindHullBreaches(const Delaunay &del, const unordered_set<int>& edgeTetrahedra, 
@@ -267,4 +284,37 @@ map<Vector3D, unordered_set<Subcube>> FindHullBreaches(const Delaunay &del, cons
 	}
 
 	return result;
+}
+
+set<Vector3D> GetGhostPoints(const Delaunay &del, const OuterBoundary3D &boundary)
+{
+	unordered_set<int> outer = FindOuterTetrahedra(del);
+	unordered_set<int> edge = FindEdgeTetrahedra(del, outer);
+	map<Vector3D, unordered_set<Subcube>> breaches = FindHullBreaches(del, edge, outer, boundary);
+
+	set<Vector3D> ghosts;
+	if (breaches.empty())
+		return ghosts;
+
+	for (map<Vector3D, unordered_set<Subcube>>::iterator it = breaches.begin(); it != breaches.end(); it++)
+	{
+		Vector3D pt = it->first;
+		for (unordered_set<Subcube>::iterator itSubcube = it->second.begin(); itSubcube != it->second.end(); itSubcube++)
+		{
+			Vector3D ghost = boundary.ghost(pt, *itSubcube);
+			ghosts.insert(ghost);
+		}
+	}
+
+	return ghosts;
+}
+
+set<Vector3D> BruteForceGhosts(const Delaunay &del, const OuterBoundary3D &boundary)
+{
+	set<Vector3D> ghosts;
+	for (auto vec : del.InputPoints())
+		for (auto subcube : Subcube::all())
+			ghosts.insert(boundary.ghost(vec, subcube));
+
+	return ghosts;
 }

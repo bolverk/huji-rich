@@ -4,6 +4,8 @@
 
 using namespace std;
 
+const double EPSILON = 1e-12;
+
 OuterBoundary3D::OuterBoundary3D(Vector3D frontUpperRight, Vector3D backLowerLeft) :
 	_frontUpperRight(frontUpperRight), _backLowerLeft(backLowerLeft)
 {
@@ -117,4 +119,16 @@ Vector3D RectangularBoundary3D::ghost(const Vector3D &pt, const Subcube subcube)
 {
 	Vector3D toBoundary = vector(pt, subcube);
 	return pt + 2 * toBoundary; // Reflect through the boundary
+}
+
+bool OuterBoundary3D::inside(const Vector3D &pt) const
+{
+	if (pt.x + EPSILON < _backLowerLeft.x || pt.x - EPSILON > _frontUpperRight.x)
+		return false;
+	if (pt.y + EPSILON < _backLowerLeft.y || pt.y - EPSILON > _frontUpperRight.y)
+		return false;
+	if (pt.z + EPSILON < _backLowerLeft.z || pt.z - EPSILON > _frontUpperRight.z)
+		return false;
+
+	return true;
 }
