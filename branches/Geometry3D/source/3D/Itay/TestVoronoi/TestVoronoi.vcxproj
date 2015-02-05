@@ -22,6 +22,7 @@
     <ProjectGuid>{102E65C2-12B7-467C-85A7-33DB9B24B491}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestVoroPlusPlus</RootNamespace>
+    <ProjectName>TestVoronoi</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
