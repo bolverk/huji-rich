@@ -173,6 +173,19 @@ public:
 	virtual Vector3D CalcFaceVelocity(size_t p0, size_t p1, Vector3D const& v0,
 		Vector3D const& v1)const;
 
+	/*!
+	\brief Returns if the cell is adjacent to a boundary
+	\param index The cell to check
+	\return If near boundary
+	*/
+	virtual bool NearBoundary(size_t index) const;
+
+	/*!
+	\brief Returns if the face is a boundary one
+	\param index The face to check
+	\return True if boundary false otherwise
+	*/
+	virtual bool BoundaryFace(size_t index) const;
 };
 
 #endif \\ TESSELLATION_BASE_HPP

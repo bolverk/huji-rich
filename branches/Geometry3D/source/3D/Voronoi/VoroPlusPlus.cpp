@@ -50,18 +50,6 @@ Tessellation3D* VoroPlusPlus::clone(void) const
 	return new VoroPlusPlus(*this);
 }
 
-bool VoroPlusPlus::NearBoundary(size_t index) const
-{
-	// TODO: This
-	return false;
-}
-
-bool VoroPlusPlus::BoundaryFace(size_t index) const
-{
-	// TODO: This
-	return false;
-}
-
 vector<vector<size_t> >& VoroPlusPlus::GetDuplicatedPoints()
 {
 	static vector<vector<size_t>> v;

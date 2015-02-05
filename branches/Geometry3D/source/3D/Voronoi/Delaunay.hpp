@@ -3,6 +3,9 @@
    \Author Itay Zandbank
  */
 
+#ifndef DELAUNAY_HPP
+#define DELAUNAY_HPP 1
+
 #include <vector>
 #include <list>
 #include <map>
@@ -67,3 +70,5 @@ public:
 
 bool operator==(const Delaunay::Edge &edge1, const Delaunay::Edge &edge2);
 bool operator<(const Delaunay::Edge &edge1, const::Delaunay::Edge &edge2);
+
+#endif // DELAUNAY_HPP

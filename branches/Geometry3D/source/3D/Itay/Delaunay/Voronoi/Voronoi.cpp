@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 #include "GeometryCommon/Subcube.hpp"
+#include "Voronoi/DelaunayVoronoi.hpp"
 
 using namespace std;
 

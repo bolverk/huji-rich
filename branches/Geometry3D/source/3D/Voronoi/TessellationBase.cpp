@@ -166,3 +166,22 @@ Vector3D TessellationBase::CalcFaceVelocity(size_t p0, size_t p1, Vector3D const
 {
 	return Vector3D(); // TODO: Calculate the velocity properly
 }
+
+//\brief Check if a cell touches the boundary
+//\remarks The cell touches a boundary iff it has a boundary face
+bool TessellationBase::NearBoundary(size_t index) const
+{
+	const vector<size_t> faces = GetCellFaces(index);
+	for (vector<size_t>::const_iterator it = faces.begin(); it != faces.end(); it++)
+		if (BoundaryFace(*it))
+			return true;
+	return false;
+}
+
+//\brief Checks if a face is a Boundary face
+//\remarks a Face is a Boundary face iff it only has one neighbor
+bool TessellationBase::BoundaryFace(size_t index) const
+{
+	Face face = GetFace(index);
+	return face.NumNeighbors() == 1;
+}

@@ -110,5 +110,8 @@
     <ClInclude Include="..\GeometryCommon\Subcube.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Voronoi\DelaunayVoronoi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

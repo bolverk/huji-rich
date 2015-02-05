@@ -1,27 +1,28 @@
-/*! \file VoroPlusPlus.hpp
-\brief A Tessalation3D implementation that is a simple wrapper around the Voro++ library
-\author Itay Zandbank
-*/
+//\file DelaunayVoronoi.hpp
+//\brief A Tessellation3D implementation using a Delaunay and converting to to a Voronoi Diagram
+//\author Itay Zandbank
+//\remarks This is a template class (the template argument being the specific Delaunay implementation),
+// so everything is in this file - no cpp file for us.
 
-#ifndef VOROPLUSPLUS_HPP
-#define VOROPLUSPLUS_HPP
+#ifndef DELAUNAY_VORONOI_HPP
+#define DELAUNAY_VORONOI_HPP 1
 
-#include "../GeometryCommon/OuterBoundary3D.hpp"
-#include "../GeometryCommon/Tessellation3D.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/static_assert.hpp>
+#include "Delaunay.hpp"
 #include "TessellationBase.hpp"
-#include "../GeometryCommon/Face.hpp"
 
-#ifdef GTEST
-#include "gtest/gtest.h"
-#endif
-
-class VoroPlusPlusImpl;
-
-class VoroPlusPlus : public TessellationBase
+template<typename T>
+class DelaunayVoronoi: public TessellationBase
 {
+private:
+	// Make sure T is derived from Delaunay. If you see an error on this line, it means you've instantiated DelaunayVoronoi
+	// with a wrong template argument.
+	BOOST_STATIC_ASSERT(boost::is_base_of<typename Delaunay, typename T>::value);
+
 public:
-	VoroPlusPlus();
-	virtual ~VoroPlusPlus();
+	DelaunayVoronoi();
 
 	/*!
 	\brief Update the tessellation
@@ -57,11 +58,8 @@ public:
 	*/
 	virtual bool IsGhostPoint(size_t index)const;
 
-private:
-	friend class VoroPlusPlusImpl; // The PIMPL pattern: Hides the voro++ dependencies. 
-								   // The class is used only in RunVoronoi, so we don't keep a pointer to it here.
 
-	void RunVoronoi();
 };
 
-#endif // VOROPLUSPLUS_HPP
+
+#endif // DELAUNAY_VORONOI_HPP
