@@ -18,13 +18,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TestVoroPlusPlus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TestCommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestDelaunay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestVoronoi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

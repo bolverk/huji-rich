@@ -148,7 +148,7 @@
   <ItemGroup>
     <ClCompile Include="TestCommon.cpp" />
     <ClCompile Include="TestDelaunay.cpp" />
-    <ClCompile Include="TestVoroPlusPlus.cpp" />
+    <ClCompile Include="TestVoronoi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\3rdParty\gtest-1.7.0\msvc\gtest-md.vcxproj">
