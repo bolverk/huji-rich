@@ -93,7 +93,7 @@ int main()
 void UseVoroPlusPlus(const vector<Vector3D>& points)
 {
 	VoroPlusPlus tes;
-	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
+	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tes.Initialise(points, boundary);
 //	unordered_set<Vector3D> vertices;
 
@@ -191,7 +191,7 @@ unordered_set<int> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<i
 
 void UseTetGen(const vector<Vector3D>& points)
 {
-	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
+	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 	tetgenio out;
 
 	cout << "TetGen:\n=======\n";

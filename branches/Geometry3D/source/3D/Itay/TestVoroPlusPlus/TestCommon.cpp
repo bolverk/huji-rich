@@ -101,17 +101,11 @@ TEST(Geometry3D, Face_Indentical)
 
 void CreateFaultyBoundary1()
 {
-	OuterBoundary3D(OuterBoundary3D::PERIODIC, Vector3D(1, 1, 1), Vector3D(0, 2, 1));
-}
-
-void CreateFaultyBoundary2()
-{
-	OuterBoundary3D((OuterBoundary3D::Kinds)17, Vector3D(0, 0, 0), Vector3D(-1, -1, -1));
+	RectangularBoundary3D(Vector3D(1, 1, 1), Vector3D(0, 2, 1));
 }
 
 TEST(Geometry3D, OuterBoundry3D)
 {
-	OuterBoundary3D b1(OuterBoundary3D::RECTANGULAR, Vector3D(0, 0, 0), Vector3D(-1, -1, -1));
+	RectangularBoundary3D b1(Vector3D(0, 0, 0), Vector3D(-1, -1, -1));
 	ASSERT_THROW(CreateFaultyBoundary1(), invalid_argument);
-	ASSERT_THROW(CreateFaultyBoundary2(), invalid_argument);
 }

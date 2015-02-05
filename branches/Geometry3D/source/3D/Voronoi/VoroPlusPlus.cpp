@@ -104,9 +104,9 @@ void VoroPlusPlusImpl::Run()
 boost::shared_ptr<voro::container> VoroPlusPlusImpl::BuildContainer()
 {
 	boost::shared_ptr<voro::container> container(new voro::container(
-		_voro._boundary.BackLowerLeft().x, _voro._boundary.FrontUpperRight().x,
-		_voro._boundary.BackLowerLeft().y, _voro._boundary.FrontUpperRight().y,
-		_voro._boundary.BackLowerLeft().z, _voro._boundary.FrontUpperRight().z,
+		_voro._boundary->BackLowerLeft().x, _voro._boundary->FrontUpperRight().x,
+		_voro._boundary->BackLowerLeft().y, _voro._boundary->FrontUpperRight().y,
+		_voro._boundary->BackLowerLeft().z, _voro._boundary->FrontUpperRight().z,
 		20, 20, 20, false, false, false, 20));
 	int num = 0;
 	for (auto it = _voro._meshPoints.begin(); it != _voro._meshPoints.end(); it++)

@@ -65,7 +65,7 @@ protected:
 		bool empty() const { return _volume < 0; }
 	};
 
-	OuterBoundary3D _boundary;
+	const OuterBoundary3D *_boundary;
 	std::vector<Cell> _cells;
 	FaceStore _faces;
 	std::vector<Vector3D> _meshPoints;

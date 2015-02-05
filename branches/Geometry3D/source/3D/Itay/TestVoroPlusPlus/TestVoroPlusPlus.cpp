@@ -54,7 +54,7 @@ TEST(VoroPlusPlus, Cube)
 				mesh.push_back(Vector3D(x, y, z));
 
 	VoroPlusPlus tes;
-	OuterBoundary3D boundary(OuterBoundary3D::RECTANGULAR, Vector3D(perSide - 0.5, perSide - 0.5, perSide - 0.5),
+	RectangularBoundary3D boundary(Vector3D(perSide - 0.5, perSide - 0.5, perSide - 0.5),
 		Vector3D(-0.5, -0.5, -0.5));
 	tes.Initialise(mesh, boundary);
 

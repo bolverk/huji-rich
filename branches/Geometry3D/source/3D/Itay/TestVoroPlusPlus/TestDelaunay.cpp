@@ -39,14 +39,14 @@ TEST(Subcube, Sets)
 	ASSERT_EQ(Subcube::all().size(), 26);
 }
 
-OuterBoundary3D InitBoundary()
+RectangularBoundary3D InitBoundary()
 {
-	return OuterBoundary3D(OuterBoundary3D::RECTANGULAR, Vector3D(1, 1, 1), Vector3D(0, 0, 0));
+	return RectangularBoundary3D(Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 }
 
 TEST(SubCube, DistanceToFace)
 {
-	OuterBoundary3D boundary = InitBoundary();
+	RectangularBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
 	ASSERT_NEAR(boundary.distance(pt, "-  "), 0.2, 1e-8);
@@ -59,7 +59,7 @@ TEST(SubCube, DistanceToFace)
 
 TEST(SubCube, DistanceToPoint)
 {
-	OuterBoundary3D boundary = InitBoundary();
+	RectangularBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
 	ASSERT_NEAR(boundary.distance(pt, "---"), 1.0488, 1e-4);
@@ -71,10 +71,20 @@ TEST(SubCube, DistanceToPoint)
 
 TEST(SubCube, DistanceEdge)
 {
-	OuterBoundary3D boundary = InitBoundary();
+	RectangularBoundary3D boundary = InitBoundary();
 	Vector3D pt(0.2, 0.5, 0.9);
 
 	ASSERT_NEAR(boundary.distance(pt, "-- "), 0.53851, 1e-5);
 	ASSERT_NEAR(boundary.distance(pt, "+ +"), 0.80623, 1e-5);
 	ASSERT_NEAR(boundary.distance(pt, " -+"), 0.50990, 1e-5);
+}
+
+TEST(SubCube, RectangularGhost)
+{
+	RectangularBoundary3D boundary = InitBoundary();
+	Vector3D pt(0.2, 0.5, 0.9);
+
+	ASSERT_EQ(boundary.ghost(pt, "-  "), Vector3D(-0.2, 0.5, 0.9));
+	ASSERT_EQ(boundary.ghost(pt, "+ +"), Vector3D(1.8, 0.5, 1.1));
+	ASSERT_EQ(boundary.ghost(pt, "-+-"), Vector3D(-0.2, 1.5, -0.9));
 }

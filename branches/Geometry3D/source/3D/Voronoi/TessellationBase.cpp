@@ -49,7 +49,7 @@ void TessellationBase::ClearData()
 
 void TessellationBase::Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc)
 {
-	_boundary = bc;
+	_boundary = &bc;
 	Update(points);
 }
 
