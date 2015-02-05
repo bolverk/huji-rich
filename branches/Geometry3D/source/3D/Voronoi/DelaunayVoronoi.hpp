@@ -12,17 +12,21 @@
 #include <boost/static_assert.hpp>
 #include "Delaunay.hpp"
 #include "TessellationBase.hpp"
+#include "GhostBusters.hpp"
 
-template<typename T>
+template<typename DelaunayType, typename GhostBusterType>
 class DelaunayVoronoi: public TessellationBase
 {
 private:
-	// Make sure T is derived from Delaunay. If you see an error on this line, it means you've instantiated DelaunayVoronoi
+	// Make sure DelaunayType is derived from Delaunay. If you see an error on this line, it means you've instantiated DelaunayVoronoi
 	// with a wrong template argument.
-	BOOST_STATIC_ASSERT(boost::is_base_of<typename Delaunay, typename T>::value);
+	BOOST_STATIC_ASSERT(boost::is_base_of<typename Delaunay, typename DelaunayType>::value);
+
+	// Make sure GhostBusterType is derived from GhostBuster. If you see an error on this line, you've instantiated the template
+	// with a wrong template argument
+	BOOST_STATIC_ASSERT(boost::is_base_of<typename GhostBuster, typename GhostBusterType>::value);
 
 public:
-	DelaunayVoronoi();
 
 	/*!
 	\brief Update the tessellation
@@ -58,8 +62,93 @@ public:
 	*/
 	virtual bool IsGhostPoint(size_t index)const;
 
-
+private:
+	//\brief Finds a Big Tetrahedron that contains the boundray subcube, and also the 26 adjacent subcubes.
+	Tetrahedron FindBigTetrahedron() const;
 };
 
+template<typename DelaunayType, typename GhostBusterType>
+void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3D> &points)
+{
+	Tetrahedron big = FindBigTetrahedron();
+
+	// First phase
+	DelaunayType del1(points, big);
+	del1.Run();
+
+	// Find the ghost points
+	GhostBusterType ghostBuster;
+	set<Vector3D> ghosts = ghostBuster(del1, *_boundary);
+
+	// Now the second phase, with the ghost points
+	vector<Vector3D> allPoints(points);
+	allPoints.insert(allPoints.end(), ghosts.begin(), ghosts.end());
+	DelaunayType del2(allPoints, big);
+	del2.Run();
+
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+Tessellation3D *DelaunayVoronoi<DelaunayType, GhostBusterType>::clone() const
+{
+	return new DelaunayVoronoi<DelaunayType, GhostBusterType>(*this);
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+vector<vector<size_t> >& DelaunayVoronoi<DelaunayType, GhostBusterType>::GetDuplicatedPoints()
+{
+	static vector<vector<size_t>> v;
+	return v;
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+vector<vector<size_t> >const& DelaunayVoronoi<DelaunayType, GhostBusterType>::GetDuplicatedPoints() const
+{
+	static vector<vector<size_t>> v;
+	return v;
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+size_t DelaunayVoronoi<DelaunayType, GhostBusterType>::GetTotalPointNumber() const
+{
+	return GetPointNo();
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+bool DelaunayVoronoi<DelaunayType, GhostBusterType>::IsGhostPoint(size_t index) const
+{
+	return false;
+}
+template <typename DelaunayType, typename GhostBusterType>
+Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron() const
+{
+	// A big tetrahedron that will contain the bounding box, as well as the 8 adjacent boundary boxes,
+	// and with room to spare.
+
+	const Vector3D &fur = _boundary->FrontUpperRight();
+	const Vector3D &bll = _boundary->BackLowerLeft();
+	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
+	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
+
+	absFrontUpperRight *= 1000;
+	absBackLowerLeft *= -1000;
+
+	// The top of the tetrahedron will be on the Y axis
+	vector<Vector3D> tetrahedron;
+	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
+
+	// The bottom face is parallel to the x-z plane
+	double bottomY = absBackLowerLeft.y;
+
+	// The bottom face is a triangle whose lower edge is parallel to the x axis
+	double backZ = absBackLowerLeft.z;
+	tetrahedron.push_back(Vector3D(absBackLowerLeft.x, bottomY, backZ));
+	tetrahedron.push_back(Vector3D(absFrontUpperRight.x, bottomY, backZ));
+
+	// The last triangle edge is on x=0
+	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
+
+	return Tetrahedron(tetrahedron);
+}
 
 #endif // DELAUNAY_VORONOI_HPP

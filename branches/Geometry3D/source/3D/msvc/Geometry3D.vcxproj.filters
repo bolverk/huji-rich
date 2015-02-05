@@ -57,6 +57,9 @@
     <ClCompile Include="..\GeometryCommon\Subcube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Voronoi\GhostBusters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GeometryCommon\Face.hpp">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Voronoi\DelaunayVoronoi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Voronoi\GhostBusters.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

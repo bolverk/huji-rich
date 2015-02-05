@@ -68,6 +68,9 @@ VectorNamer namer;
 
 int main()
 {
+	DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster> good;
+	DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> better;
+
 	vector<Vector3D> vertices{ Vector3D(90, 34, 89),
 		Vector3D(21, 3, 78),
 		Vector3D(76, 35, 74),
