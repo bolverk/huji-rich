@@ -57,12 +57,17 @@ public:
 			_bigTetrahedron.vertices().end(), pt) != _bigTetrahedron.vertices().end();
 	}
 
+	//\brief A vector of all the tetrahedra
 	const std::vector<Tetrahedron> &Tetrahedra() const { return _tetrahedra; }
+
+	//\brief Returns the list of tetrahedra that touch the edge 
 	const std::vector<int> &EdgeNeighbors(const Vector3D &vec1, const Vector3D &vec2) const;
+	
+	//\brief Returns the list of tetrahedra that touch the vertex
 	const std::vector<int> &VertexNeighbors(const Vector3D &v) const;
 
 	size_t NumTetrahedra() const { return _tetrahedra.size(); }
-	const Tetrahedron& operator[](int index) const { return _tetrahedra[index]; }
+	const Tetrahedron& operator[](size_t index) const { return _tetrahedra[index]; }
 
 	const Tetrahedron& BigTetrahedron() const { return _bigTetrahedron; }
 	const std::vector<Vector3D> &InputPoints() const { return _points; }

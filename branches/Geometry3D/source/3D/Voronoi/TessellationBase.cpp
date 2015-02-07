@@ -45,6 +45,7 @@ void TessellationBase::ClearData()
 	_cells.resize(_meshPoints.size());
 	_allCMs.clear();
 	_allCMs.resize(_meshPoints.size());
+	FillPointIndices();
 }
 
 void TessellationBase::Initialise(vector<Vector3D> const& points, const OuterBoundary3D &bc)
@@ -185,3 +186,27 @@ bool TessellationBase::BoundaryFace(size_t index) const
 	Face face = GetFace(index);
 	return face.NumNeighbors() == 1;
 }
+
+//\brief Fills the pointIndices map
+void TessellationBase::FillPointIndices()
+{
+	_pointIndices.clear();
+	for (size_t i = 0; i < _meshPoints.size(); i++)
+		_pointIndices[_meshPoints[i]] = i;
+}
+
+boost::optional<size_t> TessellationBase::GetPointIndex(const Vector3D &pt) const
+{
+	map<Vector3D, size_t>::const_iterator it = _pointIndices.find(pt);
+	if (it != _pointIndices.end())
+		return it->second;
+
+	return boost::none;
+}
+
+void TessellationBase::GetTetrahedronIndices(const Tetrahedron &t, boost::optional<size_t> *cells) const
+{
+	for (int i = 0; i < 4; i++)
+		cells[i] = GetPointIndex(t[i]);
+}
+

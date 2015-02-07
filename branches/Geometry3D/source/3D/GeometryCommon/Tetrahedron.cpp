@@ -94,9 +94,13 @@ Vector3D Tetrahedron::CalculateCenter() const
 
 double Tetrahedron::CalculateVolume() const
 {
-	// TODO: Calculate volume
-	BOOST_ASSERT(false);  // No volume yet!
-	return -1;
+	// Taken from here: http://mathworld.wolfram.com/Tetrahedron.html
+	Mat44<double> mat(_vertices[0].x, _vertices[0].y, _vertices[0].z, 1,
+		_vertices[1].x, _vertices[1].y, _vertices[1].z, 1,
+		_vertices[2].x, _vertices[2].y, _vertices[2].z, 1,
+		_vertices[3].x, _vertices[3].y, _vertices[3].z, 1);
+
+	return mat.determinant() / 6.0;
 }
 
 double Tetrahedron::CalculateRadius() const

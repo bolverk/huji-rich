@@ -9,6 +9,8 @@
 
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "../GeometryCommon/OuterBoundary3D.hpp"
+#include "../GeometryCommon/Tetrahedron.hpp"
+#include <map>
 
 class TessellationBase : public Tessellation3D
 {
@@ -70,8 +72,16 @@ protected:
 	FaceStore _faces;
 	std::vector<Vector3D> _meshPoints;
 	std::vector<Vector3D> _allCMs;
+	std::map<Vector3D, size_t> _pointIndices;
 
 	void ClearData();
+	void FillPointIndices();
+
+	//\brief Returns the index of a mesh point, or boost::none if this isn't a mesh point
+	boost::optional<size_t> GetPointIndex(const Vector3D &pt) const;
+
+	//\brief Gets the indices of all tetrahedron vertices (if they are mesh points)
+	void GetTetrahedronIndices(const Tetrahedron &t, boost::optional<size_t> *cells) const;
 
 public:
 	// Partial implementation of the Tessellation3D interface

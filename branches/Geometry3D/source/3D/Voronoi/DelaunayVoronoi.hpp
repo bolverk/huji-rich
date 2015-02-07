@@ -13,6 +13,7 @@
 #include "Delaunay.hpp"
 #include "TessellationBase.hpp"
 #include "GhostBusters.hpp"
+#include <boost/optional.hpp>
 
 template<typename DelaunayType, typename GhostBusterType>
 class DelaunayVoronoi: public TessellationBase
@@ -65,11 +66,37 @@ public:
 private:
 	//\brief Finds a Big Tetrahedron that contains the boundray subcube, and also the 26 adjacent subcubes.
 	Tetrahedron FindBigTetrahedron() const;
+	
+	//\brief Convert the DT into a VD
+	//\remarks This method fills the FaceStore and Cells stuctures
+	void ConvertToVoronoi(const Delaunay &del);
+
+	typedef std::map<Vector3D, size_t> tet_map;  // A map from vertex to the tetrahedron's center (one per vertex)
+	typedef std::unordered_set<size_t> tet_set;  // A set of all the unique tetrahedra (indices)
+
+	//\brief Removes duplicate tetrahedra
+	//\return A mapping from a mesh point to the unique tetrahedron
+	//\remark Sometimes the DT contains multiple cocentric tetrahedra. We just need one.
+	tet_map GetUniqueTetrahedra(const Delaunay &del) const;
+
+	//\brief Creates a Voronoi face, corresponding to the Delaunay Edge
+	//\return The face's index in the face store, or boost::none if the face is degenerate
+	//\param del The Delaunay class after its been run
+	//\param tetrahedra Tetrahedra map of unique tetrahedra
+	//\param vec1 The first vertex of the Delaunay edge
+	//\param vec2 The second vertex of the Delaunay edge
+	boost::optional<size_t> CreateFace(const Delaunay &del, const tet_set& tetrahedra, const Vector3D &vec1, const Vector3D &vec2);
+
+	//\brief Constructs all the cell objects
+	void ConstructCells();
 };
 
 template<typename DelaunayType, typename GhostBusterType>
 void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3D> &points)
 {
+	_meshPoints = points;
+	ClearData();
+
 	Tetrahedron big = FindBigTetrahedron();
 
 	// First phase
@@ -86,6 +113,7 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3
 	DelaunayType del2(allPoints, big);
 	del2.Run();
 
+	ConvertToVoronoi(del2);
 }
 
 template<typename DelaunayType, typename GhostBusterType>
@@ -119,6 +147,7 @@ bool DelaunayVoronoi<DelaunayType, GhostBusterType>::IsGhostPoint(size_t index) 
 {
 	return false;
 }
+
 template <typename DelaunayType, typename GhostBusterType>
 Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron() const
 {
@@ -149,6 +178,133 @@ Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron()
 	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
 
 	return Tetrahedron(tetrahedron);
+}
+
+
+template <typename DelaunayType, typename GhostBusterType>
+void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Delaunay &del)
+{
+	tet_map tetrahedra = GetUniqueTetrahedra(del);
+	tet_set tetSet;
+
+	for (tet_map::iterator itMap = tetrahedra.begin(); itMap != tetrahedra.end(); itMap++)
+		tetSet.insert(itMap->second);
+
+	for (tet_map::iterator itMap = tetrahedra.begin(); itMap != tetrahedra.end(); itMap++)
+	{
+		if (!_boundary->inside(itMap->first))  // This tetrahedron represents a Voronoi vertex outside the boundary. Ignore it/
+			continue;
+
+		const Tetrahedron &t = del[itMap->second];
+		boost::optional<size_t> cells[4];
+		GetTetrahedronIndices(t, cells);
+
+		// Go over all the edges
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = i + 1; j < 4; j++)
+			{
+				if (!cells[i].is_initialized() && !cells[j].is_initialized())  // This edge represents cells outside the boundary
+					continue;
+
+				boost::optional<size_t> faceIndex = CreateFace(del, tetSet, t[i], t[j]);
+				if (!faceIndex.is_initialized())
+					continue; // Degenerate face
+
+				Face &face = _faces.GetFace(faceIndex.value());
+
+				if (cells[i].is_initialized())
+					face.AddNeighbor(cells[i].value(), !cells[j].is_initialized());
+				if (cells[j].is_initialized())
+					face.AddNeighbor(cells[j].value(), !cells[i].is_initialized());
+			}
+		}
+	}
+
+	ConstructCells();
+}
+
+template <typename DelaunayType, typename GhostBusterType>
+typename DelaunayVoronoi<DelaunayType, GhostBusterType>::tet_map DelaunayVoronoi<DelaunayType, GhostBusterType>::GetUniqueTetrahedra(const Delaunay &del) const
+{
+	tet_map unique;
+
+	for (int tetNum = 0; tetNum < del.NumTetrahedra(); tetNum++)
+	{
+		Tetrahedron tet = del[tetNum];
+		Vector3D center = tet.center();
+
+		unique[center] = tetNum; // It doesn't matter which tetrahedron we take, so we take the last we encounter
+	}
+
+	return unique;
+}
+
+template <typename DelaunayType, typename GhostBusterType>
+boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFace(const Delaunay &del, 
+	const tet_set &tetrahedra, const Vector3D &vec1, const Vector3D &vec2)
+{
+	std::set<Vector3D> vertexSet;
+
+	vector<int> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
+	for (vector<int>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
+	{
+		const Tetrahedron &neighbor = del[*itNeighbor];
+		Vector3D center = neighbor.center();
+		if (_boundary->inside(center))
+			vertexSet.insert(center);
+	}
+
+	if (vertexSet.size() == 1) // This is a degenerate face, ignore it
+		return boost::none;
+	BOOST_ASSERT(vertexSet.size() >= 3);  // Degenerate face??
+
+	std::vector<Vector3D> vertices;
+	std::copy(vertexSet.begin(), vertexSet.end(), std::back_inserter(vertices));
+
+#ifdef _DEBUG
+	if (vertices.size() > 3)  // Check that all vertices are co-planar
+	{
+		for (int v = 3; v < vertices.size(); v++)
+		{
+			Tetrahedron t(vertices[0], vertices[1], vertices[2], vertices[v]);
+			BOOST_ASSERT(t.volume() == 0); // Coplanar iff the tetrahedron from the 4 vertice's volume is 0
+		}
+	}
+#endif
+
+	// TODO: Order vertices
+	return _faces.StoreFace(vertices);
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConstructCells()
+{
+	std::vector<std::vector<size_t>> cellFaces(_meshPoints.size());
+
+	for (size_t faceIndex = 0; faceIndex < _faces.NumFaces(); faceIndex++)
+	{
+		const Face& face = _faces.GetFace(faceIndex);
+		BOOST_ASSERT(face.NumNeighbors() > 0); // A face with no neighbors shouldn't have been created
+		
+		size_t neighbor1 = face.Neighbor1().value().GetCell();
+		cellFaces[neighbor1].push_back(faceIndex);
+
+		if (face.NumNeighbors() == 2)
+		{
+			size_t neighbor2 = face.Neighbor2().value().GetCell();
+			cellFaces[neighbor2].push_back(faceIndex);
+		}
+	}
+
+	for (int i = 0; i < _meshPoints.size(); i++)
+	{
+		double volume = -1; // TODO: Calculate volume
+		double width = -1;  // TODO: Calculate width
+		Vector3D centerOfMass; // TODO: Calculate CoM
+		_cells[i] = Cell(cellFaces[i], volume, width, _meshPoints[i], centerOfMass);
+		_allCMs[i] = centerOfMass;
+	}
 }
 
 #endif // DELAUNAY_VORONOI_HPP

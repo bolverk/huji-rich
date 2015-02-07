@@ -22,6 +22,7 @@ private:
 	double CalculateVolume() const;
 	double CalculateRadius() const;
 public:
+	Tetrahedron() { }  // Empty default constructor, for putting tetrahedra in maps
 	Tetrahedron(const std::vector<Vector3D> &vertices);
 	Tetrahedron(const Vector3D v1, const Vector3D v2, const Vector3D v3, const Vector3D v4);
 
