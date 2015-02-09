@@ -42,6 +42,13 @@ double Tetrahedron::radius() const
 	return _radius.value();
 }
 
+Vector3D Tetrahedron::centerOfMass() const
+{
+	if (!_centerOfMass.is_initialized())
+		_centerOfMass = CalculateCenterOfMass();
+	return _centerOfMass.value();
+}
+
 // \brief Find the circumcenter of a tetrahedron
 // \param vertices - a vector of the 4 corners
 // \returns The circumcenter
@@ -107,6 +114,17 @@ double Tetrahedron::CalculateRadius() const
 {
 	// The radius is the distance between the center and any of the vertices.
 	return abs(center() - _vertices[0]);
+}
+
+Vector3D Tetrahedron::CalculateCenterOfMass() const
+{
+	// See here: http://www.globalspec.com/reference/52702/203279/4-8-the-centroid-of-a-tetrahedron
+	Vector3D centerOfMass;
+
+	for (int i = 0; i < 4; i++)
+		centerOfMass += _vertices[i];
+
+	return centerOfMass / 4.0;
 }
 
 std::ostream& operator<<(std::ostream &output, const Tetrahedron &tetrahedron)

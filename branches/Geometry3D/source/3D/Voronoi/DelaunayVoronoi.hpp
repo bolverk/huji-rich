@@ -74,19 +74,13 @@ private:
 	typedef std::map<Vector3D, size_t> tet_map;  // A map from vertex to the tetrahedron's center (one per vertex)
 	typedef std::unordered_set<size_t> tet_set;  // A set of all the unique tetrahedra (indices)
 
-	//\brief Removes duplicate tetrahedra
-	//\return A mapping from a mesh point to the unique tetrahedron
-	//\remark Sometimes the DT contains multiple cocentric tetrahedra. We just need one.
-	tet_map GetUniqueTetrahedra(const Delaunay &del) const;
-
 	//\brief Creates a Voronoi face, corresponding to the Delaunay Edge
 	//\return The face's index in the face store, or boost::none if the face is degenerate
 	//\param del The Delaunay class after its been run
-	//\param tetrahedra Tetrahedra map of unique tetrahedra
 	//\param vec1 The first vertex of the Delaunay edge
 	//\param vec2 The second vertex of the Delaunay edge
-	boost::optional<size_t> CreateFace(const Delaunay &del, const tet_set& tetrahedra, const Vector3D &vec1, const Vector3D &vec2);
-
+	boost::optional<size_t> CreateFace(const Delaunay &del, const Vector3D &vec1, const Vector3D &vec2);
+	
 	//\brief Constructs all the cell objects
 	void ConstructCells();
 };
@@ -184,18 +178,9 @@ Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron()
 template <typename DelaunayType, typename GhostBusterType>
 void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Delaunay &del)
 {
-	tet_map tetrahedra = GetUniqueTetrahedra(del);
-	tet_set tetSet;
-
-	for (tet_map::iterator itMap = tetrahedra.begin(); itMap != tetrahedra.end(); itMap++)
-		tetSet.insert(itMap->second);
-
-	for (tet_map::iterator itMap = tetrahedra.begin(); itMap != tetrahedra.end(); itMap++)
+	for (size_t i = 0; i < del.NumTetrahedra(); i++)
 	{
-		if (!_boundary->inside(itMap->first))  // This tetrahedron represents a Voronoi vertex outside the boundary. Ignore it/
-			continue;
-
-		const Tetrahedron &t = del[itMap->second];
+		const Tetrahedron &t = del[i];
 		boost::optional<size_t> cells[4];
 		GetTetrahedronIndices(t, cells);
 
@@ -207,7 +192,7 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Dela
 				if (!cells[i].is_initialized() && !cells[j].is_initialized())  // This edge represents cells outside the boundary
 					continue;
 
-				boost::optional<size_t> faceIndex = CreateFace(del, tetSet, t[i], t[j]);
+				boost::optional<size_t> faceIndex = CreateFace(del, t[i], t[j]);
 				if (!faceIndex.is_initialized())
 					continue; // Degenerate face
 
@@ -225,24 +210,8 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Dela
 }
 
 template <typename DelaunayType, typename GhostBusterType>
-typename DelaunayVoronoi<DelaunayType, GhostBusterType>::tet_map DelaunayVoronoi<DelaunayType, GhostBusterType>::GetUniqueTetrahedra(const Delaunay &del) const
-{
-	tet_map unique;
-
-	for (int tetNum = 0; tetNum < del.NumTetrahedra(); tetNum++)
-	{
-		Tetrahedron tet = del[tetNum];
-		Vector3D center = tet.center();
-
-		unique[center] = tetNum; // It doesn't matter which tetrahedron we take, so we take the last we encounter
-	}
-
-	return unique;
-}
-
-template <typename DelaunayType, typename GhostBusterType>
 boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFace(const Delaunay &del, 
-	const tet_set &tetrahedra, const Vector3D &vec1, const Vector3D &vec2)
+	const Vector3D &vec1, const Vector3D &vec2)
 {
 	std::set<Vector3D> vertexSet;
 
@@ -255,9 +224,8 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 			vertexSet.insert(center);
 	}
 
-	if (vertexSet.size() == 1) // This is a degenerate face, ignore it
+	if (vertexSet.size() < 3) // This is a degenerate face, ignore it
 		return boost::none;
-	BOOST_ASSERT(vertexSet.size() >= 3);  // Degenerate face??
 
 	std::vector<Vector3D> vertices;
 	std::copy(vertexSet.begin(), vertexSet.end(), std::back_inserter(vertices));
@@ -273,8 +241,9 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 	}
 #endif
 
-	// TODO: Order vertices
-	return _faces.StoreFace(vertices);
+	size_t faceIndex = _faces.StoreFace(vertices);
+	// _faces.GetFace(faceIndex).ReorderVertices();
+	return faceIndex;
 }
 
 template<typename DelaunayType, typename GhostBusterType>

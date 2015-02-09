@@ -1,6 +1,7 @@
 #include "Face.hpp"
 #include "../../misc/universal_error.hpp"
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -101,4 +102,59 @@ std::ostream& operator<<(std::ostream& output, const Face::NeighborInfo& neighbo
 	if (neighbor.IsOverlapping())
 		output << "-O";
 	return output;
+}
+
+static const double PI = acos(-1);  // No PI definition in the C++ standard!!!
+static const double EPSILON = 1e-12;
+
+double Face::FullAngle(const Vector3D &v1, const Vector3D &v2)
+{
+	double angle = CalcAngle(v1, v2);
+	Vector3D cross = CrossProduct(v1, v2);
+
+	if (cross.x < 0 ||
+		cross.x == 0 && cross.y < 0 ||
+		cross.x == 0 && cross.y == 0 && cross.z < 0)
+	{
+		// This means the angle is between Pi and 2*Pi - adjust it
+		angle = 2 * PI - angle;
+	}
+
+	return angle;
+}
+
+typedef std::pair<double, Vector3D> AngledVertex;
+
+static int CompareAngledVertices(const AngledVertex &a1, const AngledVertex &a2)
+{
+	double diff = a1.first - a2.first;
+	if (diff < -EPSILON)
+		return -1;
+	else if (diff > EPSILON)
+		return 1;
+	return 0;
+}
+
+void Face::ReorderVertices()
+{
+	Vector3D center;
+	// We need to sort the vectors and angles together (no standard C++ sort returns the sorting permutation)
+	std::vector<std::pair<double, Vector3D>> angledVertices(vertices.size());
+
+	for (size_t i = 0; i < vertices.size(); i++)
+		center += vertices[i];
+	center = center / vertices.size();
+
+	Vector3D line0FromCenter = center - vertices[0];
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		Vector3D lineFromCenter = center - vertices[i];
+		angledVertices[i].first = FullAngle(line0FromCenter, lineFromCenter);
+		angledVertices[i].second = vertices[i];
+	}
+
+	std::sort(angledVertices.begin(), angledVertices.end(), CompareAngledVertices);
+	
+	for (size_t i = 0; i < vertices.size(); i++)  // Copy the results
+		vertices[i] = angledVertices[i].second;
 }

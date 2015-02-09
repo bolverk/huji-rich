@@ -17,10 +17,13 @@ private:
 	mutable boost::optional<Vector3D> _center;   // Caches the center, which doesn't really change the object
 	mutable boost::optional<double> _volume;     // Another cache
 	mutable boost::optional<double> _radius;
+	mutable boost::optional<Vector3D> _centerOfMass;
 
 	Vector3D CalculateCenter() const;
 	double CalculateVolume() const;
 	double CalculateRadius() const;
+	Vector3D CalculateCenterOfMass() const;
+
 public:
 	Tetrahedron() { }  // Empty default constructor, for putting tetrahedra in maps
 	Tetrahedron(const std::vector<Vector3D> &vertices);
@@ -29,6 +32,7 @@ public:
 	Vector3D center() const;
 	double volume() const;
 	double radius() const;
+	Vector3D centerOfMass() const;
 
 	const vector<Vector3D>& vertices() const { return _vertices;  }
 	const Vector3D& operator[](size_t index) const { return _vertices[index]; }

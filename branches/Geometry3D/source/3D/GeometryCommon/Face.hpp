@@ -87,6 +87,12 @@ public:
 	*/
 	double GetArea(void) const;
 
+	/*! \brief Reorders the vertices based on their angle from the center
+	\remark This is useful when the face order wasn't constructed properly
+	\remark It is assumed the vertices are all coplanar
+	\remark It is assumed the vertices form a convex polygon
+	*/
+	void ReorderVertices();
 
 	/*! \brief Sees if the face is identical to a list of vertices
 	\param List of vertices
@@ -96,6 +102,19 @@ public:
 		convex, as long as all the vertices appear in both, it's the same face.
 	*/
 	bool IdenticalTo(const vector<Vector3D> vertices) const;
+
+private:
+	/*! \brief Returns the angle between the two vectors.
+	\param v1 First vector
+	\param v2 Second vector
+	\returns The angle between the vectors, between 0 and 2*Pi
+	\remark The angle between 0 and Pi is calculated using the dot product of v1 and v2.
+	  Then v1xv2 is consulted to determine if the angle is between 0 and Pi or between Pi and 2*Pi.
+	  By convention, the first non-zero element of the cross product is consulted. If it's positive,
+	  the angle is said to be between 0 and Pi, if it's negative it's said to be between Pi and 2*Pi
+	\remark This function is used solely for ordering the faces, so this implementation is enough
+	*/
+	static double FullAngle(const Vector3D &v1, const Vector3D &v2);
 };
 
 /*! \brief Calculates the centroid of aa face

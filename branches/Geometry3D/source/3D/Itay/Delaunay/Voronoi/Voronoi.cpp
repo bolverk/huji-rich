@@ -97,8 +97,8 @@ void DisplayResults(const vector<Vector3D> &points, const Tessellation3D &tes)
 	set<Vector3D> vertices;
 	for (unsigned i = 0; i < tes.GetPointNo(); i++)
 	{
-		cout << "Cell " << namer.GetName(points[i]) << " at " << points[i] << endl;
 		auto faces = tes.GetCellFaces(i);
+		cout << "Cell " << namer.GetName(points[i]) << " at " << points[i] << " with " << faces.size() << "faces" << endl;
 		for (unsigned j = 0; j < faces.size(); j++)
 		{
 			auto face = tes.GetFace(faces[j]);
