@@ -10,14 +10,18 @@ Face::Face(vector<Vector3D> const& vert):
 {
 }
 
-Face::Face(void): vertices(), _neighbors() {}
+Face::Face(void): vertices(), _neighbors() 
+{
+}
 
   Face::~Face(void)
   {}
 
 Face::Face(Face const& other):
   vertices(other.vertices),
-  _neighbors(other._neighbors) {}
+  _neighbors(other._neighbors) 
+{
+}
 
 double Face::GetArea(void) const
 {
@@ -27,30 +31,55 @@ double Face::GetArea(void) const
 	return res;
 }
 
-bool Face::IdenticalTo(const vector<Vector3D> otherVertices) const
+bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
 {
-	if (vertices.size() != otherVertices.size())
+	size_t size = otherVertices.size();
+	BOOST_ASSERT(size >= 3);
+
+	if (vertices.size() != size)
 		return false;
 
-	// This implemenation is O(N^2), but since faces contain just a few vertices, it should be fine.
-	// To be more efficient (O(NlogN)) we need to be able to compare vectors.
-	// Using a hash is problematic, as doubles make lousy hash keys, and the performance gain to O(N) is most
-	// certainly not worh it.
-
-	for (size_t i = 0; i < vertices.size(); i++)
+	// First find the index of each of our vertices in otherVertices
+	vector<int> indices(size);
+	for (size_t i = 0; i < size; i++)
 	{
-		bool found = false;
-		for (size_t j = 0; j < otherVertices.size(); j++)
-			if (vertices[i] == otherVertices[j])
-			{
-				found = true;
-				break;
-			}
-		if (!found)
+		vector<Vector3D>::const_iterator it = std::find(otherVertices.begin(), otherVertices.end(), vertices[i]);
+		if (it == otherVertices.end())  // Can't find vertex in the other face
 			return false;
+		indices[i] = std::distance(otherVertices.begin(), it);
 	}
 
-	return true;
+	// The indices should be either x, x+1 , x+2, ... x+size-1 (all modulu size), or
+	// x, x-1, x-2, ...., x-size+1 (all modulo size) if the faces are in opposite directions.
+	// So the differences between the indices should be
+	// 1, 1, 1, 1, 1, -size, 1, 1, 1, 1 or -1, -1, -1, -1, size, -1, -1, -1, -1
+	// with size being somewhere in there (may be in the middle, may be on one of the ends)
+	bool sameDirection;
+	int diff = indices[1] - indices[0];
+	if (diff == 1 || diff == -size+1)
+		sameDirection = true;
+	else if (diff == -1 || diff == size-1)
+		sameDirection = false;
+	else
+		return false;   // The faces are *not* identical
+
+	bool sizeFound = false;
+	for (int i = 0; i < size; i++)
+	{
+		int diff = indices[(i + 1) % size] - indices[i];
+		if (!sameDirection)
+			diff *= -1;
+		if (diff != 1 && diff != -size + 1)
+			return false; 
+		if (diff == -size + 1)
+		{
+			if (sizeFound)
+				return false;
+			sizeFound = true;
+		}
+	}
+
+	return sizeFound;
 }
 
 void Face::AddNeighbor(size_t cell, bool overlapping)
@@ -125,14 +154,10 @@ double Face::FullAngle(const Vector3D &v1, const Vector3D &v2)
 
 typedef std::pair<double, Vector3D> AngledVertex;
 
-static int CompareAngledVertices(const AngledVertex &a1, const AngledVertex &a2)
+static bool CompareAngledVertices(const AngledVertex &a1, const AngledVertex &a2)
 {
 	double diff = a1.first - a2.first;
-	if (diff < -EPSILON)
-		return -1;
-	else if (diff > EPSILON)
-		return 1;
-	return 0;
+	return diff < -EPSILON;
 }
 
 void Face::ReorderVertices()

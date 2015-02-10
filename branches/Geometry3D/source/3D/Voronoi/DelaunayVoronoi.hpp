@@ -242,7 +242,7 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 #endif
 
 	size_t faceIndex = _faces.StoreFace(vertices);
-	// _faces.GetFace(faceIndex).ReorderVertices();
+	_faces.GetFace(faceIndex).ReorderVertices();
 	return faceIndex;
 }
 

@@ -98,10 +98,11 @@ public:
 	\param List of vertices
 	\return True if this is the same face
 	\remark
-		We just make sure the list of vertices is identical to our list. Since we assume faces are
-		convex, as long as all the vertices appear in both, it's the same face.
+	    Two faces are identical if they contain the same vertices in the same order. The faces need not start
+		with the same vertex, and also don't need to be the same direction, so:
+		ABCD is identical to BCDA and also to CBAD but not to BACD
 	*/
-	bool IdenticalTo(const vector<Vector3D> vertices) const;
+	bool IdenticalTo(const vector<Vector3D> &vertices) const;
 
 private:
 	/*! \brief Returns the angle between the two vectors.

@@ -85,10 +85,10 @@ TEST(Geometry3D, Face_Neighbors)
 	ASSERT_THROW(face1.AddNeighbor(1, false), UniversalError);
 }
 
-TEST(Geometry3D, Face_Indentical)
+TEST(Geometry3D, Face_Identical)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
-	vector<Vector3D> vertices1{ v1, v2, v3, v4 }, vertices2{ v2, v3, v4, v1 }, vertices3{ v4, v3, v2, v1 }, vertices4{ v1, v2, v3 };
+	vector<Vector3D> vertices1{ v1, v2, v3, v4 }, vertices2{ v2, v3, v4, v1 }, vertices3{ v4, v3, v2, v1 }, vertices4{ v1, v2, v3 }, vertices5{ v2, v1, v3, v4 };
 	Face face1(vertices1), face2(vertices2), face3(vertices3), face4(vertices4);
 
 	ASSERT_TRUE(face1.IdenticalTo(vertices2));
@@ -97,6 +97,21 @@ TEST(Geometry3D, Face_Indentical)
 	ASSERT_TRUE(face2.IdenticalTo(vertices3));
 	ASSERT_FALSE(face2.IdenticalTo(vertices4));
 	ASSERT_FALSE(face3.IdenticalTo(vertices4));
+	ASSERT_FALSE(face2.IdenticalTo(vertices4));
+}
+
+TEST(Geometry3D, Face_Order)
+{
+	Vector3D v1(0, 1, 0), v2(1, 1, 0), v3(1, 0.5, 0), v4(1.2, 0, 0), v5(0.8, -0.8, 0), v6(0, -1, 0);
+
+	vector<Vector3D> orig{ v1, v2, v3, v4, v5, v6};
+	vector<Vector3D> reshuffled(orig);
+	random_shuffle(reshuffled.begin(), reshuffled.end());
+
+	Face face(reshuffled);
+	face.ReorderVertices();
+
+	ASSERT_TRUE(face.IdenticalTo(orig));
 }
 
 void CreateFaultyBoundary1()
