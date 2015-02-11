@@ -8,32 +8,32 @@
 
 using namespace std;
 
-set<Vector3D> BruteForceGhostBuster::operator()(const Delaunay &del, const OuterBoundary3D &boundary) const
+set<VectorRef> BruteForceGhostBuster::operator()(const Delaunay &del, const OuterBoundary3D &boundary) const
 {
-	set<Vector3D> ghosts;
+	set<VectorRef> ghosts;
 	for (auto vec : del.InputPoints())
 		for (auto subcube : Subcube::all())
-			ghosts.insert(boundary.ghost(vec, subcube));
+			ghosts.insert(boundary.ghost(*vec, subcube));
 
 	return ghosts;
 }
 
-set<Vector3D> CloseToBoundaryGhostBuster::operator()(const Delaunay &del, const OuterBoundary3D &boundary) const
+set<VectorRef> CloseToBoundaryGhostBuster::operator()(const Delaunay &del, const OuterBoundary3D &boundary) const
 {
 	unordered_set<int> outer = FindOuterTetrahedra(del);
 	unordered_set<int> edge = FindEdgeTetrahedra(del, outer);
-	map<Vector3D, unordered_set<Subcube>> breaches = FindHullBreaches(del, edge, outer, boundary);
+	map<VectorRef, unordered_set<Subcube>> breaches = FindHullBreaches(del, edge, outer, boundary);
 
-	set<Vector3D> ghosts;
+	set<VectorRef> ghosts;
 	if (breaches.empty())
 		return ghosts;
 
-	for (map<Vector3D, unordered_set<Subcube>>::iterator it = breaches.begin(); it != breaches.end(); it++)
+	for (map<VectorRef, unordered_set<Subcube>>::iterator it = breaches.begin(); it != breaches.end(); it++)
 	{
-		Vector3D pt = it->first;
+		VectorRef pt = it->first;
 		for (unordered_set<Subcube>::iterator itSubcube = it->second.begin(); itSubcube != it->second.end(); itSubcube++)
 		{
-			Vector3D ghost = boundary.ghost(pt, *itSubcube);
+			Vector3D ghost = boundary.ghost(*pt, *itSubcube);
 			ghosts.insert(ghost);
 		}
 	}
@@ -50,7 +50,7 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 		Tetrahedron t = del[*itTetra];
 		for (int iv = 0; iv < 4; iv++)
 		{
-			Vector3D pt = t[iv];
+			VectorRef pt = t[iv];
 			if (result.find(pt) != result.end())
 				continue;
 
@@ -65,7 +65,7 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 				Tetrahedron tetrahedron = del[*itTetrahedron];
 				for (set<Subcube>::iterator itSubcube = Subcube::all().begin(); itSubcube != Subcube::all().end(); itSubcube++)
 				{
-					if (boundary.distance(tetrahedron.center(), *itSubcube) < tetrahedron.radius())
+					if (boundary.distance(*tetrahedron.center(), *itSubcube) < tetrahedron.radius())
 						breaches.insert(*itSubcube);
 				}
 			}
@@ -84,7 +84,7 @@ unordered_set<int> CloseToBoundaryGhostBuster::FindOuterTetrahedra(const Delauna
 
 	for (int i = 0; i < 4; i++)
 	{
-		Vector3D pt = del.BigTetrahedron()[i];
+		VectorRef pt = del.BigTetrahedron()[i];
 		vector<int> tetrahedra = del.VertexNeighbors(pt);
 		result.insert(tetrahedra.begin(), tetrahedra.end());
 	}
@@ -105,7 +105,7 @@ unordered_set<int> CloseToBoundaryGhostBuster::FindEdgeTetrahedra(const Delaunay
 		// And all their vertices
 		for (int i = 0; i < 4; i++)
 		{
-			Vector3D pt = t[i];
+			VectorRef pt = t[i];
 			if (del.IsBigTetrahedron(pt))  // Ignore the BigTetrahedron - all tetrahedra touching this vertex are Outer and not Edge
 				continue;
 			// Find all the neighbor tetrahedra of pt

@@ -7,7 +7,7 @@
 #define FACE_HPP 1
 
 #include <vector>
-#include "Vector3D.hpp"
+#include "VectorRepository.hpp"
 #include <boost/optional.hpp>
 #include <iostream>
 
@@ -35,16 +35,16 @@ private:
 
 public:
 	//! \brief Points at the ends of the edge
-	std::vector<Vector3D> vertices;
+	std::vector<VectorRef> vertices;
 
 	/*! \brief Class constructor
 	\param vert Position of the vertices
 	*/
-	Face(vector<Vector3D> const& vert);
+	Face(vector<VectorRef> const& vert);
+	//Face(const vector<Vector3D> &vert);
 	//! \brief Default constructor
 	Face();
 
-	~Face(void);
 
 	/*! \brief Copy constructor
 	\param other Source Face
@@ -102,7 +102,7 @@ public:
 		with the same vertex, and also don't need to be the same direction, so:
 		ABCD is identical to BCDA and also to CBAD but not to BACD
 	*/
-	bool IdenticalTo(const vector<Vector3D> &vertices) const;
+	bool IdenticalTo(const vector<VectorRef> &vertices) const;
 
 private:
 	/*! \brief Returns the angle between the two vectors.

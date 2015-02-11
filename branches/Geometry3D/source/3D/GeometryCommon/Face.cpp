@@ -5,17 +5,14 @@
 
 using namespace std;
 
-Face::Face(vector<Vector3D> const& vert):
+Face::Face(vector<VectorRef> const& vert):
   vertices(vert),_neighbors() 
 {
 }
 
-Face::Face(void): vertices(), _neighbors() 
+Face::Face(): vertices(), _neighbors() 
 {
 }
-
-  Face::~Face(void)
-  {}
 
 Face::Face(Face const& other):
   vertices(other.vertices),
@@ -27,13 +24,13 @@ double Face::GetArea(void) const
 {
 	double res=0;
 	for(size_t i=0;i<vertices.size()-2;++i)
-		res+=0.5*abs(CrossProduct(vertices[i+1]-vertices[0],vertices[i+2]-vertices[0]));
+		res+=0.5*abs(CrossProduct(*vertices[i+1]-*vertices[0],*vertices[i+2]-*vertices[0]));
 	return res;
 }
 
-bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
+bool Face::IdenticalTo(const vector<VectorRef> &otherVertices) const
 {
-	size_t size = otherVertices.size();
+	int size = (int)otherVertices.size();
 	BOOST_ASSERT(size >= 3);
 
 	if (vertices.size() != size)
@@ -43,10 +40,10 @@ bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
 	vector<int> indices(size);
 	for (size_t i = 0; i < size; i++)
 	{
-		vector<Vector3D>::const_iterator it = std::find(otherVertices.begin(), otherVertices.end(), vertices[i]);
+		vector<VectorRef>::const_iterator it = std::find(otherVertices.begin(), otherVertices.end(), vertices[i]);
 		if (it == otherVertices.end())  // Can't find vertex in the other face
 			return false;
-		indices[i] = std::distance(otherVertices.begin(), it);
+		indices[i] = (int)std::distance(otherVertices.begin(), it);
 	}
 
 	// The indices should be either x, x+1 , x+2, ... x+size-1 (all modulu size), or
@@ -116,11 +113,11 @@ Vector3D calc_centroid(const Face& face)
 	Vector3D res;
 	for(size_t i=0;i<face.vertices.size()-2;++i)
 	{
-		double area=0.5*abs(CrossProduct(face.vertices[i+1]-face.vertices[0],
-			face.vertices[i+2]-face.vertices[0]));
-		res.x+=area*(face.vertices[0].x+face.vertices[i+2].x+face.vertices[i+1].x)/3.;
-		res.y+=area*(face.vertices[0].y+face.vertices[i+2].y+face.vertices[i+1].y)/3.;
-		res.z+=area*(face.vertices[0].z+face.vertices[i+2].z+face.vertices[i+1].z)/3.;
+		double area=0.5*abs(CrossProduct(*face.vertices[i+1]-*face.vertices[0],
+			*face.vertices[i+2]-*face.vertices[0]));
+		res.x+=area*(face.vertices[0]->x+face.vertices[i+2]->x+face.vertices[i+1]->x)/3.;
+		res.y+=area*(face.vertices[0]->y+face.vertices[i+2]->y+face.vertices[i+1]->y)/3.;
+		res.z+=area*(face.vertices[0]->z+face.vertices[i+2]->z+face.vertices[i+1]->z)/3.;
 	}
 	return res;
 }
@@ -152,7 +149,7 @@ double Face::FullAngle(const Vector3D &v1, const Vector3D &v2)
 	return angle;
 }
 
-typedef std::pair<double, Vector3D> AngledVertex;
+typedef std::pair<double, VectorRef> AngledVertex;
 
 static bool CompareAngledVertices(const AngledVertex &a1, const AngledVertex &a2)
 {
@@ -164,16 +161,16 @@ void Face::ReorderVertices()
 {
 	Vector3D center;
 	// We need to sort the vectors and angles together (no standard C++ sort returns the sorting permutation)
-	std::vector<std::pair<double, Vector3D>> angledVertices(vertices.size());
+	std::vector<std::pair<double, VectorRef>> angledVertices(vertices.size());
 
 	for (size_t i = 0; i < vertices.size(); i++)
-		center += vertices[i];
-	center = center / vertices.size();
+		center += *vertices[i];
+	center = center / (int)vertices.size();
 
-	Vector3D line0FromCenter = center - vertices[0];
+	Vector3D line0FromCenter = center - *vertices[0];
 	for (size_t i = 0; i < vertices.size(); i++)
 	{
-		Vector3D lineFromCenter = center - vertices[i];
+		Vector3D lineFromCenter = center - *vertices[i];
 		angledVertices[i].first = FullAngle(line0FromCenter, lineFromCenter);
 		angledVertices[i].second = vertices[i];
 	}

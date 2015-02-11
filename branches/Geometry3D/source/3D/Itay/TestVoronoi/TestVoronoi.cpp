@@ -27,7 +27,7 @@ TEST(VoroPlusPlus, FaceStore)
 
 	for (int i = 0; i < 100; i++)
 	{
-		vector<Vector3D> vertices;
+		vector<VectorRef> vertices;
 		int numVertices = rand() % 6 + 3;
 		for (int j = 0; j < numVertices; j++)
 			vertices.push_back(Vector3D(rand(), rand(), rand()));

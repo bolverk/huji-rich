@@ -5,7 +5,7 @@
 * The FaceStore
 */
 
-bool TessellationBase::FaceStore::FindFace(const vector<Vector3D> &vertices, size_t &index) const
+bool TessellationBase::FaceStore::FindFace(const vector<VectorRef> &vertices, size_t &index) const
 {
 	for (index = 0; index < _faces.size(); index++)
 		if (_faces[index].IdenticalTo(vertices))
@@ -14,7 +14,7 @@ bool TessellationBase::FaceStore::FindFace(const vector<Vector3D> &vertices, siz
 	return false;
 }
 
-size_t TessellationBase::FaceStore::StoreFace(const vector<Vector3D> &vertices)
+size_t TessellationBase::FaceStore::StoreFace(const vector<VectorRef> &vertices)
 {
 	size_t index;
 	bool exists = FindFace(vertices, index);
@@ -195,9 +195,9 @@ void TessellationBase::FillPointIndices()
 		_pointIndices[_meshPoints[i]] = i;
 }
 
-boost::optional<size_t> TessellationBase::GetPointIndex(const Vector3D &pt) const
+boost::optional<size_t> TessellationBase::GetPointIndex(const VectorRef pt) const
 {
-	map<Vector3D, size_t>::const_iterator it = _pointIndices.find(pt);
+	unordered_map<VectorRef, size_t>::const_iterator it = _pointIndices.find(pt);
 	if (it != _pointIndices.end())
 		return it->second;
 

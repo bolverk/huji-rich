@@ -154,7 +154,7 @@ TessellationBase::Cell VoroPlusPlusImpl::CreateCell(Vector3D meshPoint, voro::vo
 	for (int faceNum = 0; faceNum < vcell.number_of_faces(); faceNum++)
 	{
 		int numVertices = f_verts[index++];
-		vector<Vector3D> faceVertices;
+		vector<VectorRef> faceVertices;
 		for (int i = 0; i < numVertices; i++)
 			faceVertices.push_back(vertices[f_verts[index++]]);
 		size_t faceIndex = _voro._faces.StoreFace(faceVertices);

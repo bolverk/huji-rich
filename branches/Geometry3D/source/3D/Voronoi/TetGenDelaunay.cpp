@@ -22,14 +22,14 @@ private:
 	void CallTetGen();
 	void CopyResults();
 
-	const Vector3D &GetPoint(size_t offset);
+	const VectorRef GetPoint(size_t offset);
 
 public:
 	TetGenImpl(TetGenDelaunay &delaunay) : _delaunay(delaunay) { }
 	void Run();
 };
 
-TetGenDelaunay::TetGenDelaunay(const std::vector<Vector3D> &points, const Tetrahedron &bigTetrahedron)
+TetGenDelaunay::TetGenDelaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigTetrahedron)
 	: Delaunay(points, bigTetrahedron)
 {
 }
@@ -40,7 +40,7 @@ void TetGenDelaunay::RunDelaunay()
 	impl.Run();
 }
 
-const Vector3D &TetGenImpl::GetPoint(size_t offset)
+const VectorRef TetGenImpl::GetPoint(size_t offset)
 {
 	BOOST_ASSERT(offset >= 0);
 	BOOST_ASSERT(offset < _delaunay._points.size() + 4);
@@ -66,19 +66,20 @@ void TetGenImpl::InitInput()
 
 	int offset = 0;
 	// Copy the points
-	for (vector<Vector3D>::const_iterator it = _delaunay._points.begin(); it != _delaunay._points.end(); it++)
+	for (vector<VectorRef>::const_iterator it = _delaunay._points.begin(); it != _delaunay._points.end(); it++)
 	{
-		in.pointlist[offset++] = it->x;
-		in.pointlist[offset++] = it->y;
-		in.pointlist[offset++] = it->z;
+		VectorRef vec = *it;
+		in.pointlist[offset++] = vec->x;
+		in.pointlist[offset++] = vec->y;
+		in.pointlist[offset++] = vec->z;
 	}
 
 	// Copy the big tetrahedron
 	for (int i = 0; i < 4; i++)
 	{
-		in.pointlist[offset++] = _delaunay._bigTetrahedron[i].x;
-		in.pointlist[offset++] = _delaunay._bigTetrahedron[i].y;
-		in.pointlist[offset++] = _delaunay._bigTetrahedron[i].z;
+		in.pointlist[offset++] = _delaunay._bigTetrahedron[i]->x;
+		in.pointlist[offset++] = _delaunay._bigTetrahedron[i]->y;
+		in.pointlist[offset++] = _delaunay._bigTetrahedron[i]->z;
 	}
 }
 
@@ -94,7 +95,7 @@ void TetGenImpl::CopyResults()
 	int offset = 0;
 	for (int i = 0; i < out.numberoftetrahedra; i++)
 	{
-		vector<Vector3D> vertices;
+		vector<VectorRef> vertices;
 		vector<int> neighbors;
 		for (int j = 0; j < 4; j++)
 		{

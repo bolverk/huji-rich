@@ -14,6 +14,8 @@
 #include "TessellationBase.hpp"
 #include "GhostBusters.hpp"
 #include <boost/optional.hpp>
+#include <unordered_set>
+#include <unordered_map>
 
 template<typename DelaunayType, typename GhostBusterType>
 class DelaunayVoronoi: public TessellationBase
@@ -71,7 +73,7 @@ private:
 	//\remarks This method fills the FaceStore and Cells stuctures
 	void ConvertToVoronoi(const Delaunay &del);
 
-	typedef std::map<Vector3D, size_t> tet_map;  // A map from vertex to the tetrahedron's center (one per vertex)
+	typedef std::unordered_map<VectorRef, size_t> tet_map;  // A map from vertex to the tetrahedron's center (one per vertex)
 	typedef std::unordered_set<size_t> tet_set;  // A set of all the unique tetrahedra (indices)
 
 	//\brief Creates a Voronoi face, corresponding to the Delaunay Edge
@@ -79,7 +81,7 @@ private:
 	//\param del The Delaunay class after its been run
 	//\param vec1 The first vertex of the Delaunay edge
 	//\param vec2 The second vertex of the Delaunay edge
-	boost::optional<size_t> CreateFace(const Delaunay &del, const Vector3D &vec1, const Vector3D &vec2);
+	boost::optional<size_t> CreateFace(const Delaunay &del, const VectorRef vec1, const VectorRef vec2);
 	
 	//\brief Constructs all the cell objects
 	void ConstructCells();
@@ -92,19 +94,20 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3
 	ClearData();
 
 	Tetrahedron big = FindBigTetrahedron();
+	vector<VectorRef> pointRefs(points.begin(), points.end());
 
 	// First phase
-	DelaunayType del1(points, big);
+	DelaunayType del1(pointRefs, big);
 	del1.Run();
 
 	// Find the ghost points
 	GhostBusterType ghostBuster;
-	set<Vector3D> ghosts = ghostBuster(del1, *_boundary);
+	set<VectorRef> ghosts = ghostBuster(del1, *_boundary);
 
 	// Now the second phase, with the ghost points
-	vector<Vector3D> allPoints(points);
-	allPoints.insert(allPoints.end(), ghosts.begin(), ghosts.end());
-	DelaunayType del2(allPoints, big);
+	vector<VectorRef> allPointRefs(pointRefs);
+	allPointRefs.insert(allPointRefs.end(), ghosts.begin(), ghosts.end());
+	DelaunayType del2(allPointRefs, big);
 	del2.Run();
 
 	ConvertToVoronoi(del2);
@@ -157,7 +160,7 @@ Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron()
 	absBackLowerLeft *= -1000;
 
 	// The top of the tetrahedron will be on the Y axis
-	vector<Vector3D> tetrahedron;
+	vector<VectorRef> tetrahedron;
 	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
 
 	// The bottom face is parallel to the x-z plane
@@ -211,23 +214,23 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Dela
 
 template <typename DelaunayType, typename GhostBusterType>
 boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFace(const Delaunay &del, 
-	const Vector3D &vec1, const Vector3D &vec2)
+	const VectorRef vec1, const VectorRef vec2)
 {
-	std::set<Vector3D> vertexSet;
+	std::unordered_set<VectorRef> vertexSet;
 
 	vector<int> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
 	for (vector<int>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
 	{
 		const Tetrahedron &neighbor = del[*itNeighbor];
-		Vector3D center = neighbor.center();
-		if (_boundary->inside(center))
+		VectorRef center = neighbor.center();
+		if (_boundary->inside(*center))
 			vertexSet.insert(center);
 	}
 
 	if (vertexSet.size() < 3) // This is a degenerate face, ignore it
 		return boost::none;
 
-	std::vector<Vector3D> vertices;
+	std::vector<VectorRef> vertices;
 	std::copy(vertexSet.begin(), vertexSet.end(), std::back_inserter(vertices));
 
 #ifdef _DEBUG

@@ -13,7 +13,7 @@ class TestGenImpl;
 class TetGenDelaunay : public Delaunay
 {
 public:
-	TetGenDelaunay(const std::vector<Vector3D> &points, const Tetrahedron &bigTetrahedron);
+	TetGenDelaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigTetrahedron);
 	
 protected:
 	void RunDelaunay();

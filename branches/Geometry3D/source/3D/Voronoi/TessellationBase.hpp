@@ -10,7 +10,8 @@
 #include "../GeometryCommon/Tessellation3D.hpp"
 #include "../GeometryCommon/OuterBoundary3D.hpp"
 #include "../GeometryCommon/Tetrahedron.hpp"
-#include <map>
+#include "../GeometryCommon/VectorRepository.hpp"
+#include <unordered_map>
 
 class TessellationBase : public Tessellation3D
 {
@@ -23,10 +24,10 @@ protected:
 	{
 	private:
 		std::vector<Face> _faces;
-		bool FindFace(const std::vector<Vector3D> &vertices, size_t &index) const;
+		bool FindFace(const std::vector<VectorRef> &vertices, size_t &index) const;
 
 	public:
-		size_t StoreFace(const std::vector<Vector3D>& vertices);
+		size_t StoreFace(const std::vector<VectorRef>& vertices);
 
 		const Face& GetFace(size_t index) const { return _faces[index]; }
 		Face& GetFace(size_t index) { return _faces[index]; }
@@ -72,13 +73,13 @@ protected:
 	FaceStore _faces;
 	std::vector<Vector3D> _meshPoints;
 	std::vector<Vector3D> _allCMs;
-	std::map<Vector3D, size_t> _pointIndices;
+	std::unordered_map<VectorRef, size_t> _pointIndices;
 
 	void ClearData();
 	void FillPointIndices();
 
 	//\brief Returns the index of a mesh point, or boost::none if this isn't a mesh point
-	boost::optional<size_t> GetPointIndex(const Vector3D &pt) const;
+	boost::optional<size_t> GetPointIndex(const VectorRef pt) const;
 
 	//\brief Gets the indices of all tetrahedron vertices (if they are mesh points)
 	void GetTetrahedronIndices(const Tetrahedron &t, boost::optional<size_t> *cells) const;

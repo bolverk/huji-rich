@@ -23,7 +23,7 @@ using namespace std;
 class VectorNamer
 {
 private:
-	map<Vector3D, string> _vectors;
+	map<VectorRef, string> _vectors;
 	int _last;
 
 public:
@@ -32,7 +32,7 @@ public:
 		_last = 0;
 	}
 
-	string GetName(Vector3D vec, string prefix="V")
+	string GetName(VectorRef vec, string prefix="V")
 	{
 		auto inMap = _vectors.find(vec);
 		if (inMap != _vectors.end())
@@ -44,8 +44,8 @@ public:
 		return strm.str();
 	}
 
-	map<Vector3D, string>::const_iterator begin() const { return _vectors.cbegin(); }
-	map<Vector3D, string>::const_iterator end() const { return _vectors.cend(); }
+	map<VectorRef, string>::const_iterator begin() const { return _vectors.cbegin(); }
+	map<VectorRef, string>::const_iterator end() const { return _vectors.cend(); }
 };
 
 void UseVoroPlusPlus(const vector<Vector3D>& points, const OuterBoundary3D &boundary);
@@ -106,7 +106,7 @@ void DisplayResults(const vector<Vector3D> &points, const Tessellation3D &tes)
 			for (auto it = face.vertices.begin(); it != face.vertices.end(); it++)
 			{
 				cout << namer.GetName(*it) << " ";
-				vertices.insert(*it);
+				vertices.insert(**it);
 			}
 			cout << endl;
 		}

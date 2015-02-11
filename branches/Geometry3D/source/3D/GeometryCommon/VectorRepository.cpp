@@ -18,20 +18,20 @@ private:
 	vector<Vector3D> _repository;
 
 public:
-	VectorRef GetVectorRef(const Vector3D &vec);
+	size_t GetVectorId(const Vector3D &vec);
 	const Vector3D &GetVector(size_t index) const;
 };
 
-VectorRef VectorRepository::GetVectorRef(const Vector3D &vec)
+size_t VectorRepository::GetVectorId(const Vector3D &vec)
 {
 	map_type::iterator it = _vectorMap.find(vec);
 	if (it != _vectorMap.end())
-		return VectorRef(it->second);
+		return it->second;
 
 	_repository.push_back(vec);
 	size_t index = _repository.size() - 1;
 	_vectorMap[vec] = index;
-	return VectorRef(index);
+	return index;
 }
 
 const Vector3D& VectorRepository::GetVector(size_t index) const
@@ -42,7 +42,15 @@ const Vector3D& VectorRepository::GetVector(size_t index) const
 
 static VectorRepository theRepository;
 
-VectorRef::VectorRef(size_t id) : _id(id) { }
+VectorRef::VectorRef(const Vector3D &vec)
+{ 
+	_id = theRepository.GetVectorId(vec);
+}
+
+VectorRef::VectorRef()
+{
+	_id = (size_t)-1;
+}
 
 const Vector3D &VectorRef::operator*() const
 {
@@ -58,4 +66,14 @@ ostream& operator<<(ostream& output, const VectorRef &vref)
 {
 	output << *vref;
 	return output;
+}
+
+bool operator==(const VectorRef &v1, const VectorRef &v2)
+{
+	return v1._id == v2._id;
+}
+
+bool operator<(const VectorRef &v1, const VectorRef &v2)
+{
+	return (*v1) < (*v2);
 }

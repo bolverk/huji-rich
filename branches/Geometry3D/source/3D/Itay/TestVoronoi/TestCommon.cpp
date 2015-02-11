@@ -43,7 +43,7 @@ TEST(Geometry3D, Vector3D_Operations)
 TEST(Geometry3D, Face_Basic)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
-	vector<Vector3D> vertices{ v1, v2, v3, v4 };
+	vector<VectorRef> vertices{ v1, v2, v3, v4 };
 	Face face(vertices);
 
 	ASSERT_EQ(vertices, face.vertices);
@@ -61,12 +61,12 @@ TEST(Geometry3D, Face_Basic)
 TEST(Geometry3D, Face_Area)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
-	vector<Vector3D> vertices{ v1, v2, v3, v4 };
+	vector<VectorRef> vertices{ v1, v2, v3, v4 };
 	Face square(vertices);
 	ASSERT_EQ(square.GetArea(), 1);
 
 	Vector3D v5(0, 0, 0), v6(0, 2, 0), v7(2, 0, 0);
-	vector<Vector3D> vertices2{ v5, v6, v7 };
+	vector<VectorRef> vertices2{ v5, v6, v7 };
 	Face triangle(vertices2);
 	ASSERT_EQ(triangle.GetArea(), 2);
 }
@@ -74,7 +74,7 @@ TEST(Geometry3D, Face_Area)
 TEST(Geometry3D, Face_Neighbors)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
-	vector<Vector3D> vertices{ v1, v2, v3, v4 };
+	vector<VectorRef> vertices{ v1, v2, v3, v4 };
 	Face face1(vertices);
 
 	face1.AddNeighbor(1, true);
@@ -88,7 +88,7 @@ TEST(Geometry3D, Face_Neighbors)
 TEST(Geometry3D, Face_Identical)
 {
 	Vector3D v1(0, 0, 0), v2(1, 0, 0), v3(1, 1, 0), v4(0, 1, 0);
-	vector<Vector3D> vertices1{ v1, v2, v3, v4 }, vertices2{ v2, v3, v4, v1 }, vertices3{ v4, v3, v2, v1 }, vertices4{ v1, v2, v3 }, vertices5{ v2, v1, v3, v4 };
+	vector<VectorRef> vertices1{ v1, v2, v3, v4 }, vertices2{ v2, v3, v4, v1 }, vertices3{ v4, v3, v2, v1 }, vertices4{ v1, v2, v3 }, vertices5{ v2, v1, v3, v4 };
 	Face face1(vertices1), face2(vertices2), face3(vertices3), face4(vertices4);
 
 	ASSERT_TRUE(face1.IdenticalTo(vertices2));
@@ -104,8 +104,8 @@ TEST(Geometry3D, Face_Order)
 {
 	Vector3D v1(0, 1, 0), v2(1, 1, 0), v3(1, 0.5, 0), v4(1.2, 0, 0), v5(0.8, -0.8, 0), v6(0, -1, 0);
 
-	vector<Vector3D> orig{ v1, v2, v3, v4, v5, v6};
-	vector<Vector3D> reshuffled(orig);
+	vector<VectorRef> orig{ v1, v2, v3, v4, v5, v6};
+	vector<VectorRef> reshuffled(orig);
 	random_shuffle(reshuffled.begin(), reshuffled.end());
 
 	Face face(reshuffled);
