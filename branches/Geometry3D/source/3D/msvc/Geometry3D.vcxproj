@@ -152,6 +152,7 @@
     <ClCompile Include="..\GeometryCommon\Subcube.cpp" />
     <ClCompile Include="..\GeometryCommon\Tetrahedron.cpp" />
     <ClCompile Include="..\GeometryCommon\Vector3D.cpp" />
+    <ClCompile Include="..\GeometryCommon\VectorRepository.cpp" />
     <ClCompile Include="..\Utilities\assert.cpp" />
     <ClCompile Include="..\Voronoi\Delaunay.cpp" />
     <ClCompile Include="..\Voronoi\GhostBusters.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="..\GeometryCommon\TessLogger.hpp" />
     <ClInclude Include="..\GeometryCommon\Tetrahedron.hpp" />
     <ClInclude Include="..\GeometryCommon\Vector3D.hpp" />
+    <ClInclude Include="..\GeometryCommon\VectorRepository.hpp" />
     <ClInclude Include="..\Utilities\assert.hpp" />
     <ClInclude Include="..\Voronoi\Delaunay.hpp" />
     <ClInclude Include="..\Voronoi\DelaunayVoronoi.hpp" />
