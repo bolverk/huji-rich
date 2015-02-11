@@ -544,14 +544,13 @@ namespace {
 		bool density_floor,
 		double min_density,
 		double min_pressure,
-		Primitive const& old,
+		Primitive const& /*old*/,
 		EquationOfState const& eos)
 	{
 		Conserved res = raw;
 		if(density_floor){
-			if(res.Mass<min_density)
-				res = density_floor_correction
-				(min_density, eos, old);
+			if (res.Mass < min_density)
+				res.Mass = min_density;
 			const double kinetic_energy = 0.5*pow(abs(res.Momentum/res.Mass),2);
 			const double thermal_energy = res.Energy/res.Mass-kinetic_energy;
 			const double pressure = eos.de2p(res.Mass,thermal_energy);
