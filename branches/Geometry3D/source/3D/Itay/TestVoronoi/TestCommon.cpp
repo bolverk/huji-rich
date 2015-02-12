@@ -26,6 +26,26 @@ TEST(Geometry3D, Vector3D_Construction)
 	ASSERT_EQ(vec3, vec2);
 }
 
+TEST(Geometry3D, VectorRef)
+{
+	Vector3D vec0;
+	Vector3D vec1(1, 1, 1);
+	Vector3D vec1_2(1, 1, 1);
+	Vector3D vec0_2(0, 0, 0);
+
+	VectorRef ref0(vec0), ref1(vec1), ref1_2(vec1_2), ref0_2(vec0_2);
+
+	ASSERT_EQ(&(*ref0), &(*ref0_2)); // Make sure vec0 and vec0_2 return references to the same vector in memory
+	ASSERT_NE(&vec0, &vec0_2);		// But make sure they are not the same vector
+	ASSERT_EQ(&(*ref1), &(*ref1_2)); // Same for vec1 and vec1_2
+	ASSERT_NE(&vec1, &vec1_2);		// But make sure they are not the same vector
+	ASSERT_NE(&(*ref0), &(*ref1)); // Make sure different vectors have different references
+
+	ASSERT_EQ(ref0, ref0_2);		   // Compare references
+	ASSERT_EQ(ref1, ref1_2);
+	ASSERT_NE(ref0, ref1);
+}
+
 TEST(Geometry3D, Vector3D_Operations)
 {
 	Vector3D v1(1, 2, 3);

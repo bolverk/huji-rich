@@ -41,6 +41,7 @@ namespace std
 
 std::ostream& operator<<(std::ostream& output, const VectorRef &vref);
 bool operator==(const VectorRef &v1, const VectorRef &v2);
+bool operator!=(const VectorRef &v1, const VectorRef &v2);
 bool operator<(const VectorRef &v1, const VectorRef &v2);
 
 #endif

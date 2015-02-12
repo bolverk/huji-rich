@@ -73,6 +73,11 @@ bool operator==(const VectorRef &v1, const VectorRef &v2)
 	return v1._id == v2._id;
 }
 
+bool operator!=(const VectorRef &v1, const VectorRef &v2)
+{
+	return !(v1==v2);
+}
+
 bool operator<(const VectorRef &v1, const VectorRef &v2)
 {
 	return (*v1) < (*v2);
