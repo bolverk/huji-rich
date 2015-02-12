@@ -77,7 +77,7 @@ namespace
 				const double angle=acos(ScalarProd(tocenter,tocpoint)/(abs(tocpoint)*Rcenter));
 				if(orient2d(TripleConstRef<Vector2D>(center,
 								     procpoint,
-								     cpoints[i]-center))>0)
+								     cpoints[i]))>0)
 				{	
 					if(angle>plusval)
 					{
