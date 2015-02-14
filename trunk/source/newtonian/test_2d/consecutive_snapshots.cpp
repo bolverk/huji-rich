@@ -3,22 +3,14 @@
 #include "../../misc/int2str.hpp"
 #include "../two_dimensional/hdf5_diagnostics.hpp"
 
-ConsecutiveSnapshots::ConsecutiveSnapshots(double dt,
-					   Index2FileName* i2fn,
-					   double init_time,
-					   int counter):
-  next_time_(init_time),
-  dt_(dt),
-  counter_(counter),
-  i2fn_(i2fn) {}
+ConsecutiveSnapshots::ConsecutiveSnapshots(Trigger* trigger,
+					   Index2FileName* i2fn):
+  trigger_(trigger), i2fn_(i2fn), counter_(0) {}
 
 void ConsecutiveSnapshots::operator()(hdsim const& sim)
 {
-  if(sim.GetTime()>next_time_){
-    
+  if((*trigger_.get())(sim)){
     write_snapshot_to_hdf5(sim, (*i2fn_.get())(counter_));
- 
-    next_time_ += dt_;
     ++counter_;
   }
 }
