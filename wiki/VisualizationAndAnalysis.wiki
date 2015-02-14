@@ -82,6 +82,45 @@ f.close()
 pylab.show()
 }}}
 
+== Finding Contours ==
+
+Given a set of points (given as two lists of x and y coordinates) and a value associated with each point (z list) the contour at some z value can be obtained using the following script
+
+{{{
+def extract_contour(x_list, y_list, z_list, z_value):
+
+    import pylab
+    import numpy
+    
+    temp = pylab.tricontour(x_list, y_list, z_list, levels=[z_value])
+    pylab.clf()
+    return numpy.concatenate([itm.vertices for itm
+                              in temp.collections[0].get_paths()])
+}}}
+The reader should be aware that this function should be used before any plot is drawn, as it will reset any existing figure. Unfortunately, at this point we don't know how to achieve the same end without polluting the pylab environment.
+Example usage:
+{{{
+def test_extract_contour():
+
+    import pylab
+    import numpy
+
+    zfunc = lambda x,y : (x-0.5)**2 + (y-0.5)**2
+
+    points = numpy.random.rand(1e6,2)
+    
+    z_list = [zfunc(itm[0],itm[1]) for itm in points]
+
+    contour_points = extract_contour(points[:,0],
+                                     points[:,1],
+                                     z_list,
+                                     0.1)
+
+    pylab.scatter(contour_points[:,0],
+                  contour_points[:,1])
+    pylab.show()
+}}}
+
 == Function Fitting ==
 This section will demonstrate how to use the lmfit python package to fit data to some multivariate function. In this example we start out with some 2D profile which we denote as "original" (in this case, it is a Gaussian). We then add random noise to obscure the original image. This profile we denote as "measured". Finally, we use function fitting to reconstruct the original image.
 {{{
