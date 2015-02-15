@@ -4,10 +4,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Geometry3D", "Geometry3D.vcxproj", "{0EDF2F0B-198A-4FCC-84D1-4F463F70DD93}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC858E24-556F-4F50-9030-A836DAE266AE} = {EC858E24-556F-4F50-9030-A836DAE266AE}
+		{49FC313B-D9DF-4366-A33F-FF8831B8BEE1} = {49FC313B-D9DF-4366-A33F-FF8831B8BEE1}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voro++", "..\3rdParty\voro++-0.4.6\msvc\voro++.vcxproj", "{EC858E24-556F-4F50-9030-A836DAE266AE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TryVoro++", "..\Itay\TryVoro++\TryVoro++.vcxproj", "{117B47E4-6EFB-4A96-A51C-E357CB3F0DA1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC858E24-556F-4F50-9030-A836DAE266AE} = {EC858E24-556F-4F50-9030-A836DAE266AE}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{65C6C835-9DB6-43A8-A034-F6EB11207A02}"
 EndProject
@@ -22,8 +29,19 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tetgenutil", "..\3rdParty\tetgen-1.5.0\msvc\tetgenutil\tetgenutil.vcxproj", "{BE52FDC7-95D7-456D-93AD-DEB67DB67144}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestVoronoi", "..\Itay\TestVoronoi\TestVoronoi.vcxproj", "{102E65C2-12B7-467C-85A7-33DB9B24B491}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0EDF2F0B-198A-4FCC-84D1-4F463F70DD93} = {0EDF2F0B-198A-4FCC-84D1-4F463F70DD93}
+		{EC858E24-556F-4F50-9030-A836DAE266AE} = {EC858E24-556F-4F50-9030-A836DAE266AE}
+		{49FC313B-D9DF-4366-A33F-FF8831B8BEE1} = {49FC313B-D9DF-4366-A33F-FF8831B8BEE1}
+		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE8} = {C8F6C172-56F2-4E76-B5FA-C3B423B31BE8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StressVoronoi", "..\Itay\StressVoronoi\StressVoronoi.vcxproj", "{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0EDF2F0B-198A-4FCC-84D1-4F463F70DD93} = {0EDF2F0B-198A-4FCC-84D1-4F463F70DD93}
+		{EC858E24-556F-4F50-9030-A836DAE266AE} = {EC858E24-556F-4F50-9030-A836DAE266AE}
+		{49FC313B-D9DF-4366-A33F-FF8831B8BEE1} = {49FC313B-D9DF-4366-A33F-FF8831B8BEE1}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72398897-5B71-4F49-8CED-0F688278F4A5}"
 	ProjectSection(SolutionItems) = preProject
@@ -31,6 +49,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TryVoronois", "..\Itay\TryVoronoi\TryVoronoi.vcxproj", "{FD456F35-8AEA-4A76-A946-90F0E99B4F9B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0EDF2F0B-198A-4FCC-84D1-4F463F70DD93} = {0EDF2F0B-198A-4FCC-84D1-4F463F70DD93}
+		{EC858E24-556F-4F50-9030-A836DAE266AE} = {EC858E24-556F-4F50-9030-A836DAE266AE}
+		{49FC313B-D9DF-4366-A33F-FF8831B8BEE1} = {49FC313B-D9DF-4366-A33F-FF8831B8BEE1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

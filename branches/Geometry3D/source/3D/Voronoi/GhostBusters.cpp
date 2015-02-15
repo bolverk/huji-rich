@@ -8,12 +8,23 @@
 
 using namespace std;
 
+set<Subcube> BruteForceGhostBuster::_subcubes = BruteForceGhostBuster::RelevantSubcubes();
+set<Subcube> BruteForceGhostBuster::RelevantSubcubes()
+{
+	const char *offsets[] = { "-  ", "+  ", " - ", " + ", "  -", "  +" };
+	set<Subcube> subcubes;
+	for (int i = 0; i < 6; i++)
+		subcubes.insert(Subcube(offsets[i]));
+
+	return subcubes;
+}
+
 set<VectorRef> BruteForceGhostBuster::operator()(const Delaunay &del, const OuterBoundary3D &boundary) const
 {
 	set<VectorRef> ghosts;
-	for (auto vec : del.InputPoints())
-		for (auto subcube : Subcube::all())
-			ghosts.insert(boundary.ghost(*vec, subcube));
+	for (vector<VectorRef>::const_iterator itV = del.InputPoints().begin(); itV != del.InputPoints().end(); itV++)
+		for (set<Subcube>::const_iterator itS = _subcubes.begin(); itS != _subcubes.end(); itS++)
+			ghosts.insert(boundary.ghost(**itV, *itS));
 
 	return ghosts;
 }

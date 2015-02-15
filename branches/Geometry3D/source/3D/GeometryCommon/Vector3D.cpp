@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#define EPSILON 1e-12
+#define EPSILON 1e-5
 
 using namespace std;
 

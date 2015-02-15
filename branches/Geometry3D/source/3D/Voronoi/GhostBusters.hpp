@@ -23,6 +23,9 @@ public:
 //\brief A simple implementation that copies each point 26 times
 class BruteForceGhostBuster : public GhostBuster
 {
+private:
+	static std::set<Subcube> _subcubes;
+	static std::set<Subcube> RelevantSubcubes();
 public:
 	virtual std::set<VectorRef> operator()(const Delaunay &del, const OuterBoundary3D &boundary) const;
 };

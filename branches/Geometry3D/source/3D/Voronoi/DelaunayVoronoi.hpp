@@ -65,6 +65,8 @@ public:
 	*/
 	virtual bool IsGhostPoint(size_t index)const;
 
+	std::vector<VectorRef> AllPoints;
+
 private:
 	//\brief Convert the DT into a VD
 	//\remarks This method fills the FaceStore and Cells stuctures
@@ -108,6 +110,7 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3
 	// Now the second phase, with the ghost points
 	vector<VectorRef> allPointRefs(pointRefs);
 	allPointRefs.insert(allPointRefs.end(), ghosts.begin(), ghosts.end());
+	AllPoints = allPointRefs;
 	DelaunayType del2(allPointRefs, big);
 	del2.Run();
 
