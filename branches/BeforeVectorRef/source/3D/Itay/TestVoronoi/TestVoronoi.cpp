@@ -38,7 +38,8 @@ TEST(VoroPlusPlus, FaceStore)
 
 	for (int i = 99; i >= 0; i--)
 	{
-		size_t index = store.StoreFace(faces[i].vertices);
+		vector<Vector3D> vertices(faces[i].vertices);
+		size_t index = store.StoreFace(vertices);
 		ASSERT_EQ(index, i);
 	}
 }

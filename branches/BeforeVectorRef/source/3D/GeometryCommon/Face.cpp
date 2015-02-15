@@ -33,6 +33,19 @@ double Face::GetArea(void) const
 
 bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
 {
+	if (vertices.size() != otherVertices.size())
+		return false;
+
+	for (int i = 0; i < vertices.size(); i++)
+		if (find(otherVertices.begin(), otherVertices.end(), vertices[i]) == otherVertices.end())
+			return false;
+
+	return true;
+}
+
+/*
+bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
+{
 	size_t size = otherVertices.size();
 	BOOST_ASSERT(size >= 3);
 
@@ -81,6 +94,7 @@ bool Face::IdenticalTo(const vector<Vector3D> &otherVertices) const
 
 	return sizeFound;
 }
+*/
 
 void Face::AddNeighbor(size_t cell, bool overlapping)
 {

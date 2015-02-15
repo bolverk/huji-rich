@@ -66,14 +66,15 @@ int main()
 		Vector3D(28, 4, 7),
 		Vector3D(65, 60, 22),
 		Vector3D(59, 92, 5),
-		Vector3D(84, 0, 32) };
+		Vector3D(84, 0, 32),
+		Vector3D(12, 35, 42)};
 	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
 
 	for (auto vec : vertices)
 		namer.GetName(vec, "C");
 
-	UseVoroPlusPlus(vertices, boundary);
 	UseTetGen(vertices, boundary);
+	UseVoroPlusPlus(vertices, boundary);
 
 #ifdef _DEBUG
 	string s;
