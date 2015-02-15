@@ -22,13 +22,13 @@ set<VectorRef> CloseToBoundaryGhostBuster::operator()(const Delaunay &del, const
 {
 	unordered_set<int> outer = FindOuterTetrahedra(del);
 	unordered_set<int> edge = FindEdgeTetrahedra(del, outer);
-	map<VectorRef, unordered_set<Subcube>> breaches = FindHullBreaches(del, edge, outer, boundary);
+	breach_map breaches = FindHullBreaches(del, edge, outer, boundary);
 
 	set<VectorRef> ghosts;
 	if (breaches.empty())
 		return ghosts;
 
-	for (map<VectorRef, unordered_set<Subcube>>::iterator it = breaches.begin(); it != breaches.end(); it++)
+	for (breach_map::iterator it = breaches.begin(); it != breaches.end(); it++)
 	{
 		VectorRef pt = it->first;
 		for (unordered_set<Subcube>::iterator itSubcube = it->second.begin(); itSubcube != it->second.end(); itSubcube++)

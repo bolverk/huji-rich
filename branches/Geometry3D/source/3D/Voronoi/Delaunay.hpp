@@ -8,14 +8,15 @@
 
 #include <vector>
 #include <list>
-#include <map>
+#include <unordered_map>
 #include "../GeometryCommon/Vector3D.hpp"
 #include "../GeometryCommon/Tetrahedron.hpp"
+#include "../GeometryCommon/OuterBoundary3D.hpp"
 
 class Delaunay
 {
-public:
-	class Edge // This class is public because of the operators required by std::map
+protected:
+	class Edge
 	{
 	private:
 		VectorRef _vec1, _vec2;
@@ -29,6 +30,23 @@ public:
 
 		const VectorRef &vec1() const { return _vec1; }
 		const VectorRef &vec2() const { return _vec2; }
+
+		bool operator==(const Edge &other) const
+		{
+			return _vec1 == other._vec1 && _vec2 == other._vec2;
+		}
+	};
+
+	struct EdgeHasher
+	{
+		typedef Edge argument_type;
+		typedef size_t result_type;
+
+		result_type operator()(const argument_type &edge) const
+		{
+			hash<VectorRef> hasher;
+			return hasher(edge.vec1()) ^ hasher(edge.vec2());
+		}
 	};
 
 protected:
@@ -37,10 +55,10 @@ protected:
 
 	std::vector<Tetrahedron> _tetrahedra;
 	
-	typedef std::map<Edge, std::vector<int>> EdgeMap;
+	typedef std::unordered_map<Edge, std::vector<int>, EdgeHasher> EdgeMap;
 	EdgeMap _edges;  // Edge -> list of tetrahedra it appears in
 
-	typedef std::map <VectorRef, std::vector<int>> VertexMap;
+	typedef std::unordered_map<VectorRef, std::vector<int>> VertexMap;
 	VertexMap _vertices; // Vector->list of tetrahedra it appears in
 
 	virtual void FillVertices();
@@ -71,9 +89,9 @@ public:
 
 	const Tetrahedron& BigTetrahedron() const { return _bigTetrahedron; }
 	const std::vector<VectorRef> &InputPoints() const { return _points; }
-};
 
-bool operator==(const Delaunay::Edge &edge1, const Delaunay::Edge &edge2);
-bool operator<(const Delaunay::Edge &edge1, const::Delaunay::Edge &edge2);
+	//\brief Returns a Big Tetrahedron covering the entire boundary and its 26 adjacent subcubes - with room to spare
+	static Tetrahedron CalcBigTetrahedron(const OuterBoundary3D &boundary);
+};
 
 #endif // DELAUNAY_HPP

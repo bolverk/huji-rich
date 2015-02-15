@@ -66,21 +66,6 @@ const std::vector<int> &Delaunay::VertexNeighbors(const VectorRef v) const
 	return it->second;
 }
 
-bool operator==(const Delaunay::Edge &edge1, const Delaunay::Edge &edge2)
-{
-	return edge1.vec1() == edge2.vec1() && edge1.vec2() == edge2.vec2();
-}
-
-bool operator<(const Delaunay::Edge &edge1, const::Delaunay::Edge &edge2)
-{
-	if (edge1.vec1() < edge2.vec1())
-		return true;
-	else if (edge1.vec1() == edge2.vec1())
-		return edge1.vec2() < edge2.vec2();
-	else
-		return false;
-}
-
 void Delaunay::Run()
 {
 	_tetrahedra.clear();
@@ -90,4 +75,35 @@ void Delaunay::Run()
 	BOOST_ASSERT(_edges.size() == 0 && _vertices.size() == 0); // You're not supposed to fill those
 	FillVertices();
 	FillEdges();
+}
+
+Tetrahedron Delaunay::CalcBigTetrahedron(const OuterBoundary3D &boundary)
+{
+	// A big tetrahedron that will contain the bounding box, as well as the 8 adjacent boundary boxes,
+	// and with room to spare.
+
+	const Vector3D &fur = boundary.FrontUpperRight();
+	const Vector3D &bll = boundary.BackLowerLeft();
+	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
+	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
+
+	absFrontUpperRight *= 1000;
+	absBackLowerLeft *= -1000;
+
+	// The top of the tetrahedron will be on the Y axis
+	vector<VectorRef> tetrahedron;
+	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
+
+	// The bottom face is parallel to the x-z plane
+	double bottomY = absBackLowerLeft.y;
+
+	// The bottom face is a triangle whose lower edge is parallel to the x axis
+	double backZ = absBackLowerLeft.z;
+	tetrahedron.push_back(Vector3D(absBackLowerLeft.x, bottomY, backZ));
+	tetrahedron.push_back(Vector3D(absFrontUpperRight.x, bottomY, backZ));
+
+	// The last triangle edge is on x=0
+	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
+
+	return Tetrahedron(tetrahedron);
 }

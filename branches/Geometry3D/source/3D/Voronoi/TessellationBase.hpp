@@ -11,6 +11,9 @@
 #include "../GeometryCommon/OuterBoundary3D.hpp"
 #include "../GeometryCommon/Tetrahedron.hpp"
 #include "../GeometryCommon/VectorRepository.hpp"
+#include <boost/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
+#include <boost/bimap/vector_of.hpp>
 #include <unordered_map>
 
 class TessellationBase : public Tessellation3D
@@ -24,7 +27,7 @@ protected:
 	{
 	private:
 		std::vector<Face> _faces;
-		bool FindFace(const std::vector<VectorRef> &vertices, size_t &index) const;
+		bool FindFace(const Face &face, size_t &index) const;
 
 	public:
 		size_t StoreFace(const std::vector<VectorRef>& vertices);
@@ -40,12 +43,12 @@ protected:
 	class Cell
 	{
 	private:
-		Vector3D _center, _centerOfMass;
+		VectorRef _center, _centerOfMass;
 		double _volume, _width;
 		std::vector<size_t> _faces;
 
 	public:
-		const Vector3D &GetCenterOfMass() const
+		const VectorRef &GetCenterOfMass() const
 		{
 			return _centerOfMass;
 		}
@@ -62,7 +65,7 @@ protected:
 			return _faces;
 		}
 
-		Cell(std::vector<size_t> faces, double volume, double width, Vector3D center, Vector3D centerOfMass);
+		Cell(std::vector<size_t> faces, double volume, VectorRef center, VectorRef centerOfMass);
 		Cell() { _volume = -1; }
 
 		bool empty() const { return _volume < 0; }

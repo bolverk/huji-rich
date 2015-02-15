@@ -25,6 +25,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voronoi", "..\Itay\Delaunay
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestVoronoi", "..\Itay\TestVoronoi\TestVoronoi.vcxproj", "{102E65C2-12B7-467C-85A7-33DB9B24B491}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StressVoronoi", "..\Itay\StressVoronoi\StressVoronoi.vcxproj", "{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72398897-5B71-4F49-8CED-0F688278F4A5}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -97,6 +104,14 @@ Global
 		{102E65C2-12B7-467C-85A7-33DB9B24B491}.Release|Win32.Build.0 = Release|Win32
 		{102E65C2-12B7-467C-85A7-33DB9B24B491}.Release|x64.ActiveCfg = Release|x64
 		{102E65C2-12B7-467C-85A7-33DB9B24B491}.Release|x64.Build.0 = Release|x64
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Debug|Win32.Build.0 = Debug|Win32
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Debug|x64.ActiveCfg = Debug|x64
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Debug|x64.Build.0 = Debug|x64
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Release|Win32.ActiveCfg = Release|Win32
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Release|Win32.Build.0 = Release|Win32
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Release|x64.ActiveCfg = Release|x64
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,5 +124,9 @@ Global
 		{BE52FDC7-95D7-456D-93AD-DEB67DB67144} = {EE2AE410-6B22-4F15-9086-FEA8246097D7}
 		{FD456F35-8AEA-4A76-A946-90F0E99B4F9B} = {E9D2AE5B-9B70-493B-A294-52201A193E56}
 		{102E65C2-12B7-467C-85A7-33DB9B24B491} = {65C6C835-9DB6-43A8-A034-F6EB11207A02}
+		{DFC671DF-72C3-47B6-8C3F-58DCCCAF105C} = {65C6C835-9DB6-43A8-A034-F6EB11207A02}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

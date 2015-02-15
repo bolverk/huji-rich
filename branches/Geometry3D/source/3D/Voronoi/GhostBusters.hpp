@@ -37,7 +37,7 @@ private:
 	unordered_set<int> FindOuterTetrahedra(const Delaunay &del) const ;
 	unordered_set<int> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<int>& outerTetrahedra) const;
 
-	typedef map<VectorRef, unordered_set<Subcube>> breach_map;
+	typedef unordered_map<VectorRef, unordered_set<Subcube>> breach_map;
 	breach_map FindHullBreaches(const Delaunay &del, 
 		const unordered_set<int>& edgeTetrahedra, 
 		const unordered_set<int> &outerTetrahedra, 

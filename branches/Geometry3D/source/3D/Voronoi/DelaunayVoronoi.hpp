@@ -66,9 +66,6 @@ public:
 	virtual bool IsGhostPoint(size_t index)const;
 
 private:
-	//\brief Finds a Big Tetrahedron that contains the boundray subcube, and also the 26 adjacent subcubes.
-	Tetrahedron FindBigTetrahedron() const;
-	
 	//\brief Convert the DT into a VD
 	//\remarks This method fills the FaceStore and Cells stuctures
 	void ConvertToVoronoi(const Delaunay &del);
@@ -85,6 +82,10 @@ private:
 	
 	//\brief Constructs all the cell objects
 	void ConstructCells();
+	//\brief Split cell into tetrahedra
+	//\param faces The list of cell faces
+	//\return The tetrahedra, which are going to be non-overlapping and cover the entire cell's volume
+	std::vector<Tetrahedron> SplitCell(const std::vector<size_t> &faces);
 };
 
 template<typename DelaunayType, typename GhostBusterType>
@@ -93,7 +94,7 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::Update(const vector<Vector3
 	_meshPoints = points;
 	ClearData();
 
-	Tetrahedron big = FindBigTetrahedron();
+	Tetrahedron big = Delaunay::CalcBigTetrahedron(*_boundary);
 	vector<VectorRef> pointRefs(points.begin(), points.end());
 
 	// First phase
@@ -144,39 +145,6 @@ bool DelaunayVoronoi<DelaunayType, GhostBusterType>::IsGhostPoint(size_t index) 
 {
 	return false;
 }
-
-template <typename DelaunayType, typename GhostBusterType>
-Tetrahedron DelaunayVoronoi<DelaunayType, GhostBusterType>::FindBigTetrahedron() const
-{
-	// A big tetrahedron that will contain the bounding box, as well as the 8 adjacent boundary boxes,
-	// and with room to spare.
-
-	const Vector3D &fur = _boundary->FrontUpperRight();
-	const Vector3D &bll = _boundary->BackLowerLeft();
-	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
-	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
-
-	absFrontUpperRight *= 1000;
-	absBackLowerLeft *= -1000;
-
-	// The top of the tetrahedron will be on the Y axis
-	vector<VectorRef> tetrahedron;
-	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
-
-	// The bottom face is parallel to the x-z plane
-	double bottomY = absBackLowerLeft.y;
-
-	// The bottom face is a triangle whose lower edge is parallel to the x axis
-	double backZ = absBackLowerLeft.z;
-	tetrahedron.push_back(Vector3D(absBackLowerLeft.x, bottomY, backZ));
-	tetrahedron.push_back(Vector3D(absFrontUpperRight.x, bottomY, backZ));
-
-	// The last triangle edge is on x=0
-	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
-
-	return Tetrahedron(tetrahedron);
-}
-
 
 template <typename DelaunayType, typename GhostBusterType>
 void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Delaunay &del)
@@ -233,17 +201,6 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 	std::vector<VectorRef> vertices;
 	std::copy(vertexSet.begin(), vertexSet.end(), std::back_inserter(vertices));
 
-#ifdef _DEBUG
-	if (vertices.size() > 3)  // Check that all vertices are co-planar
-	{
-		for (int v = 3; v < vertices.size(); v++)
-		{
-			Tetrahedron t(vertices[0], vertices[1], vertices[2], vertices[v]);
-			BOOST_ASSERT(t.volume() == 0); // Coplanar iff the tetrahedron from the 4 vertice's volume is 0
-		}
-	}
-#endif
-
 	size_t faceIndex = _faces.StoreFace(vertices);
 	_faces.GetFace(faceIndex).ReorderVertices();
 	return faceIndex;
@@ -271,12 +228,57 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConstructCells()
 
 	for (int i = 0; i < _meshPoints.size(); i++)
 	{
-		double volume = -1; // TODO: Calculate volume
-		double width = -1;  // TODO: Calculate width
-		Vector3D centerOfMass; // TODO: Calculate CoM
-		_cells[i] = Cell(cellFaces[i], volume, width, _meshPoints[i], centerOfMass);
+		std::vector<Tetrahedron> tetrahedra = SplitCell(cellFaces[i]);
+		double totalVolume = 0;
+		Vector3D centerOfMass;
+
+		for (int j = 0; j < tetrahedra.size(); j++)
+			totalVolume += tetrahedra[j].volume();
+
+		for (int j = 0; j < tetrahedra.size(); j++)
+		{
+			Vector3D weightedCenter = *tetrahedra[j].center() * tetrahedra[j].volume() / totalVolume;
+			centerOfMass += weightedCenter;
+		}
+
+		_cells[i] = Cell(cellFaces[i], totalVolume, _meshPoints[i], centerOfMass);
 		_allCMs[i] = centerOfMass;
 	}
+}
+
+template<typename DelaunayType, typename GhostBusterType>
+std::vector<Tetrahedron> DelaunayVoronoi<DelaunayType, GhostBusterType>::SplitCell(const std::vector<size_t> &faces)
+{
+	std::vector<Tetrahedron> tetrahedra;
+	Vector3D center;
+	std::unordered_set<VectorRef> considered;
+
+	// Find the center of the cell (an average of all the vertices)
+	for (std::vector<size_t>::const_iterator itFace = faces.cbegin(); itFace != faces.cend(); itFace++)
+	{
+		const Face& face = GetFace(*itFace);
+		for (std::vector<VectorRef>::const_iterator itVertex = face.vertices.cbegin(); itVertex != face.vertices.cend(); itVertex++)
+		{
+			if (considered.find(*itVertex) != considered.end())  // See if we've used this vertex before
+				continue;
+			considered.insert(*itVertex);
+			center += **itVertex;
+		}
+	}
+	center = center / (double)considered.size();   // Average
+	VectorRef centerRef(center);
+
+	// Now create the tetrahedra, from the center to each of the faces
+	for (std::vector<size_t>::const_iterator itFace = faces.cbegin(); itFace != faces.cend(); itFace++)
+	{
+		const Face &face = GetFace(*itFace);
+		// Split the face into trianges (face[0], face[1], face[2]), (face[0], face[2], face[3]) and so on until (face[0], face[n-2], face[n-1])
+		// add center to each triangle, providing the tetrahedron
+		for (int i = 1; i < face.vertices.size() - 1; i++)
+			tetrahedra.push_back(Tetrahedron(centerRef, face.vertices[0], face.vertices[i], face.vertices[i + 1]));
+	}
+
+	return tetrahedra;
 }
 
 #endif // DELAUNAY_VORONOI_HPP

@@ -128,7 +128,7 @@ void VoroPlusPlusImpl::ExtractResults(voro::container &container)
 			_voro._faces.GetFace(*it).AddNeighbor(cellIndex); // asserts if fails, no need to add our own assertion
 
 		// And finally, the center of mass
-		_voro._allCMs[cellIndex] = cell.GetCenterOfMass();
+		_voro._allCMs[cellIndex] = *cell.GetCenterOfMass();
 
 		cellNum++;
 	} while (looper.inc());
@@ -168,9 +168,8 @@ TessellationBase::Cell VoroPlusPlusImpl::CreateCell(Vector3D meshPoint, voro::vo
 	auto centerOfMass = Vector3D(cx, cy, cz) + meshPoint;
 	//_center = meshPoint;
 	// Volume = (4/3) * Width ^ 3
-	double width = pow(3 / 4 * volume, 1 / 3);
 
-	return TessellationBase::Cell(faces, volume, width, meshPoint, centerOfMass);
+	return TessellationBase::Cell(faces, volume, meshPoint, centerOfMass);
 }
 
 vector<Vector3D> VoroPlusPlusImpl::ExtractAllVertices(Vector3D meshPoint, voro::voronoicell &vcell)

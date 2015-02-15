@@ -1,2 +1,10 @@
+MeshPy==2014.1
+appdirs==1.4.0
+colorama==0.3.3
+decorator==3.4.0
 numpy==1.9.1
+py==1.4.26
+pytest==2.6.4
+pytools==2014.3.5
 scipy==0.15.1
+six==1.9.0

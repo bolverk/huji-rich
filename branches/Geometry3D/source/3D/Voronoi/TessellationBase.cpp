@@ -5,10 +5,10 @@
 * The FaceStore
 */
 
-bool TessellationBase::FaceStore::FindFace(const vector<VectorRef> &vertices, size_t &index) const
+bool TessellationBase::FaceStore::FindFace(const Face &face, size_t &index) const
 {
 	for (index = 0; index < _faces.size(); index++)
-		if (_faces[index].IdenticalTo(vertices))
+		if (_faces[index]==face)
 			return true;
 
 	return false;
@@ -16,12 +16,12 @@ bool TessellationBase::FaceStore::FindFace(const vector<VectorRef> &vertices, si
 
 size_t TessellationBase::FaceStore::StoreFace(const vector<VectorRef> &vertices)
 {
+	Face face(vertices);
 	size_t index;
-	bool exists = FindFace(vertices, index);
+	bool exists = FindFace(face, index);
 	if (exists)
 		return index;
 
-	Face face(vertices);
 	index = _faces.size();
 	_faces.push_back(face);
 	return index;
@@ -32,10 +32,13 @@ void TessellationBase::FaceStore::Clear()
 	_faces.clear();
 }
 
-TessellationBase::Cell::Cell(std::vector<size_t> faces, double volume, double width, Vector3D center, Vector3D centerOfMass) :
-	_faces(faces), _volume(volume), _width(width), _center(center), _centerOfMass(centerOfMass)
-{
 
+TessellationBase::Cell::Cell(std::vector<size_t> faces, double volume, VectorRef center, VectorRef centerOfMass) :
+	_faces(faces), _volume(volume),_center(center), _centerOfMass(centerOfMass)
+{
+	// width is the radius of the sphere with the same volume as the cell
+	// volume = (4/3) * radius ^ 3
+	_width = pow(3 / 4 * volume, 1 / 3);
 }
 
 void TessellationBase::ClearData()
@@ -66,7 +69,7 @@ Vector3D TessellationBase::GetMeshPoint(size_t index) const
 
 Vector3D const& TessellationBase::GetCellCM(size_t index) const
 {
-	return _cells[index].GetCenterOfMass();
+	return *_cells[index].GetCenterOfMass();
 }
 
 /*! \brief Returns the total number of faces
@@ -151,7 +154,7 @@ Vector3D TessellationBase::Normal(size_t faceIndex) const
 	Cell cell1 = _cells[face.Neighbor1()->GetCell()];
 	Cell cell2 = _cells[face.Neighbor2()->GetCell()];
 
-	return cell1.GetCenterOfMass() - cell2.GetCenterOfMass();
+	return *cell1.GetCenterOfMass() - *cell2.GetCenterOfMass();
 }
 
 /*!

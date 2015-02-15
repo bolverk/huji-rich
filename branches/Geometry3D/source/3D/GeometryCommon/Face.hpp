@@ -137,4 +137,29 @@ std::ostream& operator<<(std::ostream& output, const boost::optional<T>& opt)
 	return output;
 }
 
+// \brief Compares to faces.
+// \returns True if the faces are identical, meaning they have exactly the same vertices, regardless of ordering.
+// \remarks Since faces are convex, they are the same iff they have the same vertices.
+bool operator==(const Face &face1, const Face &face2);
+
+namespace std
+{
+	template<>
+	struct hash<Face>
+	{
+		typedef Face argument_type;
+		typedef size_t result_type;
+
+		result_type operator()(const argument_type &face) const
+		{
+			size_t value;
+			std::hash<VectorRef> hasher;
+			for (int i = 0; i < face.vertices.size(); i++)
+				value ^= hasher(face.vertices[i]);  // Ignores the vertex ordering, as it should
+
+			return value;
+		}
+	};
+}
+
 #endif	// FACE_HPP

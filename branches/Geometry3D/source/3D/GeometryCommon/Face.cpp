@@ -180,3 +180,22 @@ void Face::ReorderVertices()
 	for (size_t i = 0; i < vertices.size(); i++)  // Copy the results
 		vertices[i] = angledVertices[i].second;
 }
+
+bool operator==(const Face &face1, const Face &face2)
+{
+	if (face1.vertices.size() != face2.vertices.size())
+		return false;
+	std::hash<Face> hasher;
+
+	if (hasher(face1) != hasher(face2))
+		return false;
+
+	// This is a naive O(N^2) implementation, which beats a clever O(N) with hash tables hands down,
+	// because N is very small, and building set<>s or unordered_set<>s is expensive
+	for (vector<VectorRef>::const_iterator it1 = face1.vertices.begin(); it1 != face1.vertices.end(); it1++)
+	{
+		if (find(face2.vertices.begin(), face2.vertices.end(), *it1) == face2.vertices.end())
+			return false;
+	}
+	return true;
+}

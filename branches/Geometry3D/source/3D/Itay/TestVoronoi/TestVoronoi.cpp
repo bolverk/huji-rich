@@ -8,6 +8,9 @@
 #include "Voronoi/VoroPlusPlus.hpp"
 #include "Utilities/assert.hpp"
 #include "GeometryCommon/OuterBoundary3D.hpp"
+#include "Voronoi/DelaunayVoronoi.hpp"
+#include "Voronoi/GhostBusters.hpp"
+#include "Voronoi/TetGenDelaunay.hpp"
 
 #include <vector>
 #include <cstdlib>
@@ -33,6 +36,8 @@ TEST(VoroPlusPlus, FaceStore)
 			vertices.push_back(Vector3D(rand(), rand(), rand()));
 		size_t index = store.StoreFace(vertices);
 		ASSERT_EQ(index, i);
+		size_t index2 = store.StoreFace(vertices);
+		ASSERT_EQ(index2, index);
 		faces.push_back(store.GetFace(index));
 	}
 
@@ -110,6 +115,17 @@ TEST(VoroPlusPlus, Cube)
 	vector<Vector3D> mesh = CreateCubeMesh(5);
 
 	VoroPlusPlus tes;
+	RectangularBoundary3D boundary(Vector3D(4.5, 4.5, 4.5),
+		Vector3D(-0.5, -0.5, -0.5));
+	tes.Initialise(mesh, boundary);
+	EnsureCubeVoronoi(mesh, tes);
+}
+
+TEST(DelaunayVoronoi, Cube)
+{
+	vector<Vector3D> mesh = CreateCubeMesh(5);
+
+	DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster> tes;
 	RectangularBoundary3D boundary(Vector3D(4.5, 4.5, 4.5),
 		Vector3D(-0.5, -0.5, -0.5));
 	tes.Initialise(mesh, boundary);

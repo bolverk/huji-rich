@@ -83,20 +83,20 @@ inline Mat44<T>::Mat44(T d00, T d01, T d02, T d03,
 {
 	_data[0][0] = d00;
 	_data[0][1] = d01;
-	_data[0][2] = d00;
-	_data[0][3] = d01;
-	_data[1][0] = d00;
-	_data[1][1] = d01;
-	_data[1][2] = d00;
-	_data[1][3] = d01;
-	_data[2][0] = d00;
-	_data[2][1] = d01;
-	_data[2][2] = d00;
-	_data[2][3] = d01;
-	_data[3][0] = d00;
-	_data[3][1] = d01;
-	_data[3][2] = d00;
-	_data[3][3] = d01;
+	_data[0][2] = d02;
+	_data[0][3] = d03;
+	_data[1][0] = d10;
+	_data[1][1] = d11;
+	_data[1][2] = d12;
+	_data[1][3] = d13;
+	_data[2][0] = d20;
+	_data[2][1] = d21;
+	_data[2][2] = d22;
+	_data[2][3] = d23;
+	_data[3][0] = d30;
+	_data[3][1] = d31;
+	_data[3][2] = d32;
+	_data[3][3] = d33;
 }
 
 template<typename T>

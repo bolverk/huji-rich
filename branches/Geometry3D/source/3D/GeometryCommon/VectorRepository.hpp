@@ -22,6 +22,12 @@ public:
 
 	friend std::hash<VectorRef> ;
 	friend bool operator==(const VectorRef &v1, const VectorRef &v2);
+	friend bool operator<(const VectorRef &v1, const VectorRef &v2);
+
+	static std::vector<VectorRef> vector(const std::vector<Vector3D> &points)
+	{
+		return std::vector<VectorRef>(points.begin(), points.end());
+	}
 };
 
 namespace std
