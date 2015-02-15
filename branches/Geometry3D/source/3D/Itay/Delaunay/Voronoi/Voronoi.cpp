@@ -65,20 +65,33 @@ VectorNamer namer;
 int main()
 {
 	InitRandom();
-	RectangularBoundary3D boundary(Vector3D(200, 200, 200), Vector3D(-200, -200, -200));
-	vector<Vector3D> vertices{ Vector3D(90, 34, 89),
+	RectangularBoundary3D boundary(Vector3D(500, 500, 500), Vector3D(-500, -500, -500));
+	/*	vector<Vector3D> vertices{ Vector3D(90, 34, 89),
 		Vector3D(21, 3, 78),
 		Vector3D(76, 35, 74),
 		Vector3D(28, 4, 7),
 		Vector3D(65, 60, 22),
 		Vector3D(59, 92, 5),
 		Vector3D(84, 0, 32),
-		Vector3D(12, 15, 37),
-		Vector3D(-17, -17, -17)};
-	//auto vertices = RandomPoints(7, boundary);
+		Vector3D(12, 15, 37)} */
+	vector<Vector3D> vertices{
+		Vector3D(-195.544, -185.156, -133.897),
+		Vector3D(3.91247, 99.1302, -62.6179),
+		Vector3D(101.498, -179.223, 83.3216),
+		Vector3D(-131.285, 90.9024, 196.802),
+		Vector3D(38.9477, 1.58086, -59.2608),
+		Vector3D(-40.9864, -154.003, -187.414),
+		Vector3D(71.3584, -104.16, -9.00296),
+		Vector3D(-113.071, -7.00095, -121.018),
+		Vector3D(-148.79, 115.647, 163.976),
+		Vector3D(-60.7257, 117.161, -121.86),
+	};
+	/*auto vertices = RandomPoints(10, boundary);
+	for (auto vertice : vertices)
+		cout << vertice << endl; */
 
 	for (auto vec : vertices)
-		namer.GetName(vec, "C");
+		namer.GetName(vec, "C"); 
 
 	UseVoroPlusPlus(vertices, boundary);
 	UseTetGen(vertices, boundary);
@@ -106,8 +119,8 @@ void DisplayResults(const vector<Vector3D> &points, const Tessellation3D &tes)
 	for (unsigned i = 0; i < tes.GetPointNo(); i++)
 	{
 		auto faces = tes.GetCellFaces(i);
-		cout << "Cell " << namer.GetName(points[i]) << " at " << points[i] << " with " << faces.size() << "faces" << endl;
-		cout << "\tVolume: " << tes.GetVolume(i) << ", Center of Mass: " << namer.GetName(tes.GetCellCM(i)) << tes.GetCellCM(i) << endl;
+		cout << "Cell " << namer.GetName(points[i]) << " at " << points[i] << " with " << faces.size() << " faces" << endl;
+		// cout << "\tVolume: " << tes.GetVolume(i) << ", Center of Mass: " << namer.GetName(tes.GetCellCM(i)) << tes.GetCellCM(i) << endl;
 		for (unsigned j = 0; j < faces.size(); j++)
 		{
 			auto face = tes.GetFace(faces[j]);
