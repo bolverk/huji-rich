@@ -321,7 +321,7 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
   dump.a=coldflows[1];
   dump.b=coldflows[2];
   // read the cfl
-  vector<double> cfl=read_double_vector_from_hdf5(file,"Cfl number");
+  vector<double> cfl=read_double_vector_from_hdf5(file,"Cfl Number");
   dump.cfl=cfl[0];
   // read the cycle number
   vector<int> cycle_number=read_int_vector_from_hdf5(file,"Cycle number");
@@ -336,7 +336,7 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
   dump.densitymin=densityfloor[1];
   dump.pressuremin=densityfloor[2];
   // read the custom evolution indeces
-  dump.cevolve= read_sizet_vector_from_hdf5(file,"Custom evolution indeces");
+  dump.cevolve = read_sizet_vector_from_hdf5(file, "Custom evolution indices");
 }
 
 void ConvertHDF5toBinary(string const& input, string const& output)
