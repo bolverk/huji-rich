@@ -5,6 +5,119 @@
 
 namespace
 {
+	template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
+	{
+		vector<T> res(source.size());
+		for (size_t i = 0; i<source.size(); ++i)
+			res[i] = static_cast<T>(source[i]);
+		return res;
+	}
+
+	class TracerCommunicator : public Communication
+	{
+	public:
+
+		TracerCommunicator(const vector<vector<double> >& to_send, int dim) :
+			to_send_(to_send), dim_(dim), reply_() {}
+
+		void sendInfo(int address)
+		{
+			MPI_SendVectorTracer(to_send_, address, 0, MPI_COMM_WORLD);
+		}
+
+		void recvInfo(int address)
+		{
+			MPI_RecvVectorTracer(reply_, address, 0, MPI_COMM_WORLD, dim_);
+		}
+
+		const vector<vector<double> >& getReply(void) const
+		{
+			return reply_;
+		}
+
+	private:
+		const vector<vector<double> > to_send_;
+		const int dim_;
+		vector<vector<double> > reply_;
+	};
+}
+
+
+
+namespace {
+	class HydroCommunicator : public Communication
+	{
+	public:
+
+		HydroCommunicator(const EquationOfState& eos,
+			const vector<Primitive>& p_to_send,
+			const vector<size_t>& cei_to_send) :
+			eos_(eos), p_to_send_(p_to_send),
+			cei_to_send_(cei_to_send),
+			p_received_(), cei_received_() {}
+
+		void sendInfo(int address)
+		{
+			MPI_SendVectorPrimitive(p_to_send_, address, 0, MPI_COMM_WORLD);
+			if (!cei_to_send_.empty()){
+				vector<unsigned> buf = mass_static_cast<unsigned, size_t>(cei_to_send_);
+				MPI_Send(&buf[0], static_cast<int>(buf.size()), MPI_UNSIGNED, address, 0, MPI_COMM_WORLD);
+			}
+			else{
+				unsigned temp = 0;
+				MPI_Send(&temp, 1, MPI_UNSIGNED, address, 1, MPI_COMM_WORLD);
+			}
+		}
+
+		void recvInfo(int address)
+		{
+			try
+			{
+				MPI_RecvVectorPrimitive(p_received_, address, 0, MPI_COMM_WORLD, eos_);
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Error in HydroCommunicator while recv from cpu", address);
+				throw;
+			}
+			int count;
+			MPI_Status stat;
+			MPI_Probe(address, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+			MPI_Get_count(&stat, MPI_UNSIGNED, &count);
+			if (stat.MPI_TAG == 0){
+				vector<unsigned> buf(static_cast<size_t>(count));
+				MPI_Recv(&buf[0], count, MPI_UNSIGNED, address, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				cei_received_ = mass_static_cast<size_t, unsigned>(buf);
+			}
+			else{
+				unsigned temp;
+				MPI_Recv(&temp, 1, MPI_UNSIGNED, address, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+		}
+
+		const vector<Primitive>& getReceivedPrimitives(void) const
+		{
+			return p_received_;
+		}
+
+		const vector<size_t> getReceivedCustomEvolutionIndices(void) const
+		{
+			return cei_received_;
+		}
+
+	private:
+		const EquationOfState& eos_;
+		const vector<Primitive> p_to_send_;
+		const vector<size_t> cei_to_send_;
+		vector<Primitive> p_received_;
+		vector<size_t> cei_received_;
+	};
+}
+
+
+
+namespace
+{
 	void SendRecvHydro(vector<int> const& sentprocs,
 		vector<vector<int> > const&
 		sentcells,vector<Primitive> const& cells,
@@ -331,14 +444,7 @@ vector<int> GetProcOrder(int rank,int worldsize)
 }
 
 namespace {
-	template<class T, class S> vector<T> mass_static_cast(const vector<S>& source)
-	{
-		vector<T> res(source.size());
-		for(size_t i=0;i<source.size();++i)
-			res[i] = static_cast<T>(source[i]);
-		return res;
-	}
-
+	
 	class ExtensiveCommunicator: public Communication
 	{
 	public:
@@ -455,6 +561,47 @@ void SendRecvExtensive(vector<Conserved> const& cons,vector<vector<double> > con
 		}
 	}
 }
+
+void SendRecvPrimitive(vector<Primitive> const& cells, vector<vector<double> > const&
+	tracers,vector<vector<int> > const& sentcells,
+	vector<int> const& sentprocs, vector<Primitive> &ptoadd, vector<vector<double> >
+	&ttoadd,EquationOfState const& eos)
+{
+	bool traceractive = !tracers.empty();
+	int ntracer = 0;
+	if (traceractive)
+		traceractive = !tracers[0].empty();
+	if (traceractive)
+		ntracer = static_cast<int>(tracers[0].size());
+
+	// Take care of self send hydro
+	int nlist = static_cast<int>(sentprocs.size());
+	ptoadd.clear();
+	ttoadd.clear();
+
+	// Talk with other procs
+	const int rank = get_mpi_rank();
+	const int worldsize = get_mpi_size();
+	const vector<int> procorder = GetProcOrder(rank, worldsize);
+
+	int n = worldsize - 1;
+	vector<size_t> cempty;
+	for (size_t i = 0; i<static_cast<size_t>(n); ++i)
+	{
+		int index = static_cast<int>(find(sentprocs.begin(), sentprocs.end(), procorder[i]) - sentprocs.begin());
+		// Do we talk with this processor?
+		if (index<nlist)
+		{
+			HydroCommunicator pcom(eos,VectorValues(cells,sentcells[static_cast<size_t>(index)]), cempty);
+			TracerCommunicator tcom(VectorValues(tracers, sentcells[static_cast<size_t>(index)]), static_cast<int>(tracers[0].size()));
+			marshal_communication(pcom, procorder[i],rank < procorder[i]);
+			marshal_communication(tcom, procorder[i], rank < procorder[i]);
+			insert_all_to_back(ptoadd, pcom.getReceivedPrimitives());
+			insert_all_to_back(ttoadd, tcom.getReply());
+		}
+	}
+}
+
 
 void SendRecvShockedStatus(vector<char> const& shockedcells,
 	vector<vector<int> > const& sentcells,vector<int> const& sentprocs,
@@ -680,75 +827,17 @@ void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 	customevolutions=VectorValues(customevolutions,localpoints);
 }
 
-namespace {
-	class HydroCommunicator: public Communication
-	{
-	public:
-
-		HydroCommunicator(const EquationOfState& eos,
-			const vector<Primitive>& p_to_send,
-			const vector<size_t>& cei_to_send):
-		eos_(eos), p_to_send_(p_to_send),
-			cei_to_send_(cei_to_send),
-			p_received_(), cei_received_() {}
-
-		void sendInfo(int address)
-		{
-			MPI_SendVectorPrimitive(p_to_send_,address,0,MPI_COMM_WORLD);
-			if(!cei_to_send_.empty()){
-				vector<unsigned> buf = mass_static_cast<unsigned,size_t>(cei_to_send_);
-				MPI_Send(&buf[0],static_cast<int>(buf.size()),MPI_UNSIGNED,address,0,MPI_COMM_WORLD);
-			}
-			else{
-				unsigned temp = 0;
-				MPI_Send(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD);
-			}
-		}
-
-		void recvInfo(int address)
-		{
-			try
-			{
-				MPI_RecvVectorPrimitive(p_received_,address,0,MPI_COMM_WORLD,eos_);
-			}
-			catch(UniversalError &eo)
-			{
-				eo.AddEntry("Error in HydroCommunicator while recv from cpu",address);
-				throw;
-			}
-			int count;
-			MPI_Status stat;
-			MPI_Probe(address,MPI_ANY_TAG,MPI_COMM_WORLD,&stat);
-			MPI_Get_count(&stat,MPI_UNSIGNED,&count);
-			if(stat.MPI_TAG==0){
-			  vector<unsigned> buf(static_cast<size_t>(count));
-				MPI_Recv(&buf[0],count,MPI_UNSIGNED,address,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				cei_received_ = mass_static_cast<size_t,unsigned>(buf);
-			}
-			else{
-				unsigned temp;
-				MPI_Recv(&temp,1,MPI_UNSIGNED,address,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-			}
-		}
-
-		const vector<Primitive>& getReceivedPrimitives(void) const
-		{
-			return p_received_;
-		}
-
-		const vector<size_t> getReceivedCustomEvolutionIndices(void) const
-		{
-			return cei_received_;
-		}
-
-	private:
-		const EquationOfState& eos_;
-		const vector<Primitive> p_to_send_;
-		const vector<size_t> cei_to_send_;
-		vector<Primitive> p_received_;
-		vector<size_t> cei_received_;
-	};
+void KeepLocalPoints(vector<Primitive> &cons, vector<vector<double> > &tracers,
+	vector<int> const& localpoints)
+{
+	bool traceractive = !tracers.empty();
+	if (traceractive)
+		traceractive = !tracers[0].empty();
+	cons = VectorValues(cons, localpoints);
+	if (traceractive)
+		tracers = VectorValues(tracers, localpoints);
 }
+
 
 void SendRecvHydro(vector<Primitive> &cells,
 	vector<size_t> &customevolutions,vector<vector<int> > const& sentcells,
@@ -786,36 +875,6 @@ void SendRecvHydro(vector<Primitive> &cells,
 		ListExchange(cells,Nghost[i],padd[i]);
 		ListExchange(customevolutions,Nghost[i],cadd[i]);
 	}
-}
-
-namespace {
-	class TracerCommunicator: public Communication
-	{
-	public:
-
-		TracerCommunicator(const vector<vector<double> >& to_send,int dim):
-		  to_send_(to_send),dim_(dim),reply_() {}
-
-		  void sendInfo(int address)
-		  {
-			  MPI_SendVectorTracer(to_send_,address,0,MPI_COMM_WORLD);
-		  }
-
-		  void recvInfo(int address)
-		  {
-			  MPI_RecvVectorTracer(reply_,address,0,MPI_COMM_WORLD,dim_);
-		  }
-
-		  const vector<vector<double> >& getReply(void) const
-		  {
-			  return reply_;
-		  }
-
-	private:
-		const vector<vector<double> > to_send_;
-		const int dim_;
-		vector<vector<double> > reply_;
-	};
 }
 
 void SendRecvTracers(vector<vector<double> > &tracers,
