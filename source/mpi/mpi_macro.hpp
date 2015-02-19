@@ -191,6 +191,20 @@ void SendRecvHydro(vector<Primitive> &cells,
 	vector<int>const& sentprocs,EquationOfState const& eos,
 	vector<vector<int> > const& Nghost,int totalpoints);
 /*!
+\brief Sends and receives the primitives and tracers for the density floor
+\param cells The primitive cells
+\param sentcells The indeces of the cells to send
+\param sentprocs The ids of the cpus to talk with
+\param ptoadd The recieved primitives
+\param ttoadd The recieved tracers
+\param eos The equation of state
+*/
+void SendRecvPrimitive(vector<Primitive> const& cells, vector<vector<double> > const&
+	tracers, vector<vector<int> > const& sentcells,
+	vector<int> const& sentprocs, vector<Primitive> &ptoadd, vector < vector<double> >
+	&ttoadd, EquationOfState const& eos);
+
+/*!
 \brief Sends and receives the tracers for ghost cells
 \param tracers The intensive tracers
 \param sentcells The indeces of the cells to send
@@ -338,6 +352,14 @@ void SendRecvVelocity(vector<Vector2D> &vel,
 */
 void KeepLocalPoints(vector<Conserved> &cons,vector<vector<double> > &tracers,
 	vector<size_t> &customevolutions,vector<int> const& localpoints);
+/*!
+\brief Resizes and modifies the vectors to retain only cells that are inside the local cpu domain
+\param cons The primitive cells
+\param tracers The intensive tracers
+\param localpoints The indeces of the points to keep
+*/
+void KeepLocalPoints(vector<Primitive> &cons, vector<vector<double> > &tracers,
+	vector<int> const& localpoints);
 /*!
 \brief Send/Recv the shock state of cells
 \param shockedcells The shocked state of the cells

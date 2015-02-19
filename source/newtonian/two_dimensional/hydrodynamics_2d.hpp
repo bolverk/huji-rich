@@ -226,15 +226,13 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
   \param tess Tessellation
   \param time Time
   \param extensivetracers Extensive tracers
+  \return True if a cell has triggered the minimum density flag false otherwise
   \todo Pass old_cells as const and encapsulate densitymin parameters
 */
-void UpdatePrimitives(vector<Conserved> const& conservedintensive,
-		      EquationOfState const& eos,vector<Primitive>& cells,
-		      vector<CustomEvolution*> const& CellsEvolve,
-		      vector<Primitive> &old_cells,bool densityfloor,
-		      double densitymin,double pressuremin,
-		      Tessellation const& tess,double time,
-		      vector<vector<double> > const& extensivetracers);
+vector<bool> UpdatePrimitives(vector<Conserved> const& conservedintensive,
+	EquationOfState const& eos, vector<Primitive>& cells, vector<CustomEvolution*> const& CellsEvolve,
+	vector<Primitive> &old_cells, bool densityfloor, double densitymin, double pressuremin,
+	Tessellation const& tess, double time, vector<vector<double> > const& extensivetracers);
 
 /*! \brief Calculates the fluxes
   \param tessellation Tessellation
@@ -512,11 +510,14 @@ void MakeTracerExtensive
   \param tess Tessellation
   \param cells Fluid elements
   \param pg Physical geometry
+  \param min_density_on Did the cell turn on the min density flag
+  \param old_trace The intensive tracer at the beginning of the time step
+  \param cevolve The custom evolution
  */
-void MakeTracerIntensive
-(vector<vector<double> > &tracer,vector<vector<double> >
- const& tracer_extensive,Tessellation const& tess,
- vector<Primitive> const& cells, const PhysicalGeometry& pg);
+void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> > const& tracer_extensive,
+	Tessellation const& tess,vector<Primitive> const& cells, const PhysicalGeometry& pg,
+	vector<bool> const& min_density_on, vector<vector<double> > const& old_trace,
+	vector<CustomEvolution*> const& cevolve);
 
 /*! \brief A more efficient version of update_extensive_tracers
   \param extensive_tracers Extensive tracers
