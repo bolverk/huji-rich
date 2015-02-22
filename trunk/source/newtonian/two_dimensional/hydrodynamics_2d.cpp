@@ -1131,7 +1131,7 @@ double TimeAdvance2mid
 	if (!dctoadd.empty())
 		dextensive.insert(dextensive.end(), dctoadd.begin(), dctoadd.end());
 
-	if (dttoadd.empty())
+	if (!dttoadd.empty())
 		dtracer.insert(dtracer.end(), dttoadd.begin(), dttoadd.end());
 
 	KeepLocalPoints(extensive,tracer_extensive,custom_evolution_indices,
