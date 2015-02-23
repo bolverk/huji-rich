@@ -41,7 +41,7 @@ int main()
 		vector<double> vertices;
 		cell.vertices(vertices);
 
-		for (int i = 0; i < vertices.size(); i += 3)
+		for (size_t i = 0; i < vertices.size(); i += 3)
 		{
 			vertices[i] += x;
 			vertices[i + 1] += y;
@@ -51,7 +51,7 @@ int main()
 		vector<int> faces, orders;
 		cell.face_vertices(faces);
 		cell.face_orders(orders);
-		for (int i = 0; i < faces.size(); i++)
+		for (size_t i = 0; i < faces.size(); i++)
 		{
 			int v = faces[i] * 3;
 			cout << "(" << vertices[v] << ", " << vertices[v + 1] << +", " << vertices[v + 2] << ") ";

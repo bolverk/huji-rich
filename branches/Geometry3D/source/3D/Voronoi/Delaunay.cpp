@@ -17,7 +17,7 @@ void Delaunay::FillEdges()
 {
 	_edges.clear();
 
-	for (int i = 0; i < _tetrahedra.size(); i++)
+	for (size_t i = 0; i < _tetrahedra.size(); i++)
 	{
 		const Tetrahedron &t = _tetrahedra[i];
 		for (int iv = 0; iv < 3; iv++)  // Go over all 6 edges
@@ -37,8 +37,8 @@ void Delaunay::FillVertices()
 {
 	_vertices.clear();
 
-	for (int i = 0; i < _tetrahedra.size(); i++)
-		for (int j = 0; j < 4; j++)
+	for (size_t i = 0; i < _tetrahedra.size(); i++)
+		for (size_t j = 0; j < 4; j++)
 		{
 			VectorRef v = _tetrahedra[i][j];
 			VertexMap::iterator existing = _vertices.find(v);

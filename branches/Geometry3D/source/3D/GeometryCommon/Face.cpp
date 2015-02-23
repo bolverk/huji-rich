@@ -30,7 +30,7 @@ double Face::GetArea(void) const
 
 bool Face::IdenticalTo(const vector<VectorRef> &otherVertices) const
 {
-	int size = (int)otherVertices.size();
+	size_t size = (int)otherVertices.size();
 	BOOST_ASSERT(size >= 3);
 
 	if (vertices.size() != size)

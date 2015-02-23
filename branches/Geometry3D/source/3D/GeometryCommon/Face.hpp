@@ -154,7 +154,7 @@ namespace std
 		{
 			size_t value;
 			std::hash<VectorRef> hasher;
-			for (int i = 0; i < face.vertices.size(); i++)
+			for (size_t i = 0; i < face.vertices.size(); i++)
 				value ^= hasher(face.vertices[i]);  // Ignores the vertex ordering, as it should
 
 			return value;

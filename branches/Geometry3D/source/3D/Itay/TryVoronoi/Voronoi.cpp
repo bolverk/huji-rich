@@ -237,7 +237,7 @@ void CalcCenters(const vector<Vector3D> &points, const OuterBoundary3D &boundary
 	TetGenDelaunay tet(VectorRef::vector(points), big);
 	tet.Run();
 
-	for (int i = 0; i < tet.NumTetrahedra(); i++)
+	for (size_t i = 0; i < tet.NumTetrahedra(); i++)
 	{
 		cout << i << ": " << *tet[i].center() << endl;
 	}

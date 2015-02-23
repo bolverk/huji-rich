@@ -182,7 +182,7 @@ vector<Vector3D> VoroPlusPlusImpl::ExtractAllVertices(Vector3D meshPoint, voro::
 	BOOST_ASSERT(voro_vertices.size() % 3 == 0);
 
 	our_vertices.reserve(voro_vertices.size() / 3);
-	for (int i = 0; i < voro_vertices.size(); i += 3)
+	for (size_t i = 0; i < voro_vertices.size(); i += 3)
 	{
 		Vector3D v(voro_vertices[i], voro_vertices[i + 1], voro_vertices[i + 2]);
 		v += meshPoint;

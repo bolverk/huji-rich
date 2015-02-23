@@ -229,16 +229,16 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConstructCells()
 		}
 	}
 
-	for (int i = 0; i < _meshPoints.size(); i++)
+	for (size_t i = 0; i < _meshPoints.size(); i++)
 	{
 		std::vector<Tetrahedron> tetrahedra = SplitCell(cellFaces[i]);
 		double totalVolume = 0;
 		Vector3D centerOfMass;
 
-		for (int j = 0; j < tetrahedra.size(); j++)
+		for (size_t j = 0; j < tetrahedra.size(); j++)
 			totalVolume += tetrahedra[j].volume();
 
-		for (int j = 0; j < tetrahedra.size(); j++)
+		for (size_t j = 0; j < tetrahedra.size(); j++)
 		{
 			Vector3D weightedCenter = *tetrahedra[j].center() * tetrahedra[j].volume() / totalVolume;
 			centerOfMass += weightedCenter;
@@ -277,7 +277,7 @@ std::vector<Tetrahedron> DelaunayVoronoi<DelaunayType, GhostBusterType>::SplitCe
 		const Face &face = GetFace(*itFace);
 		// Split the face into trianges (face[0], face[1], face[2]), (face[0], face[2], face[3]) and so on until (face[0], face[n-2], face[n-1])
 		// add center to each triangle, providing the tetrahedron
-		for (int i = 1; i < face.vertices.size() - 1; i++)
+		for (size_t i = 1; i < face.vertices.size() - 1; i++)
 			tetrahedra.push_back(Tetrahedron(centerRef, face.vertices[0], face.vertices[i], face.vertices[i + 1]));
 	}
 

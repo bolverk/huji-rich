@@ -156,7 +156,7 @@ bool CompareTessallations(const Tessellation3D &tes1, const Tessellation3D &tes2
 		return false;
 	}
 
-	for (int i = 0; i < tes1.GetPointNo(); i++)
+	for (size_t i = 0; i < tes1.GetPointNo(); i++)
 	{
 		double volume1 = tes1.GetVolume(i);
 		double volume2 = tes2.GetVolume(i);
@@ -183,7 +183,7 @@ void WritePoints(const vector<Vector3D> &points, const OuterBoundary3D &boundary
 	output << "# Index, X, Y, Z, Boundary" << endl;
 	output << "# Main points" << endl;
 
-	for (int i = 0; i < points.size(); i++)
+	for (size_t i = 0; i < points.size(); i++)
 		output << i + 1 << " " << points[i].x << " " << points[i].y << " " << points[i].z << " 0" << endl;
 
 	output << "# Boundary points" << endl;
@@ -200,14 +200,14 @@ void TestDelaunay(const vector<Vector3D> &points, const OuterBoundary3D &boundar
 		namer.GetName(point, "C");
 	Tetrahedron big = Delaunay::CalcBigTetrahedron(boundary);
 
-	for (int i = 0; i < 4; i++)
+	for (size_t i = 0; i < 4; i++)
 		namer.GetName(big[i], "B");
 
 	TetGenDelaunay tetgen(VectorRef::vector(points), big);
 	tetgen.Run();
 
 	cout << "There are " << tetgen.NumTetrahedra() << " resulting tetrahedra" << endl;
-	for (int i = 0; i < tetgen.NumTetrahedra(); i++)
+	for (size_t i = 0; i < tetgen.NumTetrahedra(); i++)
 	{
 		VectorRef center = tetgen[i].center();
 		cout << "\t" << i + 1 << " " << namer.GetName(center) << center << ": ";

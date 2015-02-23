@@ -94,11 +94,11 @@ vector<Vector3D> CreateCubeMesh(int perSide)
 void EnsureCubeVoronoi(const vector<Vector3D> &mesh, const Tessellation3D &tes)
 {
 	ASSERT_EQ(tes.GetPointNo(), mesh.size());
-	for (int pt = 0; pt < mesh.size(); pt++)
+	for (size_t pt = 0; pt < mesh.size(); pt++)
 	{
 		auto faces = tes.GetCellFaces(pt);
 		EXPECT_EQ(faces.size(), 6);
-		for (int fc = 0; fc < faces.size(); fc++)
+		for (size_t fc = 0; fc < faces.size(); fc++)
 		{
 			auto face = tes.GetFace(fc);
 			EXPECT_EQ(face.vertices.size(), 4);
