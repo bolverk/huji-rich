@@ -527,18 +527,6 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 }
 
 namespace {
-	Conserved density_floor_correction(double density_min,
-		EquationOfState const& eos,
-		Primitive const& old_cell)
-	{
-		const double mass = density_min;
-		const double new_pressure = old_cell.Pressure*density_min/old_cell.Density;
-		const double kinetic_energy = 0.5*pow(abs(old_cell.Velocity),2)*density_min;
-		const double thermal_energy = density_min*
-			eos.dp2e(density_min, new_pressure);
-		const Vector2D momentum = density_min*old_cell.Velocity;
-		return Conserved(mass,momentum,kinetic_energy+thermal_energy);
-	}
 
 	std::pair<Conserved,bool> calc_safe_conserved(Conserved const& raw,
 		bool density_floor,

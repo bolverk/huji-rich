@@ -33,16 +33,6 @@ SequentialContour::SequentialContour
   p_lcc_(p_lcc) {}
 
 namespace {
-  void ascii_write(const string& output_file,
-		   const vector<Vector2D>& data)
-  {
-    std::ofstream f(output_file.c_str());
-    BOOST_FOREACH(const Vector2D& datum, data)
-      {
-	f << datum.x << " " << datum.y << "\n";
-      }
-    f.close();
-  }
 
   class ComponentExtractor: public Index2Member<double>
   {
