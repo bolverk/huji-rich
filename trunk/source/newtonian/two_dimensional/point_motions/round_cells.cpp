@@ -112,7 +112,7 @@ namespace {
 
 vector<Vector2D> RoundCells::calcAllVelocities
 	(Tessellation const& tess,
-	vector<Primitive> const& cells,double time,vector<CustomEvolution*> &cevolve)
+	 vector<Primitive> const& cells,double time,vector<CustomEvolution*> &cevolve, const vector<vector<double> >& /*tracers*/)
 {
 	vector<Vector2D> res;
 	const int n=tess.GetPointNo();

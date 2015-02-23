@@ -20,9 +20,10 @@ Vector2D HoldStill::CalcVelocity(int index,
 vector<Vector2D> HoldStill::calcAllVelocities(Tessellation const& tess,
 					      vector<Primitive> const& cells,
 					      double time,
-					      vector<CustomEvolution*> &cevolve)
+					      vector<CustomEvolution*> &cevolve,
+					      const vector<vector<double> >& tracers)
 {
-  vector<Vector2D> res = raw_.calcAllVelocities(tess,cells,time,cevolve);
+  vector<Vector2D> res = raw_.calcAllVelocities(tess,cells,time,cevolve,tracers);
   for(size_t i=0;i<res.size();++i){
     if(cond_(static_cast<int>(i),tess,cells,time))
       res[i] = Vector2D(0,0);

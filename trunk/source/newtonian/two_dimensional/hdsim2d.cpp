@@ -334,7 +334,7 @@ void hdsim::TimeAdvance(void)
 
 	vector<Vector2D> point_velocity = 
 	  _pointmotion.calcAllVelocities
-	  (_tessellation,_cells,_time,custom_evolutions);
+	  (_tessellation,_cells,_time,custom_evolutions,tracer_);
 
 #ifndef RICH_MPI
 	PeriodicVelocityExchange(point_velocity,_tessellation.GetDuplicatedPoints(),

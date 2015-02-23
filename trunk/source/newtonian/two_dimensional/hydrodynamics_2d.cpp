@@ -225,9 +225,12 @@ vector<Conserved> CalcConservedExtensive
 void CalcPointVelocities(Tessellation const& tessellation,
 	vector<Primitive> const& cells,
 	PointMotion& pointmotion,
-	vector<Vector2D>& pointvelocity,double time,vector<CustomEvolution*> & cevolve)
+	vector<Vector2D>& pointvelocity,
+			 double time,
+			 vector<CustomEvolution*> & cevolve,
+			 const vector<vector<double> >& tracers)
 {
-	pointvelocity=pointmotion.calcAllVelocities(tessellation,cells,time,cevolve);
+  pointvelocity=pointmotion.calcAllVelocities(tessellation,cells,time,cevolve,tracers);
 }
 
 double TimeStepForCell(Primitive const& cell,double width,
@@ -900,9 +903,10 @@ vector<Vector2D> calc_point_velocities
 	(Tessellation const& tess,
 	vector<Primitive> const& cells,
 	PointMotion& point_motion,
-	double time,vector<CustomEvolution*> & cevolve)
+	 double time,vector<CustomEvolution*> & cevolve,
+	 const vector<vector<double> >& tracers)
 {
-	return point_motion.calcAllVelocities(tess,cells,time,cevolve);
+  return point_motion.calcAllVelocities(tess,cells,time,cevolve,tracers);
 }
 
 vector<Vector2D> get_all_mesh_points
@@ -986,7 +990,7 @@ double TimeAdvance2mid
 
 	//do half time step
 	vector<Vector2D> point_velocities = calc_point_velocities
-		(tess, cells, point_motion, time,CellsEvolve);
+	  (tess, cells, point_motion, time,CellsEvolve,tracers);
 
 #ifndef RICH_MPI
 	PeriodicVelocityExchange(point_velocities,tess.GetDuplicatedPoints(),
@@ -1237,7 +1241,7 @@ double TimeAdvance2mid
 		custom_evolution_indices);
 
 	point_velocities = calc_point_velocities(tess,cells,
-		point_motion, time+0.5*dt,CellsEvolve);
+						 point_motion, time+0.5*dt,CellsEvolve,tracers);
 
 #ifndef RICH_MPI
 	PeriodicVelocityExchange(point_velocities,tess.GetDuplicatedPoints(),

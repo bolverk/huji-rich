@@ -45,7 +45,8 @@ public:
 
   vector<Vector2D> calcAllVelocities(Tessellation const& tess,
 				     vector<Primitive> const& cells,
-				     double time,vector<CustomEvolution*> &cevolve);
+				     double time,vector<CustomEvolution*> &cevolve,
+				     const vector<vector<double> >& tracers);
 
 private:
   PointMotion& raw_;
