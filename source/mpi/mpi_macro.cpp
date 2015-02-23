@@ -568,7 +568,6 @@ void SendRecvPrimitive(vector<Primitive> const& cells, vector<vector<double> > c
 	&ttoadd,EquationOfState const& eos)
 {
 	bool traceractive = !tracers.empty();
-	int ntracer = 0;
 	if (traceractive)
 		traceractive = !tracers[0].empty();
 	if (traceractive)
