@@ -555,6 +555,9 @@ namespace {
 			{
 				res.first.Mass = min_density;
 				res.first.Momentum = old.Velocity*min_density;
+				const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
+				res.first.Energy = res.first.Mass*kinetic_energy
+					+ res.first.Mass*eos.dp2e(res.first.Mass, min_pressure);
 				res.second = true;
 			}
 			const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
