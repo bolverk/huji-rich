@@ -187,10 +187,10 @@ def bisection(f, xl, xr, tol):
 		return xr
 	
 	if fl*fr>0:
-		print 'xl = '+str(xl)
-		print 'xr = '+str(xr)
-		print 'fl = '+str(fl)
-		print 'fr = '+str(fr)
+		print('xl = '+str(xl))
+		print('xr = '+str(xr))
+		print('fl = '+str(fl))
+		print('fr = '+str(fr))
 		raise NameError("Root not bracketed")
 	
 	xm = 0.5*(xl+xr)
