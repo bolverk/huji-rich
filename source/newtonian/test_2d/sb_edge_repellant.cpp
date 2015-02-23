@@ -39,10 +39,11 @@ bool SBEdgeRepellant::should_be_decelerated(Vector2D const& mp,
 
 vector<Vector2D> SBEdgeRepellant::calcAllVelocities(Tessellation const& tess,
 						  vector<Primitive> const& cells,
-						  double time,vector<CustomEvolution*> &cevolve)
+						    double time,vector<CustomEvolution*> &cevolve,
+						    const vector<vector<double> >& tracers)
 {
   vector<Vector2D> result = naive_.calcAllVelocities
-    (tess,cells,time,cevolve);
+    (tess,cells,time,cevolve,tracers);
   for(size_t i=0;i<static_cast<size_t>(total_specials_);++i)
     result[i] = Vector2D(0,0);
   for(size_t i=static_cast<size_t>(total_specials_);i<result.size();++i){

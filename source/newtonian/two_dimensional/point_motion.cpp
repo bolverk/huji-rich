@@ -3,7 +3,8 @@
 vector<Vector2D> PointMotion::calcAllVelocities
 (Tessellation const& tess,
  vector<Primitive> const& cells,
- double time,vector<CustomEvolution*> &cevolve)
+ double time,vector<CustomEvolution*> &cevolve,
+ const vector<vector<double> >& /*tracers*/)
 {
   vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
   for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i)

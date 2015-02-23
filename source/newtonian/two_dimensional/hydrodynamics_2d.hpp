@@ -130,7 +130,8 @@ void CalcPointVelocities(Tessellation const& tessellation,
 			 vector<Primitive> const& cells,
 			 PointMotion& pointmotion,
 			 vector<Vector2D>& pointvelocity,double time,
-			vector<CustomEvolution*> & cevolve);
+			 vector<CustomEvolution*> & cevolve,
+			 const vector<vector<double> >& tracers);
 
 /*! \brief Calculates the time step for a cell
   \param cell Computational cell
@@ -388,7 +389,8 @@ vector<Vector2D> calc_point_velocities
 (Tessellation const& tess,
  vector<Primitive>const& cells,
  PointMotion& point_motion,
- double time,vector<CustomEvolution*> & cevolve);
+ double time,vector<CustomEvolution*> & cevolve,
+ const vector<vector<double> >& tracers);
 
 /*! \brief Returns the position of all mesh generating points
   \param tess Tessellation
