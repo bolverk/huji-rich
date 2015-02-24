@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const double EPSILON = 1e-12;
+const double EPSILON = 1e-8;
 
 OuterBoundary3D::OuterBoundary3D(Vector3D frontUpperRight, Vector3D backLowerLeft) :
 	_frontUpperRight(frontUpperRight), _backLowerLeft(backLowerLeft)

@@ -46,7 +46,10 @@ const set<Subcube> &Subcube::all()
 			"+--", "+- ", "+-+", "+ -", "+  ", "+ +", "++-", "++ ", "+++",
 		};
 		for (int i = 0; i < 26; i++)
-			_all.insert(Subcube(offsets[i]));
+		{
+			Subcube subcube(offsets[i]);
+			_all.insert(subcube);
+		}
 	}
 
 	return _all;

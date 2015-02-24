@@ -186,7 +186,7 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Dela
 }
 
 template <typename DelaunayType, typename GhostBusterType>
-const double DelaunayVoronoi<DelaunayType, GhostBusterType>::EDGE_RATIO = 1e-4;
+const double DelaunayVoronoi<DelaunayType, GhostBusterType>::EDGE_RATIO = 1e-5;
 
 template <typename DelaunayType, typename GhostBusterType>
 boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFace(const Delaunay &del, 
@@ -195,6 +195,7 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 	std::vector<VectorRef> vertices;
 
 	vector<int> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
+	double firstRadius;
 	for (vector<int>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
 	{
 		const Tetrahedron &neighbor = del[*itNeighbor];
@@ -210,6 +211,8 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 			if (dist < threshold)
 				continue;
 		}
+		else
+			firstRadius = neighbor.radius();  // Remember this for later, when comparing first to last
 
 		vertices.push_back(center);
 	}
@@ -217,9 +220,17 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 	if (vertices.size() < 3) // This is a degenerate face, ignore it
 		return boost::none;
 
-	Face face(vertices);
-//	face.ReorderVertices();
+	// The above loop checks the distance between neighbor i and neighbor i+1
+	// we still need to check the distance between the first and last neighbots
+	double dist = abs(*vertices.back() - *vertices.front());
+	double threshold = firstRadius * EDGE_RATIO;
+	if (dist < threshold)
+		vertices.pop_back();  // Remove the last element
 
+	if (vertices.size() < 3)  // Check for a degenerate face again
+		return boost::none;
+
+	Face face(vertices);
 	size_t faceIndex = _faces.StoreFace(face.vertices);
 	return faceIndex;
 }
