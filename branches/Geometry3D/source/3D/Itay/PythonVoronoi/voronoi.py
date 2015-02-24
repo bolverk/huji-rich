@@ -9,6 +9,7 @@ orig_points = None
 all_points = None
 tetrahedra = None
 centers = None
+radii = None
 neighbors = None
 boundary = ((-200, -200, -200), (200, 200, 200))
 
@@ -22,7 +23,7 @@ def get_name(vector, prefix='V'):
     vector = tuple(vector)
     for vec in names.keys():
         dist = linalg.norm(vector - np.array(vec)) ** 2
-        if dist < 1e-5:
+        if dist < 1e-8:
             return names[vec]
     name = prefix + str(len(names))
     names[vector] = name
@@ -85,11 +86,17 @@ def save_point_names():
 def calc_centers():
     tetrahedra_coords = [tetrahedron_coords(t, all_points) for t in tetrahedra]
     centers = [tetrahedron_center(t) for t in tetrahedra_coords]
-    return centers
+
+    radii = []
+    for i in range(len(centers)):
+        diff = centers[i] - tetrahedra_coords[i][0]
+        radii.append(linalg.norm(diff))
+    return centers, radii
 
 class Face:
     def __init__(self, vertices):
-        self._vertices = frozenset(vertices)
+        self._vertices = vertices[:]
+        self._vertex_set = frozenset(vertices)
         self._neighbors = []
 
     @property
@@ -109,7 +116,7 @@ class Face:
 
     def same_vertices(self, vertices):
         vset = frozenset(vertices)
-        return self._vertices == vset
+        return self._vertex_set == vset
         #if len(vset)!=len(self._vertices):
         #    return False
         #for vertex in vset:
@@ -123,6 +130,41 @@ def normalize_edge(edge):
         return edge[1], edge[0]
     return edge
 
+def order_edge_neighbors(edge_neighbors):
+    global tetrahedra, neighbors
+    """
+    Orders the tetrahedra so that following their centers forms a convex polygon
+    """
+    if not edge_neighbors:
+        return []
+
+    ordered = [edge_neighbors[0]]
+    changed_order = False
+    index = 1
+    while index < len(edge_neighbors):
+        previous = ordered[-1]
+        previous_neighbors = neighbors[previous]
+        next_neighbor = None
+        for neighbor in previous_neighbors:
+            if neighbor==-1:   # The neighbor is the outside world
+                continue
+            if not neighbor in edge_neighbors:  # This neighbor is not a neighbor because of our edge
+                continue
+            if not neighbor in ordered:  # Found on!
+                next_neighbor = neighbor
+                break
+
+        if neighbor is not None:
+            ordered.append(neighbor)
+            index += 1
+        elif not changed_order:
+            ordered.reverse()  # Flip order, continue
+            changed_order = True
+        else:
+            raise ValueError("Can't create ordered neighbor list for edge!")
+
+    return ordered
+
 def build_edges():
     edges = {}
     num = 0
@@ -133,6 +175,11 @@ def build_edges():
                 edges[n] = []
             edges[n].append(num)
         num += 1
+
+    for edge in edges.keys():
+        edges[edge] = order_edge_neighbors(edges[edge])
+
+    edge_set = set(edges[edge])
     return edges
 
 faces = []
@@ -150,14 +197,29 @@ def create_face(edge):
         return None
     tetrahedron_centers = [centers[n] for n in edge_neighbors]
     vertex_names = [get_name(c) for c in tetrahedron_centers]
+    n = len(tetrahedron_centers)
+    diffs = [tetrahedron_centers[(i+1) % n] - tetrahedron_centers[i] for i in range(n)]
+    distances = [linalg.norm(diff) for diff in diffs]  # norms[0] is distance between center[1] and center[0]
+    thresholds = [radii[t] * 2e-5 for t in edge_neighbors]
+
+    to_remove = []
+    for i in range(n):
+        if distances[i] < thresholds[i]:
+            to_remove.append(i)
+    to_remove.reverse()
+    for removable in to_remove:
+        del vertex_names[removable]
+
     vertex_set = frozenset(vertex_names)
-    if len(vertex_set) < 3:   # Degenerate 0-area face, ignore it
+    if len(vertex_set)!=len(vertex_names):
+        raise ValueError("Repetition in vertices!")
+    if len(vertex_names) < 3:   # Degenerate 0-area face, ignore it
         return None
 #    name_set = set(vertex_names)
 #    if(len(name_set) < len(vertex_names)):
 #        return None  # Repeating vertices - this is a degenerate face
 
-    return save_face(vertex_set)
+    return save_face(vertex_names)
 
 cells = []
 
@@ -203,19 +265,19 @@ def print_results(detailed=False):
             print()
         print()
 
-def remove_cocentric():
-    to_remove = []
-    for i in range(len(tetrahedra)-1):
-        for j in range(i+1, len(tetrahedra)):
-            diff = centers[i] - centers[j]
-            norm = linalg.norm(diff)
-            if norm < 1e-5:
-                to_remove.append(j)
-
-    to_remove.sort()
-    for i in reversed(to_remove):
-        del tetrahedra[i]
-        del centers[i]
+# def remove_cocentric():
+#     to_remove = []
+#     for i in range(len(tetrahedra)-1):
+#         for j in range(i+1, len(tetrahedra)):
+#             diff = centers[i] - centers[j]
+#             norm = linalg.norm(diff)
+#             if norm < 1e-5:
+#                 to_remove.append(j)
+#
+#     to_remove.sort()
+#     for i in reversed(to_remove):
+#         del tetrahedra[i]
+#         del centers[i]
 
 def print_vectors():
     print()
@@ -224,15 +286,15 @@ def print_vectors():
         print("%3s\t%s" % (name, vec))
 
 def main(folder, name):
-    global all_points, tetrahedra, neighbors, centers, orig_points, edges, faces
+    global all_points, tetrahedra, neighbors, centers, radii, orig_points, edges, faces
     all_points, tetrahedra, neighbors = read_tetgen(folder, name)
     num_orig = int((len(all_points) - 4) / 7)
     orig_points = all_points[:num_orig]
     save_point_names()
-    centers = calc_centers()
+    centers, radii = calc_centers()
     edges = build_edges()
     voronoi()
-    print_results()
+    print_results(detailed=True)
 #    print_vectors()
 
 if __name__=='__main__':
