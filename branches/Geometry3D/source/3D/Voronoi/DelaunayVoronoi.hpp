@@ -29,6 +29,8 @@ private:
 	// with a wrong template argument
 	BOOST_STATIC_ASSERT(boost::is_base_of<typename GhostBuster, typename GhostBusterType>::value);
 
+	const static double EDGE_RATIO;
+
 public:
 
 	/*!
@@ -184,28 +186,41 @@ void DelaunayVoronoi<DelaunayType, GhostBusterType>::ConvertToVoronoi(const Dela
 }
 
 template <typename DelaunayType, typename GhostBusterType>
+const double DelaunayVoronoi<DelaunayType, GhostBusterType>::EDGE_RATIO = 1e-4;
+
+template <typename DelaunayType, typename GhostBusterType>
 boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFace(const Delaunay &del, 
 	const VectorRef vec1, const VectorRef vec2)
 {
-	std::unordered_set<VectorRef> vertexSet;
+	std::vector<VectorRef> vertices;
 
 	vector<int> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
 	for (vector<int>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
 	{
 		const Tetrahedron &neighbor = del[*itNeighbor];
 		VectorRef center = neighbor.center();
-		if (_boundary->inside(*center))
-			vertexSet.insert(center);
+		if (!_boundary->inside(*center))
+			continue;
+
+		// Check distance from the previous center
+		if (vertices.size())
+		{
+			double dist = abs(*center - *vertices.back());
+			double threshold = neighbor.radius() * EDGE_RATIO;
+			if (dist < threshold)
+				continue;
+		}
+
+		vertices.push_back(center);
 	}
 
-	if (vertexSet.size() < 3) // This is a degenerate face, ignore it
+	if (vertices.size() < 3) // This is a degenerate face, ignore it
 		return boost::none;
 
-	std::vector<VectorRef> vertices;
-	std::copy(vertexSet.begin(), vertexSet.end(), std::back_inserter(vertices));
+	Face face(vertices);
+//	face.ReorderVertices();
 
-	size_t faceIndex = _faces.StoreFace(vertices);
-	_faces.GetFace(faceIndex).ReorderVertices();
+	size_t faceIndex = _faces.StoreFace(face.vertices);
 	return faceIndex;
 }
 

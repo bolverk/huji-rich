@@ -6,6 +6,9 @@
 
 #include "TetGenDelaunay.hpp"
 #include <tetgen.h>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
 
 using namespace std; 
 
@@ -92,6 +95,8 @@ void TetGenImpl::CallTetGen()
 
 void TetGenImpl::CopyResults()
 {
+	_delaunay._neighbors.clear();
+
 	int offset = 0;
 	for (int i = 0; i < out.numberoftetrahedra; i++)
 	{
@@ -107,5 +112,99 @@ void TetGenImpl::CopyResults()
 		}
 		Tetrahedron t(vertices);
 		_delaunay._tetrahedra.push_back(t);
+		_delaunay._neighbors.push_back(neighbors);
 	}
 }
+
+/* Fills the _edges map after the Tetrahedra have been set */
+void TetGenDelaunay::FillEdges()
+{
+	_edges.clear();
+
+	// First step, fill the edge map with a list of tetrahedra that touch the edge, with no particular order
+	for (size_t i = 0; i < _tetrahedra.size(); i++)
+	{
+		const Tetrahedron &t = _tetrahedra[i];
+		for (int iv = 0; iv < 3; iv++)  // Go over all 6 edges
+			for (int jv = iv + 1; jv < 4; jv++)
+			{
+				Edge edge(t[iv], t[jv]);
+				EdgeMap::iterator existing = _edges.find(edge);
+				if (existing == _edges.end())
+					_edges[edge] = vector<int>();
+
+				_edges[edge].push_back(i);
+			}
+	}
+
+	// Second step, order the edge map properly
+	for (EdgeMap::iterator it = _edges.begin(); it != _edges.end(); it++)
+	{
+		vector<int> tetrahedra = it->second;
+		vector<int> ordered = OrderNeighbors(tetrahedra);
+		it->second = ordered;
+	}
+}
+
+
+// Order the neighbors of the edge so that they touch each-other
+// If there edge is not a boundary edge, it's easy since there tetrahedra form a cycle
+//
+// Boundary edges, however, don't have a cycle of neighbors. They tetrahedra do form a path,
+// So if we find out we can't go any further to one side, we just start walking to the other side.
+// This is done by reversing the neighbors found so far and continuing.
+
+vector<int> TetGenDelaunay::OrderNeighbors(const vector<int> &tetrahedra)
+{
+	BOOST_ASSERT(tetrahedra.size() > 0);
+	vector<int> ordered;
+	ordered.reserve(tetrahedra.size());
+
+	bool changedDirection = false; // True if we change directions - so we don't change directions twice
+	ordered.push_back(tetrahedra[0]); // Arbitrary starting point
+
+	int index = 1;
+	while (index < tetrahedra.size())
+	{ 
+		// Find the next neighbor
+		int previous = ordered[index - 1];
+		const vector<int> &previousNeighbors = _neighbors[previous];
+		vector<int>::const_iterator it;
+		for (it = previousNeighbors.begin(); it != previousNeighbors.end(); it++)
+		{
+			if (*it == -1) // No neighbor here
+				continue;
+
+			// TODO: This is all O(N^2) - improve if this is too lengthy in the real world
+			// See if this neighbor is part of the edge
+			if (find(tetrahedra.begin(), tetrahedra.end(), *it) == tetrahedra.end())
+				continue; // Nope
+
+			// See if the neighbor was already used
+			if (find(ordered.begin(), ordered.end(), *it) == ordered.end())
+				break;
+		}
+
+		// Found a neighbor, use it
+		if (it != previousNeighbors.end())
+		{
+			ordered.push_back(*it);
+			index++; // Move to the next one
+		}
+		else if (!changedDirection) // Change direction
+		{
+			reverse(ordered.begin(), ordered.end());
+			changedDirection = true;
+		}
+		else
+		{
+			BOOST_ASSERT(false); // No neighbor even though we changed direction, this is a bug!
+			return vector<int>(); 
+		}
+	}
+
+	return ordered;
+}
+
+
+

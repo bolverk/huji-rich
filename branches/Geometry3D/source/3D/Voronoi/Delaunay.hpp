@@ -62,7 +62,7 @@ protected:
 	VertexMap _vertices; // Vector->list of tetrahedra it appears in
 
 	virtual void FillVertices();
-	virtual void FillEdges();
+	virtual void FillEdges() = 0;
 	virtual void RunDelaunay() = 0;
 
 public:
@@ -79,6 +79,10 @@ public:
 	const std::vector<Tetrahedron> &Tetrahedra() const { return _tetrahedra; }
 
 	//\brief Returns the list of tetrahedra that touch the edge 
+	//\param vec1 First vector of the edge
+	//\param vec2 Second vector of the edge
+	//\return The list of tetrahedra indices that touch the edge in the proper order.
+	//\remark The proper order is neighboring tetrahedra, so that connecting their centers forms a convex polygon.s
 	const std::vector<int> &EdgeNeighbors(const VectorRef vec1, const VectorRef vec2) const;
 	
 	//\brief Returns the list of tetrahedra that touch the vertex

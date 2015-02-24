@@ -19,6 +19,11 @@ protected:
 	void RunDelaunay();
 	friend class TetGenImpl;   // This is the PIMPL pattern, although the PIMPL is generated once per call to Run,
 							   // so we don't need to hold a pointer to it.
+
+	virtual void FillEdges(); 
+	std::vector<int> OrderNeighbors(const std::vector<int> &tetrahedra);
+
+	std::vector<std::vector<int>> _neighbors;  // _neighbors[i] -> the 4 neighbors of tetrahedron i
 };
 
 #endif // TETGEN_DELAUNAY_HPP

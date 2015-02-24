@@ -12,27 +12,6 @@ Delaunay::Delaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigT
 
 }
 
-/* Fills the _edges map after the Tetrahedra have been set */
-void Delaunay::FillEdges()
-{
-	_edges.clear();
-
-	for (size_t i = 0; i < _tetrahedra.size(); i++)
-	{
-		const Tetrahedron &t = _tetrahedra[i];
-		for (int iv = 0; iv < 3; iv++)  // Go over all 6 edges
-			for (int jv = iv + 1; jv < 4; jv++)
-			{
-				Edge edge(t[iv], t[jv]);
-				EdgeMap::iterator existing = _edges.find(edge);
-				if (existing == _edges.end())
-					_edges[edge] = vector<int>();
-
-				_edges[edge].push_back(i);
-			}
-	}
-}
-
 void Delaunay::FillVertices()
 {
 	_vertices.clear();
