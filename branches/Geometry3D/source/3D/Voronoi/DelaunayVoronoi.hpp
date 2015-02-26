@@ -194,9 +194,9 @@ boost::optional<size_t> DelaunayVoronoi<DelaunayType, GhostBusterType>::CreateFa
 {
 	std::vector<VectorRef> vertices;
 
-	vector<int> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
+	vector<size_t> edgeNeighbors = del.EdgeNeighbors(vec1, vec2);
 	double firstRadius;
-	for (vector<int>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
+	for (vector<size_t>::iterator itNeighbor = edgeNeighbors.begin(); itNeighbor != edgeNeighbors.end(); itNeighbor++)
 	{
 		const Tetrahedron &neighbor = del[*itNeighbor];
 		VectorRef center = neighbor.center();

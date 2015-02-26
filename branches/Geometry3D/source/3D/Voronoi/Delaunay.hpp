@@ -54,13 +54,15 @@ protected:
 	Tetrahedron _bigTetrahedron;
 
 	std::vector<Tetrahedron> _tetrahedra;
+	std::vector<std::vector<size_t>> _tetrahedraNeighbors;  // Tetrahedra neighbors of each tetrahedron
 	
-	typedef std::unordered_map<Edge, std::vector<int>, EdgeHasher> EdgeMap;
+	typedef std::unordered_map<Edge, std::vector<size_t>, EdgeHasher> EdgeMap;
 	EdgeMap _edges;  // Edge -> list of tetrahedra it appears in
 
-	typedef std::unordered_map<VectorRef, std::vector<int>> VertexMap;
+	typedef std::unordered_map<VectorRef, std::vector<size_t>> VertexMap;
 	VertexMap _vertices; // Vector->list of tetrahedra it appears in
 
+	virtual void FillNeighbors() = 0;
 	virtual void FillVertices();
 	virtual void FillEdges() = 0;
 	virtual void RunDelaunay() = 0;
@@ -78,15 +80,18 @@ public:
 	//\brief A vector of all the tetrahedra
 	const std::vector<Tetrahedron> &Tetrahedra() const { return _tetrahedra; }
 
+	//\brief Returns the neighbors of the tetrahedron
+	const std::vector<size_t> TetrahedraNeighbors(size_t tetrahedron) const { return _tetrahedraNeighbors[tetrahedron]; }
+
 	//\brief Returns the list of tetrahedra that touch the edge 
 	//\param vec1 First vector of the edge
 	//\param vec2 Second vector of the edge
 	//\return The list of tetrahedra indices that touch the edge in the proper order.
 	//\remark The proper order is neighboring tetrahedra, so that connecting their centers forms a convex polygon.s
-	const std::vector<int> &EdgeNeighbors(const VectorRef vec1, const VectorRef vec2) const;
+	const std::vector<size_t> &EdgeNeighbors(const VectorRef vec1, const VectorRef vec2) const;
 	
 	//\brief Returns the list of tetrahedra that touch the vertex
-	const std::vector<int> &VertexNeighbors(const VectorRef v) const;
+	const std::vector<size_t> &VertexNeighbors(const VectorRef v) const;
 
 	size_t NumTetrahedra() const { return _tetrahedra.size(); }
 	const Tetrahedron& operator[](size_t index) const { return _tetrahedra[index]; }

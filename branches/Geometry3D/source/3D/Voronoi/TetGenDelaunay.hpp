@@ -21,9 +21,9 @@ protected:
 							   // so we don't need to hold a pointer to it.
 
 	virtual void FillEdges(); 
-	std::vector<int> OrderNeighbors(const std::vector<int> &tetrahedra);
+	virtual void FillNeighbors();
 
-	std::vector<std::vector<int>> _neighbors;  // _neighbors[i] -> the 4 neighbors of tetrahedron i
+	std::vector<size_t> OrderNeighbors(const std::vector<size_t> &tetrahedra);
 };
 
 #endif // TETGEN_DELAUNAY_HPP

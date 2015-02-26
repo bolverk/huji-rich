@@ -22,13 +22,13 @@ void Delaunay::FillVertices()
 			VectorRef v = _tetrahedra[i][j];
 			VertexMap::iterator existing = _vertices.find(v);
 			if (existing == _vertices.end())
-				_vertices[v] = vector<int>();
+				_vertices[v] = vector<size_t>();
 
 			_vertices[v].push_back(i);
 		}
 }
 
-const std::vector<int> &Delaunay::EdgeNeighbors(const VectorRef vec1, const VectorRef vec2) const
+const std::vector<size_t> &Delaunay::EdgeNeighbors(const VectorRef vec1, const VectorRef vec2) const
 {
 	Edge edge(vec1, vec2);
 	EdgeMap::const_iterator it = _edges.find(edge);
@@ -37,7 +37,7 @@ const std::vector<int> &Delaunay::EdgeNeighbors(const VectorRef vec1, const Vect
 	return it->second;
 }
 
-const std::vector<int> &Delaunay::VertexNeighbors(const VectorRef v) const
+const std::vector<size_t> &Delaunay::VertexNeighbors(const VectorRef v) const
 {
 	VertexMap::const_iterator it = _vertices.find(v);
 	BOOST_ASSERT(it != _vertices.end());
@@ -54,6 +54,7 @@ void Delaunay::Run()
 	BOOST_ASSERT(_edges.size() == 0 && _vertices.size() == 0); // You're not supposed to fill those
 	FillVertices();
 	FillEdges();
+	FillNeighbors();
 }
 
 Tetrahedron Delaunay::CalcBigTetrahedron(const OuterBoundary3D &boundary)
@@ -66,8 +67,8 @@ Tetrahedron Delaunay::CalcBigTetrahedron(const OuterBoundary3D &boundary)
 	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
 	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
 
-	absFrontUpperRight *= 1000;
-	absBackLowerLeft *= -1000;
+	absFrontUpperRight *= 1e10;
+	absBackLowerLeft *= -1e10;
 
 	// The top of the tetrahedron will be on the Y axis
 	vector<VectorRef> tetrahedron;

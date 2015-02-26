@@ -39,6 +39,9 @@ static void RunVoronoi(Tessellation3D *tes, std::string name);
 
 static void CompareTessellations();
 static void CompareTessellations(const std::string name1, const std::string name2);
+static void CompareCells(const Tessellation3D *tes1, const Tessellation3D *tes2, size_t cellNum);
+static bool IsSameFace(const Face &face1, const Face &face2);
+static double FaceSimilarity(const Face &face1, const Face &face2);
 
 static VectorNamer namer;
 static Arguments args;
@@ -55,12 +58,6 @@ int main(int argc, char*argv[])
 	if (!Initialize())
 		return -1;
 
-	if (args.RunVoroPlusPlus)
-	{
-		VoroPlusPlus *voro = new VoroPlusPlus();
-		RunVoronoi(voro, "voro++");
-	}
-
 	if (args.RunBruteForce)
 	{
 		DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster>();
@@ -70,9 +67,18 @@ int main(int argc, char*argv[])
 
 	if (args.RunCloseToBoundary)
 	{
-		DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
+		DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster>();
+		RunVoronoi(del, "full-brute-force");
+		WritePoints(del->AllPoints, "full-brute-force.node");
+		/*DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
 		RunVoronoi(del, "close-to-boundary");
-		WritePoints(del->AllPoints, "close-to-boundary.node");
+		WritePoints(del->AllPoints, "close-to-boundary.node"); */
+	}
+
+	if (args.RunVoroPlusPlus)
+	{
+		VoroPlusPlus *voro = new VoroPlusPlus();
+		RunVoronoi(voro, "voro++");
 	}
 
 	CompareTessellations();
@@ -297,35 +303,100 @@ static void CompareTessellations(const std::string name1, const std::string name
 		if (pt1 != pt2)
 			ERROR("Different points????");
 
-		vector<size_t> faces1 = tes1->GetCellFaces(i);
-		vector<size_t> faces2 = tes2->GetCellFaces(i);
-		if (faces1.size() != faces2.size())
+		CompareCells(tes1, tes2, i);
+	}
+}
+
+static void CompareCells(const Tessellation3D *tes1, const Tessellation3D *tes2, size_t cellNum)
+{
+	vector<size_t> faces1 = tes1->GetCellFaces(cellNum);
+	vector<size_t> faces2 = tes2->GetCellFaces(cellNum);
+	/*if (faces1.size() != faces2.size())
+	{
+		cout << "***    Wrong number of faces in cell " << cellNum << " " << faces1.size() << " vs. " << faces2.size() << endl;
+		return;
+	} */
+
+
+	unordered_set<size_t> faceSet1(faces1.begin(), faces1.end());
+	unordered_set<size_t> faceSet2(faces2.begin(), faces2.end());
+
+	// First, look for identical faces
+	for (size_t j = 0; j < faces1.size(); j++)
+	{
+		const Face &face1 = tes1->GetFace(faces1[j]);
+
+		// Find the face in tes2
+		bool found = false;
+		size_t k = 0;
+		for (k = 0; k < faces2.size(); k++)
 		{
-			cout << "***    Wrong number of faces in cell " << i << " " << faces1.size() << " vs. " << faces2.size() << endl;
-			continue;
+			const Face &face2 = tes2->GetFace(faces2[k]);
+			if (IsSameFace(face1, face2))
+			{
+				found = true;
+				break;
+			}
 		}
 
-		for (size_t j = 0; j < faces1.size(); j++)
+		if (found)
 		{
-			const Face &face1 = tes1->GetFace(faces1[j]);
-
-			// Find the face in tes2
-			bool found = false;
-			for (size_t k = 0; k < faces2.size(); k++)
-			{
-				const Face &face2 = tes2->GetFace(faces2[k]);
-				if (face1.IdenticalTo(face2.vertices))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				cout << "*** Can't locate face F" << faces1[j] << " of cell C" << i+1 << " in second tessellation" << endl;
-				continue;
-			}
+			faceSet1.erase(faces1[j]);
+			faceSet2.erase(faces2[k]);
 		}
 	}
+
+	if (!faceSet1.empty())
+	{
+		cerr << "***     Can't find matches in C" << cellNum+1 << " for first faces ";
+		for (unordered_set<size_t>::iterator it = faceSet1.begin(); it != faceSet1.end(); it++)
+			cerr << "F" << *it << " ";
+		cerr << endl;
+	}
+	if (!faceSet2.empty())
+	{
+		cerr << "***     Can't find matches in C" << cellNum + 1 << " for second faces ";
+		for (unordered_set<size_t>::iterator it = faceSet2.begin(); it != faceSet2.end(); it++)
+			cerr << "F" << *it << " ";
+		cerr << endl;
+	}
+}
+
+
+static const double FACE_EPSILON = 1e-5;
+
+// Checks if two faces are the same - this is done by looking at the coordinates - each vertex in
+// face1 should appear in face2. We allow close-enough vertices
+static bool IsSameFace(const Face &face1, const Face &face2)
+{
+	if (face1.vertices.size() != face2.vertices.size())
+		return false;
+
+	for (vector<VectorRef>::const_iterator it1 = face1.vertices.begin(); it1 != face1.vertices.end(); it1++)
+	{
+		bool found = false;
+		for (vector<VectorRef>::const_iterator it2 = face2.vertices.begin(); it2 != face2.vertices.end(); it2++)
+		{
+			if (*it1 == *it2)
+			{
+				found = true;
+				break;
+			}
+			Vector3D diff = **it1 - **it2;
+			if (abs(diff) < FACE_EPSILON)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			return false;
+	}
+
+	return true;
+}
+
+static double FaceSimilarity(const Face &face1, const Face &face2)
+{
+	return -1.0;
 }

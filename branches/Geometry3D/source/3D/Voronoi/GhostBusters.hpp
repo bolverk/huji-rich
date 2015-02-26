@@ -23,9 +23,12 @@ public:
 //\brief A simple implementation that copies each point 26 times
 class BruteForceGhostBuster : public GhostBuster
 {
-private:
-	static std::set<Subcube> _subcubes;
-	static std::set<Subcube> RelevantSubcubes();
+public:
+	virtual std::set<VectorRef> operator()(const Delaunay &del, const OuterBoundary3D &boundary) const;
+};
+
+class FullBruteForceGhostBuster : public GhostBuster
+{
 public:
 	virtual std::set<VectorRef> operator()(const Delaunay &del, const OuterBoundary3D &boundary) const;
 };
@@ -37,13 +40,13 @@ public:
 	virtual std::set<VectorRef> operator()(const Delaunay &del, const OuterBoundary3D &boundary) const;
 
 private:
-	unordered_set<int> FindOuterTetrahedra(const Delaunay &del) const ;
-	unordered_set<int> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<int>& outerTetrahedra) const;
+	unordered_set<size_t> FindOuterTetrahedra(const Delaunay &del) const ;
+	unordered_set<size_t> FindEdgeTetrahedra(const Delaunay &del, const unordered_set<size_t>& outerTetrahedra) const;
 
 	typedef unordered_map<VectorRef, unordered_set<Subcube>> breach_map;
 	breach_map FindHullBreaches(const Delaunay &del, 
-		const unordered_set<int>& edgeTetrahedra, 
-		const unordered_set<int> &outerTetrahedra, 
+		const unordered_set<size_t>& edgeTetrahedra,
+		const unordered_set<size_t> &outerTetrahedra,
 		const OuterBoundary3D &boundary) const;
 
 	template<typename T>
