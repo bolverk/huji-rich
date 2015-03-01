@@ -602,13 +602,17 @@ vector<bool> UpdatePrimitives
 	{
 		try
 		{
-			if (CellsEvolve[static_cast<size_t>(i)] == 0)
+			if (CellsEvolve[static_cast<size_t>(i)] == 0 || CellsEvolve[static_cast<size_t>(i)]->DensityFloorRelevant())
 			{
 				Primitive old_cell = densityfloor ? old_cells[static_cast<size_t>(i)] : cells[static_cast<size_t>(i)];
 				std::pair<Primitive, bool > res = regular_cell_evolve
 					(conservedintensive[static_cast<size_t>(i)], densityfloor,
 					densitymin, pressuremin, old_cell, eos);
-				cells[static_cast<size_t>(i)] = res.first;
+				if (CellsEvolve[static_cast<size_t>(i)] != 0 && !res.second)
+					cells[static_cast<size_t>(i)] = CellsEvolve[static_cast<size_t>(i)]->UpdatePrimitive
+					(conservedintensive,eos, old_cells, i, tess, time, tracers);
+				else
+					cells[static_cast<size_t>(i)] = res.first;
 				bres[static_cast<size_t>(i)] = res.second;
 			}
 			else
@@ -933,10 +937,15 @@ namespace
 		vector<Conserved> const& dextensive, vector<vector<double> > &old_tracers,
 		vector<vector<double> > const&tracers, vector<vector<double> > const& dtracer)
 	{
-		const double factor = 3;
+		const double factor = 2;
 		for (size_t i = 0; i < extensive.size(); ++i)
 		{
-			if (std::abs(dextensive[i].Mass) > factor*extensive[i].Mass)
+			const double old_e = old_extensive[i].Energy - 0.5*ScalarProd(old_extensive[i].Momentum, 
+				old_extensive[i].Momentum) / old_extensive[i].Mass;
+			const double mid_e = extensive[i].Energy - 0.5*ScalarProd(extensive[i].Momentum, extensive[i].Momentum) /
+				extensive[i].Mass;
+			const double e_ratio = old_e / mid_e;
+			if (std::abs(dextensive[i].Mass) > factor*extensive[i].Mass||e_ratio>factor||e_ratio<(1.0/factor))
 			{
 				old_extensive[i] = extensive[i] + dextensive[i];
 				if (!tracers.empty())
