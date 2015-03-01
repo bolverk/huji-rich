@@ -128,10 +128,16 @@ public:
   */
   virtual bool ShouldForceTracerReset(void)const;
 
-  /*! \brief Determine whether the cell should be taken into account by the interpolation
+  /*! \brief Determine whether the cell should be taken into account by the interpolation, default is false
     \return True if it is relevant for interpolation, false otherwise
    */
   virtual bool isRelevantToInterpolation(void) const;
+
+  /*!
+  \brief Determines whether the cell should be taken into account by the density floor flag, default is false
+  \return True if it is relevant, false otherwise
+  */
+  virtual bool DensityFloorRelevant(void) const;
 };
 
 //! \brief Assigns indices to pointers to custom evolution methods

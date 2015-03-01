@@ -1,5 +1,11 @@
 #include "NoMovment.hpp"
 
+bool NoMovement::DensityFloorRelevant(void) const
+{
+	return true;
+}
+
+
 bool NoMovement::ShouldForceTracerReset(void)const
 {
 	return false;

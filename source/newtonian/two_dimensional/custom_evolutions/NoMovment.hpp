@@ -44,6 +44,8 @@ public:
 
 	bool isRelevantToInterpolation(void)const;
 
+	bool DensityFloorRelevant(void) const;
+
 	~NoMovement(void);
 };
 
