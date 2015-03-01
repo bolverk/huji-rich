@@ -99,13 +99,11 @@ for i=1:NumberOfCells
 end
 
 if(ShouldPlot==1||ShouldPlot==2)
-    if(ShouldPlot==2)
-        f1=gcf;
-    else
+    if(ShouldPlot==1)
         f1=figure;
+        set(f1,'Units','normalized')
+        set(f1, 'Position', [0.03 0.03 0.65 0.85])
     end
-    set(f1,'Units','normalized')
-    set(f1, 'Position', [0.03 0.03 0.65 0.85])
     hold on;
     maxdraw=7500;
     nloops=ceil(length(Density)/maxdraw);
