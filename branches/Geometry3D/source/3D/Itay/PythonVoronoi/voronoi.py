@@ -1,9 +1,12 @@
+from boundary import reflect_points, Boundary
+
 __author__ = 'zmbq'
 
 import numpy as np
 import numpy.linalg as linalg
 import itertools
-from TetGenReader import read_tetgen
+from TetGenReader import read_tetgen, read_tetgen_points
+import os.path
 
 orig_points = None
 all_points = None
@@ -297,8 +300,20 @@ def main(folder, name):
     print_results(detailed=True)
 #    print_vectors()
 
+def main_reflect_points(folder, name):
+    filename = os.path.join(folder, name)
+    all_pts = read_tetgen_points(filename)
+    big_tetrahedron = all_pts[-4:]
+    pts = all_pts[:-4]
+    boundary = Boundary((-500, 1000, 300), (-1000, 0, -300))
+    offsets = ('   ', '-  ', ' - ', '  -', '+  ', ' + ', '  +')
+    reflected = reflect_points(pts, boundary, offsets)
+    for pt in reflected:
+        print(pt)
+
 if __name__=='__main__':
     main('points', 'all')
+    # main_reflect_points('points', 'orig.node')
     #v = np.array(name_to_vec["V47"])
     #u = np.array(name_to_vec["V70"])
     #diff = v-u

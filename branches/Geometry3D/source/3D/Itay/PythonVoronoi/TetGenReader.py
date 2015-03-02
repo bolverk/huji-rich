@@ -16,12 +16,19 @@ def _read_tetgen_file(filename, type=float):
     """
     with open(filename, "r") as inf:
         lines = inf.readlines()
-    lines = [l for l in lines if l[0]!='#']  # Remove comments
+    lines = [l for l in lines if l[0]!='#' and l.strip()]  # Remove comments and blank lines
     numbers = [parse_line(l, type) for l in lines]
-    count = numbers[0][0]
+    count = int(numbers[0][0])
     if count!=len(numbers)-1:
         raise ValueError("File %s count is wrong" % filename)
     return numbers[1:]  # No need to include the count
+
+def read_tetgen_points(filename):
+    node_file = _read_tetgen_file(filename, float)
+    points = []
+    for line in node_file:
+        points.append(line[1:4])
+    return points
 
 def read_tetgen(folder, lead_name):
     """
@@ -35,9 +42,7 @@ def read_tetgen(folder, lead_name):
     """
     filename = path.join(folder, lead_name) + ".1.";
     node_file = _read_tetgen_file(filename + "node", float)
-    points = []
-    for line in node_file:
-        points.append(line[1:4])
+    points = read_tetgen_points(node_file)
 
     tetrahedra_file = _read_tetgen_file(filename + "ele", int)
     tetrahedra = []
