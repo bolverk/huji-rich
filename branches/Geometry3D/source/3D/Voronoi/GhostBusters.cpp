@@ -71,7 +71,7 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 	{
 		unordered_set<size_t> nextCandidates;
 
-		for (unordered_set<size_t>::iterator itTetra = edgeTetrahedra.begin(); itTetra != edgeTetrahedra.end(); itTetra++)
+		for (unordered_set<size_t>::iterator itTetra = candidateTetrahedra.begin(); itTetra != candidateTetrahedra.end(); itTetra++)
 		{
 			Tetrahedron t = del[*itTetra];
 			for (int iv = 0; iv < 4; iv++)
