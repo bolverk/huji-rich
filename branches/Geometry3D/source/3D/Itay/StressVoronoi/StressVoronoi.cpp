@@ -148,6 +148,7 @@ static void WritePoints(const vector<Vector3D> &points, const std::string &filen
 	Tetrahedron big = Delaunay::CalcBigTetrahedron(*boundary);
 	fs::path full_path = fs::path(args.OutputDirectory) / filename;
 	output.open(full_path.string());
+	output.precision(10);
 	output << "# Nodes, Dim, #Attrs, Boundary" << endl;
 	output << points.size() + 4 << " 3 0 1" << endl;
 	output << "# Index, X, Y, Z, Boundary" << endl;
