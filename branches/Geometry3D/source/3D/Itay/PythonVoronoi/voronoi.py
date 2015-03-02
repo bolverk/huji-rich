@@ -1,12 +1,12 @@
-from boundary import reflect_points, Boundary
+from boundary import Boundary
+from reflector import brute_force_reflector, full_brute_force_reflector, CloseToBoundaryReflector
 
 __author__ = 'zmbq'
 
 import numpy as np
 import numpy.linalg as linalg
 import itertools
-from TetGenReader import read_tetgen, read_tetgen_points
-import os.path
+from TetGenReader import read_tetgen
 
 orig_points = None
 all_points = None
@@ -14,7 +14,7 @@ tetrahedra = None
 centers = None
 radii = None
 neighbors = None
-boundary = ((-200, -200, -200), (200, 200, 200))
+boundary = Boundary((-500, 1000, 300), (-1000, 0, -300))
 
 def svec(vec):
     return "(%.5f, %.5f, %.5f)" % (vec[0], vec[1], vec[2])
@@ -127,7 +127,9 @@ class Face:
         #        return False
         #return True
 
-edges = {}  # (vec1, vec2) -> [list of tetrahedra touching edge]
+edge_neighbors = {}  # (vec1, vec2) -> [list of tetrahedra touching edge]
+vertex_neighbors = {} # vec -> [list of tetrahedra which include vec]
+
 def normalize_edge(edge):
     if edge[0] < edge[1]:
         return edge[1], edge[0]
@@ -168,7 +170,7 @@ def order_edge_neighbors(edge_neighbors):
 
     return ordered
 
-def build_edges():
+def calc_edges_neighbors():
     edges = {}
     num = 0
     for tetrahedron in tetrahedra:
@@ -182,8 +184,19 @@ def build_edges():
     for edge in edges.keys():
         edges[edge] = order_edge_neighbors(edges[edge])
 
-    edge_set = set(edges[edge])
     return edges
+
+def calc_vertex_neighbors():
+    vertices = {}
+    num = 0
+    for tetrahedron in tetrahedra:
+        for pt in tetrahedron:
+            if not pt in vertices:
+                vertices[pt] = []
+            vertices[pt].append(num)
+        num += 1
+
+    return vertices
 
 faces = []
 def save_face(vertices):
@@ -195,15 +208,15 @@ def save_face(vertices):
     return len(faces) - 1
 
 def create_face(edge):
-    edge_neighbors = edges[edge]
-    if not edge_neighbors:
+    our_neighbors = edge_neighbors[edge]
+    if not our_neighbors:
         return None
-    tetrahedron_centers = [centers[n] for n in edge_neighbors]
+    tetrahedron_centers = [centers[n] for n in our_neighbors]
     vertex_names = [get_name(c) for c in tetrahedron_centers]
     n = len(tetrahedron_centers)
     diffs = [tetrahedron_centers[(i+1) % n] - tetrahedron_centers[i] for i in range(n)]
     distances = [linalg.norm(diff) for diff in diffs]  # norms[0] is distance between center[1] and center[0]
-    thresholds = [radii[t] * 2e-5 for t in edge_neighbors]
+    thresholds = [radii[t] * 2e-5 for t in our_neighbors]
 
     to_remove = []
     for i in range(n):
@@ -289,28 +302,67 @@ def print_vectors():
         print("%3s\t%s" % (name, vec))
 
 def main(folder, name):
-    global all_points, tetrahedra, neighbors, centers, radii, orig_points, edges, faces
+    global all_points, tetrahedra, neighbors, centers, radii, orig_points, edge_neighbors, vertex_neighbors, faces
     all_points, tetrahedra, neighbors = read_tetgen(folder, name)
     num_orig = int((len(all_points) - 4) / 7)
     orig_points = all_points[:num_orig]
     save_point_names()
     centers, radii = calc_centers()
-    edges = build_edges()
+    edge_neighbors = calc_edges_neighbors()
+    vertex_neighbors = calc_vertex_neighbors()
     voronoi()
     print_results(detailed=True)
 #    print_vectors()
 
-def create_ghosts(folder, name):
-    global all_points, tetrahedra, neighbors, centers, radii, orig_points, edges, faces
-    all_points, tetrahedra, neighbors = read_tetgen(folder, name)
-    num_orig = int((len(all_points) - 4) / 7)
+def compare_points(our_groups, cpp):
+    total_len = sum([len(group) for group in our_groups])
+    if len(cpp)!=total_len:
+        print("Not te same number of points!")
+        return False
+
+    mismatch = False
+    for group in our_groups:
+        for i in range(len(group)):
+            pt = group[i]
+            found = False
+            for j in range(len(cpp)):
+                dist = linalg.norm(pt - cpp[j])
+                if dist< 1e-4:
+                    found = True
+                    break
+            if not found:
+                print("Can't find %s in C++ points" % pt)
+                mismatch = True
+
+    return not mismatch
+
+def check_reflector(folder, reflector_name, reflector_func):
+    print("Checking %s:" % reflector_name)
+    all_points, tetrahedra, neighbors = read_tetgen(folder, "orig")
+    orig_points = all_points[:-4]
+    big_tetrahedron = all_points[-4:]
+    reflected_points = reflector_func(orig_points, boundary)
+
+    reflected_cpp, _, _ = read_tetgen(folder, reflector_name)
+    if compare_points((orig_points, reflected_points, big_tetrahedron,), reflected_cpp):
+        print("OK")
+    print()
+
+if __name__=='__main__':
+    #main('.', 'brute-force')
+    #check_reflector('.', 'brute-force', brute_force_reflector)
+    #check_reflector('.', 'full-brute-force', full_brute_force_reflector)
+
+    all_points, tetrahedra, neighbors = read_tetgen('.', 'orig')
+    num_orig = len(all_points) - 4
     orig_points = all_points[:num_orig]
     save_point_names()
     centers, radii = calc_centers()
+    edge_neighbors = calc_edges_neighbors()
+    vertex_neighbors = calc_vertex_neighbors()
+    reflector = CloseToBoundaryReflector(all_points, tetrahedra, centers, radii, neighbors, edge_neighbors, vertex_neighbors)
+    check_reflector('.', 'close-to-boundary', reflector)
 
-
-if __name__=='__main__':
-    main('/chelem/rich/temp/stress', 'brute-force')
     # main_reflect_points('points', 'orig.node')
     #v = np.array(name_to_vec["V47"])
     #u = np.array(name_to_vec["V70"])

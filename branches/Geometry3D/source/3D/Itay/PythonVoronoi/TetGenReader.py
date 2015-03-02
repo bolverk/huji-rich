@@ -21,7 +21,7 @@ def _read_tetgen_file(filename, type=float):
     count = int(numbers[0][0])
     if count!=len(numbers)-1:
         raise ValueError("File %s count is wrong" % filename)
-    return numbers[1:]  # No need to include the count
+    return np.asarray(numbers[1:])  # No need to include the count
 
 def read_tetgen_points(filename):
     node_file = _read_tetgen_file(filename, float)
@@ -40,9 +40,10 @@ def read_tetgen(folder, lead_name):
         tetrahedra: array of tetrahedra (indices into points)
         neighbors: array with four neighbors for each tetrahedron (-1 if no neighbor)
     """
-    filename = path.join(folder, lead_name) + ".1.";
-    points = read_tetgen_points(filename + "node")
+    filename = path.join(folder, lead_name);
+    points = read_tetgen_points(filename + ".node")
 
+    filename += '.1.'
     tetrahedra_file = _read_tetgen_file(filename + "ele", int)
     tetrahedra = []
     for line in tetrahedra_file:

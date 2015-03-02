@@ -44,6 +44,10 @@ class Subcube:
         """
         return sum([1 if offset!=' ' else 0 for offset in self._offsets])
 
+    @property
+    def offsets(self):
+        return self._offsets
+
 class Boundary:
     def __init__(self, ftr, bll):
         """
@@ -115,17 +119,10 @@ def distance_from_subcube(point, boundary, subcube):
     vec = vector_to_subcube(point, boundary, subcube)
     return linalg.norm(vec)
 
-def reflect_points(pts, boundary, offsets):
+def reflect_point(pt, boundary, subcube):
     """
-    Reflect points through the boundary, using only the supplied subcubes
+    Reflect a point through the boundary into the subcube
+    :return: The reflected point
     """
-    reflected = np.zeros([len(pts) * len(offsets), 3], dtype=np.float64)
-    num = 0
-    subcubes = [Subcube(offset) for offset in offsets]
-    for pt in pts:
-        for subcube in subcubes:
-            vec = vector_to_subcube(pt, boundary, subcube)
-            reflected[num] = pt + 2*vec
-            num += 1
-
-    return reflected
+    vec = vector_to_subcube(pt, boundary, subcube)
+    return pt + 2*vec
