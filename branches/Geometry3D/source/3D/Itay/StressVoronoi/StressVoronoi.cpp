@@ -65,14 +65,18 @@ int main(int argc, char*argv[])
 		WritePoints(del->AllPoints, "brute-force.node");
 	}
 
-	if (args.RunCloseToBoundary)
+	if (args.RunFullBruteForce)
 	{
 		DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster>();
 		RunVoronoi(del, "full-brute-force");
 		WritePoints(del->AllPoints, "full-brute-force.node");
-		/*DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
+	}
+
+	if (args.RunCloseToBoundary)
+	{
+		DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
 		RunVoronoi(del, "close-to-boundary");
-		WritePoints(del->AllPoints, "close-to-boundary.node"); */
+		WritePoints(del->AllPoints, "close-to-boundary.node");
 	}
 
 	if (args.RunVoroPlusPlus)
@@ -97,7 +101,9 @@ int main(int argc, char*argv[])
 static bool Initialize()
 {
 	cout << "Initializing..." << endl;
-	srand(17);
+	// srand(17);
+	srand(time(NULL));
+
 	namer.SaveZero();
 	Vector3D ftr, bll;
 	RandomBoundary(ftr, bll);
@@ -143,7 +149,7 @@ static void WritePoints(const vector<Vector3D> &points, const std::string &filen
 	fs::path full_path = fs::path(args.OutputDirectory) / filename;
 	output.open(full_path.string());
 	output << "# Nodes, Dim, #Attrs, Boundary" << endl;
-	output << points.size() + 4 << ",3,0,1" << endl;
+	output << points.size() + 4 << " 3 0 1" << endl;
 	output << "# Index, X, Y, Z, Boundary" << endl;
 	output << "# Main points" << endl;
 

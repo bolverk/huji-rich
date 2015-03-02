@@ -41,8 +41,7 @@ def read_tetgen(folder, lead_name):
         neighbors: array with four neighbors for each tetrahedron (-1 if no neighbor)
     """
     filename = path.join(folder, lead_name) + ".1.";
-    node_file = _read_tetgen_file(filename + "node", float)
-    points = read_tetgen_points(node_file)
+    points = read_tetgen_points(filename + "node")
 
     tetrahedra_file = _read_tetgen_file(filename + "ele", int)
     tetrahedra = []

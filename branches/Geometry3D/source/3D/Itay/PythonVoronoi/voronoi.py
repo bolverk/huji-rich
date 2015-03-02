@@ -300,19 +300,17 @@ def main(folder, name):
     print_results(detailed=True)
 #    print_vectors()
 
-def main_reflect_points(folder, name):
-    filename = os.path.join(folder, name)
-    all_pts = read_tetgen_points(filename)
-    big_tetrahedron = all_pts[-4:]
-    pts = all_pts[:-4]
-    boundary = Boundary((-500, 1000, 300), (-1000, 0, -300))
-    offsets = ('   ', '-  ', ' - ', '  -', '+  ', ' + ', '  +')
-    reflected = reflect_points(pts, boundary, offsets)
-    for pt in reflected:
-        print(pt)
+def create_ghosts(folder, name):
+    global all_points, tetrahedra, neighbors, centers, radii, orig_points, edges, faces
+    all_points, tetrahedra, neighbors = read_tetgen(folder, name)
+    num_orig = int((len(all_points) - 4) / 7)
+    orig_points = all_points[:num_orig]
+    save_point_names()
+    centers, radii = calc_centers()
+
 
 if __name__=='__main__':
-    main('points', 'all')
+    main('/chelem/rich/temp/stress', 'brute-force')
     # main_reflect_points('points', 'orig.node')
     #v = np.array(name_to_vec["V47"])
     #u = np.array(name_to_vec["V70"])

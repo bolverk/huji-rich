@@ -13,6 +13,7 @@ struct Arguments
 	std::string InputFile;
 	bool RunVoroPlusPlus;
 	bool RunBruteForce;
+	bool RunFullBruteForce;
 	bool RunCloseToBoundary;
 };
 
