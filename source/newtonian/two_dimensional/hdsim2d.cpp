@@ -318,6 +318,9 @@ void hdsim::TimeAdvance(void)
 #ifndef RICH_MPI
 	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
+
+	PeriodicVelocityExchange(_tessellation.GetAllCM(), _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetTotalPointNumber());
 #else
 	SendRecvHydro(_cells,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
