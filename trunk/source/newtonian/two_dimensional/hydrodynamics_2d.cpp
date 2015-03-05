@@ -985,6 +985,8 @@ double TimeAdvance2mid
 #ifndef RICH_MPI
 	PeriodicUpdateCells(cells,tracers,custom_evolution_indices,tess.GetDuplicatedPoints(),
 		tess.GetTotalPointNumber());
+
+	PeriodicVelocityExchange(tess.GetAllCM(), tess.GetDuplicatedPoints(), tess.GetTotalPointNumber());
 #else
 	SendRecvHydro(cells,custom_evolution_indices,tess.GetDuplicatedPoints(),
 		tess.GetDuplicatedProcs(),eos,tess.GetGhostIndeces(),tess.GetTotalPointNumber());

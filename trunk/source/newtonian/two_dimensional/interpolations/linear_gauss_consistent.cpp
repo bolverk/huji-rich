@@ -752,6 +752,26 @@ vector<double> LinearGaussConsistent::interpolateTracers
 			throw UniversalError("Wrong interpolation type in linear_gauss_scalar");
 }
 
+namespace
+{
+	UniversalError InterpolationError(UniversalError &eo,int cell_index,Edge const& edge,
+		Primitive const& cell,ReducedPrimitiveGradient2D const& slope,Vector2D const& dr)
+	{
+		eo.AddEntry("Error in interpolation of cell", cell_index);
+		eo.AddEntry("Error in interpolation of edge, n0 ", edge.neighbors.first);
+		eo.AddEntry("Error in interpolation of edge, n1 ", edge.neighbors.second);
+		eo.AddEntry("Density", cell.Density);
+		eo.AddEntry("Pressure", cell.Pressure);
+		eo.AddEntry("Density slope x", slope.density.x);
+		eo.AddEntry("Density slope y", slope.density.y);
+		eo.AddEntry("Pressure slope x", slope.pressure.x);
+		eo.AddEntry("Pressure slope y", slope.pressure.y);
+		eo.AddEntry("Interpolation dx", dr.x);
+		eo.AddEntry("Interpolation dy", dr.y);
+		throw eo;
+	}
+}
+
 Primitive LinearGaussConsistent::Interpolate(Tessellation const& tess,
 	vector<Primitive> const& cells,double dt,Edge const& edge,int side,
 	InterpolationType interptype,Vector2D const& vface) const
@@ -762,15 +782,23 @@ Primitive LinearGaussConsistent::Interpolate(Tessellation const& tess,
 	{
 		const Primitive temp = interp_primitive(cells[static_cast<size_t>(cell_index)],
 			tess.GetCellCM(cell_index),rslopes_[static_cast<size_t>(cell_index)],target);
-		Primitive res = CalcPrimitive(temp.Density,temp.Pressure,
-			temp.Velocity,eos_);
-		if(soitf_)
+		try
 		{
-			res+=CalcDtFlux(cells[static_cast<size_t>(cell_index)],rslopes_[static_cast<size_t>(cell_index)],dt,vface);
-			res = CalcPrimitive(res.Density,res.Pressure,Vector2D(res.Velocity.x,
-				res.Velocity.y),eos_);
+			Primitive res = CalcPrimitive(temp.Density, temp.Pressure,
+				temp.Velocity, eos_);
+			if (soitf_)
+			{
+				res += CalcDtFlux(cells[static_cast<size_t>(cell_index)], rslopes_[static_cast<size_t>(cell_index)], dt, vface);
+				res = CalcPrimitive(res.Density, res.Pressure, Vector2D(res.Velocity.x,
+					res.Velocity.y), eos_);
+			}
+			return res;
 		}
-		return res;
+		catch (UniversalError &eo)
+		{
+			throw InterpolationError(eo, cell_index, edge, cells[static_cast<size_t>(cell_index)],
+				rslopes_[static_cast<size_t>(cell_index)], target - tess.GetCellCM(cell_index));
+		}
 	}
 	else
 		if(interptype==Boundary)
@@ -778,13 +806,21 @@ Primitive LinearGaussConsistent::Interpolate(Tessellation const& tess,
 			const int other=pair_member(edge.neighbors,(side+1)%2);
 			const Primitive temp = interp_primitive(cells[static_cast<size_t>(other)],tess.GetMeshPoint(other),
 								rslopes_[static_cast<size_t>(other)],target);
-			Primitive res = CalcPrimitive(temp.Density,temp.Pressure,temp.Velocity,eos_);
-			if(soitf_)
+			try
 			{
-			  res+=CalcDtFlux(cells[static_cast<size_t>(other)],rslopes_[static_cast<size_t>(other)],dt,vface);
-				res = CalcPrimitive(res.Density,res.Pressure,res.Velocity,eos_);
+				Primitive res = CalcPrimitive(temp.Density, temp.Pressure, temp.Velocity, eos_);
+				if (soitf_)
+				{
+					res += CalcDtFlux(cells[static_cast<size_t>(other)], rslopes_[static_cast<size_t>(other)], dt, vface);
+					res = CalcPrimitive(res.Density, res.Pressure, res.Velocity, eos_);
+				}
+				return res;
 			}
-			return res;
+			catch (UniversalError &eo)
+			{
+				throw InterpolationError(eo, other, edge, cells[static_cast<size_t>(other)],
+					rslopes_[static_cast<size_t>(other)], target - tess.GetMeshPoint(other));
+			}
 		}
 		else
 			throw UniversalError("Wrong interpolation type");
