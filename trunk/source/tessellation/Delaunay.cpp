@@ -1614,7 +1614,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 				continue;
 			if(checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
-			vector<int> neighs=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
+			vector<int> neighs=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[i]);
 			for(size_t k=0;k<neighs.size();++k)
 			{
 			  Circle circ(GetCircleCenter(neighs[k]),radius[static_cast<size_t>(neighs[k])]);
@@ -1648,7 +1648,7 @@ void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 			{
 				for(size_t j=0;j<neighs.size();++j)
 				{
-				  if(!IsOuterQuick(f[static_cast<size_t>(neighs[j])],static_cast<int>(olength)))
+					if (!IsOuterFacet(neighs[j]))
 						tocheck.push(neighs[j]);
 				}
 			}
