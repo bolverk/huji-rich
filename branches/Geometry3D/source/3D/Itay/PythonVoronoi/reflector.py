@@ -109,7 +109,7 @@ class CloseToBoundaryReflector:
 
                         if breaching:
                             next_candidates.add(touching_tetrahedron)
-                            next_candidates.union(set(self._tetrahedron_neighbors[touching_tetrahedron]))
+                            next_candidates.union(set(pt_neighbors))
             if -1 in next_candidates:
                 next_candidates.remove(-1)
             candidates = next_candidates

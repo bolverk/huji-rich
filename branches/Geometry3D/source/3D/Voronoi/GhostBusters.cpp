@@ -100,9 +100,10 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 					}
 					if (breaching)
 					{
-						// If a tetrahedron is breaching, we need to test all its points and all the points of its neighbors
+						// If a tetrahedron is breaching, we need to test all its points and all the points of the tetrahedra touching pt
 						nextCandidates.insert(*itTetrahedron);
 						const vector<size_t> &neighbors = del.TetrahedraNeighbors(*itTetrahedron);
+						// const vector<size_t> &neighbors = del.VertexNeighbors(pt);
 						nextCandidates.insert(neighbors.begin(), neighbors.end());
 					}
 				}
