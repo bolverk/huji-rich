@@ -77,16 +77,18 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 			for (int iv = 0; iv < 4; iv++)
 			{
 				VectorRef pt = t[iv];
-				if (result.find(pt) != result.end())
+				if (del.IsBigTetrahedron(pt))
 					continue;
 
 				vector<size_t> tetrahedraIndices = del.VertexNeighbors(pt);
 				unordered_set<Subcube> breaches;
+				if (result.find(pt) != result.end())
+					breaches = result[pt];
 
 				for (vector<size_t>::iterator itTetrahedron = tetrahedraIndices.begin(); itTetrahedron != tetrahedraIndices.end(); itTetrahedron++)
 				{
-					if (contains(outerTetrahedra, *itTetrahedron))
-						continue;
+					/*if (contains(outerTetrahedra, *itTetrahedron))
+						continue; */
 
 					Tetrahedron tetrahedron = del[*itTetrahedron];
 					bool breaching = false;
@@ -94,15 +96,19 @@ CloseToBoundaryGhostBuster::breach_map CloseToBoundaryGhostBuster::FindHullBreac
 					{
 						if (boundary.distance(*tetrahedron.center(), *itSubcube) < tetrahedron.radius())
 						{
-							breaches.insert(*itSubcube);
-							breaching = true;
+							if (breaches.find(*itSubcube) == breaches.end())
+							{
+								breaches.insert(*itSubcube);
+								breaching = true;
+							}
 						}
 					}
 					if (breaching)
 					{
 						// If a tetrahedron is breaching, we need to test all its points and all the points of the tetrahedra touching pt
 						nextCandidates.insert(*itTetrahedron);
-						const vector<size_t> &neighbors = del.TetrahedraNeighbors(*itTetrahedron);
+						const vector<size_t> &neighbors = del.VertexNeighbors(pt);
+						// const vector<size_t> &neighbors = del.TetrahedraNeighbors(*itTetrahedron);
 						// const vector<size_t> &neighbors = del.VertexNeighbors(pt);
 						nextCandidates.insert(neighbors.begin(), neighbors.end());
 					}

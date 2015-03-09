@@ -62,28 +62,26 @@ Tetrahedron Delaunay::CalcBigTetrahedron(const OuterBoundary3D &boundary)
 	// A big tetrahedron that will contain the bounding box, as well as the 8 adjacent boundary boxes,
 	// and with room to spare.
 
-	const Vector3D &fur = boundary.FrontUpperRight();
-	const Vector3D &bll = boundary.BackLowerLeft();
-	Vector3D absFrontUpperRight(abs(fur.x), abs(fur.y), abs(fur.z));
-	Vector3D absBackLowerLeft(abs(bll.x), abs(bll.y), abs(bll.z));
+	const Vector3D delta = boundary.FrontUpperRight() - boundary.BackLowerLeft(); // Guaranteed by Boundary to be all positive
+	const Vector3D center = boundary.FrontUpperRight() - delta / 2;
 
-	absFrontUpperRight *= 1e10;
-	absBackLowerLeft *= -1e10;
+	const Vector3D bigDelta = delta * 100;
+
 
 	// The top of the tetrahedron will be on the Y axis
 	vector<VectorRef> tetrahedron;
-	tetrahedron.push_back(Vector3D(0, absFrontUpperRight.y, 0));
+	tetrahedron.push_back(Vector3D(0, center.y + bigDelta.y, 0));
 
 	// The bottom face is parallel to the x-z plane
-	double bottomY = absBackLowerLeft.y;
+	double bottomY = center.y - bigDelta.y;
 
 	// The bottom face is a triangle whose lower edge is parallel to the x axis
-	double backZ = absBackLowerLeft.z;
-	tetrahedron.push_back(Vector3D(absBackLowerLeft.x, bottomY, backZ));
-	tetrahedron.push_back(Vector3D(absFrontUpperRight.x, bottomY, backZ));
+	double backZ = center.z - bigDelta.z;
+	tetrahedron.push_back(Vector3D(center.x - bigDelta.x, bottomY, backZ));
+	tetrahedron.push_back(Vector3D(center.x + bigDelta.x, bottomY, backZ));
 
 	// The last triangle edge is on x=0
-	tetrahedron.push_back(Vector3D(0, bottomY, absFrontUpperRight.z));
+	tetrahedron.push_back(Vector3D(center.x, bottomY, center.z + bigDelta.z));
 
 	return Tetrahedron(tetrahedron);
 }

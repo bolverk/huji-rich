@@ -34,6 +34,8 @@ static bool Initialize();
 static vector<Vector3D> ReadPoints(const std::string filename);
 static void WritePoints(const std::vector<Vector3D> &points, const std::string &filename);
 static void WritePoints(const std::vector<VectorRef> &points, const std::string &filename);
+static void WriteMatlabPoints(const std::vector<VectorRef> &points, const std::string &filename);
+static void WriteMatlabPoints(const std::vector<Vector3D> &points, const std::string &filename);
 
 static void RunVoronoi(Tessellation3D *tes, std::string name);
 
@@ -63,6 +65,7 @@ int main(int argc, char*argv[])
 		DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster>();
 		RunVoronoi(del, "brute-force");
 		WritePoints(del->AllPoints, "brute-force.node");
+		WriteMatlabPoints(del->AllPoints, "brute-force.m");
 	}
 
 	if (args.RunFullBruteForce)
@@ -70,6 +73,7 @@ int main(int argc, char*argv[])
 		DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster>();
 		RunVoronoi(del, "full-brute-force");
 		WritePoints(del->AllPoints, "full-brute-force.node");
+		WriteMatlabPoints(del->AllPoints, "full-brute-force.m");
 	}
 
 	if (args.RunCloseToBoundary)
@@ -77,6 +81,7 @@ int main(int argc, char*argv[])
 		DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
 		RunVoronoi(del, "close-to-boundary");
 		WritePoints(del->AllPoints, "close-to-boundary.node");
+		WriteMatlabPoints(del->AllPoints, "close-to-boundary.m");
 	}
 
 	if (args.RunVoroPlusPlus)
@@ -125,6 +130,7 @@ static bool Initialize()
 		cout << "Generated " << points.size() << " points" << endl;
 	}
 	WritePoints(points, "orig.node");
+	WriteMatlabPoints(points, "orig.m");
 
 	for (vector<Vector3D>::iterator it = points.begin(); it != points.end(); it++)
 		namer.GetName(*it, "C");
@@ -162,6 +168,41 @@ static void WritePoints(const vector<Vector3D> &points, const std::string &filen
 		output << i + 1 + points.size() << " " << big[i]->x << " " << big[i]->y << " " << big[i]->z << " 1" << endl;
 
 	output << endl;
+}
+
+static void WriteMatlabPoints(const vector<VectorRef> &pointRefs, const std::string &filename)
+{
+	vector<Vector3D> points;
+	points.reserve(pointRefs.size());
+
+	for (vector<VectorRef>::const_iterator it = pointRefs.begin(); it != pointRefs.end(); it++)
+		points.push_back(**it);
+
+	WriteMatlabPoints(points, filename);
+}
+
+static void WriteMatlabPoints(const vector<Vector3D> &points, const std::string &filename)
+{
+	ofstream output;
+	Tetrahedron big = Delaunay::CalcBigTetrahedron(*boundary);
+	fs::path full_path = fs::path(args.OutputDirectory) / filename;
+	output.open(full_path.string());
+	output.precision(10);
+	
+	output << "m = [";
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		if (i > 0)
+			output << "," << endl;
+		output << "[" << points[i].x << ", " << points[i].y << ", " << points[i].z << "]";
+	}
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		output << "," << endl;
+		output << "[" << big[i]->x << ", " << big[i]->y << ", " << big[i]->z << "]";
+	}
+	output << "]" << endl;
 }
 
 static vector<Vector3D> ReadPoints(const std::string filename)
