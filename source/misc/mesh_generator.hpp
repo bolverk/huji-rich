@@ -30,10 +30,14 @@ std::vector<Vector2D> cartesian_mesh(int nx, int ny,
   \param Rmax The max radius
   \param xc X of circle center
   \param yc Y of circle center
+  \param xmin Left edge of confining rectangle
+  \param xmax Right edge of confining rectangle
+  \param ymax Upper edge of confining rectangle
+  \param ymin Lower edge of confining rectangle
   \return List of two dimensional points
 */
 std::vector<Vector2D> CirclePointsRmax(int PointNum,double Rmin,double Rmax,
-				       double xc=0,double yc=0);
+	double xmax, double ymax, double xmin, double ymin, double xc = 0, double yc = 0);
 
 /*!
   \brief Generates a round grid with 1/r^2 point density confined to a rectangle given by xmin,xmax,ymin and ymax.
