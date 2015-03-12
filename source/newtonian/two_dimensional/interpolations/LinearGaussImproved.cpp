@@ -33,12 +33,6 @@ namespace {
 
 namespace
 {
-	ReducedPrimitive RpMultScalar(double s, ReducedPrimitive const& rp)
-	{
-		return ReducedPrimitive(s*rp.density, s*rp.pressure, s*rp.xvelocity,
-			s*rp.yvelocity, s*rp.tracers);
-	}
-
 	ReducedPrimitive AddRp(ReducedPrimitive const& rp1,
 		ReducedPrimitive const& rp2)
 	{
