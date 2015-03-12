@@ -39,7 +39,6 @@ protected:
 		void Clear();
 	};
 
-	// A Voro++ specific Cell class
 	class Cell
 	{
 	private:

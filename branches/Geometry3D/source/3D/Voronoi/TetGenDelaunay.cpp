@@ -32,8 +32,8 @@ public:
 	void Run();
 };
 
-TetGenDelaunay::TetGenDelaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigTetrahedron)
-	: Delaunay(points, bigTetrahedron)
+TetGenDelaunay::TetGenDelaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigTetrahedron, bool runVoronoi)
+	: Delaunay(points, bigTetrahedron), _runVoronoi(runVoronoi)
 {
 }
 
@@ -89,7 +89,10 @@ void TetGenImpl::InitInput()
 void TetGenImpl::CallTetGen()
 {
 	tetgenbehavior b;
-	b.parse_commandline("efnvQ");
+	std::string commandLine = "nQ";
+	if (_delaunay._runVoronoi)
+		commandLine += "v";
+	b.parse_commandline((char *)commandLine.c_str()); // parse_command line expects a non-const pointer. Blach.
 	tetrahedralize(&b, &in, &out);
 }
 
@@ -115,6 +118,46 @@ void TetGenImpl::CopyResults()
 		Tetrahedron t(vertices);
 		_delaunay._tetrahedra.push_back(t);
 		_delaunay._tetrahedraNeighbors.push_back(neighbors);
+	}
+
+	if (_delaunay._runVoronoi) // Copy the Voronoi output
+	{
+		_delaunay._voronoiCellFaces.clear();
+		_delaunay._voronoiFaceEdges.clear();
+		_delaunay._voronoiVertices.clear();
+
+		for (size_t cellNum = 0; cellNum < out.numberofvcells; cellNum++)
+		{
+			int faceCount = out.vcelllist[cellNum][0];
+			vector<int> faces;
+			faces.assign(out.vcelllist[cellNum] + 1, out.vcelllist[cellNum] + faceCount + 1);
+			_delaunay._voronoiCellFaces.push_back(faces);
+		}
+
+		for (size_t faceNum = 0; faceNum < out.numberofvfacets; faceNum++)
+		{
+			const tetgenio::vorofacet &face = out.vfacetlist[faceNum];
+			int edgeCount = face.elist[0];
+			vector<int> edges;
+			edges.assign(face.elist + 1, face.elist + edgeCount + 1);
+			_delaunay._voronoiFaceEdges.push_back(edges);
+
+			_delaunay._voronoiFaceNeighbors.push_back(pair<int, int>(face.c1, face.c2));
+		}
+
+		for (size_t edgeNum = 0; edgeNum < out.numberofvedges; edgeNum++)
+		{
+			pair<int, int> edge(out.vedgelist[edgeNum].v1, out.vedgelist[edgeNum].v2);
+			_delaunay._voronoiEdges.push_back(edge);
+		}
+
+		double *ptr = out.vpointlist;
+		for (size_t vertexNum = 0; vertexNum < out.numberofvpoints; vertexNum++)
+		{
+			Vector3D vertex(ptr[0], ptr[1], ptr[2]);
+			_delaunay._voronoiVertices.push_back(vertex);
+			ptr += 3;
+		}
 	}
 }
 
@@ -211,4 +254,54 @@ vector<size_t> TetGenDelaunay::OrderNeighbors(const vector<size_t> &tetrahedra)
 }
 
 
+vector<size_t> TetGenDelaunay::GetVoronoiCellFaces(size_t cellNum) const
+{
+	vector<size_t> faces(_voronoiCellFaces[cellNum].begin(), _voronoiCellFaces[cellNum].end()); // Convert to size_t
 
+	return faces;
+}
+
+// Construct an ordered list of vertices of the face.
+// The face consists of edges, each edge consists of two vertices. Each edge shares
+// one vertex with the edge before it. So each edge, we take the vertex that does not appear
+// in the edge before it and use it.
+//
+// An edge list for example:   (1,5)   (5, 8)  (4, 8)  (3 4)   (3 10) (1 10)
+// Means the edge consists of vertices 1 5 8 4 3 10
+// So each edge translates to one vertex - the one that does not appear in the previous edge
+vector<Vector3D> TetGenDelaunay::GetVoronoiFace(size_t faceNum) const
+{
+	const vector<int> &edgeList = _voronoiFaceEdges[faceNum];
+
+	BOOST_ASSERT(edgeList.back() >= 0); // We shouldn't be asking for an open face!
+	if (edgeList.back() == -1)
+		return vector<Vector3D>();   // Return an empty face
+
+	vector<int> indices;
+	pair<int, int> previous = _voronoiEdges[edgeList.back()];
+	for (vector<int>::const_iterator it = edgeList.begin(); it != edgeList.end(); it++)
+	{
+		pair<int, int> current = _voronoiEdges[*it];
+
+		if (current.first == previous.first || current.first == previous.second)  // current.first appears in the previous edge
+			indices.push_back(current.second);
+		else if (current.second == previous.first || current.second == previous.second) // current.second appears in the previous edge
+			indices.push_back(current.first);
+		else
+			BOOST_ASSERT(false); // Non-consecutive edges!
+
+		previous = current;
+	}
+
+	// Now, convert the list of indices to a list of vectors
+	vector<Vector3D> face;
+	for (vector<int>::const_iterator it = indices.begin(); it != indices.end(); it++)
+	{
+		BOOST_ASSERT(*it >= 0); // We shouldn't be asking for any rays!
+		if (*it == -1)
+			return vector<Vector3D>();
+		face.push_back(_voronoiVertices[*it]);
+	}
+
+	return face;
+}

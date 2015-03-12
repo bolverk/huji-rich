@@ -184,6 +184,7 @@
     <ClInclude Include="..\Voronoi\GhostBusters.hpp" />
     <ClInclude Include="..\Voronoi\TessellationBase.hpp" />
     <ClInclude Include="..\Voronoi\TetGenDelaunay.hpp" />
+    <ClInclude Include="..\Voronoi\TetGenTessellation.hpp" />
     <ClInclude Include="..\Voronoi\VoroPlusPlus.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -125,5 +125,8 @@
     <ClInclude Include="..\GeometryCommon\VectorRepository.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Voronoi\TetGenTessellation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

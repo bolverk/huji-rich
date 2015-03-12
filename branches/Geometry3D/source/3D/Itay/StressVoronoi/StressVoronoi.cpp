@@ -4,9 +4,9 @@
 #include "GeometryCommon/Vector3D.hpp"
 #include "GeometryCommon/OuterBoundary3D.hpp"
 #include "Voronoi/VoroPlusPlus.hpp"
-#include "Voronoi/DelaunayVoronoi.hpp"
 #include "Voronoi/GhostBusters.hpp"
 #include "Voronoi/TetGenDelaunay.hpp"
+#include "Voronoi/TetGenTessellation.hpp"
 
 #include <vector>
 #include <cstdlib>
@@ -62,7 +62,7 @@ int main(int argc, char*argv[])
 
 	if (args.RunBruteForce)
 	{
-		DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, BruteForceGhostBuster>();
+		TetGenTessellation<BruteForceGhostBuster> *del = new TetGenTessellation<BruteForceGhostBuster>();
 		RunVoronoi(del, "brute-force");
 		WritePoints(del->AllPoints, "brute-force.node");
 		WriteMatlabPoints(del->AllPoints, "brute-force.m");
@@ -70,7 +70,7 @@ int main(int argc, char*argv[])
 
 	if (args.RunFullBruteForce)
 	{
-		DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, FullBruteForceGhostBuster>();
+		TetGenTessellation<FullBruteForceGhostBuster> *del = new TetGenTessellation<FullBruteForceGhostBuster>();
 		RunVoronoi(del, "full-brute-force");
 		WritePoints(del->AllPoints, "full-brute-force.node");
 		WriteMatlabPoints(del->AllPoints, "full-brute-force.m");
@@ -78,7 +78,7 @@ int main(int argc, char*argv[])
 
 	if (args.RunCloseToBoundary)
 	{
-		DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster> *del = new DelaunayVoronoi<TetGenDelaunay, CloseToBoundaryGhostBuster>();
+		TetGenTessellation<CloseToBoundaryGhostBuster> *del = new TetGenTessellation<CloseToBoundaryGhostBuster>();
 		RunVoronoi(del, "close-to-boundary");
 		WritePoints(del->AllPoints, "close-to-boundary.node");
 		WriteMatlabPoints(del->AllPoints, "close-to-boundary.m");
@@ -107,7 +107,7 @@ static bool Initialize()
 {
 	cout << "Initializing..." << endl;
 	// srand(17);
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 
 	namer.SaveZero();
 	Vector3D ftr, bll;
