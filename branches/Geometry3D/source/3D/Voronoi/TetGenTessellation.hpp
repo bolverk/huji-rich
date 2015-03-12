@@ -8,8 +8,9 @@
 #include "TessellationBase.hpp"
 #include "GhostBusters.hpp"
 #include "TetGenDelaunay.hpp"
+#include "../GeometryCommon/CellCalculations.hpp"
 
-#include <set>
+#include <unordered_set>
 
 template <typename GhostBusterType>
 class TetGenTessellation : public TessellationBase
@@ -29,17 +30,26 @@ public:
 	virtual bool IsGhostPoint(size_t index)const;
 
 	std::vector<VectorRef> AllPoints;
+	const static double EDGE_RATIO;
 
 private:
 	void ConvertToVoronoi(const TetGenDelaunay &del);
 
+	// TetGenDelaunay creates Voronoi cells for all the ghost points, too. We just need the cells of the original
+	// points, which are the first _meshPoints.size() cells, and the faces that  are part of these cells.
+	std::vector<boost::optional<Face>> _allFaces;  // All relevant faces
+	std::vector<double> _cellVolumes;		    // Volumes of the TetGenDelaunay calculated cells
+
+	void ExtractTetGenFaces(const TetGenDelaunay &del);
+	void CalculateTetGenVolumes(const TetGenDelaunay &del);
+	void OptimizeFace(size_t faceNum); // Optimize the face in place
+
 	//\brief Constructs all the cell objects
-	void ConstructCells();
-	//\brief Split cell into tetrahedra
-	//\param faces The list of cell faces
-	//\return The tetrahedra, which are going to be non-overlapping and cover the entire cell's volume
-	std::vector<Tetrahedron> SplitCell(const std::vector<size_t> &faces);
+	void ConstructCells(const TetGenDelaunay &del);
 };
+
+template<typename GhostBusterType>
+const double TetGenTessellation<GhostBusterType>::EDGE_RATIO = 1e-5;
 
 template<typename GhostBusterType>
 Tessellation3D *TetGenTessellation<GhostBusterType>::clone() const
@@ -103,75 +113,130 @@ void TetGenTessellation<GhostBusterType>::Update(const vector<Vector3D> &points)
 template<typename GhostBusterType>
 void TetGenTessellation<GhostBusterType>::ConvertToVoronoi(const TetGenDelaunay &del)
 {
+	ExtractTetGenFaces(del);
+	CalculateTetGenVolumes(del);
+
+	for (size_t faceNum = 0; faceNum < _allFaces.size(); faceNum++)
+		OptimizeFace(faceNum);
+
+	ConstructCells(del);
+}
+
+template<typename GhostBusterType>
+void TetGenTessellation<GhostBusterType>::ExtractTetGenFaces(const TetGenDelaunay &del)
+{
+	const std::vector<Face> _tetgenFaces = del.GetVoronoiFaces();
+
+	_allFaces.assign(_tetgenFaces.size(), boost::none);
 	for (size_t cellNum = 0; cellNum < _meshPoints.size(); cellNum++)
 	{
-		const std::vector<size_t> &tetGenFaces = del.GetVoronoiCellFaces(cellNum);
-		std::vector<size_t> ourFaces;
-
-		for (std::vector<size_t>::const_iterator itFace = tetGenFaces.begin(); itFace != tetGenFaces.end(); itFace++)
-		{
-			const std::vector<Vector3D> faceVertices = del.GetVoronoiFace(*itFace);
-			
-			size_t faceIndex = _faces.StoreFace(VectorRef::vector(faceVertices));
-			ourFaces.push_back(faceIndex);
-			Face face = _faces.GetFace(faceIndex);
-			face.AddNeighbor(cellNum);
-		}
-
-		// Now ourFaces contains a list of faces that construct our cell - build the cell
-		std::vector<Tetrahedron> tetrahedra = SplitCell(ourFaces);
-		double totalVolume = 0;
-		Vector3D centerOfMass;
-
-		for (size_t j = 0; j < tetrahedra.size(); j++)
-			totalVolume += tetrahedra[j].volume();
-
-		for (size_t j = 0; j < tetrahedra.size(); j++)
-		{
-			Vector3D weightedCenter = *tetrahedra[j].center() * tetrahedra[j].volume() / totalVolume;
-			centerOfMass += weightedCenter;
-		}
-
-		_cells[cellNum] = Cell(ourFaces, totalVolume, _meshPoints[cellNum], centerOfMass);
-		_allCMs[cellNum] = centerOfMass;
+		const std::vector<size_t> &faceIndices = del.GetVoronoiCellFaces(cellNum);
+		for (std::vector<size_t>::const_iterator it = faceIndices.begin(); it != faceIndices.end(); it++)
+			if (!_allFaces[*it].is_initialized())
+				_allFaces[*it] = _tetgenFaces[*it];
 	}
 }
 
 template<typename GhostBusterType>
-std::vector<Tetrahedron> TetGenTessellation<GhostBusterType>::SplitCell(const std::vector<size_t> &faces)
+void TetGenTessellation<GhostBusterType>::CalculateTetGenVolumes(const TetGenDelaunay &del)
 {
-	std::vector<Tetrahedron> tetrahedra;
-	Vector3D center;
-	std::unordered_set<VectorRef> considered;
+	_cellVolumes.clear();
 
-	// Find the center of the cell (an average of all the vertices)
-	for (std::vector<size_t>::const_iterator itFace = faces.cbegin(); itFace != faces.cend(); itFace++)
+	for (size_t cellNum = 0; cellNum < _meshPoints.size(); cellNum++)
 	{
-		const Face& face = GetFace(*itFace);
-		for (std::vector<VectorRef>::const_iterator itVertex = face.vertices.cbegin(); itVertex != face.vertices.cend(); itVertex++)
-		{
-			if (considered.find(*itVertex) != considered.end())  // See if we've used this vertex before
-				continue;
-			considered.insert(*itVertex);
-			center += **itVertex;
-		}
-	}
-	center = center / (double)considered.size();   // Average
-	VectorRef centerRef(center);
+		std::vector<const Face *> facePointers;
+		const std::vector<size_t> &faceIndices = del.GetVoronoiCellFaces(cellNum);
+		for (std::vector<size_t>::const_iterator itFace = faceIndices.begin(); itFace != faceIndices.end(); itFace++)
+			facePointers.push_back(&_allFaces[*itFace].value());
 
-	// Now create the tetrahedra, from the center to each of the faces
-	for (std::vector<size_t>::const_iterator itFace = faces.cbegin(); itFace != faces.cend(); itFace++)
-	{
-		const Face &face = GetFace(*itFace);
-		// Split the face into trianges (face[0], face[1], face[2]), (face[0], face[2], face[3]) and so on until (face[0], face[n-2], face[n-1])
-		// add center to each triangle, providing the tetrahedron
-		for (size_t i = 1; i < face.vertices.size() - 1; i++)
-			tetrahedra.push_back(Tetrahedron(centerRef, face.vertices[0], face.vertices[i], face.vertices[i + 1]));
+		double volume;
+		Vector3D CoM;
+		CalculateCellDimensions(facePointers, volume, CoM);
+		_cellVolumes.push_back(volume);
 	}
-
-	return tetrahedra;
 }
 
+//\brief Optimize a face
+//\remark Removes edges that are too short, and then remove faces that are degenerate
+//TODO: Remove faces whose area is too small
+// We compare each edge to the geometric average of the radius of the two adjacent cells
+template<typename GhostBusterType>
+void TetGenTessellation<GhostBusterType>::OptimizeFace(size_t faceNum)
+{
+	if (!_allFaces[faceNum].is_initialized())
+		return;
 
+	const Face &face = _allFaces[faceNum].value();
+	BOOST_ASSERT(face.NumNeighbors() == 2); // All our faces should have two neighbors, although one of them may be a ghost cell
+
+	int neighbor1 = face.Neighbor1().value().GetCell();
+	int neighbor2 = face.Neighbor2().value().GetCell();
+	if (neighbor1 > neighbor2)
+		std::swap(neighbor1, neighbor2);
+
+	BOOST_ASSERT(neighbor1 < _meshPoints.size()); // At least one neighbor shouldn't be for a ghost
+	double volume1 = _cellVolumes[neighbor1];
+	double volume2 = neighbor2 < _meshPoints.size() ? _cellVolumes[neighbor2] : volume1;
+	double combined = pow(volume1 * volume2, 1.0 / 6.0);  // Cubic Root of geometric average of volumes
+
+	double threshold = combined * EDGE_RATIO;
+	double threshold2 = threshold * threshold; // We combine the threshold to the distance, this saves the sqrt operations
+	std::vector<VectorRef> vertices; // Vertices we keep in our face
+
+	VectorRef prevVertex = face.vertices.back();
+	for (std::vector<VectorRef>::const_iterator it = face.vertices.begin(); it != face.vertices.end(); it++)
+	{
+		double distance2 = abs2(**it - *prevVertex);
+		if (distance2 > threshold2)  // Keep this vertex
+		{
+			vertices.push_back(*it);
+			prevVertex = *it;
+		}
+	}
+
+	if (vertices.size() == face.vertices.size())  // No change in the face
+		return;
+
+	if (vertices.size() < 3)  // Degenerate face
+		_allFaces[faceNum] = boost::none;
+	else
+		_allFaces[faceNum].value().vertices = vertices;
+}
+
+template<typename GhostBusterType>
+void TetGenTessellation<GhostBusterType>::ConstructCells(const TetGenDelaunay &del)
+{
+	for (size_t cellNum = 0; cellNum < _meshPoints.size(); cellNum++)
+	{
+		std::vector<size_t> ourFaceIndices;
+
+		const std::vector<size_t> &tetGenFaceNums = del.GetVoronoiCellFaces(cellNum);
+		for (std::vector<size_t>::const_iterator it = tetGenFaceNums.begin(); it != tetGenFaceNums.end(); it++)
+		{
+			if (!_allFaces[*it].is_initialized())  // Face was removed
+				continue;
+
+			const Face &tetGenFace = _allFaces[*it].value();
+			size_t ourFaceIndex = _faces.StoreFace(tetGenFace.vertices);
+			Face &ourFace = _faces.GetFace(ourFaceIndex);
+
+			ourFaceIndices.push_back(ourFaceIndex);
+			ourFace.AddNeighbor(cellNum);
+		}
+
+		double volume;
+		Vector3D centerOfMass;
+
+		// Convert to face pointers now, because during the previous loop the array may have been reallocated
+		// and faces may have been moved in memory
+		std::vector<const Face *> ourFacePointers;
+		for (std::vector<size_t>::const_iterator it = ourFaceIndices.begin(); it != ourFaceIndices.end(); it++)
+			ourFacePointers.push_back(&_faces.GetFace(*it));
+		CalculateCellDimensions(ourFacePointers, volume, centerOfMass);
+
+		_cells[cellNum] = Cell(ourFaceIndices, volume, _meshPoints[cellNum], centerOfMass);
+		_allCMs[cellNum] = centerOfMass;
+	}
+}
 
 #endif

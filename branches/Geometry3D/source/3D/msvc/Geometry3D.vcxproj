@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\misc\universal_error.cpp" />
     <ClCompile Include="..\GeometryCommon\BinaryLogger.cpp" />
+    <ClCompile Include="..\GeometryCommon\CellCalculations.cpp" />
     <ClCompile Include="..\GeometryCommon\Face.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D.cpp" />
     <ClCompile Include="..\GeometryCommon\HilbertOrder3D_Utils.cpp" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\misc\universal_error.hpp" />
     <ClInclude Include="..\GeometryCommon\BinaryLogger.hpp" />
+    <ClInclude Include="..\GeometryCommon\CellCalculations.hpp" />
     <ClInclude Include="..\GeometryCommon\Face.hpp" />
     <ClInclude Include="..\GeometryCommon\HilbertOrder3D.hpp" />
     <ClInclude Include="..\GeometryCommon\HilbertOrder3D_Utils.hpp" />

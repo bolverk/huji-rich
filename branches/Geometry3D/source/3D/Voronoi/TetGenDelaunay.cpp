@@ -269,13 +269,12 @@ vector<size_t> TetGenDelaunay::GetVoronoiCellFaces(size_t cellNum) const
 // An edge list for example:   (1,5)   (5, 8)  (4, 8)  (3 4)   (3 10) (1 10)
 // Means the edge consists of vertices 1 5 8 4 3 10
 // So each edge translates to one vertex - the one that does not appear in the previous edge
-vector<Vector3D> TetGenDelaunay::GetVoronoiFace(size_t faceNum) const
+Face TetGenDelaunay::GetVoronoiFace(size_t faceNum) const
 {
 	const vector<int> &edgeList = _voronoiFaceEdges[faceNum];
 
-	BOOST_ASSERT(edgeList.back() >= 0); // We shouldn't be asking for an open face!
 	if (edgeList.back() == -1)
-		return vector<Vector3D>();   // Return an empty face
+		return Face();   // Return an empty face
 
 	vector<int> indices;
 	pair<int, int> previous = _voronoiEdges[edgeList.back()];
@@ -299,9 +298,28 @@ vector<Vector3D> TetGenDelaunay::GetVoronoiFace(size_t faceNum) const
 	{
 		BOOST_ASSERT(*it >= 0); // We shouldn't be asking for any rays!
 		if (*it == -1)
-			return vector<Vector3D>();
+			return Face();
 		face.push_back(_voronoiVertices[*it]);
 	}
 
-	return face;
+	Face newFace(VectorRef::vector(face));
+
+	// Add the two neighbors now
+	pair<int, int> neighbors = _voronoiFaceNeighbors[faceNum];
+	if (neighbors.first >= 0)
+		newFace.AddNeighbor(neighbors.first);
+	if (neighbors.second >= 0)
+		newFace.AddNeighbor(neighbors.second);
+
+	return newFace;
+}
+
+vector<Face> TetGenDelaunay::GetVoronoiFaces() const
+{
+	vector<Face> faces;
+
+	for (size_t i = 0; i < _voronoiFaceEdges.size(); i++)
+		faces.push_back(GetVoronoiFace(i));
+
+	return faces;
 }

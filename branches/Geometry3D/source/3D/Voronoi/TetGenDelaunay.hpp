@@ -8,6 +8,7 @@
 #define TETGENDELAUNAY_HPP
 
 #include "Delaunay.hpp"
+#include "../GeometryCommon/Face.hpp"
 
 class TetGenImpl;
 class TetGenDelaunay : public Delaunay
@@ -16,9 +17,7 @@ public:
 	TetGenDelaunay(const std::vector<VectorRef> &points, const Tetrahedron &bigTetrahedron, bool runVoronoi=true);
 	
 	std::vector<size_t> GetVoronoiCellFaces(size_t cellNum) const;
-	std::vector<Vector3D> GetVoronoiFace(size_t faceNum) const;
-	size_t GetNumVoronoiFaces() const { return _voronoiFaceEdges.size(); }
-	std::pair<int, int> GetVoronoiFaceNeighbors(size_t faceNum) const { return _voronoiFaceNeighbors[faceNum]; }
+	std::vector<Face> GetVoronoiFaces() const;
 
 protected:
 	void RunDelaunay();
@@ -37,6 +36,7 @@ protected:
 	std::vector<std::pair<int, int>> _voronoiEdges;
 	std::vector<Vector3D> _voronoiVertices;
 
+	Face GetVoronoiFace(size_t faceNum) const;
 	bool _runVoronoi;
 };
 
