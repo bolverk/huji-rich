@@ -51,9 +51,33 @@ ConservativeForce::ConservativeForce(Acceleration& acc,bool DtCalc):acc_(acc),
 
 ConservativeForce::~ConservativeForce(void){}
 
+namespace {
+  class CellEdgesGetter: public Index2Member<Edge>
+  {
+  public:
+    
+    CellEdgesGetter(const Tessellation& tess, int n):
+      tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
+
+    size_t getLength(void) const
+    {
+      return edge_indices_.size();
+    }
+
+    Edge operator()(size_t i) const
+    {
+      return tess_.GetEdge(edge_indices_[i]);
+    }
+
+  private:
+    const Tessellation& tess_;
+    const vector<int> edge_indices_;
+  };
+}
+
 Conserved ConservativeForce::Calculate
 	(Tessellation const& tess,
-	 const PhysicalGeometry& /*pg*/,
+	 const PhysicalGeometry& pg,
 	vector<Primitive> const& cells,
 	int point,
 	vector<Conserved> const& fluxes,
@@ -69,7 +93,9 @@ Conserved ConservativeForce::Calculate
 		(tess,cells,point,fluxes,point_velocity,hbc,
 		 tracer_extensive,
 		 time, dt);
-	double volume=tess.GetVolume(point);
+	//	double volume=tess.GetVolume(point);
+	const double volume = pg.calcVolume
+	  (serial_generate(CellEdgesGetter(tess,point)));
 	res.Momentum=volume*cells[static_cast<size_t>(point)].Density*acc;
 	res.Energy=cells[static_cast<size_t>(point)].Density*volume*ScalarProd(point_velocity[static_cast<size_t>(point)],acc)+
 		0.5*ScalarProd(MassFlux(tess,point,fluxes,hbc,lengthes),acc);
