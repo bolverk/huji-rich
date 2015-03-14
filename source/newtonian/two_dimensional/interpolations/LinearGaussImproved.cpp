@@ -41,6 +41,7 @@ namespace
 			rp1.tracers + rp2.tracers);
 	}
 
+  /*
 	ReducedPrimitive MinusRp(ReducedPrimitive const& rp1,
 		ReducedPrimitive const& rp2)
 	{
@@ -48,6 +49,7 @@ namespace
 			rp1.xvelocity - rp2.xvelocity, rp1.yvelocity - rp2.yvelocity,
 			rp1.tracers - rp2.tracers);
 	}
+  */
 
 	vector<double> ScalarProd(Vector2D const&v, vector<Vector2D> const& vec)
 	{
@@ -66,6 +68,7 @@ namespace
 			ScalarProd(v, rpg.yvelocity), ScalarProd(v, rpg.tracers));
 	}
 
+  /*
 	ReducedPrimitiveGradient2D operator-(ReducedPrimitiveGradient2D const& rpg1,
 		ReducedPrimitiveGradient2D const& rpg2)
 	{
@@ -73,6 +76,7 @@ namespace
 			- rpg2.pressure, rpg1.xvelocity - rpg2.xvelocity, rpg1.yvelocity
 			- rpg2.yvelocity, rpg1.tracers - rpg2.tracers);
 	}
+  */
 
 	vector<Vector2D> operator*(Vector2D const&v, vector<double> const& vec)
 	{
