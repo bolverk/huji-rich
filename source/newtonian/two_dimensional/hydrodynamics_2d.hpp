@@ -124,7 +124,8 @@ vector<Conserved> CalcConservedExtensive
   \param pointmotion Point motion function
   \param pointvelocity List of velocities
   \param time Time
-	\param cevolve The custom evolution of the cells
+  \param cevolve The custom evolution of the cells
+  \param tracers Tracers
 */
 void CalcPointVelocities(Tessellation const& tessellation,
 			 vector<Primitive> const& cells,
@@ -382,7 +383,8 @@ double TimeAdvance2mid
   \param cells Fluid elements
   \param point_motion Point motion scheme
   \param time Time
-\param cevolve The custom evolution of the cells
+  \param cevolve The custom evolution of the cells
+  \param tracers Tracers
   \return List of the velocities of the mesh generating points
  */
 vector<Vector2D> calc_point_velocities
