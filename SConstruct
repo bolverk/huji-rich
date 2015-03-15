@@ -26,7 +26,13 @@ elif compiler=='clang++':
     if int(debug):
         cflags += ' -O0 -g -pg'
     else:
-        cflags += ' -O3'
+        cflags += ' -O3 -march=native'
+elif compiler=='mpiCC':
+    cflags = '-DRICH_MPI '
+    if int(debug):
+        cflags += ' -O0 -g -pg'
+    else:
+        cflags += ' -O3 -march=native'
 else:
     raise NameError('unsupported compiler')
 
