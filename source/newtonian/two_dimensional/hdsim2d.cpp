@@ -570,8 +570,7 @@ void hdsim::TimeAdvance2Mid(void)
 		_cells, _pointmotion,
 		_hbc, _interpolation, _rs, _eos, external_force_, _time, 
 		 *tsf_,
-		 -1,
-		tracer_, -1, custom_evolution_indices,
+		tracer_, custom_evolution_indices,
 		custom_evolution_manager, *pg_,
 #ifdef RICH_MPI
 		procupdate_,
