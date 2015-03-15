@@ -80,8 +80,6 @@ private:
 
   double _time;
 
-  double _endtime;
-
   int cycle_;
 
   vector<vector<double> > tracer_;
@@ -235,11 +233,6 @@ public:
     \brief Class destructor
   */
   ~hdsim(void);
-
-  /*! \brief Sets the time for the sim to end exactly
-    \param endtime The ending time
-  */
-  void SetEndTime(double endtime);
 
   //! \brief Advances the simulation in time
   void TimeAdvance(void);

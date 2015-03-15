@@ -49,7 +49,6 @@ _tessellation(tessellation),
 	_hbc(hbc),_obc(obc),
 	external_force_(external_force),
 	_time(0),
-	_endtime(-1),
 	cycle_(0),
 	tracer_(vector<vector<double> >()),
 	tracer_flag_(false),
@@ -108,7 +107,6 @@ _tessellation(tessellation),
 	_obc(obc),
 	external_force_(external_force),
 	_time(dump.time),
-	_endtime(-1),
 	cycle_(dump.cycle),
 	tracer_(dump.tracers),
 	tracer_flag_(!tracer_.empty()),
@@ -572,7 +570,7 @@ void hdsim::TimeAdvance2Mid(void)
 		_cells, _pointmotion,
 		_hbc, _interpolation, _rs, _eos, external_force_, _time, 
 		 *tsf_,
-		 _endtime,
+		 -1,
 		tracer_, -1, custom_evolution_indices,
 		custom_evolution_manager, *pg_,
 #ifdef RICH_MPI
@@ -640,11 +638,6 @@ double hdsim::GetCellVolume(int index) const
 int hdsim::GetCycle(void) const
 {
 	return cycle_;
-}
-
-void hdsim::SetEndTime(double endtime)
-{
-	_endtime=endtime;
 }
 
 void hdsim::SetColdFlows(double as,double bs)
