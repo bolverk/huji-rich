@@ -231,7 +231,6 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
     ("y position of vertices",chd.yvert)
     ("Number of vertices in cell",chd.nvert)
     ("Cold Flow parameters",cold_flows_block(sim))
-    ("Cfl Number",vector<double>(1,sim.GetCfl()))
     ("Cycle number",vector<int>(1,sim.GetCycle()))
     ("Density floor parameters",density_floor_block(sim))
     ("Custom evolution indices",
@@ -320,9 +319,6 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
     dump.coldflows=false;
   dump.a=coldflows[1];
   dump.b=coldflows[2];
-  // read the cfl
-  vector<double> cfl=read_double_vector_from_hdf5(file,"Cfl Number");
-  dump.cfl=cfl[0];
   // read the cycle number
   vector<int> cycle_number=read_int_vector_from_hdf5(file,"Cycle number");
   dump.cycle=cycle_number[0];

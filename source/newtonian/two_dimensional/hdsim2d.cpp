@@ -48,7 +48,6 @@ _tessellation(tessellation),
 	_pointmotion(pointmotion),
 	_hbc(hbc),_obc(obc),
 	external_force_(external_force),
-	_cfl(1./3.),
 	_time(0),
 	_endtime(-1),
 	cycle_(0),
@@ -110,7 +109,6 @@ _tessellation(tessellation),
 	_hbc(hbc),
 	_obc(obc),
 	external_force_(external_force),
-	_cfl(dump.cfl),
 	_time(dump.time),
 	_endtime(-1),
 	cycle_(dump.cycle),
@@ -148,11 +146,6 @@ _tessellation(tessellation),
 }
 
 hdsim::~hdsim(void) {}
-
-void hdsim::SetCfl(double cfl_new)
-{
-	_cfl = cfl_new;
-}
 
 void hdsim::SetTimeStepExternal(double dt)
 {
@@ -1073,11 +1066,6 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	return PointsToRefine;
 }
 
-double hdsim::GetCfl(void)const
-{
-	return _cfl;
-}
-
 bool hdsim::GetColdFlowFlag(void)const
 {
 	return coldflows_flag_;
@@ -1105,6 +1093,11 @@ void hdsim::SetDensityFloor(double density,double pressure)
 	densityfloor_=true;
 	densityMin_=density;
 	pressureMin_=pressure;
+}
+
+void hdsim::setTimeStepFunction(TimeStepFunction& tsf)
+{
+  tsf_ = &tsf;
 }
 
 vector<Primitive>& hdsim::GetAllCells(void)
@@ -1148,7 +1141,6 @@ void hdsim::load(const ResetDump& checkpoint)
 	_cells = checkpoint.snapshot.cells;
 	_conservedextensive = CalcConservedExtensive
 	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
-	_cfl = checkpoint.cfl;
 	_time = checkpoint.time;
 	cycle_ = checkpoint.cycle;
 	tracer_ = checkpoint.tracers;
@@ -1172,7 +1164,6 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
 #endif
 	checkpoint.procmesh.resize(static_cast<size_t>(n));
 	checkpoint.snapshot.cells = _cells;
-	checkpoint.cfl = _cfl;
 	checkpoint.time = _time;
 	checkpoint.cycle = cycle_;
 	checkpoint.tracers = tracer_;

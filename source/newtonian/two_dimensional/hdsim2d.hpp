@@ -78,8 +78,6 @@ private:
 
   SourceTerm& external_force_;
 
-  double _cfl;
-
   double _time;
 
   double _endtime;
@@ -240,11 +238,6 @@ public:
   */
   ~hdsim(void);
 
-  /*! \brief Overrides the value of the cfl factor
-    \param cfl_new New value of the cfl factor
-  */
-  void SetCfl(double cfl_new);
-
   /*! \brief Sets the time for the sim to end exactly
     \param endtime The ending time
   */
@@ -346,12 +339,6 @@ public:
 		   SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers,int tracerindex);
 
   /*!
-    \brief Returns the Courant number
-    \return The courant number
-  */
-  double GetCfl(void)const;
-
-  /*!
     \brief Returns the coldflow flag
   */
   bool GetColdFlowFlag(void)const;
@@ -377,6 +364,8 @@ public:
     \param pressure The minimum pressure that goes along woth the minimum density
   */
   void SetDensityFloor(double density,double pressure);
+
+  void setTimeStepFunction(TimeStepFunction& tsf);
 
   /*!
     \brief Returns all the cells

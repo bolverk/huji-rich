@@ -44,8 +44,6 @@ public:
 	vector<vector<double> > tracers;
 	//! \brief The simulation time
 	double time;
-	//! \brief The Courant number
-	double cfl;
 	//! \brief The simulation time step number
 	int cycle;
 	//! \brief Coldflows flag
