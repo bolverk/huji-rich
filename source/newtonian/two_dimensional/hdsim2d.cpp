@@ -314,6 +314,36 @@ namespace
   };
 }
 
+namespace {
+  double choose_min_dt(const Tessellation& tess,
+		       const vector<Primitive>& cells,
+		       const vector<Vector2D>& point_velocities,
+		       const HydroBoundaryConditions& hbc,
+		       const double time,
+		       const vector<CustomEvolution*>& ce,
+		       TimeStepFunction& tsf)
+  {
+#ifdef RICH_MPI
+    double local = tsf(tess,
+		       cells,
+		       point_velocities,
+		       hbc,
+		       time,
+		       ce);
+    double global = local;
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    return global;
+#else
+    return tsf(tess,
+      cells,
+      point_velocities,
+      hbc,
+      time,
+      ce);
+#endif
+  }
+}
+
 void hdsim::TimeAdvance(void)
 {
 	vector<Primitive> old_cells = _cells;
@@ -356,9 +386,13 @@ void hdsim::TimeAdvance(void)
 	  _tessellation.calc_edge_velocities
 	  (&_hbc,point_velocity,_time);
 
-	const double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv,_hbc,
-								_time,custom_evolutions),
-					      _dt_external, _time, _endtime);
+	const double dt = choose_min_dt(_tessellation,
+					_cells,
+					point_velocity,
+					_hbc,
+					_time,
+					custom_evolutions,
+					*tsf_);
 
 	if(coldflows_flag_)
 	  substitute_entropy(_tessellation.GetPointNo(),
