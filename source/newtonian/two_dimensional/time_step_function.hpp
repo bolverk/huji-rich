@@ -6,6 +6,11 @@
 #ifndef TIME_STEP_FUNCTION_HPP
 #define TIME_STEP_FUNCTION_HPP 1
 
+#include "../../tessellation/tessellation.hpp"
+#include "../common/hydrodynamic_variables.hpp"
+#include "../../misc/utils.hpp"
+#include "CustomEvolution.hpp"
+
 //! \brief Abstract class for time step function
 class TimeStepFunction
 {
@@ -20,12 +25,16 @@ public:
     \param custom_evolution Lazy list of custom evolutions
     \return Time step
    */
-  double operator()(const Tessellation& tess,
-		    const vector<Primitive>& cells,
-		    const vector<Vector2D>& point_velocities,
-		    const HydroBoundaryConditions& hbc,
-		    const double time,
-		    const Index2Member<CustomEvolution*>& custom_evolution);
+  virtual double operator()
+  (const Tessellation& tess,
+   const vector<Primitive>& cells,
+   const vector<Vector2D>& point_velocities,
+   const HydroBoundaryConditions& hbc,
+   const double time,
+   const vector<CustomEvolution*>& custom_evolution) = 0;
+
+  //! \brief Destructor
+  virtual ~TimeStepFunction(void);
 };
 
 #endif // TIME_STEP_FUNCTION_HPP
