@@ -94,8 +94,6 @@ private:
 
   bool EntropyReCalc_;
 
-  double _dt_external;
-
   const SlabSymmetry default_pg_;
   const PhysicalGeometry* pg_;
 
@@ -242,11 +240,6 @@ public:
     \param endtime The ending time
   */
   void SetEndTime(double endtime);
-  /*!
-    \brief Dictates a time step from an external source
-    \param dt The time step
-  */
-  void SetTimeStepExternal(double dt);
 
   //! \brief Advances the simulation in time
   void TimeAdvance(void);

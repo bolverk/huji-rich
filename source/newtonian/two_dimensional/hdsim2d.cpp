@@ -59,7 +59,6 @@ _tessellation(tessellation),
 	densityMin_(0),
 	pressureMin_(0),
 	EntropyReCalc_(EntropyCalc),
-	_dt_external(0),
   default_pg_(),
   pg_(&default_pg_),
   default_time_step_function_(1./3.),
@@ -84,7 +83,6 @@ _tessellation(tessellation),
 
 	_conservedextensive = CalcConservedExtensive
 	  (CalcConservedIntensive(_cells),tessellation,*pg_);
-	_dt_external=-1;
 }
 
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
@@ -120,7 +118,6 @@ _tessellation(tessellation),
 	densityMin_(dump.densitymin),
 	pressureMin_(dump.pressuremin),
 	EntropyReCalc_(EntropyCalc),
-	_dt_external(-1),
   default_pg_(),
   pg_(&default_pg_),
   default_time_step_function_(1./3.),
@@ -146,11 +143,6 @@ _tessellation(tessellation),
 }
 
 hdsim::~hdsim(void) {}
-
-void hdsim::SetTimeStepExternal(double dt)
-{
-	_dt_external=dt;
-}
 
 namespace
 {
@@ -581,7 +573,7 @@ void hdsim::TimeAdvance2Mid(void)
 		_hbc, _interpolation, _rs, _eos, external_force_, _time, 
 		 *tsf_,
 		 _endtime,
-		tracer_, _dt_external, custom_evolution_indices,
+		tracer_, -1, custom_evolution_indices,
 		custom_evolution_manager, *pg_,
 #ifdef RICH_MPI
 		procupdate_,
