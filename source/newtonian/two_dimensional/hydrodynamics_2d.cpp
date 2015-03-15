@@ -958,6 +958,36 @@ namespace
 	}
 }
 
+namespace {
+  double choose_min_dt(const Tessellation& tess,
+		       const vector<Primitive>& cells,
+		       const vector<Vector2D>& point_velocities,
+		       const HydroBoundaryConditions& hbc,
+		       const double time,
+		       const vector<CustomEvolution*>& ce,
+		       TimeStepFunction& tsf)
+  {
+#ifdef RICH_MPI
+    double local = tsf(tess,
+		       cells,
+		       point_velocities,
+		       hbc,
+		       time,
+		       ce);
+    double global = local;
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    return global;
+#else
+    return tsf(tess,
+      cells,
+      point_velocities,
+      hbc,
+      time,
+      ce);
+#endif
+  }
+}
+
 double TimeAdvance2mid
 	(Tessellation& tess,
 #ifdef RICH_MPI
@@ -966,9 +996,11 @@ double TimeAdvance2mid
 	vector<Primitive> &cells,
 	PointMotion& point_motion,HydroBoundaryConditions const& hbc,
 	SpatialReconstruction& interpolation,RiemannSolver const& rs,
-	EquationOfState const& eos,SourceTerm& force,double time,double cfl,
-	double endtime,vector<vector<double> > &tracers,
-	double dt_external,
+	EquationOfState const& eos,SourceTerm& force,double time,
+	 TimeStepFunction& tsf,
+	 double /*endtime*/,
+	 vector<vector<double> > &tracers,
+	 double /*dt_external*/,
 	vector<size_t>& custom_evolution_indices,
 	const CustomEvolutionManager& custom_evolution_manager,
 	const PhysicalGeometry& pg,
@@ -1014,9 +1046,18 @@ double TimeAdvance2mid
 	vector<Vector2D> edge_velocities =tess.calc_edge_velocities
 		(&hbc,point_velocities,time);
 
+	const double dt = choose_min_dt(tess,
+					cells,
+					point_velocities,
+					hbc,
+					time,
+					CellsEvolve,
+					tsf);
+	/*
 	double dt = determine_time_step
 		(cfl*CalcTimeStep(tess,cells,edge_velocities,hbc,time,CellsEvolve),
 		dt_external,time,endtime);
+	*/
 
 	// Entropy and tracers evolution
 	vector<double> g,Ek,Ef;

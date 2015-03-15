@@ -22,6 +22,7 @@
 #include "../../mpi/mpi_macro.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
+#include "time_step_function.hpp"
 
 //! Calculates the velocities at the vertices of edges
 class FaceVertexVelocityCalculator: public Index2Member<Vector2D>
@@ -360,7 +361,7 @@ double TimeAdvance2mid
  EquationOfState const& eos,
  SourceTerm& force,
  double time,
- double cfl,
+ TimeStepFunction& tsf,
  double endtime,
  vector<vector<double> >& tracers,
  double dt_external,
