@@ -26,6 +26,7 @@
 #include "ResetDump.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
+#include "simple_cfl.hpp"
 
 /*! \brief Parameters for cold flows correction
   \details See equations 61 and 62 in the Arepo paper
@@ -99,6 +100,9 @@ private:
 
   const SlabSymmetry default_pg_;
   const PhysicalGeometry* pg_;
+
+  SimpleCFL default_time_step_function_;
+  TimeStepFunction* tsf_;
 
   #ifdef RICH_MPI
   ProcessorUpdate *procupdate_;

@@ -63,6 +63,8 @@ _tessellation(tessellation),
 	_dt_external(0),
   default_pg_(),
   pg_(&default_pg_),
+  default_time_step_function_(0.3),
+  tsf_(&default_time_step_function_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
@@ -123,6 +125,8 @@ _tessellation(tessellation),
 	_dt_external(-1),
   default_pg_(),
   pg_(&default_pg_),
+  default_time_step_function_(0.3),
+  tsf_(&default_time_step_function_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
