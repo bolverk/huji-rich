@@ -351,6 +351,9 @@ public:
   */
   void SetDensityFloor(double density,double pressure);
 
+  /*! \brief Change the time step function
+    \param tsf New time step function
+   */
   void setTimeStepFunction(TimeStepFunction& tsf);
 
   /*!

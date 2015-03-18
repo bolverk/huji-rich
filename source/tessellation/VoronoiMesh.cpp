@@ -188,9 +188,9 @@ namespace {
 			for(int k=0;k<nneigh;++k){
 				eo.AddEntry("Neighbor "+int2str(k)+" is cpu "
 					    ,static_cast<double>(realneighproc[static_cast<size_t>(k)]));
-				for(size_t l=0;l<neighpoints[k].size();++l){
-				  eo.AddEntry("neighbor point x",neighpoints[k][l].x);
-				  eo.AddEntry("neighbor point y",neighpoints[k][l].y);
+				for(size_t l=0;l<neighpoints[static_cast<size_t>(k)].size();++l){
+				  eo.AddEntry("neighbor point x",neighpoints[static_cast<size_t>(k)][l].x);
+				  eo.AddEntry("neighbor point y",neighpoints[static_cast<size_t>(k)][l].y);
 				}
 			}			
 			for(int k=0;k<ncorner;++k)

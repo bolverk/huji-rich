@@ -325,10 +325,8 @@ void ExternalForceContribution(Tessellation const& tess,
   \param eos Equation of state
   \param force External source term
   \param time Time
-  \param cfl Courant Friedrich Lewy number
-  \param endtime Final time for the simulation
+  \param tsf Time step function
   \param tracers Tracers
-  \param dt_external Extrnal time step
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
   \param pg Physical geometry
