@@ -1567,10 +1567,12 @@ namespace {
 					edge_velocities_[i]);
 			}
 			else{
-				if(cev_[static_cast<size_t>(n0)]||cev_[static_cast<size_t>(n1)])
-				  return cev_[static_cast<size_t>(choose_special_cell_index(cev_,cem_,n0,n1))]->CalcTracerFlux
-					  (tess_,cells_,tracers_,dm,edge,static_cast<int>(i),dt_,
-					time_,interp_,edge_velocities_[i]);
+			  if(cev_[static_cast<size_t>(n0)]||cev_[static_cast<size_t>(n1)]){
+			    const int ns = choose_special_cell_index(cev_,cem_,n0,n1);
+			    return cev_[static_cast<size_t>(ns)]->CalcTracerFlux
+			      (tess_,cells_,tracers_,dm,edge,ns,dt_,
+			       time_,interp_,edge_velocities_[i]);
+			  }
 				else
 					return apply_to_each_term
 					(interp_.interpolateTracers
