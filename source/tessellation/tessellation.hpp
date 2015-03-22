@@ -14,7 +14,6 @@
 using std::vector;
 
 class OuterBoundary;
-class HydroBoundaryConditions;
 
 /*! \brief Abstract class for tessellation
   \author Elad Steinberg
@@ -31,23 +30,14 @@ public:
 	\param f The centroid of the edge
 	\returns The edge's velocity
 */
-	virtual Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
-		Vector2D rR,Vector2D f)const=0;
-/*!
-	\brief Calculates the velocities of the edges
-	\param hbc The hydro boundary conditions
-	\param point_velocities The velocities of the mesh points
-	\param time The sim time
-	\returns The velocities of the edges
-*/
-virtual vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc,
-	vector<Vector2D> const& point_velocities,double time)const=0;
+  virtual Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
+				    Vector2D rR,Vector2D f) const=0;
 
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points
     \param bc Boundary conditions of the computational domain
    */
-  virtual void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc) = 0;
+  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc) = 0;
 
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points

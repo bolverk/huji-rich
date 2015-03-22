@@ -706,7 +706,7 @@ bool VoronoiMesh::NearBoundary(int index) const
 	for(int i=0;i<n;++i)
 	{
 	  const int n0=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.first;
-		const int n1=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.second;
+	  const int n1=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.second;
 		if(n0<0||n1<0||n0>=N||n1>=N)
 			return true;
 	}

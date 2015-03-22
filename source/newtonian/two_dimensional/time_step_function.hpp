@@ -9,7 +9,7 @@
 #include "../../tessellation/tessellation.hpp"
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../misc/utils.hpp"
-#include "CustomEvolution.hpp"
+#include "computational_cell.hpp"
 
 //! \brief Abstract class for time step function
 class TimeStepFunction
@@ -20,18 +20,14 @@ public:
     \param tess Tessellation
     \param cells Primitive variables
     \param point_velocities Velocities of the mesh generating points
-    \param hbc Hydrodynamic boundary conditions
     \param time Time
-    \param custom_evolution Lazy list of custom evolutions
     \return Time step
    */
   virtual double operator()
   (const Tessellation& tess,
-   const vector<Primitive>& cells,
+   const vector<ComputationalCell>& cells,
    const vector<Vector2D>& point_velocities,
-   const HydroBoundaryConditions& hbc,
-   const double time,
-   const vector<CustomEvolution*>& custom_evolution) = 0;
+   const double time) const = 0;
 
   //! \brief Destructor
   virtual ~TimeStepFunction(void);

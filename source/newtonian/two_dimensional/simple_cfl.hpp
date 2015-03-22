@@ -21,9 +21,7 @@ public:
   double operator()(const Tessellation& tess,
 		    const vector<Primitive>& cells,
 		    const vector<Vector2D>& point_velocities,
-		    const HydroBoundaryConditions& hbc,
-		    const double time,
-		    const vector<CustomEvolution*>& custom_evolution);
+		    const double time);
 
 private:
   const double cfl_;
