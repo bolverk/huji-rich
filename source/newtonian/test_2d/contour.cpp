@@ -12,7 +12,7 @@ namespace
 				       const LocalContourCriterion& lcc)
   {
     vector<Vector2D> res;
-    const Tessellation& tess = sim.GetTessellation();
+    const Tessellation& tess = sim.getTessellation();
     BOOST_FOREACH(const Edge& edge,tess.getAllEdges())
       {
 	const std::pair<int,Vector2D> temp = lcc(edge,sim);
@@ -74,7 +74,7 @@ void SequentialContour::operator()(const hdsim& sim)
   if((*p_trigger_.get())(sim)){
     hdf5_write((*p_i2f_.get())(count_),
 	       calc_contour_points(sim,*p_lcc_.get()),
-	       sim.GetTime());
+	       sim.getTime());
     ++count_;
   }
 }

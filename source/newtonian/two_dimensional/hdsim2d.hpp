@@ -87,7 +87,7 @@ public:
   /*! \brief Returns the tessellation
     \return The tessellation
   */
-  const Tessellation& GetTessellation(void) const;
+  const Tessellation& getTessellation(void) const;
 
    /*! \brief Returns the processor tessellation
     \return The tessellation
@@ -184,18 +184,18 @@ public:
   /*! \brief Returns the time
     \return Time
   */
-  double GetTime(void) const;
+  double getTime(void) const;
 
   /*! \brief Returns the volume of a certain cell
     \param index Cell index
     \return Cell volume
   */
-  double GetCellVolume(int index) const;
+  double getCellVolume(int index) const;
 
   /*! \brief Returns the number cycles
     \return Number of times TimeAdvance was called
   */
-  int GetCycle(void) const;
+  int getCycle(void) const;
 
   /*! \brief Change the time step function
     \param tsf New time step function
@@ -212,10 +212,9 @@ public:
    */
   const OuterBoundary& getOuterBoundary(void) const;
 
-  /*! \brief Returns hydro boundary conditions
-    \return Hydro boundary conditions
-   */
-  const HydroBoundaryConditions& getHydroBoundaryCondition(void) const;
+  const vector<Extensive>& getExtensives(void) const;
+
+  const vector<ComputationalCell>& getCells(void) const;
 };
 
 #endif

@@ -108,6 +108,7 @@ void hdsim::TimeAdvance(void)
 
   const double dt = tsf_(tess_,
 			 cells_,
+			 eos_,
 			 point_velocities,
 			 time_);
 			 
@@ -171,7 +172,7 @@ const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const
   return pg_;
 }
 
-const Tessellation& hdsim::GetTessellation(void) const
+const Tessellation& hdsim::getTessellation(void) const
 {
   return tess_;
 }
@@ -192,12 +193,12 @@ void hdsim::addTracer(const string& name,
 
 // Diagnostics
 
-double hdsim::GetTime(void) const
+double hdsim::getTime(void) const
 {
   return time_;
 }
 
-int hdsim::GetCycle(void) const
+int hdsim::getCycle(void) const
 {
   return cycle_;
 }
@@ -344,4 +345,14 @@ const EquationOfState& hdsim::getEos(void) const
 const OuterBoundary& hdsim::getOuterBoundary(void) const
 {
   return obc_;
+}
+
+const vector<Extensive>& hdsim::getExtensives(void) const
+{
+  return extensives_;
+}
+
+const vector<ComputationalCell>& hdsim::getCells(void) const
+{
+  return cells_;
 }

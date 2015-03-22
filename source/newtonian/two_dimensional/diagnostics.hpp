@@ -43,7 +43,7 @@ void BinOutput(string location,
   \param sim Hydrodynamic simulation
   \return The total conserved of the simulation
 */
-Conserved total_conserved(hdsim const& sim);
+Extensive total_conserved(hdsim const& sim);
 
 /*! \brief Calculates the total amount of tracer in computational domain
   \param sim Hydrodynamic simulation

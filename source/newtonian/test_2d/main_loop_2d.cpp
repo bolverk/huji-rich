@@ -10,7 +10,7 @@ WriteTime::WriteTime(string const& fname):
 
 void WriteTime::operator()(hdsim const& sim)
 {
-  write_number(sim.GetTime(),fname_);
+  write_number(sim.getTime(),fname_);
 }
 
 TerminationCondition::~TerminationCondition(void) {}
@@ -23,10 +23,10 @@ SafeTimeTermination::SafeTimeTermination
 
 bool SafeTimeTermination::operator()(hdsim const& sim)
 {
-  if(sim.GetCycle()>max_cycles_)
+  if(sim.getCycle()>max_cycles_)
     throw UniversalError("Error in SafeTimeTermination: too many iterations");
 
-  return sim.GetTime()<termination_time_;
+  return sim.getTime()<termination_time_;
 }
 
 CycleTermination::CycleTermination(int max_cycles):
@@ -34,7 +34,7 @@ CycleTermination::CycleTermination(int max_cycles):
 
 bool CycleTermination::operator()(hdsim const& sim)
 {
-  return sim.GetCycle()<max_cycles_;
+  return sim.getCycle()<max_cycles_;
 }
 
 Manipulate::~Manipulate(void) {}

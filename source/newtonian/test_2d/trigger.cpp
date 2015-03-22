@@ -7,7 +7,7 @@ ConstantTimeInterval::ConstantTimeInterval(double dt, double t_next):
 
 bool ConstantTimeInterval::operator()(const hdsim& sim)
 {
-  if(sim.GetTime()>t_next_){
+  if(sim.getTime()>t_next_){
     t_next_ += dt_;
     return true;
   }

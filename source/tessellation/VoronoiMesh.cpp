@@ -672,33 +672,6 @@ Vector2D VoronoiMesh::CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL, Vec
 	return 0.5*(wl+wr) + wprime;
 }
 
-vector<Vector2D> VoronoiMesh::calc_edge_velocities(HydroBoundaryConditions const* hbc,
-	vector<Vector2D> const& point_velocities,double time)const
-{
-	vector<Vector2D> facevelocity;
-	facevelocity.resize(edges.size());
-	for(int i = 0; i < static_cast<int>(edges.size()); ++i)
-	{
-		if(hbc->IsBoundary(edges[static_cast<size_t>(i)],*this))
-		{
-			// Boundary
-			facevelocity[static_cast<size_t>(i)] = hbc->CalcEdgeVelocity(*this,point_velocities,edges[static_cast<size_t>(i)],
-				time);
-		}
-		else
-		{
-			// Bulk
-			facevelocity[static_cast<size_t>(i)] = CalcFaceVelocity(
-										point_velocities[static_cast<size_t>(edges[static_cast<size_t>(i)].neighbors.first)],
-				point_velocities[static_cast<size_t>(edges[static_cast<size_t>(i)].neighbors.second)],
-				GetMeshPoint(edges[static_cast<size_t>(i)].neighbors.first),
-				GetMeshPoint(edges[static_cast<size_t>(i)].neighbors.second),
-				0.5*(edges[static_cast<size_t>(i)].vertices.first+edges[static_cast<size_t>(i)].vertices.second));
-		}
-	}
-	return facevelocity;
-}
-
 bool VoronoiMesh::NearBoundary(int index) const
 {
 	const int n=int(mesh_vertices[static_cast<size_t>(index)].size());

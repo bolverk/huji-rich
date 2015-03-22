@@ -4,12 +4,12 @@ void ResetOutput(string location,hdsim const& sim)
 {
 	ResetDump dump;
 	fstream myFile (location.c_str(),ios::out | ios::binary);
-	int temp=sim.GetCellNo();
+	int temp=sim.getTessellation().GetPointNo();
 	myFile.write (reinterpret_cast<char*>(&temp), sizeof (int));
 	Vector2D p;
 	for(int i=0;i<temp;i++)
 	{
-		p=sim.GetMeshPoint(i);
+	  p=sim.getTessellation().GetMeshPoint(i);
 		double x=(p.x);
 		double y=(p.y);
 		myFile.write (reinterpret_cast<char*>(&x),sizeof(double));
@@ -28,40 +28,30 @@ void ResetOutput(string location,hdsim const& sim)
 	}
 #endif
 
-	Primitive P;
+	ComputationalCell P;
 	for(int i=0;i<temp;i++)
 	{
-		P=sim.GetCell(i);
-		double Pressure=(P.Pressure);
+	  P=sim.getCells()[static_cast<size_t>(i)];
+		double Pressure=(P.pressure);
 		myFile.write(reinterpret_cast<char*>(&Pressure),sizeof(double));
-		double Density=(P.Density);
+		double Density=(P.density);
 		myFile.write(reinterpret_cast<char*>(&Density),sizeof(double));
-		double xVelocity=(P.Velocity.x);
+		double xVelocity=(P.velocity.x);
 		myFile.write(reinterpret_cast<char*>(&xVelocity),sizeof(double));
-		double yVelocity=(P.Velocity.y);
+		double yVelocity=(P.velocity.y);
 		myFile.write(reinterpret_cast<char*>(&yVelocity),sizeof(double));
 	}
-	double dtemp=sim.GetTime();
+	double dtemp=sim.getTime();
 	myFile.write (reinterpret_cast<char*>(&dtemp),sizeof(double));
-	char cold= sim.GetColdFlowFlag() ? '1' : '0';
-	myFile.write(reinterpret_cast<char*>(&cold),sizeof(char));
-	double a,b;
-	sim.GetColdFlowParm(a,b);
-	myFile.write(reinterpret_cast<char*>(&a),sizeof(double));
-	myFile.write(reinterpret_cast<char*>(&b),sizeof(double));
-	int itemp=sim.GetCycle();
+	int itemp=sim.getCycle();
 	myFile.write(reinterpret_cast<char*>(&itemp),sizeof(int));
 	int n=0;
+	/*
 	vector<vector<double> > tracers=sim.getTracers();
 	if(!tracers.empty())
 	  n=static_cast<int>(tracers[0].size());
 	myFile.write (reinterpret_cast<char*>(&n),sizeof(int));
-	cold = static_cast<char>(sim.GetDensityFloorFlag());
-	myFile.write(reinterpret_cast<char*>(&cold), sizeof(char));
-	double dtemp2;
-	sim.GetDensityFloorParm(dtemp, dtemp2);
-	myFile.write(reinterpret_cast<char*>(&dtemp), sizeof(double));
-	myFile.write(reinterpret_cast<char*>(&dtemp2), sizeof(double));
+	*/
 	for (int i = 0; i<temp; ++i)
 	{
 	  unsigned int ctemp = static_cast<unsigned int>(sim.custom_evolution_indices[static_cast<size_t>(i)]);
@@ -72,15 +62,17 @@ void ResetOutput(string location,hdsim const& sim)
 		myFile.close();
 		return;
 	}
+	/*
 	if(static_cast<int>(tracers.size())!=temp)
 		throw UniversalError("Error in ResetDump, length of mesh points and tracers do not match");
-	double x;
+	*/
+	//	double x;
 	for(int i=0;i<n;++i)
 	{
 		for(int j=0;j<temp;++j)
 		{
-		  x=tracers[static_cast<size_t>(j)][static_cast<size_t>(i)];
-		  myFile.write(reinterpret_cast<char*>(&x),sizeof(double));
+		  //		  x=tracers[static_cast<size_t>(j)][static_cast<size_t>(i)];
+		  //		  myFile.write(reinterpret_cast<char*>(&x),sizeof(double));
 		}
 	}
 	myFile.close();

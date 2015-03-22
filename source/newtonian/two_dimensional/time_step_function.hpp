@@ -10,6 +10,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../misc/utils.hpp"
 #include "computational_cell.hpp"
+#include "../common/equation_of_state.hpp"
 
 //! \brief Abstract class for time step function
 class TimeStepFunction
@@ -26,6 +27,7 @@ public:
   virtual double operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
+   const EquationOfState& eos,
    const vector<Vector2D>& point_velocities,
    const double time) const = 0;
 

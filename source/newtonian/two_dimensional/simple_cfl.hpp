@@ -19,9 +19,10 @@ public:
   SimpleCFL(const double cfl);
 
   double operator()(const Tessellation& tess,
-		    const vector<Primitive>& cells,
+		    const vector<ComputationalCell>& cells,
+		    const EquationOfState& eos,
 		    const vector<Vector2D>& point_velocities,
-		    const double time);
+		    const double time) const;
 
 private:
   const double cfl_;
