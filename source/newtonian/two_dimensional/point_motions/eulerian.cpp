@@ -1,8 +1,9 @@
 #include "eulerian.hpp"
 
-Vector2D Eulerian::CalcVelocity
-(int /*index*/, Tessellation const& /*tessellation*/,
- vector<Primitive> const& /*primitives*/,double /*time*/)
+vector<Vector2D> Eulerian::operator()
+(Tessellation const& tessellation,
+ vector<ComputationalCell> const& /*primitives*/,double /*time*/) const
 {
-  return Vector2D(0,0);
+  return vector<Vector2D>
+    (static_cast<size_t>(tessellation.GetPointNo()));
 }

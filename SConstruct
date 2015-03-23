@@ -38,7 +38,8 @@ else:
 
 env = Environment(ENV = os.environ,
                   CXX=compiler,
-                  CPPPATH=os.environ['RICH_ROOT']+'/source',
+                  CPPPATH=[os.environ['RICH_ROOT']+'/source',
+                           os.environ['RICH_ROOT']],
                   LIBPATH=['.',os.environ['HDF5_LIB_PATH']],
                   LIBS=['rich','hdf5','hdf5_cpp'],
                   CXXFLAGS=cflags)

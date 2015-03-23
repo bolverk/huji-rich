@@ -14,8 +14,8 @@
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
+//#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
@@ -26,6 +26,8 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/tessellation/right_rectangle.hpp"
 #include "source/newtonian/test_2d/piecewise.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -46,6 +48,20 @@ using namespace simulation2d;
   }
 #endif
 
+namespace {
+  vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      res[i].density = 1;
+      res[i].pressure = tess.GetMeshPoint(static_cast<int>(i)).x < 0.5 ?
+								   2 : 1;
+      res[i].velocity = Vector2D(0,0);
+    }
+    return res;
+  }
+}
+
 class SimData
 {
 public:
@@ -61,40 +77,34 @@ public:
 		  (30,30,outer_.getBoundary().first,
 		   outer_.getBoundary().second))),
     #else
+    pg_(),
     init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
 				outer_.getBoundary().second)),
     #endif
-    tess_(),
-    interp_method_(),
-    density_(1),
-    //    pressure_(0,0.5,0,1,2,1),
-    xvelocity_(0),
-    yvelocity_(0),
+    tess_(init_points_,outer_),
     eos_(5./3.),
     pm_naive_(),
     rs_(),
     hbc_(rs_),
-    point_motion_(pm_naive_,hbc_),
+  //    point_motion_(pm_naive_,hbc_),
     force_(),
-    sim_(init_points_,
-	 tess_,
+    tsf_(0.3),
+    fc_(rs_),
+    cu_(),
+    sim_(tess_,
 	 #ifdef RICH_MPI
 	 proc_tess_,
 	 #endif
-	 interp_method_,
-	 density_,
-	 //	 pressure_,
-	 Piecewise(RightRectangle(Vector2D(0,0),
-				  Vector2D(width_/2,width_)),
-		   Uniform2D(2), Uniform2D(1)),
-	 xvelocity_,
-	 yvelocity_,
-	 eos_,
-	 rs_,
-	 point_motion_,
-	 force_,
 	 outer_,
-	 hbc_) {}
+	 pg_,
+	 calc_init_cond(tess_),
+	 eos_,
+	 //	 point_motion_,
+	 pm_naive_,
+	 force_,
+	 tsf_,
+	 fc_,
+	 cu_) {}
 
   hdsim& getSim(void)
   {
@@ -107,19 +117,18 @@ private:
   #ifdef RICH_MPI
   VoronoiMesh proc_tess_;
   #endif
+  const SlabSymmetry pg_;
   const vector<Vector2D> init_points_;
   VoronoiMesh tess_;
-  PCM2D interp_method_;
-  const Uniform2D density_;
-  //  const Step2D pressure_;
-  const Uniform2D xvelocity_;
-  const Uniform2D yvelocity_;
   const IdealGas eos_;
-  Lagrangian pm_naive_;
+  Eulerian pm_naive_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
-  RoundCells point_motion_;
+  //  RoundCells point_motion_;
   ZeroForce force_;
+  const SimpleCFL tsf_;
+  const SimpleFluxCalculator fc_;
+  const SimpleCellUpdater cu_;
   hdsim sim_;
 };
 

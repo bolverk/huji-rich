@@ -51,9 +51,26 @@ def main():
     pa = [prof.CalcPrim((i-offset)/t).Pressure for i in xs]
     va = [prof.CalcPrim((i-offset)/t).Velocity for i in xs]
 
+    import pylab
+    pylab.subplot(311)
+    pylab.plot(xs,ds,'.')
+    pylab.plot(xs,da)
+    pylab.subplot(312)
+    pylab.plot(xs,ps,'.')
+    pylab.plot(xs,pa)
+    pylab.subplot(313)
+    pylab.plot(xs,vs,'.')
+    pylab.plot(xs,va)
+    pylab.show()
+
     gof1 = goodness_of_fit(ds,da)
     gof2 = goodness_of_fit(ps,pa)
     gof3 = goodness_of_fit(vs,va)
+
+    with open('gradesheet.txt','w') as f:
+        f.write(str(gof1)+'\n')
+        f.write(str(gof2)+'\n')
+        f.write(str(gof3)+'\n')
     
     return gof1<0.1 and gof2<0.11 and gof3<0.11
 

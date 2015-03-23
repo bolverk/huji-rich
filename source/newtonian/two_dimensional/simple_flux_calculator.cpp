@@ -33,7 +33,7 @@ namespace {
 
     bool operator()(const int& index) const
     {
-      return index>0 && index<point_no_;
+      return index>=0 && index<point_no_;
     }
 
   private:

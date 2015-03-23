@@ -16,8 +16,6 @@ public:
   std::map<std::string,double> tracers;
 
   std::map<std::string,bool> stickers;
-
-  ComputationalCell(void);
 };
 
 #endif // COMPUTATIONAL_CELL_HPP
