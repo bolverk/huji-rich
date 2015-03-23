@@ -7,6 +7,7 @@
 #define RATCHET_HPP 1
 
 #include "../CustomEvolution.hpp"
+#include "../physical_geometry.hpp"
 
 //! \brief Cell that only allows either inflow or outflow
 class Ratchet: public CustomEvolution
@@ -19,7 +20,7 @@ public:
 	/*! \brief Class constructor
 	\param dir Direction of the flow
 	*/
-	Ratchet(DIRECTION dir);
+  Ratchet(DIRECTION dir, const PhysicalGeometry& pg);
 
 	Conserved CalcFlux(Tessellation const& tess,
 		vector<Primitive> const& cells,
@@ -53,6 +54,7 @@ public:
 private:
 	const DIRECTION dir_;
 	const Primitive cell_;
+  const PhysicalGeometry& pg_;
 };
 
 #endif // RATCHET_HPP
