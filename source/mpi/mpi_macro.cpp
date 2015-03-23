@@ -567,9 +567,11 @@ void SendRecvPrimitive(vector<Primitive> const& cells, vector<vector<double> > c
 	vector<int> const& sentprocs, vector<Primitive> &ptoadd, vector<vector<double> >
 	&ttoadd,EquationOfState const& eos)
 {
-	bool traceractive = !tracers.empty();
+  //	bool traceractive = !tracers.empty();
+	/*
 	if (traceractive)
 		traceractive = !tracers[0].empty();
+	*/
 
 	// Take care of self send hydro
 	int nlist = static_cast<int>(sentprocs.size());

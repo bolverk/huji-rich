@@ -127,7 +127,7 @@ void hdsim::TimeAdvance(void)
 
   MoveMeshPoints(point_velocities, dt, tess_);
 
-  cells_ = cu_(tess_, pg_, eos_, extensives_);
+  cells_ = cu_(tess_, pg_, eos_, extensives_, cells_);
 
   time_ += dt;
   cycle_++;

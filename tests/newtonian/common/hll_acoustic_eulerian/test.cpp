@@ -49,7 +49,7 @@ int main(void)
   Primitive right = CalcPrimitive(density,pressure,velocity,eos);
   double edge_velocity = 0;
   Hllc rs;
-  Conserved flux = rs.Solve(left,right,edge_velocity);
+  Conserved flux = rs(left,right,edge_velocity);
 
   write_output(left,right,flux);
 

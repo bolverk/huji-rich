@@ -14,7 +14,7 @@ class Hllc: public RiemannSolver
 {
 public:
 
-  Conserved Solve
+  Conserved operator()
   (Primitive const& left,
    Primitive const& right,
    double velocity) const;

@@ -92,9 +92,10 @@ Conserved starred_state
 }
 }
 
-Conserved Hllc::Solve(Primitive const& left,
-		      Primitive const& right,
-		      double velocity) const
+Conserved Hllc::operator()
+  (Primitive const& left,
+   Primitive const& right,
+   double velocity) const
 {
   if(is_nan(right.Velocity.x))
     throw UniversalError("Hllc::Solved entered with nan");

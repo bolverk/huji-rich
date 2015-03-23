@@ -18,7 +18,7 @@ int main(void)
   right.Velocity.y = left.Velocity.y = 0;
   double velocity = 9.1;
   Hllc solver;
-  Conserved res = solver.Solve(left, right, velocity);
+  Conserved res = solver(left, right, velocity);
 
   ofstream f("res.txt");
   f << res.Mass << endl;

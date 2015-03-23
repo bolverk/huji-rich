@@ -22,6 +22,8 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -95,6 +97,9 @@ public:
 	 read_number("amplitude.txt"),
 	 read_number("phase_velocity.txt")),
 	force_(acc_),
+    tsf_(0.3),
+    fc_(rs_),
+    cu_(),
     sim_(tess_,
 	 outer_,
 	 pg_,
@@ -102,7 +107,9 @@ public:
 	 eos_,
 	 pm_naive_,
 	 force_,
-	 hbc_) {}
+	 tsf_,
+	 fc_,
+	 cu_) {}
 
   hdsim& getSim(void)
   {
@@ -122,6 +129,9 @@ private:
   //  RoundCells point_motion_;
   PeriodicDriver acc_;
   ConservativeForce force_;
+  SimpleCFL tsf_;
+  SimpleFluxCalculator fc_;
+  SimpleCellUpdater cu_;
   hdsim sim_;
 };
 
