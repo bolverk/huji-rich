@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rich", "Rich.vcxproj", "{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		DebugMPI|Win32 = DebugMPI|Win32
+		DebugMPI|x64 = DebugMPI|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Debug|Win32.Build.0 = Debug|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Debug|x64.ActiveCfg = Debug|x64
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Debug|x64.Build.0 = Debug|x64
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.DebugMPI|Win32.ActiveCfg = DebugMPI|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.DebugMPI|Win32.Build.0 = DebugMPI|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.DebugMPI|x64.ActiveCfg = DebugMPI|x64
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.DebugMPI|x64.Build.0 = DebugMPI|x64
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Release|Win32.ActiveCfg = Release|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Release|Win32.Build.0 = Release|Win32
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Release|x64.ActiveCfg = Release|x64
+		{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

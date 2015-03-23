@@ -1,0 +1,459 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugMPI|Win32">
+      <Configuration>DebugMPI</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugMPI|x64">
+      <Configuration>DebugMPI</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\convergence\choose_between.hpp" />
+    <ClInclude Include="..\source\convergence\external_data.hpp" />
+    <ClInclude Include="..\source\misc\bisection.hpp" />
+    <ClInclude Include="..\source\misc\func_1_var.hpp" />
+    <ClInclude Include="..\source\misc\hdf5_utils.hpp" />
+    <ClInclude Include="..\source\misc\int2str.hpp" />
+    <ClInclude Include="..\source\misc\mesh_generator.hpp" />
+    <ClInclude Include="..\source\misc\simple_io.hpp" />
+    <ClInclude Include="..\source\misc\universal_error.hpp" />
+    <ClInclude Include="..\source\misc\utils.hpp" />
+    <ClInclude Include="..\source\mpi\ConstNumberPerProc.hpp" />
+    <ClInclude Include="..\source\mpi\marshal.hpp" />
+    <ClInclude Include="..\source\mpi\MeshPointsMPI.hpp" />
+    <ClInclude Include="..\source\mpi\mpi_macro.hpp" />
+    <ClInclude Include="..\source\mpi\ProcessorUpdate.hpp" />
+    <ClInclude Include="..\source\mpi\SetLoad.hpp" />
+    <ClInclude Include="..\source\newtonian\common\equation_of_state.hpp" />
+    <ClInclude Include="..\source\newtonian\common\ersig.hpp" />
+    <ClInclude Include="..\source\newtonian\common\hllc.hpp" />
+    <ClInclude Include="..\source\newtonian\common\hydrodynamics.hpp" />
+    <ClInclude Include="..\source\newtonian\common\hydrodynamic_variables.hpp" />
+    <ClInclude Include="..\source\newtonian\common\ideal_gas.hpp" />
+    <ClInclude Include="..\source\newtonian\common\riemann_solver.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\arepo_interp.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\boundary_conditions_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\eos_consistent1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\eulerian1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\hdf5_diagnostics1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\hdsim.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\lagrangian1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\outflow1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\pcm1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\periodic_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\plm1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\rigid_wall_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\source_term_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\spatial_distribution1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\spatial_reconstruction1d.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\vertex_motion.hpp" />
+    <ClInclude Include="..\source\newtonian\one_dimensional\zero_force_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\test_1d\acoustic.hpp" />
+    <ClInclude Include="..\source\newtonian\test_1d\collela.hpp" />
+    <ClInclude Include="..\source\newtonian\test_1d\main_loop_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\test_1d\simple_waves_ideal_gas.hpp" />
+    <ClInclude Include="..\source\newtonian\test_1d\sine_wave.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\clip_grid.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\consecutive_snapshots.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\kill_switch.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\main_loop_2d.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\multiple_diagnostics.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\noh2d\noh_amr.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\noh2d\noh_hbc.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\piecewise.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\profile_1d.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\random_pert.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\RT.hpp" />
+    <ClInclude Include="..\source\newtonian\test_2d\sb_edge_repellant.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\CustomEvolution.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\custom_evolutions\ConstantFluxEvolution.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\custom_evolutions\ConstantPrimitiveEvolution.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\custom_evolutions\NoMovment.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\custom_evolutions\Ratchet.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\custom_evolutions\RigidBodyEvolve.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\diagnostics.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\HalfPeriodicBox.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\PeriodicBox.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\SquareBox.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hdf5_diagnostics.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hdsim2d.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\HydroBoundaryConditions.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydrodynamics_2d.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\CustomOuter.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\FreeFlow.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\HalfPeriodicHydro.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\InFlow.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\PeriodicHydro.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\RigidWallHydro.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\interpolations\LinearGaussArepo.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\interpolations\linear_gauss_consistent.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\interpolations\pcm2d.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\OuterBoundary.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\physical_geometry.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motion.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motions\CircularRotation.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motions\eulerian.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motions\hold_still.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motions\lagrangian.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\point_motions\round_cells.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\ReducedPrimitiveGradient2D.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\RefineStrategy.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\RemovalStrategy.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\Reset.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\ResetDump.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\simple_cfl.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\SourceTerm.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\CenterGravity.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\ConservativeForce.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\ConstantGravity.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\cylinderical_geometry.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\cylindrical_complementary.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\improved_center_gravity.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\RotationForce.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\SeveralSources.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\source_terms\zero_force.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distribution2d.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distributions\KeplerVelocity.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distributions\Line2D.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distributions\PowerLawDistribution.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distributions\SineSepar.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_distributions\uniform2d.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\spatial_reconstruction.hpp" />
+    <ClInclude Include="..\source\newtonian\two_dimensional\time_step_function.hpp" />
+    <ClInclude Include="..\source\tessellation\BCSides.hpp" />
+    <ClInclude Include="..\source\tessellation\calc_face_vertex_velocity.hpp" />
+    <ClInclude Include="..\source\tessellation\ConvexHull.hpp" />
+    <ClInclude Include="..\source\tessellation\Delaunay.hpp" />
+    <ClInclude Include="..\source\tessellation\delaunay_logger.hpp" />
+    <ClInclude Include="..\source\tessellation\Edge.hpp" />
+    <ClInclude Include="..\source\tessellation\EdgeLengthCorrect.hpp" />
+    <ClInclude Include="..\source\tessellation\exactmath.hpp" />
+    <ClInclude Include="..\source\tessellation\facet.hpp" />
+    <ClInclude Include="..\source\tessellation\find_affected_cells.hpp" />
+    <ClInclude Include="..\source\tessellation\geometry.hpp" />
+    <ClInclude Include="..\source\tessellation\geotests.hpp" />
+    <ClInclude Include="..\source\tessellation\HilbertOrder.hpp" />
+    <ClInclude Include="..\source\tessellation\polygon_overlap_area.hpp" />
+    <ClInclude Include="..\source\tessellation\PolyIntersect.hpp" />
+    <ClInclude Include="..\source\tessellation\right_rectangle.hpp" />
+    <ClInclude Include="..\source\tessellation\RoundGrid.hpp" />
+    <ClInclude Include="..\source\tessellation\shape_2d.hpp" />
+    <ClInclude Include="..\source\tessellation\tessellation.hpp" />
+    <ClInclude Include="..\source\tessellation\triangle_area.hpp" />
+    <ClInclude Include="..\source\tessellation\VoronoiMesh.hpp" />
+    <ClInclude Include="..\source\tessellation\voronoi_logger.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\convergence\external_data.cpp" />
+    <ClCompile Include="..\source\misc\bisection.cpp" />
+    <ClCompile Include="..\source\misc\func_1_var.cpp" />
+    <ClCompile Include="..\source\misc\hdf5_utils.cpp" />
+    <ClCompile Include="..\source\misc\int2str.cpp" />
+    <ClCompile Include="..\source\misc\mesh_generator.cpp" />
+    <ClCompile Include="..\source\misc\simple_io.cpp" />
+    <ClCompile Include="..\source\misc\universal_error.cpp" />
+    <ClCompile Include="..\source\misc\utils.cpp" />
+    <ClCompile Include="..\source\mpi\ConstNumberPerProc.cpp" />
+    <ClCompile Include="..\source\mpi\marshal.cpp" />
+    <ClCompile Include="..\source\mpi\MeshPointsMPI.cpp" />
+    <ClCompile Include="..\source\mpi\mpi_macro.cpp" />
+    <ClCompile Include="..\source\mpi\ProcessorUpdate.cpp" />
+    <ClCompile Include="..\source\mpi\SetLoad.cpp" />
+    <ClCompile Include="..\source\newtonian\common\equation_of_state.cpp" />
+    <ClCompile Include="..\source\newtonian\common\ersig.cpp" />
+    <ClCompile Include="..\source\newtonian\common\hllc.cpp" />
+    <ClCompile Include="..\source\newtonian\common\hydrodynamics.cpp" />
+    <ClCompile Include="..\source\newtonian\common\hydrodynamic_variables.cpp" />
+    <ClCompile Include="..\source\newtonian\common\ideal_gas.cpp" />
+    <ClCompile Include="..\source\newtonian\common\riemann_solver.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\arepo_interp.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\boundary_conditions_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\eos_consistent1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\eulerian1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\hdf5_diagnostics1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\hdsim.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\lagrangian1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\outflow1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\pcm1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\periodic_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\plm1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\rigid_wall_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\source_term_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\spatial_distribution1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\spatial_reconstruction1d.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\vertex_motion.cpp" />
+    <ClCompile Include="..\source\newtonian\one_dimensional\zero_force_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\test_1d\acoustic.cpp" />
+    <ClCompile Include="..\source\newtonian\test_1d\collela.cpp" />
+    <ClCompile Include="..\source\newtonian\test_1d\main_loop_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\test_1d\simple_waves_ideal_gas.cpp" />
+    <ClCompile Include="..\source\newtonian\test_1d\sine_wave.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\clip_grid.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\consecutive_snapshots.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\kill_switch.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\main_loop_2d.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\multiple_diagnostics.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\noh2d\noh_amr.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\noh2d\noh_hbc.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\piecewise.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\profile_1d.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\random_pert.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\RT.cpp" />
+    <ClCompile Include="..\source\newtonian\test_2d\sb_edge_repellant.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\CustomEvolution.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\custom_evolutions\ConstantFluxEvolution.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\custom_evolutions\ConstantPrimitiveEvolution.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\custom_evolutions\NoMovement.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\custom_evolutions\Ratchet.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\custom_evolutions\RigidBodyEvolve.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\diagnostics.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\HalfPeriodicBox.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\PeriodicBox.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\geometric_outer_boundaries\SquareBox.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hdf5_diagnostics.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hdsim2d.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\HydroBoundaryConditions.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydrodynamics_2d.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\CustomOuter.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\FreeFlow.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\HalfPeriodicHydro.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\InFlow.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\PeriodicHydro.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\hydro_boundary_conditions\RigidWallHydro.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\interpolations\LinearGaussArepo.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\interpolations\linear_gauss_consistent.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\interpolations\pcm2d.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\OuterBoundary.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\physical_geometry.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motion.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motions\CircularRotation.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motions\eulerian.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motions\hold_still.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motions\lagrangian.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\point_motions\round_cells.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\ReducedPrimitiveGradient2D.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\RefineStrategy.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\RemovalStrategy.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\Reset.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\ResetDump.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\simple_cfl.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\SourceTerm.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\CenterGravity.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\ConservativeForce.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\ConstantGravity.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\cylinderical_geometry.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\cylindrical_complementary.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\improved_center_gravity.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\RotationForce.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\SeveralSources.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\source_terms\zero_force.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distribution2d.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distributions\KeplerVelocity.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distributions\Line2D.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distributions\PowerLawDistribution.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distributions\SineSepar.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_distributions\uniform2d.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\spatial_reconstruction.cpp" />
+    <ClCompile Include="..\source\newtonian\two_dimensional\time_step_function.cpp" />
+    <ClCompile Include="..\source\tessellation\BCSides.cpp" />
+    <ClCompile Include="..\source\tessellation\calc_face_vertex_velocity.cpp" />
+    <ClCompile Include="..\source\tessellation\ConvexHull.cpp" />
+    <ClCompile Include="..\source\tessellation\Delaunay.cpp" />
+    <ClCompile Include="..\source\tessellation\delaunay_logger.cpp" />
+    <ClCompile Include="..\source\tessellation\Edge.cpp" />
+    <ClCompile Include="..\source\tessellation\EdgeLengthCorrect.cpp" />
+    <ClCompile Include="..\source\tessellation\exactmath.cpp" />
+    <ClCompile Include="..\source\tessellation\facet.cpp" />
+    <ClCompile Include="..\source\tessellation\find_affected_cells.cpp" />
+    <ClCompile Include="..\source\tessellation\geometry.cpp" />
+    <ClCompile Include="..\source\tessellation\geotests.cpp" />
+    <ClCompile Include="..\source\tessellation\HilbertOrder.cpp" />
+    <ClCompile Include="..\source\tessellation\polygon_overlap_area.cpp" />
+    <ClCompile Include="..\source\tessellation\PolyIntersect.cpp" />
+    <ClCompile Include="..\source\tessellation\right_rectangle.cpp" />
+    <ClCompile Include="..\source\tessellation\RoundGrid.cpp" />
+    <ClCompile Include="..\source\tessellation\shape_2d.cpp" />
+    <ClCompile Include="..\source\tessellation\tessellation.cpp" />
+    <ClCompile Include="..\source\tessellation\triangle_area.cpp" />
+    <ClCompile Include="..\source\tessellation\VoronoiMesh.cpp" />
+    <ClCompile Include="..\source\tessellation\voronoi_logger.cpp" />
+    <ClCompile Include="..\test.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C6D90B07-AD00-4D0E-BB60-AD3DCA734BCB}</ProjectGuid>
+    <RootNamespace>Rich</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Intel C++ Compiler XE 14.0</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|x64'">
+    <IncludePath>C:\ann\include\ANN;C:\Program Files\Microsoft MPI\Inc;C:\Program Files\HDF_Group\HDF5\1.8.12\include;C:\boost;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\HDF_Group\HDF5\1.8.12\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\ann\include;C:\Program Files\HDF_Group\HDF5\1.8.12\include;C:\Program Files\HDF_Group\HDF5\1.8.12;C:\boost;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\HDF_Group\HDF5\1.8.12\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\ann\include;C:\Program Files\HDF_Group\HDF5\1.8.12\include;C:\boost;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\HDF_Group\HDF5\1.8.12\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMPI|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RICH_MPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft MPI\Lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>msmpi.lib;szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>szip.lib;zlib.lib;hdf5.lib;hdf5_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
