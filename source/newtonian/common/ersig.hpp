@@ -22,9 +22,9 @@ public:
    */
   ERSIG(double g, string const& vacuum_behaviour = "throw exception");
 
-  Conserved Solve(Primitive const& left,
-		  Primitive const& right,
-		  double velocity) const;
+  Conserved operator()(Primitive const& left,
+		       Primitive const& right,
+		       double velocity) const;
 
 private:
 

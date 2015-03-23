@@ -12,7 +12,7 @@
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+//#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
@@ -60,6 +60,21 @@ private:
   const double v_;
 };
 
+  namespace {
+    vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
+    {
+      const double density = read_number("mean_density.txt");
+      const double pressure = read_number("mean_pressure.txt");
+      vector<ComputationalCell> res(tess.GetPointNo());
+      for(size_t i=0;i<res.size();++i){
+	res[i].density = density;
+	res[i].pressure = pressure;
+	res[i].velocity = Vector2D(0,0);
+      }
+      return res;
+    }
+  }
+
 class SimData
 {
 public:
@@ -69,33 +84,24 @@ public:
     init_points_(cartesian_mesh(30,30,Vector2D(0,0),
 				Vector2D(width_,width_))),			       
     outer_(0,width_,width_,0),
-    tess_(),
-    interp_method_(),
-    density_(read_number("mean_density.txt")),
-    pressure_(read_number("mean_pressure.txt")),
-    xvelocity_(0),
-    yvelocity_(0),
+    pg_(),
+    tess_(init_points_, outer_),
     eos_(read_number("adiabatic_index.txt")),
     pm_naive_(),
     rs_(),
     hbc_(rs_),
-    point_motion_(pm_naive_,hbc_),
+    //    point_motion_(pm_naive_,hbc_),
     acc_(read_number("wavelength.txt"),
-	   read_number("amplitude.txt"),
-	   read_number("phase_velocity.txt")),
+	 read_number("amplitude.txt"),
+	 read_number("phase_velocity.txt")),
 	force_(acc_),
-    sim_(init_points_,
-	 tess_,
-	 interp_method_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
-	 eos_,
-	 rs_,
-	 point_motion_,
-	 force_,
+    sim_(tess_,
 	 outer_,
+	 pg_,
+	 calc_init_cond(tess_),
+	 eos_,
+	 pm_naive_,
+	 force_,
 	 hbc_) {}
 
   hdsim& getSim(void)
@@ -107,17 +113,13 @@ private:
   const double width_;
   const vector<Vector2D> init_points_;
   const SquareBox outer_;
+  const SlabSymmetry pg_;
   VoronoiMesh tess_;
-  PCM2D interp_method_;
-  const Uniform2D density_;
-  const Uniform2D pressure_;
-  const Uniform2D xvelocity_;
-  const Uniform2D yvelocity_;
   const IdealGas eos_;
   Lagrangian pm_naive_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
-  RoundCells point_motion_;
+  //  RoundCells point_motion_;
   PeriodicDriver acc_;
   ConservativeForce force_;
   hdsim sim_;

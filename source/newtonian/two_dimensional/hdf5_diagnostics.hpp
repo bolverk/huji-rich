@@ -11,7 +11,6 @@
 #include "hdsim2d.hpp"
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
-#include "Reset.hpp"
 
 /*!
 \brief Writes the simulation data into an HDF5 file

@@ -10,12 +10,12 @@ Conserved Outflow::CalcFlux(vector<double> const& Vertices,
   if(i==0){
     Primitive ghost = Cells[0];
     double vv = vertex_velocity[0];
-    return rs.Solve(ghost,Cells[0],vv);
+    return rs(ghost,Cells[0],vv);
   }
   else if(i==static_cast<int>(Vertices.size())-1){
     Primitive ghost = Cells[Vertices.size()-2];
     double vv = vertex_velocity[Vertices.size()-1];
-    return rs.Solve(Cells[Vertices.size()-2],ghost,vv);
+    return rs(Cells[Vertices.size()-2],ghost,vv);
   }
   else
     throw UniversalError("Index inside bulk of grid");

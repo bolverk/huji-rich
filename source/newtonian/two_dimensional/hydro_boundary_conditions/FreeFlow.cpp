@@ -68,7 +68,7 @@ Conserved FreeFlow::CalcFlux
 	    (Projection(states[static_cast<size_t>(i)].Velocity, n),
 	     Projection(states[static_cast<size_t>(i)].Velocity, p));
 	}
-	Conserved res = rs_.Solve(states[0], states[1],Projection(edge_velocity,n));
+	Conserved res = rs_(states[0], states[1],Projection(edge_velocity,n));
 	res.Momentum = res.Momentum.x*n/abs(n) +
 		res.Momentum.y*p/abs(p);
 	// Make sure there is no inflow

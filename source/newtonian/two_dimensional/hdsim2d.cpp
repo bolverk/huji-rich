@@ -115,6 +115,7 @@ void hdsim::TimeAdvance(void)
   const vector<Extensive> fluxes = fc_(tess_,
 				       point_velocities,
 				       cells_,
+				       eos_,
 				       time_,
 				       dt);
 

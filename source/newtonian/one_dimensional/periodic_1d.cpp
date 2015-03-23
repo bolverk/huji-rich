@@ -23,9 +23,9 @@ Conserved Periodic1D::CalcFlux(vector<double> const& Vertices,
       throw UniversalError("Vertex velocity must be the same on both sides");
     */
 
-    return rs.Solve(Cells[Cells.size()-1],Cells[0],
-		    0.5*(vertex_velocity[0]+
-			 vertex_velocity[Cells.size()-1]));
+    return rs(Cells[Cells.size()-1],Cells[0],
+	      0.5*(vertex_velocity[0]+
+		   vertex_velocity[Cells.size()-1]));
   }
   else
     throw UniversalError("Error in Periodic1D::CalcFlux \n Applied to bulk of grid");

@@ -560,7 +560,7 @@ ERSIG::ERSIG(double g,
 	     string const& vacuum_behaviour):
   g_(g), vacuum_behaviour_(vacuum_behaviour) {}
 
-Conserved ERSIG::Solve
+Conserved ERSIG::operator()
 (Primitive const& left,
  Primitive const& right,
  double velocity) const

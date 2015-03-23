@@ -195,7 +195,7 @@ namespace {
       const Primitive right = Interpolation.InterpState
 	(Vertices, Cells, VertexVelocity[i], i, 1,dt);
       try{
-	res[i] = rs.Solve(left, right, VertexVelocity[i]);
+	res[i] = rs(left, right, VertexVelocity[i]);
       }
       catch(UniversalError& eo){
 	riemann_solver_rethrow(left,

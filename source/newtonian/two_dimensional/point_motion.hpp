@@ -22,9 +22,11 @@ public:
     \param time The simulation time
     \return Velocities of the points
    */
-  virtual vector<Vector2D> operator()(Tessellation const& tess,
-				      vector<ComputationalCell> const& cells,
-				      double time) const = 0;
+  virtual vector<Vector2D> operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells,
+   double time) const = 0;
+
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
 };

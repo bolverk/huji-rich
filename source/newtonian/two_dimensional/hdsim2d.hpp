@@ -100,9 +100,6 @@ public:
   */
   void HilbertArrange(int innernum=0);
 
-  //! \brief container for the indices of the custom evolution
-  vector<size_t> custom_evolution_indices;
-
   /*! \brief Class constructor
     \param tess Voronoi tessellation method
     \param eos Equation of state

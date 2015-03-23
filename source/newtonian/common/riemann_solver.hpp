@@ -19,7 +19,7 @@ public:
     \param velocity Velocity of the vertex
     \return Corrected fluxes
    */
-  virtual Conserved Solve
+  virtual Conserved operator()
   (Primitive const& left, Primitive const& right, double velocity) const = 0;
 
   virtual ~RiemannSolver(void);

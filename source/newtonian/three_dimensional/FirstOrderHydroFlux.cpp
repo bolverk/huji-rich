@@ -51,9 +51,9 @@ namespace
 		const double fv=0;
 		Conserved sol;
 		if(real_index==0)
-			sol = rs.Solve(preal,pghost,fv);
+			sol = rs(preal,pghost,fv);
 		else
-			sol = rs.Solve(pghost,preal,fv);
+			sol = rs(pghost,preal,fv);
 		Conserved3D res(sol.Mass,sol.Momentum.x*normal+sol.Momentum.y*parallel,
 			sol.Energy);
 		if(!other.tracers.empty())
@@ -68,7 +68,7 @@ namespace
 		Face const& face = tess.GetFace(index);
 		const Vector3D normal=normalize(tess.Normal(index));
 		const double fv=ScalarProd(face_vel,normal);
-		const Conserved sol = rs.Solve(calc_primitive(cells[face.neighbors.first],
+		const Conserved sol = rs(calc_primitive(cells[face.neighbors.first],
 			eos,normal),calc_primitive(cells[face.neighbors.second],
 			eos,normal),fv);
 		const ComputationalCell& donor = cells[sol.Mass>0 ? face.neighbors.first :

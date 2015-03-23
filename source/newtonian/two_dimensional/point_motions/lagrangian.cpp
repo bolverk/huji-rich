@@ -1,8 +1,12 @@
 #include "lagrangian.hpp"
 
-Vector2D Lagrangian::CalcVelocity
-(int index, Tessellation const& /*tessellation*/,
- vector<Primitive> const& primitives,double /*time*/)
+vector<Vector2D> Lagrangian::operator()
+  (const Tessellation& /*tess*/,
+   const vector<ComputationalCell>& cells,
+   const double /*time*/) const 
 {
-  return primitives[static_cast<size_t>(index)].Velocity;
+  vector<Vector2D> res(cells.size());
+  for(size_t i=0;i<cells.size();++i)
+    res[i] = cells[i].velocity;
+  return res;
 }

@@ -51,7 +51,7 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 						      ghost : cells[static_cast<size_t>(other)],n,p),
 					       rotate(edge.neighbors.second==index ?
 						      ghost : cells[static_cast<size_t>(other)],n,p));
-  return rotate(rs.Solve(states.first, states.second, Projection(facevelocity,n)),n,p);
+  return rotate(rs(states.first, states.second, Projection(facevelocity,n)),n,p);
 }
 
 Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedintensive*/,

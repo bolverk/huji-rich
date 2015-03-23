@@ -13,9 +13,10 @@ class Lagrangian: public PointMotion
 {
 public:
 
-  Vector2D CalcVelocity
-  (int index, Tessellation const& /*tessellation*/,
-   vector<Primitive> const& primitives,double time);
+  vector<Vector2D> operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells,
+   const double time) const;   
 };
 
 #endif // LAGRANGIAN_HPP

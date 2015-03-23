@@ -656,7 +656,7 @@ Conserved FluxInBulk(Vector2D const& normaldir,
 	const Primitive rotated_left = RotatePrimitive(normaldir, paraldir, left);
 	const Primitive rotated_right = RotatePrimitive(normaldir, paraldir, right);
 	const double normal_speed = Projection(edge_velocity,normaldir);
-	const Conserved res = rs.Solve(rotated_left, rotated_right, normal_speed);
+	const Conserved res = rs(rotated_left, rotated_right, normal_speed);
 	return RotateFluxBack(res, normaldir, paraldir);
 }
 
