@@ -62,11 +62,6 @@ public:
 	friend int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,
 		int NewIndex,Vector2D const& NewPoint);
 
-	vector<Vector2D> calc_edge_velocities
-	(const HydroBoundaryConditions& hbc,
-	 const vector<Vector2D>& point_velocities,
-	 double time)const;
-
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const;
 

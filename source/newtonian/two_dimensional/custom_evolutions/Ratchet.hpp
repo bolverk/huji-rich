@@ -19,6 +19,7 @@ public:
 
 	/*! \brief Class constructor
 	\param dir Direction of the flow
+	\param pg Physical geometry
 	*/
   Ratchet(DIRECTION dir, const PhysicalGeometry& pg);
 

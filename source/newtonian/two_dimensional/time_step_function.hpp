@@ -20,6 +20,7 @@ public:
   /*! \brief Calculates the time step
     \param tess Tessellation
     \param cells Primitive variables
+    \param eos Equation of state
     \param point_velocities Velocities of the mesh generating points
     \param time Time
     \return Time step

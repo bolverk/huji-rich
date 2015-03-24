@@ -1,3 +1,8 @@
+/*! \file simple_cell_updater.hpp
+  \author Almog Yalinewich
+  \brief Simple cell updater
+ */
+
 #ifndef SIMPLE_CELL_UPDATER_HPP
 #define SIMPLE_CELL_UPDATER_HPP 1
 
@@ -6,6 +11,7 @@
 
 using std::vector;
 
+//! \brief Simple cell updater
 class SimpleCellUpdater: public CellUpdater
 {
 public:

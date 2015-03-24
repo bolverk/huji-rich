@@ -306,11 +306,6 @@ const vector<ComputationalCell>& hdsim::getAllCells(void) const
   return cells_;
 }
 
-const vector<Extensive>& hdsim::getAllConserved(void) const
-{
-  return extensives_;
-}
-
 /*
 void hdsim::HilbertArrange(int innernum)
 {
@@ -348,12 +343,12 @@ const OuterBoundary& hdsim::getOuterBoundary(void) const
   return obc_;
 }
 
-const vector<Extensive>& hdsim::getExtensives(void) const
+const vector<Extensive>& hdsim::getAllExtensives(void) const
 {
   return extensives_;
 }
 
-const vector<ComputationalCell>& hdsim::getCells(void) const
+const vector<ComputationalCell>& hdsim::getAllCells(void) const
 {
   return cells_;
 }

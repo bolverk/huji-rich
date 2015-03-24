@@ -75,9 +75,10 @@ public:
   void SetProcessorMovement(ProcessorUpdate *procupdate);
   #endif
 
+  /*! \brief Returns a list of all computational cells
+    \return List of all computational cells
+   */
   const vector<ComputationalCell>& getAllCells(void) const;
-
-  const vector<Extensive>& getAllConserved(void) const;
 
   /*! \brief Access to physical geometry
     \return Physical geometry
@@ -102,10 +103,15 @@ public:
 
   /*! \brief Class constructor
     \param tess Voronoi tessellation method
+    \param obc Outer boundary conditions
+    \param pg Physical geometry
+    \param init_cond Initial conditions
     \param eos Equation of state
     \param pointmotion Motion of the mesh generating points
     \param external_force External force
-    \param obc Outer boundary conditions
+    \param tsf Time step function
+    \param fc Flux calculator
+    \param cu Cell updater
   */
   hdsim(Tessellation& tess,
 	const OuterBoundary& obc,
@@ -169,11 +175,15 @@ public:
   void changePhysicalGeometry(const PhysicalGeometry* pg);
 
   /*! \brief Adds a tracer to the simulation
+    \param name Name of tracer
     \param tp The spatial distribution of the tracer to add
   */
   void addTracer(const std::string& name,
 		 const SpatialDistribution& tp);
 
+  /*! \brief Sets the start time
+    \param t_start Start time
+   */
   void setStartTime(double t_start);
 
   // Diagnostics
@@ -209,9 +219,10 @@ public:
    */
   const OuterBoundary& getOuterBoundary(void) const;
 
-  const vector<Extensive>& getExtensives(void) const;
-
-  const vector<ComputationalCell>& getCells(void) const;
+  /*! \brief Returns a list of extensive variables
+    \return List of extensive variables
+   */
+  const vector<Extensive>& getAllExtensives(void) const;
 };
 
 #endif
