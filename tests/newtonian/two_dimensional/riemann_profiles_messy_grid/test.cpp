@@ -15,6 +15,7 @@
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
+#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 //#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
@@ -28,6 +29,7 @@
 #include "source/newtonian/test_2d/piecewise.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include <fenv.h>
 
 using namespace std;
 using namespace simulation2d;
@@ -121,7 +123,7 @@ private:
   const vector<Vector2D> init_points_;
   VoronoiMesh tess_;
   const IdealGas eos_;
-  Eulerian pm_naive_;
+  Lagrangian pm_naive_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
   //  RoundCells point_motion_;
@@ -146,6 +148,7 @@ namespace {
 
 int main(void)
 {
+  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 
   #ifdef RICH_MPI
   MPI_Init(NULL, NULL);

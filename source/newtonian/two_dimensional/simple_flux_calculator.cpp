@@ -109,15 +109,15 @@ namespace {
       const size_t right_index = static_cast<size_t>(edge.neighbors.second);
       res.left = convert_to_primitive(cells[left_index],eos);
       res.right = convert_to_primitive(cells[right_index],eos);
+      res.n = tess.GetMeshPoint(edge.neighbors.second) - 
+	tess.GetMeshPoint(edge.neighbors.first);
       res.velocity = ScalarProd
 	(res.n,tess.CalcFaceVelocity
 	 (point_velocities[left_index], 
 	  point_velocities[right_index],
 	  tess.GetCellCM(edge.neighbors.first), 
 	  tess.GetCellCM(edge.neighbors.second),
-	  calc_centroid(edge)));
-      res.n = tess.GetMeshPoint(edge.neighbors.second) - 
-	tess.GetMeshPoint(edge.neighbors.first);
+	  calc_centroid(edge)))/abs(res.n);
     }
     return res;
   }

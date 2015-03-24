@@ -51,17 +51,18 @@ def main():
     pa = [prof.CalcPrim((i-offset)/t).Pressure for i in xs]
     va = [prof.CalcPrim((i-offset)/t).Velocity for i in xs]
 
-    import pylab
-    pylab.subplot(311)
-    pylab.plot(xs,ds,'.')
-    pylab.plot(xs,da)
-    pylab.subplot(312)
-    pylab.plot(xs,ps,'.')
-    pylab.plot(xs,pa)
-    pylab.subplot(313)
-    pylab.plot(xs,vs,'.')
-    pylab.plot(xs,va)
-    pylab.show()
+    if False:
+        import pylab
+        pylab.subplot(311)
+        pylab.plot(xs,ds,'.')
+        pylab.plot(xs,da)
+        pylab.subplot(312)
+        pylab.plot(xs,ps,'.')
+        pylab.plot(xs,pa)
+        pylab.subplot(313)
+        pylab.plot(xs,vs,'.')
+        pylab.plot(xs,va)
+        pylab.show()
 
     gof1 = goodness_of_fit(ds,da)
     gof2 = goodness_of_fit(ps,pa)
