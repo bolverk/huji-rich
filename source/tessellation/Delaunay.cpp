@@ -503,18 +503,8 @@ double Delaunay::CalculateRadius(int facet)
 
 void Delaunay::CheckInput()
 {
-	int n=static_cast<int>(cor.size());
-	for(int i=0;i<n;++i)
-	{
-		if(!InCell(cell_points,cor[static_cast<size_t>(i)]))
-		{
-			UniversalError eo("Mesh point outside cell");
-			eo.AddEntry("Point number",i);
-			eo.AddEntry("X location",cor[static_cast<size_t>(i)].x);
-			eo.AddEntry("Y location",cor[static_cast<size_t>(i)].y);
-			throw eo;
-		}
-	}
+  for(size_t i=0;i<cor.size();++i)
+    assert(InCell(cell_points,cor[i]));
 }
 
 int Delaunay::GetOriginalIndex(int NewPoint) const

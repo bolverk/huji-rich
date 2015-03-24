@@ -16,7 +16,7 @@
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-//#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
@@ -88,7 +88,7 @@ public:
     pm_naive_(),
     rs_(),
     hbc_(rs_),
-  //    point_motion_(pm_naive_,hbc_),
+    point_motion_(pm_naive_,eos_),
     force_(),
     tsf_(0.3),
     fc_(rs_),
@@ -101,8 +101,7 @@ public:
 	 pg_,
 	 calc_init_cond(tess_),
 	 eos_,
-	 //	 point_motion_,
-	 pm_naive_,
+	 point_motion_,
 	 force_,
 	 tsf_,
 	 fc_,
@@ -126,7 +125,7 @@ private:
   Lagrangian pm_naive_;
   const Hllc rs_;
   const RigidWallHydro hbc_;
-  //  RoundCells point_motion_;
+  RoundCells point_motion_;
   ZeroForce force_;
   const SimpleCFL tsf_;
   const SimpleFluxCalculator fc_;
