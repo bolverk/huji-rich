@@ -34,12 +34,12 @@ namespace {
 
     size_t getLength(void) const
     {
-      return sim_.getExtensives().size();
+      return sim_.getAllExtensives().size();
     }
 
     Extensive operator()(size_t i) const
     {
-      return sim_.getExtensives()[i];
+      return sim_.getAllExtensives()[i];
     }
 
   private:

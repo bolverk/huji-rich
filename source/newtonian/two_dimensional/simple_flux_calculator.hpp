@@ -6,7 +6,7 @@
 #ifndef SIMPLE_FLUX_CALCULATOR_HPP
 #define SIMPLE_FLUX_CALCULATOR_HPP 1
 
-#include "flux_calculator.hpp"
+#include "flux_calculator_2d.hpp"
 #include "../common/riemann_solver.hpp"
 
 //! \brief Simple flux calculator

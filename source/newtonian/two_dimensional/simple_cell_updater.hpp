@@ -6,7 +6,7 @@
 #ifndef SIMPLE_CELL_UPDATER_HPP
 #define SIMPLE_CELL_UPDATER_HPP 1
 
-#include "cell_updater.hpp"
+#include "cell_updater_2d.hpp"
 #include "../../misc/utils.hpp"
 
 using std::vector;

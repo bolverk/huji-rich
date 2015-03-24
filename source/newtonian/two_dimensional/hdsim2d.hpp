@@ -27,8 +27,8 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 #include "simple_cfl.hpp"
-#include "flux_calculator.hpp"
-#include "cell_updater.hpp"
+#include "flux_calculator_2d.hpp"
+#include "cell_updater_2d.hpp"
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim

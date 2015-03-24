@@ -8,7 +8,7 @@
 
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../tessellation/tessellation.hpp"
-#include "computational_cell.hpp"
+#include "computational_cell_2d.hpp"
 
 /*! \brief Abstract class for motion of mesh generating points
  */

@@ -9,7 +9,7 @@
 #include <vector>
 #include "extensive.hpp"
 #include "../../tessellation/tessellation.hpp"
-#include "computational_cell.hpp"
+#include "computational_cell_2d.hpp"
 #include "../common/equation_of_state.hpp"
 
 using std::vector;

@@ -121,7 +121,7 @@ namespace {
 
     double operator()(size_t i) const
     {
-      return scpe_(sim_.getCells()[i]);
+      return scpe_(sim_.getAllCells()[i]);
     }
 
   private:
@@ -166,12 +166,12 @@ namespace {
 
     size_t getLength(void) const
     {
-      return sim_.getCells().size();
+      return sim_.getAllCells().size();
     }
 		
     double operator()(size_t i) const
     {
-      return sim_.getCells()[i].tracers.find(name_)->second;
+      return sim_.getAllCells()[i].tracers.find(name_)->second;
     }
 
   private:
@@ -211,8 +211,8 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
     ("Cycle number",vector<int>(1,sim.getCycle()));
 
   for(std::map<std::string,double>::const_iterator it=
-	sim.getCells().front().tracers.begin();
-      it!=sim.getCells().front().tracers.end(); ++it)
+	sim.getAllCells().front().tracers.begin();
+      it!=sim.getAllCells().front().tracers.end(); ++it)
     h5sc(it->first,serial_generate(TracerSlice(sim,it->first)));
 }
 

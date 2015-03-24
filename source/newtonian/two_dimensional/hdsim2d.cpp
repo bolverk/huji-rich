@@ -347,8 +347,3 @@ const vector<Extensive>& hdsim::getAllExtensives(void) const
 {
   return extensives_;
 }
-
-const vector<ComputationalCell>& hdsim::getAllCells(void) const
-{
-  return cells_;
-}

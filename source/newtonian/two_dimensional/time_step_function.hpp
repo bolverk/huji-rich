@@ -9,7 +9,7 @@
 #include "../../tessellation/tessellation.hpp"
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../misc/utils.hpp"
-#include "computational_cell.hpp"
+#include "computational_cell_2d.hpp"
 #include "../common/equation_of_state.hpp"
 
 //! \brief Abstract class for time step function

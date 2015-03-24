@@ -7,7 +7,7 @@
 #define CELL_UPDATER_HPP 1
 
 #include <vector>
-#include "computational_cell.hpp"
+#include "computational_cell_2d.hpp"
 #include "../../tessellation/tessellation.hpp"
 #include "physical_geometry.hpp"
 #include "../common/equation_of_state.hpp"
