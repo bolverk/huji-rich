@@ -119,7 +119,7 @@ def main():
                        analytic[f],'.')
         pylab.show()
 
-    return l1_data['density']<0.4 and l1_data['pressure']<12 and l1_data['velocity']<1.3
+    return l1_data['density']<0.5 and l1_data['pressure']<14 and l1_data['velocity']<1.5
 
 import sys
 if __name__=='__main__':

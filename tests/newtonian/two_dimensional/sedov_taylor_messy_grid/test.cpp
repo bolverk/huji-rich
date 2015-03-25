@@ -30,6 +30,8 @@
 #include "source/mpi/MeshPointsMPI.hpp"
 #include "source/tessellation/shape_2d.hpp"
 #include "source/newtonian/test_2d/piecewise.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -52,49 +54,46 @@ namespace {
   }
 #endif
 
+  vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      res[i].density = 1;
+      res[i].pressure = 
+	abs(tess.GetMeshPoint(static_cast<int>(i)))<0.06 ? 1e4 : 0.01;
+      res[i].velocity = Vector2D(0,0);
+    }
+    return res;
+  }
+
   class SimData
   {
   public:
 
     SimData(void):
+      pg_(),
       width_(1),
       outer_(0,width_,width_,0),
-#ifdef RICH_MPI
-      proc_tess_(process_positions(outer_),outer_),
-      init_points_(distribute_grid
-		   (proc_tess_,
-		    CartesianGridGenerator
-		    (30,30, outer_.getBoundary().first,
-		     outer_.getBoundary().second))),
-#else
       init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
-#endif
-      tess_(),
-      interp_method_(),
+      tess_(init_points_, outer_),
       eos_(5./3.),
       point_motion_(),
       rs_(),
-      hbc_(rs_),
       force_(),
-      sim_(init_points_,
-	   tess_,
-#ifdef RICH_MPI
-	   proc_tess_,
-#endif
-	   interp_method_,
-	   Uniform2D(1),
-	   Piecewise(Circle(Vector2D(0,0),0.06),
-		     Uniform2D(1e4),
-		     Uniform2D(0.01)),
-	   Uniform2D(0),
-	   Uniform2D(0),
+      tsf_(0.3),
+      fc_(rs_),
+      cu_(),
+      sim_(tess_,
+	   outer_,
+	   pg_,
+	   calc_init_cond(tess_),
 	   eos_,
-	   rs_,
 	   point_motion_,
 	   force_,
-	   outer_,
-	   hbc_) {}
+	   tsf_,
+	   fc_,
+	   cu_) {}
 
     hdsim& getSim(void)
     {
@@ -102,19 +101,19 @@ namespace {
     }
 
   private:
+    const SlabSymmetry pg_;
     const double width_;
     const SquareBox outer_;
-#ifdef RICH_MPI
-    VoronoiMesh proc_tess_;
-#endif
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
     PCM2D interp_method_;
     const IdealGas eos_;
     Lagrangian point_motion_;
     const Hllc rs_;
-    const RigidWallHydro hbc_;
     ZeroForce force_;
+    const SimpleCFL tsf_;
+    const SimpleFluxCalculator fc_;
+    const SimpleCellUpdater cu_;
     hdsim sim_;
   };
 
