@@ -1,3 +1,5 @@
+//! \file acoustic.cpp
+
 #include <cmath>
 #include "acoustic.hpp"
 #include "../../misc/universal_error.hpp"

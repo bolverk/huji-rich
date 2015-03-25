@@ -56,7 +56,7 @@ hdsim::hdsim
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const PointMotion& point_motion,
- const SourceTerm& external_force,
+ const SourceTerm& source,
  const TimeStepFunction& tsf,
  const FluxCalculator& fc,
  const CellUpdater& cu):
@@ -69,7 +69,7 @@ hdsim::hdsim
 			      cells,
 			      eos)),
   point_motion_(point_motion),
-  external_force_(external_force),
+  source_(source),
   time_(0),
   cycle_(0),
   pg_(pg),
@@ -124,6 +124,16 @@ void hdsim::TimeAdvance(void)
 		    tess_,
 		    dt,
 		    extensives_);
+
+  ExternalForceContribution(tess_,
+			    pg_,
+			    cells_,
+			    fluxes,
+			    point_velocities,
+			    source_,
+			    time_,
+			    dt,
+			    extensives_);
 
   MoveMeshPoints(point_velocities, dt, tess_);
 

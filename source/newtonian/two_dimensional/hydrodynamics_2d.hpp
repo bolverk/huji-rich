@@ -287,28 +287,17 @@ Conserved FluxInBulk(Vector2D const& normaldir,
   \param force External force
   \param t Time
   \param dt Time step
-  \param conserved_extensive Extensive conserved variables
-  \param hbc Hydrodynamic boundary conditions
-  \param fluxes Hydrodynamic fluxes
-  \param point_velocity Velocities of the mesh generating points
-  \param g Output
-  \param coldflows_flag Toggles cold flows
-  \param tracers Tracers
-  \param lengthes The corrected length of the edges
  */
-void ExternalForceContribution(Tessellation const& tess,
-			       const PhysicalGeometry& pg,
-			       vector<Primitive> const& cells,
-			       SourceTerm& force,
-			       double t,
-			       double dt,
-			       vector<Conserved>& conserved_extensive,
-			       HydroBoundaryConditions const& hbc,
-			       vector<Conserved> const& fluxes,
-			       vector<Vector2D> const& point_velocity,
-			       vector<double> &g,
-			       bool coldflows_flag,vector<vector<double> > &tracers,
-				   vector<double> const& lengthes);
+void ExternalForceContribution
+(const Tessellation& tess,
+ const PhysicalGeometry& pg,
+ const vector<ComputationalCell>& cells,
+ const vector<Extensive>& fluxes,
+ const vector<Vector2D>& point_velocities,
+ const SourceTerm& force,
+ double t,
+ double dt,
+ vector<Extensive>& extensives);
 
 /*! \brief Second order time advance
   \param tess Tessellation

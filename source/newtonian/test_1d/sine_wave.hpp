@@ -25,7 +25,7 @@ public:
 	   double phase,
 	   double offset);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 

@@ -5,16 +5,32 @@
 SimpleFluxCalculator::SimpleFluxCalculator(const RiemannSolver& rs):
   rs_(rs) {}
 
-namespace {
-  Primitive convert_to_primitive(const ComputationalCell& cell,
-				 const EquationOfState& eos)
-  {
-    return CalcPrimitive(cell.density,
-			 cell.pressure,
-			 cell.velocity,
-			 eos);
-  }
+Primitive convert_to_primitive(const ComputationalCell& cell,
+			       const EquationOfState& eos)
+{
+  return CalcPrimitive(cell.density,
+		       cell.pressure,
+		       cell.velocity,
+		       eos);
+}
 
+Primitive reflect(const Primitive& p,
+		  const Vector2D& axis)
+{
+  return Primitive(p.Density,
+		   p.Pressure,
+		   Reflect(p.Velocity,axis),
+		   p.Energy,
+		   p.SoundSpeed);
+}
+
+Vector2D remove_parallel_component(const Vector2D& v,
+				   const Vector2D& p)
+{
+  return v - p*ScalarProd(v,p)/ScalarProd(p,p);
+}
+
+namespace {
   template<class S, class T> class Transform
   {
   public:
@@ -46,16 +62,6 @@ namespace {
     return std::pair<T,T>(t(s.first),t(s.second));
   }
 
-  Primitive reflect(const Primitive& p,
-		    const Vector2D& axis)
-  {
-    return Primitive(p.Density,
-		     p.Pressure,
-		     Reflect(p.Velocity,axis),
-		     p.Energy,
-		     p.SoundSpeed);
-  }
-
   class RiemannProblemInput
   {
   public:
@@ -69,12 +75,6 @@ namespace {
     RiemannProblemInput(void):
       left(), right(), velocity(0), n(), p() {}
   };
-
-  Vector2D remove_parallel_component(const Vector2D& v,
-				     const Vector2D& p)
-  {
-    return v - p*ScalarProd(v,p)/ScalarProd(p,p);
-  }
 
   RiemannProblemInput riemann_reduce
   (const Tessellation& tess,
@@ -123,6 +123,44 @@ namespace {
   }
 }
 
+namespace {
+  Primitive rotate(const Primitive& primitive,
+		   const Vector2D& n,
+		   const Vector2D& p)
+  {
+    return Primitive(primitive.Density,
+		     primitive.Pressure,
+		     Vector2D(Projection(primitive.Velocity,n),
+			      Projection(primitive.Velocity,p)),
+		     primitive.Energy,
+		     primitive.SoundSpeed);			      
+  }
+
+  Conserved rotate_back(const Conserved& c,
+			const Vector2D& n,
+			const Vector2D& p)
+  {
+    return Conserved(c.Mass,
+		     c.Momentum.x*n/abs(n)+
+		     c.Momentum.y*p/abs(p),
+		     c.Energy);
+  }
+}
+
+Conserved rotate_solve_rotate_back
+(const RiemannSolver& rs,
+ const Primitive& right,
+ const Primitive& left,
+ const double velocity,
+ const Vector2D& n,
+ const Vector2D& p)
+{
+  return rotate_back(rs(rotate(left,n,p),
+			rotate(right,n,p),
+			velocity),
+		     n,p);
+}
+
 Conserved SimpleFluxCalculator::calcHydroFlux
 (const Tessellation& tess,
  const vector<Vector2D>& point_velocities,
@@ -136,14 +174,12 @@ Conserved SimpleFluxCalculator::calcHydroFlux
 					   cells,
 					   eos,
 					   edge);
-  rpi.left.Velocity = Vector2D(Projection(rpi.left.Velocity,rpi.n),
-			       Projection(rpi.left.Velocity,rpi.p));
-  rpi.right.Velocity = Vector2D(Projection(rpi.right.Velocity,rpi.n),
-				Projection(rpi.right.Velocity,rpi.p));
-  Conserved res = rs_(rpi.left, rpi.right, rpi.velocity);
-  res.Momentum = res.Momentum.x*rpi.n/abs(rpi.n)+
-    res.Momentum.y*rpi.p/abs(rpi.p);
-  return res;
+  return rotate_solve_rotate_back(rs_,
+				  rpi.left,
+				  rpi.right,
+				  rpi.velocity,
+				  rpi.n,
+				  rpi.p);
 }
 
 vector<Extensive> SimpleFluxCalculator::operator()

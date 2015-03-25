@@ -36,7 +36,7 @@ public:
   ConstEntropy(SpatialDistribution1D const& density,
 	       double s, double g);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 
@@ -60,7 +60,7 @@ public:
 		 SpatialDistribution1D const& density,
 		 EquationOfState const& eos);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 
@@ -94,7 +94,7 @@ public:
 		  SpatialDistribution1D const& sound_speed,
 		  double g);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 
@@ -159,7 +159,7 @@ public:
 	      SpatialDistribution1D const& pressure,
 	      double adiabatic_index);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 

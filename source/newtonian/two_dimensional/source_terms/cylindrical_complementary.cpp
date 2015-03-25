@@ -41,28 +41,25 @@ namespace {
 CylindricalComplementary::CylindricalComplementary(const Axis& axis):
   axis_(axis) {}
 
-Conserved CylindricalComplementary::Calculate
-(Tessellation const& tess,
+vector<Extensive> CylindricalComplementary::operator()
+(const Tessellation& tess,
  const PhysicalGeometry& pg,
- vector<Primitive> const& cells,
- int point,
- vector<Conserved> const& /*fluxes*/,
- vector<Vector2D> const& /*point_velocity*/,
- HydroBoundaryConditions const& /*hbc*/,
- vector<vector<double> > const& /*tracer*/,
- vector<double>& /*dtracer*/,
- vector<double> const& /*lengthes*/,
- double /*t*/,
- double /*dt*/)
+ const vector<ComputationalCell>& cells,
+ const vector<Extensive>& /*fluxes*/,
+ const vector<Vector2D>& /*point_velocities*/,
+ const double /*time*/) const
 {
-  const double p = cells[static_cast<size_t>(point)].Pressure;
-  const double r = distance_from_axis(tess.GetCellCM(point),
-				      axis_);
+  vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
   const Vector2D r_hat = cross_z(axis_.direction);
-  const double volume = pg.calcVolume
-    (serial_generate(CellEdgesGetter(tess,point)));
-  return volume*Conserved
-    (0,
-     (p/r)*r_hat/abs(r_hat),
-     0);
+  for(size_t i=0;i<res.size();++i){
+    const double p = cells[i].pressure; 
+    const double r = distance_from_axis
+      (tess.GetCellCM(static_cast<int>(i)),axis_);
+    const double volume = pg.calcVolume
+      (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
+    res[i].mass = 0;
+    res[i].momentum = volume*(p/r)*r_hat/abs(r_hat);
+    res[i].energy = 0;
+  }
+  return res;
 }

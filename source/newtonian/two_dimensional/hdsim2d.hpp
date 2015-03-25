@@ -47,7 +47,7 @@ private:
 
   const PointMotion& point_motion_;
 
-  const SourceTerm& external_force_;
+  const SourceTerm& source_;
 
   double time_;
 

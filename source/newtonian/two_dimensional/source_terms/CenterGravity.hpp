@@ -12,27 +12,25 @@
 class CenterGravity: public Acceleration
 {
 public:
-	/*!
-	\brief Class constructor
-	\param M The mass of the point source
-	\param Rmin The softenning length
-	\param center The location of the point source
-	*/
-	CenterGravity(double M,double Rmin,Vector2D center=Vector2D());
+  /*! \brief Class constructor
+    \param M The mass of the point source
+    \param Rmin The softenning length
+    \param center The location of the point source
+  */
+  CenterGravity
+  (double M,double Rmin,const Vector2D& center);
 
-	Vector2D Calculate
-	(Tessellation const& tess,
-	 vector<Primitive> const& cells,
-	 int point,vector<Conserved> const& fluxes,
-	 vector<Vector2D> const& point_velocity,
-	 HydroBoundaryConditions const& hbc,
-	 vector<vector<double> > const& tracers,
-	 double time,double dt);
+  Vector2D operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells,
+   const vector<Extensive>& fluxes,
+   const double time,
+   const int point) const;
 
 private:
-	double M_;
-	double Rmin_;
-	Vector2D _center;
+  const double M_;
+  const double Rmin_;
+  const Vector2D center_;
 };
 
 #endif // CENTERGRAVITY_HPP

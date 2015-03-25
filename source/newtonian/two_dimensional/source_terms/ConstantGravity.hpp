@@ -12,23 +12,20 @@
 class ConstantGravity: public Acceleration
 {
 public:
-	/*!
-	\brief Class constructor
-	\param force The acceleration vector
-	*/
-	ConstantGravity(Vector2D const& force);
-
-  Vector2D Calculate(Tessellation const& tess,
-		     vector<Primitive> const& cells,
-		     int point,
-		     vector<Conserved> const& fluxes,
-		     vector<Vector2D> const& point_velocity,
-		     HydroBoundaryConditions const& hbc,
-		     vector<vector<double> > const& tracers,
-		     double time,double dt);
+  /*! \brief Class constructor
+    \param force The acceleration vector
+  */
+  ConstantGravity(Vector2D const& force);
+  
+  Vector2D operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells,
+   const vector<Extensive>& fluxes,
+   const double time,
+   const int point) const;
 
 private:
-	Vector2D force_;
+  const Vector2D force_;
 };
 
 #endif // CONSTANTGRAVITY_HPP

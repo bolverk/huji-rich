@@ -23,7 +23,7 @@ public:
 	*/
   Collela(double ref, double a, double l, double offset);
 
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 
 private:
 

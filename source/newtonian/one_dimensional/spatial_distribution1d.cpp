@@ -8,7 +8,7 @@ SpatialDistribution1D::~SpatialDistribution1D(void) {}
 
 Uniform::Uniform(double val): _val(val) {}
 
-double Uniform::EvalAt(double /*x*/) const
+double Uniform::operator()(double /*x*/) const
 {
   return _val;
 }
@@ -17,7 +17,7 @@ Step::Step(double val1, double val2,
 	   double steppos):
   _val1(val1), _val2(val2), _steppos(steppos) {}
 
-double Step::EvalAt(double x) const
+double Step::operator()(double x) const
 {
   if (x>_steppos)
     return _val2;
@@ -34,7 +34,7 @@ TwoSteps::TwoSteps(double ivl, double ilip,
   lip(ilip),
   rip(irip) {}
 
-double TwoSteps::EvalAt(double x) const
+double TwoSteps::operator()(double x) const
 {
   if (x<lip)
     return vl;

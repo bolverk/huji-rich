@@ -16,16 +16,13 @@ public:
    */
   CylindricalComplementary(const Axis& axis);
 
-  Conserved Calculate
-  (Tessellation const& tess,
+  vector<Extensive> operator()
+  (const Tessellation& tess,
    const PhysicalGeometry& pg_,
-   vector<Primitive> const& cells,
-   int point,vector<Conserved> const& fluxes,
-   vector<Vector2D> const& point_velocity,
-   HydroBoundaryConditions const& hbc,
-   vector<vector<double> > const &tracer,vector<double> &dtracer,
-   vector<double> const& lengthes,double t,
-   double dt);
+   const vector<ComputationalCell>& cells,
+   const vector<Extensive>& fluxes,
+   const vector<Vector2D>& point_velocities,
+   const double t) const;
 
 private:
   const Axis axis_;

@@ -1,9 +1,3 @@
-graphic_flag = False
-
-if graphic_flag:
-    import matplotlib
-    matplotlib.use('Qt4Agg')
-
 def calc_error_norm(a1,a2):
 
     abs_dif = [abs(x-y) for x,y in zip(a1,a2)]
@@ -72,9 +66,14 @@ class SpatProf:
 
 def main():
 
+    graphic_flag = True
+    if graphic_flag:
+        import pylab
+
     import numpy
     import h5py
 
+    initial = h5py.File('initial.h5')
     final_data = h5py.File('final.h5')
 
     time = numpy.array(final_data['time'])[0]
@@ -90,6 +89,17 @@ def main():
                             for x in final_data['x_coordinate']]
     analytic['x_velocity'] = [spat_prof.velocity.eval(x-spat_prof.c0*time) \
                             for x in final_data['x_coordinate']]
+
+    if graphic_flag:
+        for n, field in enumerate(['density','pressure','x_velocity']):
+            pylab.subplot(3,1,n+1)
+            pylab.plot(final_data['x_coordinate'],
+                       final_data[field],'.')
+            pylab.plot(final_data['x_coordinate'],
+                       analytic[field],'.')
+            pylab.plot(initial['x_coordinate'],
+                       initial[field], '.')
+        pylab.show()
 
     error_norm = dict()
     for i in analytic.keys():

@@ -3,16 +3,12 @@
 ConstantGravity::ConstantGravity(Vector2D const& force):
 force_(force){}
 
-Vector2D ConstantGravity::Calculate
-(Tessellation const& /*tess*/,
- vector<Primitive> const& /*cells*/,
- int /*point*/,
- vector<Conserved> const& /*fluxes*/,
- vector<Vector2D> const& /*point_velocity*/,
- HydroBoundaryConditions const& /*hbc*/,
- vector<vector<double> > const& /*tracers*/,
- double /*time*/,
- double /*dt*/)
+Vector2D ConstantGravity::operator()
+(const Tessellation& /*tess*/,
+ const vector<ComputationalCell>& /*cells*/,
+ const vector<Extensive>& /*fluxes*/,
+ const double /*time*/,
+ const int /*point*/) const
 {
-	return force_;
+  return force_;
 }

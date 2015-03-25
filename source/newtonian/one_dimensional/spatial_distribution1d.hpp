@@ -14,7 +14,7 @@ public:
     \param x Position
     \result Value of the function at x
    */
-  virtual double EvalAt(double x) const = 0;
+  virtual double operator()(double x) const = 0;
 
   virtual ~SpatialDistribution1D(void);
 };
@@ -37,7 +37,7 @@ public:
     \param x Position
     \return Value at x
    */
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 };
 
 //! \brief Step distribution
@@ -67,7 +67,7 @@ public:
     \param x Position
     \return Value of the distribution at x
    */
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 };
 
 //! \brief Two steps
@@ -99,7 +99,7 @@ public:
     \param x Position
     \return Value of the distribution at x
    */
-  double EvalAt(double x) const;
+  double operator()(double x) const;
 };
 
 #endif // SPATIAL_DISTRIBUTION_1D_HPP

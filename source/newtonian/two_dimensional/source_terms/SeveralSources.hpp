@@ -13,23 +13,21 @@
 class SeveralSources :public SourceTerm
 {
 public:
-	//! \brief Class constructor
-	SeveralSources(vector<SourceTerm*> forces);
-	//! \brief Class destructor
-	~SeveralSources(void);
+  //! \brief Class constructor
+  SeveralSources(vector<SourceTerm*> forces);
+  //! \brief Class destructor
+  ~SeveralSources(void);
 
-	Conserved Calculate(Tessellation const& tess,
-			    const PhysicalGeometry& pg,
-			    vector<Primitive> const& cells,int point,
-			    vector<Conserved> const& fluxes,
-			    vector<Vector2D> const& point_velocity,
-			    HydroBoundaryConditions const& hbc,
-			    vector<vector<double> > const &tracer_extensive,
-			    vector<double> &dtracer,vector<double> const& lengthes,
-			    double time,double dt);
+  vector<Extensive> operator()
+  (const Tessellation& tess,
+   const PhysicalGeometry& pg,
+   const vector<ComputationalCell>& cells,
+   const vector<Extensive>& fluxes,
+   const vector<Vector2D>& point_velocities,
+   const double t) const;
 
 private:
-	vector<SourceTerm*> sources_;
+  vector<SourceTerm*> sources_;
 };
 
 #endif //SEVERALSOURCES_HPP

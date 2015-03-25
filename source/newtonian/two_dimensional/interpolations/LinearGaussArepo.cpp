@@ -769,10 +769,13 @@ Primitive LinearGaussArepo::Interpolate
 					      tess.GetCellCM(cell_index),rslopes_[static_cast<size_t>(cell_index)],target);
       Primitive res = CalcPrimitive(temp.Density,temp.Pressure,
 				    temp.Velocity,eos_);
-      res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,cell_index,
-					  fluxes,pv,hbc_,
-					  vector<vector<double> >(),
-					  time_,dt);
+      /*
+      res.Velocity+=0.5*dt*acc_(tess,
+				cells,
+				fluxes,
+				time_,
+				cell_index);
+      */
       res+=CalcDtFlux(cells[static_cast<size_t>(cell_index)],rslopes_[static_cast<size_t>(cell_index)],dt,vface);
       if(res.Pressure<0)
 	return temp;
@@ -786,7 +789,7 @@ Primitive LinearGaussArepo::Interpolate
 	const Primitive temp = interp_primitive(cells[static_cast<size_t>(other)],tess.GetMeshPoint(other),
 						rslopes_[static_cast<size_t>(other)],target);
 	Primitive res = CalcPrimitive(temp.Density,temp.Pressure,temp.Velocity,eos_);
-	res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,other,fluxes,pv,hbc_,vector<vector<double> >(), time_,dt);
+	//res.Velocity+=0.5*dt*acc_.Calculate(tess,cells,other,fluxes,pv,hbc_,vector<vector<double> >(), time_,dt);
 	res+=CalcDtFlux(cells[static_cast<size_t>(other)],rslopes_[static_cast<size_t>(other)],
 		dt,vface);
 	res = CalcPrimitive(res.Density,res.Pressure,res.Velocity,eos_);

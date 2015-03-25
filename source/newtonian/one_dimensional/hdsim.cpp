@@ -29,10 +29,10 @@ namespace {
     vector<Primitive> res(vertices.size()-1);
     for(size_t i = 0; i<vertices.size() - 1; i++){
       const double r = 0.5*(vertices[i] + vertices[i+1]);
-      const double d = density.EvalAt(r);
-      const double p = pressure.EvalAt(r);
-      const Vector2D v(paravelocity.EvalAt(r),
-		       perpvelocity.EvalAt(r));
+      const double d = density(r);
+      const double p = pressure(r);
+      const Vector2D v(paravelocity(r),
+		       perpvelocity(r));
       res[i] = CalcPrimitive(d, p, v, eos);
     }
     return res;

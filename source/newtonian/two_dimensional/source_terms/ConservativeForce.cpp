@@ -4,50 +4,58 @@ using std::min;
 using std::sqrt;
 
 namespace {
-	Vector2D MassFlux(Tessellation const& tess,int point,
-		vector<Conserved> const& fluxes,
-		HydroBoundaryConditions const& hbc,vector<double> const& lengthes)
-	{
-		Vector2D dm;
-		vector<int> edge_index=tess.GetCellEdges(point);
-		Vector2D center=tess.GetMeshPoint(point);
-		int n=static_cast<int>(edge_index.size());
-		Edge edge;
-		for(int i=0;i<n;++i)
-		{
-		  edge=tess.GetEdge(edge_index[static_cast<size_t>(i)]);
-			if(point==edge.neighbors.first)
-				if(edge.neighbors.second>-1)
-				{
-				  dm-=lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*
-						(center-tess.GetMeshPoint(edge.neighbors.second));
-				}
-				else
-				{
-					Vector2D r=hbc.Normal(edge,tess);
-					dm-=2*lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*r;
-				}
-			else
-				if(point==edge.neighbors.second)
-					if(edge.neighbors.first>-1)
-					{
-					  dm+=lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*
-							(center-tess.GetMeshPoint(edge.neighbors.first));
-					}
-					else
-					{
-						Vector2D r=hbc.Normal(edge,tess);
-						dm+=2*lengthes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])]*fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].Mass*r;
-					}
-				else
-					throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
-		}
-		return dm;
+
+  Vector2D remove_parallel_component(const Vector2D& s,
+				     const Vector2D& r)
+  {
+    return s-r*ScalarProd(r,s)/ScalarProd(r,r);
+  }
+
+  Vector2D MassFlux(const Tessellation& tess,
+		    const PhysicalGeometry& pg,
+		    const vector<Extensive>& fluxes,
+		    int point)
+  {
+    Vector2D dm;
+    const vector<int> edge_index=tess.GetCellEdges(point);
+    const Vector2D center=tess.GetMeshPoint(point);
+    for(size_t i=0;i<edge_index.size();++i)
+      {
+	const Edge& edge = tess.GetEdge(edge_index[i]);
+	if(point==edge.neighbors.first){
+	  if(edge.neighbors.second>-1){
+	    dm-=pg.calcArea(edge)*fluxes[static_cast<size_t>(edge_index[i])].mass*
+	      (center-tess.GetMeshPoint(edge.neighbors.second));
+	  }
+	  else{
+	    const Vector2D p = edge.vertices.second - edge.vertices.first;
+	    const Vector2D r=remove_parallel_component(center - edge.vertices.first,p);
+	    dm-=2*pg.calcArea(edge)*fluxes[static_cast<size_t>(edge_index[i])].mass*r;
+	  }
 	}
+	else
+	  if(point==edge.neighbors.second){
+	    if(edge.neighbors.first>-1)
+	      {
+		dm+=pg.calcArea(edge)*fluxes[static_cast<size_t>(edge_index[i])].mass*
+		  (center-tess.GetMeshPoint(edge.neighbors.first));
+	      }
+	    else
+	      {
+		const Vector2D p = edge.vertices.second - edge.vertices.first;
+		const Vector2D r = remove_parallel_component(center - edge.vertices.second, p);
+		dm+=2*pg.calcArea(edge)*fluxes[static_cast<size_t>(edge_index[i])].mass*r;
+	      }
+	  }
+	  else
+	    throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
+      }
+    return dm;
+  }
 }
 
-ConservativeForce::ConservativeForce(Acceleration& acc,bool DtCalc):acc_(acc),
-	DtCalc_(DtCalc),dt_(-1),first_time_(true){}
+ConservativeForce::ConservativeForce(const Acceleration& acc):
+  acc_(acc) {}
 
 ConservativeForce::~ConservativeForce(void){}
 
@@ -75,46 +83,28 @@ namespace {
   };
 }
 
-Conserved ConservativeForce::Calculate
-	(Tessellation const& tess,
-	 const PhysicalGeometry& pg,
-	vector<Primitive> const& cells,
-	int point,
-	vector<Conserved> const& fluxes,
-	vector<Vector2D> const& point_velocity,
-	HydroBoundaryConditions const& hbc,
-	vector<vector<double> > const &tracer_extensive,
-	vector<double> &/*dtracer*/,vector<double> const& lengthes,
-	double time,
-	double dt)
+vector<Extensive> ConservativeForce::operator()
+  (const Tessellation& tess,
+   const PhysicalGeometry& pg,
+   const vector<ComputationalCell>& cells,
+   const vector<Extensive>& fluxes,
+   const vector<Vector2D>& point_velocities,
+   const double t) const
 {
-	Conserved res;
-	Vector2D acc=acc_.Calculate
-		(tess,cells,point,fluxes,point_velocity,hbc,
-		 tracer_extensive,
-		 time, dt);
-	//	double volume=tess.GetVolume(point);
-	const double volume = pg.calcVolume
-	  (serial_generate(CellEdgesGetter(tess,point)));
-	res.Momentum=volume*cells[static_cast<size_t>(point)].Density*acc;
-	res.Energy=cells[static_cast<size_t>(point)].Density*volume*ScalarProd(point_velocity[static_cast<size_t>(point)],acc)+
-		0.5*ScalarProd(MassFlux(tess,point,fluxes,hbc,lengthes),acc);
-	if(DtCalc_)
-	{
-		if(first_time_)
-		{
-			dt_=sqrt(tess.GetWidth(point)/abs(acc));
-			first_time_=false;
-		}
-		else
-		  dt_=std::min(dt_,sqrt(tess.GetWidth(point)/abs(acc)));
-	}
-	return res;
-}
-
-double ConservativeForce::GetTimeStep(void) const
-{
-	return dt_;
+  vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
+  for(size_t i=0;i<res.size();++i){
+    const Vector2D acc = acc_
+      (tess,cells,fluxes,t,static_cast<int>(i));
+    const double volume = pg.calcVolume
+      (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
+    res[i].mass = 0;
+    res[i].momentum = volume*cells[i].density*acc;
+    res[i].energy = 
+      volume*cells[i].density*
+      ScalarProd(point_velocities[i],acc)+
+      0.5*ScalarProd(MassFlux(tess,pg,fluxes,static_cast<int>(i)),acc);
+  }
+  return res;
 }
 
 Acceleration::~Acceleration(void) {}

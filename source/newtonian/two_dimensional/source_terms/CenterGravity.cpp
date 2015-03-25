@@ -1,20 +1,17 @@
 #include "CenterGravity.hpp"
 
-CenterGravity::CenterGravity(double M,double Rmin,Vector2D center):
-M_(M),Rmin_(Rmin),_center(center){}
+CenterGravity::CenterGravity
+(double M, double Rmin, const Vector2D& center):
+  M_(M),Rmin_(Rmin),center_(center){}
 
-Vector2D CenterGravity::Calculate
-(Tessellation const& tess,
- vector<Primitive> const& /*cells*/,
- int point,
- vector<Conserved> const& /*fluxes*/,
- vector<Vector2D> const& /*point_velocity*/,
- HydroBoundaryConditions const& /*hbc*/,
- vector<vector<double> > const& /*tracers*/,
- double /*time*/,
- double /*dt*/)
+Vector2D CenterGravity::operator()
+(const Tessellation& tess,
+ const vector<ComputationalCell>& /*cells*/,
+ const vector<Extensive>& /*fluxes*/,
+ const double /*time*/,
+ const int point) const
 {
-	Vector2D pos(tess.GetCellCM(point)-_center);
-	double r=abs(pos);
-	return Vector2D((-1)*pos*M_/(r*r*r+Rmin_*Rmin_*Rmin_));
+  const Vector2D pos(tess.GetCellCM(point)-center_);
+  const double r = abs(pos);
+  return (-1)*pos*M_/(r*r*r+Rmin_*Rmin_*Rmin_);
 }

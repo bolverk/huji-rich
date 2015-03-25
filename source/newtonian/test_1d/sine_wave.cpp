@@ -10,7 +10,7 @@ SineWave::SineWave(double amplitude,
   ph_(phase),
   offset_(offset) {}
 
-double SineWave::EvalAt(double x) const
+double SineWave::operator()(double x) const
 {
   return amp_*sin(k_*x+ph_)+offset_;
 }
