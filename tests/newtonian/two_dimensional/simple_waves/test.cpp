@@ -25,120 +25,143 @@
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-class InitProfiles
-{
-public:
-
-  InitProfiles(void):
-    width_(1),
-    g_(read_number("adiabatic_index.txt")),
-    density_1d_(1,10,0.3,0.5),
-    swigic_(density_1d_,1,g_,width_),
-    density_(density_1d_),
-    pressure_(swigic_.getProfile("pressure")),
-    xvelocity_(swigic_.getProfile("xvelocity")),
-    yvelocity_(0) {}
-
-  double getWidth(void)
+  class InitProfiles
   {
-    return width_;
+  public:
+
+    InitProfiles(void):
+      width_(1),
+      g_(read_number("adiabatic_index.txt")),
+      density_1d_(1,10,0.3,0.5),
+      swigic_(density_1d_,1,g_,width_),
+      density_(density_1d_),
+      pressure_(swigic_.getProfile("pressure")),
+      xvelocity_(swigic_.getProfile("xvelocity")),
+      yvelocity_(0) {}
+
+    double getWidth(void)
+    {
+      return width_;
+    }
+
+    IdealGas const& getEOS(void) const
+    {
+      return swigic_.getEOS();
+    }
+
+    double getAdiabaticIndex(void) const
+    {
+      return g_;
+    }
+
+    Profile1D const& getDensity(void) const
+    {
+      return density_;
+    }
+
+    Profile1D const& getPressure(void) const
+    {
+      return pressure_;
+    }
+
+    Profile1D const& getXVelocity(void) const
+    {
+      return xvelocity_;
+    }
+
+    Uniform2D const& getYVelocity(void) const
+    {
+      return yvelocity_;
+    }
+
+  private:
+    const double width_;
+    const double g_;
+    const Collela density_1d_;
+    const SimpleWaveIdealGasInitCond swigic_;
+    const Profile1D density_;
+    const Profile1D pressure_;
+    const Profile1D xvelocity_;
+    const Uniform2D yvelocity_;
+  };
+
+  vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    const InitProfiles ip;
+    for(size_t i=0;i<res.size();++i){
+      const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
+      res[i].density = ip.getDensity()(r);
+      res[i].pressure = ip.getPressure()(r);
+      res[i].velocity = Vector2D
+	(ip.getXVelocity()(r),
+	 ip.getYVelocity()(r));
+    }
+    return res;
   }
 
-  IdealGas const& getEOS(void) const
+  class SimData 
   {
-    return swigic_.getEOS();
-  }
+  public:
 
-  double getAdiabaticIndex(void) const
-  {
-    return g_;
-  }
+    SimData(InitProfiles init_prof = InitProfiles()):
+      pg_(),
+      outer_(0,init_prof.getWidth(),
+	     init_prof.getWidth(),0),
+      tess_(cartesian_mesh(30,30,
+			  Vector2D(0,0),
+			  Vector2D(init_prof.getWidth(),
+				   init_prof.getWidth())),
+	    outer_),
+      interpm_(),
+      eos_(init_prof.getAdiabaticIndex()),
+      bpm_(),
+      rs_(),
+      hbc_(rs_),
+      point_motion_(bpm_,eos_),
+      force_(),
+      tsf_(0.3),
+      fc_(rs_),
+      cu_(),
+      sim_(tess_,
+	   outer_,
+	   pg_,
+	   calc_init_cond(tess_),
+	   eos_,
+	   point_motion_,
+	   force_,
+	   tsf_,
+	   fc_,
+	   cu_) {}
 
-  Profile1D const& getDensity(void) const
-  {
-    return density_;
-  }
+    hdsim& getSim(void)
+    {
+      return sim_;
+    }
 
-  Profile1D const& getPressure(void) const
-  {
-    return pressure_;
-  }
-
-  Profile1D const& getXVelocity(void) const
-  {
-    return xvelocity_;
-  }
-
-  Uniform2D const& getYVelocity(void) const
-  {
-    return yvelocity_;
-  }
-
-private:
-  const double width_;
-  const double g_;
-  const Collela density_1d_;
-  const SimpleWaveIdealGasInitCond swigic_;
-  const Profile1D density_;
-  const Profile1D pressure_;
-  const Profile1D xvelocity_;
-  const Uniform2D yvelocity_;
-};
-
-class SimData 
-{
-public:
-
-  SimData(InitProfiles init_prof = InitProfiles()):
-    outer_(0,init_prof.getWidth(),
-	   init_prof.getWidth(),0),
-    tess_(),
-    interpm_(),
-    eos_(init_prof.getAdiabaticIndex()),
-    bpm_(),
-    rs_(),
-    hbc_(rs_),
-    point_motion_(bpm_,hbc_),
-    force_(),
-    sim_(cartesian_mesh(30,30,
-			Vector2D(0,0),
-			Vector2D(init_prof.getWidth(),
-				 init_prof.getWidth())),
-	 tess_,
-	 interpm_,
-	 init_prof.getDensity(),
-	 init_prof.getPressure(),
-	 init_prof.getXVelocity(),
-	 init_prof.getYVelocity(),
-	 eos_,
-	 rs_,
-	 point_motion_,
-	 force_,
-	 outer_,
-	 hbc_) {}
-
-  hdsim& getSim(void)
-  {
-    return sim_;
-  }
-
-private:
-  const SquareBox outer_;
-  VoronoiMesh tess_;
-  PCM2D interpm_;
-  const IdealGas eos_;
-  Lagrangian bpm_;
-  const Hllc rs_;
-  const RigidWallHydro hbc_;
-  RoundCells point_motion_;
-  ZeroForce force_;
-  hdsim sim_;
-};
+  private:
+    const SlabSymmetry pg_;
+    const SquareBox outer_;
+    VoronoiMesh tess_;
+    PCM2D interpm_;
+    const IdealGas eos_;
+    Lagrangian bpm_;
+    const Hllc rs_;
+    const RigidWallHydro hbc_;
+    RoundCells point_motion_;
+    ZeroForce force_;
+    const SimpleCFL tsf_;
+    const SimpleFluxCalculator fc_;
+    const SimpleCellUpdater cu_;
+    hdsim sim_;
+  };
 
   void my_main_loop(hdsim& sim)
   {
