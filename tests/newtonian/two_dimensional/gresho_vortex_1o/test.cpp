@@ -19,7 +19,8 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -96,48 +97,50 @@ namespace {
   }
 #endif
 
+namespace {
+  vector<ComputationalCell> calc_init_cond
+  (const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      res[i].density = 1;
+      const Vector2D r_vec = tess.GetMeshPoint(static_cast<int>(i));
+      const double r = abs(r_vec);
+      res[i].pressure = calc_pressure(r);
+      res[i].velocity = -azimuthal_velocity(r)*zcross(r_vec)/abs(r);
+    }
+    return res;
+  } 
+}
+
 class SimData
 {
 public:
   
   SimData(void):
+    pg_(),
     outer_(-0.5,0.5,0.5,-0.5),
-    #ifdef RICH_MPI
-    proc_tess_(process_positions(outer_),outer_),
-    #endif
     rs_(),
-    hbc_(rs_),
-    tess_(),
+    tess_(cartesian_mesh(30,30,outer_.getBoundary().first,
+			 outer_.getBoundary().second),
+	  outer_),
     eos_(5./3.),
-    interpm_(),
     bpm_(),
-    point_motion_(bpm_,hbc_),
+    point_motion_(bpm_,eos_),
     force_(),
-    sim_(
-	 #ifdef RICH_MPI
-	 distribute_grid(proc_tess_,
-			 CartesianGridGenerator
-			 (30,30,outer_.getBoundary().first,
-			  outer_.getBoundary().second)),
-	 #else
-	 cartesian_mesh(30,30,outer_.getBoundary().first,
-			outer_.getBoundary().second),
-	 #endif
-	 tess_,
-	 #ifdef RICH_MPI
-	 proc_tess_,
-	 #endif
-	 interpm_,
-	 Uniform2D(1),
-	 Pressure(),
-	 VelocityX(),
-	 VelocityY(),
+    tsf_(0.3),
+    fc_(rs_),
+    cu_(),
+    sim_(tess_,
+	 outer_,
+	 pg_,
+	 calc_init_cond(tess_),
 	 eos_,
-	 rs_,
 	 point_motion_,
 	 force_,
-	 outer_,
-	 hbc_) {}
+	 tsf_,
+	 fc_,
+	 cu_) {}
 
   hdsim& getSim(void)
   {
@@ -145,19 +148,20 @@ public:
   }
 
 private:
-  
+  const SlabSymmetry pg_;
   const SquareBox outer_;
   #ifdef RICH_MPI
   VoronoiMesh proc_tess_;
   #endif
   const Hllc rs_;
-  const RigidWallHydro hbc_;
   VoronoiMesh tess_;
   const IdealGas eos_;
-  PCM2D interpm_;
   Lagrangian bpm_;
   RoundCells point_motion_;
-  ZeroForce force_;
+  const ZeroForce force_;
+  const SimpleCFL tsf_;
+  const SimpleFluxCalculator fc_;
+  const SimpleCellUpdater cu_;
   hdsim sim_;
 };
 
@@ -183,6 +187,8 @@ int main(void)
 
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
+
+  write_snapshot_to_hdf5(sim, "initial.h5");
 
   my_main_loop(sim);
 
