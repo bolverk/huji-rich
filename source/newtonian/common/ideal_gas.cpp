@@ -21,6 +21,7 @@ double IdealGas::de2p(double d, double e) const
 }
 
 namespace {
+  /*
   UniversalError imaginary_speed_of_sound(double g,
 					  double p,
 					  double d)
@@ -31,12 +32,12 @@ namespace {
     res.AddEntry("pressure",p);
     return res;
   }
+  */
 }
 
 double IdealGas::dp2c(double d, double p) const
 {
-  if(_g<=0||p<=0||d<=0||is_nan(d)||is_nan(p))
-    throw imaginary_speed_of_sound(_g,p,d);
+  assert(_g>0 && p>0 && d>0);
   return sqrt(_g*p/d);
 }
 

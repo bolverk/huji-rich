@@ -149,8 +149,8 @@ namespace {
 
 Conserved rotate_solve_rotate_back
 (const RiemannSolver& rs,
- const Primitive& right,
  const Primitive& left,
+ const Primitive& right,
  const double velocity,
  const Vector2D& n,
  const Vector2D& p)
