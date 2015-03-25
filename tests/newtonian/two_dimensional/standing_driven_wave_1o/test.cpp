@@ -40,16 +40,12 @@ public:
     amp_(amplitude),
     v_(phase_velocity) {}
 
-  Vector2D Calculate
-  (Tessellation const& tess,
-   vector<Primitive> const& /*cells*/,
-   int point,
-   vector<Conserved> const& /*fluxes*/,
-   vector<Vector2D> const& /*point_velocity*/,
-   HydroBoundaryConditions const& /*hbc*/,
-   vector<vector<double> > const& /*tracers*/,
+  Vector2D operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& /*cells*/,
+   const vector<Extensive>& /*fluxes*/,
    double t,
-   double /*dt*/)
+   int point) const
   {
     const double x = tess.GetMeshPoint(point).x;
     const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
