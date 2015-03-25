@@ -9,7 +9,6 @@
 #include "source/newtonian/two_dimensional/physical_geometry.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/common/hllc.hpp"
@@ -18,6 +17,9 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylindrical_complementary.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -55,11 +57,29 @@ namespace {
     }
   };
 
+  vector<ComputationalCell> calc_init_cond
+  (const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      const Triangle triangle(Vector2D(0.5,0.6),
+			      Vector2D(0.7,0.5),
+			      Vector2D(0.4,0.4));
+      const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
+      res[i].density = 1;
+      res[i].pressure = triangle(r) ? 2 : 1;
+      res[i].velocity = triangle(r) ? Vector2D(1,-1) : Vector2D(0,0);
+      res[i].tracers["tracer"] = triangle(r) ? 1 : 0;
+    }
+    return res;
+  }
+
   class SimData
   {
   public:
 
     SimData(void):
+      pg_(),
       outer_(Vector2D(0,0), Vector2D(1,1)),
 #ifdef RICH_MPI
       proc_tess_(process_positions(outer_),outer_),
@@ -72,38 +92,25 @@ namespace {
 				  outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
 #endif
-      tess_(),
-      interp_method_(),
-      triangle_(Vector2D(0.5,0.6),
-		Vector2D(0.7,0.5),
-		Vector2D(0.4,0.4)),
+      tess_(init_points_,outer_),
       eos_(5./3.),
       pm_(),
       rs_(),
       hbc_(rs_),
       force_(),
-      sim_(init_points_,
-	   tess_,
-	   #ifdef RICH_MPI
-	   proc_tess_,
-	   #endif
-	   interp_method_,
-	   Uniform2D(1),
-	   Piecewise(triangle_,
-		     Uniform2D(2),
-		     Uniform2D(1)),
-	   Piecewise(triangle_,
-		     Uniform2D(1),
-		     Uniform2D(0)),
-	   Piecewise(triangle_,
-		     Uniform2D(-1),
-		     Uniform2D(0)),
+      tsf_(0.3),
+      fc_(rs_),
+      cu_(),
+      sim_(tess_,
+	   outer_,
+	   pg_,
+	   calc_init_cond(tess_),
 	   eos_,
-	   rs_,
 	   pm_,
 	   force_,
-	   outer_,
-	   hbc_) {}
+	   tsf_,
+	   fc_,
+	   cu_) {}
 
     hdsim& getSim(void)
     {
@@ -111,19 +118,21 @@ namespace {
     }
 
   private:
+    SlabSymmetry pg_;
     SquareBox outer_;
 #ifdef RICH_MPI
     VoronoiMesh proc_tess_;
 #endif
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
-    PCM2D interp_method_;
-    const Triangle triangle_;
     IdealGas eos_;
     Eulerian pm_;
     Hllc rs_;
     RigidWallHydro hbc_;
     ZeroForce force_;
+    SimpleCFL tsf_;
+    SimpleFluxCalculator fc_;
+    SimpleCellUpdater cu_;
     hdsim sim_;
   };
 
@@ -146,10 +155,11 @@ namespace {
 #endif
 	ofstream f(fname_.c_str());
 	for(size_t i=0;i<cons_.size();++i)
-	  f << cons_[i].Mass << " "
-	    << cons_[i].Momentum.x << " "
-	    << cons_[i].Momentum.y << " "
-	    << cons_[i].Energy << "\n";
+	  f << cons_[i].mass << " "
+	    << cons_[i].momentum.x << " "
+	    << cons_[i].momentum.y << " "
+	    << cons_[i].energy << " "
+	    << cons_[i].tracers["tracer"] << "\n";
 	f.close();
 #ifdef RICH_MPI
       }
@@ -157,7 +167,7 @@ namespace {
     }
 
   private:
-    mutable vector<Conserved> cons_;
+    mutable vector<Extensive> cons_;
     const string fname_;
   };
 }
@@ -167,10 +177,12 @@ namespace {
   {
     SafeTimeTermination term_cond(0.05,1e6);
     WriteConserved diag("res.txt");
+    write_snapshot_to_hdf5(sim,"initial.h5");
     main_loop(sim, 
 	      term_cond, 
 	      &hdsim::TimeAdvance,
 	      &diag);
+    write_snapshot_to_hdf5(sim,"final.h5");
   }
 }
 

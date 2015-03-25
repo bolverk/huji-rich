@@ -16,7 +16,7 @@ def main():
 
     import numpy
 
-    mass, xmom, ymom, enr = \
+    mass, xmom, ymom, enr, tracer = \
         numpy.loadtxt('res.txt',unpack=True);
 
     f = open('gradesheet.txt','w')
@@ -24,12 +24,14 @@ def main():
     f.write('xmom '+str(all_equal(xmom))+'\n')
     f.write('ymom '+str(all_equal(ymom))+'\n')
     f.write('enr '+str(all_equal(enr))+'\n')
+    f.write('tracer '+str(all_equal(tracer))+'\n')
     f.close()
 
     return all_equal(mass) and \
         all_equal(xmom) and \
         all_equal(ymom) and \
-        all_equal(enr)
+        all_equal(enr) and \
+        all_equal(tracer)
 
 if __name__=='__main__':
 

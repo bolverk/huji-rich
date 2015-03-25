@@ -44,6 +44,7 @@ namespace {
       res[i].mass = mass;
       res[i].energy = eos.dp2e(cell.density, cell.pressure)*mass + 
 	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+      res[i].momentum = mass*cells[i].velocity;
     }
     return res;
   }

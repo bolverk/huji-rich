@@ -18,6 +18,9 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylindrical_complementary.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+
 
 using namespace std;
 using namespace simulation2d;
@@ -55,6 +58,23 @@ namespace {
     }
   };
 
+  vector<ComputationalCell> calc_init_cond
+  (const Tessellation& tess)
+  {
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      const Triangle triangle(Vector2D(0.5,0.6),
+			      Vector2D(0.7,0.5),
+			      Vector2D(0.4,0.4));
+      const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
+      res[i].density = 1;
+      res[i].pressure = triangle(r) ? 2 : 1;
+      res[i].velocity = triangle(r) ? Vector2D(1,-1) : Vector2D(0,0);
+      res[i].tracers["tracer"] = triangle(r) ? 1 : 0;
+    }
+    return res;
+  }
+
   class SimData
   {
   public:
@@ -73,7 +93,7 @@ namespace {
 				  outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
 #endif
-      tess_(),
+      tess_(init_points_,outer_),
       interp_method_(),
       triangle_(Vector2D(0.5,0.6),
 		Vector2D(0.7,0.5),
@@ -83,33 +103,19 @@ namespace {
       rs_(),
       hbc_(rs_),
       force_(pg_.getAxis()),
+      tsf_(0.3),
+      fc_(rs_),
+      cu_(),
       sim_(tess_,
-	   #ifdef RICH_MPI
-	   proc_tess_,
-	   #endif
-	   interp_method_,
-	   Uniform2D(1),
-	   Piecewise(triangle_,
-		     Uniform2D(2),
-		     Uniform2D(1)),
-	   Piecewise(triangle_,
-		     Uniform2D(1),
-		     Uniform2D(0)),
-	   Piecewise(triangle_,
-		     Uniform2D(-1),
-		     Uniform2D(0)),
+	   outer_,
+	   pg_,
+	   calc_init_cond(tess_),
 	   eos_,
-	   rs_,
 	   pm_,
 	   force_,
-	   outer_,
-	   hbc_) 
-    {
-      sim_.addTracer(Piecewise(triangle_,
-			       Uniform2D(1),
-			       Uniform2D(0)));
-      sim_.changePhysicalGeometry(&pg_);
-    }
+	   tsf_,
+	   fc_,
+	   cu_) {}
 
     hdsim& getSim(void)
     {
@@ -130,8 +136,10 @@ namespace {
     Lagrangian pm_;
     Hllc rs_;
     RigidWallHydro hbc_;
-    //    ZeroForce force_;
     CylindricalComplementary force_;
+    SimpleCFL tsf_;
+    SimpleFluxCalculator fc_;
+    SimpleCellUpdater cu_;
     hdsim sim_;
   };
 
@@ -140,11 +148,10 @@ namespace {
   public:
 
     WriteConserved(string const& fname):
-      tracer_(), cons_(), fname_(fname) {}
+      cons_(), fname_(fname) {}
 
     void operator()(hdsim const& sim)
     {
-      tracer_.push_back(total_tracer(sim,0));
       cons_.push_back(total_conserved(sim));
     }
 
@@ -155,11 +162,11 @@ namespace {
 #endif
 	ofstream f(fname_.c_str());
 	for(size_t i=0;i<cons_.size();++i)
-	  f << cons_[i].Mass << " "
-	    << cons_[i].Momentum.x << " "
-	    << cons_[i].Momentum.y << " "
-	    << cons_[i].Energy << " "
-	    << tracer_[i] << "\n";
+	  f << cons_[i].mass << " "
+	    << cons_[i].momentum.x << " "
+	    << cons_[i].momentum.y << " "
+	    << cons_[i].energy << " "
+	    << cons_[i].tracers["tracer"] << "\n";
 	f.close();
 #ifdef RICH_MPI
       }
@@ -167,8 +174,7 @@ namespace {
     }
 
   private:
-    mutable vector<double> tracer_;
-    mutable vector<Conserved> cons_;
+    mutable vector<Extensive> cons_;
     const string fname_;
   };
 }
