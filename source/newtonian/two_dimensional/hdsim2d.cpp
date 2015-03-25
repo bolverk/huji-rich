@@ -358,3 +358,9 @@ const vector<Extensive>& hdsim::getAllExtensives(void) const
 {
   return extensives_;
 }
+
+double hdsim::getCellVolume(size_t index) const
+{
+  return pg_.calcVolume
+    (serial_generate(CellEdgesGetter(tess_,static_cast<int>(index))));
+}

@@ -197,7 +197,7 @@ public:
     \param index Cell index
     \return Cell volume
   */
-  double getCellVolume(int index) const;
+  double getCellVolume(size_t index) const;
 
   /*! \brief Returns the number cycles
     \return Number of times TimeAdvance was called
