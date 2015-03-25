@@ -12,7 +12,6 @@
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
-#include "source/newtonian/two_dimensional/source_terms/cylinderical_geometry.hpp"
 #include "source/newtonian/two_dimensional/source_terms/cylindrical_complementary.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
@@ -20,73 +19,78 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/tessellation/shape_2d.hpp"
 #include "source/newtonian/test_2d/piecewise.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
 
-class SimData
-{
-public:
-
-  SimData(Vector2D lower_left = Vector2D(0.02,0)+Vector2D(0,0),
-	  Vector2D upper_right = Vector2D(0.02,0)+Vector2D(1,1)):
-    mesh_(cartesian_mesh(50,50,lower_left,upper_right)),
-    outer_(lower_left, upper_right),
-    tess_(),
-    interpm_(),
-    eos_(5./3.),
-    rs_(),
-    hbc_(rs_),
-    raw_point_motion_(),
-    point_motion_(raw_point_motion_,hbc_),
-    //    force_(),
-    /*
-    force_(Vector2D(0,0),
-	   Vector2D(0,1)),
-    */
-    force_(Axis(Vector2D(0,0), Vector2D(0,1))),
-    sim_(mesh_,
-	 tess_,
-	 interpm_,
-	 Uniform2D(1),
-	 Piecewise(Circle(Vector2D(0,0.5),0.05),
-		   Uniform2D(1e5), Uniform2D(1)),
-	 Uniform2D(0),
-	 Uniform2D(0),
-	 eos_,
-	 rs_,
-	 point_motion_,
-	 force_,
-	 outer_,
-	 hbc_),
-    pg_(Vector2D(0,0), Vector2D(0,1))
+  vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
   {
-    sim_.changePhysicalGeometry(&pg_);
+    vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      res[i].density = 1;
+      res[i].pressure = abs(tess.GetMeshPoint(static_cast<int>(i)))<0.05 ?
+	1e5 : 1;
+      res[i].velocity = Vector2D(0,0);
+    }
+    return res;
   }
 
-  hdsim& getSim(void)
+  class SimData
   {
-    return sim_;
-  }
+  public:
+    SimData(Vector2D lower_left = Vector2D(0.02,0)+Vector2D(0,0),
+	    Vector2D upper_right = Vector2D(0.02,0)+Vector2D(1,1)):
+      pg_(Vector2D(0,0), Vector2D(0,1)),
+      mesh_(cartesian_mesh(50,50,lower_left,upper_right)),
+      outer_(lower_left, upper_right),
+      tess_(mesh_,outer_),
+      interpm_(),
+      eos_(5./3.),
+      rs_(),
+      hbc_(rs_),
+      raw_point_motion_(),
+      point_motion_(raw_point_motion_,eos_),
+      force_(pg_.getAxis()),
+      tsf_(0.3),
+      fc_(rs_),
+      cu_(),
+      sim_(tess_,
+	   outer_,
+	   pg_,
+	   calc_init_cond(tess_),
+	   eos_,
+	   point_motion_,
+	   force_,
+	   tsf_,
+	   fc_,
+	   cu_) {}
+
+    hdsim& getSim(void)
+    {
+      return sim_;
+    }
   
-private:
-  const vector<Vector2D> mesh_;
-  const SquareBox outer_;
-  VoronoiMesh tess_;
-  PCM2D interpm_;
-  const IdealGas eos_;
-  const Hllc rs_;
-  const RigidWallHydro hbc_;
-  Lagrangian raw_point_motion_;
-  RoundCells point_motion_;
-  //CylindericalGeometry force_;
-  //  ZeroForce force_;
-  CylindricalComplementary force_;
-  hdsim sim_;
-  const CylindricalSymmetry pg_;
-};
+  private:
+    const CylindricalSymmetry pg_;
+    const vector<Vector2D> mesh_;
+    const SquareBox outer_;
+    VoronoiMesh tess_;
+    PCM2D interpm_;
+    const IdealGas eos_;
+    const Hllc rs_;
+    const RigidWallHydro hbc_;
+    Lagrangian raw_point_motion_;
+    RoundCells point_motion_;
+    CylindricalComplementary force_;
+    const SimpleCFL tsf_;
+    const SimpleFluxCalculator fc_;
+    const SimpleCellUpdater cu_;
+    hdsim sim_;
+  };
 
   namespace {
     class TotalConservedHistory: public DiagnosticFunction
@@ -98,7 +102,7 @@ private:
 
       void operator()(const hdsim& sim)
       {
-	times_.push_back(sim.GetTime());
+	times_.push_back(sim.getTime());
 	values_.push_back(total_conserved(sim));
       }
 
@@ -107,17 +111,17 @@ private:
 	ofstream f(fname_.c_str());
 	for(size_t i=0;i<times_.size();++i)
 	  f << times_[i] << " "
-	    << values_[i].Mass << " "
-	    << values_[i].Momentum.x << " "
-	    << values_[i].Momentum.y << " "
-	    << values_[i].Energy << "\n";
+	    << values_[i].mass << " "
+	    << values_[i].momentum.x << " "
+	    << values_[i].momentum.y << " "
+	    << values_[i].energy << "\n";
 	f.close();
       }
 
     private:
       const string fname_;
       mutable vector<double> times_;
-      mutable vector<Conserved> values_;
+      mutable vector<Extensive> values_;
     };
   }
 

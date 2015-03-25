@@ -73,7 +73,7 @@ def main():
         pylab.plot(r_for_interp,p_for_interp)
         pylab.show()
 
-    return l1<20
+    return l1<23
 
 if __name__=='__main__':
 
