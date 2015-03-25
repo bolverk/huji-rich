@@ -283,10 +283,13 @@ Conserved FluxInBulk(Vector2D const& normaldir,
 /*! \brief Adds force contribution to the extensive conserved variables
   \param tess Tessellation
   \param pg Physical geometry
-  \param cells Fluid elements
-  \param force External force
+  \param cells Computational cells
+  \param fluxes Fluxes
+  \param point_velocities Velocities of the mesh generating points
+  \param source Source term
   \param t Time
   \param dt Time step
+  \param extensives Extensive variables
  */
 void ExternalForceContribution
 (const Tessellation& tess,
@@ -294,7 +297,7 @@ void ExternalForceContribution
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& fluxes,
  const vector<Vector2D>& point_velocities,
- const SourceTerm& force,
+ const SourceTerm& source,
  double t,
  double dt,
  vector<Extensive>& extensives);

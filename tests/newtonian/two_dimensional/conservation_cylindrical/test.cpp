@@ -83,8 +83,7 @@ namespace {
       rs_(),
       hbc_(rs_),
       force_(pg_.getAxis()),
-      sim_(init_points_,
-	   tess_,
+      sim_(tess_,
 	   #ifdef RICH_MPI
 	   proc_tess_,
 	   #endif

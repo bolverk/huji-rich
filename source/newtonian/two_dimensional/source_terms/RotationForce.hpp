@@ -23,6 +23,21 @@ public:
 
 	~RotationForce(void);
 
+  /*! \brief Calculates the contribution to the conserved variables
+    \param tess Tessellation
+    \param pg Physical geometry
+    \param cells Hydrodynamic cells
+    \param point Index of cell
+    \param fluxes Hydrodynamic fluxes
+    \param point_velocity Velocities of the mesh generating points
+    \param hbc Hydrodynamic boundary conditions
+    \param tracer Tracers
+    \param dtracer Tracer change
+    \param lengthes Lengts of interfaces
+    \param time Time
+    \param dt Time step
+    \return Contribution to covserved variables
+   */
 	Conserved Calculate(Tessellation const& tess,
 			    const PhysicalGeometry& pg,
 		vector<Primitive> const& cells,int point,

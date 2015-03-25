@@ -22,6 +22,8 @@ public:
     \param tess The tessellation
     \param pg Physical geometry
     \param cells The hydrodynmic variables of the cell
+    \param fluxes Fluxes
+    \param point_velocities Velocities of the mesh generating points
     \param t Time
     \return The flux of conserved variables
   */
