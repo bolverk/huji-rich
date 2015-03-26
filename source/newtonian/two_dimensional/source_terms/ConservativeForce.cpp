@@ -93,6 +93,14 @@ vector<Extensive> ConservativeForce::operator()
 {
   vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
   for(size_t i=0;i<res.size();++i){
+    if(cells[i].stickers.count("dummy")>0 && 
+       cells[i].stickers.find("dummy")->second){
+      res[i].mass = 0;
+      res[i].energy = 0;
+      res[i].momentum.x = 0;
+      res[i].momentum.y = 0;
+      continue;
+    }
     const Vector2D acc = acc_
       (tess,cells,fluxes,t,static_cast<int>(i));
     const double volume = pg.calcVolume

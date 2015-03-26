@@ -39,7 +39,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
       (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
     res[i].density = extensives[i].mass/volume;
     res[i].velocity = extensives[i].momentum / extensives[i].mass;
-    double energy = extensives[i].energy/extensives[i].mass - 
+    const double energy = extensives[i].energy/extensives[i].mass - 
       0.5*ScalarProd(res[i].velocity, res[i].velocity);
     res[i].pressure = eos.de2p(res[i].density, energy);
     for(std::map<std::string,double>::const_iterator it =

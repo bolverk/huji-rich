@@ -17,6 +17,7 @@ double IdealGas::dp2e(double d, double p) const
 
 double IdealGas::de2p(double d, double e) const
 {
+  assert(e>0);
   return (_g-1)*e*d;
 }
 

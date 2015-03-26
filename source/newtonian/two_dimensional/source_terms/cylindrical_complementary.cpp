@@ -52,6 +52,14 @@ vector<Extensive> CylindricalComplementary::operator()
   vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
   const Vector2D r_hat = cross_z(axis_.direction);
   for(size_t i=0;i<res.size();++i){
+    if(cells[i].stickers.count("dummy")>0 &&
+       cells[i].stickers.find("dummy")->second){
+      res[i].mass = 0;
+      res[i].energy = 0;
+      res[i].momentum.x = 0;
+      res[i].momentum.y = 0;
+      continue;
+    }
     const double p = cells[i].pressure; 
     const double r = distance_from_axis
       (tess.GetCellCM(static_cast<int>(i)),axis_);

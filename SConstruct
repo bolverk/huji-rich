@@ -15,16 +15,19 @@ source = ARGUMENTS.get('source',None)
 target = ARGUMENTS.get('target',None)
 compiler = ARGUMENTS.get('compiler','g++')
 
+linkflags = ''
 if compiler=='g++':
     cflags = '-Wfatal-errors'
     if int(debug):
         cflags +=' -O0 -g -pg'
+        linkflags = ' -g -pg'
     else:
         cflags +=' -O3'
 elif compiler=='clang++':
     cflags = '-Weverything -Werror -ferror-limit=1 -Wno-error=padded'
     if int(debug):
         cflags += ' -O0 -g -pg'
+        linkflags = ' -g -pg'
     else:
         cflags += ' -O3 -march=native'
 elif compiler=='mpiCC':
@@ -42,6 +45,7 @@ env = Environment(ENV = os.environ,
                            os.environ['RICH_ROOT']],
                   LIBPATH=['.',os.environ['HDF5_LIB_PATH']],
                   LIBS=['rich','hdf5','hdf5_cpp'],
+                  LINKFLAGS=linkflags,
                   CXXFLAGS=cflags)
 source_file_list = [fname for fname in find_files(os.environ['RICH_ROOT']+'/source','*.cpp')]
 lib_file = env.Library('rich',source_file_list)
