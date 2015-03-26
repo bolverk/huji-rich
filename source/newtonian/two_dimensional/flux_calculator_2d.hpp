@@ -11,6 +11,7 @@
 #include "../../tessellation/tessellation.hpp"
 #include "computational_cell_2d.hpp"
 #include "../common/equation_of_state.hpp"
+#include "cache_data.hpp"
 
 using std::vector;
 
@@ -34,7 +35,8 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const double time,
-   const double dt) const = 0;
+   const double dt,
+   const CacheData& cd) const = 0;
 
   //! \brief Class destructor
   virtual ~FluxCalculator(void);

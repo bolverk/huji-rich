@@ -125,7 +125,8 @@ void hdsim::TimeAdvance(void)
 				       cells_,
 				       eos_,
 				       time_,
-				       dt);
+				       dt,
+				       cache_data_);
 
 
   //  update_extensives(fluxes,
