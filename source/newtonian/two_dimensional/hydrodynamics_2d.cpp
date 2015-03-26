@@ -15,12 +15,12 @@ FaceVertexVelocityCalculator::FaceVertexVelocityCalculator
   control_(control),
   hbc_(hbc) {}
 
-size_t FaceVertexVelocityCalculator::getLength(void) const
+size_t FaceVertexVelocityCalculator::size(void) const
 {
   return static_cast<size_t>(tess_.GetTotalSidesNumber());
 }
 
-Vector2D FaceVertexVelocityCalculator::operator()(size_t i) const
+Vector2D FaceVertexVelocityCalculator::operator[](size_t i) const
 {
   const Edge& edge = tess_.GetEdge(static_cast<int>(i));
   if(hbc_.IsBoundary(edge,tess_))

@@ -1,7 +1,7 @@
 /*! \file simple_cell_updater.hpp
   \author Almog Yalinewich
   \brief Simple cell updater
- */
+*/
 
 #ifndef SIMPLE_CELL_UPDATER_HPP
 #define SIMPLE_CELL_UPDATER_HPP 1
@@ -16,10 +16,10 @@ class SimpleCellUpdater: public CellUpdater
 {
 public:
 
-SimpleCellUpdater(void);
+  SimpleCellUpdater(void);
 
-vector<ComputationalCell> operator()
-(const Tessellation& tess,
+  vector<ComputationalCell> operator()
+  (const Tessellation& tess,
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
    const vector<Extensive>& extensives,

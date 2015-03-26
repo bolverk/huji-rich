@@ -18,6 +18,8 @@
 #include "OuterBoundary.hpp"
 #include "HydroBoundaryConditions.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/cached_lazy_list.hpp"
+#include "../../misc/lazy_list.hpp"
 #include "../../misc/universal_error.hpp"
 #include "extensive.hpp"
 #include "RefineStrategy.hpp"
@@ -30,6 +32,7 @@
 #include "flux_calculator_2d.hpp"
 #include "cell_updater_2d.hpp"
 #include "extensive_updater.hpp"
+#include "cache_data.hpp"
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
@@ -63,6 +66,8 @@ private:
   const ExtensiveUpdater& eu_;
 
   const CellUpdater& cu_;
+
+  const CacheData cache_data_;
 
   // The purpose of these declarations is to disable copying
   hdsim(const hdsim& origin);

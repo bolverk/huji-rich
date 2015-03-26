@@ -44,9 +44,9 @@ public:
    const vector<Vector2D>& control,
    const HydroBoundaryConditions& hbc);
 
-  size_t getLength(void) const;
+  size_t size(void) const;
 
-  Vector2D operator()(size_t i) const;
+  Vector2D operator[](size_t i) const;
 
 private:
   const Tessellation& tess_;

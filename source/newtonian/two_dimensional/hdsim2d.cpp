@@ -6,7 +6,6 @@
 using namespace std;
 
 namespace {
-
   class CellEdgesGetter: public LazyList<Edge>
   {
   public:
@@ -28,6 +27,9 @@ namespace {
     const Tessellation& tess_;
     const vector<int> edge_indices_;
   };
+}
+
+namespace {
 
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
@@ -78,7 +80,8 @@ hdsim::hdsim
   tsf_(tsf),
   fc_(fc),
   eu_(eu),
-  cu_(cu) {}
+  cu_(cu),
+  cache_data_(tess, pg) {}
 
 hdsim::~hdsim(void) {}
 
@@ -143,6 +146,7 @@ void hdsim::TimeAdvance(void)
 			    extensives_);
 
   MoveMeshPoints(point_velocities, dt, tess_);
+  cache_data_.reset();
 
   cells_ = cu_(tess_, pg_, eos_, extensives_, cells_);
 
