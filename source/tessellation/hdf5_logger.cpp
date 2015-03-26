@@ -1,5 +1,6 @@
 #include "hdf5_logger.hpp"
 #include "../misc/utils.hpp"
+#include "../misc/lazy_list.hpp"
 #include "tessellation.hpp"
 #include "../misc/hdf5_utils.hpp"
 
@@ -7,7 +8,7 @@ HDF5Logger::HDF5Logger(const string& fname):
   fname_(fname) {}
 
 namespace{
-  class CoordinateExtractor: public Index2Member<double>
+  class CoordinateExtractor: public LazyList<double>
   {
   public:
 
@@ -15,12 +16,12 @@ namespace{
 			double Vector2D::* component):
       tess_(tess), component_(component) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetPointNo());
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return (tess_.GetMeshPoint(static_cast<int>(i))).*component_;
     }

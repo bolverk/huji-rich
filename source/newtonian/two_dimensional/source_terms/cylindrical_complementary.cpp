@@ -1,4 +1,5 @@
 #include "cylindrical_complementary.hpp"
+#include "../../../misc/lazy_list.hpp"
 
 namespace {
   double distance_from_axis(const Vector2D& point,
@@ -15,19 +16,19 @@ namespace {
     return Vector2D(v.y,-v.x);
   }
 
-  class CellEdgesGetter: public Index2Member<Edge>
+  class CellEdgesGetter: public LazyList<Edge>
   {
   public:
     
     CellEdgesGetter(const Tessellation& tess, int n):
       tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return edge_indices_.size();
     }
 
-    Edge operator()(size_t i) const
+    Edge operator[](size_t i) const
     {
       return tess_.GetEdge(edge_indices_[i]);
     }

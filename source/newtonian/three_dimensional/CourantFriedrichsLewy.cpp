@@ -1,5 +1,6 @@
 #include "CourantFriedrichsLewy.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/lazy_list.hpp"
 
 CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl):
 cfl_(cfl)
@@ -9,7 +10,7 @@ cfl_(cfl)
 
 namespace 
 {
-	class TimeStepBoundCalculator: public Index2Member<double>
+	class TimeStepBoundCalculator: public LazyList<double>
 	{
 	public:
 
@@ -18,12 +19,12 @@ namespace
 			const EquationOfState& eos):
 		tess_(tess), cells_(cells), eos_(eos) {}
 
-		size_t getLength(void) const
+	  size_t size(void) const
 		{
 			return cells_.size();
 		}
 
-		double operator()(size_t i) const
+		double operator[](size_t i) const
 		{
 			return tess_.GetWidth(i)/
 				(abs(cells_[i].velocity)+

@@ -4,7 +4,7 @@
 SimpleCFL::SimpleCFL(const double cfl): cfl_(cfl) {}
 
 namespace {
-  class TimeStepCalculator: public Index2Member<double>
+  class TimeStepCalculator: public LazyList<double>
   {
   public:
 
@@ -15,12 +15,12 @@ namespace {
       tess_(tess), cells_(cells), 
       point_velocities_(point_velocities), eos_(eos) {}
 
-    size_t getLength(void) const 
+    size_t size(void) const 
     {
       return cells_.size();
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return tess_.GetWidth(static_cast<int>(i))/
 	(eos_.dp2c(cells_[i].density, cells_[i].pressure)+

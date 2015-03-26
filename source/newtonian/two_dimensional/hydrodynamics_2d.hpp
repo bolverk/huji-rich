@@ -13,6 +13,7 @@
 #include "SourceTerm.hpp"
 #include "CustomEvolution.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/lazy_list.hpp"
 #include "../common/hydrodynamics.hpp"
 #include "../../misc/universal_error.hpp"
 #include "../../tessellation/ConvexHull.hpp"
@@ -25,7 +26,7 @@
 #include "time_step_function.hpp"
 
 //! Calculates the velocities at the vertices of edges
-class FaceVertexVelocityCalculator: public Index2Member<Vector2D>
+class FaceVertexVelocityCalculator: public LazyList<Vector2D>
 {
 public:
 

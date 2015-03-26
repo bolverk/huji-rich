@@ -71,7 +71,7 @@ namespace {
 			 eos);
   }
 
-  class CellInitializer: public Index2Member<Primitive>
+  class CellInitializer: public LazyList<Primitive>
   {
   public:
 
@@ -89,7 +89,7 @@ namespace {
       yvelocity_(yvelocity),
       eos_(eos) {}
 
-    Primitive operator()(size_t n) const
+    Primitive operator[](size_t n) const
     {
       return initialize_single_cell(tess_,
 				    static_cast<int>(n),
@@ -101,7 +101,7 @@ namespace {
 				    eos_);
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetPointNo());
     }
@@ -135,19 +135,19 @@ vector<Primitive> InitialiseCells
 }
 
 namespace {
-  class IntensiveInitializer: public Index2Member<Conserved>
+  class IntensiveInitializer: public LazyList<Conserved>
   {
   public:
 
     IntensiveInitializer(vector<Primitive> const& cells):
       cells_(cells) {}
 
-    Conserved operator()(size_t n) const
+    Conserved operator[](size_t n) const
     {
       return Primitive2Conserved(cells_[n]);
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return cells_.size();
     }
@@ -165,19 +165,19 @@ vector<Conserved> CalcConservedIntensive
 
 namespace {
 
-  class CellEdgesGetter: public Index2Member<Edge>
+  class CellEdgesGetter: public LazyList<Edge>
   {
   public:
 
     CellEdgesGetter(const Tessellation& tess, int n):
       tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return edge_indices_.size();
     }
 
-    Edge operator()(size_t i) const
+    Edge operator[](size_t i) const
     {
       return tess_.GetEdge(edge_indices_[i]);
     }
@@ -187,7 +187,7 @@ namespace {
     const vector<int> edge_indices_;
   };
 
-  class ExtensiveInitializer: public Index2Member<Conserved>
+  class ExtensiveInitializer: public LazyList<Conserved>
   {
   public:
 
@@ -196,13 +196,13 @@ namespace {
 			 const PhysicalGeometry& pg):
       intensive_(intensive), tess_(tess), pg_(pg)  {}
 
-    Conserved operator()(size_t n) const
+    Conserved operator[](size_t n) const
     {
       return pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,static_cast<int>(n))))*
 	intensive_[n];
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetPointNo());
     }
@@ -308,7 +308,7 @@ namespace {
 				     time);
   }
 
-  class FaceVelocityInitializer: public Index2Member<Vector2D>
+  class FaceVelocityInitializer: public LazyList<Vector2D>
   {
   public:
 
@@ -317,12 +317,12 @@ namespace {
       face_index_(face_index),
       face_velocity_(face_velocity) {}
 
-    Vector2D operator()(size_t n) const
+    Vector2D operator[](size_t n) const
     {
       return face_velocity_[static_cast<size_t>(face_index_[n])];
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return face_index_.size();
     }
@@ -404,7 +404,7 @@ void UpdateConservedExtensive
 }
 
 namespace {
-  class NewPointPosition: public Index2Member<Vector2D>
+  class NewPointPosition: public LazyList<Vector2D>
   {
   public:
 
@@ -415,12 +415,12 @@ namespace {
       point_velocity_(point_velocity),
       dt_(dt) {}
 
-    Vector2D operator()(size_t n) const
+    Vector2D operator[](size_t n) const
     {
       return tess_.GetMeshPoint(static_cast<int>(n))+dt_*point_velocity_[n];
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetPointNo());
     }
@@ -472,7 +472,7 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 #endif // RICH_MPI
 
 namespace {
-  class IntensiveCalculator: public Index2Member<Conserved>
+  class IntensiveCalculator: public LazyList<Conserved>
   {
   public:
 
@@ -481,12 +481,12 @@ namespace {
 			const PhysicalGeometry& pg):
       tess_(tess), extensive_(extensive), pg_(pg) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return extensive_.size();
     }
 
-    Conserved operator()(size_t i) const
+    Conserved operator[](size_t i) const
     {
       return extensive_[i]/
 	pg_.calcVolume(serial_generate(CellEdgesGetter(tess_,static_cast<int>(i))));
@@ -730,19 +730,19 @@ namespace {
 }
 
 namespace {
-  class InterpolationRelevancy: public Index2Member<bool>
+  class InterpolationRelevancy: public LazyList<bool>
   {
   public:
 
     InterpolationRelevancy(const vector<CustomEvolution*>& ce):
       ce_(ce) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return ce_.size();
     }
 
-    bool operator()(size_t i) const
+    bool operator[](size_t i) const
     {
       if(ce_[i])
 	return ce_[i]->isRelevantToInterpolation();
@@ -754,7 +754,7 @@ namespace {
     const vector<CustomEvolution*>& ce_;
   };
 
-  class FluxCalculator: public Index2Member<Conserved>
+  class FluxCalculator: public LazyList<Conserved>
   {
   public:
 
@@ -793,12 +793,12 @@ namespace {
 #endif
     }
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetTotalSidesNumber());
     }
 
-    Conserved operator()(size_t i) const
+    Conserved operator[](size_t i) const
     {
       const Edge& edge = tess_.GetEdge(static_cast<int>(i));
       const int n0 = edge.neighbors.first;
@@ -948,7 +948,7 @@ namespace {
 }
 
 namespace {
-  class TracerFluxCalculator: public Index2Member<vector<double> >
+  class TracerFluxCalculator: public LazyList<vector<double> >
   {
   public:
 
@@ -969,12 +969,12 @@ namespace {
       time_(time), interp_(interp),
       edge_velocities_(edge_velocities), lengths_(lengths) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetTotalSidesNumber());
     }
 
-    vector<double> operator()(size_t i) const
+    vector<double> operator[](size_t i) const
     {
       const Edge& edge = tess_.GetEdge(static_cast<int>(i));
       const double dm = fluxes_[i].Mass;
@@ -1181,7 +1181,7 @@ namespace {
 }
 
 namespace {
-  class ExtensiveTracerCalculator: public Index2Member<vector<double> >
+  class ExtensiveTracerCalculator: public LazyList<vector<double> >
   {
   public:
 
@@ -1191,7 +1191,7 @@ namespace {
 			      const PhysicalGeometry& pg):
       tracers_(tracers), tess_(tess), cells_(cells), pg_(pg) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       if(tracers_.empty())
 	return 0;
@@ -1199,7 +1199,7 @@ namespace {
 	return static_cast<size_t>(tess_.GetPointNo());
     }
 
-    vector<double> operator()(size_t i) const
+    vector<double> operator[](size_t i) const
     {
       return scalar_mult
 	(tracers_[i],
@@ -1249,7 +1249,7 @@ namespace {
     return res;
   }
 
-  class IntensiveTracerCalculator: public Index2Member<vector<double> >
+  class IntensiveTracerCalculator: public LazyList<vector<double> >
   {
   public:
 
@@ -1260,7 +1260,7 @@ namespace {
       extensive_(extensive),tess_(tess), cells_(cells), pg_(pg),
       old_trace_intensive_(old_trace_intensive), min_density_(min_density), cevolve_(cevolve){}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       if(extensive_.empty())
 	return 0;
@@ -1268,7 +1268,7 @@ namespace {
 	return static_cast<size_t>(tess_.GetPointNo());
     }
 
-    vector<double> operator()(size_t i) const
+    vector<double> operator[](size_t i) const
     {
       if (min_density_[i] && !cevolve_[i])
 	return old_trace_intensive_[i];

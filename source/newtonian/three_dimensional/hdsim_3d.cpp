@@ -37,7 +37,7 @@ tess_(tess), eos_(eos), cells_(cells),
 
 namespace 
 {
-	class PointVelocitiesCalculator: public Index2Member<Vector3D>
+	class PointVelocitiesCalculator: public LazyList<Vector3D>
 	{
 	public:
 
@@ -45,12 +45,12 @@ namespace
 			const Tessellation3D& tess):
 		pm_(pm), tess_(tess) {}
 
-		size_t getLength(void) const
+		size_t size(void) const
 		{
 			return tess_.GetPointNo();
 		}
 
-		Vector3D operator()(size_t i) const
+		Vector3D operator[](size_t i) const
 		{
 			return pm_(tess_.GetMeshPoint(i));
 		}
@@ -75,7 +75,7 @@ namespace
 		}
 	}
 
-	class AllCellsUpdater: public Index2Member<ComputationalCell>
+	class AllCellsUpdater: public LazyList<ComputationalCell>
 	{
 	public:
 
@@ -85,12 +85,12 @@ namespace
 			const CellUpdater& cu):
 		tess_(tess), extensive_(extensive), eos_(eos), cu_(cu) {}
 
-		size_t getLength(void) const
+		size_t size(void) const
 		{
 			return extensive_.size();
 		}
 
-		ComputationalCell operator()(size_t i) const
+		ComputationalCell operator[](size_t i) const
 		{
 			return cu_(extensive_[i]/tess_.GetVolume(i),eos_);
 		}
@@ -102,7 +102,7 @@ namespace
 		const CellUpdater& cu_;
 	};
 
-	class PointPositionUpdater: public Index2Member<Vector3D>
+	class PointPositionUpdater: public LazyList<Vector3D>
 	{
 	public:
 
@@ -111,12 +111,12 @@ namespace
 			double dt):
 		tess_(tess), velocities_(velocities), dt_(dt) {}
 
-		size_t getLength(void) const
+		size_t size(void) const
 		{
 			return velocities_.size();
 		}
 
-		Vector3D operator()(size_t i) const
+		Vector3D operator[](size_t i) const
 		{
 			return tess_.GetMeshPoint(i)+dt_*velocities_[i];
 		}

@@ -17,12 +17,12 @@ ExtensiveGenerator::ExtensiveGenerator
  const EquationOfState& eos):
   cells_(cells), tess_(tess), eos_(eos) {}
 
-size_t ExtensiveGenerator::getLength(void) const
+size_t ExtensiveGenerator::size(void) const
 {
   return cells_.size();
 }
 
-Conserved3D ExtensiveGenerator::operator()(size_t i) const
+Conserved3D ExtensiveGenerator::operator[](size_t i) const
 {
   return tess_.GetVolume(i)*calc_intensive(cells_[i],eos_);
 }

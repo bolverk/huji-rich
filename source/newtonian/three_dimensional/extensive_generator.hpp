@@ -10,6 +10,7 @@
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/lazy_list.hpp"
 #include "../../3D/GeometryCommon/Tessellation3D.hpp"
 
 /*! \brief Calculates the extensive conserved variables
@@ -21,7 +22,7 @@ Conserved3D calc_intensive(const ComputationalCell& cell,
 			 const EquationOfState& eos);
 
 //! \brief Generates a list of conserved variables
-class ExtensiveGenerator: public Index2Member<Conserved3D>
+class ExtensiveGenerator: public LazyList<Conserved3D>
 {
 public:
 
@@ -34,9 +35,9 @@ public:
 		     const Tessellation3D& tess,
 		     const EquationOfState& eos);
 
-  size_t getLength(void) const;
+size_t size(void) const;
 
-  Conserved3D operator()(size_t i) const;
+  Conserved3D operator[](size_t i) const;
 
 private:
   const vector<ComputationalCell>& cells_;

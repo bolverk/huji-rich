@@ -3,6 +3,7 @@
 #include <fstream>
 #include "../../misc/simple_io.hpp"
 #include "../../misc/hdf5_utils.hpp"
+#include "../../misc/lazy_list.hpp"
 
 LocalContourCriterion::~LocalContourCriterion(void) {}
 
@@ -34,7 +35,7 @@ SequentialContour::SequentialContour
 
 namespace {
 
-  class ComponentExtractor: public Index2Member<double>
+  class ComponentExtractor: public LazyList<double>
   {
   public:
 
@@ -42,12 +43,12 @@ namespace {
 		       double Vector2D::* component):
       source_(source), component_(component) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return source_.size();
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return source_[i].*component_;
     }

@@ -1,5 +1,6 @@
 #include "hdf5_diagnostics.hpp"
 #include "../../misc/hdf5_utils.hpp"
+#include "../../misc/lazy_list.hpp"
 
 using namespace H5;
 
@@ -42,7 +43,7 @@ namespace {
 }
 
 namespace {
-  class MeshGeneratingPointCoordinate: public Index2Member<double>
+  class MeshGeneratingPointCoordinate: public LazyList<double>
   {
   public:
 
@@ -50,12 +51,12 @@ namespace {
 				  double Vector2D::* component):
       tess_(tess), component_(component) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(tess_.GetPointNo());
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return tess_.GetMeshPoint(static_cast<int>(i)).*component_;
     }
@@ -106,7 +107,7 @@ namespace {
     double Vector2D::* component_;
   };
 
-  class CellsPropertyExtractor: public Index2Member<double>
+  class CellsPropertyExtractor: public LazyList<double>
   {
   public:
 
@@ -114,12 +115,12 @@ namespace {
 			   const SingleCellPropertyExtractor& scpe):
       sim_(sim), scpe_(scpe) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return static_cast<size_t>(sim_.getTessellation().GetPointNo());
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return scpe_(sim_.getAllCells()[i]);
     }
@@ -156,7 +157,7 @@ namespace {
     }
   };
 
-  class TracerSlice: public Index2Member<double>
+  class TracerSlice: public LazyList<double>
   {
   public:
 
@@ -164,12 +165,12 @@ namespace {
 		const string& name):
       sim_(sim), name_(name) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return sim_.getAllCells().size();
     }
 		
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       return sim_.getAllCells()[i].tracers.find(name_)->second;
     }

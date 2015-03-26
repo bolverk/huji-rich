@@ -5,6 +5,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "../common/hydrodynamics.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/lazy_list.hpp"
 
 using namespace std;
 
@@ -522,7 +523,7 @@ void ColdFlows::activate(double threshold)
 }
 
 namespace {
-  class EntropyCalculator: public Index2Member<double>
+  class EntropyCalculator: public LazyList<double>
   {
   public:
 
@@ -531,12 +532,12 @@ namespace {
 		      const EquationOfState& eos):
       grid_(grid), cells_(cells), eos_(eos) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return cells_.size();
     }
 
-    double operator()(size_t i) const
+    double operator[](size_t i) const
     {
       const double volume = grid_[i+1] - grid_[i];
       const double mass = volume*cells_[i].Density;
@@ -604,7 +605,7 @@ namespace {
 		     thermal_energy, sound_speed);
   }
 
-  class PrimitiveRetriever: public Index2Member<Primitive>
+  class PrimitiveRetriever: public LazyList<Primitive>
   {
   public:
 
@@ -621,12 +622,12 @@ namespace {
       threshold_(threshold),
       active_(active) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return intensive_.size();
     }
 
-    Primitive operator()(size_t i) const
+    Primitive operator[](size_t i) const
     {
       return retrieve_single_primitive
 	(intensive_.at(i),eos_,

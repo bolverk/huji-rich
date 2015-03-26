@@ -1,4 +1,5 @@
 #include "../../misc/simple_io.hpp"
+#include "../../misc/lazy_list.hpp"
 #include "diagnostics.hpp"
 
 using std::cout;
@@ -25,19 +26,19 @@ void write_error(const string& fname,
 
 namespace {
 
-  class ExtensiveConservedCalculator: public Index2Member<Extensive>
+  class ExtensiveConservedCalculator: public LazyList<Extensive>
   {
   public:
 
     ExtensiveConservedCalculator(const hdsim& sim):
       sim_(sim), pg_(sim.getPhysicalGeometry()) {}
 
-    size_t getLength(void) const
+    size_t size(void) const
     {
       return sim_.getAllExtensives().size();
     }
 
-    Extensive operator()(size_t i) const
+    Extensive operator[](size_t i) const
     {
       return sim_.getAllExtensives()[i];
     }
