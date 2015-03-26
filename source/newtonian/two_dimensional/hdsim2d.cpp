@@ -60,6 +60,7 @@ hdsim::hdsim
  const SourceTerm& source,
  const TimeStepFunction& tsf,
  const FluxCalculator& fc,
+ const ExtensiveUpdater& eu,
  const CellUpdater& cu):
   tess_(tess),
   obc_(obc),
@@ -76,12 +77,14 @@ hdsim::hdsim
   pg_(pg),
   tsf_(tsf),
   fc_(fc),
+  eu_(eu),
   cu_(cu) {}
 
 hdsim::~hdsim(void) {}
 
 namespace
 {
+  /*
   void update_extensives(const vector<Extensive>& fluxes,
 			 const PhysicalGeometry& pg,
 			 const Tessellation& tess,
@@ -100,6 +103,7 @@ namespace
 	extensives[static_cast<size_t>(edge.neighbors.second)] += delta;
     }
   }
+  */
 }
 
 void hdsim::TimeAdvance(void)
@@ -120,7 +124,9 @@ void hdsim::TimeAdvance(void)
 				       time_,
 				       dt);
 
-  update_extensives(fluxes,
+
+  //  update_extensives(fluxes,
+  eu_(fluxes,
 		    pg_,
 		    tess_,
 		    dt,

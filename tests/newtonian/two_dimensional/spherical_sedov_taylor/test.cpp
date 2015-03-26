@@ -21,6 +21,7 @@
 #include "source/newtonian/test_2d/piecewise.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -57,6 +58,7 @@ namespace {
       force_(pg_.getAxis()),
       tsf_(0.3),
       fc_(rs_),
+      eu_(),
       cu_(),
       sim_(tess_,
 	   outer_,
@@ -67,6 +69,7 @@ namespace {
 	   force_,
 	   tsf_,
 	   fc_,
+	   eu_,
 	   cu_) {}
 
     hdsim& getSim(void)
@@ -88,6 +91,7 @@ namespace {
     CylindricalComplementary force_;
     const SimpleCFL tsf_;
     const SimpleFluxCalculator fc_;
+    const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
     hdsim sim_;
   };

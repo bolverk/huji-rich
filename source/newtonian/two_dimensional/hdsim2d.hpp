@@ -29,6 +29,7 @@
 #include "simple_cfl.hpp"
 #include "flux_calculator_2d.hpp"
 #include "cell_updater_2d.hpp"
+#include "extensive_updater.hpp"
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
@@ -58,6 +59,8 @@ private:
   const TimeStepFunction& tsf_;
 
   const FluxCalculator& fc_;
+
+  const ExtensiveUpdater& eu_;
 
   const CellUpdater& cu_;
 
@@ -122,6 +125,7 @@ public:
 	const SourceTerm& external_force,
 	const TimeStepFunction& tsf,
 	const FluxCalculator& fc,
+	const ExtensiveUpdater& eu,
 	const CellUpdater& cu);
 
   /*! \brief Loads reset data into simulation
@@ -133,33 +137,6 @@ public:
     \param checkpoint Reset dump where data is to be written
    */
   void makeCheckpoint(ResetDump& checkpoint) const;
-
-    /*! \brief Class constructor from restart file for MPI
-    \param dump The ResetDump file
-    \param tessellation Voronoi tessellation method
-    */
-#ifdef RICH_MPI
-  //!    \param tproc Tessellation of the processes
-#endif // RICH_MPI
-  /*!
-    \param interpolation Interpolation method
-    \param eos Equation of state
-    \param rs Riemann solver
-    \param pointmotion Motion of the mesh generating points
-    \param external_force External force
-    \param hbc Hydro boundary conditions
-    \param obc Outer boundary conditions
-    \param EntropyCalc A flag whether to recalculate the entropy during the half time step
-  */
-  hdsim(ResetDump const& dump,Tessellation& tessellation,
-	#ifdef RICH_MPI
-	Tessellation &tproc,
-	#endif
-	SpatialReconstruction& interpolation,
-	EquationOfState const& eos,RiemannSolver const& rs,
-	PointMotion& pointmotion,SourceTerm& external_force,
-	OuterBoundary const& obc,HydroBoundaryConditions const& hbc,
-	bool EntropyCalc=false);
 
   /*!
     \brief Class destructor
