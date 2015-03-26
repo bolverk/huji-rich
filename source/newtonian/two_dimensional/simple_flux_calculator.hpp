@@ -49,8 +49,7 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const double time,
-   const double dt,
-   const CacheData& cd) const;
+   const double dt) const;
 
 private:
   const RiemannSolver& rs_;

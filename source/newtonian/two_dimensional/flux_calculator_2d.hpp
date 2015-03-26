@@ -35,8 +35,7 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const double time,
-   const double dt,
-   const CacheData& cd) const = 0;
+   const double dt) const = 0;
 
   //! \brief Class destructor
   virtual ~FluxCalculator(void);

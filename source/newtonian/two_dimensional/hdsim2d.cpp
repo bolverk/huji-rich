@@ -88,24 +88,24 @@ hdsim::~hdsim(void) {}
 namespace
 {
   /*
-  void update_extensives(const vector<Extensive>& fluxes,
-			 const PhysicalGeometry& pg,
-			 const Tessellation& tess,
-			 const double dt,
-			 vector<Extensive>& extensives)
-  {
+    void update_extensives(const vector<Extensive>& fluxes,
+    const PhysicalGeometry& pg,
+    const Tessellation& tess,
+    const double dt,
+    vector<Extensive>& extensives)
+    {
     const vector<Edge>& edge_list = tess.getAllEdges();
     for(size_t i=0;i<edge_list.size();++i){
-      const Edge edge = edge_list[i];
-      const Extensive delta = dt*pg.calcArea(edge)*fluxes[i];
-      if(edge.neighbors.first>=0 && 
-	 edge.neighbors.first < static_cast<int>(extensives.size()))
-	extensives[static_cast<size_t>(edge.neighbors.first)] -= delta;
-      if(edge.neighbors.second>=0 &&
-	 edge.neighbors.second < static_cast<int>(extensives.size()))
-	extensives[static_cast<size_t>(edge.neighbors.second)] += delta;
+    const Edge edge = edge_list[i];
+    const Extensive delta = dt*pg.calcArea(edge)*fluxes[i];
+    if(edge.neighbors.first>=0 && 
+    edge.neighbors.first < static_cast<int>(extensives.size()))
+    extensives[static_cast<size_t>(edge.neighbors.first)] -= delta;
+    if(edge.neighbors.second>=0 &&
+    edge.neighbors.second < static_cast<int>(extensives.size()))
+    extensives[static_cast<size_t>(edge.neighbors.second)] += delta;
     }
-  }
+    }
   */
 }
 
@@ -125,16 +125,16 @@ void hdsim::TimeAdvance(void)
 				       cells_,
 				       eos_,
 				       time_,
-				       dt,
-				       cache_data_);
+				       dt);
 
 
   //  update_extensives(fluxes,
   eu_(fluxes,
-		    pg_,
-		    tess_,
-		    dt,
-		    extensives_);
+      pg_,
+      tess_,
+      dt,
+      cache_data_,
+      extensives_);
 
   ExternalForceContribution(tess_,
 			    pg_,
@@ -329,18 +329,18 @@ const vector<ComputationalCell>& hdsim::getAllCells(void) const
 }
 
 /*
-void hdsim::HilbertArrange(int innernum)
-{
+  void hdsim::HilbertArrange(int innernum)
+  {
   vector<Vector2D> cor=_tessellation.GetMeshPoints();
   vector<int> order=HilbertOrder(cor,_tessellation.GetPointNo(),innernum);
   ReArrangeVector(cor,order);
   if(cor.size()>order.size())
-    cor.erase(cor.begin()+static_cast<int>(order.size()),cor.end());
+  cor.erase(cor.begin()+static_cast<int>(order.size()),cor.end());
   ReArrangeVector(_cells,order);
   if(tracer_flag_)
-    ReArrangeVector(tracer_,order);
+  ReArrangeVector(tracer_,order);
   _tessellation.Update(cor);
-}
+  }
 */
 
 #ifdef RICH_MPI

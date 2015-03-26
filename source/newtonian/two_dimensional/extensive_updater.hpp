@@ -5,6 +5,7 @@
 #include "extensive.hpp"
 #include "physical_geometry.hpp"
 #include "../../tessellation/tessellation.hpp"
+#include "cache_data.hpp"
 
 using std::vector;
 
@@ -17,6 +18,7 @@ public:
    const PhysicalGeometry& pg,
    const Tessellation& tess,
    const double dt,
+   const CacheData& cd,
    vector<Extensive>& extensives) const = 0;
 
   virtual ~ExtensiveUpdater(void);

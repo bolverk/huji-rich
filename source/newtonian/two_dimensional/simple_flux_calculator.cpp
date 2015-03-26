@@ -188,8 +188,7 @@ vector<Extensive> SimpleFluxCalculator::operator()
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const double /*time*/,
- const double /*dt*/,
- const CacheData& /*cd*/) const
+ const double /*dt*/) const
 {
   vector<Extensive> res(tess.getAllEdges().size());
   for(size_t i=0;i<tess.getAllEdges().size();++i){

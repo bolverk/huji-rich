@@ -12,6 +12,7 @@ void SimpleExtensiveUpdater::operator()
    const PhysicalGeometry& pg,
    const Tessellation& tess,
    const double dt,
+   const CacheData& /*cd*/,
    vector<Extensive>& extensives) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
