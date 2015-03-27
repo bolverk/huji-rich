@@ -24,6 +24,7 @@
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 #include "time_step_function.hpp"
+#include "cache_data.hpp"
 
 //! Calculates the velocities at the vertices of edges
 class FaceVertexVelocityCalculator: public LazyList<Vector2D>
@@ -295,6 +296,7 @@ Conserved FluxInBulk(Vector2D const& normaldir,
 void ExternalForceContribution
 (const Tessellation& tess,
  const PhysicalGeometry& pg,
+ const CacheData& cd,
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& fluxes,
  const vector<Vector2D>& point_velocities,

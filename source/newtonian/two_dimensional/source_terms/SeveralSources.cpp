@@ -8,6 +8,7 @@ SeveralSources::~SeveralSources(void) {}
 vector<Extensive> SeveralSources::operator()
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
+   const CacheData& cd,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const vector<Vector2D>& point_velocities,
@@ -25,7 +26,7 @@ vector<Extensive> SeveralSources::operator()
   }
   for(size_t i=0;i<sources_.size();++i){
     const vector<Extensive> diff = (*sources_[i])
-      (tess,pg,cells,fluxes,point_velocities,t);
+      (tess,pg,cd,cells,fluxes,point_velocities,t);
     for(size_t j=0;j<res.size();++j){
       res[j].mass += diff[j].mass;
       res[j].momentum += diff[j].momentum;

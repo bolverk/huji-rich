@@ -12,6 +12,7 @@
 #include "physical_geometry.hpp"
 #include "extensive.hpp"
 #include "computational_cell_2d.hpp"
+#include "cache_data.hpp"
 
 //! \brief Abstract class for external forces
 class SourceTerm
@@ -30,6 +31,7 @@ public:
   virtual vector<Extensive> operator()
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
+   const CacheData& cd,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const vector<Vector2D>& point_velocities,

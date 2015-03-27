@@ -19,6 +19,7 @@ public:
   vector<Extensive> operator()
   (const Tessellation& tess,
    const PhysicalGeometry& pg_,
+   const CacheData& cd,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const vector<Vector2D>& point_velocities,

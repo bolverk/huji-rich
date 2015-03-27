@@ -859,6 +859,7 @@ vector<Conserved> calc_fluxes
 void ExternalForceContribution
 (const Tessellation& tess,
  const PhysicalGeometry& pg,
+ const CacheData& cd,
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& fluxes,
  const vector<Vector2D>& point_velocities,
@@ -868,7 +869,7 @@ void ExternalForceContribution
  vector<Extensive>& extensives)
 {
   const vector<Extensive> diff = force
-    (tess,pg,cells,fluxes,point_velocities,t);
+    (tess,pg,cd,cells,fluxes,point_velocities,t);
   for(size_t i=0;i<static_cast<size_t>(tess.GetPointNo());++i){
     extensives[i].mass += dt*diff[i].mass;
     extensives[i].momentum += dt*diff[i].momentum;
