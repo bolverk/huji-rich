@@ -9,16 +9,16 @@ namespace {
 
 void SimpleExtensiveUpdater::operator()
   (const vector<Extensive>& fluxes,
-   const PhysicalGeometry& pg,
+   const PhysicalGeometry& /*pg*/,
    const Tessellation& tess,
    const double dt,
-   const CacheData& /*cd*/,
+   const CacheData& cd,
    vector<Extensive>& extensives) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
   for(size_t i=0;i<edge_list.size();++i){
     const Edge& edge = edge_list[i];
-    const Extensive delta = dt*pg.calcArea(edge)*fluxes[i];
+    const Extensive delta = dt*cd.areas[i]*fluxes[i];
     if(bracketed(0,edge.neighbors.first,tess.GetPointNo()))
       extensives[static_cast<size_t>(edge.neighbors.first)] -=
 	delta;

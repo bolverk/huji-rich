@@ -4,6 +4,7 @@
 #include <cassert>
 #include "universal_error.hpp"
 
+using std::vector;
 using std::size_t;
 
 //! \brief Ordered list whose terms are evaluated lazily

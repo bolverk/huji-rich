@@ -2,50 +2,44 @@
 #define CACHED_LAZY_LIST_HPP 1
 
 #include <vector>
+#include "lazy_list.hpp"
 
 using std::vector;
 using std::size_t;
+using std::pair;
 
 template<class T> class CachedLazyList
 {
 public:
 
-  CachedLazyList(size_t len):
-    cached_(len,false), values_(len) {}
+  CachedLazyList(const LazyList<T>& ll):
+    ll_(ll), cached_values_(ll.size(),pair<bool,T>(false,T())) {}
 
-  virtual size_t size(void) const = 0;
-
-  virtual T calculate(const size_t i) const = 0;
+  size_t size(void) const
+  {
+    return ll_.size();
+  }
 
   T& operator[](size_t i) const
   {
-    if(cached_[i])
-      return values_[i];
-    else{
-      cached_[i] = true;
-      values_[i] = calculate(i);
-      return values_[i];
-    }
+    assert(i<size());
+    if(!cached_values_[i].first)
+      cached_values_[i] = pair<bool,T>(true,ll_[i]);
+    return cached_values_[i].second;
   }
 
   void reset(void) const
   {
-    for(size_t i=0;i<cached_.size();++i)
-      cached_[i] = false;
-  }
-
-  void resize(size_t new_size) const
-  {
-    cached_.resize(new_size);
-    values_.resize(new_size);
-    reset();
+    cached_values_.resize(ll_.size());
+    for(size_t i=0;i<cached_values_.size();++i)
+      cached_values_[i].first = false;
   }
 
   virtual ~CachedLazyList(void) {}
 
 private:
-  mutable vector<bool> cached_;
-  mutable vector<T> values_;
+  const LazyList<T>& ll_;
+  mutable vector<pair<bool,T> > cached_values_;
 };
 
 #endif // CACHED_LAZY_LIST_HPP
