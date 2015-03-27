@@ -47,6 +47,10 @@ namespace {
       res[i].energy = eos.dp2e(cell.density, cell.pressure)*mass + 
 	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
       res[i].momentum = mass*cells[i].velocity;
+      for(std::map<std::string,double>::const_iterator it=
+	    cells[i].tracers.begin();
+	  it!=cells[i].tracers.end();++it)
+	res[i].tracers[it->first] = (it->second)*mass;
     }
     return res;
   }
