@@ -12,6 +12,7 @@
 #include "physical_geometry.hpp"
 #include "../common/equation_of_state.hpp"
 #include "extensive.hpp"
+#include "cache_data.hpp"
 
 using std::vector;
 
@@ -33,7 +34,8 @@ public:
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
    const vector<Extensive>& extensives,
-   const vector<ComputationalCell>& old) const = 0;
+   const vector<ComputationalCell>& old,
+   const CacheData& cd) const = 0;
 
   //! \brief Class destructor
   virtual ~CellUpdater(void);
