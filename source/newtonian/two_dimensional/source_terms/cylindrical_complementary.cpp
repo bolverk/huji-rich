@@ -44,8 +44,8 @@ CylindricalComplementary::CylindricalComplementary(const Axis& axis):
 
 vector<Extensive> CylindricalComplementary::operator()
 (const Tessellation& tess,
- const PhysicalGeometry& pg,
- const CacheData& /*cd*/,
+ const PhysicalGeometry& /*pg*/,
+ const CacheData& cd,
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& /*fluxes*/,
  const vector<Vector2D>& /*point_velocities*/,
@@ -65,8 +65,11 @@ vector<Extensive> CylindricalComplementary::operator()
     const double p = cells[i].pressure; 
     const double r = distance_from_axis
       (tess.GetCellCM(static_cast<int>(i)),axis_);
+    /*
     const double volume = pg.calcVolume
       (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
+    */
+    const double volume = cd.volumes[i];
     res[i].mass = 0;
     res[i].momentum = volume*(p/r)*r_hat/abs(r_hat);
     res[i].energy = 0;
