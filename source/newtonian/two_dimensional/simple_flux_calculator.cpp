@@ -182,6 +182,28 @@ Conserved SimpleFluxCalculator::calcHydroFlux
 				  rpi.p);
 }
 
+namespace {
+  double calc_tracer_flux(size_t i,
+			  const Tessellation& tess,
+			  const vector<ComputationalCell>& cells,
+			  const std::string& name,
+			  const Conserved& hf)
+  {
+    const Edge& edge = tess.GetEdge(static_cast<int>(i));
+    if(hf.Mass>0 && 
+       edge.neighbors.first>0 &&
+       edge.neighbors.first < tess.GetPointNo())
+      return hf.Mass*
+	cells[static_cast<size_t>(edge.neighbors.first)].tracers.find(name)->second;
+    if(hf.Mass<0 &&
+       edge.neighbors.second>0 &&
+       edge.neighbors.second < tess.GetPointNo())
+      return hf.Mass*
+	cells[static_cast<size_t>(edge.neighbors.second)].tracers.find(name)->second;
+    return 0;
+  }
+}
+
 vector<Extensive> SimpleFluxCalculator::operator()
 (const Tessellation& tess,
  const vector<Vector2D>& point_velocities,
@@ -200,7 +222,9 @@ vector<Extensive> SimpleFluxCalculator::operator()
     for(std::map<std::string,double>::const_iterator it = 
 	  cells.front().tracers.begin();
 	it!=cells.front().tracers.end();++it)
-      res[i].tracers[it->first] = (it->second)*hydro_flux.Mass;
+      res[i].tracers[it->first] =
+	calc_tracer_flux(i,tess,cells,it->first,hydro_flux);
+      //      res[i].tracers[it->first] = (it->second)*hydro_flux.Mass;
   }
   return res;
 }
