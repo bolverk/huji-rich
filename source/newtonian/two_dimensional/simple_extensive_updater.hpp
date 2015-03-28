@@ -13,6 +13,7 @@ public:
    const Tessellation& tess,
    const double dt,
    const CacheData& cd,
+   const vector<ComputationalCell>& cells,
    vector<Extensive>& extensives) const;
 };
 

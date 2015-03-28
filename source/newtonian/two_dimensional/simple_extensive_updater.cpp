@@ -13,6 +13,7 @@ void SimpleExtensiveUpdater::operator()
    const Tessellation& tess,
    const double dt,
    const CacheData& cd,
+   const vector<ComputationalCell>& /*cells*/,
    vector<Extensive>& extensives) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();

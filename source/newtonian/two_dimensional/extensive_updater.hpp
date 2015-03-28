@@ -6,6 +6,7 @@
 #include "physical_geometry.hpp"
 #include "../../tessellation/tessellation.hpp"
 #include "cache_data.hpp"
+#include "computational_cell_2d.hpp"
 
 using std::vector;
 
@@ -19,6 +20,7 @@ public:
    const Tessellation& tess,
    const double dt,
    const CacheData& cd,
+   const vector<ComputationalCell>& cells,
    vector<Extensive>& extensives) const = 0;
 
   virtual ~ExtensiveUpdater(void);

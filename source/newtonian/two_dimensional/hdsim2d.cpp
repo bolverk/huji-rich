@@ -138,6 +138,7 @@ void hdsim::TimeAdvance(void)
       tess_,
       dt,
       cache_data_,
+      cells_,
       extensives_);
 
   ExternalForceContribution(tess_,

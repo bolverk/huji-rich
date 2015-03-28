@@ -55,5 +55,6 @@ double IdealGas::dp2s(double d, double p) const
 
 double IdealGas::sd2p(double s, double d) const
 {
-	return s*pow(d,_g);
+  assert(s>0 && d>0);
+  return s*pow(d,_g);
 }
