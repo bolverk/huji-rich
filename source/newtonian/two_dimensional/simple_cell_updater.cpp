@@ -13,10 +13,6 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 {
   vector<ComputationalCell> res = old;
   for(size_t i=0;i<extensives.size();++i){
-    /*
-    const double volume = pg.calcVolume
-      (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
-    */
     const double volume = cd.volumes[i];
     res[i].density = extensives[i].mass/volume;
     res[i].velocity = extensives[i].momentum / extensives[i].mass;
@@ -24,8 +20,8 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
       0.5*ScalarProd(res[i].velocity, res[i].velocity);
     res[i].pressure = eos.de2p(res[i].density, energy);
     for(std::map<std::string,double>::const_iterator it =
-	  extensives.front().tracers.begin();
-	it!=extensives.front().tracers.end();++it)
+	  extensives[i].tracers.begin();
+	it!=extensives[i].tracers.end();++it)
       res[i].tracers[it->first] = it->second/extensives[i].mass;
   }
   return res;
