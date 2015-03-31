@@ -119,6 +119,7 @@ public:
     \param external_force External force
     \param tsf Time step function
     \param fc Flux calculator
+    \param eu Extensive updater
     \param cu Cell updater
   */
   hdsim(Tessellation& tess,

@@ -1,3 +1,8 @@
+/*! \file cache_data.hpp
+  \author Almog Yalinewich
+  \brief Geometrical cache data for optimisation
+ */
+
 #ifndef CACHE_DATA_HPP
 #define CACHE_DATA_HPP 1
 
@@ -5,6 +10,7 @@
 #include "../../tessellation/tessellation.hpp"
 #include "physical_geometry.hpp"
 
+//! \brief Container for cache data
 class CacheData
 {
 private:
@@ -46,12 +52,20 @@ private:
 
 public:
 
+  /*! \brief Class constructor
+    \param tess Tessellation
+    \param pg Physical geometry
+   */
   CacheData(const Tessellation& tess,
 	    const PhysicalGeometry& pg);
 
+  //! \brief Marks all items for recalculation
   void reset(void) const;
 
+  //! \brief List of cell volumes
   const CachedLazyList<double> volumes;
+
+  //! \brief List of areas of interfaces
   const CachedLazyList<double> areas;
 };
 

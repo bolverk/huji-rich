@@ -331,12 +331,12 @@ CartesianGridGenerator::CartesianGridGenerator
 	(size_t nx, size_t ny, const Vector2D& lower_left, const Vector2D& upper_right):
 nx_(nx), ny_(ny), lower_left_(lower_left), upper_right_(upper_right) {}
 
-size_t CartesianGridGenerator::getLength(void) const
+size_t CartesianGridGenerator::size(void) const
 {
 	return nx_*ny_;
 }
 
-Vector2D CartesianGridGenerator::operator()(size_t idx) const
+Vector2D CartesianGridGenerator::operator[](size_t idx) const
 {
 	const size_t i = idx%nx_;
 	const size_t j = idx/nx_;

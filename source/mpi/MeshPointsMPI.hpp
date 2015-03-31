@@ -86,7 +86,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	Vector2D const& lowerleft,Vector2D const& upperright);
 
 //! \brief Generates a cartesian grid
-class CartesianGridGenerator: public Index2Member<Vector2D>
+class CartesianGridGenerator: public LazyList<Vector2D>
 {
 public:
 
@@ -100,9 +100,9 @@ public:
 			 const Vector2D& lower_left,
 			 const Vector2D& upper_right);
 
-  size_t getLength(void) const;
+  size_t size(void) const;
 
-  Vector2D operator()(size_t idx) const;
+  Vector2D operator[](size_t idx) const;
 
 private:
 

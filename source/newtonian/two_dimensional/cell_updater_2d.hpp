@@ -27,6 +27,7 @@ public:
     \param eos Equation of state
     \param extensives Extensive variables
     \param old Old computational cells
+    \param cd Cached data
     \return List of computational cells
    */
   virtual vector<ComputationalCell> operator()

@@ -23,6 +23,10 @@ public:
   */
   virtual T operator[](const size_t i) const = 0;
 
+  /*! \brief bound checked access function
+    \param i Index
+    \return i'th term
+   */
   T at(const size_t i) const
   {
     assert(i<size());
@@ -192,12 +196,12 @@ public:
   Echo(const vector<T>& v):
     v_(v) {}
 
-  size_t getLength(void) const
+  size_t size(void) const
   {
     return v_.size();
   }
 
-  T operator()(size_t i) const
+  T operator[](size_t i) const
   {
     return v_[i];
   }
@@ -224,12 +228,12 @@ public:
     assert(high_>low_);
   }
 
-  size_t getLength(void) const
+  size_t size(void) const
   {
     return high_-low_;
   }
 
-  T operator()(size_t i) const
+  T operator[](size_t i) const
   {
     return i2m_(i+low_);
   }

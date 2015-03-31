@@ -1,3 +1,8 @@
+/*! \file extensive_updater.hpp
+  \author Almog Yalinewich
+  \brief Base class for extensive updater scheme
+ */
+
 #ifndef EXTENSIVE_UPDATER_HPP
 #define EXTENSIVE_UPDATER_HPP 1
 
@@ -10,10 +15,20 @@
 
 using std::vector;
 
+//! \brief Base class for extensive update scheme
 class ExtensiveUpdater
 {
 public:
 
+  /*! \brief Updates the extensive variables
+    \param fluxes Fluxes
+    \param pg Physical geometry
+    \param tess Tessellation
+    \param dt Time step
+    \param cd Cache data
+    \param cells Computational cells
+    \param extensives Extensive variables
+   */
   virtual void operator()
   (const vector<Extensive>& fluxes,
    const PhysicalGeometry& pg,
@@ -23,6 +38,7 @@ public:
    const vector<ComputationalCell>& cells,
    vector<Extensive>& extensives) const = 0;
 
+  //! \brief Class constructor
   virtual ~ExtensiveUpdater(void);
 };
   

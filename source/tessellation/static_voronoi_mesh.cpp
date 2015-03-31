@@ -626,30 +626,6 @@ StaticVoronoiMesh::StaticVoronoiMesh
 	Initialise(points,&bc);
 }
 
-#ifdef RICH_MPI
-StaticVoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proctess,
-	OuterBoundary const& bc):
-	logger(0),
-	eps(1e-8),
-	obc(0),
-	cell_edges(vector<Edge> ()),
-	edges(vector<Edge>()),
-	CM(vector<Vector2D> ()),
-	mesh_vertices(vector<vector<int> >()),
-	Tri(),
-	GhostProcs(vector<int> ()),
-	GhostPoints(vector<vector<int> > ()),
-	SentProcs(vector<int> ()),
-	SentPoints(vector<vector<int> > ()),
-	selfindex(vector<int> ()),
-	NGhostReceived(vector<vector<int> > ()),
-	OrgCorner(),
-	Nextra(0)
-{
-	Initialise(points,proctess,&bc);
-}
-#endif
-
 vector<int> StaticVoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,
 	int side)
 {
