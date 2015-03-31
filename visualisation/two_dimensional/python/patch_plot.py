@@ -16,7 +16,8 @@ def consolidate(fname,g=5./3.):
     res['radius'] = numpy.sqrt(res['x_coordinate']**2+res['y_coordinate']**2)
     res['r_velocity'] = (res['x_velocity']*res['x_coordinate']+
                          res['y_velocity']*res['y_coordinate'])/res['radius']
-    res['log_entropy'] = numpy.log(res['entropy'])
+    if 'entropy' in f:
+        res['log_entropy'] = numpy.log(res['entropy'])
     f.close()
     return res
 
