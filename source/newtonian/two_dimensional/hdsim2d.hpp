@@ -88,6 +88,10 @@ public:
    */
   const vector<ComputationalCell>& getAllCells(void) const;
 
+  vector<ComputationalCell>& getAllCells(void);
+
+  void recalculateExtensives(void);
+
   /*! \brief Access to physical geometry
     \return Physical geometry
    */
