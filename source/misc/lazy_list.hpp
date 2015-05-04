@@ -1,3 +1,8 @@
+/*! \file lazy_list.hpp
+  \author Almog Yalinewich
+  \brief Lazily evaluated list
+ */
+
 #ifndef LAZY_LIST_HPP
 #define LAZY_LIST_HPP 1
 

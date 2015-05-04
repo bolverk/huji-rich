@@ -34,7 +34,7 @@ namespace {
       width_(width),
       center_(center) {}
 
-    double EvalAt(double x) const
+    double operator()(double x) const
     {
       return ambient_ + amplitude_*exp(-pow((x-center_)/width_,2));
     }

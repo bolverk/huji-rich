@@ -88,8 +88,13 @@ public:
    */
   const vector<ComputationalCell>& getAllCells(void) const;
 
+  /*! \brief Access method to manually change data
+    \return Reference to computational cells
+   */
   vector<ComputationalCell>& getAllCells(void);
 
+  /*! \brief Recalculates extensives (in case computational cells were changed manually)
+   */
   void recalculateExtensives(void);
 
   /*! \brief Access to physical geometry

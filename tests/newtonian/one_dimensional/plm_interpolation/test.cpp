@@ -20,7 +20,7 @@ public:
   Parabola(double a, double b, double c):
     a_(a), b_(b), c_(c) {}
 
-  double EvalAt(double x) const
+  double operator()(double x) const
   {
     return a_*pow(x,2)+b_*x+c_;
   }
@@ -57,10 +57,10 @@ namespace {
     vector<Primitive> res(vertices.size()-1);
     for(int i = 0; i<(int)vertices.size() - 1; i++){
       double r = 0.5*(vertices[i] + vertices[i+1]);
-      double d = density.EvalAt(r);
-      double p = pressure.EvalAt(r);
-      Vector2D v(paravelocity.EvalAt(r),
-		 perpvelocity.EvalAt(r));
+      double d = density(r);
+      double p = pressure(r);
+      Vector2D v(paravelocity(r),
+		 perpvelocity(r));
       res[i] = CalcPrimitive(d, p, v, eos);
     }
     return res;
@@ -135,8 +135,7 @@ double test_interp(SpatialReconstruction1D const& sr,
   //  for(int i=0;i<(int)test_data.getEdges().size();++i){
   const int margin = 5;
   for(int i=margin;i<(int)test_data.getEdges().size()-margin;++i){
-    double v_a = test_data.getDistribution("xvelocity").EvalAt
-      (test_data.getEdges()[i]);
+    double v_a = test_data.getDistribution("xvelocity")(test_data.getEdges()[i]);
     if(i>0){
       double v_l = sr.InterpState
 	(test_data.getEdges(),
@@ -170,12 +169,12 @@ void write_interp_test(SpatialReconstruction1D const& sr,
   for(int i=0;i<(int)test_data.getEdges().size();++i){
     if(i>0)
       f << test_data.getEdges()[i] << " "
-	<< test_data.getDistribution("xvelocity").EvalAt(test_data.getEdges()[i]) << " "
+	<< test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
 	<< sr.InterpState
 	(test_data.getEdges(), test_data.getCells(),0,i,0,0).Velocity.x << endl;
     if(i<(int)test_data.getEdges().size()-1)
       f << test_data.getEdges()[i] << " "
-	<< test_data.getDistribution("xvelocity").EvalAt(test_data.getEdges()[i]) << " "
+	<< test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
 	<< sr.InterpState
 	(test_data.getEdges(), test_data.getCells(),0,i,1,0).Velocity.x << endl;
   }
