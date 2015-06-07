@@ -3,8 +3,8 @@
   \author Elad Steinberg
 */
 
-#ifndef ___EDGE_HPP___
-#define ___EDGE_HPP___
+#ifndef EDGE_HPP
+#define EDGE_HPP
 
 #include <vector>
 #include "geometry.hpp"
@@ -75,4 +75,4 @@ bool SegmentIntersection(Edge const& edge1,Edge const& edge2,
  */
 Vector2D calc_centroid(const Edge& edge);
 
-#endif	// of #ifndef ___EDGE_HPP___
+#endif	// EDGE_HPP

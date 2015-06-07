@@ -3,22 +3,22 @@
 #include "../../misc/universal_error.hpp"
 
 IdealGas::IdealGas(double AdiabaticIndex):
-  _g(AdiabaticIndex) {}
+  g_(AdiabaticIndex) {}
 
 double IdealGas::getAdiabaticIndex(void) const
 {
-  return _g;
+  return g_;
 }
 
-double IdealGas::dp2e(double d, double p) const
+double IdealGas::dp2e(double d, double p, const map<string,double>& /*tracers*/) const
 {
-  return p/d/(_g-1);
+  return p/d/(g_-1);
 }
 
-double IdealGas::de2p(double d, double e) const
+double IdealGas::de2p(double d, double e, const map<string,double>& /*tracers*/) const
 {
   assert(e>0);
-  return (_g-1)*e*d;
+  return (g_-1)*e*d;
 }
 
 namespace {
@@ -36,25 +36,25 @@ namespace {
   */
 }
 
-double IdealGas::dp2c(double d, double p) const
+double IdealGas::dp2c(double d, double p, const map<string,double>& /*tracers*/) const
 {
-  assert(_g>0 && p>0 && d>0);
-  return sqrt(_g*p/d);
+  assert(g_>0 && p>0 && d>0);
+  return sqrt(g_*p/d);
 }
 
-double IdealGas::de2c(double d, double e) const
+double IdealGas::de2c(double d, double e, const map<string,double>& tracers) const
 {
-  double p = de2p(d, e);
-  return sqrt(_g*p/d);
+  double p = de2p(d, e, tracers);
+  return sqrt(g_*p/d);
 }
 
-double IdealGas::dp2s(double d, double p) const
+double IdealGas::dp2s(double d, double p, const map<string,double>& /*tracers*/) const
 {
-	return p*pow(d,-_g);
+  return p*pow(d,-g_);
 }
 
-double IdealGas::sd2p(double s, double d) const
+double IdealGas::sd2p(double s, double d, const map<string,double>& /*tracers*/) const
 {
   assert(s>0 && d>0);
-  return s*pow(d,_g);
+  return s*pow(d,g_);
 }

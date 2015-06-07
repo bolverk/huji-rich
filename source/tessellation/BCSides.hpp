@@ -3,8 +3,8 @@
   \author Elad Steinberg
  */
 
-#ifndef ___BCSIDES_HPP___
-#define ___BCSIDES_HPP___
+#ifndef BCSIDES_HPP
+#define BCSIDES_HPP
 
 #include <vector>
 #include "geometry.hpp"
