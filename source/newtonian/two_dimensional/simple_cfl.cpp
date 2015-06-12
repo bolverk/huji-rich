@@ -23,7 +23,7 @@ namespace {
     double operator[](size_t i) const
     {
       return tess_.GetWidth(static_cast<int>(i))/
-	(eos_.dp2c(cells_[i].density, cells_[i].pressure)+
+	(eos_.dp2c(cells_[i].density, cells_[i].pressure, cells_[i].tracers)+
 	 abs(cells_[i].velocity)+
 	 abs(point_velocities_[i]));
     }

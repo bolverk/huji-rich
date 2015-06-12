@@ -8,10 +8,15 @@ SimpleFluxCalculator::SimpleFluxCalculator(const RiemannSolver& rs):
 Primitive convert_to_primitive(const ComputationalCell& cell,
 			       const EquationOfState& eos)
 {
+  /*
   return CalcPrimitive(cell.density,
 		       cell.pressure,
 		       cell.velocity,
 		       eos);
+  */
+  const double energy = eos.dp2e(cell.density, cell.pressure, cell.tracers);
+  const double sound_speed = eos.dp2c(cell.density, cell.pressure, cell.tracers);
+  return Primitive(cell.density, cell.pressure, cell.velocity, energy, sound_speed);
 }
 
 Primitive reflect(const Primitive& p,

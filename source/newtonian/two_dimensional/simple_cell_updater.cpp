@@ -18,11 +18,11 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
     res[i].velocity = extensives[i].momentum / extensives[i].mass;
     const double energy = extensives[i].energy/extensives[i].mass - 
       0.5*ScalarProd(res[i].velocity, res[i].velocity);
-    res[i].pressure = eos.de2p(res[i].density, energy);
     for(std::map<std::string,double>::const_iterator it =
 	  extensives[i].tracers.begin();
 	it!=extensives[i].tracers.end();++it)
       res[i].tracers[it->first] = it->second/extensives[i].mass;
+    res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers);
   }
   return res;
 }
