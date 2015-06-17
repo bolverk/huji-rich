@@ -15,6 +15,12 @@ double Vector2D::distance(Vector2D const& v1) const
 	      +(y-v1.y)*(y-v1.y));
 }
 
+double Vector2D::distance2(Vector2D const& v1) const
+{
+	return (x - v1.x)*(x - v1.x)	+(y - v1.y)*(y - v1.y);
+}
+
+
 double abs(Vector2D const& v)
 {
   return sqrt(v.x*v.x+v.y*v.y);

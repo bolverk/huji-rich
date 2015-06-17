@@ -1869,3 +1869,28 @@ void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 	    insert_all_to_back(grad,VectorValues(grad,sentcells[i]));
 	}
 }
+
+void PeriodicCMCreate(Tessellation &tess)
+{
+	/*
+	vector<Vector2D> &CM = tess.GetAllCM();
+	size_t norg =(size_t) tess.GetPointNo();
+	const size_t total_size = tess.GetTotalPointNumber();
+	vector<vector<int> > sentpoints = tess.GetDuplicatedPoints();
+	if (sentpoints.empty())
+		return;
+	CM.resize(total_size);
+	for (size_t i = 0; i < sentpoints.size(); ++i)
+	{
+		for (size_t j = 0; j < sentpoints[i].size(); ++j)
+		{
+			int point = sentpoints[i][j];
+			CM[static_cast<size_t> (point)] = CM[static_cast<size_t> (point)] - tess.GetMeshPoint(i) + tess.GetMeshPoint(tess.GetOriginalIndex(i));
+		}
+	}
+	for (size_t i = norg + 3; i<total_size; ++i)
+	{
+		if (tess.GetOriginalIndex(i) >= 0)
+			CM[i] = CM[tess.GetOriginalIndex(i)] - tess.GetMeshPoint(i) + tess.GetMeshPoint(tess.GetOriginalIndex(i));
+	}*/
+}

@@ -26,7 +26,6 @@
 #include "ResetDump.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
-#include "simple_cfl.hpp"
 
 /*! \brief Parameters for cold flows correction
   \details See equations 61 and 62 in the Arepo paper
@@ -78,7 +77,11 @@ private:
 
   SourceTerm& external_force_;
 
+  double _cfl;
+
   double _time;
+
+  double _endtime;
 
   int cycle_;
 
@@ -92,11 +95,10 @@ private:
 
   bool EntropyReCalc_;
 
+  double _dt_external;
+
   const SlabSymmetry default_pg_;
   const PhysicalGeometry* pg_;
-
-  SimpleCFL default_time_step_function_;
-  TimeStepFunction* tsf_;
 
   #ifdef RICH_MPI
   ProcessorUpdate *procupdate_;
@@ -234,6 +236,21 @@ public:
   */
   ~hdsim(void);
 
+  /*! \brief Overrides the value of the cfl factor
+    \param cfl_new New value of the cfl factor
+  */
+  void SetCfl(double cfl_new);
+
+  /*! \brief Sets the time for the sim to end exactly
+    \param endtime The ending time
+  */
+  void SetEndTime(double endtime);
+  /*!
+    \brief Dictates a time step from an external source
+    \param dt The time step
+  */
+  void SetTimeStepExternal(double dt);
+
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
@@ -245,6 +262,14 @@ public:
   //! \brief Advances the simulation in time, second order accuracy
   void TimeAdvance2Mid(void);
 
+  //! \brief Advances the simulation in time, second order accuracy Heun method
+  void TimeAdvance2Heun(void);
+
+  //! \brief Advances the simulation in time, second order accuracy with clipping
+  void TimeAdvance2MidClip(void);
+
+  void TimeAdvanceClip(void);
+ 
   /*! \brief Adds a tracer to the simulation
     \param tp The spatial distribution of the tracer to add
   */
@@ -320,9 +345,15 @@ public:
 	\param originalTracers The original tracers
     \param tracerindex The index in the tracer to consider
   */
-  void TracerReset(double alpha,SpatialDistribution const& originalD,
+  Vector2D TracerReset(double alpha,SpatialDistribution const& originalD,
 		   SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
 		   SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers,int tracerindex);
+
+  /*!
+    \brief Returns the Courant number
+    \return The courant number
+  */
+  double GetCfl(void)const;
 
   /*!
     \brief Returns the coldflow flag
@@ -350,11 +381,6 @@ public:
     \param pressure The minimum pressure that goes along woth the minimum density
   */
   void SetDensityFloor(double density,double pressure);
-
-  /*! \brief Change the time step function
-    \param tsf New time step function
-   */
-  void setTimeStepFunction(TimeStepFunction& tsf);
 
   /*!
     \brief Returns all the cells

@@ -71,6 +71,9 @@ public:
   void Rotate(double a);
   //! \brief Caluclates the distance from the Vector to v1 \param v1 The vector whose distance from is calculated \returns The distance
   double distance(Vector2D const& v1) const;
+
+  //! \brief Caluclates the square of the distance from the Vector to v1 \param v1 The vector whose distance from is calculated \returns The distance
+  double distance2(Vector2D const& v1) const;
 };
 
 /*! \brief Norm of a vector

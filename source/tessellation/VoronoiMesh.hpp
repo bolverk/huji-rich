@@ -59,8 +59,7 @@ public:
 	\param NewPoint The new point
 	\return The index of the duplicated cor
 	*/
-	friend int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,
-		int NewIndex,Vector2D const& NewPoint);
+	friend int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int NewIndex,Vector2D const& NewPoint);
 
 	vector<Vector2D> calc_edge_velocities(HydroBoundaryConditions const* hbc,
 		vector<Vector2D> const& point_velocities,double time)const;

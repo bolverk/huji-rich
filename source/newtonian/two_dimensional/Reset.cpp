@@ -45,6 +45,8 @@ void ResetOutput(string location,hdsim const& sim)
 	myFile.write (reinterpret_cast<char*>(&dtemp),sizeof(double));
 	char cold= sim.GetColdFlowFlag() ? '1' : '0';
 	myFile.write(reinterpret_cast<char*>(&cold),sizeof(char));
+	dtemp=sim.GetCfl();
+	myFile.write(reinterpret_cast<char*>(&dtemp),sizeof(double));
 	double a,b;
 	sim.GetColdFlowParm(a,b);
 	myFile.write(reinterpret_cast<char*>(&a),sizeof(double));
@@ -137,6 +139,7 @@ void ResetRead(string location,ResetDump &dump,EquationOfState const* eos)
 		dump.coldflows = true;
 	else
 		dump.coldflows = false;
+	myFile.read(reinterpret_cast<char*>(&dump.cfl),sizeof(double));
 	myFile.read(reinterpret_cast<char*>(&dump.a),sizeof(double));
 	myFile.read(reinterpret_cast<char*>(&dump.b),sizeof(double));
 	myFile.read(reinterpret_cast<char*>(&dump.cycle),sizeof(int));

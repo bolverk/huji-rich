@@ -1,6 +1,6 @@
 #include <limits>
 #include <boost/foreach.hpp>
-#include "LinearGaussImproved.hpp"
+#include "LinearGaussImprovedNoTracer.hpp"
 #include "../../common/hydrodynamics.hpp"
 
 using std::min;
@@ -92,13 +92,13 @@ namespace
 	}
 }
 
-LinearGaussImproved::LinearGaussImproved
+LinearGaussImprovedNoTracer::LinearGaussImprovedNoTracer
 (EquationOfState const& eos,
 OuterBoundary const& obc,
-HydroBoundaryConditions const& hbc,
+HydroBoundaryConditions const& hbc, vector<size_t> const& to_calc,
 bool slf, bool soitf, double delta_v, double theta,
 double delta_P, bool rigidflag) :
-eos_(eos), rslopes_(), obc_(obc), hbc_(hbc), slf_(slf), soitf_(soitf),
+eos_(eos), rslopes_(), obc_(obc), hbc_(hbc),to_calc_(to_calc), slf_(slf), soitf_(soitf),
 shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P),
 _rigidflag(rigidflag) {}
 
@@ -746,7 +746,7 @@ namespace
 	}
 }
 
-void LinearGaussImproved::Prepare(Tessellation const& tessellation,
+void LinearGaussImprovedNoTracer::Prepare(Tessellation const& tessellation,
 	vector<Primitive> const& cells, vector<vector<double> > const& tracers,
 	vector<bool> const& isrelevant, double /*dt*/, double time)
 {
@@ -795,7 +795,7 @@ namespace {
 	}
 }
 
-vector<double> LinearGaussImproved::interpolateTracers
+vector<double> LinearGaussImprovedNoTracer::interpolateTracers
 (Tessellation const& tess, vector<Primitive> const& cells,
 vector<vector<double> > const& tracers, double dt, Edge const& edge,
 int side, InterpolationType interptype, Vector2D const& vface) const
@@ -814,6 +814,9 @@ int side, InterpolationType interptype, Vector2D const& vface) const
 			for (size_t i = 0; i<static_cast<size_t>(n); ++i)
 				res[i] += temp[i];
 		}
+		for (size_t i = 0; i < res.size(); ++i)
+			if (to_calc_[i] == 0)
+				res[i] = tracers[static_cast<size_t>(cell_index)][i];
 		return res;
 	}
 	else
@@ -831,6 +834,9 @@ int side, InterpolationType interptype, Vector2D const& vface) const
 				for (size_t i = 0; i<static_cast<size_t>(n); ++i)
 					res[i] += temp[i];
 			}
+			for (size_t i = 0; i < res.size(); ++i)
+				if (to_calc_[i] == 0)
+					res[i] = tracers[static_cast<size_t>(other)][i];
 			return res;
 		}
 		else
@@ -857,7 +863,7 @@ namespace
 	}
 }
 
-Primitive LinearGaussImproved::Interpolate(Tessellation const& tess,
+Primitive LinearGaussImprovedNoTracer::Interpolate(Tessellation const& tess,
 	vector<Primitive> const& cells, double dt, Edge const& edge, int side,
 	InterpolationType interptype, Vector2D const& vface) const
 {
@@ -911,9 +917,9 @@ Primitive LinearGaussImproved::Interpolate(Tessellation const& tess,
 			throw UniversalError("Wrong interpolation type");
 }
 
-LinearGaussImproved::~LinearGaussImproved(void) {}
+LinearGaussImprovedNoTracer::~LinearGaussImprovedNoTracer(void) {}
 
-vector<ReducedPrimitiveGradient2D>& LinearGaussImproved::GetGradients(void)
+vector<ReducedPrimitiveGradient2D>& LinearGaussImprovedNoTracer::GetGradients(void)
 {
 	return rslopes_;
 }

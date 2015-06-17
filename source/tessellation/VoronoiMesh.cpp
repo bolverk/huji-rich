@@ -188,9 +188,9 @@ namespace {
 			for(int k=0;k<nneigh;++k){
 				eo.AddEntry("Neighbor "+int2str(k)+" is cpu "
 					    ,static_cast<double>(realneighproc[static_cast<size_t>(k)]));
-				for(size_t l=0;l<neighpoints[static_cast<size_t>(k)].size();++l){
-				  eo.AddEntry("neighbor point x",neighpoints[static_cast<size_t>(k)][l].x);
-				  eo.AddEntry("neighbor point y",neighpoints[static_cast<size_t>(k)][l].y);
+				for(size_t l=0;l<neighpoints[k].size();++l){
+				  eo.AddEntry("neighbor point x",neighpoints[k][l].x);
+				  eo.AddEntry("neighbor point y",neighpoints[k][l].y);
 				}
 			}			
 			for(int k=0;k<ncorner;++k)
@@ -906,9 +906,21 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		GhostProcs.push_back(-1);
 		GhostProcs.push_back(-1);
 	}
-	CM.resize(static_cast<size_t>(GetPointNo()));
-	for(size_t i=0;i<CM.size();++i)
+	if (_bc->GetBoundaryType()!=Rectengular)
+		CM.resize(static_cast<size_t>(GetTotalPointNumber()));
+	else
+		CM.resize(static_cast<size_t>(GetPointNo()));
+	for(size_t i=0;i<pv.size();++i)
 	  CM[i]=CalcCellCM(i);
+/*	if (_bc->GetBoundaryType()!=Rectengular)
+	{
+		const size_t total_size=GetTotalPointNumber();
+		for(size_t i=pv.size()+3;i<total_size;++i)
+		{
+			if(GetOriginalIndex(i)>=0)
+				CM[i]=CM[GetOriginalIndex(i)]-GetMeshPoint(i)+GetMeshPoint(GetOriginalIndex(i));
+		}
+	}*/
 }
 
 #ifdef RICH_MPI
@@ -1085,9 +1097,21 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	}
 	
 	const size_t n= static_cast<size_t>(GetPointNo());
-	CM.resize(n);
+	if (obc->GetBoundaryType()!=Rectengular)
+		CM.resize(static_cast<size_t>(GetTotalPointNumber()));
+	else
+		CM.resize(n);
 	for(size_t i=0;i<n;++i)
 		CM[i]=CalcCellCM(i);
+/*	if (obc->GetBoundaryType()!=Rectengular)
+	{
+		const size_t total_size=GetTotalPointNumber();
+		for(size_t i=n+3;i<total_size;++i)
+		{
+			if(GetOriginalIndex(i)>=0)
+				CM[i]=CM[GetOriginalIndex(i)]-GetMeshPoint(i)+GetMeshPoint(GetOriginalIndex(i));
+		}
+	}*/
 }
 
 #ifdef RICH_MPI
@@ -1256,6 +1280,7 @@ void VoronoiMesh::RemoveCells(vector<int> &ToRemove,vector<vector<int> > &VolInd
 void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	vector<vector<int> > &VolIndex,vector<vector<double> > &Volratio)
 {
+	int Ntotal=V.GetPointNo();
 #ifdef RICH_MPI
 	vector<vector<int> > BoundaryRemove;
 	vector<vector<vector<int> > > BoundaryNeigh;
@@ -1281,7 +1306,6 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	SendRecvBoundaryRemove(BoundaryRemove,BoundaryNeigh,V,LocalNeighbors,
 		GhostNeighbors);
 	// First index in GhostNeighbors is the ghost point that is removed
-	int Ntotal=V.GetPointNo();
 #endif
 	VolIndex.clear();
 	Volratio.clear();
@@ -1615,7 +1639,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	// Fix cor in Tri
 	RemoveVector(V.Tri.ChangeCor(),ToRemove);
 	// Fix CM
-	V.CM.resize(V.CM.size()-ToRemove.size());
+	V.CM.resize(Ntotal-ToRemove.size());
 	for(size_t i=0;i<V.CM.size();++i)
 		V.CM[i]=V.CalcCellCM(i);
 	n=ToRemove.size();

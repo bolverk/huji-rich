@@ -6,6 +6,8 @@
 #ifndef HYDRODYNAMICS_2D_HPP
 #define HYDRODYNAMICS_2D_HPP 1
 
+#include <iostream>
+#include <set>
 #include "spatial_distribution2d.hpp"
 #include "../common/equation_of_state.hpp"
 #include "point_motion.hpp"
@@ -22,7 +24,53 @@
 #include "../../mpi/mpi_macro.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
-#include "time_step_function.hpp"
+#include "../../clipper/clipper.hpp"
+#include "../../tessellation/voronoi_logger.hpp"
+
+/*! \brief Applies a correction to the extensive variables due to the change in volume during time step.
+\param tessold Old tessellation
+\param tessmid Half time step tessellation (for first order use old tess)
+\param tessnew New tessellation
+\param pointvelocity Velocity of the mesh points
+\param facevelocity Face velocity
+\param dt Time step
+\param cells The primitive variables
+\param fluxes The fluxes
+\param outer The outer boundary conditions
+\param pointvelocity Velocities of mesh generating points
+\param eos The equation of state
+\param hbc The hydro boudnary conditions
+*/
+vector<Conserved> FluxFix(Tessellation const& tessold, Tessellation const& tessmid,
+	Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
+	vector<Primitive> const& cells, vector<Conserved> const& fluxes,
+	vector<Vector2D> const& facevelocity, OuterBoundary const& outer,
+	EquationOfState const& eos, HydroBoundaryConditions const& hbc);
+
+vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tessmid,
+	Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
+	vector<Primitive> const& cells, vector<Conserved> &fluxes,
+	vector<Vector2D> const& fv, OuterBoundary const& outer, EquationOfState const& eos,
+	HydroBoundaryConditions const& hbc,vector<vector<double> > const& tracers, vector<vector<double> > &dtracers);
+
+vector<Conserved> FluxFix3(Tessellation const& tessold, Tessellation const& tessmid,
+	Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
+	vector<Primitive> const& cells, vector<Conserved> &fluxes,
+	vector<Vector2D> const& fv, OuterBoundary const& outer, EquationOfState const& eos,
+	HydroBoundaryConditions const& hbc);
+
+double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
+	PointMotion& point_motion, HydroBoundaryConditions const& hbc,
+	SpatialReconstruction& interpolation, RiemannSolver const& rs,
+	EquationOfState const& eos, SourceTerm& force, double time, double cfl,
+	double endtime, vector<vector<double> > &tracers, double dt_external,
+	vector<size_t>& custom_evolution_indices,
+	const CustomEvolutionManager& custom_evolution_manager,
+	const PhysicalGeometry& pg, bool traceflag, bool coldflows_flag, double as,
+	double bs, bool densityfloor, double densitymin, double pressuremin,
+	bool EntropyCalc, OuterBoundary const& outer);
+
+
 
 //! Calculates the velocities at the vertices of edges
 class FaceVertexVelocityCalculator: public Index2Member<Vector2D>
@@ -125,8 +173,8 @@ vector<Conserved> CalcConservedExtensive
   \param pointmotion Point motion function
   \param pointvelocity List of velocities
   \param time Time
-  \param cevolve The custom evolution of the cells
-  \param tracers Tracers
+	\param cevolve The custom evolution of the cells
+	\param tracers The intensive tracers
 */
 void CalcPointVelocities(Tessellation const& tessellation,
 			 vector<Primitive> const& cells,
@@ -325,8 +373,10 @@ void ExternalForceContribution(Tessellation const& tess,
   \param eos Equation of state
   \param force External source term
   \param time Time
-  \param tsf Time step function
+  \param cfl Courant Friedrich Lewy number
+  \param endtime Final time for the simulation
   \param tracers Tracers
+  \param dt_external Extrnal time step
   \param custom_evolution_indices The indices of the customevolution
   \param custom_evolution_manager Class that translates indices to class pointers
   \param pg Physical geometry
@@ -359,8 +409,10 @@ double TimeAdvance2mid
  EquationOfState const& eos,
  SourceTerm& force,
  double time,
- TimeStepFunction& tsf,
+ double cfl,
+ double endtime,
  vector<vector<double> >& tracers,
+ double dt_external,
  vector<size_t>& custom_evolution_indices,
  const CustomEvolutionManager& custom_evolution_manager,
  const PhysicalGeometry& pg,
@@ -380,8 +432,8 @@ double TimeAdvance2mid
   \param cells Fluid elements
   \param point_motion Point motion scheme
   \param time Time
-  \param cevolve The custom evolution of the cells
-  \param tracers Tracers
+  \param tracers The intensive tracers
+\param cevolve The custom evolution of the cells
   \return List of the velocities of the mesh generating points
  */
 vector<Vector2D> calc_point_velocities
@@ -576,7 +628,7 @@ void UpdateTracerExtensive
   \param cevolve The custom evolution of cells
   \param coldflows Toggles cold flows correction
 */
-void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
+Vector2D TracerResetCalc(double alpha,SpatialDistribution const& originalD,
 		     SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
 			 SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& ,
 			 vector<Primitive> &cells,Tessellation const& tess,vector<vector<double> > &tracer,
@@ -662,5 +714,18 @@ double determine_time_step(double hydro_time_step,
 			   double external_dt,
 			   double current_time,
 			   double end_time);
+
+double TimeAdvance2New(Tessellation& tess,
+#ifdef RICH_MPI
+	Tessellation& proctess,
+#endif
+	vector<Primitive> &cells, PointMotion& point_motion, HydroBoundaryConditions const& hbc, SpatialReconstruction& interpolation, RiemannSolver const& rs,
+	EquationOfState const& eos, SourceTerm& force, double time, double cfl, double endtime, vector<vector<double> > &tracers,
+	double dt_external, vector<size_t>& custom_evolution_indices, const CustomEvolutionManager& custom_evolution_manager,
+	const PhysicalGeometry& pg,
+#ifdef RICH_MPI
+	ProcessorUpdate *procupdate,
+#endif
+	bool traceflag, bool coldflows_flag, double as, double bs, bool densityfloor, double densitymin, double pressuremin, bool EntropyCalc);
 
 #endif // HYDRODYNAMICS_2D_HPP

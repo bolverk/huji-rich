@@ -55,10 +55,11 @@ Conserved RigidBodyEvolve::CalcFlux(Tessellation const& tessellation,
 }
 
 Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedintensive*/,
-					   EquationOfState const& /*eos*/,vector<Primitive>& /*cells*/,int /*index*/,
+					   EquationOfState const& /*eos*/,vector<Primitive>& cells,int index,
 	Tessellation const& /*tess*/,double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
-	return Primitive(1,1,Vector2D(0,0),1,1);
+	//return Primitive(1,1,Vector2D(0,0),1,1);
+	return cells[index];
 }
 
 RigidBodyEvolve::RigidBodyEvolve()

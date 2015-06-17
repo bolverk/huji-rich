@@ -175,10 +175,10 @@ vector<Vector2D> CirclePointsRmax(int PointNum, double Rmin, double Rmax,
 	{
 		const double r = Rmin + i*dr;
 		const int Nphi = int(2 * M_PI*r / A);
-		const double dphi = A / r;
+		const double dphi =double( 2 * M_PI / Nphi );
 		for (int j = 0; j < Nphi; ++j)
 		{
-			const Vector2D pos(r*cos(dphi*j) + xc, r*sin(dphi*j) + yc);
+			const Vector2D pos(r*cos(dphi*j+dphi*0.5) + xc, r*sin(dphi*j+dphi*0.5) + yc);
 			if (pos.x<xmax&&pos.x>xmin && pos.y<ymax&&pos.y>ymin)
 				res.push_back(pos);
 		}
@@ -268,6 +268,39 @@ vector<Vector2D> CirclePointsRmax_a(int PointNum,
 			if (pos.x<xmax&&pos.x>xmin && pos.y<ymax&&pos.y>ymin)
 				res.push_back(pos);
 		}
+	}
+	return res;
+}
+
+std::vector<Vector2D> OrderdSector(int PointNum, double Rmin, double Rmax,
+	double theta_min, double theta_max, Vector2D center)
+{
+	const int Nr = int(sqrt(1.0*(PointNum / ((theta_max - theta_min)*(0.5 + Rmin / (Rmax - Rmin))))) + 0.5);
+	const double dr = (Rmax - Rmin) / Nr;
+	vector<Vector2D> res;
+	for (int i = 0; i < Nr; ++i)
+	{
+		const double r = Rmin + i*dr;
+		const int Nphi = int((theta_max - theta_min)*r / dr+0.5);
+		const double dphi = double((theta_max - theta_min) / Nphi);
+		for (int j = 0; j < Nphi; ++j)
+		{
+			const Vector2D pos(r*cos(dphi*j + dphi*0.5+theta_min) + center.x, r*sin(dphi*j + dphi*0.5+theta_min) + center.y);
+			res.push_back(pos);
+		}
+	}
+	return res;
+}
+
+std::vector<Vector2D> OrderdArc(int PointNum, double R,
+	double theta_min, double theta_max, Vector2D center)
+{
+	vector<Vector2D> res;
+	const double dphi = double((theta_max - theta_min) / PointNum);
+	for (int i = 0; i < PointNum; ++i)
+	{
+		const Vector2D pos(R*cos(dphi*i + dphi*0.5) + center.x, R*sin(dphi*i + dphi*0.5) + center.y);
+		res.push_back(pos);
 	}
 	return res;
 }

@@ -63,6 +63,8 @@ void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 void PeriodicVelocityExchange(vector<Vector2D> &vel,
 	vector<vector<int> > const& sentcells,int npoints);
 
+void PeriodicCMCreate(Tessellation &tess);
+
 #ifdef RICH_MPI
 
 #include <mpi.h>
@@ -190,9 +192,9 @@ void SendRecvHydro(vector<Primitive> &cells,
 	vector<size_t> &customevolutions,vector<vector<int> >const& sentcells,
 	vector<int>const& sentprocs,EquationOfState const& eos,
 	vector<vector<int> > const& Nghost,int totalpoints);
-/*! \brief Sends and receives the primitives and tracers for the density floor
+/*!
+\brief Sends and receives the primitives and tracers for the density floor
 \param cells The primitive cells
-\param tracers Tracers
 \param sentcells The indeces of the cells to send
 \param sentprocs The ids of the cpus to talk with
 \param ptoadd The recieved primitives

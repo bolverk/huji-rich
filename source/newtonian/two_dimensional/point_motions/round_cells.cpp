@@ -129,54 +129,6 @@ vector<Vector2D> RoundCells::calcAllVelocities
 		tess.GetGhostIndeces(),tess.GetTotalPointNumber());
 #endif
 	FixRefinedCells(res,tess,hbc_,cevolve);
-	if(!coldflows_&&outer_==0)
-		return res;
-	const vector<Vector2D> edge_vel=tess.calc_edge_velocities(&hbc_,res,time);
-	double dt=CalcTimeStep(tess,cells,edge_vel,hbc_,time);
-	if(!evencall_)
-	{
-		lastdt_=dt;
-		evencall_=true;
-	}
-	else
-	{
-		evencall_=false;
-		if(dt<lastdt_)
-			dt=lastdt_;
-	}
-	if(outer_!=0&&!coldflows_)
-	{
-		CorrectPointsOverShoot(res,dt,tess);
-		return res;
-	}
-	if(coldflows_)
-	{
-		if(external_dt_>0)
-			dt=min(dt,external_dt_);
-		for(size_t i=0;i<static_cast<size_t>(n);++i)
-		{
-			if(cevolve[i]!=0)
-				continue;
-			if(i<static_cast<size_t>(inner_))
-			{
-				res[i].Set(0,0);
-			}
-			else
-			{
-			  res[i]=pm_.CalcVelocity(static_cast<int>(i),tess,cells,time);
-			  const double nvs = numeric_velocity_scale(tess,static_cast<int>(i),dt,cells);
-				const Vector2D dw = calc_dw(static_cast<int>(i),tess,nvs,nvs,eta_,chi_);
-				res[i]=res[i]+dw;
-			}
-		}
-#ifdef RICH_MPI
-		SendRecvVelocity(res,tess.GetDuplicatedPoints(),tess.GetDuplicatedProcs(),
-			tess.GetGhostIndeces(),tess.GetTotalPointNumber());
-#endif
-		FixRefinedCells(res,tess,hbc_,cevolve);
-		if(outer_!=0)
-			CorrectPointsOverShoot(res,dt,tess);
-	}
 	return res;
 }
 
@@ -245,4 +197,55 @@ void RoundCells::CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
 void RoundCells::SetExternalTimeStep(double dt)
 {
 	external_dt_=dt;
+}
+
+void RoundCells::ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
+	vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector < Vector2D >
+	& velocities)
+{
+	const int n = tess.GetPointNo();
+	if (!evencall_)
+	{
+		lastdt_ = dt;
+		evencall_ = true;
+	}
+	else
+	{
+		evencall_ = false;
+		if (dt<lastdt_)
+			dt = lastdt_;
+	}
+	if (outer_ != 0 && !coldflows_)
+	{
+		CorrectPointsOverShoot(velocities, dt, tess);
+		return;
+	}
+	if (coldflows_)
+	{
+		if (external_dt_>0)
+			dt = min(dt, external_dt_);
+		for (size_t i = 0; i<static_cast<size_t>(n); ++i)
+		{
+			if (cevolve[i] != 0)
+				continue;
+			if (i<static_cast<size_t>(inner_))
+			{
+				velocities[i].Set(0, 0);
+			}
+			else
+			{
+				velocities[i] = pm_.CalcVelocity(static_cast<int>(i), tess, cells, time);
+				const double nvs = numeric_velocity_scale(tess, static_cast<int>(i), dt, cells);
+				const Vector2D dw = calc_dw(static_cast<int>(i), tess, nvs, nvs, eta_, chi_);
+				velocities[i] = velocities[i] + dw;
+			}
+		}
+#ifdef RICH_MPI
+		SendRecvVelocity(velocities, tess.GetDuplicatedPoints(), tess.GetDuplicatedProcs(),
+			tess.GetGhostIndeces(), tess.GetTotalPointNumber());
+#endif
+		FixRefinedCells(velocities, tess, hbc_, cevolve);
+		if (outer_ != 0)
+			CorrectPointsOverShoot(velocities, dt, tess);
+	}
 }

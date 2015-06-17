@@ -49,6 +49,10 @@ public:
   */
   void SetExternalTimeStep(double dt);
 
+  void ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
+	  vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector < Vector2D >
+	  & velocities);
+
 private:
 	void CorrectPointsOverShoot(vector<Vector2D> &v,double dt,
 		Tessellation const& tess) const;

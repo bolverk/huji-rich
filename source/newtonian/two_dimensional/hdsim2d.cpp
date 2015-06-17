@@ -48,7 +48,9 @@ _tessellation(tessellation),
 	_pointmotion(pointmotion),
 	_hbc(hbc),_obc(obc),
 	external_force_(external_force),
+	_cfl(1./3.),
 	_time(0),
+	_endtime(-1),
 	cycle_(0),
 	tracer_(vector<vector<double> >()),
 	tracer_flag_(false),
@@ -58,10 +60,9 @@ _tessellation(tessellation),
 	densityMin_(0),
 	pressureMin_(0),
 	EntropyReCalc_(EntropyCalc),
+	_dt_external(0),
   default_pg_(),
   pg_(&default_pg_),
-  default_time_step_function_(1./3.),
-  tsf_(&default_time_step_function_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
@@ -82,6 +83,7 @@ _tessellation(tessellation),
 
 	_conservedextensive = CalcConservedExtensive
 	  (CalcConservedIntensive(_cells),tessellation,*pg_);
+	_dt_external=-1;
 }
 
 hdsim::hdsim(ResetDump const& dump,Tessellation& tessellation,
@@ -106,7 +108,9 @@ _tessellation(tessellation),
 	_hbc(hbc),
 	_obc(obc),
 	external_force_(external_force),
+	_cfl(dump.cfl),
 	_time(dump.time),
+	_endtime(-1),
 	cycle_(dump.cycle),
 	tracer_(dump.tracers),
 	tracer_flag_(!tracer_.empty()),
@@ -116,10 +120,9 @@ _tessellation(tessellation),
 	densityMin_(dump.densitymin),
 	pressureMin_(dump.pressuremin),
 	EntropyReCalc_(EntropyCalc),
+	_dt_external(-1),
   default_pg_(),
   pg_(&default_pg_),
-  default_time_step_function_(1./3.),
-  tsf_(&default_time_step_function_),
 #ifdef RICH_MPI
 	procupdate_(0),
 #endif
@@ -141,6 +144,16 @@ _tessellation(tessellation),
 }
 
 hdsim::~hdsim(void) {}
+
+void hdsim::SetCfl(double cfl_new)
+{
+	_cfl = cfl_new;
+}
+
+void hdsim::SetTimeStepExternal(double dt)
+{
+	_dt_external=dt;
+}
 
 namespace
 {
@@ -296,37 +309,6 @@ namespace
     const PhysicalGeometry& pg_;
   };
 }
-
-namespace {
-  double choose_min_dt(const Tessellation& tess,
-		       const vector<Primitive>& cells,
-		       const vector<Vector2D>& point_velocities,
-		       const HydroBoundaryConditions& hbc,
-		       const double time,
-		       const vector<CustomEvolution*>& ce,
-		       TimeStepFunction& tsf)
-  {
-#ifdef RICH_MPI
-    double local = tsf(tess,
-		       cells,
-		       point_velocities,
-		       hbc,
-		       time,
-		       ce);
-    double global = local;
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-    return global;
-#else
-    return tsf(tess,
-      cells,
-      point_velocities,
-      hbc,
-      time,
-      ce);
-#endif
-  }
-}
-
 void hdsim::TimeAdvance(void)
 {
 	vector<Primitive> old_cells = _cells;
@@ -336,8 +318,7 @@ void hdsim::TimeAdvance(void)
 	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
 
-	PeriodicVelocityExchange(_tessellation.GetAllCM(), _tessellation.GetDuplicatedPoints(),
-		_tessellation.GetTotalPointNumber());
+	PeriodicCMCreate(_tessellation);
 #else
 	SendRecvHydro(_cells,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
@@ -365,17 +346,30 @@ void hdsim::TimeAdvance(void)
 		_tessellation.GetTotalPointNumber());
 #endif
 
-	const vector<Vector2D> fv=
+	vector<Vector2D> fv=
 	  _tessellation.calc_edge_velocities
 	  (&_hbc,point_velocity,_time);
 
-	const double dt = choose_min_dt(_tessellation,
-					_cells,
-					point_velocity,
-					_hbc,
-					_time,
-					custom_evolutions,
-					*tsf_);
+	double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv,_hbc,
+								_time,custom_evolutions),
+					      _dt_external, _time, _endtime);
+
+	_pointmotion.ApplyFix(_tessellation, _cells, _time, custom_evolutions, tracer_, dt, point_velocity);
+
+#ifndef RICH_MPI
+	PeriodicVelocityExchange(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetTotalPointNumber());
+#else
+	SendRecvVelocity(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _tessellation.GetGhostIndeces(),
+		_tessellation.GetTotalPointNumber());
+#endif
+
+	fv =_tessellation.calc_edge_velocities(&_hbc, point_velocity, _time);
+
+	dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv, _hbc,
+		_time, custom_evolutions),
+		_dt_external, _time, _endtime);
 
 	if(coldflows_flag_)
 	  substitute_entropy(_tessellation.GetPointNo(),
@@ -501,6 +495,201 @@ void hdsim::TimeAdvance(void)
 	cycle_++;
 }
 
+
+void hdsim::TimeAdvanceClip(void)
+{
+	vector<Primitive> old_cells = _cells;
+	vector<vector<double> > old_trace = tracer_;
+
+#ifndef RICH_MPI
+	PeriodicUpdateCells(_cells, tracer_, custom_evolution_indices,
+		_tessellation.GetDuplicatedPoints(), _tessellation.GetTotalPointNumber());
+
+	PeriodicCMCreate(_tessellation);
+#else
+	SendRecvHydro(_cells, custom_evolution_indices, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _eos, _tessellation.GetGhostIndeces()
+		, _tessellation.GetTotalPointNumber());
+
+	SendRecvVelocity(_tessellation.GetAllCM(), _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _tessellation.GetGhostIndeces()
+		, _tessellation.GetTotalPointNumber());
+#endif
+
+	vector<CustomEvolution*> custom_evolutions =
+		convert_indices_to_custom_evolution(custom_evolution_manager,
+		custom_evolution_indices);
+
+	vector<Vector2D> point_velocity =
+		_pointmotion.calcAllVelocities
+		(_tessellation, _cells, _time, custom_evolutions, tracer_);
+
+#ifndef RICH_MPI
+	PeriodicVelocityExchange(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetTotalPointNumber());
+#else
+	SendRecvVelocity(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _tessellation.GetGhostIndeces(),
+		_tessellation.GetTotalPointNumber());
+#endif
+
+	vector<Vector2D> fv =
+		_tessellation.calc_edge_velocities
+		(&_hbc, point_velocity, _time);
+
+	double dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv, _hbc,
+		_time, custom_evolutions),
+		_dt_external, _time, _endtime);
+
+	_pointmotion.ApplyFix(_tessellation, _cells, _time, custom_evolutions, tracer_, dt, point_velocity);
+
+#ifndef RICH_MPI
+	PeriodicVelocityExchange(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetTotalPointNumber());
+#else
+	SendRecvVelocity(point_velocity, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _tessellation.GetGhostIndeces(),
+		_tessellation.GetTotalPointNumber());
+#endif
+
+	fv = _tessellation.calc_edge_velocities(&_hbc, point_velocity, _time);
+
+	dt = determine_time_step(_cfl*CalcTimeStep(_tessellation, _cells, fv, _hbc,
+		_time, custom_evolutions),
+		_dt_external, _time, _endtime);
+
+	if (coldflows_flag_)
+		substitute_entropy(_tessellation.GetPointNo(),
+		_cells, _eos, 0, tracer_);
+
+#ifdef RICH_MPI
+	if (tracer_flag_)
+		SendRecvTracers(tracer_, _tessellation.GetDuplicatedPoints(),
+		_tessellation.GetDuplicatedProcs(), _tessellation.GetGhostIndeces()
+		, _tessellation.GetTotalPointNumber());
+#endif
+	vector<Conserved> fluxes = calc_fluxes
+		(_tessellation, _cells, dt, _time,
+		_interpolation,
+		fv, _hbc, _rs,
+		custom_evolutions,
+		custom_evolution_manager,
+		tracer_);
+
+	const vector<double> lengths = serial_generate(EdgeLengthCalculator(_tessellation, *pg_));
+
+	vector<vector<double> > tracer_extensive =
+		calc_extensive_tracer(tracer_,
+		_tessellation,
+		_cells,
+		*pg_);
+
+	really_update_extensive_tracers(tracer_extensive,
+		tracer_,
+		_cells,
+		_tessellation,
+		fluxes,
+		_time, dt,
+		_hbc,
+		_interpolation,
+		custom_evolutions,
+		custom_evolution_manager,
+		fv, lengths);
+
+	vector<double> g;
+	ExternalForceContribution(_tessellation, *pg_,
+		_cells, external_force_, _time, dt,
+		_conservedextensive, _hbc, fluxes, point_velocity, g, coldflows_flag_, tracer_,
+		lengths);
+
+	ColdFlows cold_flows(coldflows_flag_,
+		_tessellation,
+		_cells,
+		_hbc,
+		_time,
+		custom_evolutions,
+		g);
+
+	boost::scoped_ptr<Tessellation> oldtess(_tessellation.clone());
+
+#ifndef RICH_MPI
+	MoveMeshPoints(point_velocity, dt, _tessellation);
+#else
+	if (procupdate_)
+		procupdate_->Update(_proctess, _tessellation);
+	MoveMeshPoints(point_velocity, dt, _tessellation, _proctess);
+#endif
+
+	vector<vector<double> > ttoadd;
+	vector<Conserved> toadd = FluxFix2(*oldtess, *oldtess, _tessellation, point_velocity,dt, _cells,
+		fluxes, fv,_obc, _eos, _hbc,tracer_,ttoadd);
+	_conservedextensive = _conservedextensive + toadd;
+	if (!tracer_.empty())
+		tracer_extensive = tracer_extensive + ttoadd;
+
+	UpdateConservedExtensive(*oldtess, fluxes, dt,
+		_conservedextensive, _hbc, lengths);
+
+#ifdef RICH_MPI
+	vector<Conserved> ptoadd;
+	vector<size_t> ctoadd;
+	SendRecvExtensive(_conservedextensive, tracer_extensive, custom_evolution_indices,
+		_tessellation.GetSentPoints(), _tessellation.GetSentProcs(), ptoadd, ttoadd,
+		ctoadd);
+
+	KeepLocalPoints(_conservedextensive, tracer_extensive, custom_evolution_indices,
+		_tessellation.GetSelfPoint());
+
+	insert_all_to_back(_conservedextensive, ptoadd);
+	insert_all_to_back(tracer_extensive, ttoadd);
+	insert_all_to_back(custom_evolution_indices, ctoadd);
+
+	custom_evolutions =
+		convert_indices_to_custom_evolution(custom_evolution_manager,
+		custom_evolution_indices);
+
+	cold_flows.herd_data(_tessellation);
+
+	if (densityfloor_)
+	{
+		ttoadd.clear();
+		vector<Primitive> pmtoadd;
+		SendRecvPrimitive(_cells, tracer_, _tessellation.GetSentPoints(), _tessellation.GetSentProcs(), pmtoadd,
+			ttoadd, _eos);
+		KeepLocalPoints(_cells, tracer_, _tessellation.GetSelfPoint());
+		insert_all_to_back(_cells, pmtoadd);
+		insert_all_to_back(tracer_, ttoadd);
+		old_trace = tracer_;
+		old_cells = _cells;
+	}
+#endif
+
+	vector<Conserved> intensive =
+		calc_conserved_intensive(_tessellation,
+		_conservedextensive,
+		*pg_);
+
+	cold_flows.fixPressure(intensive,
+		tracer_extensive,
+		_eos,
+		cfp_.as, cfp_.bs,
+		custom_evolutions,
+		_tessellation,
+		_conservedextensive,
+		densityfloor_);
+
+	vector<bool> density_floor_on = UpdatePrimitives(intensive,
+		_eos, _cells, custom_evolutions, old_cells,
+		densityfloor_, densityMin_, pressureMin_, _tessellation, _time,
+		tracer_extensive);
+
+	MakeTracerIntensive(tracer_, tracer_extensive,
+		_tessellation, _cells, *pg_, density_floor_on, old_trace, custom_evolutions);
+
+	_time += dt;
+	cycle_++;
+}
+
 namespace {
 
   template<class T> class AverageCalculator: public Index2Member<T>
@@ -568,9 +757,8 @@ void hdsim::TimeAdvance2Mid(void)
 		_proctess,
 #endif
 		_cells, _pointmotion,
-		_hbc, _interpolation, _rs, _eos, external_force_, _time, 
-		 *tsf_,
-		tracer_, custom_evolution_indices,
+		_hbc, _interpolation, _rs, _eos, external_force_, _time, _cfl, _endtime,
+		tracer_, _dt_external, custom_evolution_indices,
 		custom_evolution_manager, *pg_,
 #ifdef RICH_MPI
 		procupdate_,
@@ -583,6 +771,27 @@ void hdsim::TimeAdvance2Mid(void)
 	++cycle_;
 }
 
+void hdsim::TimeAdvance2Heun(void)
+{
+	const double dt = TimeAdvance2New
+		(_tessellation,
+#ifdef RICH_MPI
+		_proctess,
+#endif
+		_cells, _pointmotion,
+		_hbc, _interpolation, _rs, _eos, external_force_, _time, _cfl, _endtime,
+		tracer_, _dt_external, custom_evolution_indices,
+		custom_evolution_manager, *pg_,
+#ifdef RICH_MPI
+		procupdate_,
+#endif
+		tracer_flag_,
+		coldflows_flag_, cfp_.as, cfp_.bs, densityfloor_, densityMin_, pressureMin_,
+		EntropyReCalc_);
+
+	_time += dt;
+	++cycle_;
+}
 
 void hdsim::addTracer(SpatialDistribution const& tp)
 {
@@ -639,6 +848,11 @@ int hdsim::GetCycle(void) const
 	return cycle_;
 }
 
+void hdsim::SetEndTime(double endtime)
+{
+	_endtime=endtime;
+}
+
 void hdsim::SetColdFlows(double as,double bs)
 {
 	const int n = _tessellation.GetPointNo();
@@ -666,15 +880,14 @@ vector<vector<double> >& hdsim::getTracers(void)
 	return tracer_;
 }
 
-void hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
+Vector2D hdsim::TracerReset(double alpha,SpatialDistribution const& originalD,
 	SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
 	SpatialDistribution const& originalVy,vector<SpatialDistribution const*> const& originalTracers, int tracerindex)
 {
 	vector<CustomEvolution*> cevolve=convert_indices_to_custom_evolution(
 		custom_evolution_manager,custom_evolution_indices);
-	TracerResetCalc(alpha,originalD,originalP,originalVx,originalVy,originalTracers,
+	return TracerResetCalc(alpha, originalD, originalP, originalVx, originalVy, originalTracers,
 		_cells,_tessellation,tracer_,tracerindex,_eos,cevolve,coldflows_flag_);
-	return;
 }
 
 namespace
@@ -1050,6 +1263,11 @@ vector<int> hdsim::RefineCells(RefineStrategy *refine,vector<int>
 	return PointsToRefine;
 }
 
+double hdsim::GetCfl(void)const
+{
+	return _cfl;
+}
+
 bool hdsim::GetColdFlowFlag(void)const
 {
 	return coldflows_flag_;
@@ -1077,11 +1295,6 @@ void hdsim::SetDensityFloor(double density,double pressure)
 	densityfloor_=true;
 	densityMin_=density;
 	pressureMin_=pressure;
-}
-
-void hdsim::setTimeStepFunction(TimeStepFunction& tsf)
-{
-  tsf_ = &tsf;
 }
 
 vector<Primitive>& hdsim::GetAllCells(void)
@@ -1125,6 +1338,7 @@ void hdsim::load(const ResetDump& checkpoint)
 	_cells = checkpoint.snapshot.cells;
 	_conservedextensive = CalcConservedExtensive
 	  (CalcConservedIntensive(_cells),_tessellation,*pg_);
+	_cfl = checkpoint.cfl;
 	_time = checkpoint.time;
 	cycle_ = checkpoint.cycle;
 	tracer_ = checkpoint.tracers;
@@ -1148,6 +1362,7 @@ void hdsim::makeCheckpoint(ResetDump& checkpoint) const
 #endif
 	checkpoint.procmesh.resize(static_cast<size_t>(n));
 	checkpoint.snapshot.cells = _cells;
+	checkpoint.cfl = _cfl;
 	checkpoint.time = _time;
 	checkpoint.cycle = cycle_;
 	checkpoint.tracers = tracer_;
@@ -1177,4 +1392,15 @@ const OuterBoundary& hdsim::getOuterBoundary(void) const
 const HydroBoundaryConditions& hdsim::getHydroBoundaryCondition(void) const
 {
   return _hbc;
+}
+
+void hdsim::TimeAdvance2MidClip(void)
+{
+	const double dt = TimeAdvance2midClip(_tessellation, _cells, _pointmotion,
+		_hbc, _interpolation, _rs, _eos, external_force_, _time, _cfl, _endtime,
+		tracer_, _dt_external, custom_evolution_indices, custom_evolution_manager, *pg_,
+		tracer_flag_, coldflows_flag_, cfp_.as, cfp_.bs, densityfloor_, densityMin_,
+		pressureMin_, EntropyReCalc_, _obc);
+	_time += dt;
+	++cycle_;
 }
