@@ -63,7 +63,6 @@ void PeriodicGradExchange(vector<ReducedPrimitiveGradient2D> &grad,
 void PeriodicVelocityExchange(vector<Vector2D> &vel,
 	vector<vector<int> > const& sentcells,int npoints);
 
-void PeriodicCMCreate(Tessellation &tess);
 
 #ifdef RICH_MPI
 

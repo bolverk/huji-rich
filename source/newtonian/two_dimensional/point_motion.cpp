@@ -17,7 +17,7 @@ vector<Vector2D> PointMotion::calcAllVelocities
 
 PointMotion::~PointMotion(void) {}
 
-void PointMotion::ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
-	vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector < Vector2D >
-	& velocities)
+void PointMotion::ApplyFix(Tessellation const& /*tess*/, vector<Primitive> const& /*cells*/, double /*time*/,
+	vector<CustomEvolution*> &/*cevolve*/, const vector<vector<double> >& /*tracers*/, double /*dt*/, vector < Vector2D >
+	& /*velocities*/)
 {}

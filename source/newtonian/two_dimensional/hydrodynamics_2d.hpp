@@ -24,7 +24,6 @@
 #include "../../mpi/mpi_macro.hpp"
 #include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
-#include "../../clipper/clipper.hpp"
 #include "../../tessellation/voronoi_logger.hpp"
 
 /*! \brief Applies a correction to the extensive variables due to the change in volume during time step.

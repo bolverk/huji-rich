@@ -1,11 +1,11 @@
 #include "SimpleGravity.hpp"
 
 SimpleGravity::SimpleGravity(double M, double Rmin, double SoftStart, Vector2D center,double omega) :
-M_(M), Rmin_(Rmin), softlength_(SoftStart), _center(center),omega_(omega),first_time_(true),dt_(-1){}
+M_(M), Rmin_(Rmin), softlength_(SoftStart), _center(center), omega_(omega), dt_(-1), first_time_(true),time_(0){}
 
 Conserved SimpleGravity::Calculate
 (Tessellation const& tess,
-const PhysicalGeometry& pg,
+const PhysicalGeometry& /*pg*/,
 vector<Primitive> const& cells,
 int point,
 vector<Conserved> const& /*fluxes*/,
@@ -14,7 +14,7 @@ HydroBoundaryConditions const& /*hbc*/,
 vector<vector<double> > const& /*tracers*/,
 vector<double>& /*dtracer*/, vector<double> const& /*lengthes*/,
 double time,
-double dt)
+double /*dt*/)
 {
 	Vector2D pos(tess.GetCellCM(point) - (abs(_center)*Vector2D(cos(omega_*time),sin(omega_*time))));
 	double r = abs(pos);

@@ -12,7 +12,7 @@ bool ConstantPrimitiveKepler::ShouldForceTracerReset(void)const
 	return true;
 }
 
-ConstantPrimitiveKepler::ConstantPrimitiveKepler(double Mass, double density, double pressure):
+ConstantPrimitiveKepler::ConstantPrimitiveKepler(double Mass, double density, double pressure) :
 M_(Mass), rho_(density), p_(pressure)
 {}
 
@@ -22,8 +22,8 @@ ConstantPrimitiveKepler::~ConstantPrimitiveKepler(void)
 Conserved ConstantPrimitiveKepler::CalcFlux(Tessellation const& tessellation,
 	vector<Primitive> const& cells, double dt,
 	SpatialReconstruction& interpolation, Edge const& edge,
-	Vector2D const& facevelocity, RiemannSolver const& rs, int index,
-	HydroBoundaryConditions const& bc, double time, vector<vector<double> > const& tracers)
+	Vector2D const& facevelocity, RiemannSolver const& rs, int /*index*/,
+	HydroBoundaryConditions const& bc, double time, vector<vector<double> > const& /*tracers*/)
 {
 	if (bc.IsBoundary(edge, tessellation))
 		return bc.CalcFlux(tessellation, cells, facevelocity, edge, interpolation, dt, time);
@@ -39,7 +39,7 @@ Conserved ConstantPrimitiveKepler::CalcFlux(Tessellation const& tessellation,
 		Primitive right = interpolation.Interpolate
 			(tessellation, cells, dt, edge, 1, InBulk, facevelocity);
 		Conserved res(FluxInBulk(normaldir, paraldir, left, right, facevelocity, rs));
-		
+
 		return res;
 	}
 }
@@ -55,7 +55,7 @@ double /*time*/, vector<vector<double> > const& /*tracers*/)
 	double r = abs(point);
 	res.Density = rho_;
 	res.Pressure = p_;
-	res.Velocity = sqrt(M_*pow(r,-3.0))*Vector2D(-point.y, point.x);
+	res.Velocity = sqrt(M_*pow(r, -3.0))*Vector2D(-point.y, point.x);
 	res.Energy = eos.dp2e(rho_, p_);
 	res.SoundSpeed = eos.dp2c(rho_, p_);
 	return res;

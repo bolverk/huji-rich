@@ -318,7 +318,7 @@ void hdsim::TimeAdvance(void)
 	PeriodicUpdateCells(_cells,tracer_,custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(),_tessellation.GetTotalPointNumber());
 
-	PeriodicCMCreate(_tessellation);
+	PeriodicVelocityExchange(_tessellation.GetAllCM(), _tessellation.GetDuplicatedPoints(), _tessellation.GetTotalPointNumber());
 #else
 	SendRecvHydro(_cells,custom_evolution_indices,_tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(),_eos,_tessellation.GetGhostIndeces()
@@ -505,7 +505,7 @@ void hdsim::TimeAdvanceClip(void)
 	PeriodicUpdateCells(_cells, tracer_, custom_evolution_indices,
 		_tessellation.GetDuplicatedPoints(), _tessellation.GetTotalPointNumber());
 
-	PeriodicCMCreate(_tessellation);
+	PeriodicVelocityExchange(_tessellation.GetAllCM(), _tessellation.GetDuplicatedPoints(), _tessellation.GetTotalPointNumber());
 #else
 	SendRecvHydro(_cells, custom_evolution_indices, _tessellation.GetDuplicatedPoints(),
 		_tessellation.GetDuplicatedProcs(), _eos, _tessellation.GetGhostIndeces()
