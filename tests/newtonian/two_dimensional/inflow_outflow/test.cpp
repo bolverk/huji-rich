@@ -264,9 +264,11 @@ namespace {
   {
     hdsim& sim = sim_data.getSim();
 
-    //    sim.SetCfl(0.5);
+    sim.SetCfl(0.5);
+    /*
     SimpleCFL tsf(0.5);
     sim.setTimeStepFunction(tsf);
+    */
     const int max_iter = 5e6;
     const double tf = 2;
     //    sim.SetEndTime(tf);
