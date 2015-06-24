@@ -13,11 +13,7 @@ class Viscosity : public SourceTerm
 {
 public:
 	/*!
-	\brief Class constructor
-	\param M The mass of the point source
-	\param Rmin The softenning length
-	\param center The location of the point source
-	\param SoftStart The maximum radius at which the softening length works.
+	\brief Class constructor      
 	*/
 	Viscosity(double nu, SpatialReconstruction &grad);
 
@@ -44,7 +40,7 @@ private:
 	virtual double GetNu(Tessellation const& tess, const PhysicalGeometry& pg, vector<Primitive> const& cells, int point)const;
 
 	double nu_;
-	SpatialReconstruction &grads_;
+  	SpatialReconstruction &grads_;
 };
 
 #endif // VISCOSITY_HPP

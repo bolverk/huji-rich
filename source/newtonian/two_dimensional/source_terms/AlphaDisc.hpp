@@ -26,7 +26,7 @@ private:
 
 	double alpha_;
 	double height_ratio_;
-	SpatialReconstruction &grads_;
+  //	SpatialReconstruction &grads_;
 };
 
 #endif // ALPHADISC_HPP

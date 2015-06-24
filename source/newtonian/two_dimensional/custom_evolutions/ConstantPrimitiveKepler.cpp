@@ -66,7 +66,7 @@ vector<double> ConstantPrimitiveKepler::UpdateTracer
 const& tracers, vector<vector<double> > const& /*tracerchange*/, vector<Primitive> const& cells,
 Tessellation const& tess, double /*time*/)
 {
-	return tess.GetVolume(index)*cells[index].Density*tracers[index];
+  return tess.GetVolume(index)*cells[static_cast<size_t>(index)].Density*tracers[static_cast<size_t>(index)];
 }
 
 vector<double> ConstantPrimitiveKepler::CalcTracerFlux

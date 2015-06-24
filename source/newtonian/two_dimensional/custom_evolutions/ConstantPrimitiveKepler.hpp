@@ -15,10 +15,9 @@ class ConstantPrimitiveKepler : public CustomEvolution
 public:
 	/*!
 	\brief Class constructor
-	\param prim The primitive to keep constant
-	\param tracer The tracer to keep constant
-	\param mass_count A flag to whether track the mass influx into the cell
-	\param n The number of cells with ConstantPrimitiveEvolution, the cells must be the first n in the cells vector
+	\param Mass Mass
+	\param density Density
+	\param pressure Pressure
 	*/
 	ConstantPrimitiveKepler(double Mass,double density,double pressure);
 	/*!

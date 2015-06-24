@@ -1,6 +1,6 @@
 #include "Viscosity.hpp"
 
-Viscosity::Viscosity(double nu, SpatialReconstruction &grad) : nu_(nu), grads_(grad){}
+Viscosity::Viscosity(double nu, SpatialReconstruction& grad) : nu_(nu), grads_(grad) {}
 
 Conserved Viscosity::Calculate(Tessellation const& tess, const PhysicalGeometry& pg, vector<Primitive> const& cells,
 	int point, vector<Conserved> const& /*fluxes*/, vector<Vector2D> const& /*point_velocity*/, HydroBoundaryConditions const& hbc,
@@ -9,8 +9,8 @@ Conserved Viscosity::Calculate(Tessellation const& tess, const PhysicalGeometry&
 	vector<ReducedPrimitiveGradient2D> const& grads = grads_.GetGradients();
 	Conserved res;
 	vector<int> const& edge_indeces = tess.GetCellEdges(point);
-	ReducedPrimitiveGradient2D const& grad = grads[point];
-	Primitive const& cell = cells[point];
+	ReducedPrimitiveGradient2D const& grad = grads[static_cast<size_t>(point)];
+	Primitive const& cell = cells[static_cast<size_t>(point)];
 	Vector2D const& cm = tess.GetCellCM(point);
 	const double nu = GetNu(tess, pg, cells, point);
 	for (size_t i = 0; i < edge_indeces.size(); ++i)
@@ -23,8 +23,8 @@ Conserved Viscosity::Calculate(Tessellation const& tess, const PhysicalGeometry&
 			edge.neighbors.first;
 		const int other = tess.GetOriginalIndex(other_org);
 		Vector2D const& cm_other = tess.GetCellCM(other) + tess.GetMeshPoint(other_org) - tess.GetMeshPoint(other);
-		ReducedPrimitiveGradient2D const& grad_other = grads[other];
-		Primitive const& cell_other = cells[other];
+		ReducedPrimitiveGradient2D const& grad_other = grads[static_cast<size_t>(other)];
+		Primitive const& cell_other = cells[static_cast<size_t>(other)];
 		const double nu_other = GetNu(tess, pg, cells, other);
 		double eta = 0.5*nu*(cell.Density + ScalarProd(grad.density, edge_center - cm)) +
 			0.5*nu_other*(cell_other.Density + ScalarProd(grad_other.density, edge_center - cm_other));

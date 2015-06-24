@@ -59,7 +59,7 @@ Primitive RigidBodyEvolve::UpdatePrimitive(vector<Conserved> const& /*conservedi
 	Tessellation const& /*tess*/,double /*time*/,vector<vector<double> > const& /*tracers*/)
 {
 	//return Primitive(1,1,Vector2D(0,0),1,1);
-	return cells[index];
+  return cells[static_cast<size_t>(index)];
 }
 
 RigidBodyEvolve::RigidBodyEvolve()

@@ -5,7 +5,9 @@
 
 #ifndef CUSTOMOUTER_HPP
 #define CUSTOMOUTER_HPP 1
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER 
 
 #include "../HydroBoundaryConditions.hpp"
 
