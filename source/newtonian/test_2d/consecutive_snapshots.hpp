@@ -17,9 +17,8 @@ class ConsecutiveSnapshots: public DiagnosticFunction
 public:
 
   /*! \brief Class constructor
-    \param dt Time step
-    \param init_time Initial time
-    \param counter Counts how many times time advance was called
+    \param trigger Trigger function
+    \param i2fn Converts serial number to file name
    */
   ConsecutiveSnapshots(Trigger* trigger,
 		       Index2FileName* i2fn);

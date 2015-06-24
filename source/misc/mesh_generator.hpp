@@ -4,7 +4,9 @@
 */
 #ifndef MESHGENERATOR_HPP
 #define MESHGENERATOR_HPP 1
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
 #include <vector>
 #include <cmath>
 #include "../tessellation/geometry.hpp"

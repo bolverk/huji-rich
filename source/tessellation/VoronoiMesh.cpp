@@ -1639,7 +1639,7 @@ void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
 	// Fix cor in Tri
 	RemoveVector(V.Tri.ChangeCor(),ToRemove);
 	// Fix CM
-	V.CM.resize(Ntotal-ToRemove.size());
+	V.CM.resize(static_cast<size_t>(Ntotal)-ToRemove.size());
 	for(size_t i=0;i<V.CM.size();++i)
 		V.CM[i]=V.CalcCellCM(i);
 	n=ToRemove.size();

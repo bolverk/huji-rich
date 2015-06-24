@@ -6,7 +6,9 @@
 #ifndef VORONOIMESH_HPP
 #define VORONOIMESH_HPP 1
 
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
 
 #include "Delaunay.hpp"
 #include <list>
