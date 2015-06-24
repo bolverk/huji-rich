@@ -521,7 +521,7 @@ namespace
 			return res*0.5;
 		}
 	}
-
+	/*
 	int GetEdgeIndex(size_t i, Tessellation const& tessold, Tessellation const& tessnew,
 		bool first = true)
 	{
@@ -558,7 +558,7 @@ namespace
 		}
 		return -1;
 	}
-
+*/
 	int GetEdgeIndex(Tessellation const& tessnew, int n0, int n1, int cell_index)
 	{
 		if (cell_index < 0)
@@ -692,6 +692,7 @@ namespace
 					tessnew.GetOriginalIndex(edge.neighbors.second)))
 					return edges[i];
 			}
+			return -1;
 		}
 		else
 			return -1;
