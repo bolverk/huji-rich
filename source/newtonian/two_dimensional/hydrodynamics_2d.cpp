@@ -961,9 +961,9 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[3] > 0)
 				if (need_to_calc&&tessnew.GetOriginalIndex(edge_new.neighbors.second) >= 0)
 				{
-					res[tessnew.GetOriginalIndex(edge_new.neighbors.second)] += (dA[3] / total_added_area)*TotalRemoved;
+				  res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] += (dA[3] / total_added_area)*TotalRemoved;
 					if (traceractive)
-						dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.second)] = dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.second)]
+					  dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] = dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))]
 						+ (dA[3] / total_added_area)*TracerRemoved;
 				}
 
@@ -985,30 +985,30 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			real_p_new += added;
 		}
 		double area = EdgesArea(edge, edge_other, real_p, real_p_new);
-		Primitive p_mid = GetDonorPrimitive(cells[cell_index], cells[other_index],
+		Primitive p_mid = GetDonorPrimitive(cells[static_cast<size_t>(cell_index)], cells[static_cast<size_t>(other_index)],
 			(area - dA_flux)>0, eos);
 		//Primitive p_mid = (-dA_flux + area) > 0 ? cells[other_index] : cells[cell_index];
 		Conserved toadd((-dA_flux + area)*Primitive2Conserved(p_mid));
 		vector<double> ttoadd;
 		if (traceractive)
 		{
-			ttoadd = (-dA_flux + area) > 0 ? tracers[other_index] : tracers[cell_index];
+		  ttoadd = (-dA_flux + area) > 0 ? tracers[static_cast<size_t>(other_index)] : tracers[static_cast<size_t>(cell_index)];
 			ttoadd = (-dA_flux + area)*p_mid.Density*ttoadd;
 		}
 		if (other_index == edge.neighbors.first || other_index == edge.neighbors.second)
 		{
-			res[other_index] -= toadd;
+		  res[static_cast<size_t>(other_index)] -= toadd;
 			if (traceractive)
 			{
-				dtracers[other_index] = dtracers[other_index] - ttoadd;
+			  dtracers[static_cast<size_t>(other_index)] = dtracers[static_cast<size_t>(other_index)] - ttoadd;
 			}
 		}
 		if (cell_index == edge.neighbors.first || cell_index == edge.neighbors.second)
 		{
-			res[cell_index] += toadd;
+		  res[static_cast<size_t>(cell_index)] += toadd;
 			if (traceractive)
 			{
-				dtracers[cell_index] = dtracers[cell_index] + ttoadd;
+			  dtracers[static_cast<size_t>(cell_index)] = dtracers[static_cast<size_t>(cell_index)] + ttoadd;
 			}
 		}
 
@@ -1022,21 +1022,21 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (edge2.neighbors.first < 0 || edge2.neighbors.second < 0)
 				continue;
 			const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
-			double dA_flux2 = ScalarProd(norm, fv[mid_edge])*dt*edge2.GetLength() / abs(norm);
+			double dA_flux2 = ScalarProd(norm, fv[static_cast<size_t>(mid_edge)])*dt*edge2.GetLength() / abs(norm);
 			Conserved toadd2;
 			if (dA_flux2 > 0)
 			{
-				toadd2 = dA_flux2*Primitive2Conserved(cells[tessmid.GetOriginalIndex(edge2.neighbors.second)]);
+			  toadd2 = dA_flux2*Primitive2Conserved(cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))]);
 				if (traceractive)
-					ttoadd = dA_flux2*cells[tessmid.GetOriginalIndex(edge2.neighbors.second)].Density*
-					tracers[tessmid.GetOriginalIndex(edge2.neighbors.second)];
+				  ttoadd = dA_flux2*cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))].Density*
+				    tracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))];
 			}
 			else
 			{
-				toadd2 = dA_flux2*Primitive2Conserved(cells[tessmid.GetOriginalIndex(edge2.neighbors.first)]);
+			  toadd2 = dA_flux2*Primitive2Conserved(cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))]);
 				if (traceractive)
-					ttoadd = dA_flux2*cells[tessmid.GetOriginalIndex(edge2.neighbors.first)].Density*
-					tracers[tessmid.GetOriginalIndex(edge2.neighbors.first)];
+				  ttoadd = dA_flux2*cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))].Density*
+				    tracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))];
 			}
 			std::pair<int, int> mid_neigh(tessmid.GetOriginalIndex(edge2.neighbors.first), tessmid.GetOriginalIndex(edge2.neighbors.second));
 			std::pair<int, int> mid_neigh2(mid_neigh.second, mid_neigh.first);
@@ -1044,13 +1044,13 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			{
 				only_mid.insert(mid_neigh);
 				only_mid.insert(mid_neigh2);
-				res[tessmid.GetOriginalIndex(edge2.neighbors.second)] += toadd2;
-				res[tessmid.GetOriginalIndex(edge2.neighbors.first)] -= toadd2;
+				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))] += toadd2;
+				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))] -= toadd2;
 				if (traceractive)
 				{
-					dtracers[tessmid.GetOriginalIndex(edge2.neighbors.second)] = dtracers[tessmid.GetOriginalIndex(edge2.neighbors.second)]
+				  dtracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))] = dtracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))]
 						+ ttoadd;
-					dtracers[tessmid.GetOriginalIndex(edge2.neighbors.first)] = dtracers[tessmid.GetOriginalIndex(edge2.neighbors.first)]
+				  dtracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))] = dtracers[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))]
 						- ttoadd;
 				}
 			}
@@ -3207,7 +3207,7 @@ bool IsShockedCell(Tessellation const& tess, int index,
 				(vy_i + vy_j)*r_ij.y)*rij_1;
 		}
 	}
-	if (DivV<-0.1*tess.GetWidth(index)*cells[index].SoundSpeed)
+	if (DivV<-0.1*tess.GetWidth(index)*cells[static_cast<size_t>(index)].SoundSpeed)
 		return true;
 	else
 		return false;
@@ -3345,7 +3345,7 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 		custom_evolution_manager, custom_evolution_indices);
 
 	vector<Vector2D> oldpoints = tess.GetMeshPoints();
-	oldpoints.resize((size_t)tess.GetPointNo());
+	oldpoints.resize(static_cast<size_t>(tess.GetPointNo()));
 
 	//do half time step
 	vector<Vector2D> point_velocities = calc_point_velocities
@@ -3375,10 +3375,10 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 	{
 		const int n = tess.GetPointNo();
 		for (int i = 0; i<n; ++i)
-			tracers[(size_t)i][0] = eos.dp2s(cells[(size_t)i].Density, cells[(size_t)i].Pressure);
-		shockedcells.resize((size_t)n);
+		  tracers[static_cast<size_t>(i)][0] = eos.dp2s(cells[static_cast<size_t>(i)].Density, cells[static_cast<size_t>(i)].Pressure);
+		shockedcells.resize(static_cast<size_t>(n));
 		for (int i = 0; i<n; ++i)
-			shockedcells[(size_t)i] = IsShockedCell(tess, i, cells, hbc, time) ? 1 : 0;
+		  shockedcells[static_cast<size_t>(i)] = IsShockedCell(tess, i, cells, hbc, time) ? 1 : 0;
 	}
 
 	vector<Conserved> fluxes = calc_fluxes
@@ -3444,7 +3444,7 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 		FixPressure(intensive, tracer_extensive, eos, Ek, Ef, as, bs, CellsEvolve,
 		tess,/*extensive,*/shockedcells, densityfloor);
 
-	cells.resize((size_t)tess.GetPointNo());
+	cells.resize(static_cast<size_t>(tess.GetPointNo()));
 	vector<bool> min_density_on = UpdatePrimitives(intensive, eos, cells, CellsEvolve, cells, densityfloor,
 		densitymin, pressuremin, tess, time + 0.5*dt, tracers);
 	if (traceflag)
@@ -3476,7 +3476,7 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 	if (coldflows_flag&&EntropyCalc)
 	{
 		const int n = tess.GetPointNo();
-		for (size_t i = 0; i<(size_t)n; ++i)
+		for (size_t i = 0; i<static_cast<size_t>(n); ++i)
 			tracers[i][0] = eos.dp2s(cells[i].Density, cells[i].Pressure);
 	}
 
@@ -3488,9 +3488,9 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 	if (coldflows_flag)
 	{
 		const int n = tess.GetPointNo();
-		shockedcells.resize((size_t)n);
+		shockedcells.resize(static_cast<size_t>(n));
 		for (int i = 0; i<n; ++i)
-			shockedcells[(size_t)i] = IsShockedCell(tess, i, cells, hbc, time) ? 1 : 0;
+		  shockedcells[static_cast<size_t>(i)] = IsShockedCell(tess, i, cells, hbc, time) ? 1 : 0;
 	}
 
 	lengths = serial_generate(EdgeLengthCalculator(tess, pg));
