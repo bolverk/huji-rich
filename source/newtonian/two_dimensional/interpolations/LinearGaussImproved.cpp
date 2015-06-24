@@ -41,14 +41,6 @@ namespace
 			rp1.tracers + rp2.tracers);
 	}
 
-	ReducedPrimitive MinusRp(ReducedPrimitive const& rp1,
-		ReducedPrimitive const& rp2)
-	{
-		return ReducedPrimitive(rp1.density - rp2.density, rp1.pressure - rp2.pressure,
-			rp1.xvelocity - rp2.xvelocity, rp1.yvelocity - rp2.yvelocity,
-			rp1.tracers - rp2.tracers);
-	}
-
 	vector<double> ScalarProd(Vector2D const&v, vector<Vector2D> const& vec)
 	{
 		vector<double> res(vec.size());
@@ -64,14 +56,6 @@ namespace
 			ScalarProd(v, rpg.pressure),
 			ScalarProd(v, rpg.xvelocity),
 			ScalarProd(v, rpg.yvelocity), ScalarProd(v, rpg.tracers));
-	}
-
-	ReducedPrimitiveGradient2D operator-(ReducedPrimitiveGradient2D const& rpg1,
-		ReducedPrimitiveGradient2D const& rpg2)
-	{
-		return ReducedPrimitiveGradient2D(rpg1.density - rpg2.density, rpg1.pressure
-			- rpg2.pressure, rpg1.xvelocity - rpg2.xvelocity, rpg1.yvelocity
-			- rpg2.yvelocity, rpg1.tracers - rpg2.tracers);
 	}
 
 	vector<Vector2D> operator*(Vector2D const&v, vector<double> const& vec)
