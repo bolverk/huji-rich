@@ -6,7 +6,10 @@
 #ifndef SINE_WAVE_HPP
 #define SINE_WAVE_HPP 1
 
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
+
 #include "../one_dimensional/spatial_distribution1d.hpp"
 //! \brief Sine wave spatial distribution
 class SineWave: public SpatialDistribution1D
