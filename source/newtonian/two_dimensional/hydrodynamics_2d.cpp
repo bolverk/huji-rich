@@ -217,6 +217,7 @@ namespace
 		return toadd;
 	}
 */
+	/*
 	void PeriodicFix2(Vector2D const& real_p, Vector2D const& real_p_new, double dx, double dy, vector<Vector2D> &p1, vector<Vector2D> &p1new, Vector2D const& oldp, Vector2D const& newp,
 		Vector2D &added1, Vector2D &added2)
 	{
@@ -244,7 +245,7 @@ namespace
 		p1new += toadd;
 		added2 = toadd;
 	}
-
+	*/
 	std::pair<vector<std::pair<Vector2D, Vector2D> >, vector<std::pair<Vector2D, Vector2D> > > GetCorners(vector<vector<Vector2D> > const& oldp, vector<vector<Vector2D> > const& newp)
 	{
 		std::pair<vector<std::pair<Vector2D, Vector2D> >, vector<std::pair<Vector2D, Vector2D> > > res;
