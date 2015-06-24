@@ -666,71 +666,6 @@ namespace
 			tessold.GetOriginalIndex(tessold.GetEdge(edges[indeces[1]]).neighbors.first);
 	}
 
-	void Get4Area(Tessellation const& tessold, Tessellation const& tessnew, int old_edge,
-		Edge const& edge, std::pair<Vector2D, Vector2D> &res, std::pair<int, int> &resneigh)
-	{
-		Edge const& olde = tessold.GetEdge(old_edge);
-		Vector2D const inter = FindIntersection(edge, olde);
-		bool first = false;
-		if (tessold.GetMeshPoint(olde.neighbors.first).distance(edge.vertices.first)
-			<tessold.GetMeshPoint(olde.neighbors.second).distance(
-			edge.vertices.first))
-			first = true;
-		Vector2D point = tessnew.GetMeshPoint(edge.neighbors.first);
-		TripleConstRef<Vector2D> points(edge.vertices.first, inter,
-			point);
-		res.first.x = 0.5*orient2d(points);
-		TripleConstRef<Vector2D> points2(point, inter, edge.vertices.first);
-		res.first.y = 0.5*orient2d(points2);
-		resneigh.first = first ? tessold.GetOriginalIndex(olde.neighbors.first) :
-			tessold.GetOriginalIndex(olde.neighbors.second);
-		resneigh.first = first ? tessold.GetOriginalIndex(olde.neighbors.second) :
-			tessold.GetOriginalIndex(olde.neighbors.first);
-		point = tessnew.GetMeshPoint(edge.neighbors.second);
-		TripleConstRef<Vector2D> points3(edge.vertices.first, inter,
-			point);
-		res.second.x = -0.5*orient2d(points3);
-		TripleConstRef<Vector2D> points4(point, inter,
-			edge.vertices.first);
-		res.second.y = -0.5*orient2d(points4);
-		if (!RightHand(edge, point))
-		{
-			res.first *= -1;
-			res.second *= -1;
-		}
-	}
-
-	int GetMutualEdge(Tessellation const& tess, int n0, int n1, bool first)
-	{
-		if (first)
-		{
-			vector<int> const& edges = tess.GetCellEdges(n0);
-			for (size_t i = 0; i<edges.size(); ++i)
-			{
-				Edge const& edge = tess.GetEdge(edges[i]);
-				if (((tess.GetOriginalIndex(edge.neighbors.first) == n0) &&
-					(tess.GetOriginalIndex(edge.neighbors.second) == n1)) ||
-					((tess.GetOriginalIndex(edge.neighbors.first) == n1) &&
-					(tess.GetOriginalIndex(edge.neighbors.second) == n0)))
-					return edges[i];
-			}
-		}
-		else
-		{
-			vector<int> const& edges = tess.GetCellEdges(n1);
-			for (size_t i = 0; i<edges.size(); ++i)
-			{
-				Edge const& edge = tess.GetEdge(edges[i]);
-				if (((tess.GetOriginalIndex(edge.neighbors.first) == n0) &&
-					(tess.GetOriginalIndex(edge.neighbors.second) == n1)) ||
-					((tess.GetOriginalIndex(edge.neighbors.first) == n1) &&
-					(tess.GetOriginalIndex(edge.neighbors.second) == n0)))
-					return edges[i];
-			}
-		}
-		return -1;
-	}
-
 	// Find the new edge in the edge flip
 	int NewEdgeIndex(Tessellation const& tessold, Tessellation const& tessnew, int cell_index, Edge const& edge, int other_index)
 	{
@@ -788,8 +723,6 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 	const double dy = outer.GetGridBoundary(Up) - outer.GetGridBoundary(Down);
 	// Fix the fluxes
 	Vector2D temp0, temp1;
-	//vector<size_t> checked_new(tessnew.GetTotalSidesNumber(), 0);
-	//	vector<size_t> checked_mid(tessmid.GetTotalSidesNumber(), 0);
 	std::set<std::pair<int, int > > flipped_set, only_mid;
 	size_t nedgesold = tessold.GetTotalSidesNumber();
 	for (size_t i = 0; i < nedgesold; ++i)
@@ -817,9 +750,6 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 
 		if (mid_index >= 0 && !rigid_edge)
 		{
-			//			checked_mid[mid_index] = 1;
-			//		if (hbc.IsBoundary(tessmid.GetEdge(mid_index), tessmid))
-			//		checked_mid[GetEdgeIndex(tessmid, cell_index, other_index, other_index)] = 1;
 			Edge const& edge2 = tessmid.GetEdge(mid_index);
 			const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
 			dA_flux = ScalarProd(norm, fv[mid_index])*dt*edge2.GetLength() / abs(norm);
@@ -918,7 +848,6 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 				dA[2] -= dA_flux2;
 				dA[3] += dA_flux2;
 			}
-
 
 			// The conserved to remove
 			Conserved TotalRemoved;
