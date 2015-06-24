@@ -173,6 +173,7 @@ namespace
 		return toadd;
 	}
 
+	/*
 	Vector2D PeriodicFix1(Vector2D const& pointvelocity, double dx, double dy, Vector2D const& real_p,
 		Vector2D &real_p_new, vector<Vector2D> &p0new)
 	{
@@ -215,7 +216,7 @@ namespace
 			real_p_new += toadd;
 		return toadd;
 	}
-
+*/
 	void PeriodicFix2(Vector2D const& real_p, Vector2D const& real_p_new, double dx, double dy, vector<Vector2D> &p1, vector<Vector2D> &p1new, Vector2D const& oldp, Vector2D const& newp,
 		Vector2D &added1, Vector2D &added2)
 	{
@@ -1567,109 +1568,6 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 	return res;
 }
 
-/*
-vector<Conserved> FluxFix3(Tessellation const& tessold, Tessellation const& tessmid,
-Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
-vector<Vector2D> const& fv, OuterBoundary const& outer,HydroBoundaryConditions const& hbc)
-{
-int npoints = tessold.GetPointNo();
-vector<Conserved> res((size_t)npoints);
-vector<vector<Vector2D> > chull_old(npoints), chull_new(npoints);
-const double dx = outer.GetGridBoundary(Right) - outer.GetGridBoundary(Left);
-const double dy = outer.GetGridBoundary(Up) - outer.GetGridBoundary(Down);
-// Fix the fluxes
-Vector2D temp0, temp1;
-vector<size_t> checked_new(tessnew.GetTotalSidesNumber(), 0);
-vector<size_t> checked_mid(tessmid.GetTotalSidesNumber(), 0);
-size_t nedgesold = tessold.GetTotalSidesNumber();
-for (size_t i = 0; i < nedgesold; ++i)
-{
-Edge edge = tessold.GetEdge((int)i);
-if (edge.neighbors.first < 0 || edge.neighbors.second < 0)
-continue;
-
-int cell_index, other_index;
-if (hbc.IsGhostCell(edge.neighbors.first, tessold))
-{
-cell_index = edge.neighbors.second;
-other_index = tessold.GetOriginalIndex(edge.neighbors.first);
-}
-else
-{
-cell_index = edge.neighbors.first;
-other_index = tessold.GetOriginalIndex(edge.neighbors.second);
-}
-int mid_index = GetEdgeIndex(tessmid, cell_index, other_index, cell_index);
-int new_index = GetEdgeIndex(tessnew, cell_index, other_index, cell_index);
-double dA_flux = 0;
-
-if (mid_index >= 0)
-{
-checked_mid[mid_index] = 1;
-if (hbc.IsBoundary(tessmid.GetEdge(mid_index), tessmid))
-checked_mid[GetEdgeIndex(tessmid, cell_index, other_index, other_index)] = 1;
-Edge const& edge2 = tessmid.GetEdge(mid_index);
-const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
-dA_flux = ScalarProd(norm, fv[mid_index])*dt*edge2.GetLength() / abs(norm);
-if (tessmid.GetOriginalIndex(edge2.neighbors.first) == other_index)
-dA_flux *= -1;
-}
-
-Vector2D real_p, real_p_new;
-real_p = tessold.GetMeshPoint(cell_index);
-real_p_new = tessnew.GetMeshPoint(cell_index);
-Vector2D added(0, 0);
-// check if periodic jumped
-if (outer.GetBoundaryType() == Periodic)
-added = PeriodDiff(pointvelocity[cell_index], dx, dy, real_p, real_p_new);
-
-// Did the edge disappear?
-if (new_index<0)
-{
-int n0, n1;
-GetAdjacentNeigh(tessold, edge, cell_index, Vector2D(0,0), n0, n1);
-vector<int> neigh = tessnew.GetNeighbors(n0);
-for (size_t j = 0; j < neigh.size(); ++j)
-neigh[j] = tessnew.GetOriginalIndex(neigh[j]);
-sort(neigh.begin(), neigh.end());
-if (!std::binary_search(neigh.begin(), neigh.end(), n1))
-std::cout << "No relevent edge found"<<std::endl;
-else
-{
-vector<int> edges = tessnew.GetCellEdges(n0);
-for (size_t j = 0; j < edges.size(); ++j)
-{
-Edge const& etemp = tessnew.GetEdge(edges[j]);
-if (tessnew.GetOriginalIndex(etemp.neighbors.first) == n1 || tessnew.GetOriginalIndex(etemp.neighbors.second) == n1)
-{
-checked_new[edges[j]] = 1;
-if (hbc.IsBoundary(etemp, tessnew))
-checked_new[GetEdgeIndex(tessnew, n0, n1, n1)] = 1;
-}
-}
-}
-}
-else
-{
-checked_new[new_index] = 1;
-if (hbc.IsBoundary(tessnew.GetEdge(new_index), tessnew))
-checked_new[GetEdgeIndex(tessnew, cell_index, other_index, other_index)] = 1;
-}
-}
-
-for (size_t i = 0; i < checked_new.size(); ++i)
-{
-if (checked_new[i] == 1)
-continue;
-Edge const& edge = tessnew.GetEdge((int)i);
-int n0, n1;
-GetAdjacentNeigh(tessnew, edge,edge.neighbors.first<tessnew.GetPointNo() ? edge.neighbors.first: edge.neighbors.second, Vector2D(0, 0), n0, n1);
-vector<int> edges = tessold.GetCellEdges(n0);
-std::cout << "No relevent edge found" << std::endl;
-}
-return res;
-}
-*/
 
 /*
 vector<Conserved> FluxFix(Tessellation const& tessold, Tessellation const& tessmid,
