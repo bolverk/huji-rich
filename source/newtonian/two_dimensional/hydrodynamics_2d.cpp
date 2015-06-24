@@ -666,38 +666,6 @@ namespace
 			tessold.GetOriginalIndex(tessold.GetEdge(edges[indeces[1]]).neighbors.first);
 	}
 
-	int FindNewEdge(Tessellation const& tessnew, int n0, int n1)
-	{
-		vector<int> neigh0 = tessnew.GetNeighbors(n0);
-		vector<int> neigh1 = tessnew.GetNeighbors(n1);
-		for (size_t i = 0; i<neigh0.size(); ++i)
-			neigh0[i] = tessnew.GetOriginalIndex(neigh0[i]);
-		for (size_t i = 0; i<neigh1.size(); ++i)
-			neigh1[i] = tessnew.GetOriginalIndex(neigh1[i]);
-		sort(neigh0.begin(), neigh0.end());
-		sort(neigh1.begin(), neigh1.end());
-		vector<int> temp(6);
-		std::vector<int>::iterator it;
-		it = std::set_intersection(neigh0.begin(), neigh0.end(), neigh1.begin(),
-			neigh1.end(), temp.begin());
-		temp.resize(it - temp.begin());
-		if (temp.size() == 2)
-		{
-			vector<int> const& edges = tessnew.GetCellEdges(n0);
-			for (size_t i = 0; i<edges.size(); ++i)
-			{
-				Edge const& edge = tessnew.GetEdge(edges[i]);
-				if (std::binary_search(temp.begin(), temp.end(), tessnew.GetOriginalIndex(
-					edge.neighbors.first)) && std::binary_search(temp.begin(), temp.end(),
-					tessnew.GetOriginalIndex(edge.neighbors.second)))
-					return edges[i];
-			}
-			return -1;
-		}
-		else
-			return -1;
-	}
-
 	bool FindVertice(Tessellation const& tessold, Tessellation const& tessnew, int n0, int n1, int cell_index,
 		int old_edge, Vector2D const& added, Vector2D &res)
 	{
