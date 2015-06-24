@@ -1,5 +1,7 @@
 #include "CircularRotation.hpp"
 
+OmegaFunction::~OmegaFunction(void) {}
+
 KeplerianOmega::KeplerianOmega(double Mass, double RigidMin, double RigidMax) : mass_(Mass), RigidMin_(RigidMin),
 RigidMax_(RigidMax){}
 
@@ -29,7 +31,7 @@ void CircularRotation::ApplyFix(Tessellation const& tess, vector<Primitive> cons
 	for (size_t i = 0; i<N; ++i)
 	{
 		const Vector2D point = tess.GetMeshPoint(static_cast<int>(i));
-		double omega = omega_.CalcOmega(tess.GetMeshPoint((int)i));
+		double omega = omega_.CalcOmega(tess.GetMeshPoint(static_cast<int>(i)));
 		if (!evencall_)
 			velocities[i] = Vector2D(-point.x + point.x*cos(omega*dt) - point.y*sin(omega*dt), -point.y + point.y*cos(dt*omega) +
 			point.x*sin(dt*omega)) / dt;
@@ -37,4 +39,12 @@ void CircularRotation::ApplyFix(Tessellation const& tess, vector<Primitive> cons
 			velocities[i] = Vector2D(-2 * point.y*sin(omega*dt*0.5), 2 * point.x*sin(omega*dt*0.5)) / dt;
 	}
 	evencall_ = !evencall_;
+}
+
+YeeOmega::YeeOmega(double beta): beta_(beta) {}
+
+double YeeOmega::CalcOmega(const Vector2D& point) const
+{
+  const double r = abs(point);
+  return beta_*exp(0.5 - 0.5*r*r) / (2 * M_PI);
 }

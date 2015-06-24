@@ -6,7 +6,9 @@
 #ifndef CIRCULAR_ROTATION_HPP
 #define CIRCULAR_ROTATION_HPP 1
 
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
 #include "../point_motion.hpp"
 #include <cmath>
 
@@ -15,6 +17,7 @@ class OmegaFunction
 {
 public:
 	virtual double CalcOmega(Vector2D const& point) const = 0;
+  virtual ~OmegaFunction(void);
 };
 
 //! \brief Class that calculates the angular frequency for a keplerian orbit
@@ -39,12 +42,8 @@ public:
 	/*! \brief Class constructor
 	\param beta The beta parameter of the vortex
 	*/
-	YeeOmega(double beta) :beta_(beta){}
-	double CalcOmega(Vector2D const& point)const
-	{
-		const double r = abs(point);
-		return beta_*exp(0.5 - 0.5*r*r) / (2 * M_PI);
-	}
+  YeeOmega(double beta);
+  double CalcOmega(Vector2D const& point) const;
 private:
 	const double beta_;
 };
