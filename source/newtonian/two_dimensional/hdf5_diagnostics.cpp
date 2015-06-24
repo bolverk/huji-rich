@@ -157,6 +157,29 @@ namespace {
     }
   };
 
+  class StickerSlice: public LazyList<double>
+  {
+  public:
+
+    StickerSlice(const hdsim& sim,
+		 const string& name):
+      sim_(sim), name_(name) {}
+
+    size_t size(void) const
+    {
+      return sim_.getAllCells().size();
+    }
+
+    double operator[](size_t i) const
+    {
+      return static_cast<double>(sim_.getAllCells()[i].stickers.find(name_)->second);
+    }
+
+  private:
+    const hdsim& sim_;
+    const string& name_;
+  };
+
   class TracerSlice: public LazyList<double>
   {
   public:
@@ -215,6 +238,11 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 	sim.getAllCells().front().tracers.begin();
       it!=sim.getAllCells().front().tracers.end(); ++it)
     h5sc(it->first,serial_generate(TracerSlice(sim,it->first)));
+
+  for(std::map<std::string,bool>::const_iterator it=
+	sim.getAllCells().front().stickers.begin();
+      it!=sim.getAllCells().front().stickers.end(); ++it)
+    h5sc(it->first,serial_generate(StickerSlice(sim,it->first)));
 }
 
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
