@@ -246,6 +246,7 @@ namespace
 		added2 = toadd;
 	}
 	*/
+	/*
 	std::pair<vector<std::pair<Vector2D, Vector2D> >, vector<std::pair<Vector2D, Vector2D> > > GetCorners(vector<vector<Vector2D> > const& oldp, vector<vector<Vector2D> > const& newp)
 	{
 		std::pair<vector<std::pair<Vector2D, Vector2D> >, vector<std::pair<Vector2D, Vector2D> > > res;
@@ -279,8 +280,8 @@ namespace
 		}
 		return res;
 	}
-
-
+*/
+/*
 	bool NeedToCheck(std::pair<Vector2D, Vector2D> p0, std::pair<Vector2D, Vector2D> p0new, std::pair<Vector2D, Vector2D> p1, std::pair<Vector2D, Vector2D> p1new)
 	{
 		if (p0.first.x > p1new.second.x&&p0new.first.x > p1.second.x)
@@ -293,7 +294,7 @@ namespace
 			return false;
 		return true;
 	}
-
+*/
 	bool DoEdgesIntersect(Edge const& e1, Edge const &e2)
 	{
 		TripleConstRef<Vector2D> points0(e1.vertices.first, e1.vertices.second, e2.vertices.first);
@@ -342,7 +343,7 @@ namespace
 		else
 			return false;
 	}
-
+	
 	bool IsFirstVertice(Tessellation const& tess, int cell, Vector2D const& added, Edge const& other_edge)
 	{
 		vector<int> const& edges = tess.GetCellEdges(cell);
