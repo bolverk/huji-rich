@@ -36,7 +36,6 @@
 \param cells The primitive variables
 \param fluxes The fluxes
 \param outer The outer boundary conditions
-\param pointvelocity Velocities of mesh generating points
 \param eos The equation of state
 \param hbc The hydro boudnary conditions
 */

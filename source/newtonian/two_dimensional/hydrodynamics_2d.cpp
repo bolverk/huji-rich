@@ -717,17 +717,18 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		dtracers.resize(tracers.size(), ttemp);
 	}
 	int npoints = tessold.GetPointNo();
-	vector<Conserved> res((size_t)npoints);
-	vector<vector<Vector2D> > chull_old(npoints), chull_new(npoints);
+	vector<Conserved> res(static_cast<size_t>(npoints));
+	vector<vector<Vector2D> > chull_old(static_cast<size_t>(npoints)),
+	  chull_new(static_cast<size_t>(npoints));
 	const double dx = outer.GetGridBoundary(Right) - outer.GetGridBoundary(Left);
 	const double dy = outer.GetGridBoundary(Up) - outer.GetGridBoundary(Down);
 	// Fix the fluxes
 	Vector2D temp0, temp1;
 	std::set<std::pair<int, int > > flipped_set, only_mid;
-	size_t nedgesold = tessold.GetTotalSidesNumber();
+	size_t nedgesold = static_cast<size_t>(tessold.GetTotalSidesNumber());
 	for (size_t i = 0; i < nedgesold; ++i)
 	{
-		Edge edge = tessold.GetEdge((int)i);
+	  Edge edge = tessold.GetEdge(static_cast<int>(i));
 
 		bool rigid_edge = false;
 		if (edge.neighbors.first < 0 || edge.neighbors.second < 0)
@@ -752,7 +753,7 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		{
 			Edge const& edge2 = tessmid.GetEdge(mid_index);
 			const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
-			dA_flux = ScalarProd(norm, fv[mid_index])*dt*edge2.GetLength() / abs(norm);
+			dA_flux = ScalarProd(norm, fv[static_cast<size_t>(mid_index)])*dt*edge2.GetLength() / abs(norm);
 			if (tessmid.GetOriginalIndex(edge2.neighbors.first) == other_index)
 				dA_flux *= -1;
 		}
@@ -763,7 +764,7 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		Vector2D added(0, 0);
 		// check if periodic jumped
 		if (outer.GetBoundaryType() == Periodic)
-			added = PeriodDiff(pointvelocity[cell_index], dx, dy, real_p, real_p_new);
+		  added = PeriodDiff(pointvelocity[static_cast<size_t>(cell_index)], dx, dy, real_p, real_p_new);
 
 		// Did the edge disappear?
 		if (new_index<0)
@@ -842,7 +843,7 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			{
 				Edge const& edge2 = tessmid.GetEdge(mid_index2);
 				const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
-				dA_flux2 = ScalarProd(norm, fv[mid_index2])*dt*edge2.GetLength() / abs(norm);
+				dA_flux2 = ScalarProd(norm, fv[static_cast<size_t>(mid_index2)])*dt*edge2.GetLength() / abs(norm);
 				if (tessmid.GetOriginalIndex(edge2.neighbors.first) != tessnew.GetOriginalIndex(edge_new.neighbors.first))
 					dA_flux2 *= -1;
 				dA[2] -= dA_flux2;
@@ -857,14 +858,14 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[0] < 0)
 			{
 				if (traceractive)
-					ttremove = -dA[0] * cells[tessold.GetOriginalIndex(edge.neighbors.first)].Density*
-					tracers[tessold.GetOriginalIndex(edge.neighbors.first)];
-				Conserved toremove = -dA[0] * Primitive2Conserved(cells[tessold.GetOriginalIndex(edge.neighbors.first)]);
+				  ttremove = -dA[0] * cells[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))].Density*
+				    tracers[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))];
+				Conserved toremove = -dA[0] * Primitive2Conserved(cells[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))]);
 				if (!hbc.IsGhostCell(edge.neighbors.first, tessold))
 				{
-					res[edge.neighbors.first] -= toremove;
+				  res[static_cast<size_t>(edge.neighbors.first)] -= toremove;
 					if (traceractive)
-						dtracers[edge.neighbors.first] = dtracers[edge.neighbors.first] - ttremove;
+					  dtracers[static_cast<size_t>(edge.neighbors.first)] = dtracers[static_cast<size_t>(edge.neighbors.first)] - ttremove;
 				}
 				TotalRemoved += toremove;
 				if (traceractive)
@@ -875,14 +876,14 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[1] < 0)
 			{
 				if (traceractive)
-					ttremove = -dA[1] * cells[tessold.GetOriginalIndex(edge.neighbors.second)].Density*
-					tracers[tessold.GetOriginalIndex(edge.neighbors.second)];
-				Conserved toremove = -dA[1] * Primitive2Conserved(cells[tessold.GetOriginalIndex(edge.neighbors.second)]);
+				  ttremove = -dA[1] * cells[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))].Density*
+				    tracers[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))];
+				Conserved toremove = -dA[1] * Primitive2Conserved(cells[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))]);
 				if (!hbc.IsGhostCell(edge.neighbors.second, tessold))
 				{
-					res[edge.neighbors.second] -= toremove;
+				  res[static_cast<size_t>(edge.neighbors.second)] -= toremove;
 					if (traceractive)
-						dtracers[edge.neighbors.second] = dtracers[edge.neighbors.second] - ttremove;
+					  dtracers[static_cast<size_t>(edge.neighbors.second)] = dtracers[static_cast<size_t>(edge.neighbors.second)] - ttremove;
 				}
 				TotalRemoved += toremove;
 				if (traceractive)
@@ -898,14 +899,14 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[2] < 0)
 			{
 				if (traceractive)
-					ttremove = -dA[2] * cells[tessnew.GetOriginalIndex(edge_new.neighbors.first)].Density*
-					tracers[tessnew.GetOriginalIndex(edge_new.neighbors.first)];
-				Conserved toremove = -dA[2] * Primitive2Conserved(cells[tessnew.GetOriginalIndex(edge_new.neighbors.first)]);
+				  ttremove = -dA[2] * cells[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))].Density*
+				    tracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))];
+				Conserved toremove = -dA[2] * Primitive2Conserved(cells[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))]);
 				if (need_to_calc&&tessnew.GetOriginalIndex(edge_new.neighbors.first) >= 0)
 				{
-					res[tessnew.GetOriginalIndex(edge_new.neighbors.first)] -= toremove;
+				  res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] -= toremove;
 					if (traceractive)
-						dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.first)] = dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.first)] -
+					  dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] = dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] -
 						ttremove;
 				}
 				TotalRemoved += toremove;
@@ -917,14 +918,14 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[3] < 0)
 			{
 				if (traceractive)
-					ttremove = -dA[3] * cells[tessnew.GetOriginalIndex(edge_new.neighbors.second)].Density*
-					tracers[tessnew.GetOriginalIndex(edge_new.neighbors.second)];
-				Conserved toremove = -dA[3] * Primitive2Conserved(cells[tessnew.GetOriginalIndex(edge_new.neighbors.second)]);
+				  ttremove = -dA[3] * cells[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))].Density*
+				    tracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))];
+				Conserved toremove = -dA[3] * Primitive2Conserved(cells[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))]);
 				if (need_to_calc&&tessnew.GetOriginalIndex(edge_new.neighbors.second) >= 0)
 				{
-					res[tessnew.GetOriginalIndex(edge_new.neighbors.second)] -= toremove;
+				  res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] -= toremove;
 					if (traceractive)
-						dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.second)] = dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.second)] -
+					  dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] = dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] -
 						ttremove;
 				}
 				TotalRemoved += toremove;
@@ -938,23 +939,23 @@ vector<Conserved> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (dA[0] > 0)
 				if (!hbc.IsGhostCell(edge.neighbors.first, tessold))
 				{
-					res[edge.neighbors.first] += (dA[0] / total_added_area)*TotalRemoved;
+				  res[static_cast<size_t>(edge.neighbors.first)] += (dA[0] / total_added_area)*TotalRemoved;
 					if (traceractive)
-						dtracers[edge.neighbors.first] = dtracers[edge.neighbors.first] + (dA[0] / total_added_area)*TracerRemoved;
+					  dtracers[static_cast<size_t>(edge.neighbors.first)] = dtracers[static_cast<size_t>(edge.neighbors.first)] + (dA[0] / total_added_area)*TracerRemoved;
 				}
 			if (dA[1] > 0)
 				if (!hbc.IsGhostCell(edge.neighbors.second, tessold))
 				{
-					res[edge.neighbors.second] += (dA[1] / total_added_area)*TotalRemoved;
+				  res[static_cast<size_t>(edge.neighbors.second)] += (dA[1] / total_added_area)*TotalRemoved;
 					if (traceractive)
-						dtracers[edge.neighbors.second] = dtracers[edge.neighbors.second] + (dA[1] / total_added_area)*TracerRemoved;
+					  dtracers[static_cast<size_t>(edge.neighbors.second)] = dtracers[static_cast<size_t>(edge.neighbors.second)] + (dA[1] / total_added_area)*TracerRemoved;
 				}
 			if (dA[2] > 0)
 				if (need_to_calc&&tessnew.GetOriginalIndex(edge_new.neighbors.first) >= 0)
 				{
-					res[tessnew.GetOriginalIndex(edge_new.neighbors.first)] += (dA[2] / total_added_area)*TotalRemoved;
+				  res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] += (dA[2] / total_added_area)*TotalRemoved;
 					if (traceractive)
-						dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.first)] = dtracers[tessnew.GetOriginalIndex(edge_new.neighbors.first)]
+					  dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] = dtracers[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))]
 						+ (dA[2] / total_added_area)*TracerRemoved;
 				}
 			if (dA[3] > 0)
