@@ -899,30 +899,6 @@ namespace
 		else
 			return false;
 	}
-
-	double TrianlgeDisapearArea(Edge const& edge, int edge_index,
-		Tessellation const& tessold, Tessellation const& tessnew, Vector2D const& added,
-		Vector2D const& addednew, int cell_index, int /*other_index*/)
-	{
-		Vector2D point;
-		Vector2D oldpoint = tessold.GetMeshPoint(cell_index) + added;
-		int n0, n1;
-		GetAdjacentNeigh(tessold, edge, cell_index, added, n0, n1);
-		if (!FindVertice(tessold, tessnew, n0, n1, cell_index, edge_index, added, point))
-			return 0;
-		point = point + addednew;
-		if (RightHand(edge, oldpoint))
-		{
-			TripleConstRef<Vector2D> points(edge.vertices.second, edge.vertices.first, point);
-			return 0.5*orient2d(points);
-		}
-		else
-		{
-			TripleConstRef<Vector2D> points(edge.vertices.first, edge.vertices.second, point);
-			return 0.5*orient2d(points);
-		}
-	}
-
 	void Get4Area(Tessellation const& tessold, Tessellation const& tessnew, int old_edge,
 		Edge const& edge, std::pair<Vector2D, Vector2D> &res, std::pair<int, int> &resneigh)
 	{
