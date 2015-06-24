@@ -180,4 +180,29 @@ std::vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double a
 std::vector<Vector2D> RandPointsRmax(int PointNum,double Rmin,double Rmax,
 				double xc=0,double yc=0);
 
+/*!
+\brief Generates a sector of points
+\param PointNum The number of points.
+\param Rmin The min radius
+\param Rmax The max radius
+\param theta_min The min angle
+\param theta_max The max angle
+\param center The origin of the sector
+\return List of two dimensional points
+*/
+std::vector<Vector2D> OrderdSector(int PointNum, double Rmin, double Rmax,
+	double theta_min, double theta_max, Vector2D center=Vector2D(0,0));
+
+/*!
+\brief Generates an arc of points
+\param PointNum The number of points.
+\param R The radius
+\param theta_min The min angle
+\param theta_max The max angle
+\param center The origin of the sector
+\return List of two dimensional points
+*/
+std::vector<Vector2D> OrderdArc(int PointNum, double R,
+	double theta_min, double theta_max, Vector2D center = Vector2D(0, 0));
+
 #endif //MESHGENERATOR_HPP

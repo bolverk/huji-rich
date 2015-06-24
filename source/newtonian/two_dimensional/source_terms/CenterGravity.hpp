@@ -17,8 +17,10 @@ public:
 	\param M The mass of the point source
 	\param Rmin The softenning length
 	\param center The location of the point source
+	\param SoftStart The maximum radius at which the softening length works.
+	\param omega The angular frequency which the source rotates with on a circular orbit
 	*/
-	CenterGravity(double M,double Rmin,Vector2D center=Vector2D());
+	CenterGravity(double M, double Rmin, double SoftStart = 0, Vector2D center = Vector2D(),double omega = 0);
 
 	Vector2D Calculate
 	(Tessellation const& tess,
@@ -32,7 +34,9 @@ public:
 private:
 	double M_;
 	double Rmin_;
+	double  softlength_;
 	Vector2D _center;
+	double omega_;
 };
 
 #endif // CENTERGRAVITY_HPP

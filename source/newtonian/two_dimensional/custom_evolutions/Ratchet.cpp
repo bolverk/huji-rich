@@ -1,8 +1,8 @@
 #include "Ratchet.hpp"
 #include "../hydrodynamics_2d.hpp"
 
-Ratchet::Ratchet(DIRECTION dir, const PhysicalGeometry& pg):
-  dir_(dir),cell_(Primitive(1,1,Vector2D(0,0),1,1)), pg_(pg) {}
+Ratchet::Ratchet(DIRECTION dir):
+dir_(dir),cell_(Primitive(1,1,Vector2D(0,0),1,1)) {}
 
 Conserved Ratchet::CalcFlux(Tessellation const& tess,
 			    vector<Primitive> const& cells,
@@ -67,7 +67,7 @@ vector<double> Ratchet::CalcTracerFlux
 	const int other = (edge.neighbors.first==index) ?
 	  edge.neighbors.second : edge.neighbors.first;
 	return termwise_product(tracers[static_cast<size_t>(other)],
-				dm*dt*pg_.calcArea(edge));
+				dm*dt*edge.GetLength());
 }
 
 bool Ratchet::TimeStepRelevant(void)const

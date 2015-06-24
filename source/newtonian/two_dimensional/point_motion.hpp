@@ -31,8 +31,8 @@ public:
     \param tess The tessellation
     \param cells Hydrodynamics cells
     \param time The simulation time
-    \param cevolve Custom evolution of points
-    \param tracers Tracers
+	\param cevolve Custom evolution of points
+	\param tracers The intensive tracers
     \return Velocities of the points
    */
   virtual vector<Vector2D> calcAllVelocities(Tessellation const& tess,
@@ -42,6 +42,19 @@ public:
 					     const vector<vector<double> >& tracers);
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
+
+  /*! \brief Applies a small fix to the velocity of all mesh points once the time step is known
+  \param tess The tessellation
+  \param cells Hydrodynamics cells
+  \param time The simulation time
+  \param cevolve Custom evolution of points
+  \param velocities Velocities of the points
+  \param tracers The intensive tracers
+  \param dt The time step
+  */
+  virtual void ApplyFix(Tessellation const& tess, vector<Primitive> const& cells,double time,
+	  vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector<Vector2D>
+	  & velocities);
 };
 
 #endif

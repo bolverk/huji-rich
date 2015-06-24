@@ -10,48 +10,71 @@
 #include "../point_motion.hpp"
 #include <cmath>
 
-//! \brief Motion of mesh generating points in concentric circles
+//! \brief Class that calculates the angular frequency as function of radius
+class OmegaFunction
+{
+public:
+	virtual double CalcOmega(Vector2D const& point) const = 0;
+};
+
+//! \brief Class that calculates the angular frequency for a keplerian orbit
+class KeplerianOmega : public OmegaFunction
+{
+public:
+	/*! \brief Class constructor
+	\param Mass The mass of the central object
+	\param RigidMin The radius which below it rigid body rotation is applied
+	\param RigidMax The radius which above it rigid body rotation is applied
+	*/
+	KeplerianOmega(double Mass, double RigidMin, double RigidMax);
+
+	double CalcOmega(Vector2D const& point) const;
+private:
+	double mass_, RigidMin_, RigidMax_;
+};
+//! \brief Class that calculates the angular frequency for the Yee vortex
+class YeeOmega : public OmegaFunction
+{
+public:
+	/*! \brief Class constructor
+	\param beta The beta parameter of the vortex
+	*/
+	YeeOmega(double beta) :beta_(beta){}
+	double CalcOmega(Vector2D const& point)const
+	{
+		const double r = abs(point);
+		return beta_*exp(0.5 - 0.5*r*r) / (2 * M_PI);
+	}
+private:
+	const double beta_;
+};
+
+//! \brief Motion of mesh generating points in concentric circles, currently only works on second order time integration
 class CircularRotation: public PointMotion
 {
 public:
+	
   /*! \brief Class constructor
-    \param naive The original point motion
-    \param Rinner The radius which beneath it points are rotated with w_inner
-    \param Router The radius which above it points are rotated with w_inner
-    \param w_inner The angular velocity of the inner radius
-    \param w_outer The angular velocity of the outer radius
-    \param Ninner The number of points in the inner circle. The point ordering is assumed to be inner_circles,outermost_circles,other_points
-    \param Nouter The number of points in the outer circle.
-    \param t The time of the simulation
-    \param center The center of the circles
+    \param func The function that calculates w(R)
   */
-  CircularRotation(PointMotion& naive,double Rinner,double Router,double w_inner,
-		   double w_outer,int Ninner,int Nouter,double t=0,
-		   Vector2D const& center=Vector2D(0,0));
+	CircularRotation(OmegaFunction const& func);
+
 
   Vector2D CalcVelocity(int index,
 			Tessellation const& tess,
 			vector<Primitive> const& cells,
 			double time);
-
-  vector<Vector2D> calcAllVelocities(Tessellation const& tess,
-				     vector<Primitive> const& cells,
-				     double time,vector<CustomEvolution*> & cevolve,
-				     const vector<vector<double> >& tracers);
+ 
+  void ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
+	  vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector < Vector2D >
+	  & velocities);
 
 private:
-  PointMotion& naive_;
-  const double inner_radius_;
-  const double outer_radius_;
-  const double w_inner_;
-  const double w_outer_;
-  const int Ninner_;
-  const int Nouter_;
-  const double t0_;
-  const Vector2D center_;
-  vector<double> init_angles_;
-  vector<double> init_R_;
-  bool first_time_;
+  bool evencall_;
+  OmegaFunction const& omega_;
 };
+
+
+
 
 #endif // CIRCULAR_ROTATION_HPP

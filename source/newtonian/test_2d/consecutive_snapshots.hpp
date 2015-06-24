@@ -17,8 +17,9 @@ class ConsecutiveSnapshots: public DiagnosticFunction
 public:
 
   /*! \brief Class constructor
-    \param trigger Trigger function
-    \param i2fn Function for choosing file names
+    \param dt Time step
+    \param init_time Initial time
+    \param counter Counts how many times time advance was called
    */
   ConsecutiveSnapshots(Trigger* trigger,
 		       Index2FileName* i2fn);

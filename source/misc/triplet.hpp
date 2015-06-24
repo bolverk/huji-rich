@@ -33,6 +33,7 @@ template<class T> class TripleConstRef
     first(first_i),
     second(second_i),
     third(third_i) {}
+
 };
 
 //! \brief A collection of 3 items of the same type
