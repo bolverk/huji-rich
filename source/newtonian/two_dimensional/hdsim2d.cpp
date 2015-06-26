@@ -347,7 +347,7 @@ void hdsim::recalculateExtensives(void)
     const double volume = cache_data_.volumes[i];
     const double mass = volume*cell.density;
     extensives_[i].mass = mass;
-    extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure)*mass +
+    extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure,cell.tracers)*mass +
       0.5*mass*ScalarProd(cell.velocity, cell.velocity);
     extensives_[i].momentum = mass*cell.velocity;
     for(std::map<std::string,double>::const_iterator it=
