@@ -24,9 +24,23 @@ vector<Vector2D> HoldStill::calcAllVelocities(Tessellation const& tess,
 					      const vector<vector<double> >& tracers)
 {
   vector<Vector2D> res = raw_.calcAllVelocities(tess,cells,time,cevolve,tracers);
-  for(size_t i=0;i<res.size();++i){
+  for(size_t i=0;i<res.size();++i)
+  {
     if(cond_(static_cast<int>(i),tess,cells,time))
       res[i] = Vector2D(0,0);
   }
   return res;
+}
+
+void HoldStill::ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
+	vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector < Vector2D >
+	& velocities)
+{
+	raw_.ApplyFix(tess, cells, time, cevolve, tracers, dt, velocities);
+	const size_t n = static_cast<size_t>(tess.GetPointNo());
+	for (size_t i = 0; i<n; ++i)
+	{
+		if (cond_(static_cast<int>(i), tess, cells, time))
+			velocities[i] = Vector2D(0, 0);
+	}
 }

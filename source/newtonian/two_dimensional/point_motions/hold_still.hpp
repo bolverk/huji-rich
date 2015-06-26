@@ -48,6 +48,10 @@ public:
 				     double time,vector<CustomEvolution*> &cevolve,
 				     const vector<vector<double> >& tracers);
 
+  void ApplyFix(Tessellation const& tess, vector<Primitive> const& cells, double time,
+	  vector<CustomEvolution*> &cevolve, const vector<vector<double> >& tracers, double dt, vector<Vector2D>
+	  & velocities);
+
 private:
   PointMotion& raw_;
   const Condition& cond_;
