@@ -14,11 +14,13 @@ class MultipleDiagnostics: public DiagnosticFunction
 public:
 
   //! \brief List of diagnostics
-  vector<DiagnosticFunction*> diag_list;
+  const vector<DiagnosticFunction*> diag_list_;
 
-  MultipleDiagnostics(void);
+  MultipleDiagnostics(const vector<DiagnosticFunction*>& diag_list);
 
   void operator()(const hdsim& sim);
+
+  ~MultipleDiagnostics(void);
 };
 
 #endif // MULTIPLE_DIAGNOSTICS_HPP
