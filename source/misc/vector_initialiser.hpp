@@ -17,6 +17,8 @@ public:
   VectorInitialiser(const T& t):
     list_(1,t) {}
 
+  VectorInitialiser(void): list_() {}
+
   /*! \brief Termination operator
     \return Reference to vector
    */
@@ -30,6 +32,12 @@ public:
     \return Reference to self
    */
   VectorInitialiser& operator()(const T& t)
+  {
+    list_.push_back(t);
+    return *this;
+  }
+
+  VectorInitialiser& operator[](T t)
   {
     list_.push_back(t);
     return *this;
