@@ -12,12 +12,24 @@
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
 
+class DiagnosticAppendix
+{
+public:
+
+  virtual vector<double> operator()(const hdsim& sim) const = 0;
+
+  virtual string getName(void) const = 0;
+
+  virtual ~DiagnosticAppendix(void);
+};
+
 /*!
 \brief Writes the simulation data into an HDF5 file
 \param sim The hdsim class of the simulation
 \param fname The name of the output file
 */
-void write_snapshot_to_hdf5(hdsim const& sim,string const& fname);
+void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
+			    const vector<DiagnosticAppendix*>& appendices=vector<DiagnosticAppendix*>());
 /*!
 \brief Reads an HDF5 snapshot file in order to restart the simulation
 \param dump The dump data structure, should be when passed

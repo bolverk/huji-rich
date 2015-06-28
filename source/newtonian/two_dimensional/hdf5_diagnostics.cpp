@@ -4,6 +4,8 @@
 
 using namespace H5;
 
+DiagnosticAppendix::~DiagnosticAppendix(void) {}
+
 namespace {
   vector<double> read_double_vector_from_hdf5(H5File& file,string const& data_name)
   {
@@ -204,7 +206,8 @@ namespace {
   };
 }
 
-void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
+void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
+			    const vector<DiagnosticAppendix*>& appendices)
 {
   ConvexHullData chd(sim.getTessellation());
   HDF5Shortcut h5sc(fname);
@@ -243,6 +246,9 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname)
 	sim.getAllCells().front().stickers.begin();
       it!=sim.getAllCells().front().stickers.end(); ++it)
     h5sc(it->first,serial_generate(StickerSlice(sim,it->first)));
+
+  for(size_t i=0;i<appendices.size();++i)
+    h5sc(appendices[i]->getName(),(*(appendices[i]))(sim));
 }
 
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
