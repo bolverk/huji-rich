@@ -6,6 +6,10 @@
 #ifndef VECTOR_INITIALISER_HPP
 #define VECTOR_INITIALISER_HPP 1
 
+#include <vector>
+
+using std::vector;
+
 //! \brief Class for initialising vectors
 template <class T> class VectorInitialiser
 {
