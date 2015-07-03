@@ -9,6 +9,14 @@ RightRectangle::RightRectangle(const Vector2D& lower_left,
 	 "vertices are reversed");
 }
 
+RightRectangle::RightRectangle(const pair<Vector2D,Vector2D>& ll_ur):
+  lower_left_(ll_ur.first), upper_right_(ll_ur.second)
+{
+  assert(upper_right_.x>lower_left_.x &&
+	 upper_right_.y>lower_left_.y &&
+	 "vertices are reversed");
+}
+
 namespace
 {
   bool is_between(double x_cand,

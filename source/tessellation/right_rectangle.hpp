@@ -8,6 +8,8 @@
 
 #include "shape_2d.hpp"
 
+using std::pair;
+
 //! \brief A rectangle aligned with the primary axis (x and y)
 class RightRectangle: public Shape2D
 {
@@ -19,6 +21,11 @@ public:
    */
   RightRectangle(const Vector2D& lower_left,
 		 const Vector2D& upper_right);
+
+  /*! \brief Class constructor
+    \param ll_ur Pair of points (first: lower left, second: upper right)
+   */
+  RightRectangle(const pair<Vector2D,Vector2D>& ll_ur);
 
   bool operator()(const Vector2D& point) const;
 
