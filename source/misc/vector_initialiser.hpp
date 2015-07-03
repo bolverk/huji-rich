@@ -37,6 +37,10 @@ public:
     return *this;
   }
 
+  /*! \brief Append operator (pass by value)
+    \param t Next element
+    \return Reference to self
+   */
   VectorInitialiser& operator[](T t)
   {
     list_.push_back(t);

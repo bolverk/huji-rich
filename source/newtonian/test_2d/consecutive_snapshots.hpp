@@ -27,6 +27,7 @@ public:
     /*! \brief Class constructor
     \param trigger Trigger function
     \param i2fn Function for choosing file names
+    \param appendices Additional data to be written to snapshot
    */
   ConsecutiveSnapshots(Trigger* trigger,
 		       Index2FileName* i2fn,

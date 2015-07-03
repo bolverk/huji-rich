@@ -12,14 +12,22 @@
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
 
+//! \brief Addition data to be written in a snapshot
 class DiagnosticAppendix
 {
 public:
 
+  /*! \brief Calculates additional data
+    \param sim Hydrodynamic simulation
+    \return Calculated data
+   */
   virtual vector<double> operator()(const hdsim& sim) const = 0;
 
+  /*! \brief Returns the name of the new field
+   */
   virtual string getName(void) const = 0;
 
+  //! \brief Class destructor
   virtual ~DiagnosticAppendix(void);
 };
 
@@ -27,6 +35,7 @@ public:
 \brief Writes the simulation data into an HDF5 file
 \param sim The hdsim class of the simulation
 \param fname The name of the output file
+\param appendices Additional data to be written to snapshot
 */
 void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
 			    const vector<DiagnosticAppendix*>& appendices=vector<DiagnosticAppendix*>());
