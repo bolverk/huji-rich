@@ -215,6 +215,8 @@ public:
     \return List of extensive variables
    */
   const vector<Extensive>& getAllExtensives(void) const;
+
+  const CacheData& getCacheData(void) const;
 };
 
 #endif

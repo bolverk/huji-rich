@@ -404,3 +404,8 @@ double hdsim::getCellVolume(size_t index) const
   return pg_.calcVolume
     (serial_generate(CellEdgesGetter(tess_,static_cast<int>(index))));
 }
+
+const CacheData& hdsim::getCacheData(void) const
+{
+  return cache_data_;
+}
