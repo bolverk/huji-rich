@@ -216,6 +216,9 @@ public:
    */
   const vector<Extensive>& getAllExtensives(void) const;
 
+  /*! \brief Returns reference to the cached data
+    \return Cached data
+   */
   const CacheData& getCacheData(void) const;
 };
 
