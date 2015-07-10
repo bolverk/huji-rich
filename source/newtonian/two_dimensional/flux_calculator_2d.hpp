@@ -24,6 +24,7 @@ public:
     \param tess Tessellation
     \param point_velocities Velocities of the mesh generating points
     \param cells Computational cells
+    \param extensives Extensive variables
     \param eos Equation of state
     \param time Time
     \param dt Time step
