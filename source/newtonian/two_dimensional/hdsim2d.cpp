@@ -341,6 +341,12 @@ vector<ComputationalCell>& hdsim::getAllCells(void)
   return cells_;
 }
 
+void hdsim::recalculatePrimitives(void)
+{
+  cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
+	       cache_data_);
+}
+
 void hdsim::recalculateExtensives(void)
 {
   for(size_t i=0;i<extensives_.size();++i){

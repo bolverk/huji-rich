@@ -93,6 +93,9 @@ public:
    */
   vector<ComputationalCell>& getAllCells(void);
 
+  //! \brief Recalculates the primitives from the extensive variables
+  void recalculatePrimitives(void);
+
   /*! \brief Recalculates extensives (in case computational cells were changed manually)
    */
   void recalculateExtensives(void);
