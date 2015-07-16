@@ -54,10 +54,11 @@ void simulation2d::main_loop(hdsim& sim,
       catch(UniversalError const& eo)
 	{
 	  DisplayError(eo);
+	  throw;
 	}
-      if(diagfunc)
-	(*diagfunc)(sim);
       if(manipulate)
 	(*manipulate)(sim);
+      if(diagfunc)
+	(*diagfunc)(sim);
     }
 }
