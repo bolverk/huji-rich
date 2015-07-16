@@ -216,6 +216,11 @@ public:
    */
   const vector<Extensive>& getAllExtensives(void) const;
 
+  /*! \brief Returns a list of extensive variables
+    \return List of extensive variables
+  */
+  vector<Extensive>& getAllExtensives(void);
+
   /*! \brief Returns reference to the cached data
     \return Cached data
    */

@@ -400,6 +400,11 @@ const vector<Extensive>& hdsim::getAllExtensives(void) const
   return extensives_;
 }
 
+vector<Extensive>& hdsim::getAllExtensives(void)
+{
+  return extensives_;
+}
+
 double hdsim::getCellVolume(size_t index) const
 {
   return pg_.calcVolume
