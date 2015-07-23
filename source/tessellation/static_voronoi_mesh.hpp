@@ -6,6 +6,8 @@
 #ifndef STATIC_VORONOI_MESH_HPP
 #define STATIC_VORONOI_MESH_HPP 1
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "Delaunay.hpp"
 #include <list>
 #include "tessellation.hpp"
