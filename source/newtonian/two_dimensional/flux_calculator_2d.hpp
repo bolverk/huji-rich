@@ -24,11 +24,11 @@ public:
     \param tess Tessellation
     \param point_velocities Velocities of the mesh generating points
     \param cells Computational cells
-    \param extensives Extensive variables
+    \param extensives Extensive variables in each cell
     \param eos Equation of state
     \param time Time
     \param dt Time step
-    \return List of fluxes
+    \return List of fluxes on each edge
    */
   virtual vector<Extensive> operator()
   (const Tessellation& tess,
