@@ -128,6 +128,7 @@ void hdsim::TimeAdvance(void)
 				       point_velocities,
 				       cells_,
 				       extensives_,
+				       cache_data_,
 				       eos_,
 				       time_,
 				       dt);

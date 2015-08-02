@@ -6,7 +6,9 @@
 #ifndef STATIC_VORONOI_MESH_HPP
 #define STATIC_VORONOI_MESH_HPP 1
 
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
 #include <cmath>
 #include "Delaunay.hpp"
 #include <list>
