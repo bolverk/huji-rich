@@ -45,3 +45,23 @@ Extensive operator*(const double s,
     it->second *= s;
   return res;
 }
+
+Extensive operator+(const Extensive& e1,
+		    const Extensive& e2)
+{
+  Extensive res;
+  res.mass = e1.mass + e2.mass;
+  res.energy = e1.energy + e2.energy;
+  res.momentum = e1.momentum + e2.momentum;
+  for(std::map<std::string,double>::const_iterator it=e1.tracers.begin();
+      it!=e1.tracers.end();++it)
+    res.tracers[it->first] = it->second + e2.tracers.find(it->first)->second;
+  return res;
+}
+
+Extensive operator-(const Extensive& e1,
+		    const Extensive& e2)
+{
+  return e1+(-1)*e2;
+}
+		   

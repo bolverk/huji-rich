@@ -50,4 +50,10 @@ public:
 Extensive operator*(const double s,
 		    const Extensive& e);
 
+Extensive operator+(const Extensive& e1,
+		    const Extensive& e2);
+
+Extensive operator-(const Extensive& e1,
+		    const Extensive& e2);
+
 #endif // EXTENSIVE_HPP
