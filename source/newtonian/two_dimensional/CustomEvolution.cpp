@@ -31,7 +31,7 @@ bool CustomEvolution::TimeStepRelevant(void)const
 }
 
 CustomEvolutionManager::CustomEvolutionManager(void):
-  vtable_(1,NULL) {}
+  vtable_(1,static_cast<CustomEvolution*>(0)) {}
 
 namespace
 {
