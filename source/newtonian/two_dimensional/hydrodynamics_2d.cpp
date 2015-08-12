@@ -2157,25 +2157,20 @@ namespace
 	}
 }
 
-double TimeAdvance2mid
-(Tessellation& tess,
+double TimeAdvance2mid(Tessellation& tess,
 #ifdef RICH_MPI
 Tessellation& proctess,
 #endif
-vector<Primitive> &cells,
-PointMotion& point_motion, HydroBoundaryConditions const& hbc,
+vector<Primitive> &cells,PointMotion& point_motion, HydroBoundaryConditions const& hbc,
 SpatialReconstruction& interpolation, RiemannSolver const& rs,
 EquationOfState const& eos, SourceTerm& force, double time, double cfl,
-double endtime, vector<vector<double> > &tracers,
-double dt_external,
-vector<size_t>& custom_evolution_indices,
-const CustomEvolutionManager& custom_evolution_manager,
+double endtime, vector<vector<double> > &tracers,double dt_external,
+vector<size_t>& custom_evolution_indices,const CustomEvolutionManager& custom_evolution_manager,
 const PhysicalGeometry& pg,
 #ifdef RICH_MPI
 ProcessorUpdate *procupdate,
 #endif
-bool traceflag, bool coldflows_flag,
-double as, double bs, bool densityfloor, double densitymin,
+bool traceflag, bool coldflows_flag,double as, double bs, bool densityfloor, double densitymin,
 double pressuremin, bool EntropyCalc)
 {
 	vector<Primitive> old_cells = cells;
@@ -2294,8 +2289,6 @@ double pressuremin, bool EntropyCalc)
 		(intensive, tess, pg);
 
 	// Save extensive variables of beginning of time step
-	// if(traceflag)
-	// MakeTracerExtensive(tracers,tess,cells,old_trace);
 	vector<Conserved> old_extensive = extensive;
 
 	UpdateConservedExtensive(tess, fluxes, 0.5*dt,
@@ -2317,8 +2310,6 @@ double pressuremin, bool EntropyCalc)
 #ifndef RICH_MPI
 	MoveMeshPoints(point_velocities, 0.5*dt, tess);
 #else
-	//	if(procupdate!=0)
-	//		procupdate->Update(proctess,tess);
 	MoveMeshPoints(point_velocities, 0.5*dt, tess, proctess);
 #endif
 
@@ -2391,6 +2382,13 @@ double pressuremin, bool EntropyCalc)
 	if (!vtoadd.empty())
 		oldpoints.insert(oldpoints.end(), vtoadd.begin(), vtoadd.end());
 
+	vtoadd.clear();
+	SendRecvOldVector2D(point_velocities, tess.GetSentPoints(),
+		tess.GetSentProcs(), vtoadd);
+	point_velocities = VectorValues(point_velocities, tess.GetSelfPoint());
+	if (!vtoadd.empty())
+		point_velocities.insert(point_velocities.end(), point_velocities.begin(), point_velocities.end());
+
 	CellsEvolve =
 		convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
@@ -2430,7 +2428,6 @@ double pressuremin, bool EntropyCalc)
 #endif
 
 	UpdateConservedIntensive(tess, extensive, intensive);
-	//	intensive=calc_conserved_intensive(tess, extensive, pg);
 
 	if (coldflows_flag)
 		FixPressure(intensive, tracer_extensive, eos, Ek, Ef, as, bs, CellsEvolve,
@@ -2460,10 +2457,6 @@ double pressuremin, bool EntropyCalc)
 
 	CellsEvolve = convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
-
-	point_velocities = calc_point_velocities(tess, cells,
-		point_motion, time + 0.5*dt, CellsEvolve, tracers);
-	point_motion.ApplyFix(tess, cells, time + 0.5*dt, CellsEvolve, tracers, dt, point_velocities);
 
 #ifndef RICH_MPI
 	PeriodicVelocityExchange(point_velocities, tess.GetDuplicatedPoints(),
@@ -3462,11 +3455,6 @@ double TimeAdvance2midClip(Tessellation& tess, vector<Primitive> &cells,
 
 	CellsEvolve = convert_indices_to_custom_evolution(custom_evolution_manager,
 		custom_evolution_indices);
-
-	point_velocities = calc_point_velocities(tess, cells,
-		point_motion, time + 0.5*dt, CellsEvolve, tracers);
-	point_motion.ApplyFix(tess, cells, time + 0.5*dt, CellsEvolve, tracers, dt, point_velocities);
-
 
 	PeriodicVelocityExchange(point_velocities, tess.GetDuplicatedPoints(),
 		tess.GetTotalPointNumber());
