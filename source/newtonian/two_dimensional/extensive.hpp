@@ -50,9 +50,19 @@ public:
 Extensive operator*(const double s,
 		    const Extensive& e);
 
+/*! \brief Addition
+  \param e1 First argument
+  \param e2 Second argument
+  \return Sum of two extensives
+ */
 Extensive operator+(const Extensive& e1,
 		    const Extensive& e2);
 
+/*! \brief Difference
+  \param e1 First argument
+  \param e2 Second argument
+  \return Difference of two extensives
+ */
 Extensive operator-(const Extensive& e1,
 		    const Extensive& e2);
 
