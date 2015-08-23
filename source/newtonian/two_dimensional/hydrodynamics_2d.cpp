@@ -20,19 +20,6 @@ size_t FaceVertexVelocityCalculator::size(void) const
   return static_cast<size_t>(tess_.GetTotalSidesNumber());
 }
 
-Vector2D FaceVertexVelocityCalculator::operator[](size_t i) const
-{
-  const Edge& edge = tess_.GetEdge(static_cast<int>(i));
-  if(hbc_.IsBoundary(edge,tess_))
-    return control_[i];
-  return calc_face_vertex_velocity
-    (tess_.GetMeshPoint(edge.neighbors.first),
-     point_velocities_[static_cast<size_t>(edge.neighbors.first)],
-     tess_.GetMeshPoint(edge.neighbors.second),
-     point_velocities_[static_cast<size_t>(edge.neighbors.second)],
-     edge.vertices.*member_);
-}
-
 int get_other_index(const Edge& edge, const int index)
 {
   if(edge.neighbors.first==index && edge.neighbors.second!=index)
@@ -232,50 +219,6 @@ double TimeStepForCell(Primitive const& cell,double width,
 }
 
 namespace {
-  double calc_boundary_face_velocity(HydroBoundaryConditions const& hbc,
-				     Edge const& edge,
-				     Tessellation const& tess,
-				     vector<Vector2D> const& face_velocities,
-				     Primitive const& cell,
-				     vector<Primitive> const& cells,
-				     double time,
-				     int i)
-  {
-    if(hbc.IsBoundary(edge,tess))
-      return max(abs(face_velocities[static_cast<size_t>(i)]-cell.Velocity),
-		 abs(face_velocities[static_cast<size_t>(i)]-
-		     hbc.GetBoundaryPrimitive(edge,
-					      tess,
-					      cells,
-					      time).Velocity));
-    else
-      return abs(face_velocities[static_cast<size_t>(i)]-cell.Velocity);
-  }
-}
-
-double TimeStepForCellBoundary
-(Primitive const& cell,
- vector<Primitive> const& cells,
- double width,
- vector<Vector2D> const& face_velocities,
- Tessellation const& tess,
- HydroBoundaryConditions const& hbc,
- int index,double time)
-{
-  double max_fv=0;
-  const vector<int> edge_index=tess.GetCellEdges(index);
-  for(int i=0;i<static_cast<int>(face_velocities.size());++i)
-    {
-      const Edge& edge=tess.GetEdge(edge_index[static_cast<size_t>(i)]);
-      const double temp = calc_boundary_face_velocity
-	(hbc, edge, tess, face_velocities, cell,
-	 cells, time, i);
-      max_fv = max(max_fv,temp);
-    }
-  return width/(cell.SoundSpeed+max_fv);
-}
-
-namespace {
   bool irrelevant_for_time_step(vector<CustomEvolution*> const& cevolve,
 				int i)
   {
@@ -361,46 +304,6 @@ double CalcTimeStep(Tessellation const& tessellation,
 	dt = min(dt_temp, dt);
     }
   return dt;
-}
-
-namespace {
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-  __attribute__((noreturn))
-#endif
-  void update_conserved_extensive_error
-  (int edge_index, int cell_number)
-  {
-    UniversalError eo("Error in UpdateConservedExtensive: cell and edge are not mutual neighbors");
-    eo.AddEntry("edge number",edge_index);
-    eo.AddEntry("cell number",cell_number);
-    throw eo;
-  }
-}
-
-void UpdateConservedExtensive
-(Tessellation const& tessellation,
- vector<Conserved> const& fluxes,
- double dt,
- vector<Conserved>& conserved_extensive,
- HydroBoundaryConditions const& boundaryconditions,
- vector<double> const& lengthes)
-{
-  for(int i=0;i<tessellation.GetPointNo();++i){
-    const vector<int> cell_edge_indices = tessellation.GetCellEdges(i);
-    if(!boundaryconditions.IsGhostCell(i,tessellation)){
-      for(int j=0;j<static_cast<int>(cell_edge_indices.size());++j){
-	const int edge_index = cell_edge_indices[static_cast<size_t>(j)];
-	const Edge& edge = tessellation.GetEdge(edge_index);
-	const Conserved delta = dt*lengthes[static_cast<size_t>(edge_index)]*fluxes[static_cast<size_t>(edge_index)];
-	if(i==edge.neighbors.first)
-	  conserved_extensive[static_cast<size_t>(i)] -= delta;
-	else if(i==edge.neighbors.second)
-	  conserved_extensive[static_cast<size_t>(i)] += delta;
-	else
-	  update_conserved_extensive_error(edge_index,i);
-      }
-    }
-  }
 }
 
 namespace {
@@ -1033,92 +936,6 @@ void GetPointToRemove(Tessellation const& tess,Vector2D const& point,
 	PointToRemove.push_back(i);
     }
   return;
-}
-
-namespace {
-  Vector2D GetReflectedPoint(Tessellation const& tess,int point,
-			     Edge const& edge)
-  {
-    Vector2D MeshPoint=tess.GetMeshPoint(point);
-    Vector2D par=edge.vertices.second-edge.vertices.first;
-    if(fabs(par.x)>fabs(par.y)){
-      // We are in the x direction
-      if(MeshPoint.y>edge.vertices.first.y)
-	MeshPoint.y-=MeshPoint.y-edge.vertices.first.y;
-      else
-	MeshPoint.y+=edge.vertices.first.y-MeshPoint.y;
-    }
-    else{
-      // We are in the y direction
-      if(MeshPoint.x>edge.vertices.first.x)
-	MeshPoint.x-=MeshPoint.x-edge.vertices.first.x;
-      else
-	MeshPoint.x+=edge.vertices.first.x-MeshPoint.x;
-    }
-    return MeshPoint;
-  }
-}
-
-bool IsShockedCell(Tessellation const& tess,int index,
-		   vector<Primitive> const& cells,
-		   HydroBoundaryConditions const& hbc,
-		   double time)
-{
-  double DivV=0;
-  vector<int> edges_loc=tess.GetCellEdges(index);
-  vector<Edge> edges(edges_loc.size());
-  for(size_t i=0;i<edges.size();++i)
-    edges[i]=tess.GetEdge(edges_loc[i]);
-
-  // Calculate gradiant by gauss theorem
-  double vx_i = cells[static_cast<size_t>(index)].Velocity.x;
-  double vy_i = cells[static_cast<size_t>(index)].Velocity.y;
-  Vector2D center=tess.GetMeshPoint(index);
-  Vector2D c_ij,r_ij;
-  for(size_t i=0;i<edges.size();i++)
-    {
-      if(hbc.IsBoundary(edges[i],tess))
-	{
-	  Primitive other2=hbc.GetBoundaryPrimitive(edges[i],tess,cells,
-						    time);
-	  if((edges[i].neighbors.first==-1)||(edges[i].neighbors.second==-1))
-	    {
-	      c_ij = CalcCentroid(edges[i])-0.5*(GetReflectedPoint
-						 (tess,index,edges[i])+center);
-	      r_ij = center-GetReflectedPoint(tess,index,edges[i]);
-	    }
-	  else
-	    {
-	      const int other_point = get_other_index(edges[i],index);
-	      c_ij = CalcCentroid(edges[i])-0.5*(
-						 tess.GetMeshPoint(other_point)+center);
-	      r_ij = center-tess.GetMeshPoint(other_point);
-	    }
-	  double rij_1=1/abs(r_ij);
-	  double vx_j = other2.Velocity.x;
-	  double vy_j = other2.Velocity.y;
-	  DivV+=edges[i].GetLength()*((vx_j-vx_i)*c_ij.x-0.5*
-				      (vx_i+vx_j)*r_ij.x+(vy_j-vy_i)*c_ij.y-0.5*
-				      (vy_i+vy_j)*r_ij.y)*rij_1;
-	}
-      else
-	{
-	  const int other = get_other_index(edges[i],index);
-	  c_ij = CalcCentroid(edges[i])-
-	    0.5*(tess.GetMeshPoint(other)+center);
-	  r_ij = center-tess.GetMeshPoint(other);
-	  double rij_1=1/abs(r_ij);
-	  double vx_j = cells[static_cast<size_t>(other)].Velocity.x;
-	  double vy_j = cells[static_cast<size_t>(other)].Velocity.y;
-	  DivV+=edges[i].GetLength()*((vx_j-vx_i)*c_ij.x-0.5*
-				      (vx_i+vx_j)*r_ij.x+(vy_j-vy_i)*c_ij.y-0.5*
-				      (vy_i+vy_j)*r_ij.y)*rij_1;
-	}
-    }
-  if(DivV<0)
-    return true;
-  else
-    return false;
 }
 
 void FixAdvection(vector<Conserved>& extensive,
