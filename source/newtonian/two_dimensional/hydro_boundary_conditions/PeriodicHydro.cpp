@@ -18,6 +18,13 @@ namespace {
 	}
 }
 
+int PeriodicHydro::getGhostIndex
+(const Edge& edge,
+ const Tessellation& tess) const
+{
+  return calc_n(edge,tess);
+}
+
 vector<double> PeriodicHydro::GetBoundaryTracers
 	(Edge const& edge,Tessellation const& tess,
 	vector<vector<double> > const& tracers,double /*time*/)const

@@ -24,6 +24,10 @@ public:
 		SpatialReconstruction const& interp,double dt,
 		double time) const;
 
+  int getGhostIndex
+  (const Edge& edge,
+   const Tessellation& tess) const;
+
 	Vector2D CalcEdgeVelocity
 		(Tessellation const& tessellation,
 		vector<Vector2D> const& point_velocities,

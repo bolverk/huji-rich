@@ -21,7 +21,7 @@
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/PeriodicBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/PeriodicHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/ConservativeForce.hpp"
-#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/periodic_bc.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
@@ -134,7 +134,8 @@ namespace {
     PeriodicDriver acc_;
     ConservativeForce force_;
     const SimpleCFL tsf_;
-    const SimpleFluxCalculator fc_;
+    //    const SimpleFluxCalculator fc_;
+    const PeriodicBC fc_;
     const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
     hdsim sim_;
