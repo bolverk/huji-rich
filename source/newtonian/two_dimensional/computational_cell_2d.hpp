@@ -31,4 +31,38 @@ public:
   std::map<std::string,bool> stickers;
 };
 
+/*! \brief Term by term addition
+\param p1 Computational Cell
+\param p2 Computational Cell
+\return Computational Cell
+*/
+ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2);
+
+/*! \brief Term by term subtraction
+\param p1 Computational Cell
+\param p2 Computational Cell
+\return Computational Cell
+*/
+ComputationalCell operator-(ComputationalCell const& p1, ComputationalCell const& p2);
+
+/*! \brief Scalar division
+\param p Computational Cell
+\param s Scalar
+\return Computational Cell
+*/
+ComputationalCell operator/(ComputationalCell const& p, double s);
+
+/*! \brief Scalar multiplication on the right
+\param p Computational Cell
+\param s Scalar
+\return Computational Cell
+*/
+ComputationalCell operator*(ComputationalCell const& p, double s);
+
+/*! \brief Scalar multiplication on the left
+\param s Scalar
+\param p Computational Cell
+\return Computational Cell
+*/
+ComputationalCell operator*(double s, ComputationalCell const& p);
 #endif // COMPUTATIONAL_CELL_HPP
