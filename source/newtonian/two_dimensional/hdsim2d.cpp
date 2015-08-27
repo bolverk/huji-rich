@@ -89,30 +89,6 @@ hdsim::hdsim
 
 hdsim::~hdsim(void) {}
 
-namespace
-{
-  /*
-    void update_extensives(const vector<Extensive>& fluxes,
-    const PhysicalGeometry& pg,
-    const Tessellation& tess,
-    const double dt,
-    vector<Extensive>& extensives)
-    {
-    const vector<Edge>& edge_list = tess.getAllEdges();
-    for(size_t i=0;i<edge_list.size();++i){
-    const Edge edge = edge_list[i];
-    const Extensive delta = dt*pg.calcArea(edge)*fluxes[i];
-    if(edge.neighbors.first>=0 && 
-    edge.neighbors.first < static_cast<int>(extensives.size()))
-    extensives[static_cast<size_t>(edge.neighbors.first)] -= delta;
-    if(edge.neighbors.second>=0 &&
-    edge.neighbors.second < static_cast<int>(extensives.size()))
-    extensives[static_cast<size_t>(edge.neighbors.second)] += delta;
-    }
-    }
-  */
-}
-
 void hdsim::TimeAdvance(void)
 {
   const vector<Vector2D> point_velocities = 
@@ -162,6 +138,84 @@ void hdsim::TimeAdvance(void)
 
   time_ += dt;
   cycle_++;
+}
+
+namespace {
+  vector<Extensive> average_extensive
+  (const vector<Extensive>& extensives_1,
+   const vector<Extensive>& extensives_2)
+  {
+    assert(extensives_1.size()==extensives_2.size());
+    vector<Extensive> res(extensives_1.size());
+    for(size_t i=0;i<extensives_1.size();++i)
+      res[i] = 0.5*(extensives_1[i]+extensives_2[i]);
+    return res;
+  }
+}
+
+void hdsim::TimeAdvance2Heun(void)
+{
+  const vector<Vector2D> point_velocities =
+    point_motion_(tess_,cells_,time_);
+
+  const double dt = tsf_(tess_,
+			 cells_,
+			 eos_,
+			 point_velocities,
+			 time_);
+
+  const vector<Extensive> mid_fluxes =
+    fc_(tess_,
+	point_velocities,
+	cells_,
+	extensives_,
+	cache_data_,
+	eos_,
+	time_,
+	dt);
+
+  vector<Extensive> mid_extensives = extensives_;
+  eu_(mid_fluxes,
+      pg_,
+      tess_,
+      dt,
+      cache_data_,
+      cells_,
+      mid_extensives);
+
+  MoveMeshPoints(point_velocities, dt, tess_);
+  cache_data_.reset();
+
+  const vector<ComputationalCell> mid_cells =
+    cu_(tess_, pg_, eos_, extensives_, cells_,
+	cache_data_);
+
+  const vector<Extensive> fluxes =
+    fc_(tess_,
+	point_velocities,
+	mid_cells,
+	mid_extensives,
+	cache_data_,
+	eos_,
+	time_,
+	dt);
+
+  eu_(fluxes,
+      pg_,
+      tess_,
+      dt,
+      cache_data_,
+      cells_,
+      extensives_);
+
+  extensives_ = average_extensive
+    (extensives_,mid_fluxes);
+
+  cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
+	       cache_data_);
+
+  time_ += dt;
+  ++cycle_;
 }
 
 namespace {
