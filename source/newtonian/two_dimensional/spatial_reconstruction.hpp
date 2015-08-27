@@ -8,7 +8,6 @@
 
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../tessellation/tessellation.hpp"
-#include "ReducedPrimitiveGradient2D.hpp"
 #include "computational_cell_2d.hpp"
 
 using std::pair;

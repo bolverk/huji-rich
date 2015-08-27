@@ -20,8 +20,6 @@
 #include "../../tessellation/polygon_overlap_area.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "../../tessellation/EdgeLengthCorrect.hpp"
-#include "../../mpi/mpi_macro.hpp"
-#include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 #include "time_step_function.hpp"
 #include "cache_data.hpp"

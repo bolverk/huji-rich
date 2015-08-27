@@ -26,7 +26,6 @@
 #include "RemovalStrategy.hpp"
 #include "../../misc/utils.hpp"
 #include "ResetDump.hpp"
-#include "../../mpi/ProcessorUpdate.hpp"
 #include "physical_geometry.hpp"
 #include "simple_cfl.hpp"
 #include "flux_calculator_2d.hpp"
