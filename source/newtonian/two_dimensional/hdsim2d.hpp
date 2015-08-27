@@ -164,6 +164,9 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
+  // \brief Second order tiem advance
+  void TimeAdvance2Heun(void);
+
   /*! \brief Change the physical geometry
     \param pg New physical geometry
    */

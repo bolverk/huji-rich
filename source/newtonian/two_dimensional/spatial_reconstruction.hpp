@@ -26,8 +26,10 @@ class SpatialReconstruction
 {
 public:
 
-  virtual vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
-	  const vector<ComputationalCell>& cells) = 0;
+  virtual vector<pair<ComputationalCell, ComputationalCell> >
+  operator()
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };
