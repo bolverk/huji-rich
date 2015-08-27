@@ -32,7 +32,7 @@ namespace
 		return res;
 	}
 
-	vector<ComputationalCell> GetNeighborCells(Tessellation const& tess, vector<Edge> const& edges, size_t cell_index,
+	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
 		vector<ComputationalCell> const& cells)
 	{
 		int neigh0, neigh1;
@@ -344,7 +344,7 @@ namespace
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
 	vector<Vector2D> neighbor_mesh_list = GetNeighborMesh(tess, edge_list,cell_index);
 	vector<Vector2D> neighbor_cm_list = GetNeighborCM(tess, edge_list,cell_index);
-	vector<ComputationalCell> neighbor_list = GetNeighborCells(tess, edge_list, cell_index,cells);
+	vector<ComputationalCell> neighbor_list = GetNeighborCells(edge_list, cell_index,cells);
 
 	pair<ComputationalCell, ComputationalCell> naive_slope, s_compare;
 	ComputationalCell const& cell = cells[cell_index];
