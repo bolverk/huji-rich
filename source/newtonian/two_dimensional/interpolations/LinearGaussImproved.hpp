@@ -8,7 +8,7 @@
 
 #include "../../common/equation_of_state.hpp"
 #include "../spatial_reconstruction.hpp"
-#include "../ReducedPrimitiveGradient2D.hpp"
+#include <cmath>
 #include "../../../misc/universal_error.hpp"
 
 class LinearGaussImproved : public SpatialReconstruction
@@ -41,7 +41,6 @@ private:
 	EquationOfState const& eos_;
 	mutable vector<pair<ComputationalCell, ComputationalCell> > rslopes_;
 	bool slf_;
-	bool soitf_;
 	double shockratio_, diffusecoeff_, pressure_ratio_;
 
 	LinearGaussImproved(const LinearGaussImproved& origin);
