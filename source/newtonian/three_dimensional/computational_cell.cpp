@@ -1,5 +1,7 @@
 #include "computational_cell.hpp"
 
+using namespace three_dimenssional;
+
 ComputationalCell::ComputationalCell(void):
   density(0), pressure(0), velocity(), tracers() {}
 

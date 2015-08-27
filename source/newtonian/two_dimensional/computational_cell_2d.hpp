@@ -29,6 +29,16 @@ public:
 
   //! \brief Stickers (stick to the same cell)
   std::map<std::string,bool> stickers;
+
+  /*!
+  \brief Copy constructor
+  \param other The cell to copy
+  */
+  ComputationalCell(ComputationalCell const& other);
+  /*!
+  \brief Default constructor
+  */
+  ComputationalCell(void);
 };
 
 /*! \brief Term by term addition

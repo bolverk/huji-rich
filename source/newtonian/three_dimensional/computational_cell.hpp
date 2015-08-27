@@ -8,45 +8,48 @@
 
 #include "../../3D/GeometryCommon/Vector3D.hpp"
 
-//! \brief Container for the hydrodynamic variables
-class ComputationalCell
+namespace three_dimenssional
 {
-public:
 
-  //! \brief Density
-  double density;
+	//! \brief Container for the hydrodynamic variables
+	class ComputationalCell
+	{
+	public:
 
-  //! \brief Pressure
-  double pressure;
+		//! \brief Density
+		double density;
 
-  //! \brief Velocity
-  Vector3D velocity;
+		//! \brief Pressure
+		double pressure;
 
-  //! \brief Tracers
-  vector<double> tracers;
+		//! \brief Velocity
+		Vector3D velocity;
 
-  //! \brief Null constructor
-  ComputationalCell(void);
+		//! \brief Tracers
+		vector<double> tracers;
 
-  /*! \brief Class constructor
-    \param density_i Density
-    \param pressure_i Pressure
-    \param velocity_i Velocity
-   */
-  ComputationalCell(double density_i,
-		    double pressure_i,
-		    const Vector3D& velocity_i);
+		//! \brief Null constructor
+		ComputationalCell(void);
 
-  /*! \brief Class constructor
-    \param density_i Density
-    \param pressure_i Pressure
-    \param velocity_i Velocity
-    \param tracers_i Tracers
-   */
-  ComputationalCell(double density_i,
-		    double pressure_i,
-		    const Vector3D& velocity_i,
-		    const vector<double>& tracers_i);
-};
+		/*! \brief Class constructor
+		  \param density_i Density
+		  \param pressure_i Pressure
+		  \param velocity_i Velocity
+		  */
+		ComputationalCell(double density_i,
+			double pressure_i,
+			const Vector3D& velocity_i);
 
+		/*! \brief Class constructor
+		  \param density_i Density
+		  \param pressure_i Pressure
+		  \param velocity_i Velocity
+		  \param tracers_i Tracers
+		  */
+		ComputationalCell(double density_i,
+			double pressure_i,
+			const Vector3D& velocity_i,
+			const vector<double>& tracers_i);
+	};
+}
 #endif // COMPUTATIONAL_CELL_HPP

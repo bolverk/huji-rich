@@ -11,6 +11,8 @@
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
 
+using namespace three_dimenssional;
+
 //! \brief Abstract class for flux calculator
 class FluxCalculator
 {

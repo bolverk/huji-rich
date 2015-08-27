@@ -1,5 +1,13 @@
 #include "computational_cell_2d.hpp"
 
+ComputationalCell::ComputationalCell(void) :
+density(0), pressure(0), velocity(Vector2D()), tracers(),
+stickers(){}
+
+ComputationalCell::ComputationalCell(ComputationalCell const& other) :
+density(other.density), pressure(other.pressure),velocity(other.velocity),tracers(other.tracers),
+stickers(other.stickers){}
+
 ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2)
 {
 	ComputationalCell res(p1);

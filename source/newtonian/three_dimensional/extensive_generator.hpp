@@ -13,6 +13,8 @@
 #include "../../misc/lazy_list.hpp"
 #include "../../3D/GeometryCommon/Tessellation3D.hpp"
 
+using namespace three_dimenssional;
+
 /*! \brief Calculates the extensive conserved variables
   \param cell Computational cell
   \param eos Equation of state
