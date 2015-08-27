@@ -895,7 +895,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 		{
 			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
-			if (_bc->GetBoundaryType() == Rectengular()||(i%2)==1)
+			if (_bc->GetBoundaryType() == Rectengular||(i%2)==1)
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
@@ -1099,7 +1099,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 		{
 			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
-			if (obc->GetBoundaryType() == Rectengular()||(i%2)==1)
+			if (obc->GetBoundaryType() == Rectengular||(i%2)==1)
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
