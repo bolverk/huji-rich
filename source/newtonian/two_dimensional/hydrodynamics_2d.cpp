@@ -3,23 +3,6 @@
 
 using std::max;
 
-FaceVertexVelocityCalculator::FaceVertexVelocityCalculator
-(const Tessellation& tess,
- const vector<Vector2D>& point_velocities,
- const Vector2D std::pair<Vector2D,Vector2D>::* const member,
- const vector<Vector2D>& control,
- const HydroBoundaryConditions& hbc):
-  tess_(tess),
-  point_velocities_(point_velocities),
-  member_(member),
-  control_(control),
-  hbc_(hbc) {}
-
-size_t FaceVertexVelocityCalculator::size(void) const
-{
-  return static_cast<size_t>(tess_.GetTotalSidesNumber());
-}
-
 int get_other_index(const Edge& edge, const int index)
 {
   if(edge.neighbors.first==index && edge.neighbors.second!=index)
@@ -219,37 +202,6 @@ double TimeStepForCell(Primitive const& cell,double width,
 }
 
 namespace {
-  bool irrelevant_for_time_step(vector<CustomEvolution*> const& cevolve,
-				int i)
-  {
-    if(!cevolve.empty())
-      if(cevolve[static_cast<size_t>(i)]!=0)
-	if(!cevolve[static_cast<size_t>(i)]->TimeStepRelevant())
-	  return true;
-    return false;
-  }
-}
-
-namespace {
-  double calc_dt_temp(Tessellation const& tess,
-		      vector<Primitive> const& cells,
-		      vector<Vector2D> const& face_vel,
-		      HydroBoundaryConditions const& hbc,
-		      double time,
-		      int i)
-  {
-    if(!tess.NearBoundary(i))
-      return TimeStepForCell(cells[static_cast<size_t>(i)],tess.GetWidth(i),face_vel);
-    else
-      return TimeStepForCellBoundary(cells[static_cast<size_t>(i)],
-				     cells,
-				     tess.GetWidth(i),
-				     face_vel,
-				     tess,
-				     hbc,
-				     i,
-				     time);
-  }
 
   class FaceVelocityInitializer: public LazyList<Vector2D>
   {
@@ -274,36 +226,6 @@ namespace {
     vector<int> const& face_index_;
     vector<Vector2D> const& face_velocity_;
   };
-}
-
-double CalcTimeStep(Tessellation const& tessellation,
-		    vector<Primitive> const& cells,
-		    vector<Vector2D> const& facevelocity,
-		    HydroBoundaryConditions const& hbc,
-		    double time,
-		    vector<CustomEvolution*> const& evolve)
-{
-  bool first_time=true;
-  double dt=0;
-  for(int i = 0;i<tessellation.GetPointNo(); i++)
-    {
-      if(irrelevant_for_time_step(evolve,i))
-	continue;
-      const vector<Vector2D> face_vel = serial_generate
-	(FaceVelocityInitializer(tessellation.GetCellEdges(i),
-				 facevelocity));
-      const double dt_temp = calc_dt_temp
-	(tessellation, cells, face_vel,
-	 hbc, time, i);
-      if(first_time)
-	{
-	  first_time=false;
-	  dt=dt_temp;
-	}
-      else
-	dt = min(dt_temp, dt);
-    }
-  return dt;
 }
 
 namespace {
@@ -614,28 +536,6 @@ vector<Primitive> make_eos_consistent
   for(int i=0;i<static_cast<int>(vp.size());++i)
     res[static_cast<size_t>(i)] = make_eos_consistent(vp[static_cast<size_t>(i)],eos);
   return res;
-}
-
-void really_update_extensive_tracers
-(vector<vector<double> >& extensive_tracers,
- const vector<vector<double> >& tracers,
- const vector<Primitive>& cells,
- const Tessellation& tess,
- const vector<Conserved>& fluxes,
- double time, double dt,
- const HydroBoundaryConditions& hbc,
- const SpatialReconstruction& interp,
- const vector<CustomEvolution*>& ce,
- const CustomEvolutionManager& cem,
- const vector<Vector2D>& fv,
- const vector<double>& lengths)
-{
-  const vector<vector<double> >& tracer_change = 
-    CalcTraceChange(tracers,cells,tess,fluxes,dt,hbc,
-		    interp,time,ce,cem,fv,lengths);
-  UpdateTracerExtensive
-    (extensive_tracers, tracer_change,
-     ce, cells, tess, time);
 }
 
 vector<double> GetMaxKineticEnergy(Tessellation const& tess,vector<Primitive> const&

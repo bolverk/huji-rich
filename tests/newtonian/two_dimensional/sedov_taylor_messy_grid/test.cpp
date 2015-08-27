@@ -12,7 +12,6 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
@@ -109,7 +108,6 @@ namespace {
     const SquareBox outer_;
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
-    PCM2D interp_method_;
     const IdealGas eos_;
     Lagrangian point_motion_;
     const Hllc rs_;
