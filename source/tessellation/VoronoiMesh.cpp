@@ -5,7 +5,8 @@
 
 using std::abs;
 
-namespace {
+namespace 
+{
 #ifdef RICH_MPI
 
   template<class T> void tidy(vector<T>& v)
@@ -310,8 +311,7 @@ namespace {
 	}
 #endif
 
-	vector<Vector2D> UpdatePoints(vector<Vector2D> const& points,
-		OuterBoundary const* obc)
+	vector<Vector2D> UpdatePoints(vector<Vector2D> const& points,OuterBoundary const* obc)
 	{
 		if(obc->GetBoundaryType()==Rectengular)
 			return points;
@@ -602,8 +602,7 @@ namespace {
 	}
 }
 
-VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,
-	OuterBoundary const& bc):
+VoronoiMesh::VoronoiMesh(vector<Vector2D> const& points,OuterBoundary const& bc):
 	logger(0),
 	vertices_(),
 	eps(1e-8),
@@ -773,7 +772,6 @@ VoronoiMesh::VoronoiMesh(VoronoiMesh const& other):
 
 void VoronoiMesh::build_v()
 {
-	//	vector<int>::iterator it;
 	Vector2D center,center_temp;
 	int j;
 	facet to_check;
@@ -815,16 +813,8 @@ void VoronoiMesh::build_v()
 						{
 							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back(static_cast<int>(edges.size()));
-							else
-								if(obc->PointIsReflective(Tri.get_point(
-													static_cast<size_t>(edge_temp.neighbors.first))))
-									edge_temp.neighbors.first = -1;
 							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back(static_cast<int>(edges.size()));
-							else
-								if(obc->PointIsReflective(Tri.get_point(
-													static_cast<size_t>(edge_temp.neighbors.second))))
-									edge_temp.neighbors.second = -1;
 							edges.push_back(edge_temp);
 						}
 					}
@@ -834,7 +824,8 @@ void VoronoiMesh::build_v()
 	}
 }
 
-namespace {
+namespace 
+{
   vector<Vector2D> calc_procpoints(const OuterBoundary& bc)
   {
     vector<Vector2D> res(4);
@@ -844,13 +835,28 @@ namespace {
     res[3] = Vector2D(bc.GetGridBoundary(Left),bc.GetGridBoundary(Up));
     return res;
   }
+
+  Vector2D GetReflection(OuterBoundary const& bc, size_t index, Vector2D const& point)
+  {
+	  switch (index)
+	  {
+	  case 0:
+		  return point + Vector2D(2 * (bc.GetGridBoundary(Right) - point.x),0);
+	  case 1:
+		  return point + Vector2D(0 , 2 * (bc.GetGridBoundary(Up) - point.y));
+	  case 2:
+		  return point + Vector2D(2 * (bc.GetGridBoundary(Left) - point.x), 0);
+	  case 3:
+		  return point + Vector2D(0, 2 * (bc.GetGridBoundary(Down) - point.y));
+	  }
+	  throw UniversalError("Wrong index in VoronoiMesh::GetReflection");
+  }
 }
 
 void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 {
 	obc=_bc;
-	Tri.build_delaunay(UpdatePoints(pv,obc),
-			   calc_procpoints(*obc));
+	Tri.build_delaunay(UpdatePoints(pv,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
@@ -864,24 +870,49 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 	if(logger)
 		logger->output(*this);
 
+	CM.resize(Tri.getCor().size());
+	for (size_t i = 0; i<pv.size(); ++i)
+		CM[i] = CalcCellCM(i);
+
+	size_t counter = pv.size() + 3;
 	if(_bc->GetBoundaryType()==Periodic)
 	{
 		for(size_t i=0;i<8;++i)
 		{
 			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
+			for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			{
+				CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				++counter;
+			}
 		}
 	}
-	if(_bc->GetBoundaryType()==HalfPeriodic)
+	else
 	{
-		GhostPoints.push_back(toduplicate[0]);
-		GhostPoints.push_back(toduplicate[2]);
-		GhostProcs.push_back(-1);
-		GhostProcs.push_back(-1);
+		for (size_t i = 0; i < 4; ++i)
+		{
+			GhostPoints.push_back(toduplicate[i]);
+			GhostProcs.push_back(-1);
+			if (_bc->GetBoundaryType() == Rectengular()||(i%2)==1)
+			{
+				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				{
+					CM[counter] = GetReflection(*_bc, i, CM[toduplicate[i][j]]);
+				}
+			}
+			else
+			{
+				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				{
+					CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				}
+			}
+			++counter;
+		}
 	}
-	CM.resize(static_cast<size_t>(GetPointNo()));
-	for(size_t i=0;i<CM.size();++i)
-	  CM[i]=CalcCellCM(i);
 }
 
 #ifdef RICH_MPI
@@ -926,6 +957,10 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	if(logger)
 		logger->output(*this);
 	
+	CM.resize(pv.size());
+	for(size_t i=0;i<pv.size();++i)
+		CM[i]=CalcCellCM(i);
+
 	// sort the points
 	vector<int> indeces;
 	sort_index(GhostProcs,indeces);
@@ -934,26 +969,24 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,Tessellation const& vproc
 	temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[0])]);
 	temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[0])]);
 	for(int i=1;i<static_cast<int>(GhostProcs.size());++i)
+	{
 		if(GhostProcs[static_cast<size_t>(i)]==GhostProcs[static_cast<size_t>(i)-1])
 		{
 			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
-								       GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+				GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
-									 NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+				NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 		}
 		else
 		{
-		  temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
+			temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 			temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 		}
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
 		GhostPoints=temppoints;
-
-		int n=GetPointNo();
-		CM.resize(static_cast<size_t>(n));
-		for(int i=0;i<n;++i)
-		  CM[static_cast<size_t>(i)]=CalcCellCM(static_cast<size_t>(i));
+	}
+	SendRecvVelocity(CM, GhostPoints,GhostProcs, NGhostReceived,Tri.getCor().size()));
 }
 #endif
 
@@ -1041,26 +1074,49 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 	if(logger)
 		logger->output(*this);
 
+	CM.resize(Tri.getCor().size());
+	for (size_t i = 0; i<p.size(); ++i)
+		CM[i] = CalcCellCM(i);
+
+	size_t counter = p.size() + 3;
 	if(obc->GetBoundaryType()==Periodic)
 	{
-		for(int i=0;i<8;++i)
+		for(size_t i=0;i<8;++i)
 		{
-			GhostPoints.push_back(toduplicate[static_cast<size_t>(i)]);
+			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
+			for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			{
+				CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				++counter;
+			}
 		}
 	}
-	if(obc->GetBoundaryType()==HalfPeriodic)
+	else
 	{
-		GhostPoints.push_back(toduplicate[0]);
-		GhostPoints.push_back(toduplicate[2]);
-		GhostProcs.push_back(-1);
-		GhostProcs.push_back(-1);
+		for (size_t i = 0; i < 4; ++i)
+		{
+			GhostPoints.push_back(toduplicate[i]);
+			GhostProcs.push_back(-1);
+			if (obc->GetBoundaryType() == Rectengular()||(i%2)==1)
+			{
+				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				{
+					CM[counter] = GetReflection(*obc, i, CM[toduplicate[i][j]]);
+				}
+			}
+			else
+			{
+				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				{
+					CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				}
+			}
+			++counter;
+		}
 	}
-	
-	const size_t n= static_cast<size_t>(GetPointNo());
-	CM.resize(n);
-	for(size_t i=0;i<n;++i)
-		CM[i]=CalcCellCM(i);
 }
 
 #ifdef RICH_MPI
@@ -1128,25 +1184,27 @@ void VoronoiMesh::Update(vector<Vector2D> const& p,Tessellation const &vproc)
 	temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[0])]);
 	temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[0])]);
 	for(int i=1;i<static_cast<int>(GhostProcs.size());++i)
+	{
 		if(GhostProcs[static_cast<size_t>(i)]==GhostProcs[static_cast<size_t>(i)-1])
 		{
 			temppoints[temppoints.size()-1].insert(temppoints[temppoints.size()-1].end(),
-							       GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+				GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 			temppoints2[temppoints2.size()-1].insert(temppoints2[temppoints2.size()-1].end(),
-									 NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
+				NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].begin(),NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])].end());
 		}
 		else
 		{
-		  temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
+			temppoints.push_back(GhostPoints[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 			temppoints2.push_back(NGhostReceived[static_cast<size_t>(indeces[static_cast<size_t>(i)])]);
 		}
 		GhostProcs=unique(GhostProcs);
 		NGhostReceived=temppoints2;
 		GhostPoints=temppoints;
-		int n=GetPointNo();
-		CM.resize(static_cast<size_t>(n));
-		for(int i=0;i<n;++i)
-		  CM[static_cast<size_t>(i)]=CalcCellCM(static_cast<size_t>(i));
+	}
+	CM.resize(p.size());
+	for(size_t i=0;i<p.size();++i)
+		CM[i] = CalcCellCM(i);
+	SendRecvVelocity(CM, GhostPoints,GhostProcs, NGhostReceived,Tri.getCor().size()));
 }
 #endif
 

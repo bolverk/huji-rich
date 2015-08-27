@@ -1449,16 +1449,12 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,
 	vector<int> edge_index=tproc.GetCellEdges(get_mpi_rank());
 	for(size_t i=0;i<edge_index.size();++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
-//	delaunay_loggers::BinaryLogger log("del"+int2str(get_mpi_rank())+".bin");
-//	log.output(cor,f);
 	return FindOuterPointsMPI(obc,edges,tproc,Nghost,proclist);
 }
 #endif
 
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges)
 {
-//	delaunay_loggers::BinaryLogger log("c:\\del.bin");
-//	log.output(cor,f);
 	vector<vector<int> > toduplicate=FindOuterPoints(edges);
 	if(obc->GetBoundaryType()==Rectengular)
 	{
