@@ -202,33 +202,6 @@ double TimeStepForCell(Primitive const& cell,double width,
 }
 
 namespace {
-
-  class FaceVelocityInitializer: public LazyList<Vector2D>
-  {
-  public:
-
-    FaceVelocityInitializer(vector<int> const& face_index,
-			    vector<Vector2D> const& face_velocity):
-      face_index_(face_index),
-      face_velocity_(face_velocity) {}
-
-    Vector2D operator[](size_t n) const
-    {
-      return face_velocity_[static_cast<size_t>(face_index_[n])];
-    }
-
-    size_t size(void) const
-    {
-      return face_index_.size();
-    }
-
-  private:
-    vector<int> const& face_index_;
-    vector<Vector2D> const& face_velocity_;
-  };
-}
-
-namespace {
   class NewPointPosition: public LazyList<Vector2D>
   {
   public:
