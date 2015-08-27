@@ -96,7 +96,7 @@ namespace
 		// Find the det
 		const double det = m[0] * m[3] - m[1] * m[2];
 		// Check none singular
-		if (abs(det) < 1e-10*cell_volume*cell_volume)
+		if (std::abs(det) < 1e-10*cell_volume*cell_volume)
 		{
 			UniversalError eo("Singular matrix");
 			eo.AddEntry("Cell x cor", center.x);
@@ -177,7 +177,7 @@ namespace
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
 			// density
-			if (abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density),std::abs(mindiff.density))||centroid_val.density*cell.density < 0)
+			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density),std::abs(mindiff.density))||centroid_val.density*cell.density < 0)
 			{
 				if (dphi.density > 1e-9*cell.density)
 					psi[0] = std::min(psi[0], maxdiff.density / dphi.density);
@@ -186,7 +186,7 @@ namespace
 						psi[0] = std::min(psi[0], mindiff.density / dphi.density);
 			}
 			// pressure
-			if (abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
+			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (dphi.pressure > 1e-9*cell.pressure)
 					psi[1] = std::min(psi[1], maxdiff.pressure / dphi.pressure);
@@ -195,12 +195,12 @@ namespace
 						psi[1] = std::min(psi[1], mindiff.pressure / dphi.pressure);
 			}
 			// xvelocity
-			if (abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
+			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
-				if (dphi.velocity.x > abs(1e-9*cell.velocity.x))
+				if (dphi.velocity.x > std::abs(1e-9*cell.velocity.x))
 					psi[2] = std::min(psi[2], maxdiff.velocity.x / dphi.velocity.x);
 				else
-					if (dphi.velocity.x<-abs(1e-9*cell.velocity.x))
+					if (dphi.velocity.x<-std::abs(1e-9*cell.velocity.x))
 						psi[2] = std::min(psi[2], mindiff.velocity.x / dphi.velocity.x);
 			}
 			// yvelocity
@@ -280,25 +280,25 @@ namespace
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
 			// density
-			if (abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
+			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
 				if (std::abs(dphi.density) > 1e-9*cell.density)
 					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i].density-cell.density)/dphi.density,0.0));
 			}
 			// pressure
-			if (abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
+			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (std::abs(dphi.pressure) > 1e-9*cell.pressure)
 					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i].pressure - cell.pressure) / dphi.pressure, 0.0));
 			}
 			// xvelocity
-			if (abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
+			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
 				if (std::abs(dphi.velocity.x) > 1e-9*cell.velocity.x)
 					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i].velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
-			if (abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
+			if (std::abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
 				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
 					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i].velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
@@ -312,7 +312,7 @@ namespace
 				double centroid_tracer = centroid_val.tracers.find(it->first)->second;
 				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers.find(it->first)->second)) || centroid_tracer*cell_tracer < 0)
 				{
-					if (std::abs(it->second) > abs(1e-9*cell_tracer))
+					if (std::abs(it->second) > std::abs(1e-9*cell_tracer))
 						psi[4 + counter] = std::min(psi[4 + counter], std::max(diffusecoeff*(neighbors[i].tracers.find(it->first)->second - cell_tracer) / it->second, 0.0));
 				}
 				++counter;
