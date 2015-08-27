@@ -13,7 +13,7 @@
 #include "../../misc/lazy_list.hpp"
 #include "../../3D/GeometryCommon/Tessellation3D.hpp"
 
-using namespace three_dimenssional;
+using three_dimenssional::ComputationalCell;
 
 /*! \brief Calculates the extensive conserved variables
   \param cell Computational cell

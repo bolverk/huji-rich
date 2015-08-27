@@ -10,7 +10,7 @@
 #include "conserved_3d.hpp"
 #include "../common/equation_of_state.hpp"
 
-using namespace three_dimenssional;
+using three_dimenssional::ComputationalCell;
 
 //! \brief Abstract clas for cell update scheme
 class CellUpdater

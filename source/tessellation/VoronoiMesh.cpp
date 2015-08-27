@@ -883,7 +883,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 			GhostProcs.push_back(-1);
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			{
-				CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+			  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
 				++counter;
 			}
@@ -899,14 +899,14 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
-					CM[counter] = GetReflection(*_bc, i, CM[toduplicate[i][j]]);
+				  CM[counter] = GetReflection(*_bc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
 				}
 			}
 			else
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
-					CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+				  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
 				}
 			}
@@ -1087,7 +1087,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 			GhostProcs.push_back(-1);
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			{
-				CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+			  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
 				++counter;
 			}
@@ -1103,14 +1103,14 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
-					CM[counter] = GetReflection(*obc, i, CM[toduplicate[i][j]]);
+				  CM[counter] = GetReflection(*obc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
 				}
 			}
 			else
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
-					CM[counter] = CM[toduplicate[i][j]] + (Tri.get_point(counter) -
+				  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
 				}
 			}
