@@ -35,12 +35,11 @@ namespace
 	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
 		vector<ComputationalCell> const& cells)
 	{
-		int neigh0, neigh1;
 		vector<ComputationalCell> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
-			neigh0 = edges[i].neighbors.first;
-			neigh1 = edges[i].neighbors.second;
+		  const int neigh0 = edges[i].neighbors.first;
+		  const int neigh1 = edges[i].neighbors.second;
 			if (neigh0 == static_cast<int>(cell_index))
 					res[i] = cells[static_cast<size_t>(neigh1)];
 			else
