@@ -33,18 +33,23 @@ namespace
 	}
 
 	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
-		vector<ComputationalCell> const& cells)
+		vector<ComputationalCell> const& cells, std::map<size_t, ComputationalCell> const& ghost_cells,size_t npoints)
 	{
 		int neigh0, neigh1;
 		vector<ComputationalCell> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
-			neigh0 = edges[i].neighbors.first;
-			neigh1 = edges[i].neighbors.second;
-			if (neigh0 == static_cast<int>(cell_index))
-					res[i] = cells[static_cast<size_t>(neigh1)];
+			size_t other_cell = (edges[i].neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
+				(edges[i].neighbors.second) : static_cast<size_t> (edges[i].neighbors.first);
+			if (other_cell < npoints)
+				res[i] = cells[other_cell];
 			else
-				res[i] = cells[static_cast<size_t>(neigh0)];
+			{
+				std::map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(other_cell);
+				if (it == ghost_cells.end())
+					throw UniversalError("No matching ghost cell");
+				res[i] = it->second;
+			}
 		}
 		return res;
 	}
@@ -338,13 +343,14 @@ namespace
 
 	pair<ComputationalCell,ComputationalCell> calc_slope(Tessellation const& tess,vector<ComputationalCell> const& cells,
 		size_t cell_index, bool slf,double shockratio, double diffusecoeff, double pressure_ratio,
-		EquationOfState const& eos)
+		EquationOfState const& eos, std::map<size_t, ComputationalCell> const& ghost_cells)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
 	vector<Vector2D> neighbor_mesh_list = GetNeighborMesh(tess, edge_list,cell_index);
 	vector<Vector2D> neighbor_cm_list = GetNeighborCM(tess, edge_list,cell_index);
-	vector<ComputationalCell> neighbor_list = GetNeighborCells(edge_list, cell_index,cells);
+	vector<ComputationalCell> neighbor_list = GetNeighborCells(edge_list, cell_index,cells,ghost_cells,static_cast<size_t>(
+		tess.GetPointNo()));
 
 	pair<ComputationalCell, ComputationalCell> naive_slope, s_compare;
 	ComputationalCell const& cell = cells[cell_index];
@@ -378,17 +384,20 @@ ComputationalCell LinearGaussImproved::Interp(ComputationalCell const& cell, siz
 	return interp(cell, rslopes_[cell_index], target, cm);
 }
 
-LinearGaussImproved::LinearGaussImproved(EquationOfState const& eos,bool slf, double delta_v, double theta,
-	double delta_P) : eos_(eos), rslopes_(), slf_(slf),shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P) {}
+LinearGaussImproved::LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost, bool slf,
+	double delta_v, double theta,double delta_P) : eos_(eos), ghost_(ghost), rslopes_(), slf_(slf),shockratio_(delta_v),
+	diffusecoeff_(theta), pressure_ratio_(delta_P) {}
 
 vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
+	// Get ghost points
+	std::map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells);
 	// Prepare slopes
 	rslopes_.resize(CellNumber);
 	for (size_t i = 0; i<CellNumber; ++i)
-			rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_);
+			rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells);
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());

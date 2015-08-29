@@ -10,6 +10,8 @@
 #include "../spatial_reconstruction.hpp"
 #include <cmath>
 #include "../../../misc/universal_error.hpp"
+#include "../GhostPointGenerator.hpp"
+#include "../ghost_point_generators/RigidWallGenerator.hpp"
 
 class LinearGaussImproved : public SpatialReconstruction
 {
@@ -21,8 +23,9 @@ public:
 	\param delta_v The GradV*L/Cs ratio needed for slope limiter
 	\param theta The theta from tess in slope limiter.
 	\param delta_P The pressure ratio for shock detection
+	\param ghost The ghost point generator
 	*/
-	LinearGaussImproved(EquationOfState const& eos,bool slf = true,double delta_v = 0.2, 
+	LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost = RigidWallGenerator(), bool slf = true,double delta_v = 0.2, 
 		double theta = 0.5,double delta_P = 0.7);
 
 	vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
@@ -39,6 +42,7 @@ public:
 	ComputationalCell Interp(ComputationalCell const& cell,size_t cell_index, Vector2D const& cm, Vector2D const& target)const;
 private:
 	EquationOfState const& eos_;
+	GhostPointGenerator const& ghost_;
 	mutable vector<pair<ComputationalCell, ComputationalCell> > rslopes_;
 	bool slf_;
 	double shockratio_, diffusecoeff_, pressure_ratio_;
