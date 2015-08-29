@@ -35,7 +35,6 @@ namespace
 	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
 		vector<ComputationalCell> const& cells, std::map<size_t, ComputationalCell> const& ghost_cells,size_t npoints)
 	{
-		int neigh0, neigh1;
 		vector<ComputationalCell> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
