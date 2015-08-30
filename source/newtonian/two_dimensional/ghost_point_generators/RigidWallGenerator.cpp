@@ -22,7 +22,7 @@ std::map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessel
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(ghosts[i].first));
-		ComputationalCell ctemp = cells[ghosts[i].second == 2 ?edge.neighbors.first : edge.neighbors.second];
+		ComputationalCell ctemp = cells[static_cast<size_t>(ghosts[i].second == 2 ? edge.neighbors.first : edge.neighbors.second)];
 		ReverseNormalVelocity(ctemp, edge, ghosts[i].second, tess);
 		res.insert(std::pair<size_t, ComputationalCell>(ghosts[i].second == 1 ?static_cast<size_t> (edge.neighbors.first) 
 			: static_cast<size_t>(edge.neighbors.second), ctemp));

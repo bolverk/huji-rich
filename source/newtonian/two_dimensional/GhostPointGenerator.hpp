@@ -20,8 +20,8 @@ public:
 	/*!
 	\brief Calculates the ghost points
 	\param tess The tessellation
-	\param cell The computational cells
-	\retrun A map where the key is the index of the ghost cell and the value is its' comuptational cell
+	\param cells The computational cells
+	\return A map where the key is the index of the ghost cell and the value is its' comuptational cell
 	*/
 	virtual std::map<size_t,ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells) const = 0;
