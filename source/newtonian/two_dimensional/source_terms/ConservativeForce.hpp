@@ -39,7 +39,7 @@ public:
   /*! \brief Class constructor
     \param acc The acceleration force
   */
-  ConservativeForce(const Acceleration& acc);
+  explicit ConservativeForce(const Acceleration& acc);
 
   /*!
     \brief Class destructor

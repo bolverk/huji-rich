@@ -30,7 +30,7 @@ namespace {
   {
   public:
 
-    ExtensiveConservedCalculator(const hdsim& sim):
+    explicit ExtensiveConservedCalculator(const hdsim& sim):
       sim_(sim), pg_(sim.getPhysicalGeometry()) {}
 
     size_t size(void) const

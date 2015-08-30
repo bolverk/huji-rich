@@ -20,10 +20,9 @@ vector<std::pair<size_t, size_t> > GhostPointGenerator::GetOuterEdgesIndeces(Tes
 	vector<Edge> const& edges = tess.getAllEdges();
 	vector<std::pair<size_t, size_t> > res;
 	int npoints = tess.GetPointNo();
-	size_t ghostindex;
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		ghostindex = IsBoundaryEdge(edges[i], npoints);
+	  const size_t ghostindex = IsBoundaryEdge(edges[i], npoints);
 		if (ghostindex == 1)
 			res.push_back(std::pair<size_t, size_t>(i, 1));
 		if (ghostindex == 2)

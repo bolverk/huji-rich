@@ -81,7 +81,7 @@ namespace {
   {
   public:
 
-    ThermalPropertyExtractor(double ComputationalCell::* var):
+    explicit ThermalPropertyExtractor(double ComputationalCell::* var):
       var_(var) {}
 
     double operator()(const ComputationalCell& p) const
@@ -97,7 +97,7 @@ namespace {
   {
   public:
 
-    CellVelocityComponentExtractor(double Vector2D::* component):
+    explicit CellVelocityComponentExtractor(double Vector2D::* component):
       component_(component) {}
 
     double operator()(const ComputationalCell& p) const
@@ -140,7 +140,7 @@ namespace {
     vector<double> yvert;
     vector<double> nvert;
 
-    ConvexHullData(const Tessellation& tess):
+    explicit ConvexHullData(const Tessellation& tess):
       xvert(),
       yvert(),
       nvert(static_cast<size_t>(tess.GetPointNo()))

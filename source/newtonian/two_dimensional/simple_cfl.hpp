@@ -16,7 +16,7 @@ public:
   /*! \brief Class constructor
     \param cfl CFL number
    */
-  SimpleCFL(const double cfl);
+  explicit SimpleCFL(const double cfl);
 
   double operator()(const Tessellation& tess,
 		    const vector<ComputationalCell>& cells,

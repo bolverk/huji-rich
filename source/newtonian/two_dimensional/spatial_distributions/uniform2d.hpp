@@ -20,7 +20,7 @@ public:
   /*! \brief Class constructr
     \param val Value
    */
-  Uniform2D(double val);
+  explicit Uniform2D(double val);
 
   double operator()(Vector2D const& /*r*/) const;
 };

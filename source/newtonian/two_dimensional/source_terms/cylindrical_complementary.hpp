@@ -14,7 +14,7 @@ public:
   /*! \brief Class constructor
     \param axis Rotation axis
    */
-  CylindricalComplementary(const Axis& axis);
+  explicit CylindricalComplementary(const Axis& axis);
 
   vector<Extensive> operator()
   (const Tessellation& tess,

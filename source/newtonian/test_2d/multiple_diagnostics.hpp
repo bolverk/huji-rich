@@ -19,7 +19,7 @@ public:
   /*! \brief Class constructor
     \param diag_list List of pointers to diagnostics
    */
-  MultipleDiagnostics(const vector<DiagnosticFunction*>& diag_list);
+  explicit MultipleDiagnostics(const vector<DiagnosticFunction*>& diag_list);
 
   void operator()(const hdsim& sim);
 

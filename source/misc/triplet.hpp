@@ -64,7 +64,7 @@ template<class T> class Triplet
   /*! \brief Class constructor
     \param tcr References to three items
    */
-  Triplet(const TripleConstRef<int>& tcr):
+  explicit Triplet(const TripleConstRef<int>& tcr):
     first(tcr.first),
     second(tcr.second),
     third(tcr.third) {}

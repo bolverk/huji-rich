@@ -13,7 +13,7 @@ class ExternalData
 {
 public:
 
-  ExternalData(string const& fname);
+  explicit ExternalData(string const& fname);
 
   bool getVertexMotionFlag(void) const;
 

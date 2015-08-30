@@ -41,7 +41,7 @@ public:
   /*! \brief Class constructor
     \param rs Riemann solver
    */
-  SimpleFluxCalculator(const RiemannSolver& rs);
+  explicit SimpleFluxCalculator(const RiemannSolver& rs);
 
   vector<Extensive> operator()
   (const Tessellation& tess,

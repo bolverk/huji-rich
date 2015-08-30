@@ -17,7 +17,7 @@ public:
   /*! \brief Class constructor
     \param eos Equation of state
    */
-  ArepoInterp(IdealGas const& eos);
+  explicit ArepoInterp(IdealGas const& eos);
 
   Primitive InterpState
   (vector<double> const& vp,

@@ -14,7 +14,7 @@ class PeriodicHydro: public HydroBoundaryConditions
 {
 public:
 	//! \brief Class constructor \param rs The Riemann solver
-	PeriodicHydro(RiemannSolver const& rs);
+  explicit PeriodicHydro(RiemannSolver const& rs);
 	//! \brief Class destructor
 	~PeriodicHydro(void);
 

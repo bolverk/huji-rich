@@ -61,7 +61,7 @@ public:
   /*! \brief Class constructor
     \param shape Original shape
    */
-  Outside(Shape2D const& shape);
+  explicit Outside(Shape2D const& shape);
 
   bool operator()(Vector2D const& r) const;
 

@@ -37,7 +37,7 @@ namespace delaunay_loggers {
     /*! \brief Class constructor
       \param file_name Name of output file
      */
-    BinaryLogger(string const& file_name);
+    explicit BinaryLogger(string const& file_name);
 
     void output(vector<Vector2D> const& cor,
 		vector<facet> const& f);

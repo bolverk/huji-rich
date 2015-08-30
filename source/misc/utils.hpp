@@ -332,7 +332,7 @@ namespace
 {
   template<class T> struct index_cmp
   {
-    index_cmp(const T _arr) : arr(_arr) {}
+    explicit index_cmp(const T _arr) : arr(_arr) {}
     bool operator()(const size_t a, const size_t b) const
     { return arr[a] < arr[b]; }
   private:

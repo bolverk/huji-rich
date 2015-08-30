@@ -21,7 +21,7 @@ public:
   /*! \brief Class constructor
     \param fname Name of hdf5 file
    */
-  HDF5Shortcut(const string& fname);
+  explicit HDF5Shortcut(const string& fname);
 
   /*! \brief adds dataset
     \param field_name Name of dataset

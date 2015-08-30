@@ -18,7 +18,7 @@ public:
   /*! \brief Class constructor
     \param fname File name
    */
-  HDF5Logger(const string& fname);
+  explicit HDF5Logger(const string& fname);
 
   void output(const VoronoiMesh& v);
 

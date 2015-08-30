@@ -15,7 +15,7 @@ public:
   /*! \brief Class constructor
     \param force The acceleration vector
   */
-  ConstantGravity(Vector2D const& force);
+  explicit ConstantGravity(Vector2D const& force);
   
   Vector2D operator()
   (const Tessellation& tess,

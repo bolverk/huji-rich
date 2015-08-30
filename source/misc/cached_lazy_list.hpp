@@ -21,7 +21,7 @@ public:
   /*! \brief Class constructor
     \param ll Regular lazy list
    */
-  CachedLazyList(const LazyList<T>& ll):
+  explicit CachedLazyList(const LazyList<T>& ll):
     ll_(ll), cached_values_(ll.size(),pair<bool,T>(false,T())) {}
 
   /*! \brief Returns the size of the list

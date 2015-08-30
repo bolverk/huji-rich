@@ -109,7 +109,7 @@ namespace {
   {
   public:
 
-    IntensiveInitializer(vector<Primitive> const& cells):
+    explicit IntensiveInitializer(vector<Primitive> const& cells):
       cells_(cells) {}
 
     Conserved operator[](size_t n) const

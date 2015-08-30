@@ -32,7 +32,7 @@ public:
   /*! \brief Class constructor
     \param fname File name
    */
-  WriteTime(string const& fname);
+  explicit WriteTime(string const& fname);
 
   void operator()(hdsim const& sim);
 
@@ -82,7 +82,7 @@ public:
   /*! \brief Class constructor
     \param max_cycles Maximum number of cycles
    */
-  CycleTermination(int max_cycles);
+  explicit CycleTermination(int max_cycles);
 
   bool operator()(hdsim const& sim);
 

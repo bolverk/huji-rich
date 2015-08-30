@@ -14,7 +14,7 @@ class SeveralSources :public SourceTerm
 {
 public:
   //! \brief Class constructor
-  SeveralSources(vector<SourceTerm*> forces);
+  explicit SeveralSources(vector<SourceTerm*> forces);
   //! \brief Class destructor
   ~SeveralSources(void);
 

@@ -47,7 +47,7 @@ namespace voronoi_loggers
     /*! \brief Class constructor
       \param file_name Name of output file
      */
-    BinLogger(std::string const& file_name);
+    explicit BinLogger(std::string const& file_name);
 
     void output(VoronoiMesh const& v);
 

@@ -21,7 +21,7 @@ public:
   /*! \brief Class constructor
     \param AdiabaticIndex Adiabatic index
    */
-  IdealGas(double AdiabaticIndex);
+  explicit IdealGas(double AdiabaticIndex);
 
   /*! \brief Returns the adiabatic index
     \return Adiabatic index

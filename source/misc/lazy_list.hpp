@@ -198,7 +198,7 @@ public:
   /*! \brief Class constructor
     \param v Source vector
    */
-  Echo(const vector<T>& v):
+  explicit Echo(const vector<T>& v):
     v_(v) {}
 
   size_t size(void) const

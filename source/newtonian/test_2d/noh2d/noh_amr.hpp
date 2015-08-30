@@ -18,7 +18,7 @@ public:
 	\brief Class constructor
 	\param Vmax The volume above to refine the cell
 	*/
-	NohRefine(double Vmax);
+  explicit NohRefine(double Vmax);
 	//! \brief Class destructor
 	~NohRefine();
 
@@ -37,7 +37,7 @@ public:
 	\brief Class constructor
 	\param Vmin The minimum volume below which to remove the cell
 	*/
-	NohRemove(double Vmin);
+  explicit NohRemove(double Vmin);
 	//! \brief Class destructor
 	~NohRemove();
 

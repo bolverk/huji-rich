@@ -27,7 +27,7 @@ public:
 	\brief Class constructor
 	\param filename The name of the output file
 	*/
-	BinaryLogger(string const& filename);
+  explicit BinaryLogger(string const& filename);
 
 	//! \brief class destructor
 	~BinaryLogger(void);

@@ -21,7 +21,7 @@ public:
 	\brief Class constructor
 	\param rs The Riemann solver
 	*/
-	FirstOrderHydroFlux(RiemannSolver const& rs);
+  explicit FirstOrderHydroFlux(RiemannSolver const& rs);
 
 	//! \brief Class destructor
 	~FirstOrderHydroFlux(void);

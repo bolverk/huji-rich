@@ -71,7 +71,7 @@ namespace simulation1d{
     /*! \brief Class constructor
       \param fname Output file name
      */
-    WriteTime(string const& fname);
+    explicit WriteTime(string const& fname);
 
     /*! \brief Performs diagnostics
       \param sim Hydrodynamic simulation

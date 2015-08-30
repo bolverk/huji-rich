@@ -25,7 +25,7 @@ public:
   /*! \brief Class constructor
     \param ll_ur Pair of points (first: lower left, second: upper right)
    */
-  RightRectangle(const pair<Vector2D,Vector2D>& ll_ur);
+  explicit RightRectangle(const pair<Vector2D,Vector2D>& ll_ur);
 
   bool operator()(const Vector2D& point) const;
 

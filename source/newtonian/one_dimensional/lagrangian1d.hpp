@@ -16,7 +16,7 @@ public:
   /*! \brief Class constructor
     \param rigid_walls Toggles rigid walls at the edges
    */
-  Lagrangian1D(bool rigid_walls);
+  explicit Lagrangian1D(bool rigid_walls);
 
   double CalcVelocity(int i, vector<double> const& vp,
 		      vector<Primitive> const& hv) const;

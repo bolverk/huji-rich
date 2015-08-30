@@ -31,7 +31,7 @@ public:
   /*! \brief Class constructor
     \param val Value at each point
    */
-  Uniform(double val);
+  explicit Uniform(double val);
 
   /*! \brief Calculates the value at each point
     \param x Position

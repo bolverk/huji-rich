@@ -16,7 +16,7 @@ public:
   /*! \brief Class constructor
     \param cfl CFL number
    */
-  CourantFriedrichsLewy(double cfl);
+  explicit CourantFriedrichsLewy(double cfl);
 
   double operator()(const Tessellation3D& tess,
 		    const vector<ComputationalCell>& cells,

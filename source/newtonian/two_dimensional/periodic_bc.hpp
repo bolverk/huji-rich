@@ -42,7 +42,7 @@ public:
   /*! \brief Class constructor
     \param rs Riemann solver
    */
-  PeriodicBC
+  explicit PeriodicBC
   (const RiemannSolver& rs);
 
   vector<Extensive> operator()
