@@ -26,7 +26,7 @@ public:
 	\param delta_P The pressure ratio for shock detection
 	\param ghost The ghost point generator
 	*/
-	LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost = RigidWallGenerator(), bool slf = true,double delta_v = 0.2, 
+	LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost, bool slf = true,double delta_v = 0.2, 
 		double theta = 0.5,double delta_P = 0.7);
 
 	vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
