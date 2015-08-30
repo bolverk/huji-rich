@@ -6,10 +6,16 @@
 #include "../common/riemann_solver.hpp"
 #include "HydroBoundaryConditions.hpp"
 
+//! \brief Modular flux calculator
 class ModularFluxCalculator: public FluxCalculator
 {
 public:
 
+  /*! \brief Class constructor
+    \param sr Interpolation
+    \param rs Riemann solver
+    \param hbc Hydrodynamic boundary conditions
+   */
   ModularFluxCalculator
   (const SpatialReconstruction& sr,
    const RiemannSolver& rs,

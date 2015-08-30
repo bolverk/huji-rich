@@ -25,6 +25,11 @@ class SpatialReconstruction
 {
 public:
 
+  /*! \brief interpolates values on both sides of each interface
+    \param tess Tessellation
+    \param cells Computational cells
+    \return List of pairs of primitive values on each cell
+   */
   virtual vector<pair<ComputationalCell, ComputationalCell> >
   operator()
   (const Tessellation& tess,

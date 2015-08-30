@@ -8,7 +8,6 @@
 
 #include "flux_calculator_2d.hpp"
 #include "../common/riemann_solver.hpp"
-#include "hydro_boundary_conditions/PeriodicHydro.hpp"
 
 /*! \brief Converts computational cell to primitive variables
   \param cell Computational cell

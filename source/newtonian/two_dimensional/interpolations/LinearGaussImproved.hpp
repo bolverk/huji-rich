@@ -13,6 +13,7 @@
 #include "../GhostPointGenerator.hpp"
 #include "../ghost_point_generators/RigidWallGenerator.hpp"
 
+//! \brief Linear gauss interpolation
 class LinearGaussImproved : public SpatialReconstruction
 {
 public:
