@@ -9,17 +9,14 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/PeriodicBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/PeriodicHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/ConservativeForce.hpp"
 #include "source/newtonian/two_dimensional/periodic_bc.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
@@ -82,7 +79,6 @@ namespace {
       outer_(0,width_,width_,0),
       tess_(init_points_,outer_),
       pg_(),
-      interp_method_(),
       density_(1),
       pressure_(1),
       xvelocity_(0.1),
@@ -90,7 +86,6 @@ namespace {
       eos_(5./3.),
       pm_naive_(),
       rs_(),
-      hbc_(rs_),
       point_motion_(pm_naive_,eos_),
       acc_(1,0.001),
       force_(acc_),
@@ -121,7 +116,6 @@ namespace {
     const PeriodicBox outer_;
     VoronoiMesh tess_;
     const SlabSymmetry pg_;
-    PCM2D interp_method_;
     const Uniform2D density_;
     const Uniform2D pressure_;
     const Uniform2D xvelocity_;
@@ -129,7 +123,6 @@ namespace {
     const IdealGas eos_;
     Lagrangian pm_naive_;
     const Hllc rs_;
-    const PeriodicHydro hbc_;
     RoundCells point_motion_;
     PeriodicDriver acc_;
     ConservativeForce force_;
