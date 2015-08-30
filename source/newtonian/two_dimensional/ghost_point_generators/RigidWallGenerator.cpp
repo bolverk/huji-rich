@@ -21,7 +21,7 @@ std::map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessel
 	vector<std::pair<size_t,size_t> > ghosts = GetOuterEdgesIndeces(tess);
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
-		Edge const& edge = tess.GetEdge(ghosts[i].first);
+		Edge const& edge = tess.GetEdge(static_cast<int>(ghosts[i].first));
 		ComputationalCell ctemp = cells[ghosts[i].second == 2 ?edge.neighbors.first : edge.neighbors.second];
 		ReverseNormalVelocity(ctemp, edge, ghosts[i].second, tess);
 		res.insert(std::pair<size_t, ComputationalCell>(ghosts[i].second == 1 ?static_cast<size_t> (edge.neighbors.first) 
