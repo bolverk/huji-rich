@@ -415,3 +415,9 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	}
 	return res;
 }
+
+
+vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::GetSlopes(void)const
+{
+	return rslopes_;
+}

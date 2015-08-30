@@ -40,6 +40,12 @@ public:
 	*/
 
 	ComputationalCell Interp(ComputationalCell const& cell,size_t cell_index, Vector2D const& cm, Vector2D const& target)const;
+
+	/*!
+	\brief Returns the gradients
+	\return The gradients
+	*/
+	vector<pair<ComputationalCell, ComputationalCell> > GetSlopes(void)const;
 private:
 	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;
