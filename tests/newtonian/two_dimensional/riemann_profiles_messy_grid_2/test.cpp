@@ -69,6 +69,7 @@ namespace {
       tsf_(0.3),
       hbc_(),
       fc_(sr_,rs_,hbc_),
+      eu_(),
       sim_(tess_,
 	   outer_,
 	   pg_,
@@ -100,7 +101,7 @@ namespace {
     RoundCells point_motion_;
     ZeroForce force_;
     const SimpleCFL tsf_;
-	  const IdleHBC hbc_;
+    const IdleHBC hbc_;
     const ModularFluxCalculator fc_;
     const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
