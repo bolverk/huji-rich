@@ -428,7 +428,8 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			ComputationalCell const& cell = it->second;
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
-		res[i] = cell_temp;
+			res[i] = cell_temp;
+		}
 	}
 	return res;
 }

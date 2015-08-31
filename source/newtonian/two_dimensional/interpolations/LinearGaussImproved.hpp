@@ -11,7 +11,6 @@
 #include <cmath>
 #include "../../../misc/universal_error.hpp"
 #include "../GhostPointGenerator.hpp"
-#include "../ghost_point_generators/RigidWallGenerator.hpp"
 
 //! \brief Linear gauss interpolation
 class LinearGaussImproved : public SpatialReconstruction

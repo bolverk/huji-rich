@@ -6,7 +6,6 @@
 #ifndef GHOST_POINT_GENERATOR_HPP
 #define GHOST_POINT_GENERATOR_HPP 1
 
-#include "../common/hydrodynamic_variables.hpp"
 #include "../../tessellation/tessellation.hpp"
 #include "computational_cell_2d.hpp"
 #include <map>
