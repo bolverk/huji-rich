@@ -34,7 +34,7 @@ namespace {
     {
       if(0==i)
 	return left_.CalcFlux(edges,cells,rs,vertex_velocity,i);
-      else if((int)edges.size()-1==i)
+      else if(static_cast<int>(edges.size())-1==i)
 	return right_.CalcFlux(edges,cells,rs,vertex_velocity,i);
       else
 	throw "Inside bulk of grid";

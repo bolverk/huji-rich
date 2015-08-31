@@ -104,7 +104,7 @@ int main(void)
 {
   const vector<string> interp_names = 
     boost::assign::list_of("pcm")("plm_naive")("plm");
-  for(int i=0;i<(int)interp_names.size();++i){
+  for(size_t i=0;i<interp_names.size();++i){
     SimData sim_data(interp_names[i]);
 
     main_loop(sim_data.getSim(),

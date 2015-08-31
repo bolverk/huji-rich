@@ -25,7 +25,7 @@ using namespace diagnostics1d;
 namespace {
 double GetXVelocityAt(const hdsim1D& sim, double x)
 {
-  for(int i=1;i<sim.GetCellNo();i++){
+  for(size_t i=1;i<static_cast<size_t>(sim.GetCellNo());i++){
     if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
       return 0.5*(sim.GetCell(i-1).Velocity.x+
 		  sim.GetCell(i).Velocity.x);
@@ -68,7 +68,7 @@ namespace {
 void ReportError(UniversalError& eo)
 {
   cout << eo.GetErrorMessage() << endl;
-  for(int i=0;i<(int)eo.GetFields().size();i++){
+  for(size_t i=0;i<eo.GetFields().size();i++){
     cout << eo.GetFields()[i] << " = "
 	 << eo.GetValues()[i] << endl;
   }

@@ -73,8 +73,8 @@ void write_output(hdsim1D const& sim)
 {
   ofstream f;
   f.open("res.txt");
-  f << sim.GetCell(sim.GetCellNo()/2).Pressure << endl;
-  f << sim.GetCell(sim.GetCellNo()/2).Velocity.x << endl;
+  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Pressure << endl;
+  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Velocity.x << endl;
   f.close();
 }
 }

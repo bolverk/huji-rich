@@ -22,7 +22,7 @@ namespace {
 
   double GetXVelocityAt(const hdsim1D& sim, double x)
   {
-    for(int i=1;i<sim.GetCellNo();i++){
+    for(size_t i=1;i<static_cast<size_t>(sim.GetCellNo());i++){
       if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
 	return 0.5*(sim.GetCell(i-1).Velocity.x+
 		    sim.GetCell(i).Velocity.x);

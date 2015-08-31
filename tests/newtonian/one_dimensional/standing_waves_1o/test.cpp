@@ -16,39 +16,42 @@ using namespace std;
 using namespace simulation1d;
 using namespace diagnostics1d;
 
-class PeriodicDriver: public ExternalForces1D
-{
-public:
-
-  PeriodicDriver(double wavelength,
-		 double amplitude,
-		 double phase_velocity):
-    k_(2*M_PI/wavelength),
-    amp_(amplitude),
-    v_(phase_velocity) {}
-
-  Conserved calc
-  (vector<double> const& vertices,
-   vector<Primitive> const& cells,
-   int point,
-   double t,
-   double /*dt*/) const
+namespace {
+  class PeriodicDriver: public ExternalForces1D
   {
-    const double volume = vertices[point+1]-vertices[point];
-    const double x = 0.5*(vertices[point+1]+vertices[point]);
-    const double density = cells[point].Density;
-    const double xvelocity =cells[point].Velocity.x;
-    const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
-    const double xmom = density*acceleration;
-    const double enr = density*acceleration*xvelocity;
-    return -volume*Conserved(0,Vector2D(xmom,0),enr);
-  }
+  public:
 
-private:
-  const double k_;
-  const double amp_;
-  const double v_;
-};
+    PeriodicDriver(double wavelength,
+		   double amplitude,
+		   double phase_velocity):
+      k_(2*M_PI/wavelength),
+      amp_(amplitude),
+      v_(phase_velocity) {}
+
+    Conserved calc
+    (vector<double> const& vertices,
+     vector<Primitive> const& cells,
+     int point,
+     double t,
+     double /*dt*/) const
+    {
+      const size_t index = static_cast<size_t>(point);
+      const double volume = vertices[index+1]-vertices[index];
+      const double x = 0.5*(vertices[index+1]+vertices[index]);
+      const double density = cells[index].Density;
+      const double xvelocity =cells[index].Velocity.x;
+      const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
+      const double xmom = density*acceleration;
+      const double enr = density*acceleration*xvelocity;
+      return -volume*Conserved(0,Vector2D(xmom,0),enr);
+    }
+
+  private:
+    const double k_;
+    const double amp_;
+    const double v_;
+  };
+}
 
 class SimData
 {
@@ -93,13 +96,13 @@ private:
 int main(void)
 {
   try{
-  SimData sim_data;
-  hdsim1D& sim = sim_data.getSim();
+    SimData sim_data;
+    hdsim1D& sim = sim_data.getSim();
 
-  main_loop(sim, 1, 1e6, 1, 
-	    "time.txt");
+    main_loop(sim, 1, 1e6, 1, 
+	      "time.txt");
 
-  write_snapshot_to_hdf5(sim, "final.h5");
+    write_snapshot_to_hdf5(sim, "final.h5");
   }
   catch(string eo){
     cout << eo << endl;

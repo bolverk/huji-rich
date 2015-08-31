@@ -19,34 +19,36 @@ using namespace interpolations1d;
 using namespace simulation1d;
 using namespace diagnostics1d;
 
-class DifferentBC: public BoundaryConditions1D
-{
-public:
-
-  DifferentBC(BoundaryConditions1D const& left,
-	      BoundaryConditions1D const& right):
-    left_(left), right_(right) {}
-
-  Conserved CalcFlux
-  (vector<double> const& edges,
-   vector<Primitive> const& cells,
-   RiemannSolver const& rs,
-   vector<double> const& vertex_velocity,
-   int i) const
+namespace {
+  class DifferentBC: public BoundaryConditions1D
   {
-    if(0==i)
-      return left_.CalcFlux(edges,cells,rs,vertex_velocity,i);
-    else if((int)edges.size()-1==i)
-      return right_.CalcFlux(edges,cells,rs,vertex_velocity,i);
-    else
-      throw "Inside bulk of grid";
-  }
+  public:
 
-private:
+    DifferentBC(BoundaryConditions1D const& left,
+		BoundaryConditions1D const& right):
+      left_(left), right_(right) {}
 
-  BoundaryConditions1D const& left_;
-  BoundaryConditions1D const& right_;
-};
+    Conserved CalcFlux
+    (vector<double> const& edges,
+     vector<Primitive> const& cells,
+     RiemannSolver const& rs,
+     vector<double> const& vertex_velocity,
+     int i) const
+    {
+      if(0==i)
+	return left_.CalcFlux(edges,cells,rs,vertex_velocity,i);
+      else if(static_cast<int>(edges.size())-1==i)
+	return right_.CalcFlux(edges,cells,rs,vertex_velocity,i);
+      else
+	throw "Inside bulk of grid";
+    }
+
+  private:
+
+    BoundaryConditions1D const& left_;
+    BoundaryConditions1D const& right_;
+  };
+}
 
 class SimData
 {

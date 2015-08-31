@@ -11,26 +11,28 @@
 
 using namespace std;
 
-/*! \brief Spatial profile parabolic in the coordinate
- */
-class Parabola: public SpatialDistribution1D
-{
-public:
-
-  Parabola(double a, double b, double c):
-    a_(a), b_(b), c_(c) {}
-
-  double operator()(double x) const
+namespace {
+  /*! \brief Spatial profile parabolic in the coordinate
+   */
+  class Parabola: public SpatialDistribution1D
   {
-    return a_*pow(x,2)+b_*x+c_;
-  }
+  public:
 
-private:
+    Parabola(double a, double b, double c):
+      a_(a), b_(b), c_(c) {}
 
-  double a_;
-  double b_;
-  double c_;
-};
+    double operator()(double x) const
+    {
+      return a_*pow(x,2)+b_*x+c_;
+    }
+
+  private:
+
+    double a_;
+    double b_;
+    double c_;
+  };
+}
 
 namespace {
   Primitive CalcPrimitive(double density, double pressure,
@@ -55,7 +57,7 @@ namespace {
    EquationOfState const& eos)
   {
     vector<Primitive> res(vertices.size()-1);
-    for(int i = 0; i<(int)vertices.size() - 1; i++){
+    for(size_t i = 0; i<vertices.size() - 1; i++){
       double r = 0.5*(vertices[i] + vertices[i+1]);
       double d = density(r);
       double p = pressure(r);
@@ -127,85 +129,85 @@ private:
 };
 
 namespace {
-double test_interp(SpatialReconstruction1D const& sr,
-		   TestData const& test_data)
-{
-  double res = 0;
-  int counter = 0;
-  //  for(int i=0;i<(int)test_data.getEdges().size();++i){
-  const int margin = 5;
-  for(int i=margin;i<(int)test_data.getEdges().size()-margin;++i){
-    double v_a = test_data.getDistribution("xvelocity")(test_data.getEdges()[i]);
-    if(i>0){
-      double v_l = sr.InterpState
-	(test_data.getEdges(),
-	 test_data.getCells(),
-	 0,
-	 i,0,0).Velocity.x;
-      res += pow(v_a-v_l,2);
-      ++counter;
+  double test_interp(SpatialReconstruction1D const& sr,
+		     TestData const& test_data)
+  {
+    double res = 0;
+    int counter = 0;
+    //  for(int i=0;i<(int)test_data.getEdges().size();++i){
+    const int margin = 5;
+    for(size_t i=margin;i<test_data.getEdges().size()-margin;++i){
+      double v_a = test_data.getDistribution("xvelocity")(test_data.getEdges()[i]);
+      if(i>0){
+	double v_l = sr.InterpState
+	  (test_data.getEdges(),
+	   test_data.getCells(),
+	   0,
+	   i,0,0).Velocity.x;
+	res += pow(v_a-v_l,2);
+	++counter;
+      }
+      if(i<test_data.getEdges().size()-1){
+	double v_r = sr.InterpState
+	  (test_data.getEdges(),
+	   test_data.getCells(),
+	   0,
+	   i,1,0).Velocity.x;
+	res += pow(v_a-v_r,2);
+	++counter;
+      }
     }
-    if(i<(int)test_data.getEdges().size()-1){
-      double v_r = sr.InterpState
-	(test_data.getEdges(),
-	 test_data.getCells(),
-	 0,
-	 i,1,0).Velocity.x;
-      res += pow(v_a-v_r,2);
-      ++counter;
-    }
+    return sqrt(res/counter);
   }
-  return sqrt(res/counter);
-}
 }
 
 namespace{
-void write_interp_test(SpatialReconstruction1D const& sr,
-		       TestData const& test_data,
-		       string const& fname)
-{
-  ofstream f(fname.c_str());
+  void write_interp_test(SpatialReconstruction1D const& sr,
+			 TestData const& test_data,
+			 string const& fname)
+  {
+    ofstream f(fname.c_str());
   
-  for(int i=0;i<(int)test_data.getEdges().size();++i){
-    if(i>0)
-      f << test_data.getEdges()[i] << " "
-	<< test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
-	<< sr.InterpState
-	(test_data.getEdges(), test_data.getCells(),0,i,0,0).Velocity.x << endl;
-    if(i<(int)test_data.getEdges().size()-1)
-      f << test_data.getEdges()[i] << " "
-	<< test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
-	<< sr.InterpState
-	(test_data.getEdges(), test_data.getCells(),0,i,1,0).Velocity.x << endl;
+    for(size_t i=0;i<test_data.getEdges().size();++i){
+      if(i>0)
+	f << test_data.getEdges()[i] << " "
+	  << test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
+	  << sr.InterpState
+	  (test_data.getEdges(), test_data.getCells(),0,i,0,0).Velocity.x << endl;
+      if(i<test_data.getEdges().size()-1)
+	f << test_data.getEdges()[i] << " "
+	  << test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
+	  << sr.InterpState
+	  (test_data.getEdges(), test_data.getCells(),0,i,1,0).Velocity.x << endl;
+    }
+    f.close();
   }
-  f.close();
-}
 }
 
 namespace {
-vector<int> arange(int v_init,
-		   int v_stop,
-		   int v_step)
-{
-  vector<int> res((v_stop-v_init)/v_step,0);
-  for(int i=0;i<(int)res.size();++i){
-    res[i] = v_init+v_step*i;
+  vector<int> arange(int v_init,
+		     int v_stop,
+		     int v_step)
+  {
+    vector<int> res((v_stop-v_init)/v_step,0);
+    for(size_t i=0;i<res.size();++i){
+      res[i] = v_init+v_step*static_cast<int>(i);
+    }
+    return res;
   }
-  return res;
-}
 }
 
 namespace {
-vector<double> convergence_curve
-(vector<int> const& np_list,
- SpatialReconstruction1D const& sr)
-{
-  vector<double> res(np_list.size(),0);
-  for(int i=0;i<(int)np_list.size();++i)
-    res[i] = test_interp(sr,
-			 TestData(np_list[i]));
-  return res;
-}
+  vector<double> convergence_curve
+  (vector<int> const& np_list,
+   SpatialReconstruction1D const& sr)
+  {
+    vector<double> res(np_list.size(),0);
+    for(size_t i=0;i<np_list.size();++i)
+      res[i] = test_interp(sr,
+			   TestData(np_list[i]));
+    return res;
+  }
 }
 
 int main(void)
