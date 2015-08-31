@@ -75,16 +75,19 @@ void write_output(hdsim1D const& sim)
 {
   ofstream f;
   f.open("res.txt");
-  f << sim.GetCell(sim.GetCellNo()/2).Pressure << endl;
-  f << sim.GetCell(sim.GetCellNo()/2).Velocity.x << endl;
+  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Pressure << endl;
+  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Velocity.x << endl;
   f.close();
 }
 
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+  __attribute__((noreturn))
+#endif
 void report_error(UniversalError const& eo)
 {
   cout << "Caught universal error" << endl;
   cout << eo.GetErrorMessage() << endl;
-  for(int i = 0;i<(int)eo.GetFields().size();++i){
+  for(size_t i = 0;i<eo.GetFields().size();++i){
     cout << eo.GetFields()[i] << " = "
 	 << eo.GetValues()[i] << endl;
   }

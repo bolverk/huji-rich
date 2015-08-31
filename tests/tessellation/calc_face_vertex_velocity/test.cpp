@@ -4,10 +4,12 @@
 
 using namespace std;
 
-ostream& operator<<(ostream& os, const Vector2D& v)
-{
-  os << v.x << " " << v.y;
-  return os;
+namespace {
+  ostream& operator<<(ostream& os, const Vector2D& v)
+  {
+    os << v.x << " " << v.y;
+    return os;
+  }
 }
 
 int main(void)
