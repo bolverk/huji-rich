@@ -25,6 +25,19 @@ public:
 	*/
 	virtual std::map<size_t,ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells) const = 0;
+
+	/*!
+	\brief Calculates the gradients for the ghost cells
+	\param tess The tessellation
+	\param cells The computational cells
+	\param gradients The gradients for the non-ghost cells
+	\param ghost_index The index of the ghost cell
+	\return The gradient of the ghost cell
+	*/
+	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,
+		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+		size_t ghost_index)const = 0;
+
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);
 	/*!

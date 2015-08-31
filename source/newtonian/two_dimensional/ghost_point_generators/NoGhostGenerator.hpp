@@ -14,10 +14,17 @@
 class NoGhostGenerator : public GhostPointGenerator
 {
 public:
-	std::map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells) const 
+	std::map<size_t, ComputationalCell> operator() (const Tessellation& /*tess*/,
+		const vector<ComputationalCell>& /*cells*/) const 
 	{
 		return std::map<size_t, ComputationalCell>();
+	}
+
+	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& /*tess*/,
+		vector<ComputationalCell> const& /*cells*., vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
+		size_t /*ghost_index*/)const
+	{
+		return std::pair<ComputationalCell, ComputationalCell>();
 	}
 };
 

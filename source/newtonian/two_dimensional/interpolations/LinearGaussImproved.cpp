@@ -408,9 +408,26 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber))
 			cell_temp.first = interp(cells[static_cast<size_t>(edge.neighbors.first)], rslopes_[static_cast<size_t>(edge.neighbors.first)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+		else
+		{
+			std::map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.first));
+			if (it == ghost_cells.end())
+				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
+			ComputationalCell const& cell = it->second;
+			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
+				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
 			cell_temp.first = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+		else
+		{
+			std::map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.second));
+			if (it == ghost_cells.end())
+				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
+			ComputationalCell const& cell = it->second;
+			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
+				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		res[i] = cell_temp;
 	}
 	return res;
