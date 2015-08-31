@@ -33,9 +33,11 @@ public:
 	\param ghost_index The index of the ghost cell
 	\return The gradient of the ghost cell
 	*/
-	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,
-		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-		size_t ghost_index)const = 0;
+	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient
+	(const Tessellation& tess,
+	 const vector<ComputationalCell>& cells,
+	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+	 size_t ghost_index) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);

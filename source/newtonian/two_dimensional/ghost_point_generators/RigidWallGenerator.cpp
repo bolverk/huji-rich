@@ -30,9 +30,11 @@ std::map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessel
 	return res;
 }
 
-std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGradients(Tessellation const& tess,
-	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-	size_t ghost_index)const
+std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGradient
+(Tessellation const& tess,
+ vector<ComputationalCell> const& /*cells*/,
+ vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+ size_t ghost_index) const
 {
 	std::pair<ComputationalCell, ComputationalCell> grad = gradients[static_cast<size_t>(tess.GetOriginalIndex
 		(static_cast<int>(ghost_index)))];

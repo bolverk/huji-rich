@@ -17,9 +17,11 @@ public:
 	std::map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells) const;
 
-	std::pair<ComputationalCell, ComputationalCell> GetGhostGradients(Tessellation const& tess,
-		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-		size_t ghost_index)const;
+	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient
+	(const Tessellation& tess,
+	 const vector<ComputationalCell>& cells,
+	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+	 size_t ghost_index) const;
 
 };
 
