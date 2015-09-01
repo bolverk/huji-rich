@@ -418,7 +418,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
-			cell_temp.first = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
+			cell_temp.second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		else
 		{
@@ -426,7 +426,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			if (it == ghost_cells.end())
 				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
 			ComputationalCell const& cell = it->second;
-			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
+			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 			res[i] = cell_temp;
 		}
