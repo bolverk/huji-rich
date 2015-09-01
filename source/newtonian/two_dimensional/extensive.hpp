@@ -6,7 +6,7 @@
 #ifndef EXTENSIVE_HPP
 #define EXTENSIVE_HPP 1
 
-#include <map>
+#include "boost/container/flat_map.hpp"
 #include "../../tessellation/geometry.hpp"
 
 //! \brief Extensive variables
@@ -24,7 +24,9 @@ public:
   Vector2D momentum;
 
   //! \brief tracers
-  std::map<std::string,double> tracers;
+  boost::container::flat_map<std::string,double> tracers;
+
+  Extensive& operator=(const Extensive& origin);
 
   /*! \brief Self difference operator
     \param diff Difference

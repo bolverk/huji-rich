@@ -12,10 +12,19 @@ Extensive& Extensive::operator-=(const Extensive& diff)
   energy -= diff.energy;
   momentum -= diff.momentum;
   
-  for(std::map<std::string,double>::iterator it=tracers.begin();
+  for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
       it!=tracers.end();++it)
     it->second -= diff.tracers.find(it->first)->second;
 
+  return *this;
+}
+
+Extensive& Extensive::operator=(const Extensive& origin)
+{
+  mass = origin.mass;
+  energy = origin.energy;
+  momentum = origin.momentum;
+  tracers = origin.tracers;
   return *this;
 }
 
@@ -25,7 +34,7 @@ Extensive& Extensive::operator+=(const Extensive& diff)
   energy += diff.energy;
   momentum += diff.momentum;
   
-  for(std::map<std::string,double>::iterator it=tracers.begin();
+  for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
       it!=tracers.end();++it)
     it->second += diff.tracers.find(it->first)->second;
 
@@ -40,7 +49,7 @@ Extensive operator*(const double s,
   res.energy = s*e.energy;
   res.momentum = s*e.momentum;
   res.tracers = e.tracers;
-  for(std::map<std::string,double>::iterator it=res.tracers.begin();
+  for(boost::container::flat_map<std::string,double>::iterator it=res.tracers.begin();
       it!=res.tracers.end(); ++it)
     it->second *= s;
   return res;
@@ -53,7 +62,7 @@ Extensive operator+(const Extensive& e1,
   res.mass = e1.mass + e2.mass;
   res.energy = e1.energy + e2.energy;
   res.momentum = e1.momentum + e2.momentum;
-  for(std::map<std::string,double>::const_iterator it=e1.tracers.begin();
+  for(boost::container::flat_map<std::string,double>::const_iterator it=e1.tracers.begin();
       it!=e1.tracers.end();++it)
     res.tracers[it->first] = it->second + e2.tracers.find(it->first)->second;
   return res;

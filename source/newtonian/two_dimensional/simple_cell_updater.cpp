@@ -18,7 +18,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
     res[i].velocity = extensives[i].momentum / extensives[i].mass;
     const double energy = extensives[i].energy/extensives[i].mass - 
       0.5*ScalarProd(res[i].velocity, res[i].velocity);
-    for(std::map<std::string,double>::const_iterator it =
+    for(boost::container::flat_map<std::string,double>::const_iterator it =
 	  extensives[i].tracers.begin();
 	it!=extensives[i].tracers.end();++it)
       res[i].tracers[it->first] = it->second/extensives[i].mass;

@@ -24,7 +24,7 @@ namespace
     res.mass = conserved.Mass;
     res.momentum = conserved.Momentum;
     res.energy = conserved.Energy;
-    for(map<string,double>::const_iterator it= cells.first.tracers.begin();it!=cells.first.tracers.end();++it)
+    for(boost::container::flat_map<string,double>::const_iterator it= cells.first.tracers.begin();it!=cells.first.tracers.end();++it)
       res.tracers[it->first] = conserved.Mass*(conserved.Mass>0 ? cells.first : cells.second).tracers.find(it->first)->second;
     return res;
   }

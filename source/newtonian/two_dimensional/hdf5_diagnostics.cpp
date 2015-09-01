@@ -237,12 +237,12 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
     ("Number of vertices in cell",chd.nvert)
     ("Cycle number",vector<int>(1,sim.getCycle()));
 
-  for(std::map<std::string,double>::const_iterator it=
+  for(boost::container::flat_map<std::string,double>::const_iterator it=
 	sim.getAllCells().front().tracers.begin();
       it!=sim.getAllCells().front().tracers.end(); ++it)
     h5sc(it->first,serial_generate(TracerSlice(sim,it->first)));
 
-  for(std::map<std::string,bool>::const_iterator it=
+  for(boost::container::flat_map<std::string,bool>::const_iterator it=
 	sim.getAllCells().front().stickers.begin();
       it!=sim.getAllCells().front().stickers.end(); ++it)
     h5sc(it->first,serial_generate(StickerSlice(sim,it->first)));

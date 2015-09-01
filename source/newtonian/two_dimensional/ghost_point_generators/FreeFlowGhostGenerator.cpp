@@ -1,10 +1,10 @@
 #include "FreeFlowGhostGenerator.hpp"
 
-std::map<size_t, ComputationalCell> FreeFlowGenerator::operator() (const Tessellation& tess,
+boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells) const
 {
 	vector<std::pair<size_t, size_t> > outer_edges=GetOuterEdgesIndeces(tess);
-	std::map<size_t, ComputationalCell> res;
+	boost::container::flat_map<size_t, ComputationalCell> res;
 	for (size_t i = 0; i < outer_edges.size(); ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(outer_edges[i].first));

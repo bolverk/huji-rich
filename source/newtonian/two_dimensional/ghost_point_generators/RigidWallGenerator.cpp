@@ -14,10 +14,10 @@ namespace
 	}
 }
 
-std::map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessellation& tess,
+boost::container::flat_map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells) const
 {
-	std::map<size_t, ComputationalCell> res;
+	boost::container::flat_map<size_t, ComputationalCell> res;
 	vector<std::pair<size_t,size_t> > ghosts = GetOuterEdgesIndeces(tess);
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{

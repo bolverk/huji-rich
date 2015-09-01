@@ -14,7 +14,7 @@
 class FreeFlowGenerator : public GhostPointGenerator
 {
 public:
-	std::map<size_t, ComputationalCell> operator() (const Tessellation& tess,
+	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells) const;
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,

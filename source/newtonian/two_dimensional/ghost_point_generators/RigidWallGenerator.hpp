@@ -14,7 +14,7 @@
 class RigidWallGenerator : public GhostPointGenerator
 {
 public:
-	std::map<size_t, ComputationalCell> operator() (const Tessellation& tess,const vector<ComputationalCell>& cells) const;
+	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,const vector<ComputationalCell>& cells) const;
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
 		const vector<ComputationalCell>& cells,const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,

@@ -19,7 +19,7 @@ vector<Extensive> SeveralSources::operator()
     res[i].mass = 0;
     res[i].momentum = Vector2D(0,0);
     res[i].energy = 0;
-    for(std::map<std::string,double>::const_iterator it =
+    for(boost::container::flat_map<std::string,double>::const_iterator it =
 	  cells.front().tracers.begin();
 	it != cells.front().tracers.end(); ++it)
       res[i].tracers[it->first] = 0;
@@ -31,7 +31,7 @@ vector<Extensive> SeveralSources::operator()
       res[j].mass += diff[j].mass;
       res[j].momentum += diff[j].momentum;
       res[j].energy += diff[j].energy;
-      for(std::map<std::string,double>::const_iterator it =
+      for(boost::container::flat_map<std::string,double>::const_iterator it =
 	    diff[j].tracers.begin();
 	  it != diff[j].tracers.end(); ++it)
 	res[j].tracers[it->first] += it->second;

@@ -6,9 +6,9 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include <map>
 #include <string>
 #include "../../tessellation/geometry.hpp"
+#include "boost/container/flat_map.hpp"
 
 //! \brief Computational cell
 class ComputationalCell
@@ -25,10 +25,10 @@ public:
   Vector2D velocity;
 
   //! \brief Tracers (can transfer from one cell to another)
-  std::map<std::string,double> tracers;
+  boost::container::flat_map<std::string,double> tracers;
 
   //! \brief Stickers (stick to the same cell)
-  std::map<std::string,bool> stickers;
+  boost::container::flat_map<std::string,bool> stickers;
 
   /*!
   \brief Copy constructor
@@ -39,6 +39,8 @@ public:
   \brief Default constructor
   */
   ComputationalCell(void);
+
+  ComputationalCell& operator=(const ComputationalCell& origin);
 };
 
 /*! \brief Term by term addition

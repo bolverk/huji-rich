@@ -476,7 +476,7 @@ void ExternalForceContribution
     extensives[i].mass += dt*diff[i].mass;
     extensives[i].momentum += dt*diff[i].momentum;
     extensives[i].energy += dt*diff[i].energy;
-    for(std::map<std::string,double>::const_iterator it =
+    for(boost::container::flat_map<std::string,double>::const_iterator it =
 	  diff[i].tracers.begin();
 	it!=diff[i].tracers.end(); ++it)
       extensives[i].tracers[it->first] += dt*it->second;

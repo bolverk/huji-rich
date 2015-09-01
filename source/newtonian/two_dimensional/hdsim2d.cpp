@@ -49,7 +49,7 @@ namespace
       res[i].energy = eos.dp2e(cell.density, cell.pressure,cell.tracers)*mass + 
 	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
       res[i].momentum = mass*cells[i].velocity;
-      for(std::map<std::string,double>::const_iterator it=
+      for(boost::container::flat_map<std::string,double>::const_iterator it=
 	    cells[i].tracers.begin();
 	  it!=cells[i].tracers.end();++it)
 	res[i].tracers[it->first] = (it->second)*mass;
@@ -377,7 +377,7 @@ void hdsim::recalculateExtensives(void)
     extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure,cell.tracers)*mass +
       0.5*mass*ScalarProd(cell.velocity, cell.velocity);
     extensives_[i].momentum = mass*cell.velocity;
-    for(std::map<std::string,double>::const_iterator it=
+    for(boost::container::flat_map<std::string,double>::const_iterator it=
 	  cell.tracers.begin();
 	it!=cell.tracers.end();++it)
       extensives_[i].tracers[it->first] = (it->second)*mass;

@@ -226,7 +226,7 @@ vector<Extensive> SimpleFluxCalculator::operator()
     res[i].mass = hydro_flux.Mass;
     res[i].momentum = hydro_flux.Momentum;
     res[i].energy = hydro_flux.Energy;
-    for(std::map<std::string,double>::const_iterator it = 
+    for(boost::container::flat_map<std::string,double>::const_iterator it = 
 	  cells.front().tracers.begin();
 	it!=cells.front().tracers.end();++it)
       res[i].tracers[it->first] =
