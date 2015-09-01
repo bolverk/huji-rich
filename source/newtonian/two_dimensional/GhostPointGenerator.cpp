@@ -30,3 +30,9 @@ vector<std::pair<size_t, size_t> > GhostPointGenerator::GetOuterEdgesIndeces(Tes
 	}
 	return res;
 }
+
+Vector2D GhostPointGenerator::GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& /*cells*/,
+	vector<Vector2D> const& point_veolcities, size_t ghost_index)const
+{
+	return -1 * point_veolcities[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
+}

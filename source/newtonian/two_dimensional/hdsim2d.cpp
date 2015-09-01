@@ -5,7 +5,8 @@
 
 using namespace std;
 
-namespace {
+namespace 
+{
   class CellEdgesGetter: public LazyList<Edge>
   {
   public:
@@ -29,7 +30,8 @@ namespace {
   };
 }
 
-namespace {
+namespace 
+{
 
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
@@ -155,24 +157,11 @@ namespace {
 
 void hdsim::TimeAdvance2Heun(void)
 {
-  const vector<Vector2D> point_velocities =
-    point_motion_(tess_,cells_,time_);
+  const vector<Vector2D> point_velocities = point_motion_(tess_,cells_,time_);
 
-  const double dt = tsf_(tess_,
-			 cells_,
-			 eos_,
-			 point_velocities,
-			 time_);
+  const double dt = tsf_(tess_,cells_,eos_,point_velocities,time_);
 
-  const vector<Extensive> mid_fluxes =
-    fc_(tess_,
-	point_velocities,
-	cells_,
-	extensives_,
-	cache_data_,
-	eos_,
-	time_,
-	dt);
+  const vector<Extensive> mid_fluxes = fc_(tess_,point_velocities,cells_,extensives_,cache_data_,eos_,time_,dt);
 
   vector<Extensive> mid_extensives = extensives_;
   eu_(mid_fluxes,
@@ -186,33 +175,15 @@ void hdsim::TimeAdvance2Heun(void)
   MoveMeshPoints(point_velocities, dt, tess_);
   cache_data_.reset();
 
-  const vector<ComputationalCell> mid_cells =
-    cu_(tess_, pg_, eos_, extensives_, cells_,
-	cache_data_);
+  const vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_);
 
-  const vector<Extensive> fluxes =
-    fc_(tess_,
-	point_velocities,
-	mid_cells,
-	mid_extensives,
-	cache_data_,
-	eos_,
-	time_,
-	dt);
+  const vector<Extensive> fluxes = fc_(tess_,point_velocities,mid_cells,mid_extensives,cache_data_,eos_,time_,dt);
 
-  eu_(fluxes,
-      pg_,
-      tess_,
-      dt,
-      cache_data_,
-      cells_,
-      extensives_);
+  eu_(fluxes,pg_,tess_,dt,cache_data_,cells_,extensives_);
 
-  extensives_ = average_extensive
-    (extensives_,mid_fluxes);
+  extensives_ = average_extensive(extensives_, mid_extensives);
 
-  cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
-	       cache_data_);
+  cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_);
 
   time_ += dt;
   ++cycle_;

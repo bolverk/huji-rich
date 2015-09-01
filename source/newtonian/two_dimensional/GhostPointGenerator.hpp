@@ -33,11 +33,20 @@ public:
 	\param ghost_index The index of the ghost cell
 	\return The gradient of the ghost cell
 	*/
-	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient
-	(const Tessellation& tess,
-	 const vector<ComputationalCell>& cells,
-	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-	 size_t ghost_index) const = 0;
+	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
+		const vector<ComputationalCell>& cells,const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+		size_t ghost_index) const = 0;
+
+	/*!
+	\brief Returns the velocity of a ghost mesh point, default is for stationary walls
+	\param tess The tessellation
+	\param cells The computational cells
+	\param point_veolcities The velocities of the non-ghost mesh points
+	\param ghost_index The index of the ghost point
+	\return The velocity of the ghost mesh point
+	*/
+	virtual Vector2D GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& cells,
+		vector<Vector2D> const& point_veolcities,size_t ghost_index)const;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);
