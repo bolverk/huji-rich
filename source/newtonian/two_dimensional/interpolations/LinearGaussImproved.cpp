@@ -155,9 +155,9 @@ namespace
 		pair<ComputationalCell, ComputationalCell> const& slope)
 	{
 		pair<ComputationalCell, ComputationalCell> res(slope);
-		ComputationalCell cmax(neighbors[0]), cmin(neighbors[0]);
+		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum.minimum neighbor values
-		for (size_t i = 1; i < neighbors.size(); ++i)
+		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = neighbors[i];
 			cmax.density = std::max(cmax.density, cell_temp.density);
@@ -173,7 +173,7 @@ namespace
 			for (std::map<std::string, double>::iterator it = cmin.tracers.begin(); it != cmin.tracers.end(); ++it)
 				it->second = std::min(it->second, cell_temp.tracers.find(it->first)->second);
 		}
-		ComputationalCell maxdiff = cmax - cell,mindiff = cell - cmin;
+		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
 		// limit the slope
 		vector<double> psi(4 + cell.tracers.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
@@ -258,9 +258,9 @@ namespace
 		pair<ComputationalCell, ComputationalCell> const& slope,double diffusecoeff)
 	{
 		pair<ComputationalCell, ComputationalCell> res(slope);
-		ComputationalCell cmax(neighbors[0]), cmin(neighbors[0]);
+		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum values
-		for (size_t i = 1; i < neighbors.size(); ++i)
+		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = neighbors[i];
 			cmax.density = std::max(cmax.density, cell_temp.density);
@@ -276,7 +276,7 @@ namespace
 			for (std::map<std::string, double>::iterator it = cmin.tracers.begin(); it != cmin.tracers.end(); ++it)
 				it->second = std::min(it->second, cell_temp.tracers.find(it->first)->second);
 		}
-		ComputationalCell maxdiff = cmax - cell, mindiff = cell - cmin;
+		ComputationalCell maxdiff = cmax - cell, mindiff = cmin - cell;
 		// limit the slope
 		vector<double> psi(4 + cell.tracers.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)

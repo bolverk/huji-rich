@@ -164,13 +164,7 @@ void hdsim::TimeAdvance2Heun(void)
   const vector<Extensive> mid_fluxes = fc_(tess_,point_velocities,cells_,extensives_,cache_data_,eos_,time_,dt);
 
   vector<Extensive> mid_extensives = extensives_;
-  eu_(mid_fluxes,
-      pg_,
-      tess_,
-      dt,
-      cache_data_,
-      cells_,
-      mid_extensives);
+  eu_(mid_fluxes, pg_,tess_,dt,cache_data_,cells_,mid_extensives);
 
   MoveMeshPoints(point_velocities, dt, tess_);
   cache_data_.reset();
