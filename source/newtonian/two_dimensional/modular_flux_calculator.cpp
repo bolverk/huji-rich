@@ -33,9 +33,9 @@ namespace
 	  GhostPointGenerator const& ghost,vector<ComputationalCell> const& cells)
   {
 	  Vector2D v0 = (edge.neighbors.first >= tess.GetPointNo()) ? ghost.GetGhostVelocity(tess, cells, point_velocities,
-		  static_cast<size_t> (edge.neighbors.first)) : point_velocities.at(static_cast<size_t>(edge.neighbors.first));
+		  static_cast<size_t> (edge.neighbors.first),edge) : point_velocities.at(static_cast<size_t>(edge.neighbors.first));
 	  Vector2D v1 = (edge.neighbors.second >= tess.GetPointNo()) ? ghost.GetGhostVelocity(tess, cells, point_velocities,
-		  static_cast<size_t> (edge.neighbors.second)) : point_velocities.at(static_cast<size_t>(edge.neighbors.second));
+		  static_cast<size_t> (edge.neighbors.second),edge) : point_velocities.at(static_cast<size_t>(edge.neighbors.second));
 	  return tess.CalcFaceVelocity(v0, v1, tess.GetCellCM(edge.neighbors.first), tess.GetCellCM(edge.neighbors.second),
 		  calc_centroid(edge));
   }
