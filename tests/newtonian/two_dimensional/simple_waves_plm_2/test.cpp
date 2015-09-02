@@ -58,7 +58,7 @@ namespace {
       const Vector2D r =
 	tess.GetCellCM(static_cast<int>(i));
       res[i].density = density_prof(r.x);
-      res[i].pressure = density_prof(r.x);
+      res[i].pressure = pressure_prof(r.x);
       res[i].velocity = Vector2D
 	(xvelocity_prof(r.x),0);
     }
