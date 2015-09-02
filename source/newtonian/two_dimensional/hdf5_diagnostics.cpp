@@ -237,7 +237,9 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
     ("Number of vertices in cell",chd.nvert)
     ("Cycle number",vector<int>(1,sim.getCycle()));
 
-  h5sc("Number of tracers", vector<int>(1, sim.getAllCells().front().tracers.size()));
+  h5sc("Number of tracers", vector<int>
+       (1,
+	static_cast<int>(sim.getAllCells().front().tracers.size())));
 
   for(boost::container::flat_map<std::string,double>::const_iterator it=
 	sim.getAllCells().front().tracers.begin();

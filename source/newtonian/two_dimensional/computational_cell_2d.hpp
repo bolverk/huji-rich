@@ -44,6 +44,8 @@ public:
 	ComputationalCell(void);
 
 	ComputationalCell& operator+=(ComputationalCell const& other);
+
+  	ComputationalCell& operator=(ComputationalCell const& origin);
 };
 
 /*! \brief Term by term addition

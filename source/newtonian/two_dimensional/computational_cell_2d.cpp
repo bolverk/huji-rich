@@ -8,6 +8,21 @@ ComputationalCell::ComputationalCell(ComputationalCell const& other) :
 density(other.density), pressure(other.pressure), velocity(other.velocity), tracers(other.tracers),
 stickers(other.stickers){}
 
+ComputationalCell& ComputationalCell::operator=(ComputationalCell const& other)
+{
+	density = other.density;
+	pressure = other.pressure;
+	velocity = other.velocity;
+	tracers = other.tracers;
+	stickers = other.stickers;
+	/*
+	for (boost::container::flat_map<std::string, double>::iterator it = this->tracers.begin();
+		it != this->tracers.end(); ++it)
+		it->second += other.tracers.find(it->first)->second;
+	*/
+	return *this;
+}
+
 ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
 {
 	this->density += other.density;
