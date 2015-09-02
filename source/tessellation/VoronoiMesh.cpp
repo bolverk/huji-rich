@@ -900,6 +900,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
 				  CM[counter] = GetReflection(*_bc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
+				  ++counter;
 				}
 			}
 			else
@@ -908,9 +909,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
 				{
 				  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				  ++counter;
 				}
 			}
-			++counter;
 		}
 	}
 }
@@ -1104,6 +1105,7 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
 				  CM[counter] = GetReflection(*obc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
+				  ++counter;
 				}
 			}
 			else
@@ -1112,9 +1114,9 @@ void VoronoiMesh::Update(vector<Vector2D> const& p)
 				{
 				  CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
 						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
+				  ++counter;
 				}
 			}
-			++counter;
 		}
 	}
 }
