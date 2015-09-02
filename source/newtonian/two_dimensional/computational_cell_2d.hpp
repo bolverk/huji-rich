@@ -1,46 +1,49 @@
 /*! \file computational_cell.hpp
-  \author Almog Yalinewich
-  \brief Computational cell
- */
+\author Almog Yalinewich
+\brief Computational cell
+*/
 
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
+#include <map>
+#include <boost/container/flat_map.hpp>
 #include <string>
 #include "../../tessellation/geometry.hpp"
-#include "boost/container/flat_map.hpp"
 
 //! \brief Computational cell
 class ComputationalCell
 {
 public:
 
-  //! \brief Density
-  double density;
+	//! \brief Density
+	double density;
 
-  //! \brief Pressure
-  double pressure;
+	//! \brief Pressure
+	double pressure;
 
-  //! \brief Velocity
-  Vector2D velocity;
+	//! \brief Velocity
+	Vector2D velocity;
 
-  //! \brief Tracers (can transfer from one cell to another)
-  boost::container::flat_map<std::string,double> tracers;
+	//! \brief Tracers (can transfer from one cell to another)
+	// std::map<std::string,double> tracers;
+	boost::container::flat_map<std::string, double> tracers;
 
-  //! \brief Stickers (stick to the same cell)
-  boost::container::flat_map<std::string,bool> stickers;
+	//! \brief Stickers (stick to the same cell)
+	//std::map<std::string,bool> stickers;
+	boost::container::flat_map<std::string, bool> stickers;
 
-  /*!
-  \brief Copy constructor
-  \param other The cell to copy
-  */
-  ComputationalCell(ComputationalCell const& other);
-  /*!
-  \brief Default constructor
-  */
-  ComputationalCell(void);
+	/*!
+	\brief Copy constructor
+	\param other The cell to copy
+	*/
+	ComputationalCell(ComputationalCell const& other);
+	/*!
+	\brief Default constructor
+	*/
+	ComputationalCell(void);
 
-  ComputationalCell& operator=(const ComputationalCell& origin);
+	ComputationalCell& operator+=(ComputationalCell const& other);
 };
 
 /*! \brief Term by term addition
