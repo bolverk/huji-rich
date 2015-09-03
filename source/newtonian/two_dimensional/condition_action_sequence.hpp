@@ -73,4 +73,22 @@ private:
   const RiemannSolver& rs_;
 };
 
+class RigidWallFlux: public ConditionActionSequence::Action
+{
+public:
+
+  RigidWallFlux(const RiemannSolver& rs);
+
+  Extensive operator()
+  (const Edge& edge,
+   const Tessellation& tess,
+   const vector<Vector2D>& point_velocities,
+   const vector<ComputationalCell>& cells,
+   const EquationOfState& eos,
+   const bool aux) const;
+
+private:
+  const RiemannSolver& rs_;
+};
+
 #endif // CONDITION_ACTION_SEQUENCE_HPP

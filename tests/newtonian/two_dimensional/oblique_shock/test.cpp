@@ -13,7 +13,6 @@
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
-#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"

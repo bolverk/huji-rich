@@ -121,3 +121,66 @@ Extensive RegularFlux::operator()
      cells.at(static_cast<size_t>(edge.neighbors.first)):
      cells.at(static_cast<size_t>(edge.neighbors.second)));	      
 }
+
+RigidWallFlux::RigidWallFlux
+(const RiemannSolver& rs):
+  rs_(rs) {}
+
+namespace{
+  pair<Primitive,Primitive> rigid_wall_states
+    (const Primitive& state,
+     const Vector2D& p,
+     const bool aux)
+  {
+    if(aux){
+      const Primitive left = state;
+      const Primitive right = reflect(left,p);
+      return pair<Primitive,Primitive>(left,right);
+    }
+    else{
+      const Primitive right = state;
+      const Primitive left = reflect(right,p);
+      return pair<Primitive,Primitive>(left,right);
+    }
+  }
+}
+
+Extensive RigidWallFlux::operator()
+(const Edge& edge,
+ const Tessellation& tess,
+ const vector<Vector2D>& /*point_velocities*/,
+ const vector<ComputationalCell>& cells,
+ const EquationOfState& eos,
+ const bool aux) const
+{
+  if(aux)
+    assert(edge.neighbors.first>=0 && edge.neighbors.first<tess.GetPointNo());
+  else
+    assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+  const Vector2D p = normalize
+    (edge.vertices.second - edge.vertices.first);
+  const Vector2D n = 
+    normalize
+    (remove_parallel_component
+     (aux ?
+      edge.vertices.first - tess.GetMeshPoint(edge.neighbors.first) :
+      tess.GetMeshPoint(edge.neighbors.second) - edge.vertices.first,
+      p));
+  const double v = 0;
+  const pair<Primitive,Primitive> left_right =
+    rigid_wall_states
+    (convert_to_primitive
+     (cells.at
+      (static_cast<size_t>
+       (aux ? edge.neighbors.first  : edge.neighbors.second)),
+      eos),
+     p, aux);
+  const Conserved c = rotate_solve_rotate_back
+    (rs_,
+     left_right.first,
+     left_right.second,
+     v,n,p);
+  return conserved_to_extensive
+    (c,
+     cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)));
+}
