@@ -109,4 +109,43 @@ private:
   const RiemannSolver& rs_;
 };
 
+class IsBoundaryEdge: public ConditionActionSequence::Condition
+{
+public:
+
+  IsBoundaryEdge(void);
+
+  pair<bool,bool> operator()
+  (const Edge& edge,
+   const Tessellation& tess,
+   const vector<ComputationalCell>& cells) const;
+};
+
+class IsBulkEdge: public ConditionActionSequence::Condition
+{
+public:
+
+  IsBulkEdge(void);
+
+  pair<bool,bool> operator()
+  (const Edge& edge,
+   const Tessellation& tess,
+   const vector<ComputationalCell>& cells) const;
+};
+
+class RegularSpecialEdge: public ConditionActionSequence::Condition
+{
+public:
+
+  RegularSpecialEdge(const string& sticker_name);
+
+  pair<bool,bool> operator()
+  (const Edge& edge,
+   const Tessellation& tess,
+   const vector<ComputationalCell>& cells) const;
+
+private:
+  const string sticker_name_;
+};
+
 #endif // CONDITION_ACTION_SEQUENCE_HPP

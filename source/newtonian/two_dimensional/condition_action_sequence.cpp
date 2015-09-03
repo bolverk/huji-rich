@@ -224,3 +224,57 @@ Extensive FreeFlowFlux::operator()
     (c,
      cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)));
 }
+
+IsBoundaryEdge::IsBoundaryEdge(void) {}
+
+pair<bool,bool> IsBoundaryEdge::operator()
+(const Edge& edge,
+ const Tessellation& tess,
+ const vector<ComputationalCell>& /*cells*/) const
+{
+  if(edge.neighbors.first<0 || edge.neighbors.first>=tess.GetPointNo()){
+    assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+    return pair<bool,bool>(true,false);
+  }
+  if(edge.neighbors.second<0 || edge.neighbors.second>=tess.GetPointNo())
+    return pair<bool,bool>(true,true);
+  return pair<bool,bool>(false,false);
+}
+
+IsBulkEdge::IsBulkEdge(void) {}
+
+pair<bool,bool> IsBulkEdge::operator()
+(const Edge& edge,
+ const Tessellation& tess,
+ const vector<ComputationalCell>& /*cells*/) const
+{
+  return pair<bool,bool>
+    (edge.neighbors.first >= 0 &&
+     edge.neighbors.second >= 0 &&
+     edge.neighbors.first < tess.GetPointNo() &&
+     edge.neighbors.second < tess.GetPointNo(),
+     false);
+}
+
+RegularSpecialEdge::RegularSpecialEdge(const string& sticker_name):
+  sticker_name_(sticker_name) {}
+
+pair<bool,bool> RegularSpecialEdge::operator()
+(const Edge& edge,
+ const Tessellation& tess,
+ const vector<ComputationalCell>& cells) const
+{
+  if(edge.neighbors.first < 0 ||
+     edge.neighbors.second < 0 ||
+     edge.neighbors.first >= tess.GetPointNo() ||
+     edge.neighbors.second >= tess.GetPointNo())
+    return pair<bool,bool>(false,false);
+  if(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers.find(sticker_name_)->second){
+    if(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.find(sticker_name_)->second)
+      return pair<bool,bool>(false,false);
+    return pair<bool,bool>(true,false);
+  }
+  if(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.find(sticker_name_)->second)
+    return pair<bool,bool>(true,true);
+  return pair<bool,bool>(false,false);
+}
