@@ -9,11 +9,9 @@
 #include "source/newtonian/two_dimensional/physical_geometry.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/common/hllc.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
@@ -94,14 +92,12 @@ namespace {
 				  outer_.getBoundary().second)),
 #endif
       tess_(init_points_,outer_),
-      interp_method_(),
       triangle_(Vector2D(0.5,0.6),
 		Vector2D(0.7,0.5),
 		Vector2D(0.4,0.4)),
       eos_(5./3.),
       pm_(),
       rs_(),
-      hbc_(rs_),
       force_(pg_.getAxis()),
       tsf_(0.3),
       fc_(rs_),
@@ -132,12 +128,10 @@ namespace {
 #endif
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
-    PCM2D interp_method_;
     const Triangle triangle_;
     IdealGas eos_;
     Lagrangian pm_;
     Hllc rs_;
-    RigidWallHydro hbc_;
     CylindricalComplementary force_;
     SimpleCFL tsf_;
     SimpleFluxCalculator fc_;
