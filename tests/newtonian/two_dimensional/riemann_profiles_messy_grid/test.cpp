@@ -12,14 +12,12 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
@@ -88,7 +86,6 @@ public:
     eos_(5./3.),
     pm_naive_(),
     rs_(),
-    hbc_(rs_),
     point_motion_(pm_naive_,eos_),
     force_(),
     tsf_(0.3),
@@ -127,7 +124,6 @@ private:
   const IdealGas eos_;
   Lagrangian pm_naive_;
   const Hllc rs_;
-  const RigidWallHydro hbc_;
   RoundCells point_motion_;
   ZeroForce force_;
   const SimpleCFL tsf_;
