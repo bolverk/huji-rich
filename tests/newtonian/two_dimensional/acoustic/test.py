@@ -66,7 +66,7 @@ class SpatProf:
 
 def main():
 
-    graphic_flag = True
+    graphic_flag = False
     if graphic_flag:
         import pylab
 

@@ -2,9 +2,7 @@
 #include "source/newtonian/test_1d/acoustic.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/PeriodicBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/PeriodicHydro.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/test_2d/profile_1d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
@@ -17,6 +15,7 @@
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -27,7 +26,7 @@ namespace {
   {
     cout << "Caught universal error" << endl;
     cout << eo.GetErrorMessage() << endl;
-    for(int i = 0;i<(int)eo.GetFields().size();++i){
+    for(size_t i = 0;i<eo.GetFields().size();++i){
       cout << eo.GetFields()[i] << " = "
 	   << eo.GetValues()[i] << endl;
     }
@@ -75,11 +74,11 @@ namespace {
 		 read_number("amplitude.txt"),
 		 width_),
       rs_(),
-      hbc_(rs_),
       point_motion_(),
       force_(),
       tsf_(0.3),
       fc_(rs_),
+      eu_(),
       cu_(),
       sim_(tess_,
 	   outer_,
@@ -90,6 +89,7 @@ namespace {
 	   force_,
 	   tsf_,
 	   fc_,
+	   eu_,
 	   cu_) {}
 
     hdsim& getSim(void)
@@ -107,11 +107,11 @@ namespace {
     IdealGas eos_;
     AcousticInitCond init_cond_;
     Hllc rs_;
-    PeriodicHydro hbc_;
     Eulerian point_motion_;
     ZeroForce force_;
     const SimpleCFL tsf_;
     const SimpleFluxCalculator fc_;
+    const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
     hdsim sim_;
   };
