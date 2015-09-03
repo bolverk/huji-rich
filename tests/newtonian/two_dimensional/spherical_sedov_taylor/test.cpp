@@ -1,11 +1,9 @@
 #include <iostream>
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
@@ -49,10 +47,8 @@ namespace {
       mesh_(cartesian_mesh(50,50,lower_left,upper_right)),
       outer_(lower_left, upper_right),
       tess_(mesh_,outer_),
-      interpm_(),
       eos_(5./3.),
       rs_(),
-      hbc_(rs_),
       raw_point_motion_(),
       point_motion_(raw_point_motion_,eos_),
       force_(pg_.getAxis()),
@@ -82,10 +78,8 @@ namespace {
     const vector<Vector2D> mesh_;
     const SquareBox outer_;
     VoronoiMesh tess_;
-    PCM2D interpm_;
     const IdealGas eos_;
     const Hllc rs_;
-    const RigidWallHydro hbc_;
     Lagrangian raw_point_motion_;
     RoundCells point_motion_;
     CylindricalComplementary force_;
@@ -95,39 +89,6 @@ namespace {
     const SimpleCellUpdater cu_;
     hdsim sim_;
   };
-
-  namespace {
-    class TotalConservedHistory: public DiagnosticFunction
-    {
-    public:
-
-      TotalConservedHistory(const string& fname):
-	fname_(fname), times_(), values_() {}
-
-      void operator()(const hdsim& sim)
-      {
-	times_.push_back(sim.getTime());
-	values_.push_back(total_conserved(sim));
-      }
-
-      ~TotalConservedHistory(void)
-      {
-	ofstream f(fname_.c_str());
-	for(size_t i=0;i<times_.size();++i)
-	  f << times_[i] << " "
-	    << values_[i].mass << " "
-	    << values_[i].momentum.x << " "
-	    << values_[i].momentum.y << " "
-	    << values_[i].energy << "\n";
-	f.close();
-      }
-
-    private:
-      const string fname_;
-      mutable vector<double> times_;
-      mutable vector<Extensive> values_;
-    };
-  }
 
   void my_main_loop(hdsim& sim)
   {
