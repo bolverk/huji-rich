@@ -9,12 +9,10 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
@@ -50,11 +48,6 @@ namespace {
     double getWidth(void)
     {
       return width_;
-    }
-
-    IdealGas const& getEOS(void) const
-    {
-      return swigic_.getEOS();
     }
 
     double getAdiabaticIndex(void) const
@@ -121,11 +114,9 @@ namespace {
 			  Vector2D(init_prof.getWidth(),
 				   init_prof.getWidth())),
 	    outer_),
-      interpm_(),
       eos_(init_prof.getAdiabaticIndex()),
       bpm_(),
       rs_(),
-      hbc_(rs_),
       point_motion_(bpm_,eos_),
       force_(),
       tsf_(0.3),
@@ -153,11 +144,9 @@ namespace {
     const SlabSymmetry pg_;
     const SquareBox outer_;
     VoronoiMesh tess_;
-    PCM2D interpm_;
     const IdealGas eos_;
     Lagrangian bpm_;
     const Hllc rs_;
-    const RigidWallHydro hbc_;
     RoundCells point_motion_;
     ZeroForce force_;
     const SimpleCFL tsf_;
