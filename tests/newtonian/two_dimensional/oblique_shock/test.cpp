@@ -23,6 +23,8 @@
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/misc/vector_initialiser.hpp"
+#include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
+#include "source/misc/mesh_generator.hpp"
 
 using namespace std;
 
@@ -42,77 +44,128 @@ namespace {
     return res;
   }
 
-  vector<Vector2D> CustomPoints(int nx,int ny,double sidex,double sidey)
+  class LeftBoundaryEdge: public ConditionActionSequence::Condition
   {
-    vector<Vector2D> res;
-    double widthx = sidex/static_cast<double>(nx);
-    double widthy = sidey/static_cast<double>(ny);
-    Vector2D point;
-    for(int i=0;i<nx;i++){
-      for(int j=0;j<ny;j++){
-	point.x = (static_cast<double>(i)+0.5)*widthx-sidex/2;
-	point.y = (static_cast<double>(j)+0.5)*widthy-sidey/2;
-	if(point.y>0.1*point.x-0.428)
-	  res.push_back(point);
+  public:
+
+    LeftBoundaryEdge(void) {}
+
+    pair<bool,bool> operator()
+    (const Edge& edge,
+     const Tessellation& tess,
+     const vector<ComputationalCell>& /*cells*/) const
+    {
+      if(edge.neighbors.first<0 || edge.neighbors.first>=tess.GetPointNo()){
+	assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+	const Vector2D r = tess.GetMeshPoint(edge.neighbors.second);
+	if(r.x>edge.vertices.first.x && r.x>edge.vertices.second.x)
+	  return pair<bool,bool>(true,false);
+	return pair<bool,bool>(false,false);
       }
+      if(edge.neighbors.second<0 || edge.neighbors.second>=tess.GetPointNo()){
+	const Vector2D r = tess.GetMeshPoint(edge.neighbors.first);
+	if(r.x>edge.vertices.first.x && r.x>edge.vertices.second.x)
+	  return pair<bool,bool>(true,true);
+	return pair<bool,bool>(false,false);
+      }
+      return pair<bool,bool>(false,false);
     }
+  };
+
+  ComputationalCell calc_ghost(void)
+  {
+    ComputationalCell res;
+    res.density = 1;
+    res.pressure = 1;
+    res.velocity = Vector2D(4,0);
+    res.stickers["wedge"] = false;
     return res;
   }
 
-  vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,double ymax)
+  Vector2D normalize(const Vector2D& v)
   {
-    double dy=ymax-ymin,dx=xmax-xmin;
-    double angle=atan2(dy,dx);
-    double length=sqrt(dy*dy+dx*dx);
-    double dl=length/PointNum;
+    return v/abs(v);
+  }
 
-    vector<Vector2D> res;
-    Vector2D temp;
-
-    for(int i=0;i<PointNum;++i)
-      {
-	temp.Set(xmin+dl*(i+0.5)*cos(angle),ymin+dl*(i+0.5)*sin(angle));
-	res.push_back(temp);
-      }
+    Extensive conserved_to_extensive
+  (const Conserved& c, const ComputationalCell& cell)
+  {
+    Extensive res;
+    res.mass = c.Mass;
+    res.momentum = c.Momentum;
+    res.energy = c.Energy;
+    for(boost::container::flat_map<string,double>::const_iterator it=
+	  cell.tracers.begin();
+	it!=cell.tracers.end();++it)
+      res.tracers[it->first] = (it->second)*c.Mass;
     return res;
   }
 
-  vector<Vector2D> create_initial_points
-  (double width, int np, int inner_num)
+  class ConstantGhost: public ConditionActionSequence::Action
   {
-    vector<Vector2D> init_points = CustomPoints(np,np,width,width);
-    vector<Vector2D> inner_boundary_1 = 
-      Line(inner_num,
-	   -width/2+0.01,
-	   width/2,
-	   -width/2,
-	   width/2-0.9);
-    const double alpha = atan((inner_boundary_1[0].y-inner_boundary_1[1].y)/
-			      (inner_boundary_1[0].x-inner_boundary_1[1].x));
-    write_number(alpha,"wedge_angle.txt");
-    vector<Vector2D> inner_boundary_2(inner_boundary_1.size());
-    const double a = 0.01;
-    for(size_t i=0;i<inner_boundary_1.size();++i)
-      inner_boundary_2[i] = Vector2D(inner_boundary_1[i].x-a*sin(alpha),
-				     inner_boundary_1[i].y+a*cos(alpha));
-    init_points.insert
-      (init_points.begin(), inner_boundary_2.begin(), inner_boundary_2.end());
-    init_points.insert
-      (init_points.begin(), inner_boundary_1.begin(), inner_boundary_1.end());
-    return init_points;
-  }
+  public:
+
+    ConstantGhost(const ComputationalCell& ghost,
+		  const RiemannSolver& rs):
+      ghost_(ghost), rs_(rs) {}
+
+    Extensive operator()
+    (const Edge& edge,
+     const Tessellation& tess,
+     const vector<Vector2D>& /*point_velocities*/,
+     const vector<ComputationalCell>& cells,
+     const EquationOfState& eos,
+     const bool aux) const
+    {
+      if(aux)
+	assert(edge.neighbors.first>=0 && edge.neighbors.first<tess.GetPointNo());
+      else
+	assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+      const Vector2D p = normalize
+	(edge.vertices.second -
+	 edge.vertices.first);
+      const Vector2D n  = normalize
+	(remove_parallel_component
+	 (aux ?
+	  edge.vertices.first - tess.GetMeshPoint(edge.neighbors.first) :
+	  tess.GetMeshPoint(edge.neighbors.second) - edge.vertices.first,
+	  p));
+      const double v = 0;
+      const pair<ComputationalCell,ComputationalCell> cc_left_righ =
+	aux ?
+ 	pair<ComputationalCell,ComputationalCell>
+	(cells.at(static_cast<size_t>(edge.neighbors.first)),ghost_) :
+	pair<ComputationalCell,ComputationalCell>
+	(ghost_,cells.at(static_cast<size_t>(edge.neighbors.second)));
+      const pair<Primitive,Primitive> left_right =
+	pair<Primitive,Primitive>
+	(convert_to_primitive(cc_left_righ.first,eos),
+	 convert_to_primitive(cc_left_righ.second,eos));
+      const Conserved c = rotate_solve_rotate_back
+	(rs_,
+	 left_right.first,
+	 left_right.second,
+	 v,n,p);
+      return conserved_to_extensive(c,ghost_);
+    }
+
+  private:
+    const ComputationalCell ghost_;
+    const RiemannSolver& rs_;
+  };
 
   class SimData
   {
   public:
 
     SimData(double adiabatic_index = 5./3.,
-	    double width=1,
-	    int np=30,
-	    int inner_num=60):
+	    double width=1):
       pg_(),
       outer_(-width/2,width/2,width/2,-width/2),
-      tess_(create_initial_points(width,np,inner_num),
+      tess_(//create_initial_points(width,np,inner_num),
+	    cartesian_mesh(30,30,
+			   outer_.getBoundary().first,
+			   outer_.getBoundary().second),
 	    outer_),
       eos_(adiabatic_index),
       rs_(),
@@ -120,6 +173,8 @@ namespace {
       force_(),
       tsf_(0.3),
       fc_(VectorInitialiser<pair<const ConditionActionSequence::Condition*,const ConditionActionSequence::Action*> >
+	  (pair<const ConditionActionSequence::Condition*,const ConditionActionSequence::Action*>
+	   (new LeftBoundaryEdge, new ConstantGhost(calc_ghost(),rs_)))
 	  (pair<const ConditionActionSequence::Condition*,const ConditionActionSequence::Action*>
 	   (new IsBoundaryEdge, new FreeFlowFlux(rs_)))
 	  (pair<const ConditionActionSequence::Condition*,const ConditionActionSequence::Action*>
@@ -170,10 +225,8 @@ namespace {
 
   void main_loop(hdsim& sim)
   {
-    SimpleCFL tsf(0.5);
     const int max_iter = 5e6;
-    const double tf = 1;
-    //    sim.SetEndTime(tf);
+    const double tf = 0.5;
     while(tf>sim.getTime()){
       try{
 	sim.TimeAdvance();
