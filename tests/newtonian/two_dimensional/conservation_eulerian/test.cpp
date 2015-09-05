@@ -12,7 +12,6 @@
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/common/hllc.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
@@ -97,7 +96,6 @@ namespace {
       eos_(5./3.),
       pm_(),
       rs_(),
-      hbc_(rs_),
       force_(),
       tsf_(0.3),
       fc_(rs_),
@@ -131,7 +129,6 @@ namespace {
     IdealGas eos_;
     Eulerian pm_;
     Hllc rs_;
-    RigidWallHydro hbc_;
     ZeroForce force_;
     SimpleCFL tsf_;
     SimpleFluxCalculator fc_;

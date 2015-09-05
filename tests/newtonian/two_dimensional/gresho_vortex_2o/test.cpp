@@ -5,10 +5,8 @@
 #include <cmath>
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
-#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
@@ -19,12 +17,27 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/ghost_point_generators/RigidWallGenerator.hpp"
+#include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
+#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-  
+
+  double calc_vq2r(double r)
+  {
+    if(r<0.2)
+      return 5;
+    else if(r>0.4)
+      return 0;
+    return 2.0/r-5.0;
+  }
+
   double azimuthal_velocity(double r)
   {
     if(r<0.2)
@@ -35,12 +48,36 @@ namespace {
       return 2-5*r;
   }
 
+  double calc_pressure(double r)
+  {
+    if(r<0.2)
+      return 5+(25./2.)*pow(r,2);
+    else if(r>0.4)
+      return 3+4*log(2.);
+    else
+      return 9+(25./2.)*pow(r,2)-20*r+4*log(r/0.2);
+  }
+
+  vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
+  {
+    vector<ComputationalCell> res
+      (static_cast<size_t>(tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      const Vector2D r = tess.GetCellCM(static_cast<int>(i));
+      const double radius = abs(r);
+      res[i].density = 1;
+      res[i].pressure = calc_pressure(radius);
+      res[i].velocity = calc_vq2r(radius)*Vector2D(-r.y,r.x);
+    }
+    return res;
+  }
+
   class VelocityX: public SpatialDistribution
   {
   public:
     double operator()(Vector2D const& r) const
     {
-      if(abs(r)==0)
+      if(abs(r)<-0)
 	return 0;
       else
 	return -azimuthal_velocity(abs(r))*r.y/abs(r);
@@ -52,22 +89,12 @@ namespace {
   public:
     double operator()(Vector2D const& r) const
     {
-      if(abs(r)==0)
+      if(abs(r)<=0)
 	return 0;
       else
 	return azimuthal_velocity(abs(r))*r.x/abs(r);
     }
   };
-
-  double calc_pressure(double r)
-  {
-    if(r<0.2)
-      return 5+(25./2.)*pow(r,2);
-    else if(r>0.4)
-      return 3+4*log(2.);
-    else
-      return 9+(25./2.)*pow(r,2)-20*r+4*log(r/0.2);
-  }
 
   class Pressure: public SpatialDistribution
   {
@@ -105,38 +132,31 @@ public:
     proc_tess_(process_positions(outer_),outer_),
     #endif
     rs_(),
-    hbc_(rs_),
-    tess_(),
+    tess_(cartesian_mesh
+	  (30,30,
+	   outer_.getBoundary().first,
+	   outer_.getBoundary().second),
+	  outer_),
     eos_(5./3.),
-    interpm_(eos_,outer_,hbc_,true,false),
     bpm_(),
-    point_motion_(bpm_,hbc_),
+    point_motion_(bpm_,eos_),
     force_(),
-    sim_(
-	 #ifdef RICH_MPI
-	 distribute_grid(proc_tess_,
-			 CartesianGridGenerator
-			 (30,30,outer_.getBoundary().first,
-			  outer_.getBoundary().second)),
-	 #else
-	 cartesian_mesh(30,30,outer_.getBoundary().first,
-			outer_.getBoundary().second),
-	 #endif
-	 tess_,
-	 #ifdef RICH_MPI
-	 proc_tess_,
-	 #endif
-	 interpm_,
-	 Uniform2D(1),
-	 Pressure(),
-	 VelocityX(),
-	 VelocityY(),
+    tsf_(0.3),
+    gpg_(),
+    sr_(eos_,gpg_),
+    fc_(gpg_,sr_,rs_,hbc_),
+    eu_(),
+    sim_(tess_,
+	 outer_,
+	 pg_,
+	 calc_init_cond(tess_),
 	 eos_,
-	 rs_,
 	 point_motion_,
 	 force_,
-	 outer_,
-	 hbc_) {}
+	 tsf_,
+	 fc_,
+	 eu_,
+	 cu_) {}
 
   hdsim& getSim(void)
   {
@@ -144,19 +164,22 @@ public:
   }
 
 private:
-  
+
+  const SlabSymmetry pg_;
   const SquareBox outer_;
-  #ifdef RICH_MPI
-  VoronoiMesh proc_tess_;
-  #endif
   const Hllc rs_;
-  const RigidWallHydro hbc_;
   VoronoiMesh tess_;
   const IdealGas eos_;
-  LinearGaussConsistent interpm_;
   Lagrangian bpm_;
   RoundCells point_motion_;
   ZeroForce force_;
+  const SimpleCFL tsf_;
+  const RigidWallGenerator gpg_;
+  const IdleHBC hbc_;
+  const LinearGaussImproved sr_;
+  const ModularFluxCalculator fc_;
+  const SimpleExtensiveUpdater eu_;
+  const SimpleCellUpdater cu_;
   hdsim sim_;
 };
 
@@ -168,7 +191,7 @@ namespace {
     WriteTime diag("time.txt");
     main_loop(sim,
 	      term_cond,
-	      &hdsim::TimeAdvance2Mid,
+	      &hdsim::TimeAdvance2Heun,
 	      &diag);
   }
 }

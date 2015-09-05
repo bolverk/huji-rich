@@ -10,13 +10,11 @@
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
@@ -87,7 +85,6 @@ namespace {
     const SquareBox outer_;
     VoronoiMesh tess_;
     const SlabSymmetry pg_;
-    PCM2D interpm_;
     const IdealGas eos_;
     Eulerian bpm_;
     const Hllc rs_;
