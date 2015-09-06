@@ -5,10 +5,8 @@
 #include <cmath>
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
-#include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
@@ -27,6 +25,17 @@ using namespace std;
 using namespace simulation2d;
 
 namespace {
+
+  /*
+  double calc_vq2r(double r)
+  {
+    if(r<0.2)
+      return 5;
+    else if(r>0.4)
+      return 0;
+    return 2.0/r-5.0;
+  }
+  */
   
   double azimuthal_velocity(double r)
   {
@@ -43,7 +52,7 @@ namespace {
   public:
     double operator()(Vector2D const& r) const
     {
-      if(abs(r)==0)
+      if(abs(r)<=0)
 	return 0;
       else
 	return -azimuthal_velocity(abs(r))*r.y/abs(r);
@@ -55,7 +64,7 @@ namespace {
   public:
     double operator()(Vector2D const& r) const
     {
-      if(abs(r)==0)
+      if(abs(r)<=0)
 	return 0;
       else
 	return azimuthal_velocity(abs(r))*r.x/abs(r);
@@ -71,6 +80,25 @@ namespace {
     else
       return 9+(25./2.)*pow(r,2)-20*r+4*log(r/0.2);
   }
+
+  /*
+  vector<ComputationalCell> calc_init_cond
+  (const Tessellation& tess)
+  {
+    vector<ComputationalCell> res
+      (static_cast<size_t>
+       (tess.GetPointNo()));
+    for(size_t i=0;i<res.size();++i){
+      const Vector2D r = tess.GetCellCM
+	(static_cast<int>(i));
+      const double radius = abs(r);
+      res[i].density = 1;
+      res[i].pressure = calc_pressure(radius);
+      res[i].velocity = calc_vq2r(radius)*Vector2D(-r.y,r.x);
+    }
+    return res;
+  }
+  */
 
   class Pressure: public SpatialDistribution
   {
