@@ -8,7 +8,8 @@ boost::container::flat_map<size_t, ComputationalCell> PeriodicGhostGenerator::op
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(ghosts[i].first));
-		ComputationalCell ctemp = cells[static_cast<size_t>(ghosts[i].second == 2 ? edge.neighbors.first : edge.neighbors.second)];
+		ComputationalCell ctemp = cells[static_cast<size_t>(ghosts[i].second == 2 ? 
+			tess.GetOriginalIndex(edge.neighbors.second) : tess.GetOriginalIndex(edge.neighbors.first))];
 		res.insert(std::pair<size_t, ComputationalCell>(ghosts[i].second == 1 ? static_cast<size_t> (edge.neighbors.first)
 			: static_cast<size_t>(edge.neighbors.second), ctemp));
 	}
