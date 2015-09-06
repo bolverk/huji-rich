@@ -65,7 +65,7 @@ namespace {
 
     SimData(void):
       width_(read_number("width.txt")),
-      init_points_(cartesian_mesh(30,30,
+      init_points_(cartesian_mesh(2*30,2*30,
 				  Vector2D(0,0),
 				  Vector2D(width_,width_))),
       outer_(0,width_,width_,0),
@@ -132,8 +132,7 @@ int main(void)
     {
       SimData sim_data;
       hdsim& sim = sim_data.getSim();
-      //      SafeTimeTermination term_cond(1,1e6);
-      SafeTimeTermination term_cond(0.01,1e6);
+      SafeTimeTermination term_cond(1,1e6);
       WriteTime diag("time.txt");
       write_snapshot_to_hdf5(sim, "initial.h5");
       main_loop(sim, 
