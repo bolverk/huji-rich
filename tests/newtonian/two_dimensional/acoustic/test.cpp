@@ -16,6 +16,10 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
+#include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
+#include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
+#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -77,7 +81,9 @@ namespace {
       point_motion_(),
       force_(),
       tsf_(0.3),
-      fc_(rs_),
+      gpg_(),
+      sr_(eos_,gpg_),
+      fc_(gpg_,sr_,rs_,hbc_),
       eu_(),
       cu_(),
       sim_(tess_,
@@ -110,7 +116,10 @@ namespace {
     Eulerian point_motion_;
     ZeroForce force_;
     const SimpleCFL tsf_;
-    const SimpleFluxCalculator fc_;
+    const PeriodicGhostGenerator gpg_;
+    const LinearGaussImproved sr_;
+    const IdleHBC hbc_;
+    const ModularFluxCalculator fc_;
     const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
     hdsim sim_;
@@ -129,7 +138,7 @@ int main(void)
       write_snapshot_to_hdf5(sim, "initial.h5");
       main_loop(sim, 
 		term_cond,
-		&hdsim::TimeAdvance,
+		&hdsim::TimeAdvance2Heun,
 		&diag);
       write_snapshot_to_hdf5(sim, "final.h5");
     }
