@@ -166,6 +166,18 @@ void hdsim::TimeAdvance2Heun(void)
 	vector<Extensive> mid_extensives = extensives_;
 	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
 
+	ExternalForceContribution
+	  (tess_,
+	   pg_,
+	   cache_data_,
+	   cells_,
+	   mid_fluxes,
+	   point_velocities,
+	   source_,
+	   time_,
+	   dt,
+	   mid_extensives);
+
 	MoveMeshPoints(point_velocities, dt, tess_);
 	cache_data_.reset();
 
@@ -174,6 +186,18 @@ void hdsim::TimeAdvance2Heun(void)
 	const vector<Extensive> fluxes = fc_(tess_, point_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
 
 	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
+
+	ExternalForceContribution
+	  (tess_,
+	   pg_,
+	   cache_data_,
+	   mid_cells,
+	   fluxes,
+	   point_velocities,
+	   source_,
+	   time_+dt,
+	   dt,
+	   extensives_);
 
 	extensives_ = average_extensive(extensives_, mid_extensives);
 
