@@ -23,7 +23,7 @@
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
-#include "source/newtonian/two_dimensional/ghost_point_generators/RigidWallGenerator.hpp"
+#include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
 
@@ -128,7 +128,7 @@ namespace {
     PeriodicDriver acc_;
     ConservativeForce force_;
     const SimpleCFL tsf_;
-    const RigidWallGenerator gpg_;
+    const PeriodicGhostGenerator gpg_;
     const LinearGaussImproved sr_;
     const IdleHBC hbc_;
     const ModularFluxCalculator fc_;

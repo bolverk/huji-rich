@@ -41,6 +41,7 @@ namespace {
       const Vector2D r = tess.GetCellCM(static_cast<int>(i));
       res[i].stickers["wedge"] = r.y < 0.1*r.x-0.428;
     }
+    write_number(atan(0.1),"wedge_angle.txt");
     return res;
   }
 
