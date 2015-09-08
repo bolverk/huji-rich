@@ -88,5 +88,5 @@ void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> co
 	double dt, vector<Vector2D> & velocities)
 {
 	if (outer_.GetBoundaryType()!=Periodic)
-		CorrectPointsOverShoot(velocities, dt, tess, *outer_);
+		CorrectPointsOverShoot(velocities, dt, tess,outer_);
 }
