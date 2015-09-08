@@ -84,7 +84,7 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	return res;
 }
 
-void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
 	double dt, vector<Vector2D> & velocities)
 {
 	if (outer_.GetBoundaryType()!=Periodic)
