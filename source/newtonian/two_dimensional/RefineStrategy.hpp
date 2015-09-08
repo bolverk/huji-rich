@@ -8,7 +8,7 @@
 
 #include <algorithm>
 #include "../../tessellation/tessellation.hpp"
-#include "../common/hydrodynamic_variables.hpp"
+#include "../two_dimensional/computational_cell_2d.hpp"
 #include "../../misc/utils.hpp"
 /*! \brief Abstract class for refinment strategies
 	\author Elad Steinberg
@@ -22,14 +22,12 @@ public:
   \brief Calculates the cells to be refined
   \param tess The tessellation
   \param cells The primitive cells
-  \param tracers The tracers
   \param time The simulation time
   \param directions The directions to move the splitted points, can be given empty
   \param Removed A list of the cells that were removed in the last cell removal
   \return A list of the cells to refine
   */
-	virtual vector<int> CellsToRefine(Tessellation const& tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+	virtual vector<int> CellsToRefine(Tessellation const& tess,vector<ComputationalCell> const& cells,
 		double time,vector<Vector2D> &directions,vector<int> const& Removed)=0;
 	/*!
 	\brief Removes cells that were splitted in the last time step

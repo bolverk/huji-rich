@@ -7,7 +7,7 @@
 #define REMOVALSTRATEGY_HPP 1
 
 #include "../../tessellation/tessellation.hpp"
-#include "../common/hydrodynamic_variables.hpp"
+#include "../two_dimensional/computational_cell_2d.hpp"
 #include <algorithm>
 #include "../../misc/universal_error.hpp"
 #ifdef RICH_MPI
@@ -28,9 +28,8 @@ public:
 		\param time The sim time
 		\return The cells to remove
 	*/
-	virtual vector<int> CellsToRemove(Tessellation const& tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
-		double time)const=0;
+	virtual vector<int> CellsToRemove(Tessellation const& tess,vector<ComputationalCell> const& cells,double time)const=0;
+	
 	/*!
 		\brief Checks if the removed list is good, throws an error if not
 		\param tess The tessellation
