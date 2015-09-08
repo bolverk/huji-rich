@@ -23,7 +23,7 @@ public:
 	~NohRefine();
 
 	vector<int> CellsToRefine(Tessellation const& tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+		vector<ComputationalCell> const& cells,vector<vector<double> > const& tracers,
 		double time,vector<Vector2D> &directions,vector<int> const& Removed);
 };
 
@@ -42,7 +42,7 @@ public:
 	~NohRemove();
 
 	vector<int> CellsToRemove(Tessellation const& tess,
-		vector<Primitive> const& cells,vector<vector<double> > const& tracers,
+		vector<ComputationalCell> const& cells, vector<vector<double> > const& tracers,
 		double time)const;
 };
 

@@ -7,7 +7,7 @@ NohRefine::~NohRefine(void)
 {}
 
 vector<int> NohRefine::CellsToRefine(Tessellation const& tess,
-				     vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
+	vector<ComputationalCell> const& /*cells*/, vector<vector<double> > const& /*tracers*/,
 	double /*time*/,vector<Vector2D> &directions,vector<int> const& Removed)
 {
 	vector<int> res;
@@ -36,7 +36,7 @@ NohRemove::~NohRemove()
 {}
 
 vector<int> NohRemove::CellsToRemove(Tessellation const& tess,
-				     vector<Primitive> const& /*cells*/,vector<vector<double> > const& /*tracers*/,
+	vector<ComputationalCell> const& /*cells*/, vector<vector<double> > const& /*tracers*/,
 	double /*time*/)const
 {
 	vector<int> ToRemoveTemp;
