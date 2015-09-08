@@ -57,7 +57,7 @@ def main():
     f.write(str(difrat)+'\n')
     f.close()
 
-    return difrat<0.23
+    return difrat<0.24
 
 if __name__=='__main__':
     import os
