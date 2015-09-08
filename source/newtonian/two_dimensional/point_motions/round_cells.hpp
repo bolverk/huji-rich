@@ -8,6 +8,7 @@
 
 #include "../point_motion.hpp"
 #include "../../common/equation_of_state.hpp"
+#include "../OuterBoundary.hpp"
 
 //! \brief Correction to point velocities that keeps cells round
 //! \details Based on equation 63 in the Arepo paper
@@ -18,19 +19,17 @@ public:
   /*! \brief Class constructor
     \param pm Base point motion
     \param eos Equation of state
+	\param outer The outer boudnary conditions, used for preventing points from getting outside the box
     \param chi chi parameter in equation 63
     \param eta eta parameter in equation 63
    */
-  RoundCells(const PointMotion& pm,
-	     const EquationOfState& eos,
-	     double chi = 0.15,
-	     double eta = 0.02);
+  RoundCells(const PointMotion& pm,const EquationOfState& eos,OuterBoundary const* outer = 0,
+	  double chi = 0.15,double eta = 0.02);
 
-  vector<Vector2D> operator()
-  (const Tessellation& tess,
-   const vector<ComputationalCell>& cells,
-   double time) const;
+  vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time) const;
 
+  void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+	  double dt, vector<Vector2D> & velocities);
 private:
 
   Vector2D calc_dw(size_t i,
@@ -39,6 +38,7 @@ private:
 
   const PointMotion& pm_;
   const EquationOfState& eos_;
+  OuterBoundary const* outer_;
   const double chi_;
   const double eta_;
 };

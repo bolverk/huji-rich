@@ -22,10 +22,18 @@ public:
     \param time The simulation time
     \return Velocities of the points
    */
-  virtual vector<Vector2D> operator()
-  (const Tessellation& tess,
-   const vector<ComputationalCell>& cells,
-   double time) const = 0;
+  virtual vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,
+	  double time) const = 0;
+
+  /*! \brief Applies a small fix to the velocity of all mesh points once the time step is known
+  \param tess The tessellation
+  \param cells Hydrodynamics cells
+  \param time The simulation time
+  \param velocities Velocities of the points
+  \param dt The time step
+  */
+  virtual void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+	  double dt, vector<Vector2D> & velocities);
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
