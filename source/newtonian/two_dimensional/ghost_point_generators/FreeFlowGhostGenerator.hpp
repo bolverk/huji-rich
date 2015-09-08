@@ -1,4 +1,4 @@
-/*! \file FreeFlowGhostenerator.hpp
+/*! \file FreeFlowGhostGenerator.hpp
 \brief Class for creating computationalcells of ghost points for free flow
 \author Elad Steinberg
 */
