@@ -22,9 +22,12 @@ public:
 	//! \brief Class destructor
 	~NohRefine();
 
-	vector<int> CellsToRefine(Tessellation const& tess,
-		vector<ComputationalCell> const& cells,vector<vector<double> > const& tracers,
-		double time,vector<Vector2D> &directions,vector<int> const& Removed);
+	vector<int> CellsToRefine
+	(Tessellation const& tess,
+	 vector<ComputationalCell> const& cells,
+	 double time,
+	 vector<Vector2D> &directions,
+	 vector<int> const& Removed);
 };
 
 //! \brief Noh problem Removal strategy class
@@ -41,9 +44,10 @@ public:
 	//! \brief Class destructor
 	~NohRemove();
 
-	vector<int> CellsToRemove(Tessellation const& tess,
-		vector<ComputationalCell> const& cells, vector<vector<double> > const& tracers,
-		double time)const;
+	vector<int> CellsToRemove
+	(Tessellation const& tess,
+	 vector<ComputationalCell> const& cells, 
+	 double time)const;
 };
 
 #endif //NOH_AMR_HPP

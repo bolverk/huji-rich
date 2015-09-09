@@ -6,9 +6,12 @@ NohRefine::NohRefine(double Vmax):Vmax_(Vmax)
 NohRefine::~NohRefine(void)
 {}
 
-vector<int> NohRefine::CellsToRefine(Tessellation const& tess,
-	vector<ComputationalCell> const& /*cells*/, vector<vector<double> > const& /*tracers*/,
-	double /*time*/,vector<Vector2D> &directions,vector<int> const& Removed)
+vector<int> NohRefine::CellsToRefine
+(Tessellation const& tess,
+ vector<ComputationalCell> const& /*cells*/, 
+ double /*time*/,
+ vector<Vector2D> &directions,
+ vector<int> const& Removed)
 {
 	vector<int> res;
 	directions.clear();
@@ -35,9 +38,10 @@ NohRemove::NohRemove(double Vmin):Vmin_(Vmin)
 NohRemove::~NohRemove()
 {}
 
-vector<int> NohRemove::CellsToRemove(Tessellation const& tess,
-	vector<ComputationalCell> const& /*cells*/, vector<vector<double> > const& /*tracers*/,
-	double /*time*/)const
+vector<int> NohRemove::CellsToRemove
+(Tessellation const& tess,
+ vector<ComputationalCell> const& /*cells*/, 
+ double /*time*/)const
 {
 	vector<int> ToRemoveTemp;
 	vector<double> merit;

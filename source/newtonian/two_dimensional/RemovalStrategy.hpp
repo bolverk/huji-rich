@@ -24,11 +24,13 @@ public:
 		\brief Removal abstract class. Can't remove neighboring cells or cells near peiodic boundary. Use CheckOutput to check correctness
 		\param tess The tessellation
 		\param cells The hydro primitives
-		\param tracers The primitve tracers
 		\param time The sim time
 		\return The cells to remove
 	*/
-	virtual vector<int> CellsToRemove(Tessellation const& tess,vector<ComputationalCell> const& cells,double time)const=0;
+	virtual vector<int> CellsToRemove
+	(Tessellation const& tess,
+	 vector<ComputationalCell> const& cells,
+	 double time)const=0;
 	
 	/*!
 		\brief Checks if the removed list is good, throws an error if not

@@ -27,8 +27,12 @@ public:
   \param Removed A list of the cells that were removed in the last cell removal
   \return A list of the cells to refine
   */
-	virtual vector<int> CellsToRefine(Tessellation const& tess,vector<ComputationalCell> const& cells,
-		double time,vector<Vector2D> &directions,vector<int> const& Removed)=0;
+	virtual vector<int> CellsToRefine
+	(Tessellation const& tess,
+	 vector<ComputationalCell> const& cells,
+	 double time,
+	 vector<Vector2D> &directions,
+	 vector<int> const& Removed)=0;
 	/*!
 	\brief Removes cells that were splitted in the last time step
 	\param ToRefine The list of candidate cells to split

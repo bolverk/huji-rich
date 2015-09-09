@@ -1,5 +1,7 @@
 def extract_contour(x_list, y_list, z_list, z_value):
 
+    import matplotlib
+    matplotlib.use('Agg')
     import pylab
     import numpy
 
