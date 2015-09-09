@@ -43,9 +43,17 @@ public:
 	*/
 	ComputationalCell(void);
 
+  /*! \brief Self increment operator
+    \param other Addition
+    \return Reference to self
+   */
 	ComputationalCell& operator+=(ComputationalCell const& other);
 
-  	ComputationalCell& operator=(ComputationalCell const& origin);
+  /*! \brief Self decrement operator
+    \param other difference
+    \return Reference to self
+   */
+  	ComputationalCell& operator=(ComputationalCell const& other);
 };
 
 /*! \brief Term by term addition

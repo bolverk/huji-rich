@@ -16,12 +16,23 @@ class SimpleCellUpdater: public CellUpdater
 {
 public:
 
+  //! \brief Abstract class to determine cell type
   class Condition
   {
   public:
 
     virtual ~Condition(void);
 
+    /*! \brief Checks if a cell satisfies a certain condition
+      \param tess Tessellation
+      \param pg Physical geometry
+      \param eos Equation of state
+      \param extensives Extensives
+      \param cells Computational cells
+      \param cd Cached data
+      \param index Cell index
+      \return True if condition is met, false otherwise
+     */
     virtual bool operator()
     (const Tessellation& tess,
      const PhysicalGeometry& pg,
@@ -32,12 +43,23 @@ public:
      const size_t index) const = 0;
   };
 
+  //! \brief Action taken to calculate cell
   class Action
   {
   public:
 
     virtual ~Action(void);
 
+    /*! \brief Calculates the value of the primitive variables in a computational cell
+      \param tess Tessellation
+      \param pg Physical geometry
+      \param eos Equation of state
+      \param extensives Extensive variables
+      \param cells Computational cells
+      \param cd Cached data
+      \param index Cell index
+      \return Computational cell
+     */
     virtual ComputationalCell operator()
     (const Tessellation& tess,
      const PhysicalGeometry& pg,
@@ -48,6 +70,9 @@ public:
      const size_t index) const = 0;
   };
 
+  /*! \brief Class constructor
+    \param sequence List of rules for cells that are calculated in a special way
+   */
   SimpleCellUpdater
   (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
    vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >());
@@ -66,10 +91,14 @@ private:
   const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence_;
 };
 
+//! \brief Checks if a cell contains a certain sticker
 class HasSticker: public SimpleCellUpdater::Condition
 {
 public:
 
+  /*! \brief Class constructor
+    \param sticker_name Sticker name
+   */
   HasSticker(const string& sticker_name);
 
   bool operator()
@@ -85,6 +114,7 @@ private:
   const string sticker_name_;
 };
 
+//! \brief Prevents certain cells from being updated
 class SkipUpdate: public SimpleCellUpdater::Action
 {
 public:

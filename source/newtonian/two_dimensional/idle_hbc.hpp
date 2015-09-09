@@ -3,6 +3,7 @@
 
 #include "HydroBoundaryConditions.hpp"
 
+//! \brief Does not compute boundary conditions at all (return an empty list)
 class IdleHBC: public HydroBoundaryConditions
 {
 public:

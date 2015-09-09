@@ -26,6 +26,10 @@ public:
   //! \brief tracers
   boost::container::flat_map<std::string,double> tracers;
 
+  /*! \brief Assignment operator
+    \param origin Original extensives variables
+    \return Copy
+   */
   Extensive& operator=(const Extensive& origin);
 
   /*! \brief Self difference operator
