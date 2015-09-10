@@ -36,13 +36,15 @@ ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
 
 ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2)
 {
-	ComputationalCell res(p1);
-	res.density += p2.density;
-	res.pressure += p2.pressure;
-	for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it)
-		it->second += p2.tracers.find(it->first)->second;
-	res.velocity += p2.velocity;
-	return res;
+  ComputationalCell res(p1);
+  res.density += p2.density;
+  res.pressure += p2.pressure;
+  for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it){
+    assert(p2.tracers.find(it->first)!=p2.tracers.end());
+    it->second += p2.tracers.find(it->first)->second;
+  }
+  res.velocity += p2.velocity;
+  return res;
 }
 
 ComputationalCell operator-(ComputationalCell const& p1, ComputationalCell const& p2)

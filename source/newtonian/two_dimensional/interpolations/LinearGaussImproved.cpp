@@ -79,21 +79,19 @@ namespace
 		}
 		// Create the matrix to invert and the vector to compare
 		vector<double> m(4, 0);
-		pair<ComputationalCell,ComputationalCell> vec_compare;
+		pair<ComputationalCell,ComputationalCell> vec_compare
+		  (0*cell,0*cell);
 		for (size_t i = 0; i < edge_list.size(); ++i)
 		{
 			const Vector2D c_ij = CalcCentroid(edge_list[i]) -0.5*(neigh_cm[i] + cell_cm);
-			Vector2D r_ij = neighbor_centers[i] - center;
 			const double e_length = edge_list[i].GetLength();
-			r_ij = r_ij*e_length / abs(r_ij);
+			const Vector2D r_ij = normalize(neighbor_centers[i] - center)*e_length;
 			m[0] -= c_ij.x*r_ij.x;
 			m[1] -= c_ij.y*r_ij.x;
 			m[2] -= c_ij.x*r_ij.y;
 			m[3] -= c_ij.y*r_ij.y;
-
-			r_ij *= 0.5;
-			vec_compare.first = vec_compare.first + (cell + neighbors[i])*r_ij.x;
-			vec_compare.second = vec_compare.second + (cell + neighbors[i])*r_ij.y;
+			vec_compare.first = vec_compare.first + (cell + neighbors[i])*r_ij.x*0.5;
+			vec_compare.second = vec_compare.second + (cell + neighbors[i])*r_ij.y*0.5;
 		}
 		m[0] += cell_volume;
 		m[3] += cell_volume;
@@ -359,7 +357,7 @@ namespace
 	if (slf)
 	{
 		if (!is_shock(naive_slope, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
-			eos.dp2c(cell.density,cell.pressure)))
+			      eos.dp2c(cell.density,cell.pressure,cell.tracers)))
 		{
 			return slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, naive_slope);
 		}

@@ -183,4 +183,10 @@ Vector2D zcross(Vector2D const& v);
  */
 Vector2D pol2cart(double radius, double angle);
 
+/*! \brief Normalized a vector
+  \param v Original vector
+  \return Vector divided by its norm
+ */
+Vector2D normalize(const Vector2D& v);
+
 #endif // GEOMETRY_HPP

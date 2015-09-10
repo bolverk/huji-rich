@@ -83,11 +83,6 @@ namespace {
     return res;
   }
 
-  Vector2D normalize(const Vector2D& v)
-  {
-    return v/abs(v);
-  }
-
     Extensive conserved_to_extensive
   (const Conserved& c, const ComputationalCell& cell)
   {

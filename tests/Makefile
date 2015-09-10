@@ -1,6 +1,7 @@
 PROCESS_NUM = 2
 CC = g++
 LINT_FLAGS = -Wall -Wextra -pedantic -Werror -Wfatal-errors
+MY_PYTHON_PATH = python
 EXECUTION_PREFIX =
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
@@ -48,7 +49,7 @@ all: $(RESULT_LIST)
 	@echo "done"
 
 $(RESULT_LIST): $(MODE)/%/test_passed.res: $(MODE)/%/normal_termination.res %/test.py
-	cd $(MODE)/$* && python $(TEST_ROOT)/$*/test.py && tail ./test_passed.res
+	cd $(MODE)/$* && $(MY_PYTHON_PATH) $(TEST_ROOT)/$*/test.py && tail ./test_passed.res
 
 $(NORMAL_TERMINATION_LIST): $(MODE)/%/normal_termination.res: $(MODE)/%/test.exe
 	cd $(MODE)/$* && $(EXECUTION_PREFIX) ./test.exe && touch normal_termination.res

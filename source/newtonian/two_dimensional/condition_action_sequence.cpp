@@ -76,11 +76,6 @@ namespace {
       res.tracers[it->first] = (it->second)*c.Mass;
     return res;
   }
-
-  Vector2D normalize(const Vector2D& v)
-  {
-    return v/abs(v);
-  }
 }
 
 Extensive RegularFlux::operator()

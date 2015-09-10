@@ -146,3 +146,9 @@ Vector2D pol2cart(double radius,
   return Vector2D(radius*cos(angle),
 		  radius*sin(angle));
 }
+
+
+Vector2D normalize(const Vector2D& v)
+{
+  return v/abs(v);
+}
