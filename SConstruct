@@ -11,8 +11,6 @@ def find_files(directory, pattern):
 import os
 
 debug = ARGUMENTS.get('debug',0)
-source = ARGUMENTS.get('source',None)
-target = ARGUMENTS.get('target',None)
 compiler = ARGUMENTS.get('compiler','g++')
 
 linkflags = ''
@@ -38,6 +36,11 @@ elif compiler=='mpiCC':
         cflags += ' -O3 -march=native'
 else:
     raise NameError('unsupported compiler')
+build_dir = 'build/'+compiler
+if int(debug):
+    build_dir += '/debug'
+else:
+    build_dir += '/release'
 
 env = Environment(ENV = os.environ,
                   CXX=compiler,
@@ -47,7 +50,6 @@ env = Environment(ENV = os.environ,
                   LIBS=['rich','hdf5','hdf5_cpp'],
                   LINKFLAGS=linkflags,
                   CXXFLAGS=cflags)
-source_file_list = [fname for fname in find_files(os.environ['RICH_ROOT']+'/source','*.cpp')]
-lib_file = env.Library('rich',source_file_list)
-if None!=source and None!=target:
-    env.Program(target,[source])
+env.VariantDir(build_dir,'source')
+source_file_list = [build_dir+'/'+fname.replace('source/','') for fname in find_files('source','*.cpp')]
+lib_file = env.Library(build_dir+'/rich',source_file_list)
