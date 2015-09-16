@@ -25,8 +25,15 @@ public:
 	\param delta_P The pressure ratio for shock detection
 	\param ghost The ghost point generator
 	*/
-	LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost, bool slf = true,double delta_v = 0.2, 
-		double theta = 0.5,double delta_P = 0.7);
+	LinearGaussImproved
+	(EquationOfState const& eos,
+	 GhostPointGenerator const& ghost,
+	 bool slf = true,
+	 double delta_v = 0.2,
+	 double theta = 0.5,
+	 double delta_P = 0.7,
+	 const vector<string>& flat_tracers = 
+	 vector<string>());
 
 	vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells)const;
@@ -50,11 +57,17 @@ private:
 	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;
 	mutable vector<pair<ComputationalCell, ComputationalCell> > rslopes_;
-	bool slf_;
-	double shockratio_, diffusecoeff_, pressure_ratio_;
+  const bool slf_;
+  const double shockratio_;
+  const double diffusecoeff_;
+  const double pressure_ratio_;
+  const vector<string> flat_tracers_;
 
-	LinearGaussImproved(const LinearGaussImproved& origin);
-	LinearGaussImproved& operator=(const LinearGaussImproved& origin);
+  LinearGaussImproved
+  (const LinearGaussImproved& origin);
+
+  LinearGaussImproved& operator=
+  (const LinearGaussImproved& origin);
 
 };
 #endif //LINEAR_GAUSS_IMPROVED

@@ -62,10 +62,19 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
       flags.at(i) = true;
       const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess,tess.getAllEdges().at(i));
       const Edge edge = tess.getAllEdges().at(i);
-	  const double speed = ScalarProd(p_n.second, GetFaceVelocity(tess, edge, point_velocities,ghost_,cells))
+      const double speed = ScalarProd(p_n.second, GetFaceVelocity(tess, edge, point_velocities,ghost_,cells))
 		  / abs(p_n.second);
-      res.at(i) = convert_conserved_to_extensive(rotate_solve_rotate_back(rs_,convert_to_primitive(interpolated.at(i).first,
-		  eos),convert_to_primitive(interpolated.at(i).second,eos),speed,p_n.second,p_n.first),interpolated.at(i));
+      const Primitive p_left = 
+	convert_to_primitive
+	(interpolated.at(i).first, eos);
+      const Primitive p_right = 
+	convert_to_primitive
+	(interpolated.at(i).second, eos);
+      res.at(i) = 
+	convert_conserved_to_extensive
+	(rotate_solve_rotate_back
+	 (rs_,p_left,p_right,
+	  speed,p_n.second,p_n.first),interpolated.at(i));
     }
   }
   return res;

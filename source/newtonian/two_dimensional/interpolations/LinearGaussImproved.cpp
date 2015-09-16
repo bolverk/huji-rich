@@ -338,9 +338,17 @@ namespace
 		return res;
 	}
 
-	pair<ComputationalCell,ComputationalCell> calc_slope(Tessellation const& tess,vector<ComputationalCell> const& cells,
-		size_t cell_index, bool slf,double shockratio, double diffusecoeff, double pressure_ratio,
-		EquationOfState const& eos, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells)
+	pair<ComputationalCell,ComputationalCell> calc_slope
+	(Tessellation const& tess,
+	 vector<ComputationalCell> const& cells,
+	 size_t cell_index,
+	 bool slf,
+	 double shockratio,
+	 double diffusecoeff,
+	 double pressure_ratio,
+	 EquationOfState const& eos,
+	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
+	 const vector<string>& flat_tracers)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
@@ -353,6 +361,11 @@ namespace
 	ComputationalCell const& cell = cells[cell_index];
 	naive_slope = calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
 		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list);
+
+	for(size_t i=0;i<flat_tracers.size();++i){
+	  naive_slope.first.tracers[flat_tracers[i]] = 0;
+	  naive_slope.second.tracers[flat_tracers[i]] = 0;
+	}
 
 	if (slf)
 	{
@@ -381,9 +394,22 @@ ComputationalCell LinearGaussImproved::Interp(ComputationalCell const& cell, siz
 	return interp(cell, rslopes_[cell_index], target, cm);
 }
 
-LinearGaussImproved::LinearGaussImproved(EquationOfState const& eos,GhostPointGenerator const& ghost, bool slf,
-	double delta_v, double theta,double delta_P) : eos_(eos), ghost_(ghost), rslopes_(), slf_(slf),shockratio_(delta_v),
-	diffusecoeff_(theta), pressure_ratio_(delta_P) {}
+LinearGaussImproved::LinearGaussImproved
+(EquationOfState const& eos,
+ GhostPointGenerator const& ghost,
+ bool slf,
+ double delta_v,
+ double theta,
+ double delta_P,
+ const vector<string>& flat_tracers): 
+  eos_(eos), 
+  ghost_(ghost),
+  rslopes_(),
+  slf_(slf),
+  shockratio_(delta_v),
+  diffusecoeff_(theta),
+  pressure_ratio_(delta_P),
+  flat_tracers_(flat_tracers) {}
 
 vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells) const
@@ -394,7 +420,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	// Prepare slopes
 	rslopes_.resize(CellNumber);
 	for (size_t i = 0; i<CellNumber; ++i)
-			rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells);
+	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells, flat_tracers_);
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
