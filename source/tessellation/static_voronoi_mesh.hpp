@@ -238,11 +238,5 @@ private:
 		proclist,vector<vector<int> > &data);
 	void GetNeighborNeighborsMPI(vector<int> &result,int point);
 };
-/*! \brief Checks if a point is inside a Voronoi cell
-\param cpoints The points of the cell in convex order
-\param vec The point to check
-\return True if the point is inside the cell, false otherwise
-*/
-bool PointInCell(vector<Vector2D> const& cpoints,Vector2D const& vec);
 
 #endif // STATIC_VORONOI_MESH_HPP
