@@ -22,6 +22,7 @@ namespace {
   ComputationalCell regular_update
   (const EquationOfState& eos,
    const vector<Extensive>& extensives,
+   const ComputationalCell& old,
    const CacheData& cd,
    const size_t index)
   {
@@ -40,6 +41,7 @@ namespace {
       (res.density,
        energy,
        res.tracers);
+    res.stickers = old.stickers;
     return res;
   }
 
@@ -72,7 +74,7 @@ namespace {
 	  index);
     }
     return regular_update
-      (eos,extensives,cd,index);
+      (eos,extensives,old.at(index),cd,index);
   }
 }
 
