@@ -174,7 +174,9 @@ namespace {
 
     double operator[](size_t i) const
     {
-      return static_cast<double>(sim_.getAllCells()[i].stickers.find(name_)->second);
+      return static_cast<double>
+	(safe_retrieve
+	 (sim_.getAllCells()[i].stickers,name_));
     }
 
   private:

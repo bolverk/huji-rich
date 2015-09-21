@@ -1,5 +1,6 @@
 #include "condition_action_sequence.hpp"
 #include "simple_flux_calculator.hpp"
+#include "../../misc/utils.hpp"
 
 ConditionActionSequence::ConditionActionSequence
 (const vector<pair<const Condition*,const Action*> >& sequence):
@@ -264,12 +265,12 @@ pair<bool,bool> RegularSpecialEdge::operator()
      edge.neighbors.first >= tess.GetPointNo() ||
      edge.neighbors.second >= tess.GetPointNo())
     return pair<bool,bool>(false,false);
-  if(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers.find(sticker_name_)->second){
-    if(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.find(sticker_name_)->second)
+  if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers,sticker_name_)){
+    if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,sticker_name_))
       return pair<bool,bool>(false,false);
     return pair<bool,bool>(true,false);
   }
-  if(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.find(sticker_name_)->second)
+  if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,sticker_name_))
     return pair<bool,bool>(true,true);
   return pair<bool,bool>(false,false);
 }

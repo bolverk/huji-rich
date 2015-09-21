@@ -125,7 +125,7 @@ bool HasSticker::operator()
    const CacheData& /*cd*/,
    const size_t index) const
 {
-  return cells.at(index).stickers.find(sticker_name_)->second;
+  return safe_retrieve(cells.at(index).stickers,sticker_name_);
 }
 
 SkipUpdate::SkipUpdate(void) {}
