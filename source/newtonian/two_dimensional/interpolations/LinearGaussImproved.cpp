@@ -1,4 +1,5 @@
 #include "LinearGaussImproved.hpp"
+#include "../../../misc/utils.hpp"
 
 namespace 
 {
@@ -434,10 +435,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		else
 		{
-			boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.first));
-			if (it == ghost_cells.end())
-				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
-			ComputationalCell const& cell = it->second;
+		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
 				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
