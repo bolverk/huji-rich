@@ -197,7 +197,9 @@ namespace {
 		
     double operator[](size_t i) const
     {
-      return sim_.getAllCells()[i].tracers.find(name_)->second;
+      return safe_retrieve
+	(sim_.getAllCells()[i].tracers,
+	 name_);
     }
 
   private:

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "universal_error.hpp"
 #include <cassert>
+#include "boost/container/flat_map.hpp"
 
 using std::vector;
 
@@ -501,6 +502,16 @@ template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& a
 {
   if(!addendum.empty())
     subject.insert(subject.end(),addendum.begin(),addendum.end());
+}
+
+template<class S, class T> T safe_retrieve
+(const boost::container::flat_map<S,T>& m,
+ const S& s)
+{
+  typename boost::container::flat_map<S,T>::const_iterator it =
+    m.find(s);
+  assert(it!=m.end());
+  return it->second;
 }
 
 #endif // UTILS_HPP
