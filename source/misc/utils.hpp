@@ -185,6 +185,31 @@ template <class T> void RemoveVector
 }
 
 /*!
+\brief Removes the elements in v given by indeces
+\param v The vector to change
+\param indeces The cells to remove
+*/
+template <class T> void RemoveVector
+(vector<T> &v, vector<size_t> &indeces)
+{
+	if (indeces.empty())
+		return;
+	sort(indeces.begin(), indeces.end());
+	vector<T> result;
+	result.reserve(v.size() - indeces.size());
+	size_t counter = 0;
+	for (size_t i = 0; i<indeces.back(); ++i)
+	{
+		if (indeces[counter] == i)
+			++counter;
+		else
+			result.push_back(v[i]);
+	}
+	for (size_t i = indeces.back() + 1; i<v.size(); ++i)
+		result.push_back(v[i]);
+	v = result;
+}
+/*!
   \brief Returns only the values with indeces in index
   \param v The vector to check
   \param index The indeces to return

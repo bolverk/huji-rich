@@ -465,3 +465,76 @@ const CacheData& hdsim::getCacheData(void) const
 {
 	return cache_data_;
 }
+
+namespace
+{
+	void FixInDomain(OuterBoundary const& obc, Vector2D &point)
+	{
+		if (point.x > obc.GetGridBoundary(Right))
+			point.x -= obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
+		if (point.x < obc.GetGridBoundary(Left))
+			point.x += obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
+		if (point.y > obc.GetGridBoundary(Up))
+			point.y -= obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
+		if (point.y < obc.GetGridBoundary(Down))
+			point.y += obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
+		return;
+	}
+}
+
+void hdsim::RefineCells(vector<size_t> const& ToRefine)
+{
+	size_t N = tess_.GetPointNo();
+	// Find the primitive of each point and the new location
+	vector<std::pair<ComputationalCell, Vector2D> > NewPoints;
+	NewPoints.reserve(ToRefine.size() * 7);
+	
+	for (size_t i = 0; i < ToRefine.size(); ++i)
+	{
+		vector<int> neigh=tess_.GetNeighbors(static_cast<int>(ToRefine[i]));
+		Vector2D const& mypoint = tess_.GetMeshPoint(static_cast<int>(ToRefine[i]));
+		for (size_t j = 0; j < neigh.size(); ++j)
+		{
+			if (static_cast<size_t>(neigh[j]) < N)
+			{
+				NewPoints.push_back(std::pair<ComputationalCell, Vector2D>(0.5*(cells_[static_cast<size_t>(neigh[j])]+cells_[ToRefine[i]]),0.5*(mypoint+tess_.GetMeshPoint(neigh[j]))));
+			}
+			else
+			{
+				int orgindex = tess_.GetOriginalIndex(neigh[j]);
+				Vector2D const& otherpoint = tess_.GetMeshPoint(neigh[j]);
+				Vector2D NewPoint = 0.5*(otherpoint + mypoint);
+				FixInDomain(obc_, NewPoint);
+				NewPoints.push_back(std::pair<ComputationalCell, Vector2D>(0.5*(cells_[static_cast<size_t>(orgindex)] + cells_[ToRefine[i]]), NewPoint));
+			}
+		}
+	}
+	// Rebuild tessellation
+	vector<Vector2D> cor = tess_.GetMeshPoints();
+	cor.resize(N);
+	cells_.resize(N);
+	for (size_t i = 0; i < NewPoints.size(); ++i)
+	{
+		cor.push_back(NewPoints[i].second);
+		cells_.push_back(NewPoints[i].first);
+	}
+	tess_.Update(cor);
+	// Recalcualte extensives
+	recalculateExtensives();
+}
+
+void hdsim::RemoveCells(vector<size_t> &ToRemove)
+{
+	size_t N = tess_.GetPointNo();
+	// Rebuild tessellation
+	vector<Vector2D> cor = tess_.GetMeshPoints();
+	cor.resize(N);
+	cells_.resize(N);
+
+	RemoveVector(cor, ToRemove);
+	RemoveVector(cells_, ToRemove);
+
+	tess_.Update(cor);
+	// Recalcualte extensives
+	recalculateExtensives();
+}

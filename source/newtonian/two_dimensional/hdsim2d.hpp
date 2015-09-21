@@ -75,6 +75,10 @@ private:
 
 public:
 
+	void RefineCells(vector<size_t> const& ToRefine);
+
+	void RemoveCells(vector<size_t> &ToRemove);
+
   #ifdef RICH_MPI
   /*! \brief Chooses scheme for processor motion
     \param procupdate Pointer to process motion scheme
