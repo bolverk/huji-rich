@@ -333,7 +333,7 @@ namespace
 		for (boost::container::flat_map<std::string, double>::iterator it = res.first.tracers.begin(); it != res.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			res.second.tracers.find(it->first)->second *= psi[4 + counter];
+			safe_retrieve(res.second.tracers,it->first) *= psi[4 + counter];
 			++counter;
 		}
 		return res;
@@ -444,10 +444,9 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		else
 		{
-			boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.second));
-			if (it == ghost_cells.end())
-				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
-			ComputationalCell const& cell = it->second;
+		  const ComputationalCell& cell = safe_retrieve
+		    (ghost_cells,
+		     static_cast<size_t>(edge.neighbors.second));
 			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}

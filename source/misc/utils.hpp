@@ -504,11 +504,21 @@ template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& a
     subject.insert(subject.end(),addendum.begin(),addendum.end());
 }
 
-template<class S, class T> T safe_retrieve
+template<class S, class T> const T& safe_retrieve
 (const boost::container::flat_map<S,T>& m,
  const S& s)
 {
   typename boost::container::flat_map<S,T>::const_iterator it =
+    m.find(s);
+  assert(it!=m.end());
+  return it->second;
+}
+
+template<class S, class T> T& safe_retrieve
+(boost::container::flat_map<S,T>& m,
+ const S& s)
+{
+  typename boost::container::flat_map<S,T>::iterator it =
     m.find(s);
   assert(it!=m.end());
   return it->second;
