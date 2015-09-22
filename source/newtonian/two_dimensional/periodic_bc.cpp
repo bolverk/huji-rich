@@ -2,6 +2,7 @@
 #include "../common/hydrodynamics.hpp"
 #include "../../tessellation/geometry.hpp"
 #include "simple_flux_calculator.hpp"
+#include "../../misc/utils.hpp"
 
 PeriodicBC::PeriodicBC
 (const RiemannSolver& rs):
@@ -146,12 +147,12 @@ namespace {
        edge.neighbors.first>0 &&
        edge.neighbors.first < tess.GetPointNo())
       return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.first)].tracers.find(name)->second;
+	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.first)].tracers,name);
     if(hf.Mass<0 &&
        edge.neighbors.second>0 &&
        edge.neighbors.second < tess.GetPointNo())
       return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.second)].tracers.find(name)->second;
+	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.second)].tracers,name);
     return 0;
   }
 }
@@ -178,7 +179,6 @@ vector<Extensive> PeriodicBC::operator()
 	it!=cells.front().tracers.end();++it)
       res[i].tracers[it->first] =
 	calc_tracer_flux(i,tess,cells,it->first,hydro_flux);
-      //      res[i].tracers[it->first] = (it->second)*hydro_flux.Mass;
   }
   return res;
 }

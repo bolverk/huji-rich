@@ -1,6 +1,7 @@
 #include "simple_flux_calculator.hpp"
 #include "../common/hydrodynamics.hpp"
 #include "../../tessellation/geometry.hpp"
+#include "../../misc/utils.hpp"
 
 SimpleFluxCalculator::SimpleFluxCalculator(const RiemannSolver& rs):
   rs_(rs) {}
@@ -8,12 +9,6 @@ SimpleFluxCalculator::SimpleFluxCalculator(const RiemannSolver& rs):
 Primitive convert_to_primitive(const ComputationalCell& cell,
 			       const EquationOfState& eos)
 {
-  /*
-  return CalcPrimitive(cell.density,
-		       cell.pressure,
-		       cell.velocity,
-		       eos);
-  */
   const double energy = eos.dp2e(cell.density, cell.pressure, cell.tracers);
   const double sound_speed = eos.dp2c(cell.density, cell.pressure, cell.tracers);
   return Primitive(cell.density, cell.pressure, cell.velocity, energy, sound_speed);
@@ -199,12 +194,12 @@ namespace {
        edge.neighbors.first>0 &&
        edge.neighbors.first < tess.GetPointNo())
       return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.first)].tracers.find(name)->second;
+	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.first)].tracers,name);
     if(hf.Mass<0 &&
        edge.neighbors.second>0 &&
        edge.neighbors.second < tess.GetPointNo())
       return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.second)].tracers.find(name)->second;
+	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.second)].tracers,name);
     return 0;
   }
 }
