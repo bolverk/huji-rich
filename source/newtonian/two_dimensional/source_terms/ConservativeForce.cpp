@@ -4,64 +4,6 @@
 using std::min;
 using std::sqrt;
 
-namespace {
-
-  /*
-  Vector2D remove_parallel_component(const Vector2D& s,
-				     const Vector2D& r)
-  {
-    return s-r*ScalarProd(r,s)/ScalarProd(r,r);
-  }
-  */
-
-  /*
-  Vector2D MassFlux(const Tessellation& tess,
-		    const PhysicalGeometry& pg,
-		    const CacheData& cd,
-		    const vector<Extensive>& fluxes,
-		    int point)
-  {
-    Vector2D dm;
-    const vector<int> edge_index=tess.GetCellEdges(point);
-    const Vector2D center=tess.GetMeshPoint(point);
-    for(size_t i=0;i<edge_index.size();++i)
-      {
-	const Edge& edge = tess.GetEdge(edge_index[i]);
-	if(point==edge.neighbors.first){
-	  if(edge.neighbors.second>-1){
-	    dm-=cd.areas[i]*fluxes[static_cast<size_t>(edge_index[i])].mass*
-	      (center-tess.GetMeshPoint(edge.neighbors.second));
-	  }
-	  else{
-	    const Vector2D p = edge.vertices.second - edge.vertices.first;
-	    const Vector2D r=remove_parallel_component(center - edge.vertices.first,p);
-	    dm-=2*cd.areas[i]*fluxes[static_cast<size_t>(edge_index[i])].mass*r;
-	  }
-	}
-	else
-	  if(point==edge.neighbors.second){
-	    if(edge.neighbors.first>-1)
-	      {
-		dm+=cd.areas[static_cast<size_t>(i)]*
-		  fluxes[static_cast<size_t>(edge_index[i])].mass*
-		  (center-tess.GetMeshPoint(edge.neighbors.first));
-	      }
-	    else
-	      {
-		const Vector2D p = edge.vertices.second - edge.vertices.first;
-		const Vector2D r = remove_parallel_component(center - edge.vertices.second, p);
-		dm+=2*cd.areas[static_cast<size_t>(i)]*
-		  fluxes[static_cast<size_t>(edge_index[i])].mass*r;
-	      }
-	  }
-	  else
-	    throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
-      }
-    return dm;
-  }
-*/
-}
-
 ConservativeForce::ConservativeForce(const Acceleration& acc):
   acc_(acc) {}
 

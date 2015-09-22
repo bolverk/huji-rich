@@ -1,4 +1,5 @@
 #include "LinearGaussImproved.hpp"
+#include "../../../misc/utils.hpp"
 
 namespace 
 {
@@ -43,12 +44,7 @@ namespace
 			if (other_cell < npoints)
 				res[i] = cells[other_cell];
 			else
-			{
-				boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(other_cell);
-				if (it == ghost_cells.end())
-					throw UniversalError("No matching ghost cell");
-				res[i] = it->second;
-			}
+				res[i] = safe_retrieve(ghost_cells,other_cell);
 		}
 		return res;
 	}
@@ -167,9 +163,9 @@ namespace
 			cmin.velocity.x = std::min(cmin.velocity.x, cell_temp.velocity.x);
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
 			for (boost::container::flat_map<std::string, double>::iterator it = cmax.tracers.begin(); it != cmax.tracers.end(); ++it)
-				it->second = std::max(it->second, cell_temp.tracers.find(it->first)->second);
+			  it->second = std::max(it->second, safe_retrieve(cell_temp.tracers,it->first));
 			for (boost::container::flat_map<std::string, double>::iterator it = cmin.tracers.begin(); it != cmin.tracers.end(); ++it)
-				it->second = std::min(it->second, cell_temp.tracers.find(it->first)->second);
+			  it->second = std::min(it->second, safe_retrieve(cell_temp.tracers,it->first));
 		}
 		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
 		// limit the slope
@@ -218,16 +214,16 @@ namespace
 			size_t counter = 0;
 			for (boost::container::flat_map<std::string, double>::iterator it = dphi.tracers.begin(); it != dphi.tracers.end(); ++it)
 			{
-				double cell_tracer = cell.tracers.find(it->first)->second;
-				double diff_tracer = maxdiff.tracers.find(it->first)->second;
-				double centroid_tracer = centroid_val.tracers.find(it->first)->second;
-				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers.find(it->first)->second)) || centroid_tracer*cell_tracer < 0)
+			  double cell_tracer = safe_retrieve(cell.tracers,it->first);
+			  double diff_tracer = safe_retrieve(maxdiff.tracers,it->first);
+			  double centroid_tracer = safe_retrieve(centroid_val.tracers,it->first);
+				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(safe_retrieve(mindiff.tracers,it->first))) || centroid_tracer*cell_tracer < 0)
 				{
 					if (it->second > std::abs(1e-9*cell_tracer))
 						psi[4 + counter] = std::min(psi[4 + counter], diff_tracer / it->second);
 					else
 						if (it->second < -std::abs(1e-9 * cell_tracer))
-							psi[4 + counter] = std::min(psi[4 + counter], mindiff.tracers.find(it->first)->second
+						  psi[4 + counter] = std::min(psi[4 + counter], safe_retrieve(mindiff.tracers,it->first)
 							/ it->second);
 				}
 				++counter;
@@ -245,7 +241,7 @@ namespace
 		for (boost::container::flat_map<std::string, double>::iterator it = res.first.tracers.begin(); it != res.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			res.second.tracers.find(it->first)->second *= psi[4 + counter];
+			safe_retrieve(res.second.tracers,it->first) *= psi[4 + counter];
 			++counter;
 		}
 		return res;
@@ -270,9 +266,9 @@ namespace
 			cmin.velocity.x = std::min(cmin.velocity.x, cell_temp.velocity.x);
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
 			for (boost::container::flat_map<std::string, double>::iterator it = cmax.tracers.begin(); it != cmax.tracers.end(); ++it)
-				it->second = std::max(it->second, cell_temp.tracers.find(it->first)->second);
+			  it->second = std::max(it->second, safe_retrieve(cell_temp.tracers,it->first));
 			for (boost::container::flat_map<std::string, double>::iterator it = cmin.tracers.begin(); it != cmin.tracers.end(); ++it)
-				it->second = std::min(it->second, cell_temp.tracers.find(it->first)->second);
+			  it->second = std::min(it->second, safe_retrieve(cell_temp.tracers,it->first));
 		}
 		ComputationalCell maxdiff = cmax - cell, mindiff = cmin - cell;
 		// limit the slope
@@ -309,13 +305,13 @@ namespace
 			size_t counter = 0;
 			for (boost::container::flat_map<std::string, double>::iterator it = dphi.tracers.begin(); it != dphi.tracers.end(); ++it)
 			{
-				double cell_tracer = cell.tracers.find(it->first)->second;
-				double diff_tracer = maxdiff.tracers.find(it->first)->second;
-				double centroid_tracer = centroid_val.tracers.find(it->first)->second;
-				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers.find(it->first)->second)) || centroid_tracer*cell_tracer < 0)
+			  double cell_tracer = safe_retrieve(cell.tracers,it->first);
+			  double diff_tracer = safe_retrieve(maxdiff.tracers,it->first);
+			  double centroid_tracer = safe_retrieve(centroid_val.tracers,it->first);
+				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(safe_retrieve(mindiff.tracers,it->first))) || centroid_tracer*cell_tracer < 0)
 				{
 					if (std::abs(it->second) > std::abs(1e-9*cell_tracer))
-						psi[4 + counter] = std::min(psi[4 + counter], std::max(diffusecoeff*(neighbors[i].tracers.find(it->first)->second - cell_tracer) / it->second, 0.0));
+					  psi[4 + counter] = std::min(psi[4 + counter], std::max(diffusecoeff*(safe_retrieve(neighbors[i].tracers,it->first)- cell_tracer) / it->second, 0.0));
 				}
 				++counter;
 			}
@@ -332,7 +328,7 @@ namespace
 		for (boost::container::flat_map<std::string, double>::iterator it = res.first.tracers.begin(); it != res.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			res.second.tracers.find(it->first)->second *= psi[4 + counter];
+			safe_retrieve(res.second.tracers,it->first) *= psi[4 + counter];
 			++counter;
 		}
 		return res;
@@ -434,10 +430,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		else
 		{
-			boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.first));
-			if (it == ghost_cells.end())
-				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
-			ComputationalCell const& cell = it->second;
+		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
 				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
@@ -446,10 +439,9 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		else
 		{
-			boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.find(static_cast<size_t>(edge.neighbors.second));
-			if (it == ghost_cells.end())
-				throw UniversalError("Could not find ghost cell in LinearGaussImproved");
-			ComputationalCell const& cell = it->second;
+		  const ComputationalCell& cell = safe_retrieve
+		    (ghost_cells,
+		     static_cast<size_t>(edge.neighbors.second));
 			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}

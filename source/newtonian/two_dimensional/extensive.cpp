@@ -1,4 +1,5 @@
 #include "extensive.hpp"
+#include "../../misc/utils.hpp"
 
 Extensive::Extensive(void):
   mass(0),
@@ -14,7 +15,7 @@ Extensive& Extensive::operator-=(const Extensive& diff)
   
   for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
       it!=tracers.end();++it)
-    it->second -= diff.tracers.find(it->first)->second;
+    it->second -= safe_retrieve(diff.tracers,it->first);
 
   return *this;
 }
@@ -36,7 +37,7 @@ Extensive& Extensive::operator+=(const Extensive& diff)
   
   for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
       it!=tracers.end();++it)
-    it->second += diff.tracers.find(it->first)->second;
+    it->second += safe_retrieve(diff.tracers,it->first);
 
   return *this;
 }
@@ -64,7 +65,7 @@ Extensive operator+(const Extensive& e1,
   res.momentum = e1.momentum + e2.momentum;
   for(boost::container::flat_map<std::string,double>::const_iterator it=e1.tracers.begin();
       it!=e1.tracers.end();++it)
-    res.tracers[it->first] = it->second + e2.tracers.find(it->first)->second;
+    res.tracers[it->first] = it->second + safe_retrieve(e2.tracers,it->first);
   return res;
 }
 

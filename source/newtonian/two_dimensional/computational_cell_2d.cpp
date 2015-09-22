@@ -1,4 +1,5 @@
 #include "computational_cell_2d.hpp"
+#include "../../misc/utils.hpp"
 
 ComputationalCell::ComputationalCell(void) :
 density(0), pressure(0), velocity(Vector2D()), tracers(),
@@ -15,11 +16,6 @@ ComputationalCell& ComputationalCell::operator=(ComputationalCell const& other)
 	velocity = other.velocity;
 	tracers = other.tracers;
 	stickers = other.stickers;
-	/*
-	for (boost::container::flat_map<std::string, double>::iterator it = this->tracers.begin();
-		it != this->tracers.end(); ++it)
-		it->second += other.tracers.find(it->first)->second;
-	*/
 	return *this;
 }
 
@@ -30,7 +26,7 @@ ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
 	this->velocity += other.velocity;
 	for (boost::container::flat_map<std::string, double>::iterator it = this->tracers.begin();
 		it != this->tracers.end(); ++it)
-		it->second += other.tracers.find(it->first)->second;
+	  it->second += safe_retrieve(other.tracers,it->first);
 	return *this;
 }
 
@@ -39,10 +35,8 @@ ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const
   ComputationalCell res(p1);
   res.density += p2.density;
   res.pressure += p2.pressure;
-  for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it){
-    assert(p2.tracers.find(it->first)!=p2.tracers.end());
-    it->second += p2.tracers.find(it->first)->second;
-  }
+  for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it)
+    it->second += safe_retrieve(p2.tracers,it->first);
   res.velocity += p2.velocity;
   return res;
 }
@@ -53,7 +47,7 @@ ComputationalCell operator-(ComputationalCell const& p1, ComputationalCell const
 	res.density -= p2.density;
 	res.pressure -= p2.pressure;
 	for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it)
-		it->second -= p2.tracers.find(it->first)->second;
+	  it->second -= safe_retrieve(p2.tracers,it->first);
 	res.velocity -= p2.velocity;
 	return res;
 }

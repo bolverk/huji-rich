@@ -1,5 +1,6 @@
 #include "modular_flux_calculator.hpp"
 #include "simple_flux_calculator.hpp"
+#include "../../misc/utils.hpp"
 
 ModularFluxCalculator::ModularFluxCalculator(GhostPointGenerator const& ghost,const SpatialReconstruction& sr,
 	const RiemannSolver& rs, const HydroBoundaryConditions& hbc) :ghost_(ghost),sr_(sr), rs_(rs), hbc_(hbc) {}
@@ -25,7 +26,7 @@ namespace
     res.momentum = conserved.Momentum;
     res.energy = conserved.Energy;
     for(boost::container::flat_map<string,double>::const_iterator it= cells.first.tracers.begin();it!=cells.first.tracers.end();++it)
-      res.tracers[it->first] = conserved.Mass*(conserved.Mass>0 ? cells.first : cells.second).tracers.find(it->first)->second;
+      res.tracers[it->first] = conserved.Mass*safe_retrieve((conserved.Mass>0 ? cells.first : cells.second).tracers,it->first);
     return res;
   }
 
