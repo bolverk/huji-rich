@@ -2,6 +2,7 @@
 #include <cmath>
 #include "../misc/simple_io.hpp"
 #include "hdf5_logger.hpp"
+#include "VoronoiMesh.hpp"
 
 using std::abs;
 

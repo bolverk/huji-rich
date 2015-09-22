@@ -1,40 +1,11 @@
 #include "periodic_bc.hpp"
 #include "../common/hydrodynamics.hpp"
 #include "../../tessellation/geometry.hpp"
+#include "simple_flux_calculator.hpp"
 
 PeriodicBC::PeriodicBC
 (const RiemannSolver& rs):
   rs_(rs) {}
-
-Primitive convert_to_primitive(const ComputationalCell& cell,
-			       const EquationOfState& eos)
-{
-  /*
-  return CalcPrimitive(cell.density,
-		       cell.pressure,
-		       cell.velocity,
-		       eos);
-  */
-  const double energy = eos.dp2e(cell.density, cell.pressure, cell.tracers);
-  const double sound_speed = eos.dp2c(cell.density, cell.pressure, cell.tracers);
-  return Primitive(cell.density, cell.pressure, cell.velocity, energy, sound_speed);
-}
-
-Primitive reflect(const Primitive& p,
-		  const Vector2D& axis)
-{
-  return Primitive(p.Density,
-		   p.Pressure,
-		   Reflect(p.Velocity,axis),
-		   p.Energy,
-		   p.SoundSpeed);
-}
-
-Vector2D remove_parallel_component(const Vector2D& v,
-				   const Vector2D& p)
-{
-  return v - p*ScalarProd(v,p)/ScalarProd(p,p);
-}
 
 namespace {
   template<class S, class T> class Transform
@@ -140,44 +111,6 @@ namespace {
     }
     return res;
   }
-}
-
-namespace {
-  Primitive rotate(const Primitive& primitive,
-		   const Vector2D& n,
-		   const Vector2D& p)
-  {
-    return Primitive(primitive.Density,
-		     primitive.Pressure,
-		     Vector2D(Projection(primitive.Velocity,n),
-			      Projection(primitive.Velocity,p)),
-		     primitive.Energy,
-		     primitive.SoundSpeed);			      
-  }
-
-  Conserved rotate_back(const Conserved& c,
-			const Vector2D& n,
-			const Vector2D& p)
-  {
-    return Conserved(c.Mass,
-		     c.Momentum.x*n/abs(n)+
-		     c.Momentum.y*p/abs(p),
-		     c.Energy);
-  }
-}
-
-Conserved rotate_solve_rotate_back
-(const RiemannSolver& rs,
- const Primitive& left,
- const Primitive& right,
- const double velocity,
- const Vector2D& n,
- const Vector2D& p)
-{
-  return rotate_back(rs(rotate(left,n,p),
-			rotate(right,n,p),
-			velocity),
-		     n,p);
 }
 
 Conserved PeriodicBC::calcHydroFlux
