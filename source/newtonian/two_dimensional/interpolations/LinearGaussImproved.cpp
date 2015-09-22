@@ -228,7 +228,7 @@ namespace
 						psi[4 + counter] = std::min(psi[4 + counter], diff_tracer / it->second);
 					else
 						if (it->second < -std::abs(1e-9 * cell_tracer))
-							psi[4 + counter] = std::min(psi[4 + counter], mindiff.tracers.find(it->first)->second
+						  psi[4 + counter] = std::min(psi[4 + counter], safe_retrieve(mindiff.tracers,it->first)
 							/ it->second);
 				}
 				++counter;

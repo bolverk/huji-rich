@@ -99,7 +99,6 @@ void FindEqualIndices(vector<size_t> const & vD_sorted, vector<vector<size_t> > 
 {
 	vector<size_t> vD_sorted_cpy = vD_sorted;
 	vector<size_t> vD_sorted_unq = vD_sorted;
-	//vector<size_t>::iterator it = adjacent_find(vD_sorted.begin(), vD_sorted.end());
 
 	vector<size_t>::iterator it1, itPrev, itCur;
 	it1 = unique(vD_sorted_unq.begin(), vD_sorted_unq.end());
