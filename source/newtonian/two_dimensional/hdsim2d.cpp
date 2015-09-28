@@ -93,7 +93,7 @@ hdsim::~hdsim(void) {}
 
 void hdsim::TimeAdvance(void)
 {
-	const vector<Vector2D> point_velocities =
+	vector<Vector2D> point_velocities =
 		point_motion_(tess_, cells_, time_);
 
 	const double dt = tsf_(tess_,
@@ -101,6 +101,8 @@ void hdsim::TimeAdvance(void)
 		eos_,
 		point_velocities,
 		time_);
+
+	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 	const vector<Extensive> fluxes = fc_(tess_,
 		point_velocities,
@@ -157,9 +159,11 @@ namespace {
 
 void hdsim::TimeAdvance2Heun(void)
 {
-	const vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
+	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 	const double dt = tsf_(tess_, cells_, eos_, point_velocities, time_);
+
+	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 	const vector<Extensive> mid_fluxes = fc_(tess_, point_velocities, cells_, extensives_, cache_data_, eos_, time_, dt);
 

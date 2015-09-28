@@ -24,13 +24,22 @@ public:
     \param chi chi parameter in equation 63
     \param eta eta parameter in equation 63
    */
-	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02, 
-		OuterBoundary const& outer = PeriodicBox(-1, 1, 1, -1));
+	RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer,
+		double chi = 0.15, double eta = 0.02);
+
+
+	/*! \brief Class constructor
+	\param pm Base point motion
+	\param eos Equation of state
+	\param chi chi parameter in equation 63
+	\param eta eta parameter in equation 63
+	*/
+	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02);
 
   vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time) const;
 
   void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> & velocities);
+	  double dt, vector<Vector2D> & velocities)const;
 private:
 
   Vector2D calc_dw(size_t i,

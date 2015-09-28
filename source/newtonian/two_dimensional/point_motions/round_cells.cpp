@@ -1,7 +1,11 @@
 #include "round_cells.hpp"
 
-RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi, double eta, OuterBoundary const& outer)
-	: pm_(pm), eos_(eos),outer_(outer),chi_(chi), eta_(eta) {}
+RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer, double chi,
+	double eta): pm_(pm), eos_(eos), outer_(outer), chi_(chi), eta_(eta) {}
+
+RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi,
+	double eta) : pm_(pm), eos_(eos),outer_(PeriodicBox(-1,1,1,-1)), chi_(chi), eta_(eta) {}
+
 
 namespace
 {
@@ -85,7 +89,7 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 }
 
 void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
-	double dt, vector<Vector2D> & velocities)
+	double dt, vector<Vector2D> & velocities)const
 {
 	if (outer_.GetBoundaryType()!=Periodic)
 		CorrectPointsOverShoot(velocities, dt, tess,outer_);

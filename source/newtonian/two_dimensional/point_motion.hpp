@@ -33,7 +33,7 @@ public:
   \param dt The time step
   */
   virtual void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> & velocities);
+	  double dt, vector<Vector2D> & velocities)const;
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
