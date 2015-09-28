@@ -48,6 +48,7 @@ private:
 
   const PointMotion& pm_;
   const EquationOfState& eos_;
+  PeriodicBox pouter_;
   OuterBoundary const& outer_;
   const double chi_;
   const double eta_;

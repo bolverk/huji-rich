@@ -1,10 +1,10 @@
 #include "round_cells.hpp"
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer, double chi,
-	double eta): pm_(pm), eos_(eos), outer_(outer), chi_(chi), eta_(eta) {}
+	double eta) : pm_(pm), eos_(eos), outer_(outer), chi_(chi), eta_(eta), pouter_(-1, 1, 1, -1) {}
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi,
-	double eta) : pm_(pm), eos_(eos),outer_(PeriodicBox(-1,1,1,-1)), chi_(chi), eta_(eta) {}
+	double eta) : pm_(pm), eos_(eos),pouter_(-1,1,1,-1),outer_(pouter_), chi_(chi), eta_(eta) {}
 
 
 namespace
