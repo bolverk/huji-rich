@@ -22,7 +22,7 @@ public:
 	*/
 	virtual size_t GhostChoose(Tessellation const& tess, int index)const = 0;
 
-	virtual ~GhostCriteria(void){};
+  virtual ~GhostCriteria(void);
 };
 
 /*! \brief Class for creating computationalcells of ghost points from several different methods

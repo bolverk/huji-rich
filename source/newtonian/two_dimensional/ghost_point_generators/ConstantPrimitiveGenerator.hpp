@@ -3,8 +3,8 @@
 \author Elad Steinberg
 */
 
-#ifndef CONSTANT_PRIMITIVE__GENERATOR_HPP
-#define CONSTANT_PRIMITIVE__GENERATOR_HPP 1
+#ifndef CONSTANT_PRIMITIVE_GENERATOR_HPP
+#define CONSTANT_PRIMITIVE_GENERATOR_HPP 1
 
 #include "../GhostPointGenerator.hpp"
 

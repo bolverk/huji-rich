@@ -490,7 +490,7 @@ void hdsim::RefineCells(vector<size_t> const& ToRefine)
 {
 	if (ToRefine.empty())
 		return;
-	size_t N = tess_.GetPointNo();
+	size_t N = static_cast<size_t>(tess_.GetPointNo());
 	// Find the primitive of each point and the new location
 	vector<std::pair<ComputationalCell, Vector2D> > NewPoints;
 	NewPoints.reserve(ToRefine.size() * 7);
@@ -539,7 +539,7 @@ void hdsim::RemoveCells(vector<size_t> &ToRemove)
 {
 	if (ToRemove.empty())
 		return;
-	size_t N = tess_.GetPointNo();
+	size_t N = static_cast<size_t>(tess_.GetPointNo());
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess_.GetMeshPoints();
 	cor.resize(N);
