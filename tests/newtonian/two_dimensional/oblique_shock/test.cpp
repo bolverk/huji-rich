@@ -296,8 +296,10 @@ namespace
 		while (tf > sim.getTime()){
 			try{
 				sim.TimeAdvance();
-				sim.RemoveCells(RemoveList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.02));
-				sim.RefineCells(RefineList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.05*0.05));
+				vector<size_t> ToRemove = RemoveList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.02);
+				sim.RemoveCells(ToRemove);
+				vector<size_t> ToRefine = RefineList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.05*0.05);
+				sim.RefineCells(ToRefine);
 			}
 			catch (UniversalError const& eo){
 				DisplayError(eo);
