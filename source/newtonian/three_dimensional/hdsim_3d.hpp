@@ -7,7 +7,7 @@
 #include "../common/equation_of_state.hpp"
 #include "point_motion_3d.hpp"
 #include "time_step_calculator.hpp"
-#include "flux_calculator.hpp"
+#include "flux_calculator_3d.hpp"
 #include "cell_updater.hpp"
 
 //! \brief Three dimensional simulation
