@@ -57,7 +57,7 @@ public:
 	  const EquationOfState& eos,
 	  const PointMotion3D& pm,
 	  const TimeStepCalculator& tsc,
-	  const FluxCalculator& fc,
+	  const FluxCalculator3D& fc,
 	  const CellUpdater& cu);
 
   //! \brief Advances the simulation in time (first order)
@@ -80,7 +80,7 @@ private:
   vector<Conserved3D> extensive_;
   const PointMotion3D& pm_;
   const TimeStepCalculator& tsc_;
-  const FluxCalculator& fc_;
+  const FluxCalculator3D& fc_;
   const CellUpdater& cu_;
   ProgressTracker pt_;
 };

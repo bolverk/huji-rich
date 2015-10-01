@@ -12,7 +12,7 @@
 #include "../../misc/utils.hpp"
 
 //! \brief First order flux calculator
-class FirstOrderHydroFlux : public FluxCalculator
+class FirstOrderHydroFlux : public FluxCalculator3D
 {
 private:
 	RiemannSolver const& rs_;

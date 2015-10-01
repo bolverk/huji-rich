@@ -26,7 +26,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const EquationOfState& eos,
 	const PointMotion3D& pm,
 	const TimeStepCalculator& tsc,
-	const FluxCalculator& fc,
+	const FluxCalculator3D& fc,
 	const CellUpdater& cu):
 tess_(tess), eos_(eos), cells_(cells),
 	extensive_(serial_generate(ExtensiveGenerator(cells,tess,eos))),

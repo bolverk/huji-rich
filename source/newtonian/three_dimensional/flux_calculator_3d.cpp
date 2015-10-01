@@ -1,3 +1,3 @@
 #include "flux_calculator_3d.hpp"
 
-FluxCalculator::~FluxCalculator(void) {}
+FluxCalculator3D::~FluxCalculator3D(void) {}
