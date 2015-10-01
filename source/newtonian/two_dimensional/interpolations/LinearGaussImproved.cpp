@@ -34,17 +34,19 @@ namespace
 	}
 
 	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
-		vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t npoints)
+						   vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t /*npoints*/)
 	{
 		vector<ComputationalCell> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
 			size_t other_cell = (edges[i].neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
 				(edges[i].neighbors.second) : static_cast<size_t> (edges[i].neighbors.first);
-			if (other_cell < npoints)
-				res[i] = cells[other_cell];
+			const boost::container::flat_map<size_t,ComputationalCell>::const_iterator it = 
+			  ghost_cells.find(other_cell);
+			if(it==ghost_cells.end())
+			  res[i] = cells.at(other_cell);
 			else
-				res[i] = safe_retrieve(ghost_cells,other_cell);
+			  res[i] = it->second;
 		}
 		return res;
 	}
