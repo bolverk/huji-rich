@@ -529,6 +529,11 @@ template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& a
     subject.insert(subject.end(),addendum.begin(),addendum.end());
 }
 
+/*! \brief Checks for existence and retrieves entry from flat map
+  \param m flat map
+  \param s Key
+  \return Value corresponding to key
+ */
 template<class S, class T> const T& safe_retrieve
 (const boost::container::flat_map<S,T>& m,
  const S& s)
@@ -539,6 +544,11 @@ template<class S, class T> const T& safe_retrieve
   return it->second;
 }
 
+/*! \brief Non constant version of safe retrieve
+  \param m flat map
+  \param s Key
+  \return Value corresponding to key
+ */
 template<class S, class T> T& safe_retrieve
 (boost::container::flat_map<S,T>& m,
  const S& s)

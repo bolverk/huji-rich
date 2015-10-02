@@ -1,4 +1,4 @@
-/*! \file flux_calculator.hpp
+/*! \file flux_calculator_3d.hpp
   \brief Abstract class for flux calculator
   \author Almog Yalinewich
  */
