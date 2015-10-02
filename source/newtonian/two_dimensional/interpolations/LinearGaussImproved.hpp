@@ -24,6 +24,7 @@ public:
 	\param theta The theta from tess in slope limiter.
 	\param delta_P The pressure ratio for shock detection
 	\param ghost The ghost point generator
+	\param flat_tracers Names of tracers for which the slope is always zero
 	*/
 	LinearGaussImproved
 		(EquationOfState const& eos,

@@ -75,8 +75,14 @@ private:
 
 public:
 
+  /*! \brief Refines cells
+    \param ToRefine List of cell indices to refine
+   */
 	void RefineCells(vector<size_t> const& ToRefine);
 
+  /*! \brief Removes cells
+    \param ToRemove List of cell indices to remove
+   */
 	void RemoveCells(vector<size_t> &ToRemove);
 
   #ifdef RICH_MPI
