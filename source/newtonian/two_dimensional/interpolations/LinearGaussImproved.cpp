@@ -346,7 +346,8 @@ namespace
 	 double pressure_ratio,
 	 EquationOfState const& eos,
 	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
-	 const vector<string>& flat_tracers)
+	 const vector<string>& flat_tracers,
+	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
@@ -359,6 +360,8 @@ namespace
 	ComputationalCell const& cell = cells[cell_index];
 	naive_slope = calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
 		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list);
+
+	naive_slope_ = naive_slope;
 
 	for(size_t i=0;i<flat_tracers.size();++i){
 	  naive_slope.first.tracers[flat_tracers[i]] = 0;
@@ -403,6 +406,7 @@ LinearGaussImproved::LinearGaussImproved
   eos_(eos), 
   ghost_(ghost),
   rslopes_(),
+  naive_rslopes_(),
   slf_(slf),
   shockratio_(delta_v),
   diffusecoeff_(theta),
@@ -417,8 +421,10 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells);
 	// Prepare slopes
 	rslopes_.resize(CellNumber);
+	naive_rslopes_.resize(CellNumber);
 	for (size_t i = 0; i<CellNumber; ++i)
-	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells, flat_tracers_);
+	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
+		flat_tracers_,naive_rslopes_[i]);
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
