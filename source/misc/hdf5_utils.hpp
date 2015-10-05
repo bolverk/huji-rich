@@ -8,10 +8,40 @@
 
 #include <string>
 #include <vector>
+#include <H5Cpp.h>
 
 using std::string;
 using std::vector;
 using std::pair;
+using H5::CommonFG;
+using H5::PredType;
+using H5::DataSpace;
+using H5::DSetCreatPropList;
+using H5::DataSet;
+
+template<class T> void write_std_vector_to_hdf5
+(const CommonFG& file,
+ const vector<T>& data,
+ const string& caption,
+ const PredType& pt)
+{
+  hsize_t dimsf[1];
+  dimsf[0] = static_cast<hsize_t>(data.size());
+  DataSpace dataspace(1, dimsf);
+
+  DSetCreatPropList plist;
+  if(dimsf[0]>100000)
+    dimsf[0] = 100000;
+  plist.setChunk(1,dimsf);
+  plist.setDeflate(6);
+
+  DataSet dataset = file.createDataSet
+    (H5std_string(caption),
+     pt,
+     dataspace,
+     plist);
+  dataset.write(&data[0],pt);
+}
 
 //! \brief Facilitates writing hdf5 files
 class HDF5Shortcut

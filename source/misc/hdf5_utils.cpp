@@ -1,5 +1,4 @@
 #include "hdf5_utils.hpp"
-#include <H5Cpp.h>
 #include "utils.hpp"
 
 using namespace H5;
