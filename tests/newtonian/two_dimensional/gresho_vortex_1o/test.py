@@ -49,12 +49,12 @@ def main():
             vy_list.extend(f['y_velocity'])
     else:
         h5f = h5py.File('final.h5')
-        rx_list = h5f['x_coordinate']
-        ry_list = h5f['y_coordinate']
-        d_list = h5f['density']
-        p_list = h5f['pressure']
-        vx_list = h5f['x_velocity']
-        vy_list = h5f['y_velocity']
+        rx_list = h5f['geometry']['x_coordinate']
+        ry_list = h5f['geometry']['y_coordinate']
+        d_list = h5f['hydrodynamic']['density']
+        p_list = h5f['hydrodynamic']['pressure']
+        vx_list = h5f['hydrodynamic']['x_velocity']
+        vy_list = h5f['hydrodynamic']['y_velocity']
 
     r_list = [math.sqrt(x**2+y**2)
               for x,y in zip(rx_list,ry_list)]

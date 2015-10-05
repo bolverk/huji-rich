@@ -17,10 +17,10 @@ def main():
     g = numpy.loadtxt('adiabatic_index.txt')
     initial_data = h5py.File('initial.h5')
     final_data = h5py.File('final.h5')
-    xr0 = initial_data['x_coordinate']
-    dr0 = initial_data['density']
-    pr0 = initial_data['pressure']
-    vr0 = initial_data['x_velocity']
+    xr0 = initial_data['geometry']['x_coordinate']
+    dr0 = initial_data['hydrodynamic']['density']
+    pr0 = initial_data['hydrodynamic']['pressure']
+    vr0 = initial_data['hydrodynamic']['x_velocity']
     cr0 = [numpy.sqrt(g*p/d) for d,p in zip(dr0,pr0)]
     time = numpy.array(final_data['time'])[0]
 
@@ -31,10 +31,10 @@ def main():
     vs0 = [vr0[i] for i in ids0]
     cs0 = [cr0[i] for i in ids0]
 
-    xr = final_data['x_coordinate']
-    dr = final_data['density']
-    pr = final_data['pressure']
-    vr = final_data['x_velocity']
+    xr = final_data['geometry']['x_coordinate']
+    dr = final_data['hydrodynamic']['density']
+    pr = final_data['hydrodynamic']['pressure']
+    vr = final_data['hydrodynamic']['x_velocity']
     cr = [numpy.sqrt(g*p/d) for d,p in zip(dr,pr)]
 
     xs = numpy.sort(xr)

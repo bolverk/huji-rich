@@ -214,49 +214,99 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
 			    const vector<DiagnosticAppendix*>& appendices)
 {
   ConvexHullData chd(sim.getTessellation());
-  HDF5Shortcut h5sc(fname);
-  h5sc("time",vector<double>(1,sim.getTime()))
-    ("x_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.getTessellation(),&Vector2D::x)))
-    ("y_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.getTessellation(),&Vector2D::y)))
-#ifdef RICH_MPI
-    ("proc_x_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::x)))
-    ("proc_y_coordinate", serial_generate
-     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::y)))
-#endif
-    ("density",serial_generate
-     (CellsPropertyExtractor
-      (sim,ThermalPropertyExtractor(&ComputationalCell::density))))
-    ("pressure",serial_generate
-     (CellsPropertyExtractor
-      (sim,ThermalPropertyExtractor(&ComputationalCell::pressure))))
-    ("x_velocity",serial_generate
-     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::x))))
-    ("y_velocity",serial_generate
-     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::y))))
-    ("x position of vertices",chd.xvert)
-    ("y position of vertices",chd.yvert)
-    ("Number of vertices in cell",chd.nvert)
-    ("Cycle number",vector<int>(1,sim.getCycle()));
+  H5File file(H5std_string(fname), H5F_ACC_TRUNC);
+  Group geometry = file.createGroup("/geometry");
+  Group gappendices = file.createGroup("/appendices");
+  Group hydrodynamic = file.createGroup("/hydrodynamic");
+  Group tracers = file.createGroup("/tracers");
+  Group stickers = file.createGroup("/stickers");
 
-  h5sc("Number of tracers", vector<int>
-       (1,
-	static_cast<int>(sim.getAllCells().front().tracers.size())));
+  // General
+  write_std_vector_to_hdf5
+    (file,
+     vector<double>(1,sim.getTime()),
+     "time");
+  write_std_vector_to_hdf5
+    (file,
+     vector<int>(1,sim.getCycle()),
+     "cycle");
 
+  // Geometry  
+  write_std_vector_to_hdf5
+    (geometry,
+     serial_generate
+     (MeshGeneratingPointCoordinate
+      (sim.getTessellation(),&Vector2D::x)),
+     "x_coordinate");
+  write_std_vector_to_hdf5
+    (geometry,
+     serial_generate
+     (MeshGeneratingPointCoordinate
+      (sim.getTessellation(),&Vector2D::y)),
+     "y_coordinate");
+    write_std_vector_to_hdf5
+    (geometry,
+     chd.xvert,
+     "x_vertices");
+  write_std_vector_to_hdf5
+    (geometry,
+     chd.yvert,
+     "y_vertices");
+  write_std_vector_to_hdf5
+    (geometry,
+     chd.nvert,
+     "n_vertices");
+
+  // Hydrodynamic
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,ThermalPropertyExtractor(&ComputationalCell::density))),
+     "density");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,ThermalPropertyExtractor(&ComputationalCell::pressure))),
+     "pressure");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,CellVelocityComponentExtractor(&Vector2D::x))),
+     "x_velocity");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,CellVelocityComponentExtractor(&Vector2D::y))),
+     "y_velocity");
+
+  // Tracers
   for(boost::container::flat_map<std::string,double>::const_iterator it=
 	sim.getAllCells().front().tracers.begin();
       it!=sim.getAllCells().front().tracers.end(); ++it)
-    h5sc(it->first,serial_generate(TracerSlice(sim,it->first)));
+    write_std_vector_to_hdf5
+      (tracers,
+       serial_generate(TracerSlice(sim,it->first)),
+       it->first);
 
+  // Stickers
   for(boost::container::flat_map<std::string,bool>::const_iterator it=
 	sim.getAllCells().front().stickers.begin();
       it!=sim.getAllCells().front().stickers.end(); ++it)
-    h5sc(it->first,serial_generate(StickerSlice(sim,it->first)));
+    write_std_vector_to_hdf5
+      (stickers,
+       serial_generate(StickerSlice(sim,it->first)),
+       it->first);
 
+  // Appendices
   for(size_t i=0;i<appendices.size();++i)
-    h5sc(appendices[i]->getName(),(*(appendices[i]))(sim));
+    write_std_vector_to_hdf5
+      (gappendices,
+       (*(appendices.at(i)))(sim),
+       appendices.at(i)->getName());
 }
 
 void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState

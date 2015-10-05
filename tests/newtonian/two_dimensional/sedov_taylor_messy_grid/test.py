@@ -12,7 +12,14 @@ def consolidate_single(fname):
     import numpy
 
     f = h5py.File(fname)
-    res = {key:numpy.array(f[key]) for key in f}
+    #res = {key:numpy.array(f[key]) for key in f}
+    res = {}
+    res['x_coordinate'] = numpy.array(f['geometry']['x_coordinate'])
+    res['y_coordinate'] = numpy.array(f['geometry']['y_coordinate'])
+    res['x_velocity'] = numpy.array(f['hydrodynamic']['x_velocity'])
+    res['y_velocity'] = numpy.array(f['hydrodynamic']['y_velocity'])
+    res['density'] = numpy.array(f['hydrodynamic']['density'])
+    res['pressure'] = numpy.array(f['hydrodynamic']['pressure'])
     f.close()
     return res
 
