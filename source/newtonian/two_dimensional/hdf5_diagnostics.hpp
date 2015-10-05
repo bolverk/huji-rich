@@ -12,6 +12,18 @@
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
 
+class Snapshot
+{
+public:
+
+  vector<Vector2D> mesh_points;
+  vector<ComputationalCell> cells;
+  double time;
+};
+
+Snapshot read_hdf5_snapshot
+(const string& fname);
+
 //! \brief Addition data to be written in a snapshot
 class DiagnosticAppendix
 {
