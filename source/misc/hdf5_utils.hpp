@@ -18,12 +18,13 @@ using H5::PredType;
 using H5::DataSpace;
 using H5::DSetCreatPropList;
 using H5::DataSet;
+using H5::DataType;
 
 template<class T> void write_std_vector_to_hdf5
 (const CommonFG& file,
  const vector<T>& data,
  const string& caption,
- const PredType& pt)
+ const DataType& dt)
 {
   hsize_t dimsf[1];
   dimsf[0] = static_cast<hsize_t>(data.size());
@@ -37,11 +38,21 @@ template<class T> void write_std_vector_to_hdf5
 
   DataSet dataset = file.createDataSet
     (H5std_string(caption),
-     pt,
+     dt,
      dataspace,
      plist);
-  dataset.write(&data[0],pt);
+  dataset.write(&data[0],dt);
 }
+
+void write_std_vector_to_hdf5
+(const CommonFG& file,
+ const vector<double>& data,
+ const string& caption);
+
+void write_std_vector_to_hdf5
+(const CommonFG& file,
+ const vector<int>& data,
+ const string& caption);
 
 //! \brief Facilitates writing hdf5 files
 class HDF5Shortcut
