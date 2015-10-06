@@ -17,6 +17,13 @@ class Snapshot
 {
 public:
 
+  //! \brief Default constructor
+  Snapshot(void);
+
+  //! \brief Copy constructor
+  //! \param source Source
+  Snapshot(const Snapshot& source);
+
   //! \brief Mesh points
   vector<Vector2D> mesh_points;
 

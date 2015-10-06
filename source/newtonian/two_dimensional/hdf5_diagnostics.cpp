@@ -4,6 +4,16 @@
 
 using namespace H5;
 
+Snapshot::Snapshot(void):
+  mesh_points(),
+  cells(),
+  time() {}
+
+Snapshot::Snapshot(const Snapshot& source):
+  mesh_points(source.mesh_points),
+  cells(source.cells),
+  time(source.time) {}
+
 DiagnosticAppendix::~DiagnosticAppendix(void) {}
 
 namespace {
