@@ -15,11 +15,11 @@
   \param tess The tessellation
   \param index The index of the cell for which to calculate the convex hull
 */
-void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index);
+void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index);
 /*! \brief Returns the ConvexHull of the edges of a cell
   \param result The indeces of convex hull edges
   \param tess The tessellation
   \param index The index of the cell for which to calculate the convex hull
 */
-void ConvexEdges(vector<int> &result,Tessellation const* tess,int index);
+void ConvexEdges(vector<int> &result,Tessellation const& tess,int index);
 #endif //CONVEXHULL_HPP

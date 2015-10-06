@@ -152,3 +152,8 @@ Vector2D normalize(const Vector2D& v)
 {
   return v/abs(v);
 }
+
+double dist_sqr(const Vector2D& v)
+{
+  return ScalarProd(v,v);
+}

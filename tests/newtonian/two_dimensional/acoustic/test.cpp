@@ -59,6 +59,34 @@ namespace {
     return res;
   }
 
+#ifdef RICH_MPI
+
+  vector<Vector2D> my_convex_hull
+  (const Tessellation& tess,
+   int index)
+  {
+    vector<Vector2D> res;
+    ConvexHull(res,&tess,index);
+    return res;
+  }
+
+  vector<Vector2D> distribute_grid
+  (const vector<Vector2D>& complete_grid,
+   const Tessellation& proc_tess,
+   const boost::mpi::communicator& world)
+  {
+    vector<Vector2D> res;
+    const vector<Vector2D> ch_list =
+      my_convex_hull(proc_tess,world.get_rank());
+    BOOST_FOREACH(const Vector2D& v, complete_grid)
+      {
+	if(PointInCell(ch_list,v))
+	  res.push_back(v);
+      }
+    return res;
+  }
+#endif // RICH_MPI
+
   class SimData
   {
   public:

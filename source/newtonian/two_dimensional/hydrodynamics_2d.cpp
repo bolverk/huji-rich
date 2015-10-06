@@ -824,8 +824,8 @@ void FixAdvection(vector<Conserved>& extensive,
     {
       Rold[static_cast<size_t>(i)]=tessold.GetWidth(i);
       Rnew[static_cast<size_t>(i)]=tessnew.GetWidth(i);
-      ConvexHull(pold[static_cast<size_t>(i)],&tessold,i);
-      ConvexHull(pnew[static_cast<size_t>(i)],&tessnew,i);
+      ConvexHull(pold[static_cast<size_t>(i)],tessold,i);
+      ConvexHull(pnew[static_cast<size_t>(i)],tessnew,i);
     }
 
   PolygonOverlap polyoverlap;
