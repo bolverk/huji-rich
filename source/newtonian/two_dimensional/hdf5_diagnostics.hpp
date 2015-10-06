@@ -12,15 +12,25 @@
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
 
+//! \brief Container for snapshot data
 class Snapshot
 {
 public:
 
+  //! \brief Mesh points
   vector<Vector2D> mesh_points;
+
+  //! \brief Computational cells
   vector<ComputationalCell> cells;
+
+  //! \brief Time
   double time;
 };
 
+/*! \brief Load snapshot data into memory
+  \param fname File name
+  \return Snapshot data
+ */
 Snapshot read_hdf5_snapshot
 (const string& fname);
 

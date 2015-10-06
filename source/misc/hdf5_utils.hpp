@@ -20,6 +20,12 @@ using H5::DSetCreatPropList;
 using H5::DataSet;
 using H5::DataType;
 
+/*! \brief Master function for writing vectors to hdf5 files
+  \param file Either an actual file or a group within a file
+  \param data Data to be written
+  \param caption Name of dataset
+  \param dt Data type
+ */
 template<class T> void write_std_vector_to_hdf5
 (const CommonFG& file,
  const vector<T>& data,
@@ -44,11 +50,21 @@ template<class T> void write_std_vector_to_hdf5
   dataset.write(&data[0],dt);
 }
 
+/*! \brief Writes floating point data to hdf5
+  \param file Either an actual file or a group within a file
+  \param data Data to be written
+  \param caption Name of dataset
+ */
 void write_std_vector_to_hdf5
 (const CommonFG& file,
  const vector<double>& data,
  const string& caption);
 
+/*! \brief Writes integer data to hdf5
+  \param file Either an actual file or a group within a file
+  \param data Data to be written
+  \param caption Name of dataset
+ */
 void write_std_vector_to_hdf5
 (const CommonFG& file,
  const vector<int>& data,
