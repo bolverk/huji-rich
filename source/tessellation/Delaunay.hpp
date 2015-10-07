@@ -34,10 +34,6 @@ private:
 
 #ifdef RICH_MPI
   const boost::mpi::communicator& world_;
-
-  int get_real_point(size_t cur_facet);
-
-  vector<int> calc_f_temp(void);
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
