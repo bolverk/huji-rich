@@ -23,9 +23,10 @@ public:
 	\param outer The outer boudnary conditions, used for preventing points from getting outside the box. If periodic then no fix is applied
     \param chi chi parameter in equation 63
     \param eta eta parameter in equation 63
+	\param cold Switch for cold flows
    */
 	RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer,
-		double chi = 0.15, double eta = 0.02);
+		double chi = 0.15, double eta = 0.02, bool cold = false);
 
 
 	/*! \brief Class constructor
@@ -33,8 +34,9 @@ public:
 	\param eos Equation of state
 	\param chi chi parameter in equation 63
 	\param eta eta parameter in equation 63
+	\param cold Switch for cold flows
 	*/
-	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02);
+	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02,bool cold = false);
 
   vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time) const;
 
@@ -46,12 +48,15 @@ private:
 		   const Tessellation& tess,
 		   const vector<ComputationalCell>& cells) const;
 
+  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt)const;
+
   const PointMotion& pm_;
   const EquationOfState& eos_;
   PeriodicBox pouter_;
   OuterBoundary const& outer_;
   const double chi_;
   const double eta_;
+  const bool cold_;
 };
 
 #endif // ROUND_CELLS_HPP
