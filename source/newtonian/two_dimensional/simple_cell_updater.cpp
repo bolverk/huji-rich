@@ -21,13 +21,13 @@ namespace {
 
   ComputationalCell regular_update
   (const EquationOfState& eos,
-   const vector<Extensive>& extensives,
+   vector<Extensive>& extensives,
    const ComputationalCell& old,
    const CacheData& cd,
    const size_t index)
   {
     ComputationalCell res;
-    const Extensive& extensive = extensives[index];
+    Extensive& extensive = extensives[index];
     const double volume = cd.volumes[index];
     res.density = extensive.mass/volume;
     res.velocity = extensive.momentum/extensive.mass;
@@ -42,6 +42,12 @@ namespace {
        energy,
        res.tracers);
     res.stickers = old.stickers;
+	string entropy = "Entropy";
+	if (old.tracers.find(entropy) != old.tracers.end())
+	{
+		res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
+		extensive.tracers[entropy] = res.tracers[entropy] * extensive.mass;
+	}
     return res;
   }
 
@@ -49,7 +55,7 @@ namespace {
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
-   const vector<Extensive>& extensives,
+   vector<Extensive>& extensives,
    const vector<ComputationalCell>& old,
    const CacheData& cd,
    const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence,
@@ -82,7 +88,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
-   const vector<Extensive>& extensives,
+   vector<Extensive>& extensives,
    const vector<ComputationalCell>& old,
    const CacheData& cd) const
 {
@@ -97,18 +103,6 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
        cd,
        sequence_,
        i);
-    /*
-    const double volume = cd.volumes[i];
-    res[i].density = extensives[i].mass/volume;
-    res[i].velocity = extensives[i].momentum / extensives[i].mass;
-    const double energy = extensives[i].energy/extensives[i].mass - 
-      0.5*ScalarProd(res[i].velocity, res[i].velocity);
-    for(boost::container::flat_map<std::string,double>::const_iterator it =
-	  extensives[i].tracers.begin();
-	it!=extensives[i].tracers.end();++it)
-      res[i].tracers[it->first] = it->second/extensives[i].mass;
-    res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers);
-    */
   return res;
 }
 
