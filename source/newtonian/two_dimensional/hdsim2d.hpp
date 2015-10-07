@@ -85,13 +85,6 @@ public:
    */
 	void RemoveCells(vector<size_t> &ToRemove);
 
-  #ifdef RICH_MPI
-  /*! \brief Chooses scheme for processor motion
-    \param procupdate Pointer to process motion scheme
-   */
-  void SetProcessorMovement(ProcessorUpdate *procupdate);
-  #endif
-
   /*! \brief Returns a list of all computational cells
     \return List of all computational cells
    */

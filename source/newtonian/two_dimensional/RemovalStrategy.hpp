@@ -10,9 +10,6 @@
 #include "../two_dimensional/computational_cell_2d.hpp"
 #include <algorithm>
 #include "../../misc/universal_error.hpp"
-#ifdef RICH_MPI
-#include "../../mpi/mpi_macro.hpp"
-#endif
 
 /*! \brief Abstract class for derefinment strategies
 	\author Elad Steinberg

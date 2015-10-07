@@ -22,7 +22,6 @@
 #include "../misc/int2str.hpp"
 #include "../newtonian/two_dimensional/diagnostics.hpp"
 #ifdef RICH_MPI
-#include "../mpi/mpi_macro.hpp"
 #include "find_affected_cells.hpp"
 #endif
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
