@@ -15,12 +15,11 @@
 class ColdFlowsExtensiveCalculator : public ExtensiveUpdater
 {
 private:
-	const double gamma_;
 	EquationOfState const& eos_;
 	LinearGaussImproved const& interp_;
 public:
 
-	ColdFlowsExtensiveCalculator(double gamma,EquationOfState const& eos,LinearGaussImproved const& interp);
+	ColdFlowsExtensiveCalculator(EquationOfState const& eos,LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,

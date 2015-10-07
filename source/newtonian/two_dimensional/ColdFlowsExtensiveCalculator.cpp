@@ -26,8 +26,9 @@ namespace
 	}
 }
 
-ColdFlowsExtensiveCalculator::ColdFlowsExtensiveCalculator(double gamma,EquationOfState const& eos,
-	LinearGaussImproved const& interp) :gamma_(gamma),eos_(eos),interp_(interp){}
+ColdFlowsExtensiveCalculator::ColdFlowsExtensiveCalculator
+(EquationOfState const& eos,
+ LinearGaussImproved const& interp): eos_(eos),interp_(interp){}
 
 namespace 
 {
