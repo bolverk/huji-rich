@@ -41,7 +41,17 @@ Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 	return *this;
 }
 
-Delaunay::Delaunay(void):
+Delaunay::Delaunay
+(
+#ifdef RICH_MPI
+ const boost::mpi::communicator& world
+#else
+void
+#endif // RICH_MPI
+):
+#ifdef RICH_MPI
+  world_(world),
+#endif // RICH_MPI
 lastFacet(0),CalcRadius(false),
 	radius(vector<double>()),cell_points(vector<Vector2D> ()),
 	PointWasAdded(false),
@@ -53,6 +63,9 @@ lastFacet(0),CalcRadius(false),
 	logger(0) {}
 
 Delaunay::Delaunay(Delaunay const& other):
+#ifdef RICH_MPI
+  world_(other.world_),
+#endif // RICH_MPI
 lastFacet(other.lastFacet),
 	CalcRadius(other.CalcRadius),
 	radius(other.radius),cell_points(other.cell_points),
@@ -734,11 +747,12 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2
 }
 
 #ifdef RICH_MPI
-vector<vector<int> > Delaunay::FindOuterPointsMPI(OuterBoundary const* obc,
-						  vector<Edge> const& edges,
-						  Tessellation const& tproc,
-						  vector<vector<int> > &Nghost,
-						  vector<int> &proclist)
+vector<vector<int> > Delaunay::FindOuterPointsMPI
+(OuterBoundary const* obc,
+ vector<Edge> const& edges,
+ Tessellation const& tproc,
+ vector<vector<int> > &Nghost,
+ vector<int> &proclist)
 {
 	// We add the points in a counter clockwise fashion
 	int rank;

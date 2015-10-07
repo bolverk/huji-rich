@@ -23,6 +23,7 @@
 #include "../newtonian/two_dimensional/diagnostics.hpp"
 #ifdef RICH_MPI
 #include "find_affected_cells.hpp"
+#include <boost/mpi/communicator.hpp>
 #endif
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg
@@ -30,6 +31,11 @@
 class Delaunay
 {
 private:
+
+#ifdef RICH_MPI
+  const boost::mpi::communicator& world_;
+#endif // RICH_MPI
+
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
   int lastFacet; //last facet to be checked in Walk
   bool CalcRadius;
@@ -112,7 +118,14 @@ public:
   const vector<Vector2D>& getCor(void) const;
 
   //! \brief Class constructor.
-  Delaunay(void);
+  Delaunay
+  (
+#ifdef RICH_MPI
+   const boost::mpi::communicator& world
+#else
+   void
+#endif // RICH_MPI
+   );
 
   /*!
     \brief Copy constructor
