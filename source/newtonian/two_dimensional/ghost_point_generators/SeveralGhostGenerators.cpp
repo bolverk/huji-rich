@@ -9,12 +9,12 @@ ghosts_(ghosts),ghost_chooser_(ghostchooser)
 {}
 
 boost::container::flat_map<size_t, ComputationalCell> SeveralGhostGenerators::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells, double time) const
 {
 	size_t nghosts = ghosts_.size();
 	vector<GhostCells> ghost_cells(nghosts);
 	for (size_t i = 0; i < nghosts; ++i)
-		ghost_cells[i] = ghosts_[i]->operator()(tess, cells);
+		ghost_cells[i] = ghosts_[i]->operator()(tess, cells,time);
 	GhostCells res;
 	for (GhostCells::const_iterator it = ghost_cells[0].begin(); it != ghost_cells[0].end();++it)
 	{
@@ -26,9 +26,9 @@ boost::container::flat_map<size_t, ComputationalCell> SeveralGhostGenerators::op
 
 std::pair<ComputationalCell, ComputationalCell> SeveralGhostGenerators::GetGhostGradient(const Tessellation& tess,
 	const vector<ComputationalCell>& cells, const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-	size_t ghost_index) const
+	size_t ghost_index,double time) const
 {
-  return ghosts_[ghost_chooser_.GhostChoose(tess, static_cast<int>(ghost_index))]->GetGhostGradient(tess, cells, gradients, ghost_index);
+  return ghosts_[ghost_chooser_.GhostChoose(tess, static_cast<int>(ghost_index))]->GetGhostGradient(tess, cells, gradients, ghost_index,time);
 }
 
 Vector2D SeveralGhostGenerators::GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& cells,
