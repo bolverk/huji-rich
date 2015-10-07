@@ -747,6 +747,31 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2
 }
 
 #ifdef RICH_MPI
+
+int Delaunay::get_real_point(size_t cur_facet)
+{
+  for(size_t i=1;i<3;++i){
+    if(f[cur_facet].vertices[i]<static_cast<int>(olength))
+      return f[cur_facet].vertices[i];
+  }
+  return f[cur_facet].vertices[0];
+}
+
+/*
+vector<int> Delaunay::calc_f_temp(void)
+{
+  if(olength>100){
+    const int cur_facet = static_cast<int>(Walk(olength));
+    int real_point = 0;
+    for(int i=0;i<3;++i){
+      if(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]<static_cast<int>(olength)){
+	
+      }
+    }
+  }
+}
+*/
+
 vector<vector<int> > Delaunay::FindOuterPointsMPI
 (OuterBoundary const* obc,
  vector<Edge> const& edges,
@@ -758,21 +783,12 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res(edges.size());
-	vector<int> f_temp, f_add(f.size(), 0);
+	vector<int> f_temp;
 	if (olength>100)
 	{
-		// Walk to an outer point
-	  int cur_facet = static_cast<int>(Walk(olength));
-		// Find the real point
-		int real_point = 0;
-		for (int i = 0; i < 3; ++i)
-		{
-		  if (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] < static_cast<int>(olength))
-			{
-				real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
-				break;
-			}
-		}
+	  // Find the real point
+	  int real_point = get_real_point(Walk(olength));
+
 		vector<int> containing_facets;
 		FindContainingTetras(cur_facet, real_point, containing_facets);
 		for (size_t i = 0; i < containing_facets.size(); ++i)
