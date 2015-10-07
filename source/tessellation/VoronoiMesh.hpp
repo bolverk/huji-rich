@@ -93,22 +93,29 @@ public:
 	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc);
 
 	//! \brief Class default constructor.
-	VoronoiMesh(void);
+  VoronoiMesh(void);
 
 	/*!
 	\brief Class constructor
 	\param points The points to build for
 	\param bc The geometric boundary conditions
 	*/
-	VoronoiMesh(vector<Vector2D> const& points,OuterBoundary const& bc);
+	VoronoiMesh
+	(vector<Vector2D> const& points,
+	 OuterBoundary const& bc);
+
+#ifdef RICH_MPI
 	/*!
 	\brief Class constructor for MPI
 	\param points The points to build for
 	\param proctess The tessellation of the processors
 	\param bc The geometric boundary conditions
 	*/
-	VoronoiMesh(vector<Vector2D> const& points,Tessellation const& proctess,
-		OuterBoundary const& bc);
+	VoronoiMesh
+	(vector<Vector2D> const& points,
+	 Tessellation const& proctess,
+	 OuterBoundary const& bc);
+#endif // RICH_MPI
 
 	/*!
 		\brief Copy constructor

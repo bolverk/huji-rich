@@ -41,17 +41,7 @@ Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 	return *this;
 }
 
-Delaunay::Delaunay
-(
-#ifdef RICH_MPI
- const boost::mpi::communicator& world
-#else
-void
-#endif // RICH_MPI
-):
-#ifdef RICH_MPI
-  world_(world),
-#endif // RICH_MPI
+Delaunay::Delaunay(void):
 lastFacet(0),CalcRadius(false),
 	radius(vector<double>()),cell_points(vector<Vector2D> ()),
 	PointWasAdded(false),
@@ -63,9 +53,6 @@ lastFacet(0),CalcRadius(false),
 	logger(0) {}
 
 Delaunay::Delaunay(Delaunay const& other):
-#ifdef RICH_MPI
-  world_(other.world_),
-#endif // RICH_MPI
 lastFacet(other.lastFacet),
 	CalcRadius(other.CalcRadius),
 	radius(other.radius),cell_points(other.cell_points),
@@ -746,92 +733,6 @@ vector<int> Delaunay::GetOuterFacets(int start_facet,int real_point,int olength2
 	return f_temp;
 }
 
-#ifdef RICH_MPI
-void Delaunay::SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
-	vector<int> const& proclist,vector<vector<int> > &Nghost)
-{
-	const int rank = get_mpi_rank();
-	const int ws = get_mpi_size();
-	vector<int> procorder=GetProcOrder(rank,ws);
-	int nlist=static_cast<int>(proclist.size());
-	Nghost.resize(proclist.size());
-	for(size_t i=0;i<procorder.size();++i)
-	{
-	  const int index=static_cast<int>(find(proclist.begin(),proclist.end(),procorder[i])-proclist.begin());
-		// Do we talk with this processor?
-		if(index<nlist)
-		{
-			// Create send data
-			vector<double> send;
-			ConvertVector2DToDouble(tosend[static_cast<size_t>(index)],send);
-			// Send/Recv data
-			MPI_Status status;
-			vector<double> recv;
-			int nrecv;
-			if(rank<procorder[static_cast<size_t>(i)])
-			{
-				if(!send.empty())
-					MPI_Send(&send[0],static_cast<int>(send.size()),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
-				else
-				{
-					double temp=0;
-					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
-				}
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(static_cast<size_t>(nrecv));
-				int rtag=status.MPI_TAG;
-				if(rtag==0)
-					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
-				else
-				{
-					double temp=0;
-					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
-				}
-			}
-			else
-			{
-				MPI_Probe(procorder[i],MPI_ANY_TAG,MPI_COMM_WORLD,&status);
-				MPI_Get_count(&status,MPI_DOUBLE,&nrecv);
-				recv.resize(static_cast<size_t>(nrecv));
-				if(status.MPI_TAG==0)
-					MPI_Recv(&recv[0],nrecv,MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD,&status);
-				else
-				{
-					double temp=0;
-					MPI_Recv(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD,&status);
-				}
-				if(!send.empty())
-					MPI_Send(&send[0],static_cast<int>(send.size()),MPI_DOUBLE,procorder[i],0,MPI_COMM_WORLD);
-				else
-				{
-					double temp=0;
-					MPI_Send(&temp,1,MPI_DOUBLE,procorder[i],1,MPI_COMM_WORLD);
-				}
-			}
-			vector<Vector2D> toadd;
-			ConvertDoubleToVector2D(toadd,recv);
-			// Add the points
-			try
-			{
-
-				if (!toadd.empty())
-				{
-					for (size_t iii = 0; iii < toadd.size(); ++iii)
-					  Nghost[static_cast<size_t>(index)].push_back(static_cast<int>(cor.size() + iii));
-					AddBoundaryPoints(toadd);
-				}
-			}
-			catch (UniversalError &eo)
-			{
-				eo.AddEntry("Error in SendRecvFirstBatch", 0);
-				throw;
-			}
-		}
-	}
-}
-#endif
-
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
 	// We add the points in a counter clockwise fashion
@@ -1130,18 +1031,6 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edge
 	}
 }
 
-#ifdef RICH_MPI
-vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,
-	Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist)
-{
-	vector<Edge> edges;
-	vector<int> edge_index=tproc.GetCellEdges(get_mpi_rank());
-	for(size_t i=0;i<edge_index.size();++i)
-		edges.push_back(tproc.GetEdge(edge_index[i]));
-	return FindOuterPointsMPI(obc,edges,tproc,Nghost,proclist);
-}
-#endif
-
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges)
 {
 	vector<vector<int> > toduplicate=FindOuterPoints(edges);
@@ -1268,66 +1157,3 @@ void Delaunay::AddOuterFacets(int tri,vector<vector<int> > &toduplicate,
 		}
 	}
 }
-
-#ifdef RICH_MPI
-void Delaunay::AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
-	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc)
-{
-	stack<int> tocheck;
-	vector<int> neightemp=FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))),point);
-	for(size_t i=0;i<neightemp.size();++i)
-		tocheck.push(neightemp[i]);
-	const int rank=get_mpi_rank();
-	while(!tocheck.empty())
-	{
-		int cur_facet=tocheck.top();
-		tocheck.pop();
-		for(size_t i=0;i<3;++i)
-		{
-			bool added=false;
-			if(f[static_cast<size_t>(cur_facet)].vertices[i]>=static_cast<int>(olength))
-				continue;
-			if(checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])])
-				continue;
-			vector<int> neighs=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[i]);
-			for(size_t k=0;k<neighs.size();++k)
-			{
-			  Circle circ(GetCircleCenter(neighs[k]),radius[static_cast<size_t>(neighs[k])]);
-				vector<int> cputosendto;
-				find_affected_cells(tproc,rank,circ,cputosendto);
-				sort(cputosendto.begin(),cputosendto.end());
-				cputosendto=unique(cputosendto);
-				//				vector<int> toremove;
-				RemoveVal(cputosendto,rank);
-				if(!cputosendto.empty())
-				{
-					added=true;
-					for(size_t j=0;j<cputosendto.size();++j)
-					{
-					  size_t index=static_cast<size_t>(find(neigh.begin(),neigh.end(),cputosendto[j])
-									   -neigh.begin());
-						if(index<neigh.size())
-							toduplicate[index].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
-						else
-						{
-							neigh.push_back(cputosendto[j]);
-							vector<int> tempvec;
-							tempvec.push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
-							toduplicate.push_back(tempvec);
-						}
-					}
-				}
-			}
-			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])]=true;
-			if(added)
-			{
-				for(size_t j=0;j<neighs.size();++j)
-				{
-					if (!IsOuterFacet(neighs[j]))
-						tocheck.push(neighs[j]);
-				}
-			}
-		}
-	}
-}
-#endif

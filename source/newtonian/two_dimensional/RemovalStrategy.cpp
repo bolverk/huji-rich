@@ -77,9 +77,6 @@ vector<int> RemovalStrategy::RemoveNeighbors
 			merits2.push_back(merits[static_cast<size_t>(i)]);
 		}
 	}
-#ifdef RICH_MPI
-	result=RemoveMPINeighbors(result,merits2,tess);
-#endif
 	return result;
 }
 

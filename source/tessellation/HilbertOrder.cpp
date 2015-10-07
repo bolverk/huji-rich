@@ -1,7 +1,4 @@
 #include "HilbertOrder.hpp"
-#ifdef RICH_MPI
-#include "../mpi/mpi_macro.hpp"
-#endif
 
 namespace
 {
@@ -131,9 +128,6 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
       if(static_cast<int>(context_list.size())>N)
 	{
 	  UniversalError eo("Error in creating the hilbert order, probably two points are identical");
-#ifdef RICH_MPI
-	  eo.AddEntry("Rank",get_mpi_rank());
-#endif
 	  throw eo;
 	}
       if(i==0)

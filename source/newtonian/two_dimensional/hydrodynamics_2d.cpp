@@ -415,9 +415,6 @@ vector<bool> UpdatePrimitives
 	  eo.AddEntry("Cell volume",tess.GetVolume(i));
 	  eo.AddEntry("Cell x location",tess.GetMeshPoint(i).x);
 	  eo.AddEntry("Cell y location",tess.GetMeshPoint(i).y);
-#ifdef RICH_MPI
-	  eo.AddEntry("Error in CPU",static_cast<double>(get_mpi_rank()));
-#endif
 	  update_primitives_rethrow(i,eo);
 	}
     }
@@ -910,12 +907,6 @@ double determine_time_step(double hydro_time_step,
     dt = std::min(external_dt,dt);
   if(end_time>0)
     dt = std::min(end_time-current_time,dt);
-
-#ifdef RICH_MPI
-  double dt_temp = dt;
-  MPI_Reduce(&dt_temp,&dt,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-  MPI_Bcast(&dt,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-#endif
 
   return dt;
 }

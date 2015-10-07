@@ -256,13 +256,6 @@ const Tessellation& hdsim::getTessellation(void) const
 	return tess_;
 }
 
-#ifdef RICH_MPI
-Tessellation const& hdsim::GetProcTessellation(void) const
-{
-	return _proctess;
-}
-#endif
-
 void hdsim::addTracer(const string& name,
 	const SpatialDistribution& tp)
 {
@@ -315,70 +308,6 @@ namespace
 #endif // RICH_MPI
 }
 
-namespace
-{
-#ifdef RICH_MPI
-	void RemoveNGhostAMR(vector<vector<int> > &nghost, vector<int> const& sentprocs,
-		vector<vector<int> > &toremove)
-	{
-		int nlist = static_cast<int>(sentprocs.size());
-		int rank = get_mpi_rank();
-		int ws = get_mpi_size();
-		vector<int> procorder = GetProcOrder(rank, ws);
-		vector<vector<int> > recv(static_cast<size_t>(nlist));
-		int temp;
-		MPI_Status status;
-		for (int i = 0; i<static_cast<int>(procorder.size()); ++i)
-		{
-			int index = static_cast<int>(Find(sentprocs.begin(), sentprocs.end(), procorder[static_cast<size_t>(i)])
-				- sentprocs.begin());
-			if (index<nlist)
-			{
-				if (rank<procorder[static_cast<size_t>(i)])
-				{
-					if (toremove[static_cast<size_t>(index)].empty())
-						MPI_Send(&temp, 1, MPI_INT, procorder[static_cast<size_t>(i)], 1, MPI_COMM_WORLD);
-					else
-						MPI_Send(&toremove[static_cast<size_t>(index)][0], static_cast<int>(toremove[static_cast<size_t>(index)].size()),
-						MPI_INT, procorder[static_cast<size_t>(i)], 0, MPI_COMM_WORLD);
-					MPI_Probe(procorder[static_cast<size_t>(i)], MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-					if (status.MPI_TAG == 1)
-						MPI_Recv(&temp, 1, MPI_INT, procorder[static_cast<size_t>(i)], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					else
-					{
-						int count;
-						MPI_Get_count(&status, MPI_INT, &count);
-						recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
-						MPI_Recv(&recv[static_cast<size_t>(index)][0], count, MPI_INT, procorder[static_cast<size_t>(i)], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					}
-				}
-				else
-				{
-					MPI_Probe(procorder[static_cast<size_t>(i)], MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-					if (status.MPI_TAG == 1)
-						MPI_Recv(&temp, 1, MPI_INT, procorder[static_cast<size_t>(i)], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					else
-					{
-						int count;
-						MPI_Get_count(&status, MPI_INT, &count);
-						recv[static_cast<size_t>(index)].resize(static_cast<size_t>(count));
-						MPI_Recv(&recv[static_cast<size_t>(index)][0], count, MPI_INT, procorder[static_cast<size_t>(i)], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					}
-					if (toremove[static_cast<size_t>(index)].empty())
-						MPI_Send(&temp, 1, MPI_INT, procorder[static_cast<size_t>(i)], 1, MPI_COMM_WORLD);
-					else
-						MPI_Send(&toremove[static_cast<size_t>(index)][0], static_cast<int>(toremove[static_cast<size_t>(index)].size()),
-						MPI_INT, procorder[static_cast<size_t>(i)], 0, MPI_COMM_WORLD);
-				}
-			}
-		}
-		for (int i = 0; i<nlist; ++i)
-			if (!recv[static_cast<size_t>(i)].empty())
-				RemoveVector(nghost[static_cast<size_t>(i)], recv[static_cast<size_t>(i)]);
-	}
-#endif
-}
-
 const vector<ComputationalCell>& hdsim::getAllCells(void) const
 {
 	return cells_;
@@ -411,28 +340,6 @@ void hdsim::recalculateExtensives(void)
 			extensives_[i].tracers[it->first] = (it->second)*mass;
 	}
 }
-
-/*
-void hdsim::HilbertArrange(int innernum)
-{
-vector<Vector2D> cor=_tessellation.GetMeshPoints();
-vector<int> order=HilbertOrder(cor,_tessellation.GetPointNo(),innernum);
-ReArrangeVector(cor,order);
-if(cor.size()>order.size())
-cor.erase(cor.begin()+static_cast<int>(order.size()),cor.end());
-ReArrangeVector(_cells,order);
-if(tracer_flag_)
-ReArrangeVector(tracer_,order);
-_tessellation.Update(cor);
-}
-*/
-
-#ifdef RICH_MPI
-void hdsim::SetProcessorMovement(ProcessorUpdate *procupdate)
-{
-	procupdate_ = procupdate;
-}
-#endif
 
 void hdsim::setStartTime(double t_start)
 {

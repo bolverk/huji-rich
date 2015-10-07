@@ -358,9 +358,6 @@ double TimeAdvance2mid
  vector<size_t>& custom_evolution_indices,
  const CustomEvolutionManager& custom_evolution_manager,
  const PhysicalGeometry& pg,
- #ifdef RICH_MPI
- ProcessorUpdate *procupdate,
- #endif
  bool traceflag=false,
  bool coldflows_flag=false,double as=0.01,
  double bs=0.01,
