@@ -28,12 +28,14 @@ public:
   /*! \brief interpolates values on both sides of each interface
     \param tess Tessellation
     \param cells Computational cells
+	\param time The sim time
     \return List of pairs of primitive values on each cell
    */
   virtual vector<pair<ComputationalCell, ComputationalCell> >
   operator()
   (const Tessellation& tess,
-   const vector<ComputationalCell>& cells) const = 0;
+   const vector<ComputationalCell>& cells,
+   double time) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };
