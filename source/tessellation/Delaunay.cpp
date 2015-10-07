@@ -758,11 +758,10 @@ vector<vector<int> > Delaunay::FindOuterPointsMPI
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res(edges.size());
-	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
+	vector<int> res_temp, f_temp, f_add(f.size(), 0);
 	if (olength>100)
 	{
 	  res_temp.reserve(static_cast<size_t>(20 * sqrt(static_cast<double>(olength))));
-	  outer_points.reserve(static_cast<size_t>(10 * sqrt(static_cast<double>(olength))));
 		// Walk to an outer point
 	  int cur_facet = static_cast<int>(Walk(olength));
 		// Find the real point
