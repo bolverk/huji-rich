@@ -20,6 +20,18 @@ namespace
 	  const Vector2D temp=point-edge0;
 	  return 2*par*ScalarProd(par,temp)-temp+edge0;
 	}
+
+  bool check_same_point(const vector<Vector2D>& vertices,
+			const Vector2D& p,
+			double tol)
+  {
+    BOOST_FOREACH(const Vector2D& v, vertices)
+      {
+	if(dist_sqr(v-p)<tol)
+	  return true;
+      }
+    return false;
+  }
 }
 
 void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
@@ -34,27 +46,11 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
 	// Remove identical points
 	for(size_t i=1;i<edge_index.size();++i)
 	{
-		bool samepoint=false;
-		Edge const& edge = tess.GetEdge(edge_index[i]);
-		BOOST_FOREACH(const Vector2D& p, points)
-		  {
-		    if(dist_sqr(edge.vertices.first-p)<eps*pow(R,2)){
-		      samepoint = true;
-		      break;
-		    }
-		  }
-		if(!samepoint)
-			points.push_back(tess.GetEdge(edge_index[i]).vertices.first);
-		samepoint=false;
-		BOOST_FOREACH(const Vector2D& p, points)
-		  {
-		    if(dist_sqr(edge.vertices.second-p)<eps*pow(R,2)){
-		      samepoint = true;
-		      break;
-		    }
-		  }
-		if(!samepoint)
-			points.push_back(tess.GetEdge(edge_index[i]).vertices.second);
+	  const Edge& edge = tess.GetEdge(static_cast<int>(i));
+		if(!check_same_point(points,edge.vertices.first,eps*pow(R,2)))
+		  points.push_back(tess.GetEdge(edge_index[i]).vertices.first);
+		if(!check_same_point(points,edge.vertices.second,eps*pow(R,2)))
+		  points.push_back(tess.GetEdge(edge_index[i]).vertices.second);
 	}
 	// Find the bottom point
 	sort(points.begin(),points.end(),VectorSort);
