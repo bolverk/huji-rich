@@ -10,36 +10,15 @@ namespace
 	{
 		const double relval=max(max(fabs(v1.y),fabs(v2.y)),DBL_EPSILON*2);
 		const double diffmax=4*max(fabs(v1.y-v2.y),fabs(v2.y-v1.y))/relval;
-		if(diffmax<DBL_EPSILON)
-			return v1.x<v2.x;
-		else
-			return v1.y<v2.y;
+		return diffmax<DBL_EPSILON ? v1.x<v2.x : v1.y<v2.y;
 	}
-
-	/*
-	bool AngleSort(Vector2D const& v1,Vector2D const& v2)
-	{
-	const double tol=1e-8;
-	const double a1=atan2(v1.y,v1.x);
-	const double a2=atan2(v2.y,v2.x);
-	if(a1<a2+tol)
-	return true;
-	if(a2<a1+tol)
-	return false;
-	if(abs(v1)<abs(v2))
-	return true;
-	else
-	return false;
-	}
-	*/
 
 	Vector2D GetReflectedPoint(Edge const& edge,Vector2D const& point)
 	{
-		Vector2D par(Parallel(edge));
-		par=par/abs(par);
-		Vector2D edge0=edge.vertices.first;
-		Vector2D temp=point-edge0;
-		return 2*par*ScalarProd(par,temp)-temp+edge0;
+	  const Vector2D par(normalize(Parallel(edge)));
+	  const Vector2D edge0=edge.vertices.first;
+	  const Vector2D temp=point-edge0;
+	  return 2*par*ScalarProd(par,temp)-temp+edge0;
 	}
 }
 
