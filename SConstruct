@@ -29,7 +29,7 @@ elif compiler=='clang++':
     else:
         cflags += ' -O3 -march=native'
 elif compiler=='mpiCC':
-    cflags = '-DRICH_MPI '
+    cflags = '-DRICH_MPI -Wfatal-errors '
     if int(debug):
         cflags += ' -O0 -g -pg'
     else:
