@@ -343,8 +343,8 @@ VoronoiMesh::VoronoiMesh
 
 #ifdef RICH_MPI
 VoronoiMesh::VoronoiMesh
-(vector<Vector2D> const& points,
- Tessellation const& proctess,
+(Tessellation const& proctess,
+ vector<Vector2D> const& points,
  OuterBoundary const& bc):
 	logger(0),
 	eps(1e-8),

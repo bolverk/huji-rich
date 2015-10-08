@@ -112,8 +112,8 @@ public:
 	\param bc The geometric boundary conditions
 	*/
 	VoronoiMesh
-	(vector<Vector2D> const& points,
-	 Tessellation const& proctess,
+	(Tessellation const& proctess,
+	 vector<Vector2D> const& points,
 	 OuterBoundary const& bc);
 #endif // RICH_MPI
 

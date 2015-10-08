@@ -128,6 +128,33 @@ namespace {
     }
     return res;
   } 
+
+#ifdef RICH_MPI
+  vector<Vector2D> my_convex_hull
+  (const Tessellation& tess,
+   int index)
+  {
+    vector<Vector2D> res;
+    ConvexHull(res,tess,index);
+    return res;
+  }
+
+  vector<Vector2D> distribute_grid
+  (const vector<Vector2D>& complete_grid,
+   const Tessellation& proc_tess)
+  {
+    const boost::mpi::communicator world;
+    vector<Vector2D> res;
+    const vector<Vector2D> ch_list =
+      my_convex_hull(proc_tess,world.rank());
+    BOOST_FOREACH(const Vector2D& v, complete_grid)
+      {
+	if(PointInCell(ch_list,v))
+	  res.push_back(v);
+      }
+    return res;
+  }
+#endif // RICH_MPI
 }
 
 class SimData
@@ -137,10 +164,29 @@ public:
   SimData(void):
     pg_(),
     outer_(-0.5,0.5,0.5,-0.5),
+#ifdef RICH_MPI
+    proc_tess_(RandSquare(boost::mpi::communicator.size(),
+			  outer_.getBoundary().first.x,
+			  outer_.getBoundary().second.x,
+			  outer_.getBoundary().first.y,
+			  outer_.getBoundary().second.y),
+	       outer_),
+#endif // RICH_MPI
     rs_(),
-    tess_(cartesian_mesh(30,30,outer_.getBoundary().first,
-			 outer_.getBoundary().second),
-	  outer_),
+    tess_
+    (
+#ifdef RICH_MPI
+     proc_tess_,
+     distribute_grid
+     (
+#endif // RICH_MPI
+      cartesian_mesh(30,30,outer_.getBoundary().first,
+		     outer_.getBoundary().second),
+      outer_
+#ifdef RICH_MPI
+      )
+#endif // RICH_MPI
+     ),
     eos_(5./3.),
     point_motion_(),
     force_(),
