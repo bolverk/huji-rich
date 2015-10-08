@@ -1,3 +1,3 @@
-#include "cell_updater.hpp"
+#include "cell_updater_3d.hpp"
 
-CellUpdater::~CellUpdater(void) {}
+CellUpdater3D::~CellUpdater3D(void) {}
