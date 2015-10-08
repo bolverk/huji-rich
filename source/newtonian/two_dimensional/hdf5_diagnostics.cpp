@@ -410,8 +410,8 @@ void WriteDelaunay(Delaunay const& tri, string const& filename)
 		facets.push_back(tri.get_facet(i).vertices.third);
 	}
 
-	write_std_vector_to_hdf5(file, x_cor, "x_cordinate");
-	write_std_vector_to_hdf5(file, y_cor, "y_cordinate");
+	write_std_vector_to_hdf5(file, x_cor, "x_coordinate");
+	write_std_vector_to_hdf5(file, y_cor, "y_coordinate");
 	write_std_vector_to_hdf5(file, vector<int>(1, tri.GetOriginalLength()), "point number");
 	write_std_vector_to_hdf5(file, facets, "triangles");
 }
