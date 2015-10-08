@@ -13,7 +13,7 @@
 using three_dimenssional::ComputationalCell;
 
 //! \brief Abstract clas for cell update scheme
-class CellUpdater
+class CellUpdater3D
 {
 public:
 
@@ -27,7 +27,7 @@ public:
    const EquationOfState& eos) const = 0;
 
   //! \brief Class destructor
-  virtual ~CellUpdater(void);
+  virtual ~CellUpdater3D(void);
 };
 
 #endif // CELL_UPDATER_HPP

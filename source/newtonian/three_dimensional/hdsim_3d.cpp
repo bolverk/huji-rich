@@ -27,7 +27,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const PointMotion3D& pm,
 	const TimeStepCalculator& tsc,
 	const FluxCalculator3D& fc,
-	const CellUpdater& cu):
+	const CellUpdater3D& cu):
 tess_(tess), eos_(eos), cells_(cells),
 	extensive_(serial_generate(ExtensiveGenerator(cells,tess,eos))),
 	pm_(pm), tsc_(tsc), fc_(fc), cu_(cu), pt_()
@@ -82,7 +82,7 @@ namespace
 		AllCellsUpdater(const Tessellation3D& tess,
 			const vector<Conserved3D>& extensive,
 			const EquationOfState& eos,
-			const CellUpdater& cu):
+			const CellUpdater3D& cu):
 		tess_(tess), extensive_(extensive), eos_(eos), cu_(cu) {}
 
 		size_t size(void) const
@@ -99,7 +99,7 @@ namespace
 		const Tessellation3D& tess_;
 		const vector<Conserved3D>& extensive_;
 		const EquationOfState& eos_;
-		const CellUpdater& cu_;
+		const CellUpdater3D& cu_;
 	};
 
 	class PointPositionUpdater: public LazyList<Vector3D>

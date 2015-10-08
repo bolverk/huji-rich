@@ -8,7 +8,7 @@
 #include "point_motion_3d.hpp"
 #include "time_step_calculator.hpp"
 #include "flux_calculator_3d.hpp"
-#include "cell_updater.hpp"
+#include "cell_updater_3d.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
@@ -58,7 +58,7 @@ public:
 	  const PointMotion3D& pm,
 	  const TimeStepCalculator& tsc,
 	  const FluxCalculator3D& fc,
-	  const CellUpdater& cu);
+	  const CellUpdater3D& cu);
 
   //! \brief Advances the simulation in time (first order)
   void timeAdvance();
@@ -81,7 +81,7 @@ private:
   const PointMotion3D& pm_;
   const TimeStepCalculator& tsc_;
   const FluxCalculator3D& fc_;
-  const CellUpdater& cu_;
+  const CellUpdater3D& cu_;
   ProgressTracker pt_;
 };
 
