@@ -387,3 +387,31 @@ Snapshot read_hdf5_snapshot
     
   return res;
 }
+
+void WriteDelaunay(Delaunay const& tri, string const& filename)
+{
+	vector<Vector2D> const& cor=tri.getCor();
+	vector<double> x_cor, y_cor;
+	vector<int> facets;
+	int nfacets=tri.get_num_facet();
+
+	H5File file(H5std_string(filename), H5F_ACC_TRUNC);
+
+	for (size_t i = 0; i < cor.size(); ++i)
+	{
+		x_cor.push_back(cor[i].x);
+		y_cor.push_back(cor[i].y);
+	}
+
+	for (int i = 0; i < nfacets; ++i)
+	{
+		facets.push_back(tri.get_facet(i).vertices.first);
+		facets.push_back(tri.get_facet(i).vertices.second);
+		facets.push_back(tri.get_facet(i).vertices.third);
+	}
+
+	write_std_vector_to_hdf5(file, x_cor, "x_cordinate");
+	write_std_vector_to_hdf5(file, y_cor, "y_cordinate");
+	write_std_vector_to_hdf5(file, vector<int>(1, tri.GetOriginalLength()), "point number");
+	write_std_vector_to_hdf5(file, facets, "triangles");
+}

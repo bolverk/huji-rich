@@ -565,7 +565,7 @@ double Delaunay::get_cor(int index, int dim) const
 		throw UniversalError("Error in Delaunay::get_cor. Invalid index");
 }
 
-int Delaunay::get_num_facet(void)
+int Delaunay::get_num_facet(void) const
 {
 	return static_cast<int>(f.size());
 }

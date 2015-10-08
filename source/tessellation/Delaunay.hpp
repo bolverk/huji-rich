@@ -164,7 +164,7 @@ public:
   /*! \brief Returns the number of facets.
     \returns The number of facets.
   */
-  int get_num_facet(void);
+  int get_num_facet(void)const;
 
   /*! \brief Returns the number of points
     \returns The number of points.

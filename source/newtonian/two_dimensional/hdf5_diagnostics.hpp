@@ -11,6 +11,7 @@
 #include "hdsim2d.hpp"
 #include "../../misc/int2str.hpp"
 #include "diagnostics.hpp"
+#include "../../tessellation/Delaunay.hpp"
 
 //! \brief Container for snapshot data
 class Snapshot
@@ -82,5 +83,12 @@ void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
 \param output The path to the new binary file
 */
 void ConvertHDF5toBinary(string const& input, string const& output);
+
+/*!
+\brief Writes the Delaunay triangulation data into an HDF5 file
+\param Delaunay The triangulation
+\param filename The name of the output file
+*/
+void WriteDelaunay(Delaunay const& tri, string const& filename);
 
 #endif // HDF5_DIAG
