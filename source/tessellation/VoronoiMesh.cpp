@@ -17,6 +17,7 @@ namespace
     }
   }
 
+  /*
   vector<Vector2D> my_convex_hull(const Tessellation& tess,
 				  int index)
   {
@@ -24,6 +25,7 @@ namespace
     ConvexHull(res,tess,index);
     return res;
   }
+  */
 #endif
 
 	vector<Vector2D> UpdatePoints(vector<Vector2D> const& points,OuterBoundary const* obc)
@@ -154,6 +156,7 @@ namespace
 	}
 
 #ifdef RICH_MPI
+			  /*
 	vector<int> GetCornerNeighbors(Tessellation const& v,int rank)
 	{
 		vector<int> neighbors=v.GetNeighbors(rank);
@@ -275,7 +278,7 @@ namespace
 		return result;
 	}
 
-			  /*
+
 	int SumV(vector<vector<int> > const& v)
 	{
 		int res=0;
