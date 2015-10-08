@@ -8,8 +8,7 @@
 #include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/common/hllc.hpp"
-#include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
+#include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
@@ -25,17 +24,6 @@ using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  /*
-  double calc_vq2r(double r)
-  {
-    if(r<0.2)
-      return 5;
-    else if(r>0.4)
-      return 0;
-    return 2.0/r-5.0;
-  }
-  */
   
   double azimuthal_velocity(double r)
   {
@@ -154,8 +142,7 @@ public:
 			 outer_.getBoundary().second),
 	  outer_),
     eos_(5./3.),
-    bpm_(),
-    point_motion_(bpm_,eos_),
+    point_motion_(),
     force_(),
     tsf_(0.3),
     fc_(rs_),
@@ -187,8 +174,7 @@ private:
   const Hllc rs_;
   VoronoiMesh tess_;
   const IdealGas eos_;
-  Lagrangian bpm_;
-  RoundCells point_motion_;
+  Eulerian point_motion_;
   const ZeroForce force_;
   const SimpleCFL tsf_;
   const SimpleFluxCalculator fc_;
@@ -212,11 +198,6 @@ namespace {
 
 int main(void)
 {
-
-  #ifdef RICH_MPI
-  MPI_Init(NULL, NULL);
-  #endif
-
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
 
