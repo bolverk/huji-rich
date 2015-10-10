@@ -7,12 +7,12 @@
 #define FIRST_ORDER_HYDRO_FLUX_HPP 1
 
 
-#include "flux_calculator.hpp"
+#include "flux_calculator_3d.hpp"
 #include "../common/riemann_solver.hpp"
 #include "../../misc/utils.hpp"
 
 //! \brief First order flux calculator
-class FirstOrderHydroFlux : public FluxCalculator
+class FirstOrderHydroFlux : public FluxCalculator3D
 {
 private:
 	RiemannSolver const& rs_;

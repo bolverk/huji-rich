@@ -35,14 +35,18 @@ private:
 	GhostCriteria const& ghost_chooser_;
 public:
 
+  /*! \brief Class constructor
+    \param ghosts List of ghost generators
+    \param ghostchooser Criteria for when to use each ghost generator
+   */
 	SeveralGhostGenerators(vector<GhostPointGenerator*> ghosts,GhostCriteria const& ghostchooser);
 
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells) const;
+		const vector<ComputationalCell>& cells,double time) const;
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
 		const vector<ComputationalCell>& cells, const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-		size_t ghost_index) const;
+		size_t ghost_index, double time) const;
 
 	Vector2D GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& cells,
 		vector<Vector2D> const& point_veolcities, size_t ghost_index, Edge const& edge)const;

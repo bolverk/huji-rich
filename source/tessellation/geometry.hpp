@@ -189,4 +189,6 @@ Vector2D pol2cart(double radius, double angle);
  */
 Vector2D normalize(const Vector2D& v);
 
+double dist_sqr(const Vector2D& v);
+
 #endif // GEOMETRY_HPP

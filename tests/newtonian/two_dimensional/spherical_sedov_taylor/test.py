@@ -9,9 +9,12 @@ def consolidate_data(fname):
     import numpy
 
     f = h5py.File(fname)
-    data = {}
-    for field in f:
-        data[field] = numpy.array(f[field])
+    data = {'geometry':{},
+            'hydrodynamic':{}}
+    for field in data:
+        for subfield in f[field]:
+            data[field][subfield] = numpy.array(f[field][subfield])
+    data['time'] = numpy.array(f['time'])
     return data
 
 def main():
@@ -36,14 +39,14 @@ def main():
 
     x_c = 0
     y_c = 0.5
-    r_list = numpy.sqrt((numeric['y_coordinate']-y_c)**2+
-                        (numeric['x_coordinate']-x_c)**2)
-    p_front = numpy.max(numeric['pressure'])
-    r_front = r_list[numpy.argmax(numeric['pressure'])]
-    p_back = numeric['pressure'][numpy.argmin(r_list)]
+    r_list = numpy.sqrt((numeric['geometry']['y_coordinate']-y_c)**2+
+                        (numeric['geometry']['x_coordinate']-x_c)**2)
+    p_front = numpy.max(numeric['hydrodynamic']['pressure'])
+    r_front = r_list[numpy.argmax(numeric['hydrodynamic']['pressure'])]
+    p_back = numeric['hydrodynamic']['pressure'][numpy.argmin(r_list)]
 
     r_relevant = [r for r in r_list if r<r_front]
-    p_relevant = [numeric['pressure'][i] for i in range(len(r_list)) 
+    p_relevant = [numeric['hydrodynamic']['pressure'][i] for i in range(len(r_list)) 
                   if r_list[i]<r_front]
 
     # Analytic results

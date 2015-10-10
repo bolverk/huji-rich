@@ -2105,7 +2105,7 @@ vector<int> VoronoiMesh::CellIntersectBoundary(vector<Edge> const&box_edges,int 
 	if(nintersect>1)
 	{
 		vector<Vector2D> cpoints;
-		ConvexHull(cpoints,this,cell);
+		ConvexHull(cpoints,*this,cell);
 		for(int i=0;i<nbox;++i)
 			if(PointInCell(cpoints,box_edges[static_cast<size_t>(i)].vertices.first)||
 				PointInCell(cpoints,box_edges[static_cast<size_t>(i)].vertices.second))

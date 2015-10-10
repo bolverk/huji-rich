@@ -4,43 +4,52 @@
 
 using namespace H5;
 
+Snapshot::Snapshot(void):
+  mesh_points(),
+  cells(),
+  time() {}
+
+Snapshot::Snapshot(const Snapshot& source):
+  mesh_points(source.mesh_points),
+  cells(source.cells),
+  time(source.time) {}
+
 DiagnosticAppendix::~DiagnosticAppendix(void) {}
 
 namespace {
-  vector<double> read_double_vector_from_hdf5(H5File& file,string const& data_name)
+
+  template<class T> vector<T> read_vector_from_hdf5
+  (const CommonFG& file,
+   const string& caption,
+   const DataType& datatype)
   {
-    DataSet dataset = file.openDataSet(data_name);
+    DataSet dataset = file.openDataSet(caption);
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
     filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX = static_cast<int>(dims_out[0]);
-    vector<double> result(static_cast<size_t>(NX));
-    dataset.read(&result[0],PredType::NATIVE_DOUBLE);
+    const size_t NX = static_cast<size_t>(dims_out[0]);
+    vector<T> result(NX);
+    dataset.read(&result[0],datatype);
     return result;
   }
 
-  vector<size_t> read_sizet_vector_from_hdf5(H5File& file,string const& data_name)
+  vector<double> read_double_vector_from_hdf5
+  (CommonFG& file,string const& caption)
   {
-    DataSet dataset = file.openDataSet(data_name);
-    DataSpace filespace = dataset.getSpace();
-    hsize_t dims_out[2];
-    filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX = static_cast<int>(dims_out[0]);
-    vector<unsigned> result(static_cast<size_t>(NX));
-    dataset.read(&result[0],PredType::NATIVE_UINT);
-    return list_static_cast<size_t,unsigned>(result);
+    return read_vector_from_hdf5<double>
+      (file,
+       caption,
+       PredType::NATIVE_DOUBLE);
   }
 
-  vector<int> read_int_vector_from_hdf5(H5File& file,string const& data_name)
+  vector<int> read_int_vector_from_hdf5
+  (const CommonFG& file,
+   const string& caption)
   {
-    DataSet dataset = file.openDataSet(data_name);
-    DataSpace filespace = dataset.getSpace();
-    hsize_t dims_out[2];
-    filespace.getSimpleExtentDims(dims_out,NULL);
-    int NX=static_cast<int>(dims_out[0]);
-    vector<int> result(static_cast<size_t>(NX));
-    dataset.read(&result[0],PredType::NATIVE_INT);
-    return result;
+    return read_vector_from_hdf5<int>
+      (file,
+       caption,
+       PredType::NATIVE_INT);
   }
 }
 
@@ -149,7 +158,7 @@ namespace {
       yvert.reserve(7*static_cast<size_t>(tess.GetPointNo()));
       for(int i=0;i<tess.GetPointNo();++i){
 	vector<Vector2D> convhull;
-	ConvexHull(convhull,&tess,i);
+	ConvexHull(convhull,tess,i);
 	for(size_t j=0;j<convhull.size();++j){
 	  xvert.push_back(convhull[j].x);
 	  yvert.push_back(convhull[j].y);
@@ -214,136 +223,167 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
 			    const vector<DiagnosticAppendix*>& appendices)
 {
   ConvexHullData chd(sim.getTessellation());
-  HDF5Shortcut h5sc(fname);
-  h5sc("time",vector<double>(1,sim.getTime()))
-    ("x_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.getTessellation(),&Vector2D::x)))
-    ("y_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.getTessellation(),&Vector2D::y)))
-#ifdef RICH_MPI
-    ("proc_x_coordinate",serial_generate
-     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::x)))
-    ("proc_y_coordinate", serial_generate
-     (MeshGeneratingPointCoordinate(sim.GetProcTessellation(),&Vector2D::y)))
-#endif
-    ("density",serial_generate
-     (CellsPropertyExtractor
-      (sim,ThermalPropertyExtractor(&ComputationalCell::density))))
-    ("pressure",serial_generate
-     (CellsPropertyExtractor
-      (sim,ThermalPropertyExtractor(&ComputationalCell::pressure))))
-    ("x_velocity",serial_generate
-     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::x))))
-    ("y_velocity",serial_generate
-     (CellsPropertyExtractor(sim,CellVelocityComponentExtractor(&Vector2D::y))))
-    ("x position of vertices",chd.xvert)
-    ("y position of vertices",chd.yvert)
-    ("Number of vertices in cell",chd.nvert)
-    ("Cycle number",vector<int>(1,sim.getCycle()));
+  H5File file(H5std_string(fname), H5F_ACC_TRUNC);
+  Group geometry = file.createGroup("/geometry");
+  Group gappendices = file.createGroup("/appendices");
+  Group hydrodynamic = file.createGroup("/hydrodynamic");
+  Group tracers = file.createGroup("/tracers");
+  Group stickers = file.createGroup("/stickers");
 
-  h5sc("Number of tracers", vector<int>
-       (1,
-	static_cast<int>(sim.getAllCells().front().tracers.size())));
+  // General
+  write_std_vector_to_hdf5
+    (file,
+     vector<double>(1,sim.getTime()),
+     "time");
+  write_std_vector_to_hdf5
+    (file,
+     vector<int>(1,sim.getCycle()),
+     "cycle");
 
+  // Geometry  
+  write_std_vector_to_hdf5
+    (geometry,
+     serial_generate
+     (MeshGeneratingPointCoordinate
+      (sim.getTessellation(),&Vector2D::x)),
+     "x_coordinate");
+  write_std_vector_to_hdf5
+    (geometry,
+     serial_generate
+     (MeshGeneratingPointCoordinate
+      (sim.getTessellation(),&Vector2D::y)),
+     "y_coordinate");
+    write_std_vector_to_hdf5
+    (geometry,
+     chd.xvert,
+     "x_vertices");
+  write_std_vector_to_hdf5
+    (geometry,
+     chd.yvert,
+     "y_vertices");
+  write_std_vector_to_hdf5
+    (geometry,
+     chd.nvert,
+     "n_vertices");
+
+  // Hydrodynamic
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,ThermalPropertyExtractor(&ComputationalCell::density))),
+     "density");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,ThermalPropertyExtractor(&ComputationalCell::pressure))),
+     "pressure");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,CellVelocityComponentExtractor(&Vector2D::x))),
+     "x_velocity");
+  write_std_vector_to_hdf5
+    (hydrodynamic,
+     serial_generate
+     (CellsPropertyExtractor
+      (sim,CellVelocityComponentExtractor(&Vector2D::y))),
+     "y_velocity");
+
+  // Tracers
   for(boost::container::flat_map<std::string,double>::const_iterator it=
 	sim.getAllCells().front().tracers.begin();
       it!=sim.getAllCells().front().tracers.end(); ++it)
-    h5sc(it->first,serial_generate(TracerSlice(sim,it->first)));
+    write_std_vector_to_hdf5
+      (tracers,
+       serial_generate(TracerSlice(sim,it->first)),
+       it->first);
 
+  // Stickers
   for(boost::container::flat_map<std::string,bool>::const_iterator it=
 	sim.getAllCells().front().stickers.begin();
       it!=sim.getAllCells().front().stickers.end(); ++it)
-    h5sc(it->first,serial_generate(StickerSlice(sim,it->first)));
+    write_std_vector_to_hdf5
+      (stickers,
+       serial_generate(StickerSlice(sim,it->first)),
+       it->first);
 
+  // Appendices
   for(size_t i=0;i<appendices.size();++i)
-    h5sc(appendices[i]->getName(),(*(appendices[i]))(sim));
+    write_std_vector_to_hdf5
+      (gappendices,
+       (*(appendices.at(i)))(sim),
+       appendices.at(i)->getName());
 }
 
-void read_hdf5_snapshot(ResetDump &dump,string const& fname,EquationOfState
-			const* eos)
+Snapshot read_hdf5_snapshot
+(const string& fname)
 {
+  Snapshot res;
   H5File file(fname, H5F_ACC_RDONLY );
-  // Get the mesh points
-  vector<double> x=read_double_vector_from_hdf5(file,"x_coordinate");
-  vector<double> y=read_double_vector_from_hdf5(file,"y_coordinate");
-  dump.snapshot.mesh_points.resize(x.size());
-  for(size_t i=0;i<x.size();++i)
-    {
-      dump.snapshot.mesh_points[i].Set(x[i],y[i]);
-    }
+  Group g_geometry = file.openGroup("geometry");
+  Group g_hydrodynamic = file.openGroup("hydrodynamic");
+  Group g_tracers = file.openGroup("tracers");
+  Group g_stickers = file.openGroup("stickers");
+  
+  // Mesh points
+  {
+    const vector<double> x=
+      read_double_vector_from_hdf5(g_geometry,"x_coordinate");
+    const vector<double> y=
+      read_double_vector_from_hdf5(g_geometry,"y_coordinate");
+    res.mesh_points.resize(x.size());
+    for(size_t i=0;i<x.size();++i)
+      res.mesh_points.at(i) = Vector2D(x.at(i), y.at(i));
+  }
 
-  // Get the processor mesh points
-#ifdef RICH_MPI
-  vector<double> xproc=read_double_vector_from_hdf5(file,"proc_x_coordinate");
-  vector<double> yproc=read_double_vector_from_hdf5(file,"proc_y_coordinate");
-  dump.procmesh.resize(xproc.size());
-  for(int i=0;i<static_cast<int>(xproc.size());++i)
-    dump.procmesh[static_cast<size_t>(i)].Set(xproc[static_cast<size_t>(i)],yproc[static_cast<size_t>(i)]);
-#endif
+  // Hydrodynamic
+  {
+    const vector<double> density =
+      read_double_vector_from_hdf5(g_hydrodynamic,"density");
+    const vector<double> pressure =
+      read_double_vector_from_hdf5(g_hydrodynamic,"pressure");
+    const vector<double> x_velocity =
+      read_double_vector_from_hdf5(g_hydrodynamic,"x_velocity");
+    const vector<double> y_velocity =
+      read_double_vector_from_hdf5(g_hydrodynamic,"y_velocity");
+    boost::container::flat_map<string,vector<double> > tracers;
+    for(hsize_t n=0;n<g_tracers.getNumObjs();++n){
+      const H5std_string name = g_tracers.getObjnameByIdx(n);
+      tracers[name] = read_double_vector_from_hdf5
+	(g_tracers,name);
+    }
+    boost::container::flat_map<string,vector<int> > stickers;
+    for(hsize_t n=0;n<g_stickers.getNumObjs();++n){
+      const H5std_string name = g_stickers.getObjnameByIdx(n);
+      stickers[name] =
+	read_int_vector_from_hdf5(g_stickers,name);
+    }
+    res.cells.resize(density.size());
+    for(size_t i=0;i<res.cells.size();++i){
+      res.cells.at(i).density = density.at(i);
+      res.cells.at(i).pressure = pressure.at(i);
+      res.cells.at(i).velocity.x = x_velocity.at(i);
+      res.cells.at(i).velocity.y = y_velocity.at(i);
+      for(boost::container::flat_map<string,vector<double> >::const_iterator it = tracers.begin();
+	  it!=tracers.end();
+	  ++it)
+	res.cells.at(i).tracers[it->first] = (it->second).at(i);
+      for(boost::container::flat_map<string,vector<int> >::const_iterator it = stickers.begin();
+	  it!=stickers.end();
+	  ++it)
+	res.cells.at(i).stickers[it->first] = ((it->second).at(i) == 1);
+    }
+  }
 
-  // Get the hydro variables
-  vector<double> density=read_double_vector_from_hdf5(file,"density");
-  vector<double> pressure=read_double_vector_from_hdf5(file,"pressure");
-  vector<double> x_velocity=read_double_vector_from_hdf5(file,"x_velocity");
-  vector<double> y_velocity=read_double_vector_from_hdf5(file,"y_velocity");
-  dump.snapshot.cells.resize(density.size());
-  if(dump.snapshot.cells.size()!=dump.snapshot.mesh_points.size())
-    throw UniversalError("Primitive size is not equal to mesh size");
-  for(size_t i=0;i<density.size();++i)
-    {
-      dump.snapshot.cells[i].Density=density[i];
-      dump.snapshot.cells[i].Pressure=pressure[i];
-      dump.snapshot.cells[i].Velocity=Vector2D(x_velocity[i],y_velocity[i]);
-      dump.snapshot.cells[i].Energy=eos->dp2e(dump.snapshot.cells[i].Density,
-					      dump.snapshot.cells[i].Pressure);
-      dump.snapshot.cells[i].SoundSpeed=eos->dp2c(dump.snapshot.cells[i].Density,
-						  dump.snapshot.cells[i].Pressure);
-    }
-  // read time
-  vector<double> time_vector=read_double_vector_from_hdf5(file,"time");
-  dump.time=time_vector[0];
-  // read tracers if needed
-  vector<int> TracerNumber=read_int_vector_from_hdf5(file,"Number of tracers");
-  if(TracerNumber[0]>0)
-    {
-      // resize the tracers
-      dump.tracers.resize(x.size());
-      for(size_t i=0;i<x.size();++i)
-	{
-	  dump.tracers[i].resize(static_cast<size_t>(TracerNumber[0]));
-	}
-      // read the data
-      for(int i=0;i<TracerNumber[0];++i)
-	{
-	  vector<double> tracer=read_double_vector_from_hdf5(file,
-							     "Tracer number "+int2str(i+1));
-	  if(tracer.size()!=x.size())
-	    throw UniversalError("Tracer size not equal to mesh size");
-	  for(size_t j=0;j<x.size();++j)
-	    dump.tracers[j][static_cast<size_t>(i)]=tracer[j];
-	}
-    }
-  // read the coldflows parameters
-  vector<double> coldflows=read_double_vector_from_hdf5(file,
-							"Cold Flow parameters");
-  if(coldflows[0]>0)
-    dump.coldflows=true;
-  else
-    dump.coldflows=false;
-  dump.a=coldflows[1];
-  dump.b=coldflows[2];
-  // read the cycle number
-  vector<int> cycle_number=read_int_vector_from_hdf5(file,"Cycle number");
-  dump.cycle=cycle_number[0];
-  // read the density floor parameters
-  vector<double> densityfloor=read_double_vector_from_hdf5(file,
-							   "Density floor parameters");
-  if(densityfloor[0]>0)
-    dump.densityfloor=true;
-  else
-    dump.densityfloor=false;
-  dump.densitymin=densityfloor[1];
-  dump.pressuremin=densityfloor[2];
-  // read the custom evolution indeces
-  dump.cevolve = read_sizet_vector_from_hdf5(file, "Custom evolution indices");
+  // Misc
+  {
+    const vector<double> time =
+      read_double_vector_from_hdf5(file,"time");
+    res.time = time.at(0);
+  }
+    
+  return res;
 }

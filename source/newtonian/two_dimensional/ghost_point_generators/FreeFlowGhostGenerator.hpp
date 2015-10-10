@@ -15,11 +15,11 @@ class FreeFlowGenerator : public GhostPointGenerator
 {
 public:
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells) const;
+		const vector<ComputationalCell>& cells,double time) const;
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,
 		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-		size_t ghost_index)const;
+		size_t ghost_index,double time)const;
 };
 
 #endif // FREEFLOW_GENERATOR_HPP

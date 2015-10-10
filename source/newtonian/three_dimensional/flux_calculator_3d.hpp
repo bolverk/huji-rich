@@ -1,4 +1,4 @@
-/*! \file flux_calculator.hpp
+/*! \file flux_calculator_3d.hpp
   \brief Abstract class for flux calculator
   \author Almog Yalinewich
  */
@@ -14,7 +14,7 @@
 using three_dimenssional::ComputationalCell;
 
 //! \brief Abstract class for flux calculator
-class FluxCalculator
+class FluxCalculator3D
 {
 public:
 
@@ -32,7 +32,7 @@ public:
    const vector<Vector3D>& point_velocities) const = 0;
 
   //! \brief Class destructor
-  virtual ~FluxCalculator(void);
+  virtual ~FluxCalculator3D(void);
 };
 
 #endif // FLUX_CALCULATOR_HPP

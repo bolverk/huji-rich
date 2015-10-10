@@ -1,10 +1,10 @@
 #include "round_cells.hpp"
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer, double chi,
-	double eta) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1),outer_(outer), chi_(chi), eta_(eta) {}
+	double eta, bool cold) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(outer), chi_(chi), eta_(eta), cold_(cold) {}
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi,
-	double eta) : pm_(pm), eos_(eos),pouter_(-1,1,1,-1),outer_(pouter_), chi_(chi), eta_(eta) {}
+	double eta, bool cold) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(pouter_), chi_(chi), eta_(eta),cold_(cold) {}
 
 
 namespace
@@ -77,6 +77,18 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 	return chi_*c*(s - r) / d*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
 }
 
+Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
+{
+	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
+	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
+	const double d = abs(s - r);
+	const double R = tess.GetWidth(static_cast<int>(i));
+	if (d < 0.9*eta_*R)
+		return Vector2D(0, 0);
+	const double c = 0.25 * R / dt;
+	return chi_*c*(s - r) / d*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+}
+
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 	double time) const
 {
@@ -88,9 +100,18 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	return res;
 }
 
-void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
+void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
 	double dt, vector<Vector2D> & velocities)const
 {
+	if (cold_)
+	{
+		vector<Vector2D> res = pm_(tess, cells, time);
+		for (size_t i = 0; i < res.size(); ++i)
+		{
+			res[i] += calc_dw(i, tess, dt);
+		}
+		velocities = res;
+	}
 	if (outer_.GetBoundaryType()!=Periodic)
 		CorrectPointsOverShoot(velocities, dt, tess,outer_);
 }

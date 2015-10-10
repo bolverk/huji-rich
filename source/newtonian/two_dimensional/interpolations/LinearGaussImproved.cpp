@@ -34,17 +34,19 @@ namespace
 	}
 
 	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
-		vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t npoints)
+						   vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t /*npoints*/)
 	{
 		vector<ComputationalCell> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
 			size_t other_cell = (edges[i].neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
 				(edges[i].neighbors.second) : static_cast<size_t> (edges[i].neighbors.first);
-			if (other_cell < npoints)
-				res[i] = cells[other_cell];
+			const boost::container::flat_map<size_t,ComputationalCell>::const_iterator it = 
+			  ghost_cells.find(other_cell);
+			if(it==ghost_cells.end())
+			  res[i] = cells.at(other_cell);
 			else
-				res[i] = safe_retrieve(ghost_cells,other_cell);
+			  res[i] = it->second;
 		}
 		return res;
 	}
@@ -344,7 +346,8 @@ namespace
 	 double pressure_ratio,
 	 EquationOfState const& eos,
 	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
-	 const vector<string>& flat_tracers)
+	 const vector<string>& flat_tracers,
+	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
@@ -357,6 +360,8 @@ namespace
 	ComputationalCell const& cell = cells[cell_index];
 	naive_slope = calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
 		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list);
+
+	naive_slope_ = naive_slope;
 
 	for(size_t i=0;i<flat_tracers.size();++i){
 	  naive_slope.first.tracers[flat_tracers[i]] = 0;
@@ -401,6 +406,7 @@ LinearGaussImproved::LinearGaussImproved
   eos_(eos), 
   ghost_(ghost),
   rslopes_(),
+  naive_rslopes_(),
   slf_(slf),
   shockratio_(delta_v),
   diffusecoeff_(theta),
@@ -408,15 +414,17 @@ LinearGaussImproved::LinearGaussImproved
   flat_tracers_(flat_tracers) {}
 
 vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells,double time) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	// Get ghost points
-	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells);
+	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells,time);
 	// Prepare slopes
 	rslopes_.resize(CellNumber);
+	naive_rslopes_.resize(CellNumber);
 	for (size_t i = 0; i<CellNumber; ++i)
-	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells, flat_tracers_);
+	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
+		flat_tracers_,naive_rslopes_[i]);
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
@@ -432,7 +440,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		{
 		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
-				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+				edge.neighbors.first),time),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
 			cell_temp.second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
@@ -443,7 +451,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		    (ghost_cells,
 		     static_cast<size_t>(edge.neighbors.second));
 			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+				edge.neighbors.second),time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
 		res[i] = cell_temp;
 	}
@@ -451,7 +459,13 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 }
 
 
-vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::GetSlopes(void)const
+vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopes(void)const
 {
 	return rslopes_;
 }
+
+vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopesUnlimited(void)const
+{
+	return naive_rslopes_;
+}
+

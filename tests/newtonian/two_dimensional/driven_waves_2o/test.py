@@ -15,10 +15,10 @@ def main():
     import h5py
 
     h5f = h5py.File('final.h5')
-    x_list = h5f['x_coordinate']
-    d_list = h5f['density']
-    p_list = h5f['pressure']
-    vx_list = h5f['x_velocity']
+    x_list = h5f['geometry']['x_coordinate']
+    d_list = h5f['hydrodynamic']['density']
+    p_list = h5f['hydrodynamic']['pressure']
+    vx_list = h5f['hydrodynamic']['x_velocity']
 
     rho_0 = 1.0
     amp = 0.001

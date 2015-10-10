@@ -7,7 +7,7 @@
 #include "../common/equation_of_state.hpp"
 #include "point_motion_3d.hpp"
 #include "time_step_calculator.hpp"
-#include "flux_calculator.hpp"
+#include "flux_calculator_3d.hpp"
 #include "cell_updater.hpp"
 
 //! \brief Three dimensional simulation
@@ -57,7 +57,7 @@ public:
 	  const EquationOfState& eos,
 	  const PointMotion3D& pm,
 	  const TimeStepCalculator& tsc,
-	  const FluxCalculator& fc,
+	  const FluxCalculator3D& fc,
 	  const CellUpdater& cu);
 
   //! \brief Advances the simulation in time (first order)
@@ -80,7 +80,7 @@ private:
   vector<Conserved3D> extensive_;
   const PointMotion3D& pm_;
   const TimeStepCalculator& tsc_;
-  const FluxCalculator& fc_;
+  const FluxCalculator3D& fc_;
   const CellUpdater& cu_;
   ProgressTracker pt_;
 };

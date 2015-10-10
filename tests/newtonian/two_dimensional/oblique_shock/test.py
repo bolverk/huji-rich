@@ -23,8 +23,11 @@ def main():
 
     with h5py.File('final.h5','r+') as f:
         raw = {}
-        for field in ['x_coordinate','y_coordinate','y_velocity','wedge','density','pressure']:
-            raw[field] = numpy.array(f[field])
+        for field in ['x_coordinate','y_coordinate']:
+            raw[field] = numpy.array(f['geometry'][field])
+        for field in ['density','pressure']:
+            raw[field] = numpy.array(f['hydrodynamic'][field])
+        raw['wedge'] = numpy.array(f['stickers']['wedge'])
         numeric = {}
         for field in raw:
             numeric[field] = raw[field][raw['wedge']<0.5]
@@ -59,7 +62,7 @@ def main():
     f.write(str(difrat)+'\n')
     f.close()
 
-    return difrat<0.24
+    return difrat<0.35
 
 if __name__=='__main__':
     import os

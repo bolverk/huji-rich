@@ -15,7 +15,7 @@ namespace
 }
 
 boost::container::flat_map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	boost::container::flat_map<size_t, ComputationalCell> res;
 	vector<std::pair<size_t,size_t> > ghosts = GetOuterEdgesIndeces(tess);
@@ -34,7 +34,7 @@ std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGrad
 (Tessellation const& tess,
  vector<ComputationalCell> const& /*cells*/,
  vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
- size_t ghost_index) const
+ size_t ghost_index, double /*time*/) const
 {
 	std::pair<ComputationalCell, ComputationalCell> grad = gradients[static_cast<size_t>(tess.GetOriginalIndex
 		(static_cast<int>(ghost_index)))];

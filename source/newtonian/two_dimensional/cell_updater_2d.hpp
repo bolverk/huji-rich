@@ -34,7 +34,7 @@ public:
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
-   const vector<Extensive>& extensives,
+   vector<Extensive>& extensives,
    const vector<ComputationalCell>& old,
    const CacheData& cd) const = 0;
 

@@ -84,11 +84,11 @@ def main():
                          numpy.loadtxt('width.txt'))
     analytic = dict()
     analytic['density'] = [spat_prof.density.eval(x-spat_prof.c0*time) \
-                            for x in final_data['x_coordinate']]
+                            for x in final_data['geometry']['x_coordinate']]
     analytic['pressure'] = [spat_prof.pressure.eval(x-spat_prof.c0*time) \
-                            for x in final_data['x_coordinate']]
+                            for x in final_data['geometry']['x_coordinate']]
     analytic['x_velocity'] = [spat_prof.velocity.eval(x-spat_prof.c0*time) \
-                            for x in final_data['x_coordinate']]
+                            for x in final_data['geometry']['x_coordinate']]
 
     if graphic_flag:
         for n, field in enumerate(['density','pressure','x_velocity']):
@@ -103,7 +103,8 @@ def main():
 
     error_norm = dict()
     for i in analytic.keys():
-        error_norm[i] = calc_error_norm(final_data[i],analytic[i])
+        error_norm[i] = calc_error_norm(
+            final_data['hydrodynamic'][i],analytic[i])
 
     f = open('gradesheet.txt','w')
     for i in analytic.keys():

@@ -14,11 +14,12 @@
 class RigidWallGenerator : public GhostPointGenerator
 {
 public:
-	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,const vector<ComputationalCell>& cells) const;
+	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess, const vector<ComputationalCell>& cells,
+		double time) const;
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
 		const vector<ComputationalCell>& cells,const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-		size_t ghost_index) const;
+		size_t ghost_index, double time) const;
 };
 
 #endif // RIGIDWALL_GENERATOR_HPP
