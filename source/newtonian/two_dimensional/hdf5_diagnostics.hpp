@@ -86,7 +86,7 @@ void ConvertHDF5toBinary(string const& input, string const& output);
 
 /*!
 \brief Writes the Delaunay triangulation data into an HDF5 file
-\param Delaunay The triangulation
+\param tri The triangulation
 \param filename The name of the output file
 */
 void WriteDelaunay(Delaunay const& tri, string const& filename);

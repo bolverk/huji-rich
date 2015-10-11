@@ -6,13 +6,6 @@ using namespace std;
 
 namespace
 {
-	bool VectorSort(Vector2D const& v1,Vector2D const& v2)
-	{
-		const double relval=max(max(fabs(v1.y),fabs(v2.y)),DBL_EPSILON*2);
-		const double diffmax=4*max(fabs(v1.y-v2.y),fabs(v2.y-v1.y))/relval;
-		return diffmax<DBL_EPSILON ? v1.x<v2.x : v1.y<v2.y;
-	}
-
 	Vector2D GetReflectedPoint(Edge const& edge,Vector2D const& point)
 	{
 	  const Vector2D par(normalize(Parallel(edge)));
@@ -52,56 +45,16 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
 		if(!check_same_point(points,edge.vertices.second,eps*pow(R,2)))
 		  points.push_back(tess.GetEdge(edge_index[i]).vertices.second);
 	}
-	// Find the bottom point
-	sort(points.begin(),points.end(),VectorSort);
+
+	const Vector2D cm = tess.GetCellCM(index);
+	
 	// Start building the convexhull
 	size_t n=points.size();
-	vector<double> angles(n-1);
-	for(size_t i=0;i<n-1;++i)
-		angles[i]=atan2(points[i+1].y-points[0].y,points[i+1].x-points[0].x);
-	//	sort_index(angles,indeces);
+	vector<double> angles(n);
+	for(size_t i=0;i<n;++i)
+	  angles[i]=atan2(points[i+1].y-cm.y,points[i+1].x-cm.x);
 	const vector<size_t> indeces = sort_index(angles);
-	result.resize(points.size());
-	result[0]=points[0];
-	// Check for colinear points
-	const double tol=1e-8;
-	vector<Vector2D> pfirst,plast;
-	for(size_t i=1;i<n-1;++i)
-	{
-		if(abs(angles[indeces[i]]-angles[indeces[0]])<tol)
-			pfirst.push_back(points[indeces[i]+1]);
-		if(abs(angles[indeces[n-i-2]]-angles[indeces[n-2]])<tol)
-			plast.push_back(points[indeces[n-i-2]+1]);
-	}
-	result[0]=points[0];
-	if(!pfirst.empty())
-	{
-		pfirst.insert(pfirst.begin(),points[indeces[0]+1]);
-		//		int N=static_cast<int>(pfirst.size());
-		vector<double> dist(pfirst.size());
-		for(size_t i=0;i<pfirst.size();++i)
-			dist[i]=abs(pfirst[i]-points[0]);
-		vector<int> indeces2(pfirst.size());
-		sort_index(dist,indeces2);
-		ReArrangeVector(pfirst,indeces2);
-		for(size_t i=0;i<pfirst.size();++i)
-			result[i+1]=pfirst[i];
-	}
-	if(!plast.empty())
-	{
-	  plast.insert(plast.begin(),points[static_cast<size_t>(indeces[static_cast<size_t>(n)-2])+1]);
-		int N=static_cast<int>(plast.size());
-		vector<double> dist;
-		for(int i=0;i<N;++i)
-			dist.push_back(abs(plast[static_cast<size_t>(i)]-points[0]));
-		vector<int> indeces2(static_cast<size_t>(N));
-		sort_index(dist,indeces2);
-		ReArrangeVector(plast,indeces2);
-		for(int i=0;i<N;++i)
-			result[n-1-static_cast<size_t>(i)]=plast[static_cast<size_t>(i)];
-	}
-	for(size_t i=pfirst.size()+1;i<n-plast.size();++i)
-	  result[i]=points[static_cast<size_t>(indeces[i-1])+1];
+	result = VectorValues(points,indeces);
 }
 
 void ConvexEdges(vector<int> &result,Tessellation const& tess,int index)

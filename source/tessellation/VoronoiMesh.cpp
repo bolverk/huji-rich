@@ -2127,3 +2127,20 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 	}
 	return res;
 }
+
+#ifdef RICH_MPI
+void VoronoiMesh::Update
+(const vector<Vector2D>& /*points*/,
+ const Tessellation& /*vproc*/)
+{
+  throw;
+}
+
+void VoronoiMesh::Initialise
+(vector<Vector2D> const& /*points*/,
+ Tessellation const& /*vproc*/,
+ OuterBoundary const* /*outer*/)
+{
+  throw;
+}
+#endif 

@@ -228,6 +228,25 @@ template <class T> vector<T> VectorValues(vector<T> const&v,vector<int> const &i
 }
 
 /*!
+  \brief Returns only the values with indeces in index
+  \param v The vector to check
+  \param index The indeces to return
+  \return The reduced vector
+*/
+template <class T> vector<T> VectorValues
+(vector<T> const&v,
+ vector<size_t> const &index)
+{
+  if(index.empty() || v.empty())
+    return vector<T> ();
+
+  vector<T> result(index.size());
+  for(size_t i=0;i<index.size();++i)
+    result.at(i) = v.at(index.at(i));
+  return result;
+}
+
+/*!
   \brief Returns the sum of the vector
   \param v The vector to sum
   \return The sum

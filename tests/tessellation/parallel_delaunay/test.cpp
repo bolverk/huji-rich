@@ -4,9 +4,17 @@
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/misc/mesh_generator.hpp"
+#ifdef RICH_MPI
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
+#endif // RICH_MPI
+#include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
+#include <boost/foreach.hpp>
+#include "source/tessellation/VoronoiMesh.hpp"
 
 using namespace std;
 
+#ifdef RICH_MPI
 vector<Vector2D> delineate_rectangle
 (const pair<Vector2D,Vector2D>& boundary)
 {
@@ -18,9 +26,51 @@ vector<Vector2D> delineate_rectangle
   return res;
 }
 
+vector<Vector2D> my_convex_hull
+(const Tessellation& tess,
+ int index)
+{
+  vector<Vector2D> res;
+  ConvexHull(res,tess,index);
+  return res;
+}
+
+vector<Vector2D> distribute_grid
+(const vector<Vector2D>& complete_grid,
+ const Tessellation& proc_tess)
+{
+  const boost::mpi::communicator world;
+  vector<Vector2D> res;
+  const vector<Vector2D> ch_list =
+    my_convex_hull(proc_tess,world.rank());
+  for(int i =0; i<world.size();++i){
+    if(world.rank()==i){
+      cout << world.rank() << " : ";
+      BOOST_FOREACH(const Vector2D& v, ch_list)
+	{
+	  cout << "(" << v.x << ", " << v.y << ") ";
+	}
+      cout << endl;
+      cout.flush();
+    }
+    world.barrier();
+  }
+  BOOST_FOREACH(const Vector2D& v, complete_grid)
+    {
+      if(PointInCell(ch_list,v))
+	res.push_back(v);
+    }
+  return res;
+}
+#endif // RICH_MPI
+
 int main(void)
 {
 #ifdef RICH_MPI
+  
+  boost::mpi::environment env;
+  boost::mpi::communicator world;
+
   const SquareBox obc
     (Vector2D(0,0),
      Vector2D(1,1));
@@ -30,12 +80,31 @@ int main(void)
 	       obc.getBoundary().second.x,
 	       obc.getBoundary().first.y,
 	       obc.getBoundary().second.y);
+  if(world.rank()==0){
     Delaunay tri;
     tri.build_delaunay
       (all_points, 
        delineate_rectangle
        (obc.getBoundary()));
-    
+    WriteDelaunay(tri,string("whole.h5"));
+  }
+  VoronoiMesh super
+    (RandSquare(world.size(),
+		obc.getBoundary().first.x,
+		obc.getBoundary().second.x,
+		obc.getBoundary().first.y,
+		obc.getBoundary().second.y),
+     obc);
+  const vector<Vector2D> local_points =
+    distribute_grid
+    (all_points,
+     super);
+  Delaunay tri;
+  tri.build_delaunay
+    (local_points,
+     delineate_rectangle
+     (obc.getBoundary()));
+  WriteDelaunay(tri,string("part_"+int2str(world.rank())+".h5"));
 #else
 
   write_number(0,"serial_ignore.txt");
