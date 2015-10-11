@@ -52,7 +52,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
 	size_t n=points.size();
 	vector<double> angles(n);
 	for(size_t i=0;i<n;++i)
-	  angles[i]=atan2(points[i+1].y-cm.y,points[i+1].x-cm.x);
+	  angles.at(i)=atan2(points.at(i).y-cm.y,points.at(i).x-cm.x);
 	const vector<size_t> indeces = sort_index(angles);
 	result = VectorValues(points,indeces);
 }
