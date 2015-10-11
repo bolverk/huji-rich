@@ -18,6 +18,7 @@ else ifeq ($(MODE),debug_parallel)
 	LFLAGS := -pg
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS :=
+	LFLAGS = -lboost_mpi -lboost_serialization
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
