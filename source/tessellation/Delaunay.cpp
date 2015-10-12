@@ -1284,6 +1284,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	    }
 	}
     }
+  throw "tba";
 }
 
 vector<vector<int> > Delaunay::findOuterPoints
@@ -1323,5 +1324,7 @@ vector<vector<int> > Delaunay::findOuterPoints
   boost::mpi::wait_all
     (requests.begin(),
      requests.end());
+
+  throw "under construction";
 }
 #endif // RICH_MPI
