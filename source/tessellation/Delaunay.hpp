@@ -34,6 +34,21 @@ private:
 
 #ifdef RICH_MPI
   int findSomeOuterPoint(void);
+
+  vector<vector<int> > findOuterPoints
+  (void);
+
+  vector<vector<int> > AddOuterFacetsMPI
+  (int point,
+   vector<vector<int> > &toduplicate,
+   vector<int> &neigh,
+   vector<bool> &checked,
+   Tessellation const &tproc,
+   const vector<Edge>& own_edges);
+
+  vector<vector<int> > findOuterPoints
+  (const Tessellation& t_proc,
+   const vector<Edge>& edge_list);
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};

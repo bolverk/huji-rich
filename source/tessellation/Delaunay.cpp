@@ -2,6 +2,11 @@
 #include <vector>
 #include <cmath>
 #include "../misc/triplet.hpp"
+#include <boost/foreach.hpp>
+#ifdef RICH_MPI
+#include <boost/mpi/nonblocking.hpp>
+#include <boost/serialization/vector.hpp>
+#endif // RICH_MPI
 
 namespace {
 pair<int,int> find_diff(const facet& f1,const facet& f2)
@@ -1168,5 +1173,155 @@ int Delaunay::findSomeOuterPoint(void)
       return candidate;
   }
   assert(false && "something went wrong");
+}
+
+namespace {
+  pair<vector<int>,vector<Edge> >
+  calc_neighbors_own_edges
+  (const Tessellation& t_proc,
+   const vector<Edge>& edge_list)
+  {
+    const boost::mpi::communicator world;
+    pair<vector<int>, vector<Edge> > res;
+    BOOST_FOREACH(const Edge& edge, edge_list){
+      const int other = 
+	(edge.neighbors.first+
+	 edge.neighbors.second)-
+	world.rank();
+      if(other<t_proc.GetPointNo()){
+	res.first.push_back(other);
+      }
+      else
+	res.second.push_back(edge);
+    }
+    return res;
+  }
+
+  stack<int> initialise_tocheck
+  (const vector<int>& neightemp)
+  {
+    stack<int> res;
+    for(size_t i=0;i<neightemp.size();++i)
+      res.push(neightemp[i]);
+    return res;
+  }
+
+  vector<int> calc_self_intersection
+  (const vector<Edge>& edge_list,
+   const Circle& circle)
+  {
+    vector<int> res;
+    for(size_t i=0;i<edge_list.size();++i){
+      const Edge& edge = edge_list.at(i);
+      if(edge_circle_intersect(edge,circle))
+	res.push_back(static_cast<int>(i));
+    }
+    return res;
+  }
+}
+
+vector<vector<int> > Delaunay::AddOuterFacetsMPI
+(int point,
+ vector<vector<int> > &toduplicate,
+ vector<int> &neigh,
+ vector<bool> &checked,
+ Tessellation const &tproc,
+ const vector<Edge>& own_edges)
+{
+  vector<vector<int> > res(own_edges.size());
+  const boost::mpi::communicator world;
+  stack<int> tocheck = initialise_tocheck
+    (FindContainingTetras
+     (static_cast<int>(Walk(static_cast<size_t>(point))),point));
+
+  while(!tocheck.empty())
+    {
+      int cur_facet=tocheck.top();
+      tocheck.pop();
+      for(size_t i=0;i<3;++i)
+	{
+	  bool added=false;
+	  if(f[static_cast<size_t>(cur_facet)].vertices[i]>=
+	     static_cast<int>(olength))
+	    continue;
+	  if(checked[static_cast<size_t>
+		     (f[static_cast<size_t>(cur_facet)].vertices[i])])
+	    continue;
+	  vector<int> neighs=FindContainingTetras(cur_facet,f[static_cast<size_t>(cur_facet)].vertices[i]);
+	  for(size_t k=0;k<neighs.size();++k)
+	    {
+	      Circle circ(GetCircleCenter(neighs[k]),radius[static_cast<size_t>(neighs[k])]);
+	      vector<int> cputosendto = find_affected_cells
+		(tproc,world.rank(),circ);
+	      sort(cputosendto.begin(),cputosendto.end());
+	      cputosendto=unique(cputosendto);
+	      
+	      RemoveVal(cputosendto,world.rank());
+	      const vector<int> self_intersection = calc_self_intersection(own_edges,circ);
+	      if(!self_intersection.empty())
+		added = true;
+	      BOOST_FOREACH(int sindex, self_intersection)
+		res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);		
+	      if(!cputosendto.empty())
+		{
+		  added=true;
+		  for(size_t j=0;j<cputosendto.size();++j)
+		    {
+		      size_t index=static_cast<size_t>(find(neigh.begin(),neigh.end(),cputosendto[j])
+						       -neigh.begin());
+		      toduplicate.at(index).push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+		    }
+		}
+	    }
+	  checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])]=true;
+	  if(added)
+	    {
+	      for(size_t j=0;j<neighs.size();++j)
+		{
+		  if (!IsOuterFacet(neighs[j]))
+		    tocheck.push(neighs[j]);
+		}
+	    }
+	}
+    }
+}
+
+vector<vector<int> > Delaunay::findOuterPoints
+(const Tessellation& t_proc,
+ const vector<Edge>& edge_list)
+{
+  const boost::mpi::communicator world;
+  pair<vector<int>, vector<Edge> > neighbors_own_edges = 
+    calc_neighbors_own_edges(t_proc, edge_list);
+  const size_t some_outer_point = findSomeOuterPoint();
+
+  vector<vector<int> > to_duplicate(neighbors_own_edges.first.size());
+  vector<bool> checked(olength,false);
+  const vector<vector<int> > self_points = 
+    AddOuterFacetsMPI
+    (static_cast<int>(some_outer_point),
+     to_duplicate, // indices of points to send
+     neighbors_own_edges.first, // Rank of processes to send to
+     checked,
+     t_proc,
+     neighbors_own_edges.second);
+
+  // Communication
+  vector<boost::mpi::request> requests;
+  vector<vector<Vector2D> > incoming
+    (neighbors_own_edges.first.size());
+  for(size_t i=0;i<neighbors_own_edges.first.size();++i){
+    const int dest = neighbors_own_edges.first.at(i);
+    requests.push_back
+      (world.isend
+       (dest,0,VectorValues
+	(cor,to_duplicate[i])));
+    requests.push_back
+      (world.irecv
+       (dest,0,incoming[i]));
+  }
+  boost::mpi::wait_all
+    (requests.begin(),
+     requests.end());
 }
 #endif // RICH_MPI

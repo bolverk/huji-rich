@@ -14,32 +14,26 @@ namespace {
 		return false;
 	}
 
-  /*
-	vector<int> join(const vector<int>& v,
-		int n)
-	{
-		vector<int> res = v;
-		res.push_back(n);
-		return res;
-	}
-  */
-
 	double bracket(double low, double num, double high)
 	{
 		return std::max(std::min(num,high),low);
 	}
+}
 
-	bool edge_circle_intersect(const Edge& edge,
-		const Circle& circle)
-	{
-		const double s = ScalarProd(circle.getCenter() - edge.vertices.first,
-			edge.vertices.second - edge.vertices.first)/
-			ScalarProd(edge.vertices.second - edge.vertices.first,
-			edge.vertices.second - edge.vertices.first);
-		const double sb = bracket(0,s,1);
-		return circle((1-sb)*edge.vertices.first+sb*edge.vertices.second);
-	}
+bool edge_circle_intersect
+(const Edge& edge,
+ const Circle& circle)
+{
+  const double s = 
+    ScalarProd(circle.getCenter() - edge.vertices.first,
+	       edge.vertices.second - edge.vertices.first)/
+    ScalarProd(edge.vertices.second - edge.vertices.first,
+	       edge.vertices.second - edge.vertices.first);
+  const double sb = bracket(0,s,1);
+  return circle((1-sb)*edge.vertices.first+sb*edge.vertices.second);
+}
 
+namespace {
 	bool cell_circle_intersect(const Tessellation& tess,
 		int index,
 		const Circle& circle)
@@ -83,9 +77,7 @@ vector<int> find_affected_cells
  int index,
  const Circle& circle)
 {
-  if(!cell_circle_intersect(tess,index,circle))
-    return vector<int>();
-  vector<int> res(1,index);
+  vector<int> res;
   BOOST_FOREACH(int nbr, tess.GetNeighbors(index)){
     if(nbr<tess.GetPointNo() && 
        cell_circle_intersect(tess,nbr,circle))

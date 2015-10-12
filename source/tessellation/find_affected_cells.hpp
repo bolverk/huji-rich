@@ -12,6 +12,10 @@
 
 using std::vector;
 
+bool edge_circle_intersect
+(const Edge& edge,
+ const Circle& circle);
+
 /*! \brief Recursively finds all cells that intersect a circle
   \param tess Tessellation
   \param index Current cell index

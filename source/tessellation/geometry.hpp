@@ -71,6 +71,15 @@ public:
   void Rotate(double a);
   //! \brief Caluclates the distance from the Vector to v1 \param v1 The vector whose distance from is calculated \returns The distance
   double distance(Vector2D const& v1) const;
+
+#ifdef RICH_MPI
+  template<class Archive>
+  void serialize(Archive& ar, const unsigned int version)
+  {
+    ar & x;
+    ar & y;
+  }
+#endif // RICH_MPI
 };
 
 /*! \brief Norm of a vector
