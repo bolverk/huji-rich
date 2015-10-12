@@ -37,7 +37,7 @@ public:
 		vector<string>());
 
 	vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells)const;
+		const vector<ComputationalCell>& cells,double time)const;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell
@@ -53,7 +53,14 @@ public:
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	vector<pair<ComputationalCell, ComputationalCell> > GetSlopes(void)const;
+	vector<pair<ComputationalCell, ComputationalCell> >& GetSlopes(void)const;
+
+	/*!
+	\brief Returns the unsloped limtied gradients
+	\return The gradients
+	*/
+	vector<pair<ComputationalCell, ComputationalCell> >& GetSlopesUnlimited(void)const;
+
 private:
 	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;

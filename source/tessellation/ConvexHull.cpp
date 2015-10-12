@@ -1,3 +1,4 @@
+#include <boost/foreach.hpp>
 #include <cfloat>
 #include "ConvexHull.hpp"
 
@@ -9,74 +10,47 @@ namespace
 	{
 		const double relval=max(max(fabs(v1.y),fabs(v2.y)),DBL_EPSILON*2);
 		const double diffmax=4*max(fabs(v1.y-v2.y),fabs(v2.y-v1.y))/relval;
-		if(diffmax<DBL_EPSILON)
-			return v1.x<v2.x;
-		else
-			return v1.y<v2.y;
+		return diffmax<DBL_EPSILON ? v1.x<v2.x : v1.y<v2.y;
 	}
-
-	/*
-	bool AngleSort(Vector2D const& v1,Vector2D const& v2)
-	{
-	const double tol=1e-8;
-	const double a1=atan2(v1.y,v1.x);
-	const double a2=atan2(v2.y,v2.x);
-	if(a1<a2+tol)
-	return true;
-	if(a2<a1+tol)
-	return false;
-	if(abs(v1)<abs(v2))
-	return true;
-	else
-	return false;
-	}
-	*/
 
 	Vector2D GetReflectedPoint(Edge const& edge,Vector2D const& point)
 	{
-		Vector2D par(Parallel(edge));
-		par=par/abs(par);
-		Vector2D edge0=edge.vertices.first;
-		Vector2D temp=point-edge0;
-		return 2*par*ScalarProd(par,temp)-temp+edge0;
+	  const Vector2D par(normalize(Parallel(edge)));
+	  const Vector2D edge0=edge.vertices.first;
+	  const Vector2D temp=point-edge0;
+	  return 2*par*ScalarProd(par,temp)-temp+edge0;
 	}
+
+  bool check_same_point(const vector<Vector2D>& vertices,
+			const Vector2D& p,
+			double tol)
+  {
+    BOOST_FOREACH(const Vector2D& v, vertices)
+      {
+	if(dist_sqr(v-p)<tol)
+	  return true;
+      }
+    return false;
+  }
 }
 
-void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
+void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
 {
-	vector<int> edge_index=tess->GetCellEdges(index);
+	vector<int> edge_index=tess.GetCellEdges(index);
 	const double eps=1e-14;
 	vector<Vector2D> points;
 	points.reserve(10);
-	double R=tess->GetWidth(index);
-	points.push_back(tess->GetEdge(edge_index[0]).vertices.first);
-	points.push_back(tess->GetEdge(edge_index[0]).vertices.second);
+	double R=tess.GetWidth(index);
+	points.push_back(tess.GetEdge(edge_index[0]).vertices.first);
+	points.push_back(tess.GetEdge(edge_index[0]).vertices.second);
 	// Remove identical points
 	for(size_t i=1;i<edge_index.size();++i)
 	{
-		bool samepoint=false;
-		Edge const& edge = tess->GetEdge(edge_index[i]);
-		for (vector<Vector2D>::iterator it = points.begin(); it != points.end();++it)
-		{
-			if (((edge.vertices.first.x - it->x)*(edge.vertices.first.x - it->x) + (edge.vertices.first.y - it->y)*(edge.vertices.first.y - it->y)) < eps*R*R)
-			{
-				samepoint = true;
-				break;
-			}				
-		}
-		if(!samepoint)
-			points.push_back(tess->GetEdge(edge_index[i]).vertices.first);
-		samepoint=false;
-		for (vector<Vector2D>::iterator it = points.begin(); it != points.end(); ++it)
-		{
-			if (((edge.vertices.second.x - it->x)*(edge.vertices.second.x - it->x) + (edge.vertices.second.y - it->y)*(edge.vertices.second.y - it->y))<eps*R*R)
-			{
-				samepoint = true;
-				break;
-			}
-		}
-		if(!samepoint)
-			points.push_back(tess->GetEdge(edge_index[i]).vertices.second);
+	  const Edge& edge = tess.GetEdge(static_cast<int>(i));
+		if(!check_same_point(points,edge.vertices.first,eps*pow(R,2)))
+		  points.push_back(tess.GetEdge(edge_index[i]).vertices.first);
+		if(!check_same_point(points,edge.vertices.second,eps*pow(R,2)))
+		  points.push_back(tess.GetEdge(edge_index[i]).vertices.second);
 	}
 	// Find the bottom point
 	sort(points.begin(),points.end(),VectorSort);
@@ -130,18 +104,18 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const* tess,int index)
 	  result[i]=points[static_cast<size_t>(indeces[i-1])+1];
 }
 
-void ConvexEdges(vector<int> &result,Tessellation const* tess,int index)
+void ConvexEdges(vector<int> &result,Tessellation const& tess,int index)
 {
-	vector<int> const& edges=tess->GetCellEdges(index);
-	const Vector2D mypoint=tess->GetMeshPoint(index);
+	vector<int> const& edges=tess.GetCellEdges(index);
+	const Vector2D mypoint=tess.GetMeshPoint(index);
 	int nedges=static_cast<int>(edges.size());
 	result.resize(static_cast<size_t>(nedges));
 	vector<double> angles(static_cast<size_t>(nedges));
 	for(int i=0;i<nedges;++i)
 	{
-		Edge const& edge=tess->GetEdge(edges[static_cast<size_t>(i)]);
+		Edge const& edge=tess.GetEdge(edges[static_cast<size_t>(i)]);
 		const int other=(edge.neighbors.first==index)? edge.neighbors.second : edge.neighbors.first;
-		Vector2D otherpoint=(other==-1) ? GetReflectedPoint(edge,mypoint) : tess->GetMeshPoint(other);
+		Vector2D otherpoint=(other==-1) ? GetReflectedPoint(edge,mypoint) : tess.GetMeshPoint(other);
 		angles[static_cast<size_t>(i)]=atan2(otherpoint.y-mypoint.y,otherpoint.x-mypoint.x);
 	}
 	vector<int> temp;

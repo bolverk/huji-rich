@@ -4,13 +4,13 @@ ConstantPrimitiveGenerator::ConstantPrimitiveGenerator(ComputationalCell const& 
 
 std::pair<ComputationalCell, ComputationalCell> ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& /*tess*/,
 	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
-	size_t /*ghost_index*/)const
+	size_t /*ghost_index*/, double /*time*/)const
 {
 	return std::pair<ComputationalCell, ComputationalCell>();
 }
 
 boost::container::flat_map<size_t, ComputationalCell> ConstantPrimitiveGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/) const
+	const vector<ComputationalCell>& /*cells*/, double /*time*/) const
 {
 	vector<std::pair<size_t, size_t> > outer_edges = GetOuterEdgesIndeces(tess);
 	boost::container::flat_map<size_t, ComputationalCell> res;

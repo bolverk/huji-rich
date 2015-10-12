@@ -47,7 +47,7 @@ def main():
     exact_shock_angle = oblique_shock.calc_shock_angle\
         (mach, adiabatic_index, wedge_angle)
 
-    if True:
+    if False:
         print('mach number = '+str(mach))
         print('adiabatic index = '+str(adiabatic_index))
         print('wedge angle = '+str(wedge_angle*180/math.pi))

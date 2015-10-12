@@ -4,6 +4,16 @@
 
 using namespace H5;
 
+Snapshot::Snapshot(void):
+  mesh_points(),
+  cells(),
+  time() {}
+
+Snapshot::Snapshot(const Snapshot& source):
+  mesh_points(source.mesh_points),
+  cells(source.cells),
+  time(source.time) {}
+
 DiagnosticAppendix::~DiagnosticAppendix(void) {}
 
 namespace {
@@ -148,7 +158,7 @@ namespace {
       yvert.reserve(7*static_cast<size_t>(tess.GetPointNo()));
       for(int i=0;i<tess.GetPointNo();++i){
 	vector<Vector2D> convhull;
-	ConvexHull(convhull,&tess,i);
+	ConvexHull(convhull,tess,i);
 	for(size_t j=0;j<convhull.size();++j){
 	  xvert.push_back(convhull[j].x);
 	  yvert.push_back(convhull[j].y);
