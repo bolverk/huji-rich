@@ -32,6 +32,10 @@ class Delaunay
 {
 private:
 
+#ifdef RICH_MPI
+  int findSomeOuterPoint(void);
+#endif // RICH_MPI
+
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
   int lastFacet; //last facet to be checked in Walk
   bool CalcRadius;
