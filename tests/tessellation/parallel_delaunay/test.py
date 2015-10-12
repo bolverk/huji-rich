@@ -39,12 +39,12 @@ def main():
         pylab.plot(
             data['x_coordinate'][range(data['point number'])],
             data['y_coordinate'][range(data['point number'])],
-            '.')
-        #for facet in data['facets']:
-        #    closed = numpy.concatenate((facet,[facet[0]]))
-        #    pylab.plot(data['x_coordinate'][closed],
-        #               data['y_coordinate'][closed],
-        #               color='g') 
+            'b.')
+        for facet in data['facets']:
+            closed = numpy.concatenate((facet,[facet[0]]))
+            pylab.plot(data['x_coordinate'][closed],
+                       data['y_coordinate'][closed],
+                       color='g') 
     pylab.show()
 
     return False

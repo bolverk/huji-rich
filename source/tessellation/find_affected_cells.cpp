@@ -78,6 +78,22 @@ namespace {
 	}
 }
 
+vector<int> find_affected_cells
+(const Tessellation& tess,
+ int index,
+ const Circle& circle)
+{
+  if(!cell_circle_intersect(tess,index,circle))
+    return vector<int>();
+  vector<int> res(1,index);
+  BOOST_FOREACH(int nbr, tess.GetNeighbors(index)){
+    if(nbr<tess.GetPointNo() && 
+       cell_circle_intersect(tess,nbr,circle))
+      res.push_back(nbr);      
+  }
+  return res;
+}
+
 void find_affected_cells(const Tessellation& tess,int index,const Circle& circle,
 	vector<int> &res)
 {

@@ -23,4 +23,15 @@ void find_affected_cells(const Tessellation& tess,
 				const Circle& circle,
 				vector<int> & res);
 
+/*! \brief Non recursive version of find affected cells. Only searches one degree of separation
+  \param tess Tessellation
+  \param index Cell index
+  \param circle Circle
+  \return Vector with indices of affected cells
+ */
+vector<int> find_affected_cells
+(const Tessellation& tess,
+ int index,
+ const Circle& circle);
+
 #endif // FIND_AFFECTED_CELLS
