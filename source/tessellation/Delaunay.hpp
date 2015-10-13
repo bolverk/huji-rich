@@ -36,19 +36,13 @@ private:
   int findSomeOuterPoint(void);
 
   vector<vector<int> > findOuterPoints
-  (void);
-
-  vector<vector<int> > AddOuterFacetsMPI
-  (int point,
-   vector<vector<int> > &toduplicate,
-   vector<int> &neigh,
-   vector<bool> &checked,
-   Tessellation const &tproc,
-   const vector<Edge>& own_edges);
-
-  vector<vector<int> > findOuterPoints
   (const Tessellation& t_proc,
    const vector<Edge>& edge_list);
+
+  vector<vector<int> > findOuterPoints2
+  (const Tessellation& t_proc,
+   const vector<Edge>& edge_list,
+   vector<vector<int> >& to_duplicate);
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
@@ -95,8 +89,16 @@ private:
 	const& edges,vector<bool> &checked)const;
   void AddOuterFacets(int tri,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked);
-  void AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
-	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc);
+
+  vector<vector<int> > AddOuterFacetsMPI
+  (int point,
+   vector<vector<int> > &toduplicate,
+   vector<int> &neigh,
+   vector<bool> &checked,
+   const Tessellation& tproc,
+   const vector<Edge>& own_edges,
+   bool recursive = false);
+
   void AddRigid(vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,

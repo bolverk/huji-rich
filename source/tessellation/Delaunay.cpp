@@ -6,6 +6,7 @@
 #ifdef RICH_MPI
 #include <boost/mpi/nonblocking.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/mpi/collectives.hpp>
 #endif // RICH_MPI
 
 namespace {
@@ -1227,7 +1228,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
  vector<bool> &checked,
  Tessellation const &tproc,
  const vector<Edge>& own_edges,
- bool recursive = false)
+ bool recursive)
 {
   vector<vector<int> > res;
   if(!recursive)
@@ -1350,12 +1351,26 @@ vector<vector<int> > Delaunay::findOuterPoints
   AddRigid
     (neighbors_own_edges.second,
      self_points);
+
+  return to_duplicate;
+}
+
+namespace {
+  template<class T> bool is_in
+  (const T& t,
+   const vector<T>& v)
+  {
+    BOOST_FOREACH(const T&m, v){
+      if(t==m)
+	return true;
+    }
+    return false;
+  }
 }
 
 vector<vector<int> > Delaunay::findOuterPoints2
 (const Tessellation& t_proc,
  const vector<Edge>& edge_list,
- vector<int>& correspondents
  vector<vector<int> >& to_duplicate)
 {
   const boost::mpi::communicator world;
@@ -1386,6 +1401,7 @@ vector<vector<int> > Delaunay::findOuterPoints2
      correspondence_matrix);
   vector<size_t> indices;
   for(size_t i=0;i<neighbors_own_edges.first.size();++i){
+    const int dest = neighbors_own_edges.first.at(i);
     if(is_in
        (world.rank(),
 	correspondence_matrix.at(dest)))
@@ -1425,8 +1441,7 @@ vector<vector<int> > Delaunay::findOuterPoints2
   // Incorporate points recieved into triangulation
   BOOST_FOREACH(const vector<Vector2D>& line, incoming)
     AddBoundaryPoints(line);
-  AddRigid
-    (neighbors_own_edges.second,
-     self_points);
+
+  return to_duplicate;
 }
 #endif // RICH_MPI
