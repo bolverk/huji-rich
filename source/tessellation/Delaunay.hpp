@@ -97,7 +97,7 @@ private:
 	const& edges,vector<bool> &checked);
   void AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,
 	vector<int> &neigh,vector<bool> &checked,Tessellation const &tproc);
-  void AddRigid(OuterBoundary const* obc,vector<Edge> const& edges,
+  void AddRigid(vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
