@@ -1444,4 +1444,20 @@ vector<vector<int> > Delaunay::findOuterPoints2
 
   return to_duplicate;
 }
+
+vector<vector<int> > Delaunay::BuildBoundary
+(OuterBoundary const* /*obc*/,
+ Tessellation const& tproc,
+ vector<vector<int> >& /*Nghost*/,
+ vector<int> & /*proclist*/)
+{
+  const boost::mpi::communicator world;
+  vector<Edge> edges;
+  vector<int> edge_index=tproc.GetCellEdges(world.rank());
+  for(size_t i=0;i<edge_index.size();++i)
+    edges.push_back(tproc.GetEdge(edge_index[i]));
+  vector<vector<int> > to_duplicate = 
+    findOuterPoints(tproc,edges);
+  return findOuterPoints2(tproc,edges,to_duplicate);
+}
 #endif // RICH_MPI

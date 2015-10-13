@@ -104,6 +104,13 @@ int main(void)
     (local_points,
      delineate_rectangle
      (obc.getBoundary()));
+  vector<vector<int> > dummy_1;
+  vector<int> dummy_2;
+  tri.BuildBoundary
+    (&obc,
+     super,
+     dummy_1,
+     dummy_2);
   WriteDelaunay(tri,string("part_"+int2str(world.rank())+".h5"));
 #else
 
