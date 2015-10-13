@@ -15,7 +15,7 @@ else ifeq ($(MODE),parallel)
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
-	LINT_FLAGS := -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
+	LINT_FLAGS := -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-error=long-long -Wno-error=effc++ -Wno-error=shadow
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
