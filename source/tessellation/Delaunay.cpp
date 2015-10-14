@@ -1189,7 +1189,7 @@ namespace {
 	(edge.neighbors.first+
 	 edge.neighbors.second)-
 	world.rank();
-      if(other<t_proc.GetPointNo()){
+      if(other<t_proc.GetPointNo() || other<0){
 	res.first.push_back(other);
       }
       else
@@ -1348,6 +1348,10 @@ vector<vector<int> > Delaunay::findOuterPoints
   // Incorporate points recieved into triangulation
   BOOST_FOREACH(const vector<Vector2D>& line, incoming)
     AddBoundaryPoints(line);
+  BOOST_FOREACH(vector<int>& line, self_points){
+    sort(line.begin(), line.end());
+    line = unique(line);
+  }
   AddRigid
     (neighbors_own_edges.second,
      self_points);

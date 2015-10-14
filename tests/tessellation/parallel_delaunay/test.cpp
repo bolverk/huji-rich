@@ -67,9 +67,11 @@ vector<Vector2D> distribute_grid
 int main(void)
 {
 #ifdef RICH_MPI
-  
+
   boost::mpi::environment env;
   boost::mpi::communicator world;
+  
+  try{
 
   const SquareBox obc
     (Vector2D(0,0),
@@ -112,6 +114,11 @@ int main(void)
      dummy_1,
      dummy_2);
   WriteDelaunay(tri,string("part_"+int2str(world.rank())+".h5"));
+  }
+  catch(const UniversalError& eo){
+    cout << eo.GetErrorMessage() << endl;
+    throw;
+  }
 #else
 
   write_number(0,"serial_ignore.txt");

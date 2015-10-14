@@ -59,7 +59,7 @@ namespace {
 			res.push_back(index);
 			BOOST_FOREACH(int nbr, tess.GetNeighbors(index))
 			{			
-				if(nbr!=-1)
+			  if(nbr<tess.GetPointNo())
 					find_affected_cells2(tess,nbr,circle,res,visited);
 				else
 				{
