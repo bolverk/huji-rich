@@ -20,7 +20,7 @@
 
 namespace
 {
-	vector<ComputationalCell> calc_init_cond(const Tessellation& tess,EquationOfState const& eos)
+	vector<ComputationalCell> calc_init_cond(const Tessellation& tess, EquationOfState const& eos)
 	{
 		vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
 		for (size_t i = 0; i < res.size(); ++i)
@@ -41,7 +41,7 @@ namespace
 		EquationOfState const& eos_;
 	public:
 
-		NOHGhostGenerator(EquationOfState const& eos) :eos_(eos){}
+		NOHGhostGenerator(EquationOfState const& eos) :eos_(eos) {}
 
 		boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 			const vector<ComputationalCell>& /*cells*/, double time) const
@@ -74,15 +74,15 @@ namespace
 		}
 	};
 
-	class NohRefine: public CellsToRefine
+	class NohRefine : public CellsToRefine
 	{
 	private:
 		const double maxV_;
-		
-	public:
-		NohRefine(double maxV) :maxV_(maxV){}
 
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const
+	public:
+		NohRefine(double maxV) :maxV_(maxV) {}
+
+		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			vector<size_t> res;
 			size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -99,21 +99,21 @@ namespace
 	class NohRefineDebug : public CellsToRefine
 	{
 	public:
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const
+		vector<size_t> ToRefine(Tessellation const& /*tess*/, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			return vector<size_t>();
 		}
 	};
 
-	class NohRemove: public CellsToRemove
+	class NohRemove : public CellsToRemove
 	{
 	private:
 		const double minV_;
 	public:
-		NohRemove(double minV):minV_(minV){}
+		NohRemove(double minV) :minV_(minV) {}
 
-		std::pair<vector<size_t>,vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& cells, double time)const
+		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
+			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			vector<size_t> indeces;
 			vector<double> merits;
@@ -124,7 +124,7 @@ namespace
 				if (V < minV_)
 				{
 					indeces.push_back(i);
-					merits.push_back(1.0/V);
+					merits.push_back(1.0 / V);
 				}
 			}
 			return std::pair<vector<size_t>, vector<double> >(indeces, merits);
@@ -135,7 +135,7 @@ namespace
 	{
 	public:
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& /*tess*/,
-			vector<ComputationalCell> const& cells, double /*time*/)const
+			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			return std::pair<vector<size_t>, vector<double> >();
 		}
