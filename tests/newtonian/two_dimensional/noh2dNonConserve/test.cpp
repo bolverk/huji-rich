@@ -205,7 +205,7 @@ int main(void)
 	//NohRefineDebug refine;
 	NohRemove remove(Vmin);
 	//NohRemoveDebug remove;
-	ConservativeAMR amr(refine, remove);
+	NonConservativeAMR amr(refine, remove);
 
 	// How long shall we run the simulation?
 #ifdef restart

@@ -27,7 +27,7 @@ Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const Computatio
 }
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
-	double volume, ComputationalCell const& old_cell) const
+	double volume, ComputationalCell const& /*old_cell*/) const
 {
 	ComputationalCell res;
 	const double vol_inv = 1.0 / volume;
@@ -75,7 +75,7 @@ namespace
 				vector<Vector2D> inter(solution[0].size());
 				double factor = pow(10.0, maxscale - 18);
 				for (size_t i = 0; i < solution[0].size(); ++i)
-					inter[i].Set(solution[0][i].X * factor, solution[0][i].Y * factor);
+					inter[i].Set(static_cast<double>(solution[0][i].X) * factor, static_cast<double>(solution[0][i].Y) * factor);
 				return polyoverlap.PolyArea(inter);
 			}
 		}
@@ -186,7 +186,7 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 		real_neigh.push_back(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
-			if (neigh[j] < N)
+			if (neigh[j] < static_cast<int>(N))
 			{
 				real_neigh.push_back(neigh[j]);
 				ConvexHull(temp, *oldtess, neigh[j]);
@@ -195,7 +195,7 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 			else
 			{
 				// Is it not a rigid wall?
-				if (oldtess->GetOriginalIndex(neigh[j]) != ToRefine[i])
+				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRefine[i]))
 				{
 					real_neigh.push_back(oldtess->GetOriginalIndex(neigh[j]));
 					ConvexHull(temp, *oldtess, real_neigh.front());
@@ -226,7 +226,7 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 }
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
-	OuterBoundary const& obc, vector<ComputationalCell> &cells,vector<Extensive> &extensives,
+	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells,vector<Extensive> &extensives,
 	EquationOfState const& eos,double time)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -258,13 +258,13 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			size_t toadd = lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin();
-			if (neigh[j] < N)
+			if (neigh[j] < static_cast<int>(N))
 			{
 				ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
 			}
 			else
 			{
-				if (oldtess->GetOriginalIndex(neigh[j]) != ToRemove[i])
+				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
 				{
 					ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
 					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
@@ -320,7 +320,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
-	OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
+	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 	EquationOfState const& eos,double time)const
 {
 	std::pair<vector<size_t>,vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
