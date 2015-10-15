@@ -46,6 +46,13 @@ public:
 
   //! \brief Null constructor
   Extensive(void);
+
+  /*!
+  \brief constructor for extensive with a tracer list. All tracers start with zero.
+  \param Tracers The tracers 
+  */
+  Extensive(boost::container::flat_map<std::string, double> const& Tracers);
+  
 };
 
 /*! \brief Scalar product

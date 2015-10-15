@@ -75,16 +75,7 @@ private:
 
 public:
 
-  /*! \brief Refines cells
-    \param ToRefine List of cell indices to refine
-   */
-	void RefineCells(vector<size_t> const& ToRefine);
-
-  /*! \brief Removes cells
-    \param ToRemove List of cell indices to remove
-   */
-	void RemoveCells(vector<size_t> &ToRemove);
-
+ 
   #ifdef RICH_MPI
   /*! \brief Chooses scheme for processor motion
     \param procupdate Pointer to process motion scheme
@@ -117,7 +108,12 @@ public:
   /*! \brief Returns the tessellation
     \return The tessellation
   */
-  const Tessellation& getTessellation(void) const;
+  Tessellation& getTessellation(void);
+
+  /*! \brief Returns the tessellation
+  \return The tessellation
+  */
+  const Tessellation& getTessellation(void)const;
 
    /*! \brief Returns the processor tessellation
     \return The tessellation

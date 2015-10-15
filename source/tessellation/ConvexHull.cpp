@@ -46,7 +46,7 @@ void ConvexHull(vector<Vector2D> &result,Tessellation const& tess,int index)
 	// Remove identical points
 	for(size_t i=1;i<edge_index.size();++i)
 	{
-	  const Edge& edge = tess.GetEdge(static_cast<int>(i));
+		const Edge& edge = tess.GetEdge(edge_index[i]);
 		if(!check_same_point(points,edge.vertices.first,eps*pow(R,2)))
 		  points.push_back(tess.GetEdge(edge_index[i]).vertices.first);
 		if(!check_same_point(points,edge.vertices.second,eps*pow(R,2)))
