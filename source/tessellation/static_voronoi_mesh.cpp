@@ -1369,19 +1369,6 @@ vector<vector<int> >const& StaticVoronoiMesh::GetSentPoints(void)const
 	return SentPoints;
 }
 
-// cpoints must be convex hull, checks if vec is inside cpoints
-bool PointInCell(vector<Vector2D> const& cpoints,Vector2D const& vec)
-{
-	for(size_t i=0, endp=cpoints.size();i<endp;++i)
-	{
-	  if(orient2d(TripleConstRef<Vector2D>(cpoints[i],
-					       cpoints[(i+1)%endp],
-					       vec))<0)
-	  return false;
-	}
-	return true;
-}
-
 // result is : minx, maxx, miny, maxy
 boost::array<double,4> StaticVoronoiMesh::FindMaxCellEdges(void)
 {

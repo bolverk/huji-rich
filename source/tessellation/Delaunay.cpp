@@ -1437,7 +1437,7 @@ vector<vector<int> > Delaunay::findOuterPoints2
     (neighbors_own_edges.first.size());
   for(size_t i=0;i<neighbors_own_edges.first.size();++i){
     const int dest = neighbors_own_edges.first.at(i);
-    requests.push_back(world.isend(dest,0,messages.at(i)));
+    requests.push_back(world.isend(dest,0,VectorValues(cor,messages.at(i))));
     requests.push_back(world.irecv(dest,0,incoming[i]));
   }
   wait_all(requests.begin(),requests.end());

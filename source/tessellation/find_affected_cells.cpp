@@ -61,11 +61,6 @@ namespace {
 			{			
 			  if(nbr<tess.GetPointNo())
 					find_affected_cells2(tess,nbr,circle,res,visited);
-				else
-				{
-					if(!contains(visited,-1))
-						res.push_back(-1);
-				}
 			}
 			return;
 		}
