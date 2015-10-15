@@ -67,7 +67,6 @@ namespace
 		c.AddPaths(subj, ptSubject, true);
 		c.AddPaths(clip, ptClip, true);
 		c.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-		double res;
 		PolygonOverlap polyoverlap;
 		if (!solution.empty())
 		{
@@ -182,9 +181,9 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 		vector<int> real_neigh;
 		vector<vector<Vector2D> > Chull;
 		vector<Vector2D> temp;
-		ConvexHull(temp, *oldtess, ToRefine[i]);
+		ConvexHull(temp, *oldtess, static_cast<int>(ToRefine[i]));
 		Chull.push_back(temp);
-		real_neigh.push_back(ToRefine[i]);
+		real_neigh.push_back(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			if (neigh[j] < N)
@@ -212,7 +211,7 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 			Extensive NewExtensive(extensives[0].tracers);
 			for (size_t j = 0; j < Chull.size(); ++j)
 			{
-				ConvexHull(temp, tess, N + location);
+				ConvexHull(temp, tess, static_cast<int>(N + location));
 				double v = AreaOverlap(temp, Chull[j]);
 				NewExtensive += eu_.ConvertPrimitveToExtensive(cells[real_neigh[j]], eos, v);
 				TotalVolume += v;
@@ -223,7 +222,7 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	}
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(i));
+		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -252,7 +251,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	{
 		vector<int> neigh = oldtess->GetNeighbors(static_cast<int>(ToRemove[i]));
 		vector<Vector2D> chull;
-		ConvexHull(chull, *oldtess, ToRemove[i]);
+		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
 		const double TotalV = oldtess->GetVolume(static_cast<int>(ToRemove[i]));
 		Extensive oldcell = extensives[ToRemove[i]];
 		temp.clear();
@@ -261,13 +260,13 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			size_t toadd = lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin();
 			if (neigh[j] < N)
 			{
-				ConvexHull(temp, tess, neigh[j] - toadd);
+				ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
 			}
 			else
 			{
 				if (oldtess->GetOriginalIndex(neigh[j]) != ToRemove[i])
 				{
-					ConvexHull(temp, tess, neigh[j] - toadd);
+					ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
 					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
 						oldtess->GetMeshPoint(oldtess->GetOriginalIndex(neigh[j])));
 				}
@@ -283,7 +282,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	RemoveVector(cells, ToRemove);
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_.ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(i), cells[i]);
+		cells[i] = cu_.ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
 }
 
 SimpleAMRCellUpdater NonConservativeAMR::scu_=SimpleAMRCellUpdater();
@@ -317,7 +316,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + ToRefine.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(i));
+		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -339,7 +338,7 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	// Recalcualte extensives
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(i));
+		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMR::operator()(hdsim &sim)
@@ -374,7 +373,7 @@ candidates, Tessellation const& tess) const
 	for (size_t i = 0; i<merits.size(); ++i)
 	{
 		bool good = true;
-		vector<int> neigh = tess.GetNeighbors(candidates[i]);
+		vector<int> neigh = tess.GetNeighbors(static_cast<int>(candidates[i]));
 		size_t nneigh = neigh.size();
 		if (!good)
 			continue;
