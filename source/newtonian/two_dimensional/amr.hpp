@@ -71,38 +71,73 @@ public:
 class CellsToRemove
 {
 public:
+	/*! 
+	\brief Finds the cells to remove
+	\param tess The tesselation
+	\param cells The computational cells
+	\param time The sim time
+	\return The indeces of cells to remove with a corresponding merit which decides if there are neighboring cells which one to choose to remove
+	*/
 	virtual std::pair<vector<size_t>,vector<double> > ToRemove(Tessellation const& tess,
 		vector<ComputationalCell> const& cells,double time)const=0;
 
+	//! \brief Virtual destructor
 	virtual ~CellsToRemove(void);
 };
 
 class CellsToRefine
 {
 public:
+	/*!
+	\brief Finds the cells to refine
+		\param tess The tesselation
+		\param cells The computational cells
+		\param time The sim time
+		\return The indeces of cells to remove
+     */
 	virtual vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const = 0;
 	
+	//! \brief Virtual destructor
 	virtual ~CellsToRefine(void);
 };
 
 
 class AMR : public Manipulate
 {
-public:
-	virtual void operator() (hdsim &sim) = 0;
-
-	virtual void UpdateCellsRefine(Tessellation &tess,
-		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time)const = 0;
-
-	virtual void UpdateCellsRemove(Tessellation &tess,
-		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time)const = 0;
-
+private:
 	void GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
 		OuterBoundary const& obc)const;
-
+public:
+	/*!
+	\brief Runs the AMR
+	\param sim The sim object
+	*/
+	virtual void operator() (hdsim &sim) = 0;
+	/*!
+	\brief Runs the refine
+	\param tess The tessellation
+	\param cells The computational cells
+	\param eos The equation of state
+	\param extensives The extensive variables
+	\param time The sim time
+	*/
+	virtual void UpdateCellsRefine(Tessellation &tess,
+		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
+		vector<Extensive> &extensives, double time)const = 0;
+	/*!
+	\brief Runs the removal
+	\param tess The tessellation
+	\param cells The computational cells
+	\param eos The equation of state
+	\param extensives The extensive variables
+	\param time The sim time
+	\param obc The outer boundary conditions
+	*/
+	virtual void UpdateCellsRemove(Tessellation &tess,
+		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
+		EquationOfState const& eos, double time)const = 0;
+	//! \brief Virtual destructor
 	virtual ~AMR(void);
 };
 

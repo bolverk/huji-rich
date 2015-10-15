@@ -82,7 +82,7 @@ namespace
 	public:
 		NohRefine(double maxV) :maxV_(maxV){}
 
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const
+		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			vector<size_t> res;
 			size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -99,7 +99,7 @@ namespace
 	class NohRefineDebug : public CellsToRefine
 	{
 	public:
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const
+		vector<size_t> ToRefine(Tessellation const& /*tess*/, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			return vector<size_t>();
 		}
@@ -113,7 +113,7 @@ namespace
 		NohRemove(double minV):minV_(minV){}
 
 		std::pair<vector<size_t>,vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& cells, double time)const
+			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			vector<size_t> indeces;
 			vector<double> merits;
@@ -135,7 +135,7 @@ namespace
 	{
 	public:
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& /*tess*/,
-			vector<ComputationalCell> const& cells, double /*time*/)const
+			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
 		{
 			return std::pair<vector<size_t>, vector<double> >();
 		}
