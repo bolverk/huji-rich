@@ -1,6 +1,7 @@
 #include "simple_extensive_updater.hpp"
 
-namespace {
+namespace 
+{
   bool bracketed(int low, int arg, int high)
   {
     return arg>=low && high>arg;

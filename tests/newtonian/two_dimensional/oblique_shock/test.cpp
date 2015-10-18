@@ -27,6 +27,7 @@
 #include "source/misc/vector_initialiser.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/amr.hpp"
 
 using namespace std;
 
@@ -256,50 +257,80 @@ namespace
 		hdsim sim_;
 	};
 
-	vector<size_t> RefineList(Tessellation const& tess, vector<ComputationalCell> const& cells, string key,
-		double maxV)
+	class ObliqueRefine : public CellsToRefine
 	{
-		vector<size_t> res;
-		size_t N = static_cast<size_t>(tess.GetPointNo());
-		for (size_t i = 0; i < N; ++i)
-		{
-			if (tess.GetVolume(static_cast<int>(i)) > maxV&&!cells[i].stickers.at(key))
-				res.push_back(i);
-		}
-		return res;
-	}
+	private:
+		const double maxV_;
+		string key_;
 
-	vector<size_t> RemoveList(Tessellation const& tess, vector<ComputationalCell> const& cells, string key,
-		double distanceToWall)
-	{
-		vector<size_t> res;
-		size_t N = static_cast<size_t>(tess.GetPointNo());
-		for (size_t i = 0; i < N; ++i)
+	public:
+		ObliqueRefine(double maxV,string key) :maxV_(maxV),key_(key) {}
+
+		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/)const
 		{
-			if (!cells[i].stickers.at(key))
+			vector<size_t> res;
+			size_t N = static_cast<size_t>(tess.GetPointNo());
+			for (size_t i = 0; i < N; ++i)
 			{
-				Vector2D const& point = tess.GetMeshPoint(static_cast<int>(i));
-				if (point.y < (0.1*point.x - 0.428 + distanceToWall))
+				if (tess.GetVolume(static_cast<int>(i)) > maxV_&&!cells[i].stickers.at(key_))
 					res.push_back(i);
-				else
-					if (point.x>(0.5 - distanceToWall))
-						res.push_back(i);
 			}
+			return res;
 		}
-		return res;
-	}
+	};
+	
+	class ObliqueRemove :public CellsToRemove
+	{
+	private:
+		string key_;
+		double distanceToWall_;
+	public:
+		ObliqueRemove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
+
+		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
+			vector<ComputationalCell> const& /*cells*/, double /*time*/)const 
+		{
+			std::pair<vector<size_t>, vector<double> > res;
+			vector<double> merits;
+			vector<size_t> indeces;
+			size_t N = static_cast<size_t>(tess.GetPointNo());
+			for (size_t i = 0; i < N; ++i)
+			{
+				if (!cells[i].stickers.at(key_))
+				{
+					Vector2D const& point = tess.GetMeshPoint(static_cast<int>(i));
+					if (point.y < (0.1*point.x - 0.428 + distanceToWall_))
+					{
+						indeces.push_back(i);
+						merits.push_back(0.1*point.x - 0.428 + distanceToWall_-point.y);
+					}
+					else
+					{
+						if (point.x > (0.5 - distanceToWall_))
+						{
+							indeces.push_back(i);
+							merits.push_back(point.x - (0.5 - distanceToWall_));
+						}
+					}
+				}
+			}
+			return std::pair<vector<size_t>, vector<double> >(indeces,merits);
+		}
+
+	};
 
 	void main_loop(hdsim& sim)
 	{
 		const int max_iter = 5e6;
 		const double tf = 0.5;
+		ObliqueRefine refine(0.05*0.05,"wedge");
+		ObliqueRemove remove("wedge",0.02);
+		NonConservativeAMR amr(refine, remove);
+
 		while (tf > sim.getTime()){
 			try{
 				sim.TimeAdvance();
-				vector<size_t> ToRemove = RemoveList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.02);
-				sim.RemoveCells(ToRemove);
-				vector<size_t> ToRefine = RefineList(sim.getTessellation(), sim.getAllCells(), "wedge", 0.05*0.05);
-				sim.RefineCells(ToRefine);
+				amr(sim);
 			}
 			catch (UniversalError const& eo){
 				DisplayError(eo);

@@ -50,23 +50,25 @@ else
     error('Illegal number of input arguments');
 end
 
+h=h5info(filename);
+
 % Read the HDF5 data
-Density=h5read(filename,'/density');
-Pressure=h5read(filename,'/pressure');
-X=h5read(filename,'/x_coordinate');
-Y=h5read(filename,'/y_coordinate');
-Vx=h5read(filename,'/x_velocity');
-Vy=h5read(filename,'/y_velocity');
+Density=h5read(filename,'/hydrodynamic/density');
+Pressure=h5read(filename,'/hydrodynamic/pressure');
+X=h5read(filename,'/geometry/x_coordinate');
+Y=h5read(filename,'/geometry/y_coordinate');
+Vx=h5read(filename,'/hydrodynamic/x_velocity');
+Vy=h5read(filename,'/hydrodynamic/y_velocity');
 time=h5read(filename,'/time');
-NumberOfTracers=h5read(filename,'/Number of tracers');
+NumberOfTracers=length(h.Groups(5).Datasets);
 NumberOfCells=length(Density);
-Vertx=h5read(filename,'/x position of vertices');
-Verty=h5read(filename,'/y position of vertices');
-nVert=h5read(filename,'/Number of vertices in cell');
+Vertx=h5read(filename,'/geometry/x_vertices');
+Verty=h5read(filename,'/geometry/y_vertices');
+nVert=h5read(filename,'/geometry/n_vertices');
 Tracers=zeros(NumberOfCells,NumberOfTracers);
 
 for i=1:NumberOfTracers
-    Tracers(:,i)=h5read(filename,sprintf('/Tracer number %d',i));
+    Tracers(:,i)=h5read(filename,sprintf('/tracers/%s', h.Groups(5).Datasets(i).Name));
 end
 
 draw=WhatToPlot;

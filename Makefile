@@ -72,11 +72,16 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.15-pat
 	cd external_libraries/hdf5_dump/hdf5-1.8.15-patch1 && make
 	cd external_libraries/hdf5_dump/hdf5-1.8.15-patch1 && make install
 
+external_libraries/include/clipper.hpp:
+	mkdir -p external_libraries/dump_clipper
+	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && mv cpp/clipper.hpp ../include
+
+external_libraries/dump_clipper/clipper.o: external_libraries/dump_clipper/clipper.hpp
+	cd external_libraries/dump_clipper && g++ -c -O3 clipper.cpp -o clipper.o
+
 external_libraries/hdf5_dump/hdf5-1.8.15-patch1/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.15-patch1.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.15-patch1.tar.gz
 
-external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_59_0.tar.bz2
-	cd external_libraries/boost_dump/ && tar xvf ./boost_1_59_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
 	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
@@ -89,11 +94,8 @@ external_libraries/hdf5_dump/hdf5-1.8.15-patch1.tar.gz:
 	cd external_libraries/hdf5_dump && \
 	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.15-patch1.tar.gz
 
-external_libraries/boost_dump/boost_1_59_0.tar.bz2:
 	mkdir -p external_libraries/boost_dump
 	cd external_libraries/boost_dump && \
-	wget 'http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.bz2/download'
-	cd external_libraries/boost_dump && mv download boost_1_59_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2.tar.gz:
 	mkdir -p external_libraries/ann_tree_dump
