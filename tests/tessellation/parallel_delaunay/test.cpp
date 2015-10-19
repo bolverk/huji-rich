@@ -43,18 +43,6 @@ vector<Vector2D> distribute_grid
   vector<Vector2D> res;
   const vector<Vector2D> ch_list =
     my_convex_hull(proc_tess,world.rank());
-  for(int i =0; i<world.size();++i){
-    if(world.rank()==i){
-      cout << world.rank() << " : ";
-      BOOST_FOREACH(const Vector2D& v, ch_list)
-	{
-	  cout << "(" << v.x << ", " << v.y << ") ";
-	}
-      cout << endl;
-      cout.flush();
-    }
-    world.barrier();
-  }
   BOOST_FOREACH(const Vector2D& v, complete_grid)
     {
       if(PointInCell(ch_list,v))
@@ -88,6 +76,7 @@ int main(void)
       (all_points, 
        delineate_rectangle
        (obc.getBoundary()));
+    tri.BuildBoundary(&obc, obc.GetBoxEdges());
     WriteDelaunay(tri,string("whole.h5"));
   }
   VoronoiMesh super
