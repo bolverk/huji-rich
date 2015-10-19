@@ -1422,6 +1422,10 @@ vector<vector<int> > Delaunay::findOuterPoints2
     (to_duplicate,
      indices);
   // Get rid of duplicate points
+  for(size_t i=0;i<to_duplicate.size();++i){
+    sort(to_duplicate[i].begin(),to_duplicate[i].end());
+    to_duplicate[i]=unique(to_duplicate[i]);
+  }
   vector<vector<int> > messages(to_duplicate.size());
   for(size_t i=0;i<to_duplicate.size();++i){
     const vector<int>::const_iterator it = 
