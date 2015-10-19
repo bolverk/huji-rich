@@ -1383,6 +1383,7 @@ vector<vector<int> > Delaunay::findOuterPoints2
     sort(line.begin(), line.end());
   pair<vector<int>, vector<Edge> > neighbors_own_edges = 
     calc_neighbors_own_edges(t_proc, edge_list);
+  vector<int> old_neighbors = neighbors_own_edges.first;
   assert(!to_duplicate.empty());
   BOOST_FOREACH(const vector<int>& line,to_duplicate)
     assert(!line.empty());
@@ -1423,11 +1424,21 @@ vector<vector<int> > Delaunay::findOuterPoints2
   // Get rid of duplicate points
   vector<vector<int> > messages(to_duplicate.size());
   for(size_t i=0;i<to_duplicate.size();++i){
+    const vector<int>::const_iterator it = 
+      find(old_neighbors.begin(),
+	   old_neighbors.end(),
+	   neighbors_own_edges.first.at(i));
     for(size_t j=0;j<to_duplicate.at(i).size();++j){
-      if(!binary_search
-	 (to_duplicate_2.at(i).begin(),
-	  to_duplicate_2.at(i).end(),
-	  to_duplicate.at(i).at(j)))
+
+      if(it!=old_neighbors.end()){
+	const size_t my_index = static_cast<size_t>(it-old_neighbors.begin());
+	if(!binary_search
+	   (to_duplicate_2.at(my_index).begin(),
+	    to_duplicate_2.at(my_index).end(),
+	    to_duplicate.at(i).at(j)))
+	  messages.at(i).push_back(to_duplicate.at(i).at(j));
+      }
+      else
 	messages.at(i).push_back(to_duplicate.at(i).at(j));
     }
   }

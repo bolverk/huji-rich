@@ -27,16 +27,20 @@ def main():
     import os
     import pylab
     import numpy
+    import re
     import glob
 
     if os.path.isfile('serial_ignore.txt'):
         return True
 
     whole = parse_delaunay('whole.h5')
-    parts = [parse_delaunay(fname) for fname in glob.glob('part_*.h5')]
+    parts = [parse_delaunay(fname) for fname in 
+             sorted(glob.glob('part_*.h5'),
+                    key=
+                    lambda x: int(re.search(r'part_(\d+).h5',x).group(1)))]
 
     whole['sorted facets'] = [sorted(itm) for itm in whole['facets']]
-    for part in parts:
+    for n, part in enumerate(parts):
         index_table = [
             locate_point(
                 whole['x_coordinate'],
@@ -56,6 +60,7 @@ def main():
                  for itm in facet]) and numpy.any([itm<part['point number'] for itm in facet]):
                 t_facet = sorted([index_table[itm] for itm in facet])
                 if not t_facet in whole['sorted facets']:
+                    print n, facet, t_facet, part['point number'], [[part['x_coordinate'][itm],part['y_coordinate'][itm]] for itm in facet]
                     return False                
 
     return True
