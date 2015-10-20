@@ -46,6 +46,20 @@ namespace {
 		return false;
 	}
 
+  /*
+  int cell_circle_intersect_2
+  (const Tessellation& tess,
+   int index,
+   const Circle& circle)
+  {
+    BOOST_FOREACH(int ei, tess.GetCellEdges(index)){
+      if(edge_circle_intersect(tess.GetEdge(ei),circle))
+	return ei;
+    }
+    return -1;
+  }
+  */
+
 	void find_affected_cells2(const Tessellation& tess,int index,const Circle& circle,
 		vector<int> &res,vector<int>& visited)
 	{

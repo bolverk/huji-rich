@@ -15,12 +15,15 @@ def locate_point(x_list, y_list, xp, yp, tol = 1e-10):
     import numpy
 
     d_list = (x_list-xp)**2 + (y_list-yp)**2
+    if(numpy.min(d_list)>tol):
+        print xp, yp
+        print x_list[numpy.argmin(d_list)], y_list[numpy.argmin(d_list)]
     assert(numpy.min(d_list)<tol)
     return numpy.argmin(d_list)
 
-def is_boxed(x, y):
+def is_boxed(x, y, offset=0):
 
-    return 1>=x>=0 and 1>=y>=0
+    return 1-offset>=x>=0+offset and 1-offset>=y>=0+offset
 
 def main():
 
@@ -56,7 +59,7 @@ def main():
                     return False
             elif numpy.all(
                 [is_boxed(part['x_coordinate'][itm],
-                          part['y_coordinate'][itm])
+                          part['y_coordinate'][itm],0.04)
                  for itm in facet]) and numpy.any([itm<part['point number'] for itm in facet]):
                 t_facet = sorted([index_table[itm] for itm in facet])
                 if not t_facet in whole['sorted facets']:
