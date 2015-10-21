@@ -15,7 +15,7 @@ else ifeq ($(MODE),parallel)
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
-	LINT_FLAGS := -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-error=long-long -Wno-error=effc++ -Wno-error=shadow
+	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
@@ -56,7 +56,7 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libboost_mpi.a
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_59_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
@@ -65,6 +65,9 @@ set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boo
 	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
+
+external_libraries/lib/libboost_mpi.a:
+	cd external_libraries/boost_dump/boost_1_59_0 && ./bootstrap.sh --prefix=../.. && echo "using mpi ; " >> project_config.jam && ./b2 --user-config=project_config.jam --with-mpi install  --prefix=../..
 
 external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.15-patch1/c++/src/H5Cpp.h
 	cd external_libraries/hdf5_dump/hdf5-1.8.15-patch1 && \
