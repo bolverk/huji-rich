@@ -196,7 +196,7 @@ private:
 	vector<vector<int> > GhostPoints;
 	vector<int> SentProcs;
 	vector<vector<int> > SentPoints;
-	vector<int> selfindex;
+	vector<size_t> selfindex;
 	vector<vector<int> > NGhostReceived;
 	vector<vector<int> > OrgCorner;
 	int Nextra;
