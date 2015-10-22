@@ -1358,7 +1358,7 @@ Delaunay::findOuterPoints
 	NghostIndex.resize(incoming.size());
 	for (size_t i = 0; i < incoming.size(); ++i)
 	{
-		for (size_t j = 0; j < incoming.size(); ++j)
+		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
 		AddBoundaryPoints(incoming.at(i));
 	}
@@ -1515,7 +1515,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	NghostIndex.resize(incoming.size());
 	for (size_t i = 0; i < incoming.size(); ++i)
 	{
-		for (size_t j = 0; j < incoming.size(); ++j)
+		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
 		AddBoundaryPoints(incoming.at(i));
 	}
