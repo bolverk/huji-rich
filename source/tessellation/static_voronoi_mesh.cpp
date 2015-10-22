@@ -336,7 +336,7 @@ StaticVoronoiMesh::StaticVoronoiMesh
 	GhostPoints(vector<vector<int> > ()),
 	SentProcs(vector<int> ()),
 	SentPoints(vector<vector<int> > ()),
-	selfindex(vector<int> ()),
+	selfindex(vector<size_t> ()),
 	NGhostReceived(vector<vector<int> > ()),
 	OrgCorner(),
 	Nextra(0)
@@ -422,7 +422,7 @@ int StaticVoronoiMesh::GetOriginalIndex(int point) const
 	}
 }
 
-vector<int> StaticVoronoiMesh::GetSelfPoint(void)const
+vector<size_t> StaticVoronoiMesh::GetSelfPoint(void)const
 {
 	return selfindex;
 }

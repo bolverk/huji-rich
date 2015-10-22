@@ -174,7 +174,7 @@ public:
 
   vector<vector<int> >const& GetGhostIndeces(void)const;
 
-  vector<int> GetSelfPoint(void)const;
+  vector<size_t> GetSelfPoint(void)const;
 
   int GetTotalPointNumber(void)const;
   
