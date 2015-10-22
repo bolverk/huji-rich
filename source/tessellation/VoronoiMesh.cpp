@@ -3,6 +3,7 @@
 #include "../misc/simple_io.hpp"
 #include "hdf5_logger.hpp"
 #ifdef RICH_MPI
+#include <boost/mpi/nonblocking.hpp>
 #include <boost/serialization/vector.hpp>
 #endif
 
