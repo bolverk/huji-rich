@@ -104,11 +104,12 @@ public:
 
 class AMR : public Manipulate
 {
-private:
+protected:
 	void GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
 		OuterBoundary const& obc)const;
 public:
+
 	/*!
 	\brief Runs the AMR
 	\param sim The sim object
