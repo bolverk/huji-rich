@@ -1348,9 +1348,12 @@ Delaunay::findOuterPoints
 			requests.end());
 
 	// Incorporate points recieved into triangulation
-	AddRigid
-		(box_edges,
-			self_points);
+	BOOST_FOREACH(vector<int> &line, self_points)
+	{
+		sort(line.begin(), line.end());
+		line = unique(line);
+	}
+	AddRigid(box_edges,self_points);
 
 	NghostIndex.resize(incoming.size());
 	for (size_t i = 0; i < incoming.size(); ++i)
