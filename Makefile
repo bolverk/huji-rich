@@ -56,7 +56,7 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libboost_mpi.a
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libboost_mpi.a external_libraries/lib/libclipper.a
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_59_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
@@ -78,9 +78,12 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.15-pat
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
 	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && mv cpp/clipper.hpp ../include
-
+	
 external_libraries/dump_clipper/clipper.o: external_libraries/dump_clipper/clipper.hpp
-	cd external_libraries/dump_clipper && g++ -c -O3 clipper.cpp -o clipper.o
+	cd external_libraries/dump_clipper && g++ -c -O3 cpp/clipper.cpp -o clipper.o
+	
+external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
+	ar cr $@ $^ 
 
 external_libraries/hdf5_dump/hdf5-1.8.15-patch1/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.15-patch1.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.15-patch1.tar.gz
