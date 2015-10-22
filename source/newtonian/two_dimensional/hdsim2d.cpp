@@ -261,12 +261,6 @@ const Tessellation& hdsim::getTessellation(void) const
 	return tess_;
 }
 
-#ifdef RICH_MPI
-Tessellation const& hdsim::GetProcTessellation(void) const
-{
-	return _proctess;
-}
-#endif
 
 void hdsim::addTracer(const string& name,
 	const SpatialDistribution& tp)

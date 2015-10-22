@@ -67,12 +67,6 @@ public:
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const;
 
-	void RemoveCells(vector<int> &ToRemove,vector<vector<int> > &VolIndex,
-		vector<vector<double> > &Volratio);
-
-	void RefineCells(vector<int> const& ToRefine,
-		vector<Vector2D> const& directions,double alpha=1e-3);
-
 	Tessellation* clone(void)const;
 
 	vector<int> GetNeighbors(int index)const;

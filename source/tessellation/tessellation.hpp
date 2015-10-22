@@ -149,24 +149,6 @@ virtual ~Tessellation(void)=0;
 */
 virtual bool NearBoundary(int index) const = 0;
 
-/*!
-	\brief An efficient method of removing cells from the tessellation. Currently works only for cells not near a periodic boundary. Doesn't work with self gravity yet
-	\param ToRemovevector A list of the cells to remove. There SHOULDN'T be any neighboring cells in the list
-	\param VolIndex The index in the old tessellation of the cells that had their volume changed
-	\param Volratio The ratio of the removed cell's volume that went into the cell from VolIndex
-*/
-virtual void RemoveCells(vector<int> &ToRemovevector,vector<vector<int> > &VolIndex,
-	vector<vector<double> > &Volratio)=0;
-
-/*!
-	\brief Refine cells by splitting them
-	\param ToRefine The indexes of the cells to refine. SHOULDN'T be near periodic boundary
-	\param directions Vector between the two new points
-	\param alpha How close (in cell radius) to place the new mesh point
-*/
-virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
-	directions,double alpha)=0;
-
 	/*!
 	\brief Returns the indeces of the points that where sent to other processors as ghost points
 	\return The sent points
@@ -197,7 +179,7 @@ virtual void RefineCells(vector<int> const& ToRefine,vector<Vector2D> const&
   \brief Returns the indeces of the points that remain with the processor after the ne processor mesh is built
   \return The indeces of the points
   */
-  virtual vector<int> GetSelfPoint(void)const=0;
+  virtual vector<size_t> GetSelfPoint(void)const=0;
 
   /*!
   \brief Returns the indeces of each ghost point in the vector of points that the tessellation holds

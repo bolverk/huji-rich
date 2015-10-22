@@ -75,16 +75,6 @@ private:
 
 public:
 
-  /*! \brief Refines cells
-    \param ToRefine List of cell indices to refine
-   */
-	void RefineCells(vector<size_t> const& ToRefine);
-
-  /*! \brief Removes cells
-    \param ToRemove List of cell indices to remove
-   */
-	void RemoveCells(vector<size_t> &ToRemove);
-
   /*! \brief Returns a list of all computational cells
     \return List of all computational cells
    */
@@ -111,6 +101,11 @@ public:
     \return The tessellation
   */
   const Tessellation& getTessellation(void) const;
+
+  /*! \brief Returns the tessellation
+  \return The tessellation
+  */
+  Tessellation& getTessellation(void);
 
    /*! \brief Returns the processor tessellation
     \return The tessellation
