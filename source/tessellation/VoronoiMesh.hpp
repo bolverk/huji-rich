@@ -22,6 +22,7 @@
 #include "../misc/int2str.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
+#include <boost/mpi/communicator.hpp>
 #endif
 
 using std::string;
@@ -213,7 +214,7 @@ public:
 
   vector<vector<int> >const& GetGhostIndeces(void)const;
 
-  vector<int> GetSelfPoint(void)const;
+  vector<size_t> GetSelfPoint(void)const;
 
   int GetTotalPointNumber(void)const;
   
@@ -234,7 +235,7 @@ private:
 	vector<vector<int> > GhostPoints;
 	vector<int> SentProcs;
 	vector<vector<int> > SentPoints;
-	vector<int> selfindex;
+	vector<size_t> selfindex;
 	vector<vector<int> > NGhostReceived;
 	vector<vector<int> > OrgCorner;
 	int Nextra;

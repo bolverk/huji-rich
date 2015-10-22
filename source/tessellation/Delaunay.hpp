@@ -35,18 +35,16 @@ private:
 #ifdef RICH_MPI
   int findSomeOuterPoint(void);
 
-  pair<vector<vector<int> >, vector<vector<int> > > 
-  findOuterPoints
-  (const Tessellation& t_proc,
-   const vector<Edge>& edge_list,
-   const vector<Edge>& box_edges);
+  pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
+	  const vector<Edge>& edge_list,const vector<Edge>& box_edges,vector<vector<int> > &NghostIndex);
 
-  vector<vector<int> > findOuterPoints2
+  pair<vector<vector<int> >, vector<int> > FindOuterPoints2
   (const Tessellation& t_proc,
    const vector<Edge>& edge_list,
-   vector<vector<int> >& to_duplicate,
-   const vector<vector<int> >& self_points,
-   const vector<Edge>& box_edges);
+   vector<vector<int> > &to_duplicate,
+   vector<vector<int> >& self_points,
+   const vector<Edge>& box_edges,
+	  vector<vector<int> > &NghostIndex);
 
   vector<vector<int> > boundary_intersection_check
   (const vector<Edge>& edges,
@@ -286,11 +284,11 @@ public:
   \param obc The geometrical boundary conditions
   \param tproc The tessellation of the processors
   \param Nghost The indeces of the ghost cells (order by cpu) in the cor vector. Given as output.
-  \param proclist The list of cpus to talk with. Given as output.
-  \return The indeces of the boundary points sent to each cpu
+  \param SelfSend The indeces of the ghost cells that are with respect to the entrie domain so are sent to self. Given as output.
+  \return The indeces of the boundary points sent to each cpu and the list of cpus to talk with.
   */
-  vector<vector<int> > BuildBoundary(OuterBoundary const* obc,Tessellation const& tproc,
-	  vector<vector<int> > &Nghost,vector<int> &proclist);
+  pair<vector<vector<int> >,vector<int> > BuildBoundary(OuterBoundary const* obc,Tessellation const& tproc,
+	  vector<vector<int> > &Nghost,vector<vector<int> > & SelfSend);
   /*!
   \brief Adds the points to the tessellation, used for boundary points
   \param points The points to add
