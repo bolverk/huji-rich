@@ -20,10 +20,11 @@ public:
 	\brief Calculates the ghost points
 	\param tess The tessellation
 	\param cells The computational cells
+	\param time The time
 	\return A map where the key is the index of the ghost cell and the value is its' comuptational cell
 	*/
   virtual boost::container::flat_map<size_t,ComputationalCell> operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells) const = 0;
+		const vector<ComputationalCell>& cells,double time) const = 0;
 
 	/*!
 	\brief Calculates the gradients for the ghost cells
@@ -31,11 +32,12 @@ public:
 	\param cells The computational cells
 	\param gradients The gradients for the non-ghost cells
 	\param ghost_index The index of the ghost cell
+	\param time The time
 	\return The gradient of the ghost cell
 	*/
 	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
 		const vector<ComputationalCell>& cells,const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-		size_t ghost_index) const = 0;
+		size_t ghost_index,double time) const = 0;
 
 	/*!
 	\brief Returns the velocity of a ghost mesh point, default is for stationary walls

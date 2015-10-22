@@ -414,11 +414,11 @@ LinearGaussImproved::LinearGaussImproved
   flat_tracers_(flat_tracers) {}
 
 vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells,double time) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	// Get ghost points
-	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells);
+	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells,time);
 	// Prepare slopes
 	rslopes_.resize(CellNumber);
 	naive_rslopes_.resize(CellNumber);
@@ -440,7 +440,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		{
 		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
-				edge.neighbors.first)),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+				edge.neighbors.first),time),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
 			cell_temp.second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
@@ -451,7 +451,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		    (ghost_cells,
 		     static_cast<size_t>(edge.neighbors.second));
 			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-				edge.neighbors.second)), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+				edge.neighbors.second),time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
 		res[i] = cell_temp;
 	}
@@ -459,7 +459,13 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 }
 
 
-vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::GetSlopes(void)const
+vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopes(void)const
 {
 	return rslopes_;
 }
+
+vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopesUnlimited(void)const
+{
+	return naive_rslopes_;
+}
+

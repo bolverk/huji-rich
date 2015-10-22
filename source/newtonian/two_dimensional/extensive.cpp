@@ -7,6 +7,16 @@ Extensive::Extensive(void):
   momentum(0,0),
   tracers() {}
 
+Extensive::Extensive(boost::container::flat_map<std::string, double> const& Tracers):mass(0),
+energy(0),
+momentum(0, 0),
+tracers() 
+{
+	for (boost::container::flat_map<std::string, double>::const_iterator it = Tracers.begin();
+		it != Tracers.end(); ++it)
+		tracers[it->first] = 0;
+}
+
 Extensive& Extensive::operator-=(const Extensive& diff)
 {
   mass -= diff.mass;

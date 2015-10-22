@@ -13,7 +13,8 @@ int get_other_index(const Edge& edge, const int index)
     throw UniversalError("Something went wrong in Hydrodynamics2D::get_other_index");
 }
 
-namespace {
+namespace 
+{
   Vector2D calc_representing_point(Tessellation const& tess,
 				   int index,
 				   bool cm_flag)

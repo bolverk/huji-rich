@@ -1,7 +1,7 @@
 #include "FreeFlowGhostGenerator.hpp"
 
 boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	vector<std::pair<size_t, size_t> > outer_edges=GetOuterEdgesIndeces(tess);
 	boost::container::flat_map<size_t, ComputationalCell> res;
@@ -17,7 +17,7 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 
 std::pair<ComputationalCell, ComputationalCell> FreeFlowGenerator::GetGhostGradient(Tessellation const& tess,
 	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-	size_t ghost_index)const
+	size_t ghost_index, double /*time*/)const
 {
 	return gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
 }
