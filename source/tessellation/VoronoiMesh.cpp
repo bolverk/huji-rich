@@ -1555,7 +1555,7 @@ void VoronoiMesh::Update
 		{
 			Vector2D const& ghost = Tri.get_point(i);
 			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
-				(ghost.x < obc->GetGridBoundary(Down)) * 3;
+				(ghost.y < obc->GetGridBoundary(Down)) * 3;
 			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
 		}
 	}
@@ -1624,7 +1624,7 @@ void VoronoiMesh::Initialise
 		{
 			Vector2D const& ghost = Tri.get_point(i);
 			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
-				(ghost.x < obc->GetGridBoundary(Down))*3;
+				(ghost.y < obc->GetGridBoundary(Down))*3;
 			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
 		}
 	}
