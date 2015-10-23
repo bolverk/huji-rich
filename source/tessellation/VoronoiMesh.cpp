@@ -420,7 +420,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 	else
 	{
 #ifdef RICH_MPI
-		return point;
+		return Tri.GetOrgIndex(point);
 #else
 		int counter=0;
 		if(point<Nextra)
@@ -1511,7 +1511,68 @@ void VoronoiMesh::Update
 (const vector<Vector2D>& points,
  const Tessellation& vproc)
 {
-  throw;
+
+	boost::mpi::communicator world;
+	NGhostReceived.clear();
+	const int rank = world.rank();
+	vector<int> cedges;
+	ConvexEdges(cedges, vproc, rank);
+	cell_edges.clear();
+	for (size_t i = 0; i<cedges.size(); ++i)
+		cell_edges.push_back(vproc.GetEdge(cedges[i]));
+
+	// Get the convex hull of the cell
+	vector<Vector2D> cpoints;
+	ConvexHull(cpoints, vproc, rank);
+	//Build the delaunay
+	Tri.build_delaunay(points, cpoints);
+	eps = 1e-8;
+	edges.clear();
+	GhostPoints.clear();
+	GhostProcs.clear();
+	NGhostReceived.clear();
+	selfindex.resize(points.size());
+	size_t npoints = points.size();
+	for (size_t i = 0; i<npoints; ++i)
+		selfindex[i] = i;
+	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(obc, vproc, NGhostReceived);
+	GhostPoints = ptemp.first;
+	GhostProcs = ptemp.second;
+	build_v();
+
+	if (logger)
+		logger->output(*this);
+
+	size_t n = static_cast<size_t>(GetPointNo());
+	CM.resize(Tri.getCor().size());
+	for (size_t i = 0; i<n; ++i)
+		CM[i] = CalcCellCM(i);
+
+	// we only deal with rigid walls
+	for (size_t i = n + 3; i < CM.size(); ++i)
+	{
+		if (static_cast<size_t>(GetOriginalIndex(i)) < n)
+		{
+			Vector2D const& ghost = Tri.get_point(i);
+			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
+				(ghost.x < obc->GetGridBoundary(Down)) * 3;
+			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
+		}
+	}
+	// communicate the ghost CM
+	vector<boost::mpi::request> requests;
+	vector<vector<Vector2D> > incoming(GhostProcs.size());
+	for (size_t i = 0; i < GhostProcs.size(); ++i)
+	{
+		const int dest = GhostProcs.at(i);
+		requests.push_back(world.isend(dest, 0, VectorValues(CM, GhostPoints[i])));
+		requests.push_back(world.irecv(dest, 0, incoming[i]));
+	}
+	boost::mpi::wait_all(requests.begin(), requests.end());
+	// Add the recieved CM
+	for (size_t i = 0; i < incoming.size(); ++i)
+		for (size_t j = 0; j < incoming.at(i).size(); ++j)
+			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
 }
 
 void VoronoiMesh::Initialise
@@ -1543,8 +1604,7 @@ void VoronoiMesh::Initialise
 	size_t npoints = points.size();
 	for (size_t i = 0; i<npoints; ++i)
 		selfindex[i] = i;
-	vector<vector<int> > SelfSend;
-	pair<vector<vector<int> >,vector<int> > ptemp=Tri.BuildBoundary(outer, vproc, NGhostReceived,SelfSend);
+	pair<vector<vector<int> >,vector<int> > ptemp=Tri.BuildBoundary(outer, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
 	build_v();
@@ -1558,16 +1618,14 @@ void VoronoiMesh::Initialise
 		CM[i] = CalcCellCM(i);
 
 	// we only deal with rigid walls
-	for (size_t j = 0; j < 4; ++j)
-		std::sort(SelfSend[j].begin(), SelfSend[j].end());
-	for (size_t i = n; i < CM.size(); ++i)
+	for (size_t i = n+3; i < CM.size(); ++i)
 	{
-		for (size_t j = 0; j < 4; ++j)
+		if (static_cast<size_t>(GetOriginalIndex(i)) < n)
 		{
-			size_t index = static_cast<size_t>(std::lower_bound(SelfSend.at(j).begin(), SelfSend.at(j).end(),
-				static_cast<int>(i)) - SelfSend.at(j).begin());
-			if(index<SelfSend.at(j).size())
-				CM[i] = GetReflection(*obc, j, CM[static_cast<size_t>(SelfSend[j][index])]);
+			Vector2D const& ghost = Tri.get_point(i);
+			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
+				(ghost.x < obc->GetGridBoundary(Down))*3;
+			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
 		}
 	}
 	// communicate the ghost CM

@@ -33,6 +33,8 @@ class Delaunay
 private:
 
 #ifdef RICH_MPI
+	vector<int> OrgIndex;
+
   int findSomeOuterPoint(void);
 
   pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
@@ -120,6 +122,9 @@ private:
 
 public:
 
+#ifdef RICH_MPI
+	int GetOrgIndex(int index)const;
+#endif
   /*! \brief Changes the cor olength
     \param n The new length;
   */
@@ -284,11 +289,10 @@ public:
   \param obc The geometrical boundary conditions
   \param tproc The tessellation of the processors
   \param Nghost The indeces of the ghost cells (order by cpu) in the cor vector. Given as output.
-  \param SelfSend The indeces of the ghost cells that are with respect to the entrie domain so are sent to self. Given as output.
   \return The indeces of the boundary points sent to each cpu and the list of cpus to talk with.
   */
   pair<vector<vector<int> >,vector<int> > BuildBoundary(OuterBoundary const* obc,Tessellation const& tproc,
-	  vector<vector<int> > &Nghost,vector<vector<int> > & SelfSend);
+	  vector<vector<int> > &Nghost);
   /*!
   \brief Adds the points to the tessellation, used for boundary points
   \param points The points to add

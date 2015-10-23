@@ -56,7 +56,11 @@ Delaunay::Delaunay(void) :
 	cor(vector<Vector2D>()),
 	length(0),
 	olength(0), location_pointer(0), last_loc(0),
-	logger(0) {}
+	logger(0)
+#ifdef RICH_MPI
+	,OrgIndex(vector<int>())
+#endif
+{}
 
 Delaunay::Delaunay(Delaunay const& other) :
 	lastFacet(other.lastFacet),
@@ -70,7 +74,11 @@ Delaunay::Delaunay(Delaunay const& other) :
 	olength(other.olength),
 	location_pointer(other.location_pointer),
 	last_loc(other.last_loc),
-	logger(other.logger) {}
+	logger(other.logger)
+#ifdef RICH_MPI
+	,OrgIndex(other.OrgIndex)
+#endif
+{}
 
 Delaunay::~Delaunay(void)
 {
@@ -1324,7 +1332,8 @@ Delaunay::findOuterPoints
 			checked,
 			t_proc,
 			box_edges);
-	BOOST_FOREACH(vector<int>& line, to_duplicate) {
+	BOOST_FOREACH(vector<int>& line, to_duplicate) 
+	{
 		sort(line.begin(), line.end());
 		line = unique(line);
 	}
@@ -1333,7 +1342,8 @@ Delaunay::findOuterPoints
 	vector<boost::mpi::request> requests;
 	vector<vector<Vector2D> > incoming
 		(neighbors_own_edges.size());
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i) {
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i) 
+	{
 		const int dest = neighbors_own_edges.at(i);
 		requests.push_back
 			(world.isend
@@ -1343,9 +1353,7 @@ Delaunay::findOuterPoints
 			(world.irecv
 				(dest, 0, incoming[i]));
 	}
-	boost::mpi::wait_all
-		(requests.begin(),
-			requests.end());
+	boost::mpi::wait_all(requests.begin(),requests.end());
 
 	// Incorporate points recieved into triangulation
 	BOOST_FOREACH(vector<int> &line, self_points)
@@ -1354,12 +1362,19 @@ Delaunay::findOuterPoints
 		line = unique(line);
 	}
 	AddRigid(box_edges,self_points);
+	for (size_t i = 0; i < self_points.size(); ++i)
+		for (size_t j = 0; j < self_points[i].size(); ++j)
+			OrgIndex.push_back(self_points[i][j]);
 
+	NghostIndex.clear();
 	NghostIndex.resize(incoming.size());
 	for (size_t i = 0; i < incoming.size(); ++i)
 	{
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
+		{
+			OrgIndex.push_back(static_cast<int>(cor.size() + j));
 			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
+		}
 		AddBoundaryPoints(incoming.at(i));
 	}
 
@@ -1415,6 +1430,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		(box_edges.size());
 	for (size_t i = 0; i < boundary_points.size(); ++i)
 	{
+		sort(self_points.at(i).begin(), self_points.at(i).end());
 		BOOST_FOREACH(int bp, boundary_points.at(i))
 		{
 			if (!binary_search(self_points.at(i).begin(),
@@ -1516,11 +1532,18 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	for (size_t i = 0; i < incoming.size(); ++i)
 	{
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
+		{
 			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
+			OrgIndex.push_back(static_cast<int>(cor.size() + j));
+		}
 		AddBoundaryPoints(incoming.at(i));
 	}
 
 	AddRigid(box_edges,real_boundary_points);
+	for (size_t i = 0; i < real_boundary_points.size(); ++i)
+		for (size_t j = 0; j < real_boundary_points[i].size(); ++j)
+			OrgIndex.push_back(real_boundary_points[i][j]);
+
 	for (size_t i = 0; i < self_points.size(); ++i)
 		if (!real_boundary_points[i].empty())
 			self_points[i].insert(self_points[i].end(), real_boundary_points[i].begin(),
@@ -1532,8 +1555,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 (OuterBoundary const* obc,
 	Tessellation const& tproc,
-	vector<vector<int> >& Nghost,
-	vector<vector<int> > & SelfSend)
+	vector<vector<int> >& Nghost)
 {
 	const boost::mpi::communicator world;
 	vector<Edge> edges;
@@ -1543,7 +1565,15 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	vector<Edge> box_edges = obc->GetBoxEdges();
 	pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
 		findOuterPoints(tproc, edges, box_edges, Nghost);
-	SelfSend = to_duplicate.second;
-	return FindOuterPoints2(tproc,edges,to_duplicate.first,SelfSend,box_edges, Nghost);
+	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);
 }
+
+int Delaunay::GetOrgIndex(int index)const
+{
+	if (index < olength)
+		return static_cast<int>(olength);
+	else
+		return OrgIndex.at(index - 3 - static_cast<int>(olength));
+}
+
 #endif // RICH_MPI
