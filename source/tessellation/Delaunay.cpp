@@ -1244,7 +1244,24 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	stack<int> tocheck = initialise_tocheck
 		(FindContainingTetras
 			(static_cast<int>(Walk(static_cast<size_t>(point))), point));
-
+	if (recursive)
+	{
+		vector<int> allouter;
+		for (size_t i = 0; i < toduplicate.size(); ++i)
+		{
+			for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			{
+				vector<int> temp = FindContainingTetras
+					(static_cast<int>(Walk(static_cast<size_t>(toduplicate[i][j]))), toduplicate[i][j]);
+				for (size_t k = 0; k < temp.size(); ++k)
+					allouter.push_back(temp[k]);
+			}
+		}
+		sort(allouter.begin(), allouter.end());
+		allouter = unique(allouter);
+		for (size_t i = 0; i < allouter.size(); ++i)
+			tocheck.push(allouter[i]);
+	}
 	while (!tocheck.empty())
 	{
 		int cur_facet = tocheck.top();
