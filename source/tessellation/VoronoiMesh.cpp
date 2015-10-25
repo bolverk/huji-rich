@@ -1551,12 +1551,12 @@ void VoronoiMesh::Update
 	// we only deal with rigid walls
 	for (size_t i = n + 3; i < CM.size(); ++i)
 	{
-		if (static_cast<size_t>(GetOriginalIndex(i)) < n)
+		if (static_cast<size_t>(GetOriginalIndex(static_cast<int>(i))) < n)
 		{
 			Vector2D const& ghost = Tri.get_point(i);
 			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
 				(ghost.y < obc->GetGridBoundary(Down)) * 3;
-			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
+			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(static_cast<int>(i)))]);
 		}
 	}
 	// communicate the ghost CM
@@ -1620,12 +1620,12 @@ void VoronoiMesh::Initialise
 	// we only deal with rigid walls
 	for (size_t i = n+3; i < CM.size(); ++i)
 	{
-		if (static_cast<size_t>(GetOriginalIndex(i)) < n)
+		if (static_cast<size_t>(GetOriginalIndex(static_cast<int>(i))) < n)
 		{
 			Vector2D const& ghost = Tri.get_point(i);
 			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
 				(ghost.y < obc->GetGridBoundary(Down))*3;
-			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(i))]);
+			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(static_cast<int>(i)))]);
 		}
 	}
 	// communicate the ghost CM

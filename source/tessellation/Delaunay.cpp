@@ -1252,6 +1252,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
+			int max_neigh = 0;
 			if (f[static_cast<size_t>(cur_facet)].vertices[i] >=
 				static_cast<int>(olength))
 				continue;
@@ -1272,12 +1273,18 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				cputosendto = unique(cputosendto);
 
 				RemoveVal(cputosendto, world.rank());
-				if (!recursive) {
+				if (!recursive) 
+				{
 					const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
 					if (!self_intersection.empty())
 						added = true;
 					BOOST_FOREACH(int sindex, self_intersection)
 						res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+				}
+				else
+				{
+					for (size_t jj = 0; jj < 3; ++jj)
+						max_neigh = max(max_neigh, f[static_cast<size_t>(neighs[k])].vertices[jj]);
 				}
 				if (!cputosendto.empty())
 				{
@@ -1297,11 +1304,11 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				}
 			}
 			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])] = true;
-			if (added)
+			if (added||(recursive&&static_cast<size_t>(max_neigh)>=olength))
 			{
 				for (size_t j = 0; j < neighs.size(); ++j)
 				{
-					if (!IsOuterFacet(neighs[j]))
+					//if (!IsOuterFacet(neighs[j]))
 						tocheck.push(neighs[j]);
 				}
 			}
@@ -1570,7 +1577,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 
 int Delaunay::GetOrgIndex(int index)const
 {
-	if (index < olength)
+	if (index < static_cast<int>(olength))
 		return static_cast<int>(olength);
 	else
 		return OrgIndex.at(index - 3 - static_cast<int>(olength));
