@@ -5,6 +5,7 @@
 #ifdef RICH_MPI
 #include <boost/mpi/nonblocking.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/mpi/collectives.hpp>
 #endif
 
 using std::abs;
@@ -1643,4 +1644,145 @@ void VoronoiMesh::Initialise
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
 }
+
+
+vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int rank,
+	vector<Vector2D> const& points, OuterBoundary const* obc, vector<int> &selfindex,
+	vector<int> &sentproc, vector<vector<int> > &sentpoints)
+{
+	vector<Vector2D> res;
+	res.reserve(points.size());
+	selfindex.clear();
+	size_t npoints = points.size();
+	size_t nproc = static_cast<size_t>(vproc.GetPointNo());
+	const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
+	const double dy = obc->GetGridBoundary(Up) - obc->GetGridBoundary(Down);
+	vector<Vector2D> cproc;
+	ConvexHull(cproc, vproc, rank);
+	vector<int> neighbors = vproc.GetNeighbors(rank);
+	vector<int> realneigh;
+	vector<vector<Vector2D> > neigh_chull;
+	for (size_t i = 0; i < neighbors.size(); ++i)
+		if (static_cast<size_t>(neighbors[i]) < nproc)
+		{
+			realneigh.push_back(neighbors[i]);
+			vector<Vector2D> temp;
+			ConvexHull(temp, vproc, neighbors[i]);
+			neigh_chull.push_back(temp);
+		}
+	sentpoints.clear();
+	sentproc.clear();
+	sentpoints.resize(neigh_chull.size());
+	sentproc.resize(neigh_chull.size());
+
+	for (size_t i = 0; i<npoints; ++i)
+	{
+		Vector2D temp=points[i];
+		if (obc->GetBoundaryType() == Periodic)
+		{
+			if (temp.x>obc->GetGridBoundary(Right))
+				temp.x -= dx;
+			if (temp.x<obc->GetGridBoundary(Left))
+				temp.x += dx;
+			if (temp.y>obc->GetGridBoundary(Up))
+				temp.y -= dy;
+			if (temp.y<obc->GetGridBoundary(Down))
+				temp.y += dy;
+		}
+		if (obc->GetBoundaryType() == HalfPeriodic)
+		{
+			if (temp.x>obc->GetGridBoundary(Right))
+				temp.x -= dx;
+			if (temp.x<obc->GetGridBoundary(Left))
+				temp.x += dx;
+		}
+		if (PointInCell(cproc, temp))
+		{
+			res.push_back(temp);
+			selfindex.push_back(static_cast<int>(i));
+			continue;
+		}
+		bool good = false;
+		for (size_t j = 0; j<neigh_chull.size(); ++j)
+		{
+			if (PointInCell(neigh_chull[j], temp))
+			{
+				sentpoints[j].push_back(static_cast<int>(i));
+				good = true;
+				break;
+			}
+		}
+		if (good)
+			continue;
+		for (size_t j = 0; j<nproc; ++j)
+		{
+			if (std::find(realneigh.begin(), realneigh.end(), j) == realneigh.end() || j == static_cast<size_t>(rank))
+				continue;
+			vector<Vector2D> cellpoints;
+			ConvexHull(cellpoints, vproc, static_cast<int>(j));
+			if (PointInCell(cellpoints, temp))
+			{
+				good = true;
+				size_t index = std::find(sentproc.begin(), sentproc.end(), j) - sentproc.begin();
+				if (index >= sentproc.size())
+				{
+					sentproc.push_back(static_cast<int>(j));
+					sentpoints.push_back(vector<int>(1, static_cast<int>(i)));
+				}
+				else
+					sentpoints[index].push_back(static_cast<int>(i));
+				break;
+			}
+		}
+		if (good)
+			continue;
+		HDF5Logger log("verror" + int2str(rank) + ".h5");
+		log.output(vproc);
+		UniversalError eo("Point is not inside any processor");
+		eo.AddEntry("CPU rank", rank);
+		eo.AddEntry("Point number", static_cast<double>(i));
+		eo.AddEntry("Point x cor", points[i].x);
+		eo.AddEntry("Point y cor", points[i].y);
+		throw eo;
+	}
+	// Send/Recv the points
+	vector<vector<int> > correspondence_matrix;
+	vector<int> recvproc;
+	boost::mpi::communicator world;
+	boost::mpi::all_gather(world,sentproc,correspondence_matrix);
+	vector<size_t> indices;
+	for (size_t i = 0; i < correspondence_matrix.size(); ++i)
+	{
+		if (std::find(correspondence_matrix.at(i).begin(), correspondence_matrix.at(i).end(), rank) !=
+			correspondence_matrix.at(i).end())
+			recvproc.push_back(static_cast<int>(i));
+	}
+	for (size_t i = 0; i < recvproc.size(); ++i)
+	{
+		if (std::find(sentproc.begin(), sentproc.end(), recvproc[i]) == sentproc.end())
+		{
+			sentproc.push_back(recvproc[i]);
+			sentpoints.push_back(vector<int>());
+		}
+	}
+	// Point exchange
+	vector<boost::mpi::request> requests;
+	vector<vector<Vector2D> > incoming(sentproc.size());
+	for (size_t i = 0; i < sentproc.size(); ++i)
+	{
+		const int dest = sentproc.at(i);
+		requests.push_back(world.irecv(dest, 0, incoming[i]));
+		requests.push_back(world.isend(dest, 0, VectorValues(points, sentpoints.at(i))));
+	}
+	wait_all(requests.begin(), requests.end());
+
+	// Combine the vectors
+	for (size_t i = 0; i < incoming.size(); ++i)
+		for (size_t j = 0; j < incoming[j].size(); ++j)
+			res.push_back(incoming[i][j]);
+	return res;
+}
+
+
+
 #endif 

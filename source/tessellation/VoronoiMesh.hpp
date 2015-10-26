@@ -269,6 +269,12 @@ private:
 	void SendRecvRemove(vector<int> const& procorder,vector<int> const&
 		proclist,vector<vector<int> > &data);
 	void GetNeighborNeighborsMPI(vector<int> &result,int point);
+#ifdef RICH_MPI
+	vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
+		vector<Vector2D> const& points, OuterBoundary const* obc, vector<int> &selfindex,
+		vector<int> &sentproc, vector<vector<int> > &sentpoints);
+#endif
+
 };
 /*! \brief Checks if a point is inside a Voronoi cell
 \param cpoints The points of the cell in convex order
