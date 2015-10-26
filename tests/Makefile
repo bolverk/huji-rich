@@ -27,6 +27,7 @@ else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
 	LINT_FLAGS :=
+	LFLAGS = -lclipper
 else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native

@@ -689,6 +689,9 @@ MPI_AMR_Send[j].push_back(SortIndex[j][index2]);
 }
 */
 
+#ifdef __clang__
+__attribute__((noreturn))
+#endif // __clang__
 void StaticVoronoiMesh::RemoveCells(vector<int> & /*ToRemove*/,
 				    vector<vector<int> >& /*VolIndex*/,
 				    vector<vector<double> >& /*Volratio*/)
@@ -726,6 +729,9 @@ int FixPeriodNeighbor(StaticVoronoiMesh &V,int other,int ToRefine,int /*NewIndex
 	return static_cast<int>(cor.size());
 }
 
+#ifdef __clang__
+__attribute__((noreturn))
+#endif // __clang__
 void StaticVoronoiMesh::RefineCells(vector<int> const& /*ToRefine*/,
 				    vector<Vector2D> const& /*directions*/,double /*alpha*/)
 {

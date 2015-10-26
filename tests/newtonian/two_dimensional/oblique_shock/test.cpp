@@ -288,7 +288,7 @@ namespace
 		ObliqueRemove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
 
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& /*cells*/, double /*time*/)const 
+			vector<ComputationalCell> const& cells, double /*time*/)const 
 		{
 			std::pair<vector<size_t>, vector<double> > res;
 			vector<double> merits;

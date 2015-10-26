@@ -53,14 +53,14 @@ namespace
 			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
 			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
-		int maxscale = (int)log10(maxi) + 9;
+		int maxscale = static_cast<int>(log10(maxi) + 9);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
 		for (size_t i = 0; i < poly0.size(); ++i)
-			subj[0][i] = IntPoint((cInt)(poly0[i].x*pow(10.0, 18 - maxscale)), (cInt)(poly0[i].y*pow(10.0, 18 - maxscale)));
+			subj[0][i] = IntPoint(static_cast<cInt>(poly0[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly0[i].y*pow(10.0, 18 - maxscale)));
 		for (size_t i = 0; i < poly1.size(); ++i)
-			clip[0][i] = IntPoint((cInt)(poly1[i].x*pow(10.0, 18 - maxscale)), (cInt)(poly1[i].y*pow(10.0, 18 - maxscale)));
+			clip[0][i] = IntPoint(static_cast<cInt>(poly1[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly1[i].y*pow(10.0, 18 - maxscale)));
 
 		//perform intersection ...
 		Clipper c;
@@ -143,16 +143,30 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	}
 }
 
-SimpleAMRCellUpdater ConservativeAMR::scu_ = SimpleAMRCellUpdater();
-SimpleAMRExtensiveUpdater ConservativeAMR::seu_ = SimpleAMRExtensiveUpdater();
+ConservativeAMR::ConservativeAMR
+(CellsToRefine const& refine,
+ CellsToRemove const& remove,
+ AMRCellUpdater* cu,
+ AMRExtensiveUpdater* eu):
+  refine_(refine),
+  remove_(remove), 
+  cu_(cu), 
+  eu_(eu)
+{
+  if(!cu){
+    assert(!eu);
+    cu_ = &scu_;
+    eu_ = &seu_;
+  }
+}
 
-
-ConservativeAMR::ConservativeAMR(CellsToRefine const& refine, CellsToRemove const& remove, AMRCellUpdater const& cu,
-	AMRExtensiveUpdater const& eu) :refine_(refine), remove_(remove), cu_(cu), eu_(eu){}
-
-void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
-	OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
-	vector<Extensive> &extensives,double time)const
+void ConservativeAMR::UpdateCellsRefine
+(Tessellation &tess,
+ OuterBoundary const& obc,
+ vector<ComputationalCell> &cells,
+ EquationOfState const& eos,
+ vector<Extensive> &extensives,
+ double time)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Find the primitive of each point and the new location
@@ -213,16 +227,16 @@ void ConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 			{
 				ConvexHull(temp, tess, static_cast<int>(N + location));
 				double v = AreaOverlap(temp, Chull[j]);
-				NewExtensive += eu_.ConvertPrimitveToExtensive(cells[real_neigh[j]], eos, v);
+				NewExtensive += eu_->ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 			}
-			cells.push_back(cu_.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine[i]]));
+			cells.push_back(cu_->ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine[i]]));
 			++location;
 		}
 	}
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -257,16 +271,16 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 		temp.clear();
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
-			size_t toadd = lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin();
+		  size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin());
 			if (neigh[j] < static_cast<int>(N))
 			{
-				ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
+			  ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
 			}
 			else
 			{
 				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
 				{
-					ConvexHull(temp, tess, static_cast<int>(neigh[j] - toadd));
+				  ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
 					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
 						oldtess->GetMeshPoint(oldtess->GetOriginalIndex(neigh[j])));
 				}
@@ -282,15 +296,18 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	RemoveVector(cells, ToRemove);
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_.ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
+		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
 }
 
-SimpleAMRCellUpdater NonConservativeAMR::scu_=SimpleAMRCellUpdater();
-SimpleAMRExtensiveUpdater NonConservativeAMR::seu_ = SimpleAMRExtensiveUpdater();
-
-
-NonConservativeAMR::NonConservativeAMR(CellsToRefine const& refine, CellsToRemove const& remove, AMRCellUpdater const& cu,
-	AMRExtensiveUpdater const& eu) :refine_(refine), remove_(remove),cu_(cu), eu_(eu){}
+NonConservativeAMR::NonConservativeAMR
+  (CellsToRefine const& refine,
+   CellsToRemove const& remove,
+   AMRExtensiveUpdater* eu):
+    refine_(refine), remove_(remove), eu_(eu)
+{
+  if(!eu)
+    eu_ = &seu_;
+}
 
 void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
@@ -316,7 +333,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + ToRefine.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -338,7 +355,7 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	// Recalcualte extensives
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
-		extensives[i] = eu_.ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMR::operator()(hdsim &sim)
@@ -386,13 +403,13 @@ candidates, Tessellation const& tess) const
 			{
 				if (binary_search(candidates.begin(), candidates.end(), neigh[j]))
 				{
-					if (merits[i]<merits[lower_bound(candidates.begin(),candidates.end(), neigh[j]) - candidates.begin()])
+				  if (merits[i]<merits[static_cast<size_t>(lower_bound(candidates.begin(),candidates.end(), neigh[j]) - candidates.begin())])
 					{
 						good = false;
 						break;
 					}
-					if (fabs(merits[i] - merits[lower_bound(candidates.begin(),candidates.end(), neigh[j]) 
-						- candidates.begin()])<1e-9)
+				  if (fabs(merits[i] - merits[static_cast<size_t>(lower_bound(candidates.begin(),candidates.end(), neigh[j]) 
+										  - candidates.begin())])<1e-9)
 					{
 						if (find(bad_neigh.begin(), bad_neigh.end(), neigh[j]) == bad_neigh.end())
 							bad_neigh.push_back(static_cast<size_t>(neigh[j]));

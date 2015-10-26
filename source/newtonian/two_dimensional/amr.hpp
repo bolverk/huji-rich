@@ -23,8 +23,10 @@ class AMRCellUpdater
 public:
 
 	/*! \brief Calculates the computational cell
-	\param intensive Intensive conserved variables (per volume)
+	\param extensive Extensive conserved variables
 	\param eos Equation of state
+	\param volume Cell volume
+	\param old_cell Old computational cell
 	\return Computational cell
 	*/
 	virtual ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive,const EquationOfState& eos,
@@ -40,9 +42,10 @@ class AMRExtensiveUpdater
 public:
 
 	/*! \brief Calculates the computational cell
-	\param intensive Intensive conserved variables (per volume)
+	\param cell Computational cell
 	\param eos Equation of state
-	\return Computational cell
+	\param volume Cell volume
+	\return Extensive
 	*/
 	virtual Extensive ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
 		double volume) const = 0;
@@ -105,11 +108,13 @@ public:
 class AMR : public Manipulate
 {
 protected:
-	void GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
-		vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
-		OuterBoundary const& obc)const;
+  void GetNewPoints
+  (vector<size_t> const& ToRefine,
+   Tessellation const& tess,
+   vector<std::pair<size_t, Vector2D> > &NewPoints, 
+   vector<Vector2D> &Moved,
+   OuterBoundary const& obc)const;
 public:
-
 	/*!
 	\brief Runs the AMR
 	\param sim The sim object
@@ -148,10 +153,10 @@ class ConservativeAMR : public AMR
 private:
 	CellsToRefine const& refine_;
 	CellsToRemove const& remove_;
-	static SimpleAMRCellUpdater scu_;
-	static SimpleAMRExtensiveUpdater seu_;
-	AMRCellUpdater const& cu_;
-	AMRExtensiveUpdater const& eu_;
+  SimpleAMRCellUpdater scu_;
+  SimpleAMRExtensiveUpdater seu_;
+	AMRCellUpdater* cu_;
+	AMRExtensiveUpdater* eu_;
 
 	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const&
 		candidates, Tessellation const& tess) const;
@@ -159,8 +164,11 @@ private:
 public:
 	void operator() (hdsim &sim);
 
-	ConservativeAMR(CellsToRefine const& refine, CellsToRemove const& remove, AMRCellUpdater const& cu = scu_,
-		AMRExtensiveUpdater const& eu = seu_);
+	ConservativeAMR
+	(CellsToRefine const& refine,
+	 CellsToRemove const& remove,
+	 AMRCellUpdater* cu=0,
+	 AMRExtensiveUpdater* eu=0);
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
@@ -176,16 +184,17 @@ class NonConservativeAMR : public AMR
 private:
 	CellsToRefine const& refine_;
 	CellsToRemove const& remove_;
-	static SimpleAMRCellUpdater scu_;
-	static SimpleAMRExtensiveUpdater seu_;
-	AMRCellUpdater const& cu_;
-	AMRExtensiveUpdater const& eu_;
+  SimpleAMRCellUpdater scu_;
+  SimpleAMRExtensiveUpdater seu_;
+	AMRExtensiveUpdater* eu_;
 
 public:
 	void operator() (hdsim &sim);
 
-	NonConservativeAMR(CellsToRefine const& refine, CellsToRemove const& remove, AMRCellUpdater const& cu = scu_,
-		AMRExtensiveUpdater const& eu = seu_);
+  NonConservativeAMR
+  (CellsToRefine const& refine,
+   CellsToRemove const& remove,
+   AMRExtensiveUpdater* eu = 0);
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
