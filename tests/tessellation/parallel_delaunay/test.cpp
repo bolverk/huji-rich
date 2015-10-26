@@ -96,12 +96,11 @@ int main(void)
      delineate_rectangle
      (obc.getBoundary()));
   vector<vector<int> > dummy_1;
-  vector<int> dummy_2;
+  //vector<int> dummy_2;
   tri.BuildBoundary
     (&obc,
      super,
-     dummy_1,
-     dummy_2);
+     dummy_1);
   WriteDelaunay(tri,string("part_"+int2str(world.rank())+".h5"));
   }
   catch(const UniversalError& eo){
