@@ -161,6 +161,10 @@ private:
 	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const&
 		candidates, Tessellation const& tess) const;
 
+	ConservativeAMR(ConservativeAMR const& other);
+
+	ConservativeAMR& operator=(ConservativeAMR const& other);
+
 public:
 	void operator() (hdsim &sim);
 
@@ -187,6 +191,10 @@ private:
   SimpleAMRCellUpdater scu_;
   SimpleAMRExtensiveUpdater seu_;
 	AMRExtensiveUpdater* eu_;
+
+	NonConservativeAMR(NonConservativeAMR const& other);
+
+	NonConservativeAMR& operator=(NonConservativeAMR const& other);
 
 public:
 	void operator() (hdsim &sim);

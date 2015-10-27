@@ -47,9 +47,6 @@ public:
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
 		const vector<ComputationalCell>& cells, const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
 		size_t ghost_index, double time) const;
-
-	Vector2D GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& cells,
-		vector<Vector2D> const& point_veolcities, size_t ghost_index, Edge const& edge)const;
 };
 
 #endif // SEVERAL_GHOST_GENERATOR_HPP

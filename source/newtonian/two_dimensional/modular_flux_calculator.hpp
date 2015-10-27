@@ -21,7 +21,7 @@ public:
   ModularFluxCalculator(GhostPointGenerator const& ghost,const SpatialReconstruction& sr,const RiemannSolver& rs,
 	  const HydroBoundaryConditions& hbc);
 
-  vector<Extensive> operator()(const Tessellation& tess,const vector<Vector2D>& point_velocities,
+  vector<Extensive> operator()(const Tessellation& tess,const vector<Vector2D>& edge_velocities,
 	  const vector<ComputationalCell>& cells,const vector<Extensive>& extensives,const CacheData& cd,
 	  const EquationOfState& eos,const double time,const double dt) const;
 

@@ -149,7 +149,9 @@ ConservativeAMR::ConservativeAMR
  AMRCellUpdater* cu,
  AMRExtensiveUpdater* eu):
   refine_(refine),
-  remove_(remove), 
+  remove_(remove),
+	scu_(),
+	seu_(),
   cu_(cu), 
   eu_(eu)
 {
@@ -303,7 +305,9 @@ NonConservativeAMR::NonConservativeAMR
   (CellsToRefine const& refine,
    CellsToRemove const& remove,
    AMRExtensiveUpdater* eu):
-    refine_(refine), remove_(remove), eu_(eu)
+    refine_(refine), remove_(remove), scu_(),
+	seu_(),
+	eu_(eu)
 {
   if(!eu)
     eu_ = &seu_;

@@ -1,5 +1,11 @@
 #include "LinearGaussImproved.hpp"
 #include "../../../misc/utils.hpp"
+#ifdef RICH_MPI
+#include <boost/mpi/communicator.hpp>
+#include <boost/serialization/utility.hpp>
+#endif //RICH_MPI
+
+typedef pair<ComputationalCell, ComputationalCell> Slope;
 
 namespace 
 {
@@ -413,6 +419,34 @@ LinearGaussImproved::LinearGaussImproved
   pressure_ratio_(delta_P),
   flat_tracers_(flat_tracers) {}
 
+#ifdef RICH_MPI
+namespace
+{
+	void exchange_ghost_slopes(Tessellation const& tess,vector<Slope > & slopes)
+	{
+		const boost::mpi::communicator world;
+		vector<boost::mpi::request> requests;
+		vector<int> const& proc = tess.GetDuplicatedProcs();
+		vector<vector<int> > const& tosend = tess.GetDuplicatedPoints();
+		vector<vector<Slope> > incoming(proc.size());
+		for (size_t i = 0; i < proc.size(); ++i)
+		{
+			const int dest = proc.at(i);
+			requests.push_back(world.isend(dest, 0, VectorValues(slopes, tosend[i])));
+			requests.push_back(world.irecv(dest, 0, incoming[i]));
+		}
+		boost::mpi::wait_all(requests.begin(), requests.end());
+		vector<vector<int> > const& ghost_indeces = tess.GetGhostIndeces();
+		slopes.resize(tess.GetTotalPointNumber());
+		for (size_t i = 0; i < proc.size(); ++i)
+		{
+			for (size_t j = 0; j < ghost_indeces.at(i).size(); ++j)
+				slopes[static_cast<size_t>(ghost_indeces[i][j])] = incoming.at(i).at(j);
+		}
+	}
+}
+#endif//RICH_MPI
+
 vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells,double time) const
 {
@@ -425,6 +459,10 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	for (size_t i = 0; i<CellNumber; ++i)
 	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
 		flat_tracers_,naive_rslopes_[i]);
+#ifdef RICH_MPI
+	// communicate ghost slopes
+	exchange_ghost_slopes(tess, rslopes_);
+#endif //RICH_MPI
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
