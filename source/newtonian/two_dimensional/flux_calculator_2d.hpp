@@ -22,7 +22,7 @@ public:
 
   /*! \brief Calculates fluxes
     \param tess Tessellation
-    \param point_velocities Velocities of the mesh generating points
+    \param edge_velocities Velocities of the mesh generating points
     \param cells Computational cells
     \param extensives Extensive variables in each cell
     \param cd Cached data
@@ -33,7 +33,7 @@ public:
    */
   virtual vector<Extensive> operator()
   (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
+   const vector<Vector2D>& edge_velocities,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& extensives,
    const CacheData& cd,
