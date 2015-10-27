@@ -19,6 +19,7 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -189,6 +190,7 @@ public:
      ),
     eos_(5./3.),
     point_motion_(),
+    sb_(),
     force_(),
     tsf_(0.3),
     fc_(rs_),
@@ -200,6 +202,7 @@ public:
 	 calc_init_cond(tess_),
 	 eos_,
 	 point_motion_,
+	 sb_,
 	 force_,
 	 tsf_,
 	 fc_,
@@ -221,6 +224,7 @@ private:
   VoronoiMesh tess_;
   const IdealGas eos_;
   Eulerian point_motion_;
+  const StationaryBox sb_;
   const ZeroForce force_;
   const SimpleCFL tsf_;
   const SimpleFluxCalculator fc_;
