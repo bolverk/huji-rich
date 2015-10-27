@@ -2,15 +2,18 @@
 
 ConstantPrimitiveGenerator::ConstantPrimitiveGenerator(ComputationalCell const& cell) : cell_(cell){}
 
-std::pair<ComputationalCell, ComputationalCell> ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& /*tess*/,
-	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
-	size_t /*ghost_index*/, double /*time*/)const
+std::pair<ComputationalCell, ComputationalCell> ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
+	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+	size_t ghost_index, double /*time*/)const
 {
-	return std::pair<ComputationalCell, ComputationalCell>();
+	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
+		return std::pair<ComputationalCell, ComputationalCell>();
+	else
+		return gradients[ghost_index];
 }
 
 boost::container::flat_map<size_t, ComputationalCell> ConstantPrimitiveGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/, double /*time*/) const
+	const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	vector<std::pair<size_t, size_t> > outer_edges = GetOuterEdgesIndeces(tess);
 	boost::container::flat_map<size_t, ComputationalCell> res;
@@ -18,7 +21,10 @@ boost::container::flat_map<size_t, ComputationalCell> ConstantPrimitiveGenerator
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(outer_edges[i].first));
 		size_t ghost_index = static_cast<size_t>(outer_edges[i].second == 1 ? edge.neighbors.first : edge.neighbors.second);
-		res[ghost_index] = cell_;
+		if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
+			res[ghost_index] = cell_;
+		else
+			res[ghost_index] = cells[ghost_index];
 	}
 	return res;
 }

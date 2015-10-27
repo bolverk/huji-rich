@@ -30,19 +30,9 @@ namespace
     return res;
   }
 
-  Vector2D GetFaceVelocity(Tessellation const& tess,Edge const& edge,vector<Vector2D> const& point_velocities,
-	  GhostPointGenerator const& ghost,vector<ComputationalCell> const& cells)
-  {
-	  Vector2D v0 = (edge.neighbors.first >= tess.GetPointNo()) ? ghost.GetGhostVelocity(tess, cells, point_velocities,
-		  static_cast<size_t> (edge.neighbors.first),edge) : point_velocities.at(static_cast<size_t>(edge.neighbors.first));
-	  Vector2D v1 = (edge.neighbors.second >= tess.GetPointNo()) ? ghost.GetGhostVelocity(tess, cells, point_velocities,
-		  static_cast<size_t> (edge.neighbors.second),edge) : point_velocities.at(static_cast<size_t>(edge.neighbors.second));
-	  return tess.CalcFaceVelocity(v0, v1, tess.GetCellCM(edge.neighbors.first), tess.GetCellCM(edge.neighbors.second),
-		  calc_centroid(edge));
-  }
-}
+ }
 
-vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,const vector<Vector2D>& point_velocities,
+vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,const vector<Vector2D>& edge_velocities,
 	const vector<ComputationalCell>& cells,const vector<Extensive>& /*extensives*/,const CacheData& /*cd*/,
 	const EquationOfState& eos,const double time,const double /*dt*/) const
 {
@@ -63,8 +53,7 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
       flags.at(i) = true;
       const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess,tess.getAllEdges().at(i));
       const Edge edge = tess.getAllEdges().at(i);
-      const double speed = ScalarProd(p_n.second, GetFaceVelocity(tess, edge, point_velocities,ghost_,cells))
-		  / abs(p_n.second);
+      const double speed = ScalarProd(p_n.second, edge_velocities.at(i)) / abs(p_n.second);
       const Primitive p_left = 
 	convert_to_primitive
 	(interpolated.at(i).first, eos);

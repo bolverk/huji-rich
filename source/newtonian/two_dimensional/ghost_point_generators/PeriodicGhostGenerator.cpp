@@ -23,8 +23,3 @@ std::pair<ComputationalCell, ComputationalCell> PeriodicGhostGenerator::GetGhost
 	return gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
 }
 
-Vector2D PeriodicGhostGenerator::GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& /*cells*/,
-	vector<Vector2D> const& point_veolcities, size_t ghost_index, Edge const& /*edge*/)const
-{
-  return point_veolcities[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
-}

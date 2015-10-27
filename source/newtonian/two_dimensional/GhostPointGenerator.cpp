@@ -47,11 +47,3 @@ namespace
 	}
 }
 
-Vector2D GhostPointGenerator::GetGhostVelocity(const Tessellation& tess, const vector<ComputationalCell>& /*cells*/,
-	vector<Vector2D> const& point_veolcities, size_t ghost_index,Edge const& edge)const
-{
-
-	return ReverseNormalVelocity(point_veolcities[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))],
-		edge, ghost_index, tess);
-		
-}

@@ -8,9 +8,13 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 	for (size_t i = 0; i < outer_edges.size(); ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(outer_edges[i].first));
-		int real_cell = outer_edges[i].second == 1 ? edge.neighbors.second : edge.neighbors.first;
 		size_t ghost_index = static_cast<size_t>(outer_edges[i].second == 1 ? edge.neighbors.first : edge.neighbors.second);
-		res[ghost_index] = cells[static_cast<size_t>(real_cell)];
+		if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
+		{
+			int real_cell = outer_edges[i].second == 1 ? edge.neighbors.second : edge.neighbors.first;
+			res[ghost_index] = cells[static_cast<size_t>(real_cell)];
+		}
+		res[ghost_index] = cells[ghost_index];
 	}
 	return res;
 }
