@@ -2,8 +2,11 @@
 #include "simple_flux_calculator.hpp"
 #include "../../misc/utils.hpp"
 
-ModularFluxCalculator::ModularFluxCalculator(GhostPointGenerator const& ghost,const SpatialReconstruction& sr,
-	const RiemannSolver& rs, const HydroBoundaryConditions& hbc) :ghost_(ghost),sr_(sr), rs_(rs), hbc_(hbc) {}
+ModularFluxCalculator::ModularFluxCalculator
+(const SpatialReconstruction& sr,
+ const RiemannSolver& rs,
+ const HydroBoundaryConditions& hbc):
+  sr_(sr), rs_(rs), hbc_(hbc) {}
 
 namespace
 {

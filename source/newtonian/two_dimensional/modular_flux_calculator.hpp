@@ -13,20 +13,20 @@ class ModularFluxCalculator: public FluxCalculator
 public:
 
   /*! \brief Class constructor
-  \param ghost The ghost point generator
     \param sr Interpolation
     \param rs Riemann solver
     \param hbc Hydrodynamic boundary conditions
    */
-  ModularFluxCalculator(GhostPointGenerator const& ghost,const SpatialReconstruction& sr,const RiemannSolver& rs,
-	  const HydroBoundaryConditions& hbc);
+  ModularFluxCalculator
+  (const SpatialReconstruction& sr,
+   const RiemannSolver& rs,
+   const HydroBoundaryConditions& hbc);
 
   vector<Extensive> operator()(const Tessellation& tess,const vector<Vector2D>& edge_velocities,
 	  const vector<ComputationalCell>& cells,const vector<Extensive>& extensives,const CacheData& cd,
 	  const EquationOfState& eos,const double time,const double dt) const;
 
 private:
-	const GhostPointGenerator& ghost_;
 	const SpatialReconstruction& sr_;
 	const RiemannSolver& rs_;
 	const HydroBoundaryConditions& hbc_;

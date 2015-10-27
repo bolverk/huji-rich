@@ -31,19 +31,3 @@ vector<std::pair<size_t, size_t> > GhostPointGenerator::GetOuterEdgesIndeces(Tes
 	return res;
 }
 
-namespace
-{
-	Vector2D ReverseNormalVelocity(Vector2D const& point, Edge const& edge, size_t index, Tessellation const& tess)
-	{
-		Vector2D normal;
-		Vector2D res(point);
-		if (index == static_cast<size_t>(edge.neighbors.first))
-			normal = tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second);
-		else
-			normal = tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
-		normal = normal / abs(normal);
-		res -= 2 * ScalarProd(point, normal)*normal;
-		return res;
-	}
-}
-

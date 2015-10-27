@@ -70,7 +70,7 @@ namespace {
       force_(),
       tsf_(0.3),
       hbc_(),
-      fc_(gpg_,sr_,rs_,hbc_),
+      fc_(sr_,rs_,hbc_),
       eu_(),
       sim_(tess_,
 	   outer_,
