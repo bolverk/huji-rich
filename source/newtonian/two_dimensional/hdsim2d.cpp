@@ -60,58 +60,105 @@ namespace
 
 hdsim::hdsim
 (Tessellation& tess,
-const OuterBoundary& obc,
-const PhysicalGeometry& pg,
-const vector<ComputationalCell>& cells,
-const EquationOfState& eos,
-const PointMotion& point_motion,
-const SourceTerm& source,
-const TimeStepFunction& tsf,
-const FluxCalculator& fc,
-const ExtensiveUpdater& eu,
-const CellUpdater& cu) :
-tess_(tess),
-obc_(obc),
-eos_(eos),
-cells_(cells),
-extensives_(init_extensives(tess,
-pg,
-cells,
-eos)),
-point_motion_(point_motion),
-source_(source),
-time_(0),
-cycle_(0),
-pg_(pg),
-tsf_(tsf),
-fc_(fc),
-eu_(eu),
-cu_(cu),
-cache_data_(tess, pg) {}
+ const OuterBoundary& obc,
+ const PhysicalGeometry& pg,
+ const vector<ComputationalCell>& cells,
+ const EquationOfState& eos,
+ const PointMotion& point_motion,
+ const EdgeVelocityCalculator& evc,
+ const SourceTerm& source,
+ const TimeStepFunction& tsf,
+ const FluxCalculator& fc,
+ const ExtensiveUpdater& eu,
+ const CellUpdater& cu) :
+  tess_(tess),
+  obc_(obc),
+  eos_(eos),
+  cells_(cells),
+  extensives_
+  (init_extensives
+   (tess,
+    pg,
+    cells,
+    eos)),
+  point_motion_(point_motion),
+  edge_velocity_calculator_(evc),
+  source_(source),
+  time_(0),
+  cycle_(0),
+  pg_(pg),
+  tsf_(tsf),
+  fc_(fc),
+  eu_(eu),
+  cu_(cu),
+  cache_data_(tess, pg) {}
 
 hdsim::~hdsim(void) {}
+
+namespace {
+
+#ifdef RICH_MPI
+  void exchange_point_velocities
+  (const Tessellation& tess,
+   vector<Vector2D>& point_velocities)
+  {
+    const boost::mpi::communicator world;
+    const vector<int>& correspondents = tess.GetDuplicatedProcs();
+    const vector<vector<int> >& duplicated_points =
+    tess.GetDuplicatedPoints();
+    vector<vector<Vector2D> > incoming(correspondents.size());
+    vector<boost::mpi::request> requests;
+    for(size_t i=0;i<correspondents.size();++i){
+      requests.push_back
+	(world.isend
+	 (correspondents[i],0,VectorValues
+	  (point_velocities,duplicated_points[i])));
+      requests.push_back
+	(world.irecv
+	 (correspondents[i],0,incoming[i]));
+  }
+    const vector<vector<int> >& ghost_indices =
+      tess.GetGhostIndeces();
+    boost::mpi::wait_all(requests.begin(),requests.end());
+    point_velocities.resize(tess.GetTotalPointNumber());
+    for(size_t i=0;i<incoming.size();++i){
+      for(size_t j=0;j<incoming.at(i).size();++j){
+	point_velocities.at(ghost_indices.at(i).at(j)) =
+	  incoming.at(i).at(j);
+      }
+    }
+  }
+#endif // RICH_MPI
+}
 
 void hdsim::TimeAdvance(void)
 {
 	vector<Vector2D> point_velocities =
 		point_motion_(tess_, cells_, time_);
 
+	vector<Vector2D> edge_velocities =
+	  edge_velocity_calculator_(tess_,point_velocities);
+
 	const double dt = tsf_(tess_,
 		cells_,
 		eos_,
-		point_velocities,
+		edge_velocities,
 		time_);
 
 	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
+	edge_velocities =
+	  edge_velocity_calculator_(tess_,point_velocities);
 
-	const vector<Extensive> fluxes = fc_(tess_,
-		point_velocities,
-		cells_,
-		extensives_,
-		cache_data_,
-		eos_,
-		time_,
-		dt);
+	const vector<Extensive> fluxes =
+	  fc_
+	  (tess_,
+	   edge_velocities,
+	   cells_,
+	   extensives_,
+	   cache_data_,
+	   eos_,
+	   time_,
+	   dt);
 
 
 	//  update_extensives(fluxes,

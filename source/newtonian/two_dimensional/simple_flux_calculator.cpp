@@ -78,11 +78,13 @@ namespace {
 
   RiemannProblemInput riemann_reduce
   (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
+   const vector<Vector2D>& edge_velocities,
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
-   const Edge& edge)
+   const size_t& edge_index)
   {
+    const Edge& edge = tess.getAllEdges().at
+      (edge_index);
     RiemannProblemInput res;
     res.p = Parallel(edge);
     const std::pair<bool,bool> flags = transform_pair
@@ -112,12 +114,8 @@ namespace {
       res.n = tess.GetMeshPoint(edge.neighbors.second) - 
 	tess.GetMeshPoint(edge.neighbors.first);
       res.velocity = ScalarProd
-	(res.n,tess.CalcFaceVelocity
-	 (point_velocities[left_index], 
-	  point_velocities[right_index],
-	  tess.GetCellCM(edge.neighbors.first), 
-	  tess.GetCellCM(edge.neighbors.second),
-	  calc_centroid(edge)))/abs(res.n);
+	(res.n,edge_velocities.at(edge_index))/
+	abs(res.n);
     }
     return res;
   }
@@ -163,23 +161,24 @@ Conserved rotate_solve_rotate_back
 
 Conserved SimpleFluxCalculator::calcHydroFlux
 (const Tessellation& tess,
- const vector<Vector2D>& point_velocities,
+ const vector<Vector2D>& edge_velocities,
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const size_t i) const
 {
-  const Edge& edge = tess.GetEdge(static_cast<int>(i));
-  RiemannProblemInput rpi = riemann_reduce(tess,
-					   point_velocities,
-					   cells,
-					   eos,
-					   edge);
-  return rotate_solve_rotate_back(rs_,
-				  rpi.left,
-				  rpi.right,
-				  rpi.velocity,
-				  rpi.n,
-				  rpi.p);
+  RiemannProblemInput rpi = riemann_reduce
+    (tess,
+     edge_velocities,
+     cells,
+     eos,
+     i);
+  return rotate_solve_rotate_back
+    (rs_,
+     rpi.left,
+     rpi.right,
+     rpi.velocity,
+     rpi.n,
+     rpi.p);
 }
 
 namespace {
@@ -206,7 +205,7 @@ namespace {
 
 vector<Extensive> SimpleFluxCalculator::operator()
 (const Tessellation& tess,
- const vector<Vector2D>& point_velocities,
+ const vector<Vector2D>& edge_velocities,
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& /*extensives_*/,
  const CacheData& /*cd*/,
@@ -217,7 +216,7 @@ vector<Extensive> SimpleFluxCalculator::operator()
   vector<Extensive> res(tess.getAllEdges().size());
   for(size_t i=0;i<tess.getAllEdges().size();++i){
     const Conserved hydro_flux = calcHydroFlux
-      (tess, point_velocities, cells, eos, i);
+      (tess, edge_velocities, cells, eos, i);
     res[i].mass = hydro_flux.Mass;
     res[i].momentum = hydro_flux.Momentum;
     res[i].energy = hydro_flux.Energy;

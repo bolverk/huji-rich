@@ -66,6 +66,7 @@ namespace {
       gpg_(),
       sr_(eos_,gpg_),
       point_motion_(bpm_,eos_),
+      sb_(),
       force_(),
       tsf_(0.3),
       hbc_(),
@@ -77,6 +78,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   point_motion_,
+	   sb_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -106,6 +108,7 @@ namespace {
     const RigidWallGenerator gpg_;
     const LinearGaussImproved sr_;
     RoundCells point_motion_;
+    const StationaryBox sb_;
     ZeroForce force_;
     const SimpleCFL tsf_;
     const IdleHBC hbc_;

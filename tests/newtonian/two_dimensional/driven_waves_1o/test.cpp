@@ -24,6 +24,7 @@
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
+#include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -87,6 +88,7 @@ namespace {
       pm_naive_(),
       rs_(),
       point_motion_(pm_naive_,eos_),
+      evc_(),
       acc_(1,0.001),
       force_(acc_),
       tsf_(0.3),
@@ -99,6 +101,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   point_motion_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -124,6 +127,7 @@ namespace {
     Lagrangian pm_naive_;
     const Hllc rs_;
     RoundCells point_motion_;
+    PeriodicEdgeVelocities evc_;
     PeriodicDriver acc_;
     ConservativeForce force_;
     const SimpleCFL tsf_;

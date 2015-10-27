@@ -32,6 +32,7 @@
 #include "cell_updater_2d.hpp"
 #include "extensive_updater.hpp"
 #include "cache_data.hpp"
+#include "edge_velocity_calculator.hpp"
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
@@ -49,6 +50,8 @@ private:
   vector<Extensive> extensives_;
 
   const PointMotion& point_motion_;
+
+  const EdgeVelocityCalculator& edge_velocity_calculator_;
 
   const SourceTerm& source_;
 
@@ -131,17 +134,19 @@ public:
     \param eu Extensive updater
     \param cu Cell updater
   */
-  hdsim(Tessellation& tess,
-	const OuterBoundary& obc,
-	const PhysicalGeometry& pg,
-	const vector<ComputationalCell>& init_cond,
-	const EquationOfState& eos,
-	const PointMotion& pointmotion,
-	const SourceTerm& external_force,
-	const TimeStepFunction& tsf,
-	const FluxCalculator& fc,
-	const ExtensiveUpdater& eu,
-	const CellUpdater& cu);
+  hdsim
+  (Tessellation& tess,
+   const OuterBoundary& obc,
+   const PhysicalGeometry& pg,
+   const vector<ComputationalCell>& init_cond,
+   const EquationOfState& eos,
+   const PointMotion& pointmotion,
+   const EdgeVelocityCalculator& evc,
+   const SourceTerm& external_force,
+   const TimeStepFunction& tsf,
+   const FluxCalculator& fc,
+   const ExtensiveUpdater& eu,
+   const CellUpdater& cu);
 
   /*! \brief Loads reset data into simulation
     \param checkpoint Reset dump

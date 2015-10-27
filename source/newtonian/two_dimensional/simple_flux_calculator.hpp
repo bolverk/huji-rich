@@ -45,7 +45,7 @@ public:
 
   vector<Extensive> operator()
   (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
+   const vector<Vector2D>& edge_velocities,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& extensives,
    const CacheData& cd,
@@ -57,7 +57,7 @@ private:
   const RiemannSolver& rs_;
 
   Conserved calcHydroFlux(const Tessellation& tess,
-			  const vector<Vector2D>& point_velocities,
+			  const vector<Vector2D>& edge_velocities,
 			  const vector<ComputationalCell>& cells,
 			  const EquationOfState& eos,
 			  const size_t i) const;
