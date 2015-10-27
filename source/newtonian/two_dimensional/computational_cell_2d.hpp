@@ -6,10 +6,15 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include <map>
 #include <boost/container/flat_map.hpp>
 #include <string>
 #include "../../tessellation/geometry.hpp"
+#ifdef RICH_MPI
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
+#include "flat_map_serial.hpp"
+#endif // RICH_MPI
+
 
 //! \brief Computational cell
 class ComputationalCell
@@ -54,6 +59,20 @@ public:
     \return Reference to self
    */
   	ComputationalCell& operator=(ComputationalCell const& other);
+
+#ifdef RICH_MPI
+	template<class Archive>
+	void serialize
+		(Archive& ar,
+			const unsigned int /*version*/)
+	{
+		ar & density;
+		ar & pressure;
+		ar & velocity;
+		ar & tracers;
+		ar & stickers;
+	}
+#endif // RICH_MPI
 };
 
 /*! \brief Term by term addition
