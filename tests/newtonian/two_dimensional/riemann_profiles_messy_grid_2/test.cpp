@@ -27,6 +27,7 @@
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/ghost_point_generators/RigidWallGenerator.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -65,6 +66,7 @@ namespace {
       gpg_(),
       sr_(eos_, gpg_),
       point_motion_(pm_naive_,eos_),
+      evc_(),
       force_(),
       tsf_(0.3),
       hbc_(),
@@ -76,6 +78,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   point_motion_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -99,6 +102,7 @@ namespace {
     const RigidWallGenerator gpg_;
     const LinearGaussImproved sr_;
     RoundCells point_motion_;
+    const StationaryBox evc_;
     ZeroForce force_;
     const SimpleCFL tsf_;
     const IdleHBC hbc_;

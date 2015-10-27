@@ -208,11 +208,25 @@ void hdsim::TimeAdvance2Heun(void)
 {
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
-	const double dt = tsf_(tess_, cells_, eos_, point_velocities, time_);
+	vector<Vector2D> edge_velocities =
+	  edge_velocity_calculator_(tess_,point_velocities);
+
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
 	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
+	edge_velocities =
+	  edge_velocity_calculator_(tess_,point_velocities);
 
-	const vector<Extensive> mid_fluxes = fc_(tess_, point_velocities, cells_, extensives_, cache_data_, eos_, time_, dt);
+	const vector<Extensive> mid_fluxes =
+	  fc_
+	  (tess_,
+	   edge_velocities,
+	   cells_,
+	   extensives_,
+	   cache_data_,
+	   eos_,
+	   time_,
+	   dt);
 
 	vector<Extensive> mid_extensives = extensives_;
 	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
@@ -234,7 +248,19 @@ void hdsim::TimeAdvance2Heun(void)
 
 	const vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
 
-	const vector<Extensive> fluxes = fc_(tess_, point_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
+	edge_velocities =
+	  edge_velocity_calculator_(tess_,point_velocities);
+
+	const vector<Extensive> fluxes =
+	  fc_
+	  (tess_,
+	   edge_velocities,
+	   mid_cells,
+	   mid_extensives,
+	   cache_data_,
+	   eos_,
+	   time_,
+	   dt);
 
 	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
 
