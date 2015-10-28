@@ -78,7 +78,9 @@ hdsim::hdsim
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
  const CellUpdater& cu) :
+#ifdef RICH_MPI
 	proctess_(proctess),
+#endif
   tess_(tess),
   obc_(obc),
   eos_(eos),
