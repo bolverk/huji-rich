@@ -36,7 +36,7 @@ public:
     /*! \brief Calculates flux
       \param edge Interface between cells
       \param tess Tessellation
-      \param point_velocities Point velocities
+      \param edge_velocities The edge velocities
       \param cells Computational cells
       \param eos Equation of state
       \param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
@@ -45,7 +45,7 @@ public:
     virtual Extensive operator()
     (const Edge& edge,
      const Tessellation& tess,
-     const vector<Vector2D>& point_velocities,
+     const Vector2D& edge_velocity,
      const vector<ComputationalCell>& cells,
      const EquationOfState& eos,
      const bool aux) const = 0;
@@ -63,7 +63,7 @@ public:
 
   vector<Extensive> operator()
   (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
+   const vector<Vector2D>& edge_velocities,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& extensives,
    const CacheData& cd,
@@ -86,12 +86,12 @@ public:
   RegularFlux(const RiemannSolver& rs);
 
   Extensive operator()
-  (const Edge& edge,
-   const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
-   const vector<ComputationalCell>& cells,
-   const EquationOfState& eos,
-   const bool aux) const;
+	  (const Edge& edge,
+	  const Tessellation& tess,
+	  const Vector2D& edge_velocity,
+	const vector<ComputationalCell>& cells,
+	const EquationOfState& eos,
+	const bool aux) const;
 
 private:
 
@@ -111,8 +111,8 @@ public:
   Extensive operator()
   (const Edge& edge,
    const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
-   const vector<ComputationalCell>& cells,
+	  const Vector2D& edge_velocity,
+	  const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const bool aux) const;
 
@@ -133,7 +133,7 @@ public:
   Extensive operator()
   (const Edge& edge,
    const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
+	  const Vector2D& edge_velocity,
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const bool aux) const;

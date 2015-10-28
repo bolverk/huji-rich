@@ -87,32 +87,35 @@ namespace {
       (edge_index);
     RiemannProblemInput res;
     res.p = Parallel(edge);
+	res.n = tess.GetMeshPoint(edge.neighbors.second) -
+		tess.GetMeshPoint(edge.neighbors.first);
     const std::pair<bool,bool> flags = transform_pair
       (edge.neighbors,CellIndexValidator(tess.GetPointNo()));
     assert(flags.first || flags.second);
-    if(!flags.first){
+    if(!flags.first)
+	{
       res.right = convert_to_primitive
 	(cells[static_cast<size_t>(edge.neighbors.second)],eos);
-      res.left = reflect(res.right,res.p);
-      res.n = remove_parallel_component
-	(tess.GetMeshPoint(edge.neighbors.second) - edge.vertices.first,
-	 res.p);
+	  if(tess.GetOriginalIndex(edge.neighbors.second)==tess.GetOriginalIndex(edge.neighbors.first))
+		res.left = reflect(res.right,res.p);
+	  else
+		  res.left = convert_to_primitive(cells[static_cast<size_t>(edge.neighbors.first)], eos);
     }
     else if(!flags.second){
       res.left = convert_to_primitive
 	(cells[static_cast<size_t>(edge.neighbors.first)],eos);
-      res.right = reflect(res.left,res.p);
-      res.n = remove_parallel_component
-	(edge.vertices.first - tess.GetMeshPoint(edge.neighbors.first),
-	 res.p);
+	  if (tess.GetOriginalIndex(edge.neighbors.second) == tess.GetOriginalIndex(edge.neighbors.first))
+		res.right = reflect(res.left,res.p);
+	  else
+		  res.right = convert_to_primitive
+		  (cells[static_cast<size_t>(edge.neighbors.second)], eos);
     }
     else{
       const size_t left_index = static_cast<size_t>(edge.neighbors.first);
       const size_t right_index = static_cast<size_t>(edge.neighbors.second);
       res.left = convert_to_primitive(cells[left_index],eos);
       res.right = convert_to_primitive(cells[right_index],eos);
-      res.n = tess.GetMeshPoint(edge.neighbors.second) - 
-	tess.GetMeshPoint(edge.neighbors.first);
+      
       res.velocity = ScalarProd
 	(res.n,edge_velocities.at(edge_index))/
 	abs(res.n);
@@ -190,13 +193,15 @@ namespace {
   {
     const Edge& edge = tess.GetEdge(static_cast<int>(i));
     if(hf.Mass>0 && 
-       edge.neighbors.first>0 &&
-       edge.neighbors.first < tess.GetPointNo())
+       edge.neighbors.first>=0 &&
+       (edge.neighbors.first < tess.GetPointNo() || tess.GetOriginalIndex(edge.neighbors.first)!=
+		   tess.GetOriginalIndex(edge.neighbors.second)))
       return hf.Mass*
 	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.first)].tracers,name);
     if(hf.Mass<0 &&
-       edge.neighbors.second>0 &&
-       edge.neighbors.second < tess.GetPointNo())
+       edge.neighbors.second>=0 &&
+       (edge.neighbors.second < tess.GetPointNo() || tess.GetOriginalIndex(edge.neighbors.first) !=
+		   tess.GetOriginalIndex(edge.neighbors.second)))
       return hf.Mass*
 	safe_retrieve(cells[static_cast<size_t>(edge.neighbors.second)].tracers,name);
     return 0;
