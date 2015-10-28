@@ -19,6 +19,7 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -97,6 +98,7 @@ namespace {
 		Vector2D(0.4,0.4)),
       eos_(5./3.),
       pm_(),
+      evc_(),
       rs_(),
       force_(pg_.getAxis()),
       tsf_(0.3),
@@ -109,6 +111,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   pm_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -131,6 +134,7 @@ namespace {
     const Triangle triangle_;
     IdealGas eos_;
     Lagrangian pm_;
+    const StationaryBox evc_;
     Hllc rs_;
     CylindricalComplementary force_;
     SimpleCFL tsf_;
