@@ -20,7 +20,7 @@ namespace{
      const Tessellation& tess,
      const vector<ComputationalCell>& cells,
      const EquationOfState& eos,
-     const vector<Vector2D>& point_velocities,
+     const Vector2D& edge_velocity,
      const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence)
   {
     for(size_t i=0;i<sequence.size();++i){
@@ -28,7 +28,7 @@ namespace{
 	(edge,tess,cells);
       if(flag_aux.first)
 	return (*sequence[i].second)
-	  (edge,tess,point_velocities,cells,eos,flag_aux.second);
+	  (edge,tess, edge_velocity,cells,eos,flag_aux.second);
     }
     throw "Error in ConditionActionSequence";
   }
@@ -36,7 +36,7 @@ namespace{
 
 vector<Extensive> ConditionActionSequence::operator()
 (const Tessellation& tess,
- const vector<Vector2D>& point_velocities,
+ const vector<Vector2D>& edge_velocities,
  const vector<ComputationalCell>& cells,
  const vector<Extensive>& /*extensives*/,
  const CacheData& /*cd*/,
@@ -51,7 +51,7 @@ vector<Extensive> ConditionActionSequence::operator()
        tess,
        cells,
        eos,
-       point_velocities,
+		  edge_velocities[i],
        sequence_);
   return res;
 }
@@ -82,13 +82,13 @@ namespace {
 Extensive RegularFlux::operator()
 (const Edge& edge,
  const Tessellation& tess,
- const vector<Vector2D>& point_velocities,
+	const Vector2D& edge_velocity,
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const bool /*aux*/) const
 {
-  assert(edge.neighbors.first>=0 && edge.neighbors.first<tess.GetPointNo());
-  assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) ==
+		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
   const Vector2D p = normalize
     (edge.vertices.second -
      edge.vertices.first);
@@ -96,14 +96,7 @@ Extensive RegularFlux::operator()
     (tess.GetMeshPoint(edge.neighbors.second)-
      tess.GetMeshPoint(edge.neighbors.first));
   const double v =
-    ScalarProd
-    (n,
-     tess.CalcFaceVelocity
-     (point_velocities[static_cast<size_t>(edge.neighbors.first)],
-      point_velocities[static_cast<size_t>(edge.neighbors.second)],
-      tess.GetCellCM(edge.neighbors.first),
-      tess.GetCellCM(edge.neighbors.second),
-      calc_centroid(edge)));
+    ScalarProd(n,edge_velocity);
   const Conserved c = rotate_solve_rotate_back
     (rs_,
      convert_to_primitive
@@ -144,7 +137,7 @@ namespace{
 Extensive RigidWallFlux::operator()
 (const Edge& edge,
  const Tessellation& tess,
- const vector<Vector2D>& /*point_velocities*/,
+	const Vector2D& /*edge_velocity*/,
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const bool aux) const
@@ -187,7 +180,7 @@ FreeFlowFlux::FreeFlowFlux(const RiemannSolver& rs):
 Extensive FreeFlowFlux::operator()
 (const Edge& edge,
  const Tessellation& tess,
- const vector<Vector2D>& /*point_velocities*/,
+	const Vector2D& /*edge_velocity*/,
  const vector<ComputationalCell>& cells,
  const EquationOfState& eos,
  const bool aux) const
@@ -247,8 +240,10 @@ pair<bool,bool> IsBulkEdge::operator()
   return pair<bool,bool>
     (edge.neighbors.first >= 0 &&
      edge.neighbors.second >= 0 &&
-     edge.neighbors.first < tess.GetPointNo() &&
-     edge.neighbors.second < tess.GetPointNo(),
+     ((edge.neighbors.first < tess.GetPointNo() &&
+		 edge.neighbors.second < tess.GetPointNo() ) || 
+		(tess.GetOriginalIndex(edge.neighbors.first)!=
+		 tess.GetOriginalIndex(edge.neighbors.second))),
      false);
 }
 
@@ -257,15 +252,10 @@ RegularSpecialEdge::RegularSpecialEdge(const string& sticker_name):
 
 pair<bool,bool> RegularSpecialEdge::operator()
 (const Edge& edge,
- const Tessellation& tess,
+ const Tessellation& /*tess*/,
  const vector<ComputationalCell>& cells) const
 {
-  if(edge.neighbors.first < 0 ||
-     edge.neighbors.second < 0 ||
-     edge.neighbors.first >= tess.GetPointNo() ||
-     edge.neighbors.second >= tess.GetPointNo())
-    return pair<bool,bool>(false,false);
-  if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers,sticker_name_)){
+   if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers,sticker_name_)){
     if(safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,sticker_name_))
       return pair<bool,bool>(false,false);
     return pair<bool,bool>(true,false);

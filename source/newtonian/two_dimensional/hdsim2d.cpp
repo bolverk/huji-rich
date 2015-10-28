@@ -2,6 +2,9 @@
 #include <algorithm>
 #include "hdsim2d.hpp"
 #include "hydrodynamics_2d.hpp"
+#ifdef RICH_MPI
+#include <boost/mpi/communicator.hpp>
+#endif //RICH_MPI
 
 using namespace std;
 
@@ -98,36 +101,60 @@ hdsim::~hdsim(void) {}
 namespace {
 
 #ifdef RICH_MPI
-  void exchange_point_velocities
-  (const Tessellation& tess,
-   vector<Vector2D>& point_velocities)
-  {
-    const boost::mpi::communicator world;
-    const vector<int>& correspondents = tess.GetDuplicatedProcs();
-    const vector<vector<int> >& duplicated_points =
-    tess.GetDuplicatedPoints();
-    vector<vector<Vector2D> > incoming(correspondents.size());
-    vector<boost::mpi::request> requests;
-    for(size_t i=0;i<correspondents.size();++i){
-      requests.push_back
-	(world.isend
-	 (correspondents[i],0,VectorValues
-	  (point_velocities,duplicated_points[i])));
-      requests.push_back
-	(world.irecv
-	 (correspondents[i],0,incoming[i]));
-  }
-    const vector<vector<int> >& ghost_indices =
-      tess.GetGhostIndeces();
-    boost::mpi::wait_all(requests.begin(),requests.end());
-    point_velocities.resize(tess.GetTotalPointNumber());
-    for(size_t i=0;i<incoming.size();++i){
-      for(size_t j=0;j<incoming.at(i).size();++j){
-	point_velocities.at(ghost_indices.at(i).at(j)) =
-	  incoming.at(i).at(j);
-      }
-    }
-  }
+	void exchange_cells(const Tessellation& tess, vector<ComputationalCell>& cells)
+	{
+		const boost::mpi::communicator world;
+		const vector<int>& correspondents = tess.GetDuplicatedProcs();
+		const vector<vector<int> >& duplicated_points = tess.GetDuplicatedPoints();
+		vector<vector<ComputationalCell> > incoming(correspondents.size());
+		vector<boost::mpi::request> requests;
+		for (size_t i = 0; i < correspondents.size(); ++i)
+		{
+			requests.push_back(world.isend(correspondents[i], 0, VectorValues(cells, duplicated_points[i])));
+			requests.push_back(world.irecv(correspondents[i], 0, incoming[i]));
+		}
+		const vector<vector<int> >& ghost_indices = tess.GetGhostIndeces();
+		boost::mpi::wait_all(requests.begin(), requests.end());
+		cells.resize(tess.GetTotalPointNumber());
+		for (size_t i = 0; i < incoming.size(); ++i)
+		{
+			for (size_t j = 0; j < incoming.at(i).size(); ++j)
+			{
+				cells.at(ghost_indices.at(i).at(j)) = incoming.at(i).at(j);
+			}
+		}
+	}
+
+	void exchange_point_velocities
+		(const Tessellation& tess,
+			vector<Vector2D>& point_velocities)
+	{
+		const boost::mpi::communicator world;
+		const vector<int>& correspondents = tess.GetDuplicatedProcs();
+		const vector<vector<int> >& duplicated_points =
+			tess.GetDuplicatedPoints();
+		vector<vector<Vector2D> > incoming(correspondents.size());
+		vector<boost::mpi::request> requests;
+		for (size_t i = 0; i < correspondents.size(); ++i) {
+			requests.push_back
+				(world.isend
+					(correspondents[i], 0, VectorValues
+						(point_velocities, duplicated_points[i])));
+			requests.push_back
+				(world.irecv
+					(correspondents[i], 0, incoming[i]));
+		}
+		const vector<vector<int> >& ghost_indices =
+			tess.GetGhostIndeces();
+		boost::mpi::wait_all(requests.begin(), requests.end());
+		point_velocities.resize(tess.GetTotalPointNumber());
+		for (size_t i = 0; i < incoming.size(); ++i) {
+			for (size_t j = 0; j < incoming.at(i).size(); ++j) {
+				point_velocities.at(ghost_indices.at(i).at(j)) =
+					incoming.at(i).at(j);
+			}
+		}
+	}
 #endif // RICH_MPI
 }
 
@@ -135,6 +162,11 @@ void hdsim::TimeAdvance(void)
 {
 	vector<Vector2D> point_velocities =
 		point_motion_(tess_, cells_, time_);
+
+#ifdef RICH_MPI
+	exchange_point_velocities(tess_, point_velocities);
+	exchange_cells(tess_, cells_);
+#endif
 
 	vector<Vector2D> edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
@@ -191,7 +223,8 @@ void hdsim::TimeAdvance(void)
 	cycle_++;
 }
 
-namespace {
+namespace 
+{
 	vector<Extensive> average_extensive
 		(const vector<Extensive>& extensives_1,
 		const vector<Extensive>& extensives_2)
