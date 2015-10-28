@@ -95,7 +95,7 @@ def main():
     np = len(glob.glob('process_*_final.h5'))
 
     if np>0:
-        numeric = consolidate_multiple(glob.glob('process_*_final.h5'))
+        numeric = consolidate_multiple(glob.glob('process_final_*.h5'))
     else:
         numeric = consolidate_single('final.h5')
     numeric['radius'] = numpy.sqrt(numeric['x_coordinate']**2+numeric['y_coordinate']**2)

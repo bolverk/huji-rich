@@ -24,21 +24,24 @@ edgestrength=0.05;
 filename=strcat(filedir,filename);
 [X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
-xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_x_coordinate');
-yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_y_coordinate');
-NumberOfTracers=h5read(strcat(filename,sprintf('_%d.h5',0)),'/Number of tracers');
+%xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_x_coordinate');
+%yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_y_coordinate');
+xproc=0;
+yproc=0;
+h=h5info(strcat(filename,sprintf('_%d.h5',0)));
+NumberOfTracers=length(h.Groups(5).Datasets);
 time=h5read(strcat(filename,sprintf('_%d.h5',0)),'/time');
 
 npoints=0;
 for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
     a=h5info(fname);
-    npoints=npoints+a.Datasets(8).ChunkSize;
+    npoints=npoints+a.Groups(3).Datasets(1).ChunkSize;
 end
 maxfaces=0;
 for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
-    nVert=h5read(fname,'/Number of vertices in cell');
+    nVert=h5read(fname,'/geometry/n_vertices');
     maxfaces=max(max(nVert),maxfaces);
     if(maxfaces>20)
         display('Warning, max number of faces exceeds 20!!')

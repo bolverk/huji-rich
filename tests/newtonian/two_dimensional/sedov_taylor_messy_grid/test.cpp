@@ -1,5 +1,6 @@
 #ifdef RICH_MPI
-#include <mpi.h>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/collectives.hpp>
 #endif
 #include <iostream>
 #include <fstream>
@@ -41,14 +42,80 @@ namespace {
   {
     const Vector2D lower_left = boundary.getBoundary().first;
     const Vector2D upper_right = boundary.getBoundary().second;
-    vector<Vector2D> res(get_mpi_size());
-    if(get_mpi_rank()==0){
-      res = RandSquare(get_mpi_size(),
+	const boost::mpi::communicator world;
+    vector<Vector2D> res(static_cast<size_t>(world.size()));
+    if(world.rank()==0)
+	{
+      res = RandSquare(world.size(),
 		       lower_left.x,upper_right.x,
 		       lower_left.y,upper_right.y);
     }
-    MPI_VectorBcast_Vector2D(res,0,MPI_COMM_WORLD,get_mpi_rank());
+	boost::mpi::broadcast(world, res, 0);
     return res;
+  }
+
+  boost::array<double, 4> FindMaxEdges(Tessellation const& tess)
+  {
+	  const boost::mpi::communicator world;
+	  const int rank = world.rank();
+	  const vector<int>& edge_index = tess.GetCellEdges(rank);
+	  const int n = static_cast<int>(edge_index.size());
+	  boost::array<double, 4> res;
+	  res[0] = min(tess.GetEdge(edge_index[0]).vertices.first.x,
+		  tess.GetEdge(edge_index[0]).vertices.second.x);
+	  res[1] = max(tess.GetEdge(edge_index[0]).vertices.first.x,
+		  tess.GetEdge(edge_index[0]).vertices.second.x);
+	  res[2] = min(tess.GetEdge(edge_index[0]).vertices.first.y,
+		  tess.GetEdge(edge_index[0]).vertices.second.y);
+	  res[3] = max(tess.GetEdge(edge_index[0]).vertices.first.y,
+		  tess.GetEdge(edge_index[0]).vertices.second.y);
+	  for (size_t i = 1; i<static_cast<size_t>(n); ++i)
+	  {
+		  res[0] = min(min(tess.GetEdge(edge_index[i]).vertices.first.x,
+			  tess.GetEdge(edge_index[i]).vertices.second.x), res[0]);
+		  res[1] = max(max(tess.GetEdge(edge_index[i]).vertices.first.x,
+			  tess.GetEdge(edge_index[i]).vertices.second.x), res[1]);
+		  res[2] = min(min(tess.GetEdge(edge_index[i]).vertices.first.y,
+			  tess.GetEdge(edge_index[i]).vertices.second.y), res[2]);
+
+		  res[3] = max(max(tess.GetEdge(edge_index[i]).vertices.first.y,
+			  tess.GetEdge(edge_index[i]).vertices.second.y), res[3]);
+	  }
+	  return res;
+  }
+
+ 
+  vector<Vector2D> SquareMeshM(int nx, int ny, Tessellation const& tess,
+	  Vector2D const&lowerleft, Vector2D const&upperright)
+  {
+	  const double widthx = (upperright.x - lowerleft.x) / static_cast<double>(nx);
+	  const double widthy = (upperright.y - lowerleft.y) / static_cast<double>(ny);
+	  const boost::array<double, 4> tessEdges = FindMaxEdges(tess);
+	  nx = static_cast<int>(floor((tessEdges[1] - tessEdges[0]) / widthx + 0.5));
+	  ny = static_cast<int>(floor((tessEdges[3] - tessEdges[2]) / widthy + 0.5));
+	  vector<Vector2D> res;
+	  res.reserve(static_cast<size_t>(nx*ny));
+	  const int nx0 = static_cast<int>(floor((tessEdges[0] - lowerleft.x) / widthx + 0.5));
+	  const int ny0 = static_cast<int>(floor((tessEdges[2] - lowerleft.y) / widthy + 0.5));
+	  Vector2D point;
+	  const boost::mpi::communicator world;
+	  int rank = world.rank();
+	  vector<Vector2D> cpoints;
+	  ConvexHull(cpoints, tess, rank);
+	  for (int i = 0; i<nx; i++)
+	  {
+		  for (int j = 0; j<ny; j++)
+		  {
+			  point.x = (static_cast<double>(i) + 0.5 + nx0)*widthx + lowerleft.x;
+			  point.y = (static_cast<double>(j) + 0.5 + ny0)*widthy + lowerleft.y;
+			  if ((point.x<lowerleft.x) || (point.x>upperright.x) ||
+				  (point.y<lowerleft.y) || (point.y>upperright.y))
+				  continue;
+			  if (PointInCell(cpoints, point))
+				  res.push_back(point);
+		  }
+	  }
+	  return res;
   }
 #endif
 
@@ -72,9 +139,15 @@ namespace {
       pg_(),
       width_(1),
       outer_(0,width_,width_,0),
+#ifdef RICH_MPI
+	  vproc_(process_positions(outer_),outer_),
+		init_points_(SquareMeshM(50,50,vproc_,outer_.getBoundary().first,outer_.getBoundary().second)),
+		tess_(vproc_,init_points_,outer_),
+#else
       init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
-      tess_(init_points_, outer_),
+		tess_(init_points_, outer_),
+#endif
       eos_(5./3.),
       point_motion_(),
       sb_(),
@@ -84,7 +157,11 @@ namespace {
       fc_(rs_),
       eu_(),
       cu_(),
-      sim_(tess_,
+      sim_(
+#ifdef RICH_MPI
+		  vproc_,
+#endif
+		  tess_,
 	   outer_,
 	   pg_,
 	   calc_init_cond(tess_),
@@ -106,10 +183,17 @@ namespace {
     const SlabSymmetry pg_;
     const double width_;
     const SquareBox outer_;
+#ifdef RICH_MPI
+	VoronoiMesh vproc_;
+#endif
     const vector<Vector2D> init_points_;
     VoronoiMesh tess_;
     const IdealGas eos_;
+#ifdef RICH_MPI
+	Eulerian point_motion_;
+#else
     Lagrangian point_motion_;
+#endif
     const StationaryBox sb_;
     const Hllc rs_;
     ZeroForce force_;
@@ -134,24 +218,20 @@ namespace {
 int main(void)
 {
 #ifdef RICH_MPI
-  MPI_Init(NULL, NULL);
+	boost::mpi::environment env;
 #endif
-
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
 
   my_main_loop(sim);
 
 #ifdef RICH_MPI
-  write_snapshot_to_hdf5(sim, "process_"+int2str(get_mpi_rank())+"_final.h5");
+  boost::mpi::communicator world;
+  write_snapshot_to_hdf5(sim, "process_final_"+int2str(world.rank())+".h5");
 #else
   write_snapshot_to_hdf5(sim, "final.h5");
 #endif
 
-
-#ifdef RICH_MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }
