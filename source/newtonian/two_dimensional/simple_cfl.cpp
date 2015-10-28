@@ -22,7 +22,7 @@ namespace {
 
     size_t size(void) const 
     {
-      return cells_.size();
+		return static_cast<size_t>(tess_.GetPointNo());
     }
 
     double operator[](size_t i) const
