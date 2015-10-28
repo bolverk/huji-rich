@@ -17,6 +17,7 @@
 #include "source/newtonian/two_dimensional/ColdFlowsExtensiveCalculator.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 namespace
 {
@@ -167,6 +168,7 @@ int main(void)
 	// Set up the point motion scheme
 	Lagrangian l_motion;
 	RoundCells pointmotion(l_motion, eos,0.15,0.02,true);
+	const StationaryBox evc;
 
 	// Set the ghost points
 	NOHGhostGenerator ghost(eos);
@@ -180,7 +182,7 @@ int main(void)
 	ColdFlowsExtensiveCalculator eu(eos,interpolation);
 	SimpleCFL tsf(0.15);
 	IdleHBC hbc;
-	ModularFluxCalculator fc(ghost, interpolation, rs, hbc);
+	ModularFluxCalculator fc(interpolation, rs, hbc);
 	SimpleCellUpdater cu;
 	SlabSymmetry pg;
 
@@ -194,7 +196,7 @@ int main(void)
 	tess.Update(snap.mesh_points);
 	init_cells = snap.cells;
 #endif
-	hdsim sim(tess, outer, pg, init_cells, eos, pointmotion, force, tsf, fc, eu, cu);
+	hdsim sim(tess, outer, pg, init_cells, eos, pointmotion, evc, force, tsf, fc, eu, cu);
 #ifdef restart
 	sim.setStartTime(snap.time);
 #endif
