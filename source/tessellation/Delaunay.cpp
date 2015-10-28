@@ -1583,6 +1583,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 {
 	const boost::mpi::communicator world;
 	vector<Edge> edges;
+	OrgIndex.clear();
 	vector<int> edge_index = tproc.GetCellEdges(world.rank());
 	for (size_t i = 0; i < edge_index.size(); ++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
