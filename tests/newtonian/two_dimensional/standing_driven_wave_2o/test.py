@@ -178,9 +178,9 @@ def main():
     f.write(str(l1_velocity)+'\n')
     f.close()
     
-    return l1_density < 1.27e-5 and \
-        l1_pressure < 2.2e-5 and \
-        l1_velocity < 3.4e-5
+    return l1_density < 3.45e-5 and \
+        l1_pressure < 3.44e-5 and \
+        l1_velocity < 8.2e-5
 
 if __name__=='__main__':
     import os
