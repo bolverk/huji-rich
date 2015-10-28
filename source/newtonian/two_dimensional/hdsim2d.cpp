@@ -62,7 +62,11 @@ namespace
 }
 
 hdsim::hdsim
-(Tessellation& tess,
+(
+#ifdef RICH_MPI
+	Tessellation& proctess,
+#endif
+	Tessellation& tess,
  const OuterBoundary& obc,
  const PhysicalGeometry& pg,
  const vector<ComputationalCell>& cells,
@@ -74,6 +78,7 @@ hdsim::hdsim
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
  const CellUpdater& cu) :
+	proctess_(proctess),
   tess_(tess),
   obc_(obc),
   eos_(eos),

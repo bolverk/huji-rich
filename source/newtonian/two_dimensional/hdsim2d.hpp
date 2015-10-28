@@ -38,6 +38,9 @@
 class hdsim
 {
 private:
+#ifdef RICH_MPI
+	Tessellation& proctess_;
+#endif
 
   Tessellation& tess_;
 
@@ -135,7 +138,11 @@ public:
     \param cu Cell updater
   */
   hdsim
-  (Tessellation& tess,
+	  (
+#ifdef RICH_MPI
+	  Tessellation& proctess,
+#endif
+	  Tessellation& tess,
    const OuterBoundary& obc,
    const PhysicalGeometry& pg,
    const vector<ComputationalCell>& init_cond,
