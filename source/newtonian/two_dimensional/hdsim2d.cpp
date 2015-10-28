@@ -220,7 +220,11 @@ void hdsim::TimeAdvance(void)
 		dt,
 		extensives_);
 
+#ifdef RICH_MPI
+	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
+#else
 	MoveMeshPoints(point_velocities, dt, tess_);
+#endif
 	cache_data_.reset();
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
