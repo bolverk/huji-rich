@@ -62,7 +62,11 @@ namespace
 }
 
 hdsim::hdsim
-(Tessellation& tess,
+(
+#ifdef RICH_MPI
+	Tessellation& proctess,
+#endif
+	Tessellation& tess,
  const OuterBoundary& obc,
  const PhysicalGeometry& pg,
  const vector<ComputationalCell>& cells,
@@ -74,6 +78,9 @@ hdsim::hdsim
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
  const CellUpdater& cu) :
+#ifdef RICH_MPI
+	proctess_(proctess),
+#endif
   tess_(tess),
   obc_(obc),
   eos_(eos),
@@ -213,7 +220,11 @@ void hdsim::TimeAdvance(void)
 		dt,
 		extensives_);
 
+#ifdef RICH_MPI
+	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
+#else
 	MoveMeshPoints(point_velocities, dt, tess_);
+#endif
 	cache_data_.reset();
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
