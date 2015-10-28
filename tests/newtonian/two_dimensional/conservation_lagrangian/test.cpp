@@ -20,6 +20,7 @@
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -95,6 +96,7 @@ namespace {
       tess_(init_points_,outer_),
       eos_(5./3.),
       pm_(),
+      evc_(),
       rs_(),
       force_(),
       tsf_(0.3),
@@ -107,6 +109,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   pm_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -128,6 +131,7 @@ namespace {
     VoronoiMesh tess_;
     IdealGas eos_;
     Lagrangian pm_;
+    const StationaryBox evc_;
     Hllc rs_;
     ZeroForce force_;
     SimpleCFL tsf_;

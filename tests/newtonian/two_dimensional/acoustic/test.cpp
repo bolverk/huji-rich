@@ -20,6 +20,7 @@
 #include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
+#include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -107,11 +108,12 @@ namespace {
 		 width_),
       rs_(),
       point_motion_(),
+      evc_(),
       force_(),
       tsf_(0.3),
       gpg_(),
       sr_(eos_,gpg_),
-      fc_(gpg_,sr_,rs_,hbc_),
+      fc_(sr_,rs_,hbc_),
       eu_(),
       cu_(),
       sim_(tess_,
@@ -120,6 +122,7 @@ namespace {
 	   calc_init_cond(tess_,eos_,width_),
 	   eos_,
 	   point_motion_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -142,6 +145,7 @@ namespace {
     AcousticInitCond init_cond_;
     Hllc rs_;
     Eulerian point_motion_;
+    const PeriodicEdgeVelocities evc_;
     ZeroForce force_;
     const SimpleCFL tsf_;
     const PeriodicGhostGenerator gpg_;
