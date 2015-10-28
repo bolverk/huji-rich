@@ -62,7 +62,7 @@ double SimpleCFL::operator()(const Tessellation& tess,
   double res =  cfl_*lazy_min(TimeStepCalculator(tess,cells,eos,point_velocities));
 #ifdef RICH_MPI
   const boost::mpi::communicator world;
-  boost::mpi::all_reduce(world, res, boost::mpi::minimum<double>());
+  res = boost::mpi::all_reduce(world, res, boost::mpi::minimum<double>());
 #endif
   return res;
 }
