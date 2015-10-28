@@ -28,6 +28,7 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 
@@ -138,12 +139,12 @@ namespace
 			ghost_(ghost), rs_(rs) {}
 
 		Extensive operator()
-			(const Edge& edge,
-			const Tessellation& tess,
-			const vector<Vector2D>& /*point_velocities*/,
-			const vector<ComputationalCell>& cells,
-			const EquationOfState& eos,
-			const bool aux) const
+		(const Edge& edge,
+		 const Tessellation& tess,
+		 const Vector2D& /*edge_velocity*/,
+		 const vector<ComputationalCell>& cells,
+		 const EquationOfState& eos,
+		 const bool aux) const
 		{
 			if (aux)
 				assert(edge.neighbors.first < tess.GetPointNo());
@@ -222,6 +223,7 @@ namespace
 			calc_init_cond(tess_),
 			eos_,
 			point_motion_,
+			     evc_,
 			force_,
 			tsf_,
 			fc_,
@@ -249,6 +251,7 @@ namespace
 		Lagrangian lpm_;
 		RoundCells pm_;
 		CustomMotion point_motion_;
+	  const StationaryBox evc_;
 		ZeroForce force_;
 		const SimpleCFL tsf_;
 		const ConditionActionSequence fc_;
