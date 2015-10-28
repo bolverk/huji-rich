@@ -22,6 +22,7 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -84,6 +85,7 @@ namespace {
       tess_(init_points_, outer_),
       eos_(read_number("adiabatic_index.txt")),
       pm_naive_(),
+      evc_(),
       rs_(),
       acc_(read_number("wavelength.txt"),
 	   read_number("amplitude.txt"),
@@ -99,6 +101,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   pm_naive_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -118,6 +121,7 @@ namespace {
     VoronoiMesh tess_;
     const IdealGas eos_;
     Lagrangian pm_naive_;
+    const StationaryBox evc_;
     const Hllc rs_;
     PeriodicDriver acc_;
     ConservativeForce force_;
