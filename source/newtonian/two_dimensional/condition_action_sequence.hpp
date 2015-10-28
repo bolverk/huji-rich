@@ -36,7 +36,6 @@ public:
     /*! \brief Calculates flux
       \param edge Interface between cells
       \param tess Tessellation
-      \param edge_velocities The edge velocities
       \param cells Computational cells
       \param eos Equation of state
       \param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
