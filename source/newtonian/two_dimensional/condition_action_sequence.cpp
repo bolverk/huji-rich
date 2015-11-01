@@ -87,7 +87,7 @@ Extensive RegularFlux::operator()
  const EquationOfState& eos,
  const bool /*aux*/) const
 {
-	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) ==
+	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
 		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
   const Vector2D p = normalize
     (edge.vertices.second -

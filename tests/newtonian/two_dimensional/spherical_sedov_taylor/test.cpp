@@ -20,6 +20,7 @@
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -51,6 +52,7 @@ namespace {
       rs_(),
       raw_point_motion_(),
       point_motion_(raw_point_motion_,eos_),
+      evc_(),
       force_(pg_.getAxis()),
       tsf_(0.3),
       fc_(rs_),
@@ -62,6 +64,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   point_motion_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -82,6 +85,7 @@ namespace {
     const Hllc rs_;
     Lagrangian raw_point_motion_;
     RoundCells point_motion_;
+    const StationaryBox evc_;
     CylindricalComplementary force_;
     const SimpleCFL tsf_;
     const SimpleFluxCalculator fc_;
