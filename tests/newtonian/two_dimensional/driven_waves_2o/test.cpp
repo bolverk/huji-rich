@@ -26,6 +26,7 @@
 #include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
+#include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -86,13 +87,14 @@ namespace {
       pm_naive_(),
       rs_(),
       point_motion_(pm_naive_,eos_),
+      evc_(),
       acc_(1,0.001),
       force_(acc_),
       tsf_(0.3),
       gpg_(),
       sr_(eos_,gpg_),
       hbc_(),
-      fc_(gpg_,sr_,rs_,hbc_),
+      fc_(sr_,rs_,hbc_),
       eu_(),
       sim_(tess_,
 	   outer_,
@@ -100,6 +102,7 @@ namespace {
 	   calc_init_cond(tess_),
 	   eos_,
 	   point_motion_,
+	   evc_,
 	   force_,
 	   tsf_,
 	   fc_,
@@ -125,6 +128,7 @@ namespace {
     Lagrangian pm_naive_;
     const Hllc rs_;
     RoundCells point_motion_;
+    const PeriodicEdgeVelocities evc_;
     PeriodicDriver acc_;
     ConservativeForce force_;
     const SimpleCFL tsf_;
