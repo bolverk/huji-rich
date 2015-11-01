@@ -23,6 +23,7 @@
 #include "source/newtonian/two_dimensional/ghost_point_generators/RigidWallGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -140,11 +141,12 @@ public:
     eos_(5./3.),
     bpm_(),
     point_motion_(bpm_,eos_),
+    evc_(),
     force_(),
     tsf_(0.3),
     gpg_(),
     sr_(eos_,gpg_),
-    fc_(gpg_,sr_,rs_,hbc_),
+    fc_(sr_,rs_,hbc_),
     eu_(),
     sim_(tess_,
 	 outer_,
@@ -152,6 +154,7 @@ public:
 	 calc_init_cond(tess_),
 	 eos_,
 	 point_motion_,
+	 evc_,
 	 force_,
 	 tsf_,
 	 fc_,
@@ -172,6 +175,7 @@ private:
   const IdealGas eos_;
   Lagrangian bpm_;
   RoundCells point_motion_;
+  const StationaryBox evc_;
   ZeroForce force_;
   const SimpleCFL tsf_;
   const RigidWallGenerator gpg_;
