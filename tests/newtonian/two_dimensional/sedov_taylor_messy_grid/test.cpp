@@ -205,7 +205,7 @@ namespace {
     hdsim sim_;
   };
 
-  void my_main_loop(hdsim& sim)
+  /*  void my_main_loop(hdsim& sim)
   {
     SafeTimeTermination term_cond(0.04,1e6);
 #ifdef BUGMODE
@@ -219,6 +219,7 @@ namespace {
 	      &hdsim::TimeAdvance,
 	      &diag);
   }
+  */
 }
 
 int main(void)
