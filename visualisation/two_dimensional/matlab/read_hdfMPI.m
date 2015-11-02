@@ -24,10 +24,8 @@ edgestrength=0.05;
 filename=strcat(filedir,filename);
 [X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
-%xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_x_coordinate');
-%yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/proc_y_coordinate');
-xproc=0;
-yproc=0;
+xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/x_coordinate');
+yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/y_coordinate');
 h=h5info(strcat(filename,sprintf('_%d.h5',0)));
 NumberOfTracers=length(h.Groups(5).Datasets);
 time=h5read(strcat(filename,sprintf('_%d.h5',0)),'/time');
