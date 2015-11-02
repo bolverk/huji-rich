@@ -113,10 +113,12 @@ public:
   */
   Tessellation& getTessellation(void);
 
+#ifdef RICH_MPI
    /*! \brief Returns the processor tessellation
     \return The tessellation
   */
-  Tessellation const& GetProcTessellation(void)const;
+  const Tessellation & GetProcTessellation(void)const;
+#endif
 
   /*!
     \brief Rearranges the simulation data according to Hibler ordering

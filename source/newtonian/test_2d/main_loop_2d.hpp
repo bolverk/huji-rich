@@ -40,6 +40,22 @@ private:
   string fname_;
 };
 
+class WriteData : public DiagnosticFunction
+{
+public:
+
+	/*! \brief Class constructor
+	\param fname File name
+	*/
+	explicit WriteData(string const& fname);
+
+	void operator()(hdsim const& sim);
+
+private:
+	string fname_;
+};
+
+
 //! \brief Abstract class for a termination condition for the main loop
 class TerminationCondition
 {

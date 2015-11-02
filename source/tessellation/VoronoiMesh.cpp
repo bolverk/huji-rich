@@ -1512,7 +1512,6 @@ void VoronoiMesh::Update
 (const vector<Vector2D>& points,
  const Tessellation& vproc)
 {
-
 	boost::mpi::communicator world;
 	NGhostReceived.clear();
 	const int rank = world.rank();
@@ -1525,17 +1524,16 @@ void VoronoiMesh::Update
 	// Get the convex hull of the cell
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints, vproc, rank);
+	// Did points move between procs?
+	vector<Vector2D> newcor =  UpdateMPIPoints(vproc, rank, points, obc, selfindex, SentProcs, SentPoints);
+
 	//Build the delaunay
-	Tri.build_delaunay(points, cpoints);
+	Tri.build_delaunay(newcor, cpoints);
 	eps = 1e-8;
 	edges.clear();
 	GhostPoints.clear();
 	GhostProcs.clear();
 	NGhostReceived.clear();
-	selfindex.resize(points.size());
-	size_t npoints = points.size();
-	for (size_t i = 0; i<npoints; ++i)
-		selfindex[i] = i;
 	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(obc, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
@@ -1647,7 +1645,7 @@ void VoronoiMesh::Initialise
 
 
 vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int rank,
-	vector<Vector2D> const& points, OuterBoundary const* obc, vector<int> &selfindex,
+	vector<Vector2D> const& points, OuterBoundary const* obc, vector<size_t> &selfindex,
 	vector<int> &sentproc, vector<vector<int> > &sentpoints)
 {
 	vector<Vector2D> res;
@@ -1662,6 +1660,8 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	vector<int> neighbors = vproc.GetNeighbors(rank);
 	vector<int> realneigh;
 	vector<vector<Vector2D> > neigh_chull;
+	sentpoints.clear();
+	sentproc.clear();
 	for (size_t i = 0; i < neighbors.size(); ++i)
 		if (static_cast<size_t>(neighbors[i]) < nproc)
 		{
@@ -1669,11 +1669,9 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			vector<Vector2D> temp;
 			ConvexHull(temp, vproc, neighbors[i]);
 			neigh_chull.push_back(temp);
+			sentproc.push_back(neighbors[i]);
 		}
-	sentpoints.clear();
-	sentproc.clear();
-	sentpoints.resize(neigh_chull.size());
-	sentproc.resize(neigh_chull.size());
+	sentpoints.resize(sentproc.size());
 
 	for (size_t i = 0; i<npoints; ++i)
 	{
@@ -1699,7 +1697,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		if (PointInCell(cproc, temp))
 		{
 			res.push_back(temp);
-			selfindex.push_back(static_cast<int>(i));
+			selfindex.push_back(i);
 			continue;
 		}
 		bool good = false;
@@ -1778,7 +1776,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 
 	// Combine the vectors
 	for (size_t i = 0; i < incoming.size(); ++i)
-		for (size_t j = 0; j < incoming[j].size(); ++j)
+		for (size_t j = 0; j < incoming[i].size(); ++j)
 			res.push_back(incoming[i][j]);
 	return res;
 }

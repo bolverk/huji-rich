@@ -422,6 +422,47 @@ template<class T> vector<size_t> sort_index(const vector<T> & arr)
   return res;
 }
 
+namespace
+{
+	template <class RAIter, class Compare>
+	class PairComp
+	{
+	public:
+		Compare comp;
+		PairComp(Compare comp_) : comp(comp_) {}
+		bool operator() (const std::pair<size_t, RAIter>& a,
+			const std::pair<size_t, RAIter>& b) const {
+			return comp(*a.second, *b.second);
+		}
+	};
+}
+
+/*! \brief Returns the indeces of a sort
+\param arr The array to sort
+\param res The indeces of the sort that is given as the output
+\param comp The compare function
+*/
+template <class RAIter, class Compare>
+void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
+	std::vector<size_t>& indexes) 
+{
+
+	std::vector< std::pair<size_t, RAIter> > pv;
+	pv.reserve(iterEnd - iterBegin);
+
+	RAIter iter;
+	size_t k;
+	for (iter = iterBegin, k = 0; iter != iterEnd; iter++, k++) {
+		pv.push_back(std::pair<int, RAIter>(k, iter));
+	}
+	PairComp<RAIter, Compare> compy(comp);
+	std::sort(pv.begin(), pv.end(), compy);
+
+	indexes.resize(pv.size());
+	for (size_t i = 0; i < pv.size(); ++i)
+		indexes[i] = pv[i].first;
+}
+
 /*! \brief Concatenates two vectors
   \param v1 vector
   \param v2 vector

@@ -162,6 +162,35 @@ namespace {
 			}
 		}
 	}
+
+	void exchange_extensive_cells(const Tessellation& tess, vector<Extensive>& cells,
+		vector<ComputationalCell>& primitves)
+	{
+		const boost::mpi::communicator world;
+		const vector<int>& correspondents = tess.GetSentProcs();
+		const vector<vector<int> >& duplicated_points = tess.GetSentPoints();
+		vector<vector<Extensive> > incoming(correspondents.size());
+		vector<vector<ComputationalCell> > incoming2(correspondents.size());
+		vector<boost::mpi::request> requests;
+		for (size_t i = 0; i < correspondents.size(); ++i)
+		{
+			requests.push_back(world.isend(correspondents[i], 0, VectorValues(cells, duplicated_points[i])));
+			requests.push_back(world.irecv(correspondents[i], 0, incoming[i]));
+			requests.push_back(world.isend(correspondents[i], 1, VectorValues(primitves, duplicated_points[i])));
+			requests.push_back(world.irecv(correspondents[i], 1, incoming2[i]));
+		}
+		boost::mpi::wait_all(requests.begin(), requests.end());
+		cells = VectorValues(cells, tess.GetSelfPoint());
+		primitves = VectorValues(primitves, tess.GetSelfPoint());
+		for (size_t i = 0; i < incoming.size(); ++i)
+		{
+			for (size_t j = 0; j < incoming.at(i).size(); ++j)
+			{
+				cells.push_back(incoming[i][j]);
+				primitves.push_back(incoming2[i][j]);
+			}
+		}
+	}
 #endif // RICH_MPI
 }
 
@@ -222,6 +251,8 @@ void hdsim::TimeAdvance(void)
 
 #ifdef RICH_MPI
 	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
+	// Keep relevant points
+	exchange_extensive_cells(tess_, extensives_, cells_);
 #else
 	MoveMeshPoints(point_velocities, dt, tess_);
 #endif
@@ -465,3 +496,10 @@ const CacheData& hdsim::getCacheData(void) const
 {
 	return cache_data_;
 }
+
+#ifdef RICH_MPI
+const Tessellation & hdsim::GetProcTessellation(void)const
+{
+	return proctess_;
+}
+#endif// RICH_MPI

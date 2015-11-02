@@ -2,6 +2,7 @@
 #include "../../misc/universal_error.hpp"
 #include "../../misc/simple_io.hpp"
 #include "../../newtonian/two_dimensional/diagnostics.hpp"
+#include "../two_dimensional/hdf5_diagnostics.hpp"
 
 DiagnosticFunction::~DiagnosticFunction(void) {}
 
@@ -61,4 +62,12 @@ void simulation2d::main_loop(hdsim& sim,
       if(diagfunc)
 	(*diagfunc)(sim);
     }
+}
+
+WriteData::WriteData(string const& fname) :
+	fname_(fname) {}
+
+void WriteData::operator()(hdsim const& sim)
+{
+	write_snapshot_to_hdf5(sim, fname_);
 }

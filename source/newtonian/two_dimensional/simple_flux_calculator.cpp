@@ -110,16 +110,16 @@ namespace {
 		  res.right = convert_to_primitive
 		  (cells[static_cast<size_t>(edge.neighbors.second)], eos);
     }
-    else{
+	else
+	{
       const size_t left_index = static_cast<size_t>(edge.neighbors.first);
       const size_t right_index = static_cast<size_t>(edge.neighbors.second);
       res.left = convert_to_primitive(cells[left_index],eos);
       res.right = convert_to_primitive(cells[right_index],eos);
-      
-      res.velocity = ScalarProd
-	(res.n,edge_velocities.at(edge_index))/
-	abs(res.n);
     }
+	res.velocity = ScalarProd
+		(res.n, edge_velocities.at(edge_index)) /
+		abs(res.n);
     return res;
   }
 }

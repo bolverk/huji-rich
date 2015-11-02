@@ -38,6 +38,7 @@ using namespace simulation2d;
 namespace {
 
 #ifdef RICH_MPI
+
   vector<Vector2D> process_positions(const SquareBox& boundary)
   {
     const Vector2D lower_left = boundary.getBoundary().first;
@@ -84,7 +85,6 @@ namespace {
 	  return res;
   }
 
- 
   vector<Vector2D> SquareMeshM(int nx, int ny, Tessellation const& tess,
 	  Vector2D const&lowerleft, Vector2D const&upperright)
   {
@@ -144,7 +144,7 @@ namespace {
 		init_points_(SquareMeshM(50,50,vproc_,outer_.getBoundary().first,outer_.getBoundary().second)),
 		tess_(vproc_,init_points_,outer_),
 #else
-      init_points_(cartesian_mesh(30,30,outer_.getBoundary().first,
+      init_points_(cartesian_mesh(50,50,outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
 		tess_(init_points_, outer_),
 #endif
@@ -190,7 +190,8 @@ namespace {
     VoronoiMesh tess_;
     const IdealGas eos_;
 #ifdef RICH_MPI
-	Eulerian point_motion_;
+	//Eulerian point_motion_;
+	Lagrangian point_motion_;
 #else
     Lagrangian point_motion_;
 #endif
@@ -207,7 +208,12 @@ namespace {
   void my_main_loop(hdsim& sim)
   {
     SafeTimeTermination term_cond(0.04,1e6);
+#ifdef BUGMODE
+	boost::mpi::communicator world;
+	WriteData diag("process_temp_" + int2str(world.rank()) + ".h5");
+#else
     WriteTime diag("time.txt");
+#endif
     main_loop(sim,
 	      term_cond,
 	      &hdsim::TimeAdvance,
@@ -219,14 +225,23 @@ int main(void)
 {
 #ifdef RICH_MPI
 	boost::mpi::environment env;
+	boost::mpi::communicator world;
 #endif
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
 
-  my_main_loop(sim);
+  //my_main_loop(sim);
+  for (size_t i = 0; i < 100; ++i)
+  {
+	  sim.TimeAdvance();
+#ifdef RICH_MPI
+	  write_snapshot_to_hdf5(sim, "snap_"+int2str(sim.getCycle())+"_"+int2str(world.rank())+".h5");
+#else
+	  write_snapshot_to_hdf5(sim, "snap_" + int2str(sim.getCycle()) + ".h5");
+#endif
+  }
 
 #ifdef RICH_MPI
-  boost::mpi::communicator world;
   write_snapshot_to_hdf5(sim, "process_final_"+int2str(world.rank())+".h5");
 #else
   write_snapshot_to_hdf5(sim, "final.h5");

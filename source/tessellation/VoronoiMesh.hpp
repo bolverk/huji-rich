@@ -32,27 +32,6 @@ class VoronoiMesh : public Tessellation
 {
 public:
 	/*!
-	\brief Removes cells from a Voronoi tessellation
-	\param V The Voronoi to change
-	\param ToRemove The indeces of the cells to remove
-	\param VolIndex The indeces of the neighbors of each removed cell, the input of the vector is overwritten with the output
-	\param Volratio How much volume relative to the removed cell's volume did each of the neighbors recieve, the input of the vector is overwritten with the output
-	*/
-	friend void Remove_Cells(VoronoiMesh &V,vector<int> &ToRemove,
-		vector<vector<int> > &VolIndex,vector<vector<double> > &Volratio);
-
-	/*!
-	\brief Refines cells
-	\param V The Voronoi tesselllation
-	\param ToRefine The list of points to split and refine
-	\param alpha The relative seperation between the splitted points (in units of the cell radius)
-	\param directions The directions to give the splitted points (can be given empty)
-	\param PeriodicBoundary Flag whether the grid is periodic or not
-	*/
-	friend void Refine_Cells(VoronoiMesh &V,vector<int> const& ToRefine,
-		double alpha,vector<Vector2D> const& directions,bool PeriodicBoundary);
-
-	/*!
 	\brief Fixes the number in the NewIndex for periodic boundary conditions
 	\param V The Voronoi
 	\param other The real index of the cell whose edge we fix
@@ -271,7 +250,7 @@ private:
 	void GetNeighborNeighborsMPI(vector<int> &result,int point);
 #ifdef RICH_MPI
 	vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
-		vector<Vector2D> const& points, OuterBoundary const* obc, vector<int> &selfindex,
+		vector<Vector2D> const& points, OuterBoundary const* obc, vector<size_t> &selfindex,
 		vector<int> &sentproc, vector<vector<int> > &sentpoints);
 #endif
 

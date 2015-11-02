@@ -229,6 +229,9 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
   Group hydrodynamic = file.createGroup("/hydrodynamic");
   Group tracers = file.createGroup("/tracers");
   Group stickers = file.createGroup("/stickers");
+#ifdef RICH_MPI
+  Group mpi = file.createGroup("/mpi");
+#endif
 
   // General
   write_std_vector_to_hdf5
@@ -265,6 +268,21 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
     (geometry,
      chd.nvert,
      "n_vertices");
+  //MPI
+#ifdef RICH_MPI
+  write_std_vector_to_hdf5
+	  (mpi,
+		  serial_generate
+		  (MeshGeneratingPointCoordinate
+			  (sim.GetProcTessellation(), &Vector2D::x)),
+		  "x_coordinate");
+  write_std_vector_to_hdf5
+	  (mpi,
+		  serial_generate
+		  (MeshGeneratingPointCoordinate
+			  (sim.GetProcTessellation(), &Vector2D::y)),
+		  "y_coordinate");
+#endif
 
   // Hydrodynamic
   write_std_vector_to_hdf5

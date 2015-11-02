@@ -8,12 +8,16 @@
 
 #include "boost/container/flat_map.hpp"
 #include "../../tessellation/geometry.hpp"
+#ifdef RICH_MPI
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
+#include "flat_map_serial.hpp"
+#endif // RICH_MPI
 
 //! \brief Extensive variables
 class Extensive
 {
 public:
-  
   //! \brief mass
   double mass;
 
@@ -52,7 +56,20 @@ public:
   \param Tracers The tracers 
   */
   Extensive(boost::container::flat_map<std::string, double> const& Tracers);
-  
+
+#ifdef RICH_MPI
+  template<class Archive>
+  void serialize
+	  (Archive& ar,
+		  const unsigned int /*version*/)
+  {
+	  ar & mass;
+	  ar & energy;
+	  ar & momentum;
+	  ar & tracers;
+  }
+#endif
+
 };
 
 /*! \brief Scalar product
