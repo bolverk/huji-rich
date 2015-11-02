@@ -191,6 +191,36 @@ namespace {
 			}
 		}
 	}
+
+	void exchange_extensive_velocity(const Tessellation& tess, vector<Extensive>& cells,
+		vector<Vector2D>& point_vel)
+	{
+		const boost::mpi::communicator world;
+		const vector<int>& correspondents = tess.GetSentProcs();
+		const vector<vector<int> >& duplicated_points = tess.GetSentPoints();
+		vector<vector<Extensive> > incoming(correspondents.size());
+		vector<vector<Vector2D> > incoming2(correspondents.size());
+		vector<boost::mpi::request> requests;
+		for (size_t i = 0; i < correspondents.size(); ++i)
+		{
+			requests.push_back(world.isend(correspondents[i], 0, VectorValues(cells, duplicated_points[i])));
+			requests.push_back(world.irecv(correspondents[i], 0, incoming[i]));
+			requests.push_back(world.isend(correspondents[i], 1, VectorValues(point_vel, duplicated_points[i])));
+			requests.push_back(world.irecv(correspondents[i], 1, incoming2[i]));
+		}
+		boost::mpi::wait_all(requests.begin(), requests.end());
+		cells = VectorValues(cells, tess.GetSelfPoint());
+		point_vel = VectorValues(point_vel, tess.GetSelfPoint());
+		for (size_t i = 0; i < incoming.size(); ++i)
+		{
+			for (size_t j = 0; j < incoming.at(i).size(); ++j)
+			{
+				cells.push_back(incoming[i][j]);
+				point_vel.push_back(incoming2[i][j]);
+			}
+		}
+	}
+
 #endif // RICH_MPI
 }
 
@@ -283,6 +313,12 @@ void hdsim::TimeAdvance2Heun(void)
 {
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
+#ifdef RICH_MPI
+	exchange_point_velocities(tess_, point_velocities);
+	exchange_cells(tess_, cells_);
+#endif
+
+
 	vector<Vector2D> edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
 
@@ -318,11 +354,22 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt,
 	   mid_extensives);
 
+#ifdef RICH_MPI
+	MoveMeshPoints(point_velocities, dt, tess_, proctess_);
+	// Keep relevant points
+	exchange_extensive_cells(tess_, mid_extensives, cells_);
+	exchange_extensive_velocity(tess_, extensives_, point_velocities);
+	exchange_point_velocities(tess_, point_velocities);
+#else
 	MoveMeshPoints(point_velocities, dt, tess_);
+#endif
 	cache_data_.reset();
 
-	const vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
 
+#ifdef RICH_MPI
+	exchange_cells(tess_, mid_cells);
+#endif
 	edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
 
