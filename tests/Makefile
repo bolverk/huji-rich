@@ -12,18 +12,19 @@ else ifeq ($(MODE),parallel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors 
-	LFLAGS = -lboost_mpi -lboost_serialization
+	LFLAGS = -lboost_mpi -lboost_serialization -lclipper
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
 	LFLAGS := -pg
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS :=
-	LFLAGS = -lboost_mpi -lboost_serialization
+	LFLAGS = -lboost_mpi -lboost_serialization -lclipper
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS :=
+	LFLAGS = -lclipper
 else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
