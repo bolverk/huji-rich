@@ -1,4 +1,4 @@
-/*! \file cell_updater.hpp
+/*! \file cell_updater_2d.hpp
   \author Almog Yalinewich
   \brief Base class for cell update scheme
  */

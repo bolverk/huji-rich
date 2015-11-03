@@ -3,6 +3,7 @@
 
 #include "../../tessellation/tessellation.hpp"
 
+//! \brief Base class for a scheme to calculate the velocity on the edges
 class EdgeVelocityCalculator
 {
 public:

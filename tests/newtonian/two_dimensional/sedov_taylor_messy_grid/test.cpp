@@ -243,7 +243,7 @@ int main(void)
   }
 
 #ifdef RICH_MPI
-  write_snapshot_to_hdf5(sim, "process_final_"+int2str(world.rank())+".h5");
+  write_snapshot_to_hdf5(sim, "process_"+int2str(world.rank())+"_final"+".h5");
 #else
   write_snapshot_to_hdf5(sim, "final.h5");
 #endif

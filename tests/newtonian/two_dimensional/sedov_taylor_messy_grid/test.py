@@ -11,7 +11,7 @@ def consolidate_single(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname)
+    f = h5py.File(fname,'r+')
     #res = {key:numpy.array(f[key]) for key in f}
     res = {}
     res['x_coordinate'] = numpy.array(f['geometry']['x_coordinate'])
@@ -24,6 +24,8 @@ def consolidate_single(fname):
     return res
 
 def consolidate_multiple(f_list):
+
+    assert(len(f_list)>1)
 
     import numpy
 
@@ -95,7 +97,7 @@ def main():
     np = len(glob.glob('process_*_final.h5'))
 
     if np>0:
-        numeric = consolidate_multiple(glob.glob('process_final_*.h5'))
+        numeric = consolidate_multiple(glob.glob('process_*_final.h5'))
     else:
         numeric = consolidate_single('final.h5')
     numeric['radius'] = numpy.sqrt(numeric['x_coordinate']**2+numeric['y_coordinate']**2)

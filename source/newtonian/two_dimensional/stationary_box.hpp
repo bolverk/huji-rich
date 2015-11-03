@@ -3,6 +3,7 @@
 
 #include "edge_velocity_calculator.hpp"
 
+//! \brief Edge velocity calculator for a stationary box
 class StationaryBox: public EdgeVelocityCalculator
 {
 public:

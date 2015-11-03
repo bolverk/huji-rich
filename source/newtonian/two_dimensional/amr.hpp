@@ -36,7 +36,7 @@ public:
 	virtual ~AMRCellUpdater(void);
 };
 
-// !\brief Abstract class for extensive update scheme in amr
+//! \brief Abstract class for extensive update scheme in amr
 class AMRExtensiveUpdater
 {
 public:

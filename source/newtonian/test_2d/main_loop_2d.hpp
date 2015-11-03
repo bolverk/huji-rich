@@ -40,6 +40,7 @@ private:
   string fname_;
 };
 
+//! \brief A class for writing data to a file
 class WriteData : public DiagnosticFunction
 {
 public:
