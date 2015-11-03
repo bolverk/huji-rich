@@ -50,8 +50,8 @@ public:
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 		double time) const;
 
-	void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-		double dt, vector<Vector2D> & velocities)const;
+	vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+		double dt, vector<Vector2D> const& velocities)const;
 private:
 	PointMotion const& pm_;
 	CustomMotionCriteria const& criteria_;
