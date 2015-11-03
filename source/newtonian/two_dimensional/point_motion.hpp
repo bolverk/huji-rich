@@ -31,9 +31,10 @@ public:
   \param time The simulation time
   \param velocities Velocities of the points
   \param dt The time step
+  \return The new velocities
   */
-  virtual void ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> & velocities)const;
+  virtual vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+	  double dt, vector<Vector2D> const& velocities)const;
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
