@@ -104,17 +104,16 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 }
 
 vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	double dt, vector<Vector2D>const & /*velocities*/)const
+	double dt, vector<Vector2D>const & velocities)const
 {
 #ifdef RICH_MPI
 	boost::mpi::communicator world;
 	const int rank = world.rank();
 #endif
-	vector<Vector2D> res;
+	vector<Vector2D> res(velocities);
+	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{
-		res = pm_(tess, cells, time);
-		res.resize(static_cast<size_t>(tess.GetPointNo()));
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
@@ -122,7 +121,7 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 			if (rank == 4)
 				std::cout << i << std::endl;
 #endif
-			res.at(i) = res.at(i) + calc_dw(i, tess, dt);
+			res.at(i) += calc_dw(i, tess, dt);
 #ifdef RICH_MPI
 			if (rank == 4)
 				std::cout << i << std::endl;
