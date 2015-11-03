@@ -438,8 +438,6 @@ namespace
 }
 
 /*! \brief Returns the indeces of a sort
-\param arr The array to sort
-\param res The indeces of the sort that is given as the output
 \param comp The compare function
 */
 template <class RAIter, class Compare>
