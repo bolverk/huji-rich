@@ -1,5 +1,7 @@
 #ifdef RICH_MPI
 #include "source/mpi/MeshPointsMPI.hpp"
+#include <boost/mpi/collectives.hpp>
+#include <boost/mpi/environment.hpp>
 #endif
 #include <iostream>
 #include <cmath>
@@ -110,15 +112,16 @@ namespace {
 #ifdef RICH_MPI
   vector<Vector2D> process_positions(const SquareBox& boundary)
   {
+	  const boost::mpi::communicator world;
     const Vector2D lower_left = boundary.getBoundary().first;
     const Vector2D upper_right = boundary.getBoundary().second;
-    vector<Vector2D> res(get_mpi_size());
-    if(get_mpi_rank()==0){
-      res = RandSquare(get_mpi_size(),
+    vector<Vector2D> res(world.size());
+    if(world.rank()==0){
+      res = RandSquare(world.size(),
 		       lower_left.x,upper_right.x,
 		       lower_left.y,upper_right.y);
     }
-    MPI_VectorBcast_Vector2D(res,0,MPI_COMM_WORLD,get_mpi_rank());
+	boost::mpi::broadcast(world, res, 0);
     return res;
   }
 #endif
@@ -129,14 +132,21 @@ public:
   
   SimData(void):
     outer_(-0.5,0.5,0.5,-0.5),
-    #ifdef RICH_MPI
-    proc_tess_(process_positions(outer_),outer_),
-    #endif
     rs_(),
-    tess_(cartesian_mesh
-	  (30,30,
-	   outer_.getBoundary().first,
-	   outer_.getBoundary().second),
+#ifdef RICH_MPI
+	  proctess_(process_positions(outer_), outer_),
+#endif
+    tess_(
+#ifdef RICH_MPI
+		proctess_,
+		SquareMeshM(30,30,proctess_,outer_.getBoundary().first,
+			outer_.getBoundary().second),
+#else
+		cartesian_mesh
+		(30, 30,
+			outer_.getBoundary().first,
+			outer_.getBoundary().second),
+#endif
 	  outer_),
     eos_(5./3.),
     bpm_(),
@@ -148,7 +158,11 @@ public:
     sr_(eos_,gpg_),
     fc_(sr_,rs_,hbc_),
     eu_(),
-    sim_(tess_,
+    sim_(
+#ifdef RICH_MPI
+		proctess_,
+#endif
+		tess_,
 	 outer_,
 	 pg_,
 	 calc_init_cond(tess_),
@@ -171,6 +185,9 @@ private:
   const SlabSymmetry pg_;
   const SquareBox outer_;
   const Hllc rs_;
+#ifdef RICH_MPI
+  VoronoiMesh proctess_;
+#endif
   VoronoiMesh tess_;
   const IdealGas eos_;
   Lagrangian bpm_;
@@ -204,7 +221,8 @@ int main(void)
 {
 
   #ifdef RICH_MPI
-  MPI_Init(NULL, NULL);
+	boost::mpi::environment end;
+	const boost::mpi::communicator world;
   #endif
 
   SimData sim_data;
@@ -213,13 +231,9 @@ int main(void)
   my_main_loop(sim);
 
   #ifdef RICH_MPI
-  write_snapshot_to_hdf5(sim, "process_"+int2str(get_mpi_rank())+"_final.h5");
+  write_snapshot_to_hdf5(sim, "process_"+int2str(world.rank())+"_final.h5");
   #else
   write_snapshot_to_hdf5(sim, "final.h5");
-  #endif
-
-  #ifdef RICH_MPI
-  MPI_Finalize();
   #endif
 
   return 0;
