@@ -106,6 +106,7 @@ void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> co
 	if (cold_)
 	{
 		vector<Vector2D> res = pm_(tess, cells, time);
+		res.resize(static_cast<size_t>(tess.GetPointNo()));
 		for (size_t i = 0; i < res.size(); ++i)
 		{
 			res[i] += calc_dw(i, tess, dt);
