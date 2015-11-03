@@ -1,4 +1,4 @@
-/*! \file cell_updater.hpp
+/*! \file cell_updater_3d.hpp
   \brief Abstract class for cell update scheme
   \author Almog Yalinewich
  */
