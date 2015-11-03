@@ -14,7 +14,6 @@ def main():
     import imp
     import h5py
     import glob
-    print os.environ['RICH_ROOT']
     enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
 
     ns = len(glob.glob('process_*_final.h5'))

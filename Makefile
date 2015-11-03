@@ -77,11 +77,11 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.15-pat
 
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
-	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && mv cpp/clipper.hpp ../include
-	
-external_libraries/dump_clipper/clipper.o: external_libraries/dump_clipper/clipper.hpp
+	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include
+
+external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hpp
 	cd external_libraries/dump_clipper && g++ -c -O3 cpp/clipper.cpp -o clipper.o
-	
+
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
 
