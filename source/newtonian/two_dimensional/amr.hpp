@@ -113,7 +113,14 @@ protected:
    Tessellation const& tess,
    vector<std::pair<size_t, Vector2D> > &NewPoints, 
    vector<Vector2D> &Moved,
-   OuterBoundary const& obc)const;
+   OuterBoundary const& obc
+#ifdef RICH_MPI
+	  , vector<Vector2D> const& proc_chull
+#endif
+	  )const;
+#ifdef RICH_MPI
+  vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const;
+#endif
 public:
 	/*!
 	\brief Runs the AMR
@@ -130,7 +137,11 @@ public:
 	*/
 	virtual void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time)const = 0;
+		vector<Extensive> &extensives, double time
+#ifdef RICH_MPI
+		,Tessellation const& proctess
+#endif
+		)const = 0;
 	/*!
 	\brief Runs the removal
 	\param tess The tessellation
@@ -142,7 +153,11 @@ public:
 	*/
 	virtual void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time)const = 0;
+		EquationOfState const& eos, double time
+#ifdef RICH_MPI
+		,Tessellation const& proctess
+#endif
+		)const = 0;
 	//! \brief Virtual destructor
 	virtual ~AMR(void);
 };
@@ -176,11 +191,19 @@ public:
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
-		vector<Extensive> &extensives,double time)const;
+		vector<Extensive> &extensives,double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos,double time)const;
+		EquationOfState const& eos,double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
 };
 
 class NonConservativeAMR : public AMR
@@ -206,11 +229,19 @@ public:
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time)const;
+		vector<Extensive> &extensives, double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time)const;
+		EquationOfState const& eos, double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
 };
 
 #endif // AMR_HPP

@@ -23,6 +23,13 @@ vector<std::pair<size_t, size_t> > GhostPointGenerator::GetOuterEdgesIndeces(Tes
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 	  const size_t ghostindex = IsBoundaryEdge(edges[i], npoints);
+#ifdef RICH_MPI
+	  if (ghostindex > 0)
+	  {
+		  if (tess.GetOriginalIndex(edges[i].neighbors.first) != tess.GetOriginalIndex(edges[i].neighbors.second))
+			  continue;
+	  }
+#endif
 		if (ghostindex == 1)
 			res.push_back(std::pair<size_t, size_t>(i, 1));
 		if (ghostindex == 2)

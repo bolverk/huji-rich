@@ -18,6 +18,11 @@
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/collectives.hpp>
+#endif
 
 namespace
 {
@@ -146,6 +151,10 @@ namespace
 
 int main(void)
 {
+#ifdef RICH_MPI
+	boost::mpi::environment env;
+	const boost::mpi::communicator world;
+#endif
 	// Set up the initial grid points
 	int np = read_int("resolution.txt");
 	//int np =30;
@@ -153,10 +162,22 @@ int main(void)
 	// Set up the boundary type for the points
 	SquareBox outer(-width*0.5,width*0.5,width*0.5,-width*0.5);
 
+#ifdef RICH_MPI
+	vector<Vector2D> procpoints;
+	if (world.rank() == 0)
+		procpoints = RandSquare(world.size(), -1, 1, -1, 1);
+	boost::mpi::broadcast(world, procpoints, 0);
+	VoronoiMesh proctess(procpoints, outer);
+	vector<Vector2D> InitPoints = SquareMeshM(np, np,proctess,Vector2D(-1, -1), Vector2D(1, 1));
+#else
 	vector<Vector2D> InitPoints = cartesian_mesh(np, np, Vector2D(-1, -1), Vector2D(1, 1));
-
+#endif
 	// Set up the tessellation
+#ifdef RICH_MPI
+	VoronoiMesh tess(proctess,InitPoints, outer);
+#else
 	VoronoiMesh tess(InitPoints, outer);
+#endif
 
 	// Set up the Riemann solver
 	Hllc rs;
@@ -189,24 +210,17 @@ int main(void)
 	vector<ComputationalCell> init_cells = calc_init_cond(tess,eos);
 
 	// Set up the simulation
-//#define restart 1
+	hdsim sim(
+#ifdef RICH_MPI
+		proctess,
+#endif
+		tess, outer, pg, init_cells, eos, pointmotion, evc_, force, tsf, fc, eu, cu);
 
-#ifdef restart
-	Snapshot snap = read_hdf5_snapshot("c:/sim_data/snap.h5");
-	tess.Update(snap.mesh_points);
-	init_cells = snap.cells;
-#endif
-	hdsim sim(tess, outer, pg, init_cells, eos, pointmotion, evc_, force, tsf, fc, eu, cu);
-#ifdef restart
-	sim.setStartTime(snap.time);
-#endif
 	// Define the AMR 
 	double Vmax = 3 * width*width / (np*np);
 	double Vmin = 0.25*width*width / (np*np);
 	NohRefine refine(Vmax);
-	//NohRefineDebug refine;
 	NohRemove remove(Vmin);
-	//NohRemoveDebug remove;
 	NonConservativeAMR amr(refine, remove);
 
 	// How long shall we run the simulation?
@@ -222,7 +236,6 @@ int main(void)
 		try
 		{
 			// Advance one time step
-//			write_snapshot_to_hdf5(sim, "c:/sim_data/snap.h5");
 			sim.TimeAdvance2Heun();
 			write_number(sim.getTime(), "time.txt");
 			amr(sim);
@@ -234,9 +247,8 @@ int main(void)
 	}
 
 	// Done running the simulation, output the data
-	//string filename = "final.h5";
-#ifdef restart
-	string filename = "c:/sim_data/final2.h5";
+#ifdef RICH_MPI
+	string filename = "final_" + int2str(world.rank()) + ".h5";
 #else
 	string filename = "final.h5";
 #endif

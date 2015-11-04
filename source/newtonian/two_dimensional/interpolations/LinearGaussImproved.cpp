@@ -471,7 +471,11 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	{
 		pair<ComputationalCell, ComputationalCell> cell_temp;
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
-		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber))
+		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber)
+#ifdef RICH_MPI
+			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
+#endif
+			)
 			cell_temp.first = interp(cells[static_cast<size_t>(edge.neighbors.first)], rslopes_[static_cast<size_t>(edge.neighbors.first)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		else
@@ -480,7 +484,11 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
 				edge.neighbors.first),time),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
-		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
+		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber)
+#ifdef RICH_MPI
+			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
+#endif
+			)
 			cell_temp.second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		else

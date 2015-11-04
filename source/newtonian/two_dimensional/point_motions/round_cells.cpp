@@ -1,4 +1,7 @@
 #include "round_cells.hpp"
+#ifdef RICH_MPI
+#include <boost/mpi/communicator.hpp>
+#endif
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer, double chi,
 	double eta, bool cold) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(outer), chi_(chi), eta_(eta), cold_(cold) {}
@@ -100,19 +103,36 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	return res;
 }
 
-void RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	double dt, vector<Vector2D> & velocities)const
+vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
+	double dt, vector<Vector2D>const & velocities)const
 {
+#ifdef RICH_MPI
+	boost::mpi::communicator world;
+	const int rank = world.rank();
+#endif
+	vector<Vector2D> res(velocities);
+	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{
-		vector<Vector2D> res = pm_(tess, cells, time);
-		res.resize(static_cast<size_t>(tess.GetPointNo()));
-		for (size_t i = 0; i < res.size(); ++i)
+		const size_t n = res.size();
+		for (size_t i = 0; i < n; ++i)
 		{
-			res[i] += calc_dw(i, tess, dt);
+#ifdef RICH_MPI
+			if (rank == 4)
+				std::cout << i << std::endl;
+#endif
+			res.at(i) += calc_dw(i, tess, dt);
+#ifdef RICH_MPI
+			if (rank == 4)
+				std::cout << i << std::endl;
+#endif
 		}
-		velocities = res;
+#ifdef RICH_MPI
+		if (rank == 4)
+			std::cout << "out" << std::endl;
+#endif
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
-		CorrectPointsOverShoot(velocities, dt, tess,outer_);
+		CorrectPointsOverShoot(res, dt, tess,outer_);
+	return res;
 }

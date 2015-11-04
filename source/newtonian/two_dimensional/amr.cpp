@@ -1,4 +1,5 @@
 #include "amr.hpp"
+#include "../../tessellation/VoronoiMesh.hpp"
 
 AMRCellUpdater::~AMRCellUpdater(){}
 
@@ -111,7 +112,11 @@ namespace
 
 void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
-	OuterBoundary const& obc)const
+	OuterBoundary const& obc
+#ifdef RICH_MPI
+	,vector<Vector2D> const& proc_chull
+#endif
+	)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	NewPoints.clear();
@@ -128,16 +133,20 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 			Vector2D const& otherpoint = tess.GetMeshPoint(neigh[j]);
 			if (otherpoint.distance(mypoint) < 1.5*R)
 				continue;
+			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
+#ifdef RICH_MPI
+			if (!PointInCell(proc_chull, candidate))
+				continue;
+#endif
 			if (static_cast<size_t>(neigh[j]) < N)
 			{
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], 0.75*mypoint + 0.25*otherpoint));
+				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i],candidate));
 				Moved.push_back(Vector2D());
 			}
 			else
 			{
-				Vector2D NewPoint = 0.25*otherpoint + 0.75*mypoint;
-				Moved.push_back(FixInDomain(obc, NewPoint));
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], NewPoint));
+				Moved.push_back(FixInDomain(obc, candidate));
+				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
 			}
 		}
 	}
@@ -168,7 +177,11 @@ void ConservativeAMR::UpdateCellsRefine
  vector<ComputationalCell> &cells,
  EquationOfState const& eos,
  vector<Extensive> &extensives,
- double time)const
+ double time
+#ifdef RICH_MPI
+	, Tessellation const& proctess
+#endif
+	)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Find the primitive of each point and the new location
@@ -177,7 +190,17 @@ void ConservativeAMR::UpdateCellsRefine
 	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
 	if (ToRefine.empty())
 		return;
-	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc);
+#ifdef RICH_MPI
+	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
+	vector<Vector2D> chull;
+	const boost::mpi::communicator world;
+	ConvexHull(chull, proctess, world.rank());
+#endif
+	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc
+#ifdef RICH_MPI
+		,chull
+#endif
+		);
 	// save copy of old tessellation
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
 
@@ -188,7 +211,11 @@ void ConservativeAMR::UpdateCellsRefine
 
 	for (size_t i = 0; i < NewPoints.size(); ++i)
 		cor.push_back(NewPoints[i].second);
+#ifdef RICH_MPI
+	tess.Update(cor, proctess);
+#else
 	tess.Update(cor);
+#endif
 
 	size_t location = 0;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
@@ -243,7 +270,11 @@ void ConservativeAMR::UpdateCellsRefine
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells,vector<Extensive> &extensives,
-	EquationOfState const& eos,double time)const
+	EquationOfState const& eos,double time
+#ifdef RICH_MPI
+	, Tessellation const& proctess
+#endif
+	)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Rebuild tessellation
@@ -255,11 +286,18 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	if (ToRemove.empty())
 		return;
 	ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
+#ifdef RICH_MPI
+	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
+#endif
 	// save copy of old tessellation
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
 
 	RemoveVector(cor, ToRemove);
+#ifdef RICH_MPI
+	tess.Update(cor, proctess);
+#else
 	tess.Update(cor);
+#endif
 
 	// Fix the extensives
 	vector<Vector2D> temp;
@@ -315,12 +353,25 @@ NonConservativeAMR::NonConservativeAMR
 
 void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-	vector<Extensive> &extensives,double time)const
+	vector<Extensive> &extensives,double time
+#ifdef RICH_MPI
+	, Tessellation const& proctess
+#endif
+	)const
 {
 	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
-	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc);
+#ifdef RICH_MPI
+	vector<Vector2D> chull;
+	const boost::mpi::communicator world;
+	ConvexHull(chull, proctess, world.rank());
+#endif
+	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc
+#ifdef RICH_MPI
+		, chull
+#endif
+		);
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
@@ -333,7 +384,11 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 		cells.push_back(cells[NewPoints[i].first]);
 	}
 	// Rebuild tessellation
+#ifdef RICH_MPI
+	tess.Update(cor, proctess);
+#else
 	tess.Update(cor);
+#endif
 
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + ToRefine.size(); ++i)
@@ -342,7 +397,11 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-	EquationOfState const& eos,double time)const
+	EquationOfState const& eos,double time
+#ifdef RICH_MPI
+	, Tessellation const& proctess
+#endif
+	)const
 {
 	std::pair<vector<size_t>,vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 	vector<size_t> ToRemove = ToRemovepair.first;
@@ -355,7 +414,11 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	RemoveVector(cor, ToRemove);
 	RemoveVector(cells, ToRemove);
 
+#ifdef RICH_MPI
+	tess.Update(cor, proctess);
+#else
 	tess.Update(cor);
+#endif
 	// Recalcualte extensives
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
@@ -365,9 +428,17 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 void ConservativeAMR::operator()(hdsim &sim)
 {
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(),sim.getTime());
+		sim.getAllExtensives(),sim.getTime()
+#ifdef RICH_MPI
+		, sim.GetProcTessellation()
+#endif
+		);
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(),sim.getTime());
+		sim.getEos(),sim.getTime()
+#ifdef RICH_MPI
+		, sim.GetProcTessellation()
+#endif
+		);
 	// redo cache data
 	sim.getCacheData().reset();
 }
@@ -375,9 +446,17 @@ void ConservativeAMR::operator()(hdsim &sim)
 void NonConservativeAMR::operator()(hdsim &sim)
 {
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(), sim.getTime());
+		sim.getAllExtensives(), sim.getTime()
+#ifdef RICH_MPI
+		, sim.GetProcTessellation()
+#endif
+		);
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(), sim.getTime());
+		sim.getEos(), sim.getTime()
+#ifdef RICH_MPI
+		, sim.GetProcTessellation()
+#endif
+		);
 	// redo cache data
 	sim.getCacheData().reset();
 }
@@ -428,3 +507,27 @@ candidates, Tessellation const& tess) const
 	}
 	return result;
 }
+
+#ifdef RICH_MPI
+vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const
+{
+	vector<size_t> res;
+	int N = tess.GetPointNo();
+	for (size_t i = 0; i < candidates.size(); ++i)
+	{
+		bool good = true;
+		vector<int> neigh = tess.GetNeighbors(static_cast<int>(candidates[i]));
+		for (size_t j = 0; j < neigh.size(); ++j)
+		{
+			if (tess.GetOriginalIndex(neigh[j]) >= N)
+			{
+				good = false;
+				break;
+			}
+		}
+		if (good)
+			res.push_back(candidates[i]);
+	}
+	return res;
+}
+#endif
