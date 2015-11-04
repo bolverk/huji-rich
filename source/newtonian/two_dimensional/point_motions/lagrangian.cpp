@@ -6,7 +6,7 @@ vector<Vector2D> Lagrangian::operator()
    const double /*time*/) const 
 {
   vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
-  for(size_t i=0;i<cells.size();++i)
+  for(size_t i=0;i<res.size();++i)
     res[i] = cells[i].velocity;
   return res;
 }
