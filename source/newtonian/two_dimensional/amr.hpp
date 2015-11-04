@@ -62,7 +62,7 @@ public:
 		double volume) const;
 };
 
-// !\brief Simple class for cell update scheme in amr
+//! \brief Simple class for cell update scheme in amr
 class SimpleAMRCellUpdater : public AMRCellUpdater
 {
 public:
@@ -70,7 +70,7 @@ public:
 		double volume, ComputationalCell const& old_cell) const;
 };
 
-
+//! \brief Chooses which cells should be remove
 class CellsToRemove
 {
 public:
@@ -104,7 +104,7 @@ public:
 	virtual ~CellsToRefine(void);
 };
 
-
+//! \brief Base class for amr
 class AMR : public Manipulate
 {
 protected:
