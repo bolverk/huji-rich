@@ -44,13 +44,6 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 				dw = 0*s;
 			else
 				dw = chi_*0.5*(s-r);
-			/*#ifdef RICH_MPI
-			if(tproc!=0)
-			{
-			if(!PointInCell(cpoints,tess->GetMeshPoint(i)+dw))
-			dw=Vector2D(0,0);
-			}
-			#endif*/
 			res[static_cast<size_t>(i)]=tess->GetMeshPoint(i)+dw;
 		}
 #ifdef RICH_MPI
