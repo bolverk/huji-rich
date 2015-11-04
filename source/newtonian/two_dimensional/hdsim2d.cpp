@@ -243,7 +243,7 @@ void hdsim::TimeAdvance(void)
 		edge_velocities,
 		time_);
 
-	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
+	point_velocities=point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 #ifdef RICH_MPI
 	exchange_point_velocities(tess_, point_velocities);
 #endif
@@ -328,7 +328,7 @@ void hdsim::TimeAdvance2Heun(void)
 
 	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
-	point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
+	point_velocities=point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 #ifdef RICH_MPI
 	exchange_point_velocities(tess_, point_velocities);
