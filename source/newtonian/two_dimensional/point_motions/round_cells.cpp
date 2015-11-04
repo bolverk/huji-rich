@@ -103,7 +103,7 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	return res;
 }
 
-vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
 	double dt, vector<Vector2D>const & velocities)const
 {
 #ifdef RICH_MPI
