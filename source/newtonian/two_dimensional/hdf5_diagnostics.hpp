@@ -33,6 +33,14 @@ public:
 
   //! \brief Time
   double time;
+
+  //! \brief Cycle number
+  int cycle;
+
+#ifdef RICH_MPI
+  //! \brief Locations of cpus
+  vector<Vector2D> proc_points;
+#endif
 };
 
 /*! \brief Load snapshot data into memory

@@ -1,18 +1,23 @@
 #include "hdf5_diagnostics.hpp"
 #include "../../misc/hdf5_utils.hpp"
 #include "../../misc/lazy_list.hpp"
+#ifdef RICH_MPI
+#include "../../tessellation/VoronoiMesh.hpp"
+#endif
 
 using namespace H5;
 
 Snapshot::Snapshot(void):
   mesh_points(),
   cells(),
-  time() {}
+  time(),
+  cycle(){}
 
 Snapshot::Snapshot(const Snapshot& source):
   mesh_points(source.mesh_points),
   cells(source.cells),
-  time(source.time) {}
+  time(source.time),
+  cycle(source.cycle){}
 
 DiagnosticAppendix::~DiagnosticAppendix(void) {}
 
@@ -345,6 +350,10 @@ Snapshot read_hdf5_snapshot
   Group g_hydrodynamic = file.openGroup("hydrodynamic");
   Group g_tracers = file.openGroup("tracers");
   Group g_stickers = file.openGroup("stickers");
+#ifdef RICH_MPI
+  Group mpi = file.createGroup("/mpi");
+#endif
+
   
   // Mesh points
   {
@@ -356,6 +365,19 @@ Snapshot read_hdf5_snapshot
     for(size_t i=0;i<x.size();++i)
       res.mesh_points.at(i) = Vector2D(x.at(i), y.at(i));
   }
+
+#ifdef RICH_MPI
+  // MPI
+  {
+	  const vector<double> x =
+		  read_double_vector_from_hdf5(mpi, "x_coordinate");
+	  const vector<double> y =
+		  read_double_vector_from_hdf5(mpi, "y_coordinate");
+	  res.proc_points.resize(x.size());
+	  for (size_t i = 0; i<x.size(); ++i)
+		  res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
+  }
+#endif
 
   // Hydrodynamic
   {
@@ -401,6 +423,9 @@ Snapshot read_hdf5_snapshot
     const vector<double> time =
       read_double_vector_from_hdf5(file,"time");
     res.time = time.at(0);
+	const vector<int> cycle =
+		read_int_vector_from_hdf5(file, "cycle");
+	res.cycle = cycle.at(0);
   }
     
   return res;
@@ -433,3 +458,80 @@ void WriteDelaunay(Delaunay const& tri, string const& filename)
 	write_std_vector_to_hdf5(file, vector<int>(1, tri.GetOriginalLength()), "point number");
 	write_std_vector_to_hdf5(file, facets, "triangles");
 }
+
+#ifdef RICH_MPI
+
+namespace
+{
+
+}
+
+Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,size_t snapshot_number)
+{
+	const boost::mpi::communicator world;
+	double read_num = snapshot_number*1.0/world.size();
+	// Read the data
+	int start = floor(world.rank()*read_num+0.1);
+	int stop = floor((1+world.rank())*read_num-1.1);
+	Snapshot res,snap;
+	for (int i = start; i < stop; ++i)
+	{
+		Snapshot temp = read_hdf5_snapshot(filename + int2str(i) + ".h5");
+		snap.cells.insert(snap.cells.end(), temp.cells.begin(), temp.cells.end());
+		snap.mesh_points.insert(snap.mesh_points.end(), temp.mesh_points.begin(), temp.mesh_points.end());
+		if (i == start)
+		{
+			snap.time = temp.time;
+			snap.cycle = temp.cycle;
+		}
+	}
+	vector<vector<Vector2D> > chull(static_cast<size_t>(world.size()));
+	vector<vector<ComputationalCell> > cell_recv(world.size());
+	vector<vector<Vector2D> > mesh_recv(world.size());
+	vector<vector<size_t> > indeces(world.size());
+	for (size_t i = 0; i < chull.size(); ++i)
+		ConvexHull(chull[i], proctess, static_cast<int>(i));
+	for (size_t i = 0; i < snap.mesh_points.size(); ++i)
+	{
+		bool added = false;
+		for (size_t j = 0; j < chull.size(); ++j)
+		{
+			if (PointInCell(chull[j], snap.mesh_points[i]))
+			{
+				indeces[j].push_back(i);
+				added = true;
+				break;
+			}
+		}
+		if (!added)
+			throw UniversalError("Didn't find point in ReDistributeData");
+	}
+	// Send/Recv data
+	vector < boost::mpi::request> req;
+	for (size_t i = 0; i < chull.size(); ++i)
+	{
+		if (i == static_cast<size_t>(world.rank()))
+		{ 
+			res.cells = VectorValues(snap.cells, indeces[i]);
+			res.mesh_points = VectorValues(snap.mesh_points, indeces[i]);
+			continue;
+		}	
+		req.push_back(world.isend(static_cast<int>(i), 0, VectorValues(snap.cells,indeces[i])));
+		req.push_back(world.isend(static_cast<int>(i), 1, VectorValues(snap.mesh_points, indeces[i])));
+		req.push_back(world.irecv(static_cast<int>(i), 0,cell_recv[i]));
+		req.push_back(world.irecv(static_cast<int>(i), 1, mesh_recv[i]));
+	}
+	boost::mpi::wait_all(req.begin(), req.end());
+
+	for (size_t i = 0; i < chull.size(); ++i)
+	{
+		if (i == static_cast<size_t>(world.rank()))
+			continue;
+		res.cells.insert(res.cells.end(), cell_recv[i].begin(), cell_recv[i].end());
+		res.mesh_points.insert(res.mesh_points.end(), mesh_recv[i].begin(), mesh_recv[i].end());
+	}
+
+	res.time = snap.time;
+	res.cycle = snap.cycle;
+}
+#endif
