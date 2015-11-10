@@ -195,6 +195,11 @@ public:
    */
   void setStartTime(double t_start);
 
+  /*! \brief Sets the cycle
+  \param cycle The cycle number
+  */
+  void setCycle(int cycle);
+
   // Diagnostics
 
   /*! \brief Returns the time

@@ -516,6 +516,12 @@ void hdsim::recalculateExtensives(void)
 			extensives_[i].tracers[it->first] = (it->second)*mass;
 	}
 }
+
+void hdsim::setCycle(int cycle)
+{
+	cycle_ = cycle;
+}
+
 void hdsim::setStartTime(double t_start)
 {
 	time_ = t_start;
