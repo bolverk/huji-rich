@@ -10,6 +10,7 @@ ConditionActionSequence2::ConditionActionSequence2
 
 ConditionActionSequence2::~ConditionActionSequence2(void)
 {
+	/*
 	for (size_t i = 0; i<sequence_.size(); ++i) {
 		delete sequence_[i].first;
 		delete sequence_[i].second;
@@ -18,6 +19,7 @@ ConditionActionSequence2::~ConditionActionSequence2(void)
 		delete sequence2_[i].first;
 		delete sequence2_[i].second;
 	}
+	*/
 }
 
 namespace 
@@ -106,8 +108,6 @@ Extensive RegularFlux2::operator()
 	const bool /*aux*/,
 	pair<ComputationalCell,ComputationalCell> const& edge_values) const
 {
-	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
-		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
 	const Vector2D p = normalize
 		(edge.vertices.second -
 			edge.vertices.first);
@@ -189,4 +189,23 @@ Extensive RigidWallFlux2::operator()
 	return conserved_to_extensive
 		(c,
 			aux ? edge_values.first : edge_values.second);
+}
+
+Ratchet::Ratchet(const RiemannSolver& rs,bool in) :	rs_(rs),in_(in),wall_(RigidWallFlux2(rs)),free_(FreeFlowFlux(rs)) {}
+
+
+Extensive Ratchet::operator()
+(const Edge& edge,
+	const Tessellation& tess,
+	const Vector2D& edge_velocity,
+	const vector<ComputationalCell>& cells,
+	const EquationOfState& eos,
+	const bool aux,
+	const pair<ComputationalCell, ComputationalCell> & edge_values) const
+{
+	Vector2D n = tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
+	if (ScalarProd(n, cells[edge.neighbors.second].velocity)*(2*static_cast<double>(in_)-1) < 0)
+		return free_.operator()(edge,tess, edge_velocity, cells, eos, aux);
+	else
+		return wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values);
 }

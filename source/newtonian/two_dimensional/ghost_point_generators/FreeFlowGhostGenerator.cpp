@@ -14,7 +14,6 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 			int real_cell = outer_edges[i].second == 1 ? edge.neighbors.second : edge.neighbors.first;
 			res[ghost_index] = cells[static_cast<size_t>(real_cell)];
 		}
-		res[ghost_index] = cells[ghost_index];
 	}
 	return res;
 }

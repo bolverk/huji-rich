@@ -40,7 +40,7 @@ public:
 	*/
 	ConditionActionSequence2
 		(const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
-			const vector<pair<const ConditionActionSequence::Condition*, const Action2*> >& sequence2,
+			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
 			SpatialReconstruction const& interp);
 
 	~ConditionActionSequence2(void);
@@ -85,6 +85,7 @@ private:
 	const RiemannSolver& rs_;
 };
 
+
 //! \brief Calculates flux assuming rigid wall boundary conditions
 class RigidWallFlux2 : public ConditionActionSequence2::Action2
 {
@@ -106,6 +107,32 @@ public:
 
 private:
 	const RiemannSolver& rs_;
+};
+
+class Ratchet : public ConditionActionSequence2::Action2
+{
+public:
+
+	/*! \brief Class constructor
+	\param rs Riemann solver
+	\param in If the ratchet allows inflow or outflow
+	*/
+	Ratchet(const RiemannSolver& rs, bool in);
+
+	Extensive operator()
+		(const Edge& edge,
+			const Tessellation& tess,
+			const Vector2D& edge_velocity,
+			const vector<ComputationalCell>& cells,
+			const EquationOfState& eos,
+			const bool aux,
+			const pair<ComputationalCell, ComputationalCell> & edge_values) const;
+
+private:
+	const RiemannSolver& rs_;
+	const bool in_;
+	const RigidWallFlux2 wall_;
+	const FreeFlowFlux free_;
 };
 
 #endif // CONDITION_ACTION_SEQUENCE2_HPP
