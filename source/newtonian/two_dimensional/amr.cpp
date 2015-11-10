@@ -360,6 +360,8 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	)const
 {
 	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
+	if (ToRefine.empty())
+		return;
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
 #ifdef RICH_MPI
@@ -405,6 +407,8 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 {
 	std::pair<vector<size_t>,vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 	vector<size_t> ToRemove = ToRemovepair.first;
+	if (ToRemove.empty())
+		return;
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess.GetMeshPoints();
