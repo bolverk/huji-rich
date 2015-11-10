@@ -88,7 +88,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
 	const double R = tess.GetWidth(static_cast<int>(i));
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
-	const double c = 0.25 * R / dt;
+	const double c = std::min(d,0.2*R) / dt;
 	return chi_*c*(s - r) / d*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
 }
 
@@ -96,9 +96,12 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	double time) const
 {
 	vector<Vector2D> res = pm_(tess, cells, time);
-	for (size_t i = 0; i < res.size(); ++i)
+	if (!cold_)
 	{
-		res[i] += calc_dw(i, tess, cells);
+		for (size_t i = 0; i < res.size(); ++i)
+		{
+			res[i] += calc_dw(i, tess, cells);
+		}
 	}
 	return res;
 }
@@ -117,20 +120,8 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-#ifdef RICH_MPI
-			if (rank == 4)
-				std::cout << i << std::endl;
-#endif
 			res.at(i) += calc_dw(i, tess, dt);
-#ifdef RICH_MPI
-			if (rank == 4)
-				std::cout << i << std::endl;
-#endif
 		}
-#ifdef RICH_MPI
-		if (rank == 4)
-			std::cout << "out" << std::endl;
-#endif
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
 		CorrectPointsOverShoot(res, dt, tess,outer_);
