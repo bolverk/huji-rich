@@ -102,7 +102,6 @@ void WriteDelaunay(Delaunay const& tri, string const& filename);
 /*!
 \brief Reads an HDF5 snapshot file in order to restart the simulation with a different cpu number
 \return dump The snapshot structure relevent for current cpu
-\param fname The path to the HDF5 file prefix (without "_rank.h5")
 \param proctess Tessellation of the processors
 \param snapshot_number Number of old cpus
 */
