@@ -29,8 +29,8 @@ ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
 	assert(this->tracers.size() == other.tracers.size());
 	for (size_t j = 0; j < this->tracers.size(); ++j)
 	{
-		assert((this->tracers.begin() + j)->first == (other.tracers.begin()+j)->first);
-		(this->tracers.begin() + j)->second += (other.tracers.begin() + j)->second;
+	  assert((this->tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin()+static_cast<int>(j))->first);
+	  (this->tracers.begin() + static_cast<int>(j))->second += (other.tracers.begin() + static_cast<int>(j))->second;
 	}
 	return *this;
 }
@@ -43,8 +43,8 @@ ComputationalCell& ComputationalCell::operator-=(ComputationalCell const& other)
 	assert(this->tracers.size() == other.tracers.size());
 	for (size_t j = 0; j < this->tracers.size(); ++j)
 	{
-		assert((this->tracers.begin() + j)->first == (other.tracers.begin() + j)->first);
-		(this->tracers.begin() + j)->second -= (other.tracers.begin() + j)->second;
+	  assert((this->tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
+	  (this->tracers.begin() + static_cast<int>(j))->second -= (other.tracers.begin() + static_cast<int>(j))->second;
 	}
 	return *this;
 }
@@ -56,7 +56,7 @@ ComputationalCell& ComputationalCell::operator*=(double s)
 	this->velocity *= s;
 	for (size_t j = 0; j < this->tracers.size(); ++j)
 	{
-		(this->tracers.begin() + j)->second *= s;
+	  (this->tracers.begin() + static_cast<int>(j))->second *= s;
 	}
 	return *this;
 }
@@ -69,8 +69,8 @@ void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& o
 	assert(res.tracers.size() == other.tracers.size());
 	for (size_t j = 0; j < res.tracers.size(); ++j)
 	{
-		assert((res.tracers.begin() + j)->first == (other.tracers.begin() + j)->first);
-		(res.tracers.begin() + j)->second += (other.tracers.begin() + j)->second*scalar;
+	  assert((res.tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
+	  (res.tracers.begin() + static_cast<int>(j))->second += (other.tracers.begin() + static_cast<int>(j))->second*scalar;
 	}
 }
 

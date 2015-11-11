@@ -84,7 +84,7 @@ public:
   SafeTimeTermination(double termination_time,
 		      int max_cycles);
 
-  bool operator()(hdsim const& sim);
+  bool operator()(const hdsim& sim);
 
 private:
   const double termination_time_;

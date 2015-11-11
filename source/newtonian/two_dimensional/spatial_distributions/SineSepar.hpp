@@ -27,7 +27,7 @@ public:
    */
   SineSepar(double Amp,double f,double off,double above,double under);
   ~SineSepar();
-  double operator()(Vector2D const& r) const;
+  double operator()(const Vector2D& r) const;
 };
 
 #endif // SINESEPAR_HPP
