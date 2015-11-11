@@ -20,7 +20,7 @@ public:
 	\brief Class constructor
 	\param cell The primitive variable to be set on the boundary
 	*/
-	ConstantPrimitiveGenerator(ComputationalCell const& cell);
+  explicit ConstantPrimitiveGenerator(ComputationalCell const& cell);
 
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells, double time) const;

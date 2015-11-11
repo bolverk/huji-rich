@@ -47,11 +47,11 @@ namespace voronoi_loggers
     /*! \brief Class constructor
       \param file_name Name of output file
      */
-    explicit BinLogger(std::string const& file_name);
+    explicit BinLogger(const std::string& file_name);
 
-    void output(VoronoiMesh const& v);
+    void output(const VoronoiMesh& v);
 
-	void output(Tessellation const& v);
+	void output(const Tessellation& v);
 
 	/*! \brief Reads the output information from the Voronoi tessellation
       \param location Name of output file

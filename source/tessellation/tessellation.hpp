@@ -53,7 +53,7 @@ public:
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
    */
-  virtual void Update(vector<Vector2D> const& points) = 0;
+  virtual void Update(const vector<Vector2D>& points) = 0;
 
 #ifdef RICH_MPI
   /*!
@@ -61,7 +61,7 @@ public:
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
    */
-  virtual void Update(vector<Vector2D> const& points,Tessellation const& tess) = 0;
+  virtual void Update(const vector<Vector2D>& points, const Tessellation& tess) = 0;
 #endif // RICH_MPI
 
   /*! \brief Get Total number of mesh generating points

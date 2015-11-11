@@ -19,7 +19,7 @@ public:
   /*! \brief Perform diagnostics
     \param sim Hydrodynamic simulation
    */
-  virtual void operator()(hdsim const& sim) = 0;
+  virtual void operator()(const hdsim& sim) = 0;
 
   virtual ~DiagnosticFunction(void);
 };
@@ -32,9 +32,9 @@ public:
   /*! \brief Class constructor
     \param fname File name
    */
-  explicit WriteTime(string const& fname);
+  explicit WriteTime(const string& fname);
 
-  void operator()(hdsim const& sim);
+  void operator()(const hdsim& sim);
 
 private:
   string fname_;
@@ -48,9 +48,9 @@ public:
 	/*! \brief Class constructor
 	\param fname File name
 	*/
-	explicit WriteData(string const& fname);
+	explicit WriteData(const string& fname);
 
-	void operator()(hdsim const& sim);
+	void operator()(const hdsim& sim);
 
 private:
 	string fname_;
@@ -66,7 +66,7 @@ public:
     \param sim Hydrodynamic simulation
     \return True is simulation should continue running
    */
-  virtual bool operator()(hdsim const& sim) = 0;
+  virtual bool operator()(const hdsim& sim) = 0;
 
   //! \brief Virtual destructor
   virtual ~TerminationCondition(void);
@@ -84,7 +84,7 @@ public:
   SafeTimeTermination(double termination_time,
 		      int max_cycles);
 
-  bool operator()(hdsim const& sim);
+  bool operator()(const hdsim& sim);
 
 private:
   const double termination_time_;
@@ -101,7 +101,7 @@ public:
    */
   explicit CycleTermination(int max_cycles);
 
-  bool operator()(hdsim const& sim);
+  bool operator()(const hdsim& sim);
 
 private:
 

@@ -73,7 +73,7 @@ public:
   /*! \brief Class constructor
     \param sequence List of rules for cells that are calculated in a special way
    */
-  SimpleCellUpdater
+  explicit SimpleCellUpdater
   (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
    vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >());
 
@@ -99,7 +99,7 @@ public:
   /*! \brief Class constructor
     \param sticker_name Sticker name
    */
-  HasSticker(const string& sticker_name);
+  explicit HasSticker(const string& sticker_name);
 
   bool operator()
   (const Tessellation& tess,

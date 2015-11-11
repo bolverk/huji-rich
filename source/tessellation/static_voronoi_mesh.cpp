@@ -593,7 +593,7 @@ vector<Vector2D>& StaticVoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void StaticVoronoiMesh::Update(vector<Vector2D> const& /*p*/) {}
+void StaticVoronoiMesh::Update(const vector<Vector2D>& /*p*/) {}
 
 vector<int> StaticVoronoiMesh::GetNeighbors(int index)const
 {
@@ -665,16 +665,6 @@ MPI_AMR_Send[j].push_back(SortIndex[j][index2]);
 }
 */
 
-#ifdef __clang__
-__attribute__((noreturn))
-#endif // __clang__
-void StaticVoronoiMesh::RemoveCells(vector<int> & /*ToRemove*/,
-				    vector<vector<int> >& /*VolIndex*/,
-				    vector<vector<double> >& /*Volratio*/)
-{
-  throw;
-}
-
 namespace
 {
 	int FindEdge(StaticVoronoiMesh const& V,int tofind,int celltolook)
@@ -703,15 +693,6 @@ int FixPeriodNeighbor(StaticVoronoiMesh &V,int other,int ToRefine,int /*NewIndex
 	V.edges[static_cast<size_t>(loc)].neighbors.second;
 	temp = static_cast<int>(cor.size());
 	return static_cast<int>(cor.size());
-}
-
-#ifdef __clang__
-__attribute__((noreturn))
-#endif // __clang__
-void StaticVoronoiMesh::RefineCells(vector<int> const& /*ToRefine*/,
-				    vector<Vector2D> const& /*directions*/,double /*alpha*/)
-{
-  throw;
 }
 
 int StaticVoronoiMesh::GetPointNo(void) const

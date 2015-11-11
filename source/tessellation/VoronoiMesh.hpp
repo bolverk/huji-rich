@@ -101,7 +101,7 @@ public:
 	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
 #endif // RICH_MPI
 
-	void Update(vector<Vector2D> const& points);
+	void Update(const vector<Vector2D>& points);
 
 	~VoronoiMesh(void);
 	/*! \brief Get Total number of mesh generating points

@@ -45,12 +45,6 @@ public:
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const;
 
-	void RemoveCells(vector<int> &ToRemove,vector<vector<int> > &VolIndex,
-		vector<vector<double> > &Volratio);
-
-	void RefineCells(vector<int> const& ToRefine,
-		vector<Vector2D> const& directions,double alpha=1e-3);
-
 	Tessellation* clone(void)const;
 
 	vector<int> GetNeighbors(int index)const;
@@ -85,10 +79,10 @@ public:
   StaticVoronoiMesh(StaticVoronoiMesh const& other);
 
   #ifdef RICH_MPI
-	void Update(vector<Vector2D> const& points,Tessellation const& vproc);
+	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
 #endif // RICH_MPI
 
-	void Update(vector<Vector2D> const& points);
+	void Update(const vector<Vector2D>& points);
 
   ~StaticVoronoiMesh(void);
 	/*! \brief Get Total number of mesh generating points

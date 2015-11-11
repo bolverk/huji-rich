@@ -202,10 +202,10 @@ namespace
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
 			for (size_t j = 0; j < cell_temp.tracers.size(); ++j)
 			{
-				(cmax.tracers.begin()+j)->second = std::max((cmax.tracers.begin() + j)->second,
-					(cell_temp.tracers.begin() + j)->second);
-				(cmin.tracers.begin() + j)->second = std::min((cmin.tracers.begin() + j)->second,
-					(cell_temp.tracers.begin() + j)->second);
+			  (cmax.tracers.begin()+static_cast<int>(j))->second = std::max((cmax.tracers.begin() + static_cast<int>(j))->second,
+											(cell_temp.tracers.begin() + static_cast<int>(j))->second);
+			  (cmin.tracers.begin() + static_cast<int>(j))->second = std::min((cmin.tracers.begin() + static_cast<int>(j))->second,
+											  (cell_temp.tracers.begin() + static_cast<int>(j))->second);
 			}
 		}
 		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
@@ -267,16 +267,16 @@ namespace
 			// tracers
 			for (size_t j = 0; j < dphi.tracers.size(); ++j)
 			{
-				double cell_tracer = (cell.tracers.begin() + j)->second;
-				double diff_tracer = (maxdiff.tracers.begin() + j)->second;
-				if (std::abs((dphi.tracers.begin() + j)->second) > 0.1*std::max(std::abs(diff_tracer), std::abs((mindiff.tracers.begin() + j)->second)) || (centroid_val.tracers.begin() + j)->second *cell_tracer < 0)
+			  double cell_tracer = (cell.tracers.begin() + static_cast<int>(j))->second;
+			  double diff_tracer = (maxdiff.tracers.begin() + static_cast<int>(j))->second;
+			  if (std::abs((dphi.tracers.begin() + static_cast<int>(j))->second) > 0.1*std::max(std::abs(diff_tracer), std::abs((mindiff.tracers.begin() + static_cast<int>(j))->second)) || (centroid_val.tracers.begin() + static_cast<int>(j))->second *cell_tracer < 0)
 				{
-					if ((dphi.tracers.begin() + j)->second > std::abs(1e-9*cell_tracer))
-						psi[4 + j] = std::min(psi[4 + j], diff_tracer / (dphi.tracers.begin() + j)->second);
+				  if ((dphi.tracers.begin() + static_cast<int>(j))->second > std::abs(1e-9*cell_tracer))
+				    psi[4 + j] = std::min(psi[4 + j], diff_tracer / (dphi.tracers.begin() + static_cast<int>(j))->second);
 					else
-						if ((dphi.tracers.begin() + j)->second < -std::abs(1e-9 * cell_tracer))
-							psi[4 + j] = std::min(psi[4 + j], (mindiff.tracers.begin() + j)->second
-								/ (dphi.tracers.begin() + j)->second);
+					  if ((dphi.tracers.begin() + static_cast<int>(j))->second < -std::abs(1e-9 * cell_tracer))
+					    psi[4 + j] = std::min(psi[4 + j], (mindiff.tracers.begin() + static_cast<int>(j))->second
+								  / (dphi.tracers.begin() + static_cast<int>(j))->second);
 				}
 			}
 		}

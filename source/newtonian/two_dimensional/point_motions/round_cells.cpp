@@ -111,7 +111,7 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 {
 #ifdef RICH_MPI
 	boost::mpi::communicator world;
-	const int rank = world.rank();
+	//const int rank = world.rank();
 #endif
 	vector<Vector2D> res(velocities);
 	res.resize(static_cast<size_t>(tess.GetPointNo()));

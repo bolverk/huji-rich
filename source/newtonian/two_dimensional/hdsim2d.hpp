@@ -133,12 +133,16 @@ public:
     \param init_cond Initial conditions
     \param eos Equation of state
     \param pointmotion Motion of the mesh generating points
+    \param evc Edge velocity calculator
     \param external_force External force
     \param tsf Time step function
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
   */
+#ifdef RICH_MPI
+  //! \param proctess Tessellation of the processes
+#endif // RICH_MPI
   hdsim
 	  (
 #ifdef RICH_MPI

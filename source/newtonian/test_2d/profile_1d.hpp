@@ -22,7 +22,7 @@ public:
    */
   explicit Profile1D(SpatialDistribution1D const& prof_1d);
 
-  double operator()(Vector2D const& r) const;
+  double operator()(const Vector2D& r) const;
 
 private:
 

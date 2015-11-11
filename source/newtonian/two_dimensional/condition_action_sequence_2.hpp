@@ -72,7 +72,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	RegularFlux2(const RiemannSolver& rs);
+  explicit RegularFlux2(const RiemannSolver& rs);
 
 	Extensive operator()
 		(const Edge& edge,
@@ -97,7 +97,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	RigidWallFlux2(const RiemannSolver& rs);
+  explicit RigidWallFlux2(const RiemannSolver& rs);
 
 	Extensive operator()
 		(const Edge& edge,
@@ -118,9 +118,10 @@ class Ratchet : public ConditionActionSequence2::Action2
 public:
 
 	/*! \brief Class constructor
+	  \param rs Riemann solver
 	\param in If the ratchet allows inflow or outflow
 	*/
-  Ratchet(const RiemannSolver&rs, const bool in);
+  Ratchet(const RiemannSolver& rs, const bool in);
 
 	Extensive operator()
 		(const Edge& edge,

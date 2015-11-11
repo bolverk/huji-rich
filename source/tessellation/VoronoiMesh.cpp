@@ -696,7 +696,7 @@ vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void VoronoiMesh::Update(vector<Vector2D> const& p)
+void VoronoiMesh::Update(const vector<Vector2D>& p)
 {
 	// Clean_up last step
 	edges.clear();
@@ -1748,7 +1748,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	vector<int> recvproc;
 	boost::mpi::communicator world;
 	boost::mpi::all_gather(world,sentproc,correspondence_matrix);
-	vector<size_t> indices;
+	//	vector<size_t> indices;
 	for (size_t i = 0; i < correspondence_matrix.size(); ++i)
 	{
 		if (std::find(correspondence_matrix.at(i).begin(), correspondence_matrix.at(i).end(), rank) !=
