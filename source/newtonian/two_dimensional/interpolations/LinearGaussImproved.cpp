@@ -39,10 +39,10 @@ namespace
 		return res;
 	}
 
-	vector<ComputationalCell> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
+	vector<ComputationalCell const*> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
 						   vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t /*npoints*/)
 	{
-		vector<ComputationalCell> res(edges.size());
+		vector<ComputationalCell const*> res(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
 			size_t other_cell = (edges[i].neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
@@ -50,9 +50,9 @@ namespace
 			const boost::container::flat_map<size_t,ComputationalCell>::const_iterator it = 
 			  ghost_cells.find(other_cell);
 			if(it==ghost_cells.end())
-			  res[i] = cells.at(other_cell);
+			  res[i]=&cells.at(other_cell);
 			else
-			  res[i] = it->second;
+				res[i]=&it->second;
 		}
 		return res;
 	}
@@ -69,7 +69,7 @@ namespace
 	}
 
 	pair<ComputationalCell, ComputationalCell> calc_naive_slope(ComputationalCell const& cell,
-		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell> const& neighbors,
+		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list)
 	{
 		size_t n = edge_list.size();
@@ -82,8 +82,7 @@ namespace
 		}
 		// Create the matrix to invert and the vector to compare
 		vector<double> m(4, 0);
-		pair<ComputationalCell,ComputationalCell> vec_compare
-		  (0*cell,0*cell);
+		pair<ComputationalCell, ComputationalCell> vec_compare;
 		for (size_t i = 0; i < edge_list.size(); ++i)
 		{
 			const Vector2D c_ij = CalcCentroid(edge_list[i]) -0.5*(neigh_cm[i] + cell_cm);
@@ -93,10 +92,20 @@ namespace
 			m[1] -= c_ij.y*r_ij.x;
 			m[2] -= c_ij.x*r_ij.y;
 			m[3] -= c_ij.y*r_ij.y;
-			ComputationalCellAddMult(vec_compare.first, cell, r_ij.x*0.5);
-			ComputationalCellAddMult(vec_compare.first, neighbors[i], r_ij.x*0.5);
-			ComputationalCellAddMult(vec_compare.second, cell, r_ij.y*0.5);
-			ComputationalCellAddMult(vec_compare.second, neighbors[i], r_ij.y*0.5);
+			if (i == 0)
+			{
+				vec_compare.first = cell;
+				vec_compare.second = cell;
+				vec_compare.first *= r_ij.x*0.5;
+				vec_compare.second *= r_ij.y*0.5;
+			}
+			else
+			{
+				ComputationalCellAddMult(vec_compare.first, cell, r_ij.x*0.5);
+				ComputationalCellAddMult(vec_compare.second, cell, r_ij.y*0.5);
+			}
+			ComputationalCellAddMult(vec_compare.second, *neighbors[i], r_ij.y*0.5);
+			ComputationalCellAddMult(vec_compare.first, *neighbors[i], r_ij.x*0.5);
 			/*
 			vec_compare.first += cell*r_ij.x*0.5;
 			vec_compare.first += neighbors[i]*r_ij.x*0.5;
@@ -134,22 +143,22 @@ namespace
 		return res;
 	}
 
-	double PressureRatio(ComputationalCell cell, vector<ComputationalCell> const& neigh)
+	double PressureRatio(ComputationalCell cell, vector<ComputationalCell const*> const& neigh)
 	{
 		double res = 1;
 		double p = cell.pressure;
 		for (size_t i = 0; i<neigh.size(); ++i)
 		{
-			if (p>neigh[i].pressure)
-				res = std::min(res, neigh[i].pressure / p);
+			if (p>neigh[i]->pressure)
+				res = std::min(res, neigh[i]->pressure / p);
 			else
-				res = std::min(res, p / neigh[i].pressure);
+				res = std::min(res, p / neigh[i]->pressure);
 		}
 		return res;
 	}
 
 	bool is_shock(pair<ComputationalCell,ComputationalCell> const& naive_slope, double cell_width, double shock_ratio,
-		ComputationalCell const& cell, vector<ComputationalCell> const& neighbor_list, double pressure_ratio,double cs)
+		ComputationalCell const& cell, vector<ComputationalCell const*> const& neighbor_list, double pressure_ratio,double cs)
 	{
 		const bool cond1 =(naive_slope.first.velocity.x + naive_slope.second.velocity.y)*
 			cell_width<(-shock_ratio)*cs;
@@ -166,8 +175,15 @@ namespace
 		return res;
 	}
 
+	void interp2(ComputationalCell &res, pair<ComputationalCell, ComputationalCell> const& slope,
+		Vector2D const& target, Vector2D const& cm)
+	{
+		ComputationalCellAddMult(res, slope.first, target.x - cm.x);
+		ComputationalCellAddMult(res, slope.second, target.y - cm.y);
+	}
+
 	pair<ComputationalCell, ComputationalCell> slope_limit(ComputationalCell const& cell,Vector2D const& cm,
-		vector<ComputationalCell> const& neighbors, vector<Edge> const& edge_list,
+		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
 		pair<ComputationalCell, ComputationalCell> const& slope)
 	{
 		pair<ComputationalCell, ComputationalCell> res(slope);
@@ -175,7 +191,7 @@ namespace
 		// Find maximum.minimum neighbor values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
-			ComputationalCell const& cell_temp = neighbors[i];
+			ComputationalCell const& cell_temp = *neighbors[i];
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
 			cmax.velocity.x = std::max(cmax.velocity.x, cell_temp.velocity.x);
@@ -194,11 +210,20 @@ namespace
 		}
 		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
 		// limit the slope
+		ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[0]), cm);
+		ComputationalCell dphi = centroid_val - cell;
 		vector<double> psi(4 + cell.tracers.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
-			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
-			ComputationalCell dphi = centroid_val - cell;
+			if (i > 0)
+			{
+				ReplaceComputationalCell(centroid_val, cell);
+				interp2(centroid_val, slope, CalcCentroid(edge_list[i]), cm);
+				ReplaceComputationalCell(dphi, centroid_val);
+				dphi -= cell;
+			}
+			//ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
+			//ComputationalCell dphi = centroid_val - cell;
 			/*Vector2D cent = CalcCentroid(edge_list[i]);
 			ComputationalCell dphi(slope.first);
 			dphi*=(cent.x - cm.x);
@@ -274,7 +299,7 @@ namespace
 	}
 
 	pair<ComputationalCell, ComputationalCell> shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
-		vector<ComputationalCell> const& neighbors, vector<Edge> const& edge_list,
+		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
 		pair<ComputationalCell, ComputationalCell> const& slope,double diffusecoeff)
 	{
 		pair<ComputationalCell, ComputationalCell> res(slope);
@@ -282,7 +307,7 @@ namespace
 		// Find maximum values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
-			ComputationalCell const& cell_temp = neighbors[i];
+			ComputationalCell const& cell_temp = *neighbors[i];
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
 			cmax.velocity.x = std::max(cmax.velocity.x, cell_temp.velocity.x);
@@ -307,25 +332,25 @@ namespace
 			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
 				if (std::abs(dphi.density) > 1e-9*cell.density)
-					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i].density-cell.density)/dphi.density,0.0));
+					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i]->density-cell.density)/dphi.density,0.0));
 			}
 			// pressure
 			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (std::abs(dphi.pressure) > 1e-9*cell.pressure)
-					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i].pressure - cell.pressure) / dphi.pressure, 0.0));
+					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i]->pressure - cell.pressure) / dphi.pressure, 0.0));
 			}
 			// xvelocity
 			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
 				if (std::abs(dphi.velocity.x) > 1e-9*cell.velocity.x)
-					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i].velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
+					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i]->velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
 			if (std::abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
 				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
-					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i].velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
+					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i]->velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
 			}
 			// tracers
 			size_t counter = 0;
@@ -337,7 +362,7 @@ namespace
 				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(safe_retrieve(mindiff.tracers,it->first))) || centroid_tracer*cell_tracer < 0)
 				{
 					if (std::abs(it->second) > std::abs(1e-9*cell_tracer))
-					  psi[4 + counter] = std::min(psi[4 + counter], std::max(diffusecoeff*(safe_retrieve(neighbors[i].tracers,it->first)- cell_tracer) / it->second, 0.0));
+					  psi[4 + counter] = std::min(psi[4 + counter], std::max(diffusecoeff*(safe_retrieve(neighbors[i]->tracers,it->first)- cell_tracer) / it->second, 0.0));
 				}
 				++counter;
 			}
@@ -377,17 +402,18 @@ namespace
 	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
 	vector<Vector2D> neighbor_mesh_list = GetNeighborMesh(tess, edge_list,cell_index);
 	vector<Vector2D> neighbor_cm_list = GetNeighborCM(tess, edge_list,cell_index);
-	vector<ComputationalCell> neighbor_list = GetNeighborCells(edge_list, cell_index,cells,ghost_cells,static_cast<size_t>(
+	vector<ComputationalCell const* > neighbor_list = GetNeighborCells(edge_list, cell_index,cells,ghost_cells,static_cast<size_t>(
 		tess.GetPointNo()));
 
-	pair<ComputationalCell, ComputationalCell> naive_slope, s_compare;
+	pair<ComputationalCell, ComputationalCell> naive_slope;
 	ComputationalCell const& cell = cells[cell_index];
 	naive_slope = calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
 		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list);
 
 	naive_slope_ = naive_slope;
 
-	for(size_t i=0;i<flat_tracers.size();++i){
+	for(size_t i=0;i<flat_tracers.size();++i)
+	{
 	  naive_slope.first.tracers[flat_tracers[i]] = 0;
 	  naive_slope.second.tracers[flat_tracers[i]] = 0;
 	}
@@ -493,21 +519,28 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
 #endif
 			)
-			res[i].first = interp(cells[static_cast<size_t>(edge.neighbors.first)], rslopes_[static_cast<size_t>(edge.neighbors.first)],
-			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+		{
+			res[i].first=cells[static_cast<size_t>(edge.neighbors.first)];
+			interp2(res[i].first, rslopes_[static_cast<size_t>(edge.neighbors.first)],
+				CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+		}
 		else
 		{
 		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
-		  res[i].first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
-				edge.neighbors.first),time),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+		  res[i].first = cell;
+		  interp2(res[i].first, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
+			  edge.neighbors.first), time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber)
 #ifdef RICH_MPI
 			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
 #endif
 			)
-			res[i].second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
-			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+		{
+			res[i].second = cells[static_cast<size_t>(edge.neighbors.second)];
+			interp2(res[i].second, rslopes_[static_cast<size_t>(edge.neighbors.second)],
+				CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+		}
 		else
 		{
 		  const ComputationalCell& cell = safe_retrieve

@@ -114,3 +114,16 @@ ComputationalCell operator*(double s, ComputationalCell const& p)
 {
 	return p*s;
 }
+
+void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const& other)
+{
+	cell.density = other.density;
+	cell.pressure = other.pressure;
+	cell.velocity = other.velocity;
+	assert(cell.tracers.size() == other.tracers.size());
+	for (size_t j = 0; j < cell.tracers.size(); ++j)
+	{
+		assert((cell.tracers.begin() + j)->first == (other.tracers.begin() + j)->first);
+		(cell.tracers.begin() + j)->second = (other.tracers.begin() + j)->second;
+	}
+}

@@ -126,4 +126,6 @@ ComputationalCell operator*(ComputationalCell const& p, double s);
 ComputationalCell operator*(double s, ComputationalCell const& p);
 
 void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& other, double scalar);
+
+void ReplaceComputationalCell(ComputationalCell &cell, ComputationalCell const& other);
 #endif // COMPUTATIONAL_CELL_HPP
