@@ -181,6 +181,7 @@ public:
 	virtual ~AMR(void);
 };
 
+//! \brief Conservative amr
 //! \todo Make sure AMR works with all physical geometries
 class ConservativeAMR : public AMR
 {
@@ -202,6 +203,12 @@ private:
 public:
 	void operator() (hdsim &sim);
 
+  /*! \brief Class constructor
+    \param refine Refinement scheme
+    \param remove Removal scheme
+    \param cu Cell updater
+    \param eu Extensive updater
+   */
 	ConservativeAMR
 	(CellsToRefine const& refine,
 	 CellsToRemove const& remove,

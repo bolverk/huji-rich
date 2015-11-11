@@ -19,6 +19,10 @@ private:
 	LinearGaussImproved const& interp_;
 public:
 
+  /*! \brief Class constructor
+    \param eos Equation of state
+    \param interp Interpolation
+   */
 	ColdFlowsExtensiveCalculator(EquationOfState const& eos,LinearGaussImproved const& interp);
 
 	void operator()

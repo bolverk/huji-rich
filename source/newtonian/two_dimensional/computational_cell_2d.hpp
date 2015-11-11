@@ -61,10 +61,14 @@ public:
   	ComputationalCell& operator=(ComputationalCell const& other);
 
 #ifdef RICH_MPI
+  /*! \brief Serializer
+    \param ar Archive
+    \param version Version
+   */
 	template<class Archive>
 	void serialize
 		(Archive& ar,
-			const unsigned int /*version*/)
+		 const unsigned int version)
 	{
 		ar & density;
 		ar & pressure;

@@ -21,6 +21,7 @@ public:
 		\param eos Equation of state
 		\param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
 		\param edge_values The interpolated values at the edge 
+		\param edge_velocity Velocity of the edges
 		\return Flux
 		*/
 		virtual Extensive operator()
@@ -37,6 +38,8 @@ public:
 
 	/*! \brief Class constructor
 	\param sequence Series of condition and action action pairs
+	\param interp Interpolation
+	\param sequence2 List of second order condition action sequences
 	*/
 	ConditionActionSequence2
 		(const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,

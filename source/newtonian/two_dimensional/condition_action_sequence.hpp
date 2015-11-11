@@ -39,6 +39,7 @@ public:
       \param cells Computational cells
       \param eos Equation of state
       \param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
+      \param edge_velocity Velocity of the egdes
       \return Flux
      */
     virtual Extensive operator()
