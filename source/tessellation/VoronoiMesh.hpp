@@ -98,7 +98,7 @@ public:
 	VoronoiMesh(VoronoiMesh const& other);
 
   #ifdef RICH_MPI
-	void Update(vector<Vector2D> const& points,Tessellation const& vproc);
+	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
 #endif // RICH_MPI
 
 	void Update(vector<Vector2D> const& points);

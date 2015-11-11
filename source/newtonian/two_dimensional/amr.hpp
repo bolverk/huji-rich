@@ -118,9 +118,7 @@ protected:
     \param obc Outer boundary conditions
     */
 #ifdef RICH_MPI
-  /*
-    \param proc_chull Cells' convex hull
-   */
+  //!    \param proc_chull Cells' convex hull
 #endif // RICH_MPI
   void GetNewPoints
   (vector<size_t> const& ToRefine,
@@ -156,8 +154,8 @@ public:
 	\param time The sim time
 	\param obc Outer boundary conditions
 	*/
-#ifndef RICH_MPI
-  //	\param proctess Tessellation of the processes (for parallel runs)
+#ifdef RICH_MPI
+  //! \param proctess Tessellation of the processes (for parallel runs)
 #endif // RICH_MPI
 	virtual void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
@@ -176,7 +174,7 @@ public:
 	\param obc The outer boundary conditions
 	*/
 #ifdef RICH_MPI
-  //	\param proctess Tessellation of the processes (for parallel runs)
+  //!	\param proctess Tessellation of the processes (for parallel runs)
 #endif // RICH_MPI
 	virtual void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,

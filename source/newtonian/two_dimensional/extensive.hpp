@@ -58,10 +58,14 @@ public:
   Extensive(boost::container::flat_map<std::string, double> const& Tracers);
 
 #ifdef RICH_MPI
+  /*! \brief Serializer
+    \param ar Archive
+    \param version Version
+   */
   template<class Archive>
   void serialize
-	  (Archive& ar,
-		  const unsigned int /*version*/)
+  (Archive& ar,
+   const unsigned int version)
   {
 	  ar & mass;
 	  ar & energy;
