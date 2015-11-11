@@ -325,9 +325,6 @@ void ExternalForceContribution
   \param custom_evolution_manager Class that translates indices to class pointers
   \param pg Physical geometry
 */
-#ifdef RICH_MPI
-//!  \param procupdate Scheme for updating the positions of the processes
-#endif // RICH_MPI
 /*!
   \param traceflag Determines whether tracers should be updated
   \param coldflows_flag Determines whether cold flows should be used

@@ -320,30 +320,6 @@ namespace {
 	}
 }
 
-StaticVoronoiMesh::StaticVoronoiMesh
-(const vector<Vector2D>& points,
- const OuterBoundary& bc):
-	logger(0),
-	vertices_(),
-	eps(1e-8),
-	obc(0),
-	cell_edges(vector<Edge> ()),
-	edges(vector<Edge>()),
-	CM(vector<Vector2D> ()),
-	mesh_vertices(vector<vector<int> >()),
-	Tri(),
-	GhostProcs(vector<int> ()),
-	GhostPoints(vector<vector<int> > ()),
-	SentProcs(vector<int> ()),
-	SentPoints(vector<vector<int> > ()),
-	selfindex(vector<size_t> ()),
-	NGhostReceived(vector<vector<int> > ()),
-	OrgCorner(),
-	Nextra(0)
-{
-	Initialise(points,&bc);
-}
-
 vector<int> StaticVoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,
 	int side)
 {

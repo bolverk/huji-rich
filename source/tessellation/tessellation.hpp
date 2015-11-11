@@ -55,12 +55,12 @@ public:
    */
   virtual void Update(vector<Vector2D> const& points) = 0;
 
+#ifdef RICH_MPI
   /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
    */
-  #ifdef RICH_MPI
   virtual void Update(vector<Vector2D> const& points,Tessellation const& tess) = 0;
 #endif // RICH_MPI
 

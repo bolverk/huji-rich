@@ -438,7 +438,10 @@ namespace
 }
 
 /*! \brief Returns the indeces of a sort
-\param comp The compare function
+  \param iterBegin Starting iterator
+  \param iterEnd End iterator
+  \param comp The compare function
+  \param indexes Output
 */
 template <class RAIter, class Compare>
 void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
