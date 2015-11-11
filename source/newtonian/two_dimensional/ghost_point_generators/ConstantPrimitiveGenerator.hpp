@@ -25,6 +25,14 @@ public:
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells, double time) const;
 
+  /*! \brief Calculates the gradient of a ghost cell
+    \return Gradient
+    \param tess Tessellation
+    \param cells Computational cells
+    \param gradients Gradients of the computational cells
+    \param ghost_index Index of ghost point
+    \param time Time
+   */
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,
 		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
 		size_t ghost_index, double time)const;

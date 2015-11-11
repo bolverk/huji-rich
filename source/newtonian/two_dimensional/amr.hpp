@@ -116,8 +116,12 @@ protected:
     \param NewPoints output
     \param Moved displacement for periodic grid
     \param obc Outer boundary conditions
+    */
+#ifdef RICH_MPI
+  /*
     \param proc_chull Cells' convex hull
    */
+#endif // RICH_MPI
   void GetNewPoints
   (vector<size_t> const& ToRefine,
    Tessellation const& tess,
@@ -151,8 +155,10 @@ public:
 	\param extensives The extensive variables
 	\param time The sim time
 	\param obc Outer boundary conditions
-	\param proctess Tessellation of the processes (for parallel runs)
 	*/
+#ifndef RICH_MPI
+  //	\param proctess Tessellation of the processes (for parallel runs)
+#endif // RICH_MPI
 	virtual void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
 		vector<Extensive> &extensives, double time
@@ -168,8 +174,10 @@ public:
 	\param extensives The extensive variables
 	\param time The sim time
 	\param obc The outer boundary conditions
-	\param proctess Tessellation of the processes (for parallel runs)
 	*/
+#ifdef RICH_MPI
+  //	\param proctess Tessellation of the processes (for parallel runs)
+#endif // RICH_MPI
 	virtual void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 		EquationOfState const& eos, double time

@@ -8,6 +8,11 @@ class EdgeVelocityCalculator
 {
 public:
 
+  /*! \brief Calculates the velocity of the edges
+    \param tess Tessellation
+    \param point_velocities Point velocities
+    \return Edge velocities
+   */
   virtual vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<Vector2D>& point_velocities) const = 0;

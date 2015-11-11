@@ -123,6 +123,10 @@ private:
 public:
 
 #ifdef RICH_MPI
+  /*! \brief Retrieves the original index of a point (in case a point was duplicated)
+    \param index Index of a point
+    \return Original index
+   */
 	int GetOrgIndex(int index)const;
 #endif
   /*! \brief Changes the cor olength

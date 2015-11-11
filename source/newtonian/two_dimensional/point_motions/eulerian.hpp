@@ -14,8 +14,9 @@ class Eulerian: public PointMotion
 public:
 
   vector<Vector2D> operator()
-  (Tessellation const& /*tessellation*/,
-   vector<ComputationalCell> const& /*primitives*/,double /*time*/) const;
+  (Tessellation const& tessellation,
+   vector<ComputationalCell> const& primitives,
+   double time) const;
 };
 
 #endif // EULERIAN_HPP
