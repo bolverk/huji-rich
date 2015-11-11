@@ -114,10 +114,9 @@ class Ratchet : public ConditionActionSequence2::Action2
 public:
 
 	/*! \brief Class constructor
-	\param rs Riemann solver
 	\param in If the ratchet allows inflow or outflow
 	*/
-	Ratchet(const RiemannSolver& rs, bool in);
+  Ratchet(const RiemannSolver&rs, const bool in);
 
 	Extensive operator()
 		(const Edge& edge,
@@ -129,7 +128,6 @@ public:
 			const pair<ComputationalCell, ComputationalCell> & edge_values) const;
 
 private:
-	const RiemannSolver& rs_;
 	const bool in_;
 	const RigidWallFlux2 wall_;
 	const FreeFlowFlux free_;

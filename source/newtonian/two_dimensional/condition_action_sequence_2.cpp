@@ -191,7 +191,10 @@ Extensive RigidWallFlux2::operator()
 			aux ? edge_values.first : edge_values.second);
 }
 
-Ratchet::Ratchet(const RiemannSolver& rs,bool in) :	rs_(rs),in_(in),wall_(RigidWallFlux2(rs)),free_(FreeFlowFlux(rs)) {}
+Ratchet::Ratchet(const RiemannSolver& rs,bool in) :	
+  in_(in),
+  wall_(RigidWallFlux2(rs)),
+  free_(FreeFlowFlux(rs)) {}
 
 
 Extensive Ratchet::operator()
@@ -204,7 +207,7 @@ Extensive Ratchet::operator()
 	const pair<ComputationalCell, ComputationalCell> & edge_values) const
 {
 	Vector2D n = tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
-	if (ScalarProd(n, cells[aux ? edge.neighbors.second : edge.neighbors.first].velocity)*(2*static_cast<double>(in_)-1) < 0)
+	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.second : edge.neighbors.first)].velocity)*(2*static_cast<double>(in_)-1) < 0)
 		return free_.operator()(edge,tess, edge_velocity, cells, eos, aux);
 	else
 		return wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values);
