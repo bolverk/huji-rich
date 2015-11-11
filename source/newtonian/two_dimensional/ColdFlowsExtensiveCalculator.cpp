@@ -10,6 +10,14 @@ namespace
 			return false;
 	}
 
+	bool SmallThermalEnergy(Extensive const& cell)
+	{
+		if (0.5*ScalarProd(cell.momentum, cell.momentum) > 0.95*cell.energy*cell.mass)
+			return true;
+		else
+			return false;
+	}
+
 	bool IsShocked(size_t index, LinearGaussImproved const& interp, ComputationalCell const& cell,Tessellation
 		const& tess,EquationOfState const& eos)
 	{
@@ -61,6 +69,8 @@ vector<Extensive>& extensives) const
 	string entropy = "Entropy";
 	for (size_t i = 0; i < N; ++i)
 	{
+		if (!SmallThermalEnergy(extensives[i]))
+			continue;
 		if (!IsShocked(i, interp_, cells[i],tess,eos_)||NegativeThermalEnergy(extensives[i]))
 		{
 			const double Ek = ScalarProd(extensives[i].momentum, extensives[i].momentum) / (2 * extensives[i].mass);
