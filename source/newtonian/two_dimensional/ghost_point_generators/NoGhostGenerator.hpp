@@ -21,10 +21,10 @@ public:
 	}
 
 	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient
-	(Tessellation const& /*tess*/,
-	 vector<ComputationalCell> const& /*cells*/,
-	 vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
-	 size_t /*ghost_index*/, double /*time*/)const
+	(const Tessellation& /*tess*/,
+	 const vector<ComputationalCell>& /*cells*/,
+	 const vector<std::pair<ComputationalCell, ComputationalCell> >& /*gradients*/,
+	 size_t /*ghost_index*/, double /*time*/) const
 	{
 		return std::pair<ComputationalCell, ComputationalCell>();
 	}

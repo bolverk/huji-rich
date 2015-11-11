@@ -255,6 +255,11 @@ private:
 public:
 	void operator() (hdsim &sim);
 
+  /*! \brief Class constructor
+    \param refine Refinement scheme
+    \param remove Removal scheme
+    \param eu Extensive updater
+   */
   NonConservativeAMR
   (CellsToRefine const& refine,
    CellsToRemove const& remove,

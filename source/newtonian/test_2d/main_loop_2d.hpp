@@ -19,7 +19,7 @@ public:
   /*! \brief Perform diagnostics
     \param sim Hydrodynamic simulation
    */
-  virtual void operator()(hdsim const& sim) = 0;
+  virtual void operator()(const hdsim& sim) = 0;
 
   virtual ~DiagnosticFunction(void);
 };
@@ -66,7 +66,7 @@ public:
     \param sim Hydrodynamic simulation
     \return True is simulation should continue running
    */
-  virtual bool operator()(hdsim const& sim) = 0;
+  virtual bool operator()(const hdsim& sim) = 0;
 
   //! \brief Virtual destructor
   virtual ~TerminationCondition(void);
@@ -101,7 +101,7 @@ public:
    */
   explicit CycleTermination(int max_cycles);
 
-  bool operator()(hdsim const& sim);
+  bool operator()(const hdsim& sim);
 
 private:
 
