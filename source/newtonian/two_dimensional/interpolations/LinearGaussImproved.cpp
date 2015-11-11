@@ -72,7 +72,6 @@ namespace
 		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list)
 	{
-		pair<ComputationalCell, ComputationalCell> res;
 		size_t n = edge_list.size();
 		if (n>20)
 		{
@@ -94,8 +93,16 @@ namespace
 			m[1] -= c_ij.y*r_ij.x;
 			m[2] -= c_ij.x*r_ij.y;
 			m[3] -= c_ij.y*r_ij.y;
-			vec_compare.first = vec_compare.first + (cell + neighbors[i])*r_ij.x*0.5;
-			vec_compare.second = vec_compare.second + (cell + neighbors[i])*r_ij.y*0.5;
+			ComputationalCellAddMult(vec_compare.first, cell, r_ij.x*0.5);
+			ComputationalCellAddMult(vec_compare.first, neighbors[i], r_ij.x*0.5);
+			ComputationalCellAddMult(vec_compare.second, cell, r_ij.y*0.5);
+			ComputationalCellAddMult(vec_compare.second, neighbors[i], r_ij.y*0.5);
+			/*
+			vec_compare.first += cell*r_ij.x*0.5;
+			vec_compare.first += neighbors[i]*r_ij.x*0.5;
+			vec_compare.second += cell*r_ij.y*0.5;
+			vec_compare.second += neighbors[i]*r_ij.y*0.5;
+			*/
 		}
 		m[0] += cell_volume;
 		m[3] += cell_volume;
@@ -119,8 +126,12 @@ namespace
 		m_inv[2] = -m[2] * det_inv;
 		m_inv[3] = m[0] * det_inv;
 		// Calculate the gradient
-		return pair<ComputationalCell, ComputationalCell>(m_inv[0] * vec_compare.first + m_inv[1] * vec_compare.second,
-			m_inv[2] * vec_compare.first + m_inv[3] * vec_compare.second);
+		pair<ComputationalCell, ComputationalCell> res(vec_compare.first,vec_compare.second);
+		res.first *= m_inv[0];
+		res.second *= m_inv[3];
+		ComputationalCellAddMult(res.first, vec_compare.second, m_inv[1]);
+		ComputationalCellAddMult(res.second, vec_compare.first, m_inv[2]);
+		return res;
 	}
 
 	double PressureRatio(ComputationalCell cell, vector<ComputationalCell> const& neigh)
@@ -149,7 +160,10 @@ namespace
 	ComputationalCell interp(ComputationalCell const& cell,pair<ComputationalCell, ComputationalCell> const& slope,
 		Vector2D const& target,Vector2D const& cm)
 	{
-		return cell + (target.x - cm.x)*slope.first + (target.y - cm.y)*slope.second;
+		ComputationalCell res(cell);
+		ComputationalCellAddMult(res, slope.first, target.x - cm.x);
+		ComputationalCellAddMult(res, slope.second, target.y - cm.y);
+		return res;
 	}
 
 	pair<ComputationalCell, ComputationalCell> slope_limit(ComputationalCell const& cell,Vector2D const& cm,
@@ -170,10 +184,13 @@ namespace
 			cmin.pressure = std::min(cmin.pressure, cell_temp.pressure);
 			cmin.velocity.x = std::min(cmin.velocity.x, cell_temp.velocity.x);
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
-			for (boost::container::flat_map<std::string, double>::iterator it = cmax.tracers.begin(); it != cmax.tracers.end(); ++it)
-			  it->second = std::max(it->second, safe_retrieve(cell_temp.tracers,it->first));
-			for (boost::container::flat_map<std::string, double>::iterator it = cmin.tracers.begin(); it != cmin.tracers.end(); ++it)
-			  it->second = std::min(it->second, safe_retrieve(cell_temp.tracers,it->first));
+			for (size_t j = 0; j < cell_temp.tracers.size(); ++j)
+			{
+				(cmax.tracers.begin()+j)->second = std::max((cmax.tracers.begin() + j)->second,
+					(cell_temp.tracers.begin() + j)->second);
+				(cmin.tracers.begin() + j)->second = std::min((cmin.tracers.begin() + j)->second,
+					(cell_temp.tracers.begin() + j)->second);
+			}
 		}
 		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
 		// limit the slope
@@ -182,6 +199,10 @@ namespace
 		{
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
+			/*Vector2D cent = CalcCentroid(edge_list[i]);
+			ComputationalCell dphi(slope.first);
+			dphi*=(cent.x - cm.x);
+			ComputationalCellAddMult(dphi, slope.second, cent.y - cm.y);*/
 			// density
 			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density),std::abs(mindiff.density))||centroid_val.density*cell.density < 0)
 			{
@@ -219,22 +240,19 @@ namespace
 						psi[3] = std::min(psi[3], mindiff.velocity.y / dphi.velocity.y);
 			}
 			// tracers
-			size_t counter = 0;
-			for (boost::container::flat_map<std::string, double>::iterator it = dphi.tracers.begin(); it != dphi.tracers.end(); ++it)
+			for (size_t j = 0; j < dphi.tracers.size(); ++j)
 			{
-			  double cell_tracer = safe_retrieve(cell.tracers,it->first);
-			  double diff_tracer = safe_retrieve(maxdiff.tracers,it->first);
-			  double centroid_tracer = safe_retrieve(centroid_val.tracers,it->first);
-				if (std::abs(it->second) > 0.1*std::max(std::abs(diff_tracer), std::abs(safe_retrieve(mindiff.tracers,it->first))) || centroid_tracer*cell_tracer < 0)
+				double cell_tracer = (cell.tracers.begin() + j)->second;
+				double diff_tracer = (maxdiff.tracers.begin() + j)->second;
+				if (std::abs((dphi.tracers.begin() + j)->second) > 0.1*std::max(std::abs(diff_tracer), std::abs((mindiff.tracers.begin() + j)->second)) || (centroid_val.tracers.begin() + j)->second *cell_tracer < 0)
 				{
-					if (it->second > std::abs(1e-9*cell_tracer))
-						psi[4 + counter] = std::min(psi[4 + counter], diff_tracer / it->second);
+					if ((dphi.tracers.begin() + j)->second > std::abs(1e-9*cell_tracer))
+						psi[4 + j] = std::min(psi[4 + j], diff_tracer / (dphi.tracers.begin() + j)->second);
 					else
-						if (it->second < -std::abs(1e-9 * cell_tracer))
-						  psi[4 + counter] = std::min(psi[4 + counter], safe_retrieve(mindiff.tracers,it->first)
-							/ it->second);
+						if ((dphi.tracers.begin() + j)->second < -std::abs(1e-9 * cell_tracer))
+							psi[4 + j] = std::min(psi[4 + j], (mindiff.tracers.begin() + j)->second
+								/ (dphi.tracers.begin() + j)->second);
 				}
-				++counter;
 			}
 		}
 		res.first.density *= psi[0];
@@ -469,19 +487,18 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	res.resize(edge_number);
 	for (size_t i = 0; i < edge_number; ++i)
 	{
-		pair<ComputationalCell, ComputationalCell> cell_temp;
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
 		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber)
 #ifdef RICH_MPI
 			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
 #endif
 			)
-			cell_temp.first = interp(cells[static_cast<size_t>(edge.neighbors.first)], rslopes_[static_cast<size_t>(edge.neighbors.first)],
+			res[i].first = interp(cells[static_cast<size_t>(edge.neighbors.first)], rslopes_[static_cast<size_t>(edge.neighbors.first)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		else
 		{
 		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
-			cell_temp.first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
+		  res[i].first = interp(cell, ghost_.GetGhostGradient(tess,cells,rslopes_,static_cast<size_t>(
 				edge.neighbors.first),time),CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber)
@@ -489,17 +506,16 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			|| tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second)
 #endif
 			)
-			cell_temp.second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
+			res[i].second = interp(cells[static_cast<size_t>(edge.neighbors.second)], rslopes_[static_cast<size_t>(edge.neighbors.second)],
 			CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		else
 		{
 		  const ComputationalCell& cell = safe_retrieve
 		    (ghost_cells,
 		     static_cast<size_t>(edge.neighbors.second));
-			cell_temp.second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
+			res[i].second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 				edge.neighbors.second),time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
-		res[i] = cell_temp;
 	}
 	return res;
 }

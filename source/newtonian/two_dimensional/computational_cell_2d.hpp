@@ -53,6 +53,17 @@ public:
     \return Reference to self
    */
 	ComputationalCell& operator+=(ComputationalCell const& other);
+	/*! \brief Self reduction operator
+	\param other Reduction
+	\return Reference to self
+	*/
+	ComputationalCell& operator-=(ComputationalCell const& other);
+
+	/*! \brief Self multiplication operator
+	\param s The scalar to multiply
+	\return Reference to self
+	*/
+	ComputationalCell& operator*=(double s);
 
   /*! \brief Self decrement operator
     \param other difference
@@ -113,4 +124,6 @@ ComputationalCell operator*(ComputationalCell const& p, double s);
 \return Computational Cell
 */
 ComputationalCell operator*(double s, ComputationalCell const& p);
+
+void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& other, double scalar);
 #endif // COMPUTATIONAL_CELL_HPP
