@@ -35,9 +35,13 @@ public:
 	\param time The time
 	\return The gradient of the ghost cell
 	*/
-	virtual std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(const Tessellation& tess,
-		const vector<ComputationalCell>& cells,const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-		size_t ghost_index,double time) const = 0;
+	virtual std::pair<ComputationalCell, ComputationalCell> 
+	GetGhostGradient
+	(const Tessellation& tess,
+	 const vector<ComputationalCell>& cells,
+	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+	 size_t ghost_index,
+	 double time) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);

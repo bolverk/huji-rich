@@ -17,8 +17,11 @@ public:
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells,double time) const;
 
-	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& tess,
-		vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+  std::pair<ComputationalCell, ComputationalCell> 
+  GetGhostGradient
+  (const Tessellation& tess,
+   const vector<ComputationalCell>& cells,
+   const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
 		size_t ghost_index,double time)const;
 };
 

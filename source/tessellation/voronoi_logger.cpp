@@ -7,9 +7,9 @@ using namespace voronoi_loggers;
 
 VoronoiLogger::VoronoiLogger(void) {}
 
-void VoronoiLogger::output(VoronoiMesh const& /*v*/) {}
+void VoronoiLogger::output(const VoronoiMesh& /*v*/) {}
 
-void VoronoiLogger::output(Tessellation const& /*v*/) {}
+void VoronoiLogger::output(const Tessellation& /*v*/) {}
 
 VoronoiLogger::~VoronoiLogger(void) {}
 

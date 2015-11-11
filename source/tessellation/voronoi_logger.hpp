@@ -29,12 +29,12 @@ namespace voronoi_loggers
     /*! \brief Outputs information from the Voronoi tessellation
       \param v Refernce to Voronoi tessellation
      */
-    virtual void output(VoronoiMesh const& v);
+    virtual void output(const VoronoiMesh& v);
 
 	 /*! \brief Outputs information from a tessellation
       \param v Refernce to the tessellation
      */
-    virtual void output(Tessellation const& v);
+    virtual void output(const Tessellation& v);
 
     virtual ~VoronoiLogger(void);
   };
