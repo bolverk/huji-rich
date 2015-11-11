@@ -7,28 +7,29 @@ ENDEMIC_SOURCES := $(shell find $(TARGET) -name '*.cpp')
 ENDEMIC_OBJECTS := $(patsubst $(TARGET)/%.cpp,$(DUMP_FOLDER)/%.o,$(ENDEMIC_SOURCES))
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
-	LFLAGS := -pg
+	LFLAGS := -pg -lclipper
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
+	LFLAGS := -lclipper
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wshadow -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lboost_mpi -lboost_serialization
+	LFLAGS := -lboost_mpi -lboost_serialization -lclipper
 else ifeq ($(MODE),debug_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
 	LINT_FLAGS := -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations
-	LFLAGS := -pg -lboost_mpi -lboost_serialization
+	LFLAGS := -pg -lboost_mpi -lboost_serialization -lclipper
 else
 	MODE := production
-	OPTIMIZATION_FLAGS := -O2
-	LFLAGS :=
+	OPTIMIZATION_FLAGS := -O3
+	LFLAGS := -lclipper
 endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
