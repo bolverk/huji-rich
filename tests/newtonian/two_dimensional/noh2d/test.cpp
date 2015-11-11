@@ -13,7 +13,8 @@
 #include "source/misc/int2str.hpp"
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cfl.hpp"
-#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
+#include "source/newtonian/two_dimensional/ColdFlowsCellUpdater.hpp"
+
 #include "source/newtonian/two_dimensional/ColdFlowsExtensiveCalculator.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
@@ -106,15 +107,16 @@ namespace
 		}
 	};
 
-	class NohRemove: public CellsToRemove
+	class NohRemove : public CellsToRemove
 	{
 	private:
 		const double minV_;
+		LinearGaussImproved const& interp_;
 	public:
-		NohRemove(double minV):minV_(minV){}
+		NohRemove(double minV, LinearGaussImproved const& interp) :minV_(minV), interp_(interp) {}
 
-		std::pair<vector<size_t>,vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
+		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
+			vector<ComputationalCell> const& cells, double /*time*/)const
 		{
 			vector<size_t> indeces;
 			vector<double> merits;
@@ -124,13 +126,19 @@ namespace
 				const double V = tess.GetVolume(static_cast<int>(i));
 				if (V < minV_)
 				{
-					indeces.push_back(i);
-					merits.push_back(1.0/V);
+					const double drhox = interp_.GetSlopesUnlimited()[i].first.density;
+					const double drhoy = interp_.GetSlopesUnlimited()[i].second.density;
+					if ((drhox*drhox + drhoy*drhoy)*V < 0.1*cells[i].density*cells[i].density)
+					{
+						indeces.push_back(i);
+						merits.push_back(1.0 / V);
+					}
 				}
 			}
 			return std::pair<vector<size_t>, vector<double> >(indeces, merits);
 		}
 	};
+
 
 	class NohRemoveDebug : public CellsToRemove
 	{
@@ -183,7 +191,7 @@ int main(void)
 	SimpleCFL tsf(0.15);
 	IdleHBC hbc;
 	ModularFluxCalculator fc(interpolation, rs, hbc);
-	SimpleCellUpdater cu;
+	ColdFlowsCellUpdate cu;
 	SlabSymmetry pg;
 
 	vector<ComputationalCell> init_cells = calc_init_cond(tess,eos);
@@ -205,7 +213,7 @@ int main(void)
 	double Vmin = 0.25*width*width / (np*np);
 	NohRefine refine(Vmax);
 	//NohRefineDebug refine;
-	NohRemove remove(Vmin);
+	NohRemove remove(Vmin, interpolation);
 	//NohRemoveDebug remove;
 	ConservativeAMR amr(refine, remove);
 
