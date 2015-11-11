@@ -696,7 +696,7 @@ vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void VoronoiMesh::Update(vector<Vector2D> const& p)
+void VoronoiMesh::Update(const vector<Vector2D>& p)
 {
 	// Clean_up last step
 	edges.clear();

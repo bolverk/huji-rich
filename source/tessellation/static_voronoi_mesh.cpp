@@ -593,7 +593,7 @@ vector<Vector2D>& StaticVoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void StaticVoronoiMesh::Update(vector<Vector2D> const& /*p*/) {}
+void StaticVoronoiMesh::Update(const vector<Vector2D>& /*p*/) {}
 
 vector<int> StaticVoronoiMesh::GetNeighbors(int index)const
 {

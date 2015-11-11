@@ -79,10 +79,10 @@ public:
   StaticVoronoiMesh(StaticVoronoiMesh const& other);
 
   #ifdef RICH_MPI
-	void Update(vector<Vector2D> const& points,Tessellation const& vproc);
+	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
 #endif // RICH_MPI
 
-	void Update(vector<Vector2D> const& points);
+	void Update(const vector<Vector2D>& points);
 
   ~StaticVoronoiMesh(void);
 	/*! \brief Get Total number of mesh generating points

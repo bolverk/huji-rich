@@ -32,9 +32,9 @@ public:
   /*! \brief Class constructor
     \param fname File name
    */
-  explicit WriteTime(string const& fname);
+  explicit WriteTime(const string& fname);
 
-  void operator()(hdsim const& sim);
+  void operator()(const hdsim& sim);
 
 private:
   string fname_;
@@ -48,9 +48,9 @@ public:
 	/*! \brief Class constructor
 	\param fname File name
 	*/
-	explicit WriteData(string const& fname);
+	explicit WriteData(const string& fname);
 
-	void operator()(hdsim const& sim);
+	void operator()(const hdsim& sim);
 
 private:
 	string fname_;
