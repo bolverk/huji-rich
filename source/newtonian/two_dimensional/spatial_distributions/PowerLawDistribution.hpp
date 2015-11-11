@@ -21,7 +21,7 @@ public:
 	*/
 	PowerLawDistribution(double A,double b,Vector2D const& center=Vector2D(0,0));
 
-	double operator()(Vector2D const& point) const;
+	double operator()(const Vector2D& point) const;
 private:
 	const double A_;
 	const double b_;

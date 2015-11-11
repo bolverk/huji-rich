@@ -17,7 +17,7 @@ public:
     \param r Point in 2d space
     \return True if r is inside the shape
    */
-  virtual bool operator()(Vector2D const& r) const = 0;
+  virtual bool operator()(const Vector2D& r) const = 0;
 
   //! \brief virtual destructor
   virtual ~Shape2D(void);
@@ -35,7 +35,7 @@ public:
   Circle(Vector2D const& center,
 	 double radius);
 
-  bool operator()(Vector2D const& r) const;
+  bool operator()(const Vector2D& r) const;
 
   /*! \brief Returns the center of the circle
     \return Center of the circle
@@ -63,7 +63,7 @@ public:
    */
   explicit Outside(Shape2D const& shape);
 
-  bool operator()(Vector2D const& r) const;
+  bool operator()(const Vector2D& r) const;
 
 private:
 

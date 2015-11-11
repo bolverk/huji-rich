@@ -17,7 +17,7 @@ public:
     \param point Position
     \return The value of the function at the point
    */
-  virtual double operator()(Vector2D const& point) const = 0;
+  virtual double operator()(const Vector2D& point) const = 0;
 
   virtual ~SpatialDistribution(void);
 };
