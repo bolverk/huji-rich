@@ -72,7 +72,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	RegularFlux2(const RiemannSolver& rs);
+  explicit RegularFlux2(const RiemannSolver& rs);
 
 	Extensive operator()
 		(const Edge& edge,
@@ -97,7 +97,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	RigidWallFlux2(const RiemannSolver& rs);
+  explicit RigidWallFlux2(const RiemannSolver& rs);
 
 	Extensive operator()
 		(const Edge& edge,

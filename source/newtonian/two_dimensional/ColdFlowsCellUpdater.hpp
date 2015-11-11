@@ -18,7 +18,7 @@ public:
 	/*! \brief Class constructor
 	\param sequence List of rules for cells that are calculated in a special way
 	*/
-	ColdFlowsCellUpdate
+  explicit ColdFlowsCellUpdate
 		(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
 			vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >());
 

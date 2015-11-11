@@ -56,7 +56,7 @@ public:
   /*! \brief Class constructor
     \param sequence Series of condition and action action pairs
    */
-  ConditionActionSequence
+  explicit ConditionActionSequence
   (const vector<pair<const Condition*, const Action*> >& sequence);
 
   ~ConditionActionSequence(void);
@@ -83,7 +83,7 @@ public:
   /*! \brief Class constructor
     \param rs Riemann solver
    */
-  RegularFlux(const RiemannSolver& rs);
+  explicit RegularFlux(const RiemannSolver& rs);
 
   Extensive operator()
 	  (const Edge& edge,
@@ -106,7 +106,7 @@ public:
   /*! \brief Class constructor
     \param rs Riemann solver
    */
-  RigidWallFlux(const RiemannSolver& rs);
+  explicit RigidWallFlux(const RiemannSolver& rs);
 
   Extensive operator()
   (const Edge& edge,
@@ -128,7 +128,7 @@ public:
   /*! \brief Class constructor
     \param rs Riemann solver
    */
-  FreeFlowFlux(const RiemannSolver& rs);
+  explicit FreeFlowFlux(const RiemannSolver& rs);
 
   Extensive operator()
   (const Edge& edge,
@@ -176,7 +176,7 @@ public:
   /*! \brief Class constructor
     \param sticker_name Sticker name
    */
-  RegularSpecialEdge(const string& sticker_name);
+  explicit RegularSpecialEdge(const string& sticker_name);
 
   pair<bool,bool> operator()
   (const Edge& edge,

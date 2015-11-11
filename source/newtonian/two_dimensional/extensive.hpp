@@ -55,7 +55,7 @@ public:
   \brief constructor for extensive with a tracer list. All tracers start with zero.
   \param Tracers The tracers 
   */
-  Extensive(boost::container::flat_map<std::string, double> const& Tracers);
+  explicit Extensive(const boost::container::flat_map<std::string, double>& Tracers);
 
 #ifdef RICH_MPI
   /*! \brief Serializer
