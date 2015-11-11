@@ -109,6 +109,7 @@ private:
 	const RiemannSolver& rs_;
 };
 
+//! \brief Allows matter to flow in only one direction
 class Ratchet : public ConditionActionSequence2::Action2
 {
 public:

@@ -1,4 +1,4 @@
-/*! \file ColdFlowsCellUpdate.hpp
+/*! \file ColdFlowsCellUpdater.hpp
 \author Elad Steinberg
 \brief Cell updater for cold flows
 */

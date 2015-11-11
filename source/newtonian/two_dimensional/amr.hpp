@@ -54,7 +54,7 @@ public:
 	virtual ~AMRExtensiveUpdater(void);
 };
 
-// !\brief Simple class for extensive update scheme in amr
+//! \brief Simple class for extensive update scheme in amr
 class SimpleAMRExtensiveUpdater : public AMRExtensiveUpdater
 {
 public:
@@ -88,6 +88,7 @@ public:
 	virtual ~CellsToRemove(void);
 };
 
+//! \brief Chooses which cells should be refined
 class CellsToRefine
 {
 public:
@@ -206,6 +207,7 @@ public:
 		)const;
 };
 
+//! \brief Non conservative amr
 class NonConservativeAMR : public AMR
 {
 private:
