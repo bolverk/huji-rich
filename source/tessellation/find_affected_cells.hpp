@@ -12,6 +12,11 @@
 
 using std::vector;
 
+/*! \brief Determines if an edge and a circle intersect
+  \param edge Edge
+  \param circle Circle
+  \return True if both intersect, false otherwise
+ */
 bool edge_circle_intersect
 (const Edge& edge,
  const Circle& circle);

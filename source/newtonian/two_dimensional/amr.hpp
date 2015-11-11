@@ -109,6 +109,15 @@ public:
 class AMR : public Manipulate
 {
 protected:
+
+  /*! \brief Calculates the positions of the new points
+    \param ToRefine points to refine
+    \param tess Tessellation
+    \param NewPoints output
+    \param Moved displacement for periodic grid
+    \param obc Outer boundary conditions
+    \param proc_chull Cells' convex hull
+   */
   void GetNewPoints
   (vector<size_t> const& ToRefine,
    Tessellation const& tess,
@@ -120,6 +129,12 @@ protected:
 #endif
 	  )const;
 #ifdef RICH_MPI
+
+  /*! \brief Calculates the list of indices of points because they are near the edge
+    \param candidates Candidates for refinement
+    \param tess Tessellation
+    \return List of indices of points because they are near the edge
+   */
   vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const;
 #endif
 public:
@@ -135,6 +150,8 @@ public:
 	\param eos The equation of state
 	\param extensives The extensive variables
 	\param time The sim time
+	\param obc Outer boundary conditions
+	\param proctess Tessellation of the processes (for parallel runs)
 	*/
 	virtual void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
@@ -151,6 +168,7 @@ public:
 	\param extensives The extensive variables
 	\param time The sim time
 	\param obc The outer boundary conditions
+	\param proctess Tessellation of the processes (for parallel runs)
 	*/
 	virtual void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,

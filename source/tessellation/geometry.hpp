@@ -200,6 +200,10 @@ Vector2D pol2cart(double radius, double angle);
  */
 Vector2D normalize(const Vector2D& v);
 
+/*! \brief Calculates the square of the distance. This is computationaly cheaper then actually calculating the distance
+  \param v Vector
+  \return Square of the distance
+ */
 double dist_sqr(const Vector2D& v);
 
 #endif // GEOMETRY_HPP
