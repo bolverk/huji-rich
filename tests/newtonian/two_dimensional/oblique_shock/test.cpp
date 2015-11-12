@@ -1,3 +1,8 @@
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#include <boost/mpi/collectives.hpp>
+#include <boost/mpi/environment.hpp>
+#endif
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -34,6 +39,23 @@ using namespace std;
 
 namespace
 {
+
+#ifdef RICH_MPI
+  vector<Vector2D> process_positions(const SquareBox& boundary)
+  {
+    const boost::mpi::communicator world;
+    const Vector2D lower_left = boundary.getBoundary().first;
+    const Vector2D upper_right = boundary.getBoundary().second;
+    vector<Vector2D> res(world.size());
+    if(world.rank()==0){
+      res = RandSquare(world.size(),
+		       lower_left.x,upper_right.x,
+		       lower_left.y,upper_right.y);
+    }
+    boost::mpi::broadcast(world, res, 0);
+    return res;
+  }
+#endif // RICH_MPI
 
 	class WedgeNoMove : public CustomMotionCriteria
 	{
@@ -191,10 +213,22 @@ namespace
 			double width = 1) :
 			pg_(),
 			outer_(-width / 2, width / 2, width / 2, -width / 2),
-			tess_(//create_initial_points(width,np,inner_num),
+#ifdef RICH_MPI
+			proctess_(process_positions(outer_), outer_),
+#endif // RICH_MPI
+			tess_(
+#ifdef RICH_MPI
+			      proctess_,
+			      SquareMeshM
+			      (30,30,
+			       proctess_,
+			       outer_.getBoundary().first,
+			       outer_.getBoundary().second),
+#else
 			cartesian_mesh(30, 30,
 			outer_.getBoundary().first,
 			outer_.getBoundary().second),
+#endif
 			outer_),
 			eos_(adiabatic_index),
 			rs_(),
@@ -217,7 +251,12 @@ namespace
 			cu_(VectorInitialiser<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >
 			(pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*>
 			(new HasSticker("wedge"), new SkipUpdate))()),
-			sim_(tess_,
+			sim_
+		  (
+#ifdef RICH_MPI
+		   proctess_,
+#endif // RICH_MPI
+		   tess_,
 			outer_,
 			pg_,
 			calc_init_cond(tess_),
@@ -244,6 +283,9 @@ namespace
 	private:
 		const SlabSymmetry pg_;
 		SquareBox outer_;
+#ifdef RICH_MPI
+	  VoronoiMesh proctess_;
+#endif // RICH_MPI
 		VoronoiMesh tess_;
 		const IdealGas eos_;
 		const Hllc rs_;
@@ -331,6 +373,9 @@ namespace
 		NonConservativeAMR amr(refine, remove);
 
 		while (tf > sim.getTime()){
+#ifdef RICH_MPI
+		  cout << sim.getTime() << endl;
+#endif // RICH_MPI
 			try{
 				sim.TimeAdvance();
 				amr(sim);
@@ -348,13 +393,22 @@ namespace
 
 int main(void)
 {
+#ifdef RICH_MPI
+  boost::mpi::environment env;
+  const boost::mpi::communicator world;
+#endif // RICH_MPI
+
 	SimData sim_data;
 
 	hdsim& sim = sim_data.getSim();
 
 	main_loop(sim);
 
+#ifdef RICH_MPI
+	write_snapshot_to_hdf5(sim, "process_"+int2str(world.rank())+"_final.h5");
+#else
 	write_snapshot_to_hdf5(sim, "final.h5");
+#endif // RICH_MPI
 
 	return 0;
 }

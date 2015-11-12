@@ -75,12 +75,12 @@ public:
 #ifdef RICH_MPI
   /*! \brief Serializer
     \param ar Archiver
-    \param version Version
+    \param int Version
    */
   template<class Archive>
   void serialize
   (Archive& ar, 
-   const unsigned int version)
+   const unsigned int /*version*/)
   {
     ar & x;
     ar & y;

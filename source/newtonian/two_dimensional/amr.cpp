@@ -188,8 +188,10 @@ void ConservativeAMR::UpdateCellsRefine
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
 	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
+#ifndef RICH_MPI
 	if (ToRefine.empty())
 		return;
+#endif // RICH_MPI
 #ifdef RICH_MPI
 	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
 	vector<Vector2D> chull;
@@ -283,8 +285,10 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	cells.resize(N);
 	std::pair<vector<size_t>,vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 	vector<size_t> ToRemove = ToRemovepair.first;
+#ifndef RICH_MPI
 	if (ToRemove.empty())
 		return;
+#endif // RICH_MPI
 	ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
 	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
@@ -360,8 +364,10 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	)const
 {
 	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
+#ifndef RICH_MPI
 	if (ToRefine.empty())
 		return;
+#endif // RICH_MPI
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
 #ifdef RICH_MPI
@@ -407,8 +413,10 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 {
 	std::pair<vector<size_t>,vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 	vector<size_t> ToRemove = ToRemovepair.first;
+#ifndef RICH_MPI
 	if (ToRemove.empty())
 		return;
+#endif // RICH_MPI
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess.GetMeshPoints();

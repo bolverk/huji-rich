@@ -123,7 +123,7 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
 	assert(cell.tracers.size() == other.tracers.size());
 	for (size_t j = 0; j < cell.tracers.size(); ++j)
 	{
-		assert((cell.tracers.begin() + j)->first == (other.tracers.begin() + j)->first);
-		(cell.tracers.begin() + j)->second = (other.tracers.begin() + j)->second;
+	  assert((cell.tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
+	  (cell.tracers.begin() + static_cast<int>(j))->second = (other.tracers.begin() + static_cast<int>(j))->second;
 	}
 }
