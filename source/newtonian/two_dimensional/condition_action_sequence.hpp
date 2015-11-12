@@ -54,7 +54,7 @@ public:
   };
 
   /*! \brief Class constructor
-    \param sequence Series of condition and action action pairs
+    \param sequence Series of condition and action action pairs. Both have to be dynamically allocated pointers, and will be explicitly destructed upon descruction of the class
    */
   explicit ConditionActionSequence
   (const vector<pair<const Condition*, const Action*> >& sequence);
