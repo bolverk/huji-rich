@@ -469,10 +469,15 @@ namespace
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,size_t snapshot_number)
 {
 	const boost::mpi::communicator world;
-	double read_num = snapshot_number*1.0/world.size();
+	double read_num = 
+	  static_cast<double>(snapshot_number)*1.0/
+	  static_cast<double>(world.size());
 	// Read the data
-	int start = floor(world.rank()*read_num+0.1);
-	int stop = floor((1+world.rank())*read_num-1.1);
+	int start = static_cast<int>
+	  (floor
+	   (static_cast<double>(world.rank())*read_num+0.1));
+	int stop = static_cast<int>
+	  (floor((1+world.rank())*read_num-1.1));
 	Snapshot res,snap;
 	for (int i = start; i < stop; ++i)
 	{
@@ -533,5 +538,6 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 
 	res.time = snap.time;
 	res.cycle = snap.cycle;
+	return res;
 }
 #endif

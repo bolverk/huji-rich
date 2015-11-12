@@ -80,7 +80,7 @@ public:
   template<class Archive>
   void serialize
   (Archive& ar, 
-   const unsigned int version)
+   const unsigned int /*version*/)
   {
     ar & x;
     ar & y;
