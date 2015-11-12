@@ -392,7 +392,7 @@ void hdsim::TimeAdvance2Heun(void)
 	   time_,
 	   dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
 
 	ExternalForceContribution
 	  (tess_,
@@ -404,9 +404,9 @@ void hdsim::TimeAdvance2Heun(void)
 	   source_,
 	   time_+dt,
 	   dt,
-	   extensives_);
+	   mid_extensives);
 
-	extensives_ = average_extensive(extensives_, mid_extensives);
+	extensives_ = average_extensive(mid_extensives, extensives_);
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
