@@ -60,7 +60,7 @@ public:
 #ifdef RICH_MPI
   /*! \brief Serializer
     \param ar Archive
-    \param version Version
+    \param int Version
    */
   template<class Archive>
   void serialize
