@@ -16,6 +16,7 @@
 #include "../test_2d/main_loop_2d.hpp"
 #include "../../tessellation/polygon_overlap_area.hpp"
 #include <boost/scoped_ptr.hpp>
+#include "interpolations/LinearGaussImproved.hpp"
 
 //! \brief Abstract class for cell update scheme in amr
 class AMRCellUpdater
@@ -198,6 +199,7 @@ private:
   SimpleAMRExtensiveUpdater seu_;
 	AMRCellUpdater* cu_;
 	AMRExtensiveUpdater* eu_;
+	LinearGaussImproved *interp_;
 
 	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const&
 		candidates, Tessellation const& tess) const;
@@ -218,6 +220,7 @@ public:
 	ConservativeAMR
 	(CellsToRefine const& refine,
 	 CellsToRemove const& remove,
+	 LinearGaussImproved *slopes = 0,
 	 AMRCellUpdater* cu=0,
 	 AMRExtensiveUpdater* eu=0);
 

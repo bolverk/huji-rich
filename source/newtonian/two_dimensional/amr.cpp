@@ -28,7 +28,7 @@ Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const Computatio
 }
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
-	double volume, ComputationalCell const& /*old_cell*/) const
+	double volume, ComputationalCell const& old_cell) const
 {
 	ComputationalCell res;
 	const double vol_inv = 1.0 / volume;
@@ -39,6 +39,7 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 		extensive.tracers.begin();
 		it != extensive.tracers.end(); ++it)
 		res.tracers[it->first] = (it->second)/extensive.mass;
+	res.stickers = old_cell.stickers;
 	return res;
 }
 
@@ -131,7 +132,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			Vector2D const& otherpoint = tess.GetMeshPoint(neigh[j]);
-			if (otherpoint.distance(mypoint) < 1.5*R)
+			if (otherpoint.distance(mypoint) < 1.75*R)
 				continue;
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
 #ifdef RICH_MPI
@@ -154,15 +155,17 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 
 ConservativeAMR::ConservativeAMR
 (CellsToRefine const& refine,
- CellsToRemove const& remove,
- AMRCellUpdater* cu,
- AMRExtensiveUpdater* eu):
-  refine_(refine),
-  remove_(remove),
+	CellsToRemove const& remove,
+	LinearGaussImproved *slopes,
+	AMRCellUpdater* cu,
+	AMRExtensiveUpdater* eu) :
+	refine_(refine),
+	remove_(remove),
 	scu_(),
 	seu_(),
-  cu_(cu), 
-  eu_(eu)
+	cu_(cu),
+	eu_(eu),
+	interp_(slopes)
 {
   if(!cu){
     assert(!eu);
@@ -262,6 +265,8 @@ void ConservativeAMR::UpdateCellsRefine
 				TotalVolume += v;
 			}
 			cells.push_back(cu_->ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine[i]]));
+			if (interp_ != 0)
+				interp_->GetSlopesUnlimited().push_back(interp_->GetSlopesUnlimited()[ToRefine[i]]);
 			++location;
 		}
 	}
