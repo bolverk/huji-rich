@@ -389,9 +389,9 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
 	cells.resize(N);
-	extensives.resize(N+ToRefine.size());
+	extensives.resize(N+NewPoints.size());
 
-	for (size_t i = 0; i < ToRefine.size(); ++i)
+	for (size_t i = 0; i < NewPoints.size(); ++i)
 	{
 		cor.push_back(NewPoints[i].second);
 		cells.push_back(cells[NewPoints[i].first]);
@@ -404,7 +404,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 #endif
 
 	// Recalcualte extensives
-	for (size_t i = 0; i < N + ToRefine.size(); ++i)
+	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
