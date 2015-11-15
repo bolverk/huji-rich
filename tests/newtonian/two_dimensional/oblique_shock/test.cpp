@@ -57,31 +57,48 @@ namespace
   }
 #endif // RICH_MPI
 
-	class WedgeNoMove : public CustomMotionCriteria
-	{
-	public:
-		WedgeNoMove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall){}
-		bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-			double /*time*/)const
-		{
-			if (cells[index].stickers.at(key_) || tess.GetMeshPoint(static_cast<int>(index)).y
-				<(0.1*tess.GetMeshPoint(static_cast<int>(index)).x - 0.428 + distanceToWall_))
-				return true;
-			else
-				return false;
-		}
-		Vector2D CustomVelocityResult(size_t index, Tessellation const& /*tess*/, vector<ComputationalCell> const& cells,
-			double /*time*/)const
-		{
-			if (!cells[index].stickers.at(key_))
-				return cells[index].velocity*0.2;
-			else
-				return Vector2D(0, 0);
-		}
-	private:
-		string key_;
-		double const distanceToWall_;
-	};
+  class WedgeNoMove : public CustomMotionCriteria
+  {
+  public:
+	  WedgeNoMove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
+	  bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
+		  double /*time*/, vector<Vector2D> const& velocities, double dt)const
+	  {
+		  if (cells[index].stickers.at(key_))
+			  return true;
+		  const double dx = tess.GetMeshPoint(static_cast<int>(index)).x + velocities[index].x*dt -
+			  (tess.GetMeshPoint(static_cast<int>(index)).y + 0.428) * 10;
+		  if (dx>(-1 * distanceToWall_))
+			  return true;
+		  const double dy = tess.GetMeshPoint(static_cast<int>(index)).y + velocities[index].y*dt -
+			  (tess.GetMeshPoint(static_cast<int>(index)).x*0.1 - 0.428);
+		  if (dy<distanceToWall_)
+			  return true;
+		  return false;
+	  }
+	  Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
+		  double /*time*/, vector<Vector2D> const& velocities, double dt)const
+	  {
+		  if (!cells[index].stickers.at(key_))
+		  {
+			  Vector2D res(velocities[index]);
+			  const double dx = tess.GetMeshPoint(static_cast<int>(index)).x + velocities[index].x*dt -
+				  (tess.GetMeshPoint(static_cast<int>(index)).y + 0.428) * 10;
+			  if (dx > (-1 * distanceToWall_))
+				  res.x = -0.5*dx / dt;
+			  const double dy = tess.GetMeshPoint(static_cast<int>(index)).y + velocities[index].y*dt -
+				  (tess.GetMeshPoint(static_cast<int>(index)).x*0.1 - 0.428);
+			  if (dy < distanceToWall_)
+				  res.y = -0.5*dy / dt;
+			  return res;
+		  }
+		  else
+			  return Vector2D(0, 0);
+	  }
+  private:
+	  string key_;
+	  double const distanceToWall_;
+  };
 
 	vector<ComputationalCell> calc_init_cond
 		(const Tessellation& tess)
@@ -232,9 +249,9 @@ namespace
 			outer_),
 			eos_(adiabatic_index),
 			rs_(),
-			criteria_("wedge", 0.03),
+			criteria_("wedge", 0.02),
 			lpm_(),
-			pm_(lpm_, eos_, outer_),
+			pm_(lpm_, eos_, outer_,0.25),
 			point_motion_(pm_, criteria_),
 			force_(),
 			tsf_(0.3),

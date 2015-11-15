@@ -17,20 +17,23 @@ public:
     \param tess Tessellation
     \param cells Computational cells
     \param time Time
+	\param dt The time step
+	\param velocities The mesh point velocitites
     \return True if condition is met
    */
 	virtual bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-		double time)const = 0;
+		double time,vector<Vector2D> const& velocities, double dt)const = 0;
 
   /*! \brief Calculates custom velocity
     \param index Call index
     \param tess Tessellation
     \param cells Computational cells
     \param time Time
+	\param velocities The original velocities
     \return Custom velocity
    */
 	virtual Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-		double time)const = 0;
+		double time,vector<Vector2D> const& velocities,double dt)const = 0;
 
   //! \brief Class destructor
 	virtual ~CustomMotionCriteria(void);
