@@ -116,18 +116,10 @@ namespace
 	double GetAspectRatio(Tessellation const& tess, int index)
 	{
 		vector<int> const& edges = tess.GetCellEdges(index);
-		double minx = tess.GetEdge(edges[0]).vertices.first.x;
-		double maxx = minx;
-		double miny = tess.GetEdge(edges[0]).vertices.first.y;
-		double maxy = miny;
+		double L = 0;
 		for (size_t i = 0; i < edges.size(); ++i)
-		{
-			minx = min(minx, tess.GetEdge(edges[i]).vertices.first.x);
-			maxx = max(maxx, tess.GetEdge(edges[i]).vertices.first.x);
-			miny = min(miny, tess.GetEdge(edges[i]).vertices.first.y);
-			maxy = max(maxy, tess.GetEdge(edges[i]).vertices.first.y);
-		}
-		return max((maxx - minx) / (maxy - miny), (maxy - miny) / (maxx - minx));
+			L += tess.GetEdge(edges[i]).GetLength();
+		return 4*3.14*tess.GetVolume(index) / (L*L);
 	}
 }
 
@@ -150,18 +142,21 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		// Split only if cell is rather round
 		const double R = tess.GetWidth(static_cast<int>(ToRefine[i]));
 		Vector2D const& mypoint = tess.GetCellCM(static_cast<int>(ToRefine[i]));
-//		if (mypoint.distance(tess.GetCellCM(static_cast<int>(ToRefine[i])))>0.5*R)
-//			continue;
 		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) > 3)
 			continue;
 
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
+		vector<int> const& edges = tess.GetCellEdges(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			Vector2D const& otherpoint = tess.GetCellCM(neigh[j]);
 			if (otherpoint.distance(mypoint) < 1.75*R)
 				continue;
+			if (tess.GetEdge(edges[j]).GetLength() < 0.5*R)
+				continue;
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
+			if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i])))<0.5*R)
+				continue;
 			// Make sure not to split neighboring cells, this causes bad aspect ratio
 			if (std::binary_search(ToRefine.begin(), ToRefine.end(), static_cast<size_t>(neigh[j])))
 			{
