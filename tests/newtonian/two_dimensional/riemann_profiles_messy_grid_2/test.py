@@ -60,7 +60,7 @@ def main():
     f.write(str(gof3)+'\n')
     f.close()
     
-    return gof1<0.067 and gof2<0.051 and gof3<0.06
+    return gof1<0.067 and gof2<0.053 and gof3<0.062
 
 if __name__=='__main__':
 
