@@ -149,16 +149,16 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	{
 		// Split only if cell is rather round
 		const double R = tess.GetWidth(static_cast<int>(ToRefine[i]));
-		Vector2D const& mypoint = tess.GetMeshPoint(static_cast<int>(ToRefine[i]));
-		if (mypoint.distance(tess.GetCellCM(static_cast<int>(ToRefine[i])))>0.5*R)
-			continue;
+		Vector2D const& mypoint = tess.GetCellCM(static_cast<int>(ToRefine[i]));
+//		if (mypoint.distance(tess.GetCellCM(static_cast<int>(ToRefine[i])))>0.5*R)
+//			continue;
 		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) > 3)
 			continue;
 
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
-			Vector2D const& otherpoint = tess.GetMeshPoint(neigh[j]);
+			Vector2D const& otherpoint = tess.GetCellCM(neigh[j]);
 			if (otherpoint.distance(mypoint) < 1.75*R)
 				continue;
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
