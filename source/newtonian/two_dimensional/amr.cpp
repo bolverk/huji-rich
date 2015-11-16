@@ -111,6 +111,26 @@ namespace
 	}
 }
 
+namespace
+{
+	double GetAspectRatio(Tessellation const& tess, int index)
+	{
+		vector<int> const& edges = tess.GetCellEdges(index);
+		double minx = tess.GetEdge(edges[0]).vertices.first.x;
+		double maxx = minx;
+		double miny = tess.GetEdge(edges[0]).vertices.first.y;
+		double maxy = miny;
+		for (size_t i = 0; i < edges.size(); ++i)
+		{
+			minx = min(minx, tess.GetEdge(edges[i]).vertices.first.x);
+			maxx = max(maxx, tess.GetEdge(edges[i]).vertices.first.x);
+			miny = min(miny, tess.GetEdge(edges[i]).vertices.first.y);
+			maxy = max(maxy, tess.GetEdge(edges[i]).vertices.first.y);
+		}
+		return max((maxx - minx) / (maxy - miny), (maxy - miny) / (maxx - minx));
+	}
+}
+
 void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
 	OuterBoundary const& obc
@@ -119,6 +139,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 #endif
 	)const
 {
+	// ToRefine should be sorted
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	NewPoints.clear();
 	NewPoints.reserve(ToRefine.size() * 7);
@@ -131,6 +152,8 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		Vector2D const& mypoint = tess.GetMeshPoint(static_cast<int>(ToRefine[i]));
 		if (mypoint.distance(tess.GetCellCM(static_cast<int>(ToRefine[i])))>0.5*R)
 			continue;
+		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) > 3)
+			continue;
 
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
@@ -139,6 +162,14 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 			if (otherpoint.distance(mypoint) < 1.75*R)
 				continue;
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
+			// Make sure not to split neighboring cells, this causes bad aspect ratio
+			if (std::binary_search(ToRefine.begin(), ToRefine.end(), static_cast<size_t>(neigh[j])))
+			{
+				if (static_cast<size_t>(neigh[j]) > ToRefine[i])
+					candidate = 0.5*mypoint + 0.5*otherpoint;
+				else
+					continue;
+			}
 #ifdef RICH_MPI
 			if (!PointInCell(proc_chull, candidate))
 				continue;
@@ -199,6 +230,7 @@ void ConservativeAMR::UpdateCellsRefine
 	if (ToRefine.empty())
 		return;
 #endif // RICH_MPI
+	sort(ToRefine.begin(), ToRefine.end());
 #ifdef RICH_MPI
 	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
 	vector<Vector2D> chull;
@@ -377,6 +409,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	if (ToRefine.empty())
 		return;
 #endif // RICH_MPI
+	sort(ToRefine.begin(), ToRefine.end());
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
 #ifdef RICH_MPI
