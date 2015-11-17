@@ -142,7 +142,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		// Split only if cell is rather round
 		const double R = tess.GetWidth(static_cast<int>(ToRefine[i]));
 		Vector2D const& mypoint = tess.GetCellCM(static_cast<int>(ToRefine[i]));
-		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) > 3)
+		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) < 0.65)
 			continue;
 
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
@@ -157,11 +157,23 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
 			if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i])))<0.5*R)
 				continue;
+			if(neigh[j]<static_cast<int>(N)&&candidate.distance(tess.GetMeshPoint(neigh[j]))<tess.GetWidth(neigh[j])*0.5)
+				continue;
 			// Make sure not to split neighboring cells, this causes bad aspect ratio
 			if (std::binary_search(ToRefine.begin(), ToRefine.end(), static_cast<size_t>(neigh[j])))
 			{
 				if (static_cast<size_t>(neigh[j]) > ToRefine[i])
+				{
 					candidate = 0.5*mypoint + 0.5*otherpoint;
+					if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.5*R ||
+						(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.5))
+					{
+						candidate = 0.5*tess.GetMeshPoint(static_cast<int>(ToRefine[i])) + 0.5*tess.GetMeshPoint(neigh[j]);
+						if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.5*R ||
+							(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.5))
+							continue;
+					}
+				}
 				else
 					continue;
 			}
