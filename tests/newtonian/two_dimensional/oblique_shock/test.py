@@ -39,7 +39,7 @@ def main():
     shock_front = extract_contour(numeric['x_coordinate'],
                                   numeric['y_coordinate'],
                                   numeric['entropy'],
-                                  1.01)
+                                  1.03)
     x_far = shock_front.T[0][shock_front.T[0]>0]
     y_far = shock_front.T[1][shock_front.T[0]>0]
     lfit = numpy.polyfit(x_far, y_far,1)
