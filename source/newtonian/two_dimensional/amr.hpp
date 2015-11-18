@@ -140,6 +140,28 @@ protected:
    */
   vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const;
 #endif
+
+  /*! \brief Calculates the positions of the new points like AREPO
+  \param ToRefine points to refine
+  \param tess Tessellation
+  \param NewPoints output
+  \param Moved displacement for periodic grid
+  \param obc Outer boundary conditions
+  */
+#ifdef RICH_MPI
+  //!    \param proc_chull Cells' convex hull
+#endif // RICH_MPI
+  void GetNewPoints2
+	  (vector<size_t> const& ToRefine,
+		  Tessellation const& tess,
+		  vector<std::pair<size_t, Vector2D> > &NewPoints,
+		  vector<Vector2D> &Moved,
+		  OuterBoundary const& obc
+#ifdef RICH_MPI
+		  , vector<Vector2D> const& proc_chull
+#endif
+		  )const;
+
 public:
 	/*!
 	\brief Runs the AMR
@@ -200,9 +222,6 @@ private:
 	AMRCellUpdater* cu_;
 	AMRExtensiveUpdater* eu_;
 	LinearGaussImproved *interp_;
-
-	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const&
-		candidates, Tessellation const& tess) const;
 
 	ConservativeAMR(ConservativeAMR const& other);
 
@@ -284,5 +303,56 @@ public:
 #endif
 		)const;
 };
+
+//! \brief Conservative amr using old method to split cells
+//! \todo Make sure AMR works with all physical geometries
+class ConservativeAMROld : public AMR
+{
+private:
+	CellsToRefine const& refine_;
+	CellsToRemove const& remove_;
+	SimpleAMRCellUpdater scu_;
+	SimpleAMRExtensiveUpdater seu_;
+	AMRCellUpdater* cu_;
+	AMRExtensiveUpdater* eu_;
+	LinearGaussImproved *interp_;
+
+	ConservativeAMROld(ConservativeAMROld const& other);
+
+	ConservativeAMROld& operator=(ConservativeAMROld const& other);
+
+public:
+	void operator() (hdsim &sim);
+
+	/*! \brief Class constructor
+	\param refine Refinement scheme
+	\param remove Removal scheme
+	\param cu Cell updater
+	\param eu Extensive updater
+	*/
+	ConservativeAMROld
+		(CellsToRefine const& refine,
+			CellsToRemove const& remove,
+			LinearGaussImproved *slopes = 0,
+			AMRCellUpdater* cu = 0,
+			AMRExtensiveUpdater* eu = 0);
+
+	void UpdateCellsRefine(Tessellation &tess,
+		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
+		vector<Extensive> &extensives, double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
+
+	void UpdateCellsRemove(Tessellation &tess,
+		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
+		EquationOfState const& eos, double time
+#ifdef RICH_MPI
+		, Tessellation const& proctess
+#endif
+		)const;
+};
+
 
 #endif // AMR_HPP
