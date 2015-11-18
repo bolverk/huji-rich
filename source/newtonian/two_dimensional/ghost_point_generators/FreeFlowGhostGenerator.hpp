@@ -1,5 +1,5 @@
 /*! \file FreeFlowGhostGenerator.hpp
-\brief Class for creating computationalcells of ghost points for free flow
+\brief Class for creating computationalcells of ghost points for free flow that allows only outflow
 \author Elad Steinberg
 */
 
