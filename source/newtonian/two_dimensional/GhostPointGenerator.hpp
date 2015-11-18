@@ -33,6 +33,7 @@ public:
 	\param gradients The gradients for the non-ghost cells
 	\param ghost_index The index of the ghost cell
 	\param time The time
+	\param edge The edge of the ghost cell
 	\return The gradient of the ghost cell
 	*/
 	virtual std::pair<ComputationalCell, ComputationalCell> 
@@ -41,7 +42,8 @@ public:
 	 const vector<ComputationalCell>& cells,
 	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
 	 size_t ghost_index,
-	 double time) const = 0;
+	 double time,
+     Edge const& edge) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);

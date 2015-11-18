@@ -26,8 +26,27 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 }
 
 std::pair<ComputationalCell, ComputationalCell> FreeFlowGenerator::GetGhostGradient(Tessellation const& tess,
-	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-	size_t ghost_index, double /*time*/)const
+	vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+	size_t ghost_index, double /*time*/, Edge const& edge)const
 {
-	return gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
+	std::pair<ComputationalCell, ComputationalCell> res = gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
+	res.first.density *= -1;
+	res.first.pressure *= -1;
+	res.second.density *= -1;
+	res.second.pressure *= -1;
+	for (size_t i = 0; i < res.first.tracers.size(); ++i)
+	{
+		(res.first.tracers.begin() + i)->second *= -1;
+		(res.second.tracers.begin() + i)->second *= -1;
+	}
+	Vector2D normal = edge.neighbors.first == static_cast<int>(ghost_index) ? 
+		tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second)
+		: tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
+	if (ScalarProd(normal, cells[ghost_index].velocity) > 0)
+	{
+		normal = normal / abs(normal);
+		res.first.velocity -= 2 * ScalarProd(res.first.velocity, normal)*normal;
+		res.second.velocity -= 2 * ScalarProd(res.second.velocity, normal)*normal;
+	}
+	return res;
 }

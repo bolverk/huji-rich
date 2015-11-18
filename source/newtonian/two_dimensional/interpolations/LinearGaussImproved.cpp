@@ -9,9 +9,10 @@ typedef pair<ComputationalCell, ComputationalCell> Slope;
 
 namespace 
 {
-	vector<Vector2D> GetNeighborMesh(Tessellation const& tess, vector<Edge> const& edges,size_t cell_index)
+	void GetNeighborMesh(Tessellation const& tess, vector<Edge> const& edges,size_t cell_index,
+		vector<Vector2D> &res)
 	{
-		vector<Vector2D> res(edges.size());
+		res.resize(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
 			const int neigh0 = edges[i].neighbors.first;
@@ -21,12 +22,12 @@ namespace
 			else
 				res[i] = tess.GetMeshPoint(neigh0);
 		}
-		return res;
 	}
 
-	vector<Vector2D> GetNeighborCM(Tessellation const& tess, vector<Edge> const& edges, size_t cell_index)
+	void GetNeighborCM(Tessellation const& tess, vector<Edge> const& edges, size_t cell_index,
+		vector<Vector2D> &res)
 	{
-		vector<Vector2D> res(edges.size());
+		res.resize(edges.size());
 		for (size_t i = 0; i<edges.size(); ++i)
 		{
 			const int neigh0 = edges[i].neighbors.first;
@@ -36,7 +37,6 @@ namespace
 			else
 					res[i] = tess.GetCellCM(neigh0);
 		}
-		return res;
 	}
 
 	vector<ComputationalCell const*> GetNeighborCells(vector<Edge> const& edges, size_t cell_index,
@@ -57,20 +57,20 @@ namespace
 		return res;
 	}
 
-	vector<Edge> GetEdgeList(Tessellation const& tess,
-		vector<int> const& edge_indices)
+	void GetEdgeList(Tessellation const& tess,
+		vector<int> const& edge_indices,vector<Edge> &res)
 	{
-		vector<Edge> res(edge_indices.size());
+		res.resize(edge_indices.size());
 		for (size_t i = 0; i<edge_indices.size(); ++i)
 		{
 			res[i] = tess.GetEdge(edge_indices[i]);
 		}
-		return res;
 	}
 
-	pair<ComputationalCell, ComputationalCell> calc_naive_slope(ComputationalCell const& cell,
+	void calc_naive_slope(ComputationalCell const& cell,
 		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
-		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list)
+		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list,
+		pair<ComputationalCell, ComputationalCell> &res)
 	{
 		size_t n = edge_list.size();
 		if (n>20)
@@ -135,12 +135,11 @@ namespace
 		m_inv[2] = -m[2] * det_inv;
 		m_inv[3] = m[0] * det_inv;
 		// Calculate the gradient
-		pair<ComputationalCell, ComputationalCell> res(vec_compare.first,vec_compare.second);
+		res = vec_compare;
 		res.first *= m_inv[0];
 		res.second *= m_inv[3];
 		ComputationalCellAddMult(res.first, vec_compare.second, m_inv[1]);
 		ComputationalCellAddMult(res.second, vec_compare.first, m_inv[2]);
-		return res;
 	}
 
 	double PressureRatio(ComputationalCell cell, vector<ComputationalCell const*> const& neigh)
@@ -182,11 +181,10 @@ namespace
 		ComputationalCellAddMult(res, slope.second, target.y - cm.y);
 	}
 
-	pair<ComputationalCell, ComputationalCell> slope_limit(ComputationalCell const& cell,Vector2D const& cm,
+	void slope_limit(ComputationalCell const& cell,Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> const& slope)
+		pair<ComputationalCell, ComputationalCell> &slope)
 	{
-		pair<ComputationalCell, ComputationalCell> res(slope);
 		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum.minimum neighbor values
 		for (size_t i = 0; i < neighbors.size(); ++i)
@@ -280,29 +278,28 @@ namespace
 				}
 			}
 		}
-		res.first.density *= psi[0];
-		res.second.density *= psi[0];
-		res.first.pressure *= psi[1];
-		res.second.pressure *= psi[1];
-		res.first.velocity.x *= psi[2];
-		res.second.velocity.x *= psi[2];
-		res.first.velocity.y *= psi[3];
-		res.second.velocity.y *= psi[3];
+		slope.first.density *= psi[0];
+		slope.second.density *= psi[0];
+		slope.first.pressure *= psi[1];
+		slope.second.pressure *= psi[1];
+		slope.first.velocity.x *= psi[2];
+		slope.second.velocity.x *= psi[2];
+		slope.first.velocity.y *= psi[3];
+		slope.second.velocity.y *= psi[3];
 		size_t counter = 0;
-		for (boost::container::flat_map<std::string, double>::iterator it = res.first.tracers.begin(); it != res.first.tracers.end(); ++it)
+		for (boost::container::flat_map<std::string, double>::iterator it = slope.first.tracers.begin(); it != slope.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			safe_retrieve(res.second.tracers,it->first) *= psi[4 + counter];
+	//		safe_retrieve(slope.second.tracers,it->first) *= psi[4 + counter];
+			(slope.second.tracers.begin()+counter)->second*= psi[4 + counter];
 			++counter;
 		}
-		return res;
 	}
 
-	pair<ComputationalCell, ComputationalCell> shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
+	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> const& slope,double diffusecoeff)
+		pair<ComputationalCell, ComputationalCell>  &slope,double diffusecoeff)
 	{
-		pair<ComputationalCell, ComputationalCell> res(slope);
 		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum values
 		for (size_t i = 0; i < neighbors.size(); ++i)
@@ -367,25 +364,24 @@ namespace
 				++counter;
 			}
 		}
-		res.first.density *= psi[0];
-		res.second.density *= psi[0];
-		res.first.pressure *= psi[1];
-		res.second.pressure *= psi[1];
-		res.first.velocity.x *= psi[2];
-		res.second.velocity.x *= psi[2];
-		res.first.velocity.y *= psi[3];
-		res.second.velocity.y *= psi[3];
+		slope.first.density *= psi[0];
+		slope.second.density *= psi[0];
+		slope.first.pressure *= psi[1];
+		slope.second.pressure *= psi[1];
+		slope.first.velocity.x *= psi[2];
+		slope.second.velocity.x *= psi[2];
+		slope.first.velocity.y *= psi[3];
+		slope.second.velocity.y *= psi[3];
 		size_t counter = 0;
-		for (boost::container::flat_map<std::string, double>::iterator it = res.first.tracers.begin(); it != res.first.tracers.end(); ++it)
+		for (boost::container::flat_map<std::string, double>::iterator it = slope.first.tracers.begin(); it != slope.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			safe_retrieve(res.second.tracers,it->first) *= psi[4 + counter];
+			safe_retrieve(slope.second.tracers,it->first) *= psi[4 + counter];
 			++counter;
 		}
-		return res;
 	}
 
-	pair<ComputationalCell,ComputationalCell> calc_slope
+	void calc_slope
 	(Tessellation const& tess,
 	 vector<ComputationalCell> const& cells,
 	 size_t cell_index,
@@ -396,43 +392,42 @@ namespace
 	 EquationOfState const& eos,
 	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
 	 const vector<string>& flat_tracers,
-	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_)
+	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_,
+	 std::pair<ComputationalCell, ComputationalCell> & res)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
-	vector<Edge> edge_list = GetEdgeList(tess, edge_indices);
-	vector<Vector2D> neighbor_mesh_list = GetNeighborMesh(tess, edge_list,cell_index);
-	vector<Vector2D> neighbor_cm_list = GetNeighborCM(tess, edge_list,cell_index);
+	vector<Edge> edge_list;
+	GetEdgeList(tess, edge_indices,edge_list);
+	vector<Vector2D> neighbor_mesh_list;
+	GetNeighborMesh(tess, edge_list, cell_index,neighbor_mesh_list);
+	vector<Vector2D> neighbor_cm_list;
+	GetNeighborCM(tess, edge_list, cell_index,neighbor_cm_list);
 	vector<ComputationalCell const* > neighbor_list = GetNeighborCells(edge_list, cell_index,cells,ghost_cells,static_cast<size_t>(
 		tess.GetPointNo()));
 
-	pair<ComputationalCell, ComputationalCell> naive_slope;
 	ComputationalCell const& cell = cells[cell_index];
-	naive_slope = calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
-		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list);
+	calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
+		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list,res);
 
-	naive_slope_ = naive_slope;
+	naive_slope_ = res;
 
 	for(size_t i=0;i<flat_tracers.size();++i)
 	{
-	  naive_slope.first.tracers[flat_tracers[i]] = 0;
-	  naive_slope.second.tracers[flat_tracers[i]] = 0;
+	  res.first.tracers[flat_tracers[i]] = 0;
+	  res.second.tracers[flat_tracers[i]] = 0;
 	}
 
 	if (slf)
 	{
-		if (!is_shock(naive_slope, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
+		if (!is_shock(res, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
 			      eos.dp2c(cell.density,cell.pressure,cell.tracers)))
 		{
-			return slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, naive_slope);
+			slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res);
 		}
 		else
 		{
-			return shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, naive_slope, diffusecoeff);
+			shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff);
 		}
-	}
-	else
-	{
-		return naive_slope;
 	}
 }
 
@@ -501,8 +496,8 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	rslopes_.resize(CellNumber);
 	naive_rslopes_.resize(CellNumber);
 	for (size_t i = 0; i<CellNumber; ++i)
-	  rslopes_[i] = calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
-		flat_tracers_,naive_rslopes_[i]);
+	  calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
+		flat_tracers_,naive_rslopes_[i],rslopes_[i]);
 #ifdef RICH_MPI
 	// communicate ghost slopes
 	exchange_ghost_slopes(tess, rslopes_);
@@ -510,7 +505,29 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	// Interpolate the edges
 	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
-	res.resize(edge_number);
+	res.reserve(edge_number);
+	for (size_t i = 0; i < edge_number; ++i)
+	{
+		Edge const& edge = tess.GetEdge(static_cast<int>(i));
+		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber))
+		{
+			if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
+				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+					cells[static_cast<size_t>(edge.neighbors.second)]));
+			else
+				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+					safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+		}
+		else
+		{
+			if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
+				res.push_back(pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
+					cells[static_cast<size_t>(edge.neighbors.second)]));
+			else
+				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+					safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+		}		
+	}
 	for (size_t i = 0; i < edge_number; ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
@@ -520,16 +537,13 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 #endif
 			)
 		{
-			res[i].first=cells[static_cast<size_t>(edge.neighbors.first)];
 			interp2(res[i].first, rslopes_[static_cast<size_t>(edge.neighbors.first)],
 				CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		else
 		{
-		  ComputationalCell const& cell = safe_retrieve(ghost_cells,static_cast<size_t>(edge.neighbors.first));
-		  res[i].first = cell;
 		  interp2(res[i].first, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-			  edge.neighbors.first), time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+			  edge.neighbors.first), time,edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 		}
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber)
 #ifdef RICH_MPI
@@ -537,7 +551,6 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 #endif
 			)
 		{
-			res[i].second = cells[static_cast<size_t>(edge.neighbors.second)];
 			interp2(res[i].second, rslopes_[static_cast<size_t>(edge.neighbors.second)],
 				CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
@@ -547,7 +560,7 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 		    (ghost_cells,
 		     static_cast<size_t>(edge.neighbors.second));
 			res[i].second = interp(cell, ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-				edge.neighbors.second),time), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+				edge.neighbors.second),time,edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
 	}
 	return res;

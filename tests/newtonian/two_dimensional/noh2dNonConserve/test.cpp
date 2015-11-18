@@ -72,7 +72,7 @@ namespace
 
 		std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& /*tess*/,
 			vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
-			size_t /*ghost_index*/, double /*time*/)const
+			size_t /*ghost_index*/, double /*time*/, Edge const& /*edge*/)const
 		{
 			ComputationalCell temp;
 			temp.tracers["Entropy"] = 0;

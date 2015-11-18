@@ -4,7 +4,7 @@ ConstantPrimitiveGenerator::ConstantPrimitiveGenerator(ComputationalCell const& 
 
 std::pair<ComputationalCell, ComputationalCell> ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
 	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
-	size_t ghost_index, double /*time*/)const
+	size_t ghost_index, double /*time*/,Edge const& /*edge*/)const
 {
 	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
 		return std::pair<ComputationalCell, ComputationalCell>();

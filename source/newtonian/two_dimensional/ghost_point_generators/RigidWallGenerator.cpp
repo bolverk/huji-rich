@@ -40,18 +40,21 @@ std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGrad
 (Tessellation const& tess,
  vector<ComputationalCell> const& /*cells*/,
  vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
- size_t ghost_index, double /*time*/) const
+ size_t ghost_index, double /*time*/, Edge const& /*edge*/) const
 {
 	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
 	{
-		std::pair<ComputationalCell, ComputationalCell> grad = gradients[static_cast<size_t>(tess.GetOriginalIndex
-			(static_cast<int>(ghost_index)))];
-		Vector2D normal = tess.GetMeshPoint(static_cast<int>(ghost_index)) -
-			tess.GetMeshPoint(tess.GetOriginalIndex(static_cast<int>(ghost_index)));
-		normal = normal / abs(normal);
-		grad.first.velocity -= 2 * ScalarProd(grad.first.velocity, normal)*normal;
-		grad.second.velocity -= 2 * ScalarProd(grad.second.velocity, normal)*normal;
-		return grad;
+		std::pair<ComputationalCell, ComputationalCell> res = gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
+		res.first.density *= -1;
+		res.first.pressure *= -1;
+		res.second.density *= -1;
+		res.second.pressure *= -1;
+		for (size_t i = 0; i < res.first.tracers.size(); ++i)
+		{
+			(res.first.tracers.begin() + i)->second *= -1;
+			(res.second.tracers.begin() + i)->second *= -1;
+		}
+		return res;
 	}
 	else
 		return gradients[ghost_index];
