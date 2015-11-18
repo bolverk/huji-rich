@@ -42,7 +42,9 @@ std::pair<ComputationalCell, ComputationalCell> FreeFlowGenerator::GetGhostGradi
 	Vector2D normal = edge.neighbors.first == static_cast<int>(ghost_index) ? 
 		tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second)
 		: tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
-	if (ScalarProd(normal, cells[ghost_index].velocity) > 0)
+	int index = edge.neighbors.first == static_cast<int>(ghost_index) ?
+		edge.neighbors.second : edge.neighbors.first;
+	if (ScalarProd(normal, cells[static_cast<size_t>(index)].velocity) > 0)
 	{
 		normal = normal / abs(normal);
 		res.first.velocity -= 2 * ScalarProd(res.first.velocity, normal)*normal;
