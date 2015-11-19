@@ -207,7 +207,7 @@ Extensive Ratchet::operator()
 	const pair<ComputationalCell, ComputationalCell> & edge_values) const
 {
 	Vector2D n = tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
-	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.second : edge.neighbors.first)].velocity)*(2*static_cast<double>(in_)-1) < 0)
+	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)].velocity)*(2*static_cast<double>(in_)-1) > 0)
 		return free_.operator()(edge,tess, edge_velocity, cells, eos, aux);
 	else
 		return wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values);
