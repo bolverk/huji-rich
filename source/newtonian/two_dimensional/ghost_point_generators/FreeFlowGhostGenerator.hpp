@@ -22,7 +22,7 @@ public:
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
    const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
-		size_t ghost_index,double time,Edge const& edge)const;
+		size_t ghost_index,double time,const Edge& edge)const;
 };
 
 #endif // FREEFLOW_GENERATOR_HPP

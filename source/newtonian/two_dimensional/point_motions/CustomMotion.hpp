@@ -30,6 +30,7 @@ public:
     \param cells Computational cells
     \param time Time
 	\param velocities The original velocities
+	\param dt Time step
     \return Custom velocity
    */
 	virtual Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
