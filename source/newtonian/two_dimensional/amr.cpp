@@ -430,12 +430,11 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	cor.resize(N);
 	cells.resize(N);
 	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
-	vector<size_t> ToRemove = ToRemovepair.first;
 #ifndef RICH_MPI
-	if (ToRemove.empty())
+	if (ToRemovepair.first.empty())
 		return;
 #endif // RICH_MPI
-	ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
+	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
 	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
 #endif
@@ -715,12 +714,11 @@ void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 	cor.resize(N);
 	cells.resize(N);
 	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
-	vector<size_t> ToRemove = ToRemovepair.first;
 #ifndef RICH_MPI
-	if (ToRemove.empty())
+	if (ToRemovepair.first.empty())
 		return;
 #endif // RICH_MPI
-	ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
+	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
 	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
 #endif
