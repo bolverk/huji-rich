@@ -29,7 +29,7 @@ std::pair<ComputationalCell, ComputationalCell> FreeFlowGenerator::GetGhostGradi
 	vector<ComputationalCell> const& cells, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
 	size_t ghost_index, double /*time*/, Edge const& /*edge*/)const
 {
-	ComputationalCell cell(cells[tess.GetOriginalIndex(static_cast<int>((ghost_index))]);
+	ComputationalCell cell(cells[tess.GetOriginalIndex(static_cast<int>(ghost_index))]);
 	cell.density = 0;
 	cell.pressure = 0;
 	cell.velocity = Vector2D(0, 0);
