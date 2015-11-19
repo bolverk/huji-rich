@@ -9,9 +9,9 @@ Duffell::Duffell
 
 namespace {
   vector<Vector2D> extract_velocity
-  (const vector<ComputationalCell>& cells)
+  (const vector<ComputationalCell>& cells,size_t N)
   {
-    vector<Vector2D> res(cells.size());
+    vector<Vector2D> res(N);
     for(size_t i=0;i<res.size();++i)
       res.at(i) = cells.at(i).velocity;
     return res;
@@ -61,7 +61,7 @@ vector<Vector2D> Duffell::operator()
  const vector<ComputationalCell>& cells,
  double /*time*/) const
 {
-  vector<Vector2D> res = extract_velocity(cells);
+  vector<Vector2D> res = extract_velocity(cells,static_cast<size_t>(tess.GetPointNo()));
   for(int i=0;i<iter_;++i)
     res = smooth(tess,res,alpha_);
   return res;
