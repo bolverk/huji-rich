@@ -291,7 +291,7 @@ namespace
 		{
 			it->second *= psi[4 + counter];
 	//		safe_retrieve(slope.second.tracers,it->first) *= psi[4 + counter];
-			(slope.second.tracers.begin()+counter)->second*= psi[4 + counter];
+			(slope.second.tracers.begin()+static_cast<int>(counter))->second*= psi[4 + counter];
 			++counter;
 		}
 	}

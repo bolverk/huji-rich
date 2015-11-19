@@ -51,8 +51,8 @@ std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGrad
 		res.second.pressure *= -1;
 		for (size_t i = 0; i < res.first.tracers.size(); ++i)
 		{
-			(res.first.tracers.begin() + i)->second *= -1;
-			(res.second.tracers.begin() + i)->second *= -1;
+		  (res.first.tracers.begin() + static_cast<int>(i))->second *= -1;
+		  (res.second.tracers.begin() + static_cast<int>(i))->second *= -1;
 		}
 		return res;
 	}

@@ -34,7 +34,8 @@ namespace
 			if (factor > 7)
 			{
 				return normal*ScalarProd(vel[static_cast<size_t>(index)],normal) +
-					ScalarProd((vel[edge.neighbors.first]+vel[edge.neighbors.second])*0.5,parallel)*parallel;
+				  ScalarProd((vel[static_cast<size_t>(edge.neighbors.first)]+
+					      vel[static_cast<size_t>(edge.neighbors.second)])*0.5,parallel)*parallel;
 			}
 		}
 		return vel[static_cast<size_t>(index)];
