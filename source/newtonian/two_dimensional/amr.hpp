@@ -235,6 +235,7 @@ public:
     \param remove Removal scheme
     \param cu Cell updater
     \param eu Extensive updater
+    \param slopes Slopes
    */
 	ConservativeAMR
 	(CellsToRefine const& refine,
@@ -329,6 +330,7 @@ public:
 	\param remove Removal scheme
 	\param cu Cell updater
 	\param eu Extensive updater
+	\param slopes Slopes
 	*/
 	ConservativeAMROld
 		(CellsToRefine const& refine,

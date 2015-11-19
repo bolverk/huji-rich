@@ -43,7 +43,7 @@ public:
 	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
 	 size_t ghost_index,
 	 double time,
-     Edge const& edge) const = 0;
+     const Edge& edge) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);
