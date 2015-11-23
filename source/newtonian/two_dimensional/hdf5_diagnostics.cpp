@@ -541,3 +541,17 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 	return res;
 }
 #endif
+
+void WriteTess(Tessellation const& tess, string const& fname)
+{
+	ConvexHullData chd(tess);
+	H5File file(H5std_string(fname), H5F_ACC_TRUNC);
+	Group geometry = file.createGroup("/geometry");
+	write_std_vector_to_hdf5(geometry,serial_generate(MeshGeneratingPointCoordinate(tess, &Vector2D::x)),
+		"x_coordinate");
+	write_std_vector_to_hdf5(geometry,serial_generate(MeshGeneratingPointCoordinate(tess, &Vector2D::y)),
+		"y_coordinate");
+	write_std_vector_to_hdf5(geometry,chd.xvert,"x_vertices");
+	write_std_vector_to_hdf5(geometry,chd.yvert,"y_vertices");
+	write_std_vector_to_hdf5(geometry,chd.nvert,"n_vertices");
+}

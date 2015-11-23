@@ -108,4 +108,11 @@ void WriteDelaunay(Delaunay const& tri, string const& filename);
 */
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, size_t snapshot_number);
 
+
+/*!
+\brief Writes the tessellation data into an HDF5 file
+\param tess The tessellation
+\param filename The name of the output file
+*/
+void WriteTess(Tessellation const& tess, string const& filename);
 #endif // HDF5_DIAG
