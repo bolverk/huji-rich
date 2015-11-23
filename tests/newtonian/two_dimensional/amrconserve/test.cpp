@@ -20,6 +20,7 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include "source/misc/simple_io.hpp"
 
+namespace {
 class ConserveRefine : public CellsToRefine
 {
 public:
@@ -29,7 +30,7 @@ public:
 		boost::random::uniform_int_distribution<> dist(0, tess.GetPointNo()-1);
 		vector<size_t> res(10);
 		for (size_t i = 0; i < res.size(); ++i)
-			res[i] = dist(gen);
+		  res[i] = static_cast<size_t>(dist(gen));
 		return res;
 	}
 };
@@ -44,7 +45,7 @@ public:
 		std::pair<vector<size_t>, vector<double> > res(vector<size_t>(10), vector<double>(10));
 		for (size_t i = 0; i < res.first.size(); ++i)
 		{
-			res.first[i] = dist(gen);
+		  res.first[i] = static_cast<size_t>(dist(gen));
 			res.second[i] = static_cast<double>(dist(gen));
 		}
 		return res;
@@ -55,7 +56,7 @@ double TotalMass(hdsim const& sim)
 {
 	double res = 0;
 	for (int i = 0; i < sim.getTessellation().GetPointNo(); ++i)
-		res += sim.getTessellation().GetVolume(i)*sim.getAllCells()[static_cast<int>(i)].density;
+		res += sim.getTessellation().GetVolume(i)*sim.getAllCells()[static_cast<size_t>(i)].density;
 	return res;
 }
 
@@ -69,6 +70,7 @@ vector<ComputationalCell> calc_cells(size_t n)
 		res[i].velocity = Vector2D(1, 0);
 	}
 	return res;
+}
 }
 
 int main(void)
