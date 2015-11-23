@@ -382,6 +382,7 @@ void ConservativeAMR::UpdateCellsRefine
 		return;
 #endif // RICH_MPI
 	sort(ToRefine.begin(), ToRefine.end());
+	ToRefine=unique(ToRefine);
 #ifdef RICH_MPI
 	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
 	vector<Vector2D> chull;
@@ -435,6 +436,16 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	if (ToRemovepair.first.empty())
 		return;
 #endif // RICH_MPI
+
+	// Clean up vectors
+	vector<int> indeces;
+	sort_index(ToRemovepair.first,indeces);
+	sort(ToRemovepair.first.begin(), ToRemovepair.first.end());
+	ToRemovepair.second = VectorValues(ToRemovepair.second, indeces);
+	indeces = unique_index(ToRemovepair.first);
+	ToRemovepair.first = unique(ToRemovepair.first);
+	ToRemovepair.second = VectorValues(ToRemovepair.second, indeces);
+
 	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
 	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
