@@ -83,7 +83,7 @@ v_0))
     f.close()
     
     return l1_density < 0.02 and \
-        l1_pressure < 0.03 and \
+        l1_pressure < 0.04 and \
         l1_velocity < 0.02
 
 if __name__=='__main__':
