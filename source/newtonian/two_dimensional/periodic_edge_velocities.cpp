@@ -13,8 +13,8 @@ vector<Vector2D> PeriodicEdgeVelocities::operator()
     res.at(i) = tess.CalcFaceVelocity
       (point_velocities.at(static_cast<size_t>(tess.GetOriginalIndex(edge.neighbors.first))),
        point_velocities.at(static_cast<size_t>(tess.GetOriginalIndex(edge.neighbors.second))),
-       tess.GetMeshPoint(tess.GetOriginalIndex(edge.neighbors.first)),
-       tess.GetMeshPoint(tess.GetOriginalIndex(edge.neighbors.second)),
+       tess.GetMeshPoint(edge.neighbors.first),
+       tess.GetMeshPoint(edge.neighbors.second),
        calc_centroid(edge));
   }
   return res;

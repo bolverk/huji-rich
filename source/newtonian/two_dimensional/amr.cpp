@@ -171,7 +171,7 @@ namespace
 	void ConservedSingleCell(Tessellation const& oldtess, Tessellation const& tess, size_t ToRefine, size_t &location,
 		LinearGaussImproved *interp, EquationOfState const& eos, vector<ComputationalCell> &cells,
 		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
-		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu)
+		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved)
 	{
 		vector<int> neigh = oldtess.GetNeighbors(static_cast<int>(ToRefine));
 		vector<int> real_neigh;
@@ -206,9 +206,10 @@ namespace
 		{
 			double TotalVolume = 0;
 			Extensive NewExtensive(extensives[0].tracers);
+			ConvexHull(temp, tess, static_cast<int>(N + location));
+			temp = temp + moved[location];
 			for (size_t j = 0; j < Chull.size(); ++j)
 			{
-				ConvexHull(temp, tess, static_cast<int>(N + location));
 				double v = AreaOverlap(temp, Chull[j]);
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
@@ -407,10 +408,10 @@ void ConservativeAMR::UpdateCellsRefine
 #else
 	tess.Update(cor);
 #endif
-
 	size_t location = 0;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
-		ConservedSingleCell(*oldtess, tess, ToRefine[i], location, interp_, eos, cells, NewPoints, extensives, *eu_, *cu_);
+		ConservedSingleCell(*oldtess, tess, ToRefine[i], location, interp_, eos, cells, NewPoints, extensives, *eu_,
+			*cu_,Moved);
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
@@ -456,11 +457,11 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 		vector<Vector2D> chull;
 		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
 		const double TotalV = oldtess->GetVolume(static_cast<int>(ToRemove[i]));
-		Extensive oldcell = extensives[ToRemove[i]];
 		temp.clear();
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
-			size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin());
+			size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(),
+				oldtess->GetOriginalIndex(neigh[j])) - ToRemove.begin());
 			if (neigh[j] < static_cast<int>(N))
 			{
 				ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
@@ -469,7 +470,8 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			{
 				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
 				{
-					ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
+					ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(
+						oldtess->GetOriginalIndex(neigh[j]) )- toadd));
 					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
 						oldtess->GetMeshPoint(oldtess->GetOriginalIndex(neigh[j])));
 				}
@@ -483,6 +485,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	}
 	RemoveVector(extensives, ToRemove);
 	RemoveVector(cells, ToRemove);
+
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
 		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
