@@ -1,6 +1,12 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
+//#define debug_amr 1
+
+#ifdef debug_amr
+#include "hdf5_diagnostics.hpp"
+#endif
+
 AMRCellUpdater::~AMRCellUpdater() {}
 
 AMRExtensiveUpdater::~AMRExtensiveUpdater() {}
@@ -173,7 +179,8 @@ namespace
 		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
 		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved)
 	{
-		vector<int> neigh = oldtess.GetNeighbors(static_cast<int>(ToRefine));
+		vector<int> neigh;
+		oldtess.GetNeighborNeighbors(neigh,static_cast<int>(ToRefine));
 		vector<int> real_neigh;
 		vector<vector<Vector2D> > Chull;
 		vector<Vector2D> temp;
@@ -214,11 +221,16 @@ namespace
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 			}
+			const double vv = tess.GetVolume(N + location);
+			if (vv >(1 + 1e-6)*TotalVolume || vv < (1 - 1e-6)*TotalVolume)
+				throw UniversalError("Not same volume in amr refine");
+
 			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine]));
 			if (interp != 0)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
 			++location;
 		}
+
 	}
 
 }
@@ -404,11 +416,21 @@ void ConservativeAMR::UpdateCellsRefine
 
 	for (size_t i = 0; i < NewPoints.size(); ++i)
 		cor.push_back(NewPoints[i].second);
+#ifdef debug_amr
+	WriteTess(tess, "c:/vold.h5");
+#endif
+
 #ifdef RICH_MPI
 	tess.Update(cor, proctess);
 #else
 	tess.Update(cor);
 #endif
+
+#ifdef debug_amr
+	WriteTess(tess, "c:/vnew.h5");
+#endif
+
+
 	size_t location = 0;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 		ConservedSingleCell(*oldtess, tess, ToRefine[i], location, interp_, eos, cells, NewPoints, extensives, *eu_,
@@ -454,10 +476,19 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
 
 	RemoveVector(cor, ToRemove);
+
+#ifdef debug_amr
+	WriteTess(tess, "c:/vold.h5");
+#endif
+
 #ifdef RICH_MPI
 	tess.Update(cor, proctess);
 #else
 	tess.Update(cor);
+#endif
+
+#ifdef debug_amr
+	WriteTess(tess, "c:/vnew.h5");
 #endif
 
 	// Fix the extensives
@@ -469,10 +500,12 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
 		const double TotalV = oldtess->GetVolume(static_cast<int>(ToRemove[i]));
 		temp.clear();
+		double dv = 0;
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(),
 				oldtess->GetOriginalIndex(neigh[j])) - ToRemove.begin());
+			temp.clear();
 			if (neigh[j] < static_cast<int>(N))
 			{
 				ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
@@ -490,9 +523,12 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			if (!temp.empty())
 			{
 				const double v = AreaOverlap(chull, temp);
+				dv += v;
 				extensives[static_cast<size_t>(oldtess->GetOriginalIndex(neigh[j]))] += (v / TotalV)*extensives[ToRemove[i]];
 			}
 		}
+		if (dv > (1 + 1e-6)*TotalV || dv < (1 - 1e-6)*TotalV)
+			throw UniversalError("Not same volume in amr remove");
 	}
 	RemoveVector(extensives, ToRemove);
 	RemoveVector(cells, ToRemove);
