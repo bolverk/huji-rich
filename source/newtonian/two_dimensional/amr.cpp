@@ -221,7 +221,7 @@ namespace
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 			}
-			const double vv = tess.GetVolume(N + location);
+			const double vv = tess.GetVolume(static_cast<int>(N + location));
 			if (vv >(1 + 1e-6)*TotalVolume || vv < (1 - 1e-6)*TotalVolume)
 				throw UniversalError("Not same volume in amr refine");
 
