@@ -219,6 +219,7 @@ private:
 	CellsToRemove const& remove_;
   SimpleAMRCellUpdater scu_;
   SimpleAMRExtensiveUpdater seu_;
+  const bool periodic_;
 	AMRCellUpdater* cu_;
 	AMRExtensiveUpdater* eu_;
 	LinearGaussImproved *interp_;
@@ -236,10 +237,12 @@ public:
     \param cu Cell updater
     \param eu Extensive updater
     \param slopes Slopes
+	\param periodic Flag whether the boundary is periodic or not
    */
 	ConservativeAMR
 	(CellsToRefine const& refine,
 	 CellsToRemove const& remove,
+		bool periodic = false,
 	 LinearGaussImproved *slopes = 0,
 	 AMRCellUpdater* cu=0,
 	 AMRExtensiveUpdater* eu=0);

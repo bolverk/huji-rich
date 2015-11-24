@@ -98,7 +98,7 @@ int main(void)
 
 	ConserveRefine refine;
 	ConserveRemove remove;
-	ConservativeAMR amr(refine, remove, &interp);
+	ConservativeAMR amr(refine, remove,true, &interp);
 
 	for (size_t i = 0; i < 50; ++i)
 	{

@@ -1,7 +1,7 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
-//#define debug_amr 1
+#define debug_amr 1
 
 #ifdef debug_amr
 #include "hdf5_diagnostics.hpp"
@@ -174,57 +174,154 @@ namespace
 		return result;
 	}
 
-	void ConservedSingleCell(Tessellation const& oldtess, Tessellation const& tess, size_t ToRefine, size_t &location,
-		LinearGaussImproved *interp, EquationOfState const& eos, vector<ComputationalCell> &cells,
-		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
-		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved)
+	Extensive GetNewExtensive(vector<Extensive> const& extensives,Tessellation const& tess,size_t N,size_t location,
+		vector<Vector2D> const& moved,vector<int> const& real_neigh,vector<vector<Vector2D> >  const& Chull,
+		vector<ComputationalCell> const& cells,EquationOfState const& eos, AMRExtensiveUpdater const& eu,
+		double &TotalVolume,Tessellation const& oldtess,bool periodic)
 	{
-		vector<int> neigh;
-		oldtess.GetNeighborNeighbors(neigh,static_cast<int>(ToRefine));
-		vector<int> real_neigh;
-		vector<vector<Vector2D> > Chull;
+		Extensive NewExtensive(extensives[0].tracers);
 		vector<Vector2D> temp;
-		ConvexHull(temp, oldtess, static_cast<int>(ToRefine));
+		ConvexHull(temp, tess, static_cast<int>(N + location));
+		temp = temp + moved[location];
+		const double vv = tess.GetVolume(static_cast<int>(N + location));
+		stack<int> tocheck;
+		stack<vector<Vector2D> > tocheck_hull;
+		vector<int> checked(real_neigh);
+		for (size_t j = 0; j < Chull.size(); ++j)
+		{
+			double v = AreaOverlap(temp, Chull[j]);
+			if (v > vv*1e-8)
+			{
+				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
+				TotalVolume += v;
+				vector<int> neightemp = oldtess.GetNeighbors(real_neigh[j]);
+				for (size_t k = 0; k < neightemp.size(); ++k)
+				{
+					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
+					{
+						vector<Vector2D> temp2;
+						ConvexHull(temp2, oldtess, oldtess.GetOriginalIndex(neightemp[k]));
+						tocheck.push(oldtess.GetOriginalIndex(neightemp[k]));
+						tocheck_hull.push(temp2);
+						checked.push_back(oldtess.GetOriginalIndex(neightemp[k]));
+					}
+				}
+			}		
+		}
+		while (!tocheck.empty())
+		{
+			vector<Vector2D> chull = tocheck_hull.top();
+			tocheck_hull.pop();
+			double v = AreaOverlap(temp, chull);
+			if (v > vv*1e-8)
+			{
+				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(tocheck.top())], eos, v);
+				TotalVolume += v;
+				vector<int> neightemp = oldtess.GetNeighbors(tocheck.top());
+				for (size_t k = 0; k < neightemp.size(); ++k)
+				{
+					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
+					{
+						vector<Vector2D> temp2;
+						ConvexHull(temp2, oldtess, oldtess.GetOriginalIndex(neightemp[k]));
+						tocheck.push(oldtess.GetOriginalIndex(neightemp[k]));
+						tocheck_hull.push(temp2);
+						checked.push_back(oldtess.GetOriginalIndex(neightemp[k]));
+					}
+				}
+			}
+			tocheck.pop();
+		}
+		const double eps = periodic ? 1e-2 : 1e-6;
+		if (vv > (1 + eps)*TotalVolume || vv < (1 - eps)*TotalVolume)
+		{
+			std::cout << "Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
+			throw UniversalError("Not same volume in amr refine");
+		}
+		return NewExtensive;
+	}
+
+	void GetToCheck(Tessellation const& tess, int ToRefine, vector<int> &real_neigh, vector<vector<Vector2D> > &Chull)
+	{
+		vector<int> neigh = tess.GetNeighbors(ToRefine);
+		vector<Vector2D> temp;
+		ConvexHull(temp, tess, static_cast<int>(ToRefine));
 		Chull.push_back(temp);
 		real_neigh.push_back(static_cast<int>(ToRefine));
-		size_t N = static_cast<size_t>(oldtess.GetPointNo());
+		size_t N = static_cast<size_t>(tess.GetPointNo());
+		vector<Vector2D> moved;
+		moved.push_back(Vector2D(0, 0));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			if (neigh[j] < static_cast<int>(N))
 			{
 				real_neigh.push_back(neigh[j]);
-				ConvexHull(temp, oldtess, neigh[j]);
+				ConvexHull(temp, tess, neigh[j]);
 				Chull.push_back(temp);
+				moved.push_back(Vector2D(0, 0));
 			}
 			else
 			{
 				// Is it not a rigid wall?
-				if (oldtess.GetOriginalIndex(neigh[j]) != static_cast<int>(ToRefine))
+				if (tess.GetOriginalIndex(neigh[j]) != static_cast<int>(ToRefine))
 				{
-					real_neigh.push_back(oldtess.GetOriginalIndex(neigh[j]));
-					ConvexHull(temp, oldtess, real_neigh.front());
-					temp = temp + (oldtess.GetMeshPoint(neigh[j]) -
-						oldtess.GetMeshPoint(oldtess.GetOriginalIndex(neigh[j])));
+					real_neigh.push_back(tess.GetOriginalIndex(neigh[j]));
+					ConvexHull(temp, tess, real_neigh.back());
+					temp = temp + (tess.GetMeshPoint(neigh[j]) -
+						tess.GetMeshPoint(tess.GetOriginalIndex(neigh[j])));
 					Chull.push_back(temp);
+					moved.push_back((tess.GetMeshPoint(neigh[j]) - tess.GetMeshPoint(tess.GetOriginalIndex(neigh[j]))));
 				}
 			}
 		}
+		// Get neighbor neighbors
+		const size_t NN = real_neigh.size();
+		for (size_t j = 0; j < NN; ++j)
+		{
+			vector<int> neigh_temp = tess.GetNeighbors(real_neigh[j]);
+			for (size_t i = 0; i < neigh_temp.size(); ++i)
+			{
+				if (std::find(real_neigh.begin(), real_neigh.end(), tess.GetOriginalIndex(neigh_temp[i])) == real_neigh.end())
+				{
+					if (neigh_temp[i] < static_cast<int>(N))
+					{
+						real_neigh.push_back(neigh_temp[i]);
+						ConvexHull(temp, tess, neigh_temp[i]);
+						Chull.push_back(temp+moved[j]);
+					}
+					else
+					{
+						// Is it not a rigid wall?
+						if (tess.GetOriginalIndex(neigh_temp[i]) != static_cast<int>(real_neigh[j]))
+						{
+							real_neigh.push_back(tess.GetOriginalIndex(neigh_temp[i]));
+							ConvexHull(temp, tess, real_neigh.back());
+							temp = temp + (tess.GetMeshPoint(neigh_temp[i]) -
+								tess.GetMeshPoint(tess.GetOriginalIndex(neigh_temp[i]))) + moved[j];
+							Chull.push_back(temp);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void ConservedSingleCell(Tessellation const& oldtess, Tessellation const& tess, size_t ToRefine, size_t &location,
+		LinearGaussImproved *interp, EquationOfState const& eos, vector<ComputationalCell> &cells,
+		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
+		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved,bool periodic)
+	{
+		vector<int> neigh=oldtess.GetNeighbors(static_cast<int>(ToRefine));
+		vector<int> real_neigh;
+		vector<vector<Vector2D> > Chull;
+		vector<Vector2D> temp;
+		GetToCheck(oldtess, ToRefine,real_neigh,Chull);
+		size_t N = static_cast<size_t>(oldtess.GetPointNo());
 		while (location < NewPoints.size() && NewPoints[location].first == ToRefine)
 		{
-			double TotalVolume = 0;
-			Extensive NewExtensive(extensives[0].tracers);
-			ConvexHull(temp, tess, static_cast<int>(N + location));
-			temp = temp + moved[location];
-			for (size_t j = 0; j < Chull.size(); ++j)
-			{
-				double v = AreaOverlap(temp, Chull[j]);
-				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
-				TotalVolume += v;
-			}
-			const double vv = tess.GetVolume(static_cast<int>(N + location));
-			if (vv >(1 + 1e-6)*TotalVolume || vv < (1 - 1e-6)*TotalVolume)
-				throw UniversalError("Not same volume in amr refine");
-
+			double TotalVolume=0;
+			Extensive NewExtensive = GetNewExtensive(extensives, tess, N, location, moved, real_neigh, Chull,
+				cells, eos, eu,TotalVolume,oldtess,periodic);
 			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine]));
 			if (interp != 0)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
@@ -354,6 +451,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 ConservativeAMR::ConservativeAMR
 (CellsToRefine const& refine,
 	CellsToRemove const& remove,
+	bool periodic,
 	LinearGaussImproved *slopes,
 	AMRCellUpdater* cu,
 	AMRExtensiveUpdater* eu) :
@@ -361,6 +459,7 @@ ConservativeAMR::ConservativeAMR
 	remove_(remove),
 	scu_(),
 	seu_(),
+	periodic_(periodic),
 	cu_(cu),
 	eu_(eu),
 	interp_(slopes)
@@ -434,7 +533,7 @@ void ConservativeAMR::UpdateCellsRefine
 	size_t location = 0;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 		ConservedSingleCell(*oldtess, tess, ToRefine[i], location, interp_, eos, cells, NewPoints, extensives, *eu_,
-			*cu_,Moved);
+			*cu_,Moved,periodic_);
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
@@ -528,7 +627,10 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			}
 		}
 		if (dv > (1 + 1e-6)*TotalV || dv < (1 - 1e-6)*TotalV)
+		{
+			std::cout << "Real volume: " << TotalV << " AMR volume: " << dv << std::endl;
 			throw UniversalError("Not same volume in amr remove");
+		}
 	}
 	RemoveVector(extensives, ToRemove);
 	RemoveVector(cells, ToRemove);
