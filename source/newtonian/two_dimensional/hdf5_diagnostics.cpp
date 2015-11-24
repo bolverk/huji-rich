@@ -183,7 +183,7 @@ namespace {
 
     size_t size(void) const
     {
-      return sim_.getAllCells().size();
+		return static_cast<size_t>(sim_.getTessellation().GetPointNo());
     }
 
     double operator[](size_t i) const
@@ -208,7 +208,7 @@ namespace {
 
     size_t size(void) const
     {
-      return sim_.getAllCells().size();
+      return static_cast<size_t>(sim_.getTessellation().GetPointNo());
     }
 		
     double operator[](size_t i) const
