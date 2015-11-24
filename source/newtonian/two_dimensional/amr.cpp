@@ -315,7 +315,7 @@ namespace
 		vector<int> real_neigh;
 		vector<vector<Vector2D> > Chull;
 		vector<Vector2D> temp;
-		GetToCheck(oldtess, ToRefine,real_neigh,Chull);
+		GetToCheck(oldtess, static_cast<int>(ToRefine),real_neigh,Chull);
 		size_t N = static_cast<size_t>(oldtess.GetPointNo());
 		while (location < NewPoints.size() && NewPoints[location].first == ToRefine)
 		{
