@@ -211,13 +211,15 @@ namespace
 		while (!tocheck.empty())
 		{
 			vector<Vector2D> chull = tocheck_hull.top();
+			int cur_check=tocheck.top();
+			tocheck.pop();
 			tocheck_hull.pop();
 			double v = AreaOverlap(temp, chull);
 			if (v > vv*1e-8)
 			{
-				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(tocheck.top())], eos, v);
+				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(cur_check)], eos, v);
 				TotalVolume += v;
-				vector<int> neightemp = oldtess.GetNeighbors(tocheck.top());
+				vector<int> neightemp = oldtess.GetNeighbors(cur_check);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
@@ -230,7 +232,6 @@ namespace
 					}
 				}
 			}
-			tocheck.pop();
 		}
 		const double eps = periodic ? 1e-2 : 1e-6;
 		if (vv > (1 + eps)*TotalVolume || vv < (1 - eps)*TotalVolume)
