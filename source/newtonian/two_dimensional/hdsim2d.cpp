@@ -77,7 +77,11 @@ hdsim::hdsim
  const TimeStepFunction& tsf,
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
- const CellUpdater& cu) :
+ const CellUpdater& cu,
+#ifdef RICH_MPI
+	const ProcessorUpdate* proc_update
+#endif
+	) :
 #ifdef RICH_MPI
 	proctess_(proctess),
 #endif
@@ -101,7 +105,8 @@ hdsim::hdsim
   fc_(fc),
   eu_(eu),
   cu_(cu),
-  cache_data_(tess, pg) {}
+  cache_data_(tess, pg),
+  proc_update_(proc_update){}
 
 hdsim::~hdsim(void) {}
 
@@ -284,6 +289,8 @@ void hdsim::TimeAdvance(void)
 		extensives_);
 
 #ifdef RICH_MPI
+	if (proc_update_ != 0)
+		proc_update_->Update(proctess_, tess_);
 	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
 	// Keep relevant points
 	exchange_extensive_cells(tess_, extensives_, cells_);
@@ -363,6 +370,8 @@ void hdsim::TimeAdvance2Heun(void)
 	   mid_extensives);
 
 #ifdef RICH_MPI
+	if (proc_update_ != 0)
+		proc_update_->Update(proctess_, tess_);
 	MoveMeshPoints(point_velocities, dt, tess_, proctess_);
 	// Keep relevant points
 	exchange_extensive_cells(tess_, mid_extensives, cells_);

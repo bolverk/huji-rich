@@ -336,11 +336,7 @@ namespace
 
 void AMR::GetNewPoints2(vector<size_t> const& ToRefine, Tessellation const& tess,
 	vector<std::pair<size_t, Vector2D> > &NewPoints, vector<Vector2D> &Moved,
-	OuterBoundary const& obc
-#ifdef RICH_MPI
-	, vector<Vector2D> const& proc_chull
-#endif
-	)const
+	OuterBoundary const& obc)const
 {
 	const double small = 1e-3;
 	NewPoints.clear();

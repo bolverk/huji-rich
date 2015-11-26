@@ -33,6 +33,9 @@
 #include "extensive_updater.hpp"
 #include "cache_data.hpp"
 #include "edge_velocity_calculator.hpp"
+#ifdef RICH_MPI
+#include "../../mpi/ProcessorUpdate.hpp"
+#endif
 
 //! \brief Newtonian hydrodynamic simulation
 class hdsim
@@ -73,6 +76,10 @@ private:
   const CellUpdater& cu_;
 
   const CacheData cache_data_;
+
+#ifdef RICH_MPI
+  const ProcessorUpdate* proc_update_;
+#endif
 
   // The purpose of these declarations is to disable copying
   hdsim(const hdsim& origin);
@@ -159,7 +166,11 @@ public:
    const TimeStepFunction& tsf,
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
-   const CellUpdater& cu);
+   const CellUpdater& cu,
+#ifdef RICH_MPI
+		  const ProcessorUpdate* proc_update=0
+#endif
+		  );
 
   /*! \brief Loads reset data into simulation
     \param checkpoint Reset dump

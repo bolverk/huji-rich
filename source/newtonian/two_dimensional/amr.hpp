@@ -148,19 +148,12 @@ protected:
   \param Moved displacement for periodic grid
   \param obc Outer boundary conditions
   */
-#ifdef RICH_MPI
-  //!    \param proc_chull Cells' convex hull
-#endif // RICH_MPI
   void GetNewPoints2
 	  (vector<size_t> const& ToRefine,
 		  Tessellation const& tess,
 		  vector<std::pair<size_t, Vector2D> > &NewPoints,
 		  vector<Vector2D> &Moved,
-		  OuterBoundary const& obc
-#ifdef RICH_MPI
-		  , vector<Vector2D> const& proc_chull
-#endif
-		  )const;
+		  OuterBoundary const& obc)const;
 
 public:
 	/*!
