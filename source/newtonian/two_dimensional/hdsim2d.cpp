@@ -105,8 +105,11 @@ hdsim::hdsim
   fc_(fc),
   eu_(eu),
   cu_(cu),
-  cache_data_(tess, pg),
-  proc_update_(proc_update){}
+  cache_data_(tess, pg)
+#ifdef RICH_MPI
+	,proc_update_(proc_update)
+#endif
+{}
 
 hdsim::~hdsim(void) {}
 
