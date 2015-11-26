@@ -515,17 +515,38 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
 					cells[static_cast<size_t>(edge.neighbors.second)]));
 			else
+#ifdef RICH_MPI
+			{
+				if(tess.GetOriginalIndex(edge.neighbors.second)!= tess.GetOriginalIndex(edge.neighbors.first))
+					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						cells[static_cast<size_t>(edge.neighbors.second)]));
+				else
+					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+			}				
+#else
 				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
 					safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+#endif
 		}
 		else
 		{
 			if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
+			{
+#ifdef RICH_MPI
+				if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						cells[static_cast<size_t>(edge.neighbors.second)]));
+				else
+					res.push_back(pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
+						cells[static_cast<size_t>(edge.neighbors.second)]));
+#else
 				res.push_back(pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
 					cells[static_cast<size_t>(edge.neighbors.second)]));
+#endif
+			}
 			else
-				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-					safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+				throw UniversalError("Both sides of edge are ghost");
 		}		
 	}
 	for (size_t i = 0; i < edge_number; ++i)

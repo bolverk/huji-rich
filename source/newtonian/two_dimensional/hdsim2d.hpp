@@ -166,9 +166,9 @@ public:
    const TimeStepFunction& tsf,
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
-   const CellUpdater& cu,
+   const CellUpdater& cu
 #ifdef RICH_MPI
-		  const ProcessorUpdate* proc_update=0
+		  ,const ProcessorUpdate* proc_update=0
 #endif
 		  );
 
