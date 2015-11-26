@@ -77,9 +77,9 @@ hdsim::hdsim
  const TimeStepFunction& tsf,
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
- const CellUpdater& cu,
+ const CellUpdater& cu
 #ifdef RICH_MPI
-	const ProcessorUpdate* proc_update
+	,const ProcessorUpdate* proc_update
 #endif
 	) :
 #ifdef RICH_MPI
