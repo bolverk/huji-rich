@@ -292,6 +292,7 @@ namespace
 					}
 					else
 					{
+#ifndef RICH_MPI
 						// Is it not a rigid wall?
 						if (tess.GetOriginalIndex(neigh_temp[i]) != static_cast<int>(real_neigh[j]))
 						{
@@ -301,6 +302,7 @@ namespace
 								tess.GetMeshPoint(tess.GetOriginalIndex(neigh_temp[i]))) + moved[j];
 							Chull.push_back(temp);
 						}
+#endif
 					}
 				}
 			}
