@@ -21,6 +21,8 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 				res[ghost_index].velocity -= 2 * ScalarProd(res[ghost_index].velocity, normal)*normal;
 			}
 		}
+		else
+			res.insert(std::pair<size_t, ComputationalCell>(ghost_index, cells[ghost_index]));
 	}
 	return res;
 }
