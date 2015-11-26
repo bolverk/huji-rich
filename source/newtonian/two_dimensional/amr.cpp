@@ -194,9 +194,17 @@ namespace
 			{
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
+#ifdef RICH_MPI
+				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo())
+					continue;
+#endif
 				vector<int> neightemp = oldtess.GetNeighbors(real_neigh[j]);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
+#ifdef RICH_MPI
+					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo())
+						continue;
+#endif
 					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
 					{
 						vector<Vector2D> temp2;
@@ -222,6 +230,10 @@ namespace
 				vector<int> neightemp = oldtess.GetNeighbors(cur_check);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
+#ifdef RICH_MPI
+					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo())
+						continue;
+#endif
 					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
 					{
 						vector<Vector2D> temp2;
@@ -237,7 +249,9 @@ namespace
 		if (vv > (1 + eps)*TotalVolume || vv < (1 - eps)*TotalVolume)
 		{
 			std::cout << "Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
+#ifndef RICH_MPI
 			throw UniversalError("Not same volume in amr refine");
+#endif
 		}
 		return NewExtensive;
 	}
