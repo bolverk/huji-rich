@@ -815,15 +815,8 @@ void ConservativeAMROld::UpdateCellsRefine
 	sort(ToRefine.begin(), ToRefine.end());
 #ifdef RICH_MPI
 	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
-	vector<Vector2D> chull;
-	const boost::mpi::communicator world;
-	ConvexHull(chull, proctess, world.rank());
 #endif
-	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc
-#ifdef RICH_MPI
-		, chull
-#endif
-		);
+	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc);
 
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess.GetMeshPoints();
