@@ -162,10 +162,12 @@ Extensive RigidWallFlux2::operator()
 	const bool aux,
 	pair<ComputationalCell,ComputationalCell> const& edge_values) const
 {
+#ifndef RICH_MPI
 	if (aux)
 		assert(edge.neighbors.first >= 0 && edge.neighbors.first<tess.GetPointNo());
 	else
 		assert(edge.neighbors.second >= 0 && edge.neighbors.second<tess.GetPointNo());
+#endif
 	const Vector2D p = normalize
 		(edge.vertices.second - edge.vertices.first);
 	const Vector2D n =
