@@ -5,7 +5,9 @@
 #ifndef PROCUPDATE
 #define PROCUPDATE 1
 
+#ifdef _MSC_VER
 #define _USE_MATH_DEFINES
+#endif // _MSC_VER
 #include <cmath>
 #include <algorithm>
 #include "../newtonian/two_dimensional/OuterBoundary.hpp"
