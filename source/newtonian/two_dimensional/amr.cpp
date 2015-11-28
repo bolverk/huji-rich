@@ -1,7 +1,7 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
-//#define debug_amr 1
+#define debug_amr 1
 
 #ifdef debug_amr
 #include "hdf5_diagnostics.hpp"
@@ -245,7 +245,7 @@ namespace
 				}
 			}
 		}
-		const double eps = periodic ? 1e-2 : 1e-6;
+		const double eps = periodic ? 1e-2 : 1e-5;
 		if (vv > (1 + eps)*TotalVolume || vv < (1 - eps)*TotalVolume)
 		{
 			std::cout << "Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
