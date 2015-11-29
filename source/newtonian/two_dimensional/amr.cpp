@@ -639,7 +639,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 				extensives[static_cast<size_t>(oldtess->GetOriginalIndex(neigh[j]))] += (v / TotalV)*extensives[ToRemove[i]];
 			}
 		}
-		if (dv > (1 + 1e-6)*TotalV || dv < (1 - 1e-6)*TotalV)
+		if (dv > (1 + 1e-5)*TotalV || dv < (1 - 1e-5)*TotalV)
 		{
 			std::cout << "Real volume: " << TotalV << " AMR volume: " << dv << std::endl;
 			throw UniversalError("Not same volume in amr remove");
