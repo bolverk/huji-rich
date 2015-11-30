@@ -28,8 +28,11 @@ namespace
     res.mass = conserved.Mass;
     res.momentum = conserved.Momentum;
     res.energy = conserved.Energy;
-    for(boost::container::flat_map<string,double>::const_iterator it= cells.first.tracers.begin();it!=cells.first.tracers.end();++it)
-      res.tracers[it->first] = conserved.Mass*safe_retrieve((conserved.Mass>0 ? cells.first : cells.second).tracers,it->first);
+	res.tracers.reserve(cells.first.tracers.size());
+	for (size_t i = 0; i < cells.first.tracers.size(); ++i)
+		res.tracers.insert(pair<string, double>((cells.first.tracers.begin()+i)->first,
+			conserved.Mass*(conserved.Mass>0 ? (cells.first.tracers.begin() + i)->second : 
+				(cells.second.tracers.begin() + i)->second)));
     return res;
   }
 

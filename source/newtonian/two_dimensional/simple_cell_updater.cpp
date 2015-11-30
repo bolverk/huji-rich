@@ -33,10 +33,10 @@ namespace {
     res.velocity = extensive.momentum/extensive.mass;
     const double energy = extensive.energy/extensive.mass -
       0.5*ScalarProd(res.velocity,res.velocity);
-    for(boost::container::flat_map<string,double>::const_iterator it=
-	  extensive.tracers.begin();
-	it!=extensive.tracers.end();++it)
-      res.tracers[it->first] = it->second/extensive.mass;
+	res.tracers.reserve(extensive.tracers.size());
+	for (size_t i = 0; i < extensive.tracers.size(); ++i)
+		res.tracers.insert(pair<string,double>((extensive.tracers.begin() + i)->first ,
+			(extensive.tracers.begin() + i)->second/extensive.mass));
     res.pressure = eos.de2p
       (res.density,
        energy,

@@ -70,7 +70,8 @@ namespace
 	void calc_naive_slope(ComputationalCell const& cell,
 		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> &res)
+		pair<ComputationalCell, ComputationalCell> &res,
+		pair<ComputationalCell, ComputationalCell> &vec_compare)
 	{
 		size_t n = edge_list.size();
 		if (n>20)
@@ -82,7 +83,6 @@ namespace
 		}
 		// Create the matrix to invert and the vector to compare
 		vector<double> m(4, 0);
-		pair<ComputationalCell, ComputationalCell> vec_compare;
 		for (size_t i = 0; i < edge_list.size(); ++i)
 		{
 			const Vector2D c_ij = CalcCentroid(edge_list[i]) -0.5*(neigh_cm[i] + cell_cm);
@@ -94,8 +94,8 @@ namespace
 			m[3] -= c_ij.y*r_ij.y;
 			if (i == 0)
 			{
-				vec_compare.first = cell;
-				vec_compare.second = cell;
+				ReplaceComputationalCell(vec_compare.first, cell);
+				ReplaceComputationalCell(vec_compare.second, cell);
 				vec_compare.first *= r_ij.x*0.5;
 				vec_compare.second *= r_ij.y*0.5;
 			}
@@ -106,12 +106,6 @@ namespace
 			}
 			ComputationalCellAddMult(vec_compare.second, *neighbors[i], r_ij.y*0.5);
 			ComputationalCellAddMult(vec_compare.first, *neighbors[i], r_ij.x*0.5);
-			/*
-			vec_compare.first += cell*r_ij.x*0.5;
-			vec_compare.first += neighbors[i]*r_ij.x*0.5;
-			vec_compare.second += cell*r_ij.y*0.5;
-			vec_compare.second += neighbors[i]*r_ij.y*0.5;
-			*/
 		}
 		m[0] += cell_volume;
 		m[3] += cell_volume;
@@ -135,7 +129,8 @@ namespace
 		m_inv[2] = -m[2] * det_inv;
 		m_inv[3] = m[0] * det_inv;
 		// Calculate the gradient
-		res = vec_compare;
+		ReplaceComputationalCell(res.first, vec_compare.first);
+		ReplaceComputationalCell(res.second, vec_compare.second);
 		res.first *= m_inv[0];
 		res.second *= m_inv[3];
 		ComputationalCellAddMult(res.first, vec_compare.second, m_inv[1]);
@@ -393,7 +388,8 @@ namespace
 	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
 	 const vector<string>& flat_tracers,
 	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_,
-	 std::pair<ComputationalCell, ComputationalCell> & res)
+	 std::pair<ComputationalCell, ComputationalCell> & res,
+		pair<ComputationalCell, ComputationalCell> & temp1)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list;
@@ -407,7 +403,8 @@ namespace
 
 	ComputationalCell const& cell = cells[cell_index];
 	calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
-		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list,res);
+		tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list,
+		res,temp1);
 
 	naive_slope_ = res;
 
@@ -493,11 +490,12 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	// Get ghost points
 	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells,time);
 	// Prepare slopes
-	rslopes_.resize(CellNumber);
+	rslopes_.resize(CellNumber,pair<ComputationalCell,ComputationalCell>(cells[0],cells[0]));
 	naive_rslopes_.resize(CellNumber);
+	pair<ComputationalCell, ComputationalCell> temp1(cells[0],cells[0]);
 	for (size_t i = 0; i<CellNumber; ++i)
 	  calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
-		flat_tracers_,naive_rslopes_[i],rslopes_[i]);
+		flat_tracers_,naive_rslopes_[i],rslopes_[i],temp1);
 #ifdef RICH_MPI
 	// communicate ghost slopes
 	exchange_ghost_slopes(tess, rslopes_);
