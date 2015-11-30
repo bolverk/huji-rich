@@ -1491,7 +1491,32 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			true); // recursive
 
 		 // Communication
-	vector<vector<int> > correspondence_matrix;
+	
+	vector<int> totalk(static_cast<size_t>(world.size()), 0);
+	vector<int> scounts(totalk.size(), 1);
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+		totalk[neighbors_own_edges[i]] = 1;
+	int nrecv;
+	MPI_Reduce_scatter(&totalk[0], &nrecv, &scounts[0], MPI_INT, MPI_SUM,
+		MPI_COMM_WORLD);
+
+	vector < boost::mpi::request> req;
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+		req.push_back(world.isend(neighbors_own_edges[i],3));
+	vector<int> talkwithme;
+	for (int i = 0; i < nrecv; ++i)
+	{
+		boost::mpi::status stat = world.recv(boost::mpi::any_source, 3);
+		talkwithme.push_back(stat.source());
+	}
+	vector<size_t> indices;
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	{
+		if (is_in(neighbors_own_edges[i],talkwithme))
+			indices.push_back(i);
+	}
+
+/*	vector<vector<int> > correspondence_matrix;
 	all_gather
 		(world,
 			neighbors_own_edges,
@@ -1504,7 +1529,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			(world.rank(),
 				correspondence_matrix.at(dest)))
 			indices.push_back(i);
-	}
+	}*/
 	// Symmetrisation
 	neighbors_own_edges =
 		VectorValues
