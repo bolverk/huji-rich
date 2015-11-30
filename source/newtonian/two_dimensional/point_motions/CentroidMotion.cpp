@@ -4,6 +4,38 @@
 
 namespace
 {
+	vector<size_t> ConvexIndeces(vector<Vector2D> const& points,Vector2D const& meshpoint)
+	{
+		// Start building the convexhull
+		size_t n = points.size();
+		vector<double> angles(n);
+		for (size_t i = 0; i<n; ++i)
+			angles.at(i) = atan2(points.at(i).y - meshpoint.y, points.at(i).x - meshpoint.x);
+		return sort_index(angles);
+	}
+
+	vector<Vector2D> GetConvexPoints(vector<Vector2D> const& chull, Vector2D const& meshpoint, double R)
+	{
+		Edge e1, e2;
+		vector<Vector2D> res(chull.size());
+		for (size_t i = 0; i < res.size(); ++i)
+		{
+			Vector2D normal = chull[static_cast<size_t>(i)] - meshpoint;
+			normal = normal / abs(normal);
+			e1.vertices.first = 0.5*(chull[static_cast<size_t>(i)] + meshpoint);
+			e1.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
+			e1.vertices.second = e1.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			normal = chull[static_cast<size_t>((i+1)%res.size())] - meshpoint;
+			normal = normal / abs(normal);
+			e2.vertices.first = 0.5*(chull[static_cast<size_t>((i + 1) % res.size())] + meshpoint);
+			e2.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
+			e2.vertices.second = e2.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			if (!SegmentIntersection(e1, e2, res[i]))
+				throw UniversalError("No intersection in centroid motion");
+		}
+		return res;
+	}
+
 	Vector2D GetCM(vector<Vector2D> const& chull,Vector2D const& meshpoint)
 	{
 		double area = 0;
@@ -26,11 +58,27 @@ namespace
 	}
 
 	vector<Vector2D> GetChullVelocity(Tessellation const & tess, vector<Vector2D> const& orgvel,
-		vector<size_t> const& indeces)
+		vector<size_t> const& indeces,int point)
 	{
 		vector<Vector2D> res(indeces.size());
+		const size_t N = static_cast<size_t>(tess.GetPointNo());
 		for (size_t i = 0; i < indeces.size(); ++i)
-			res[i] = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
+		{
+			if(indeces[i]<N)
+				res[i] = orgvel[indeces[i]];
+			else
+			{
+				if (tess.GetOriginalIndex(static_cast<int>(indeces[i]) == static_cast<int>(indeces[i])))
+				{
+					Vector2D normal = tess.GetMeshPoint(point) - tess.GetMeshPoint(static_cast<int>(indeces[i]));
+					normal = normal / abs(normal);
+					Vector2D vel = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
+					res[i] = vel - 2*normal*ScalarProd(vel,normal);
+				}
+				else
+					res[i] = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
+			}
+		}
 		return res;
 	}
 	
@@ -40,8 +88,9 @@ namespace
 		Vector2D temp = cm - meshpoint - dt*w;
 		if(abs(temp)<1e-6*R)
 			return (cm - meshpoint) / dt;
-		Vector2D newcm = meshpoint + w*dt + std::min(1.0, abs(cm - meshpoint)*reduce_factor/abs(temp))*temp;
-		return (newcm - meshpoint) / dt;
+		const Vector2D newcm = meshpoint + w*dt + std::min(1.0, abs(cm - meshpoint)*reduce_factor/abs(temp))*temp;
+		const Vector2D diff = newcm - meshpoint;
+		return diff / dt;
 	}
 
 	vector<Vector2D> GetCorrectedVelocities(Tessellation const& tess,vector<Vector2D> const& w,double dt,
@@ -62,18 +111,13 @@ namespace
 			for (size_t i = 0; i < N; ++i)
 			{
 				vector<Vector2D> chull = GetOrgChullPoints(tess, neighbor_indeces[i]);
-				chull = chull + dt*GetChullVelocity(tess, cur_w, neighbor_indeces[i]);
+				vector<size_t> convex_index = ConvexIndeces(chull, tess.GetMeshPoint(static_cast<int>(i)));
+				chull = VectorValues(chull,convex_index);
+				chull = chull + dt*GetChullVelocity(tess, cur_w,VectorValues(neighbor_indeces[i],convex_index)
+					,static_cast<int>(i));
+				chull = GetConvexPoints(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt,
+					tess.GetWidth(static_cast<int>(i)));
 				Vector2D cm = GetCM(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt);
-/*				if (j > 0)
-				{
-					std::cout << "cell " << i << " cm.x " << cm.x << " cm.y " << cm.y << std::endl;
-					for (size_t k = 0; k < chull.size(); ++k)
-					{
-						std::cout << "point " << k << " x " << chull[k].x << " point.y " << chull[k].y << std::endl;
-					}
-					int jj;
-					std::cin >> jj;
-				}*/
 				res[i] = GetCorrectedVelociy(cm, tess.GetMeshPoint(static_cast<int>(i)), w[i], dt, reduce_factor,
 					tess.GetWidth(static_cast<int>(i)));
 			}
@@ -89,14 +133,18 @@ namespace
 	}
 }
 
-CentroidMotion::CentroidMotion(double reduction_factor, size_t niter) :
-	reduce_factor_(reduction_factor),niter_(niter){}
+CentroidMotion::CentroidMotion(double reduction_factor, LinearGaussImproved const& interp, size_t niter) :
+	reduce_factor_(reduction_factor),interp_(interp),niter_(niter){}
 
 vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < res.size(); ++i)
-		res[i] = cells[i].velocity;
+	{
+		Vector2D density_grad(interp_.GetSlopesUnlimited()[i].first.density, interp_.GetSlopesUnlimited()[i].second.density);
+		density_grad = 0.1*density_grad*abs(cells[i].velocity) / abs(density_grad);
+		res[i] = cells[i].velocity+density_grad;
+	}
 	return res;
 }
 
