@@ -30,9 +30,12 @@ namespace
     res.energy = conserved.Energy;
 	res.tracers.reserve(cells.first.tracers.size());
 	for (size_t i = 0; i < cells.first.tracers.size(); ++i)
-		res.tracers.insert(pair<string, double>((cells.first.tracers.begin()+i)->first,
-			conserved.Mass*(conserved.Mass>0 ? (cells.first.tracers.begin() + i)->second : 
-				(cells.second.tracers.begin() + i)->second)));
+	  res.tracers.insert
+	    (pair<string, double>
+	     ((cells.first.tracers.begin()+static_cast<int>(i))->first,
+	      conserved.Mass*
+	      (conserved.Mass>0 ? (cells.first.tracers.begin() + static_cast<int>(i))->second : 
+	       (cells.second.tracers.begin() + static_cast<int>(i))->second)));
     return res;
   }
 
