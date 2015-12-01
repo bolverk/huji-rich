@@ -29,13 +29,13 @@ public:
     \param tess Tessellation
     \param cells Computational cells
 	\param time The sim time
-    \return List of pairs of primitive values on each cell
+    \param res List of pairs of primitive values on each edge
    */
-  virtual vector<pair<ComputationalCell, ComputationalCell> >
+  virtual void
   operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   double time) const = 0;
+   double time, vector<pair<ComputationalCell, ComputationalCell> > &res) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };

@@ -36,8 +36,8 @@ public:
 		const vector<string>& flat_tracers =
 		vector<string>());
 
-	vector<pair<ComputationalCell, ComputationalCell> > operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells,double time)const;
+	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
+		vector<pair<ComputationalCell, ComputationalCell> > &res)const;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell

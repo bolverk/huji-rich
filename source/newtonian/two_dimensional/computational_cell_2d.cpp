@@ -126,4 +126,8 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
 	  assert((cell.tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
 	  (cell.tracers.begin() + static_cast<int>(j))->second = (other.tracers.begin() + static_cast<int>(j))->second;
 	}
+	for (size_t j = 0; j < cell.stickers.size(); ++j)
+	{
+		(cell.stickers.begin() + static_cast<int>(j))->second = (other.stickers.begin() + static_cast<int>(j))->second;
+	}
 }

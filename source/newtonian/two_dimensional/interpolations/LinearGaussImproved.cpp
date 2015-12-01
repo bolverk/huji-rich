@@ -178,9 +178,14 @@ namespace
 
 	void slope_limit(ComputationalCell const& cell,Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> &slope)
+		pair<ComputationalCell, ComputationalCell> &slope,
+		ComputationalCell &cmax,
+		ComputationalCell &cmin,
+		ComputationalCell &maxdiff,
+		ComputationalCell &mindiff)
 	{
-		ComputationalCell cmax(cell), cmin(cell);
+		ReplaceComputationalCell(cmax, cell);
+		ReplaceComputationalCell(cmin, cell);
 		// Find maximum.minimum neighbor values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
@@ -201,7 +206,10 @@ namespace
 											  (cell_temp.tracers.begin() + static_cast<int>(j))->second);
 			}
 		}
-		ComputationalCell maxdiff = cmax - cell,mindiff = cmin - cell;
+		ReplaceComputationalCell(maxdiff, cmax);
+		maxdiff -= cell;
+		ReplaceComputationalCell(mindiff, cmin);
+		mindiff -= cell;
 		// limit the slope
 		ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[0]), cm);
 		ComputationalCell dphi = centroid_val - cell;
@@ -215,12 +223,6 @@ namespace
 				ReplaceComputationalCell(dphi, centroid_val);
 				dphi -= cell;
 			}
-			//ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(edge_list[i]), cm);
-			//ComputationalCell dphi = centroid_val - cell;
-			/*Vector2D cent = CalcCentroid(edge_list[i]);
-			ComputationalCell dphi(slope.first);
-			dphi*=(cent.x - cm.x);
-			ComputationalCellAddMult(dphi, slope.second, cent.y - cm.y);*/
 			// density
 			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density),std::abs(mindiff.density))||centroid_val.density*cell.density < 0)
 			{
@@ -285,7 +287,6 @@ namespace
 		for (boost::container::flat_map<std::string, double>::iterator it = slope.first.tracers.begin(); it != slope.first.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-	//		safe_retrieve(slope.second.tracers,it->first) *= psi[4 + counter];
 			(slope.second.tracers.begin()+static_cast<int>(counter))->second*= psi[4 + counter];
 			++counter;
 		}
@@ -389,7 +390,11 @@ namespace
 	 const vector<string>& flat_tracers,
 	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_,
 	 std::pair<ComputationalCell, ComputationalCell> & res,
-		pair<ComputationalCell, ComputationalCell> & temp1)
+		pair<ComputationalCell, ComputationalCell> & temp1,
+		ComputationalCell &temp2,
+		ComputationalCell &temp3, 
+		ComputationalCell &temp4, 
+		ComputationalCell &temp5)
 {
 	vector<int> edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
 	vector<Edge> edge_list;
@@ -419,7 +424,8 @@ namespace
 		if (!is_shock(res, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
 			      eos.dp2c(cell.density,cell.pressure,cell.tracers)))
 		{
-			slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res);
+			slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res,temp2,temp3,
+				temp4,temp5);
 		}
 		else
 		{
@@ -483,8 +489,8 @@ namespace
 }
 #endif//RICH_MPI
 
-vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells,double time) const
+void LinearGaussImproved::operator() (const Tessellation& tess,
+	const vector<ComputationalCell>& cells,double time, vector<pair<ComputationalCell, ComputationalCell> > &res) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	// Get ghost points
@@ -493,38 +499,50 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 	rslopes_.resize(CellNumber,pair<ComputationalCell,ComputationalCell>(cells[0],cells[0]));
 	naive_rslopes_.resize(CellNumber);
 	pair<ComputationalCell, ComputationalCell> temp1(cells[0],cells[0]);
+	ComputationalCell temp2(cells[0]);
+	ComputationalCell temp3(cells[0]);
+	ComputationalCell temp4(cells[0]);
+	ComputationalCell temp5(cells[0]);
 	for (size_t i = 0; i<CellNumber; ++i)
 	  calc_slope(tess, cells,i,slf_,shockratio_, diffusecoeff_, pressure_ratio_,eos_,ghost_cells,
-		flat_tracers_,naive_rslopes_[i],rslopes_[i],temp1);
+		flat_tracers_,naive_rslopes_[i],rslopes_[i],temp1,temp2,temp3,temp4,temp5);
 #ifdef RICH_MPI
 	// communicate ghost slopes
 	exchange_ghost_slopes(tess, rslopes_);
 #endif //RICH_MPI
 	// Interpolate the edges
-	vector<pair<ComputationalCell, ComputationalCell> > res;
 	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
-	res.reserve(edge_number);
+	res.resize(edge_number);
 	for (size_t i = 0; i < edge_number; ++i)
 	{
+		res[i].first.tracers = cells[0].tracers;
+		res[i].first.stickers = cells[0].stickers;
+		res[i].second.tracers = cells[0].tracers;
+		res[i].second.stickers = cells[0].stickers;
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
 		if (edge.neighbors.first >= 0 && edge.neighbors.first < static_cast<int>(CellNumber))
 		{
 			if (edge.neighbors.second >= 0 && edge.neighbors.second < static_cast<int>(CellNumber))
-				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-					cells[static_cast<size_t>(edge.neighbors.second)]));
+			{
+				ReplaceComputationalCell(res[i].first, cells[static_cast<size_t>(edge.neighbors.first)]);
+				ReplaceComputationalCell(res[i].second, cells[static_cast<size_t>(edge.neighbors.second)]);
+			}
 			else
 #ifdef RICH_MPI
 			{
-				if(tess.GetOriginalIndex(edge.neighbors.second)!= tess.GetOriginalIndex(edge.neighbors.first))
-					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-						cells[static_cast<size_t>(edge.neighbors.second)]));
+				if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+					res[i] = pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						cells[static_cast<size_t>(edge.neighbors.second)]);
 				else
-					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-						safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
-			}				
+					res[i] = pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second)));
+			}
 #else
-				res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-					safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second))));
+			{
+				ReplaceComputationalCell(res[i].first, cells[static_cast<size_t>(edge.neighbors.first)]);
+				ReplaceComputationalCell(res[i].second, safe_retrieve(ghost_cells,
+					static_cast<size_t>(edge.neighbors.second)));
+			}
 #endif
 		}
 		else
@@ -533,16 +551,17 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 			{
 #ifdef RICH_MPI
 				if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-					res.push_back(pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
-						cells[static_cast<size_t>(edge.neighbors.second)]));
+					res[i]=pair<ComputationalCell, ComputationalCell>(cells[static_cast<size_t>(edge.neighbors.first)],
+						cells[static_cast<size_t>(edge.neighbors.second)]);
 				else
-					res.push_back(pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
-						cells[static_cast<size_t>(edge.neighbors.second)]));
+					res[i]=pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
+						cells[static_cast<size_t>(edge.neighbors.second)]);
 #else
-				res.push_back(pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
-					cells[static_cast<size_t>(edge.neighbors.second)]));
-#endif
+				ReplaceComputationalCell(res[i].first, safe_retrieve(ghost_cells,
+					static_cast<size_t>(edge.neighbors.first)));
+				ReplaceComputationalCell(res[i].second, cells[static_cast<size_t>(edge.neighbors.second)]);
 			}
+#endif
 			else
 				throw UniversalError("Both sides of edge are ghost");
 		}		
@@ -582,7 +601,6 @@ vector<pair<ComputationalCell, ComputationalCell> > LinearGaussImproved::operato
 				edge.neighbors.second),time,edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 		}
 	}
-	return res;
 }
 
 

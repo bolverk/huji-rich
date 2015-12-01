@@ -63,7 +63,8 @@ vector<Extensive> ConditionActionSequence2::operator()
 	const double /*dt*/) const
 {
 	vector<Extensive> res(tess.getAllEdges().size());
-	vector<pair<ComputationalCell,ComputationalCell> > edge_values= interp_.operator()(tess, cells, time);
+	vector<pair<ComputationalCell, ComputationalCell> > edge_values;
+	interp_.operator()(tess, cells, time,edge_values);
 	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
 		res[i] = choose_action
 		(tess.getAllEdges()[i],

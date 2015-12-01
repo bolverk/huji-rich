@@ -42,7 +42,8 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
 	const vector<ComputationalCell>& cells,const vector<Extensive>& /*extensives*/,const CacheData& /*cd*/,
 	const EquationOfState& eos,const double time,const double /*dt*/) const
 {
-  const vector<pair<ComputationalCell, ComputationalCell> > interpolated = sr_(tess, cells,time);
+	vector<pair<ComputationalCell, ComputationalCell> > interpolated;
+	sr_(tess, cells, time,interpolated);
   vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
   const vector<pair<size_t, Extensive> > boundary_conditions = hbc_(tess, cells);
   vector<Extensive> res(tess.getAllEdges().size());
