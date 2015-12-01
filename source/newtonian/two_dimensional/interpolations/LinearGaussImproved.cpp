@@ -556,6 +556,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 				else
 					res[i]=pair<ComputationalCell, ComputationalCell>(safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first)),
 						cells[static_cast<size_t>(edge.neighbors.second)]);
+			}
 #else
 				ReplaceComputationalCell(res[i].first, safe_retrieve(ghost_cells,
 					static_cast<size_t>(edge.neighbors.first)));
