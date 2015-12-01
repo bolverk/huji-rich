@@ -7,7 +7,7 @@ def main():
 	
     with h5py.File('final.h5','r+') as f:
         density_list = numpy.array(f['hydrodynamic']['density'])
-    	chi_2 = numpy.sqrt(sum((density_list-1)**2))/len(density_list)
+        chi_2 = numpy.sqrt(sum((density_list-1)**2))/len(density_list)
     mass = numpy.loadtxt('mass.txt')
     return chi_2<3e-7 and abs(mass-4)<5e-8
 
