@@ -83,18 +83,20 @@ namespace
 	}
 	
 	Vector2D GetCorrectedVelociy(Vector2D const& cm,Vector2D const& meshpoint,Vector2D const& w,
-		double dt,double reduce_factor,double R)
+		double dt,double reduce_factor,double R,bool cold, EquationOfState const& eos,ComputationalCell const& cell)
 	{
 		Vector2D temp = cm - meshpoint - dt*w;
 		if(abs(temp)<1e-6*R)
 			return (cm - meshpoint) / dt;
-		const Vector2D newcm = meshpoint + w*dt + std::min(1.0, abs(cm - meshpoint)*reduce_factor/abs(temp))*temp;
+		const Vector2D newcm = meshpoint + w*dt +reduce_factor*temp*std::min(1.0, cold ? 
+			abs(cm - meshpoint)/abs(temp) : eos.dp2c(cell.density,cell.pressure)*dt/abs(temp));
 		const Vector2D diff = newcm - meshpoint;
 		return diff / dt;
 	}
 
 	vector<Vector2D> GetCorrectedVelocities(Tessellation const& tess,vector<Vector2D> const& w,double dt,
-		double reduce_factor,size_t Niter)
+		double reduce_factor,size_t Niter,vector<ComputationalCell> const& cells,EquationOfState const& eos,
+		bool cold)
 	{
 		size_t N = static_cast<size_t>(tess.GetPointNo());
 		vector<Vector2D> res(N);
@@ -119,7 +121,7 @@ namespace
 					tess.GetWidth(static_cast<int>(i)));
 				Vector2D cm = GetCM(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt);
 				res[i] = GetCorrectedVelociy(cm, tess.GetMeshPoint(static_cast<int>(i)), w[i], dt, reduce_factor,
-					tess.GetWidth(static_cast<int>(i)));
+					tess.GetWidth(static_cast<int>(i)),cold,eos,cells[i]);
 			}
 			cur_w = res;
 		}
@@ -133,23 +135,19 @@ namespace
 	}
 }
 
-CentroidMotion::CentroidMotion(double reduction_factor, LinearGaussImproved const& interp, size_t niter) :
-	reduce_factor_(reduction_factor),interp_(interp),niter_(niter){}
+CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& eos, bool cold, size_t niter) :
+	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter){}
 
 vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < res.size(); ++i)
-	{
-		Vector2D density_grad(interp_.GetSlopesUnlimited()[i].first.density, interp_.GetSlopesUnlimited()[i].second.density);
-		density_grad = 0.1*density_grad*abs(cells[i].velocity) / abs(density_grad);
-		res[i] = cells[i].velocity+density_grad;
-	}
+		res[i] = cells[i].velocity;
 	return res;
 }
 
-vector<Vector2D> CentroidMotion::ApplyFix(Tessellation const & tess, vector<ComputationalCell> const & /*cells*/, double /*time*/,
+vector<Vector2D> CentroidMotion::ApplyFix(Tessellation const & tess, vector<ComputationalCell> const & cells, double /*time*/,
 	double dt, vector<Vector2D> const & velocities) const
 {
-	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_);
+	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_,cells,eos_,cold_);
 }

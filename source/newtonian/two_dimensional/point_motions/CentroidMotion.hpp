@@ -22,9 +22,10 @@ public:
 	/*! \brief Class constructor
 	\param reduction_factor The factor to reduce the correction velocity (1/reduction_factor is the number of iterations to fix)
 	\param niter The number of correction iterations to apply
-	\param interp The Gradient estimate
+	\param coldflow Flag if to use the soundspeed for the correction or the time step if the flow is cold
+	\param eos The equation of state
 	*/
-	CentroidMotion(double reduction_factor,LinearGaussImproved const& interp, size_t niter = 2);
+	CentroidMotion(double reduction_factor,EquationOfState const& eos, bool coldflow = false, size_t niter = 2);
 
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time) const;
 
@@ -33,7 +34,8 @@ public:
 private:
 
 	const double reduce_factor_;
-	LinearGaussImproved const& interp_;
+	EquationOfState const& eos_;
+	const bool cold_;
 	const size_t niter_;
 };
 
