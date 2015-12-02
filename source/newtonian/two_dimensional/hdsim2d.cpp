@@ -426,6 +426,55 @@ void hdsim::TimeAdvance2Heun(void)
 	++cycle_;
 }
 
+void hdsim::TimeAdvance2MidPoint(void)
+{
+	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
+
+	vector<Vector2D> edge_velocities =edge_velocity_calculator_(tess_, point_velocities);
+
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
+
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
+
+	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
+
+	vector<Extensive> fluxes = fc_(tess_,edge_velocities,cells_,extensives_,cache_data_,eos_,time_,0.5*dt);
+
+	vector<Extensive> mid_extensives = extensives_;
+
+	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives);
+
+	ExternalForceContribution(tess_,pg_,cache_data_,cells_,fluxes,point_velocities,source_,time_,0.5*dt,mid_extensives);
+
+	vector<Vector2D> old_points = tess_.GetMeshPoints();
+	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
+
+	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
+
+	time_ += 0.5*dt;
+
+	cache_data_.reset();
+
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
+
+	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
+
+	fluxes = fc_(tess_,edge_velocities,mid_cells,mid_extensives,cache_data_,eos_,time_,dt);
+
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
+
+	ExternalForceContribution(tess_,pg_,cache_data_,mid_cells,fluxes,point_velocities,source_,time_,dt,extensives_);
+
+	MoveMeshPoints(point_velocities, dt, tess_, old_points);
+
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
+	cache_data_.reset();
+
+	time_ += 0.5*dt;
+	++cycle_;
+}
+
+
 namespace {
 
 	template<class T> class AverageCalculator : public LazyList<T>

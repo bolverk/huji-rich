@@ -190,8 +190,11 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
-  //! \brief Second order tiem advance
+  //! \brief Second order time advance
   void TimeAdvance2Heun(void);
+
+  //! \brief Second order time advance
+  void TimeAdvance2MidPoint(void);
 
   /*! \brief Change the physical geometry
     \param pg New physical geometry
