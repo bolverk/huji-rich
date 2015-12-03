@@ -33,9 +33,14 @@ Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const Computatio
 	return res;
 }
 
+SimpleAMRCellUpdater::SimpleAMRCellUpdater(vector<string> const& toskip) :toskip_(toskip) {}
+
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 	double volume, ComputationalCell const& old_cell) const
 {
+	for (size_t i = 0; i < toskip_.size(); ++i)
+		if (old_cell.stickers.at(toskip_[i]))
+			return old_cell;
 	ComputationalCell res;
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
@@ -470,7 +475,7 @@ ConservativeAMR::ConservativeAMR
 	AMRExtensiveUpdater* eu) :
 	refine_(refine),
 	remove_(remove),
-	scu_(),
+	scu_(vector<string>()),
 	seu_(),
 	periodic_(periodic),
 	cu_(cu),
@@ -677,7 +682,7 @@ NonConservativeAMR::NonConservativeAMR
 (CellsToRefine const& refine,
 	CellsToRemove const& remove,
 	AMRExtensiveUpdater* eu) :
-	refine_(refine), remove_(remove), scu_(),
+	refine_(refine), remove_(remove), scu_(vector<string>()),
 	seu_(),
 	eu_(eu)
 {
@@ -794,7 +799,7 @@ ConservativeAMROld::ConservativeAMROld
 	AMRExtensiveUpdater* eu) :
 	refine_(refine),
 	remove_(remove),
-	scu_(),
+	scu_(vector<string>()),
 	seu_(),
 	cu_(cu),
 	eu_(eu),
