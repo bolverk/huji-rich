@@ -482,11 +482,10 @@ ConservativeAMR::ConservativeAMR
 	eu_(eu),
 	interp_(slopes)
 {
-	if (!cu) {
-		assert(!eu);
+	if (!cu) 
 		cu_ = &scu_;
+	if(!eu)
 		eu_ = &seu_;
-	}
 }
 
 void ConservativeAMR::UpdateCellsRefine
@@ -805,11 +804,10 @@ ConservativeAMROld::ConservativeAMROld
 	eu_(eu),
 	interp_(slopes)
 {
-	if (!cu) {
-		assert(!eu);
+	if (!cu)
 		cu_ = &scu_;
+	if(!eu)
 		eu_ = &seu_;
-	}
 }
 
 void ConservativeAMROld::UpdateCellsRefine
