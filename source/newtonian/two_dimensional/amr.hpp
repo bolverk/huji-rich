@@ -67,13 +67,13 @@ public:
 class SimpleAMRCellUpdater : public AMRCellUpdater
 {
 private:
-	vector<string> const& toskip_;
+	const vector<string>  toskip_;
 public:
 	/*!
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	SimpleAMRCellUpdater(vector<string> const& toskip);
+	SimpleAMRCellUpdater(vector<string> toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell const& old_cell) const;

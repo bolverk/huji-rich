@@ -33,7 +33,7 @@ Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const Computatio
 	return res;
 }
 
-SimpleAMRCellUpdater::SimpleAMRCellUpdater(vector<string> const& toskip) :toskip_(toskip) {}
+SimpleAMRCellUpdater::SimpleAMRCellUpdater(vector<string> toskip) :toskip_(toskip) {}
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 	double volume, ComputationalCell const& old_cell) const
