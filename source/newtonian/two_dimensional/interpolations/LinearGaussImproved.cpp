@@ -479,7 +479,7 @@ namespace
 		}
 		boost::mpi::wait_all(requests.begin(), requests.end());
 		vector<vector<int> > const& ghost_indeces = tess.GetGhostIndeces();
-		slopes.resize(tess.GetTotalPointNumber());
+		slopes.resize(tess.GetTotalPointNumber(),slopes[0]);
 		for (size_t i = 0; i < proc.size(); ++i)
 		{
 			for (size_t j = 0; j < ghost_indeces.at(i).size(); ++j)
