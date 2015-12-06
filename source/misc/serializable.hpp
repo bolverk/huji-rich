@@ -4,6 +4,7 @@
 #include <vector>
 #include <cassert>
 #include "lazy_list.hpp"
+#include <boost/foreach.hpp>
 
 using std::vector;
 using std::size_t;
@@ -36,17 +37,21 @@ namespace {
 }
 
 vector<double> list_serialize
-(const LazyList<Serializable*>& los);
+(const vector<Serializable*>& los);
 
 template <class S> vector<double>
 list_serialize
-(const LazyList<S> los)
+(const vector<S> los)
 {
+	if (los.empty())
+		return vector<double> ();
   vector<double> res(los.size()*los.at(0).getChunkSize());
   size_t counter = 0;
-  for(size_t i=0;i<los.size();++i){
+  for(size_t i=0;i<los.size();++i)
+  {
     const vector<double> temp = los.at(i).serialize();
-    BOOST_FOREACH(double x, temp){
+    BOOST_FOREACH(double x, temp)
+	{
       res.at(counter) = x;
       ++counter;
     }
@@ -58,14 +63,14 @@ template<class T> vector<T> list_unserialize
 (const vector<double>& data,
  const T& t)
 {
+	if (data.empty())
+		return vector<T>();
   assert(data.size()%t.getChunkSize()==0);
   const size_t n = data.size()/t.getChunkSize();
   vector<T> res(n);
   for(size_t i=0;i<n;++i)
-    res.at(i)->unserialize
-      (chunk
-       (data,i*t.getChunkSize(),
-	data,(i+1)*t.getChunkSize()));
+    res.at(i).unserialize
+      (chunk(data,i*t.getChunkSize(),(i+1)*t.getChunkSize()));
   return res;
 }
 

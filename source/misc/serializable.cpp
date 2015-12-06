@@ -4,7 +4,7 @@
 Serializable::~Serializable(void) {}
 
 vector<double> list_serialize
-(const LazyList<Serializable*>& los)
+(const vector<Serializable*>& los)
 {
   Serializable* dummy = los.at(0);
   vector<double> res(los.size()*(dummy->getChunkSize()));
