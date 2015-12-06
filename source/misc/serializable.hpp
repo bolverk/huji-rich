@@ -2,8 +2,11 @@
 #define SERIALIZABLE_HPP 1
 
 #include <vector>
+#include <cassert>
+#include "lazy_list.hpp"
 
 using std::vector;
+using std::size_t;
 
 class Serializable
 {
@@ -14,10 +17,12 @@ public:
   virtual vector<double> serialize(void) const = 0;
 
   virtual void unserialize(const vector<double>& data) = 0;
+
+  virtual ~Serializable(void);
 };
 
 namespace {
-  template<class T> chunk
+  template<class T> vector<T> chunk
   (const vector<T>& source,
    size_t i_start,
    size_t i_end)
@@ -33,15 +38,31 @@ namespace {
 vector<double> list_serialize
 (const LazyList<Serializable*>& los);
 
+template <class S> vector<double>
+list_serialize
+(const LazyList<S> los)
+{
+  vector<double> res(los.size()*los.at(0).getChunkSize());
+  size_t counter = 0;
+  for(size_t i=0;i<los.size();++i){
+    const vector<double> temp = los.at(i).serialize();
+    BOOST_FOREACH(double x, temp){
+      res.at(counter) = x;
+      ++counter;
+    }
+  }
+  return res;
+}
+
 template<class T> vector<T> list_unserialize
 (const vector<double>& data,
  const T& t)
 {
-  assert(res.size()%t.getChunkSize()==0);
-  const size_t n = res.size()/t.getChunkSize();
+  assert(data.size()%t.getChunkSize()==0);
+  const size_t n = data.size()/t.getChunkSize();
   vector<T> res(n);
   for(size_t i=0;i<n;++i)
-    res.at(i).unserialize
+    res.at(i)->unserialize
       (chunk
        (data,i*t.getChunkSize(),
 	data,(i+1)*t.getChunkSize()));

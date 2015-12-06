@@ -35,7 +35,7 @@ public:
   T at(const size_t i) const
   {
     assert(i<size());
-    return (*this)(i);
+    return (*this)[i];
   }
 
   virtual ~LazyList(void) {}

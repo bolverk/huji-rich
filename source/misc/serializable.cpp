@@ -1,9 +1,13 @@
+#include <boost/foreach.hpp>
 #include "serializable.hpp"
+
+Serializable::~Serializable(void) {}
 
 vector<double> list_serialize
 (const LazyList<Serializable*>& los)
 {
-  vector<double> res(los.size()*los.at(0).getChunkSize());
+  Serializable* dummy = los.at(0);
+  vector<double> res(los.size()*(dummy->getChunkSize()));
   size_t counter = 0;
   for(size_t i=0;i<los.size();++i){
     const vector<double> temp = los.at(i)->serialize();
