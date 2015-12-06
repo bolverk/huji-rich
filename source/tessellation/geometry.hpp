@@ -7,9 +7,15 @@
 #define GEOMETRY_HPP 1
 #include <vector>
 #include <boost/array.hpp>
+#ifdef RICH_MPI
+#include "../misc/serializable.hpp"
+#endif // RICH_MPI
 
 //! \brief 2D Mathematical vector
 class Vector2D
+#ifdef RICH_MPI
+  : public Serializable
+#endif // RICH_MPI
 {
 public:
 
@@ -85,6 +91,13 @@ public:
     ar & x;
     ar & y;
   }
+
+  vector<double> serialize(void) const;
+
+  size_t getChunkSize(void) const;
+
+  void unserialize
+  (const vector<double>& data);
 #endif // RICH_MPI
 };
 

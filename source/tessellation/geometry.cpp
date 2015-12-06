@@ -157,3 +157,26 @@ double dist_sqr(const Vector2D& v)
 {
   return ScalarProd(v,v);
 }
+
+#ifdef RICH_MPI
+size_t Vector2D::getChunkSize(void) const
+{
+  return 2;
+}
+
+vector<double> Vector2D::serialize(void) const
+{
+  vector<double> res(2,0);
+  res.at(0) = x;
+  res.at(1) = y;
+  return res;
+}
+
+void Vector2D::unserialize
+(const vector<double>& data)
+{
+  assert(data.size()==getChunkSize());
+  x = data.at(0);
+  y = data.at(1);
+}
+#endif // RICH_MPI

@@ -15,9 +15,13 @@
 #include "flat_map_serial.hpp"
 #endif // RICH_MPI
 
+using std::string;
 
 //! \brief Computational cell
 class ComputationalCell
+#ifdef RICH_MPI
+  : public Serializable
+#endif // RICH_MPI
 {
 public:
 
@@ -87,6 +91,13 @@ public:
 		ar & tracers;
 		ar & stickers;
 	}
+
+  size_t getChunkSize(void) const;
+
+  vector<double> serialize(void) const;
+
+  void unserialize
+  (const vector<double>& data);
 #endif // RICH_MPI
 };
 

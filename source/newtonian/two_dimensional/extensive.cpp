@@ -85,3 +85,47 @@ Extensive operator-(const Extensive& e1,
   return e1+(-1)*e2;
 }
 		   
+#ifdef RICH_MPI
+size_t Extensive::getChunkSize(void) const
+{
+  return 4 + tracers.size();
+}
+
+vector<double> Extensive::serialize(void) const
+{
+  vector<double> res(getChunkSize());
+  res.at(0) = mass;
+  res.at(1) = energy;
+  res.at(2) = momentum.x;
+  res.at(3) = momentum.y;
+  size_t counter = 4;
+  for(boost::container::flat_map<string,double>::const_iterator
+	it=tracers.begin();
+      it!=tracers.end();
+      ++it){
+    res.at(counter) = it->second;
+    ++counter;
+  }
+  assert(counter==res.size());
+  return res;
+}
+
+void Extensive::unserialize
+(const vector<double>& data)
+{
+  assert(data.size()==getChunkSize());
+  mass = data.at(0);
+  energy = data.at(1);
+  momentum.x = data.at(2);
+  momentum.y = data.at(3);
+  size_t counter = 4;
+  for(boost::container::flat_map<string,double>::iterator
+	it=tracers.begin();
+      it!=tracers.end();
+      ++it){
+    it->second = data.at(counter);
+    ++counter;
+  }
+  assert(data.size()==counter);
+}
+#endif // RICH_MPI
