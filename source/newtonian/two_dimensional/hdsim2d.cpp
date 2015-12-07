@@ -120,11 +120,8 @@ void hdsim::TimeAdvance(void)
 		point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, cells_, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 #endif
 
 	vector<Vector2D> edge_velocities =
@@ -214,11 +211,8 @@ void hdsim::TimeAdvance2Heun(void)
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, cells_, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 #endif
 
 
@@ -231,7 +225,6 @@ void hdsim::TimeAdvance2Heun(void)
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 #endif
 	edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
@@ -268,15 +261,10 @@ void hdsim::TimeAdvance2Heun(void)
 	MoveMeshPoints(point_velocities, dt, tess_, proctess_);
 	// Keep relevant points
 	MPI_exchange_data(tess_, mid_extensives, false);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, extensives_, false);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, cells_, false);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, point_velocities, false);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_Barrier(MPI_COMM_WORLD);
 #else
 	MoveMeshPoints(point_velocities, dt, tess_);
 #endif

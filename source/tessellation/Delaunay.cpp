@@ -4,9 +4,7 @@
 #include "../misc/triplet.hpp"
 #include <boost/foreach.hpp>
 #ifdef RICH_MPI
-#include <boost/mpi/nonblocking.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <mpi.h>
 #endif // RICH_MPI
 
 namespace {
@@ -1191,13 +1189,12 @@ namespace
 		(const Tessellation& t_proc,
 			const vector<Edge>& edge_list)
 	{
-		const boost::mpi::communicator world;
 		vector<int> res;
-		BOOST_FOREACH(const Edge& edge, edge_list) {
-			const int other =
-				(edge.neighbors.first +
-					edge.neighbors.second) -
-				world.rank();
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		BOOST_FOREACH(const Edge& edge, edge_list) 
+		{
+			const int other = (edge.neighbors.first + edge.neighbors.second) -	rank;
 			if (other < t_proc.GetPointNo()) {
 				res.push_back(other);
 			}
@@ -1237,10 +1234,11 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	const vector<Edge>& own_edges,
 	bool recursive)
 {
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res;
 	if (!recursive)
 		res.resize(own_edges.size());
-	const boost::mpi::communicator world;
 	stack<int> tocheck = initialise_tocheck
 		(FindContainingTetras
 			(static_cast<int>(Walk(static_cast<size_t>(point))), point));
@@ -1282,14 +1280,14 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
 				vector<int> cputosendto;
 				if (recursive)
-					find_affected_cells(tproc, world.rank(), circ, cputosendto);
+					find_affected_cells(tproc,rank, circ, cputosendto);
 				else
 					cputosendto = find_affected_cells
-					(tproc, world.rank(), circ);
+					(tproc, rank, circ);
 				sort(cputosendto.begin(), cputosendto.end());
 				cputosendto = unique(cputosendto);
 
-				RemoveVal(cputosendto, world.rank());
+				RemoveVal(cputosendto,rank);
 				if (!recursive) 
 				{
 					const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
@@ -1341,7 +1339,6 @@ Delaunay::findOuterPoints
 	const vector<Edge>& box_edges,
 	vector<vector<int> > &NghostIndex)
 {
-	const boost::mpi::communicator world;
 	vector<int> neighbors_own_edges =
 		calc_neighbors_own_edges(t_proc, edge_list);
 	const size_t some_outer_point = findSomeOuterPoint();
@@ -1363,22 +1360,54 @@ Delaunay::findOuterPoints
 	}
 
 	// Communication
-	vector<boost::mpi::request> requests;
-	vector<vector<Vector2D> > incoming
-		(neighbors_own_edges.size());
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i) 
+	vector<vector<Vector2D> > incoming(neighbors_own_edges.size());
+	vector<MPI_Request> req(neighbors_own_edges.size());
+	vector<vector<double> > tosend(neighbors_own_edges.size());
+	double dtemp = 0;
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
 	{
 		const int dest = neighbors_own_edges.at(i);
-		requests.push_back
-			(world.isend
-				(dest, 0, VectorValues
-					(cor, to_duplicate[i])));
-		requests.push_back
-			(world.irecv
-				(dest, 0, incoming[i]));
+		tosend[i] = list_serialize(VectorValues(cor, to_duplicate[i]));
+		int size = static_cast<int>(tosend[i].size());
+		if (size == 0)
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE,dest, 1, MPI_COMM_WORLD, &req[i]);
+		else
+		{
+			if (size < 2)
+				throw UniversalError("Wrong send size");
+			MPI_Isend(&tosend[i][0], size, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[i]);
+		}
 	}
-	boost::mpi::wait_all(requests.begin(),requests.end());
-
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	{
+		vector<double> temprecv;
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, MPI_DOUBLE, &count);
+		temprecv.resize(static_cast<size_t>(max(count, 1)));
+		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 0)
+		{
+			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
+				status.MPI_SOURCE) - neighbors_own_edges.begin());
+			if (location >= neighbors_own_edges.size())
+				throw UniversalError("Bad location in mpi exchange");
+			try
+			{
+				incoming[location] = list_unserialize(temprecv, cor[0]);
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Error in first send in triangulation", 0.0);
+				throw eo;
+			}
+		}
+		else
+			if (status.MPI_TAG != 1)
+				throw UniversalError("Wrong mpi tag");
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
 	// Incorporate points recieved into triangulation
 	BOOST_FOREACH(vector<int> &line, self_points)
 	{
@@ -1469,7 +1498,6 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		real_boundary_points.at(i) = unique(real_boundary_points.at(i));
 	}
 
-	const boost::mpi::communicator world;
 	vector<vector<int> > to_duplicate_2 = to_duplicate;
 	BOOST_FOREACH(vector<int>& line, to_duplicate_2)
 		sort(line.begin(), line.end());
@@ -1490,9 +1518,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			edge_list,
 			true); // recursive
 
-		 // Communication
-	
-	vector<int> totalk(static_cast<size_t>(world.size()), 0);
+	// Communication
+	int wsize;
+	MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+	vector<int> totalk(static_cast<size_t>(wsize), 0);
 	vector<int> scounts(totalk.size(), 1);
 	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
 		totalk[neighbors_own_edges[i]] = 1;
@@ -1500,14 +1529,15 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	MPI_Reduce_scatter(&totalk[0], &nrecv, &scounts[0], MPI_INT, MPI_SUM,
 		MPI_COMM_WORLD);
 
-	vector < boost::mpi::request> req;
+	vector<MPI_Request> req(neighbors_own_edges.size());
 	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
-		req.push_back(world.isend(neighbors_own_edges[i],3));
+		MPI_Isend(&wsize, 1, MPI_INT, neighbors_own_edges[i], 3, MPI_COMM_WORLD, &req[i]);
 	vector<int> talkwithme;
 	for (int i = 0; i < nrecv; ++i)
 	{
-		boost::mpi::status stat = world.recv(boost::mpi::any_source, 3);
-		talkwithme.push_back(stat.source());
+		MPI_Status status;
+		MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
+		talkwithme.push_back(status.MPI_SOURCE);
 	}
 	vector<size_t> indices;
 	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
@@ -1516,20 +1546,6 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			indices.push_back(i);
 	}
 
-/*	vector<vector<int> > correspondence_matrix;
-	all_gather
-		(world,
-			neighbors_own_edges,
-			correspondence_matrix);
-	vector<size_t> indices;
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
-	{
-		const int dest = neighbors_own_edges.at(i);
-		if (is_in
-			(world.rank(),
-				correspondence_matrix.at(dest)))
-			indices.push_back(i);
-	}*/
 	// Symmetrisation
 	neighbors_own_edges =
 		VectorValues
@@ -1565,17 +1581,61 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 				messages.at(i).push_back(to_duplicate.at(i).at(j));
 		}
 	}
+	MPI_Waitall(static_cast<int>(neighbors_own_edges.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
 	// Point exchange
-	vector<boost::mpi::request> requests;
-	vector<vector<Vector2D> > incoming
-		(neighbors_own_edges.size());
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i) {
+	req.clear();
+	req.resize(neighbors_own_edges.size());
+	double dtemp = 0;
+	vector<vector<Vector2D> > incoming(neighbors_own_edges.size());
+	vector<vector<double> > tosend(neighbors_own_edges.size());
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	{
 		const int dest = neighbors_own_edges.at(i);
-		requests.push_back(world.isend(dest, 0, VectorValues(cor, messages.at(i))));
-		requests.push_back(world.irecv(dest, 0, incoming[i]));
+		tosend[i] = list_serialize(VectorValues(cor, messages.at(i)));
+		int size = static_cast<int>(tosend[i].size());
+		if (size > 0)
+		{
+			if (size < 2)
+				throw UniversalError("Wrong send size");
+			MPI_Isend(&tosend[i][0], size, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[i]);
+		}
+		else
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[i]);
 	}
-	wait_all(requests.begin(), requests.end());
-
+	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	{
+		vector<double> temprecv;
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, MPI_DOUBLE, &count);
+		temprecv.resize(static_cast<size_t>(count));
+		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 0)
+		{
+			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) -
+				neighbors_own_edges.begin());
+			if (location >= neighbors_own_edges.size())
+				throw UniversalError("Bad location in mpi exchange");
+			try
+			{
+				incoming[location] = list_unserialize(temprecv, cor[0]);
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Error in second send in triangulation", 0.0);
+				eo.AddEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
+				eo.AddEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
+				eo.AddEntry("Mpi count", static_cast<double>(count));
+				throw eo;
+			}
+		}
+		else
+			if (status.MPI_TAG != 1)
+				throw UniversalError("Wrong mpi tag");
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
 	// Incorporate points recieved into triangulation
 	NghostIndex.resize(incoming.size());
 	for (size_t i = 0; i < incoming.size(); ++i)
@@ -1606,10 +1666,11 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	Tessellation const& tproc,
 	vector<vector<int> >& Nghost)
 {
-	const boost::mpi::communicator world;
 	vector<Edge> edges;
 	OrgIndex.clear();
-	vector<int> edge_index = tproc.GetCellEdges(world.rank());
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	vector<int> edge_index = tproc.GetCellEdges(rank);
 	for (size_t i = 0; i < edge_index.size(); ++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
 	vector<Edge> box_edges = obc->GetBoxEdges();

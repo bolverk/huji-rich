@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cassert>
+#include "universal_error.hpp"
 #include "lazy_list.hpp"
 #include <boost/foreach.hpp>
 
@@ -65,7 +66,13 @@ template<class T> vector<T> list_unserialize
 {
 	if (data.empty())
 		return vector<T>();
-  assert(data.size()%t.getChunkSize()==0);
+	if (data.size() % t.getChunkSize() != 0)
+	{
+		UniversalError eo("Count of serializable objects not integer");
+		eo.AddEntry("chunksize", static_cast<double>(t.getChunkSize()));
+		eo.AddEntry("Data size", static_cast<double>(data.size()));
+		throw eo;
+	}
   const size_t n = data.size()/t.getChunkSize();
   vector<T> res(n);
   for(size_t i=0;i<n;++i)

@@ -3,6 +3,7 @@
 #include "../../misc/lazy_list.hpp"
 #ifdef RICH_MPI
 #include "../../tessellation/VoronoiMesh.hpp"
+#include <boost/mpi/communicator.hpp>
 #endif
 
 using namespace H5;

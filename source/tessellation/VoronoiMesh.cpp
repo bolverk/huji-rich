@@ -1715,7 +1715,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			continue;
 		for (size_t j = 0; j<nproc; ++j)
 		{
-			if (std::find(realneigh.begin(), realneigh.end(), j) == realneigh.end() || j == static_cast<size_t>(rank))
+			if (std::find(realneigh.begin(), realneigh.end(), j) != realneigh.end() || j == static_cast<size_t>(rank))
 				continue;
 			vector<Vector2D> cellpoints;
 			ConvexHull(cellpoints, vproc, static_cast<int>(j));

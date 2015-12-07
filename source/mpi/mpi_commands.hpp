@@ -44,9 +44,9 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 			tempsend[i] = list_serialize(VectorValues(cells, duplicated_points[i]));
 		int size = static_cast<int>(tempsend[i].size());
 		if (size == 0)
-			MPI_Isend(&temp, 1, MPI_DOUBLE, correspondents[i], 1, MPI_COMM_WORLD, &req[i]);
+			MPI_Isend(&temp, 1, MPI_DOUBLE, correspondents[i], 4, MPI_COMM_WORLD, &req[i]);
 		else
-			MPI_Isend(&tempsend[i][0], size, MPI_DOUBLE, correspondents[i], 0, MPI_COMM_WORLD, &req[i]);
+			MPI_Isend(&tempsend[i][0], size, MPI_DOUBLE, correspondents[i], 5, MPI_COMM_WORLD, &req[i]);
 	}
 	const vector<vector<int> >& ghost_indices = tess.GetGhostIndeces();
 	if (ghost_or_sent)
@@ -60,15 +60,20 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		int count;
 		MPI_Get_count(&status, MPI_DOUBLE, &count);
-		temprecv.resize(static_cast<size_t>(max(count,1)));
+		temprecv.resize(static_cast<size_t>(count));
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		if (status.MPI_TAG == 0)
+		if (status.MPI_TAG == 5)
 		{
 			size_t location = static_cast<size_t>(std::find(correspondents.begin(), correspondents.end(), status.MPI_SOURCE) -
 				correspondents.begin());
 			if (location >= correspondents.size())
 				throw UniversalError("Bad location in mpi exchange");
 			torecv[location] = list_unserialize(temprecv, cells[0]);
+		}
+		else
+		{
+			if (status.MPI_TAG != 4)
+				throw UniversalError("Recv bad mpi tag");
 		}
 	}
 	for (size_t i = 0; i < correspondents.size(); ++i)
@@ -84,7 +89,8 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 				cells.push_back(torecv[i][j]);
 		}
 	}
-	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+//	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
 }
 
 #endif //RICH_MPI

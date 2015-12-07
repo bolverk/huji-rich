@@ -514,8 +514,9 @@ void ConservativeAMR::UpdateCellsRefine
 #ifdef RICH_MPI
 	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
 	vector<Vector2D> chull;
-	const boost::mpi::communicator world;
-	ConvexHull(chull, proctess, world.rank());
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	ConvexHull(chull, proctess, rank);
 #endif
 	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc
 #ifdef RICH_MPI
@@ -707,8 +708,9 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	vector<Vector2D> Moved;
 #ifdef RICH_MPI
 	vector<Vector2D> chull;
-	const boost::mpi::communicator world;
-	ConvexHull(chull, proctess, world.rank());
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	ConvexHull(chull, proctess,rank);
 #endif
 	GetNewPoints(ToRefine, tess, NewPoints, Moved, obc
 #ifdef RICH_MPI
