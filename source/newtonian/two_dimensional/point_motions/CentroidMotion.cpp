@@ -76,7 +76,11 @@ namespace
 					res[i] = vel - 2*normal*ScalarProd(vel,normal);
 				}
 				else
+#ifdef RICH_MPI
+					res[i] = orgvel[indeces[i]];
+#else
 					res[i] = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
+#endif
 			}
 		}
 		return res;

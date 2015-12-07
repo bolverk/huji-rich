@@ -74,7 +74,7 @@ template<class T> vector<T> list_unserialize
 		throw eo;
 	}
   const size_t n = data.size()/t.getChunkSize();
-  vector<T> res(n);
+  vector<T> res(n,t);
   for(size_t i=0;i<n;++i)
     res.at(i).unserialize
       (chunk(data,i*t.getChunkSize(),(i+1)*t.getChunkSize()));

@@ -20,14 +20,19 @@ else
     error('Illegal number of input arguments');
 end
 
-edgestrength=0.05;
 filename=strcat(filedir,filename);
 [X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
 xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/x_coordinate');
 yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/y_coordinate');
 h=h5info(strcat(filename,sprintf('_%d.h5',0)));
-NumberOfTracers=length(h.Groups(5).Datasets);
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/tracers')==1)
+        tracerindex=i;
+        break;
+    end
+end
+NumberOfTracers=length(h.Groups(tracerindex).Datasets);
 time=h5read(strcat(filename,sprintf('_%d.h5',0)),'/time');
 
 npoints=0;
@@ -140,19 +145,19 @@ if(ShouldPlot==1||ShouldPlot==2)
                 Entropy=Pressure./Density.^gamma;
                 if(LogScale==1)
                     caxis([min(log10(Entropy)) max(log10(Entropy*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
                 else
                     caxis([min(Entropy) max(Entropy)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 5
                 tracerindex=1;
                 if(LogScale==1)
                     caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',edgestrength);
                 else
                     caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',0.05);
+                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',edgestrength);
                 end
         end
     end

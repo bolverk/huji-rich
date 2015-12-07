@@ -60,15 +60,23 @@ Y=h5read(filename,'/geometry/y_coordinate');
 Vx=h5read(filename,'/hydrodynamic/x_velocity');
 Vy=h5read(filename,'/hydrodynamic/y_velocity');
 time=h5read(filename,'/time');
-NumberOfTracers=length(h.Groups(5).Datasets);
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/tracers')==1)
+        tracerindex=i;
+        break;
+    end
+end
+NumberOfTracers=length(h.Groups(tracerindex).Datasets);
 NumberOfCells=length(Density);
 Vertx=h5read(filename,'/geometry/x_vertices');
 Verty=h5read(filename,'/geometry/y_vertices');
 nVert=h5read(filename,'/geometry/n_vertices');
 Tracers=zeros(NumberOfCells,NumberOfTracers);
 
+
+
 for i=1:NumberOfTracers
-    Tracers(:,i)=h5read(filename,sprintf('/tracers/%s', h.Groups(5).Datasets(i).Name));
+    Tracers(:,i)=h5read(filename,sprintf('/tracers/%s', h.Groups(tracerindex).Datasets(i).Name));
 end
 
 draw=WhatToPlot;

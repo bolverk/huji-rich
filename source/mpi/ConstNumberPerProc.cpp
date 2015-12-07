@@ -1,7 +1,7 @@
 #include "ConstNumberPerProc.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/collectives.hpp>
+#include "../misc/serializable.hpp"
+#include <mpi.h>
 #endif
 
 ConstNumberPerProc::~ConstNumberPerProc(void){}
@@ -19,9 +19,9 @@ ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,int npercell,
 #ifdef RICH_MPI
 void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal)const
 {
-	const boost::mpi::communicator world;
 	int nproc=tproc.GetPointNo();
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<double> R(static_cast<size_t>(nproc));
 	double dx=0;
 	double dy=0;
@@ -41,8 +41,8 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal)c
 	// Find out how many points each proc has
 	vector<int> NPerProc(static_cast<size_t>(nproc));
 	int mypointnumber=tlocal.GetPointNo()+1;
-	boost::mpi::gather(world, mypointnumber, NPerProc, 0);
-	boost::mpi::broadcast(world, NPerProc, 0);
+	MPI_Gather(&mypointnumber, 1, MPI_INT, &NPerProc[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&NPerProc[0], nproc, MPI_INT, 0, MPI_COMM_WORLD);
 	// Move point according to density
 	if(mode_==1||mode_==3)
 	{
@@ -221,9 +221,11 @@ void ConstNumberPerProc::Update(Tessellation& tproc,Tessellation const& tlocal)c
 	cor[static_cast<size_t>(rank)]=cor[static_cast<size_t>(rank)]+Vector2D(dx,dy);
 	cor.resize(static_cast<size_t>(nproc));
 	// Have all processors have the same points
-	vector<Vector2D> cortemp(cor.size());
-	boost::mpi::gather(world, cor[static_cast<size_t>(rank)], cortemp, 0);
-	boost::mpi::broadcast(world, cortemp, 0);
+	vector<double> tosend = list_serialize(vector<Vector2D> (1,cor[static_cast<size_t>(rank)]));
+	vector<double> torecv(cor.size() * 2);
+	MPI_Gather(&tosend[0], 2, MPI_DOUBLE, &torecv[0], 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&torecv[0], nproc * 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	vector<Vector2D> cortemp = list_unserialize(torecv, cor[0]);
 	tproc.Update(cortemp);
 }
 #endif
