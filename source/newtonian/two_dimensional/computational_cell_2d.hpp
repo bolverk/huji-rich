@@ -141,7 +141,10 @@ void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& o
 void ReplaceComputationalCell(ComputationalCell &cell, ComputationalCell const& other);
 
 //! \brief Class for spatial interpolations
-class Slope : public Serializable
+class Slope
+#ifdef RICH_MPI
+	: public Serializable
+#endif // RICH_MPI
 {
 public:
 	ComputationalCell xderivative;
