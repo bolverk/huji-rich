@@ -66,13 +66,13 @@ namespace
 			return res;
 		}
 
-		std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& /*tess*/,
-			vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
+		Slope GetGhostGradient(Tessellation const& /*tess*/,
+			vector<ComputationalCell> const& /*cells*/, vector<Slope> const& /*gradients*/,
 			size_t /*ghost_index*/, double /*time*/,Edge const& /*edge*/)const
 		{
 			ComputationalCell temp;
 			temp.tracers["Entropy"] = 0;
-			return std::pair<ComputationalCell, ComputationalCell>(temp, temp);
+			return Slope(temp, temp);
 		}
 	};
 
