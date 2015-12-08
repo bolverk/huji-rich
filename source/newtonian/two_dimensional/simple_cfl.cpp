@@ -2,8 +2,7 @@
 #include "hydrodynamics_2d.hpp"
 #include <boost/foreach.hpp>
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <mpi.h>
 #endif
 
 SimpleCFL::SimpleCFL(const double cfl): cfl_(cfl) {}
@@ -61,8 +60,7 @@ double SimpleCFL::operator()(const Tessellation& tess,
 {
   double res =  cfl_*lazy_min(TimeStepCalculator(tess,cells,eos,point_velocities));
 #ifdef RICH_MPI
-  const boost::mpi::communicator world;
-  res = boost::mpi::all_reduce(world, res, boost::mpi::minimum<double>());
+  MPI_Allreduce(&res, &res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 #endif
   return res;
 }

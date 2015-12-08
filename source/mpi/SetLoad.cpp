@@ -1,7 +1,6 @@
 #include "SetLoad.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <mpi.h>
 #endif
 
 
@@ -11,13 +10,13 @@ namespace
 {
 	double GetLoad(Tessellation const& tess)
 	{
-		const boost::mpi::communicator world;
-		const int ws = world.size();
+		int ws;
+		MPI_Comm_size(MPI_COMM_WORLD, &ws);
 		int n=tess.GetPointNo();
 		int result=10;
 		int total=n;
-		boost::mpi::reduce(world, n, result,boost::mpi::maximum<int>(), 0);
-		boost::mpi::reduce(world, n, total, std::plus<int>(), 0);
+		MPI_Reduce(&n, &result, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
+		MPI_Reduce(&n, &total, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 		return result*ws*1.0/(total*1.0);
 	}
 
@@ -26,8 +25,8 @@ namespace
 	{
 		double BestLoad=100;
 		vector<Vector2D> BestProc,BestMesh;
-		const boost::mpi::communicator world;
-		const int ws = world.size();
+		int ws;
+		MPI_Comm_size(MPI_COMM_WORLD, &ws);
 		double round;
 		if(mode==1)
 			round=2;
@@ -38,7 +37,7 @@ namespace
 		vector<double> loads;
 		for(int i=0;i<Niter;++i)
 		{
-			world.barrier();
+			MPI_Barrier(MPI_COMM_WORLD);
 			//			if(rank==0)
 			//				cout<<"h1"<<endl;
 			procmove.Update(tproc,local);
@@ -66,9 +65,9 @@ namespace
 			{
 				DisplayError(eo);
 			}
-			world.barrier();
+			MPI_Barrier(MPI_COMM_WORLD);
 			double load=GetLoad(local);
-			boost::mpi::broadcast(world, load, 0);
+			MPI_Bcast(&load, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 			loads.push_back(load);
 			if(load<BestLoad)
 			{
@@ -88,11 +87,11 @@ namespace
 			round=1.75;
 		ConstNumberPerProc procmove2(outer,Nbest,speed,round,mode);
 		tproc.Update(BestProc);
-		world.barrier();
+		MPI_Barrier(MPI_COMM_WORLD);
 		local.Update(BestMesh,tproc);
 		for(int i=0;i<3;++i)
 		{
-			world.barrier();
+			MPI_Barrier(MPI_COMM_WORLD);
 			procmove2.Update(tproc,local);
 			vector<Vector2D> cp=local.GetMeshPoints();
 			cp.resize(static_cast<size_t>(local.GetPointNo()));

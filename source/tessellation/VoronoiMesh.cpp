@@ -3,9 +3,8 @@
 #include "../misc/simple_io.hpp"
 #include "hdf5_logger.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/nonblocking.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <mpi.h>
+#include "../mpi/mpi_commands.hpp"
 #endif
 
 using std::abs;
@@ -1513,9 +1512,9 @@ void VoronoiMesh::Update
 (const vector<Vector2D>& points,
  const Tessellation& vproc)
 {
-	boost::mpi::communicator world;
 	NGhostReceived.clear();
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<int> cedges;
 	ConvexEdges(cedges, vproc, rank);
 	cell_edges.clear();
@@ -1560,15 +1559,7 @@ void VoronoiMesh::Update
 		}
 	}
 	// communicate the ghost CM
-	vector<boost::mpi::request> requests;
-	vector<vector<Vector2D> > incoming(GhostProcs.size());
-	for (size_t i = 0; i < GhostProcs.size(); ++i)
-	{
-		const int dest = GhostProcs.at(i);
-		requests.push_back(world.isend(dest, 0, VectorValues(CM, GhostPoints[i])));
-		requests.push_back(world.irecv(dest, 0, incoming[i]));
-	}
-	boost::mpi::wait_all(requests.begin(), requests.end());
+	vector<vector<Vector2D> > incoming = MPI_exchange_data(GhostProcs, GhostPoints, CM);
 	// Add the recieved CM
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
@@ -1580,9 +1571,9 @@ void VoronoiMesh::Initialise
  Tessellation const& vproc,
  OuterBoundary const* outer)
 {
-	boost::mpi::communicator world;
 	NGhostReceived.clear();
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	obc = outer;
 	vector<int> cedges;
 	ConvexEdges(cedges, vproc, rank);
@@ -1629,15 +1620,7 @@ void VoronoiMesh::Initialise
 		}
 	}
 	// communicate the ghost CM
-	vector<boost::mpi::request> requests;
-	vector<vector<Vector2D> > incoming(GhostProcs.size());
-	for (size_t i = 0; i < GhostProcs.size(); ++i)
-	{
-		const int dest = GhostProcs.at(i);
-		requests.push_back(world.isend(dest, 0, VectorValues(CM, GhostPoints[i])));
-		requests.push_back(world.irecv(dest, 0, incoming[i]));
-	}
-	boost::mpi::wait_all(requests.begin(),requests.end());
+	vector<vector<Vector2D> > incoming = MPI_exchange_data(GhostProcs, GhostPoints, CM);
 	// Add the recieved CM
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
@@ -1745,35 +1728,78 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		throw eo;
 	}
 	// Send/Recv the points
-	vector<vector<int> > correspondence_matrix;
-	vector<int> recvproc;
-	boost::mpi::communicator world;
-	boost::mpi::all_gather(world,sentproc,correspondence_matrix);
-	//	vector<size_t> indices;
-	for (size_t i = 0; i < correspondence_matrix.size(); ++i)
+	// Communication
+	int wsize;
+	MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+	vector<int> totalk(static_cast<size_t>(wsize), 0);
+	vector<int> scounts(totalk.size(), 1);
+	for (size_t i = 0; i < sentproc.size(); ++i)
+		totalk[sentproc[i]] = 1;
+	int nrecv;
+	MPI_Reduce_scatter(&totalk[0], &nrecv, &scounts[0], MPI_INT, MPI_SUM,
+		MPI_COMM_WORLD);
+
+	vector<MPI_Request> req(sentproc.size());
+	for (size_t i = 0; i < sentproc.size(); ++i)
+		MPI_Isend(&wsize, 1, MPI_INT, sentproc[i], 3, MPI_COMM_WORLD, &req[i]);
+	vector<int> talkwithme;
+	for (int i = 0; i < nrecv; ++i)
 	{
-		if (std::find(correspondence_matrix.at(i).begin(), correspondence_matrix.at(i).end(), rank) !=
-			correspondence_matrix.at(i).end())
-			recvproc.push_back(static_cast<int>(i));
+		MPI_Status status;
+		MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
+		talkwithme.push_back(status.MPI_SOURCE);
 	}
-	for (size_t i = 0; i < recvproc.size(); ++i)
+	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
+	for (size_t i = 0; i < talkwithme.size(); ++i)
 	{
-		if (std::find(sentproc.begin(), sentproc.end(), recvproc[i]) == sentproc.end())
+		if (std::find(sentproc.begin(), sentproc.end(), talkwithme[i]) != sentproc.end())
 		{
-			sentproc.push_back(recvproc[i]);
+			sentproc.push_back(talkwithme[i]);
 			sentpoints.push_back(vector<int>());
 		}
 	}
 	// Point exchange
-	vector<boost::mpi::request> requests;
 	vector<vector<Vector2D> > incoming(sentproc.size());
+	vector<vector<double> > tosend(sentproc.size());
+	vector<double> torecv;
+	double dtemp = 0;
+	Vector2D vtemp;
+	req.clear();
+	req.resize(sentproc.size());
 	for (size_t i = 0; i < sentproc.size(); ++i)
 	{
 		const int dest = sentproc.at(i);
-		requests.push_back(world.irecv(dest, 0, incoming[i]));
-		requests.push_back(world.isend(dest, 0, VectorValues(points, sentpoints.at(i))));
+		tosend[i] = list_serialize(VectorValues(points, sentpoints.at(i)));
+		if(tosend[i].empty())
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[0]);
+		else
+			MPI_Isend(&tosend[i][0], static_cast<int>(tosend[i].size()), MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[0]);
 	}
-	wait_all(requests.begin(), requests.end());
+	for (size_t i = 0; i < sentproc.size(); ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, MPI_DOUBLE, &count);
+		torecv.resize(static_cast<size_t>(count));
+		MPI_Recv(&torecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 0)
+		{
+			size_t location = static_cast<size_t>(std::find(sentproc.begin(), sentproc.end(), status.MPI_SOURCE) -
+				sentproc.begin());
+			if (location >= sentproc.size())
+				throw UniversalError("Bad location in mpi exchange");
+			incoming[location] = list_unserialize(torecv,vtemp);
+		}
+		else
+		{
+			if (status.MPI_TAG != 1)
+				throw UniversalError("Recv bad mpi tag");
+		}
+	}
+	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	// Combine the vectors
 	for (size_t i = 0; i < incoming.size(); ++i)

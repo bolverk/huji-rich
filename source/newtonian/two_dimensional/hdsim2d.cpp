@@ -3,7 +3,6 @@
 #include "hdsim2d.hpp"
 #include "hydrodynamics_2d.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
 #include "../../mpi/mpi_commands.hpp"
 #endif //RICH_MPI
 

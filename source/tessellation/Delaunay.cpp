@@ -1407,6 +1407,7 @@ Delaunay::findOuterPoints
 			if (status.MPI_TAG != 1)
 				throw UniversalError("Wrong mpi tag");
 	}
+	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Incorporate points recieved into triangulation
 	BOOST_FOREACH(vector<int> &line, self_points)
@@ -1635,6 +1636,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			if (status.MPI_TAG != 1)
 				throw UniversalError("Wrong mpi tag");
 	}
+	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Incorporate points recieved into triangulation
 	NghostIndex.resize(incoming.size());
