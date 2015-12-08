@@ -869,7 +869,7 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		catch (UniversalError &eo)
 		{
 			eo.AddEntry("Error in AddRigid", 0);
-			throw;
+			throw eo;
 		}
 		ReArrangeVector(toduplicate[i], order);
 	}

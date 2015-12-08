@@ -30,7 +30,7 @@ namespace{
 	return (*sequence[i].second)
 	  (edge,tess, edge_velocity,cells,eos,flag_aux.second);
     }
-    throw "Error in ConditionActionSequence";
+    throw UniversalError("Error in ConditionActionSequence");
   }
 }
 
