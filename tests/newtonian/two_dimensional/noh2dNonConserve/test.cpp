@@ -130,8 +130,8 @@ namespace
 				const double V = tess.GetVolume(static_cast<int>(i));
 				if (V < minV_)
 				{
-					const double drhox = interp_.GetSlopesUnlimited()[i].first.density;
-					const double drhoy = interp_.GetSlopesUnlimited()[i].second.density;
+					const double drhox = interp_.GetSlopesUnlimited()[i].xderivative.density;
+					const double drhoy = interp_.GetSlopesUnlimited()[i].yderivative.density;
 					if ((drhox*drhox + drhoy*drhoy)*V < 0.1*cells[i].density*cells[i].density)
 					{
 						indeces.push_back(i);
