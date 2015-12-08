@@ -36,10 +36,10 @@ boost::container::flat_map<size_t, ComputationalCell> RigidWallGenerator::operat
 	return res;
 }
 
-std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGradient
+Slope RigidWallGenerator::GetGhostGradient
 (Tessellation const& tess,
  vector<ComputationalCell> const& cells,
- vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
+ vector<Slope> const& /*gradients*/,
  size_t ghost_index, double /*time*/, Edge const& /*edge*/) const
 {
   ComputationalCell cell(cells[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))]);
@@ -49,5 +49,5 @@ std::pair<ComputationalCell, ComputationalCell> RigidWallGenerator::GetGhostGrad
 	for (boost::container::flat_map<std::string, double>::iterator it = cell.tracers.begin(); it !=
 		cell.tracers.end(); ++it)
 		it->second = 0;
-	return std::pair<ComputationalCell, ComputationalCell> (cell,cell);
+	return Slope(cell,cell);
 }

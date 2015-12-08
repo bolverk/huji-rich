@@ -22,12 +22,14 @@ namespace
 		const& tess,EquationOfState const& eos)
 	{
 		const double R = tess.GetWidth(static_cast<int>(index));
-		const double dv = R*(interp.GetSlopesUnlimited()[index].first.velocity.x +
-			interp.GetSlopesUnlimited()[index].second.velocity.y);
+		const double dv = R*(interp.GetSlopesUnlimited()[index].xderivative.velocity.x +
+			interp.GetSlopesUnlimited()[index].yderivative.velocity.y);
 		if (dv < -0.2*eos.dp2c(cell.density, cell.pressure))
 			return true;
-		const double dp2 = R*R*(interp.GetSlopesUnlimited()[index].first.pressure*interp.GetSlopesUnlimited()[index].first.pressure +
-			interp.GetSlopesUnlimited()[index].second.pressure*interp.GetSlopesUnlimited()[index].second.pressure);
+		const double dp2 = R*R*(interp.GetSlopesUnlimited()[index].xderivative.pressure*
+			interp.GetSlopesUnlimited()[index].xderivative.pressure +
+			interp.GetSlopesUnlimited()[index].yderivative.pressure*
+			interp.GetSlopesUnlimited()[index].yderivative.pressure);
 		if (dp2 > 0.1*cell.pressure*cell.pressure)
 			return true;
 		return false;

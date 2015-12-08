@@ -1,11 +1,10 @@
 #include "LinearGaussImproved.hpp"
 #include "../../../misc/utils.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/serialization/utility.hpp>
+#include "../../../mpi/mpi_commands.hpp"
 #endif //RICH_MPI
 
-typedef pair<ComputationalCell, ComputationalCell> Slope;
+
 
 namespace 
 {
@@ -70,8 +69,8 @@ namespace
 	void calc_naive_slope(ComputationalCell const& cell,
 		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> &res,
-		pair<ComputationalCell, ComputationalCell> &vec_compare)
+		Slope &res,
+		Slope &vec_compare)
 	{
 		size_t n = edge_list.size();
 		if (n>20)
@@ -94,18 +93,18 @@ namespace
 			m[3] -= c_ij.y*r_ij.y;
 			if (i == 0)
 			{
-				ReplaceComputationalCell(vec_compare.first, cell);
-				ReplaceComputationalCell(vec_compare.second, cell);
-				vec_compare.first *= r_ij.x*0.5;
-				vec_compare.second *= r_ij.y*0.5;
+				ReplaceComputationalCell(vec_compare.xderivative, cell);
+				ReplaceComputationalCell(vec_compare.yderivative, cell);
+				vec_compare.xderivative *= r_ij.x*0.5;
+				vec_compare.yderivative *= r_ij.y*0.5;
 			}
 			else
 			{
-				ComputationalCellAddMult(vec_compare.first, cell, r_ij.x*0.5);
-				ComputationalCellAddMult(vec_compare.second, cell, r_ij.y*0.5);
+				ComputationalCellAddMult(vec_compare.xderivative, cell, r_ij.x*0.5);
+				ComputationalCellAddMult(vec_compare.yderivative, cell, r_ij.y*0.5);
 			}
-			ComputationalCellAddMult(vec_compare.second, *neighbors[i], r_ij.y*0.5);
-			ComputationalCellAddMult(vec_compare.first, *neighbors[i], r_ij.x*0.5);
+			ComputationalCellAddMult(vec_compare.yderivative, *neighbors[i], r_ij.y*0.5);
+			ComputationalCellAddMult(vec_compare.xderivative, *neighbors[i], r_ij.x*0.5);
 		}
 		m[0] += cell_volume;
 		m[3] += cell_volume;
@@ -129,12 +128,12 @@ namespace
 		m_inv[2] = -m[2] * det_inv;
 		m_inv[3] = m[0] * det_inv;
 		// Calculate the gradient
-		ReplaceComputationalCell(res.first, vec_compare.first);
-		ReplaceComputationalCell(res.second, vec_compare.second);
-		res.first *= m_inv[0];
-		res.second *= m_inv[3];
-		ComputationalCellAddMult(res.first, vec_compare.second, m_inv[1]);
-		ComputationalCellAddMult(res.second, vec_compare.first, m_inv[2]);
+		ReplaceComputationalCell(res.xderivative, vec_compare.xderivative);
+		ReplaceComputationalCell(res.yderivative, vec_compare.yderivative);
+		res.xderivative *= m_inv[0];
+		res.yderivative *= m_inv[3];
+		ComputationalCellAddMult(res.xderivative, vec_compare.yderivative, m_inv[1]);
+		ComputationalCellAddMult(res.yderivative, vec_compare.xderivative, m_inv[2]);
 	}
 
 	double PressureRatio(ComputationalCell cell, vector<ComputationalCell const*> const& neigh)
@@ -151,34 +150,34 @@ namespace
 		return res;
 	}
 
-	bool is_shock(pair<ComputationalCell,ComputationalCell> const& naive_slope, double cell_width, double shock_ratio,
+	bool is_shock(Slope const& naive_slope, double cell_width, double shock_ratio,
 		ComputationalCell const& cell, vector<ComputationalCell const*> const& neighbor_list, double pressure_ratio,double cs)
 	{
-		const bool cond1 =(naive_slope.first.velocity.x + naive_slope.second.velocity.y)*
+		const bool cond1 =(naive_slope.xderivative.velocity.x + naive_slope.yderivative.velocity.y)*
 			cell_width<(-shock_ratio)*cs;
 		const bool cond2 = PressureRatio(cell, neighbor_list)<pressure_ratio;
 		return cond1 || cond2;
 	}
 	
-	ComputationalCell interp(ComputationalCell const& cell,pair<ComputationalCell, ComputationalCell> const& slope,
+	ComputationalCell interp(ComputationalCell const& cell,Slope const& slope,
 		Vector2D const& target,Vector2D const& cm)
 	{
 		ComputationalCell res(cell);
-		ComputationalCellAddMult(res, slope.first, target.x - cm.x);
-		ComputationalCellAddMult(res, slope.second, target.y - cm.y);
+		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
+		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		return res;
 	}
 
-	void interp2(ComputationalCell &res, pair<ComputationalCell, ComputationalCell> const& slope,
+	void interp2(ComputationalCell &res, Slope const& slope,
 		Vector2D const& target, Vector2D const& cm)
 	{
-		ComputationalCellAddMult(res, slope.first, target.x - cm.x);
-		ComputationalCellAddMult(res, slope.second, target.y - cm.y);
+		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
+		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 	}
 
 	void slope_limit(ComputationalCell const& cell,Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell> &slope,
+		Slope &slope,
 		ComputationalCell &cmax,
 		ComputationalCell &cmin,
 		ComputationalCell &maxdiff,
@@ -275,26 +274,27 @@ namespace
 				}
 			}
 		}
-		slope.first.density *= psi[0];
-		slope.second.density *= psi[0];
-		slope.first.pressure *= psi[1];
-		slope.second.pressure *= psi[1];
-		slope.first.velocity.x *= psi[2];
-		slope.second.velocity.x *= psi[2];
-		slope.first.velocity.y *= psi[3];
-		slope.second.velocity.y *= psi[3];
+		slope.xderivative.density *= psi[0];
+		slope.yderivative.density *= psi[0];
+		slope.xderivative.pressure *= psi[1];
+		slope.yderivative.pressure *= psi[1];
+		slope.xderivative.velocity.x *= psi[2];
+		slope.yderivative.velocity.x *= psi[2];
+		slope.xderivative.velocity.y *= psi[3];
+		slope.yderivative.velocity.y *= psi[3];
 		size_t counter = 0;
-		for (boost::container::flat_map<std::string, double>::iterator it = slope.first.tracers.begin(); it != slope.first.tracers.end(); ++it)
+		for (boost::container::flat_map<std::string, double>::iterator it = slope.xderivative.tracers.begin();
+			it != slope.xderivative.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			(slope.second.tracers.begin()+static_cast<int>(counter))->second*= psi[4 + counter];
+			(slope.yderivative.tracers.begin()+static_cast<int>(counter))->second*= psi[4 + counter];
 			++counter;
 		}
 	}
 
 	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<Edge> const& edge_list,
-		pair<ComputationalCell, ComputationalCell>  &slope,double diffusecoeff)
+		Slope  &slope,double diffusecoeff)
 	{
 		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum values
@@ -360,19 +360,20 @@ namespace
 				++counter;
 			}
 		}
-		slope.first.density *= psi[0];
-		slope.second.density *= psi[0];
-		slope.first.pressure *= psi[1];
-		slope.second.pressure *= psi[1];
-		slope.first.velocity.x *= psi[2];
-		slope.second.velocity.x *= psi[2];
-		slope.first.velocity.y *= psi[3];
-		slope.second.velocity.y *= psi[3];
+		slope.xderivative.density *= psi[0];
+		slope.yderivative.density *= psi[0];
+		slope.xderivative.pressure *= psi[1];
+		slope.yderivative.pressure *= psi[1];
+		slope.xderivative.velocity.x *= psi[2];
+		slope.yderivative.velocity.x *= psi[2];
+		slope.xderivative.velocity.y *= psi[3];
+		slope.yderivative.velocity.y *= psi[3];
 		size_t counter = 0;
-		for (boost::container::flat_map<std::string, double>::iterator it = slope.first.tracers.begin(); it != slope.first.tracers.end(); ++it)
+		for (boost::container::flat_map<std::string, double>::iterator it = slope.xderivative.tracers.begin();
+			it != slope.xderivative.tracers.end(); ++it)
 		{
 			it->second *= psi[4 + counter];
-			safe_retrieve(slope.second.tracers,it->first) *= psi[4 + counter];
+			safe_retrieve(slope.yderivative.tracers,it->first) *= psi[4 + counter];
 			++counter;
 		}
 	}
@@ -388,9 +389,9 @@ namespace
 	 EquationOfState const& eos,
 	 boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
 	 const vector<string>& flat_tracers,
-	 std::pair<ComputationalCell,ComputationalCell> &naive_slope_,
-	 std::pair<ComputationalCell, ComputationalCell> & res,
-		pair<ComputationalCell, ComputationalCell> & temp1,
+	 Slope &naive_slope_,
+	Slope & res,
+		Slope & temp1,
 		ComputationalCell &temp2,
 		ComputationalCell &temp3, 
 		ComputationalCell &temp4, 
@@ -415,8 +416,8 @@ namespace
 
 	for(size_t i=0;i<flat_tracers.size();++i)
 	{
-	  res.first.tracers[flat_tracers[i]] = 0;
-	  res.second.tracers[flat_tracers[i]] = 0;
+	  res.xderivative.tracers[flat_tracers[i]] = 0;
+	  res.yderivative.tracers[flat_tracers[i]] = 0;
 	}
 
 	if (slf)
@@ -464,27 +465,9 @@ LinearGaussImproved::LinearGaussImproved
 #ifdef RICH_MPI
 namespace
 {
-	void exchange_ghost_slopes(Tessellation const& tess,vector<Slope > & slopes)
+	void exchange_ghost_slopes(Tessellation const& tess,vector<Slope> & slopes)
 	{
-		const boost::mpi::communicator world;
-		vector<boost::mpi::request> requests;
-		vector<int> const& proc = tess.GetDuplicatedProcs();
-		vector<vector<int> > const& tosend = tess.GetDuplicatedPoints();
-		vector<vector<Slope> > incoming(proc.size());
-		for (size_t i = 0; i < proc.size(); ++i)
-		{
-			const int dest = proc.at(i);
-			requests.push_back(world.isend(dest, 0, VectorValues(slopes, tosend[i])));
-			requests.push_back(world.irecv(dest, 0, incoming[i]));
-		}
-		boost::mpi::wait_all(requests.begin(), requests.end());
-		vector<vector<int> > const& ghost_indeces = tess.GetGhostIndeces();
-		slopes.resize(tess.GetTotalPointNumber(),slopes[0]);
-		for (size_t i = 0; i < proc.size(); ++i)
-		{
-			for (size_t j = 0; j < ghost_indeces.at(i).size(); ++j)
-				slopes[static_cast<size_t>(ghost_indeces[i][j])] = incoming.at(i).at(j);
-		}
+		MPI_exchange_data(tess, slopes, true);
 	}
 }
 #endif//RICH_MPI
@@ -496,9 +479,9 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	// Get ghost points
 	boost::container::flat_map<size_t,ComputationalCell> ghost_cells = ghost_.operator()(tess,cells,time);
 	// Prepare slopes
-	rslopes_.resize(CellNumber,pair<ComputationalCell,ComputationalCell>(cells[0],cells[0]));
+	rslopes_.resize(CellNumber,Slope(cells[0],cells[0]));
 	naive_rslopes_.resize(CellNumber);
-	pair<ComputationalCell, ComputationalCell> temp1(cells[0],cells[0]);
+	Slope temp1(cells[0],cells[0]);
 	ComputationalCell temp2(cells[0]);
 	ComputationalCell temp3(cells[0]);
 	ComputationalCell temp4(cells[0]);
@@ -605,12 +588,12 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 }
 
 
-vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopes(void)const
+vector<Slope>& LinearGaussImproved::GetSlopes(void)const
 {
 	return rslopes_;
 }
 
-vector<pair<ComputationalCell, ComputationalCell> >& LinearGaussImproved::GetSlopesUnlimited(void)const
+vector<Slope>& LinearGaussImproved::GetSlopesUnlimited(void)const
 {
 	return naive_rslopes_;
 }

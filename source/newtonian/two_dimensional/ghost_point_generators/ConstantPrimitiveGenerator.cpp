@@ -2,12 +2,12 @@
 
 ConstantPrimitiveGenerator::ConstantPrimitiveGenerator(ComputationalCell const& cell) : cell_(cell){}
 
-std::pair<ComputationalCell, ComputationalCell> ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
-	vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& gradients,
+Slope ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
+	vector<ComputationalCell> const& /*cells*/, vector<Slope> const& gradients,
 	size_t ghost_index, double /*time*/,Edge const& /*edge*/)const
 {
 	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
-		return std::pair<ComputationalCell, ComputationalCell>();
+		return Slope();
 	else
 		return gradients[ghost_index];
 }

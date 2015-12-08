@@ -36,11 +36,11 @@ public:
 	\param edge The edge of the ghost cell
 	\return The gradient of the ghost cell
 	*/
-	virtual std::pair<ComputationalCell, ComputationalCell> 
+	virtual Slope 
 	GetGhostGradient
 	(const Tessellation& tess,
 	 const vector<ComputationalCell>& cells,
-	 const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+	 const vector<Slope>& gradients,
 	 size_t ghost_index,
 	 double time,
      const Edge& edge) const = 0;

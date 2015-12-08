@@ -139,4 +139,27 @@ ComputationalCell operator*(double s, ComputationalCell const& p);
 void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& other, double scalar);
 
 void ReplaceComputationalCell(ComputationalCell &cell, ComputationalCell const& other);
+
+//! \brief Class for spatial interpolations
+class Slope : public Serializable
+{
+public:
+	ComputationalCell xderivative;
+	ComputationalCell yderivative;
+
+	/*!
+	\brief Class constructor
+	\param x The x derivative 
+	\param y The y derivative
+	*/
+	Slope(ComputationalCell const& x, ComputationalCell const& y);
+	//! \brief Default constructor
+	Slope(void);
+
+	size_t getChunkSize(void) const;
+
+	vector<double> serialize(void) const;
+
+	void unserialize(const vector<double>& data);
+};
 #endif // COMPUTATIONAL_CELL_HPP
