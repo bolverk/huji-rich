@@ -158,11 +158,12 @@ public:
 	Slope(ComputationalCell const& x, ComputationalCell const& y);
 	//! \brief Default constructor
 	Slope(void);
-
+#ifdef RICH_MPI
 	size_t getChunkSize(void) const;
 
 	vector<double> serialize(void) const;
 
 	void unserialize(const vector<double>& data);
+#endif//RICH_MPI
 };
 #endif // COMPUTATIONAL_CELL_HPP
