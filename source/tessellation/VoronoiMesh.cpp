@@ -1753,7 +1753,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	MPI_Barrier(MPI_COMM_WORLD);
 	for (size_t i = 0; i < talkwithme.size(); ++i)
 	{
-		if (std::find(sentproc.begin(), sentproc.end(), talkwithme[i]) != sentproc.end())
+		if (std::find(sentproc.begin(), sentproc.end(), talkwithme[i]) == sentproc.end())
 		{
 			sentproc.push_back(talkwithme[i]);
 			sentpoints.push_back(vector<int>());
