@@ -10,9 +10,7 @@
 #include <string>
 #include "../../tessellation/geometry.hpp"
 #ifdef RICH_MPI
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>
-#include "flat_map_serial.hpp"
+#include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
 using std::string;
