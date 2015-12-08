@@ -1772,9 +1772,9 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		const int dest = sentproc.at(i);
 		tosend[i] = list_serialize(VectorValues(points, sentpoints.at(i)));
 		if(tosend[i].empty())
-			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[0]);
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[i]);
 		else
-			MPI_Isend(&tosend[i][0], static_cast<int>(tosend[i].size()), MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[0]);
+			MPI_Isend(&tosend[i][0], static_cast<int>(tosend[i].size()), MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[i]);
 	}
 	for (size_t i = 0; i < sentproc.size(); ++i)
 	{
