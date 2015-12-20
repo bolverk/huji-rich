@@ -167,7 +167,7 @@ namespace
 	}
 
 	std::pair<Vector2D, Vector2D> TrianglesArea(Edge const& eold, Edge const &enew, Tessellation const& tessnew,
-		Tessellation const& tessold, Vector2D const& new_edge_added, int cell_index)
+		Tessellation const& tessold, Vector2D const& new_edge_added, int /*cell_index*/)
 	{ // first is the change in the old and the second the change in the new
 	  // x is e1.first y is e1.second
 		std::pair<Vector2D, Vector2D> res;
@@ -207,14 +207,14 @@ namespace
 		{
 			TripleConstRef<Vector2D> temp3 = TripleConstRef<Vector2D>(points[0], third_point, points[1]);
 			res.first.x = 0.5*orient2d(temp3);
-			area_scale = abs(res.first.x);
+			area_scale = std::abs(res.first.x);
 			sum = res.first.x;
 		}
 		{
 			third_point = (first ? enew.vertices.second : enew.vertices.first) + new_edge_added;
 			TripleConstRef<Vector2D> temp4 = TripleConstRef<Vector2D>(points[1], third_point, points[0]);
 			res.first.y = 0.5*orient2d(temp4);
-			area_scale = std::max(area_scale, abs(res.first.y));
+			area_scale = std::max(area_scale,std::abs(res.first.y));
 			sum += res.first.y;
 		}
 		bool newrigid = tessnew.GetOriginalIndex(enew.neighbors.first) == tessnew.GetOriginalIndex(enew.neighbors.second);
@@ -227,7 +227,7 @@ namespace
 			third_point = first ? eold.vertices.first : eold.vertices.second;
 			TripleConstRef<Vector2D> temp5(points[2], third_point, points[3]);
 			res.second.x = 0.5*orient2d(temp5);
-			area_scale = std::max(area_scale, abs(res.second.x));
+			area_scale = std::max(area_scale, std::abs(res.second.x));
 			sum += res.second.x;
 		}
 
@@ -237,10 +237,10 @@ namespace
 			third_point = !first ? eold.vertices.first : eold.vertices.second;
 			TripleConstRef<Vector2D> temp6(points[3], third_point, points[2]);
 			res.second.y = 0.5*orient2d(temp6);
-			area_scale = std::max(area_scale, abs(res.second.y));
+			area_scale = std::max(area_scale, std::abs(res.second.y));
 			sum += res.second.y;
 		}
-		if (abs(sum) > 1e-5*area_scale)
+		if (std::abs(sum) > 1e-5*area_scale)
 		{
 			UniversalError eo("Bad total area in TrianglesArea");
 			eo.AddEntry("area_scale", area_scale);
@@ -310,11 +310,9 @@ namespace
 		std::pair<int, int> neighbors(tessold.GetOriginalIndex(edge.neighbors.first), tessold.GetOriginalIndex(edge.neighbors.second));
 		if (flipped_set.count(neighbors) > 0)
 			return;
-		bool need_to_calc = both_real;
 		Edge edge_new = tessnew.GetEdge(new_edge);
 		// Did it jump?
 		Vector2D addedother;
-		vector<int> const& cell_edges = tessold.GetCellEdges(cell_index);
 		if (outer.GetBoundaryType() == Periodic)
 		{
 			if (edge_new.neighbors.first < npoints)
@@ -449,7 +447,7 @@ namespace
 	}
 
 	ComputationalCell GetDonorCell(ComputationalCell const& c0, ComputationalCell const& c1,
-		bool seconddonor, EquationOfState const& eos)
+		bool seconddonor, EquationOfState const& /*eos*/)
 	{
 		ComputationalCell p_mid;
 		double ratio = c1.density / c0.density;
@@ -509,7 +507,7 @@ namespace
 
 vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tessmid,
 	Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
-	vector<ComputationalCell> const& cells, vector<Extensive> const& fluxes,
+	vector<ComputationalCell> const& cells, vector<Extensive> const& /*fluxes*/,
 	vector<Vector2D> const& fv, OuterBoundary const& outer, EquationOfState const& eos)
 {
 	size_t npoints = static_cast<size_t>(tessold.GetPointNo());
@@ -538,7 +536,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		// Did the edge disappear? An edge flip
 		if (new_index < 0)
 		{
-			AreaFixEdgeDisappear(tessold, tessnew, cell_index, other_index, edge, outer, npoints, pointvelocity, dt,
+			AreaFixEdgeDisappear(tessold, tessnew, cell_index, other_index, edge, outer, static_cast<int>(npoints), pointvelocity, dt,
 				dA_flux, mid_index, tessmid, fv, cells, eos, res, flipped_set);
 			continue;
 		}
