@@ -32,7 +32,7 @@ namespace
 			round=2;
 		else
 			round=1.6;
-		ConstNumberPerProc procmove(outer,Nbest,speed,round,mode);
+		ConstNumberPerProc procmove(outer,speed,round,mode);
 		VoronoiMesh local(tproc, points, outer);
 		vector<double> loads;
 		for(int i=0;i<Niter;++i)
@@ -85,7 +85,7 @@ namespace
 			round=2.1;
 		else
 			round=1.75;
-		ConstNumberPerProc procmove2(outer,Nbest,speed,round,mode);
+		ConstNumberPerProc procmove2(outer,speed,round,mode);
 		tproc.Update(BestProc);
 		MPI_Barrier(MPI_COMM_WORLD);
 		local.Update(BestMesh,tproc);
