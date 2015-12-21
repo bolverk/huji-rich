@@ -461,8 +461,6 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
 	time_ += 0.5*dt;
-	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
-		edge_velocities, obc_, eos_);
 
 	cache_data_.reset();
 
@@ -480,8 +478,6 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	MoveMeshPoints(point_velocities, dt, tess_, old_points);
 	cache_data_.reset();
-	extensives_ = extensives_ + FluxFix2(*oldtess, *midtess, tess_, point_velocities, dt, mid_cells, fluxes,
-		edge_velocities, obc_, eos_);
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
