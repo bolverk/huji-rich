@@ -126,21 +126,6 @@ namespace
 		return -1;
 	}
 
-	Vector2D GetNewEdgeAddition(Tessellation const& tessold, Tessellation const& tessnew, int cell_index, Edge const&
-		newedge, Vector2D const& dr)
-	{
-		int npoints = tessnew.GetPointNo();
-		int other = newedge.neighbors.first < npoints ? newedge.neighbors.first : newedge.neighbors.second;
-		vector<int> const& edges = tessold.GetCellEdges(cell_index);
-		for (size_t i = 0; i < edges.size(); ++i)
-		{
-			Edge const& edge = tessold.GetEdge(edges[i]);
-			if (tessold.GetOriginalIndex(edge.neighbors.first) == other)
-				return tessold.GetMeshPoint(edge.neighbors.first) - tessnew.GetMeshPoint(other) - dr;
-		}
-		throw UniversalError("Could not find the new edge movment");
-	}
-
 	bool FirstVertice(Edge edgenew, Tessellation const& tessnew, int cell,Vector2D const& edge_added)
 	{
 		edgenew.vertices.first += edge_added;
