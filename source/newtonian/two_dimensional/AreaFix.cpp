@@ -219,9 +219,9 @@ namespace
 			first = !first;
 			if (rigid)
 			{
-				Vector2D temp = points[0];
+				Vector2D tempp = points[0];
 				points[0] = points[1];
-				points[1] = temp;
+				points[1] = tempp;
 			}
 		}
 		Vector2D third_point = (first ? enew.vertices.first : enew.vertices.second) + new_edge_added;
