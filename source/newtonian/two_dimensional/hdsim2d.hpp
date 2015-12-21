@@ -197,6 +197,8 @@ public:
   void TimeAdvance2Heun(void);
 
   //! \brief Second order time advance, mid point method with area fix
+  void TimeAdvance2MidPointClip(void);
+  //! \brief Second order time advance, mid point method
   void TimeAdvance2MidPoint(void);
 
   /*! \brief Change the physical geometry

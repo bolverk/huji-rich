@@ -141,33 +141,43 @@ namespace
 		throw UniversalError("Could not find the new edge movment");
 	}
 
-	bool FirstVertice(Edge const& edgenew, Tessellation const& tessnew, int cell)
+	bool FirstVertice(Edge edgenew, Tessellation const& tessnew, int cell,Vector2D const& edge_added)
 	{
-		bool first = edgenew.neighbors.first < tessnew.GetPointNo() ? true : false;
-		int other = first ? tessnew.GetOriginalIndex(edgenew.neighbors.first) :
-			tessnew.GetOriginalIndex(edgenew.neighbors.second);
-		vector<int> const& edges = tessnew.GetCellEdges(other);
+		edgenew.vertices.first += edge_added;
+		edgenew.vertices.second += edge_added;
+		const double R = 1e-8*tessnew.GetWidth(cell);
+		vector<int> const& edges = tessnew.GetCellEdges(cell);
 		for (size_t i = 0; i < edges.size(); ++i)
 		{
-			Edge const& edge = tessnew.GetEdge(edges[i]);
-			if (tessnew.GetOriginalIndex(edge.neighbors.first) == cell)
-			{
-				Vector2D const& point = tessnew.GetMeshPoint(edge.neighbors.first);
-				return edgenew.vertices.first.distance(point) < edgenew.vertices.second.distance(point) ?
-					true : false;
-			}
-			if (tessnew.GetOriginalIndex(edge.neighbors.second) == cell)
-			{
-				Vector2D const& point = tessnew.GetMeshPoint(edge.neighbors.second);
-				return edgenew.vertices.first.distance(point) < edgenew.vertices.second.distance(point) ?
-					true : false;
-			}
+			Edge edge = tessnew.GetEdge(edges[i]);
+			if (edge.vertices.first.distance(edgenew.vertices.first) < R)
+				return true;
+			if (edge.vertices.first.distance(edgenew.vertices.second) < R)
+				return false;
+			if (edge.vertices.second.distance(edgenew.vertices.first) < R)
+				return true;
+			if (edge.vertices.second.distance(edgenew.vertices.second) < R)
+				return false;
 		}
 		throw UniversalError("Couldn't find first vertice");
 	}
 
+	Edge FindOtherEdge(Tessellation const& tess, int cell_index,int other)
+	{
+		vector<int> const& edges = tess.GetCellEdges(cell_index);
+		for (size_t i = 0; i < edges.size(); ++i)
+		{
+			Edge const& edge = tess.GetEdge(edges[i]);
+			if (tess.GetOriginalIndex(edge.neighbors.first) == other)
+				return edge;
+			if (tess.GetOriginalIndex(edge.neighbors.second) == other)
+				return edge;
+		}
+		throw UniversalError("Couldn't find other edge");
+	}
+
 	std::pair<Vector2D, Vector2D> TrianglesArea(Edge const& eold, Edge const &enew, Tessellation const& tessnew,
-		Tessellation const& tessold, Vector2D const& new_edge_added, int /*cell_index*/)
+		Tessellation const& tessold, Vector2D const& new_edge_added, int cell_index,Vector2D const& cell_index_added)
 	{ // first is the change in the old and the second the change in the new
 	  // x is e1.first y is e1.second
 		std::pair<Vector2D, Vector2D> res;
@@ -202,7 +212,18 @@ namespace
 			points[3] = enew.vertices.second + new_edge_added;
 		}
 		int npoints = tessold.GetPointNo();
-		bool first = FirstVertice(enew, tessnew, tessold.GetOriginalIndex(eold.neighbors.first));
+		Vector2D toadd = new_edge_added - cell_index_added;
+		bool first = FirstVertice(enew, tessnew, cell_index,toadd);
+		if (eold.neighbors.first > npoints)
+		{
+			first = !first;
+			if (rigid)
+			{
+				Vector2D temp = points[0];
+				points[0] = points[1];
+				points[1] = temp;
+			}
+		}
 		Vector2D third_point = (first ? enew.vertices.first : enew.vertices.second) + new_edge_added;
 		{
 			TripleConstRef<Vector2D> temp3 = TripleConstRef<Vector2D>(points[0], third_point, points[1]);
@@ -218,7 +239,15 @@ namespace
 			sum += res.first.y;
 		}
 		bool newrigid = tessnew.GetOriginalIndex(enew.neighbors.first) == tessnew.GetOriginalIndex(enew.neighbors.second);
-		first = FirstVertice(eold, tessold, tessnew.GetOriginalIndex(enew.neighbors.first));
+		int other = tessnew.GetOriginalIndex(enew.neighbors.first);
+		Edge otheredge = FindOtherEdge(tessold, cell_index, other);
+		Vector2D added;
+		if (tessold.GetOriginalIndex(otheredge.neighbors.first) == other)
+			added = tessold.GetMeshPoint(other) - tessold.GetMeshPoint(otheredge.neighbors.first);
+		else
+			added = tessold.GetMeshPoint(other) - tessold.GetMeshPoint(otheredge.neighbors.second);
+		first = FirstVertice(eold, tessold, other, added);
+
 		if (newrigid&&enew.neighbors.first > npoints)
 			first = !first;
 		if (enew.neighbors.first < npoints || (tessnew.GetOriginalIndex(enew.neighbors.first) !=
@@ -300,7 +329,7 @@ namespace
 		Edge const& edge, OuterBoundary const& outer, int npoints, vector<Vector2D> const& pointvelocity, double dt,
 		double dA_flux, int mid_index, Tessellation const& tessmid, vector<Vector2D> const& fv,
 		vector<ComputationalCell> const& cells, EquationOfState const& eos, vector<Extensive> &res,
-		std::set<std::pair<int, int > > &flipped_set)
+		std::set<std::pair<int, int > > &flipped_set,Vector2D const& cell_added)
 	{
 		// Is there a corresponding new edge? An edge flip
 		int new_edge = NewEdgeIndex(tessold, tessnew, cell_index, edge, other_index);
@@ -328,7 +357,8 @@ namespace
 				addedother += FixNewEdgeLeap(tessold, edge_new.neighbors.second, cell_index);
 			}
 		}
-		std::pair<Vector2D, Vector2D> areas = TrianglesArea(edge, edge_new, tessnew, tessold, addedother, cell_index);
+		std::pair<Vector2D, Vector2D> areas = TrianglesArea(edge, edge_new, tessnew, tessold, addedother, cell_index,
+			cell_added);
 		vector<double> dA(4);
 		if (mid_index >= 0 && tessmid.GetOriginalIndex(tessmid.GetEdge(mid_index).neighbors.first) == other_index)
 			dA_flux *= -1;
@@ -537,7 +567,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		if (new_index < 0)
 		{
 			AreaFixEdgeDisappear(tessold, tessnew, cell_index, other_index, edge, outer, static_cast<int>(npoints), pointvelocity, dt,
-				dA_flux, mid_index, tessmid, fv, cells, eos, res, flipped_set);
+				dA_flux, mid_index, tessmid, fv, cells, eos, res, flipped_set,added);
 			continue;
 		}
 		Vector2D real_p_new = tessnew.GetMeshPoint(cell_index);
