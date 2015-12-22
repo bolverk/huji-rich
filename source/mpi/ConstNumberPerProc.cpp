@@ -39,7 +39,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 	MPI_Gather(&mypointnumber, 1, MPI_INT, &NPerProc[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&NPerProc[0], nproc, MPI_INT, 0, MPI_COMM_WORLD);
 	int IdealPerProc = 0;
-	for (size_t i = 0; i < nproc; ++i)
+	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		IdealPerProc += NPerProc[i];
 	IdealPerProc /= nproc;
 	// Move point according to density
