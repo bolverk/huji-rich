@@ -6,34 +6,30 @@ EXECUTION_PREFIX =
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
 	LFLAGS := -pg
-	LFLAGS = -lclipper
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors 
-	LFLAGS = -lboost_mpi -lboost_serialization -lclipper
+	LFLAGS = -lboost_mpi -lboost_serialization
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
 	LFLAGS := -pg
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS :=
-	LFLAGS = -lboost_mpi -lboost_serialization -lclipper
+	LFLAGS = -lboost_mpi -lboost_serialization
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS :=
-	LFLAGS = -lclipper
 else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
 	LINT_FLAGS :=
-	LFLAGS = -lclipper
 else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native
-	LFLAGS := -lclipper
 endif
 CFLAGS = $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 SOURCE_LIST := $(shell find . -name 'test.cpp')
@@ -61,7 +57,7 @@ $(NORMAL_TERMINATION_LIST): $(MODE)/%/normal_termination.res: $(MODE)/%/test.exe
 
 $(BINARY_LIST): $(MODE)/%/test.exe: $(MODE)/%/test.o
 	$(MAKE) -C .. MODE=$(MODE)
-	$(CC) $(MODE)/$*/test.o ../library_$(MODE)/librich.a -L $(HDF5_LIB_PATH) -lhdf5 -lhdf5_cpp -lz -o $(MODE)/$*/test.exe $(LFLAGS)
+	$(CC) $(MODE)/$*/test.o -L ../library_$(MODE) -L $(HDF5_LIB_PATH) -lz -lhdf5 -lhdf5_cpp -lrich -lclipper -o $(MODE)/$*/test.exe $(LFLAGS)
 
 $(OBJECT_LIST): $(MODE)/%/test.o: %/test.cpp $(SOURCE_DEPENDENCIES) | $(MODE)/%
 	$(CC) -c $(CFLAGS) $*/test.cpp -o $(MODE)/$*/test.o -I ..
