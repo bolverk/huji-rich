@@ -21,7 +21,7 @@ namespace
 	}
 
 	void RunLoadBalance(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-		outer,int Nbest,int Niter,double tload,double speed,int mode)
+		outer,int Niter,double tload,double speed,int mode)
 	{
 		double BestLoad=100;
 		vector<Vector2D> BestProc,BestMesh;
@@ -110,15 +110,15 @@ namespace
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,int Niter,double speed,int mode)
+	outer,int Niter,double speed,int mode)
 {
-	RunLoadBalance(tproc,points,outer,Nbest,Niter,0,speed,mode);
+	RunLoadBalance(tproc,points,outer,Niter,0,speed,mode);
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Nbest,double TargetLoad,double speed,int mode)
+	outer,double TargetLoad,double speed,int mode)
 {
-	RunLoadBalance(tproc,points,outer,Nbest,1000,TargetLoad,speed,mode);
+	RunLoadBalance(tproc,points,outer,1000,TargetLoad,speed,mode);
 }
 
 #endif
