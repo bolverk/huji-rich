@@ -366,7 +366,7 @@ namespace
 		dA[3] -= dA_flux2;
 
 		// The conserved to remove
-		Extensive TotalRemoved;
+		Extensive TotalRemoved(cells[0].tracers);
 		double total_added_area = 0;
 		if (dA[0] < 0)
 		{
@@ -526,7 +526,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 	vector<Vector2D> const& fv, OuterBoundary const& outer, EquationOfState const& eos)
 {
 	size_t npoints = static_cast<size_t>(tessold.GetPointNo());
-	vector<Extensive> res(static_cast<size_t>(npoints));
+	vector<Extensive> res(static_cast<size_t>(npoints),Extensive (cells[0].tracers));
 	// Fix the fluxes
 	Vector2D temp0, temp1;
 	std::set<std::pair<int, int > > flipped_set, only_mid;
@@ -582,7 +582,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			if (tessmid.GetOriginalIndex(edge2.neighbors.first) == tessmid.GetOriginalIndex(edge2.neighbors.second))
 				continue;
 			double dA_flux2 = GetdAFlux(mid_edge, tessmid, dt, tessmid.GetOriginalIndex(edge2.neighbors.second), fv);
-			Extensive toadd2;
+			Extensive toadd2(cells[0].tracers);
 			if (dA_flux2 > 0)
 				toadd2 = ComputationalCell2Extensive(cells[tessmid.GetOriginalIndex(edge2.neighbors.second)],
 					dA_flux2, eos);

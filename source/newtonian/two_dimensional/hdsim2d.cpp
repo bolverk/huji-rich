@@ -395,20 +395,22 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	vector<Extensive> mid_extensives = extensives_;
 
-	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives);
-
-	ExternalForceContribution(tess_,pg_,cache_data_,cells_,fluxes,point_velocities,source_,time_,0.5*dt,mid_extensives);
+	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
 	vector<Vector2D> old_points = tess_.GetMeshPoints();
 	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
-
-	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
-
 	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
-	time_ += 0.5*dt;
+	
+	CacheData data_temp(*oldtess, pg_);
+
 	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
 		edge_velocities, obc_, eos_);
 
+	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives);
+
+	ExternalForceContribution(*oldtess,pg_, data_temp,cells_,fluxes,point_velocities,source_,time_,0.5*dt,mid_extensives);
+
+	time_ += 0.5*dt;
 	cache_data_.reset();
 
 	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
@@ -417,17 +419,20 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	fluxes = fc_(tess_,edge_velocities,mid_cells,mid_extensives,cache_data_,eos_,time_,dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
-
-	ExternalForceContribution(tess_,pg_,cache_data_,mid_cells,fluxes,point_velocities,source_,time_,dt,extensives_);
-
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
 	MoveMeshPoints(point_velocities, dt, tess_, old_points);
-	cache_data_.reset();
+
+	CacheData cachetemp2(*midtess, pg_);
+
 	extensives_ = extensives_ + FluxFix2(*oldtess, *midtess, tess_, point_velocities, dt, mid_cells, fluxes,
 		edge_velocities, obc_, eos_);
 
+	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_);
+
+	ExternalForceContribution(*midtess,pg_, cachetemp2,mid_cells,fluxes,point_velocities,source_,time_,dt,extensives_);
+
+	cache_data_.reset();
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
 	time_ += 0.5*dt;
