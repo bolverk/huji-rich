@@ -73,7 +73,7 @@ public:
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	SimpleAMRCellUpdater(vector<string> toskip);
+  explicit SimpleAMRCellUpdater(vector<string> toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell const& old_cell) const;
