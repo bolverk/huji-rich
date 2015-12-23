@@ -155,18 +155,19 @@ namespace
 			{
 				for (size_t j = 0; j < nneigh; ++j)
 				{
-					if (binary_search(candidates.begin(), candidates.end(), neigh[j]))
+					if (binary_search(candidates.begin(), candidates.end(), tess.GetOriginalIndex(neigh[j])))
 					{
-						if (merits[i] < merits[static_cast<size_t>(lower_bound(candidates.begin(), candidates.end(), neigh[j]) - candidates.begin())])
+						if (merits[i] < merits[static_cast<size_t>(lower_bound(candidates.begin(), candidates.end(),
+							tess.GetOriginalIndex(neigh[j])) - candidates.begin())])
 						{
 							good = false;
 							break;
 						}
-						if (fabs(merits[i] - merits[static_cast<size_t>(lower_bound(candidates.begin(), candidates.end(), neigh[j])
-							- candidates.begin())]) < 1e-9)
+						if (fabs(merits[i] - merits[static_cast<size_t>(lower_bound(candidates.begin(), candidates.end(),
+							tess.GetOriginalIndex(neigh[j])) - candidates.begin())]) < 1e-9)
 						{
-							if (find(bad_neigh.begin(), bad_neigh.end(), neigh[j]) == bad_neigh.end())
-								bad_neigh.push_back(static_cast<size_t>(neigh[j]));
+							if (find(bad_neigh.begin(), bad_neigh.end(), tess.GetOriginalIndex(neigh[j])) == bad_neigh.end())
+								bad_neigh.push_back(static_cast<size_t>(tess.GetOriginalIndex(neigh[j])));
 						}
 					}
 				}
