@@ -135,6 +135,7 @@ public:
 
   /*! \brief Class constructor
     \param tess Voronoi tessellation method
+    \param proc_update Scheme for updating the locations of the processes
     \param obc Outer boundary conditions
     \param pg Physical geometry
     \param init_cond Initial conditions
