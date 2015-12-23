@@ -143,7 +143,9 @@ class SimData
 public:
   
   SimData(void):
+#ifdef RICH_MPI
 	  ws_(GetWS()),
+#endif
     outer_(-0.5,0.5,0.5,-0.5),
     rs_(),
 #ifdef RICH_MPI
@@ -194,7 +196,9 @@ public:
   }
 
 private:
+#ifdef RICH_MPI
 	const int ws_;
+#endif
   const SlabSymmetry pg_;
   const SquareBox outer_;
   const Hllc rs_;
