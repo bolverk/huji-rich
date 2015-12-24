@@ -132,7 +132,7 @@ namespace
 		// check output
 		for (size_t i = 0; i < res.size(); ++i)
 		{
-			if (tess.GetWidth(static_cast<int>(i))< abs(res[i]) * dt)
+			if (tess.GetWidth(static_cast<int>(i)) < abs(res[i]) * dt && abs(cells[i].velocity)*2 < abs(res[i]))
 				throw UniversalError("Velocity too large in Centroid Motion");
 		}
 		return res;

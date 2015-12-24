@@ -13,7 +13,7 @@ namespace
 			0.5*res.mass*ScalarProd(cell.velocity, cell.velocity);
 		res.momentum = res.mass*cell.velocity;
 		for (size_t i = 0; i < cell.tracers.size(); ++i)
-			res.tracers[(cell.tracers.begin() + i)->first] = res.mass*(cell.tracers.begin() + i)->second;
+			res.tracers[(cell.tracers.begin() + static_cast<int>(i))->first] = res.mass*(cell.tracers.begin() + static_cast<int>(i))->second;
 		return res;
 	}
 
@@ -303,7 +303,7 @@ namespace
 		{
 			Edge const& edge2 = tessmid.GetEdge(mid_index);
 			const Vector2D norm = tessmid.GetMeshPoint(edge2.neighbors.second) - tessmid.GetMeshPoint(edge2.neighbors.first);
-			res = ScalarProd(norm, fv[mid_index])*dt*edge2.GetLength() / abs(norm);
+			res = ScalarProd(norm, fv[static_cast<size_t>(mid_index)])*dt*edge2.GetLength() / abs(norm);
 			if (tessmid.GetOriginalIndex(edge2.neighbors.first) == other_index)
 				res *= -1;
 		}
@@ -332,13 +332,13 @@ namespace
 			if (edge_new.neighbors.first < npoints)
 			{
 				addedother = -1 * FixPeriodicLeap(tessnew.GetMeshPoint(edge_new.neighbors.first),
-					pointvelocity[edge_new.neighbors.first], -dt, outer);
+					pointvelocity[static_cast<size_t>(edge_new.neighbors.first)], -dt, outer);
 				addedother += FixNewEdgeLeap(tessold, edge_new.neighbors.first, cell_index);
 			}
 			else
 			{
 				addedother = -1 * FixPeriodicLeap(tessnew.GetMeshPoint(edge_new.neighbors.second),
-					pointvelocity[edge_new.neighbors.second], -dt, outer);
+					pointvelocity[static_cast<size_t>(edge_new.neighbors.second)], -dt, outer);
 				addedother += FixNewEdgeLeap(tessold, edge_new.neighbors.second, cell_index);
 			}
 		}
@@ -372,7 +372,7 @@ namespace
 		{
 			Extensive toremove = ComputationalCell2Extensive(cells[
 				static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))], -dA[0], eos);
-			res[tessold.GetOriginalIndex(edge.neighbors.first)] -= toremove;
+			res[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))] -= toremove;
 			TotalRemoved += toremove;
 		}
 		else
@@ -381,7 +381,7 @@ namespace
 		{
 			Extensive toremove = ComputationalCell2Extensive(cells[
 				static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))], -dA[1], eos);
-			res[tessold.GetOriginalIndex(edge.neighbors.second)] -= toremove;
+			res[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))] -= toremove;
 			TotalRemoved += toremove;
 		}
 		else
@@ -391,7 +391,7 @@ namespace
 		{
 			Extensive toremove = ComputationalCell2Extensive(cells[
 				static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))], -dA[2], eos);
-			res[tessnew.GetOriginalIndex(edge_new.neighbors.first)] -= toremove;
+			res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] -= toremove;
 			TotalRemoved += toremove;
 		}
 		else
@@ -400,7 +400,7 @@ namespace
 		{
 			Extensive toremove = ComputationalCell2Extensive(cells[
 				static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))], -dA[3], eos);
-			res[tessnew.GetOriginalIndex(edge_new.neighbors.second)] -= toremove;
+			res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] -= toremove;
 			TotalRemoved += toremove;
 		}
 		else
@@ -408,17 +408,17 @@ namespace
 
 		// Add the conserved
 		if (dA[0] > 0)
-			res[tessold.GetOriginalIndex(edge.neighbors.first)] += (dA[0] / total_added_area)*TotalRemoved;
+			res[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.first))] += (dA[0] / total_added_area)*TotalRemoved;
 		if (dA[1] > 0)
-			res[tessold.GetOriginalIndex(edge.neighbors.second)] += (dA[1] / total_added_area)*TotalRemoved;
+			res[static_cast<size_t>(tessold.GetOriginalIndex(edge.neighbors.second))] += (dA[1] / total_added_area)*TotalRemoved;
 		if (dA[2] > 0)
 			if ((edge_new.neighbors.first < tessnew.GetPointNo()) ||
 				(tessnew.GetOriginalIndex(edge_new.neighbors.first) != tessnew.GetOriginalIndex(edge_new.neighbors.second)))
-				res[tessnew.GetOriginalIndex(edge_new.neighbors.first)] += (dA[2] / total_added_area)*TotalRemoved;
+				res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.first))] += (dA[2] / total_added_area)*TotalRemoved;
 		if (dA[3] > 0)
 			if ((edge_new.neighbors.second < tessnew.GetPointNo()) ||
 				(tessnew.GetOriginalIndex(edge_new.neighbors.first) != tessnew.GetOriginalIndex(edge_new.neighbors.second)))
-				res[tessnew.GetOriginalIndex(edge_new.neighbors.second)] += (dA[3] / total_added_area)*TotalRemoved;
+				res[static_cast<size_t>(tessnew.GetOriginalIndex(edge_new.neighbors.second))] += (dA[3] / total_added_area)*TotalRemoved;
 		if (!both_real)
 		{
 			flipped_set.insert(neighbors);
@@ -507,14 +507,14 @@ namespace
 		}
 		for (size_t i = 0; i < c0.tracers.size(); ++i)
 		{
-			ratio = (c0.tracers.begin() + i)->second / (c1.tracers.begin() + i)->second;
+			ratio = (c0.tracers.begin() + static_cast<int>(i))->second / (c1.tracers.begin() + static_cast<int>(i))->second;
 			if (ratio<2 && ratio>0.5)
-				p_mid.tracers[(c0.tracers.begin() + i)->first] = 0.5*(c0.tracers.begin() + i)->second *(1 + 1 / ratio);
+				p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = 0.5*(c0.tracers.begin() + static_cast<int>(i))->second *(1 + 1 / ratio);
 			else
 				if (seconddonor)
-					p_mid.tracers[(c0.tracers.begin() + i)->first] = (c1.tracers.begin() + i)->second;
+					p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = (c1.tracers.begin() + static_cast<int>(i))->second;
 				else
-					p_mid.tracers[(c0.tracers.begin() + i)->first] = (c0.tracers.begin() + i)->second;
+					p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = (c0.tracers.begin() + static_cast<int>(i))->second;
 		}
 		return p_mid;
 	}
@@ -546,7 +546,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		Vector2D added(0, 0);
 		// check if periodic jumped
 		if (outer.GetBoundaryType() == Periodic)
-			added = FixPeriodicLeap(real_p, pointvelocity[cell_index], dt, outer);
+			added = FixPeriodicLeap(real_p, pointvelocity[static_cast<size_t>(cell_index)], dt, outer);
 
 		// Did the edge disappear? An edge flip
 		if (new_index < 0)
@@ -564,14 +564,14 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			real_p_new += added;
 		}
 		double area = EdgesArea(edge, edge_other, real_p, real_p_new);
-		ComputationalCell p_mid = GetDonorCell(cells[cell_index], cells[other_index],
+		ComputationalCell p_mid = GetDonorCell(cells[static_cast<size_t>(cell_index)], cells[static_cast<size_t>(other_index)],
 			(area - dA_flux)>0, eos);
 		Extensive toadd = ComputationalCell2Extensive(p_mid, (-dA_flux + area), eos);
 
 		if (other_index == edge.neighbors.first || other_index == edge.neighbors.second)
-			res[other_index] -= toadd;
+			res[static_cast<size_t>(other_index)] -= toadd;
 		if (cell_index == edge.neighbors.first || cell_index == edge.neighbors.second)
-			res[cell_index] += toadd;
+			res[static_cast<size_t>(cell_index)] += toadd;
 		if (mid_index < 0)
 		{
 			// Was there a flip in mid step?
@@ -584,10 +584,10 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			double dA_flux2 = GetdAFlux(mid_edge, tessmid, dt, tessmid.GetOriginalIndex(edge2.neighbors.second), fv);
 			Extensive toadd2(cells[0].tracers);
 			if (dA_flux2 > 0)
-				toadd2 = ComputationalCell2Extensive(cells[tessmid.GetOriginalIndex(edge2.neighbors.second)],
+				toadd2 = ComputationalCell2Extensive(cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))],
 					dA_flux2, eos);
 			else
-				toadd2 = ComputationalCell2Extensive(cells[tessmid.GetOriginalIndex(edge2.neighbors.first)],
+				toadd2 = ComputationalCell2Extensive(cells[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))],
 					dA_flux2, eos);
 			std::pair<int, int> mid_neigh(tessmid.GetOriginalIndex(edge2.neighbors.first), tessmid.GetOriginalIndex(edge2.neighbors.second));
 			std::pair<int, int> mid_neigh2(mid_neigh.second, mid_neigh.first);
@@ -595,8 +595,8 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 			{
 				only_mid.insert(mid_neigh);
 				only_mid.insert(mid_neigh2);
-				res[tessmid.GetOriginalIndex(edge2.neighbors.second)] += toadd2;
-				res[tessmid.GetOriginalIndex(edge2.neighbors.first)] -= toadd2;
+				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))] += toadd2;
+				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))] -= toadd2;
 			}
 		}
 	}
