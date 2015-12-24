@@ -225,7 +225,7 @@ namespace {
 
   void my_main_loop(hdsim& sim)
   {
-    SafeTimeTermination term_cond(0.03, 1e6);
+    SafeTimeTermination term_cond(0.003, 1e6);
     WriteTime diag("time.txt");
     main_loop(sim,
 	      term_cond,

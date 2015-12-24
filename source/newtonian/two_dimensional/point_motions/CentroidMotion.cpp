@@ -23,13 +23,13 @@ namespace
 			Vector2D normal = chull[static_cast<size_t>(i)] - meshpoint;
 			normal = normal / abs(normal);
 			e1.vertices.first = 0.5*(chull[static_cast<size_t>(i)] + meshpoint);
-			e1.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
-			e1.vertices.second = e1.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			e1.vertices.first += 500 * R*Vector2D(normal.y, -normal.x);
+			e1.vertices.second = e1.vertices.first - 1000 * R*Vector2D(normal.y, -normal.x);
 			normal = chull[static_cast<size_t>((i+1)%res.size())] - meshpoint;
 			normal = normal / abs(normal);
 			e2.vertices.first = 0.5*(chull[static_cast<size_t>((i + 1) % res.size())] + meshpoint);
-			e2.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
-			e2.vertices.second = e2.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			e2.vertices.first += 500 * R*Vector2D(normal.y, -normal.x);
+			e2.vertices.second = e2.vertices.first - 1000 * R*Vector2D(normal.y, -normal.x);
 			if (!SegmentIntersection(e1, e2, res[i]))
 				throw UniversalError("No intersection in centroid motion");
 		}

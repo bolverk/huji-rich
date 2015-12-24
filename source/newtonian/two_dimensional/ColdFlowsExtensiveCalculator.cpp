@@ -76,7 +76,7 @@ vector<Extensive>& extensives) const
 		if (!IsShocked(i, interp_, cells[i],tess,eos_)||NegativeThermalEnergy(extensives[i]))
 		{
 			const double Ek = ScalarProd(extensives[i].momentum, extensives[i].momentum) / (2 * extensives[i].mass);
-			const double density = extensives[i].mass/tess.GetVolume(static_cast<int>(i));			
+			const double density = extensives[i].mass/cd.volumes[i];			
 			extensives[i].energy = Ek + eos_.dp2e(density,eos_.sd2p(safe_retrieve(cells[i].tracers, entropy),density))
 				*extensives[i].mass;
 		}

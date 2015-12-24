@@ -309,7 +309,6 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt);
 
 	vector<Extensive> mid_extensives = extensives_;
-	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
 
 	ExternalForceContribution
 	  (tess_,
@@ -322,6 +321,9 @@ void hdsim::TimeAdvance2Heun(void)
 	   time_,
 	   dt,
 	   mid_extensives);
+	
+	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+
 
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -357,8 +359,6 @@ void hdsim::TimeAdvance2Heun(void)
 	   time_,
 	   dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
-
 	ExternalForceContribution
 	  (tess_,
 	   pg_,
@@ -370,6 +370,9 @@ void hdsim::TimeAdvance2Heun(void)
 	   time_+dt,
 	   dt,
 	   mid_extensives);
+
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
 

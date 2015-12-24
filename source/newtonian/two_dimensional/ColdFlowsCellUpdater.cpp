@@ -13,6 +13,9 @@ vector<ComputationalCell> ColdFlowsCellUpdate::operator()
 {
 	vector<ComputationalCell> res = scu_(tess, pg, eos, extensives, old, cd);
 	for (size_t i = 0; i < res.size(); ++i)
+	{
 		res[i].tracers["Entropy"] = eos.dp2s(res[i].density, res[i].pressure);
+		extensives[i].tracers["Entropy"] = res[i].tracers["Entropy"] * cd.volumes[i] * res[i].density;
+	}
 	return res;
 }
