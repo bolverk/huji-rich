@@ -10,16 +10,27 @@
 using std::vector;
 using std::size_t;
 
+//! \brief Base class for a serializable object
 class Serializable
 {
 public:
 
+  /*! \brief returns the length of the array needed to store all the numbers
+    \return Array length
+   */
   virtual size_t getChunkSize(void) const = 0;
 
+  /*! \brief Convert object to a list of numbers
+    \return List of numbers
+   */
   virtual vector<double> serialize(void) const = 0;
 
+  /*! \brief Convert a list of numbers to an object
+    \param data List of numbers
+   */
   virtual void unserialize(const vector<double>& data) = 0;
 
+  //! \brief Class destructor
   virtual ~Serializable(void);
 };
 

@@ -129,7 +129,10 @@ class Slope
 #endif // RICH_MPI
 {
 public:
+  //! \brief Slope in the x direction
 	ComputationalCell xderivative;
+
+  //! \brief Slope in the y direction
 	ComputationalCell yderivative;
 
 	/*!
