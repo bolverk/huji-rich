@@ -334,10 +334,8 @@ namespace
 		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
 		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved,bool periodic)
 	{
-		vector<int> neigh=oldtess.GetNeighbors(static_cast<int>(ToRefine));
 		vector<int> real_neigh;
 		vector<vector<Vector2D> > Chull;
-		vector<Vector2D> temp;
 		GetToCheck(oldtess, static_cast<int>(ToRefine),real_neigh,Chull);
 		size_t N = static_cast<size_t>(oldtess.GetPointNo());
 		while (location < NewPoints.size() && NewPoints[location].first == ToRefine)

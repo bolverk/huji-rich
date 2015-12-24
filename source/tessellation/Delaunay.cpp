@@ -869,7 +869,7 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		catch (UniversalError &eo)
 		{
 			eo.AddEntry("Error in AddRigid", 0);
-			throw eo;
+			throw;
 		}
 		ReArrangeVector(toduplicate[i], order);
 	}
@@ -1400,7 +1400,7 @@ Delaunay::findOuterPoints
 			catch (UniversalError &eo)
 			{
 				eo.AddEntry("Error in first send in triangulation", 0.0);
-				throw eo;
+				throw;
 			}
 		}
 		else
@@ -1628,7 +1628,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 				eo.AddEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
 				eo.AddEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
 				eo.AddEntry("Mpi count", static_cast<double>(count));
-				throw eo;
+				throw;
 			}
 		}
 		else

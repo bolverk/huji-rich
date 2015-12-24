@@ -149,6 +149,7 @@ public:
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes
+  //! \param proc_update Scheme for updating the position of the processes
 #endif // RICH_MPI
   hdsim
 	  (
