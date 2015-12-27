@@ -52,10 +52,10 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 			Vector2D otherpoint = tproc.GetCellCM(static_cast<int>(i));
 			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + 0.2*R[static_cast<size_t>(rank)] * R[i]);
-			double temp = (NPerProc[i] - NPerProc[static_cast<size_t>(rank)])*
+			double temp = (NPerProc[i] -IdealPerProc)*
 				(point.x - otherpoint.x) / (pow(dist, 3)*IdealPerProc);
 			dx -= temp;
-			temp = (NPerProc[i] - NPerProc[static_cast<size_t>(rank)])*
+			temp = (NPerProc[i] - IdealPerProc)*
 				(point.y - otherpoint.y) / (pow(dist, 3)*IdealPerProc);
 			dy -= temp;
 		}
@@ -89,7 +89,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 			}
 		}
 	}
-	const double FarFraction = 0.5;
+	const double FarFraction = 0.65;
 	old_dx = (old_dx>0) ? std::min(old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]);
 	old_dy = (old_dy > 0) ? std::min(old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]);
 	dx = (dx > 0) ? std::min(dx, speed_*R[static_cast<size_t>(rank)]) : -std::min(-dx, speed_*R[static_cast<size_t>(rank)]);
