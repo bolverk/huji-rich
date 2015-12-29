@@ -62,6 +62,7 @@ private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
 	const vector<pair<const ConditionActionSequence::Condition*, const Action2*> > sequence2_;
 	const SpatialReconstruction & interp_;
+	mutable vector<pair<ComputationalCell, ComputationalCell> > edge_values_;
 };
 
 //! \brief Calculates flux between two regular bulk cells

@@ -48,9 +48,9 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
 	interpolated_.resize(tess.GetTotalSidesNumber(),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	sr_(tess, cells, time,interpolated_);
-  vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
-  const vector<pair<size_t, Extensive> > boundary_conditions = hbc_(tess, cells);
-  vector<Extensive> res(tess.getAllEdges().size());
+	vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
+	const vector<pair<size_t, Extensive> > boundary_conditions = hbc_(tess, cells);
+	vector<Extensive> res(tess.getAllEdges().size());
   for(size_t i=0;i<boundary_conditions.size();++i)
   {
     const size_t index = boundary_conditions.at(i).first;

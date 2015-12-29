@@ -63,8 +63,9 @@ vector<Extensive> ConditionActionSequence2::operator()
 	const double /*dt*/) const
 {
 	vector<Extensive> res(tess.getAllEdges().size());
-	vector<pair<ComputationalCell, ComputationalCell> > edge_values;
-	interp_.operator()(tess, cells, time,edge_values);
+	edge_values_.resize(tess.GetTotalSidesNumber(),
+		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
+	interp_.operator()(tess, cells, time,edge_values_);
 	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
 		res[i] = choose_action
 		(tess.getAllEdges()[i],
@@ -74,7 +75,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			edge_velocities[i],
 			sequence_,
 			sequence2_,
-			edge_values[i]);
+			edge_values_[i]);
 	return res;
 }
 
