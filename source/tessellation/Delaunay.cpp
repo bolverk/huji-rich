@@ -27,12 +27,10 @@ namespace {
 	}
 }
 
-Delaunay::DataOnlyForBuild::DataOnlyForBuild() :insert_order(vector<int>()),
-copied(vector<vector<char> >())
+Delaunay::DataOnlyForBuild::DataOnlyForBuild() :copied(vector<vector<char> >())
 {}
 
-Delaunay::DataOnlyForBuild::DataOnlyForBuild(DataOnlyForBuild const& other) :
-	insert_order(other.insert_order), copied(other.copied) {}
+Delaunay::DataOnlyForBuild::DataOnlyForBuild(DataOnlyForBuild const& other) :copied(other.copied) {}
 
 Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 (DataOnlyForBuild const& other)
@@ -40,7 +38,6 @@ Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 	if (this != &other)
 	{
 		copied = other.copied;
-		insert_order = other.insert_order;
 	}
 	return *this;
 }
@@ -309,8 +306,6 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	// Check point input
 	CheckInput();
 
-	data.insert_order = HilbertOrder(cor, static_cast<int>(olength), 0);
-
 	// add the 3 extreme points
 	Vector2D p_temp;
 	vector<double> cellsize = CellSize(cell_points);
@@ -338,9 +333,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	location_pointer = 0;
 	// add the points
 	for (size_t i = 0; i < static_cast<size_t>(length) - 3; i++)
-	{
-		add_point(static_cast<size_t>(data.insert_order[i]));
-	}
+		add_point(i);
 	// Calculate radius
 	radius.resize(f.size());
 	int n = int(f.size());

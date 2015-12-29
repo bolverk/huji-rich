@@ -62,7 +62,6 @@ private:
     DataOnlyForBuild();
     DataOnlyForBuild(DataOnlyForBuild const& other);
     DataOnlyForBuild& operator=(DataOnlyForBuild const& other);
-    vector<int> insert_order;
     vector<vector<char> > copied;
   };
 

@@ -182,9 +182,11 @@ void UpdateConservedExtensive
   \param dt Time step
   \param tessellation Tessellation
   \param oldpoints Possible input for the location of the old points
+  \param reorder Should we reorder the points
+  \return The indeces of the hilbert order of the points
 */
-void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-		    double dt, Tessellation& tessellation,
+vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
+		    double dt, Tessellation& tessellation,bool reorder,
 			vector<Vector2D> oldpoints=vector<Vector2D> ());
 /*! \brief Move mesh points
   \param pointvelocity Velocities of all mesh points
@@ -192,9 +194,11 @@ void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
   \param tessellation The local tessellation
   \param vproc The processor tessellation
   \param oldpoints Possible input for the location of the old points
+  \param reorder Should we reorder the points
+  \return The indeces of the hilbert order of the points
 */
-void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-	double dt, Tessellation& tessellation,Tessellation const& vproc,
+vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
+	double dt, Tessellation& tessellation,Tessellation const& vproc,bool reorder,
 	vector<Vector2D> oldpoints=vector<Vector2D> ());
 
 /*! \brief Calculates the intensive conserved variables

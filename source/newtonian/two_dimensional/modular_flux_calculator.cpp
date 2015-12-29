@@ -6,7 +6,7 @@ ModularFluxCalculator::ModularFluxCalculator
 (const SpatialReconstruction& sr,
  const RiemannSolver& rs,
  const HydroBoundaryConditions& hbc):
-  sr_(sr), rs_(rs), hbc_(hbc) {}
+  sr_(sr), rs_(rs), hbc_(hbc),interpolated_(vector<pair<ComputationalCell, ComputationalCell> >()) {}
 
 namespace
 {
@@ -45,8 +45,9 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
 	const vector<ComputationalCell>& cells,const vector<Extensive>& /*extensives*/,const CacheData& /*cd*/,
 	const EquationOfState& eos,const double time,const double /*dt*/) const
 {
-	vector<pair<ComputationalCell, ComputationalCell> > interpolated;
-	sr_(tess, cells, time,interpolated);
+	interpolated_.resize(tess.GetTotalSidesNumber(),
+		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
+	sr_(tess, cells, time,interpolated_);
   vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
   const vector<pair<size_t, Extensive> > boundary_conditions = hbc_(tess, cells);
   vector<Extensive> res(tess.getAllEdges().size());
@@ -66,15 +67,15 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
       const double speed = ScalarProd(p_n.second, edge_velocities.at(i)) / abs(p_n.second);
       const Primitive p_left = 
 	convert_to_primitive
-	(interpolated.at(i).first, eos);
+	(interpolated_.at(i).first, eos);
       const Primitive p_right = 
 	convert_to_primitive
-	(interpolated.at(i).second, eos);
+	(interpolated_.at(i).second, eos);
       res.at(i) = 
 	convert_conserved_to_extensive
 	(rotate_solve_rotate_back
 	 (rs_,p_left,p_right,
-	  speed,p_n.second,p_n.first),interpolated.at(i));
+	  speed,p_n.second,p_n.first),interpolated_.at(i));
     }
   }
   return res;

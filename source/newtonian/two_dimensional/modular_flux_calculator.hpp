@@ -30,6 +30,7 @@ private:
 	const SpatialReconstruction& sr_;
 	const RiemannSolver& rs_;
 	const HydroBoundaryConditions& hbc_;
+	mutable vector<pair<ComputationalCell, ComputationalCell> > interpolated_;
 };
 
 #endif // MODULAR_FLUX_CALCULATOR_HPP

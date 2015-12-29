@@ -182,7 +182,7 @@ void hdsim::TimeAdvance(void)
 	MPI_exchange_data(tess_, extensives_, false);
 	MPI_exchange_data(tess_, cells_, false);
 #else
-	MoveMeshPoints(point_velocities, dt, tess_);
+	MoveMeshPoints(point_velocities, dt, tess_,false);
 #endif
 	cache_data_.reset();
 
@@ -246,7 +246,7 @@ void hdsim::TimeAdvanceClip(void)
 
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_);
+	MoveMeshPoints(point_velocities, dt, tess_,false);
 
 	extensives_= extensives_+FluxFix2(*oldtess, *oldtess, tess_, point_velocities, dt, cells_, fluxes, edge_velocities, obc_, eos_);
 
@@ -274,20 +274,8 @@ namespace
 	}
 }
 
-void hdsim::HilbertArrange()
-{
-	vector<Vector2D> cor = tess_.GetMeshPoints();
-	vector<int> indeces = HilbertOrder(cor, tess_.GetPointNo());
-	cor = VectorValues(cor,indeces);
-	tess_.Update(cor);
-	cells_ = VectorValues(cells_, indeces);
-	extensives_ = VectorValues(extensives_, indeces);
-}
-
 void hdsim::TimeAdvance2Heun(void)
 {
-	if (cycle_ % 25 == 0)
-		HilbertArrange();
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
@@ -340,7 +328,14 @@ void hdsim::TimeAdvance2Heun(void)
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	MoveMeshPoints(point_velocities, dt, tess_, proctess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, proctess_);
+	if (cycle_ % 25 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 	// Keep relevant points
 	MPI_exchange_data(tess_, mid_extensives, false);
 	MPI_exchange_data(tess_, extensives_, false);
@@ -348,7 +343,14 @@ void hdsim::TimeAdvance2Heun(void)
 	MPI_exchange_data(tess_, point_velocities, false);
 	MPI_exchange_data(tess_, point_velocities, true);
 #else
-	MoveMeshPoints(point_velocities, dt, tess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_,cycle_%25==0);
+	if (cycle_ % 25 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 #endif
 	cache_data_.reset();
 
@@ -414,7 +416,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	vector<Vector2D> old_points = tess_.GetMeshPoints();
 	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
-	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
+	MoveMeshPoints(point_velocities, 0.5*dt, tess_,false);
 	
 	CacheData data_temp(*oldtess, pg_);
 
@@ -436,7 +438,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_, old_points);
+	MoveMeshPoints(point_velocities, dt, tess_,false, old_points);
 
 	CacheData cachetemp2(*midtess, pg_);
 
@@ -479,7 +481,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
+	MoveMeshPoints(point_velocities, 0.5*dt, tess_,false);
 	time_ += 0.5*dt;
 
 	cache_data_.reset();
@@ -496,7 +498,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_, old_points);
+	MoveMeshPoints(point_velocities, dt, tess_, false,old_points);
 	cache_data_.reset();
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
