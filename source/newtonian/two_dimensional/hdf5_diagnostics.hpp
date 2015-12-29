@@ -108,6 +108,15 @@ void WriteDelaunay(Delaunay const& tri, string const& filename);
 */
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, size_t snapshot_number);
 
+/*!
+\brief Reads an HDF5 snapshot file in order to restart the simulation with a different cpu number. SLower but more robust then other method
+\return dump The snapshot structure relevent for current cpu
+\param filename File name
+\param proctess Tessellation of the processors
+\param snapshot_number Number of old cpus
+*/
+Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number);
+
 
 /*!
 \brief Writes the tessellation data into an HDF5 file

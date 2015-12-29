@@ -66,7 +66,7 @@ namespace
 			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
 			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
-		int maxscale = static_cast<int>(log10(maxi) + 9);
+		int maxscale = static_cast<int>(log10(maxi) + 6);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
@@ -254,7 +254,7 @@ namespace
 		const double eps = periodic ? 1e-2 : 1e-5;
 		if (vv > (1 + eps)*TotalVolume || vv < (1 - eps)*TotalVolume)
 		{
-			std::cout << "Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
+			std::cout << "In refine Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
 #ifndef RICH_MPI
 			throw UniversalError("Not same volume in amr refine");
 #endif
@@ -283,6 +283,7 @@ namespace
 			}
 			else
 			{
+#ifndef RICH_MPI
 				// Is it not a rigid wall?
 				if (tess.GetOriginalIndex(neigh[j]) != static_cast<int>(ToRefine))
 				{
@@ -293,6 +294,7 @@ namespace
 					Chull.push_back(temp);
 					moved.push_back((tess.GetMeshPoint(neigh[j]) - tess.GetMeshPoint(tess.GetOriginalIndex(neigh[j]))));
 				}
+#endif
 			}
 		}
 		// Get neighbor neighbors
@@ -329,6 +331,37 @@ namespace
 		}
 	}
 
+	void AddCurrentNeigh(Tessellation const& tess,
+		size_t location, vector<vector<Vector2D> > &Chull, vector<int> &real_neigh,vector<Vector2D> const& Moved,
+		Tessellation const& oldtess)
+	{
+		int oldpointnumber = oldtess.GetPointNo();
+		int newindex = static_cast<int>(location) + oldpointnumber;
+		vector<int> neigh = tess.GetNeighbors(newindex);
+		vector<int> neighcopy(real_neigh);
+		sort(neighcopy.begin(), neighcopy.end());
+		vector<Vector2D> temp;
+		for (size_t i = 0; i < neigh.size(); ++i)
+		{
+			// Is it a new point? Should deal with mpi as well
+			if (tess.GetOriginalIndex(neigh[i]) >= oldpointnumber)
+				continue;
+			// Rigid wall?
+			if (tess.GetOriginalIndex(neigh[i]) == newindex)
+				continue;
+			// Do we already have this point?
+			if (binary_search(neighcopy.begin(), neighcopy.end(), tess.GetOriginalIndex(neigh[i])))
+				continue;
+			real_neigh.push_back(tess.GetOriginalIndex(neigh[i]));
+			ConvexHull(temp, oldtess, real_neigh.back());
+			// Periodic?
+			if (neigh[i] > tess.GetPointNo())
+				temp = temp + (tess.GetMeshPoint(neigh[i]) -
+					tess.GetMeshPoint(tess.GetOriginalIndex(neigh[i])))+Moved[location];
+			Chull.push_back(temp);
+		}
+	}
+
 	void ConservedSingleCell(Tessellation const& oldtess, Tessellation const& tess, size_t ToRefine, size_t &location,
 		LinearGaussImproved *interp, EquationOfState const& eos, vector<ComputationalCell> &cells,
 		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
@@ -340,6 +373,7 @@ namespace
 		size_t N = static_cast<size_t>(oldtess.GetPointNo());
 		while (location < NewPoints.size() && NewPoints[location].first == ToRefine)
 		{
+			AddCurrentNeigh(tess,location, Chull, real_neigh, moved, oldtess);
 			double TotalVolume=0;
 			Extensive NewExtensive = GetNewExtensive(extensives, tess, N, location, moved, real_neigh, Chull,
 				cells, eos, eu,TotalVolume,oldtess,periodic);
@@ -969,6 +1003,18 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, T
 			{
 				good = false;
 				break;
+			}
+			else
+			{
+				vector<int> neigh2 = tess.GetNeighbors(neigh[j]);
+				for (size_t k = 0; k < neigh2.size(); ++k)
+				{
+					if (tess.GetOriginalIndex(neigh2[k]) >= N)
+					{
+						good = false;
+						break;
+					}
+				}
 			}
 		}
 		if (good)
