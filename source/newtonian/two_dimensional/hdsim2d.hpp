@@ -131,7 +131,7 @@ public:
     \brief Rearranges the simulation data according to Hibler ordering
     \param innernum The number of first points in the data not to move
   */
-  void HilbertArrange(int innernum=0);
+  void HilbertArrange();
 
   /*! \brief Class constructor
     \param tess Voronoi tessellation method

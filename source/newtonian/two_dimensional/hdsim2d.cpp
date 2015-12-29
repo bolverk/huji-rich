@@ -274,8 +274,20 @@ namespace
 	}
 }
 
+void hdsim::HilbertArrange()
+{
+	vector<Vector2D> cor = tess_.GetMeshPoints();
+	vector<int> indeces = HilbertOrder(cor, tess_.GetPointNo());
+	cor = VectorValues(cor,indeces);
+	tess_.Update(cor);
+	cells_ = VectorValues(cells_, indeces);
+	extensives_ = VectorValues(extensives_, indeces);
+}
+
 void hdsim::TimeAdvance2Heun(void)
 {
+	if (cycle_ % 25 == 0)
+		HilbertArrange();
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
