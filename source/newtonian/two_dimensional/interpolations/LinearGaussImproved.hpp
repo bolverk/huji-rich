@@ -81,3 +81,4 @@ private:
 
 };
 #endif //LINEAR_GAUSS_IMPROVED
+
