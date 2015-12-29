@@ -223,6 +223,17 @@ pair<bool,bool> IsBoundaryEdge::operator()
  const Tessellation& tess,
  const vector<ComputationalCell>& /*cells*/) const
 {
+#ifdef RICH_MPI
+	if(tess.GetOriginalIndex(edge.neighbors.first)!=tess.GetOriginalIndex(edge.neighbors.second))
+		return pair<bool, bool>(false, false);
+	else
+	{
+		if (edge.neighbors.first < tess.GetPointNo())
+			return pair<bool, bool>(true, true);
+		else
+			return pair<bool, bool>(true, false);
+	}
+#endif
   if(edge.neighbors.first<0 || edge.neighbors.first>=tess.GetPointNo()){
     assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
     return pair<bool,bool>(true,false);

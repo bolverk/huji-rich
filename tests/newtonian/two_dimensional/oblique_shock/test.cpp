@@ -126,7 +126,9 @@ namespace
 			const Tessellation& tess,
 			const vector<ComputationalCell>& /*cells*/) const
 		{
-			if (edge.neighbors.first >= tess.GetPointNo())
+			if(tess.GetOriginalIndex(edge.neighbors.first)!=tess.GetOriginalIndex(edge.neighbors.second))
+				return pair<bool, bool>(false, false);
+			if (edge.neighbors.first>= tess.GetPointNo())
 			{
 				assert(edge.neighbors.second<tess.GetPointNo());
 				const Vector2D r = tess.GetMeshPoint(edge.neighbors.second);
