@@ -12,7 +12,6 @@
 	\param points The initial points
 	\param bc The outer boundary conditions
 	\param NumberIt The number of correction iterations
-	\param InnerNum The number of first points not to move
 	\param tess The tessellation
 */
 #ifdef RICH_MPI
@@ -23,7 +22,6 @@
 */
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	OuterBoundary const* bc,int NumberIt=10,
-	int InnerNum=0,
 			   #ifdef RICH_MPI
 			   Tessellation const* tproc=0,
 			   #endif
