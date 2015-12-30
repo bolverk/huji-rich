@@ -6,7 +6,8 @@ ConditionActionSequence2::ConditionActionSequence2
 (const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
 	const vector<pair<const ConditionActionSequence::Condition*, const Action2*> >& sequence2,
 	SpatialReconstruction const& interp):
-	sequence_(sequence),sequence2_(sequence2),interp_(interp) {}
+	sequence_(sequence),sequence2_(sequence2),interp_(interp),edge_values_(vector<pair<ComputationalCell,
+	ComputationalCell> >()){}
 
 ConditionActionSequence2::~ConditionActionSequence2(void)
 {
