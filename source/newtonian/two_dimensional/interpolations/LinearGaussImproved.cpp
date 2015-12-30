@@ -489,7 +489,6 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	// Prepare slopes
 	rslopes_.resize(CellNumber,Slope(cells[0],cells[0]));
 	naive_rslopes_.resize(CellNumber);
-	const size_t edge_number = static_cast<size_t>(tess.GetTotalSidesNumber());
 	Slope temp1(cells[0],cells[0]);
 	ComputationalCell temp2(cells[0]);
 	ComputationalCell temp3(cells[0]);
