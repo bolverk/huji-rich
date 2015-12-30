@@ -468,17 +468,6 @@ namespace
 }
 #endif//RICH_MPI
 
-namespace
-{
-	bool IsBulkEdge(Edge const& edge, size_t n)
-	{
-		if (edge.neighbors.first < static_cast<int>(n) && edge.neighbors.second < static_cast<int>(n))
-			return true;
-		else
-			return false;
-	}
-}
-
 void LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells,double time, vector<pair<ComputationalCell, ComputationalCell> > &res) const
 {
