@@ -1,7 +1,7 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
-#define debug_amr 1
+//#define debug_amr 1
 
 #ifdef debug_amr
 #include "hdf5_diagnostics.hpp"
