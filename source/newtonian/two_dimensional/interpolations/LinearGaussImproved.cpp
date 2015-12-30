@@ -393,11 +393,9 @@ namespace
 		ComputationalCell &temp2,
 		ComputationalCell &temp3, 
 		ComputationalCell &temp4, 
-		ComputationalCell &temp5)
+		ComputationalCell &temp5,
+		vector<const Edge *> const& edge_list)
 {
-	vector<int> const& edge_indices = tess.GetCellEdges(static_cast<int>(cell_index));
-	vector<const Edge *> edge_list;
-	GetEdgeList(tess, edge_indices,edge_list);
 	vector<Vector2D> neighbor_mesh_list;
 	GetNeighborMesh(tess, edge_list, cell_index,neighbor_mesh_list);
 	vector<Vector2D> neighbor_cm_list;
@@ -499,12 +497,14 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	ComputationalCell temp5(cells[0]);
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
+		vector<int> const& edge_index = tess.GetCellEdges(static_cast<int>(i));
+		vector<const Edge *> edge_list;
+		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_, ghost_cells,
-			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5);
-		vector<int> const& edge_index = tess.GetCellEdges(static_cast<size_t>(i));
+			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,edge_list);
 		for (size_t j = 0; j < edge_index.size(); ++j)
 		{
-			Edge const& edge = tess.GetEdge(edge_index[j]);
+			Edge const& edge = *edge_list[j];
 			if (edge.neighbors.first == static_cast<int>(i))
 			{
 				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].first, 
