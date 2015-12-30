@@ -1,7 +1,7 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
-//#define debug_amr 1
+#define debug_amr 1
 
 #ifdef debug_amr
 #include "hdf5_diagnostics.hpp"
@@ -485,16 +485,8 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 			if (!PointInCell(proc_chull, candidate))
 				continue;
 #endif
-			if (static_cast<size_t>(neigh[j]) < N)
-			{
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
-				Moved.push_back(Vector2D());
-			}
-			else
-			{
-				Moved.push_back(FixInDomain(obc, candidate));
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
-			}
+			Moved.push_back(FixInDomain(obc, candidate));
+			NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
 		}
 	}
 }
