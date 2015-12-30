@@ -1,7 +1,7 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
 
-//#define debug_amr 1
+#define debug_amr 1
 
 #ifdef debug_amr
 #include "hdf5_diagnostics.hpp"
@@ -66,7 +66,7 @@ namespace
 			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
 			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
-		int maxscale = static_cast<int>(log10(maxi) + 6);
+		int maxscale = static_cast<int>(log10(maxi) + 7);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
@@ -256,7 +256,9 @@ namespace
 		{
 			std::cout << "In refine Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
 #ifndef RICH_MPI
-			throw UniversalError("Not same volume in amr refine");
+			UniversalError eo("Not same volume in amr refine");
+			eo.AddEntry("location",static_cast<double>(location));
+			throw eo;
 #endif
 		}
 		return NewExtensive;
