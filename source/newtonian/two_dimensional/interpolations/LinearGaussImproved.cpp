@@ -560,11 +560,12 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 						edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 			}
-#endif //RICH_MPI
+#else
 			res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
 			res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+#endif //RICH_MPI
 		}
 	}
 }
