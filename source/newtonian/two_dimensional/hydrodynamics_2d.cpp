@@ -265,8 +265,12 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		for (size_t i = 0; i<oldpoints.size(); ++i)
 			oldpoints[i] += pointvelocity[i] * dt;
 	}
-	vector<int> indeces = HilbertOrder(oldpoints, static_cast<int>(oldpoints.size()));
-	oldpoints = VectorValues(oldpoints, indeces);
+	vector<int> indeces;
+	if (reorder)
+	{
+		indeces = HilbertOrder(oldpoints, static_cast<int>(oldpoints.size()));
+		oldpoints = VectorValues(oldpoints, indeces);
+	}
 	tessellation.Update(oldpoints,vproc);
 	return indeces;
 }

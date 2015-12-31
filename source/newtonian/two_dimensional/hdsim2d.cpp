@@ -177,7 +177,7 @@ void hdsim::TimeAdvance(void)
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
+	MoveMeshPoints(point_velocities, dt, tess_,proctess_,false);
 	// Keep relevant points
 	MPI_exchange_data(tess_, extensives_, false);
 	MPI_exchange_data(tess_, cells_, false);
