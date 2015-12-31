@@ -130,6 +130,7 @@ if(ShouldPlot==1||ShouldPlot==2)
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 3
+                Temperature = Pressure./Density;
                 if(LogScale==1)
                     caxis([min(log10(Temperature)) max(log10(Temperature*1.01))]);
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
