@@ -603,10 +603,19 @@ void hdsim::recalculateExtensives(void)
 		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers)*mass +
 			0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 		extensives_[i].momentum = mass*cell.velocity;
-		for (boost::container::flat_map<std::string, double>::const_iterator it =
-			cell.tracers.begin();
-			it != cell.tracers.end(); ++it)
-			extensives_[i].tracers[it->first] = (it->second)*mass;
+		if (extensives_[0].tracers.size() != cell.tracers.size())
+		{
+			for (boost::container::flat_map<std::string, double>::const_iterator it =
+				cell.tracers.begin();
+				it != cell.tracers.end(); ++it)
+				extensives_[i].tracers[it->first] = (it->second)*mass;
+		}
+		else
+		{
+			for (size_t j = 0; j < extensives_[i].tracers.size();++j)
+				(extensives_[i].tracers.begin()+static_cast<int>(j))->second = (cell.tracers.begin()+
+					static_cast<int>(j))->second*mass;
+		}
 	}
 }
 
