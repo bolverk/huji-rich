@@ -66,13 +66,13 @@ namespace
 			return res;
 		}
 
-		std::pair<ComputationalCell, ComputationalCell> GetGhostGradient(Tessellation const& /*tess*/,
-			vector<ComputationalCell> const& /*cells*/, vector<std::pair<ComputationalCell, ComputationalCell> > const& /*gradients*/,
+		Slope GetGhostGradient(Tessellation const& /*tess*/,
+			vector<ComputationalCell> const& /*cells*/, vector<Slope> const& /*gradients*/,
 			size_t /*ghost_index*/, double /*time*/,Edge const& /*edge*/)const
 		{
 			ComputationalCell temp;
 			temp.tracers["Entropy"] = 0;
-			return std::pair<ComputationalCell, ComputationalCell>(temp, temp);
+			return Slope(temp, temp);
 		}
 	};
 
@@ -126,8 +126,8 @@ namespace
 				const double V = tess.GetVolume(static_cast<int>(i));
 				if (V < minV_)
 				{
-					const double drhox = interp_.GetSlopesUnlimited()[i].first.density;
-					const double drhoy = interp_.GetSlopesUnlimited()[i].second.density;
+					const double drhox = interp_.GetSlopesUnlimited()[i].xderivative.density;
+					const double drhoy = interp_.GetSlopesUnlimited()[i].yderivative.density;
 					if ((drhox*drhox + drhoy*drhoy)*V < 0.1*cells[i].density*cells[i].density)
 					{
 						indeces.push_back(i);

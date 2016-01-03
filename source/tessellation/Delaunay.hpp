@@ -23,7 +23,6 @@
 #include "../newtonian/two_dimensional/diagnostics.hpp"
 #ifdef RICH_MPI
 #include "find_affected_cells.hpp"
-#include <boost/mpi/communicator.hpp>
 #endif
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg

@@ -10,9 +10,7 @@
 #include <string>
 #include "../../tessellation/geometry.hpp"
 #ifdef RICH_MPI
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>
-#include "flat_map_serial.hpp"
+#include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
 using std::string;
@@ -76,22 +74,6 @@ public:
   	ComputationalCell& operator=(ComputationalCell const& other);
 
 #ifdef RICH_MPI
-  /*! \brief Serializer
-    \param ar Archive
-    \param int version
-   */
-	template<class Archive>
-	void serialize
-		(Archive& ar,
-		 const unsigned int /*version*/)
-	{
-		ar & density;
-		ar & pressure;
-		ar & velocity;
-		ar & tracers;
-		ar & stickers;
-	}
-
   size_t getChunkSize(void) const;
 
   vector<double> serialize(void) const;
@@ -139,4 +121,34 @@ ComputationalCell operator*(double s, ComputationalCell const& p);
 void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& other, double scalar);
 
 void ReplaceComputationalCell(ComputationalCell &cell, ComputationalCell const& other);
+
+//! \brief Class for spatial interpolations
+class Slope
+#ifdef RICH_MPI
+	: public Serializable
+#endif // RICH_MPI
+{
+public:
+  //! \brief Slope in the x direction
+	ComputationalCell xderivative;
+
+  //! \brief Slope in the y direction
+	ComputationalCell yderivative;
+
+	/*!
+	\brief Class constructor
+	\param x The x derivative 
+	\param y The y derivative
+	*/
+	Slope(ComputationalCell const& x, ComputationalCell const& y);
+	//! \brief Default constructor
+	Slope(void);
+#ifdef RICH_MPI
+	size_t getChunkSize(void) const;
+
+	vector<double> serialize(void) const;
+
+	void unserialize(const vector<double>& data);
+#endif//RICH_MPI
+};
 #endif // COMPUTATIONAL_CELL_HPP

@@ -22,12 +22,14 @@ namespace
 		const& tess,EquationOfState const& eos)
 	{
 		const double R = tess.GetWidth(static_cast<int>(index));
-		const double dv = R*(interp.GetSlopesUnlimited()[index].first.velocity.x +
-			interp.GetSlopesUnlimited()[index].second.velocity.y);
+		const double dv = R*(interp.GetSlopesUnlimited()[index].xderivative.velocity.x +
+			interp.GetSlopesUnlimited()[index].yderivative.velocity.y);
 		if (dv < -0.2*eos.dp2c(cell.density, cell.pressure))
 			return true;
-		const double dp2 = R*R*(interp.GetSlopesUnlimited()[index].first.pressure*interp.GetSlopesUnlimited()[index].first.pressure +
-			interp.GetSlopesUnlimited()[index].second.pressure*interp.GetSlopesUnlimited()[index].second.pressure);
+		const double dp2 = R*R*(interp.GetSlopesUnlimited()[index].xderivative.pressure*
+			interp.GetSlopesUnlimited()[index].xderivative.pressure +
+			interp.GetSlopesUnlimited()[index].yderivative.pressure*
+			interp.GetSlopesUnlimited()[index].yderivative.pressure);
 		if (dp2 > 0.1*cell.pressure*cell.pressure)
 			return true;
 		return false;
@@ -74,7 +76,7 @@ vector<Extensive>& extensives) const
 		if (!IsShocked(i, interp_, cells[i],tess,eos_)||NegativeThermalEnergy(extensives[i]))
 		{
 			const double Ek = ScalarProd(extensives[i].momentum, extensives[i].momentum) / (2 * extensives[i].mass);
-			const double density = extensives[i].mass/tess.GetVolume(static_cast<int>(i));			
+			const double density = extensives[i].mass/cd.volumes[i];			
 			extensives[i].energy = Ek + eos_.dp2e(density,eos_.sd2p(safe_retrieve(cells[i].tracers, entropy),density))
 				*extensives[i].mass;
 		}

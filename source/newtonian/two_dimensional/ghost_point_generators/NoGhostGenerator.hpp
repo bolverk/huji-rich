@@ -20,10 +20,10 @@ public:
 		return boost::container::flat_map<size_t, ComputationalCell>();
 	}
 
-	std::pair<ComputationalCell, ComputationalCell> GetGhostGradient
+	Slope GetGhostGradient
 	(const Tessellation& /*tess*/,
 	 const vector<ComputationalCell>& /*cells*/,
-	 const vector<std::pair<ComputationalCell, ComputationalCell> >& /*gradients*/,
+	 const vector<Slope>& /*gradients*/,
 	 size_t /*ghost_index*/, double /*time*/, const Edge& /*edge*/) const
 	{
 		return std::pair<ComputationalCell, ComputationalCell>();

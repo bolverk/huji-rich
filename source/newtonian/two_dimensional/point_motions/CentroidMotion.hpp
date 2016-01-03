@@ -24,8 +24,10 @@ public:
 	\param niter The number of correction iterations to apply
 	\param coldflow Flag if to use the soundspeed for the correction or the time step if the flow is cold
 	\param eos The equation of state
+	\param toignore List of sticker names not to apply correction for
 	*/
-	CentroidMotion(double reduction_factor,EquationOfState const& eos, bool coldflow = false, size_t niter = 2);
+	CentroidMotion(double reduction_factor,EquationOfState const& eos, bool coldflow = false, size_t niter = 2,
+		vector<string> toignore = vector<string>());
 
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time) const;
 
@@ -37,6 +39,7 @@ private:
 	EquationOfState const& eos_;
 	const bool cold_;
 	const size_t niter_;
+	const vector<string> toignore_;
 };
 
 #endif // CENTROIDMOTION_HPP

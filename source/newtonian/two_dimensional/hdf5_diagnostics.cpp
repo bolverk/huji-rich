@@ -351,7 +351,7 @@ Snapshot read_hdf5_snapshot
   Group g_tracers = file.openGroup("tracers");
   Group g_stickers = file.openGroup("stickers");
 #ifdef RICH_MPI
-  Group mpi = file.createGroup("/mpi");
+  Group mpi = file.openGroup("/mpi");
 #endif
 
   
@@ -468,16 +468,18 @@ namespace
 
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,size_t snapshot_number)
 {
-	const boost::mpi::communicator world;
+	int ws,rank;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	double read_num = 
 	  static_cast<double>(snapshot_number)*1.0/
-	  static_cast<double>(world.size());
+	  static_cast<double>(ws);
 	// Read the data
 	int start = static_cast<int>
 	  (floor
-	   (static_cast<double>(world.rank())*read_num+0.1));
+	   (static_cast<double>(rank)*read_num+0.1));
 	int stop = static_cast<int>
-	  (floor((1+world.rank())*read_num-1.1));
+	  (floor((1+rank)*read_num-0.9));
 	Snapshot res,snap;
 	for (int i = start; i < stop; ++i)
 	{
@@ -490,10 +492,10 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 			snap.cycle = temp.cycle;
 		}
 	}
-	vector<vector<Vector2D> > chull(static_cast<size_t>(world.size()));
-	vector<vector<ComputationalCell> > cell_recv(world.size());
-	vector<vector<Vector2D> > mesh_recv(world.size());
-	vector<vector<size_t> > indeces(world.size());
+	vector<vector<Vector2D> > chull(static_cast<size_t>(ws));
+	vector<vector<ComputationalCell> > cell_recv(chull.size());
+	vector<vector<Vector2D> > mesh_recv(chull.size());
+	vector<vector<size_t> > indeces(chull.size());
 	for (size_t i = 0; i < chull.size(); ++i)
 		ConvexHull(chull[i], proctess, static_cast<int>(i));
 	for (size_t i = 0; i < snap.mesh_points.size(); ++i)
@@ -512,25 +514,58 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 			throw UniversalError("Didn't find point in ReDistributeData");
 	}
 	// Send/Recv data
-	vector < boost::mpi::request> req;
+	vector<MPI_Request> req(chull.size() * 2);
+	vector<vector<double> > tosend(chull.size()*2);
+	vector<double> temprecv;
+	double dtemp = 0;
 	for (size_t i = 0; i < chull.size(); ++i)
 	{
-		if (i == static_cast<size_t>(world.rank()))
-		{ 
+		if (i == static_cast<size_t>(rank))
+		{
 			res.cells = VectorValues(snap.cells, indeces[i]);
-			res.mesh_points = VectorValues(snap.mesh_points, indeces[i]);
+			req[2 * i] = MPI_REQUEST_NULL;
 			continue;
-		}	
-		req.push_back(world.isend(static_cast<int>(i), 0, VectorValues(snap.cells,indeces[i])));
-		req.push_back(world.isend(static_cast<int>(i), 1, VectorValues(snap.mesh_points, indeces[i])));
-		req.push_back(world.irecv(static_cast<int>(i), 0,cell_recv[i]));
-		req.push_back(world.irecv(static_cast<int>(i), 1, mesh_recv[i]));
+		}
+		tosend[i*2] = list_serialize(VectorValues(snap.cells, indeces[i]));
+		if (tosend[i*2].empty())
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE, static_cast<int>(i), 2, MPI_COMM_WORLD, &req[2 * i]);
+		else
+			MPI_Isend(&tosend[i*2][0], static_cast<int>(tosend[i*2].size()), MPI_DOUBLE, static_cast<int>(i), 0, MPI_COMM_WORLD, &req[2 * i]);
 	}
-	boost::mpi::wait_all(req.begin(), req.end());
+	for (size_t i = 0; i < chull.size(); ++i)
+	{
+		if (i == static_cast<size_t>(rank))
+		{
+			res.mesh_points = VectorValues(snap.mesh_points, indeces[i]);
+			req[2 * i +1] = MPI_REQUEST_NULL;
+			continue;
+		}
+		tosend[i*2+1] = list_serialize(VectorValues(snap.mesh_points, indeces[i]));
+		if (tosend[i*2+1].empty())
+			MPI_Isend(&dtemp, 1, MPI_DOUBLE, static_cast<int>(i), 3, MPI_COMM_WORLD, &req[2 * i+1]);
+		else
+			MPI_Isend(&tosend[i*2+1][0], static_cast<int>(tosend[i*2+1].size()), MPI_DOUBLE, static_cast<int>(i), 1, MPI_COMM_WORLD, &req[2 * i+1]);
+	}
+	for (size_t i = 0; i < 2*chull.size()-2; ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, MPI_DOUBLE, &count);
+		temprecv.resize(static_cast<size_t>(count));
+		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 0)
+			cell_recv[static_cast<size_t>(status.MPI_SOURCE)] = list_unserialize(temprecv, snap.cells[0]);
+		if (status.MPI_TAG == 1)
+			mesh_recv[static_cast<size_t>(status.MPI_SOURCE)] = list_unserialize(temprecv, snap.mesh_points[0]);
+		if (status.MPI_TAG > 3)
+			throw UniversalError("Wrong mpi tag");
+	}
+	MPI_Waitall(static_cast<int>(req.size()),&req[0], MPI_STATUSES_IGNORE);
 
 	for (size_t i = 0; i < chull.size(); ++i)
 	{
-		if (i == static_cast<size_t>(world.rank()))
+		if (i == static_cast<size_t>(rank))
 			continue;
 		res.cells.insert(res.cells.end(), cell_recv[i].begin(), cell_recv[i].end());
 		res.mesh_points.insert(res.mesh_points.end(), mesh_recv[i].begin(), mesh_recv[i].end());
@@ -539,6 +574,34 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 	res.time = snap.time;
 	res.cycle = snap.cycle;
 	return res;
+}
+
+Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number)
+{
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// Read the data
+	Snapshot snap;
+	for (int i = 0; i < static_cast<int>(snapshot_number); ++i)
+	{
+		Snapshot temp = read_hdf5_snapshot(filename + int2str(i) + ".h5");
+		snap.cells.insert(snap.cells.end(), temp.cells.begin(), temp.cells.end());
+		snap.mesh_points.insert(snap.mesh_points.end(), temp.mesh_points.begin(), temp.mesh_points.end());
+		if (i == 0)
+		{
+			snap.time = temp.time;
+			snap.cycle = temp.cycle;
+		}
+	}
+	vector<Vector2D> chull;
+	ConvexHull(chull, proctess, rank);
+	vector<size_t> indeces;
+	for (size_t i = 0; i < snap.mesh_points.size(); ++i)
+		if (PointInCell(chull, snap.mesh_points[i]))
+			indeces.push_back(i);
+	snap.mesh_points = VectorValues(snap.mesh_points, indeces);
+	snap.cells = VectorValues(snap.cells, indeces);
+	return snap;
 }
 #endif
 

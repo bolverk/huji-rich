@@ -30,7 +30,7 @@ namespace{
 	return (*sequence[i].second)
 	  (edge,tess, edge_velocity,cells,eos,flag_aux.second);
     }
-    throw "Error in ConditionActionSequence";
+    throw UniversalError("Error in ConditionActionSequence");
   }
 }
 
@@ -185,10 +185,12 @@ Extensive FreeFlowFlux::operator()
  const EquationOfState& eos,
  const bool aux) const
 {
+#ifndef RICH_MPI
   if(aux)
     assert(edge.neighbors.first>=0 && edge.neighbors.first<tess.GetPointNo());
   else
     assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
+#endif //RICH_MPI
   const Vector2D p = normalize
     (edge.vertices.second - edge.vertices.first);
   const Vector2D n = 
@@ -221,6 +223,17 @@ pair<bool,bool> IsBoundaryEdge::operator()
  const Tessellation& tess,
  const vector<ComputationalCell>& /*cells*/) const
 {
+#ifdef RICH_MPI
+	if(tess.GetOriginalIndex(edge.neighbors.first)!=tess.GetOriginalIndex(edge.neighbors.second))
+		return pair<bool, bool>(false, false);
+	else
+	{
+		if (edge.neighbors.first < tess.GetPointNo())
+			return pair<bool, bool>(true, true);
+		else
+			return pair<bool, bool>(true, false);
+	}
+#endif
   if(edge.neighbors.first<0 || edge.neighbors.first>=tess.GetPointNo()){
     assert(edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
     return pair<bool,bool>(true,false);

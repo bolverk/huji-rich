@@ -132,6 +132,13 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
     }
 }
 
+
+Slope::Slope(void) :xderivative(ComputationalCell()), yderivative(ComputationalCell()) {}
+
+Slope::Slope(ComputationalCell const & x, ComputationalCell const & y) : xderivative(x), yderivative(y)
+{}
+
+
 #ifdef RICH_MPI
 size_t ComputationalCell::getChunkSize(void) const
 {
@@ -187,4 +194,27 @@ void ComputationalCell::unserialize
   }
   assert(data.size()==counter);
 }
+
+size_t Slope::getChunkSize(void) const
+{
+	return xderivative.getChunkSize() * 2;
+}
+
+vector<double> Slope::serialize(void) const
+{
+	vector<double> res(getChunkSize());
+	vector<double> temp(xderivative.serialize());
+	std::copy(temp.begin(), temp.end(), res.begin());
+	temp = yderivative.serialize();
+	std::copy(temp.begin(), temp.end(), res.begin() + xderivative.getChunkSize());
+	return res;
+}
+
+void Slope::unserialize(const vector<double>& data)
+{
+	size_t size = xderivative.getChunkSize();
+	xderivative.unserialize(vector<double>(data.begin(), data.begin() + size));
+	yderivative.unserialize(vector<double>(data.begin() + size, data.end()));
+}
+
 #endif // RICH_MPI

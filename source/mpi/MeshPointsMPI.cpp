@@ -1,7 +1,7 @@
 #include "MeshPointsMPI.hpp"
 #include "../misc/mesh_generator.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
+#include <mpi.h>
 typedef boost::mt19937_64 gen_type;
 
 namespace
@@ -9,8 +9,8 @@ namespace
 	// result it : minx, maxx, miny, maxy
 	boost::array<double,4> FindMaxEdges(Tessellation const& tess)
 	{
-		const boost::mpi::communicator world;
-		const int rank = world.rank();
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		const vector<int>& edge_index=tess.GetCellEdges(rank);
 		const int n=static_cast<int>(edge_index.size());
 		boost::array<double,4> res;
@@ -115,10 +115,10 @@ namespace
 vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	Vector2D const& lowerleft,Vector2D const& upperright)
 {
-	const boost::mpi::communicator world;
 	const double Area=(upperright.x-lowerleft.x)*(upperright.y-lowerleft.y);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	const double myarea=tess.GetVolume(rank);
 	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
@@ -143,7 +143,6 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	Vector2D const&lowerleft,Vector2D const&upperright)
 {
-	const boost::mpi::communicator world;
 	const double widthx = (upperright.x-lowerleft.x)/static_cast<double>(nx);
 	const double widthy = (upperright.y-lowerleft.y)/static_cast<double>(ny);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
@@ -154,7 +153,8 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	const int nx0=static_cast<int>(floor((tessEdges[0]-lowerleft.x)/widthx+0.5));
 	const int ny0=static_cast<int>(floor((tessEdges[2]-lowerleft.y)/widthy+0.5));
 	Vector2D point;
-	int rank=world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,tess,rank);
 	for(int i=0;i<nx;i++)
@@ -178,11 +178,11 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
 				   Vector2D const& /*topright*/,
 	Tessellation const& tess,double xc,double yc)
 {
-	const boost::mpi::communicator world;
 	double A=sqrt(M_PI*(Rmax*Rmax-Rmin*Rmin)/PointNum);
 	int Nr=int((Rmax-Rmin)/A);
 	double dr=(Rmax-Rmin)/Nr;
-	const int rank= world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,tess,rank);
 	boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
@@ -213,12 +213,12 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
 vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 	double xc,double yc,double alpha,Tessellation const& tess)
 {
-	const boost::mpi::communicator world;
 	double N0=sqrt(PointNum*4*M_PI*(alpha+1)/(pow(Rmax,2*(alpha+1))-
 		pow(Rmin,2*(alpha+1))));
 	Vector2D pos;
 	vector<Vector2D> res;
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,tess,rank);
 	boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
@@ -249,9 +249,9 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 	Vector2D const& center,Tessellation const& tproc)
 {
-	const boost::mpi::communicator world;
 	vector<Vector2D> res;
-	const int rank = world.rank();
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints,tproc,rank);
 	for(int i=0;i<point_number;++i)

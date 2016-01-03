@@ -1,7 +1,5 @@
 #ifdef RICH_MPI
 #include "source/mpi/MeshPointsMPI.hpp"
-#include <boost/mpi/collectives.hpp>
-#include <boost/mpi/environment.hpp>
 #endif
 #include <iostream>
 #include <cmath>
@@ -110,18 +108,32 @@ namespace {
 }
 
 #ifdef RICH_MPI
+int GetWS(void)
+{
+	int ws;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	return ws;
+}
+
   vector<Vector2D> process_positions(const SquareBox& boundary)
   {
-	  const boost::mpi::communicator world;
+	  int ws,rank;
+	  MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     const Vector2D lower_left = boundary.getBoundary().first;
     const Vector2D upper_right = boundary.getBoundary().second;
-    vector<Vector2D> res(world.size());
-    if(world.rank()==0){
-      res = RandSquare(world.size(),
+    vector<Vector2D> res(ws);
+	vector<double> temp(static_cast<size_t>(ws) * 2);
+    if(rank==0)
+	{
+      res = RandSquare(ws,
 		       lower_left.x,upper_right.x,
 		       lower_left.y,upper_right.y);
+	  temp = list_serialize(res);
     }
-	boost::mpi::broadcast(world, res, 0);
+	MPI_Bcast(&temp[0], ws * 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	Vector2D vtemp;
+	res = list_unserialize(temp, vtemp);
     return res;
   }
 #endif
@@ -131,6 +143,9 @@ class SimData
 public:
   
   SimData(void):
+#ifdef RICH_MPI
+	  ws_(GetWS()),
+#endif
     outer_(-0.5,0.5,0.5,-0.5),
     rs_(),
 #ifdef RICH_MPI
@@ -139,7 +154,7 @@ public:
     tess_(
 #ifdef RICH_MPI
 		proctess_,
-		SquareMeshM(30,30,proctess_,outer_.getBoundary().first,
+		SquareMeshM(30*ws_,30*ws_,proctess_,outer_.getBoundary().first,
 			outer_.getBoundary().second),
 #else
 		cartesian_mesh
@@ -181,7 +196,9 @@ public:
   }
 
 private:
-
+#ifdef RICH_MPI
+	const int ws_;
+#endif
   const SlabSymmetry pg_;
   const SquareBox outer_;
   const Hllc rs_;
@@ -221,8 +238,7 @@ int main(void)
 {
 
   #ifdef RICH_MPI
-	boost::mpi::environment end;
-	const boost::mpi::communicator world;
+	MPI_Init(NULL, NULL);
   #endif
 
   SimData sim_data;
@@ -231,7 +247,10 @@ int main(void)
   my_main_loop(sim);
 
   #ifdef RICH_MPI
-  write_snapshot_to_hdf5(sim, "process_"+int2str(world.rank())+"_final.h5");
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  write_snapshot_to_hdf5(sim, "process_"+int2str(rank)+"_final.h5");
+  MPI_Finalize();
   #else
   write_snapshot_to_hdf5(sim, "final.h5");
   #endif

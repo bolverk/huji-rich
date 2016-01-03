@@ -1,6 +1,9 @@
 #include "CentroidMotion.hpp"
 #include "../../../tessellation/ConvexHull.hpp"
 #include "../../../misc/simple_io.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 
 namespace
 {
@@ -23,15 +26,39 @@ namespace
 			Vector2D normal = chull[static_cast<size_t>(i)] - meshpoint;
 			normal = normal / abs(normal);
 			e1.vertices.first = 0.5*(chull[static_cast<size_t>(i)] + meshpoint);
-			e1.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
-			e1.vertices.second = e1.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			e1.vertices.first += 500 * R*Vector2D(normal.y, -normal.x);
+			e1.vertices.second = e1.vertices.first - 1000 * R*Vector2D(normal.y, -normal.x);
 			normal = chull[static_cast<size_t>((i+1)%res.size())] - meshpoint;
 			normal = normal / abs(normal);
 			e2.vertices.first = 0.5*(chull[static_cast<size_t>((i + 1) % res.size())] + meshpoint);
-			e2.vertices.first += 50 * R*Vector2D(normal.y, -normal.x);
-			e2.vertices.second = e2.vertices.first - 100 * R*Vector2D(normal.y, -normal.x);
+			e2.vertices.first += 500 * R*Vector2D(normal.y, -normal.x);
+			e2.vertices.second = e2.vertices.first - 1000 * R*Vector2D(normal.y, -normal.x);
 			if (!SegmentIntersection(e1, e2, res[i]))
-				throw UniversalError("No intersection in centroid motion");
+			{
+				UniversalError eo("No intersection in centroid motion");
+#ifdef RICH_MPI
+				int rank;
+				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+				eo.AddEntry("Rank", rank);
+#endif
+				eo.AddEntry("mesh.x", meshpoint.x);
+				eo.AddEntry("mesh.y", meshpoint.y);
+				eo.AddEntry("R", R);
+				for (size_t k = 0; k < chull.size(); ++k)
+				{
+					eo.AddEntry("chull x", chull[k].x);
+					eo.AddEntry("chull y", chull[k].y);
+				}
+				eo.AddEntry("e1.vertices.first.x", e1.vertices.first.x);
+				eo.AddEntry("e1.vertices.first.y", e1.vertices.first.y);
+				eo.AddEntry("e1.vertices.second.x", e1.vertices.second.x);
+				eo.AddEntry("e1.vertices.second.y", e1.vertices.second.y);
+				eo.AddEntry("e2.vertices.first.x", e2.vertices.first.x);
+				eo.AddEntry("e2.vertices.first.y", e2.vertices.first.y);
+				eo.AddEntry("e2.vertices.second.x", e2.vertices.second.x);
+				eo.AddEntry("e2.vertices.second.y", e2.vertices.second.y);
+				throw eo;
+			}
 		}
 		return res;
 	}
@@ -58,7 +85,13 @@ namespace
 	}
 
 	vector<Vector2D> GetChullVelocity(Tessellation const & tess, vector<Vector2D> const& orgvel,
-		vector<size_t> const& indeces,int point)
+		vector<size_t> const& indeces,
+#ifdef RICH_MPI
+	int /*point*/
+#else
+		int point
+#endif
+		)
 	{
 		vector<Vector2D> res(indeces.size());
 		const size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -68,6 +101,9 @@ namespace
 				res[i] = orgvel[indeces[i]];
 			else
 			{
+#ifdef RICH_MPI
+				res[i] = orgvel[indeces[i]];
+#else
 				if (tess.GetOriginalIndex(static_cast<int>(indeces[i]) == static_cast<int>(indeces[i])))
 				{
 					Vector2D normal = tess.GetMeshPoint(point) - tess.GetMeshPoint(static_cast<int>(indeces[i]));
@@ -76,7 +112,9 @@ namespace
 					res[i] = vel - 2*normal*ScalarProd(vel,normal);
 				}
 				else
+
 					res[i] = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
+#endif
 			}
 		}
 		return res;
@@ -89,14 +127,22 @@ namespace
 		if(abs(temp)<1e-6*R)
 			return (cm - meshpoint) / dt;
 		const Vector2D newcm = meshpoint + w*dt +reduce_factor*temp*std::min(1.0, cold ? 
-			abs(cm - meshpoint)/abs(temp) : eos.dp2c(cell.density,cell.pressure)*dt/abs(temp));
+			abs(cm - meshpoint)/abs(temp) : std::max(abs(w),eos.dp2c(cell.density,cell.pressure))*dt/abs(temp));
 		const Vector2D diff = newcm - meshpoint;
 		return diff / dt;
 	}
 
+	bool ShouldCalc(vector<string> const& toignore, ComputationalCell const& cell)
+	{
+		for (size_t i = 0; i < toignore.size(); ++i)
+			if (cell.stickers.at(toignore[i]))
+				return false;
+		return true;
+	}
+
 	vector<Vector2D> GetCorrectedVelocities(Tessellation const& tess,vector<Vector2D> const& w,double dt,
 		double reduce_factor,size_t Niter,vector<ComputationalCell> const& cells,EquationOfState const& eos,
-		bool cold)
+		bool cold,vector<string> const& toignore)
 	{
 		size_t N = static_cast<size_t>(tess.GetPointNo());
 		vector<Vector2D> res(N);
@@ -112,6 +158,8 @@ namespace
 		{
 			for (size_t i = 0; i < N; ++i)
 			{
+				if (!ShouldCalc(toignore, cells[i]))
+					continue;
 				vector<Vector2D> chull = GetOrgChullPoints(tess, neighbor_indeces[i]);
 				vector<size_t> convex_index = ConvexIndeces(chull, tess.GetMeshPoint(static_cast<int>(i)));
 				chull = VectorValues(chull,convex_index);
@@ -128,15 +176,16 @@ namespace
 		// check output
 		for (size_t i = 0; i < res.size(); ++i)
 		{
-			if (tess.GetWidth(static_cast<int>(i))< abs(res[i]) * dt)
+			if (tess.GetWidth(static_cast<int>(i)) < abs(res[i]) * dt && abs(cells[i].velocity)*2 < abs(res[i]))
 				throw UniversalError("Velocity too large in Centroid Motion");
 		}
 		return res;
 	}
 }
 
-CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& eos, bool cold, size_t niter) :
-	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter){}
+CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& eos, bool cold, size_t niter,
+	vector<string> toignore) :
+	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter),toignore_(toignore){}
 
 vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells, double /*time*/) const
 {
@@ -149,5 +198,5 @@ vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vec
 vector<Vector2D> CentroidMotion::ApplyFix(Tessellation const & tess, vector<ComputationalCell> const & cells, double /*time*/,
 	double dt, vector<Vector2D> const & velocities) const
 {
-	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_,cells,eos_,cold_);
+	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_,cells,eos_,cold_,toignore_);
 }

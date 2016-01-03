@@ -1,7 +1,6 @@
 #include "ProcessorUpdate.hpp"
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/collectives.hpp>
+#include <mpi.h>
 #endif
 
 ProcessorUpdate::~ProcessorUpdate(void){}
@@ -9,11 +8,11 @@ ProcessorUpdate::~ProcessorUpdate(void){}
 #ifdef RICH_MPI
 double ProcessorUpdate::GetLoadImbalance(Tessellation const& tlocal)const
 {
-	const boost::mpi::communicator world;
-	int ws=world.size();
+	int ws;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
 	vector<int> N(ws,0);
 	int n=tlocal.GetPointNo();
-	boost::mpi::all_gather(world, n, N);
+	MPI_Allgather(&n, 1, MPI_INT, &N[0], 1, MPI_INT, MPI_COMM_WORLD);
 	int total=0;
 	for(size_t i=0;i<N.size();++i)
 		total+=N[i];

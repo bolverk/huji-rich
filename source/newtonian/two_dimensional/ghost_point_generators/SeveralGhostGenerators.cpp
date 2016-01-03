@@ -24,8 +24,8 @@ boost::container::flat_map<size_t, ComputationalCell> SeveralGhostGenerators::op
 	return res;
 }
 
-std::pair<ComputationalCell, ComputationalCell> SeveralGhostGenerators::GetGhostGradient(const Tessellation& tess,
-	const vector<ComputationalCell>& cells, const vector<std::pair<ComputationalCell, ComputationalCell> >& gradients,
+Slope SeveralGhostGenerators::GetGhostGradient(const Tessellation& tess,
+	const vector<ComputationalCell>& cells, const vector<Slope>& gradients,
 	size_t ghost_index,double time,Edge const& edge) const
 {
   return ghosts_[ghost_chooser_.GhostChoose(tess, static_cast<int>(ghost_index))]->GetGhostGradient(tess, cells, gradients, ghost_index,time,edge);

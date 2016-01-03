@@ -22,7 +22,6 @@
 #include "../misc/int2str.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
-#include <boost/mpi/communicator.hpp>
 #endif
 
 using std::string;

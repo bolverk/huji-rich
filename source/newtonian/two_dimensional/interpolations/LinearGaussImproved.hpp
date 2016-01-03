@@ -11,6 +11,7 @@
 #include <cmath>
 #include "../../../misc/universal_error.hpp"
 #include "../GhostPointGenerator.hpp"
+#include "../../../misc/serializable.hpp"
 
 //! \brief Linear gauss interpolation
 class LinearGaussImproved : public SpatialReconstruction
@@ -53,19 +54,19 @@ public:
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	vector<pair<ComputationalCell, ComputationalCell> >& GetSlopes(void)const;
+	vector<Slope>& GetSlopes(void)const;
 
 	/*!
 	\brief Returns the unsloped limtied gradients
 	\return The gradients
 	*/
-	vector<pair<ComputationalCell, ComputationalCell> >& GetSlopesUnlimited(void)const;
+	vector<Slope>& GetSlopesUnlimited(void)const;
 
 private:
 	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;
-	mutable vector<pair<ComputationalCell, ComputationalCell> > rslopes_;
-	mutable vector<pair<ComputationalCell, ComputationalCell> > naive_rslopes_;
+	mutable vector<Slope> rslopes_;
+	mutable vector<Slope> naive_rslopes_;
 	const bool slf_;
 	const double shockratio_;
 	const double diffusecoeff_;
@@ -80,3 +81,4 @@ private:
 
 };
 #endif //LINEAR_GAUSS_IMPROVED
+

@@ -150,6 +150,7 @@ public:
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes
+  //! \param proc_update Scheme for updating the position of the processes
 #endif // RICH_MPI
   hdsim
 	  (
@@ -191,10 +192,15 @@ public:
   //! \brief Advances the simulation in time
   void TimeAdvance(void);
 
+  //! \brief Advances the simulation in time with area fix
+  void TimeAdvanceClip(void);
+
   //! \brief Second order time advance
   void TimeAdvance2Heun(void);
 
-  //! \brief Second order time advance
+  //! \brief Second order time advance, mid point method with area fix
+  void TimeAdvance2MidPointClip(void);
+  //! \brief Second order time advance, mid point method
   void TimeAdvance2MidPoint(void);
 
   /*! \brief Change the physical geometry
