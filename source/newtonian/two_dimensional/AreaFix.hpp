@@ -15,6 +15,20 @@
 #include "../../misc/utils.hpp"
 #include "../../tessellation/geotests.hpp"
 
+/*!
+\brief Fixes the flux to propely converge second order
+\param tessold The tessellation at the beginning of the time step
+\param tessmid The tessellation at the mid time step (old for first fix)
+\param tessnew The tessellation at the end of the time step (mid for first fix)
+\param pointvelocity The mesh point velocities
+\param dt The time step
+\param cells The computational cells
+\param fluxes The fluxes
+\param fv The edge velocities
+\param outer The outer boundary conditions
+\param eos The equation of state
+\return The fix for each cells
+*/
 vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tessmid,
 	Tessellation const& tessnew, vector<Vector2D> const& pointvelocity, double dt,
 	vector<ComputationalCell> const& cells, vector<Extensive> const& fluxes,
