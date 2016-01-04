@@ -118,8 +118,8 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
 	const double R = tess.GetWidth(static_cast<int>(i));
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
-	const double c = std::min(d,0.2*R) / dt;
-	return chi_*c*(s - r) / d*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+	const double c = d / dt;
+	return chi_*c*(s - r) / R*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,

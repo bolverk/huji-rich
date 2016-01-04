@@ -53,6 +53,12 @@ public:
    */
   Extensive& operator+=(const Extensive& diff);
 
+  /*! \brief Self multiplication by scalar
+  \param scalar The scalar to multiply
+  \return Reference to self
+  */
+  Extensive& operator*=(const double scalar);
+
   //! \brief Null constructor
   Extensive(void);
 
@@ -112,5 +118,11 @@ Extensive operator+(const Extensive& e1,
  */
 Extensive operator-(const Extensive& e1,
 		    const Extensive& e2);
+/*!
+\brief Replaces the data in the extensive. The tracers should already be allocated
+\param toreplace The extensive to change
+\param other The data to copy
+*/
+void ReplaceExtensive(Extensive &toreplace, Extensive const& other);
 
 #endif // EXTENSIVE_HPP

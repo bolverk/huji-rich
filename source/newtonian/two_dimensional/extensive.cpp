@@ -23,10 +23,8 @@ Extensive& Extensive::operator-=(const Extensive& diff)
   energy -= diff.energy;
   momentum -= diff.momentum;
   
-  for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
-      it!=tracers.end();++it)
-    it->second -= safe_retrieve(diff.tracers,it->first);
-
+  for (size_t i = 0; i < tracers.size(); ++i)
+	  (tracers.begin() + static_cast<int>(i))->second -= (diff.tracers.begin() + static_cast<int>(i))->second;
   return *this;
 }
 
@@ -39,15 +37,25 @@ Extensive& Extensive::operator=(const Extensive& origin)
   return *this;
 }
 
+void ReplaceExtensive(Extensive &toreplace, Extensive const& other)
+{
+	toreplace.mass = other.mass;
+	toreplace.energy = other.energy;
+	toreplace.momentum = other.momentum;
+	for (size_t i = 0; i < toreplace.tracers.size(); ++i)
+		(toreplace.tracers.begin() + static_cast<int>(i))->second = 
+		(other.tracers.begin() + static_cast<int>(i))->second;
+}
+
 Extensive& Extensive::operator+=(const Extensive& diff)
 {
   mass += diff.mass;
   energy += diff.energy;
   momentum += diff.momentum;
   
-  for(boost::container::flat_map<std::string,double>::iterator it=tracers.begin();
-      it!=tracers.end();++it)
-    it->second += safe_retrieve(diff.tracers,it->first);
+  for (size_t i = 0; i < tracers.size(); ++i)
+	  (tracers.begin() + static_cast<int>(i))->second += (diff.tracers.begin() + static_cast<int>(i))->second;
+
 
   return *this;
 }
@@ -77,6 +85,16 @@ Extensive operator+(const Extensive& e1,
       it!=e1.tracers.end();++it)
     res.tracers[it->first] = it->second + safe_retrieve(e2.tracers,it->first);
   return res;
+}
+
+Extensive& Extensive::operator*=(const double scalar)
+{
+	mass *=scalar;
+	energy *=scalar;
+	momentum *=scalar;
+	for (size_t i = 0; i < tracers.size(); ++i)
+		(tracers.begin() + static_cast<int>(i))->second *= scalar;
+	return *this;
 }
 
 Extensive operator-(const Extensive& e1,

@@ -18,9 +18,12 @@ void SimpleExtensiveUpdater::operator()
    vector<Extensive>& extensives) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
-  for(size_t i=0;i<edge_list.size();++i){
+  Extensive delta = dt*cd.areas[0] * fluxes[0];
+  for(size_t i=0;i<edge_list.size();++i)
+  {
     const Edge& edge = edge_list[i];
-    const Extensive delta = dt*cd.areas[i]*fluxes[i];
+	ReplaceExtensive(delta,fluxes[i]);
+	delta *= dt*cd.areas[i];
     if(bracketed(0,edge.neighbors.first,tess.GetPointNo()))
       extensives[static_cast<size_t>(edge.neighbors.first)] -=
 	delta;
