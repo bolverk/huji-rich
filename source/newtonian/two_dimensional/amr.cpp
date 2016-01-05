@@ -66,7 +66,7 @@ namespace
 			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
 			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
-		int maxscale = static_cast<int>(log10(maxi) + 7);
+		int maxscale = static_cast<int>(log10(maxi) + 10);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
