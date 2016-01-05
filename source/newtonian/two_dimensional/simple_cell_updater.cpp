@@ -62,22 +62,11 @@ namespace {
   {
     for(size_t i=0;i<sequence.size();++i)
 	{
-      if((*sequence[i].first)
-	 (tess,
-	  pg,
-	  eos,
-	  extensives,
-	  old,
-	  cd,
-	  index))
-	res= (*sequence[i].second)
-	 (tess,
-	  pg,
-	  eos,
-	  extensives,
-	  old,
-	  cd,
-	  index);
+		if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index))
+		{
+			res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index);
+			return;
+		}
     }
 	regular_update(eos,extensives,old.at(index),cd,index,res);
   }

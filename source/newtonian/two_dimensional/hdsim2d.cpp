@@ -182,7 +182,14 @@ void hdsim::TimeAdvance(void)
 	MPI_exchange_data(tess_, extensives_, false);
 	MPI_exchange_data(tess_, cells_, false);
 #else
-	MoveMeshPoints(point_velocities, dt, tess_,false);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, cycle_ % 25 == 0);
+	if (cycle_ % 25 == 0)
+	{
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
+
 #endif
 	cache_data_.reset();
 
@@ -417,7 +424,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	vector<Vector2D> old_points = tess_.GetMeshPoints();
 	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
 	MoveMeshPoints(point_velocities, 0.5*dt, tess_,false);
-	
+
 	CacheData data_temp(*oldtess, pg_);
 
 	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
@@ -452,6 +459,14 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	cache_data_.reset();
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
+	if (cycle_ % 25 == 0)
+	{
+		vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, cycle_ % 25 == 0,old_points);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		cache_data_.reset();
+	}
+
 	time_ += 0.5*dt;
 	++cycle_;
 }
@@ -481,7 +496,17 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, 0.5*dt, tess_,false);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, 0.5*dt, tess_, cycle_ % 25 == 0);
+	if (cycle_ % 25 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+		old_points = VectorValues(old_points, HilbertIndeces);
+	}
+
+
 	time_ += 0.5*dt;
 
 	cache_data_.reset();
