@@ -25,7 +25,7 @@ ConditionActionSequence2::~ConditionActionSequence2(void)
 
 namespace 
 {
-	Extensive choose_action
+	void choose_action
 		(const Edge& edge,
 			const Tessellation& tess,
 			const vector<ComputationalCell>& cells,
@@ -33,21 +33,27 @@ namespace
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
 		const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
-			pair<ComputationalCell,ComputationalCell> const& edge_values)
+			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res)
 	{
-		for (size_t i = 0; i<sequence.size(); ++i) {
+		for (size_t i = 0; i<sequence.size(); ++i) 
+		{
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
 				(edge, tess, cells);
 			if (flag_aux.first)
-				return (*sequence[i].second)
-				(edge, tess, edge_velocity, cells, eos, flag_aux.second);
+			{
+				res = (*sequence[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second);
+				return;
+			}
 		}
-		for (size_t i = 0; i<sequence2.size(); ++i) {
+		for (size_t i = 0; i<sequence2.size(); ++i) 
+		{
 			const pair<bool, bool> flag_aux = (*sequence2[i].first)
 				(edge, tess, cells);
 			if (flag_aux.first)
-				return (*sequence2[i].second)
-				(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values);
+			{
+				res = (*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values);
+				return;
+			}
 		}
 		throw UniversalError("Error in ConditionActionSequence");
 	}
@@ -68,7 +74,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	interp_.operator()(tess, cells, time,edge_values_);
 	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
-		res[i] = choose_action
+		choose_action
 		(tess.getAllEdges()[i],
 			tess,
 			cells,
@@ -76,7 +82,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			edge_velocities[i],
 			sequence_,
 			sequence2_,
-			edge_values_[i]);
+			edge_values_[i],res[i]);
 	return res;
 }
 
