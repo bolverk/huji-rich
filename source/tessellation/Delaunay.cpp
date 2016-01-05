@@ -332,7 +332,8 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 		f[0].neighbors[i] = last_loc;
 	location_pointer = 0;
 	// add the points
-	for (size_t i = 0; i < static_cast<size_t>(length) - 3; i++)
+	size_t nloop = static_cast<size_t>(length) - 3;
+	for (size_t i = 0; i < nloop; i++)
 		add_point(i);
 	// Calculate radius
 	radius.resize(f.size());

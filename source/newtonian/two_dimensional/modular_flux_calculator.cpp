@@ -29,13 +29,9 @@ namespace
     res.momentum = conserved.Momentum;
     res.energy = conserved.Energy;
 	res.tracers.reserve(cells.first.tracers.size());
-	for (size_t i = 0; i < cells.first.tracers.size(); ++i)
-	  res.tracers.insert
-	    (pair<string, double>
-	     ((cells.first.tracers.begin()+static_cast<int>(i))->first,
-	      conserved.Mass*
-	      (conserved.Mass>0 ? (cells.first.tracers.begin() + static_cast<int>(i))->second : 
-	       (cells.second.tracers.begin() + static_cast<int>(i))->second)));
+	for (boost::container::flat_map<string, double>::const_iterator it = cells.first.tracers.begin(), it2 = cells.second
+		.tracers.begin(); it != cells.first.tracers.end(); ++it, ++it2)
+		res.tracers.insert(pair<string, double>(it->first,conserved.Mass*(conserved.Mass>0 ? it->second : it2->second)));
     return res;
   }
 

@@ -662,7 +662,8 @@ double VoronoiMesh::GetVolume(int index) const
 {
   const Vector2D center=Tri.get_point(static_cast<size_t>(index));
 	double area=0;
-	for (size_t i=0;i<mesh_vertices[static_cast<size_t>(index)].size();++i)
+	const size_t nloop = mesh_vertices[static_cast<size_t>(index)].size();
+	for (size_t i=0;i<nloop;++i)
 	{
 	  const Vector2D p1 = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].vertices.first-
 			center;

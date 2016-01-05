@@ -23,9 +23,11 @@ vector<Vector2D> StationaryBox::operator()
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
   vector<Vector2D> res(edge_list.size());
-  for(size_t i=0;i<res.size();++i){
-    const Edge& edge = edge_list.at(i);
-    res.at(i) = is_outer_edge(tess,edge) ?
+  const size_t nloop = res.size();
+  for(size_t i=0;i<nloop;++i)
+  {
+    const Edge& edge = edge_list[i];
+    res[i] = is_outer_edge(tess,edge) ?
       Vector2D() :
       tess.CalcFaceVelocity
       (point_velocities.at(static_cast<size_t>(edge.neighbors.first)),

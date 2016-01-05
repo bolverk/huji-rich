@@ -22,9 +22,11 @@ Extensive& Extensive::operator-=(const Extensive& diff)
   mass -= diff.mass;
   energy -= diff.energy;
   momentum -= diff.momentum;
-  
-  for (size_t i = 0; i < tracers.size(); ++i)
-	  (tracers.begin() + static_cast<int>(i))->second -= (diff.tracers.begin() + static_cast<int>(i))->second;
+  assert(diff.tracers.size() == this->tracers.size());
+  boost::container::flat_map<std::string, double>::iterator it2 = this->tracers.begin();
+  for (boost::container::flat_map<std::string, double>::const_iterator it = diff.tracers.begin();
+  it != diff.tracers.end(); ++it, ++it2)
+	  it2->second -= it->second;
   return *this;
 }
 
@@ -42,9 +44,11 @@ void ReplaceExtensive(Extensive &toreplace, Extensive const& other)
 	toreplace.mass = other.mass;
 	toreplace.energy = other.energy;
 	toreplace.momentum = other.momentum;
-	for (size_t i = 0; i < toreplace.tracers.size(); ++i)
-		(toreplace.tracers.begin() + static_cast<int>(i))->second = 
-		(other.tracers.begin() + static_cast<int>(i))->second;
+	assert(other.tracers.size() == toreplace.tracers.size());
+	boost::container::flat_map<std::string, double>::iterator it2 = toreplace.tracers.begin();
+	for (boost::container::flat_map<std::string, double>::const_iterator it = other.tracers.begin();
+	it != other.tracers.end(); ++it, ++it2)
+		it2->second = it->second;
 }
 
 Extensive& Extensive::operator+=(const Extensive& diff)
@@ -52,11 +56,11 @@ Extensive& Extensive::operator+=(const Extensive& diff)
   mass += diff.mass;
   energy += diff.energy;
   momentum += diff.momentum;
-  
-  for (size_t i = 0; i < tracers.size(); ++i)
-	  (tracers.begin() + static_cast<int>(i))->second += (diff.tracers.begin() + static_cast<int>(i))->second;
-
-
+  assert(diff.tracers.size() == this->tracers.size());
+  boost::container::flat_map<std::string, double>::iterator it2 = this->tracers.begin();
+  for (boost::container::flat_map<std::string, double>::const_iterator it = diff.tracers.begin();
+  it != diff.tracers.end(); ++it, ++it2)
+	  it2->second += it->second;
   return *this;
 }
 

@@ -12,7 +12,8 @@ namespace
 		vector<Vector2D> &res)
 	{
 		res.resize(edges.size());
-		for (size_t i = 0; i<edges.size(); ++i)
+		const size_t nloop = edges.size();
+		for (size_t i = 0; i < nloop; ++i)
 		{
 			const int neigh0 = edges[i]->neighbors.first;
 			const int neigh1 = edges[i]->neighbors.second;
@@ -27,7 +28,8 @@ namespace
 		vector<Vector2D> &res)
 	{
 		res.resize(edges.size());
-		for (size_t i = 0; i<edges.size(); ++i)
+		const size_t nloop = edges.size();
+		for (size_t i = 0; i<nloop; ++i)
 		{
 			const int neigh0 = edges[i]->neighbors.first;
 			const int neigh1 = edges[i]->neighbors.second;
@@ -42,7 +44,8 @@ namespace
 						   vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,size_t /*npoints*/)
 	{
 		vector<ComputationalCell const*> res(edges.size());
-		for (size_t i = 0; i<edges.size(); ++i)
+		const size_t nloop = edges.size();
+		for (size_t i = 0; i<nloop; ++i)
 		{
 			size_t other_cell = (edges[i]->neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
 				(edges[i]->neighbors.second) : static_cast<size_t> (edges[i]->neighbors.first);
@@ -60,7 +63,8 @@ namespace
 		vector<int> const& edge_indices,vector<const Edge*> &res)
 	{
 		res.reserve(edge_indices.size());
-		for (size_t i = 0; i<edge_indices.size(); ++i)
+		const size_t nloop = edge_indices.size();
+		for (size_t i = 0; i<nloop; ++i)
 			res.push_back(&tess.GetEdge(edge_indices[i]));
 	}
 
@@ -184,7 +188,8 @@ namespace
 		ReplaceComputationalCell(cmax, cell);
 		ReplaceComputationalCell(cmin, cell);
 		// Find maximum.minimum neighbor values
-		for (size_t i = 0; i < neighbors.size(); ++i)
+		size_t nloop = neighbors.size();
+		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
 			cmax.density = std::max(cmax.density, cell_temp.density);
@@ -211,7 +216,8 @@ namespace
 		ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[0]), cm);
 		ComputationalCell dphi = centroid_val - cell;
 		vector<double> psi(4 + cell.tracers.size(), 1);
-		for (size_t i = 0; i<edge_list.size(); ++i)
+		const size_t nedges = edge_list.size();
+		for (size_t i = 0; i<nedges; ++i)
 		{
 			if (i > 0)
 			{
@@ -490,7 +496,8 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_, ghost_cells,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,edge_list);
-		for (size_t j = 0; j < edge_index.size(); ++j)
+		const size_t nloop = edge_index.size();
+		for (size_t j = 0; j < nloop; ++j)
 		{
 			Edge const& edge = *edge_list[j];
 			if (edge.neighbors.first == static_cast<int>(i))
