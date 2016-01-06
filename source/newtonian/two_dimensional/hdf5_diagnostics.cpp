@@ -352,7 +352,7 @@ Snapshot read_hdf5_snapshot
   Group g_stickers = file.openGroup("stickers");
 #ifdef RICH_MPI
   Group mpi;
-  if(mpioverride)
+  if(!mpioverride)
 	mpi = file.openGroup("/mpi");
 #endif
 
