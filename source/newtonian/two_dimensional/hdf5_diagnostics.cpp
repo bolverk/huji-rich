@@ -354,6 +354,8 @@ Snapshot read_hdf5_snapshot
   Group mpi;
   if(!mpioverride)
 	mpi = file.openGroup("/mpi");
+#else
+	mpioverride = true;
 #endif
 
   
