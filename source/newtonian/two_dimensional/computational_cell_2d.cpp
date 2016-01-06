@@ -78,7 +78,7 @@ void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& o
     }*/
   boost::container::flat_map<string, double>::const_iterator it2 = other.tracers.begin();
   for(boost::container::flat_map<string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it, ++it2)
-		  it->second = it2->second*scalar;
+		  it->second += it2->second*scalar;
 }
 
 ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2)

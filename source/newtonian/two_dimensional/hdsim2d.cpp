@@ -637,9 +637,10 @@ void hdsim::recalculateExtensives(void)
 		}
 		else
 		{
-			for (size_t j = 0; j < extensives_[i].tracers.size();++j)
-				(extensives_[i].tracers.begin()+static_cast<int>(j))->second = (cell.tracers.begin()+
-					static_cast<int>(j))->second*mass;
+			boost::container::flat_map<string, double>::const_iterator it2 = cell.tracers.begin();
+			for (boost::container::flat_map<string, double>::iterator it = extensives_[i].tracers.begin(); it !=
+				extensives_[i].tracers.end(); ++it, ++it2)
+				it->second = it2->second*mass;
 		}
 	}
 }
