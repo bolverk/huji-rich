@@ -351,7 +351,9 @@ Snapshot read_hdf5_snapshot
   Group g_tracers = file.openGroup("tracers");
   Group g_stickers = file.openGroup("stickers");
 #ifdef RICH_MPI
-  Group mpi = file.openGroup("/mpi");
+  Group mpi;
+  if(mpioverride)
+	mpi = file.openGroup("/mpi");
 #endif
 
   
