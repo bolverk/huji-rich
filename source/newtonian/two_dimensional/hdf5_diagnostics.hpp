@@ -45,10 +45,11 @@ public:
 
 /*! \brief Load snapshot data into memory
   \param fname File name
+  \param mpioverride Flag for not reading mpi data when MPI is on
   \return Snapshot data
  */
 Snapshot read_hdf5_snapshot
-(const string& fname);
+(const string& fname,bool mpioverride=false);
 
 //! \brief Addition data to be written in a snapshot
 class DiagnosticAppendix
@@ -109,13 +110,15 @@ void WriteDelaunay(Delaunay const& tri, string const& filename);
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, size_t snapshot_number);
 
 /*!
-\brief Reads an HDF5 snapshot file in order to restart the simulation with a different cpu number. SLower but more robust then other method
+\brief Reads an HDF5 snapshot file in order to restart the simulation with a different cpu number. Slower but more robust then other method
 \return dump The snapshot structure relevent for current cpu
 \param filename File name
 \param proctess Tessellation of the processors
 \param snapshot_number Number of old cpus
+\param mpioverride Flag for not reading mpi data when MPI is on
 */
-Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number);
+Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number,
+	bool mpioverride = false);
 
 
 /*!

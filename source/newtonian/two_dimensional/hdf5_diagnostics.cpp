@@ -342,7 +342,7 @@ void write_snapshot_to_hdf5(hdsim const& sim,string const& fname,
 }
 
 Snapshot read_hdf5_snapshot
-(const string& fname)
+(const string& fname,bool mpioverride)
 {
   Snapshot res;
   H5File file(fname, H5F_ACC_RDONLY );
@@ -369,13 +369,16 @@ Snapshot read_hdf5_snapshot
 #ifdef RICH_MPI
   // MPI
   {
-	  const vector<double> x =
-		  read_double_vector_from_hdf5(mpi, "x_coordinate");
-	  const vector<double> y =
-		  read_double_vector_from_hdf5(mpi, "y_coordinate");
-	  res.proc_points.resize(x.size());
-	  for (size_t i = 0; i<x.size(); ++i)
-		  res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
+	  if (!mpioverride)
+	  {
+		  const vector<double> x =
+			  read_double_vector_from_hdf5(mpi, "x_coordinate");
+		  const vector<double> y =
+			  read_double_vector_from_hdf5(mpi, "y_coordinate");
+		  res.proc_points.resize(x.size());
+		  for (size_t i = 0; i < x.size(); ++i)
+			  res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
+	  }
   }
 #endif
 
@@ -576,7 +579,7 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess,s
 	return res;
 }
 
-Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number)
+Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess, size_t snapshot_number,bool mpioverride)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -584,7 +587,7 @@ Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess,
 	Snapshot snap;
 	for (int i = 0; i < static_cast<int>(snapshot_number); ++i)
 	{
-		Snapshot temp = read_hdf5_snapshot(filename + int2str(i) + ".h5");
+		Snapshot temp = read_hdf5_snapshot(filename + int2str(i) + ".h5",mpioverride);
 		snap.cells.insert(snap.cells.end(), temp.cells.begin(), temp.cells.end());
 		snap.mesh_points.insert(snap.mesh_points.end(), temp.mesh_points.begin(), temp.mesh_points.end());
 		if (i == 0)
