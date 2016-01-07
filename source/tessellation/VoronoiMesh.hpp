@@ -237,9 +237,6 @@ private:
 		vector<Edge> const& boxedges);
 	void NonSendCorners(vector<int> & proclist,vector<vector<int> > & data,
 		Tessellation const& v);
-	void RigidBoundaryPoints(vector<int> &points,Edge const& edge);
-	void PeriodicBoundaryPoints(vector<int> &points,int edge_number);
-	void CornerBoundaryPoints(vector<int> &points,int edge_number);
 	boost::array<double,4> FindMaxCellEdges(void);
 	vector<int> CellIntersectOuterBoundary(vector<Edge> const&box_edges,int cell);
 	void FindIntersectingOuterPoints(vector<Edge> const&bedge,vector<vector<int> >

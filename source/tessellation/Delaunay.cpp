@@ -859,6 +859,8 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		try
 		{
 			AddBoundaryPoints(toadd);
+			for (size_t i = 0; i < toadd.size(); ++i)
+				OrgIndex.push_back(toadd[i]);
 		}
 		catch (UniversalError &eo)
 		{

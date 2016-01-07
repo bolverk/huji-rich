@@ -71,7 +71,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 		vector<int> neigh = tproc.GetNeighbors(rank);
 		for (size_t i = 0; i < neigh.size(); ++i)
 		{
-			if (neigh[i] == -1)
+			if (tproc.GetOriginalIndex(neigh[i])==rank)
 				continue;
 			Vector2D otherpoint = tproc.GetMeshPoint(neigh[i]);
 			//Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
@@ -132,15 +132,13 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 		else
 			dy = 0.5*(outer_.GetGridBoundary(Down) - point.y);
 	}
-	vector<Vector2D> cor = tproc.GetMeshPoints();
-	cor[static_cast<size_t>(rank)] = cor[static_cast<size_t>(rank)] + Vector2D(dx, dy);
-	cor.resize(static_cast<size_t>(nproc));
+	Vector2D cor = tproc.GetMeshPoint(rank) + Vector2D(dx, dy);
 	// Have all processors have the same points
-	vector<double> tosend = list_serialize(vector<Vector2D>(1, cor[static_cast<size_t>(rank)]));
-	vector<double> torecv(cor.size() * 2);
+	vector<double> tosend = list_serialize(vector<Vector2D>(1, cor));
+	vector<double> torecv(static_cast<size_t>(nproc) * 2);
 	MPI_Gather(&tosend[0], 2, MPI_DOUBLE, &torecv[0], 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&torecv[0], nproc * 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	vector<Vector2D> cortemp = list_unserialize(torecv, cor[0]);
+	vector<Vector2D> cortemp = list_unserialize(torecv, cor);
 	tproc.Update(cortemp);
 }
 #endif
