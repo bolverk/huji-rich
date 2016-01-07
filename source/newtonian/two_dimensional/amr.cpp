@@ -62,18 +62,22 @@ namespace
 		using namespace ClipperLib;
 		Paths subj(1), clip(1), solution;
 		double maxi = 0;
+		Vector2D cm0;
 		for (size_t i = 0; i < poly0.size(); ++i)
-			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
+			cm0 += poly0[i];
+		cm0 = cm0/static_cast<double>(poly0.size());
+		for (size_t i = 0; i < poly0.size(); ++i)
+			maxi = std::max(maxi, std::max(std::abs(poly0[i].x-cm0.x), std::abs(poly0[i].y-cm0.y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
-			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
+			maxi = std::max(maxi, std::max(std::abs(poly1[i].x-cm0.x), std::abs(poly1[i].y-cm0.y)));
 		int maxscale = static_cast<int>(log10(maxi) + 10);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
 		for (size_t i = 0; i < poly0.size(); ++i)
-			subj[0][i] = IntPoint(static_cast<cInt>(poly0[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly0[i].y*pow(10.0, 18 - maxscale)));
+			subj[0][i] = IntPoint(static_cast<cInt>((poly0[i].x-cm0.x)*pow(10.0, 18 - maxscale)), static_cast<cInt>((poly0[i].y-cm0.y)*pow(10.0, 18 - maxscale)));
 		for (size_t i = 0; i < poly1.size(); ++i)
-			clip[0][i] = IntPoint(static_cast<cInt>(poly1[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly1[i].y*pow(10.0, 18 - maxscale)));
+			clip[0][i] = IntPoint(static_cast<cInt>((poly1[i].x-cm0.x)*pow(10.0, 18 - maxscale)), static_cast<cInt>((poly1[i].y-cm0.y)*pow(10.0, 18 - maxscale)));
 
 		//perform intersection ...
 		Clipper c;
