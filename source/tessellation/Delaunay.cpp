@@ -859,8 +859,6 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		try
 		{
 			AddBoundaryPoints(toadd);
-			for (size_t i = 0; i < toadd.size(); ++i)
-				OrgIndex.push_back(toadd[i]);
 		}
 		catch (UniversalError &eo)
 		{
@@ -1045,6 +1043,9 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 	if (obc->GetBoundaryType() == Rectengular)
 	{
 		AddRigid(edges, toduplicate);
+		for (size_t i = 0; i < toduplicate.size(); ++i)
+			for (size_t j = 0; j < toduplicate[j].size(); ++j)
+				OrgIndex.push_back(toduplicate[i][j]);
 	}
 	else
 	{
