@@ -1044,7 +1044,7 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 	{
 		AddRigid(edges, toduplicate);
 		for (size_t i = 0; i < toduplicate.size(); ++i)
-			for (size_t j = 0; j < toduplicate[j].size(); ++j)
+			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				OrgIndex.push_back(toduplicate[i][j]);
 	}
 	else
