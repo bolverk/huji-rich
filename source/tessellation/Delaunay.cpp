@@ -1040,6 +1040,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edg
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges)
 {
 	vector<vector<int> > toduplicate = FindOuterPoints(edges);
+	OrgIndex.clear();
 	if (obc->GetBoundaryType() == Rectengular)
 	{
 		AddRigid(edges, toduplicate);

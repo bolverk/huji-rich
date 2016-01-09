@@ -71,7 +71,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 		vector<int> neigh = tproc.GetNeighbors(rank);
 		for (size_t i = 0; i < neigh.size(); ++i)
 		{
-			if (tproc.GetOriginalIndex(neigh[i])==rank)
+			if (neigh[i]>=nproc)
 				continue;
 			Vector2D otherpoint = tproc.GetMeshPoint(neigh[i]);
 			//Vector2D otherpoint=tproc.GetCellCM(neigh[i]);
