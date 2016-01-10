@@ -52,10 +52,10 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 			Vector2D otherpoint = tproc.GetCellCM(static_cast<int>(i));
 			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + 0.2*R[static_cast<size_t>(rank)] * R[i]);
-			double temp = (NPerProc[i] -IdealPerProc)*
+			double temp = (NPerProc[i] -IdealPerProc)*R[static_cast<size_t>(rank)] * R[i]*
 				(point.x - otherpoint.x) / (pow(dist, 3)*IdealPerProc);
 			dx -= temp;
-			temp = (NPerProc[i] - IdealPerProc)*
+			temp = (NPerProc[i] - IdealPerProc)*R[static_cast<size_t>(rank)] * R[i]*
 				(point.y - otherpoint.y) / (pow(dist, 3)*IdealPerProc);
 			dy -= temp;
 		}
