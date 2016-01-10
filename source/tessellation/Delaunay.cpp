@@ -1040,13 +1040,17 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edg
 vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges)
 {
 	vector<vector<int> > toduplicate = FindOuterPoints(edges);
+#ifdef RICH_MPI
 	OrgIndex.clear();
+#endif
 	if (obc->GetBoundaryType() == Rectengular)
 	{
 		AddRigid(edges, toduplicate);
+#ifdef RICH_MPI
 		for (size_t i = 0; i < toduplicate.size(); ++i)
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				OrgIndex.push_back(toduplicate[i][j]);
+#endif
 	}
 	else
 	{
