@@ -31,9 +31,10 @@ public:
 	/*!
 	\brief Calcualtes the load imbalance as max(number of points per proc)/(avg per proc)
 	\param tlocal The local tesselaltion
+	\param total The total number of points, given as output
 	\return The load imbalance
 	*/
-	double GetLoadImbalance(Tessellation const& tlocal)const;
+	double GetLoadImbalance(Tessellation const& tlocal,int &total)const;
 #endif
 };
 
