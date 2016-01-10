@@ -535,7 +535,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			{
 				res[static_cast<size_t>(boundaryedges[i])].first = cells[static_cast<size_t>(edge.neighbors.first)];
 				interp2(res[static_cast<size_t>(boundaryedges[i])].first,
-					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+					rslopes_[static_cast<size_t>(edge.neighbors.first)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 			}
 			else
 			{
@@ -558,7 +558,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			{
 				res[static_cast<size_t>(boundaryedges[i])].second = cells[static_cast<size_t>(edge.neighbors.second)];
 				interp2(res[static_cast<size_t>(boundaryedges[i])].second,
-					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+					rslopes_[static_cast<size_t>(edge.neighbors.second)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 			}
 			else
 			{
