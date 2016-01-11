@@ -72,10 +72,12 @@ public:
 	\brief Class constructor
 	\param points The points to build for
 	\param bc The geometric boundary conditions
+	\param HOrder Should the points be rearranged with  Hilbert ordering
 	*/
 	VoronoiMesh
 	(vector<Vector2D> const& points,
-	 OuterBoundary const& bc);
+	 OuterBoundary const& bc,
+		bool HOrder=true);
 
 #ifdef RICH_MPI
 	/*!
@@ -83,11 +85,13 @@ public:
 	\param points The points to build for
 	\param proctess The tessellation of the processors
 	\param bc The geometric boundary conditions
+	\param HOrder Should the points be rearranged with  Hilbert ordering
 	*/
 	VoronoiMesh
 	(Tessellation const& proctess,
 	 vector<Vector2D> const& points,
-	 OuterBoundary const& bc);
+	 OuterBoundary const& bc,
+		bool HOrder=true);
 #endif // RICH_MPI
 
 	/*!

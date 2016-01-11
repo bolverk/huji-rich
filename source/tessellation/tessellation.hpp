@@ -64,10 +64,10 @@ public:
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
-  \param HilbertOrder Should the points be rearranged before insertion
+  \param HOrder Should the points be rearranged before insertion
   \return The indeces of sort (if done, else empty)
    */
-  virtual vector<int> Update(const vector<Vector2D>& points, const Tessellation& tess, bool HilberOrder = false) = 0;
+  virtual vector<int> Update(const vector<Vector2D>& points, const Tessellation& tess, bool HOrder = false) = 0;
 #endif // RICH_MPI
 
   /*! \brief Get Total number of mesh generating points

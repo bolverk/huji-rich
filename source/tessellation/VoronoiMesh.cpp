@@ -326,7 +326,7 @@ namespace
 
 VoronoiMesh::VoronoiMesh
 (vector<Vector2D> const& points,
- OuterBoundary const& bc):
+ OuterBoundary const& bc, bool HOrder):
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -344,14 +344,15 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,&bc);
+	Initialise(points,&bc,HOrder);
 }
 
 #ifdef RICH_MPI
 VoronoiMesh::VoronoiMesh
 (Tessellation const& proctess,
  vector<Vector2D> const& points,
- OuterBoundary const& bc):
+ OuterBoundary const& bc,
+	bool HOrder):
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -369,7 +370,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,proctess,&bc);
+	Initialise(points,proctess,&bc,HOrder);
 }
 #endif
 
@@ -1742,7 +1743,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		if (!sentpoints.at(i).empty())
 		{
 			cortemphilbert = VectorValues(points, sentpoints.at(i));
-			indeces = HilbertOrder(cortemphilbert, static_cast<size_t>(cortemphilbert.size()));
+			indeces = HilbertOrder(cortemphilbert, static_cast<int>(cortemphilbert.size()));
 			tosend[i] = list_serialize(VectorValues(cortemphilbert, indeces));
 			sentpoints[i] = VectorValues(sentpoints[i], indeces);
 		}
