@@ -576,10 +576,15 @@ namespace
   }
 }
 
-void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
+void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
 {
 	obc=_bc;
-	Tri.build_delaunay(UpdatePoints(pv,obc),calc_procpoints(*obc));
+	vector<Vector2D> points;
+	if (reorder)
+		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
+	else
+		points = pv;
+	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
@@ -696,7 +701,7 @@ vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void VoronoiMesh::Update(const vector<Vector2D>& p)
+vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 {
 	// Clean_up last step
 	edges.clear();
@@ -707,7 +712,15 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Down)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Up)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Left),obc->GetGridBoundary(Up)));
-	vector<Vector2D> points=UpdatePoints(p,obc);
+
+	vector<Vector2D> points = UpdatePoints(pv, obc);
+	vector<int> HilbertIndeces;
+	if (reorder)
+	{
+		HilbertIndeces = HilbertOrder(points, static_cast<int>(pv.size()));
+		points = VectorValues(points,HilbertIndeces);
+	}
+
 	Tri.update(points,procpoints);
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
@@ -724,10 +737,10 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 		logger->output(*this);
 
 	CM.resize(Tri.getCor().size());
-	for (size_t i = 0; i<p.size(); ++i)
+	for (size_t i = 0; i<points.size(); ++i)
 		CM[i] = CalcCellCM(i);
 
-	size_t counter = p.size() + 3;
+	size_t counter = points.size() + 3;
 	if(obc->GetBoundaryType()==Periodic)
 	{
 		for(size_t i=0;i<8;++i)
@@ -767,6 +780,7 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 			}
 		}
 	}
+	return HilbertIndeces;
 }
 
 vector<int> VoronoiMesh::GetNeighbors(int index)const
@@ -1441,9 +1455,9 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 }
 
 #ifdef RICH_MPI
-void VoronoiMesh::Update
+vector<int> VoronoiMesh::Update
 (const vector<Vector2D>& points,
- const Tessellation& vproc)
+ const Tessellation& vproc, bool reorder)
 {
 	NGhostReceived.clear();
 	int rank;
@@ -1459,6 +1473,13 @@ void VoronoiMesh::Update
 	ConvexHull(cpoints, vproc, rank);
 	// Did points move between procs?
 	vector<Vector2D> newcor =  UpdateMPIPoints(vproc, rank, points, obc, selfindex, SentProcs, SentPoints);
+	
+	vector<int> HilbertIndeces;
+	if (reorder)
+	{
+		HilbertIndeces = HilbertOrder(newcor, static_cast<int>(newcor.size()));
+		newcor = VectorValues(newcor, HilbertIndeces);
+	}
 
 	//Build the delaunay
 	Tri.build_delaunay(newcor, cpoints);
@@ -1497,12 +1518,14 @@ void VoronoiMesh::Update
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
+
+	return HilbertIndeces;
 }
 
 void VoronoiMesh::Initialise
-(vector<Vector2D> const& points,
+(vector<Vector2D> const& pv,
  Tessellation const& vproc,
- OuterBoundary const* outer)
+ OuterBoundary const* outer,bool reorder)
 {
 	NGhostReceived.clear();
 	int rank;
@@ -1513,6 +1536,12 @@ void VoronoiMesh::Initialise
 	cell_edges.clear();
 	for (size_t i = 0; i<cedges.size(); ++i)
 		cell_edges.push_back(vproc.GetEdge(cedges[i]));
+
+	vector<Vector2D> points;
+	if (reorder)
+		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
+	else
+		points = pv;
 
 	// Get the convex hull of the cell
 	vector<Vector2D> cpoints;

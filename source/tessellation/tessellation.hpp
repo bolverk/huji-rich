@@ -36,32 +36,38 @@ public:
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points
     \param bc Boundary conditions of the computational domain
+	\param HilbertOrder Should the points be rearranged before insertion
    */
-  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc) = 0;
+  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc, bool HilberOrder = true) = 0;
 
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points
     \param tess The tessellation of the processors
 	\param outer The geometric outer boundary conditions
+	\param HilbertOrder Should the points be rearranged before insertion
    */
 #ifdef RICH_MPI
   virtual void Initialise(vector<Vector2D> const& points,Tessellation const& tess,
-	  OuterBoundary const* outer) = 0;
+	  OuterBoundary const* outer, bool HilberOrder = true) = 0;
 #endif
 
   /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
+  \param HilbertOrder Should the points be rearranged before insertion
+  \return The indeces of sort (if done, else empty)
    */
-  virtual void Update(const vector<Vector2D>& points) = 0;
+  virtual vector<int> Update(const vector<Vector2D>& points,bool HilberOrder=false) = 0;
 
 #ifdef RICH_MPI
   /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
+  \param HilbertOrder Should the points be rearranged before insertion
+  \return The indeces of sort (if done, else empty)
    */
-  virtual void Update(const vector<Vector2D>& points, const Tessellation& tess) = 0;
+  virtual vector<int> Update(const vector<Vector2D>& points, const Tessellation& tess, bool HilberOrder = false) = 0;
 #endif // RICH_MPI
 
   /*! \brief Get Total number of mesh generating points

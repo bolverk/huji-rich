@@ -242,13 +242,7 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		for(size_t i=0;i<oldpoints.size();++i)
 			oldpoints[i]+=pointvelocity[i]*dt;
     }
-	vector<int> indeces;
-	if (reorder)
-	{
-		indeces = HilbertOrder(oldpoints, static_cast<int>(oldpoints.size()));
-		oldpoints = VectorValues(oldpoints, indeces);
-	}
-	tessellation.Update(oldpoints);
+	vector<int> indeces=tessellation.Update(oldpoints,reorder);
 	return indeces;
 }
 
@@ -265,13 +259,7 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		for (size_t i = 0; i<oldpoints.size(); ++i)
 			oldpoints[i] += pointvelocity[i] * dt;
 	}
-	vector<int> indeces;
-	if (reorder)
-	{
-		indeces = HilbertOrder(oldpoints, static_cast<int>(oldpoints.size()));
-		oldpoints = VectorValues(oldpoints, indeces);
-	}
-	tessellation.Update(oldpoints,vproc);
+	vector<int> indeces=tessellation.Update(oldpoints,vproc,reorder);
 	return indeces;
 }
 #endif // RICH_MPI

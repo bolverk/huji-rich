@@ -177,7 +177,13 @@ void hdsim::TimeAdvance(void)
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	MoveMeshPoints(point_velocities, dt, tess_,proctess_,false);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_,proctess_, cycle_ % 10);
+	if(cycle_%10==0)
+	{
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 	// Keep relevant points
 	MPI_exchange_data(tess_, extensives_, false);
 	MPI_exchange_data(tess_, cells_, false);
@@ -335,8 +341,8 @@ void hdsim::TimeAdvance2Heun(void)
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, proctess_,cycle_%25==0);
-	if (cycle_ % 25 == 0)
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, proctess_,cycle_%10==0);
+	if (cycle_ % 10 == 0)
 	{
 		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
 		extensives_ = VectorValues(extensives_, HilbertIndeces);
