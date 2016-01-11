@@ -1471,16 +1471,21 @@ vector<int> VoronoiMesh::Update
 	// Get the convex hull of the cell
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints, vproc, rank);
-	// Did points move between procs?
-	vector<Vector2D> newcor =  UpdateMPIPoints(vproc, rank, points, obc, selfindex, SentProcs, SentPoints);
-	
+
 	vector<int> HilbertIndeces;
+	vector<Vector2D> newcor;
 	if (reorder)
 	{
-		HilbertIndeces = HilbertOrder(newcor, static_cast<int>(newcor.size()));
-		newcor = VectorValues(newcor, HilbertIndeces);
+		HilbertIndeces = HilbertOrder(points, static_cast<int>(points.size()));
+		newcor = VectorValues(points, HilbertIndeces);
 	}
+	else
+		newcor = points;
 
+
+	// Did points move between procs?
+	newcor =  UpdateMPIPoints(vproc, rank, newcor, obc, selfindex, SentProcs, SentPoints);
+	
 	//Build the delaunay
 	Tri.build_delaunay(newcor, cpoints);
 	eps = 1e-8;
@@ -1729,10 +1734,18 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	Vector2D vtemp;
 	req.clear();
 	req.resize(sentproc.size());
+	vector<int> indeces;
+	vector<Vector2D> cortemphilbert;
 	for (size_t i = 0; i < sentproc.size(); ++i)
 	{
 		const int dest = sentproc.at(i);
-		tosend[i] = list_serialize(VectorValues(points, sentpoints.at(i)));
+		if (!sentpoints.at(i).empty())
+		{
+			cortemphilbert = VectorValues(points, sentpoints.at(i));
+			indeces = HilbertOrder(cortemphilbert, static_cast<size_t>(cortemphilbert.size()));
+			tosend[i] = list_serialize(VectorValues(cortemphilbert, indeces));
+			sentpoints[i] = VectorValues(sentpoints[i], indeces);
+		}
 		if(tosend[i].empty())
 			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[i]);
 		else
