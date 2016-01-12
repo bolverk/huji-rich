@@ -144,7 +144,7 @@ namespace
 	}
 }
 
-void Delaunay::add_point(size_t index)
+void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
 	assert(InTriangle(TripleConstRef<Vector2D>(cor[olength],
@@ -206,27 +206,21 @@ void Delaunay::add_point(size_t index)
 	}
 
 	// check if flipping is needed
-	flip(triangle, static_cast<size_t>(temp_friends.third));
-	flip(static_cast<size_t>(location_pointer) + 1, static_cast<size_t>(temp_friends.first));
-	flip(static_cast<size_t>(location_pointer) + 2, static_cast<size_t>(temp_friends.second));
+	flip(triangle, static_cast<size_t>(temp_friends.third),flip_stack);
+	flip(static_cast<size_t>(location_pointer) + 1, static_cast<size_t>(temp_friends.first),flip_stack);
+	flip(static_cast<size_t>(location_pointer) + 2, static_cast<size_t>(temp_friends.second),flip_stack);
 
 	// _update number of facets
 	location_pointer += 2;
 }
 
-void Delaunay::flip(size_t i, size_t j)
+void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	if (j == static_cast<size_t>(last_loc))
 		return;
-	stack<std::pair<size_t, size_t> > flip_stack(std::deque<std::pair<size_t, size_t> >(1, std::pair<size_t, size_t>(i, j)));
-	//    (std::deque<std::pair<size_t,size_t> >(1,std::pair<size_t,size_t>(i,j)));
-	//  flip_stack.push(std::pair<int,int>(i,j));
+	flip_stack.push(std::pair<size_t, size_t>(i, j));
 	while (!flip_stack.empty())
 	{
-		//	  if(flip_stack.top().second==static_cast<size_t>(last_loc))
-		//			flip_stack.pop();
-		//		else
-		//		{
 		const pair<size_t, size_t> indexes = flip_stack.top();
 		// Returns the index to the point to check in coordinates and the index of the point in the facet
 		const pair<int, int> check = find_diff(f[indexes.second],
@@ -333,8 +327,9 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	location_pointer = 0;
 	// add the points
 	size_t nloop = static_cast<size_t>(length) - 3;
+	stack<std::pair<size_t, size_t> > flip_stack;
 	for (size_t i = 0; i < nloop; i++)
-		add_point(i);
+		add_point(i,flip_stack);
 	// Calculate radius
 	radius.resize(f.size());
 	int n = int(f.size());
@@ -609,11 +604,12 @@ int Delaunay::GetTotalLength(void)
 void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 {
 	int n = static_cast<int>(points.size());
+	stack<std::pair<size_t, size_t> > flip_stack;
 	//	vector<int> order=HilbertOrder(points,n);
 	for (int i = 0; i < n; ++i)
 	{
 		cor.push_back(points[static_cast<size_t>(i)]);
-		add_point(cor.size() - 1);
+		add_point(cor.size() - 1,flip_stack);
 	}
 }
 
