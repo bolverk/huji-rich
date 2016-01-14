@@ -205,14 +205,14 @@ namespace
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 #ifdef RICH_MPI
-				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo())
+				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo() || oldtess.GetOriginalIndex(real_neigh[j])==real_neigh[j])
 					continue;
 #endif
 				vector<int> neightemp = oldtess.GetNeighbors(real_neigh[j]);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 #ifdef RICH_MPI
-					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo())
+					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo() || oldtess.GetOriginalIndex(neightemp[k]) == neightemp[k])
 						continue;
 #endif
 					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())

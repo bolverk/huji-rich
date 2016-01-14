@@ -107,7 +107,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 		return Vector2D(0, 0);
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers), abs(cells[i].velocity));
-	return chi_*c*(s - r) / R*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+	return chi_*c*(s - r) / R;
 }
 
 Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
@@ -119,7 +119,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
 	const double c = d / dt;
-	return chi_*c*(s - r) / R*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+	return chi_*c*(s - r) / R;
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
