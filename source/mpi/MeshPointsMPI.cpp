@@ -146,12 +146,12 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	const double widthx = (upperright.x-lowerleft.x)/static_cast<double>(nx);
 	const double widthy = (upperright.y-lowerleft.y)/static_cast<double>(ny);
 	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
-	nx=static_cast<int>(floor((tessEdges[1]-tessEdges[0])/widthx+0.5));
-	ny=static_cast<int>(floor((tessEdges[3]-tessEdges[2])/widthy+0.5));
+	nx=static_cast<int>(floor((tessEdges[1]-tessEdges[0])/widthx+2));
+	ny=static_cast<int>(floor((tessEdges[3]-tessEdges[2])/widthy+2));
 	vector<Vector2D> res;
 	res.reserve(static_cast<size_t>(nx*ny));
-	const int nx0=static_cast<int>(floor((tessEdges[0]-lowerleft.x)/widthx+0.5));
-	const int ny0=static_cast<int>(floor((tessEdges[2]-lowerleft.y)/widthy+0.5));
+	const int nx0=static_cast<int>(floor((tessEdges[0]-lowerleft.x)/widthx-0.5));
+	const int ny0=static_cast<int>(floor((tessEdges[2]-lowerleft.y)/widthy-0.5));
 	Vector2D point;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
