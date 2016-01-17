@@ -149,13 +149,6 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 			res.at(i) += calc_dw(i, tess, dt);
 		}
 	}
-	// Limit shear velocity
-	vector<Vector2D> temp(res);
-	const size_t n = res.size();
-	for (size_t i = 0; i < n; ++i)
-	{
-		res.at(i) = LimitShearVelocity(temp, tess, static_cast<int>(i));
-	}
 	if (outer_.GetBoundaryType()!=Periodic)
 		CorrectPointsOverShoot(res, dt, tess,outer_);
 	return res;
