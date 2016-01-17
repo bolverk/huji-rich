@@ -12,53 +12,6 @@ RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double
 
 namespace
 {
-	Vector2D LimitShearVelocity(vector<Vector2D> &vel, Tessellation const& tess, int index)
-	{
-		vector<int> const& edges = tess.GetCellEdges(index);
-		vector<int> neigh = tess.GetNeighbors(index);
-		Vector2D const& mypoint = tess.GetMeshPoint(index);
-		for (size_t i = 0; i < edges.size(); ++i)
-		{
-			if (tess.GetOriginalIndex(neigh[i]) == index)
-				continue;
-			Edge const& edge = tess.GetEdge(edges[i]);
-			const double maxdist = std::max(mypoint.distance(edge.vertices.first),
-				mypoint.distance(edge.vertices.second));
-			Vector2D const& otherpoint = edge.neighbors.first == index ? tess.GetMeshPoint(edge.neighbors.second) :
-				tess.GetMeshPoint(edge.neighbors.first);
-			Vector2D normal = otherpoint - mypoint;
-			const double factor = 2 * maxdist / abs(normal);
-			normal = normal/abs(normal);
-			Vector2D parallel = edge.vertices.first - edge.vertices.second;
-			parallel = parallel / abs(parallel);
-			if (factor > 7)
-			{
-				return normal*ScalarProd(vel[static_cast<size_t>(index)],normal) +
-				  ScalarProd((vel[static_cast<size_t>(edge.neighbors.first)]+
-					      vel[static_cast<size_t>(edge.neighbors.second)])*0.5,parallel)*parallel;
-			}
-		}
-		return vel[static_cast<size_t>(index)];
-	}
-
-	void LimitNeighborVelocity(vector<Vector2D> &vel, Tessellation const& tess,	int index, double factor)
-	{
-		vector<int> neigh = tess.GetNeighbors(index);
-		Vector2D r = tess.GetMeshPoint(index);
-		double R = tess.GetWidth(index);
-		for (size_t i = 0; i<neigh.size(); ++i)
-		{
-			if (tess.GetOriginalIndex(neigh[i])!=index)
-			{
-				if (r.distance(tess.GetMeshPoint(neigh[i]))<0.1*R)
-				{
-					vel[static_cast<size_t>(neigh[i])] = vel[static_cast<size_t>(neigh[i])] * factor;
-					return;
-				}
-			}
-		}
-	}
-
 	void CorrectPointsOverShoot(vector<Vector2D> &v, double dt,Tessellation const& tess,OuterBoundary const&
 		outer)
 	{
@@ -72,25 +25,21 @@ namespace
 			{
 				double factor = 0.4*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].x*dt * 2 + point.x)<outer.GetGridBoundary(Left))
 			{
 				double factor = 0.4*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].y*dt * 2 + point.y)>outer.GetGridBoundary(Up))
 			{
 				double factor = 0.4*(outer.GetGridBoundary(Up) - point.y)*inv_dt / abs(v[i]);
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].y*dt * 2 + point.y)<outer.GetGridBoundary(Down))
 			{
 				double factor = 0.4*(point.y - outer.GetGridBoundary(Down))*	inv_dt / abs(v[i]);
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 		}
 		return;
