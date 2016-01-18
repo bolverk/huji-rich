@@ -1004,13 +1004,20 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, T
 			}
 			else
 			{
+				if (tess.GetOriginalIndex(neigh[j]) == candidates[i])
+					continue;
 				vector<int> neigh2 = tess.GetNeighbors(neigh[j]);
 				for (size_t k = 0; k < neigh2.size(); ++k)
 				{
-					if (tess.GetOriginalIndex(neigh2[k]) >= N)
+					if (tess.GetOriginalIndex(neigh2[k]) == neigh[j])
+						continue;
+					else
 					{
-						good = false;
-						break;
+						if (tess.GetOriginalIndex(neigh2[k]) >= N)
+						{
+							good = false;
+							break;
+						}
 					}
 				}
 			}
