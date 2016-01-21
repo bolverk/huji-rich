@@ -80,8 +80,9 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
    const vector<ComputationalCell>& old,
    const CacheData& cd) const
 {
-  vector<ComputationalCell> res = old;
-  for(size_t i=0;i<extensives.size();++i)
+	size_t N = static_cast<size_t>(tess.GetPointNo());
+  vector<ComputationalCell> res(N);
+  for(size_t i=0;i<N;++i)
 	  update_single(tess,pg,eos, extensives, old,cd,
        sequence_,
        i,res[i]);
