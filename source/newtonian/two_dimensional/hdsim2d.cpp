@@ -371,6 +371,7 @@ void hdsim::TimeAdvance2Heun(void)
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, mid_cells,true);
+	MPI_exchange_data(tess_, cells_, true);
 #endif
 	edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
