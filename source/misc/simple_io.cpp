@@ -40,6 +40,18 @@ namespace {
   }
 }
 
+vector<double> read_vector(string const& fname)
+{
+	double buf = 0;
+	vector<double> res;
+	ifstream f(fname.c_str());
+	assert(f || missing_file_data(fname));
+	while (f >> buf)
+		res.push_back(buf);
+	f.close();
+	return res;
+}
+
 double read_number(string const& fname)
 {
   double buf = 0;

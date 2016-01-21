@@ -21,24 +21,33 @@ namespace
 		for (size_t i = 0; i < n; ++i)
 		{
 			Vector2D point(tess.GetMeshPoint(static_cast<int>(i)));
+			double R = tess.GetWidth(static_cast<int>(i));
 			if ((v[i].x*dt * 2 + point.x)>outer.GetGridBoundary(Right))
 			{
-				double factor = 0.4*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
+				double factor = 0.25*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
+				if (R*0.1 > (outer.GetGridBoundary(Right) - point.x))
+					factor*=-0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].x*dt * 2 + point.x)<outer.GetGridBoundary(Left))
 			{
-				double factor = 0.4*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
+				double factor = 0.25*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
+				if (R*0.1 > (point.x - outer.GetGridBoundary(Left)))
+					factor*=-0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].y*dt * 2 + point.y)>outer.GetGridBoundary(Up))
 			{
-				double factor = 0.4*(outer.GetGridBoundary(Up) - point.y)*inv_dt / abs(v[i]);
+				double factor = 0.25*(outer.GetGridBoundary(Up) - point.y)*inv_dt / abs(v[i]);
+				if (R*0.1 > (outer.GetGridBoundary(Up) - point.y))
+					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].y*dt * 2 + point.y)<outer.GetGridBoundary(Down))
 			{
-				double factor = 0.4*(point.y - outer.GetGridBoundary(Down))*	inv_dt / abs(v[i]);
+				double factor = 0.25*(point.y - outer.GetGridBoundary(Down))*	inv_dt / abs(v[i]);
+				if (R*0.1 > (point.y - outer.GetGridBoundary(Down)))
+					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 		}
