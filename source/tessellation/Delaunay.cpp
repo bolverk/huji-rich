@@ -755,66 +755,9 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	// Walk to an outer point
 	int cur_facet = static_cast<int>(Walk(olength));
-	// Find the real point
-	int real_point = 0;
-	for (int i = 0; i < 3; ++i)
-	{
-		if (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] < static_cast<int>(olength))
-		{
-			real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
-			break;
-		}
-	}
-	vector<int> containing_facets;
-	FindContainingTetras(cur_facet, real_point, containing_facets);
-	for (size_t i = 0; i < containing_facets.size(); ++i)
-	{
-		if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], static_cast<int>(olength)))
-		{
-			cur_facet = containing_facets[static_cast<size_t>(i)];
-			break;
-		}
-	}
-	int start_facet = cur_facet;
-	int point_index = FindPointInFacet(cur_facet, real_point);
-	// Make sure we are at the right location in the triangle, we want to be in the last outer point
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], static_cast<int>(olength)))
-	{
-		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
-	}
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], static_cast<int>(olength)))
-	{
-		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
-	}
-	do
-	{
-		FindContainingTetras(cur_facet, real_point, containing_facets);
-		int old_current = cur_facet;
-		for (size_t i = 0; i < containing_facets.size(); ++i)
-		{
-			if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], static_cast<int>(olength)) &&
-				containing_facets[static_cast<size_t>(i)] != old_current)
-				cur_facet = containing_facets[static_cast<size_t>(i)];
-			if (!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], static_cast<int>(olength)))
-				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
-		}
-		point_index = (1 + FindPointInFacet(cur_facet, real_point)) % 3;
-		if (IsTripleOut(cur_facet))
-			point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
-	} while (start_facet != cur_facet);
-	sort(f_temp.begin(), f_temp.end());
-	f_temp = unique(f_temp);
-	// Found all initial outer facets
-
-	//Find the points in the outer facets
 	vector<vector<int> > toduplicate(edges.size());
-	// Recursively look for more points
-	vector<bool> checked(static_cast<size_t>(olength), false);
-	for (size_t i = 0; i < f_temp.size(); ++i)
-		AddOuterFacets(f_temp[i], toduplicate, edges, checked);
+	vector<bool> checked(f.size(), false);
+	AddOuterFacets(cur_facet, toduplicate, edges, checked);
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 		sort(toduplicate[static_cast<size_t>(i)].begin(), toduplicate[static_cast<size_t>(i)].end());
