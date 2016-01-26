@@ -1102,10 +1102,7 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 			if (added)
 			{
 				for (size_t j = 0; j < neigh.size(); ++j)
-				{
-					if (!IsOuterQuick(f[static_cast<size_t>(neigh[static_cast<size_t>(j)])], static_cast<int>(olength)))
-						tocheck.push(neigh[static_cast<size_t>(j)]);
-				}
+					tocheck.push(neigh[static_cast<size_t>(j)]);
 			}
 		}
 	}
