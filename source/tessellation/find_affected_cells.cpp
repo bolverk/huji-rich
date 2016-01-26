@@ -71,10 +71,12 @@ namespace {
 		else
 		{
 			res.push_back(index);
-			BOOST_FOREACH(int nbr, tess.GetNeighbors(index))
+			vector<int> vtemp = tess.GetNeighbors(index);
+			size_t NN = vtemp.size();
+			for(size_t j = 0; j < NN;++j)
 			{			
-			  if(nbr<tess.GetPointNo())
-					find_affected_cells2(tess,nbr,circle,res,visited);
+			  if(vtemp[j]<tess.GetPointNo())
+					find_affected_cells2(tess, vtemp[j],circle,res,visited);
 			}
 			return;
 		}
@@ -84,18 +86,21 @@ namespace {
 vector<int> find_affected_cells
 (const Tessellation& tess,
  int index,
- const Circle& circle)
+ const Circle& circle, vector<int> &vtemp)
 {
   vector<int> res;
-  BOOST_FOREACH(int nbr, tess.GetNeighbors(index)){
-    if(nbr<tess.GetPointNo() && 
-       cell_circle_intersect(tess,nbr,circle))
-      res.push_back(nbr);      
+  vtemp = tess.GetNeighbors(index);
+  size_t N = vtemp.size();
+  for (size_t i = 0; i < N;++i)
+  {
+    if(vtemp[i]<tess.GetPointNo() && 
+       cell_circle_intersect(tess,vtemp[i],circle))
+      res.push_back(vtemp[i]);      
   }
   return res;
 }
 
-void find_affected_cells(const Tessellation& tess,int index,const Circle& circle,
+void find_affected_cells_recursive(const Tessellation& tess,int index,const Circle& circle,
 	vector<int> &res)
 {
 	vector<int> visited;

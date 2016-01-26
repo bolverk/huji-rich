@@ -49,6 +49,7 @@ public:
 
 	vector<int> GetNeighbors(int index)const;
 
+	void GetNeighbors(int index, vector<int> &neigh)const;
 	/*!
 	\brief Returns the list of neighbors including ghost points
 	\return The neighbors

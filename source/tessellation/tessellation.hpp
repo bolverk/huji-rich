@@ -142,6 +142,7 @@ virtual vector<Vector2D>& GetMeshPoints(void)=0;
 
 virtual vector<int> GetNeighbors(int index)const=0;
 
+virtual void GetNeighbors(int index,vector<int> &neigh)const = 0;
 /*!
 	\brief Cloning function
 */

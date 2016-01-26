@@ -608,6 +608,11 @@ vector<int> StaticVoronoiMesh::GetNeighbors(int index)const
   return res;
 }
 
+void StaticVoronoiMesh::GetNeighbors(int index, vector<int> &neigh)const
+{
+	neigh = GetNeighbors(index);
+}
+
 vector<int> StaticVoronoiMesh::GetLiteralNeighbors(int index)const
 {
   int n=static_cast<int>(mesh_vertices[static_cast<size_t>(index)].size());

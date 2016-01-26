@@ -1175,6 +1175,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<vector<int> > res;
+	vector<int> vtemp;
 	if (!recursive)
 		res.resize(own_edges.size());
 	stack<int> tocheck = initialise_tocheck
@@ -1218,10 +1219,10 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
 				vector<int> cputosendto;
 				if (recursive)
-					find_affected_cells(tproc,rank, circ, cputosendto);
+					find_affected_cells_recursive(tproc,rank, circ, cputosendto);
 				else
 					cputosendto = find_affected_cells
-					(tproc, rank, circ);
+					(tproc, rank, circ,vtemp);
 				sort(cputosendto.begin(), cputosendto.end());
 				cputosendto = unique(cputosendto);
 

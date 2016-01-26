@@ -145,10 +145,11 @@ namespace
 			throw UniversalError("Merits and Candidates don't have same size in RemoveNeighbors");
 		// Make sure there are no neighbors
 		vector<size_t> bad_neigh;
+		vector<int> neigh;
 		for (size_t i = 0; i < merits.size(); ++i)
 		{
 			bool good = true;
-			vector<int> neigh = tess.GetNeighbors(static_cast<int>(candidates[i]));
+			tess.GetNeighbors(static_cast<int>(candidates[i]),neigh);
 			size_t nneigh = neigh.size();
 			if (!good)
 				continue;
@@ -197,6 +198,7 @@ namespace
 		stack<int> tocheck;
 		stack<vector<Vector2D> > tocheck_hull;
 		vector<int> checked(real_neigh);
+		vector<int> neightemp;
 		for (size_t j = 0; j < Chull.size(); ++j)
 		{
 			double v = AreaOverlap(temp, Chull[j]);
@@ -208,7 +210,7 @@ namespace
 				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo() || oldtess.GetOriginalIndex(real_neigh[j])==real_neigh[j])
 					continue;
 #endif
-				vector<int> neightemp = oldtess.GetNeighbors(real_neigh[j]);
+				oldtess.GetNeighbors(real_neigh[j],neightemp);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 #ifdef RICH_MPI
@@ -237,7 +239,7 @@ namespace
 			{
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(cur_check)], eos, v);
 				TotalVolume += v;
-				vector<int> neightemp = oldtess.GetNeighbors(cur_check);
+				oldtess.GetNeighbors(cur_check,neightemp);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 #ifdef RICH_MPI
@@ -305,9 +307,10 @@ namespace
 		}
 		// Get neighbor neighbors
 		const size_t NN = real_neigh.size();
+		vector<int> neigh_temp;
 		for (size_t j = 0; j < NN; ++j)
 		{
-			vector<int> neigh_temp = tess.GetNeighbors(real_neigh[j]);
+			tess.GetNeighbors(real_neigh[j],neigh_temp);
 			for (size_t i = 0; i < neigh_temp.size(); ++i)
 			{
 				if (std::find(real_neigh.begin(), real_neigh.end(), tess.GetOriginalIndex(neigh_temp[i])) == real_neigh.end())
@@ -403,6 +406,7 @@ void AMR::GetNewPoints2(vector<size_t> const& ToRefine, Tessellation const& tess
 	NewPoints.reserve(ToRefine.size());
 	Moved.clear();
 	Moved.reserve(ToRefine.size());
+	vector<int> neigh;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 	{
 		// Split only if cell is rather round
@@ -413,7 +417,7 @@ void AMR::GetNewPoints2(vector<size_t> const& ToRefine, Tessellation const& tess
 			continue;
 		if (myCM.distance(mypoint) > 0.2*R)
 			continue;
-		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
+		tess.GetNeighbors(static_cast<int>(ToRefine[i]),neigh);
 		double otherdist = mypoint.distance(tess.GetMeshPoint(neigh[0]));
 		size_t max_ind = 0;
 		for (size_t j = 1; j < neigh.size(); ++j)
@@ -447,6 +451,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	NewPoints.reserve(ToRefine.size() * 7);
 	Moved.clear();
 	Moved.reserve(ToRefine.size() * 7);
+	vector<int> neigh;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 	{
 		// Split only if cell is rather round
@@ -455,7 +460,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) < 0.65)
 			continue;
 
-		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
+		tess.GetNeighbors(static_cast<int>(ToRefine[i]),neigh);
 		vector<int> const& edges = tess.GetCellEdges(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{

@@ -794,6 +794,17 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
   return res;
 }
 
+void VoronoiMesh::GetNeighbors(int index, vector<int> &neigh)const
+{
+	neigh.resize(mesh_vertices[static_cast<size_t>(index)].size());
+	size_t N = neigh.size();
+	for (size_t i = 0; i<N; ++i)
+		neigh[i] = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first != index ?
+		edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first :
+		edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.second;
+}
+
+
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 {
   int n=static_cast<int>(mesh_vertices[static_cast<size_t>(index)].size());
@@ -1664,11 +1675,11 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		}
 		if (good)
 			continue;
+		vector<Vector2D> cellpoints;
 		for (size_t j = 0; j<nproc; ++j)
 		{
 			if (std::find(realneigh.begin(), realneigh.end(), j) != realneigh.end() || j == static_cast<size_t>(rank))
 				continue;
-			vector<Vector2D> cellpoints;
 			ConvexHull(cellpoints, vproc, static_cast<int>(j));
 			if (PointInCell(cellpoints, temp))
 			{
