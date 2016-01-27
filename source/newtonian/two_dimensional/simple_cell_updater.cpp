@@ -36,16 +36,28 @@ namespace {
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
 		(res.tracers.begin() + static_cast<int>(i))->second = 
 		(extensive.tracers.begin() + static_cast<int>(i))->second / extensive.mass;
-    res.pressure = eos.de2p
-      (res.density,
-       energy,
-       res.tracers);
-    res.stickers = old.stickers;
-	string entropy = "Entropy";
-	if (old.tracers.find(entropy) != old.tracers.end())
+	try
 	{
-		res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
-		extensive.tracers[entropy] = res.tracers[entropy] * extensive.mass;
+		res.pressure = eos.de2p
+			(res.density,
+				energy,
+				res.tracers);
+		res.stickers = old.stickers;
+		string entropy = "Entropy";
+		if (old.tracers.find(entropy) != old.tracers.end())
+		{
+			res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
+			extensive.tracers[entropy] = res.tracers[entropy] * extensive.mass;
+		}
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Cell index", static_cast<double>(index));
+		eo.AddEntry("Cell mass", extensive.mass);
+		eo.AddEntry("Cell x momentum", extensive.momentum.x);
+		eo.AddEntry("Cell y momentum", extensive.momentum.y);
+		eo.AddEntry("Cell energy", extensive.energy);
+		throw eo;
 	}
   }
 
