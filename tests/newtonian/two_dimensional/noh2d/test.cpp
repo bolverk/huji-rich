@@ -175,7 +175,7 @@ int main(void)
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion, eos,0.15,0.02,true);
+	RoundCells pointmotion(l_motion, eos,0.5,0.01,true);
 	const StationaryBox evc;
 
 	// Set the ghost points
