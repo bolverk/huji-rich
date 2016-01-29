@@ -68,7 +68,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 	return chi_*c*(s - r) / R;
 }
 
-Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
+Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells)const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -76,8 +76,18 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
 	const double R = tess.GetWidth(static_cast<int>(i));
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
-	const double c = d / dt;
-	return chi_*c*(s - r) / R;
+	vector<int> neigh = tess.GetNeighbors(static_cast<int>(i));
+	size_t N = neigh.size();
+	double cs =std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
+		cells[i].tracers));
+	for (size_t j = 0; j < N; ++j)
+	{
+		cs = std::max(cs, eos_.dp2c(cells[static_cast<size_t>(neigh[j])].density, cells[static_cast<size_t>(neigh[j])].pressure,
+			cells[static_cast<size_t>(neigh[j])].tracers));
+		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity));
+	}
+	const double c_dt = d / dt;
+	return chi_*std::min(c_dt,cs)*(s - r) / R;
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
@@ -104,7 +114,7 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			res.at(i) += calc_dw(i, tess, dt);
+			res.at(i) += calc_dw(i, tess, dt,cells);
 		}
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
