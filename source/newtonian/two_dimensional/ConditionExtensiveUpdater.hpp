@@ -100,7 +100,8 @@ public:
 			const CacheData& cd,
 			const vector<ComputationalCell>& cells,
 			Extensive& extensive,
-			size_t index)const;
+			size_t index,
+			double time)const;
 private:
 	EquationOfState const& eos_;
 	LinearGaussImproved const& interp_;

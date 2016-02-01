@@ -99,7 +99,8 @@ void ColdFlowsUpdate::operator()
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
 	Extensive& extensive,
-	size_t index)const
+	size_t index,
+	double /*time*/)const
 {
 	if (!SmallThermalEnergy(extensive))
 		return;
