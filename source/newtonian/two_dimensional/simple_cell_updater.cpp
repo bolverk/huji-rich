@@ -3,7 +3,7 @@
 
 SimpleCellUpdater::SimpleCellUpdater
 (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence):
-  sequence_(sequence) {}
+  sequence_(sequence),entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)
 {
@@ -25,7 +25,8 @@ namespace {
    const ComputationalCell& old,
    const CacheData& cd,
    const size_t index,
-	  ComputationalCell &res)
+	  ComputationalCell &res,
+	  string const& entropy)
   {
     Extensive& extensive = extensives[index];
     const double volume = cd.volumes[index];
@@ -33,6 +34,7 @@ namespace {
     res.velocity = extensive.momentum/extensive.mass;
     const double energy = extensive.energy/extensive.mass -
       0.5*ScalarProd(res.velocity,res.velocity);
+	res.stickers = old.stickers;
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
 		(res.tracers.begin() + static_cast<int>(i))->second = 
 		(extensive.tracers.begin() + static_cast<int>(i))->second / extensive.mass;
@@ -42,8 +44,6 @@ namespace {
 			(res.density,
 				energy,
 				res.tracers);
-		res.stickers = old.stickers;
-		string entropy = "Entropy";
 		if (old.tracers.find(entropy) != old.tracers.end())
 		{
 			res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
@@ -70,7 +70,8 @@ namespace {
    const CacheData& cd,
    const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence,
    const size_t index,
-	  ComputationalCell &res)
+	  ComputationalCell &res,
+	  string const& entropy)
   {
     for(size_t i=0;i<sequence.size();++i)
 	{
@@ -80,7 +81,7 @@ namespace {
 			return;
 		}
     }
-	regular_update(eos,extensives,old.at(index),cd,index,res);
+	regular_update(eos,extensives,old.at(index),cd,index,res,entropy);
   }
 }
 
@@ -97,7 +98,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
   for(size_t i=0;i<N;++i)
 	  update_single(tess,pg,eos, extensives, old,cd,
        sequence_,
-       i,res[i]);
+       i,res[i],entropy_);
   return res;
 }
 
