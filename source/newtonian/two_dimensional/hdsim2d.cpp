@@ -161,7 +161,8 @@ void hdsim::TimeAdvance(void)
 		dt,
 		cache_data_,
 		cells_,
-		extensives_);
+		extensives_,
+		time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -244,7 +245,7 @@ void hdsim::TimeAdvanceClip(void)
 		dt,
 		cache_data_,
 		cells_,
-		extensives_);
+		extensives_,time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -335,7 +336,7 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt,
 	   mid_extensives);
 	
-	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives,time_);
 
 
 #ifdef RICH_MPI
@@ -399,7 +400,7 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt,
 	   mid_extensives);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives,time_+dt);
 
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
@@ -437,7 +438,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives);
+	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives,time_);
 
 	ExternalForceContribution(*oldtess,pg_, data_temp,cells_,fluxes,point_velocities,source_,time_,0.5*dt,mid_extensives);
 
@@ -459,7 +460,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	extensives_ = extensives_ + FluxFix2(*oldtess, *midtess, tess_, point_velocities, dt, mid_cells, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_);
+	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_,time_);
 
 	ExternalForceContribution(*midtess,pg_, cachetemp2,mid_cells,fluxes,point_velocities,source_,time_,dt,extensives_);
 
@@ -494,7 +495,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	vector<Extensive> mid_extensives = extensives_;
 
-	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives);
+	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives,time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, cells_, fluxes, point_velocities, source_, time_, 0.5*dt, mid_extensives);
 
@@ -524,7 +525,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_,time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, mid_cells, fluxes, point_velocities, source_, time_, dt, extensives_);
 

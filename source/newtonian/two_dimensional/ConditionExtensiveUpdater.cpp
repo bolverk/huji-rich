@@ -23,7 +23,8 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	const double dt,
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
-	vector<Extensive>& extensives) const
+	vector<Extensive>& extensives,
+	double time) const
 {
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	Extensive delta(extensives[0]);
@@ -42,9 +43,9 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	{
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells))
+			if (sequence_[j].first->operator()(i, tess, cells,time))
 			{
-				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i);
+				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i,time);
 				break;
 			}
 		}
