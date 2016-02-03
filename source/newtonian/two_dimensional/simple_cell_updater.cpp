@@ -57,7 +57,7 @@ namespace {
 		eo.AddEntry("Cell x momentum", extensive.momentum.x);
 		eo.AddEntry("Cell y momentum", extensive.momentum.y);
 		eo.AddEntry("Cell energy", extensive.energy);
-		throw eo;
+		throw;
 	}
   }
 
