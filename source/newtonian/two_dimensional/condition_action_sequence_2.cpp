@@ -58,7 +58,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 	const double time,
 	const double /*dt*/) const
 {
-	edge_values_.resize(tess.GetTotalSidesNumber(),
+	edge_values_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	interp_.operator()(tess, cells, time,edge_values_);
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);

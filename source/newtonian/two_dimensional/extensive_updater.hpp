@@ -28,7 +28,7 @@ public:
     \param cd Cache data
     \param cells Computational cells
     \param extensives Extensive variables
-	\param time
+	\param time The time
    */
   virtual void operator()
   (const vector<Extensive>& fluxes,

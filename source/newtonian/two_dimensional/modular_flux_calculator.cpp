@@ -41,7 +41,7 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess,co
 	const vector<ComputationalCell>& cells,const vector<Extensive>& /*extensives*/,const CacheData& /*cd*/,
 	const EquationOfState& eos,const double time,const double /*dt*/) const
 {
-	interpolated_.resize(tess.GetTotalSidesNumber(),
+	interpolated_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	sr_(tess, cells, time,interpolated_);
 	vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);

@@ -43,7 +43,7 @@ public:
 			\param cells Computational cells
 			\param extensive Extensive variable, input is after the addition of hydro fluxes
 			\param index The index of the cell
-			\param time
+			\param time The time
 		*/
 		virtual void operator()
 			(const vector<Extensive>& fluxes,
