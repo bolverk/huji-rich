@@ -36,6 +36,7 @@ void find_affected_cells_recursive(const Tessellation& tess,
   \param tess Tessellation
   \param index Cell index
   \param circle Circle
+  \param vtemp Temperaroy object for not reallocating on heap
   \return Vector with indices of affected cells
  */
 vector<int> find_affected_cells

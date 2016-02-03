@@ -141,6 +141,12 @@ virtual vector<Vector2D>& GetMeshPoints(void)=0;
 */
 
 virtual vector<int> GetNeighbors(int index)const=0;
+/*!
+\brief Returns the indeces of the neighbors
+\param index The cell to check
+\param neigh the indeces of the neighbors given as output
+\return The neighbors
+*/
 
 virtual void GetNeighbors(int index,vector<int> &neigh)const = 0;
 /*!

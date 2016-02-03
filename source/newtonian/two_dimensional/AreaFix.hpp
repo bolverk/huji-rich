@@ -15,7 +15,7 @@
 #include "../../misc/utils.hpp"
 #include "../../tessellation/geotests.hpp"
 
-/*
+/*!
 \brief Fixes the flux to propely converge second order
 \param tessold The tessellation at the beginning of the time step
 \param tessmid The tessellation at the mid time step (old for first fix)
