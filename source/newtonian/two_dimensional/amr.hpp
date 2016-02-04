@@ -273,6 +273,7 @@ private:
 	CellsToRemove const& remove_;
   SimpleAMRCellUpdater scu_;
   SimpleAMRExtensiveUpdater seu_;
+  LinearGaussImproved *interp_;
 	AMRExtensiveUpdater* eu_;
 
 	NonConservativeAMR(NonConservativeAMR const& other);
@@ -286,10 +287,12 @@ public:
     \param refine Refinement scheme
     \param remove Removal scheme
     \param eu Extensive updater
+	\param slopes Slopes
    */
   NonConservativeAMR
   (CellsToRefine const& refine,
    CellsToRemove const& remove,
+	  LinearGaussImproved *slopes = 0,
    AMRExtensiveUpdater* eu = 0);
 
 	void UpdateCellsRefine(Tessellation &tess,
