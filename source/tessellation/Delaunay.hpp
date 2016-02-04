@@ -62,7 +62,6 @@ private:
     DataOnlyForBuild();
     DataOnlyForBuild(DataOnlyForBuild const& other);
     DataOnlyForBuild& operator=(DataOnlyForBuild const& other);
-    vector<int> insert_order;
     vector<vector<char> > copied;
   };
 
@@ -78,8 +77,8 @@ private:
   int last_loc;
 
   bool IsOuterFacet(int facet)const;
-  void add_point(size_t index);
-  void flip(size_t i,size_t j);
+  void add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack);
+  void flip(size_t i,size_t j, stack<std::pair<size_t, size_t> > & flip_stack);
   size_t Walk(size_t point);
   void CheckInput();
   double CalculateRadius(int facet);

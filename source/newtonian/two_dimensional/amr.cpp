@@ -62,18 +62,22 @@ namespace
 		using namespace ClipperLib;
 		Paths subj(1), clip(1), solution;
 		double maxi = 0;
+		Vector2D cm0;
 		for (size_t i = 0; i < poly0.size(); ++i)
-			maxi = std::max(maxi, std::max(std::abs(poly0[i].x), std::abs(poly0[i].y)));
+			cm0 += poly0[i];
+		cm0 = cm0/static_cast<double>(poly0.size());
+		for (size_t i = 0; i < poly0.size(); ++i)
+			maxi = std::max(maxi, std::max(std::abs(poly0[i].x-cm0.x), std::abs(poly0[i].y-cm0.y)));
 		for (size_t i = 0; i < poly1.size(); ++i)
-			maxi = std::max(maxi, std::max(std::abs(poly1[i].x), std::abs(poly1[i].y)));
-		int maxscale = static_cast<int>(log10(maxi) + 6);
+			maxi = std::max(maxi, std::max(std::abs(poly1[i].x-cm0.x), std::abs(poly1[i].y-cm0.y)));
+		int maxscale = static_cast<int>(log10(maxi) + 10);
 
 		subj[0].resize(poly0.size());
 		clip[0].resize(poly1.size());
 		for (size_t i = 0; i < poly0.size(); ++i)
-			subj[0][i] = IntPoint(static_cast<cInt>(poly0[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly0[i].y*pow(10.0, 18 - maxscale)));
+			subj[0][i] = IntPoint(static_cast<cInt>((poly0[i].x-cm0.x)*pow(10.0, 18 - maxscale)), static_cast<cInt>((poly0[i].y-cm0.y)*pow(10.0, 18 - maxscale)));
 		for (size_t i = 0; i < poly1.size(); ++i)
-			clip[0][i] = IntPoint(static_cast<cInt>(poly1[i].x*pow(10.0, 18 - maxscale)), static_cast<cInt>(poly1[i].y*pow(10.0, 18 - maxscale)));
+			clip[0][i] = IntPoint(static_cast<cInt>((poly1[i].x-cm0.x)*pow(10.0, 18 - maxscale)), static_cast<cInt>((poly1[i].y-cm0.y)*pow(10.0, 18 - maxscale)));
 
 		//perform intersection ...
 		Clipper c;
@@ -141,10 +145,11 @@ namespace
 			throw UniversalError("Merits and Candidates don't have same size in RemoveNeighbors");
 		// Make sure there are no neighbors
 		vector<size_t> bad_neigh;
+		vector<int> neigh;
 		for (size_t i = 0; i < merits.size(); ++i)
 		{
 			bool good = true;
-			vector<int> neigh = tess.GetNeighbors(static_cast<int>(candidates[i]));
+			tess.GetNeighbors(static_cast<int>(candidates[i]),neigh);
 			size_t nneigh = neigh.size();
 			if (!good)
 				continue;
@@ -193,6 +198,7 @@ namespace
 		stack<int> tocheck;
 		stack<vector<Vector2D> > tocheck_hull;
 		vector<int> checked(real_neigh);
+		vector<int> neightemp;
 		for (size_t j = 0; j < Chull.size(); ++j)
 		{
 			double v = AreaOverlap(temp, Chull[j]);
@@ -201,14 +207,14 @@ namespace
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 #ifdef RICH_MPI
-				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo())
+				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo() || oldtess.GetOriginalIndex(real_neigh[j])==real_neigh[j])
 					continue;
 #endif
-				vector<int> neightemp = oldtess.GetNeighbors(real_neigh[j]);
+				oldtess.GetNeighbors(real_neigh[j],neightemp);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 #ifdef RICH_MPI
-					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo())
+					if (oldtess.GetOriginalIndex(neightemp[k]) > tess.GetPointNo() || oldtess.GetOriginalIndex(neightemp[k]) == neightemp[k])
 						continue;
 #endif
 					if (std::find(checked.begin(), checked.end(), oldtess.GetOriginalIndex(neightemp[k])) == checked.end())
@@ -233,7 +239,7 @@ namespace
 			{
 				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(cur_check)], eos, v);
 				TotalVolume += v;
-				vector<int> neightemp = oldtess.GetNeighbors(cur_check);
+				oldtess.GetNeighbors(cur_check,neightemp);
 				for (size_t k = 0; k < neightemp.size(); ++k)
 				{
 #ifdef RICH_MPI
@@ -256,7 +262,9 @@ namespace
 		{
 			std::cout << "In refine Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
 #ifndef RICH_MPI
-			throw UniversalError("Not same volume in amr refine");
+			UniversalError eo("Not same volume in amr refine");
+			eo.AddEntry("location",static_cast<double>(location));
+			throw eo;
 #endif
 		}
 		return NewExtensive;
@@ -299,9 +307,10 @@ namespace
 		}
 		// Get neighbor neighbors
 		const size_t NN = real_neigh.size();
+		vector<int> neigh_temp;
 		for (size_t j = 0; j < NN; ++j)
 		{
-			vector<int> neigh_temp = tess.GetNeighbors(real_neigh[j]);
+			tess.GetNeighbors(real_neigh[j],neigh_temp);
 			for (size_t i = 0; i < neigh_temp.size(); ++i)
 			{
 				if (std::find(real_neigh.begin(), real_neigh.end(), tess.GetOriginalIndex(neigh_temp[i])) == real_neigh.end())
@@ -397,6 +406,7 @@ void AMR::GetNewPoints2(vector<size_t> const& ToRefine, Tessellation const& tess
 	NewPoints.reserve(ToRefine.size());
 	Moved.clear();
 	Moved.reserve(ToRefine.size());
+	vector<int> neigh;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 	{
 		// Split only if cell is rather round
@@ -407,7 +417,7 @@ void AMR::GetNewPoints2(vector<size_t> const& ToRefine, Tessellation const& tess
 			continue;
 		if (myCM.distance(mypoint) > 0.2*R)
 			continue;
-		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
+		tess.GetNeighbors(static_cast<int>(ToRefine[i]),neigh);
 		double otherdist = mypoint.distance(tess.GetMeshPoint(neigh[0]));
 		size_t max_ind = 0;
 		for (size_t j = 1; j < neigh.size(); ++j)
@@ -441,6 +451,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 	NewPoints.reserve(ToRefine.size() * 7);
 	Moved.clear();
 	Moved.reserve(ToRefine.size() * 7);
+	vector<int> neigh;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 	{
 		// Split only if cell is rather round
@@ -449,7 +460,7 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		if (GetAspectRatio(tess, static_cast<int>(ToRefine[i])) < 0.65)
 			continue;
 
-		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRefine[i]));
+		tess.GetNeighbors(static_cast<int>(ToRefine[i]),neigh);
 		vector<int> const& edges = tess.GetCellEdges(static_cast<int>(ToRefine[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
@@ -485,16 +496,8 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 			if (!PointInCell(proc_chull, candidate))
 				continue;
 #endif
-			if (static_cast<size_t>(neigh[j]) < N)
-			{
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
-				Moved.push_back(Vector2D());
-			}
-			else
-			{
-				Moved.push_back(FixInDomain(obc, candidate));
-				NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
-			}
+			Moved.push_back(FixInDomain(obc, candidate));
+			NewPoints.push_back(std::pair<size_t, Vector2D>(ToRefine[i], candidate));
 		}
 	}
 }
@@ -1006,13 +1009,20 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, T
 			}
 			else
 			{
+				if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(candidates[i]))
+					continue;
 				vector<int> neigh2 = tess.GetNeighbors(neigh[j]);
 				for (size_t k = 0; k < neigh2.size(); ++k)
 				{
-					if (tess.GetOriginalIndex(neigh2[k]) >= N)
+					if (tess.GetOriginalIndex(neigh2[k]) == neigh[j])
+						continue;
+					else
 					{
-						good = false;
-						break;
+						if (tess.GetOriginalIndex(neigh2[k]) >= N)
+						{
+							good = false;
+							break;
+						}
 					}
 				}
 			}

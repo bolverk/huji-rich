@@ -23,13 +23,16 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	const double dt,
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
-	vector<Extensive>& extensives) const
+	vector<Extensive>& extensives,
+	double time) const
 {
 	const vector<Edge>& edge_list = tess.getAllEdges();
+	Extensive delta(extensives[0]);
 	for (size_t i = 0; i<edge_list.size(); ++i)
 	{
 		const Edge& edge = edge_list[i];
-		const Extensive delta = dt*cd.areas[i] * fluxes[i];
+		ReplaceExtensive(delta, fluxes[i]);
+		delta *= dt*cd.areas[i];
 		if (bracketed(0, edge.neighbors.first, tess.GetPointNo()))
 			extensives[static_cast<size_t>(edge.neighbors.first)] -= delta;
 		if (bracketed(0, edge.neighbors.second, tess.GetPointNo()))
@@ -40,9 +43,9 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	{
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells))
+			if (sequence_[j].first->operator()(i, tess, cells,time))
 			{
-				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i);
+				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i,time);
 				break;
 			}
 		}
@@ -96,7 +99,8 @@ void ColdFlowsUpdate::operator()
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
 	Extensive& extensive,
-	size_t index)const
+	size_t index,
+	double /*time*/)const
 {
 	if (!SmallThermalEnergy(extensive))
 		return;

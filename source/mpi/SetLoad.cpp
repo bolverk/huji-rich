@@ -57,6 +57,7 @@ namespace
 			*/
 			try
 			{
+				MPI_Barrier(MPI_COMM_WORLD);
 				local.Update(cp,tproc);
 				//				if(rank==0)
 				//				cout<<"h3"<<endl;

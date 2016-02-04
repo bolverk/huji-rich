@@ -18,12 +18,14 @@ public:
 		\param index The index of the cell
 		\param tess Tessellation
 		\param cells Computational cells
+		\param time The sim time
 		\return Whether the cell satisfies a condition.
 		*/
 		virtual bool operator()
 			(size_t index,
 				const Tessellation& tess,
-				const vector<ComputationalCell>& cells) const = 0;
+				const vector<ComputationalCell>& cells,
+				double time) const = 0;
 
 		virtual ~Condition(void);
 	};
@@ -41,6 +43,7 @@ public:
 			\param cells Computational cells
 			\param extensive Extensive variable, input is after the addition of hydro fluxes
 			\param index The index of the cell
+			\param time The time
 		*/
 		virtual void operator()
 			(const vector<Extensive>& fluxes,
@@ -50,7 +53,8 @@ public:
 				const CacheData& cd,
 				const vector<ComputationalCell>& cells,
 				Extensive& extensive,
-				size_t index) const = 0;
+				size_t index,
+				double time) const = 0;
 
 		virtual ~Action(void);
 	};
@@ -69,7 +73,8 @@ public:
 		const double dt,
 		const CacheData& cd,
 		const vector<ComputationalCell>& cells,
-		vector<Extensive>& extensives) const;
+		vector<Extensive>& extensives,
+		double time) const;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -95,7 +100,8 @@ public:
 			const CacheData& cd,
 			const vector<ComputationalCell>& cells,
 			Extensive& extensive,
-			size_t index)const;
+			size_t index,
+			double time)const;
 private:
 	EquationOfState const& eos_;
 	LinearGaussImproved const& interp_;

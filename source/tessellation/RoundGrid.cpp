@@ -1,11 +1,16 @@
 #include "RoundGrid.hpp"
+#include "HilbertOrder.hpp"
+
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-			   OuterBoundary const* bc,int NumberIt,int InnerNum,
+			   OuterBoundary const* bc,int NumberIt,
 			   #ifdef RICH_MPI
 			   Tessellation const* tproc,
 			   #endif
 	Tessellation *tess)
 {
+	vector<int> indeces = HilbertOrder(points, static_cast<int>(points.size()));
+	vector<Vector2D> res(points);
+	res = VectorValues(res, indeces);
 	VoronoiMesh default_tess;
 	if(tess==0)
 		tess=&default_tess;
@@ -22,7 +27,6 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	int N=tess->GetPointNo();
 
 	// Copy the points
-	vector<Vector2D> res(static_cast<size_t>(N));
 	for(int i=0;i<N;++i)
 	  res[static_cast<size_t>(i)]=tess->GetMeshPoint(i);
 
@@ -33,7 +37,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 		res=tess->GetMeshPoints();
 		res.resize(static_cast<size_t>(N));
 #endif
-		for(int i=InnerNum;i<N;++i)
+		for(int i=0;i<N;++i)
 		{
 			double R = sqrt(tess->GetVolume(i)/pi);
 			Vector2D s = tess->GetCellCM(i);

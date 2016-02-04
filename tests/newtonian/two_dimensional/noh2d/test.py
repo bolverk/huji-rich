@@ -91,7 +91,7 @@ def main():
     f.write(str(l1_velocity)+'\n')
     f.close()
 
-    return l1_density<1.04 and \
+    return l1_density<1.05 and \
         l1_pressure<0.33 and \
         l1_velocity<0.075
 

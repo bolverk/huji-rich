@@ -498,7 +498,7 @@ namespace {
   }
 }
 
-void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
+void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool /*reorder*/)
 {
 	obc=_bc;
 	Tri.build_delaunay(UpdatePoints(pv,obc),
@@ -593,7 +593,10 @@ vector<Vector2D>& StaticVoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void StaticVoronoiMesh::Update(const vector<Vector2D>& /*p*/) {}
+vector<int> StaticVoronoiMesh::Update(const vector<Vector2D>& /*p*/,bool /*reorder*/) 
+{
+	return vector<int>();
+}
 
 vector<int> StaticVoronoiMesh::GetNeighbors(int index)const
 {
@@ -603,6 +606,11 @@ vector<int> StaticVoronoiMesh::GetNeighbors(int index)const
 	edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first :
 	edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.second;
   return res;
+}
+
+void StaticVoronoiMesh::GetNeighbors(int index, vector<int> &neigh)const
+{
+	neigh = GetNeighbors(index);
 }
 
 vector<int> StaticVoronoiMesh::GetLiteralNeighbors(int index)const

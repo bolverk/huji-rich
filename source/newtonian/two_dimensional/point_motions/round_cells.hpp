@@ -48,7 +48,7 @@ private:
 		   const Tessellation& tess,
 		   const vector<ComputationalCell>& cells) const;
 
-  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt)const;
+  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells)const;
 
   const PointMotion& pm_;
   const EquationOfState& eos_;

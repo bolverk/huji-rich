@@ -28,6 +28,7 @@ public:
     \param cd Cache data
     \param cells Computational cells
     \param extensives Extensive variables
+	\param time The time
    */
   virtual void operator()
   (const vector<Extensive>& fluxes,
@@ -36,7 +37,8 @@ public:
    const double dt,
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
-   vector<Extensive>& extensives) const = 0;
+   vector<Extensive>& extensives,
+	  double time) const = 0;
 
   //! \brief Class constructor
   virtual ~ExtensiveUpdater(void);

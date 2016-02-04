@@ -36,32 +36,38 @@ public:
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points
     \param bc Boundary conditions of the computational domain
+	\param HilbertOrder Should the points be rearranged before insertion
    */
-  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc) = 0;
+  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc, bool HilbertOrder = true) = 0;
 
   /*! \brief Initialises the tessellation
     \param points Initial position of mesh generating points
     \param tess The tessellation of the processors
 	\param outer The geometric outer boundary conditions
+	\param HilbertOrder Should the points be rearranged before insertion
    */
 #ifdef RICH_MPI
   virtual void Initialise(vector<Vector2D> const& points,Tessellation const& tess,
-	  OuterBoundary const* outer) = 0;
+	  OuterBoundary const* outer, bool HilbertOrder = true) = 0;
 #endif
 
   /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
+  \param HilbertOrder Should the points be rearranged before insertion
+  \return The indeces of sort (if done, else empty)
    */
-  virtual void Update(const vector<Vector2D>& points) = 0;
+  virtual vector<int> Update(const vector<Vector2D>& points,bool HilbertOrder=false) = 0;
 
 #ifdef RICH_MPI
   /*!
   \brief Update the tessellation
   \param points The new positions of the mesh generating points
   \param tess The tessellation of the processors
+  \param HOrder Should the points be rearranged before insertion
+  \return The indeces of sort (if done, else empty)
    */
-  virtual void Update(const vector<Vector2D>& points, const Tessellation& tess) = 0;
+  virtual vector<int> Update(const vector<Vector2D>& points, const Tessellation& tess, bool HOrder = false) = 0;
 #endif // RICH_MPI
 
   /*! \brief Get Total number of mesh generating points
@@ -133,9 +139,15 @@ virtual vector<Vector2D>& GetMeshPoints(void)=0;
 	\param index The cell to check
 	\return The neighbors
 */
-
 virtual vector<int> GetNeighbors(int index)const=0;
-
+  
+/*!
+\brief Returns the indeces of the neighbors
+\param index The cell to check
+\param neigh the indeces of the neighbors given as output
+*/
+virtual void GetNeighbors(int index,vector<int> &neigh)const = 0;
+  
 /*!
 	\brief Cloning function
 */

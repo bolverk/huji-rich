@@ -20,7 +20,8 @@ public:
    const double dt,
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
-   vector<Extensive>& extensives) const;
+   vector<Extensive>& extensives,
+	  double time) const;
 };
 
 #endif // SIMPLE_EXTENSIVE_UPDATER_HPP

@@ -22,16 +22,17 @@ public:
 		\param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
 		\param edge_values The interpolated values at the edge 
 		\param edge_velocity Velocity of the edges
-		\return Flux
+		\param res The flux given as output
 		*/
-		virtual Extensive operator()
+		virtual void operator()
 			(const Edge& edge,
 				const Tessellation& tess,
 				const Vector2D& edge_velocity,
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				const pair<ComputationalCell,ComputationalCell> & edge_values) const = 0;
+				const pair<ComputationalCell,ComputationalCell> & edge_values,
+				Extensive &res) const = 0;
 
 		virtual ~Action2(void);
 	};
@@ -62,6 +63,7 @@ private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
 	const vector<pair<const ConditionActionSequence::Condition*, const Action2*> > sequence2_;
 	const SpatialReconstruction & interp_;
+	mutable vector<pair<ComputationalCell, ComputationalCell> > edge_values_;
 };
 
 //! \brief Calculates flux between two regular bulk cells
@@ -74,14 +76,15 @@ public:
 	*/
   explicit RegularFlux2(const RiemannSolver& rs);
 
-	Extensive operator()
+	void operator()
 		(const Edge& edge,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			const pair<ComputationalCell, ComputationalCell> & edge_values) const;
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			Extensive &res) const;
 
 private:
 
@@ -99,14 +102,15 @@ public:
 	*/
   explicit RigidWallFlux2(const RiemannSolver& rs);
 
-	Extensive operator()
+	void operator()
 		(const Edge& edge,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			const pair<ComputationalCell, ComputationalCell> & edge_values) const;
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			Extensive &res) const;
 
 private:
 	const RiemannSolver& rs_;
@@ -123,14 +127,15 @@ public:
 	*/
   Ratchet(const RiemannSolver& rs, const bool in);
 
-	Extensive operator()
+	void operator()
 		(const Edge& edge,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			const pair<ComputationalCell, ComputationalCell> & edge_values) const;
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			Extensive &res) const;
 
 private:
 	const bool in_;

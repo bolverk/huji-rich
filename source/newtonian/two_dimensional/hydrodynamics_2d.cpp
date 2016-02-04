@@ -1,5 +1,6 @@
 #include "hydrodynamics_2d.hpp"
 #include "../../tessellation/calc_face_vertex_velocity.hpp"
+#include "../../tessellation/HilbertOrder.hpp"
 
 using std::max;
 
@@ -231,42 +232,35 @@ namespace {
   };
 }
 
-void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-		    double dt, Tessellation& tessellation,vector<Vector2D> oldpoints)
+vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
+		    double dt,Tessellation& tessellation, bool reorder, vector<Vector2D> oldpoints)
 {
-  if(oldpoints.empty())
+	if(oldpoints.empty())
+		oldpoints = serial_generate(NewPointPosition(tessellation,pointvelocity,dt));
+	else
     {
-      tessellation.Update(serial_generate
-			  (NewPointPosition(tessellation,
-					    pointvelocity,
-					    dt)));
+		for(size_t i=0;i<oldpoints.size();++i)
+			oldpoints[i]+=pointvelocity[i]*dt;
     }
-  else
-    {
-      for(size_t i=0;i<oldpoints.size();++i)
-	oldpoints[i]+=pointvelocity[i]*dt;
-      tessellation.Update(oldpoints);
-    }
+	vector<int> indeces=tessellation.Update(oldpoints,reorder);
+	return indeces;
 }
 
 #ifdef RICH_MPI
-void MoveMeshPoints(vector<Vector2D> const& pointvelocity,
+vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 		    double dt, Tessellation& tessellation,
-
-		    Tessellation const& vproc,
+		    Tessellation const& vproc,bool reorder,
 		    vector<Vector2D> oldpoints)
 {
-  if(oldpoints.empty())
-    tessellation.Update(serial_generate
-			(NewPointPosition(tessellation,
-					  pointvelocity,
-					  dt)),vproc);
-  else
-    {
-      for(size_t i=0;i<oldpoints.size();++i)
-	oldpoints[i]+=pointvelocity[i]*dt;
-      tessellation.Update(oldpoints,vproc);
-    }
+	if (oldpoints.empty())
+		oldpoints = serial_generate(NewPointPosition(tessellation, pointvelocity, dt));
+	else
+	{
+		for (size_t i = 0; i<oldpoints.size(); ++i)
+			oldpoints[i] += pointvelocity[i] * dt;
+	}
+	vector<int> indeces=tessellation.Update(oldpoints,vproc,reorder);
+	return indeces;
 }
 #endif // RICH_MPI
 

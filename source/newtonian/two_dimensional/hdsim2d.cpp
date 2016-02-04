@@ -161,7 +161,8 @@ void hdsim::TimeAdvance(void)
 		dt,
 		cache_data_,
 		cells_,
-		extensives_);
+		extensives_,
+		time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -177,12 +178,25 @@ void hdsim::TimeAdvance(void)
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	MoveMeshPoints(point_velocities, dt, tess_,proctess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_,proctess_, cycle_ % 10);
+	if(cycle_%10==0)
+	{
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 	// Keep relevant points
 	MPI_exchange_data(tess_, extensives_, false);
 	MPI_exchange_data(tess_, cells_, false);
 #else
-	MoveMeshPoints(point_velocities, dt, tess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, cycle_ % 25 == 0);
+	if (cycle_ % 25 == 0)
+	{
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
+
 #endif
 	cache_data_.reset();
 
@@ -231,7 +245,7 @@ void hdsim::TimeAdvanceClip(void)
 		dt,
 		cache_data_,
 		cells_,
-		extensives_);
+		extensives_,time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -246,7 +260,7 @@ void hdsim::TimeAdvanceClip(void)
 
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_);
+	MoveMeshPoints(point_velocities, dt, tess_,false);
 
 	extensives_= extensives_+FluxFix2(*oldtess, *oldtess, tess_, point_velocities, dt, cells_, fluxes, edge_velocities, obc_, eos_);
 
@@ -322,13 +336,20 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt,
 	   mid_extensives);
 	
-	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives,time_);
 
 
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(proctess_, tess_);
-	MoveMeshPoints(point_velocities, dt, tess_, proctess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, proctess_,cycle_%10==0);
+	if (cycle_ % 10 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 	// Keep relevant points
 	MPI_exchange_data(tess_, mid_extensives, false);
 	MPI_exchange_data(tess_, extensives_, false);
@@ -336,7 +357,14 @@ void hdsim::TimeAdvance2Heun(void)
 	MPI_exchange_data(tess_, point_velocities, false);
 	MPI_exchange_data(tess_, point_velocities, true);
 #else
-	MoveMeshPoints(point_velocities, dt, tess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_,cycle_%25==0);
+	if (cycle_ % 25 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+	}
 #endif
 	cache_data_.reset();
 
@@ -344,6 +372,7 @@ void hdsim::TimeAdvance2Heun(void)
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, mid_cells,true);
+	MPI_exchange_data(tess_, cells_, true);
 #endif
 	edge_velocities =
 	  edge_velocity_calculator_(tess_,point_velocities);
@@ -371,7 +400,7 @@ void hdsim::TimeAdvance2Heun(void)
 	   dt,
 	   mid_extensives);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives,time_+dt);
 
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
@@ -402,14 +431,14 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	vector<Vector2D> old_points = tess_.GetMeshPoints();
 	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
-	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
-	
+	MoveMeshPoints(point_velocities, 0.5*dt, tess_,false);
+
 	CacheData data_temp(*oldtess, pg_);
 
 	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives);
+	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives,time_);
 
 	ExternalForceContribution(*oldtess,pg_, data_temp,cells_,fluxes,point_velocities,source_,time_,0.5*dt,mid_extensives);
 
@@ -424,19 +453,27 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_, old_points);
+	MoveMeshPoints(point_velocities, dt, tess_,false, old_points);
 
 	CacheData cachetemp2(*midtess, pg_);
 
 	extensives_ = extensives_ + FluxFix2(*oldtess, *midtess, tess_, point_velocities, dt, mid_cells, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_);
+	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_,time_);
 
 	ExternalForceContribution(*midtess,pg_, cachetemp2,mid_cells,fluxes,point_velocities,source_,time_,dt,extensives_);
 
 	cache_data_.reset();
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
+
+	if (cycle_ % 25 == 0)
+	{
+		vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, dt, tess_, cycle_ % 25 == 0,old_points);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		cache_data_.reset();
+	}
 
 	time_ += 0.5*dt;
 	++cycle_;
@@ -458,7 +495,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	vector<Extensive> mid_extensives = extensives_;
 
-	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives);
+	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives,time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, cells_, fluxes, point_velocities, source_, time_, 0.5*dt, mid_extensives);
 
@@ -467,7 +504,17 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, 0.5*dt, tess_);
+	vector<int> HilbertIndeces = MoveMeshPoints(point_velocities, 0.5*dt, tess_, cycle_ % 25 == 0);
+	if (cycle_ % 25 == 0)
+	{
+		mid_extensives = VectorValues(mid_extensives, HilbertIndeces);
+		extensives_ = VectorValues(extensives_, HilbertIndeces);
+		cells_ = VectorValues(cells_, HilbertIndeces);
+		point_velocities = VectorValues(point_velocities, HilbertIndeces);
+		old_points = VectorValues(old_points, HilbertIndeces);
+	}
+
+
 	time_ += 0.5*dt;
 
 	cache_data_.reset();
@@ -478,13 +525,13 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_,time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, mid_cells, fluxes, point_velocities, source_, time_, dt, extensives_);
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
-	MoveMeshPoints(point_velocities, dt, tess_, old_points);
+	MoveMeshPoints(point_velocities, dt, tess_, false,old_points);
 	cache_data_.reset();
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
@@ -589,10 +636,20 @@ void hdsim::recalculateExtensives(void)
 		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers)*mass +
 			0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 		extensives_[i].momentum = mass*cell.velocity;
-		for (boost::container::flat_map<std::string, double>::const_iterator it =
-			cell.tracers.begin();
-			it != cell.tracers.end(); ++it)
-			extensives_[i].tracers[it->first] = (it->second)*mass;
+		if (extensives_[0].tracers.size() != cell.tracers.size())
+		{
+			for (boost::container::flat_map<std::string, double>::const_iterator it =
+				cell.tracers.begin();
+				it != cell.tracers.end(); ++it)
+				extensives_[i].tracers[it->first] = (it->second)*mass;
+		}
+		else
+		{
+			boost::container::flat_map<string, double>::const_iterator it2 = cell.tracers.begin();
+			for (boost::container::flat_map<string, double>::iterator it = extensives_[i].tracers.begin(); it !=
+				extensives_[i].tracers.end(); ++it, ++it2)
+				it->second = it2->second*mass;
+		}
 	}
 }
 

@@ -40,15 +40,16 @@ public:
       \param eos Equation of state
       \param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
       \param edge_velocity Velocity of the egdes
-      \return Flux
+      \param res The flux
      */
-    virtual Extensive operator()
+    virtual void operator()
     (const Edge& edge,
      const Tessellation& tess,
      const Vector2D& edge_velocity,
      const vector<ComputationalCell>& cells,
      const EquationOfState& eos,
-     const bool aux) const = 0;
+     const bool aux,
+		Extensive &res) const = 0;
 
     virtual ~Action(void);
   };
@@ -85,13 +86,14 @@ public:
    */
   explicit RegularFlux(const RiemannSolver& rs);
 
-  Extensive operator()
+  void operator()
 	  (const Edge& edge,
 	  const Tessellation& tess,
 	  const Vector2D& edge_velocity,
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
-	const bool aux) const;
+	const bool aux,
+		  Extensive &res) const;
 
 private:
 
@@ -108,13 +110,14 @@ public:
    */
   explicit RigidWallFlux(const RiemannSolver& rs);
 
-  Extensive operator()
+  void operator()
   (const Edge& edge,
    const Tessellation& tess,
 	  const Vector2D& edge_velocity,
 	  const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
-   const bool aux) const;
+   const bool aux,
+	  Extensive &res) const;
 
 private:
   const RiemannSolver& rs_;
@@ -130,13 +133,14 @@ public:
    */
   explicit FreeFlowFlux(const RiemannSolver& rs);
 
-  Extensive operator()
+  void operator()
   (const Edge& edge,
    const Tessellation& tess,
 	  const Vector2D& edge_velocity,
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
-   const bool aux) const;
+   const bool aux,
+	  Extensive &res) const;
 
 private:
   const RiemannSolver& rs_;

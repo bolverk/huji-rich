@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell,xproc,yproc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength)
 if(nargin==3),
     ShouldPlot=0;
     WhatToPlot=1;
@@ -19,7 +19,7 @@ elseif (nargin==7),
 else
     error('Illegal number of input arguments');
 end
-
+NperProc=zeros(nproc,1);
 filename=strcat(filedir,filename);
 [X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
@@ -69,6 +69,7 @@ for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
     [Xt,Yt,Pressuret,Densityt,Vxt,Vyt,Pointst,~,Tracerst,nincellt]=read_hdf(fname);
     n=length(Xt);
+    NperProc(i+1)=n;
     X(temp+1:temp+n)=Xt;
     Y(temp+1:temp+n)=Yt;
     Vx(temp+1:temp+n)=Vxt;
@@ -130,6 +131,7 @@ if(ShouldPlot==1||ShouldPlot==2)
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 3
+                Temperature = Pressure./Density;
                 if(LogScale==1)
                     caxis([min(log10(Temperature)) max(log10(Temperature*1.01))]);
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);

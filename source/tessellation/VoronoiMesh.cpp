@@ -67,235 +67,6 @@ namespace
 		return res;
 	}
 
-#ifdef RICH_MPI
-		  /*
-	void RemoveDuplicateCorners(vector<int> &cornerproc,vector<vector<int> >
-		&corners,vector<int> const& proclist,vector<vector<int> > &toduplicate)
-	{
-		vector<int> newcornerproc;
-		vector<vector<int> > newcorners;
-		int ncorners=static_cast<int>(cornerproc.size());
-		int nproc=static_cast<int>(proclist.size());
-		for(int i=0;i<ncorners;++i)
-		{
-			if(cornerproc[static_cast<size_t>(i)]==-1)
-				continue;
-			int index=static_cast<int>(find(proclist.begin(),proclist.end(),cornerproc[static_cast<size_t>(i)])-proclist.begin());
-			if(index<nproc)
-			{
-				// Add unduplicated data
-				vector<int> toadd;
-				int npoints=static_cast<int>(corners[static_cast<size_t>(i)].size());
-				for(int j=0;j<npoints;++j)
-				{
-					if(!binary_search(toduplicate[static_cast<size_t>(index)].begin(),toduplicate[static_cast<size_t>(index)].end(),
-						corners[static_cast<size_t>(i)][static_cast<size_t>(j)]))
-						toadd.push_back(corners[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-				}
-				if(!toadd.empty())
-				{
-					toduplicate[static_cast<size_t>(index)].insert(toduplicate[static_cast<size_t>(index)].end(),toadd.begin(),
-						toadd.end());
-					sort(toduplicate[static_cast<size_t>(index)].begin(),toduplicate[static_cast<size_t>(index)].end());
-				}
-			}
-			else
-			{
-				// copy the data
-				newcornerproc.push_back(cornerproc[static_cast<size_t>(i)]);
-				newcorners.push_back(corners[static_cast<size_t>(i)]);
-			}
-		}
-		// Remove same CPUs
-		if(newcornerproc.size()>1)
-		{
-			int n=static_cast<int>(newcornerproc.size());
-			vector<int> index;
-			sort_index(newcornerproc,index);
-			sort(newcornerproc.begin(),newcornerproc.end());
-			vector<int> temp=unique(newcornerproc);
-			int nuinq=static_cast<int>(temp.size());
-			vector<vector<int> > cornerstemp(temp.size());
-			for(int i=0;i<n;++i)
-			{
-			  int place=static_cast<int>(find(temp.begin(),temp.end(),newcornerproc[static_cast<size_t>(i)])-temp.begin());
-				cornerstemp[static_cast<size_t>(place)].insert(cornerstemp[static_cast<size_t>(place)].begin(),
-									       newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].begin(),newcorners[static_cast<size_t>(index[static_cast<size_t>(i)])].end());
-			}
-			for(int i=0;i<nuinq;++i)
-			{
-				sort(cornerstemp[static_cast<size_t>(i)].begin(),cornerstemp[static_cast<size_t>(i)].end());
-				cornerstemp[static_cast<size_t>(i)]=unique(cornerstemp[static_cast<size_t>(i)]);
-			}
-			newcornerproc=temp;
-			newcorners=cornerstemp;
-		}
-		cornerproc=newcornerproc;
-		corners=newcorners;
-	}
-		  */
-#endif // RICH_MPI
-
-	Vector2D GetPeriodicDiff(Edge const& edge,OuterBoundary const* obc)
-	{
-		Vector2D diff;
-		if(abs(edge.vertices.first.x-edge.vertices.second.x)
-			<abs(edge.vertices.first.y-edge.vertices.second.y))
-		{
-			if(abs(edge.vertices.first.x-obc->GetGridBoundary(Left))
-				<abs(edge.vertices.first.x-obc->GetGridBoundary(Right)))
-				diff=Vector2D(obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left),0);
-			else
-				diff=Vector2D(-obc->GetGridBoundary(Right)+obc->GetGridBoundary(Left),0);
-		}
-		else
-		{
-			if(abs(edge.vertices.first.y-obc->GetGridBoundary(Down))
-				<abs(edge.vertices.first.y-obc->GetGridBoundary(Up)))
-				diff=Vector2D(0,obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down));
-			else
-				diff=Vector2D(0,-obc->GetGridBoundary(Up)+obc->GetGridBoundary(Down));
-		}
-		return diff;
-	}
-
-#ifdef RICH_MPI
-			  /*
-	vector<int> GetCornerNeighbors(Tessellation const& v,int rank)
-	{
-		vector<int> neighbors=v.GetNeighbors(rank);
-		sort(neighbors.begin(),neighbors.end());
-		int n=static_cast<int>(neighbors.size());
-		vector<int> minremove(1,-1);
-		neighbors=RemoveList(neighbors,minremove);
-		// Arrange the corners accordingly
-		vector<int> edgeindex;
-		ConvexEdges(edgeindex,v,rank);
-		vector<int> result(static_cast<size_t>(n));
-		for(int i=0;i<n;++i)
-		{
-			int other=v.GetEdge(edgeindex[static_cast<size_t>(i)]).neighbors.first;
-			if(other==rank)
-				other=v.GetEdge(edgeindex[static_cast<size_t>(i)]).neighbors.second;
-			int nextneigh=v.GetEdge(edgeindex[static_cast<size_t>((i+1)%n)]).neighbors.first;
-			if(nextneigh==rank)
-			  nextneigh=v.GetEdge(edgeindex[static_cast<size_t>((i+1)%n)]).neighbors.second;
-			if(other==-1&&nextneigh==-1)
-			{
-				result[static_cast<size_t>(i)]=-1;
-				continue;
-			}
-			if(other==-1||nextneigh==-1)
-			{
-				vector<int> nextedges;
-				(nextneigh==-1)?ConvexEdges(nextedges,v,other):ConvexEdges(nextedges,v,nextneigh);
-				int nedges=static_cast<int>(nextedges.size());
-				int counter=0;
-				for(int k=0;k<nedges;++k)
-				{
-					Edge e=v.GetEdge(nextedges[static_cast<size_t>(k)]);
-					if(e.neighbors.first==rank||e.neighbors.second==rank)
-					{
-						counter=k;
-						break;
-					}
-				}
-				Edge nextedge=(other==-1)?v.GetEdge(nextedges[static_cast<size_t>((counter+2)%nedges)])
-				  :v.GetEdge(nextedges[static_cast<size_t>((counter-2+nedges)%nedges)]);
-				if(nextneigh==-1)
-					result[static_cast<size_t>(i)]=(nextedge.neighbors.first==other)?
-					nextedge.neighbors.second:nextedge.neighbors.first;
-				else
-					result[static_cast<size_t>(i)]=(nextedge.neighbors.first==nextneigh)?
-					nextedge.neighbors.second:nextedge.neighbors.first;
-			}
-			else
-			{
-				// Do they have a mutual edge?
-				vector<int> const& otheredges=v.GetCellEdges(other);
-				int N=static_cast<int>(otheredges.size());
-				int k;
-				for(k=0;k<N;++k)
-				{
-					Edge const& edge=v.GetEdge(otheredges[static_cast<size_t>(k)]);
-					if(edge.neighbors.first==nextneigh||
-						edge.neighbors.second==nextneigh)
-					{
-						// We have a mutual edge
-						Vector2D otherv = (abs(abs(v.GetMeshPoint(rank) - edge.vertices.first) - abs(v.GetMeshPoint(other) -
-							edge.vertices.first))<abs(abs(v.GetMeshPoint(rank) - edge.vertices.second) - abs(v.GetMeshPoint(other) -
-							edge.vertices.second))) ? edge.vertices.second : edge.vertices.first;
-						// Find mutual neighbors
-						vector<int> minremove2(1,-1);
-						minremove2.push_back(rank);
-						vector<int> neighbors1=v.GetNeighbors(other);
-						vector<int> neighbors2=v.GetNeighbors(nextneigh);
-						neighbors1=RemoveList(neighbors1,minremove2);
-						neighbors2=RemoveList(neighbors2,minremove2);
-						sort(neighbors1.begin(),neighbors1.end());
-						sort(neighbors2.begin(),neighbors2.end());
-						vector<int> restemp(10,-1);
-						vector<int>::iterator it=set_intersection(neighbors1.begin(),
-							neighbors1.end(),neighbors2.begin(),neighbors2.end(),restemp.begin());
-						int size=static_cast<int>(it-restemp.begin());
-						if(size==0)
-						{
-							result[static_cast<size_t>(i)]=-1;
-							break;
-						}
-						if (size == 1)
-						{
-							const double d2 = abs(v.GetMeshPoint(other) - otherv);
-							const double d1 = abs(abs(v.GetMeshPoint(restemp[0]) - otherv) - d2);
-							const double eps2 = 1e-6;
-							if (d1 > eps2*d2)
-							{
-								result[static_cast<size_t>(i)] = -1;
-								break;
-							}
-						}
-						vector<double> dist(static_cast<size_t>(size));
-						for(int kk=0;kk<size;++kk)
-							dist[static_cast<size_t>(kk)]=abs(otherv-v.GetMeshPoint(restemp[static_cast<size_t>(kk)]));
-						result[static_cast<size_t>(i)]=restemp[static_cast<size_t>(min_element(dist.begin(),dist.end())
-										   -dist.begin())];
-						break;
-					}
-				}
-				if(k<N)
-					continue;
-				// No mutual edge, probably a square, find mutual neighbor
-				vector<int> neigh1=v.GetNeighbors(other);
-				vector<int> neigh2=v.GetNeighbors(nextneigh);
-				sort(neigh1.begin(),neigh1.end());
-				sort(neigh2.begin(),neigh2.end());
-				vector<int> minremove2(1,-1);
-				minremove2.push_back(rank);
-				neigh1=RemoveList(neigh1,minremove2);
-				neigh2=RemoveList(neigh2,minremove2);
-				vector<int> restemp(10,-1);
-				set_intersection(neigh1.begin(),neigh1.end(),neigh2.begin(),
-					neigh2.end(),restemp.begin());
-				result[static_cast<size_t>(i)]=restemp[0];
-			}
-		}
-		return result;
-	}
-
-
-	int SumV(vector<vector<int> > const& v)
-	{
-		int res=0;
-		int n=static_cast<int>(v.size());
-		for(int i=0;i<n;++i)
-		{
-		  res+=static_cast<int>(v[static_cast<size_t>(i)].size());
-		}
-		return res;
-	}
-			  */
-#endif // RICH_MPI
-
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -326,7 +97,7 @@ namespace
 
 VoronoiMesh::VoronoiMesh
 (vector<Vector2D> const& points,
- OuterBoundary const& bc):
+ OuterBoundary const& bc, bool HOrder):
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -344,14 +115,15 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,&bc);
+	Initialise(points,&bc,HOrder);
 }
 
 #ifdef RICH_MPI
 VoronoiMesh::VoronoiMesh
 (Tessellation const& proctess,
  vector<Vector2D> const& points,
- OuterBoundary const& bc):
+ OuterBoundary const& bc,
+	bool HOrder):
 	logger(0),
 	eps(1e-8),
 	obc(0),
@@ -369,7 +141,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,proctess,&bc);
+	Initialise(points,proctess,&bc,HOrder);
 }
 #endif
 
@@ -576,10 +348,15 @@ namespace
   }
 }
 
-void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc)
+void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
 {
 	obc=_bc;
-	Tri.build_delaunay(UpdatePoints(pv,obc),calc_procpoints(*obc));
+	vector<Vector2D> points;
+	if (reorder)
+		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
+	else
+		points = pv;
+	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
@@ -662,7 +439,8 @@ double VoronoiMesh::GetVolume(int index) const
 {
   const Vector2D center=Tri.get_point(static_cast<size_t>(index));
 	double area=0;
-	for (size_t i=0;i<mesh_vertices[static_cast<size_t>(index)].size();++i)
+	const size_t nloop = mesh_vertices[static_cast<size_t>(index)].size();
+	for (size_t i=0;i<nloop;++i)
 	{
 	  const Vector2D p1 = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].vertices.first-
 			center;
@@ -695,7 +473,7 @@ vector<Vector2D>& VoronoiMesh::GetMeshPoints(void)
 	return Tri.GetMeshPoints();
 }
 
-void VoronoiMesh::Update(const vector<Vector2D>& p)
+vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 {
 	// Clean_up last step
 	edges.clear();
@@ -706,7 +484,15 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Down)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Up)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Left),obc->GetGridBoundary(Up)));
-	vector<Vector2D> points=UpdatePoints(p,obc);
+
+	vector<Vector2D> points = UpdatePoints(pv, obc);
+	vector<int> HilbertIndeces;
+	if (reorder)
+	{
+		HilbertIndeces = HilbertOrder(points, static_cast<int>(pv.size()));
+		points = VectorValues(points,HilbertIndeces);
+	}
+
 	Tri.update(points,procpoints);
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
@@ -723,10 +509,10 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 		logger->output(*this);
 
 	CM.resize(Tri.getCor().size());
-	for (size_t i = 0; i<p.size(); ++i)
+	for (size_t i = 0; i<points.size(); ++i)
 		CM[i] = CalcCellCM(i);
 
-	size_t counter = p.size() + 3;
+	size_t counter = points.size() + 3;
 	if(obc->GetBoundaryType()==Periodic)
 	{
 		for(size_t i=0;i<8;++i)
@@ -766,6 +552,7 @@ void VoronoiMesh::Update(const vector<Vector2D>& p)
 			}
 		}
 	}
+	return HilbertIndeces;
 }
 
 vector<int> VoronoiMesh::GetNeighbors(int index)const
@@ -777,6 +564,17 @@ vector<int> VoronoiMesh::GetNeighbors(int index)const
 	edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.second;
   return res;
 }
+
+void VoronoiMesh::GetNeighbors(int index, vector<int> &neigh)const
+{
+	neigh.resize(mesh_vertices[static_cast<size_t>(index)].size());
+	size_t N = neigh.size();
+	for (size_t i = 0; i<N; ++i)
+		neigh[i] = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first != index ?
+		edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.first :
+		edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][i])].neighbors.second;
+}
+
 
 vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 {
@@ -1367,74 +1165,6 @@ vector<Edge>& VoronoiMesh::GetAllEdges(void)
 	return edges;
 }
 
-void VoronoiMesh::RigidBoundaryPoints(vector<int> &points,Edge const& edge)
-{
-	int npoints=static_cast<int>(points.size());
-	vector<Vector2D> toadd;
-	vector<int> pointstemp;
-	pointstemp.reserve(static_cast<size_t>(npoints));
-	toadd.reserve(static_cast<size_t>(npoints));
-	Vector2D par(Parallel(edge));
-	par=par/abs(par);
-	Vector2D edge0=edge.vertices.first;
-	boost::array<double,4> maxedges=FindMaxCellEdges();
-	double dx=maxedges[1]-maxedges[0];
-	double dy=maxedges[3]-maxedges[static_cast<size_t>(2)];
-	for(int i=0;i<npoints;++i)
-	{
-	  Vector2D point=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]));
-		Vector2D temp=point-edge0;
-		temp=2*par*ScalarProd(par,temp)-temp+edge0;
-		if((abs(point.x-temp.x)<2*dx)&&(abs(point.y-temp.y)<2*dy))
-		{
-			toadd.push_back(temp);
-			pointstemp.push_back(i);
-		}
-	}
-	if(!toadd.empty())
-	{
-		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd,order);
-		Tri.AddBoundaryPoints(toadd);
-		ReArrangeVector(pointstemp,order);
-		points=pointstemp;
-	}
-}
-
-void VoronoiMesh::PeriodicBoundaryPoints(vector<int> &points,int edge_number)
-{
-	int npoints=static_cast<int>(points.size());
-	vector<Vector2D> toadd(static_cast<size_t>(npoints));
-	Vector2D diff=GetPeriodicDiff(cell_edges[static_cast<size_t>(edge_number)],obc);
-	for(int i=0;i<npoints;++i)
-	  toadd[static_cast<size_t>(i)]=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]))+diff;
-	if(!toadd.empty())
-	{
-		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd,order);
-		Tri.AddBoundaryPoints(toadd);
-		ReArrangeVector(points,order);
-	}
-}
-
-void VoronoiMesh::CornerBoundaryPoints(vector<int> &points,int edge_number)
-{
-	int n=static_cast<int>(cell_edges.size());
-	Vector2D diff1=GetPeriodicDiff(cell_edges[static_cast<size_t>(edge_number)],obc);
-	Vector2D diff2=GetPeriodicDiff(cell_edges[static_cast<size_t>(((edge_number+1)%n))],obc);
-	int npoints=static_cast<int>(points.size());
-	vector<Vector2D> toadd(static_cast<size_t>(npoints));
-	for(int i=0;i<npoints;++i)
-	  toadd[static_cast<size_t>(i)]=Tri.get_point(static_cast<size_t>(points[static_cast<size_t>(i)]))+diff1+diff2;
-	if(!toadd.empty())
-	{
-		vector<int> order=HilbertOrder(toadd,static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd,order);
-		Tri.AddBoundaryPoints(toadd);
-		ReArrangeVector(points,order);
-	}
-}
-
 vector<vector<int> >& VoronoiMesh::GetDuplicatedPoints(void)
 {
 	return GhostPoints;
@@ -1508,9 +1238,9 @@ boost::array<double,4> VoronoiMesh::FindMaxCellEdges(void)
 }
 
 #ifdef RICH_MPI
-void VoronoiMesh::Update
+vector<int> VoronoiMesh::Update
 (const vector<Vector2D>& points,
- const Tessellation& vproc)
+ const Tessellation& vproc, bool reorder)
 {
 	NGhostReceived.clear();
 	int rank;
@@ -1524,9 +1254,21 @@ void VoronoiMesh::Update
 	// Get the convex hull of the cell
 	vector<Vector2D> cpoints;
 	ConvexHull(cpoints, vproc, rank);
-	// Did points move between procs?
-	vector<Vector2D> newcor =  UpdateMPIPoints(vproc, rank, points, obc, selfindex, SentProcs, SentPoints);
 
+	vector<int> HilbertIndeces;
+	vector<Vector2D> newcor;
+	if (reorder)
+	{
+		HilbertIndeces = HilbertOrder(points, static_cast<int>(points.size()));
+		newcor = VectorValues(points, HilbertIndeces);
+	}
+	else
+		newcor = points;
+
+
+	// Did points move between procs?
+	newcor =  UpdateMPIPoints(vproc, rank, newcor, obc, selfindex, SentProcs, SentPoints);
+	
 	//Build the delaunay
 	Tri.build_delaunay(newcor, cpoints);
 	eps = 1e-8;
@@ -1564,12 +1306,14 @@ void VoronoiMesh::Update
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
+
+	return HilbertIndeces;
 }
 
 void VoronoiMesh::Initialise
-(vector<Vector2D> const& points,
+(vector<Vector2D> const& pv,
  Tessellation const& vproc,
- OuterBoundary const* outer)
+ OuterBoundary const* outer,bool reorder)
 {
 	NGhostReceived.clear();
 	int rank;
@@ -1580,6 +1324,12 @@ void VoronoiMesh::Initialise
 	cell_edges.clear();
 	for (size_t i = 0; i<cedges.size(); ++i)
 		cell_edges.push_back(vproc.GetEdge(cedges[i]));
+
+	vector<Vector2D> points;
+	if (reorder)
+		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
+	else
+		points = pv;
 
 	// Get the convex hull of the cell
 	vector<Vector2D> cpoints;
@@ -1696,11 +1446,11 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		}
 		if (good)
 			continue;
+		vector<Vector2D> cellpoints;
 		for (size_t j = 0; j<nproc; ++j)
 		{
 			if (std::find(realneigh.begin(), realneigh.end(), j) != realneigh.end() || j == static_cast<size_t>(rank))
 				continue;
-			vector<Vector2D> cellpoints;
 			ConvexHull(cellpoints, vproc, static_cast<int>(j));
 			if (PointInCell(cellpoints, temp))
 			{
@@ -1767,10 +1517,18 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	Vector2D vtemp;
 	req.clear();
 	req.resize(sentproc.size());
+	vector<int> indeces;
+	vector<Vector2D> cortemphilbert;
 	for (size_t i = 0; i < sentproc.size(); ++i)
 	{
 		const int dest = sentproc.at(i);
-		tosend[i] = list_serialize(VectorValues(points, sentpoints.at(i)));
+		if (!sentpoints.at(i).empty())
+		{
+			cortemphilbert = VectorValues(points, sentpoints.at(i));
+			indeces = HilbertOrder(cortemphilbert, static_cast<int>(cortemphilbert.size()));
+			tosend[i] = list_serialize(VectorValues(cortemphilbert, indeces));
+			sentpoints[i] = VectorValues(sentpoints[i], indeces);
+		}
 		if(tosend[i].empty())
 			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[i]);
 		else

@@ -3,7 +3,7 @@
 
 SimpleCellUpdater::SimpleCellUpdater
 (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence):
-  sequence_(sequence) {}
+  sequence_(sequence),entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)
 {
@@ -19,39 +19,49 @@ SimpleCellUpdater::Action::~Action(void) {}
 
 namespace {
 
-  ComputationalCell regular_update
+  void regular_update
   (const EquationOfState& eos,
    vector<Extensive>& extensives,
    const ComputationalCell& old,
    const CacheData& cd,
-   const size_t index)
+   const size_t index,
+	  ComputationalCell &res,
+	  string const& entropy)
   {
-    ComputationalCell res;
     Extensive& extensive = extensives[index];
     const double volume = cd.volumes[index];
     res.density = extensive.mass/volume;
     res.velocity = extensive.momentum/extensive.mass;
     const double energy = extensive.energy/extensive.mass -
       0.5*ScalarProd(res.velocity,res.velocity);
-	res.tracers.reserve(extensive.tracers.size());
+	res.stickers = old.stickers;
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
-	  res.tracers.insert(pair<string,double>((extensive.tracers.begin() + static_cast<int>(i))->first ,
-						 (extensive.tracers.begin() + static_cast<int>(i))->second/extensive.mass));
-    res.pressure = eos.de2p
-      (res.density,
-       energy,
-       res.tracers);
-    res.stickers = old.stickers;
-	string entropy = "Entropy";
-	if (old.tracers.find(entropy) != old.tracers.end())
+		(res.tracers.begin() + static_cast<int>(i))->second = 
+		(extensive.tracers.begin() + static_cast<int>(i))->second / extensive.mass;
+	try
 	{
-		res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
-		extensive.tracers[entropy] = res.tracers[entropy] * extensive.mass;
+		res.pressure = eos.de2p
+			(res.density,
+				energy,
+				res.tracers);
+		if (old.tracers.find(entropy) != old.tracers.end())
+		{
+			res.tracers[entropy] = eos.dp2s(res.density, res.pressure);
+			extensive.tracers[entropy] = res.tracers[entropy] * extensive.mass;
+		}
 	}
-    return res;
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Cell index", static_cast<double>(index));
+		eo.AddEntry("Cell mass", extensive.mass);
+		eo.AddEntry("Cell x momentum", extensive.momentum.x);
+		eo.AddEntry("Cell y momentum", extensive.momentum.y);
+		eo.AddEntry("Cell energy", extensive.energy);
+		throw;
+	}
   }
 
-  ComputationalCell update_single
+  void update_single
   (const Tessellation& tess,
    const PhysicalGeometry& pg,
    const EquationOfState& eos,
@@ -59,28 +69,19 @@ namespace {
    const vector<ComputationalCell>& old,
    const CacheData& cd,
    const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence,
-   const size_t index)
+   const size_t index,
+	  ComputationalCell &res,
+	  string const& entropy)
   {
-    for(size_t i=0;i<sequence.size();++i){
-      if((*sequence[i].first)
-	 (tess,
-	  pg,
-	  eos,
-	  extensives,
-	  old,
-	  cd,
-	  index))
-	return (*sequence[i].second)
-	 (tess,
-	  pg,
-	  eos,
-	  extensives,
-	  old,
-	  cd,
-	  index);
+    for(size_t i=0;i<sequence.size();++i)
+	{
+		if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index))
+		{
+			res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index);
+			return;
+		}
     }
-    return regular_update
-      (eos,extensives,old.at(index),cd,index);
+	regular_update(eos,extensives,old.at(index),cd,index,res,entropy);
   }
 }
 
@@ -92,17 +93,12 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
    const vector<ComputationalCell>& old,
    const CacheData& cd) const
 {
-  vector<ComputationalCell> res = old;
-  for(size_t i=0;i<extensives.size();++i)
-    res[i] = update_single
-      (tess,
-       pg,
-       eos,
-       extensives,
-       old,
-       cd,
+	size_t N = static_cast<size_t>(tess.GetPointNo());
+  vector<ComputationalCell> res(N,old[0]);
+  for(size_t i=0;i<N;++i)
+	  update_single(tess,pg,eos, extensives, old,cd,
        sequence_,
-       i);
+       i,res[i],entropy_);
   return res;
 }
 

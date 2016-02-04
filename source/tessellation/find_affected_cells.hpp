@@ -27,7 +27,7 @@ bool edge_circle_intersect
   \param circle Circle
   \param res List of cell indices that intersect the circle
  */
-void find_affected_cells(const Tessellation& tess,
+void find_affected_cells_recursive(const Tessellation& tess,
 				int index,
 				const Circle& circle,
 				vector<int> & res);
@@ -36,11 +36,12 @@ void find_affected_cells(const Tessellation& tess,
   \param tess Tessellation
   \param index Cell index
   \param circle Circle
+  \param vtemp Temperaroy object for not reallocating on heap
   \return Vector with indices of affected cells
  */
 vector<int> find_affected_cells
 (const Tessellation& tess,
  int index,
- const Circle& circle);
+ const Circle& circle, vector<int> &vtemp);
 
 #endif // FIND_AFFECTED_CELLS

@@ -49,6 +49,7 @@ public:
 
 	vector<int> GetNeighbors(int index)const;
 
+	void GetNeighbors(int index, vector<int> &neigh)const;
 	/*!
 	\brief Returns the list of neighbors including ghost points
 	\return The neighbors
@@ -60,10 +61,10 @@ public:
 
 #ifdef RICH_MPI
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
-		OuterBoundary const* outer);
+		OuterBoundary const* outer,bool reorder=true);
 #endif
 
-	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc);
+	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true);
 
 	//! \brief Class default constructor.
   VoronoiMesh(void);
@@ -72,10 +73,12 @@ public:
 	\brief Class constructor
 	\param points The points to build for
 	\param bc The geometric boundary conditions
+	\param HOrder Should the points be rearranged with  Hilbert ordering
 	*/
 	VoronoiMesh
 	(vector<Vector2D> const& points,
-	 OuterBoundary const& bc);
+	 OuterBoundary const& bc,
+		bool HOrder=true);
 
 #ifdef RICH_MPI
 	/*!
@@ -83,11 +86,13 @@ public:
 	\param points The points to build for
 	\param proctess The tessellation of the processors
 	\param bc The geometric boundary conditions
+	\param HOrder Should the points be rearranged with  Hilbert ordering
 	*/
 	VoronoiMesh
 	(Tessellation const& proctess,
 	 vector<Vector2D> const& points,
-	 OuterBoundary const& bc);
+	 OuterBoundary const& bc,
+		bool HOrder=true);
 #endif // RICH_MPI
 
 	/*!
@@ -97,10 +102,10 @@ public:
 	VoronoiMesh(VoronoiMesh const& other);
 
   #ifdef RICH_MPI
-	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
+	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool reorder=false);
 #endif // RICH_MPI
 
-	void Update(const vector<Vector2D>& points);
+	vector<int> Update(const vector<Vector2D>& points, bool reorder=false);
 
 	~VoronoiMesh(void);
 	/*! \brief Get Total number of mesh generating points
@@ -237,9 +242,6 @@ private:
 		vector<Edge> const& boxedges);
 	void NonSendCorners(vector<int> & proclist,vector<vector<int> > & data,
 		Tessellation const& v);
-	void RigidBoundaryPoints(vector<int> &points,Edge const& edge);
-	void PeriodicBoundaryPoints(vector<int> &points,int edge_number);
-	void CornerBoundaryPoints(vector<int> &points,int edge_number);
 	boost::array<double,4> FindMaxCellEdges(void);
 	vector<int> CellIntersectOuterBoundary(vector<Edge> const&box_edges,int cell);
 	void FindIntersectingOuterPoints(vector<Edge> const&bedge,vector<vector<int> >

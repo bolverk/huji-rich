@@ -12,53 +12,6 @@ RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double
 
 namespace
 {
-	Vector2D LimitShearVelocity(vector<Vector2D> &vel, Tessellation const& tess, int index)
-	{
-		vector<int> const& edges = tess.GetCellEdges(index);
-		vector<int> neigh = tess.GetNeighbors(index);
-		Vector2D const& mypoint = tess.GetMeshPoint(index);
-		for (size_t i = 0; i < edges.size(); ++i)
-		{
-			if (tess.GetOriginalIndex(neigh[i]) == index)
-				continue;
-			Edge const& edge = tess.GetEdge(edges[i]);
-			const double maxdist = std::max(mypoint.distance(edge.vertices.first),
-				mypoint.distance(edge.vertices.second));
-			Vector2D const& otherpoint = edge.neighbors.first == index ? tess.GetMeshPoint(edge.neighbors.second) :
-				tess.GetMeshPoint(edge.neighbors.first);
-			Vector2D normal = otherpoint - mypoint;
-			const double factor = 2 * maxdist / abs(normal);
-			normal = normal/abs(normal);
-			Vector2D parallel = edge.vertices.first - edge.vertices.second;
-			parallel = parallel / abs(parallel);
-			if (factor > 7)
-			{
-				return normal*ScalarProd(vel[static_cast<size_t>(index)],normal) +
-				  ScalarProd((vel[static_cast<size_t>(edge.neighbors.first)]+
-					      vel[static_cast<size_t>(edge.neighbors.second)])*0.5,parallel)*parallel;
-			}
-		}
-		return vel[static_cast<size_t>(index)];
-	}
-
-	void LimitNeighborVelocity(vector<Vector2D> &vel, Tessellation const& tess,	int index, double factor)
-	{
-		vector<int> neigh = tess.GetNeighbors(index);
-		Vector2D r = tess.GetMeshPoint(index);
-		double R = tess.GetWidth(index);
-		for (size_t i = 0; i<neigh.size(); ++i)
-		{
-			if (tess.GetOriginalIndex(neigh[i])!=index)
-			{
-				if (r.distance(tess.GetMeshPoint(neigh[i]))<0.1*R)
-				{
-					vel[static_cast<size_t>(neigh[i])] = vel[static_cast<size_t>(neigh[i])] * factor;
-					return;
-				}
-			}
-		}
-	}
-
 	void CorrectPointsOverShoot(vector<Vector2D> &v, double dt,Tessellation const& tess,OuterBoundary const&
 		outer)
 	{
@@ -68,29 +21,34 @@ namespace
 		for (size_t i = 0; i < n; ++i)
 		{
 			Vector2D point(tess.GetMeshPoint(static_cast<int>(i)));
+			double R = tess.GetWidth(static_cast<int>(i));
 			if ((v[i].x*dt * 2 + point.x)>outer.GetGridBoundary(Right))
 			{
-				double factor = 0.4*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
+				double factor = 0.25*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
+				if (R*0.1 > (outer.GetGridBoundary(Right) - point.x))
+					factor*=-0.1;
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].x*dt * 2 + point.x)<outer.GetGridBoundary(Left))
 			{
-				double factor = 0.4*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
+				double factor = 0.25*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
+				if (R*0.1 > (point.x - outer.GetGridBoundary(Left)))
+					factor*=-0.1;
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].y*dt * 2 + point.y)>outer.GetGridBoundary(Up))
 			{
-				double factor = 0.4*(outer.GetGridBoundary(Up) - point.y)*inv_dt / abs(v[i]);
+				double factor = 0.25*(outer.GetGridBoundary(Up) - point.y)*inv_dt / abs(v[i]);
+				if (R*0.1 > (outer.GetGridBoundary(Up) - point.y))
+					factor *= -0.1;
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 			if ((v[i].y*dt * 2 + point.y)<outer.GetGridBoundary(Down))
 			{
-				double factor = 0.4*(point.y - outer.GetGridBoundary(Down))*	inv_dt / abs(v[i]);
+				double factor = 0.25*(point.y - outer.GetGridBoundary(Down))*	inv_dt / abs(v[i]);
+				if (R*0.1 > (point.y - outer.GetGridBoundary(Down)))
+					factor *= -0.1;
 				v[i] = v[i] * factor;
-				LimitNeighborVelocity(v, tess, static_cast<int>(i), factor);
 			}
 		}
 		return;
@@ -105,12 +63,12 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 	const double R = tess.GetWidth(static_cast<int>(i));
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
-	const double c = eos_.dp2c(cells[i].density, cells[i].pressure,
-				   cells[i].tracers);
-	return chi_*c*(s - r) / R*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
+		cells[i].tracers), abs(cells[i].velocity));
+	return chi_*c*(s - r) / R;
 }
 
-Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
+Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells)const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -118,8 +76,20 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt)const
 	const double R = tess.GetWidth(static_cast<int>(i));
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
-	const double c = std::min(d,0.2*R) / dt;
-	return chi_*c*(s - r) / d*(d > 1.1*eta_*R ? 1 : (d - 0.9*eta_*R) / (0.2*eta_*R));
+	vector<int> neigh = tess.GetNeighbors(static_cast<int>(i));
+	size_t N = neigh.size();
+	double cs =std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
+		cells[i].tracers));
+	for (size_t j = 0; j < N; ++j)
+	{
+		if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(i))
+			continue;
+		cs = std::max(cs, eos_.dp2c(cells[static_cast<size_t>(neigh[j])].density, cells[static_cast<size_t>(neigh[j])].pressure,
+			cells[static_cast<size_t>(neigh[j])].tracers));
+		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity));
+	}
+	const double c_dt = d / dt;
+	return chi_*std::min(c_dt,cs)*(s - r) / R;
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
@@ -136,25 +106,18 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	return res;
 }
 
-vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
+vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
 	double dt, vector<Vector2D>const & velocities)const
 {
-	vector<Vector2D> res(velocities);
+	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities);
 	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			res.at(i) += calc_dw(i, tess, dt);
+			res.at(i) += calc_dw(i, tess, dt,cells);
 		}
-	}
-	// Limit shear velocity
-	vector<Vector2D> temp(res);
-	const size_t n = res.size();
-	for (size_t i = 0; i < n; ++i)
-	{
-		res.at(i) = LimitShearVelocity(temp, tess, static_cast<int>(i));
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
 		CorrectPointsOverShoot(res, dt, tess,outer_);

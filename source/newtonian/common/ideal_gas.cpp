@@ -17,7 +17,8 @@ double IdealGas::dp2e(double d, double p, const boost::container::flat_map<strin
 
 double IdealGas::de2p(double d, double e, const boost::container::flat_map<string,double>& /*tracers*/) const
 {
-  assert(e>0);
+	if (e < 0)
+		throw UniversalError("Negative thermal energy");
   return (g_-1)*e*d;
 }
 

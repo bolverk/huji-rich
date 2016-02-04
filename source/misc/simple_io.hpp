@@ -48,6 +48,12 @@ void write_vector(vector<int> const& v,
 */
 double read_number(string const& fname);
 
+/*! \brief Reads a several numbers from a file
+\param fname Name of the file
+\return The numbers
+*/
+vector<double> read_vector(string const& fname);
+
 /*! \brief Reads a single integer from a file
 \param fname Name of the file
 \return The integer

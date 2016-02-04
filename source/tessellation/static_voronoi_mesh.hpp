@@ -49,6 +49,8 @@ public:
 
 	vector<int> GetNeighbors(int index)const;
 
+	void GetNeighbors(int index, vector<int> &neigh)const;
+
 	/*!
 	\brief Returns the list of neighbors including ghost points
 	\return The neighbors
@@ -60,10 +62,10 @@ public:
 
 #ifdef RICH_MPI
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
-		OuterBoundary const* outer);
+		OuterBoundary const* outer,bool HilbertOrder=true);
 #endif
 
-	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc);
+	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool HilbertOrder = true);
 
 	/*!
 	\brief Class constructor
@@ -79,10 +81,10 @@ public:
   StaticVoronoiMesh(StaticVoronoiMesh const& other);
 
   #ifdef RICH_MPI
-	void Update(const vector<Vector2D>& points,const Tessellation& vproc);
+	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool HilbertOrder = false);
 #endif // RICH_MPI
 
-	void Update(const vector<Vector2D>& points);
+	vector<int> Update(const vector<Vector2D>& points, bool HilbertOrder = false);
 
   ~StaticVoronoiMesh(void);
 	/*! \brief Get Total number of mesh generating points

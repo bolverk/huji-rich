@@ -127,13 +127,7 @@ public:
   const Tessellation & GetProcTessellation(void)const;
 #endif
 
-  /*!
-    \brief Rearranges the simulation data according to Hibler ordering
-    \param innernum The number of first points in the data not to move
-  */
-  void HilbertArrange(int innernum=0);
-
-  /*! \brief Class constructor
+   /*! \brief Class constructor
     \param tess Voronoi tessellation method
     \param proc_update Scheme for updating the locations of the processes
     \param obc Outer boundary conditions

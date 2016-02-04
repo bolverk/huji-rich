@@ -89,6 +89,7 @@ public:
 
 private:
   const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence_;
+  const string entropy_;
 };
 
 //! \brief Checks if a cell contains a certain sticker
