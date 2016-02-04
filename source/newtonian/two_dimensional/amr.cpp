@@ -717,9 +717,10 @@ void ConservativeAMR::operator()(hdsim &sim)
 NonConservativeAMR::NonConservativeAMR
 (CellsToRefine const& refine,
 	CellsToRemove const& remove,
+	LinearGaussImproved *slopes,
 	AMRExtensiveUpdater* eu) :
 	refine_(refine), remove_(remove), scu_(vector<string>()),
-	seu_(),
+	seu_(),interp_(slopes),
 	eu_(eu)
 {
 	if (!eu)
@@ -763,6 +764,8 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	{
 		cor.push_back(NewPoints[i].second);
 		cells.push_back(cells[NewPoints[i].first]);
+		if (interp_ != 0)
+			interp_->GetSlopesUnlimited().push_back(interp_->GetSlopesUnlimited()[NewPoints[i].first]);
 	}
 	// Rebuild tessellation
 #ifdef RICH_MPI
