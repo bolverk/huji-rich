@@ -13,13 +13,13 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 		{
 			int real_cell = outer_edges[i].second == 1 ? edge.neighbors.second : edge.neighbors.first;
 			res[ghost_index] = cells[static_cast<size_t>(real_cell)];
-			Vector2D normal = outer_edges[i].second == 1 ? tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second)
+	/*		Vector2D normal = outer_edges[i].second == 1 ? tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second)
 				: tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
 			if (ScalarProd(normal, res[ghost_index].velocity) < 0)
 			{
 				normal = normal / abs(normal);
 				res[ghost_index].velocity -= 2 * ScalarProd(res[ghost_index].velocity, normal)*normal;
-			}
+			}*/
 		}
 		else
 			res.insert(std::pair<size_t, ComputationalCell>(ghost_index, cells[ghost_index]));
