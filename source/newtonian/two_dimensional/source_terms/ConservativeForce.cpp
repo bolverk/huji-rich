@@ -4,8 +4,39 @@
 using std::min;
 using std::sqrt;
 
-ConservativeForce::ConservativeForce(const Acceleration& acc):
-  acc_(acc) {}
+namespace 
+{
+	Vector2D MassFlux(Tessellation const& tess, int point,
+		vector<Extensive> const& fluxes)
+	{
+		Vector2D dm;
+		vector<int> edge_index = tess.GetCellEdges(point);
+		Vector2D center = tess.GetCellCM(point);
+		int n = static_cast<int>(edge_index.size());
+		Edge edge;
+		for (int i = 0; i<n; ++i)
+		{
+			edge = tess.GetEdge(edge_index[static_cast<size_t>(i)]);
+			if (point == edge.neighbors.first)
+			{
+				dm -= edge.GetLength() * fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].mass *
+					(center - 0.5*(edge.vertices.first + edge.vertices.second));
+			}
+			else
+				if (point == edge.neighbors.second)
+				{
+					dm += edge.GetLength() * fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].mass *
+						(center - 0.5*(edge.vertices.first + edge.vertices.second));
+				}
+				else
+					throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
+		}
+		return dm;
+	}
+}
+
+ConservativeForce::ConservativeForce(const Acceleration& acc, bool mass_flux):
+  acc_(acc),mass_flux_(mass_flux) {}
 
 ConservativeForce::~ConservativeForce(void){}
 
@@ -15,13 +46,15 @@ vector<Extensive> ConservativeForce::operator()
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
-   const vector<Vector2D>& /*point_velocities*/,
+   const vector<Vector2D>& point_velocities,
    const double t) const
 {
   vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
-  for(size_t i=0;i<res.size();++i){
+  for(size_t i=0;i<res.size();++i)
+  {
     if(cells[i].stickers.count("dummy")>0 && 
-       cells[i].stickers.find("dummy")->second){
+       cells[i].stickers.find("dummy")->second)
+	{
       res[i].mass = 0;
       res[i].energy = 0;
       res[i].momentum.x = 0;
@@ -30,22 +63,16 @@ vector<Extensive> ConservativeForce::operator()
     }
     const Vector2D acc = acc_
       (tess,cells,fluxes,t,static_cast<int>(i));
-    /*
-    const double volume = pg.calcVolume
-      (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
-    */
     const double volume = cd.volumes[i];
     res[i].mass = 0;
     res[i].momentum = volume*cells[i].density*acc;
-    res[i].energy = volume*cells[i].density*ScalarProd(acc,cells[i].velocity);
-    /*
-    const Vector2D mass_flux = MassFlux(tess,pg,cd,fluxes,static_cast<int>(i));
-    res[i].energy = 
-      volume*cells[i].density*
-      ScalarProd(point_velocities[i],acc)+
-      0.5*ScalarProd(mass_flux,acc);
-    */
-      //      0.5*ScalarProd(MassFlux(tess,pg,cd,fluxes,static_cast<int>(i)),acc);
+	if(!mass_flux_)
+		res[i].energy = volume*cells[i].density*ScalarProd(acc,cells[i].velocity);
+	else
+	{
+		const Vector2D mass_flux = MassFlux(tess, static_cast<int>(i), fluxes);
+		res[i].energy = volume*cells[i].density*ScalarProd(point_velocities[i], acc) +0.5*ScalarProd(mass_flux, acc);
+	}
   }
   return res;
 }
