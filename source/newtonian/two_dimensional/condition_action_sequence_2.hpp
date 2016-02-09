@@ -23,6 +23,7 @@ public:
 		\param edge_values The interpolated values at the edge 
 		\param edge_velocity Velocity of the edges
 		\param res The flux given as output
+		\param time The time
 		*/
 		virtual void operator()
 			(const Edge& edge,
@@ -32,7 +33,8 @@ public:
 				const EquationOfState& eos,
 				const bool aux,
 				const pair<ComputationalCell,ComputationalCell> & edge_values,
-				Extensive &res) const = 0;
+				Extensive &res,
+				double time) const = 0;
 
 		virtual ~Action2(void);
 	};
@@ -84,7 +86,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res) const;
+			Extensive &res,double time) const;
 
 private:
 
@@ -110,7 +112,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res) const;
+			Extensive &res,double time) const;
 
 private:
 	const RiemannSolver& rs_;
@@ -135,7 +137,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res) const;
+			Extensive &res,double time) const;
 
 private:
 	const bool in_;
