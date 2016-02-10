@@ -182,7 +182,8 @@ namespace
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				Extensive &res) const
+				Extensive &res,
+				double /*time*/) const
 		{
 			if (aux)
 				assert(edge.neighbors.first < tess.GetPointNo());
