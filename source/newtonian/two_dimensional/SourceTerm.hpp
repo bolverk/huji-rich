@@ -18,27 +18,28 @@
 class SourceTerm
 {
 public:
-  /*!
-    \brief Calcualtes the change in conserved variables done on a cell from a source term
-    \param tess The tessellation
-    \param pg Physical geometry
-    \param cd Cache data
-    \param cells The hydrodynmic variables of the cell
-    \param fluxes Fluxes
-    \param point_velocities Velocities of the mesh generating points
-    \param t Time
-    \return The flux of conserved variables
-  */
-  virtual vector<Extensive> operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& pg,
-   const CacheData& cd,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const vector<Vector2D>& point_velocities,
-   const double t) const = 0;
+	/*!
+	  \brief Calcualtes the change in conserved variables done on a cell from a source term
+	  \param tess The tessellation
+	  \param pg Physical geometry
+	  \param cd Cache data
+	  \param cells The hydrodynmic variables of the cell
+	  \param fluxes Fluxes
+	  \param point_velocities Velocities of the mesh generating points
+	  \param t Time
+	  \return The flux of conserved variables
+	*/
+	virtual vector<Extensive> operator()
+		(const Tessellation& tess,
+			const PhysicalGeometry& pg,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			const vector<Extensive>& fluxes,
+			const vector<Vector2D>& point_velocities,
+			const double t,
+			TracerStickerNames const& tracerstickernames) const = 0;
 
-  virtual ~SourceTerm(void);
+	virtual ~SourceTerm(void);
 };
 
 #endif //SOURCETERM_HPP

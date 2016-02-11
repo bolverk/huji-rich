@@ -17,8 +17,8 @@ SimpleCellUpdater::Condition::~Condition(void) {}
 
 SimpleCellUpdater::Action::~Action(void) {}
 
-namespace {
-
+namespace 
+{
   void regular_update
   (const EquationOfState& eos,
    vector<Extensive>& extensives,

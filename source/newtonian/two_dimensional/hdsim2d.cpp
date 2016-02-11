@@ -79,10 +79,11 @@ hdsim::hdsim
  const TimeStepFunction& tsf,
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
- const CellUpdater& cu
+ const CellUpdater& cu,
 #ifdef RICH_MPI
-	,const ProcessorUpdate* proc_update
+	const ProcessorUpdate* proc_update,
 #endif
+	TracerStickerNames tracer_sticker_names
 	) :
 #ifdef RICH_MPI
 	proctess_(proctess),
@@ -107,11 +108,29 @@ hdsim::hdsim
   fc_(fc),
   eu_(eu),
   cu_(cu),
+	tracer_sticker_names_(tracer_sticker_names),
   cache_data_(tess, pg)
 #ifdef RICH_MPI
 	,proc_update_(proc_update)
 #endif
-{}
+{
+	// sort tracers and stickers
+	size_t N = cells_.size();
+	vector<size_t> tindex=sort_index(tracer_sticker_names_.tracer_names);
+	vector<size_t> sindex = sort_index(tracer_sticker_names_.sticker_names);
+	tracer_sticker_names_.tracer_names = VectorValues(tracer_sticker_names_.tracer_names, tindex);
+	tracer_sticker_names_.sticker_names = VectorValues(tracer_sticker_names_.sticker_names, sindex);
+	for (size_t i = 0; i < N; ++i)
+	{
+		for (size_t j = 0; j < tindex.size(); ++j)
+		{
+			cells_[i].tracers[j] = cells[i].tracers[tindex[j]];
+			extensives_[i].tracers[j] = cells_[i].tracers[j] * extensives_[i].mass;
+		}
+		for (size_t j = 0; j < sindex.size(); ++j)
+			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
+	}
+}
 
 hdsim::~hdsim(void) {}
 

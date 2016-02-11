@@ -102,7 +102,9 @@ void ColdFlowsUpdate::operator()
 	size_t index,
 	double /*time*/)const
 {
-	if (!SmallThermalEnergy(extensive))
+	/*if (!SmallThermalEnergy(extensive))
+		return;*/
+	if (!NegativeThermalEnergy(extensive))
 		return;
 	string entropy = "Entropy";
 	if (!IsShocked(index, interp_, cells[index], tess, eos_) || NegativeThermalEnergy(extensive))

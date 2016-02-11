@@ -6,9 +6,11 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include <boost/container/flat_map.hpp>
+#include <boost/container/small_vector.hpp>
 #include <string>
 #include "../../tessellation/geometry.hpp"
+typedef boost::container::small_vector<double,0> tvector;
+typedef boost::container::small_vector<bool,0> svector;
 #ifdef RICH_MPI
 #include "../../misc/serializable.hpp"
 #endif // RICH_MPI
@@ -18,8 +20,9 @@ using std::string;
 //! \brief Computational cell
 class ComputationalCell
 #ifdef RICH_MPI
-  : public Serializable
+	: public Serializable
 #endif // RICH_MPI
+
 {
 public:
 
@@ -33,12 +36,10 @@ public:
 	Vector2D velocity;
 
 	//! \brief Tracers (can transfer from one cell to another)
-	// std::map<std::string,double> tracers;
-	boost::container::flat_map<std::string, double> tracers;
+	tvector tracers;
 
 	//! \brief Stickers (stick to the same cell)
-	//std::map<std::string,bool> stickers;
-	boost::container::flat_map<std::string, bool> stickers;
+	svector stickers;
 
 	/*!
 	\brief Copy constructor
@@ -151,4 +152,11 @@ public:
 	void unserialize(const vector<double>& data);
 #endif//RICH_MPI
 };
+class TracerStickerNames
+{
+public:
+	vector<string> tracer_names;
+	vector<string> sticker_names;
+};
+
 #endif // COMPUTATIONAL_CELL_HPP

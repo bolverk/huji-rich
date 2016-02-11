@@ -33,6 +33,7 @@
 #include "extensive_updater.hpp"
 #include "cache_data.hpp"
 #include "edge_velocity_calculator.hpp"
+#include <boost/container/small_vector.hpp>
 #ifdef RICH_MPI
 #include "../../mpi/ProcessorUpdate.hpp"
 #endif
@@ -74,6 +75,8 @@ private:
   const ExtensiveUpdater& eu_;
 
   const CellUpdater& cu_;
+
+  TracerStickerNames tracer_sticker_names_;
 
   const CacheData cache_data_;
 
@@ -161,10 +164,11 @@ public:
    const TimeStepFunction& tsf,
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
-   const CellUpdater& cu
+   const CellUpdater& cu,
 #ifdef RICH_MPI
-		  ,const ProcessorUpdate* proc_update=0
+		  const ProcessorUpdate* proc_update=0,
 #endif
+		  TracerStickerNames tracer_sticker_names = TracerStickerNames()
 		  );
 
   /*! \brief Loads reset data into simulation

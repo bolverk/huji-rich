@@ -39,7 +39,8 @@ public:
    const CacheData& cd,
    const EquationOfState& eos,
    const double time,
-   const double dt) const = 0;
+   const double dt,
+	  TracerStickerNames const& tracerstickernames) const = 0;
 
   //! \brief Class destructor
   virtual ~FluxCalculator(void);

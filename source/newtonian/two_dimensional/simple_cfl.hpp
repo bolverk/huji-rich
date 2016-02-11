@@ -22,7 +22,7 @@ public:
 		    const vector<ComputationalCell>& cells,
 		    const EquationOfState& eos,
 		    const vector<Vector2D>& point_velocities,
-		    const double time) const;
+		    const double time,TracerStickerNames const& tracerstickernames) const;
 
 private:
   const double cfl_;

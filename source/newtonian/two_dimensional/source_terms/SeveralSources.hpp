@@ -13,22 +13,23 @@
 class SeveralSources :public SourceTerm
 {
 public:
-  //! \brief Class constructor
-  explicit SeveralSources(vector<SourceTerm*> forces);
-  //! \brief Class destructor
-  ~SeveralSources(void);
+	//! \brief Class constructor
+	explicit SeveralSources(vector<SourceTerm*> forces);
+	//! \brief Class destructor
+	~SeveralSources(void);
 
-  vector<Extensive> operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& pg,
-   const CacheData& cd,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const vector<Vector2D>& point_velocities,
-   const double t) const;
+	vector<Extensive> operator()
+		(const Tessellation& tess,
+			const PhysicalGeometry& pg,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			const vector<Extensive>& fluxes,
+			const vector<Vector2D>& point_velocities,
+			const double t,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
-  vector<SourceTerm*> sources_;
+	vector<SourceTerm*> sources_;
 };
 
 #endif //SEVERALSOURCES_HPP
