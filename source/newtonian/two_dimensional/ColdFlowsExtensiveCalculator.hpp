@@ -19,21 +19,22 @@ private:
 	LinearGaussImproved const& interp_;
 public:
 
-  /*! \brief Class constructor
-    \param eos Equation of state
-    \param interp Interpolation
-   */
-	ColdFlowsExtensiveCalculator(EquationOfState const& eos,LinearGaussImproved const& interp);
+	/*! \brief Class constructor
+	  \param eos Equation of state
+	  \param interp Interpolation
+	 */
+	ColdFlowsExtensiveCalculator(EquationOfState const& eos, LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
-		const PhysicalGeometry& pg,
-		const Tessellation& tess,
-		const double dt,
-		const CacheData& cd,
-		const vector<ComputationalCell>& cells,
-		vector<Extensive>& extensives,
-			double time) const;
+			const PhysicalGeometry& pg,
+			const Tessellation& tess,
+			const double dt,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			vector<Extensive>& extensives,
+			double time,
+			TracerStickerNames const& tracerstickernames) const;
 };
 
 #endif // COLD_EXTENSIVE_UPDATER_HPP

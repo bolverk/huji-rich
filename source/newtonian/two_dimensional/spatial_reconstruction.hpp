@@ -35,7 +35,8 @@ public:
   operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   double time, vector<pair<ComputationalCell, ComputationalCell> > &res) const = 0;
+   double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
+	  TracerStickerNames const& tracerstikersnames) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };

@@ -41,6 +41,8 @@ public:
   //! \brief Locations of cpus
   vector<Vector2D> proc_points;
 #endif
+
+  TracerStickerNames tracerstickernames;
 };
 
 /*! \brief Load snapshot data into memory

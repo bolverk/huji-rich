@@ -205,14 +205,7 @@ public:
    */
   void changePhysicalGeometry(const PhysicalGeometry* pg);
 
-  /*! \brief Adds a tracer to the simulation
-    \param name Name of tracer
-    \param tp The spatial distribution of the tracer to add
-  */
-  void addTracer(const std::string& name,
-		 const SpatialDistribution& tp);
-
-  /*! \brief Sets the start time
+    /*! \brief Sets the start time
     \param t_start Start time
    */
   void setStartTime(double t_start);
@@ -269,6 +262,8 @@ public:
     \return Cached data
    */
   const CacheData& getCacheData(void) const;
+
+  TracerStickerNames const& GetTracerStickerNames(void)const;
 };
 
 #endif

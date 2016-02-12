@@ -25,7 +25,8 @@ public:
 			(size_t index,
 				const Tessellation& tess,
 				const vector<ComputationalCell>& cells,
-				double time) const = 0;
+				double time,
+				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Condition(void);
 	};
@@ -54,7 +55,8 @@ public:
 				const vector<ComputationalCell>& cells,
 				Extensive& extensive,
 				size_t index,
-				double time) const = 0;
+				double time,
+				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Action(void);
 	};
@@ -74,7 +76,8 @@ public:
 		const CacheData& cd,
 		const vector<ComputationalCell>& cells,
 		vector<Extensive>& extensives,
-		double time) const;
+		double time,
+		TracerStickerNames const& tracerstickernames) const;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -101,7 +104,8 @@ public:
 			const vector<ComputationalCell>& cells,
 			Extensive& extensive,
 			size_t index,
-			double time)const;
+			double time, 
+			TracerStickerNames const& tracerstickernames)const;
 private:
 	EquationOfState const& eos_;
 	LinearGaussImproved const& interp_;

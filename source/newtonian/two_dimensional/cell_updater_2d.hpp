@@ -21,25 +21,26 @@ class CellUpdater
 {
 public:
 
-  /*! \brief Calculates the computational cells
-    \param tess Tessellation
-    \param pg Physical geometry
-    \param eos Equation of state
-    \param extensives Extensive variables
-    \param old Old computational cells
-    \param cd Cached data
-    \return List of computational cells
-   */
-  virtual vector<ComputationalCell> operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& pg,
-   const EquationOfState& eos,
-   vector<Extensive>& extensives,
-   const vector<ComputationalCell>& old,
-   const CacheData& cd) const = 0;
+	/*! \brief Calculates the computational cells
+	  \param tess Tessellation
+	  \param pg Physical geometry
+	  \param eos Equation of state
+	  \param extensives Extensive variables
+	  \param old Old computational cells
+	  \param cd Cached data
+	  \return List of computational cells
+	 */
+	virtual vector<ComputationalCell> operator()
+		(const Tessellation& tess,
+			const PhysicalGeometry& pg,
+			const EquationOfState& eos,
+			vector<Extensive>& extensives,
+			const vector<ComputationalCell>& old,
+			const CacheData& cd,
+			TracerStickerNames const& tracerstickernames) const = 0;
 
-  //! \brief Class destructor
-  virtual ~CellUpdater(void);
+	//! \brief Class destructor
+	virtual ~CellUpdater(void);
 };
 
 #endif // CELL_UPDATER_HPP

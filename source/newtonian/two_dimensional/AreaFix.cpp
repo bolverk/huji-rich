@@ -13,7 +13,7 @@ namespace
 			0.5*res.mass*ScalarProd(cell.velocity, cell.velocity);
 		res.momentum = res.mass*cell.velocity;
 		for (size_t i = 0; i < cell.tracers.size(); ++i)
-			res.tracers[(cell.tracers.begin() + static_cast<int>(i))->first] = res.mass*(cell.tracers.begin() + static_cast<int>(i))->second;
+			res.tracers[i] = res.mass*cell.tracers[i];
 		return res;
 	}
 
@@ -126,7 +126,7 @@ namespace
 		return -1;
 	}
 
-	bool FirstVertice(Edge edgenew, Tessellation const& tessnew, int cell,Vector2D const& edge_added)
+	bool FirstVertice(Edge edgenew, Tessellation const& tessnew, int cell, Vector2D const& edge_added)
 	{
 		edgenew.vertices.first += edge_added;
 		edgenew.vertices.second += edge_added;
@@ -147,7 +147,7 @@ namespace
 		throw UniversalError("Couldn't find first vertice");
 	}
 
-	Edge FindOtherEdge(Tessellation const& tess, int cell_index,int other)
+	Edge FindOtherEdge(Tessellation const& tess, int cell_index, int other)
 	{
 		vector<int> const& edges = tess.GetCellEdges(cell_index);
 		for (size_t i = 0; i < edges.size(); ++i)
@@ -162,7 +162,7 @@ namespace
 	}
 
 	std::pair<Vector2D, Vector2D> TrianglesArea(Edge const& eold, Edge const &enew, Tessellation const& tessnew,
-		Tessellation const& tessold, Vector2D const& new_edge_added, int cell_index,Vector2D const& cell_index_added)
+		Tessellation const& tessold, Vector2D const& new_edge_added, int cell_index, Vector2D const& cell_index_added)
 	{ // first is the change in the old and the second the change in the new
 	  // x is e1.first y is e1.second
 		std::pair<Vector2D, Vector2D> res;
@@ -198,7 +198,7 @@ namespace
 		}
 		int npoints = tessold.GetPointNo();
 		Vector2D toadd = new_edge_added - cell_index_added;
-		bool first = FirstVertice(enew, tessnew, cell_index,toadd);
+		bool first = FirstVertice(enew, tessnew, cell_index, toadd);
 		if (eold.neighbors.first > npoints)
 		{
 			first = !first;
@@ -220,7 +220,7 @@ namespace
 			third_point = (first ? enew.vertices.second : enew.vertices.first) + new_edge_added;
 			TripleConstRef<Vector2D> temp4 = TripleConstRef<Vector2D>(points[1], third_point, points[0]);
 			res.first.y = 0.5*orient2d(temp4);
-			area_scale = std::max(area_scale,std::abs(res.first.y));
+			area_scale = std::max(area_scale, std::abs(res.first.y));
 			sum += res.first.y;
 		}
 		bool newrigid = tessnew.GetOriginalIndex(enew.neighbors.first) == tessnew.GetOriginalIndex(enew.neighbors.second);
@@ -314,7 +314,7 @@ namespace
 		Edge const& edge, OuterBoundary const& outer, int npoints, vector<Vector2D> const& pointvelocity, double dt,
 		double dA_flux, int mid_index, Tessellation const& tessmid, vector<Vector2D> const& fv,
 		vector<ComputationalCell> const& cells, EquationOfState const& eos, vector<Extensive> &res,
-		std::set<std::pair<int, int > > &flipped_set,Vector2D const& cell_added)
+		std::set<std::pair<int, int > > &flipped_set, Vector2D const& cell_added)
 	{
 		// Is there a corresponding new edge? An edge flip
 		int new_edge = NewEdgeIndex(tessold, tessnew, cell_index, edge, other_index);
@@ -507,14 +507,14 @@ namespace
 		}
 		for (size_t i = 0; i < c0.tracers.size(); ++i)
 		{
-			ratio = (c0.tracers.begin() + static_cast<int>(i))->second / (c1.tracers.begin() + static_cast<int>(i))->second;
+			ratio = c0.tracers[i] / c1.tracers[i];
 			if (ratio<2 && ratio>0.5)
-				p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = 0.5*(c0.tracers.begin() + static_cast<int>(i))->second *(1 + 1 / ratio);
+				p_mid.tracers[i] = 0.5*c0.tracers[i] * (1 + 1 / ratio);
 			else
 				if (seconddonor)
-					p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = (c1.tracers.begin() + static_cast<int>(i))->second;
+					p_mid.tracers[i] = c1.tracers[i];
 				else
-					p_mid.tracers[(c0.tracers.begin() + static_cast<int>(i))->first] = (c0.tracers.begin() + static_cast<int>(i))->second;
+					p_mid.tracers[i] = c0.tracers[i];
 		}
 		return p_mid;
 	}
@@ -526,7 +526,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 	vector<Vector2D> const& fv, OuterBoundary const& outer, EquationOfState const& eos)
 {
 	size_t npoints = static_cast<size_t>(tessold.GetPointNo());
-	vector<Extensive> res(static_cast<size_t>(npoints),Extensive (cells[0].tracers));
+	vector<Extensive> res(static_cast<size_t>(npoints), Extensive(cells[0].tracers));
 	// Fix the fluxes
 	Vector2D temp0, temp1;
 	std::set<std::pair<int, int > > flipped_set, only_mid;
@@ -552,7 +552,7 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 		if (new_index < 0)
 		{
 			AreaFixEdgeDisappear(tessold, tessnew, cell_index, other_index, edge, outer, static_cast<int>(npoints), pointvelocity, dt,
-				dA_flux, mid_index, tessmid, fv, cells, eos, res, flipped_set,added);
+				dA_flux, mid_index, tessmid, fv, cells, eos, res, flipped_set, added);
 			continue;
 		}
 		Vector2D real_p_new = tessnew.GetMeshPoint(cell_index);

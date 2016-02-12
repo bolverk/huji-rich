@@ -1,4 +1,5 @@
 #include "ConditionExtensiveUpdater.hpp"
+#include "../../misc/utils.hpp"
 
 namespace
 {
@@ -24,7 +25,8 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
 	vector<Extensive>& extensives,
-	double time) const
+	double time,
+	TracerStickerNames const& tracerstickernames) const
 {
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	Extensive delta(extensives[0]);
@@ -43,9 +45,9 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	{
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells,time))
+			if (sequence_[j].first->operator()(i, tess, cells,time,tracerstickernames))
 			{
-				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i,time);
+				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i],i,time,tracerstickernames);
 				break;
 			}
 		}
@@ -100,18 +102,23 @@ void ColdFlowsUpdate::operator()
 	const vector<ComputationalCell>& cells,
 	Extensive& extensive,
 	size_t index,
-	double /*time*/)const
+	double /*time*/,
+	TracerStickerNames const& tracerstickernames)const
 {
 	/*if (!SmallThermalEnergy(extensive))
 		return;*/
 	if (!NegativeThermalEnergy(extensive))
 		return;
 	string entropy = "Entropy";
+	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
+		entropy);
+	assert(it != tracerstickernames.tracer_names.end());
+	size_t entropy_index = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
 	if (!IsShocked(index, interp_, cells[index], tess, eos_) || NegativeThermalEnergy(extensive))
 	{
 		const double Ek = ScalarProd(extensive.momentum, extensive.momentum) / (2 * extensive.mass);
 		const double density = extensive.mass / cd.volumes[index];
-		extensive.energy = Ek + eos_.dp2e(density, eos_.sd2p(cells[index].tracers.at(entropy), density))
+		extensive.energy = Ek + eos_.dp2e(density, eos_.sd2p(cells[index].tracers.at(entropy_index), density))
 			*extensive.mass;
 	}
 }

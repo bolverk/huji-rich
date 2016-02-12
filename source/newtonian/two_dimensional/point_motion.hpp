@@ -23,7 +23,7 @@ public:
     \return Velocities of the points
    */
   virtual vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,
-	  double time,svector const& tracers,svector const& stickers) const = 0;
+	  double time,TracerStickerNames const& tracerstickersnames) const = 0;
 
   /*! \brief Applies a small fix to the velocity of all mesh points once the time step is known
   \param tess The tessellation
@@ -34,7 +34,7 @@ public:
   \return The new velocities
   */
   virtual vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> const& velocities,svector const& tracers, svector const& stickers)const;
+	  double dt, vector<Vector2D> const& velocities,TracerStickerNames const& tracerstickernames)const;
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);

@@ -23,14 +23,14 @@ namespace
 			const EquationOfState& eos,
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
-			Extensive &res,double time)
+			Extensive &res, double time, TracerStickerNames const& tracerstickernames)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i) {
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
-				(edge, tess, cells);
+				(edge, tess, cells, tracerstickernames);
 			if (flag_aux.first)
 				return (*sequence[i].second)
-				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res,time);
+				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res, time, tracerstickernames);
 		}
 		throw UniversalError("Error in ConditionActionSequence");
 	}
@@ -44,7 +44,8 @@ vector<Extensive> ConditionActionSequence::operator()
 	const CacheData& /*cd*/,
 	const EquationOfState& eos,
 	const double time,
-	const double /*dt*/) const
+	const double /*dt*/,
+	TracerStickerNames const& tracerstickernames) const
 {
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
 	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
@@ -54,7 +55,7 @@ vector<Extensive> ConditionActionSequence::operator()
 			cells,
 			eos,
 			edge_velocities[i],
-			sequence_, res[i],time);
+			sequence_, res[i], time, tracerstickernames);
 	return res;
 }
 
@@ -65,17 +66,18 @@ ConditionActionSequence::Action::~Action(void) {}
 RegularFlux::RegularFlux(const RiemannSolver& rs) :
 	rs_(rs) {}
 
-namespace {
+namespace
+{
 	void conserved_to_extensive
 		(const Conserved& c, const ComputationalCell& cell, Extensive &res)
 	{
 		res.mass = c.Mass;
 		res.momentum = c.Momentum;
 		res.energy = c.Energy;
-		boost::container::flat_map<string, double>::iterator it2 = res.tracers.begin();
-		for (boost::container::flat_map<string, double>::const_iterator it =
-			cell.tracers.begin(); it != cell.tracers.end(); ++it, ++it2)
-			it2->second = (it->second)*c.Mass;
+		res.tracers.resize(cell.tracers.size());
+		size_t N = cell.tracers.size();
+		for (size_t i = 0; i < N; ++i)
+			res.tracers[i] = cell.tracers[i] * c.Mass;
 	}
 }
 
@@ -86,7 +88,7 @@ void RegularFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool /*aux*/,
-	Extensive &res,double /*time*/) const
+	Extensive &res, double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
 		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
@@ -109,7 +111,7 @@ void RegularFlux::operator()
 		(c,
 			c.Mass > 0 ?
 			cells.at(static_cast<size_t>(edge.neighbors.first)) :
-			cells.at(static_cast<size_t>(edge.neighbors.second)),res);
+			cells.at(static_cast<size_t>(edge.neighbors.second)), res);
 }
 
 RigidWallFlux::RigidWallFlux
@@ -142,7 +144,7 @@ void RigidWallFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res,double /*time*/) const
+	Extensive &res, double /*time*/,TracerStickerNames const& /*tracerstickernames*/) const
 {
 	if (aux)
 		assert(edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo());
@@ -173,7 +175,7 @@ void RigidWallFlux::operator()
 			v, n, p);
 	conserved_to_extensive
 		(c,
-			cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)),res);
+			cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)), res);
 }
 
 FreeFlowFlux::FreeFlowFlux(const RiemannSolver& rs) :
@@ -186,7 +188,7 @@ void FreeFlowFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res,double /*time*/) const
+	Extensive &res, double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -216,7 +218,7 @@ void FreeFlowFlux::operator()
 			v, n, p);
 	conserved_to_extensive
 		(c,
-			cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)),res);
+			cells.at(static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)), res);
 }
 
 IsBoundaryEdge::IsBoundaryEdge(void) {}
@@ -224,7 +226,7 @@ IsBoundaryEdge::IsBoundaryEdge(void) {}
 pair<bool, bool> IsBoundaryEdge::operator()
 (const Edge& edge,
 	const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/) const
+	const vector<ComputationalCell>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 #ifdef RICH_MPI
 	if (tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second))
@@ -251,7 +253,7 @@ IsBulkEdge::IsBulkEdge(void) {}
 pair<bool, bool> IsBulkEdge::operator()
 (const Edge& edge,
 	const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/) const
+	const vector<ComputationalCell>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	return pair<bool, bool>
 		(edge.neighbors.first >= 0 &&
@@ -269,14 +271,17 @@ RegularSpecialEdge::RegularSpecialEdge(const string& sticker_name) :
 pair<bool, bool> RegularSpecialEdge::operator()
 (const Edge& edge,
 	const Tessellation& /*tess*/,
-	const vector<ComputationalCell>& cells) const
+	const vector<ComputationalCell>& cells, TracerStickerNames const& tracerstickernames) const
 {
-	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers, sticker_name_)) {
-		if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers, sticker_name_))
+	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers,tracerstickernames.sticker_names,
+		sticker_name_)) {
+		if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,tracerstickernames.sticker_names,
+			sticker_name_))
 			return pair<bool, bool>(false, false);
 		return pair<bool, bool>(true, false);
 	}
-	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers, sticker_name_))
+	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,tracerstickernames.sticker_names,
+		sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);
 }

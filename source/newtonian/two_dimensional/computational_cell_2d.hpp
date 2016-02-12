@@ -6,11 +6,14 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include <boost/container/small_vector.hpp>
+/*#include <boost/container/small_vector.hpp>
+typedef boost::container::small_vector<double,0> tvector;
+typedef boost::container::small_vector<bool,0> svector;*/
+#include <vector>
+typedef std::vector<double> tvector;
+typedef std::vector<bool> svector;
 #include <string>
 #include "../../tessellation/geometry.hpp"
-typedef boost::container::small_vector<double,0> tvector;
-typedef boost::container::small_vector<bool,0> svector;
 #ifdef RICH_MPI
 #include "../../misc/serializable.hpp"
 #endif // RICH_MPI

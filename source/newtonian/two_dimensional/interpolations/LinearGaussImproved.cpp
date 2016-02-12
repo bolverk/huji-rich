@@ -267,7 +267,7 @@ namespace
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
 				if (std::abs(dphi.tracers[j]) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || (
-					centroid_val.tracers[j]*cell_tracer < 0))
+					centroid_val.tracers[j] * cell_tracer < 0))
 				{
 					if (dphi.tracers[j] > std::abs(1e-9*cell_tracer))
 						psi[4 + j] = std::min(psi[4 + j], diff_tracer / dphi.tracers[j]);
@@ -287,7 +287,7 @@ namespace
 		slope.yderivative.velocity.y *= psi[3];
 		size_t counter = 4;
 		size_t N = slope.xderivative.tracers.size();
-		for (size_t k = 0; k < N;++k)
+		for (size_t k = 0; k < N; ++k)
 		{
 			slope.xderivative.tracers[k] *= psi[counter];
 			slope.yderivative.tracers[k] *= psi[counter];
@@ -355,12 +355,12 @@ namespace
 			{
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
-				double centroid_tracer =centroid_val.tracers[j];
-				if (std::abs(dphi.tracers[j]) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || 
+				double centroid_tracer = centroid_val.tracers[j];
+				if (std::abs(dphi.tracers[j]) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) ||
 					centroid_tracer*cell_tracer < 0)
 				{
 					if (std::abs(dphi.tracers[j]) > std::abs(1e-9*cell_tracer))
-						psi[4 + counter] = std::min(psi[4 + counter], 
+						psi[4 + counter] = std::min(psi[4 + counter],
 							std::max(diffusecoeff*(neighbors[i]->tracers[j] - cell_tracer) / dphi.tracers[j], 0.0));
 				}
 				++counter;
@@ -375,7 +375,7 @@ namespace
 		slope.xderivative.velocity.y *= psi[3];
 		slope.yderivative.velocity.y *= psi[3];
 		size_t counter = 0;
-		for (size_t k = 0; k < slope.xderivative.tracers.size();++k)
+		for (size_t k = 0; k < slope.xderivative.tracers.size(); ++k)
 		{
 			slope.xderivative.tracers[k] *= psi[4 + counter];
 			slope.yderivative.tracers[k] *= psi[4 + counter];
@@ -420,7 +420,7 @@ namespace
 
 		for (size_t i = 0; i < flat_tracers.size(); ++i)
 		{
-			size_t tindex=static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
+			size_t tindex = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
 				flat_tracers[i]) - tracerstickernames.tracer_names.begin());
 			assert(tindex < tracerstickernames.tracer_names.size());
 			res.xderivative.tracers[tindex] = 0;
@@ -480,12 +480,13 @@ namespace
 #endif//RICH_MPI
 
 void LinearGaussImproved::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells, double time, vector<pair<ComputationalCell, ComputationalCell> > &res) const
+	const vector<ComputationalCell>& cells, double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
+	TracerStickerNames const& tracerstikersnames) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	vector<int> boundaryedges;
 	// Get ghost points
-	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time);
+	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time, tracerstikersnames);
 	// Prepare slopes
 	rslopes_.resize(CellNumber, Slope(cells[0], cells[0]));
 	naive_rslopes_.resize(CellNumber);
@@ -503,7 +504,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_, ghost_cells,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
-			neighbor_mesh_list, neighbor_cm_list);
+			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{
@@ -550,7 +551,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 				res[static_cast<size_t>(boundaryedges[i])].first = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first));
 				res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-						edge.neighbors.first), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+						edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 			}
 #else
 			res[static_cast<size_t>(boundaryedges[i])].first = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first));
@@ -573,7 +574,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 				res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
 				res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-						edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+						edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 			}
 #else
 			res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
@@ -582,8 +583,8 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 					edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #endif //RICH_MPI
 		}
-		}
-		}
+	}
+}
 
 
 vector<Slope>& LinearGaussImproved::GetSlopes(void)const

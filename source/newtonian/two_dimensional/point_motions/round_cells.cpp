@@ -93,9 +93,9 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
-	double time) const
+	double time, TracerStickerNames const& tracerstickernames) const
 {
-	vector<Vector2D> res = pm_(tess, cells, time);
+	vector<Vector2D> res = pm_(tess, cells, time,tracerstickernames);
 	if (!cold_)
 	{
 		for (size_t i = 0; i < res.size(); ++i)
@@ -107,9 +107,9 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 }
 
 vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	double dt, vector<Vector2D>const & velocities)const
+	double dt, vector<Vector2D>const & velocities, TracerStickerNames const& tracerstickernames)const
 {
-	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities);
+	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities,tracerstickernames);
 	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{
