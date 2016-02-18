@@ -9,7 +9,8 @@ Vector2D CenterGravity::operator()
  const vector<ComputationalCell>& /*cells*/,
  const vector<Extensive>& /*fluxes*/,
  const double /*time*/,
- const int point) const
+ const int point,
+ TracerStickerNames const& /*tracerstickernames*/) const
 {
   const Vector2D pos(tess.GetCellCM(point)-center_);
   const double r = abs(pos);

@@ -469,7 +469,8 @@ void ExternalForceContribution
 		extensives[i].mass += dt*diff[i].mass;
 		extensives[i].momentum += dt*diff[i].momentum;
 		extensives[i].energy += dt*diff[i].energy;
-		size_t N = extensives[i].tracers.size();
+		assert(extensives[i].tracers.size()==diff[i].tracers.size());
+		size_t N = diff[i].tracers.size();
 		for (size_t j = 0; j < N; ++j)
 			extensives[i].tracers[j] += dt*diff[i].tracers[j];
 	}
