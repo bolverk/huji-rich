@@ -95,7 +95,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(),
 		tracerstickernames.tracer_names.end(), entropy_);
 	if (it != tracerstickernames.tracer_names.end())
-		size_t tindex = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+		tindex = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
 
 	for (size_t i = 0; i < N; ++i)
 		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex,tracerstickernames);

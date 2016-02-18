@@ -23,7 +23,7 @@ boost::container::flat_map<size_t, ComputationalCell> FreeFlowGenerator::operato
 Slope FreeFlowGenerator::GetGhostGradient(Tessellation const& tess,
 	vector<ComputationalCell> const& cells, vector<Slope> const& /*gradients*/,
 	size_t ghost_index, double /*time*/, Edge const& /*edge*/, TracerStickerNames const&
-	tracerstickernames)const
+	/*tracerstickernames*/)const
 {
 	ComputationalCell cell(cells[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))]);
 	cell.density = 0;

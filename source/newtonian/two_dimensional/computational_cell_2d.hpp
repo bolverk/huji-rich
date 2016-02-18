@@ -18,7 +18,7 @@ typedef std::vector<bool> svector;
 #include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
-using std::string;
+using namespace std;
 
 //! \brief Computational cell
 class ComputationalCell
@@ -155,11 +155,17 @@ public:
 	void unserialize(const vector<double>& data);
 #endif//RICH_MPI
 };
+
 class TracerStickerNames
 {
 public:
 	vector<string> tracer_names;
 	vector<string> sticker_names;
+
+	TracerStickerNames(void);
+	TracerStickerNames(TracerStickerNames const& other);
+	TracerStickerNames(vector<string> tracers,vector<string> stickers);
+	~TracerStickerNames(void);
 };
 
 #endif // COMPUTATIONAL_CELL_HPP

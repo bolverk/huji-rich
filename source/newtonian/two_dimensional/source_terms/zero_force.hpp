@@ -20,7 +20,8 @@ public:
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const vector<Vector2D>& point_velocities,
-   const double t) const;
+   const double t,
+	 TracerStickerNames const& tracerstickersnames) const;
 };
 
 #endif // ZEROFORCE_HPP

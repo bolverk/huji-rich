@@ -18,7 +18,7 @@ CellsToRefine::~CellsToRefine() {}
 AMR::~AMR(void) {}
 
 Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& tracerstickernames) const
+	double volume, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Extensive res;
 	const double mass = volume*cell.density;

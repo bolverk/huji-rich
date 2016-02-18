@@ -22,7 +22,7 @@ public:
     \return True if condition is met
    */
 	virtual bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-		double time,vector<Vector2D> const& velocities, double dt)const = 0;
+		double time,vector<Vector2D> const& velocities, double dt, TracerStickerNames const& ts)const = 0;
 
   /*! \brief Calculates custom velocity
     \param index Call index
@@ -34,7 +34,7 @@ public:
     \return Custom velocity
    */
 	virtual Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-		double time,vector<Vector2D> const& velocities,double dt)const = 0;
+		double time,vector<Vector2D> const& velocities,double dt, TracerStickerNames const& ts)const = 0;
 
   //! \brief Class destructor
 	virtual ~CustomMotionCriteria(void);

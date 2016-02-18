@@ -61,7 +61,8 @@ namespace {
   (const Tessellation& tess)
   {
     vector<ComputationalCell> res(static_cast<size_t>(tess.GetPointNo()));
-    for(size_t i=0;i<res.size();++i){
+    for(size_t i=0;i<res.size();++i)
+	{
       const Triangle triangle(Vector2D(0.5,0.6),
 			      Vector2D(0.7,0.5),
 			      Vector2D(0.4,0.4));
@@ -69,7 +70,7 @@ namespace {
       res[i].density = 1;
       res[i].pressure = triangle(r) ? 2 : 1;
       res[i].velocity = triangle(r) ? Vector2D(1,-1) : Vector2D(0,0);
-      res[i].tracers["tracer"] = triangle(r) ? 1 : 0;
+      res[i].tracers.push_back(triangle(r) ? 1 : 0);
     }
     return res;
   }
@@ -116,7 +117,8 @@ namespace {
 	   tsf_,
 	   fc_,
 	   eu_,
-	   cu_) {}
+	   cu_,
+	   TracerStickerNames (vector<string> (1,"tracer"),vector<string>())) {}
 
     hdsim& getSim(void)
     {
@@ -167,7 +169,7 @@ namespace {
 	    << cons_[i].momentum.x << " "
 	    << cons_[i].momentum.y << " "
 	    << cons_[i].energy << " "
-	    << cons_[i].tracers["tracer"] << "\n";
+	    << cons_[i].tracers[0] << "\n";
 	f.close();
 #ifdef RICH_MPI
       }

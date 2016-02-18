@@ -557,7 +557,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			res[static_cast<size_t>(boundaryedges[i])].first = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first));
 			res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-					edge.neighbors.first), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+					edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 #endif //RICH_MPI
 		}
 		else
@@ -580,7 +580,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
 			res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-					edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+					edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #endif //RICH_MPI
 		}
 	}

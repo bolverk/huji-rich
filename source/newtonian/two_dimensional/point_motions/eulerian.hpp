@@ -22,7 +22,7 @@ public:
   vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   double time) const;
+   double time, TracerStickerNames const& tracerstickersnames) const;
 };
 
 #endif // EULERIAN_HPP

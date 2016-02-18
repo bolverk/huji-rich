@@ -34,6 +34,7 @@
 #include "cache_data.hpp"
 #include "edge_velocity_calculator.hpp"
 #include <boost/container/small_vector.hpp>
+#include "computational_cell_2d.hpp"
 #ifdef RICH_MPI
 #include "../../mpi/ProcessorUpdate.hpp"
 #endif
