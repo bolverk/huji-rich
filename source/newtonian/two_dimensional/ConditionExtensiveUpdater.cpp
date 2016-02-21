@@ -67,14 +67,6 @@ namespace
 			return false;
 	}
 
-	bool SmallThermalEnergy(Extensive const& cell)
-	{
-		if (0.5*ScalarProd(cell.momentum, cell.momentum) > 0.95*cell.energy*cell.mass)
-			return true;
-		else
-			return false;
-	}
-
 	bool IsShocked(size_t index, LinearGaussImproved const& interp, ComputationalCell const& cell, Tessellation
 		const& tess, EquationOfState const& eos)
 	{
