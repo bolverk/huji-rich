@@ -109,6 +109,7 @@ public:
 private:
 	EquationOfState const& eos_;
 	LinearGaussImproved const& interp_;
+	mutable int entropy_index_;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER_HPP

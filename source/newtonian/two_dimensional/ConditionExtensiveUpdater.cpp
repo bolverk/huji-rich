@@ -55,13 +55,13 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 }
 
 ColdFlowsUpdate::ColdFlowsUpdate(EquationOfState const& eos, LinearGaussImproved const& interp) :
-	eos_(eos), interp_(interp) {}
+	eos_(eos), interp_(interp),entropy_index_(-1) {}
 
 namespace
 {
 	bool NegativeThermalEnergy(Extensive const& cell)
 	{
-		if (0.505*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
+		if (0.500001*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
 			return true;
 		else
 			return false;
@@ -95,22 +95,19 @@ void ColdFlowsUpdate::operator()
 	Extensive& extensive,
 	size_t index,
 	double /*time*/,
-	TracerStickerNames const& tracerstickernames)const
+	TracerStickerNames const& ts)const
 {
-	/*if (!SmallThermalEnergy(extensive))
-		return;*/
 	if (!NegativeThermalEnergy(extensive))
 		return;
-	string entropy = "Entropy";
-	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		entropy);
-	assert(it != tracerstickernames.tracer_names.end());
-	size_t entropy_index = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+	if(entropy_index_<0)
+		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(),ts.tracer_names.end(),string("Entropy")) - ts.tracer_names.begin());	
+	size_t e_index=static_cast<size_t>(entropy_index_);
+	assert(e_index<extensive.tracers.size());
 	if (!IsShocked(index, interp_, cells[index], tess, eos_) || NegativeThermalEnergy(extensive))
 	{
 		const double Ek = ScalarProd(extensive.momentum, extensive.momentum) / (2 * extensive.mass);
 		const double density = extensive.mass / cd.volumes[index];
-		extensive.energy = Ek + eos_.dp2e(density, eos_.sd2p(cells[index].tracers.at(entropy_index), density))
+		extensive.energy = Ek + eos_.dp2e(density, eos_.sd2p(cells[index].tracers[e_index], density))
 			*extensive.mass;
 	}
 }
