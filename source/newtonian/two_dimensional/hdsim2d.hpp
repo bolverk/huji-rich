@@ -6,6 +6,7 @@
 #ifndef HDSIM_HPP
 #define HDSIM_HPP 1
 
+#include "computational_cell_2d.hpp"
 #include "../common/equation_of_state.hpp"
 #include "spatial_distribution2d.hpp"
 #include "../common/riemann_solver.hpp"

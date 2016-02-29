@@ -4,7 +4,7 @@ namespace
 {
 	bool NegativeThermalEnergy(Extensive const& cell)
 	{
-		if (0.505*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
+		if (0.50000001*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
 			return true;
 		else
 			return false;
