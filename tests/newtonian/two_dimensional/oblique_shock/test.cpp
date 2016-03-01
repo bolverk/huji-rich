@@ -1,7 +1,5 @@
 #ifdef RICH_MPI
 #include "source/mpi/MeshPointsMPI.hpp"
-#include <boost/mpi/collectives.hpp>
-#include <boost/mpi/environment.hpp>
 #endif
 #include <iostream>
 #include <fstream>
@@ -9,7 +7,7 @@
 #include <vector>
 #include "source/misc/int2str.hpp"
 #include "source/tessellation/VoronoiMesh.hpp"
-#include "source/tessellation/tessellation.hpp"
+#include "source/tessellation/RoundGrid.hpp"
 #include "source/tessellation/geometry.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/tessellation/tessellation.hpp"
@@ -43,16 +41,15 @@ namespace
 #ifdef RICH_MPI
 	vector<Vector2D> process_positions(const SquareBox& boundary)
 	{
-		const boost::mpi::communicator world;
+		int ws=0;
+		MPI_Comm_size(MPI_COMM_WORLD,&ws);
+		size_t ws2=static_cast<size_t>(ws);
 		const Vector2D lower_left = boundary.getBoundary().first;
 		const Vector2D upper_right = boundary.getBoundary().second;
-		vector<Vector2D> res(world.size());
-		if (world.rank() == 0) {
-			res = RandSquare(world.size(),
+		vector<Vector2D> res(ws2);
+		res = RandSquare(ws2,
 				lower_left.x, upper_right.x,
 				lower_left.y, upper_right.y);
-		}
-		boost::mpi::broadcast(world, res, 0);
 		return res;
 	}
 #endif // RICH_MPI
@@ -126,20 +123,15 @@ namespace
 				const Tessellation& tess,
 				const vector<ComputationalCell>& /*cells*/) const
 		{
-			if (edge.neighbors.first >= tess.GetPointNo())
+			if (edge.neighbors.first >= tess.GetPointNo() && tess.GetOriginalIndex(edge.neighbors.first)==edge.neighbors.second)
 			{
 				assert(edge.neighbors.second<tess.GetPointNo());
-				const Vector2D r = tess.GetMeshPoint(edge.neighbors.second);
-				if (r.x>edge.vertices.first.x && r.x > edge.vertices.second.x)
-					return pair<bool, bool>(true, false);
-				return pair<bool, bool>(false, false);
+				return pair<bool, bool>(true, false);
 			}
-			if (edge.neighbors.second >= tess.GetPointNo())
+			if (edge.neighbors.second >= tess.GetPointNo()&& tess.GetOriginalIndex(edge.neighbors.second)==edge.neighbors.first)
 			{
-				const Vector2D r = tess.GetMeshPoint(edge.neighbors.first);
-				if (r.x>edge.vertices.first.x && r.x > edge.vertices.second.x)
-					return pair<bool, bool>(true, true);
-				return pair<bool, bool>(false, false);
+				assert(edge.neighbors.first<tess.GetPointNo());
+				return pair<bool, bool>(true, true);
 			}
 			return pair<bool, bool>(false, false);
 		}
@@ -236,15 +228,10 @@ namespace
 			tess_(
 #ifdef RICH_MPI
 				proctess_,
-				SquareMeshM
-				(30, 30,
-					proctess_,
-					outer_.getBoundary().first,
-					outer_.getBoundary().second),
+				RoundGrid(RandSquare(50*50,proctess_,outer_.getBoundary().first,
+					outer_.getBoundary().second),&outer_,10,&proctess_),
 #else
-				cartesian_mesh(30, 30,
-					outer_.getBoundary().first,
-					outer_.getBoundary().second),
+				RoundGrid(RandSquare(50*50,-width / 2, width / 2, -width / 2, width / 2),&outer_),
 #endif
 				outer_),
 			eos_(adiabatic_index),
@@ -411,8 +398,9 @@ namespace
 int main(void)
 {
 #ifdef RICH_MPI
-	boost::mpi::environment env;
-	const boost::mpi::communicator world;
+	MPI_Init(NULL,NULL);
+	int rank=0;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif // RICH_MPI
 
 	SimData sim_data;
@@ -422,7 +410,8 @@ int main(void)
 	main_loop(sim);
 
 #ifdef RICH_MPI
-	write_snapshot_to_hdf5(sim, "process_" + int2str(world.rank()) + "_final.h5");
+	write_snapshot_to_hdf5(sim, "process_" + int2str(rank) + "_final.h5");
+	MPI_Finalize();
 #else
 	write_snapshot_to_hdf5(sim, "final.h5");
 #endif // RICH_MPI
