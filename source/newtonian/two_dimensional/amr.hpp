@@ -143,12 +143,14 @@ protected:
 	  )const;
 #ifdef RICH_MPI
 
-  /*! \brief Calculates the list of indices of points because they are near the edge
-    \param candidates Candidates for refinement
+  /*! \brief Removes points because they are near the edge of a cpu domain
+    \param ToRemove Candidates for AMR
+	\param merits The merits for points to be removed. given as input and output. should be empty vector for refinement
     \param tess Tessellation
-    \return List of indices of points because they are near the edge
+    \return The new indices and merits of points 
    */
-  vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const;
+  vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,
+	  Tessellation const& tess,vector<double> &merits)const;
 #endif
 
   /*! \brief Calculates the positions of the new points like AREPO

@@ -549,7 +549,7 @@ void ConservativeAMR::UpdateCellsRefine
 	sort(ToRefine.begin(), ToRefine.end());
 	ToRefine=unique(ToRefine);
 #ifdef RICH_MPI
-	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
+	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,vector<double>());
 	vector<Vector2D> chull;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -621,11 +621,11 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	indeces = unique_index(ToRemovepair.first);
 	ToRemovepair.first = unique(ToRemovepair.first);
 	ToRemovepair.second = VectorValues(ToRemovepair.second, indeces);
+#ifdef RICH_MPI
+	ToRemovepair.first = RemoveNearBoundaryPoints(ToRemovepair.first, tess,ToRemovepair.second);
+#endif
 
 	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
-#ifdef RICH_MPI
-	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
-#endif
 	// save copy of old tessellation
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
 
@@ -875,7 +875,7 @@ void ConservativeAMROld::UpdateCellsRefine
 #endif // RICH_MPI
 	sort(ToRefine.begin(), ToRefine.end());
 #ifdef RICH_MPI
-	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess);
+	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,vector<double>());
 #endif
 	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc);
 
@@ -921,10 +921,10 @@ void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 	if (ToRemovepair.first.empty())
 		return;
 #endif // RICH_MPI
-	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
-	ToRemove = RemoveNearBoundaryPoints(ToRemove, tess);
+	ToRemovepair.first = RemoveNearBoundaryPoints(ToRemovepair.first, tess,ToRemovepair.second);
 #endif
+	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 	// save copy of old tessellation
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
 
@@ -996,14 +996,16 @@ void ConservativeAMROld::operator()(hdsim &sim)
 
 
 #ifdef RICH_MPI
-vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, Tessellation const& tess)const
+vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,
+	Tessellation const& tess, vector<double> &merits)const
 {
 	vector<size_t> res;
 	int N = tess.GetPointNo();
-	for (size_t i = 0; i < candidates.size(); ++i)
+	vector<double> merittemp(merits);
+	for (size_t i = 0; i < ToRemove.size(); ++i)
 	{
 		bool good = true;
-		vector<int> neigh = tess.GetNeighbors(static_cast<int>(candidates[i]));
+		vector<int> neigh = tess.GetNeighbors(static_cast<int>(ToRemove[i]));
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			if (tess.GetOriginalIndex(neigh[j]) >= N)
@@ -1013,7 +1015,7 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, T
 			}
 			else
 			{
-				if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(candidates[i]))
+				if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(ToRemove[i]))
 					continue;
 				vector<int> neigh2 = tess.GetNeighbors(neigh[j]);
 				for (size_t k = 0; k < neigh2.size(); ++k)
@@ -1032,8 +1034,13 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const& candidates, T
 			}
 		}
 		if (good)
-			res.push_back(candidates[i]);
+		{
+			res.push_back(ToRemove[i]);
+			if(!merits.empty())
+				merittemp.push_back(merits.at(i));
+		}
 	}
+	merits = merittemp;
 	return res;
 }
 #endif
