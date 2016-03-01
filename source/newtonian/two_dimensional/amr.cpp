@@ -549,7 +549,8 @@ void ConservativeAMR::UpdateCellsRefine
 	sort(ToRefine.begin(), ToRefine.end());
 	ToRefine=unique(ToRefine);
 #ifdef RICH_MPI
-	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,vector<double>());
+	vector<double> merit;
+	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,merit);
 	vector<Vector2D> chull;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -875,7 +876,8 @@ void ConservativeAMROld::UpdateCellsRefine
 #endif // RICH_MPI
 	sort(ToRefine.begin(), ToRefine.end());
 #ifdef RICH_MPI
-	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,vector<double>());
+	vector<double> merit;
+	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,merit);
 #endif
 	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc);
 
@@ -1001,7 +1003,7 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,
 {
 	vector<size_t> res;
 	int N = tess.GetPointNo();
-	vector<double> merittemp(merits);
+	vector<double> merittemp;
 	for (size_t i = 0; i < ToRemove.size(); ++i)
 	{
 		bool good = true;

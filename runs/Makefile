@@ -17,7 +17,7 @@ else ifeq ($(MODE),intel)
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper
 else ifeq ($(MODE),parallel_profile)
