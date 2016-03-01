@@ -469,11 +469,6 @@ void WriteDelaunay(Delaunay const& tri, string const& filename)
 
 #ifdef RICH_MPI
 
-namespace
-{
-
-}
-
 Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, size_t snapshot_number)
 {
 	int ws, rank;
@@ -498,6 +493,7 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, 
 		{
 			snap.time = temp.time;
 			snap.cycle = temp.cycle;
+			snap.tracerstickernames = temp.tracerstickernames;
 		}
 	}
 	vector<vector<Vector2D> > chull(static_cast<size_t>(ws));
@@ -581,6 +577,7 @@ Snapshot ReDistributeData(string const& filename, Tessellation const& proctess, 
 
 	res.time = snap.time;
 	res.cycle = snap.cycle;
+	res.tracerstickernames = snap.tracerstickernames;
 	return res;
 }
 
@@ -599,6 +596,7 @@ Snapshot ReDistributeData2(string const& filename, Tessellation const& proctess,
 		{
 			snap.time = temp.time;
 			snap.cycle = temp.cycle;
+			snap.tracerstickernames = temp.tracerstickernames;
 		}
 	}
 	vector<Vector2D> chull;
