@@ -1003,7 +1003,7 @@ vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,
 {
 	vector<size_t> res;
 	int N = tess.GetPointNo();
-	vector<double> merittemp(merits);
+	vector<double> merittemp;
 	for (size_t i = 0; i < ToRemove.size(); ++i)
 	{
 		bool good = true;
