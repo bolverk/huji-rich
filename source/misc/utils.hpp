@@ -611,8 +611,9 @@ Iter binary_find(Iter begin, Iter end, T val)
 }
 
 /*! \brief Checks for existence and retrieves entry from flat map
-  \param m flat map
-  \param s Key
+  \param data Data vector
+  \param key Key to look for
+  \param keys Sorted vector of keys
   \return Value corresponding to key
  */
 template<class S, class T> typename vector<T>::const_reference safe_retrieve
@@ -625,9 +626,10 @@ template<class S, class T> typename vector<T>::const_reference safe_retrieve
 	return data.at(index);
 }
 
-/*! \brief Non constant version of safe retrieve
-  \param m flat map
-  \param s Key
+/*! \brief Checks for existence and retrieves entry from flat map
+  \param data Data vector
+  \param key Key to look for
+  \param keys Sorted vector of keys
   \return Value corresponding to key
  */
 template<class S, class T> typename vector<T>::reference safe_retrieve
