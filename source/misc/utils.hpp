@@ -611,8 +611,9 @@ Iter binary_find(Iter begin, Iter end, T val)
 }
 
 /*! \brief Checks for existence and retrieves entry from flat map
-  \param m flat map
-  \param s Key
+\param data Data
+\param keys List of keys
+\param key Lookup key
   \return Value corresponding to key
  */
 template<class S, class T> const T& safe_retrieve
@@ -625,8 +626,9 @@ template<class S, class T> const T& safe_retrieve
 }
 
 /*! \brief Non constant version of safe retrieve
-  \param m flat map
-  \param s Key
+\param data Data
+\param keys List of keys
+\param key Lookup key
   \return Value corresponding to key
  */
 template<class S, class T> T& safe_retrieve
