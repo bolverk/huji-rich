@@ -23,14 +23,14 @@ namespace
 			const EquationOfState& eos,
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
-			Extensive &res)
+			Extensive &res,double time)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i) {
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
 				(edge, tess, cells);
 			if (flag_aux.first)
 				return (*sequence[i].second)
-				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res);
+				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res,time);
 		}
 		throw UniversalError("Error in ConditionActionSequence");
 	}
@@ -43,7 +43,7 @@ vector<Extensive> ConditionActionSequence::operator()
 	const vector<Extensive>& extensives,
 	const CacheData& /*cd*/,
 	const EquationOfState& eos,
-	const double /*time*/,
+	const double time,
 	const double /*dt*/) const
 {
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
@@ -54,7 +54,7 @@ vector<Extensive> ConditionActionSequence::operator()
 			cells,
 			eos,
 			edge_velocities[i],
-			sequence_, res[i]);
+			sequence_, res[i],time);
 	return res;
 }
 
@@ -86,7 +86,7 @@ void RegularFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool /*aux*/,
-	Extensive &res) const
+	Extensive &res,double /*time*/) const
 {
 	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
 		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
@@ -142,7 +142,7 @@ void RigidWallFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res) const
+	Extensive &res,double /*time*/) const
 {
 	if (aux)
 		assert(edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo());
@@ -186,7 +186,7 @@ void FreeFlowFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res) const
+	Extensive &res,double /*time*/) const
 {
 #ifndef RICH_MPI
 	if (aux)

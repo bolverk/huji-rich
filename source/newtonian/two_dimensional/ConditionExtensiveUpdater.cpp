@@ -59,15 +59,7 @@ namespace
 {
 	bool NegativeThermalEnergy(Extensive const& cell)
 	{
-		if (0.505*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
-			return true;
-		else
-			return false;
-	}
-
-	bool SmallThermalEnergy(Extensive const& cell)
-	{
-		if (0.5*ScalarProd(cell.momentum, cell.momentum) > 0.95*cell.energy*cell.mass)
+		if (0.500001*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
 			return true;
 		else
 			return false;
@@ -79,13 +71,13 @@ namespace
 		const double R = tess.GetWidth(static_cast<int>(index));
 		const double dv = R*(interp.GetSlopesUnlimited()[index].xderivative.velocity.x +
 			interp.GetSlopesUnlimited()[index].yderivative.velocity.y);
-		if (dv < -0.2*eos.dp2c(cell.density, cell.pressure))
+		if (dv < -0.1*eos.dp2c(cell.density, cell.pressure))
 			return true;
 		const double dp2 = R*R*(interp.GetSlopesUnlimited()[index].xderivative.pressure*
 			interp.GetSlopesUnlimited()[index].xderivative.pressure +
 			interp.GetSlopesUnlimited()[index].yderivative.pressure*
 			interp.GetSlopesUnlimited()[index].yderivative.pressure);
-		if (dp2 > 0.1*cell.pressure*cell.pressure)
+		if (dp2 > 0.03*cell.pressure*cell.pressure)
 			return true;
 		return false;
 	}
@@ -102,7 +94,9 @@ void ColdFlowsUpdate::operator()
 	size_t index,
 	double /*time*/)const
 {
-	if (!SmallThermalEnergy(extensive))
+	/*if (!SmallThermalEnergy(extensive))
+		return;*/
+	if (!NegativeThermalEnergy(extensive))
 		return;
 	string entropy = "Entropy";
 	if (!IsShocked(index, interp_, cells[index], tess, eos_) || NegativeThermalEnergy(extensive))

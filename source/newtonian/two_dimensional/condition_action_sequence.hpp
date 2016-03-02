@@ -41,6 +41,7 @@ public:
       \param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
       \param edge_velocity Velocity of the egdes
       \param res The flux
+	  \param time The time
      */
     virtual void operator()
     (const Edge& edge,
@@ -49,7 +50,7 @@ public:
      const vector<ComputationalCell>& cells,
      const EquationOfState& eos,
      const bool aux,
-		Extensive &res) const = 0;
+		Extensive &res,double time) const = 0;
 
     virtual ~Action(void);
   };
@@ -93,7 +94,7 @@ public:
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-		  Extensive &res) const;
+		  Extensive &res,double time) const;
 
 private:
 
@@ -117,7 +118,7 @@ public:
 	  const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const bool aux,
-	  Extensive &res) const;
+	  Extensive &res,double time) const;
 
 private:
   const RiemannSolver& rs_;
@@ -140,7 +141,7 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const bool aux,
-	  Extensive &res) const;
+	  Extensive &res,double time) const;
 
 private:
   const RiemannSolver& rs_;

@@ -20,8 +20,6 @@
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
 #ifdef RICH_MPI
 #include "source/mpi/MeshPointsMPI.hpp"
-#include <boost/mpi/environment.hpp>
-#include <boost/mpi/collectives.hpp>
 #endif
 
 namespace
@@ -159,8 +157,10 @@ namespace
 int main(void)
 {
 #ifdef RICH_MPI
-	boost::mpi::environment env;
-	const boost::mpi::communicator world;
+	MPI_Init(NULL,NULL);
+	int ws=0,rank=0;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	MPI_Comm_size(MPI_COMM_WORLD,&ws);
 #endif
 	// Set up the initial grid points
 	int np = read_int("resolution.txt");
@@ -170,10 +170,7 @@ int main(void)
 	SquareBox outer(-width*0.5,width*0.5,width*0.5,-width*0.5);
 
 #ifdef RICH_MPI
-	vector<Vector2D> procpoints;
-	if (world.rank() == 0)
-		procpoints = RandSquare(world.size(), -1, 1, -1, 1);
-	boost::mpi::broadcast(world, procpoints, 0);
+	vector<Vector2D> procpoints = RandSquare(ws, -1, 1, -1, 1);
 	VoronoiMesh proctess(procpoints, outer);
 	vector<Vector2D> InitPoints = SquareMeshM(np, np,proctess,Vector2D(-1, -1), Vector2D(1, 1));
 #else
@@ -195,7 +192,7 @@ int main(void)
 
 	// Set up the point motion scheme
 	Lagrangian l_motion;
-	RoundCells pointmotion(l_motion, eos,0.15,0.02,true);
+	RoundCells pointmotion(l_motion, eos,0.5,0.01,true);
 	StationaryBox evc_;
 
 	// Set the ghost points
@@ -228,7 +225,8 @@ int main(void)
 	double Vmin = 0.25*width*width / (np*np);
 	NohRefine refine(Vmax);
 	NohRemove remove(Vmin, interpolation);
-	NonConservativeAMR amr(refine, remove);
+	//NohRemoveDebug remove;
+	NonConservativeAMR amr(refine, remove,&interpolation);
 
 	// How long shall we run the simulation?
 #ifdef restart
@@ -255,11 +253,14 @@ int main(void)
 
 	// Done running the simulation, output the data
 #ifdef RICH_MPI
-	string filename = "final_" + int2str(world.rank()) + ".h5";
+	string filename = "final_" + int2str(rank) + ".h5";
 #else
 	string filename = "final.h5";
 #endif
 	write_snapshot_to_hdf5(sim, filename);
+#ifdef RICH_MPI
+	MPI_Finalize();
+#endif
 	return 0;
 
 }

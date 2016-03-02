@@ -22,7 +22,7 @@ namespace
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
 		const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
-			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res)
+			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res,double time)
 	{
 		for (size_t i = 0; i<sequence.size(); ++i) 
 		{
@@ -30,7 +30,7 @@ namespace
 				(edge, tess, cells);
 			if (flag_aux.first)
 			{
-				(*sequence[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second,res);
+				(*sequence[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second,res,time);
 				return;
 			}
 		}
@@ -40,7 +40,7 @@ namespace
 				(edge, tess, cells);
 			if (flag_aux.first)
 			{
-				(*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res);
+				(*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res,time);
 				return;
 			}
 		}
@@ -71,7 +71,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			edge_velocities[i],
 			sequence_,
 			sequence2_,
-			edge_values_[i],res[i]);
+			edge_values_[i],res[i],time);
 	return res;
 }
 
@@ -104,7 +104,7 @@ void RegularFlux2::operator()
 	const EquationOfState& eos,
 	const bool /*aux*/,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
-	Extensive &res) const
+	Extensive &res,double /*time*/) const
 {
 	const Vector2D p = normalize
 		(edge.vertices.second -
@@ -156,7 +156,7 @@ void RigidWallFlux2::operator()
 	const EquationOfState& eos,
 	const bool aux,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
-	Extensive &res) const
+	Extensive &res,double /*time*/) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -201,12 +201,12 @@ void Ratchet::operator()
 	const EquationOfState& eos,
 	const bool aux,
 	const pair<ComputationalCell, ComputationalCell> & edge_values,
-	Extensive &res) const
+	Extensive &res,double time) const
 {
 	Vector2D n = aux ? tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first) :
 		tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second);
 	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)].velocity)*(2*static_cast<double>(in_)-1) < 0)
-		free_.operator()(edge,tess, edge_velocity, cells, eos, aux,res);
+		free_.operator()(edge,tess, edge_velocity, cells, eos, aux,res,time);
 	else
-		wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values,res);
+		wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values,res,time);
 }

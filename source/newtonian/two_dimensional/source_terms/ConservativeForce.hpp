@@ -38,8 +38,9 @@ class ConservativeForce: public SourceTerm
 public:
   /*! \brief Class constructor
     \param acc The acceleration force
+	\param mass_flux Flag whether to include mass flux into energy equation
   */
-  explicit ConservativeForce(const Acceleration& acc);
+  explicit ConservativeForce(const Acceleration& acc,bool mass_flux=false);
 
   /*!
     \brief Class destructor
@@ -57,6 +58,7 @@ public:
 
 private:
   const Acceleration& acc_;
+  const bool mass_flux_;
 
   ConservativeForce(const ConservativeForce& origin);
   ConservativeForce& operator=(const ConservativeForce& origin);
