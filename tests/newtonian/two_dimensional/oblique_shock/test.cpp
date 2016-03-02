@@ -228,10 +228,10 @@ namespace
 			tess_(
 #ifdef RICH_MPI
 				proctess_,
-				RoundGrid(RandSquare(50*50,proctess_,outer_.getBoundary().first,
+				RoundGrid(RandSquare(75*75,proctess_,outer_.getBoundary().first,
 					outer_.getBoundary().second),&outer_,10,&proctess_),
 #else
-				RoundGrid(RandSquare(50*50,-width / 2, width / 2, -width / 2, width / 2),&outer_),
+				RoundGrid(RandSquare(75*75,-width / 2, width / 2, -width / 2, width / 2),&outer_),
 #endif
 				outer_),
 			eos_(adiabatic_index),
