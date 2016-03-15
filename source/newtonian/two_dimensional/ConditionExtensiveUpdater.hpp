@@ -91,9 +91,9 @@ public:
 
 	/*! \brief Class constructor
 	\param eos The equation of state
-	\param interp The interpolation
+	\param ghost The ghost point generator
 	*/
-	ColdFlowsUpdate(EquationOfState const& eos, LinearGaussImproved const& interp);
+	ColdFlowsUpdate(EquationOfState const& eos, GhostPointGenerator const& ghost,LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
@@ -108,8 +108,11 @@ public:
 			TracerStickerNames const& tracerstickernames)const;
 private:
 	EquationOfState const& eos_;
+	GhostPointGenerator const& ghost_;
 	LinearGaussImproved const& interp_;
+	mutable double lasttime_,dt_;
 	mutable int entropy_index_;
+	mutable boost::container::flat_map<size_t, ComputationalCell> ghost_cells_;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER_HPP

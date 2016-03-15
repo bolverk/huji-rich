@@ -6,7 +6,7 @@
 #ifndef COLD_EXTENSIVE_UPDATER_HPP
 #define COLD_EXTENSIVE_UPDATER_HPP 1
 
-#include "extensive_updater.hpp"
+#include "ConditionExtensiveUpdater.hpp"
 #include "simple_flux_calculator.hpp"
 #include "../../misc/utils.hpp"
 #include "interpolations/LinearGaussImproved.hpp"
@@ -15,15 +15,14 @@
 class ColdFlowsExtensiveCalculator : public ExtensiveUpdater
 {
 private:
-	EquationOfState const& eos_;
-	LinearGaussImproved const& interp_;
+	mutable ColdFlowsUpdate coldupdate_;
 public:
 
 	/*! \brief Class constructor
 	  \param eos Equation of state
-	  \param interp Interpolation
+	  \param ghost The ghost point generator
 	 */
-	ColdFlowsExtensiveCalculator(EquationOfState const& eos, LinearGaussImproved const& interp);
+	ColdFlowsExtensiveCalculator(EquationOfState const& eos, GhostPointGenerator const& ghost, LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
