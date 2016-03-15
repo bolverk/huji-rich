@@ -23,10 +23,16 @@ public:
 	\brief Class constructor
 	\param left The left coordinate
 	\param right The right coordinate
-	\param up The yp coordinate
+	\param up The up coordinate
 	\param down The down coordinate
 	*/
 	HalfPeriodicBox(double left, double right,double up, double down);
+
+	/*! \brief Returns the lower left and upper right corners
+	\return std::pair. first is lower left corner and second is upper right corner
+	*/
+	std::pair<Vector2D, Vector2D> getBoundaries(void) const;
+
 private:
 	double _left,_right,_up,_down;
 };

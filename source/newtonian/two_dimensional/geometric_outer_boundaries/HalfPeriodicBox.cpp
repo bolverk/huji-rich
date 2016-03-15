@@ -1,6 +1,12 @@
 #include "HalfPeriodicBox.hpp"
 #include "../../../misc/universal_error.hpp"
 
+std::pair<Vector2D, Vector2D> HalfPeriodicBox::getBoundaries(void) const
+{
+	return std::pair<Vector2D, Vector2D>(Vector2D(_left, _down),
+		Vector2D(_right, _up));
+}
+
 bool HalfPeriodicBox::PointIsReflective(Vector2D const& point)const
 {
 	if(point.y<_down||point.y>_up)
