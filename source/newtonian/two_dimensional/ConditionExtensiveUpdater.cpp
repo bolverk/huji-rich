@@ -94,7 +94,7 @@ namespace
 		{
 			if (ScalarProd(point - tess.GetMeshPoint(neigh[i]), Tgrad)<0)
 			{
-				if (neigh[i] < N || (tess.GetOriginalIndex(neigh[i])!=index)) 
+				if (neigh[i] < N || (tess.GetOriginalIndex(neigh[i])!=static_cast<int>(index))) 
 				{
 					maxT = std::max(maxT, cells[static_cast<size_t>(neigh[i])].pressure /
 						cells[static_cast<size_t>(neigh[i])].density);
