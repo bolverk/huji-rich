@@ -73,7 +73,7 @@ namespace
 	bool NegativeVelocityDivergence(size_t index, LinearGaussImproved const& interp,double cs,double R)
 	{
 		Slope slope = interp.GetSlopesUnlimited()[index];
-		return (slope.xderivative.velocity.x + slope.yderivative.velocity.y) < -0.2*cs*R;
+		return (slope.xderivative.velocity.x + slope.yderivative.velocity.y)*R < -0.2*cs;
 	}
 
 	bool PositiveTemperatureDensityGrad(size_t index, LinearGaussImproved const& interp,Vector2D const& Tgrad)
