@@ -87,14 +87,14 @@ namespace
 	{
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(index));
 		size_t n = neigh.size();
-		int N = tess.GetTotalPointNumber();
+		int N = tess.GetPointNo();
 		double maxT=0, maxP=0;
 		const Vector2D & point = tess.GetMeshPoint(static_cast<int>(index));
 		for (size_t i = 0; i < n; ++i)
 		{
 			if (ScalarProd(point - tess.GetMeshPoint(neigh[i]), Tgrad)<0)
 			{
-				if (neigh[i] < N || (tess.GetOriginalIndex(neigh[i])!=neigh[i])) 
+				if (neigh[i] < N || (tess.GetOriginalIndex(neigh[i])!=index)) 
 				{
 					maxT = std::max(maxT, cells[static_cast<size_t>(neigh[i])].pressure /
 						cells[static_cast<size_t>(neigh[i])].density);
@@ -147,6 +147,8 @@ namespace
 	{
 		double new_p = extensive.energy - ScalarProd(extensive.momentum, extensive.momentum)*0.5 / extensive.mass;
 		new_p /= extensive.mass;
+		if (new_p < 0)
+			return -1;
 		return eos.de2p(new_d, new_p);
 	}
 
