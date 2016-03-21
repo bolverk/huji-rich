@@ -160,9 +160,20 @@ public:
 	std::vector<std::string> tracer_names;
 	std::vector<std::string> sticker_names;
 
+	//! \brief Default constructor
 	TracerStickerNames(void);
+	/*! 
+	\brief Copy constructor
+	\param other The instance to copy from
+	*/
 	TracerStickerNames(TracerStickerNames const& other);
+	/*!
+	\brief Class constructor
+	\param tracers The names of the tracers
+	\param stickers The names of the stickers
+	*/
 	TracerStickerNames(std::vector<std::string> tracers,std::vector<std::string> stickers);
+	//! \brief Class destructor
 	~TracerStickerNames(void);
 };
 

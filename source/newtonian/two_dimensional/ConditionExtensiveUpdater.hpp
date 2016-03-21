@@ -19,6 +19,7 @@ public:
 		\param tess Tessellation
 		\param cells Computational cells
 		\param time The sim time
+		\param tracerstickernames The names of the tracers and stickers
 		\return Whether the cell satisfies a condition.
 		*/
 		virtual bool operator()
@@ -45,6 +46,7 @@ public:
 			\param extensive Extensive variable, input is after the addition of hydro fluxes
 			\param index The index of the cell
 			\param time The time
+			\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()
 			(const vector<Extensive>& fluxes,
@@ -92,6 +94,7 @@ public:
 	/*! \brief Class constructor
 	\param eos The equation of state
 	\param ghost The ghost point generator
+	\param interp The interpolation
 	*/
 	ColdFlowsUpdate(EquationOfState const& eos, GhostPointGenerator const& ghost,LinearGaussImproved const& interp);
 

@@ -31,6 +31,7 @@ public:
 		  \param cells Computational cells
 		  \param cd Cached data
 		  \param index Cell index
+		  \param tracerstickernames THe names of the stickers and tracers
 		  \return True if condition is met, false otherwise
 		 */
 		virtual bool operator()
@@ -59,6 +60,7 @@ public:
 		  \param cells Computational cells
 		  \param cd Cached data
 		  \param index Cell index
+		  \param tracerstickernames THe names of the stickers and tracers
 		  \return Computational cell
 		 */
 		virtual ComputationalCell operator()

@@ -295,6 +295,7 @@ Conserved FluxInBulk(Vector2D const& normaldir,
   \param t Time
   \param dt Time step
   \param extensives Extensive variables
+  \param tracerstickernames The names of the tracers and stickers
  */
 void ExternalForceContribution
 (const Tessellation& tess,

@@ -30,17 +30,6 @@ using std::string;
 class VoronoiMesh : public Tessellation
 {
 public:
-	/*!
-	\brief Fixes the number in the NewIndex for periodic boundary conditions
-	\param V The Voronoi
-	\param other The real index of the cell whose edge we fix
-	\param ToRefine The point that is refined
-	\param NewIndex The index of the new point
-	\param NewPoint The new point
-	\return The index of the duplicated cor
-	*/
-	friend int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,
-		int NewIndex,Vector2D const& NewPoint);
 
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const;

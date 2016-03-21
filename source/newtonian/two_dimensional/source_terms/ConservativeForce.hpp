@@ -19,6 +19,7 @@ public:
 	  \param point The index of the cell to calculate
 	  \param fluxes The vector of the fluxes
 	  \param time The simulation time
+	  \param tracerstickernames The names of the tracers and stickers
 	  \return The calculated acceleration
 	*/
 	virtual Vector2D operator()

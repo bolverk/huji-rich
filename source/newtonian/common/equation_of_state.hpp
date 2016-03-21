@@ -23,6 +23,7 @@ public:
     \param d Density
     \param p Pressure
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Thermal energy per unit mass
    */
   virtual double dp2e(double d, double p, tvector const& tracers = tvector(),vector<string> const& tracernames = vector<string>())
@@ -32,6 +33,7 @@ public:
     \param d Density
     \param e Specific thermal energy
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Presusre
    */
   virtual double de2p(double d, double e,
@@ -41,6 +43,7 @@ public:
     \param d Density
     \param e Specific thermal energy
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Speed of sound
   */
   virtual double de2c(double d, double e,
@@ -50,6 +53,7 @@ public:
     \param d Density
     \param p Pressure
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Speed of sound
    */
   virtual double dp2c(double d, double p,
@@ -59,6 +63,7 @@ public:
     \param d Density
     \param p Pressure
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Entropy
   */
   virtual double dp2s(double d, double p,
@@ -68,6 +73,7 @@ public:
     \param s Entropy
     \param d Density
     \param tracers Tracers
+	\param tracernames The names of the tracers
     \return Entropy
   */
   virtual double sd2p(double s, double d,

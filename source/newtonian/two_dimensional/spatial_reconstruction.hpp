@@ -29,14 +29,15 @@ public:
     \param tess Tessellation
     \param cells Computational cells
 	\param time The sim time
-    \param res List of pairs of primitive values on each edge
+    \param res List of pairs of primitive values on each edge given as output
+	\param tracerstickersnames The names of the tracers and stickers
    */
   virtual void
   operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
    double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-	  TracerStickerNames const& tracerstikersnames) const = 0;
+	  TracerStickerNames const& tracerstickersnames) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };

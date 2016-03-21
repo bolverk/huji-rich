@@ -144,6 +144,7 @@ public:
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
+	\param tracer_sticker_names The names of the tracers and stickers
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes

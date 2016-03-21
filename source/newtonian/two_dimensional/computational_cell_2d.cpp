@@ -138,7 +138,8 @@ TracerStickerNames::~TracerStickerNames(void) {}
 
 TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
 
-TracerStickerNames::TracerStickerNames(vector<string> tracers,vector<string> stickers):tracer_names(tracers),sticker_names(stickers){}
+TracerStickerNames::TracerStickerNames(std::vector<std::string> tracers, std::vector<std::string> stickers):
+	tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI
 size_t ComputationalCell::getChunkSize(void) const

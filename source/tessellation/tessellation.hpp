@@ -40,13 +40,13 @@ public:
    */
   virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc, bool HilbertOrder = true) = 0;
 
-  /*! \brief Initialises the tessellation
-    \param points Initial position of mesh generating points
-    \param tess The tessellation of the processors
-	\param outer The geometric outer boundary conditions
-	\param HilbertOrder Should the points be rearranged before insertion
-   */
 #ifdef RICH_MPI
+  /*! \brief Initialises the tessellation
+  \param points Initial position of mesh generating points
+  \param tess The tessellation of the processors
+  \param outer The geometric outer boundary conditions
+  \param HilbertOrder Should the points be rearranged before insertion
+  */
   virtual void Initialise(vector<Vector2D> const& points,Tessellation const& tess,
 	  OuterBoundary const* outer, bool HilbertOrder = true) = 0;
 #endif

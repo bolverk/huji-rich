@@ -19,6 +19,7 @@ public:
     \param time Time
 	\param dt The time step
 	\param velocities The mesh point velocitites
+	\param ts The names of the tracers and stickers
     \return True if condition is met
    */
 	virtual bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
@@ -31,6 +32,7 @@ public:
     \param time Time
 	\param velocities The original velocities
 	\param dt Time step
+	\param ts The names of the tracers and stickers
     \return Custom velocity
    */
 	virtual Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,

@@ -28,6 +28,7 @@ public:
 	  \param extensives Extensive variables
 	  \param old Old computational cells
 	  \param cd Cached data
+	  \param tracerstickernames The names of the tracers and stickers
 	  \return List of computational cells
 	 */
 	virtual vector<ComputationalCell> operator()

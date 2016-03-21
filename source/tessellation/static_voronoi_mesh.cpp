@@ -690,18 +690,6 @@ namespace
 	}
 }
 
-int FixPeriodNeighbor(StaticVoronoiMesh &V,int other,int ToRefine,int /*NewIndex*/,
-	Vector2D const& NewPoint)
-{
-	int loc=FindEdge(V,ToRefine,other);
-	vector<Vector2D>& cor=V.Tri.ChangeCor();
-	cor.push_back(NewPoint);
-	int& temp = V.edges[static_cast<size_t>(loc)].neighbors.second==other ?
-		V.edges[static_cast<size_t>(loc)].neighbors.first :
-	V.edges[static_cast<size_t>(loc)].neighbors.second;
-	temp = static_cast<int>(cor.size());
-	return static_cast<int>(cor.size());
-}
 
 int StaticVoronoiMesh::GetPointNo(void) const
 {

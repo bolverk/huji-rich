@@ -24,6 +24,7 @@ public:
 		\param edge_velocity Velocity of the edges
 		\param res The flux given as output
 		\param time The time
+		\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()
 			(const Edge& edge,

@@ -13,12 +13,6 @@ class Eulerian: public PointMotion
 {
 public:
 
-  /*! \brief Calculates the velocity of all mesh points
-    \param tess The tessellation
-    \param cells Hydrodynamics cells
-    \param time The simulation time
-    \return Velocities of the points
-  */
   vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,

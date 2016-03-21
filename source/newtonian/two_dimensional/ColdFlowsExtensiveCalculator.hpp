@@ -21,8 +21,10 @@ public:
 	/*! \brief Class constructor
 	  \param eos Equation of state
 	  \param ghost The ghost point generator
+	  \param interp The interpolation
 	 */
-	ColdFlowsExtensiveCalculator(EquationOfState const& eos, GhostPointGenerator const& ghost, LinearGaussImproved const& interp);
+	ColdFlowsExtensiveCalculator(EquationOfState const& eos, GhostPointGenerator const& ghost,
+		LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,

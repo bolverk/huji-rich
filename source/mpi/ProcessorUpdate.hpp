@@ -17,12 +17,12 @@
 class ProcessorUpdate
 {
 public:
+#ifdef RICH_MPI
 	/*!
 	\brief Moves the processor tessellation
 	\param tproc The tessellation of the processors
 	\param tlocal The tessellation of the local mesh points
 	*/
-#ifdef RICH_MPI
 	virtual void Update(Tessellation &tproc,Tessellation const& tlocal)const=0;
 #endif
 	//! \brief virtual destructor

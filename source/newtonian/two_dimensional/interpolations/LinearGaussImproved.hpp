@@ -38,7 +38,7 @@ public:
 		vector<string>());
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
-		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstikersnames)const;
+		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames)const;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell

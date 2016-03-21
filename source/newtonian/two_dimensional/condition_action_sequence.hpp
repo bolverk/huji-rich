@@ -18,6 +18,7 @@ public:
 		  \param edge Interface
 		  \param tess Tessellation
 		  \param cells Computational cells
+		  \param tracerstickernames The names of the tracers and stickers
 		  \return A pair of booleans. The first is whether the edge satisfies a condition, and the second is an auxiliary variable.
 		 */
 		virtual pair<bool, bool> operator()(const Edge& edge,
@@ -42,6 +43,7 @@ public:
 		  \param edge_velocity Velocity of the egdes
 		  \param res The flux
 		  \param time The time
+		  \param tracerstickernames The names of the tracers and stickers
 		 */
 		virtual void operator()
 			(const Edge& edge,
