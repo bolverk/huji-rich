@@ -18,8 +18,6 @@ typedef std::vector<bool> svector;
 #include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
-using namespace std;
-
 //! \brief Computational cell
 class ComputationalCell
 #ifdef RICH_MPI
@@ -159,12 +157,12 @@ public:
 class TracerStickerNames
 {
 public:
-	vector<string> tracer_names;
-	vector<string> sticker_names;
+	std::vector<std::string> tracer_names;
+	std::vector<std::string> sticker_names;
 
 	TracerStickerNames(void);
 	TracerStickerNames(TracerStickerNames const& other);
-	TracerStickerNames(vector<string> tracers,vector<string> stickers);
+	TracerStickerNames(std::vector<std::string> tracers,std::vector<std::string> stickers);
 	~TracerStickerNames(void);
 };
 

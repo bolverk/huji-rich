@@ -1,6 +1,8 @@
 #include "computational_cell_2d.hpp"
 #include "../../misc/utils.hpp"
 
+using namespace std;
+
 ComputationalCell::ComputationalCell(void) :
   density(0), pressure(0), velocity(Vector2D()), tracers(),
   stickers(){}

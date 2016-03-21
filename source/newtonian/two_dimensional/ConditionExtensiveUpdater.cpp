@@ -76,12 +76,12 @@ namespace
 		return (slope.xderivative.velocity.x + slope.yderivative.velocity.y)*R < -0.2*cs;
 	}
 
-	bool PositiveTemperatureDensityGrad(size_t index, LinearGaussImproved const& interp,Vector2D const& Tgrad)
+/*	bool PositiveTemperatureDensityGrad(size_t index, LinearGaussImproved const& interp,Vector2D const& Tgrad)
 	{
 		Slope slope = interp.GetSlopesUnlimited()[index];
 		return (Tgrad.x*slope.xderivative.density + Tgrad.y*slope.yderivative.density)>0;
 	}
-
+*/
 	bool BigJump(Vector2D const& Tgrad, size_t index,Tessellation const& tess,vector<ComputationalCell> const& cells,
 		boost::container::flat_map<size_t, ComputationalCell> ghost_cells)
 	{
@@ -152,7 +152,7 @@ namespace
 		return eos.de2p(new_d, new_p);
 	}
 
-	bool IsShocked(size_t index, ComputationalCell const& cell, Tessellation
+/*	bool IsShocked(size_t index, ComputationalCell const& cell, Tessellation
 		const& tess, vector<int> &temp, vector<ComputationalCell> const& cells,
 		boost::container::flat_map<size_t, ComputationalCell> ghost_cells, double new_p, double new_d)
 	{
@@ -190,7 +190,7 @@ namespace
 				return true;
 		}
 		return false;
-	}
+	}*/
 }
 
 void ColdFlowsUpdate::operator()
@@ -212,7 +212,7 @@ void ColdFlowsUpdate::operator()
 		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
 		dt_ = dt;
 	}
-	if (lasttime_ < time || dt != dt_)
+	if (lasttime_ < time || dt < dt_ || dt > dt_)
 	{
 		lasttime_ = time;
 		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);

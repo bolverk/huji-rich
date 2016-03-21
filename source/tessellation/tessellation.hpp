@@ -145,7 +145,6 @@ virtual vector<int> GetNeighbors(int index)const=0;
 \brief Returns the indeces of the neighbors
 \param index The cell to check
 \param neigh the indeces of the neighbors given as output
-\return The neighbors
 */
 
 virtual void GetNeighbors(int index,vector<int> &neigh)const = 0;
@@ -220,7 +219,6 @@ virtual bool NearBoundary(int index) const = 0;
     \param result Output
     \param point Mesh generating point index
    */
-  virtual void GetNeighborNeighbors(vector<int> &result, int point)const =0;
+  virtual void GetNeighborNeighbors(vector<int> &result, int point)const=0;
 };
-
 #endif // TESSELLATION_HPP
