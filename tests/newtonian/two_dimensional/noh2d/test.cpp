@@ -190,7 +190,7 @@ int main(void)
 	// Set up the external source term
 	ZeroForce force;
 
-	ColdFlowsExtensiveCalculator eu(eos,interpolation);
+	ColdFlowsExtensiveCalculator eu(eos,ghost,interpolation);
 	SimpleCFL tsf(0.15);
 	IdleHBC hbc;
 	ModularFluxCalculator fc(interpolation, rs, hbc);
@@ -242,6 +242,7 @@ int main(void)
 		catch (UniversalError const& eo)
 		{
 			DisplayError(eo);
+			throw;
 		}
 	}
 
