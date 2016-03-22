@@ -81,10 +81,10 @@ hdsim::hdsim
 	const FluxCalculator& fc,
 	const ExtensiveUpdater& eu,
 	const CellUpdater& cu,
-#ifdef RICH_MPI
-	const ProcessorUpdate* proc_update,
-#endif
 	TracerStickerNames tracer_sticker_names
+#ifdef RICH_MPI
+	,const ProcessorUpdate* proc_update
+#endif
 	) :
 #ifdef RICH_MPI
 	proctess_(proctess),

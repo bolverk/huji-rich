@@ -1,5 +1,5 @@
 #ifdef RICH_MPI
-#include <mpi.h>
+#include "source/mpi/MeshPointsMPI.hpp"
 #endif
 #include <boost/foreach.hpp>
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
@@ -75,6 +75,19 @@ namespace {
     return res;
   }
 
+  #ifdef RICH_MPI
+
+  vector<Vector2D> process_positions(const SquareBox& boundary)
+  {
+    const Vector2D lower_left = boundary.getBoundary().first;
+    const Vector2D upper_right = boundary.getBoundary().second;
+	int ws=0;
+	MPI_Comm_size(MPI_COMM_WORLD,&ws);
+    return RandSquare(ws,lower_left.x,upper_right.x,lower_left.y,upper_right.y);
+  }
+
+#endif
+  
   class SimData
   {
   public:
@@ -83,17 +96,16 @@ namespace {
       pg_(Vector2D(0,0),Vector2D(0,1)),
       outer_(Vector2D(0,0), Vector2D(1,1)),
 #ifdef RICH_MPI
-      proc_tess_(process_positions(outer_),outer_),
-      init_points_
-      (distribute_grid(proc_tess_,CartesianGridGenerator
-		       (30,30, outer_.getBoundary().first,
-			outer_.getBoundary().second))),
+	proc_tess_(process_positions(outer_),outer_),
+		init_points_(SquareMeshM(30,30,proc_tess_,outer_.getBoundary().first,outer_.getBoundary().second)),
+		tess_(proc_tess_,init_points_,outer_),
 #else
       init_points_(cartesian_mesh(30,30,
 				  outer_.getBoundary().first,
 				  outer_.getBoundary().second)),
+		tess_(init_points_,outer_),
 #endif
-      tess_(init_points_,outer_),
+
       triangle_(Vector2D(0.5,0.6),
 		Vector2D(0.7,0.5),
 		Vector2D(0.4,0.4)),
@@ -106,7 +118,11 @@ namespace {
       fc_(rs_),
       eu_(),
       cu_(),
-      sim_(tess_,
+      sim_(
+	  #ifdef RICH_MPI
+		  proc_tess_,
+#endif
+	tess_,
 	   outer_,
 	   pg_,
 	   calc_init_cond(tess_),
@@ -151,7 +167,15 @@ namespace {
   public:
 
     WriteConserved(string const& fname):
-      cons_(), fname_(fname) {}
+      cons_(), fname_(fname)
+#ifdef RICH_MPI
+	,rank_(0)
+#endif
+	  {
+#ifdef RICH_MPI
+		MPI_Comm_rank(MPI_COMM_WORLD,&rank_);
+#endif
+	  }
 
     void operator()(hdsim const& sim)
     {
@@ -161,7 +185,7 @@ namespace {
     ~WriteConserved(void)
     {
 #ifdef RICH_MPI
-      if(get_mpi_rank()==0){
+      if(rank_==0){
 #endif
 	ofstream f(fname_.c_str());
 	for(size_t i=0;i<cons_.size();++i)
@@ -179,6 +203,9 @@ namespace {
   private:
     mutable vector<Extensive> cons_;
     const string fname_;
+#ifdef RICH_MPI
+	int rank_;
+#endif
   };
 }
 
