@@ -114,60 +114,56 @@ if(ShouldPlot==1||ShouldPlot==2)
         set(f1,'Units','normalized')
         set(f1, 'Position', [0.03 0.03 0.65 0.85])
     end
-    hold on;
-    maxdraw=7500;
-    nloops=ceil(length(Density)/maxdraw);
-    for i=1:nloops
-        maxindex=min(i*maxdraw,length(Density));
-        switch (draw)
-            case 1
-                if(Log==1)
-                    caxis([min(log10(Density)) max(log10(Density*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Density((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
-                else
-                    caxis([min(Density) max(Density)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Density((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
-                end
-            case 2
-                if(Log==1)
-                    caxis([min(log10(Pressure)) max(log10(Pressure*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Pressure((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
-                else
-                    caxis([min(Pressure) max(Pressure)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
-                end
-            case 3
-                if(Log==1)
-                    caxis([min(log10(Temperature)) max(log10(Temperature*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
-                else
-                    caxis([min(Temperature) max(Temperature)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Temperature((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
-                end
-            case 4
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Change here gamma as needed
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                gamma=5/3;
-                Entropy=Pressure./Density.^gamma;
-                if(Log==1)
-                    caxis([min(log10(Entropy)) max(log10(Entropy*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
-                else
-                    caxis([min(Entropy) max(Entropy)*1.01]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
-                end
-            case 5
-                tracerindex=1;
-                if(Log==1)
-                    caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);
-                else
-                    caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
-                    patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',0.05);
-                end
-        end
-    end
     colorbar;
     axis equal;
+    maxindex=length(Density);
+    maxdraw=0;
+    switch (draw)
+        case 1
+            if(Log==1)
+                caxis([min(log10(Density)) max(log10(Density*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Density((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
+            else
+                caxis([min(Density) max(Density)*1.01]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Density((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
+            end
+        case 2
+            if(Log==1)
+                caxis([min(log10(Pressure)) max(log10(Pressure*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Pressure((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
+            else
+                caxis([min(Pressure) max(Pressure)*1.01]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Pressure((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
+            end
+        case 3
+            if(Log==1)
+                caxis([min(log10(Temperature)) max(log10(Temperature*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Temperature((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
+            else
+                caxis([min(Temperature) max(Temperature)*1.01]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Temperature((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
+            end
+        case 4
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Change here gamma as needed
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            gamma=5/3;
+            Entropy=Pressure./Density.^gamma;
+            if(Log==1)
+                caxis([min(log10(Entropy)) max(log10(Entropy*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
+            else
+                caxis([min(Entropy) max(Entropy)*1.01]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
+            end
+        case 5
+            tracerindex=1;
+            if(Log==1)
+                caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);
+            else
+                caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',0.05);
+            end
+    end
 end
