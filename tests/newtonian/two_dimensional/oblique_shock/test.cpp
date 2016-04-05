@@ -139,7 +139,6 @@ namespace
 					}
 				}
 				return pair<bool, bool>(false, false);
-
 			}
 			return pair<bool, bool>(false, false);
 		}
