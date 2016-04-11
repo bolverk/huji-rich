@@ -12,11 +12,15 @@
 #include "../computational_cell_2d.hpp"
 #include "../GhostPointGenerator.hpp"
 
+//! \brief Piecewise constant interpolation
 class PCM : public SpatialReconstruction
 {
 private:
 	GhostPointGenerator const & ghost_;
 public:
+	/*! \brief Class constructor
+	\param ghost The ghost point generator
+	*/
 	explicit PCM(GhostPointGenerator const& ghost);
 
 	void operator()

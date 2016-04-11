@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 #include <vector>
+/** typedef for tracer vector */
 typedef std::vector<double> tvector;
+/** typedef for string vector */
 typedef std::vector<bool> svector;
 using std::string;
 using std::vector;

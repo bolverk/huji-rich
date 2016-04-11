@@ -153,11 +153,13 @@ public:
 	void unserialize(const vector<double>& data);
 #endif//RICH_MPI
 };
-
+//! \brief Class for keeping the names of the tracers and stickers
 class TracerStickerNames
 {
 public:
+	//! \brief The names of the tracers
 	std::vector<std::string> tracer_names;
+	//! \brief The names of the stickers
 	std::vector<std::string> sticker_names;
 
 	//! \brief Default constructor

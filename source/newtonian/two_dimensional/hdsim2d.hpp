@@ -265,6 +265,10 @@ public:
    */
   const CacheData& getCacheData(void) const;
 
+  /*!
+  \brief Returns the TracerStickerNames
+  \return The TracerStickerNames of the simulation
+  */
   TracerStickerNames const& GetTracerStickerNames(void)const;
 };
 

@@ -42,6 +42,7 @@ public:
   vector<Vector2D> proc_points;
 #endif
 
+  //! \brief THe names of the tracers and stickers
   TracerStickerNames tracerstickernames;
 };
 
