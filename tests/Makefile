@@ -30,6 +30,7 @@ else ifeq ($(MODE),clang)
 else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native
+	LFLAGS = -lclipper
 endif
 CFLAGS = $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 SOURCE_LIST := $(shell find . -name 'test.cpp')
