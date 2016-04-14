@@ -29,10 +29,11 @@ public:
 	CentroidMotion(double reduction_factor,EquationOfState const& eos, bool coldflow = false, size_t niter = 2,
 		vector<string> toignore = vector<string>());
 
-	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time) const;
+	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time,
+		TracerStickerNames const& tracerstickernames) const;
 
 	vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-		double dt, vector<Vector2D> const& velocities)const;
+		double dt, vector<Vector2D> const& velocities, TracerStickerNames const& tracerstickernames)const;
 private:
 
 	const double reduce_factor_;

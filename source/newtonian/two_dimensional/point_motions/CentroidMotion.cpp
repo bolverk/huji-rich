@@ -132,17 +132,23 @@ namespace
 		return diff / dt;
 	}
 
-	bool ShouldCalc(vector<string> const& toignore, ComputationalCell const& cell)
+	bool ShouldCalc(vector<string> const& toignore, ComputationalCell const& cell,TracerStickerNames const&
+		tracerstickernames)
 	{
 		for (size_t i = 0; i < toignore.size(); ++i)
-			if (cell.stickers.at(toignore[i]))
+		{
+			vector<string>::const_iterator it = binary_find(tracerstickernames.sticker_names.begin(),
+				tracerstickernames.sticker_names.end(), toignore[i]);
+			if (it != tracerstickernames.sticker_names.end() && cell.stickers[static_cast<size_t>(
+				it - tracerstickernames.sticker_names.begin())])
 				return false;
+		}
 		return true;
 	}
 
 	vector<Vector2D> GetCorrectedVelocities(Tessellation const& tess,vector<Vector2D> const& w,double dt,
 		double reduce_factor,size_t Niter,vector<ComputationalCell> const& cells,EquationOfState const& eos,
-		bool cold,vector<string> const& toignore)
+		bool cold,vector<string> const& toignore, TracerStickerNames const&	tracerstickernames)
 	{
 		size_t N = static_cast<size_t>(tess.GetPointNo());
 		vector<Vector2D> res(N);
@@ -158,7 +164,7 @@ namespace
 		{
 			for (size_t i = 0; i < N; ++i)
 			{
-				if (!ShouldCalc(toignore, cells[i]))
+				if (!ShouldCalc(toignore, cells[i],tracerstickernames))
 					continue;
 				vector<Vector2D> chull = GetOrgChullPoints(tess, neighbor_indeces[i]);
 				vector<size_t> convex_index = ConvexIndeces(chull, tess.GetMeshPoint(static_cast<int>(i)));
@@ -187,7 +193,8 @@ CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& e
 	vector<string> toignore) :
 	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter),toignore_(toignore){}
 
-vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells, double /*time*/) const
+vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells,
+	double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < res.size(); ++i)
@@ -196,7 +203,8 @@ vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vec
 }
 
 vector<Vector2D> CentroidMotion::ApplyFix(Tessellation const & tess, vector<ComputationalCell> const & cells, double /*time*/,
-	double dt, vector<Vector2D> const & velocities) const
+	double dt, vector<Vector2D> const & velocities, TracerStickerNames const& tracerstickernames) const
 {
-	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_,cells,eos_,cold_,toignore_);
+	return GetCorrectedVelocities(tess, velocities, dt, reduce_factor_, niter_,cells,eos_,cold_,toignore_,
+		tracerstickernames);
 }

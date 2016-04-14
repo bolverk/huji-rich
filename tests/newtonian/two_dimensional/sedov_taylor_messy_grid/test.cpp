@@ -1,6 +1,5 @@
 #ifdef RICH_MPI
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/collectives.hpp>
+#include "source/mpi/MeshPointsMPI.hpp"
 #endif
 #include <iostream>
 #include <fstream>
@@ -43,80 +42,11 @@ namespace {
   {
     const Vector2D lower_left = boundary.getBoundary().first;
     const Vector2D upper_right = boundary.getBoundary().second;
-	const boost::mpi::communicator world;
-    vector<Vector2D> res(static_cast<size_t>(world.size()));
-    if(world.rank()==0)
-	{
-      res = RandSquare(world.size(),
-		       lower_left.x,upper_right.x,
-		       lower_left.y,upper_right.y);
-    }
-	boost::mpi::broadcast(world, res, 0);
-    return res;
+	int ws=0;
+	MPI_Comm_size(MPI_COMM_WORLD,&ws);
+    return RandSquare(ws,lower_left.x,upper_right.x,lower_left.y,upper_right.y);
   }
 
-  boost::array<double, 4> FindMaxEdges(Tessellation const& tess)
-  {
-	  const boost::mpi::communicator world;
-	  const int rank = world.rank();
-	  const vector<int>& edge_index = tess.GetCellEdges(rank);
-	  const int n = static_cast<int>(edge_index.size());
-	  boost::array<double, 4> res;
-	  res[0] = min(tess.GetEdge(edge_index[0]).vertices.first.x,
-		  tess.GetEdge(edge_index[0]).vertices.second.x);
-	  res[1] = max(tess.GetEdge(edge_index[0]).vertices.first.x,
-		  tess.GetEdge(edge_index[0]).vertices.second.x);
-	  res[2] = min(tess.GetEdge(edge_index[0]).vertices.first.y,
-		  tess.GetEdge(edge_index[0]).vertices.second.y);
-	  res[3] = max(tess.GetEdge(edge_index[0]).vertices.first.y,
-		  tess.GetEdge(edge_index[0]).vertices.second.y);
-	  for (size_t i = 1; i<static_cast<size_t>(n); ++i)
-	  {
-		  res[0] = min(min(tess.GetEdge(edge_index[i]).vertices.first.x,
-			  tess.GetEdge(edge_index[i]).vertices.second.x), res[0]);
-		  res[1] = max(max(tess.GetEdge(edge_index[i]).vertices.first.x,
-			  tess.GetEdge(edge_index[i]).vertices.second.x), res[1]);
-		  res[2] = min(min(tess.GetEdge(edge_index[i]).vertices.first.y,
-			  tess.GetEdge(edge_index[i]).vertices.second.y), res[2]);
-
-		  res[3] = max(max(tess.GetEdge(edge_index[i]).vertices.first.y,
-			  tess.GetEdge(edge_index[i]).vertices.second.y), res[3]);
-	  }
-	  return res;
-  }
-
-  vector<Vector2D> SquareMeshM(int nx, int ny, Tessellation const& tess,
-	  Vector2D const&lowerleft, Vector2D const&upperright)
-  {
-	  const double widthx = (upperright.x - lowerleft.x) / static_cast<double>(nx);
-	  const double widthy = (upperright.y - lowerleft.y) / static_cast<double>(ny);
-	  const boost::array<double, 4> tessEdges = FindMaxEdges(tess);
-	  nx = static_cast<int>(floor((tessEdges[1] - tessEdges[0]) / widthx + 0.5));
-	  ny = static_cast<int>(floor((tessEdges[3] - tessEdges[2]) / widthy + 0.5));
-	  vector<Vector2D> res;
-	  res.reserve(static_cast<size_t>(nx*ny));
-	  const int nx0 = static_cast<int>(floor((tessEdges[0] - lowerleft.x) / widthx + 0.5));
-	  const int ny0 = static_cast<int>(floor((tessEdges[2] - lowerleft.y) / widthy + 0.5));
-	  Vector2D point;
-	  const boost::mpi::communicator world;
-	  int rank = world.rank();
-	  vector<Vector2D> cpoints;
-	  ConvexHull(cpoints, tess, rank);
-	  for (int i = 0; i<nx; i++)
-	  {
-		  for (int j = 0; j<ny; j++)
-		  {
-			  point.x = (static_cast<double>(i) + 0.5 + nx0)*widthx + lowerleft.x;
-			  point.y = (static_cast<double>(j) + 0.5 + ny0)*widthy + lowerleft.y;
-			  if ((point.x<lowerleft.x) || (point.x>upperright.x) ||
-				  (point.y<lowerleft.y) || (point.y>upperright.y))
-				  continue;
-			  if (PointInCell(cpoints, point))
-				  res.push_back(point);
-		  }
-	  }
-	  return res;
-  }
 #endif
 
   vector<ComputationalCell> calc_init_cond(const Tessellation& tess)
@@ -225,8 +155,9 @@ namespace {
 int main(void)
 {
 #ifdef RICH_MPI
-	boost::mpi::environment env;
-	boost::mpi::communicator world;
+	MPI_Init(NULL,NULL);
+	int rank=0;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
@@ -235,15 +166,18 @@ int main(void)
   for (size_t i = 0; i < 100; ++i)
   {
 	  sim.TimeAdvance();
+	  /*
 #ifdef RICH_MPI
-	  write_snapshot_to_hdf5(sim, "snap_"+int2str(sim.getCycle())+"_"+int2str(world.rank())+".h5");
+	  write_snapshot_to_hdf5(sim, "snap_"+int2str(sim.getCycle())+"_"+int2str(rank)+".h5");
 #else
 	  write_snapshot_to_hdf5(sim, "snap_" + int2str(sim.getCycle()) + ".h5");
 #endif
+*/
   }
 
 #ifdef RICH_MPI
-  write_snapshot_to_hdf5(sim, "process_"+int2str(world.rank())+"_final"+".h5");
+  write_snapshot_to_hdf5(sim, "process_"+int2str(rank)+"_final"+".h5");
+  MPI_Finalize();
 #else
   write_snapshot_to_hdf5(sim, "final.h5");
 #endif

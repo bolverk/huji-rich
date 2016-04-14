@@ -2,7 +2,7 @@
 
 namespace
 {
-	void ReverseNormalVelocity(ComputationalCell &cell, Edge const& edge,size_t index,Tessellation const& tess)
+	void ReverseNormalVelocity(ComputationalCell &cell, Edge const& edge, size_t index, Tessellation const& tess)
 	{
 		Vector2D normal;
 		if (index == 1)
@@ -15,10 +15,10 @@ namespace
 }
 
 boost::container::flat_map<size_t, ComputationalCell> RigidWallGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells, double /*time*/) const
+	const vector<ComputationalCell>& cells, double /*time*/,TracerStickerNames const& /*tracerstickernames*/) const
 {
 	boost::container::flat_map<size_t, ComputationalCell> res;
-	vector<std::pair<size_t,size_t> > ghosts = GetOuterEdgesIndeces(tess);
+	vector<std::pair<size_t, size_t> > ghosts = GetOuterEdgesIndeces(tess);
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(ghosts[i].first));
@@ -38,16 +38,17 @@ boost::container::flat_map<size_t, ComputationalCell> RigidWallGenerator::operat
 
 Slope RigidWallGenerator::GetGhostGradient
 (Tessellation const& tess,
- vector<ComputationalCell> const& cells,
- vector<Slope> const& /*gradients*/,
- size_t ghost_index, double /*time*/, Edge const& /*edge*/) const
+	vector<ComputationalCell> const& cells,
+	vector<Slope> const& /*gradients*/,
+	size_t ghost_index, double /*time*/, Edge const& /*edge*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
-  ComputationalCell cell(cells[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))]);
+	ComputationalCell cell(cells[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))]);
 	cell.density = 0;
 	cell.pressure = 0;
 	cell.velocity = Vector2D(0, 0);
-	for (boost::container::flat_map<std::string, double>::iterator it = cell.tracers.begin(); it !=
-		cell.tracers.end(); ++it)
-		it->second = 0;
-	return Slope(cell,cell);
+	cell.tracers = cells[0].tracers;
+	size_t N = cell.tracers.size();
+	for (size_t i = 0; i < N; ++i)
+		cell.tracers[i] = 0;
+	return Slope(cell, cell);
 }

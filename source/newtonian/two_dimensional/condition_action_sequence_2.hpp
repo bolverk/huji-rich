@@ -20,10 +20,11 @@ public:
 		\param cells Computational cells
 		\param eos Equation of state
 		\param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
-		\param edge_values The interpolated values at the edge 
+		\param edge_values The interpolated values at the edge
 		\param edge_velocity Velocity of the edges
 		\param res The flux given as output
 		\param time The time
+		\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()
 			(const Edge& edge,
@@ -32,9 +33,10 @@ public:
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				const pair<ComputationalCell,ComputationalCell> & edge_values,
+				const pair<ComputationalCell, ComputationalCell> & edge_values,
 				Extensive &res,
-				double time) const = 0;
+				double time,
+				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Action2(void);
 	};
@@ -59,7 +61,8 @@ public:
 			const CacheData& cd,
 			const EquationOfState& eos,
 			const double time,
-			const double dt) const;
+			const double dt,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
@@ -76,7 +79,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-  explicit RegularFlux2(const RiemannSolver& rs);
+	explicit RegularFlux2(const RiemannSolver& rs);
 
 	void operator()
 		(const Edge& edge,
@@ -86,7 +89,8 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res,double time) const;
+			Extensive &res, double time,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
 
@@ -102,7 +106,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-  explicit RigidWallFlux2(const RiemannSolver& rs);
+	explicit RigidWallFlux2(const RiemannSolver& rs);
 
 	void operator()
 		(const Edge& edge,
@@ -112,7 +116,8 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res,double time) const;
+			Extensive &res, double time,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
 	const RiemannSolver& rs_;
@@ -127,7 +132,7 @@ public:
 	  \param rs Riemann solver
 	\param in If the ratchet allows inflow or outflow
 	*/
-  Ratchet(const RiemannSolver& rs, const bool in);
+	Ratchet(const RiemannSolver& rs, const bool in);
 
 	void operator()
 		(const Edge& edge,
@@ -137,7 +142,8 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res,double time) const;
+			Extensive &res, double time,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
 	const bool in_;

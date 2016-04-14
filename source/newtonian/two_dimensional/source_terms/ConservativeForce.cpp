@@ -4,7 +4,7 @@
 using std::min;
 using std::sqrt;
 
-namespace 
+namespace
 {
 	Vector2D MassFlux(Tessellation const& tess, int point,
 		vector<Extensive> const& fluxes)
@@ -14,7 +14,7 @@ namespace
 		Vector2D center = tess.GetCellCM(point);
 		int n = static_cast<int>(edge_index.size());
 		Edge edge;
-		for (int i = 0; i<n; ++i)
+		for (int i = 0; i < n; ++i)
 		{
 			edge = tess.GetEdge(edge_index[static_cast<size_t>(i)]);
 			if (point == edge.neighbors.first)
@@ -35,46 +35,39 @@ namespace
 	}
 }
 
-ConservativeForce::ConservativeForce(const Acceleration& acc, bool mass_flux):
-  acc_(acc),mass_flux_(mass_flux) {}
+ConservativeForce::ConservativeForce(const Acceleration& acc, bool mass_flux) :
+	acc_(acc), mass_flux_(mass_flux) {}
 
-ConservativeForce::~ConservativeForce(void){}
+ConservativeForce::~ConservativeForce(void) {}
 
 vector<Extensive> ConservativeForce::operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& /*pg*/,
-   const CacheData& cd,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const vector<Vector2D>& point_velocities,
-   const double t) const
+(const Tessellation& tess,
+	const PhysicalGeometry& /*pg*/,
+	const CacheData& cd,
+	const vector<ComputationalCell>& cells,
+	const vector<Extensive>& fluxes,
+	const vector<Vector2D>& point_velocities,
+	const double t,
+	TracerStickerNames const& tracerstickernames) const
 {
-  vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
-  for(size_t i=0;i<res.size();++i)
-  {
-    if(cells[i].stickers.count("dummy")>0 && 
-       cells[i].stickers.find("dummy")->second)
+	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
+	for (size_t i = 0; i < res.size(); ++i)
 	{
-      res[i].mass = 0;
-      res[i].energy = 0;
-      res[i].momentum.x = 0;
-      res[i].momentum.y = 0;
-      continue;
-    }
-    const Vector2D acc = acc_
-      (tess,cells,fluxes,t,static_cast<int>(i));
-    const double volume = cd.volumes[i];
-    res[i].mass = 0;
-    res[i].momentum = volume*cells[i].density*acc;
-	if(!mass_flux_)
-		res[i].energy = volume*cells[i].density*ScalarProd(acc,cells[i].velocity);
-	else
-	{
-		const Vector2D mass_flux = MassFlux(tess, static_cast<int>(i), fluxes);
-		res[i].energy = volume*cells[i].density*ScalarProd(point_velocities[i], acc) +0.5*ScalarProd(mass_flux, acc);
+		const Vector2D acc = acc_(tess, cells, fluxes, t, static_cast<int>(i),tracerstickernames);
+		const double volume = cd.volumes[i];
+		res[i].mass = 0;
+		res[i].momentum = volume*cells[i].density*acc;
+		if (!mass_flux_)
+			res[i].energy = volume*cells[i].density*ScalarProd(acc, cells[i].velocity);
+		else
+		{
+			const Vector2D mass_flux = MassFlux(tess, static_cast<int>(i), fluxes);
+			res[i].energy = volume*cells[i].density*ScalarProd(point_velocities[i], acc) + 
+				0.5*ScalarProd(mass_flux, acc);
+		}
+		res[i].tracers.resize(tracerstickernames.tracer_names.size(),0);
 	}
-  }
-  return res;
+	return res;
 }
 
 Acceleration::~Acceleration(void) {}

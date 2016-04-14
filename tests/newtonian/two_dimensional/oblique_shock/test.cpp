@@ -42,12 +42,10 @@ namespace
 	vector<Vector2D> process_positions(const SquareBox& boundary)
 	{
 		int ws=0;
+		Vector2D lower_left=boundary.getBoundary().first;
+		Vector2D upper_right=boundary.getBoundary().second;
 		MPI_Comm_size(MPI_COMM_WORLD,&ws);
-		size_t ws2=static_cast<size_t>(ws);
-		const Vector2D lower_left = boundary.getBoundary().first;
-		const Vector2D upper_right = boundary.getBoundary().second;
-		vector<Vector2D> res(ws2);
-		res = RandSquare(ws2,
+		vector<Vector2D> res = RandSquare(ws,
 				lower_left.x, upper_right.x,
 				lower_left.y, upper_right.y);
 		return res;
@@ -59,9 +57,9 @@ namespace
 	public:
 		WedgeNoMove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
 		bool SatisfyCriteria(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-			double /*time*/, vector<Vector2D> const& velocities, double dt)const
+			double /*time*/, vector<Vector2D> const& velocities, double dt,TracerStickerNames const& ts)const
 		{
-			if (cells[index].stickers.at(key_))
+			if (safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
 				return true;
 			const double dx = tess.GetMeshPoint(static_cast<int>(index)).x + velocities[index].x*dt -
 				(tess.GetMeshPoint(static_cast<int>(index)).y + 0.428) * 10;
@@ -74,9 +72,9 @@ namespace
 			return false;
 		}
 		Vector2D CustomVelocityResult(size_t index, Tessellation const& tess, vector<ComputationalCell> const& cells,
-			double /*time*/, vector<Vector2D> const& velocities, double dt)const
+			double /*time*/, vector<Vector2D> const& velocities, double dt,TracerStickerNames const& ts)const
 		{
-			if (!cells[index].stickers.at(key_))
+			if (!safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
 			{
 				Vector2D res(velocities[index]);
 				const double dx = tess.GetMeshPoint(static_cast<int>(index)).x + velocities[index].x*dt -
@@ -106,7 +104,7 @@ namespace
 			res[i].pressure = 1;
 			res[i].velocity = Vector2D(4, 0);
 			const Vector2D r = tess.GetCellCM(static_cast<int>(i));
-			res[i].stickers["wedge"] = r.y < 0.1*r.x - 0.428;
+			res[i].stickers.push_back(r.y < 0.1*r.x - 0.428);
 		}
 		write_number(atan(0.1), "wedge_angle.txt");
 		return res;
@@ -121,23 +119,26 @@ namespace
 		pair<bool, bool> operator()
 			(const Edge& edge,
 				const Tessellation& tess,
-				const vector<ComputationalCell>& /*cells*/) const
+				const vector<ComputationalCell>& /*cells*/,TracerStickerNames const& /*ts*/) const
 		{
-		  /*<<<<<<< HEAD
-			if(tess.GetOriginalIndex(edge.neighbors.first)!=tess.GetOriginalIndex(edge.neighbors.second))
+			if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
+			{
+				if (abs(edge.vertices.first.x-edge.vertices.second.x)<abs(edge.vertices.first.y-edge.vertices.second.y))
+				{
+					if(edge.neighbors.second<tess.GetPointNo())
+					{
+						Vector2D const& r = tess.GetMeshPoint(edge.neighbors.second);
+						if(r.x>edge.vertices.first.x)
+							return pair<bool, bool>(true, false);
+					}
+					else
+					{
+						Vector2D const& r = tess.GetMeshPoint(edge.neighbors.first);
+						if(r.x>edge.vertices.first.x)
+							return pair<bool, bool>(true, true);
+					}
+				}
 				return pair<bool, bool>(false, false);
-			if (edge.neighbors.first>= tess.GetPointNo())
-			=======*/
-			if (edge.neighbors.first >= tess.GetPointNo() && tess.GetOriginalIndex(edge.neighbors.first)==edge.neighbors.second)
-			  //>>>>>>> butter
-			{
-				assert(edge.neighbors.second<tess.GetPointNo());
-				return pair<bool, bool>(true, false);
-			}
-			if (edge.neighbors.second >= tess.GetPointNo()&& tess.GetOriginalIndex(edge.neighbors.second)==edge.neighbors.first)
-			{
-				assert(edge.neighbors.first<tess.GetPointNo());
-				return pair<bool, bool>(true, true);
 			}
 			return pair<bool, bool>(false, false);
 		}
@@ -149,20 +150,16 @@ namespace
 		res.density = 1;
 		res.pressure = 1;
 		res.velocity = Vector2D(4, 0);
-		res.stickers["wedge"] = false;
+		res.stickers.push_back(false);
 		return res;
 	}
 
 	void conserved_to_extensive
-		(const Conserved& c, const ComputationalCell& cell, Extensive &res)
+		(const Conserved& c, const ComputationalCell& /*cell*/, Extensive &res)
 	{
 		res.mass = c.Mass;
 		res.momentum = c.Momentum;
 		res.energy = c.Energy;
-		for (boost::container::flat_map<string, double>::const_iterator it =
-			cell.tracers.begin();
-			it != cell.tracers.end(); ++it)
-			res.tracers[it->first] = (it->second)*c.Mass;
 	}
 
 	class ConstantGhost : public ConditionActionSequence::Action
@@ -180,8 +177,7 @@ namespace
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				Extensive &res,
-				double /*time*/) const
+				Extensive &res,double /*time*/,TracerStickerNames const& /*ts*/) const
 		{
 			if (aux)
 				assert(edge.neighbors.first < tess.GetPointNo());
@@ -277,7 +273,8 @@ namespace
 				tsf_,
 				fc_,
 				eu_,
-				cu_)
+				cu_,
+				TracerStickerNames (vector<string>(),vector<string>(1,"wedge")))
 		{
 			write_number(adiabatic_index,
 				"adiabatic_index.txt");
@@ -321,13 +318,14 @@ namespace
 	public:
 		ObliqueRefine(double maxV, string key) :maxV_(maxV), key_(key) {}
 
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/)const
+		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/,
+		TracerStickerNames const& /*ts*/)const
 		{
 			vector<size_t> res;
 			size_t N = static_cast<size_t>(tess.GetPointNo());
 			for (size_t i = 0; i < N; ++i)
 			{
-				if (tess.GetVolume(static_cast<int>(i)) > maxV_&&!cells[i].stickers.at(key_))
+				if (tess.GetVolume(static_cast<int>(i)) > maxV_&&!cells[i].stickers[0])
 					res.push_back(i);
 			}
 			return res;
@@ -343,7 +341,7 @@ namespace
 		ObliqueRemove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
 
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& cells, double /*time*/)const
+			vector<ComputationalCell> const& cells, double /*time*/,TracerStickerNames const& /*ts*/)const
 		{
 			std::pair<vector<size_t>, vector<double> > res;
 			vector<double> merits;
@@ -351,7 +349,7 @@ namespace
 			size_t N = static_cast<size_t>(tess.GetPointNo());
 			for (size_t i = 0; i < N; ++i)
 			{
-				if (!cells[i].stickers.at(key_))
+				if (!cells[i].stickers[0])
 				{
 					Vector2D const& point = tess.GetMeshPoint(static_cast<int>(i));
 					if (point.y < (0.1*point.x - 0.428 + distanceToWall_))
@@ -405,8 +403,6 @@ int main(void)
 {
 #ifdef RICH_MPI
 	MPI_Init(NULL,NULL);
-	int rank=0;
-	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif // RICH_MPI
 
 	SimData sim_data;
@@ -416,6 +412,8 @@ int main(void)
 	main_loop(sim);
 
 #ifdef RICH_MPI
+	int rank=0;
+	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	write_snapshot_to_hdf5(sim, "process_" + int2str(rank) + "_final.h5");
 	MPI_Finalize();
 #else

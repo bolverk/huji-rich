@@ -6,12 +6,10 @@
 #ifndef EXTENSIVE_HPP
 #define EXTENSIVE_HPP 1
 
-#include "boost/container/flat_map.hpp"
 #include "../../tessellation/geometry.hpp"
+#include "computational_cell_2d.hpp"
 #ifdef RICH_MPI
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>
-#include "flat_map_serial.hpp"
+#include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
 using std::string;
@@ -33,7 +31,7 @@ public:
   Vector2D momentum;
 
   //! \brief tracers
-  boost::container::flat_map<std::string,double> tracers;
+  tvector tracers;
 
   /*! \brief Assignment operator
     \param origin Original extensives variables
@@ -66,24 +64,9 @@ public:
   \brief constructor for extensive with a tracer list. All tracers start with zero.
   \param Tracers The tracers 
   */
-  explicit Extensive(const boost::container::flat_map<std::string, double>& Tracers);
+  explicit Extensive(tvector const& Tracers);
 
 #ifdef RICH_MPI
-  /*! \brief Serializer
-    \param ar Archive
-    \param int Version
-   */
-  template<class Archive>
-  void serialize
-  (Archive& ar,
-   const unsigned int /*version*/)
-  {
-	  ar & mass;
-	  ar & energy;
-	  ar & momentum;
-	  ar & tracers;
-  }
-
   size_t getChunkSize(void) const;
 
   vector<double> serialize(void) const;

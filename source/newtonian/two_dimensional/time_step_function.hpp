@@ -23,6 +23,7 @@ public:
     \param eos Equation of state
     \param point_velocities Velocities of the mesh generating points
     \param time Time
+	\param tracerstickernames The names of the tracers and stickers
     \return Time step
    */
   virtual double operator()
@@ -30,7 +31,8 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const vector<Vector2D>& point_velocities,
-   const double time) const = 0;
+   const double time,
+	  TracerStickerNames const& tracerstickernames) const = 0;
 
   //! \brief Destructor
   virtual ~TimeStepFunction(void);

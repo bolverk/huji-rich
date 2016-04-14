@@ -13,7 +13,7 @@
 #include "source/misc/int2str.hpp"
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cfl.hpp"
-#include "source/newtonian/two_dimensional/ColdFlowsCellUpdater.hpp"
+#include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/ColdFlowsExtensiveCalculator.hpp"
 #include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
@@ -34,7 +34,7 @@ namespace
 			Vector2D const& point = tess.GetCellCM(static_cast<int>(i));
 			const double r = abs(point);
 			res[i].velocity = Vector2D(-point.x / r, -point.y / r);
-			res[i].tracers["Entropy"] = eos.dp2s(1, 1e-6);
+			res[i].tracers.push_back(eos.dp2s(1, 1e-6));
 		}
 		return res;
 	}
@@ -48,7 +48,7 @@ namespace
 		NOHGhostGenerator(EquationOfState const& eos) :eos_(eos) {}
 
 		boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-			const vector<ComputationalCell>& /*cells*/, double time) const
+			const vector<ComputationalCell>& /*cells*/, double time,TracerStickerNames const& /*ts*/) const
 		{
 			vector<std::pair<size_t, size_t> > outer_edges = GetOuterEdgesIndeces(tess);
 			boost::container::flat_map<size_t, ComputationalCell> res;
@@ -62,7 +62,7 @@ namespace
 				temp.density = (1 + time / r);
 				temp.pressure = 1e-6;
 				temp.velocity = -1.0*edge_cen / r;
-				temp.tracers["Entropy"] = eos_.dp2s(temp.density, temp.pressure);
+				temp.tracers.push_back(eos_.dp2s(temp.density, temp.pressure));
 				res[ghost_index] = temp;
 			}
 			return res;
@@ -70,10 +70,10 @@ namespace
 
 		Slope GetGhostGradient(Tessellation const& /*tess*/,
 			vector<ComputationalCell> const& /*cells*/, vector<Slope> const& /*gradients*/,
-			size_t /*ghost_index*/, double /*time*/, Edge const& /*edge*/)const
+			size_t /*ghost_index*/, double /*time*/, Edge const& /*edge*/,TracerStickerNames const& /*ts*/)const
 		{
 			ComputationalCell temp;
-			temp.tracers["Entropy"] = 0;
+			temp.tracers.push_back(0);
 			return Slope(temp, temp);
 		}
 	};
@@ -86,7 +86,8 @@ namespace
 	public:
 		NohRefine(double maxV) :maxV_(maxV) {}
 
-		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
+		vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double /*time*/,
+		TracerStickerNames const& /*ts*/)const
 		{
 			vector<size_t> res;
 			size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -103,7 +104,8 @@ namespace
 	class NohRefineDebug : public CellsToRefine
 	{
 	public:
-		vector<size_t> ToRefine(Tessellation const& /*tess*/, vector<ComputationalCell> const& /*cells*/, double /*time*/)const
+		vector<size_t> ToRefine(Tessellation const& /*tess*/, vector<ComputationalCell> const& /*cells*/, double /*time*/,
+		TracerStickerNames const& /*ts*/)const
 		{
 			return vector<size_t>();
 		}
@@ -118,7 +120,7 @@ namespace
 		NohRemove(double minV, LinearGaussImproved const& interp) :minV_(minV), interp_(interp) {}
 
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
-			vector<ComputationalCell> const& cells, double /*time*/)const
+			vector<ComputationalCell> const& cells, double /*time*/,TracerStickerNames const& /*ts*/)const
 		{
 			vector<size_t> indeces;
 			vector<double> merits;
@@ -146,7 +148,7 @@ namespace
 	{
 	public:
 		std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& /*tess*/,
-			vector<ComputationalCell> const& /*cells*/, double /*time*/)const
+			vector<ComputationalCell> const& /*cells*/, double /*time*/,TracerStickerNames const& /*ts*/)const
 		{
 			return std::pair<vector<size_t>, vector<double> >();
 		}
@@ -204,11 +206,11 @@ int main(void)
 	// Set up the external source term
 	ZeroForce force;
 
-	ColdFlowsExtensiveCalculator eu(eos,interpolation);
+	ColdFlowsExtensiveCalculator eu(eos,ghost,interpolation);
 	SimpleCFL tsf(0.15);
 	IdleHBC hbc;
 	ModularFluxCalculator fc(interpolation, rs, hbc);
-	ColdFlowsCellUpdate cu;
+	SimpleCellUpdater cu;
 	SlabSymmetry pg;
 
 	vector<ComputationalCell> init_cells = calc_init_cond(tess,eos);
@@ -218,7 +220,8 @@ int main(void)
 #ifdef RICH_MPI
 		proctess,
 #endif
-		tess, outer, pg, init_cells, eos, pointmotion, evc_, force, tsf, fc, eu, cu);
+		tess, outer, pg, init_cells, eos, pointmotion, evc_, force, tsf, fc, eu, cu,
+		TracerStickerNames(vector<string>(1,"Entropy"),vector<string>()));
 
 	// Define the AMR 
 	double Vmax = 3 * width*width / (np*np);

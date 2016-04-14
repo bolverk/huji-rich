@@ -11,7 +11,7 @@ else ifeq ($(MODE),parallel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	EXECUTION_PREFIX := mpirun -n $(PROCESS_NUM)
 	LINT_FLAGS = -Wall -Wextra -pedantic -Wfatal-errors 
-	LFLAGS = -lboost_mpi -lboost_serialization
+	LFLAGS = -lclipper
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
@@ -57,7 +57,7 @@ $(NORMAL_TERMINATION_LIST): $(MODE)/%/normal_termination.res: $(MODE)/%/test.exe
 
 $(BINARY_LIST): $(MODE)/%/test.exe: $(MODE)/%/test.o
 	$(MAKE) -C .. MODE=$(MODE)
-	$(CC) $(MODE)/$*/test.o -L ../library_$(MODE) -L $(HDF5_LIB_PATH) -lz -lhdf5 -lhdf5_cpp -lrich -lclipper -o $(MODE)/$*/test.exe $(LFLAGS)
+	$(CC) $(MODE)/$*/test.o ../library_$(MODE)/librich.a -L $(HDF5_LIB_PATH) -lhdf5 -lhdf5_cpp -lz $(LFLAGS) -o $(MODE)/$*/test.exe
 
 $(OBJECT_LIST): $(MODE)/%/test.o: %/test.cpp $(SOURCE_DEPENDENCIES) | $(MODE)/%
 	$(CC) -c $(CFLAGS) $*/test.cpp -o $(MODE)/$*/test.o -I ..

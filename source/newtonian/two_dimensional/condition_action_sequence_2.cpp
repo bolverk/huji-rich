@@ -22,25 +22,27 @@ namespace
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
 		const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
-			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res,double time)
+			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res,double time,
+			TracerStickerNames const& tracerstickernames)
 	{
 		for (size_t i = 0; i<sequence.size(); ++i) 
 		{
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
-				(edge, tess, cells);
+				(edge, tess, cells,tracerstickernames);
 			if (flag_aux.first)
 			{
-				(*sequence[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second,res,time);
+				(*sequence[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second,res,time,tracerstickernames);
 				return;
 			}
 		}
 		for (size_t i = 0; i<sequence2.size(); ++i) 
 		{
 			const pair<bool, bool> flag_aux = (*sequence2[i].first)
-				(edge, tess, cells);
+				(edge, tess, cells,tracerstickernames);
 			if (flag_aux.first)
 			{
-				(*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res,time);
+				(*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res,time,
+					tracerstickernames);
 				return;
 			}
 		}
@@ -56,11 +58,12 @@ vector<Extensive> ConditionActionSequence2::operator()
 	const CacheData& /*cd*/,
 	const EquationOfState& eos,
 	const double time,
-	const double /*dt*/) const
+	const double /*dt*/,
+	TracerStickerNames const& tracerstickernames) const
 {
 	edge_values_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
-	interp_.operator()(tess, cells, time,edge_values_);
+	interp_.operator()(tess, cells, time,edge_values_,tracerstickernames);
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
 	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
 		choose_action
@@ -71,7 +74,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			edge_velocities[i],
 			sequence_,
 			sequence2_,
-			edge_values_[i],res[i],time);
+			edge_values_[i],res[i],time,tracerstickernames);
 	return res;
 }
 
@@ -89,10 +92,10 @@ namespace
 		res.mass = c.Mass;
 		res.momentum = c.Momentum;
 		res.energy = c.Energy;
-		boost::container::flat_map<string, double>::iterator it2 = res.tracers.begin();
-		for (boost::container::flat_map<string, double>::const_iterator it =
-			cell.tracers.begin();it != cell.tracers.end(); ++it,++it2)
-			it2->second = (it->second)*c.Mass;
+		res.tracers.resize(cell.tracers.size());
+		size_t N = cell.tracers.size();
+		for (size_t i = 0; i < N; ++i)
+			res.tracers[i] = cell.tracers[i] * c.Mass;
 	}
 }
 
@@ -104,7 +107,8 @@ void RegularFlux2::operator()
 	const EquationOfState& eos,
 	const bool /*aux*/,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
-	Extensive &res,double /*time*/) const
+	Extensive &res,double /*time*/,
+	TracerStickerNames const& /*tracerstickernames*/) const
 {
 	const Vector2D p = normalize
 		(edge.vertices.second -
@@ -156,7 +160,8 @@ void RigidWallFlux2::operator()
 	const EquationOfState& eos,
 	const bool aux,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
-	Extensive &res,double /*time*/) const
+	Extensive &res,double /*time*/,
+	TracerStickerNames const& /*tracerstickernames*/) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -201,12 +206,13 @@ void Ratchet::operator()
 	const EquationOfState& eos,
 	const bool aux,
 	const pair<ComputationalCell, ComputationalCell> & edge_values,
-	Extensive &res,double time) const
+	Extensive &res,double time,
+	TracerStickerNames const& tracerstickernames) const
 {
 	Vector2D n = aux ? tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first) :
 		tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second);
 	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)].velocity)*(2*static_cast<double>(in_)-1) < 0)
-		free_.operator()(edge,tess, edge_velocity, cells, eos, aux,res,time);
+		free_.operator()(edge,tess, edge_velocity, cells, eos, aux,res,time,tracerstickernames);
 	else
-		wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values,res,time);
+		wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values,res,time,tracerstickernames);
 }

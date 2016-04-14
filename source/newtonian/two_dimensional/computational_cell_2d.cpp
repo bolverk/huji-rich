@@ -1,7 +1,7 @@
 #include "computational_cell_2d.hpp"
 #include "../../misc/utils.hpp"
 
-typedef boost::container::flat_map<std::string, double> TracerMap;
+using namespace std;
 
 ComputationalCell::ComputationalCell(void) :
   density(0), pressure(0), velocity(Vector2D()), tracers(),
@@ -27,11 +27,9 @@ ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
   this->pressure += other.pressure;
   this->velocity += other.velocity;
   assert(this->tracers.size() == other.tracers.size());
-  for (size_t j = 0; j < this->tracers.size(); ++j)
-    {
-      assert((this->tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin()+static_cast<int>(j))->first);
-      (this->tracers.begin() + static_cast<int>(j))->second += (other.tracers.begin() + static_cast<int>(j))->second;
-    }
+  size_t N = this->tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  this->tracers[j] += other.tracers[j];
   return *this;
 }
 
@@ -41,14 +39,9 @@ ComputationalCell& ComputationalCell::operator-=(ComputationalCell const& other)
   this->pressure -= other.pressure;
   this->velocity -= other.velocity;
   assert(this->tracers.size() == other.tracers.size());
-  /*for (size_t j = 0; j < this->tracers.size(); ++j)
-    {
-      assert((this->tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
-      (this->tracers.begin() + static_cast<int>(j))->second -= (other.tracers.begin() + static_cast<int>(j))->second;
-    }*/
-  boost::container::flat_map<string, double>::const_iterator it2 = other.tracers.begin();
-  for (boost::container::flat_map<string, double>::iterator it = this->tracers.begin(); it != this->tracers.end(); ++it, ++it2)
-	  it->second -= it2->second;
+  size_t N = this->tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  this->tracers[j] -= other.tracers[j];
   return *this;
 }
 
@@ -57,10 +50,9 @@ ComputationalCell& ComputationalCell::operator*=(double s)
   this->density *= s;
   this->pressure *= s;
   this->velocity *= s;
-  for (size_t j = 0; j < this->tracers.size(); ++j)
-    {
-      (this->tracers.begin() + static_cast<int>(j))->second *= s;
-    }
+  size_t N = this->tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  this->tracers[j] *= s;
   return *this;
 }
 
@@ -70,15 +62,9 @@ void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& o
   res.pressure += other.pressure*scalar;
   res.velocity += other.velocity*scalar;
   assert(res.tracers.size() == other.tracers.size());
-  /*const size_t nloop = res.tracers.size();
-  for (size_t j = 0; j < nloop; ++j)
-    {
-      assert((res.tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
-      (res.tracers.begin() + static_cast<int>(j))->second += (other.tracers.begin() + static_cast<int>(j))->second*scalar;
-    }*/
-  boost::container::flat_map<string, double>::const_iterator it2 = other.tracers.begin();
-  for(boost::container::flat_map<string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it, ++it2)
-		  it->second += it2->second*scalar;
+  size_t N = res.tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  res.tracers[j] += other.tracers[j]*scalar;
 }
 
 ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2)
@@ -100,8 +86,9 @@ ComputationalCell operator/(ComputationalCell const& p, double s)
   ComputationalCell res(p);
   res.density /= s;
   res.pressure /= s;
-  for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it)
-    it->second /= s;
+  size_t N = res.tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  res.tracers[j] /= s;
   res.velocity = res.velocity / s;
   return res;
 }
@@ -111,8 +98,9 @@ ComputationalCell operator*(ComputationalCell const& p, double s)
   ComputationalCell res(p);
   res.density *= s;
   res.pressure *= s;
-  for (boost::container::flat_map<std::string, double>::iterator it = res.tracers.begin(); it != res.tracers.end(); ++it)
-    it->second *= s;
+  size_t N = res.tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  res.tracers[j] *= s;
   res.velocity = res.velocity * s;
   return res;
 }
@@ -129,23 +117,12 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
   cell.velocity = other.velocity;
   assert(cell.tracers.size() == other.tracers.size());
   assert(cell.stickers.size() == other.stickers.size());
-  /*const size_t ntracer = cell.tracers.size();
-  const size_t nsticker = cell.stickers.size();
-  for (size_t j = 0; j < ntracer; ++j)
-    {
-      assert((cell.tracers.begin() + static_cast<int>(j))->first == (other.tracers.begin() + static_cast<int>(j))->first);
-      (cell.tracers.begin() + static_cast<int>(j))->second = (other.tracers.begin() + static_cast<int>(j))->second;
-    }
-  for (size_t j = 0; j < nsticker; ++j)
-    {
-      (cell.stickers.begin() + static_cast<int>(j))->second = (other.stickers.begin() + static_cast<int>(j))->second;
-    }*/
-  boost::container::flat_map<string, double>::const_iterator it2 = other.tracers.begin();
-  for (boost::container::flat_map<string, double>::iterator it = cell.tracers.begin(); it != cell.tracers.end(); ++it, ++it2)
-	  it->second = it2->second;
-  boost::container::flat_map<string, bool>::const_iterator it3 = other.stickers.begin();
-  for (boost::container::flat_map<string, bool>::iterator it = cell.stickers.begin(); it != cell.stickers.end(); ++it, ++it3)
-	  it->second = it3->second;
+  size_t N = cell.tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  cell.tracers[j] = other.tracers[j];
+  N = cell.stickers.size();
+  for (size_t i = 0; i < N; ++i)
+	  cell.stickers[i] = other.stickers[i];
 }
 
 
@@ -154,6 +131,15 @@ Slope::Slope(void) :xderivative(ComputationalCell()), yderivative(ComputationalC
 Slope::Slope(ComputationalCell const & x, ComputationalCell const & y) : xderivative(x), yderivative(y)
 {}
 
+TracerStickerNames::TracerStickerNames(void)
+	: tracer_names(vector<string>()), sticker_names(vector<string>()) {}
+
+TracerStickerNames::~TracerStickerNames(void) {}
+
+TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
+
+TracerStickerNames::TracerStickerNames(std::vector<std::string> tracers, std::vector<std::string> stickers):
+	tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI
 size_t ComputationalCell::getChunkSize(void) const
@@ -169,20 +155,12 @@ vector<double> ComputationalCell::serialize(void) const
   res.at(2) = velocity.x;
   res.at(3) = velocity.y;
   size_t counter = 4;
-  for(boost::container::flat_map<string,double>::const_iterator 
-	it=tracers.begin();
-      it!=tracers.end(); ++it){
-    res.at(counter) = it->second;
-    ++counter;
-  }
-  for(boost::container::flat_map<string,bool>::const_iterator
-	it=stickers.begin();
-      it!=stickers.end();
-      ++it){
-    res.at(counter) = it->second ? 0 : 1;
-    ++counter;
-  }
-  assert(counter==res.size());
+  size_t N = tracers.size();
+  for (size_t j = 0; j < N ; ++j)
+	 res[j+counter] = tracers[j];
+  size_t N2 = stickers.size();
+  for (size_t j = 0; j < N2; ++j)
+	  res[j + counter + N] = stickers[j] ? 1 : 0;
   return res;
 }
 
@@ -195,20 +173,12 @@ void ComputationalCell::unserialize
   velocity.x = data.at(2);
   velocity.y = data.at(3);
   size_t counter = 4;
-  for(boost::container::flat_map<string,double>::iterator 
-	it=tracers.begin();
-      it!=tracers.end(); ++it){
-    it->second = data.at(counter);
-    ++counter;
-  }
-  for(boost::container::flat_map<string,bool>::iterator
-	it=stickers.begin();
-      it!=stickers.end();
-      ++it){
-    it->second = data.at(counter)<0.5;
-    ++counter;
-  }
-  assert(data.size()==counter);
+  size_t N = tracers.size();
+  for (size_t j = 0; j < N; ++j)
+	  tracers[j] = data.at(counter + j);
+  size_t N2 = stickers.size();
+  for (size_t i = 0; i < N2; ++i)
+	  stickers[i] = data.at(counter + N + i)>0.5;
 }
 
 size_t Slope::getChunkSize(void) const

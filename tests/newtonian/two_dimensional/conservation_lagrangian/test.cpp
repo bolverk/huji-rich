@@ -70,7 +70,7 @@ namespace {
       res[i].density = 1;
       res[i].pressure = triangle(r) ? 2 : 1;
       res[i].velocity = triangle(r) ? Vector2D(1,-1) : Vector2D(0,0);
-      res[i].tracers["tracer"] = triangle(r) ? 1 : 0;
+      res[i].tracers.push_back(triangle(r) ? 1 : 0);
     }
     return res;
   }
@@ -114,7 +114,8 @@ namespace {
 	   tsf_,
 	   fc_,
 	   eu_,
-	   cu_) {}
+	   cu_,
+	   TracerStickerNames (vector<string>(1,"tracer"),vector<string>())) {}
 
     hdsim& getSim(void)
     {
@@ -164,7 +165,7 @@ namespace {
 	    << cons_[i].momentum.x << " "
 	    << cons_[i].momentum.y << " "
 	    << cons_[i].energy << " "
-	    << cons_[i].tracers["tracer"] << "\n";
+	    << cons_[i].tracers[0] << "\n";
 	f.close();
 #ifdef RICH_MPI
       }

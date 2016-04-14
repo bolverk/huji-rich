@@ -604,37 +604,6 @@ Tessellation* VoronoiMesh::clone(void)const
 	return new VoronoiMesh(*this);
 }
 
-namespace
-{
-	int FindEdge(VoronoiMesh const& V,int tofind,int celltolook)
-	{
-		vector<int> edges=V.GetCellEdges(celltolook);
-		int n=static_cast<int>(edges.size());
-		for(int i=0;i<n;++i)
-		{
-			Edge edge=V.GetEdge(edges[static_cast<size_t>(i)]);
-			if(V.GetOriginalIndex(edge.neighbors.first)==tofind||
-				V.GetOriginalIndex(edge.neighbors.second)==tofind)
-				return edges[static_cast<size_t>(i)];
-		}
-		throw("Couldn't find neighbor in Voronoi::FindEdge");
-	}
-}
-
-int FixPeriodNeighbor(VoronoiMesh &V,int other,int ToRefine,int /*NewIndex*/,
-	Vector2D const& NewPoint)
-{
-	int loc=FindEdge(V,ToRefine,other);
-	vector<Vector2D>& cor=V.Tri.ChangeCor();
-	cor.push_back(NewPoint);
-	int& temp = V.edges[static_cast<size_t>(loc)].neighbors.second==other ?
-		V.edges[static_cast<size_t>(loc)].neighbors.first :
-	V.edges[static_cast<size_t>(loc)].neighbors.second;
-	temp = static_cast<int>(cor.size());
-	return static_cast<int>(cor.size());
-}
-
-
 int VoronoiMesh::GetPointNo(void) const
 {
 	return Tri.get_length();

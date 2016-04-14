@@ -21,6 +21,11 @@ public:
 	ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
 		double RoundSpeed=2,int mode=2);
 
+	/*!
+	\brief Updates the load balance, does one iteration
+	\param tproc The processors tessellation.
+	\param tlocal The local tessellation
+	*/
 	void Update(Tessellation &tproc,Tessellation const& tlocal)const;
 
 	//! \brief Class destructor

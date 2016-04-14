@@ -22,8 +22,9 @@ public:
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const double time,
-   const int point) const;
-
+   const int point,
+   TracerStickerNames const& tracerstickernames) const;
+ 
 private:
   const Vector2D force_;
 };

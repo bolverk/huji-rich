@@ -29,6 +29,7 @@ public:
     \param eos Equation of state
     \param time Time
     \param dt Time step
+	\param tracerstickernames The names of the tracers and stickers
     \return List of fluxes on each edge
    */
   virtual vector<Extensive> operator()
@@ -39,7 +40,8 @@ public:
    const CacheData& cd,
    const EquationOfState& eos,
    const double time,
-   const double dt) const = 0;
+   const double dt,
+	  TracerStickerNames const& tracerstickernames) const = 0;
 
   //! \brief Class destructor
   virtual ~FluxCalculator(void);

@@ -24,7 +24,8 @@ namespace {
 class ConserveRefine : public CellsToRefine
 {
 public:
-	vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double time)const
+	vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double time,
+	TracerStickerNames const& /*ts*/)const
 	{
 		boost::random::mt19937_64 gen(static_cast<uint64_t>(time*10000));
 		boost::random::uniform_int_distribution<> dist(0, tess.GetPointNo()-1);
@@ -38,7 +39,8 @@ public:
 class ConserveRemove : public CellsToRemove
 {
 public:
-	std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double time)const
+	std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess, vector<ComputationalCell> const& /*cells*/, double time,
+	TracerStickerNames const& /*ts*/)const
 	{
 		boost::random::mt19937_64 gen(static_cast<uint64_t>(time * 11000));
 		boost::random::uniform_int_distribution<> dist(0,tess.GetPointNo()-1);

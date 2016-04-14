@@ -15,6 +15,7 @@ namespace
 	void CorrectPointsOverShoot(vector<Vector2D> &v, double dt,Tessellation const& tess,OuterBoundary const&
 		outer)
 	{
+		bool halfperiodic = outer.GetBoundaryType() == HalfPeriodic;
 		// check that we don't go outside grid
 		size_t n = static_cast<size_t>(tess.GetPointNo());
 		const double inv_dt = 1.0 / dt;
@@ -22,19 +23,22 @@ namespace
 		{
 			Vector2D point(tess.GetMeshPoint(static_cast<int>(i)));
 			double R = tess.GetWidth(static_cast<int>(i));
-			if ((v[i].x*dt * 2 + point.x)>outer.GetGridBoundary(Right))
+			if (!halfperiodic)
 			{
-				double factor = 0.25*(outer.GetGridBoundary(Right) -	point.x)*inv_dt / abs(v[i]);
-				if (R*0.1 > (outer.GetGridBoundary(Right) - point.x))
-					factor*=-0.1;
-				v[i] = v[i] * factor;
-			}
-			if ((v[i].x*dt * 2 + point.x)<outer.GetGridBoundary(Left))
-			{
-				double factor = 0.25*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
-				if (R*0.1 > (point.x - outer.GetGridBoundary(Left)))
-					factor*=-0.1;
-				v[i] = v[i] * factor;
+				if ((v[i].x*dt * 2 + point.x)>outer.GetGridBoundary(Right))
+				{
+					double factor = 0.25*(outer.GetGridBoundary(Right) - point.x)*inv_dt / abs(v[i]);
+					if (R*0.1 > (outer.GetGridBoundary(Right) - point.x))
+						factor *= -0.1;
+					v[i] = v[i] * factor;
+				}
+				if ((v[i].x*dt * 2 + point.x) < outer.GetGridBoundary(Left))
+				{
+					double factor = 0.25*(point.x - outer.GetGridBoundary(Left))*inv_dt / abs(v[i]);
+					if (R*0.1 > (point.x - outer.GetGridBoundary(Left)))
+						factor *= -0.1;
+					v[i] = v[i] * factor;
+				}
 			}
 			if ((v[i].y*dt * 2 + point.y)>outer.GetGridBoundary(Up))
 			{
@@ -93,9 +97,9 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
-	double time) const
+	double time, TracerStickerNames const& tracerstickernames) const
 {
-	vector<Vector2D> res = pm_(tess, cells, time);
+	vector<Vector2D> res = pm_(tess, cells, time,tracerstickernames);
 	if (!cold_)
 	{
 		for (size_t i = 0; i < res.size(); ++i)
@@ -107,9 +111,9 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 }
 
 vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	double dt, vector<Vector2D>const & velocities)const
+	double dt, vector<Vector2D>const & velocities, TracerStickerNames const& tracerstickernames)const
 {
-	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities);
+	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities,tracerstickernames);
 	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{

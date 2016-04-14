@@ -16,7 +16,7 @@ void SimpleExtensiveUpdater::operator()
    const CacheData& cd,
    const vector<ComputationalCell>& /*cells*/,
    vector<Extensive>& extensives,
-	  double /*time*/) const
+	  double /*time*/, TracerStickerNames const& /*tracerstickersnames*/) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
   Extensive delta = dt*cd.areas[0] * fluxes[0];

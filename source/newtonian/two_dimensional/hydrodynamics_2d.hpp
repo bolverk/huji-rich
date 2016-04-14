@@ -25,34 +25,34 @@
 #include "cache_data.hpp"
 
 //! Calculates the velocities at the vertices of edges
-class FaceVertexVelocityCalculator: public LazyList<Vector2D>
+class FaceVertexVelocityCalculator : public LazyList<Vector2D>
 {
 public:
 
-  /*! \brief Class constructor
-    \param tess Tessellation
-    \param point_velocities Velocities of mesh generating point
-    \param member Toggles on which vertex to calculate the velocity
-    \param control Face velocities at the centroid
-    \param hbc Hydrodynamic boundary conditions
-   */
-  FaceVertexVelocityCalculator
-  (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities,
-   const Vector2D std::pair<Vector2D,Vector2D>::* const member,
-   const vector<Vector2D>& control,
-   const HydroBoundaryConditions& hbc);
+	/*! \brief Class constructor
+	  \param tess Tessellation
+	  \param point_velocities Velocities of mesh generating point
+	  \param member Toggles on which vertex to calculate the velocity
+	  \param control Face velocities at the centroid
+	  \param hbc Hydrodynamic boundary conditions
+	 */
+	FaceVertexVelocityCalculator
+		(const Tessellation& tess,
+			const vector<Vector2D>& point_velocities,
+			const Vector2D std::pair<Vector2D, Vector2D>::* const member,
+			const vector<Vector2D>& control,
+			const HydroBoundaryConditions& hbc);
 
-  size_t size(void) const;
+	size_t size(void) const;
 
-  Vector2D operator[](size_t i) const;
+	Vector2D operator[](size_t i) const;
 
 private:
-  const Tessellation& tess_;
-  const vector<Vector2D>& point_velocities_;
-  const Vector2D std::pair<Vector2D,Vector2D>::* const member_;
-  const vector<Vector2D>& control_;
-  const HydroBoundaryConditions& hbc_;
+	const Tessellation& tess_;
+	const vector<Vector2D>& point_velocities_;
+	const Vector2D std::pair<Vector2D, Vector2D>::* const member_;
+	const vector<Vector2D>& control_;
+	const HydroBoundaryConditions& hbc_;
 };
 
 /*! \brief Rotates primitive variables to align with edge
@@ -62,8 +62,8 @@ private:
   \return Rotated cell
  */
 Primitive RotatePrimitive(const Vector2D& n,
-			  const Vector2D& p,
-			  const Primitive& cell);
+	const Vector2D& p,
+	const Primitive& cell);
 
 /*! \brief Rotates flux from the edge frame back to the lab frame
   \param c Flux
@@ -72,8 +72,8 @@ Primitive RotatePrimitive(const Vector2D& n,
   \return Rotated flux
  */
 Conserved RotateFluxBack(const Conserved& c,
-			 const Vector2D& n,
-			 const Vector2D& p);
+	const Vector2D& n,
+	const Vector2D& p);
 
 /*! \brief Given an edge and an index of one neighbor, returns the index of another neighbor
   \param edge Voronoi edge
@@ -81,7 +81,7 @@ Conserved RotateFluxBack(const Conserved& c,
   \return Index of the other neighbor
  */
 int get_other_index(const Edge& edge,
-		    const int index);
+	const int index);
 
 /*! \brief Initialize computational cells
   \param density Density distribution
@@ -95,11 +95,11 @@ int get_other_index(const Edge& edge,
 */
 vector<Primitive> InitialiseCells
 (SpatialDistribution const& density,
- SpatialDistribution const& pressure,
- SpatialDistribution const& xvelocity,
- SpatialDistribution const& yvelocity,
- EquationOfState const& eos,
- Tessellation const& tess,bool CMvalue=true);
+	SpatialDistribution const& pressure,
+	SpatialDistribution const& xvelocity,
+	SpatialDistribution const& yvelocity,
+	EquationOfState const& eos,
+	Tessellation const& tess, bool CMvalue = true);
 
 /*! \brief Calculates the intensive conserved variables
   \param cells Hydrodynamical cells
@@ -116,8 +116,8 @@ vector<Conserved> CalcConservedIntensive
 */
 vector<Conserved> CalcConservedExtensive
 (const vector<Conserved>& cons_int,
- const Tessellation& tess,
- const PhysicalGeometry& pg);
+	const Tessellation& tess,
+	const PhysicalGeometry& pg);
 
 /*! \brief Calculates the velocities of the mesh generating points
   \param tessellation Tessellation
@@ -129,11 +129,11 @@ vector<Conserved> CalcConservedExtensive
   \param tracers Tracers
 */
 void CalcPointVelocities(Tessellation const& tessellation,
-			 vector<Primitive> const& cells,
-			 PointMotion& pointmotion,
-			 vector<Vector2D>& pointvelocity,double time,
-			 vector<CustomEvolution*> & cevolve,
-			 const vector<vector<double> >& tracers);
+	vector<Primitive> const& cells,
+	PointMotion& pointmotion,
+	vector<Vector2D>& pointvelocity, double time,
+	vector<CustomEvolution*> & cevolve,
+	const vector<vector<double> >& tracers);
 
 /*! \brief Calculates the time step for a cell
   \param cell Computational cell
@@ -142,7 +142,7 @@ void CalcPointVelocities(Tessellation const& tessellation,
   \return Time step
 */
 double TimeStepForCell(Primitive const& cell,
-		       double width,vector<Vector2D> const& face_velocites);
+	double width, vector<Vector2D> const& face_velocites);
 
 /*! \brief Calculates the time step
   \param tessellation Tessellation
@@ -155,11 +155,11 @@ double TimeStepForCell(Primitive const& cell,
 */
 double CalcTimeStep
 (Tessellation const& tessellation,
- vector<Primitive> const& cells,
- vector<Vector2D> const& facevelocity,
- HydroBoundaryConditions const& hbc,
- double time,
- vector<CustomEvolution*> const& evolve=vector<CustomEvolution*>());
+	vector<Primitive> const& cells,
+	vector<Vector2D> const& facevelocity,
+	HydroBoundaryConditions const& hbc,
+	double time,
+	vector<CustomEvolution*> const& evolve = vector<CustomEvolution*>());
 
 /*! \brief Updates the extensive conserved variables
   \param tessellation Tessellation
@@ -171,11 +171,11 @@ double CalcTimeStep
 */
 void UpdateConservedExtensive
 (Tessellation const& tessellation,
- vector<Conserved> const& fluxes,
- double dt,
- vector<Conserved>& conserved_extensive,
- HydroBoundaryConditions const& boundaryconditions,
- vector<double> const& lengthes);
+	vector<Conserved> const& fluxes,
+	double dt,
+	vector<Conserved>& conserved_extensive,
+	HydroBoundaryConditions const& boundaryconditions,
+	vector<double> const& lengthes);
 
 /*! \brief Move mesh points
   \param pointvelocity Velocities of all mesh points
@@ -186,8 +186,8 @@ void UpdateConservedExtensive
   \return The indeces of the hilbert order of the points
 */
 vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-		    double dt, Tessellation& tessellation,bool reorder,
-			vector<Vector2D> oldpoints=vector<Vector2D> ());
+	double dt, Tessellation& tessellation, bool reorder,
+	vector<Vector2D> oldpoints = vector<Vector2D>());
 /*! \brief Move mesh points
   \param pointvelocity Velocities of all mesh points
   \param dt Time step
@@ -198,8 +198,8 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
   \return The indeces of the hilbert order of the points
 */
 vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
-	double dt, Tessellation& tessellation,Tessellation const& vproc,bool reorder,
-	vector<Vector2D> oldpoints=vector<Vector2D> ());
+	double dt, Tessellation& tessellation, Tessellation const& vproc, bool reorder,
+	vector<Vector2D> oldpoints = vector<Vector2D>());
 
 /*! \brief Calculates the intensive conserved variables
   \param tess Tessellation
@@ -209,8 +209,8 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
  */
 vector<Conserved> calc_conserved_intensive
 (const Tessellation& tess,
- const vector<Conserved>& extensive,
- const PhysicalGeometry& pg);
+	const vector<Conserved>& extensive,
+	const PhysicalGeometry& pg);
 
 /*! \brief Updates the intensive conserved variables
   \param tessellation Tessellation
@@ -218,8 +218,8 @@ vector<Conserved> calc_conserved_intensive
   \param conservedintensive Intensive conserved variables
 */
 void UpdateConservedIntensive(Tessellation const& tessellation,
-			      vector<Conserved> const& conservedextensive,
-			      vector<Conserved>& conservedintensive);
+	vector<Conserved> const& conservedextensive,
+	vector<Conserved>& conservedintensive);
 
 /*! \brief Updates the primitive variables
   \param conservedintensive Intensive conserved variables
@@ -257,16 +257,16 @@ vector<bool> UpdatePrimitives(vector<Conserved> const& conservedintensive,
  */
 vector<Conserved> calc_fluxes
 (Tessellation const& tessellation,
- vector<Primitive> const& cells,
- double dt,
- double time,
- SpatialReconstruction& interpolation,
- vector<Vector2D> const& facevelocity,
- HydroBoundaryConditions const& boundaryconditions,
- RiemannSolver const& rs,
- vector<CustomEvolution*> const& CellsEvolve,
- CustomEvolutionManager const& cem,
- vector<vector<double> > const& tracers);
+	vector<Primitive> const& cells,
+	double dt,
+	double time,
+	SpatialReconstruction& interpolation,
+	vector<Vector2D> const& facevelocity,
+	HydroBoundaryConditions const& boundaryconditions,
+	RiemannSolver const& rs,
+	vector<CustomEvolution*> const& CellsEvolve,
+	CustomEvolutionManager const& cem,
+	vector<vector<double> > const& tracers);
 
 /*! \brief Calculates the flux in the bulk of the fluid
   \param normaldir A unit vector normal to the interface
@@ -278,11 +278,11 @@ vector<Conserved> calc_fluxes
   \return Flux
  */
 Conserved FluxInBulk(Vector2D const& normaldir,
-		     Vector2D const& paraldir,
-		     Primitive const& left,
-		     Primitive const& right,
-		     Vector2D const& edge_velocity,
-		     RiemannSolver const& rs);
+	Vector2D const& paraldir,
+	Primitive const& left,
+	Primitive const& right,
+	Vector2D const& edge_velocity,
+	RiemannSolver const& rs);
 
 /*! \brief Adds force contribution to the extensive conserved variables
   \param tess Tessellation
@@ -295,18 +295,20 @@ Conserved FluxInBulk(Vector2D const& normaldir,
   \param t Time
   \param dt Time step
   \param extensives Extensive variables
+  \param tracerstickernames The names of the tracers and stickers
  */
 void ExternalForceContribution
 (const Tessellation& tess,
- const PhysicalGeometry& pg,
- const CacheData& cd,
- const vector<ComputationalCell>& cells,
- const vector<Extensive>& fluxes,
- const vector<Vector2D>& point_velocities,
- const SourceTerm& source,
- double t,
- double dt,
- vector<Extensive>& extensives);
+	const PhysicalGeometry& pg,
+	const CacheData& cd,
+	const vector<ComputationalCell>& cells,
+	const vector<Extensive>& fluxes,
+	const vector<Vector2D>& point_velocities,
+	const SourceTerm& source,
+	double t,
+	double dt,
+	vector<Extensive>& extensives,
+	TracerStickerNames const& tracerstickernames);
 
 /*! \brief Second order time advance
   \param tess Tessellation
@@ -344,28 +346,28 @@ void ExternalForceContribution
 double TimeAdvance2mid
 (Tessellation& tess,
 #ifdef RICH_MPI
- Tessellation& proctess,
+	Tessellation& proctess,
 #endif
- vector<Primitive> &cells,
- PointMotion& point_motion,
- HydroBoundaryConditions const& hbc,
- SpatialReconstruction& interpolation,
- RiemannSolver const& rs,
- EquationOfState const& eos,
- SourceTerm& force,
- double time,
- TimeStepFunction& tsf,
- vector<vector<double> >& tracers,
- vector<size_t>& custom_evolution_indices,
- const CustomEvolutionManager& custom_evolution_manager,
- const PhysicalGeometry& pg,
- bool traceflag=false,
- bool coldflows_flag=false,double as=0.01,
- double bs=0.01,
- bool densityfloor=false,
- double densitymin=0.01,
- double pressuremin=0.01,
- bool EntropyCalc=false);
+	vector<Primitive> &cells,
+	PointMotion& point_motion,
+	HydroBoundaryConditions const& hbc,
+	SpatialReconstruction& interpolation,
+	RiemannSolver const& rs,
+	EquationOfState const& eos,
+	SourceTerm& force,
+	double time,
+	TimeStepFunction& tsf,
+	vector<vector<double> >& tracers,
+	vector<size_t>& custom_evolution_indices,
+	const CustomEvolutionManager& custom_evolution_manager,
+	const PhysicalGeometry& pg,
+	bool traceflag = false,
+	bool coldflows_flag = false, double as = 0.01,
+	double bs = 0.01,
+	bool densityfloor = false,
+	double densitymin = 0.01,
+	double pressuremin = 0.01,
+	bool EntropyCalc = false);
 
 /*! \brief Calculates the velocities of the mesh generating points
   \param tess Tessellation
@@ -378,10 +380,10 @@ double TimeAdvance2mid
  */
 vector<Vector2D> calc_point_velocities
 (Tessellation const& tess,
- vector<Primitive>const& cells,
- PointMotion& point_motion,
- double time,vector<CustomEvolution*> & cevolve,
- const vector<vector<double> >& tracers);
+	vector<Primitive>const& cells,
+	PointMotion& point_motion,
+	double time, vector<CustomEvolution*> & cevolve,
+	const vector<vector<double> >& tracers);
 
 /*! \brief Returns the position of all mesh generating points
   \param tess Tessellation
@@ -397,7 +399,7 @@ vector<Vector2D> get_all_mesh_points
  */
 vector<Primitive> make_eos_consistent
 (vector<Primitive> const& vp,
- EquationOfState const& eos);
+	EquationOfState const& eos);
 
 /*! \brief Calculates the change in the tracer
   \param old_trace Tracers in the beginning of the time step
@@ -416,13 +418,13 @@ vector<Primitive> make_eos_consistent
  */
 vector<vector<double> > CalcTraceChange
 (vector<vector<double> > const& old_trace,
- vector<Primitive> const& cells,
- Tessellation const& tess,vector<Conserved> const& fluxes,double dt,
- HydroBoundaryConditions const& bc,
- SpatialReconstruction const& interp,
- double time,vector<CustomEvolution*> const& cellsevolve,
- CustomEvolutionManager const& cem,
- vector<Vector2D> const& edge_velocities,vector<double> const& lengthes);
+	vector<Primitive> const& cells,
+	Tessellation const& tess, vector<Conserved> const& fluxes, double dt,
+	HydroBoundaryConditions const& bc,
+	SpatialReconstruction const& interp,
+	double time, vector<CustomEvolution*> const& cellsevolve,
+	CustomEvolutionManager const& cem,
+	vector<Vector2D> const& edge_velocities, vector<double> const& lengthes);
 
 /*! \brief Calculates the maximum kinetic energy
   \param tess Tessellation
@@ -431,8 +433,8 @@ vector<vector<double> > CalcTraceChange
   \return List of kinetic energies
  */
 vector<double> GetMaxKineticEnergy
-(Tessellation const& tess,vector<Primitive> const& cells,
- vector<CustomEvolution*> const& customevolve);
+(Tessellation const& tess, vector<Primitive> const& cells,
+	vector<CustomEvolution*> const& customevolve);
 
 /*! \brief Returns the energies due to external potentials
   \param tess Tessellation
@@ -441,7 +443,7 @@ vector<double> GetMaxKineticEnergy
   \todo Add documentation
  */
 vector<double> GetForceEnergy(Tessellation const& tess,
-			      vector<double> const& g);
+	vector<double> const& g);
 
 /*! \brief Cold flows pressure fix
   \param intensive Intensive conserved variables
@@ -457,21 +459,21 @@ vector<double> GetForceEnergy(Tessellation const& tess,
   \param densityfloor Is the densityfllor on or off
  */
 void FixPressure
-(vector<Conserved> &intensive,vector<vector<double> > const& entropy,
- EquationOfState const& eos,vector<double> const& Ek,
- vector<double> const& Ef,double as,double bs,vector<CustomEvolution*>
- const& customevolve,Tessellation const& tess,/*vector<Conserved>
- &extensive,*/vector<char> const& shockedcells,bool densityfloor);
+(vector<Conserved> &intensive, vector<vector<double> > const& entropy,
+	EquationOfState const& eos, vector<double> const& Ek,
+	vector<double> const& Ef, double as, double bs, vector<CustomEvolution*>
+	const& customevolve, Tessellation const& tess,/*vector<Conserved>
+	&extensive,*/vector<char> const& shockedcells, bool densityfloor);
 
-/*! \brief Returns true is a cell is near a boundary
-  \param index Cell index
-  \param tess Tessellation
-  \param customevolve Custom evolusion
-  \return True if a cell is near a boundary
-  \todo Remove custom evolution from the signature
- */
-bool NearBoundary(int index,Tessellation const& tess,
-		  vector<CustomEvolution*> const& customevolve);
+	/*! \brief Returns true is a cell is near a boundary
+	  \param index Cell index
+	  \param tess Tessellation
+	  \param customevolve Custom evolusion
+	  \return True if a cell is near a boundary
+	  \todo Remove custom evolution from the signature
+	 */
+bool NearBoundary(int index, Tessellation const& tess,
+	vector<CustomEvolution*> const& customevolve);
 
 /*! \brief Calculates extensive tracers
   \param intensive_tracer Intensive tracers
@@ -482,9 +484,9 @@ bool NearBoundary(int index,Tessellation const& tess,
  */
 vector<vector<double> > calc_extensive_tracer
 (const vector<vector<double> > & intensive_tracer,
- const Tessellation& tess,
- const vector<Primitive>& cells,
- const PhysicalGeometry& pg);
+	const Tessellation& tess,
+	const vector<Primitive>& cells,
+	const PhysicalGeometry& pg);
 
 /*! \brief Calculates the extensive tracer
   \param tracer Intensive tracer
@@ -494,8 +496,8 @@ vector<vector<double> > calc_extensive_tracer
  */
 void MakeTracerExtensive
 (vector<vector<double> > const&tracer,
- Tessellation const& tess,vector<Primitive> const& cells,
- vector<vector<double> > &result);
+	Tessellation const& tess, vector<Primitive> const& cells,
+	vector<vector<double> > &result);
 
 /*! \brief Calculates the intensive tracers
   \param tracer Output
@@ -507,8 +509,8 @@ void MakeTracerExtensive
   \param old_trace The intensive tracer at the beginning of the time step
   \param cevolve The custom evolution
  */
-void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> > const& tracer_extensive,
-	Tessellation const& tess,vector<Primitive> const& cells, const PhysicalGeometry& pg,
+void MakeTracerIntensive(vector<vector<double> > &tracer, vector<vector<double> > const& tracer_extensive,
+	Tessellation const& tess, vector<Primitive> const& cells, const PhysicalGeometry& pg,
 	vector<bool> const& min_density_on, vector<vector<double> > const& old_trace,
 	vector<CustomEvolution*> const& cevolve);
 
@@ -529,17 +531,17 @@ void MakeTracerIntensive(vector<vector<double> > &tracer,vector<vector<double> >
  */
 void really_update_extensive_tracers
 (vector<vector<double> >& extensive_tracers,
- const vector<vector<double> >& tracers,
- const vector<Primitive>& cells,
- const Tessellation& tess,
- const vector<Conserved>& fluxes,
- double time, double dt,
- const HydroBoundaryConditions& hbc,
- const SpatialReconstruction& interp,
- const vector<CustomEvolution*>& ce,
- const CustomEvolutionManager& cem,
- const vector<Vector2D>& fv,
- const vector<double>& lengths);
+	const vector<vector<double> >& tracers,
+	const vector<Primitive>& cells,
+	const Tessellation& tess,
+	const vector<Conserved>& fluxes,
+	double time, double dt,
+	const HydroBoundaryConditions& hbc,
+	const SpatialReconstruction& interp,
+	const vector<CustomEvolution*>& ce,
+	const CustomEvolutionManager& cem,
+	const vector<Vector2D>& fv,
+	const vector<double>& lengths);
 
 /*! \brief Updates the extensive tracers
   \param tracerextensive Extensive tracers
@@ -551,8 +553,8 @@ void really_update_extensive_tracers
  */
 void UpdateTracerExtensive
 (vector<vector<double> > &tracerextensive,
- vector<vector<double> > const& tracerchange,vector<CustomEvolution*> const&
- CellsEvolve,vector<Primitive> const& cells,Tessellation const& tess,double time);
+	vector<vector<double> > const& tracerchange, vector<CustomEvolution*> const&
+	CellsEvolve, vector<Primitive> const& cells, Tessellation const& tess, double time);
 
 /*! \brief Resets the primitive variables based on a tracer threshold
   \param alpha The tracer threshold
@@ -568,12 +570,12 @@ void UpdateTracerExtensive
   \param cevolve The custom evolution of cells
   \param coldflows Toggles cold flows correction
 */
-void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
-		     SpatialDistribution const& originalP,SpatialDistribution const& originalVx,
-			 SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& ,
-			 vector<Primitive> &cells,Tessellation const& tess,vector<vector<double> > &tracer,
-		     int tracerindex,EquationOfState const& eos,vector<CustomEvolution*>
-			const& cevolve,bool coldflows);
+void TracerResetCalc(double alpha, SpatialDistribution const& originalD,
+	SpatialDistribution const& originalP, SpatialDistribution const& originalVx,
+	SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const&,
+	vector<Primitive> &cells, Tessellation const& tess, vector<vector<double> > &tracer,
+	int tracerindex, EquationOfState const& eos, vector<CustomEvolution*>
+	const& cevolve, bool coldflows);
 
 /*! \brief Makes a list of points to remove
   \param tess Tessellation
@@ -583,8 +585,8 @@ void TracerResetCalc(double alpha,SpatialDistribution const& originalD,
   \param Inner TBA
   \todo Add documentation
  */
-void GetPointToRemove(Tessellation const& tess,Vector2D const& point,
-		      double R,vector<int> & PointToRemove,int Inner);
+void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
+	double R, vector<int> & PointToRemove, int Inner);
 
 /*! \brief Returns true if a computational cell is shocked
   \param tess Tessellation
@@ -595,9 +597,9 @@ void GetPointToRemove(Tessellation const& tess,Vector2D const& point,
   \return True if a cell is shocked
  */
 bool IsShockedCell
-(Tessellation const& tess,int index,
- vector<Primitive> const& cells,HydroBoundaryConditions const& hbc,
- double time);
+(Tessellation const& tess, int index,
+	vector<Primitive> const& cells, HydroBoundaryConditions const& hbc,
+	double time);
 
 /*! \brief Calculates time step for a cell boundary
   \param cell Fluid element
@@ -613,9 +615,9 @@ bool IsShockedCell
  */
 double TimeStepForCellBoundary
 (Primitive const& cell,
- vector<Primitive> const& cells,double width,
- vector<Vector2D> const& face_velocities,Tessellation const& tess,
- HydroBoundaryConditions const& hbc,int index,double time);
+	vector<Primitive> const& cells, double width,
+	vector<Vector2D> const& face_velocities, Tessellation const& tess,
+	HydroBoundaryConditions const& hbc, int index, double time);
 
 /*!
 \brief Convert indeces of customevolution to pointer to classes
@@ -637,11 +639,11 @@ vector<CustomEvolution*> convert_indices_to_custom_evolution(const CustomEvoluti
   \param pointvelocity Velocities of mesh generating points
  */
 void FixAdvection(vector<Conserved>& extensive,
-		  vector<Conserved> const& intensive,
-		  Tessellation const& tessold,
-		  Tessellation const& tessnew,
-		  vector<Vector2D> const& facevelocity,
-		  double dt,vector<Vector2D> const& pointvelocity);
+	vector<Conserved> const& intensive,
+	Tessellation const& tessold,
+	Tessellation const& tessnew,
+	vector<Vector2D> const& facevelocity,
+	double dt, vector<Vector2D> const& pointvelocity);
 
 /*! \brief Determines the time step
   \param hydro_time_step Time step derived from hydrodynamics
@@ -651,8 +653,8 @@ void FixAdvection(vector<Conserved>& extensive,
   \return Time step
  */
 double determine_time_step(double hydro_time_step,
-			   double external_dt,
-			   double current_time,
-			   double end_time);
+	double external_dt,
+	double current_time,
+	double end_time);
 
 #endif // HYDRODYNAMICS_2D_HPP

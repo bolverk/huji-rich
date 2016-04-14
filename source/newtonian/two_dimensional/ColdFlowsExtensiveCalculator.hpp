@@ -6,7 +6,7 @@
 #ifndef COLD_EXTENSIVE_UPDATER_HPP
 #define COLD_EXTENSIVE_UPDATER_HPP 1
 
-#include "extensive_updater.hpp"
+#include "ConditionExtensiveUpdater.hpp"
 #include "simple_flux_calculator.hpp"
 #include "../../misc/utils.hpp"
 #include "interpolations/LinearGaussImproved.hpp"
@@ -15,25 +15,27 @@
 class ColdFlowsExtensiveCalculator : public ExtensiveUpdater
 {
 private:
-	EquationOfState const& eos_;
-	LinearGaussImproved const& interp_;
+	mutable ColdFlowsUpdate coldupdate_;
 public:
 
-  /*! \brief Class constructor
-    \param eos Equation of state
-    \param interp Interpolation
-   */
-	ColdFlowsExtensiveCalculator(EquationOfState const& eos,LinearGaussImproved const& interp);
+	/*! \brief Class constructor
+	  \param eos Equation of state
+	  \param ghost The ghost point generator
+	  \param interp The interpolation
+	 */
+	ColdFlowsExtensiveCalculator(EquationOfState const& eos, GhostPointGenerator const& ghost,
+		LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
-		const PhysicalGeometry& pg,
-		const Tessellation& tess,
-		const double dt,
-		const CacheData& cd,
-		const vector<ComputationalCell>& cells,
-		vector<Extensive>& extensives,
-			double time) const;
+			const PhysicalGeometry& pg,
+			const Tessellation& tess,
+			const double dt,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			vector<Extensive>& extensives,
+			double time,
+			TracerStickerNames const& tracerstickernames) const;
 };
 
 #endif // COLD_EXTENSIVE_UPDATER_HPP

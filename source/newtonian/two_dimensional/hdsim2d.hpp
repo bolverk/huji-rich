@@ -34,6 +34,8 @@
 #include "extensive_updater.hpp"
 #include "cache_data.hpp"
 #include "edge_velocity_calculator.hpp"
+#include <boost/container/small_vector.hpp>
+#include "computational_cell_2d.hpp"
 #ifdef RICH_MPI
 #include "../../mpi/ProcessorUpdate.hpp"
 #endif
@@ -75,6 +77,8 @@ private:
   const ExtensiveUpdater& eu_;
 
   const CellUpdater& cu_;
+
+  TracerStickerNames tracer_sticker_names_;
 
   const CacheData cache_data_;
 
@@ -142,6 +146,7 @@ public:
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
+	\param tracer_sticker_names The names of the tracers and stickers
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes
@@ -163,7 +168,8 @@ public:
    const TimeStepFunction& tsf,
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
-   const CellUpdater& cu
+   const CellUpdater& cu,
+   TracerStickerNames tracer_sticker_names = TracerStickerNames()
 #ifdef RICH_MPI
 		  ,const ProcessorUpdate* proc_update=0
 #endif
@@ -203,14 +209,7 @@ public:
    */
   void changePhysicalGeometry(const PhysicalGeometry* pg);
 
-  /*! \brief Adds a tracer to the simulation
-    \param name Name of tracer
-    \param tp The spatial distribution of the tracer to add
-  */
-  void addTracer(const std::string& name,
-		 const SpatialDistribution& tp);
-
-  /*! \brief Sets the start time
+    /*! \brief Sets the start time
     \param t_start Start time
    */
   void setStartTime(double t_start);
@@ -267,6 +266,12 @@ public:
     \return Cached data
    */
   const CacheData& getCacheData(void) const;
+
+  /*!
+  \brief Returns the TracerStickerNames
+  \return The TracerStickerNames of the simulation
+  */
+  TracerStickerNames const& GetTracerStickerNames(void)const;
 };
 
 #endif

@@ -6,20 +6,24 @@
 #ifndef COMPUTATIONAL_CELL_HPP
 #define COMPUTATIONAL_CELL_HPP 1
 
-#include <boost/container/flat_map.hpp>
+/*#include <boost/container/small_vector.hpp>
+typedef boost::container::small_vector<double,0> tvector;
+typedef boost::container::small_vector<bool,0> svector;*/
+#include <vector>
+typedef std::vector<double> tvector;
+typedef std::vector<bool> svector;
 #include <string>
 #include "../../tessellation/geometry.hpp"
 #ifdef RICH_MPI
 #include "../../misc/serializable.hpp"
 #endif // RICH_MPI
 
-using std::string;
-
 //! \brief Computational cell
 class ComputationalCell
 #ifdef RICH_MPI
-  : public Serializable
+	: public Serializable
 #endif // RICH_MPI
+
 {
 public:
 
@@ -33,12 +37,10 @@ public:
 	Vector2D velocity;
 
 	//! \brief Tracers (can transfer from one cell to another)
-	// std::map<std::string,double> tracers;
-	boost::container::flat_map<std::string, double> tracers;
+	tvector tracers;
 
 	//! \brief Stickers (stick to the same cell)
-	//std::map<std::string,bool> stickers;
-	boost::container::flat_map<std::string, bool> stickers;
+	svector stickers;
 
 	/*!
 	\brief Copy constructor
@@ -151,4 +153,30 @@ public:
 	void unserialize(const vector<double>& data);
 #endif//RICH_MPI
 };
+//! \brief Class for keeping the names of the tracers and stickers
+class TracerStickerNames
+{
+public:
+	//! \brief The names of the tracers
+	std::vector<std::string> tracer_names;
+	//! \brief The names of the stickers
+	std::vector<std::string> sticker_names;
+
+	//! \brief Default constructor
+	TracerStickerNames(void);
+	/*! 
+	\brief Copy constructor
+	\param other The instance to copy from
+	*/
+	TracerStickerNames(TracerStickerNames const& other);
+	/*!
+	\brief Class constructor
+	\param tracers The names of the tracers
+	\param stickers The names of the stickers
+	*/
+	TracerStickerNames(std::vector<std::string> tracers,std::vector<std::string> stickers);
+	//! \brief Class destructor
+	~TracerStickerNames(void);
+};
+
 #endif // COMPUTATIONAL_CELL_HPP

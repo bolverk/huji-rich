@@ -19,13 +19,15 @@ public:
 		\param tess Tessellation
 		\param cells Computational cells
 		\param time The sim time
+		\param tracerstickernames The names of the tracers and stickers
 		\return Whether the cell satisfies a condition.
 		*/
 		virtual bool operator()
 			(size_t index,
 				const Tessellation& tess,
 				const vector<ComputationalCell>& cells,
-				double time) const = 0;
+				double time,
+				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Condition(void);
 	};
@@ -44,6 +46,7 @@ public:
 			\param extensive Extensive variable, input is after the addition of hydro fluxes
 			\param index The index of the cell
 			\param time The time
+			\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()
 			(const vector<Extensive>& fluxes,
@@ -54,7 +57,8 @@ public:
 				const vector<ComputationalCell>& cells,
 				Extensive& extensive,
 				size_t index,
-				double time) const = 0;
+				double time,
+				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Action(void);
 	};
@@ -74,7 +78,8 @@ public:
 		const CacheData& cd,
 		const vector<ComputationalCell>& cells,
 		vector<Extensive>& extensives,
-		double time) const;
+		double time,
+		TracerStickerNames const& tracerstickernames) const;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -88,9 +93,10 @@ public:
 
 	/*! \brief Class constructor
 	\param eos The equation of state
+	\param ghost The ghost point generator
 	\param interp The interpolation
 	*/
-	ColdFlowsUpdate(EquationOfState const& eos, LinearGaussImproved const& interp);
+	ColdFlowsUpdate(EquationOfState const& eos, GhostPointGenerator const& ghost,LinearGaussImproved const& interp);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
@@ -101,10 +107,15 @@ public:
 			const vector<ComputationalCell>& cells,
 			Extensive& extensive,
 			size_t index,
-			double time)const;
+			double time, 
+			TracerStickerNames const& tracerstickernames)const;
 private:
 	EquationOfState const& eos_;
+	GhostPointGenerator const& ghost_;
 	LinearGaussImproved const& interp_;
+	mutable double lasttime_,dt_;
+	mutable int entropy_index_;
+	mutable boost::container::flat_map<size_t, ComputationalCell> ghost_cells_;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER_HPP

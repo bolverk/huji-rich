@@ -611,27 +611,28 @@ Iter binary_find(Iter begin, Iter end, T val)
 }
 
 /*! \brief Checks for existence and retrieves entry from flat map
-\param data Data
-\param keys List of keys
-\param key Lookup key
+  \param data Data vector
+  \param key Key to look for
+  \param keys Sorted vector of keys
   \return Value corresponding to key
  */
-template<class S, class T> const T& safe_retrieve
+template<class S, class T> typename vector<T>::const_reference safe_retrieve
 (vector<T> const& data, vector<S> const& keys, const S& key)
 {
 	assert(data.size() == keys.size());
 	typename vector<S>::const_iterator it = binary_find(keys.begin(), keys.end(), key);
 	assert(it != keys.end());
-	return data[static_cast<size_t>(it - keys.begin())];
+	size_t index = static_cast<size_t>(it - keys.begin());
+	return data.at(index);
 }
 
-/*! \brief Non constant version of safe retrieve
-\param data Data
-\param keys List of keys
-\param key Lookup key
+/*! \brief Checks for existence and retrieves entry from flat map
+  \param data Data vector
+  \param key Key to look for
+  \param keys Sorted vector of keys
   \return Value corresponding to key
  */
-template<class S, class T> T& safe_retrieve
+template<class S, class T> typename vector<T>::reference safe_retrieve
 (vector<T> &data, vector<S> const& keys, const S& key)
 {
 	assert(data.size() == keys.size());

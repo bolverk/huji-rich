@@ -12,56 +12,59 @@
 class Acceleration
 {
 public:
-  /*!
-    \brief Calculates the acceleration that the cell feels
-    \param tess The tessellation
-    \param cells The primitive cells
-    \param point The index of the cell to calculate
-    \param fluxes The vector of the fluxes
-    \param time The simulation time
-    \return The calculated acceleration
-  */
-  virtual Vector2D operator()
-  (const Tessellation& tess,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const double time,
-   const int point) const = 0;
+	/*!
+	  \brief Calculates the acceleration that the cell feels
+	  \param tess The tessellation
+	  \param cells The primitive cells
+	  \param point The index of the cell to calculate
+	  \param fluxes The vector of the fluxes
+	  \param time The simulation time
+	  \param tracerstickernames The names of the tracers and stickers
+	  \return The calculated acceleration
+	*/
+	virtual Vector2D operator()
+		(const Tessellation& tess,
+			const vector<ComputationalCell>& cells,
+			const vector<Extensive>& fluxes,
+			const double time,
+			const int point,
+			TracerStickerNames const& tracerstickernames) const = 0;
 
-  virtual ~Acceleration(void);
+	virtual ~Acceleration(void);
 };
 /*! \brief Class for conservative forces
   \author Elad Steinberg
 */
-class ConservativeForce: public SourceTerm
+class ConservativeForce : public SourceTerm
 {
 public:
-  /*! \brief Class constructor
-    \param acc The acceleration force
-	\param mass_flux Flag whether to include mass flux into energy equation
-  */
-  explicit ConservativeForce(const Acceleration& acc,bool mass_flux=false);
+	/*! \brief Class constructor
+	  \param acc The acceleration force
+	  \param mass_flux Flag whether to include mass flux into energy equation
+	*/
+	explicit ConservativeForce(const Acceleration& acc, bool mass_flux = false);
 
-  /*!
-    \brief Class destructor
-  */
-  ~ConservativeForce(void);
+	/*!
+	  \brief Class destructor
+	*/
+	~ConservativeForce(void);
 
-  vector<Extensive> operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& pg,
-   const CacheData& cd,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const vector<Vector2D>& point_velocities,
-   const double t) const;
+	vector<Extensive> operator()
+		(const Tessellation& tess,
+			const PhysicalGeometry& pg,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			const vector<Extensive>& fluxes,
+			const vector<Vector2D>& point_velocities,
+			const double t,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
-  const Acceleration& acc_;
-  const bool mass_flux_;
+	const Acceleration& acc_;
+	const bool mass_flux_;
 
-  ConservativeForce(const ConservativeForce& origin);
-  ConservativeForce& operator=(const ConservativeForce& origin);
+	ConservativeForce(const ConservativeForce& origin);
+	ConservativeForce& operator=(const ConservativeForce& origin);
 };
 
 #endif // CONSFORCE_HPP

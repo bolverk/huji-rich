@@ -6,27 +6,28 @@
 #include "../physical_geometry.hpp"
 
 //! \brief Adds necessary correction to cylindrical geometry
-class CylindricalComplementary: public SourceTerm
+class CylindricalComplementary : public SourceTerm
 {
 
 public:
 
-  /*! \brief Class constructor
-    \param axis Rotation axis
-   */
-  explicit CylindricalComplementary(const Axis& axis);
+	/*! \brief Class constructor
+	  \param axis Rotation axis
+	 */
+	explicit CylindricalComplementary(const Axis& axis);
 
-  vector<Extensive> operator()
-  (const Tessellation& tess,
-   const PhysicalGeometry& pg_,
-   const CacheData& cd,
-   const vector<ComputationalCell>& cells,
-   const vector<Extensive>& fluxes,
-   const vector<Vector2D>& point_velocities,
-   const double t) const;
+	vector<Extensive> operator()
+		(const Tessellation& tess,
+			const PhysicalGeometry& pg_,
+			const CacheData& cd,
+			const vector<ComputationalCell>& cells,
+			const vector<Extensive>& fluxes,
+			const vector<Vector2D>& point_velocities,
+			const double t,
+			TracerStickerNames const& tracerstickernames) const;
 
 private:
-  const Axis axis_;
+	const Axis axis_;
 };
 
 

@@ -62,7 +62,7 @@ namespace {
      const vector<ComputationalCell>& /*cells*/,
      const vector<Extensive>& /*fluxes*/,
      double t,
-     int point) const
+     int point,TracerStickerNames const& /*ts*/) const
     {
       return Vector2D(-amp_*sin(k_*tess.GetCellCM(point).x)*sin(k_*v_*t),0);
     }
