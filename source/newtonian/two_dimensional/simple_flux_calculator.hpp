@@ -12,10 +12,11 @@
  /*! \brief Converts computational cell to primitive variables
    \param cell Computational cell
    \param eos Equation of state
+   \param tracerstickernames The names of the tracers and stickers
    \return Primitive variable
   */
 Primitive convert_to_primitive(const ComputationalCell& cell,
-	const EquationOfState& eos);
+	const EquationOfState& eos, TracerStickerNames const& tracerstickernames);
 
 /*! \brief Reflects velocity about axis
   \param p Primitive variables
