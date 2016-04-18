@@ -61,7 +61,8 @@ private:
 		const vector<Vector2D>& edge_velocities,
 		const vector<ComputationalCell>& cells,
 		const EquationOfState& eos,
-		const size_t i) const;
+		const size_t i,
+		TracerStickerNames const& tracerstickernames) const;
 };
 
 /*! \brief Rotates, solve riemann problem and rotates results back

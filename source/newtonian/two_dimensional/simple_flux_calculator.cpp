@@ -7,10 +7,10 @@ SimpleFluxCalculator::SimpleFluxCalculator(const RiemannSolver& rs) :
 	rs_(rs) {}
 
 Primitive convert_to_primitive(const ComputationalCell& cell,
-	const EquationOfState& eos)
+	const EquationOfState& eos,TracerStickerNames const& tracerstickernames)
 {
-	const double energy = eos.dp2e(cell.density, cell.pressure, cell.tracers);
-	const double sound_speed = eos.dp2c(cell.density, cell.pressure, cell.tracers);
+	const double energy = eos.dp2e(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names);
+	const double sound_speed = eos.dp2c(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names);
 	return Primitive(cell.density, cell.pressure, cell.velocity, energy, sound_speed);
 }
 
@@ -82,7 +82,8 @@ namespace
 			const vector<Vector2D>& edge_velocities,
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
-			const size_t& edge_index)
+			const size_t& edge_index,
+			TracerStickerNames const& tracerstickernames)
 	{
 		const Edge& edge = tess.getAllEdges().at
 			(edge_index);
@@ -96,27 +97,27 @@ namespace
 		if (!flags.first)
 		{
 			res.right = convert_to_primitive
-				(cells[static_cast<size_t>(edge.neighbors.second)], eos);
+				(cells[static_cast<size_t>(edge.neighbors.second)], eos,tracerstickernames);
 			if (tess.GetOriginalIndex(edge.neighbors.second) == tess.GetOriginalIndex(edge.neighbors.first))
 				res.left = reflect(res.right, res.p);
 			else
-				res.left = convert_to_primitive(cells[static_cast<size_t>(edge.neighbors.first)], eos);
+				res.left = convert_to_primitive(cells[static_cast<size_t>(edge.neighbors.first)], eos,tracerstickernames);
 		}
 		else if (!flags.second) {
 			res.left = convert_to_primitive
-				(cells[static_cast<size_t>(edge.neighbors.first)], eos);
+				(cells[static_cast<size_t>(edge.neighbors.first)], eos,tracerstickernames);
 			if (tess.GetOriginalIndex(edge.neighbors.second) == tess.GetOriginalIndex(edge.neighbors.first))
 				res.right = reflect(res.left, res.p);
 			else
 				res.right = convert_to_primitive
-				(cells[static_cast<size_t>(edge.neighbors.second)], eos);
+				(cells[static_cast<size_t>(edge.neighbors.second)], eos,tracerstickernames);
 		}
 		else
 		{
 			const size_t left_index = static_cast<size_t>(edge.neighbors.first);
 			const size_t right_index = static_cast<size_t>(edge.neighbors.second);
-			res.left = convert_to_primitive(cells[left_index], eos);
-			res.right = convert_to_primitive(cells[right_index], eos);
+			res.left = convert_to_primitive(cells[left_index], eos,tracerstickernames);
+			res.right = convert_to_primitive(cells[right_index], eos,tracerstickernames);
 		}
 		res.velocity = ScalarProd
 			(res.n, edge_velocities.at(edge_index)) /
@@ -168,14 +169,16 @@ Conserved SimpleFluxCalculator::calcHydroFlux
 	const vector<Vector2D>& edge_velocities,
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
-	const size_t i) const
+	const size_t i,
+	TracerStickerNames const& tracerstickernames) const
 {
 	RiemannProblemInput rpi = riemann_reduce
 		(tess,
 			edge_velocities,
 			cells,
 			eos,
-			i);
+			i,
+			tracerstickernames);
 	return rotate_solve_rotate_back
 		(rs_,
 			rpi.left,
@@ -219,13 +222,13 @@ vector<Extensive> SimpleFluxCalculator::operator()
 	const EquationOfState& eos,
 	const double /*time*/,
 	const double /*dt*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	TracerStickerNames const& tracerstickernames) const
 {
 	vector<Extensive> res(tess.getAllEdges().size());
 	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
 	{
 		const Conserved hydro_flux = calcHydroFlux
-			(tess, edge_velocities, cells, eos, i);
+			(tess, edge_velocities, cells, eos, i,tracerstickernames);
 		res[i].mass = hydro_flux.Mass;
 		res[i].momentum = hydro_flux.Momentum;
 		res[i].energy = hydro_flux.Energy;

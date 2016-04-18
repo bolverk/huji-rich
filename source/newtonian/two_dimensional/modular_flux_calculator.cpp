@@ -64,10 +64,10 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess, c
 			const double speed = ScalarProd(p_n.second, edge_velocities.at(i)) / abs(p_n.second);
 			const Primitive p_left =
 				convert_to_primitive
-				(interpolated_.at(i).first, eos);
+				(interpolated_.at(i).first, eos,tracerstickernames);
 			const Primitive p_right =
 				convert_to_primitive
-				(interpolated_.at(i).second, eos);
+				(interpolated_.at(i).second, eos,tracerstickernames);
 			res.at(i) =
 				convert_conserved_to_extensive
 				(rotate_solve_rotate_back

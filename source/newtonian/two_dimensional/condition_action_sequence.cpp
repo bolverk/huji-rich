@@ -88,7 +88,7 @@ void RegularFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool /*aux*/,
-	Extensive &res, double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
+	Extensive &res, double /*time*/, TracerStickerNames const& tracerstickernames) const
 {
 	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
 		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
@@ -103,9 +103,9 @@ void RegularFlux::operator()
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
 			convert_to_primitive
-			(cells.at(static_cast<size_t>(edge.neighbors.first)), eos),
+			(cells.at(static_cast<size_t>(edge.neighbors.first)), eos,tracerstickernames),
 			convert_to_primitive
-			(cells.at(static_cast<size_t>(edge.neighbors.second)), eos),
+			(cells.at(static_cast<size_t>(edge.neighbors.second)), eos,tracerstickernames),
 			v, n, p);
 	conserved_to_extensive
 		(c,
@@ -144,7 +144,7 @@ void RigidWallFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res, double /*time*/,TracerStickerNames const& /*tracerstickernames*/) const
+	Extensive &res, double /*time*/,TracerStickerNames const& tracerstickernames) const
 {
 	if (aux)
 		assert(edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo());
@@ -166,7 +166,7 @@ void RigidWallFlux::operator()
 			(cells.at
 				(static_cast<size_t>
 					(aux ? edge.neighbors.first : edge.neighbors.second)),
-				eos),
+				eos,tracerstickernames),
 			p, aux);
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
@@ -188,7 +188,7 @@ void FreeFlowFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res, double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
+	Extensive &res, double /*time*/, TracerStickerNames const& tracerstickernames) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -211,7 +211,7 @@ void FreeFlowFlux::operator()
 		(cells.at
 			(static_cast<size_t>
 				(aux ? edge.neighbors.first : edge.neighbors.second)),
-			eos);
+			eos,tracerstickernames);
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
 			state, state,

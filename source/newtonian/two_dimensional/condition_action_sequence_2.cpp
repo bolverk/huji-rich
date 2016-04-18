@@ -108,7 +108,7 @@ void RegularFlux2::operator()
 	const bool /*aux*/,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
 	Extensive &res,double /*time*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	TracerStickerNames const& tracerstickernames) const
 {
 	const Vector2D p = normalize
 		(edge.vertices.second -
@@ -121,9 +121,9 @@ void RegularFlux2::operator()
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
 			convert_to_primitive
-			(edge_values.first, eos),
+			(edge_values.first, eos,tracerstickernames),
 			convert_to_primitive
-			(edge_values.second, eos),
+			(edge_values.second, eos,tracerstickernames),
 			v, n, p);
 	conserved_to_extensive(c,c.Mass>0 ?	edge_values.first :	edge_values.second,res);
 }
@@ -161,7 +161,7 @@ void RigidWallFlux2::operator()
 	const bool aux,
 	pair<ComputationalCell,ComputationalCell> const& edge_values,
 	Extensive &res,double /*time*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	TracerStickerNames const& tracerstickernames) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -182,7 +182,7 @@ void RigidWallFlux2::operator()
 	const pair<Primitive, Primitive> left_right =
 		rigid_wall_states
 		(convert_to_primitive
-			(aux ? edge_values.first :edge_values.second,eos),
+			(aux ? edge_values.first :edge_values.second,eos,tracerstickernames),
 			p, aux);
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
