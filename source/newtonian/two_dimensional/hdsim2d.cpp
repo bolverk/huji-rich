@@ -41,7 +41,8 @@ namespace
 	vector<Extensive> init_extensives(const Tessellation& tess,
 		const PhysicalGeometry& pg,
 		const vector<ComputationalCell>& cells,
-		const EquationOfState& eos)
+		const EquationOfState& eos,
+		TracerStickerNames const& tracernames)
 	{
 		vector<Extensive> res(cells.size());
 		for (size_t i = 0; i < cells.size(); ++i)
@@ -52,7 +53,7 @@ namespace
 				(serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
 			const double mass = volume*cell.density;
 			res[i].mass = mass;
-			res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers)*mass +
+			res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers,tracernames.tracer_names)*mass +
 				0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 			res[i].momentum = mass*cell.velocity;
 			size_t N = cell.tracers.size();
@@ -98,7 +99,8 @@ hdsim::hdsim
 		(tess,
 			pg,
 			cells,
-			eos)),
+			eos,
+			tracer_sticker_names)),
 	point_motion_(point_motion),
 	edge_velocity_calculator_(evc),
 	source_(source),
