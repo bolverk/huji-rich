@@ -24,7 +24,8 @@ namespace
 		const CacheData& cd,
 		const size_t index,
 		ComputationalCell &res,
-		size_t entropy_index)
+		size_t entropy_index,
+		TracerStickerNames const& tracerstickernames)
 	{
 		Extensive& extensive = extensives[index];
 		const double volume = cd.volumes[index];
@@ -37,10 +38,10 @@ namespace
 			res.tracers[i] = extensive.tracers[i] / extensive.mass;
 		try
 		{
-			res.pressure = eos.de2p(res.density, energy, res.tracers);
+			res.pressure = eos.de2p(res.density, energy, res.tracers,tracerstickernames.tracer_names);
 			if (entropy_index < res.tracers.size())
 			{
-				res.tracers[entropy_index] = eos.dp2s(res.density, res.pressure);
+				res.tracers[entropy_index] = eos.dp2s(res.density, res.pressure, res.tracers,tracerstickernames.tracer_names);
 				extensive.tracers[entropy_index] = res.tracers[entropy_index] * extensive.mass;
 			}
 		}
@@ -75,7 +76,7 @@ namespace
 				return;
 			}
 		}
-		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex);
+		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex,tracerstickernames);
 	}
 }
 
