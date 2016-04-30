@@ -177,7 +177,7 @@ namespace
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				Extensive &res,double /*time*/,TracerStickerNames const& /*ts*/) const
+				Extensive &res,double /*time*/,TracerStickerNames const& ts) const
 		{
 			if (aux)
 				assert(edge.neighbors.first < tess.GetPointNo());
@@ -201,8 +201,8 @@ namespace
 				(ghost_, cells.at(static_cast<size_t>(edge.neighbors.second)));
 			const pair<Primitive, Primitive> left_right =
 				pair<Primitive, Primitive>
-				(convert_to_primitive(cc_left_righ.first, eos),
-					convert_to_primitive(cc_left_righ.second, eos));
+			  (convert_to_primitive(cc_left_righ.first, eos, ts),
+			   convert_to_primitive(cc_left_righ.second, eos, ts));
 			const Conserved c = rotate_solve_rotate_back
 				(rs_,
 					left_right.first,
