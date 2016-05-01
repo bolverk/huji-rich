@@ -744,46 +744,6 @@ void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
 				tracerextensive[i][j] += tracerchange[i][j];
 }
 
-void TracerResetCalc
-(double alpha, SpatialDistribution const& originalD,
-	SpatialDistribution const& originalP, SpatialDistribution const& originalVx,
-	SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& originalTracers, vector<Primitive> &cells,
-	Tessellation const& tess, vector<vector<double> > &tracer,
-	int tracerindex, EquationOfState const& eos, vector<CustomEvolution*>
-	const& cevolve, bool coldflows)
-{
-	const int n = tess.GetPointNo();
-	if (n < 1)
-		return;
-	Vector2D velocity;
-	if (tracer.empty())
-		return;
-	if (tracerindex >= static_cast<int>(tracer[0].size()) || tracerindex < 0)
-		throw UniversalError("Error in tracerReset, wrong dimension for tracer");
-	for (int i = 0; i < n; ++i)
-	{
-		bool customforce = false;
-		if (cevolve[static_cast<size_t>(i)])
-			customforce = cevolve[static_cast<size_t>(i)]->ShouldForceTracerReset();
-		if ((tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] < alpha) || customforce)
-		{
-			velocity.Set(originalVx(tess.GetCellCM(i)),
-				originalVy(tess.GetCellCM(i)));
-			cells[static_cast<size_t>(i)] = CalcPrimitive(originalD(tess.GetCellCM(i)),
-				originalP(tess.GetCellCM(i)), velocity, eos);
-			if (tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] < 0)
-				tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] = 0;
-			for (size_t j = 0; j < tracer[static_cast<size_t>(i)].size(); ++j)
-				if (coldflows&&j == 0)
-					tracer[static_cast<size_t>(i)][j] = eos.dp2s(cells[static_cast<size_t>(i)].Density, cells[static_cast<size_t>(i)].Pressure);
-				else
-					if (static_cast<int>(j) != tracerindex)
-						tracer[static_cast<size_t>(i)][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
-		}
-	}
-	return;
-}
-
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
 	double R, vector<int> & PointToRemove, int Inner)
 {
