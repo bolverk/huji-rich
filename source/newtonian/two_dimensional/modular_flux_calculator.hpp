@@ -4,7 +4,6 @@
 #include "flux_calculator_2d.hpp"
 #include "spatial_reconstruction.hpp"
 #include "../common/riemann_solver.hpp"
-#include "HydroBoundaryConditions.hpp"
 #include "GhostPointGenerator.hpp"
 
 //! \brief Modular flux calculator
