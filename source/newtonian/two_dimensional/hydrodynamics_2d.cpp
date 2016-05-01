@@ -538,64 +538,6 @@ vector<double> GetForceEnergy(Tessellation const& tess,
 	return res;
 }
 
-void FixPressure(vector<Conserved> &intensive, vector<vector<double> > const& entropy,
-	EquationOfState const& eos, vector<double> const& Ek,
-	vector<double> const& Ef, double as, double bs, vector<CustomEvolution*>
-	const& customevolve, Tessellation const& tess,//vector<Conserved> &extensive,
-	vector<char> const& shockedcells, bool densityfloor)
-{
-	int n = tess.GetPointNo();
-	double Et, Ek2;
-	double temp;
-	for (int i = 0; i < n; ++i)
-	{
-		if (customevolve[static_cast<size_t>(i)] == 0 || customevolve[static_cast<size_t>(i)]->TimeStepRelevant())
-		{
-			if (intensive[static_cast<size_t>(i)].Mass < 0)
-				continue;
-			//Make intensive
-			temp = entropy[static_cast<size_t>(i)][0] / (tess.GetVolume(i)*intensive[static_cast<size_t>(i)].Mass);
-			Ek2 = 0.5*pow(abs(intensive[static_cast<size_t>(i)].Momentum) / intensive[static_cast<size_t>(i)].Mass, 2);
-			Et = intensive[static_cast<size_t>(i)].Energy / intensive[static_cast<size_t>(i)].Mass - Ek2;
-			if ((Et < as*Ek[static_cast<size_t>(i)]) || (Et < bs*Ef[static_cast<size_t>(i)]))
-			{
-				if ((shockedcells[static_cast<size_t>(i)] == 0) || Et < 0)
-				{
-					Et = eos.dp2e(intensive[static_cast<size_t>(i)].Mass,
-						eos.sd2p(temp, intensive[static_cast<size_t>(i)].Mass));
-					if (Et < 0 && !densityfloor)
-					{
-						UniversalError eo("Negative thermal enegry");
-						eo.AddEntry("Cell index", i);
-						eo.AddEntry("Thermal energy", Et);
-						eo.AddEntry("ShockedStatus", shockedcells[static_cast<size_t>(i)]);
-						eo.AddEntry("Extensive entropy", entropy[static_cast<size_t>(i)][0]);
-						eo.AddEntry("The density", intensive[static_cast<size_t>(i)].Mass);
-						throw eo;
-					}
-					intensive[static_cast<size_t>(i)].Energy = intensive[static_cast<size_t>(i)].Mass*(Et + Ek2);
-					//extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
-				}
-			}
-		}
-	}
-}
-
-bool NearBoundary(int index, Tessellation const& tess,
-	vector<CustomEvolution*> const& /*customevolve*/)
-{
-	vector<int> neigh = tess.GetNeighbors(index);
-	int n = int(neigh.size());
-	for (int i = 0; i < n; ++i)
-	{
-		if (neigh[static_cast<size_t>(i)] < 0)
-			return true;
-		/*if(customevolve[neigh[i]]!=0)
-	  return true;*/
-	}
-	return false;
-}
-
 namespace {
 	vector<double> scalar_mult(const vector<double>& v,
 		double s)
