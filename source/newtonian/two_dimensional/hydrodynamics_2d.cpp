@@ -594,25 +594,6 @@ void FixAdvection(vector<Conserved>& extensive,
 		norm = norm / abs(norm);
 		norm = norm*edge.GetLength();
 		double dv_dt = ScalarProd(facevelocity[static_cast<size_t>(i)], norm)*dt;
-		/*		vector<Vector2D> poly0,poly1;
-			  ConvexHull(poly0,&tessold,tessold.GetOriginalIndex(n0));
-			  ConvexHull(poly1,&tessnew,tessold.GetOriginalIndex(n1));
-			  if(n0>=npoints)
-			  {
-			  const Vector2D diff(tessold.GetMeshPoint(tessold.GetOriginalIndex(n0))
-			  -tessold.GetMeshPoint(n0));
-			  int N=static_cast<int>(poly0.size());
-			  for(int j=0;j<N;++j)
-			  poly0[j]-=diff;
-			  }
-			  if(n1>=npoints)
-			  {
-			  const Vector2D diff(tessnew.GetMeshPoint(tessnew.GetOriginalIndex(n1))
-			  -tessnew.GetMeshPoint(n1));
-			  int N=static_cast<int>(poly1.size());
-			  for(int j=0;j<N;++j)
-			  poly1[j]-=diff;
-			  }*/
 		double real_dv1 = polyoverlap.polygon_overlap_area
 			(pold[static_cast<size_t>(tessold.GetOriginalIndex(n0))],
 				pnew[static_cast<size_t>(tessold.GetOriginalIndex(n1))],
