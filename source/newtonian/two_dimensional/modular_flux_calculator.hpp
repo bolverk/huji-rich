@@ -19,8 +19,7 @@ public:
    */
   ModularFluxCalculator
   (const SpatialReconstruction& sr,
-   const RiemannSolver& rs,
-   const HydroBoundaryConditions& hbc);
+   const RiemannSolver& rs);
 
   vector<Extensive> operator()(const Tessellation& tess,const vector<Vector2D>& edge_velocities,
 	  const vector<ComputationalCell>& cells,const vector<Extensive>& extensives,const CacheData& cd,
@@ -29,7 +28,6 @@ public:
 private:
 	const SpatialReconstruction& sr_;
 	const RiemannSolver& rs_;
-	const HydroBoundaryConditions& hbc_;
 	mutable vector<pair<ComputationalCell, ComputationalCell> > interpolated_;
 };
 

@@ -208,8 +208,7 @@ int main(void)
 
 	ColdFlowsExtensiveCalculator eu(eos,ghost,interpolation);
 	SimpleCFL tsf(0.15);
-	IdleHBC hbc;
-	ModularFluxCalculator fc(interpolation, rs, hbc);
+	ModularFluxCalculator fc(interpolation, rs);
 	SimpleCellUpdater cu;
 	SlabSymmetry pg;
 
