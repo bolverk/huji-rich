@@ -14,7 +14,6 @@
 #include <list>
 #include "tessellation.hpp"
 #include "../misc/utils.hpp"
-#include "../newtonian/two_dimensional/HydroBoundaryConditions.hpp"
 #include "../newtonian/two_dimensional/RefineStrategy.hpp"
 #include "../newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "voronoi_logger.hpp"
