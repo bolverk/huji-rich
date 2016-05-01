@@ -720,30 +720,6 @@ namespace {
 	};
 }
 
-void MakeTracerIntensive(vector<vector<double> > &tracer,
-	const vector<vector<double> >& extensive,
-	const Tessellation& tess,
-	const vector<Primitive>& cells,
-	const PhysicalGeometry& pg, vector<bool> const& min_density_on, vector<vector<double> > const& old_trace,
-	vector<CustomEvolution*> const& cevolve)
-{
-	tracer = serial_generate(IntensiveTracerCalculator(extensive, tess, cells, pg, old_trace, min_density_on, cevolve));
-}
-
-void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
-	vector<vector<double> > const& tracerchange, vector<CustomEvolution*> const&
-	CellsEvolve, vector<Primitive> const& cells, Tessellation const& tess,
-	double time)
-{
-	for (size_t i = 0; i < tracerextensive.size(); ++i)
-		if (CellsEvolve[i])
-			tracerextensive[i] = CellsEvolve[i]->UpdateTracer
-			(static_cast<int>(i), tracerextensive, tracerchange, cells, tess, time);
-		else
-			for (size_t j = 0; j < tracerextensive[i].size(); ++j)
-				tracerextensive[i][j] += tracerchange[i][j];
-}
-
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
 	double R, vector<int> & PointToRemove, int Inner)
 {
