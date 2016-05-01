@@ -22,37 +22,7 @@
 #include "physical_geometry.hpp"
 #include "time_step_function.hpp"
 #include "cache_data.hpp"
-
-//! Calculates the velocities at the vertices of edges
-class FaceVertexVelocityCalculator : public LazyList<Vector2D>
-{
-public:
-
-	/*! \brief Class constructor
-	  \param tess Tessellation
-	  \param point_velocities Velocities of mesh generating point
-	  \param member Toggles on which vertex to calculate the velocity
-	  \param control Face velocities at the centroid
-	  \param hbc Hydrodynamic boundary conditions
-	 */
-	FaceVertexVelocityCalculator
-		(const Tessellation& tess,
-			const vector<Vector2D>& point_velocities,
-			const Vector2D std::pair<Vector2D, Vector2D>::* const member,
-			const vector<Vector2D>& control,
-			const HydroBoundaryConditions& hbc);
-
-	size_t size(void) const;
-
-	Vector2D operator[](size_t i) const;
-
-private:
-	const Tessellation& tess_;
-	const vector<Vector2D>& point_velocities_;
-	const Vector2D std::pair<Vector2D, Vector2D>::* const member_;
-	const vector<Vector2D>& control_;
-	const HydroBoundaryConditions& hbc_;
-};
+#include "../common/riemann_solver.hpp"
 
 /*! \brief Rotates primitive variables to align with edge
   \param n Normal directions
@@ -126,22 +96,6 @@ vector<Conserved> CalcConservedExtensive
 */
 double TimeStepForCell(Primitive const& cell,
 	double width, vector<Vector2D> const& face_velocites);
-
-/*! \brief Updates the extensive conserved variables
-  \param tessellation Tessellation
-  \param fluxes Hydrodynamic fluxes
-  \param dt Time step
-  \param conserved_extensive Extensive conserved variables
-  \param boundaryconditions Hydrodynamic boundary condition
-  \param lengthes The corrected lengthes of the edges
-*/
-void UpdateConservedExtensive
-(Tessellation const& tessellation,
-	vector<Conserved> const& fluxes,
-	double dt,
-	vector<Conserved>& conserved_extensive,
-	HydroBoundaryConditions const& boundaryconditions,
-	vector<double> const& lengthes);
 
 /*! \brief Move mesh points
   \param pointvelocity Velocities of all mesh points
@@ -288,37 +242,6 @@ void MakeTracerExtensive
  */
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
 	double R, vector<int> & PointToRemove, int Inner);
-
-/*! \brief Returns true if a computational cell is shocked
-  \param tess Tessellation
-  \param index Cell index
-  \param cells Fluid elements
-  \param hbc Hydrodynamic boundary conditions
-  \param time Time
-  \return True if a cell is shocked
- */
-bool IsShockedCell
-(Tessellation const& tess, int index,
-	vector<Primitive> const& cells, HydroBoundaryConditions const& hbc,
-	double time);
-
-/*! \brief Calculates time step for a cell boundary
-  \param cell Fluid element
-  \param cells Fluid elements
-  \param width Cell width
-  \param face_velocities Velocities of the cell interfaces
-  \param tess Tessellation
-  \param hbc Hydrodynamic boundary conditions
-  \param index Cells index
-  \param time Time
-  \return Time step
-  \todo Check for redundancy (can't cell be reproduced from cells and index?)
- */
-double TimeStepForCellBoundary
-(Primitive const& cell,
-	vector<Primitive> const& cells, double width,
-	vector<Vector2D> const& face_velocities, Tessellation const& tess,
-	HydroBoundaryConditions const& hbc, int index, double time);
 
 /*! \brief Applies a correction to the extensive variables due to the change in volume during time step.
   \details This method calculates the change in extensive by calculating the volume swept by an edge and multiplying it by the intensive variables of the respective cell.
