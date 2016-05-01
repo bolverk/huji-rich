@@ -119,22 +119,6 @@ vector<Conserved> CalcConservedExtensive
 	const Tessellation& tess,
 	const PhysicalGeometry& pg);
 
-/*! \brief Calculates the velocities of the mesh generating points
-  \param tessellation Tessellation
-  \param cells Computational cells
-  \param pointmotion Point motion function
-  \param pointvelocity List of velocities
-  \param time Time
-  \param cevolve The custom evolution of the cells
-  \param tracers Tracers
-*/
-void CalcPointVelocities(Tessellation const& tessellation,
-	vector<Primitive> const& cells,
-	PointMotion& pointmotion,
-	vector<Vector2D>& pointvelocity, double time,
-	vector<CustomEvolution*> & cevolve,
-	const vector<vector<double> >& tracers);
-
 /*! \brief Calculates the time step for a cell
   \param cell Computational cell
   \param width Cell width
