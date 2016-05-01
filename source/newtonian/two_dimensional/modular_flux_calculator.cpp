@@ -4,9 +4,8 @@
 
 ModularFluxCalculator::ModularFluxCalculator
 (const SpatialReconstruction& sr,
-	const RiemannSolver& rs,
-	const HydroBoundaryConditions& hbc) :
-	sr_(sr), rs_(rs), hbc_(hbc), interpolated_(vector<pair<ComputationalCell, ComputationalCell> >()) {}
+ const RiemannSolver& rs):
+	sr_(sr), rs_(rs), interpolated_(vector<pair<ComputationalCell, ComputationalCell> >()) {}
 
 namespace
 {
@@ -46,14 +45,7 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess, c
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	sr_(tess, cells, time, interpolated_, tracerstickernames);
 	vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
-	const vector<pair<size_t, Extensive> > boundary_conditions = hbc_(tess, cells);
 	vector<Extensive> res(tess.getAllEdges().size());
-	for (size_t i = 0; i < boundary_conditions.size(); ++i)
-	{
-		const size_t index = boundary_conditions.at(i).first;
-		flags.at(index) = true;
-		res.at(index) = boundary_conditions.at(i).second;
-	}
 	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
 	{
 		if (!flags.at(i))

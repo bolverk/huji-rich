@@ -311,111 +311,6 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 	}
 }
 
-namespace {
-
-	std::pair<Conserved, bool> calc_safe_conserved(Conserved const& raw,
-		bool density_floor,
-		double min_density,
-		double min_pressure,
-		Primitive const& old,
-		EquationOfState const& eos)
-	{
-		std::pair<Conserved, bool> res;
-		res.first = raw;
-		if (density_floor)
-		{
-			if (res.first.Mass < min_density)
-			{
-				res.first.Mass = min_density;
-				res.first.Momentum = old.Velocity*min_density;
-				const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
-				res.first.Energy = res.first.Mass*kinetic_energy
-					+ res.first.Mass*eos.dp2e(res.first.Mass, min_pressure);
-				res.second = true;
-			}
-			const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
-			const double thermal_energy = res.first.Energy / res.first.Mass - kinetic_energy;
-			const double pressure = eos.de2p(res.first.Mass, thermal_energy);
-			if (pressure < min_pressure || res.second)
-			{
-				res.first.Energy = res.first.Mass*kinetic_energy
-					+ res.first.Mass*eos.dp2e(res.first.Mass, min_pressure);
-				res.second = true;
-			}
-		}
-		return res;
-	}
-
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-	__attribute__((noreturn))
-#endif
-		void update_primitives_rethrow(int cell_index,
-			UniversalError& eo)
-	{
-		eo.AddEntry("UpdatePrimitive data starts here", 0);
-		eo.AddEntry("cell index", static_cast<double>(cell_index));
-		throw eo;
-	}
-
-	std::pair<Primitive, bool> regular_cell_evolve(Conserved const& intensive,
-		bool density_floor,
-		double min_density,
-		double min_pressure,
-		Primitive const& old,
-		EquationOfState const& eos)
-	{
-		const std::pair<Conserved, bool> temp = calc_safe_conserved
-			(intensive, density_floor, min_density,
-				min_pressure, old, eos);
-		return std::pair<Primitive, bool>(Conserved2Primitive(temp.first, eos), temp.second);
-	}
-}
-
-vector<bool> UpdatePrimitives
-(vector<Conserved> const& conservedintensive,
-	EquationOfState const& eos, vector<Primitive>& cells,
-	vector<CustomEvolution*> const& CellsEvolve, vector<Primitive> &old_cells,
-	bool densityfloor, double densitymin, double pressuremin, Tessellation const&
-	tess, double time, vector<vector<double> > const& tracers)
-{
-	cells.resize(conservedintensive.size());
-	vector<bool> bres(cells.size(), false);
-	for (int i = 0; i < tess.GetPointNo(); i++)
-	{
-		try
-		{
-			if (CellsEvolve[static_cast<size_t>(i)] == 0 || CellsEvolve[static_cast<size_t>(i)]->DensityFloorRelevant())
-			{
-				Primitive old_cell = densityfloor ? old_cells[static_cast<size_t>(i)] : cells[static_cast<size_t>(i)];
-				std::pair<Primitive, bool > res = regular_cell_evolve
-					(conservedintensive[static_cast<size_t>(i)], densityfloor,
-						densitymin, pressuremin, old_cell, eos);
-				if (CellsEvolve[static_cast<size_t>(i)] != 0 && !res.second)
-					cells[static_cast<size_t>(i)] = CellsEvolve[static_cast<size_t>(i)]->UpdatePrimitive
-					(conservedintensive, eos, old_cells, i, tess, time, tracers);
-				else
-					cells[static_cast<size_t>(i)] = res.first;
-				bres[static_cast<size_t>(i)] = res.second;
-			}
-			else
-				cells[static_cast<size_t>(i)] = CellsEvolve[static_cast<size_t>(i)]->UpdatePrimitive
-				(conservedintensive,
-					eos, old_cells, i, tess, time, tracers);
-		}
-		catch (UniversalError& eo)
-		{
-			eo.AddEntry("x momentum per unit volume", conservedintensive[static_cast<size_t>(i)].Momentum.x);
-			eo.AddEntry("y momentum per unit volume", conservedintensive[static_cast<size_t>(i)].Momentum.y);
-			eo.AddEntry("thermal energy per unit mass", conservedintensive[static_cast<size_t>(i)].Energy);
-			eo.AddEntry("Cell volume", tess.GetVolume(i));
-			eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
-			eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
-			update_primitives_rethrow(i, eo);
-		}
-	}
-	return bres;
-}
-
 Primitive RotatePrimitive(Vector2D const& normaldir,
 	Vector2D const& paraldir,
 	Primitive const& p)
@@ -485,15 +380,6 @@ vector<Vector2D> get_all_mesh_points
 	return res;
 }
 
-vector<CustomEvolution*> convert_indices_to_custom_evolution
-(const CustomEvolutionManager& cem, const vector<size_t>& indices)
-{
-	vector<CustomEvolution*> res(indices.size());
-	for (size_t i = 0; i < res.size(); ++i)
-		res[i] = cem.getFunction(indices[i]);
-	return res;
-}
-
 vector<Primitive> make_eos_consistent
 (vector<Primitive> const& vp,
 	EquationOfState const& eos)
@@ -501,29 +387,6 @@ vector<Primitive> make_eos_consistent
 	vector<Primitive> res = vp;
 	for (int i = 0; i < static_cast<int>(vp.size()); ++i)
 		res[static_cast<size_t>(i)] = make_eos_consistent(vp[static_cast<size_t>(i)], eos);
-	return res;
-}
-
-vector<double> GetMaxKineticEnergy(Tessellation const& tess, vector<Primitive> const&
-	cells, vector<CustomEvolution*> const& /*customevolve*/)
-{
-	const int n = tess.GetPointNo();
-	vector<double> res;
-	res.resize(static_cast<size_t>(n));
-	for (int j = 0; j < n; ++j)
-	{
-		vector<int> neightemp = tess.GetNeighbors(j);
-		vector<int> neigh;
-		for (size_t i = 0; i < neightemp.size(); ++i)
-			if (neightemp[i] >= 0)
-				neigh.push_back(neightemp[i]);
-		double e = pow(abs(cells[static_cast<size_t>(j)].Velocity - cells[static_cast<size_t>(neigh[0])].Velocity), 2);
-		for (int i = 1; i < static_cast<int>(neigh.size()); ++i)
-		{// This could be made much faster by writing the expression implicitly
-			e = max(e, pow(abs(cells[static_cast<size_t>(j)].Velocity - cells[static_cast<size_t>(neigh[static_cast<size_t>(i)])].Velocity), 2));
-		}
-		res[static_cast<size_t>(j)] = 0.5*e;
-	}
 	return res;
 }
 
@@ -536,64 +399,6 @@ vector<double> GetForceEnergy(Tessellation const& tess,
 	for (int i = 0; i < n; ++i)
 		res[static_cast<size_t>(i)] = g[static_cast<size_t>(i)] * tess.GetWidth(i);
 	return res;
-}
-
-void FixPressure(vector<Conserved> &intensive, vector<vector<double> > const& entropy,
-	EquationOfState const& eos, vector<double> const& Ek,
-	vector<double> const& Ef, double as, double bs, vector<CustomEvolution*>
-	const& customevolve, Tessellation const& tess,//vector<Conserved> &extensive,
-	vector<char> const& shockedcells, bool densityfloor)
-{
-	int n = tess.GetPointNo();
-	double Et, Ek2;
-	double temp;
-	for (int i = 0; i < n; ++i)
-	{
-		if (customevolve[static_cast<size_t>(i)] == 0 || customevolve[static_cast<size_t>(i)]->TimeStepRelevant())
-		{
-			if (intensive[static_cast<size_t>(i)].Mass < 0)
-				continue;
-			//Make intensive
-			temp = entropy[static_cast<size_t>(i)][0] / (tess.GetVolume(i)*intensive[static_cast<size_t>(i)].Mass);
-			Ek2 = 0.5*pow(abs(intensive[static_cast<size_t>(i)].Momentum) / intensive[static_cast<size_t>(i)].Mass, 2);
-			Et = intensive[static_cast<size_t>(i)].Energy / intensive[static_cast<size_t>(i)].Mass - Ek2;
-			if ((Et < as*Ek[static_cast<size_t>(i)]) || (Et < bs*Ef[static_cast<size_t>(i)]))
-			{
-				if ((shockedcells[static_cast<size_t>(i)] == 0) || Et < 0)
-				{
-					Et = eos.dp2e(intensive[static_cast<size_t>(i)].Mass,
-						eos.sd2p(temp, intensive[static_cast<size_t>(i)].Mass));
-					if (Et < 0 && !densityfloor)
-					{
-						UniversalError eo("Negative thermal enegry");
-						eo.AddEntry("Cell index", i);
-						eo.AddEntry("Thermal energy", Et);
-						eo.AddEntry("ShockedStatus", shockedcells[static_cast<size_t>(i)]);
-						eo.AddEntry("Extensive entropy", entropy[static_cast<size_t>(i)][0]);
-						eo.AddEntry("The density", intensive[static_cast<size_t>(i)].Mass);
-						throw eo;
-					}
-					intensive[static_cast<size_t>(i)].Energy = intensive[static_cast<size_t>(i)].Mass*(Et + Ek2);
-					//extensive[i].Energy=tess.GetVolume(i)*intensive[i].Energy;
-				}
-			}
-		}
-	}
-}
-
-bool NearBoundary(int index, Tessellation const& tess,
-	vector<CustomEvolution*> const& /*customevolve*/)
-{
-	vector<int> neigh = tess.GetNeighbors(index);
-	int n = int(neigh.size());
-	for (int i = 0; i < n; ++i)
-	{
-		if (neigh[static_cast<size_t>(i)] < 0)
-			return true;
-		/*if(customevolve[neigh[i]]!=0)
-	  return true;*/
-	}
-	return false;
 }
 
 namespace {
@@ -668,122 +473,6 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 			tess.GetVolume(static_cast<int>(i))*cells[i].Density);
 }
 
-namespace {
-	vector<double> scalar_div(const vector<double>& v,
-		const double s)
-	{
-		vector<double> res(v.size());
-		for (size_t i = 0; i < res.size(); ++i)
-			res[i] = v[i] / s;
-		return res;
-	}
-
-	class IntensiveTracerCalculator : public LazyList<vector<double> >
-	{
-	public:
-
-		IntensiveTracerCalculator(const vector<vector<double> >& extensive, const Tessellation& tess,
-			const vector<Primitive>& cells, const PhysicalGeometry& pg,
-			const vector<vector<double> > &old_trace_intensive, const vector<bool> &min_density,
-			const vector<CustomEvolution*> &cevolve) :
-			extensive_(extensive), tess_(tess), cells_(cells), pg_(pg),
-			old_trace_intensive_(old_trace_intensive), min_density_(min_density), cevolve_(cevolve) {}
-
-		size_t size(void) const
-		{
-			if (extensive_.empty())
-				return 0;
-			else
-				return static_cast<size_t>(tess_.GetPointNo());
-		}
-
-		vector<double> operator[](size_t i) const
-		{
-			if (min_density_[i] && !cevolve_[i])
-				return old_trace_intensive_[i];
-			else
-			{
-				const double mass = cells_[i].Density*
-					pg_.calcVolume(serial_generate(CellEdgesGetter(tess_, static_cast<int>(i))));
-				return scalar_div(extensive_[i], mass);
-			}
-		}
-
-	private:
-		const vector<vector<double> >& extensive_;
-		const Tessellation& tess_;
-		const vector<Primitive>& cells_;
-		const PhysicalGeometry& pg_;
-		const vector<vector<double> > &old_trace_intensive_;
-		const vector<bool> &min_density_;
-		const vector<CustomEvolution*> &cevolve_;
-	};
-}
-
-void MakeTracerIntensive(vector<vector<double> > &tracer,
-	const vector<vector<double> >& extensive,
-	const Tessellation& tess,
-	const vector<Primitive>& cells,
-	const PhysicalGeometry& pg, vector<bool> const& min_density_on, vector<vector<double> > const& old_trace,
-	vector<CustomEvolution*> const& cevolve)
-{
-	tracer = serial_generate(IntensiveTracerCalculator(extensive, tess, cells, pg, old_trace, min_density_on, cevolve));
-}
-
-void UpdateTracerExtensive(vector<vector<double> > &tracerextensive,
-	vector<vector<double> > const& tracerchange, vector<CustomEvolution*> const&
-	CellsEvolve, vector<Primitive> const& cells, Tessellation const& tess,
-	double time)
-{
-	for (size_t i = 0; i < tracerextensive.size(); ++i)
-		if (CellsEvolve[i])
-			tracerextensive[i] = CellsEvolve[i]->UpdateTracer
-			(static_cast<int>(i), tracerextensive, tracerchange, cells, tess, time);
-		else
-			for (size_t j = 0; j < tracerextensive[i].size(); ++j)
-				tracerextensive[i][j] += tracerchange[i][j];
-}
-
-void TracerResetCalc
-(double alpha, SpatialDistribution const& originalD,
-	SpatialDistribution const& originalP, SpatialDistribution const& originalVx,
-	SpatialDistribution const& originalVy, vector<SpatialDistribution const*> const& originalTracers, vector<Primitive> &cells,
-	Tessellation const& tess, vector<vector<double> > &tracer,
-	int tracerindex, EquationOfState const& eos, vector<CustomEvolution*>
-	const& cevolve, bool coldflows)
-{
-	const int n = tess.GetPointNo();
-	if (n < 1)
-		return;
-	Vector2D velocity;
-	if (tracer.empty())
-		return;
-	if (tracerindex >= static_cast<int>(tracer[0].size()) || tracerindex < 0)
-		throw UniversalError("Error in tracerReset, wrong dimension for tracer");
-	for (int i = 0; i < n; ++i)
-	{
-		bool customforce = false;
-		if (cevolve[static_cast<size_t>(i)])
-			customforce = cevolve[static_cast<size_t>(i)]->ShouldForceTracerReset();
-		if ((tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] < alpha) || customforce)
-		{
-			velocity.Set(originalVx(tess.GetCellCM(i)),
-				originalVy(tess.GetCellCM(i)));
-			cells[static_cast<size_t>(i)] = CalcPrimitive(originalD(tess.GetCellCM(i)),
-				originalP(tess.GetCellCM(i)), velocity, eos);
-			if (tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] < 0)
-				tracer[static_cast<size_t>(i)][static_cast<size_t>(tracerindex)] = 0;
-			for (size_t j = 0; j < tracer[static_cast<size_t>(i)].size(); ++j)
-				if (coldflows&&j == 0)
-					tracer[static_cast<size_t>(i)][j] = eos.dp2s(cells[static_cast<size_t>(i)].Density, cells[static_cast<size_t>(i)].Pressure);
-				else
-					if (static_cast<int>(j) != tracerindex)
-						tracer[static_cast<size_t>(i)][j] = originalTracers[j]->operator()(tess.GetCellCM(i));
-		}
-	}
-	return;
-}
-
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
 	double R, vector<int> & PointToRemove, int Inner)
 {
@@ -834,25 +523,6 @@ void FixAdvection(vector<Conserved>& extensive,
 		norm = norm / abs(norm);
 		norm = norm*edge.GetLength();
 		double dv_dt = ScalarProd(facevelocity[static_cast<size_t>(i)], norm)*dt;
-		/*		vector<Vector2D> poly0,poly1;
-			  ConvexHull(poly0,&tessold,tessold.GetOriginalIndex(n0));
-			  ConvexHull(poly1,&tessnew,tessold.GetOriginalIndex(n1));
-			  if(n0>=npoints)
-			  {
-			  const Vector2D diff(tessold.GetMeshPoint(tessold.GetOriginalIndex(n0))
-			  -tessold.GetMeshPoint(n0));
-			  int N=static_cast<int>(poly0.size());
-			  for(int j=0;j<N;++j)
-			  poly0[j]-=diff;
-			  }
-			  if(n1>=npoints)
-			  {
-			  const Vector2D diff(tessnew.GetMeshPoint(tessnew.GetOriginalIndex(n1))
-			  -tessnew.GetMeshPoint(n1));
-			  int N=static_cast<int>(poly1.size());
-			  for(int j=0;j<N;++j)
-			  poly1[j]-=diff;
-			  }*/
 		double real_dv1 = polyoverlap.polygon_overlap_area
 			(pold[static_cast<size_t>(tessold.GetOriginalIndex(n0))],
 				pnew[static_cast<size_t>(tessold.GetOriginalIndex(n1))],

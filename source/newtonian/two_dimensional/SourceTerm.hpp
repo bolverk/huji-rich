@@ -7,7 +7,6 @@
 #define SOURCETERM_HPP 1
 #include "../../tessellation/tessellation.hpp"
 #include "../common/hydrodynamic_variables.hpp"
-#include "HydroBoundaryConditions.hpp"
 #include "../../misc/utils.hpp"
 #include "physical_geometry.hpp"
 #include "extensive.hpp"

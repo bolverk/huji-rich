@@ -17,7 +17,6 @@
 #include "SourceTerm.hpp"
 #include "../../tessellation/HilbertOrder.hpp"
 #include "OuterBoundary.hpp"
-#include "HydroBoundaryConditions.hpp"
 #include "../../misc/utils.hpp"
 #include "../../misc/cached_lazy_list.hpp"
 #include "../../misc/lazy_list.hpp"

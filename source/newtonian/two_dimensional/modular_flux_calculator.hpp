@@ -4,7 +4,6 @@
 #include "flux_calculator_2d.hpp"
 #include "spatial_reconstruction.hpp"
 #include "../common/riemann_solver.hpp"
-#include "HydroBoundaryConditions.hpp"
 #include "GhostPointGenerator.hpp"
 
 //! \brief Modular flux calculator
@@ -15,12 +14,10 @@ public:
   /*! \brief Class constructor
     \param sr Interpolation
     \param rs Riemann solver
-    \param hbc Hydrodynamic boundary conditions
    */
   ModularFluxCalculator
   (const SpatialReconstruction& sr,
-   const RiemannSolver& rs,
-   const HydroBoundaryConditions& hbc);
+   const RiemannSolver& rs);
 
   vector<Extensive> operator()(const Tessellation& tess,const vector<Vector2D>& edge_velocities,
 	  const vector<ComputationalCell>& cells,const vector<Extensive>& extensives,const CacheData& cd,
@@ -29,7 +26,6 @@ public:
 private:
 	const SpatialReconstruction& sr_;
 	const RiemannSolver& rs_;
-	const HydroBoundaryConditions& hbc_;
 	mutable vector<pair<ComputationalCell, ComputationalCell> > interpolated_;
 };
 
