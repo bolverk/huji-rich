@@ -146,10 +146,12 @@ void RigidWallFlux::operator()
 	const bool aux,
 	Extensive &res, double /*time*/,TracerStickerNames const& tracerstickernames) const
 {
+#ifndef RICH_MPI
 	if (aux)
 		assert(edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo());
 	else
 		assert(edge.neighbors.second >= 0 && edge.neighbors.second < tess.GetPointNo());
+#endif //RICH_MPI
 	const Vector2D p = normalize
 		(edge.vertices.second - edge.vertices.first);
 	const Vector2D n =

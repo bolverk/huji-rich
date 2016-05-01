@@ -27,7 +27,14 @@ elif compiler=='clang++':
         cflags += ' -O0 -g -pg'
         linkflags = ' -g -pg'
     else:
-        cflags += ' -O3 -march=native'
+		cflags += ' -O3 -march=native'
+elif compiler=='profile':
+    cflags = ' -Wfatal-errors '
+    cflags += ' -O3 -g'
+    linkflags = ' -g '
+elif compiler=='icc':
+    cflags = ' -O3 -ipo -xHost -fp-model precise -g '
+    linkflags = ' -g '
 elif compiler=='mpiCC':
     cflags = '-DRICH_MPI -Wfatal-errors '
     if int(debug):
@@ -36,6 +43,9 @@ elif compiler=='mpiCC':
         cflags += ' -O3 -march=native'
 else:
     raise NameError('unsupported compiler')
+if compiler=='profile':
+	compiler = 'g++'
+
 build_dir = 'build/'+compiler
 if int(debug):
     build_dir += '/debug'
