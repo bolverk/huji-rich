@@ -677,47 +677,6 @@ namespace {
 			res[i] = v[i] / s;
 		return res;
 	}
-
-	class IntensiveTracerCalculator : public LazyList<vector<double> >
-	{
-	public:
-
-		IntensiveTracerCalculator(const vector<vector<double> >& extensive, const Tessellation& tess,
-			const vector<Primitive>& cells, const PhysicalGeometry& pg,
-			const vector<vector<double> > &old_trace_intensive, const vector<bool> &min_density,
-			const vector<CustomEvolution*> &cevolve) :
-			extensive_(extensive), tess_(tess), cells_(cells), pg_(pg),
-			old_trace_intensive_(old_trace_intensive), min_density_(min_density), cevolve_(cevolve) {}
-
-		size_t size(void) const
-		{
-			if (extensive_.empty())
-				return 0;
-			else
-				return static_cast<size_t>(tess_.GetPointNo());
-		}
-
-		vector<double> operator[](size_t i) const
-		{
-			if (min_density_[i] && !cevolve_[i])
-				return old_trace_intensive_[i];
-			else
-			{
-				const double mass = cells_[i].Density*
-					pg_.calcVolume(serial_generate(CellEdgesGetter(tess_, static_cast<int>(i))));
-				return scalar_div(extensive_[i], mass);
-			}
-		}
-
-	private:
-		const vector<vector<double> >& extensive_;
-		const Tessellation& tess_;
-		const vector<Primitive>& cells_;
-		const PhysicalGeometry& pg_;
-		const vector<vector<double> > &old_trace_intensive_;
-		const vector<bool> &min_density_;
-		const vector<CustomEvolution*> &cevolve_;
-	};
 }
 
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
