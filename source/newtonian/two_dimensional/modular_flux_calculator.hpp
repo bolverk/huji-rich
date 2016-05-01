@@ -14,7 +14,6 @@ public:
   /*! \brief Class constructor
     \param sr Interpolation
     \param rs Riemann solver
-    \param hbc Hydrodynamic boundary conditions
    */
   ModularFluxCalculator
   (const SpatialReconstruction& sr,

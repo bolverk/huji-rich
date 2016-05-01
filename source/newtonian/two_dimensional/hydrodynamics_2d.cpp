@@ -311,66 +311,6 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 	}
 }
 
-namespace {
-
-	std::pair<Conserved, bool> calc_safe_conserved(Conserved const& raw,
-		bool density_floor,
-		double min_density,
-		double min_pressure,
-		Primitive const& old,
-		EquationOfState const& eos)
-	{
-		std::pair<Conserved, bool> res;
-		res.first = raw;
-		if (density_floor)
-		{
-			if (res.first.Mass < min_density)
-			{
-				res.first.Mass = min_density;
-				res.first.Momentum = old.Velocity*min_density;
-				const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
-				res.first.Energy = res.first.Mass*kinetic_energy
-					+ res.first.Mass*eos.dp2e(res.first.Mass, min_pressure);
-				res.second = true;
-			}
-			const double kinetic_energy = 0.5*pow(abs(res.first.Momentum / res.first.Mass), 2);
-			const double thermal_energy = res.first.Energy / res.first.Mass - kinetic_energy;
-			const double pressure = eos.de2p(res.first.Mass, thermal_energy);
-			if (pressure < min_pressure || res.second)
-			{
-				res.first.Energy = res.first.Mass*kinetic_energy
-					+ res.first.Mass*eos.dp2e(res.first.Mass, min_pressure);
-				res.second = true;
-			}
-		}
-		return res;
-	}
-
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-	__attribute__((noreturn))
-#endif
-		void update_primitives_rethrow(int cell_index,
-			UniversalError& eo)
-	{
-		eo.AddEntry("UpdatePrimitive data starts here", 0);
-		eo.AddEntry("cell index", static_cast<double>(cell_index));
-		throw eo;
-	}
-
-	std::pair<Primitive, bool> regular_cell_evolve(Conserved const& intensive,
-		bool density_floor,
-		double min_density,
-		double min_pressure,
-		Primitive const& old,
-		EquationOfState const& eos)
-	{
-		const std::pair<Conserved, bool> temp = calc_safe_conserved
-			(intensive, density_floor, min_density,
-				min_pressure, old, eos);
-		return std::pair<Primitive, bool>(Conserved2Primitive(temp.first, eos), temp.second);
-	}
-}
-
 Primitive RotatePrimitive(Vector2D const& normaldir,
 	Vector2D const& paraldir,
 	Primitive const& p)
@@ -531,17 +471,6 @@ void MakeTracerExtensive(vector<vector<double> > const &tracer,
 	for (size_t i = 0; i < n; ++i)
 		result[i] = scalar_mult(tracer[i],
 			tess.GetVolume(static_cast<int>(i))*cells[i].Density);
-}
-
-namespace {
-	vector<double> scalar_div(const vector<double>& v,
-		const double s)
-	{
-		vector<double> res(v.size());
-		for (size_t i = 0; i < res.size(); ++i)
-			res[i] = v[i] / s;
-		return res;
-	}
 }
 
 void GetPointToRemove(Tessellation const& tess, Vector2D const& point,
