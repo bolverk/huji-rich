@@ -151,8 +151,6 @@ namespace
 			bool good = true;
 			tess.GetNeighbors(static_cast<int>(candidates[i]),neigh);
 			size_t nneigh = neigh.size();
-			if (!good)
-				continue;
 			if (find(bad_neigh.begin(), bad_neigh.end(), candidates[i]) !=
 				bad_neigh.end())
 				good = false;

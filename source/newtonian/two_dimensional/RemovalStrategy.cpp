@@ -44,8 +44,6 @@ vector<int> RemovalStrategy::RemoveNeighbors
 		bool good=true;
 		vector<int> neigh=tess.GetNeighbors(candidates[static_cast<size_t>(i)]);
 		int nneigh=static_cast<int>(neigh.size());
-		if(!good)
-			continue;
 		if(find(bad_neigh.begin(),bad_neigh.end(),candidates[static_cast<size_t>(i)])!=
 			bad_neigh.end())
 			good=false;
