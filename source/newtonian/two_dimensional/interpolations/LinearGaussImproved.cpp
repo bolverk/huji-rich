@@ -437,7 +437,7 @@ namespace
 		if (slf)
 		{
 			if (!is_shock(res, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
-				eos.dp2c(cell.density, cell.pressure, cell.tracers)))
+				eos.dp2c(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names)))
 			{
 				slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, temp2, temp3,
 					temp4, temp5);
