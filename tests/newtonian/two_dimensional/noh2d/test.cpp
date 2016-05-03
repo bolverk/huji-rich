@@ -14,9 +14,7 @@
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cfl.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
-//#include "source/newtonian/two_dimensional/ColdFlowsCellUpdater.hpp"
 #include "source/newtonian/two_dimensional/ColdFlowsExtensiveCalculator.hpp"
-#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
 
@@ -192,8 +190,7 @@ int main(void)
 
 	ColdFlowsExtensiveCalculator eu(eos,ghost,interpolation);
 	SimpleCFL tsf(0.15);
-	IdleHBC hbc;
-	ModularFluxCalculator fc(interpolation, rs, hbc);
+	ModularFluxCalculator fc(interpolation, rs);
 	SimpleCellUpdater cu;
 	SlabSymmetry pg;
 

@@ -14,7 +14,6 @@
 #include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/PeriodicBox.hpp"
 #include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
-#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include <boost/random/uniform_int_distribution.hpp>
@@ -87,11 +86,10 @@ int main(void)
 	PeriodicGhostGenerator ghost;
 	PeriodicEdgeVelocities vedge;
 	LinearGaussImproved interp(eos, ghost);
-	IdleHBC hbc;
 	SimpleCellUpdater cu;
 	SimpleExtensiveUpdater eu;
 	SimpleCFL tsf(0.3);
-	ModularFluxCalculator fc(interp, rs, hbc);
+	ModularFluxCalculator fc(interp, rs);
 	Lagrangian pm;
 	SlabSymmetry pg;
 	ZeroForce force;

@@ -27,7 +27,6 @@
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
-#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 
 using namespace std;
 using namespace simulation2d;
@@ -96,10 +95,9 @@ namespace {
 			acc_(1, 0.001),
 			force_(acc_),
 			tsf_(0.3),
-			hbc_(),
 			ghost_(),
 			interpolation_(ghost_),
-			fc_(interpolation_,rs_,hbc_),
+			fc_(interpolation_,rs_),
 			eu_(),
 			cu_(),
 			sim_(tess_,
@@ -138,7 +136,6 @@ namespace {
 		PeriodicDriver acc_;
 		ConservativeForce force_;
 		const SimpleCFL tsf_;
-		const IdleHBC hbc_;
 		PeriodicGhostGenerator ghost_;
 		const PCM interpolation_;
 		const ModularFluxCalculator fc_;

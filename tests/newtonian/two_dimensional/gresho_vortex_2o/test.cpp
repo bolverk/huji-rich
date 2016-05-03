@@ -22,7 +22,6 @@
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/ghost_point_generators/RigidWallGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
-#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 using namespace std;
@@ -171,7 +170,7 @@ public:
     tsf_(0.3),
     gpg_(),
     sr_(eos_,gpg_),
-    fc_(sr_,rs_,hbc_),
+    fc_(sr_,rs_),
     eu_(),
     sim_(
 #ifdef RICH_MPI
@@ -213,7 +212,6 @@ private:
   ZeroForce force_;
   const SimpleCFL tsf_;
   const RigidWallGenerator gpg_;
-  const IdleHBC hbc_;
   const LinearGaussImproved sr_;
   const ModularFluxCalculator fc_;
   const SimpleExtensiveUpdater eu_;

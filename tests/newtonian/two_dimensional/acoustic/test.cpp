@@ -19,7 +19,6 @@
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
-#include "source/newtonian/two_dimensional/idle_hbc.hpp"
 #include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 
 using namespace std;
@@ -113,7 +112,7 @@ namespace {
       tsf_(0.3),
       gpg_(),
       sr_(eos_,gpg_),
-      fc_(sr_,rs_,hbc_),
+      fc_(sr_,rs_),
       eu_(),
       cu_(),
       sim_(tess_,
@@ -150,7 +149,6 @@ namespace {
     const SimpleCFL tsf_;
     const PeriodicGhostGenerator gpg_;
     const LinearGaussImproved sr_;
-    const IdleHBC hbc_;
     const ModularFluxCalculator fc_;
     const SimpleExtensiveUpdater eu_;
     const SimpleCellUpdater cu_;
