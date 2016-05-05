@@ -41,7 +41,7 @@ namespace
 	}
 
 	vector<ComputationalCell const*> GetNeighborCells(vector<const Edge *> const& edges, size_t cell_index,
-		vector<ComputationalCell> const& cells, boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells, size_t npoints)
+		vector<ComputationalCell> const& cells)
 	{
 		vector<ComputationalCell const*> res(edges.size());
 		const size_t nloop = edges.size();
@@ -49,19 +49,7 @@ namespace
 		{
 			size_t other_cell = (edges[i]->neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
 				(edges[i]->neighbors.second) : static_cast<size_t> (edges[i]->neighbors.first);
-			if (other_cell < npoints)
-			{
-				res[i] = &cells.at(other_cell);
-			}
-			else
-			{
-				const boost::container::flat_map<size_t, ComputationalCell>::const_iterator it =
-					ghost_cells.find(other_cell);
-				if (it == ghost_cells.end())
-					res[i] = &cells.at(other_cell);
-				else
-					res[i] = &it->second;
-			}
+			res[i] = &cells.at(other_cell);
 		}
 		return res;
 	}
@@ -399,7 +387,6 @@ namespace
 			double diffusecoeff,
 			double pressure_ratio,
 			EquationOfState const& eos,
-			boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells,
 			const vector<string>& flat_tracers,
 			Slope &naive_slope_,
 			Slope & res,
@@ -415,8 +402,7 @@ namespace
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
 		GetNeighborCM(tess, edge_list, cell_index, neighbor_cm_list);
-		vector<ComputationalCell const* > neighbor_list = GetNeighborCells(edge_list, cell_index, cells, ghost_cells, static_cast<size_t>(
-			tess.GetPointNo()));
+		vector<ComputationalCell const* > neighbor_list = GetNeighborCells(edge_list, cell_index, cells);
 
 		ComputationalCell const& cell = cells[cell_index];
 		calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
@@ -494,6 +480,12 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	vector<int> boundaryedges;
 	// Get ghost points
 	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time, tracerstikersnames);
+	// Copy ghost data into new cells vector
+	vector<ComputationalCell> new_cells(cells);
+	new_cells.resize(tess.GetTotalPointNumber());
+	for (boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.begin(); it !=
+		ghost_cells.end(); ++it)
+		new_cells[it->first] = it->second;
 	// Prepare slopes
 	rslopes_.resize(CellNumber, Slope(cells[0], cells[0]));
 	naive_rslopes_.resize(CellNumber);
@@ -509,7 +501,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	{
 		vector<int> const& edge_index = tess.GetCellEdges(static_cast<int>(i));
 		GetEdgeList(tess, edge_index, edge_list);
-		calc_slope(tess, cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_, ghost_cells,
+		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
 			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames);
 		const size_t nloop = edge_index.size();
@@ -519,7 +511,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			if (edge.neighbors.first == static_cast<int>(i))
 			{
 				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].first,
-					cells[i]);
+					new_cells[i]);
 				interp2(res[static_cast<size_t>(edge_index[j])].first,
 					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(static_cast<int>(i)));
 				if (edge.neighbors.second > static_cast<int>(CellNumber))
@@ -528,7 +520,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			else
 			{
 				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].second,
-					cells[i]);
+					new_cells[i]);
 				interp2(res[static_cast<size_t>(edge_index[j])].second,
 					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(static_cast<int>(i)));
 				if (edge.neighbors.first > static_cast<int>(CellNumber))
@@ -546,22 +538,16 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		Edge const& edge = tess.GetEdge(boundaryedges[i]);
 		if (edge.neighbors.first > static_cast<int>(CellNumber))
 		{
+			res[static_cast<size_t>(boundaryedges[i])].first = new_cells[static_cast<size_t>(edge.neighbors.first)];
 #ifdef RICH_MPI
 			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-			{
-				res[static_cast<size_t>(boundaryedges[i])].first = cells[static_cast<size_t>(edge.neighbors.first)];
 				interp2(res[static_cast<size_t>(boundaryedges[i])].first,
 					rslopes_[static_cast<size_t>(edge.neighbors.first)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
-			}
 			else
-			{
-				res[static_cast<size_t>(boundaryedges[i])].first = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first));
 				res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 						edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
-			}
 #else
-			res[static_cast<size_t>(boundaryedges[i])].first = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.first));
 			res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
@@ -569,22 +555,16 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		}
 		else
 		{
+			res[static_cast<size_t>(boundaryedges[i])].second = new_cells[static_cast<size_t>(edge.neighbors.second)];
 #ifdef RICH_MPI
 			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-			{
-				res[static_cast<size_t>(boundaryedges[i])].second = cells[static_cast<size_t>(edge.neighbors.second)];
 				interp2(res[static_cast<size_t>(boundaryedges[i])].second,
 					rslopes_[static_cast<size_t>(edge.neighbors.second)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
-			}
 			else
-			{
-				res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
 				res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 						edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
-			}
 #else
-			res[static_cast<size_t>(boundaryedges[i])].second = safe_retrieve(ghost_cells, static_cast<size_t>(edge.neighbors.second));
 			res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
