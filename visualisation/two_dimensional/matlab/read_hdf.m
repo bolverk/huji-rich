@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Matlab script to read RICH binary files in float/double format
 %
@@ -74,6 +74,10 @@ nVert=h5read(filename,'/geometry/n_vertices');
 Tracers=zeros(NumberOfCells,NumberOfTracers);
 
 
+TracerNames=cell(NumberOfTracers,1);
+for i=1:NumberOfTracers
+    TracerNames{i}= h.Groups(tracerindex).Datasets(i).Name;
+end
 
 for i=1:NumberOfTracers
     Tracers(:,i)=h5read(filename,sprintf('/tracers/%s', h.Groups(tracerindex).Datasets(i).Name));

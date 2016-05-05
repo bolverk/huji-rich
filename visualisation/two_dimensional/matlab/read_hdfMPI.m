@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength)
 if(nargin==3),
     ShouldPlot=0;
     WhatToPlot=1;
@@ -21,7 +21,7 @@ else
 end
 NperProc=zeros(nproc,1);
 filename=strcat(filedir,filename);
-[X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
+[X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,TracerNames,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
 xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/x_coordinate');
 yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/y_coordinate');
@@ -67,7 +67,7 @@ end
 temp=0;
 for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
-    [Xt,Yt,Pressuret,Densityt,Vxt,Vyt,Pointst,~,Tracerst,nincellt]=read_hdf(fname);
+    [Xt,Yt,Pressuret,Densityt,Vxt,Vyt,Pointst,~,Tracerst,~,nincellt]=read_hdf(fname);
     n=length(Xt);
     NperProc(i+1)=n;
     X(temp+1:temp+n)=Xt;
