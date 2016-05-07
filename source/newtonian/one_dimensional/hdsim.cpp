@@ -95,17 +95,23 @@ namespace {
     return res;
   }
 
-  double GetVolume(vector<double> v, size_t i)
+  double GetVolume
+  (const vector<double>& v, 
+   const PhysicalGeometry1D& pg,
+   size_t i)
   {
-    return v[i+1] - v[i];
+    return pg.calcVolume(v.at(i+1)) 
+      - pg.calcVolume(v.at(i));
   }
 
   vector<Conserved> CalcConservedExtensive
-  (vector<Conserved> const& ci, vector<double> const& v)
+  (const PhysicalGeometry1D& pg,
+   const vector<Conserved>& ci, 
+   const vector<double>& v)
   {
     vector<Conserved> res(ci.size());
     for(size_t i=0;i<ci.size();i++){
-      res[i] = GetVolume(v, i)*ci[i];
+      res[i] = GetVolume(v, pg, i)*ci[i];
     }
     return res;
   }
@@ -132,8 +138,11 @@ hdsim1D::hdsim1D
   _Fluxes(vector<Conserved>(vertices.size())),
   _VertexVelocity(vector<double>()),
   _ConservedIntensive(CalcConservedIntensive(_Cells)),
-  _ConservedExtensive(CalcConservedExtensive
-		      (_ConservedIntensive, _Vertices)),
+  _ConservedExtensive
+  (CalcConservedExtensive
+   (pg_,
+    _ConservedIntensive, 
+    _Vertices)),
   _Interpolation(Interpolation),
   _rs(rs), _vm(vm), _bc(bc), 
   force_(force), _cfl(1./3.), time_(0), cycle_(0),
@@ -256,13 +265,14 @@ namespace {
   }
 
   vector<Conserved> UpdateConservedIntensive
-  (vector<Conserved> const& ConservedExtensive, 
-   vector<double> const& Vertices)
+  (const vector<Conserved>& ConservedExtensive, 
+   const vector<double>& Vertices,
+   const PhysicalGeometry1D& pg)
   {
     vector<Conserved> res(ConservedExtensive.size());
     for(size_t i=0;i<ConservedExtensive.size();i++){
       res[i] = ConservedExtensive[i] / 
-	GetVolume(Vertices, i);
+	GetVolume(Vertices, pg, i);
     }
     return res;
   }
@@ -331,7 +341,7 @@ void hdsim1D::TimeAdvance(void)
   MoveVertices(_VertexVelocity, dt, _Vertices);
 
   _ConservedIntensive = UpdateConservedIntensive
-    (_ConservedExtensive, _Vertices);
+    (_ConservedExtensive, _Vertices, pg_);
 
   //  _Cells = UpdatePrimitives(_ConservedIntensive, _eos);
   _Cells = cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
@@ -375,7 +385,10 @@ void hdsim1D::TimeAdvance2(void)
 	       dt/2, mid_vertices);
 
   const vector<Conserved> mid_intesive = 
-    UpdateConservedIntensive(mid_extensive, mid_vertices);
+    UpdateConservedIntensive
+    (mid_extensive,
+     mid_vertices,
+     pg_);
 
   const vector<Primitive> mid_cells = 
     cold_flows_.retrieveAllPrimitive(mid_intesive,
@@ -409,7 +422,7 @@ void hdsim1D::TimeAdvance2(void)
   MoveVertices(_VertexVelocity, dt, _Vertices);
 
   _ConservedIntensive = UpdateConservedIntensive
-    (_ConservedExtensive, _Vertices);
+    (_ConservedExtensive, _Vertices, pg_);
 
   _Cells = cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
 					    _ConservedExtensive,
@@ -453,7 +466,8 @@ namespace{
     vector<double> edges = old.edges;
     MoveVertices(edge_velocity,dt,edges);
 
-    const vector<Conserved> intensive = UpdateConservedIntensive(extensive,edges);
+    const vector<Conserved> intensive = 
+      UpdateConservedIntensive(extensive,edges,pg);
 
     const vector<Primitive> cells = UpdatePrimitives(intensive,eos);
 
@@ -498,7 +512,8 @@ namespace{
     MoveVertices(edge_velocity,dt,new_edges);
 
     vector<Conserved> new_intensive = 
-      UpdateConservedIntensive(new_extensive,new_edges);
+      UpdateConservedIntensive
+      (new_extensive,new_edges, pg);
 
     vector<Primitive> new_cells = 
       UpdatePrimitives(new_intensive,eos);
