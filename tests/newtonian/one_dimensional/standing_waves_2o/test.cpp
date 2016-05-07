@@ -68,7 +68,8 @@ public:
     force_(read_number("wavelength.txt"),
 	   read_number("amplitude.txt"),
 	   read_number("phase_velocity.txt")),
-    sim_(linspace(0,width,30),
+    sim_(pg_,
+	 linspace(0,width,30),
 	 interpm_,
 	 Uniform(read_number("mean_density.txt")),
 	 Uniform(read_number("mean_pressure.txt")),
@@ -86,6 +87,7 @@ public:
   }
 
 private:
+  const SlabSymmetry1D pg_;
   const IdealGas eos_;
   PLM1D plm_naive_;
   EOSConsistent interpm_;

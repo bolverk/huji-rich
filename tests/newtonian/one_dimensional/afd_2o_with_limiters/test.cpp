@@ -60,7 +60,8 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(edges_,
+    sim_(pg_,
+	 edges_,
 	 interpm_,
 	 Uniform(read_number("ambient_density.txt")),
 	 GaussianPert(read_number("ambient_pressure.txt"),
@@ -81,6 +82,7 @@ public:
   }
   
 private:
+  const SlabSymmetry1D pg_;
   vector<double> edges_;
   IdealGas eos_;
   PLM1D naive_;

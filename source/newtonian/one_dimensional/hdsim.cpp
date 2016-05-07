@@ -112,18 +112,21 @@ namespace {
 }
 
 hdsim1D::hdsim1D
-(vector<double> const& vertices,
- SpatialReconstruction1D const& Interpolation,
- SpatialDistribution1D const& density,
- SpatialDistribution1D const& pressure,
- SpatialDistribution1D const& paravelocity,
- SpatialDistribution1D const& perpvelocity,
- EquationOfState const& eos,
- RiemannSolver const& rs,
- VertexMotion const& vm,
- BoundaryConditions1D const& bc,
- ExternalForces1D const& force):
-  _Vertices(vertices), _eos(eos), 
+(const PhysicalGeometry1D& pg,
+ const vector<double>& vertices,
+ const SpatialReconstruction1D& Interpolation,
+ const SpatialDistribution1D& density,
+ const SpatialDistribution1D& pressure,
+ const SpatialDistribution1D& paravelocity,
+ const SpatialDistribution1D& perpvelocity,
+ const EquationOfState& eos,
+ const RiemannSolver& rs,
+ const VertexMotion& vm,
+ const BoundaryConditions1D& bc,
+ const ExternalForces1D& force):
+  pg_(pg),
+  _Vertices(vertices), 
+  _eos(eos), 
   _Cells(InitialiseCells(vertices, density, pressure,
 			 paravelocity, perpvelocity, eos)),
   _Fluxes(vector<Conserved>(vertices.size())),
