@@ -235,12 +235,15 @@ namespace {
   }
 
   void UpdateConservedExtensive
-  (vector<Conserved> const& Fluxes, double dt,
+  (const vector<Conserved>& Fluxes, 
+   double dt,
+   const vector<double>& vertices,
+   const PhysicalGeometry1D& pg,
    vector<Conserved>& ConservedExtensive)
   {
     for(size_t i = 0; i<ConservedExtensive.size(); i++){
-      ConservedExtensive[i] += dt*Fluxes[i];
-      ConservedExtensive[i] -= dt*Fluxes[i+1];
+      ConservedExtensive[i] += dt*pg.calcArea(vertices.at(i))*Fluxes.at(i);
+      ConservedExtensive[i] -= dt*pg.calcArea(vertices.at(i))*Fluxes.at(i+1);
     }
   }
 
@@ -314,7 +317,12 @@ void hdsim1D::TimeAdvance(void)
 
   cold_flows_.advanceEntropies(_Fluxes,_ConservedExtensive,dt);
 
-  UpdateConservedExtensive(_Fluxes, dt, _ConservedExtensive);
+  UpdateConservedExtensive
+    (_Fluxes, 
+     dt, 
+     _Vertices,
+     pg_,
+     _ConservedExtensive);
 
   force_contribution(_Vertices, _Cells,
 		     force_, time_, dt, 
@@ -353,7 +361,12 @@ void hdsim1D::TimeAdvance2(void)
   cold_flows_.advanceEntropies(mid_fluxes, _ConservedExtensive, dt/2);
 
   vector<Conserved> mid_extensive = _ConservedExtensive;
-  UpdateConservedExtensive(mid_fluxes,dt/2,mid_extensive);
+  UpdateConservedExtensive
+    (mid_fluxes,
+     dt/2,
+     _Vertices,
+     pg_,
+     mid_extensive);
   force_contribution(_Vertices, _Cells,
 		     force_, time_, dt/2,
 		     mid_extensive);
@@ -382,7 +395,12 @@ void hdsim1D::TimeAdvance2(void)
 
   cold_flows_.advanceEntropies(_Fluxes,_ConservedIntensive,dt);
 
-  UpdateConservedExtensive(_Fluxes, dt, _ConservedExtensive);
+  UpdateConservedExtensive
+    (_Fluxes, 
+     dt, 
+     _Vertices,
+     pg_,
+     _ConservedExtensive);
 
   force_contribution(mid_vertices, mid_cells,
 		     force_, time_, dt,
@@ -403,7 +421,8 @@ void hdsim1D::TimeAdvance2(void)
 
 namespace{
   HydroSnapshot1D time_advance_1st_order
-    (const HydroSnapshot1D& old,
+    (const PhysicalGeometry1D& pg,
+     const HydroSnapshot1D& old,
      const VertexMotion& vm,
      const SpatialReconstruction1D& sr,
      const RiemannSolver& rs,
@@ -419,7 +438,12 @@ namespace{
       (old.edges,old.cells,sr,edge_velocity,rs,bc,dt);
 
     vector<Conserved> extensive = old.extensive;
-    UpdateConservedExtensive(fluxes,dt,extensive);
+    UpdateConservedExtensive
+      (fluxes,
+       dt,
+       old.edges,
+       pg,
+       extensive);
     force_contribution(old.edges,
 		       old.cells,
 		       force,
@@ -437,17 +461,19 @@ namespace{
   }
 
   HydroSnapshot1D time_advance_2nd_order
-    (HydroSnapshot1D const& old,
-     VertexMotion const& vm,
-     SpatialReconstruction1D const& sr,
-     RiemannSolver const& rs,
-     BoundaryConditions1D const& bc,
-     EquationOfState const& eos,
-     ExternalForces1D const& force,
-     double t, double dt)
+    (const PhysicalGeometry1D& pg,
+     const HydroSnapshot1D& old,
+     const VertexMotion& vm,
+     const SpatialReconstruction1D& sr,
+     const RiemannSolver& rs,
+     const BoundaryConditions1D& bc,
+     const EquationOfState& eos,
+     const ExternalForces1D& force,
+     double t, 
+     double dt)
   {
     const HydroSnapshot1D mid = time_advance_1st_order
-      (old,vm,sr,rs,bc,eos,force,t,dt/2);
+      (pg, old,vm,sr,rs,bc,eos,force,t,dt/2);
 
     const vector<double> edge_velocity = CalcVertexVelocities
       (mid.edges,mid.cells,vm);
@@ -456,7 +482,12 @@ namespace{
       (mid.edges,mid.cells,sr,edge_velocity,rs,bc,dt);
 
     vector<Conserved> new_extensive = old.extensive;
-    UpdateConservedExtensive(fluxes,dt,new_extensive);
+    UpdateConservedExtensive
+      (fluxes,
+       dt,
+       old.edges,
+       pg,
+       new_extensive);
     force_contribution(mid.edges,
 		       mid.cells,
 		       force,
@@ -484,7 +515,8 @@ void hdsim1D::TimeAdvanceRK(int order)
   const double dt = _cfl*MaxTimeStep(_Vertices, _Cells);
   if(1==order){
     HydroSnapshot1D res = time_advance_1st_order
-      (HydroSnapshot1D(_Vertices,_Cells,
+      (pg_,
+       HydroSnapshot1D(_Vertices,_Cells,
 		       _ConservedIntensive,
 		       _ConservedExtensive),
        _vm, _Interpolation, _rs, _bc, _eos, 
@@ -496,7 +528,8 @@ void hdsim1D::TimeAdvanceRK(int order)
   }
   else if(2==order){
     HydroSnapshot1D res = time_advance_2nd_order
-      (HydroSnapshot1D(_Vertices,_Cells,
+      (pg_,
+       HydroSnapshot1D(_Vertices,_Cells,
 		       _ConservedIntensive,
 		       _ConservedExtensive),
        _vm, _Interpolation, _rs, _bc, _eos, 
