@@ -13,6 +13,7 @@
 #include "spatial_reconstruction1d.hpp"
 #include "boundary_conditions_1d.hpp"
 #include "source_term_1d.hpp"
+#include "physical_geometry_1d.hpp"
 
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
@@ -95,6 +96,8 @@ class hdsim1D
 {
 private:
 
+  const PhysicalGeometry1D& pg_;
+
   vector<double> _Vertices;
 
   EquationOfState const& _eos;
@@ -146,17 +149,19 @@ public:
     \param bc Boundary conditions
     \param force External force
   */
-  hdsim1D(vector<double> const& vertices,
-	  SpatialReconstruction1D const& Interpolation,
-	  SpatialDistribution1D const& density,
-	  SpatialDistribution1D const& pressure,
-	  SpatialDistribution1D const& paravelocity,
-	  SpatialDistribution1D const& perpvelocity,
-	  EquationOfState const& eos,
-	  RiemannSolver const& rs,
-	  VertexMotion const& vm,
-	  BoundaryConditions1D const& bc,
-	  ExternalForces1D const& force);
+  hdsim1D
+  (const PhysicalGeometry1D& pg,
+   const vector<double>& vertices,
+   const SpatialReconstruction1D& Interpolation,
+   const SpatialDistribution1D& density,
+   const SpatialDistribution1D& pressure,
+   const SpatialDistribution1D& paravelocity,
+   const SpatialDistribution1D& perpvelocity,
+   const EquationOfState& eos,
+   const RiemannSolver& rs,
+   const VertexMotion& vm,
+   const BoundaryConditions1D& bc,
+   const ExternalForces1D& force);
 
   /*! \brief Changes the value of the Courant Friedrichs Levy coefficient
     \param cfl New value of cfl number

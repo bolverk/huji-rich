@@ -55,6 +55,7 @@ class SimData
 public:
 
   SimData(void):
+    pg_(),
     edges_(linspace(0,1,100)),
     pcm_(),
     plm_naive_(),
@@ -70,17 +71,19 @@ public:
     right_bc_(),
     bc_(left_bc_,right_bc_),
     force_(),
-    sim_(edges_,
-	 interpm_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
-	 eos_,
-	 rs_,
-	 vm_,
-	 bc_,
-	 force_) {}
+    sim_
+    (pg_,
+     edges_,
+     interpm_,
+     density_,
+     pressure_,
+     xvelocity_,
+     yvelocity_,
+     eos_,
+     rs_,
+     vm_,
+     bc_,
+     force_) {}
 
   hdsim1D& getSim(void)
   {
@@ -88,7 +91,7 @@ public:
   }
 
 private:
-
+  const SlabSymmetry1D pg_;
   const vector<double> edges_;
   const PCM1D pcm_;
   const PLM1D plm_naive_;

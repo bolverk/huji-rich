@@ -64,15 +64,17 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(edges_,
-	 interpm_,
-	 init_cond_.getProfile("density"),
-	 init_cond_.getProfile("pressure"),
-	 init_cond_.getProfile("xvelocity"),
-	 init_cond_.getProfile("yvelocity"),
-	 init_cond_.getEOS(),
-	 rs_, vm_, bc_,
-	 force_) {}
+    sim_
+    (pg_,
+     edges_,
+     interpm_,
+     init_cond_.getProfile("density"),
+     init_cond_.getProfile("pressure"),
+     init_cond_.getProfile("xvelocity"),
+     init_cond_.getProfile("yvelocity"),
+     init_cond_.getEOS(),
+     rs_, vm_, bc_,
+     force_) {}
 
   hdsim1D& getSim(void)
   {
@@ -80,6 +82,7 @@ public:
   }
   
 private:
+  const SlabSymmetry1D pg_;
   const vector<double> edges_;
   CollelaSimpleWave init_cond_;
   PLM1D naive_;

@@ -64,17 +64,19 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(vertices_,
-	 interpm_,
-	 density_,
-	 pressure_,
-	 xvelocity_,
-	 yvelocity_,
-	 eos_,
-	 rs_,
-	 vm_,
-	 bc_,
-	 force_) {}
+    sim_
+    (pg_,
+     vertices_,
+     interpm_,
+     density_,
+     pressure_,
+     xvelocity_,
+     yvelocity_,
+     eos_,
+     rs_,
+     vm_,
+     bc_,
+     force_) {}
 
   hdsim1D& getSim(void)
   {
@@ -82,6 +84,7 @@ public:
   }
 
 private:
+  const SlabSymmetry1D pg_;
   const vector<double> vertices_;
   const IdealGas eos_;
   PCM1D pcm_;

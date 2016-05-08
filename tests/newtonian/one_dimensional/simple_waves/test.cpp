@@ -60,7 +60,8 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(edges_,
+    sim_(pg_,
+	 edges_,
 	 interpm_,
 	 init_cond_.getProfile("density"),
 	 init_cond_.getProfile("pressure"),
@@ -76,6 +77,7 @@ public:
   }
   
 private:
+  const SlabSymmetry1D pg_;
   vector<double> edges_;
   PCM1D interpm_;
   CollelaSimpleWave init_cond_;

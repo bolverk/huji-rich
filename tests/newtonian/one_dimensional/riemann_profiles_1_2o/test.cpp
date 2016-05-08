@@ -87,7 +87,8 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(linspace(0,1,read_int("resolution.txt")),
+    sim_(pg_,
+	 linspace(0,1,read_int("resolution.txt")),
 	 interpm_,
 	 Uniform(1),
 	 Step(10,1,0.5),
@@ -105,6 +106,7 @@ public:
   }
 
 private:
+  const SlabSymmetry1D pg_;
   const IdealGas eos_;
   PLM1D plm_naive_;
   EOSConsistent interpm_;

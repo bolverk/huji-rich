@@ -64,7 +64,8 @@ namespace {
       right_bc_(),
       bc_(left_bc_,right_bc_),
       force_(),
-      sim_(edges_,
+      sim_(pg_,
+	   edges_,
 	   interpm_,
 	   density_,
 	   pressure_,
@@ -82,7 +83,7 @@ namespace {
     }
 
   private:
-    
+    const SlabSymmetry1D pg_;
     const vector<double> edges_;
     const PCM1D interpm_;
     const Uniform density_;

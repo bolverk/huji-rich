@@ -36,7 +36,8 @@ public:
     vm_(false),
     bc_(),
     force_(),
-    sim_(vertices_,
+    sim_(pg_,
+	 vertices_,
 	 interpm_,
 	 density_,
 	 pressure_,
@@ -54,7 +55,7 @@ public:
   }
 
 private:
-
+  const SlabSymmetry1D pg_;
   const vector<double> vertices_;
   PCM1D interpm_;
   const Uniform density_;

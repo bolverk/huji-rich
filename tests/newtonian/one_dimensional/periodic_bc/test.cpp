@@ -35,7 +35,8 @@ public:
     vm_(),
     bc_(),
     force_(),
-    sim_(vertices_,
+    sim_(pg_,
+	 vertices_,
 	 interpm_,
 	 init_cond_.getProfile("density"),
 	 init_cond_.getProfile("pressure"),
@@ -54,6 +55,7 @@ public:
   }
 
 private:
+  const SlabSymmetry1D pg_;
   const vector<double> vertices_;
   PCM1D interpm_;
   const IdealGas eos_;
