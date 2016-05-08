@@ -3,6 +3,11 @@
 using namespace std;
 typedef boost::mt19937_64 base_generator_type;
 
+std::vector<Vector2D> RandSquare(int PointNum, Vector2D const& lowerleft, Vector2D const& upperright)
+{
+	return RandSquare(PointNum, lowerleft.x, upperright.x, lowerleft.y, upperright.y);
+}
+
 vector<Vector2D> RandPointsRmax(int PointNum, double Rmin, double Rmax,
 	double xc, double yc)
 {

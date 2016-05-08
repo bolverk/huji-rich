@@ -133,14 +133,24 @@ std::vector<Vector2D> RandPointsR(int PointNum,double xl=-0.5,double xr=0.5,
 /*!
   \brief Generates a random rectangular grid with uniform point density and a constant seed
   \param PointNum The number of points.
-  \param xl The left boundary
-  \param xr The right boundary
-  \param yd The lower boundary
-  \param yu The upper boundary
+  \param lowerleft The lower left point of the domain
+  \param upperright The upper right point of the domain
   \return List of two dimensional points
 */
-std::vector<Vector2D> RandSquare(int PointNum,double xl=-0.5,double xr=0.5,
-			    double yd=-0.5,double yu=0.5);
+std::vector<Vector2D> RandSquare(int PointNum,Vector2D const& lowerleft, Vector2D const& upperright);
+
+
+/*!
+\brief Generates a random rectangular grid with uniform point density and a constant seed
+\param PointNum The number of points.
+\param xl The left boundary
+\param xr The right boundary
+\param yd The lower boundary
+\param yu The upper boundary
+\return List of two dimensional points
+*/
+std::vector<Vector2D> RandSquare(int PointNum, double xl = -0.5, double xr = 0.5,
+	double yd = -0.5, double yu = 0.5);
 
 /*!
   \brief Generates a random rectangular grid with uniform point density. This is when reseting the seed between calls isn't wanted
