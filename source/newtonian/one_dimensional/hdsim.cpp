@@ -252,7 +252,7 @@ namespace {
   {
     for(size_t i = 0; i<ConservedExtensive.size(); i++){
       ConservedExtensive[i] += dt*pg.calcArea(vertices.at(i))*Fluxes.at(i);
-      ConservedExtensive[i] -= dt*pg.calcArea(vertices.at(i))*Fluxes.at(i+1);
+      ConservedExtensive[i] -= dt*pg.calcArea(vertices.at(i+1))*Fluxes.at(i+1);
     }
   }
 
