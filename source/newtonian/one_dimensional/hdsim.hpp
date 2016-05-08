@@ -137,6 +137,7 @@ private:
 public:
 
   /*! \brief Class constructor
+    \param pg Physical geometry
     \param vertices Vertices
     \param Interpolation Interpolation method
     \param density Initial spatial density distribution

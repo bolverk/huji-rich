@@ -1,4 +1,4 @@
-/*! \file physical_geomtry_1d.hpp
+/*! \file physical_geometry_1d.hpp
   \author Almog Yalinewich
   \brief Physical geometry of the grid
 */
@@ -22,6 +22,8 @@ public:
     \return Volume
    */
   virtual double calcVolume(double radius) const = 0;
+
+  virtual ~PhysicalGeometry1D(void);
 };
 
 //! \brief Planar geometry

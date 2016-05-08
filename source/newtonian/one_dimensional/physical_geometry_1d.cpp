@@ -1,6 +1,8 @@
 #include <cmath>
 #include "physical_geometry_1d.hpp"
 
+PhysicalGeometry1D::~PhysicalGeometry1D(void) {}
+
 SlabSymmetry1D::SlabSymmetry1D(void) {}
 
 double SlabSymmetry1D::calcArea(double /*radius*/) const

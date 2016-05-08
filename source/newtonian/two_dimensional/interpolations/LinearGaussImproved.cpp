@@ -482,7 +482,8 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time, tracerstikersnames);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell> new_cells(cells);
-	new_cells.resize(tess.GetTotalPointNumber());
+	new_cells.resize
+	  (static_cast<size_t>(tess.GetTotalPointNumber()));
 	for (boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.begin(); it !=
 		ghost_cells.end(); ++it)
 		new_cells[it->first] = it->second;
