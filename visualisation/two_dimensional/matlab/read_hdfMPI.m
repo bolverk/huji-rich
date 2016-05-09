@@ -32,6 +32,20 @@ for i=1:length(h.Groups)
         break;
     end
 end
+
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/geometry')==1)
+        g_index=i;
+        for j=1:length(h.Groups(i).Datasets)
+            if(strcmp(h.Groups(i).Datasets(j).Name,'x_coordinate')==1)
+                x_index=j;
+                break;
+            end
+        end
+        break;
+    end
+end
+
 NumberOfTracers=length(h.Groups(tracerindex).Datasets);
 time=h5read(strcat(filename,sprintf('_%d.h5',0)),'/time');
 
@@ -39,7 +53,7 @@ npoints=0;
 for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
     a=h5info(fname);
-    npoints=npoints+a.Groups(3).Datasets(1).ChunkSize;
+    npoints=npoints+a.Groups(g_index).Datasets(x_index).Dataspace.Size;
 end
 maxfaces=0;
 for i=0:nproc-1
