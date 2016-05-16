@@ -45,11 +45,11 @@ public:
 	  double dt, vector<Vector2D> const& velocities, TracerStickerNames const& tracerstickernames)const;
 private:
 
-  Vector2D calc_dw(size_t i,
-		   const Tessellation& tess,
-		   const vector<ComputationalCell>& cells) const;
+  Vector2D calc_dw(size_t i, const Tessellation& tess,const vector<ComputationalCell>& cells,
+	  TracerStickerNames const& tracerstickernames) const;
 
-  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells)const;
+  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells,
+	  TracerStickerNames const& tracerstickernames)const;
 
   const PointMotion& pm_;
   const EquationOfState& eos_;
