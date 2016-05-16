@@ -11,7 +11,8 @@ namespace
 	{
 		Vector2D dm;
 		vector<int> edge_index = tess.GetCellEdges(point);
-		Vector2D center = tess.GetCellCM(point);
+		//Vector2D center = tess.GetCellCM(point);
+		Vector2D center = tess.GetMeshPoint(point);
 		int n = static_cast<int>(edge_index.size());
 		Edge edge;
 		for (int i = 0; i < n; ++i)
@@ -20,13 +21,15 @@ namespace
 			if (point == edge.neighbors.first)
 			{
 				dm -= edge.GetLength() * fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].mass *
-					(center - 0.5*(edge.vertices.first + edge.vertices.second));
+					//(center - 0.5*(edge.vertices.first + edge.vertices.second));
+					(center - tess.GetMeshPoint(edge.neighbors.second));
 			}
 			else
 				if (point == edge.neighbors.second)
 				{
 					dm += edge.GetLength() * fluxes[static_cast<size_t>(edge_index[static_cast<size_t>(i)])].mass *
-						(center - 0.5*(edge.vertices.first + edge.vertices.second));
+						//(center - 0.5*(edge.vertices.first + edge.vertices.second));
+						(center - tess.GetMeshPoint(edge.neighbors.first));
 				}
 				else
 					throw UniversalError("Error in ConservativeForce MassFlux: Cell and edge are not mutual neighbors");
