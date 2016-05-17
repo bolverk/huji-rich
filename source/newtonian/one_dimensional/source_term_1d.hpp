@@ -12,7 +12,7 @@
 using std::vector;
 
 //! \brief Abstract class for external forces
-class ExternalForces1D
+class SourceTerm1D
 {
 public:
 
@@ -24,14 +24,14 @@ public:
     \param dt Time step
     \return Value of the external force
    */
-  virtual Conserved calc
+  virtual Conserved operator()
   (vector<double> const& vertices,
    vector<Primitive> const& cells,
-   int point,
+   size_t point,
    double t,
    double dt) const = 0;
 
-  virtual ~ExternalForces1D(void);
+  virtual ~SourceTerm1D(void);
 };
 
 #endif // EXTERNAL_FORCES_1D_HPP

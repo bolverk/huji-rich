@@ -19,7 +19,7 @@ using namespace simulation1d;
 using namespace diagnostics1d;
 
 namespace {
-class PeriodicDriver: public ExternalForces1D
+class PeriodicDriver: public SourceTerm1D
 {
 public:
 
@@ -30,10 +30,10 @@ public:
     amp_(amplitude),
     v_(phase_velocity) {}
 
-  Conserved calc
+  Conserved operator()
   (vector<double> const& vertices,
    vector<Primitive> const& cells,
-   int point,
+   size_t point,
    double t,
    double /*dt*/) const
   {

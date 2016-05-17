@@ -9,13 +9,13 @@
 #include "source_term_1d.hpp"
 
 //! \brief Zero external force
-class ZeroForce1D: public ExternalForces1D
+class ZeroForce1D: public SourceTerm1D
 {
 public:
-  Conserved calc
+  Conserved operator()
   (vector<double> const& vertices,
    vector<Primitive> const& cells,
-   int point,
+   size_t point,
    double t,
    double dt) const;
 };

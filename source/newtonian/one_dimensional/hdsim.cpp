@@ -129,7 +129,7 @@ hdsim1D::hdsim1D
  const RiemannSolver& rs,
  const VertexMotion& vm,
  const BoundaryConditions1D& bc,
- const ExternalForces1D& force):
+ const SourceTerm1D& force):
   pg_(pg),
   _Vertices(vertices), 
   _eos(eos), 
@@ -297,16 +297,16 @@ namespace {
   void force_contribution
   (vector<double> const& vertices,
    vector<Primitive> const& cells,
-   ExternalForces1D const& force,
+   const SourceTerm1D& force,
    double t,
    double dt,
    vector<Conserved>& extensive)
   {
     for(size_t i=0;i<extensive.size();++i)
       extensive[i] +=
-	dt*force.calc(vertices,
-		      cells,
-		      int(i), t, dt); 
+	dt*force(vertices,
+		 cells,
+		 i, t, dt); 
   }
 }
 
@@ -441,7 +441,7 @@ namespace{
      const RiemannSolver& rs,
      const BoundaryConditions1D& bc,
      const EquationOfState& eos,
-     const ExternalForces1D& force,
+     const SourceTerm1D& force,
      double t, double dt)
   {
     const vector<double> edge_velocity = CalcVertexVelocities
@@ -482,7 +482,7 @@ namespace{
      const RiemannSolver& rs,
      const BoundaryConditions1D& bc,
      const EquationOfState& eos,
-     const ExternalForces1D& force,
+     const SourceTerm1D& force,
      double t, 
      double dt)
   {

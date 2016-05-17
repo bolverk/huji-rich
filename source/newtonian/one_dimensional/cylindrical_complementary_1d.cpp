@@ -3,10 +3,10 @@
 
 CylindricalComplementary1D::CylindricalComplementary1D(void) {}
 
-Conserved CylindricalComplementary1D::calc
+Conserved CylindricalComplementary1D::operator()
 (const vector<double>& vertices,
  const vector<Primitive>& cells,
- int point,
+ size_t point,
  double /*t*/,
  double /*dt*/) const
 {

@@ -1,3 +1,3 @@
 #include "source_term_1d.hpp"
 
-ExternalForces1D::~ExternalForces1D(void) {}
+SourceTerm1D::~SourceTerm1D(void) {}

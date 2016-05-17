@@ -120,7 +120,7 @@ private:
 
   BoundaryConditions1D const& _bc;
 
-  ExternalForces1D const& force_;
+  SourceTerm1D const& force_;
 
   double _cfl;
 
@@ -162,7 +162,7 @@ public:
    const RiemannSolver& rs,
    const VertexMotion& vm,
    const BoundaryConditions1D& bc,
-   const ExternalForces1D& force);
+   const SourceTerm1D& force);
 
   /*! \brief Changes the value of the Courant Friedrichs Levy coefficient
     \param cfl New value of cfl number

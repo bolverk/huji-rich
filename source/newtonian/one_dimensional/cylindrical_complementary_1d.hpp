@@ -2,16 +2,16 @@
 
 //! \brief Complementary source term for spherical simulations
 //! \todo Change name to spherical complementary
-class CylindricalComplementary1D: public ExternalForces1D
+class CylindricalComplementary1D: public SourceTerm1D
 {
 public:
 
   CylindricalComplementary1D(void);
 
-  Conserved calc
+  Conserved operator()
   (const vector<double>& vertices,
    const vector<Primitive>& cells,
-   int point,
+   size_t point,
    double t,
    double dt) const;
 };

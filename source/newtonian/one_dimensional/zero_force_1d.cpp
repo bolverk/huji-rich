@@ -1,9 +1,9 @@
 #include "zero_force_1d.hpp"
 
-Conserved ZeroForce1D::calc
+Conserved ZeroForce1D::operator()
 (vector<double> const& /*vertices*/,
  vector<Primitive> const& /*cells*/,
- int /*point*/,
+ size_t /*point*/,
  double /*t*/,
  double /*dt*/) const
 {
