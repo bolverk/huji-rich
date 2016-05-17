@@ -16,7 +16,7 @@ public:
     \param M The mass of the point source
     \param Rmin The softenning length
     \param center The location of the point source
-	\param Rsfot The maximum radius where the sofetning length applies to
+    \param Rsoft The maximum radius where the sofetning length applies to
   */
   ImprovedCenterGravity(double M,double Rmin,const Vector2D& center,double Rsoft=0);
 
