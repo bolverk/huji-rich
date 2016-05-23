@@ -21,6 +21,9 @@ using std::vector;
 template<class T>
 void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_sent)
 {
+	if (cells.empty())
+		throw UniversalError("Empty cell vector in MPI_exchange_data");
+	T example_cell = cells[0];
 	vector<int> correspondents;
 	vector<vector<int> > duplicated_points;
 	if (ghost_or_sent)
@@ -68,7 +71,7 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 				correspondents.begin());
 			if (location >= correspondents.size())
 				throw UniversalError("Bad location in mpi exchange");
-			torecv[location] = list_unserialize(temprecv, cells[0]);
+			torecv[location] = list_unserialize(temprecv, example_cell);
 		}
 		else
 		{
