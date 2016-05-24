@@ -96,7 +96,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity));
 	}
 	const double c_dt = d / dt;
-	return chi_*std::min(c_dt,3 * cs)*(s - r) / R;
+	return chi_*std::min(c_dt,cs)*(s - r) / R;
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
