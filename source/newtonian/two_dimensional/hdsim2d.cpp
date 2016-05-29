@@ -44,8 +44,9 @@ namespace
 		const EquationOfState& eos,
 		TracerStickerNames const& tracernames)
 	{
-		vector<Extensive> res(cells.size());
-		for (size_t i = 0; i < cells.size(); ++i)
+		size_t Nloop = tess.GetPointNo();
+		vector<Extensive> res(Nloop);
+		for (size_t i = 0; i < Nloop; ++i)
 		{
 			const ComputationalCell& cell = cells[i];
 			const double volume =
