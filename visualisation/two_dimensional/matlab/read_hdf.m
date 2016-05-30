@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Matlab script to read RICH binary files in float/double format
 %
@@ -6,8 +6,7 @@ function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPoi
 %             ShouldPlot - 2: indicates to the current figure, 1: indicates
 %             that a new figure is wanted 0: no plot
 %             WhatToPlot - 1: density, 2: pressure, 3: pressure/density, 4:
-%             Entropy (assuming gamma=5/3), 5: Tracer (assuming
-%             tracerindex=1)
+%             Entropy (assuming gamma=5/3), 5: Tracer
 %             LogScale - 1 Plot Log scaled, 0 linear scale
 %             edgestrength - The intensity of line edges around each
 %             voronoi cell. Values are from 0 to 1 with 1 being very strong
@@ -34,17 +33,23 @@ if(nargin==1),
     WhatToPlot=1;
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==2),
     ShouldPlot=0;
     WhatToPlot=1;
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==3),
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==4),
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==5),
+    tracernametoplot=0;
+elseif (nargin==6),
     % do nothing
 else
     error('Illegal number of input arguments');
@@ -161,7 +166,13 @@ if(ShouldPlot==1||ShouldPlot==2)
                 patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
             end
         case 5
-            tracerindex=1;
+            if(tracernametoplot==0)
+                error('No tracer name given');
+            end
+            tracerindex=find(strcmp(a,tracernametoplot));
+            if(isempty(tracerindex))
+                error('No tracer with given name');
+            end
             if(Log==1)
                 caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
                 patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);

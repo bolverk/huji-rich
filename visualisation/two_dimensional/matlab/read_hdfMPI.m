@@ -1,20 +1,26 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
 if(nargin==3),
     ShouldPlot=0;
     WhatToPlot=1;
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==4),
     ShouldPlot=0;
     WhatToPlot=1;
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==5),
     LogScale=0;
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==6),
     edgestrength=0;
+    tracernametoplot=0;
 elseif (nargin==7),
+    tracernametoplot=0;
+elseif (nargin==8),
     % do nothing
 else
     error('Illegal number of input arguments');
@@ -167,7 +173,13 @@ if(ShouldPlot==1||ShouldPlot==2)
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
                 end
             case 5
-                tracerindex=1;
+                if(tracernametoplot==0)
+                    error('No tracer name given');
+                end
+                tracerindex=find(strcmp(a,tracernametoplot));
+                if(isempty(tracerindex))
+                    error('No tracer with given name');
+                end
                 if(LogScale==1)
                     caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
                     patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',edgestrength);
