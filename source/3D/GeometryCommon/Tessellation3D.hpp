@@ -7,9 +7,7 @@
 #define TESSELLATION3D_HPP 1
 
 #include <vector>
-#include "HilbertOrder3D.hpp"
 #include "Face.hpp"
-#include "OuterBoundary3D.hpp"
 
 using std::vector;
 
@@ -20,17 +18,10 @@ class Tessellation3D
 {
 public:
 
-	/*! \brief Initialises the tessellation
+	/*! \brief Builds the tessellation
 	\param points Initial position of mesh generating points
-	\param bc Boundary conditions of the computational domain
 	*/
-	virtual void Initialise(vector<Vector3D> const& points, OuterBoundary3D const* bc) = 0;
-
-	/*!
-	\brief Update the tessellation
-	\param points The new positions of the mesh generating points
-	*/
-	virtual void Update(vector<Vector3D> const& points) = 0;
+	virtual void Build(vector<Vector3D> const& points) = 0;
 
 
 	/*! \brief Get Total number of mesh generating points
@@ -44,6 +35,13 @@ public:
 	*/
 	virtual Vector3D GetMeshPoint(size_t index) const = 0;
 
+	/*! \brief Returns Area of face
+	\param index The index of the face
+	\return The area of the face
+	*/
+	virtual double GetArea(size_t index) const = 0;
+
+
 	/*! \brief Returns Position of Cell's Center of Mass
 	\param index Mesh generating point index (the cell's index)
 	\return Position of CM
@@ -54,12 +52,6 @@ public:
 	\return Total number of faces
 	*/
 	virtual size_t GetTotalFacesNumber(void) const = 0;
-
-	/*! \brief Returns Face (interface between cells)
-	\param index Face index
-	\return Interface between cells
-	*/
-	virtual Face const& GetFace(size_t index) const = 0;
 
 	/*! \brief Returns the effective width of a cell
 	\param index Cell index
@@ -79,11 +71,24 @@ public:
 	*/
 	virtual vector<size_t>const& GetCellFaces(size_t index) const = 0;
 
-		/*!
+	/*!
 	\brief Returns a reference to the point vector
 	\returns The reference
 	*/
 	virtual vector<Vector3D>& GetMeshPoints(void) = 0;
+
+	/*!
+	\brief Returns a reference to the points composing the faces vector
+	\returns The reference
+	*/
+	virtual vector<Vector3D>const& GetFacePoints(void) const = 0;
+
+	/*!
+	\brief Returns a reference to the indeces of the points composing a face
+	\param index The index of the face
+	\returns The reference
+	*/
+	virtual vector<size_t>const& GetPointsInFace(size_t index) const = 0;
 
 	/*!
 	\brief Returns a list of the neighbors of a cell
@@ -161,14 +166,12 @@ public:
 
 	/*!
 	\brief Calculates the velocity of a face
-	\param p0 The index of the first neighbor
-	\param p1 The index of the second neighbor
+	\param index The face index
 	\param v0 The velocity of the first neighbor
 	\param v1 The velocity of the second neighbor
 	\return The velocity of the face
 	*/
-	virtual Vector3D CalcFaceVelocity(size_t p0,size_t p1,Vector3D const& v0,
-		Vector3D const& v1)const=0;
+	virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
 };
 
 #endif // TESSELLATION3D_HPP
