@@ -179,7 +179,9 @@ namespace
 		ComputationalCell &cmax,
 		ComputationalCell &cmin,
 		ComputationalCell &maxdiff,
-		ComputationalCell &mindiff)
+		ComputationalCell &mindiff,
+		TracerStickerNames const& tracerstickernames,
+		string const& skip_key)
 	{
 		ReplaceComputationalCell(cmax, cell);
 		ReplaceComputationalCell(cmin, cell);
@@ -188,6 +190,8 @@ namespace
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
+			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
 			cmax.velocity.x = std::max(cmax.velocity.x, cell_temp.velocity.x);
@@ -292,13 +296,16 @@ namespace
 
 	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<const Edge*> const& edge_list,
-		Slope  &slope, double diffusecoeff)
+		Slope  &slope, double diffusecoeff,TracerStickerNames const& tracerstickernames,
+		string const& skip_key)
 	{
 		ComputationalCell cmax(cell), cmin(cell);
 		// Find maximum values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
+			if (safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
 			cmax.velocity.x = std::max(cmax.velocity.x, cell_temp.velocity.x);
@@ -318,6 +325,8 @@ namespace
 		vector<double> psi(4 + cell.tracers.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
+			if (!skip_key.empty() && safe_retrieve(neighbors[i]->stickers, tracerstickernames.sticker_names, skip_key))
+				continue;
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
 			// density
@@ -398,7 +407,8 @@ namespace
 			vector<const Edge *> const& edge_list,
 			vector<Vector2D> &neighbor_mesh_list,
 			vector<Vector2D> &neighbor_cm_list,
-			TracerStickerNames const& tracerstickernames)
+			TracerStickerNames const& tracerstickernames,
+			string const& skip_key)
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
 		GetNeighborCM(tess, edge_list, cell_index, neighbor_cm_list);
@@ -426,11 +436,11 @@ namespace
 				eos.dp2c(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names)))
 			{
 				slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, temp2, temp3,
-					temp4, temp5);
+					temp4, temp5,tracerstickernames,skip_key);
 			}
 			else
 			{
-				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff);
+				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff,tracerstickernames,skip_key);
 			}
 		}
 	}
@@ -451,7 +461,8 @@ LinearGaussImproved::LinearGaussImproved
 	double delta_v,
 	double theta,
 	double delta_P,
-	const vector<string>& flat_tracers) :
+	const vector<string>& flat_tracers,
+	string skip_key) :
 	eos_(eos),
 	ghost_(ghost),
 	rslopes_(),
@@ -460,7 +471,8 @@ LinearGaussImproved::LinearGaussImproved
 	shockratio_(delta_v),
 	diffusecoeff_(theta),
 	pressure_ratio_(delta_P),
-	flat_tracers_(flat_tracers) {}
+	flat_tracers_(flat_tracers),
+	skip_key_(skip_key){}
 
 #ifdef RICH_MPI
 namespace
@@ -504,7 +516,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
-			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames);
+			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{
