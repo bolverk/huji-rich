@@ -304,7 +304,7 @@ namespace
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
-			if (safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
