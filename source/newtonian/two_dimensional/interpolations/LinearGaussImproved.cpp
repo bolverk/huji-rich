@@ -67,8 +67,7 @@ namespace
 	void calc_naive_slope(ComputationalCell const& cell,
 		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<const Edge*> const& edge_list,
-		Slope &res,
-		Slope &vec_compare)
+		Slope &res,Slope &vec_compare,CacheData const& cd,vector<int> const& edge_index)
 	{
 		size_t n = edge_list.size();
 		if (n > 20)
@@ -83,7 +82,7 @@ namespace
 		for (size_t i = 0; i < edge_list.size(); ++i)
 		{
 			const Vector2D c_ij = CalcCentroid(*edge_list[i]) - 0.5*(neigh_cm[i] + cell_cm);
-			const double e_length = edge_list[i]->GetLength();
+			const double e_length = cd.areas[static_cast<size_t>(edge_index[i])];
 			const Vector2D r_ij = normalize(neighbor_centers[i] - center)*e_length;
 			m[0] -= c_ij.x*r_ij.x;
 			m[1] -= c_ij.y*r_ij.x;
@@ -408,7 +407,9 @@ namespace
 			vector<Vector2D> &neighbor_mesh_list,
 			vector<Vector2D> &neighbor_cm_list,
 			TracerStickerNames const& tracerstickernames,
-			string const& skip_key)
+			string const& skip_key,
+			CacheData const& cd,
+			vector<int> const& edge_index)
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
 		GetNeighborCM(tess, edge_list, cell_index, neighbor_cm_list);
@@ -416,8 +417,8 @@ namespace
 
 		ComputationalCell const& cell = cells[cell_index];
 		calc_naive_slope(cell, tess.GetMeshPoint(static_cast<int>(cell_index)), tess.GetCellCM(static_cast<int>(cell_index)),
-			tess.GetVolume(static_cast<int>(cell_index)), neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list,
-			res, temp1);
+			cd.volumes[cell_index], neighbor_list, neighbor_mesh_list, neighbor_cm_list, edge_list,
+			res, temp1,cd,edge_index);
 
 		naive_slope_ = res;
 
@@ -486,7 +487,7 @@ namespace
 
 void LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells, double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-	TracerStickerNames const& tracerstikersnames) const
+	TracerStickerNames const& tracerstikersnames,CacheData const& cd) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	vector<int> boundaryedges;
@@ -516,7 +517,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
-			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_);
+			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_,cd,edge_index);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{

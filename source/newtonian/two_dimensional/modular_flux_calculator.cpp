@@ -37,13 +37,13 @@ namespace
 }
 
 vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess, const vector<Vector2D>& edge_velocities,
-	const vector<ComputationalCell>& cells, const vector<Extensive>& /*extensives*/, const CacheData& /*cd*/,
+	const vector<ComputationalCell>& cells, const vector<Extensive>& /*extensives*/, const CacheData& cd,
 	const EquationOfState& eos, const double time, const double /*dt*/,
 	TracerStickerNames const& tracerstickernames) const
 {
 	interpolated_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
-	sr_(tess, cells, time, interpolated_, tracerstickernames);
+	sr_(tess, cells, time, interpolated_, tracerstickernames,cd);
 	vector<bool> flags(static_cast<size_t>(tess.getAllEdges().size()), false);
 	vector<Extensive> res(tess.getAllEdges().size());
 	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
