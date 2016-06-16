@@ -75,6 +75,7 @@ private:
 	const double pressure_ratio_;
 	const vector<string> flat_tracers_;
 	const string skip_key_;
+	mutable vector<size_t> to_skip_;
 
 	LinearGaussImproved
 		(const LinearGaussImproved& origin);
