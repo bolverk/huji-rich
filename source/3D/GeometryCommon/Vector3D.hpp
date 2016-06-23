@@ -211,4 +211,6 @@ Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2);
 */
 void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & vY, vector<double> & vZ);
 
+Vector3D normalize(Vector3D const& vec);
+
 #endif // Vector3D_HPP

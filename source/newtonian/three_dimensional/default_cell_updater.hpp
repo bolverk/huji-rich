@@ -8,17 +8,19 @@
 
 #include "cell_updater_3d.hpp"
 
-//! \brief Default scheme for cell update
-class DefaultCellUpdater: public CellUpdater3D
+ //! \brief Default scheme for cell update
+class DefaultCellUpdater : public CellUpdater3D
 {
 public:
 
-  //! \brief Class constructor
-  DefaultCellUpdater(void);
+	//! \brief Class constructor
+	DefaultCellUpdater(void);
 
-  ComputationalCell operator()
-  (const Conserved3D& intensive,
-   const EquationOfState& eos) const;
+	void operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
+		const Tessellation3D& tess, vector<Conserved3D>& extensives, 
+		TracerStickerNames const& tracerstickernames) const;
+private:
+	mutable size_t entropy_index_;
 };
 
 #endif // DEFAULT_CELL_UPDATER_HPP

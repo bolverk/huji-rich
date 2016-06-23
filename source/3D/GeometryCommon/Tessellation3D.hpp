@@ -150,6 +150,8 @@ public:
 	virtual void GetNeighborNeighbors(vector<size_t> &result,size_t point)const = 0;
 
 
+	virtual std::pair<size_t,size_t> GetFaceNeighbors(size_t face_index)const = 0;
+
 	/*!
 	\brief Returns a vector normal to the face whose magnitude is the seperation between the neighboring points
 	\param faceindex The index of the face

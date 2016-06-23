@@ -6,9 +6,10 @@
 #include "conserved_3d.hpp"
 #include "../common/equation_of_state.hpp"
 #include "point_motion_3d.hpp"
-#include "time_step_calculator.hpp"
+#include "time_step_function3D.hpp"
 #include "flux_calculator_3d.hpp"
 #include "cell_updater_3d.hpp"
+#include "extensive_updater3d.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
@@ -53,12 +54,14 @@ public:
     \param cu Cell updater
    */
   HDSim3D(Tessellation3D& tess,
-	  const vector<ComputationalCell>& cells,
+	  const vector<ComputationalCell3D>& cells,
 	  const EquationOfState& eos,
 	  const PointMotion3D& pm,
-	  const TimeStepCalculator& tsc,
+	  const TimeStepFunction3D& tsc,
 	  const FluxCalculator3D& fc,
-	  const CellUpdater3D& cu);
+	  const CellUpdater3D& cu,
+	  const ExtensiveUpdater3D & eu,
+	  const TracerStickerNames tsn);
 
   //! \brief Advances the simulation in time (first order)
   void timeAdvance();
@@ -71,17 +74,25 @@ public:
   /*! \brief Access to computational cells
     \return Computational cells
    */
-  const vector<ComputationalCell>& getCells(void) const;
+  const vector<ComputationalCell3D>& getCells(void) const;
+
+  double GetTime(void)const;
+
+  TracerStickerNames GetTracerStickerNames(void)const;
+
+  size_t GetCycle(void)const;
 
 private:
   Tessellation3D& tess_;
   const EquationOfState& eos_;
-  vector<ComputationalCell> cells_;
+  vector<ComputationalCell3D> cells_;
   vector<Conserved3D> extensive_;
   const PointMotion3D& pm_;
-  const TimeStepCalculator& tsc_;
+  const TimeStepFunction3D& tsc_;
   const FluxCalculator3D& fc_;
   const CellUpdater3D& cu_;
+  const ExtensiveUpdater3D& eu_;
+  const TracerStickerNames tsn_;
   ProgressTracker pt_;
 };
 

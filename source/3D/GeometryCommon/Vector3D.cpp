@@ -233,3 +233,9 @@ void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & v
 	}
 	return;
 }
+
+Vector3D normalize(Vector3D const& vec)
+{
+	double l = abs(vec);
+	return vec / l;
+}

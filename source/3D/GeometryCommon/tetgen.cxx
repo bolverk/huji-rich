@@ -31143,7 +31143,8 @@ void tetrahedralize(tetgenbehavior *b, tetgenio *in, tetgenio *out,
     m.outneighbors(out);
   }
 
-  if ((!(b->plc || b->refine)) && b->voroout) {
+ // if ((!(b->plc || b->refine)) && b->voroout) {
+  if (b->voroout) {
     m.outvoronoi(out);
   }
 
@@ -31198,6 +31199,7 @@ void tetrahedralize(char *switches, tetgenio *in, tetgenio *out,
   tetgenbehavior b;
 
 #ifndef TETLIBRARY
+
 
   tetgenio in, addin, bgmin;
   

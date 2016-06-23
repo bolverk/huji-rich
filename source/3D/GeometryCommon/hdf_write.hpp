@@ -9,6 +9,7 @@
 #include <H5Cpp.h>
 #include <string>
 #include "Voronoi3D.hpp"
+#include "../../newtonian/three_dimensional/hdsim_3d.hpp"
 
 //! \brief Container for snapshot data
 class Snapshot
@@ -28,4 +29,5 @@ public:
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
+void WriteSnapshot(HDSim3D const& sim, std::string const& filename);
 #endif // HDF_WRITE

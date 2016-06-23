@@ -8,26 +8,28 @@
 
 #include "computational_cell.hpp"
 #include "conserved_3d.hpp"
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
+#include "../two_dimensional/computational_cell_2d.hpp"
 #include "../common/equation_of_state.hpp"
-
-using three_dimenssional::ComputationalCell;
 
 //! \brief Abstract clas for cell update scheme
 class CellUpdater3D
 {
 public:
 
-  /*! \brief Calculates the computational cell
-    \param intensive Intensive conserved variables (per volume)
-    \param eos Equation of state
-    \return Computational cell
-   */
-  virtual ComputationalCell operator()
-  (const Conserved3D& intensive,
-   const EquationOfState& eos) const = 0;
+	/*! \brief Calculates the computational cell
+	\param res The new cells given as output
+	  \param extensives The extensive conserved variables
+	  \param eos Equation of state
+	  \param tess The tessellation
+	  \param tracerstickernames The names of the tracers and stickers
+	  \return Computational cell
+	 */
+	virtual void operator() (vector<ComputationalCell3D> &res, EquationOfState const& eos,
+		const Tessellation3D& tess,vector<Conserved3D>& extensives,TracerStickerNames const& tracerstickernames)const = 0;
 
-  //! \brief Class destructor
-  virtual ~CellUpdater3D(void);
+		//! \brief Class destructor
+		virtual ~CellUpdater3D(void);
 };
 
 #endif // CELL_UPDATER_HPP

@@ -9,6 +9,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "../../tessellation/tessellation.hpp"
 #include "computational_cell_2d.hpp"
+#include "cache_data.hpp"
 
 using std::pair;
 
@@ -31,13 +32,14 @@ public:
 	\param time The sim time
     \param res List of pairs of primitive values on each edge given as output
 	\param tracerstickersnames The names of the tracers and stickers
+	\param cd The cache data of the geometry
    */
   virtual void
   operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
    double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-	  TracerStickerNames const& tracerstickersnames) const = 0;
+	  TracerStickerNames const& tracerstickersnames,CacheData const& cd) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };

@@ -193,4 +193,13 @@ std::vector<Vector2D> RandPointsRa(int PointNum,double Rmin,double Rmax,double a
 std::vector<Vector2D> RandPointsRmax(int PointNum,double Rmin,double Rmax,
 				double xc=0,double yc=0);
 
+/*!
+\brief Generates a random round grid with 1/y point density where y is the cylindrical r coordinate
+\param PointNum The number of points.
+\param ll The lower left point of the domain. Should be ll.y>0
+\param ur The upper right point of the domain
+\return List of two dimensional points
+*/
+std::vector<Vector2D> RandPointsCylinder(int PointNum, Vector2D const& ll,Vector2D const& ur);
+
 #endif //MESHGENERATOR_HPP

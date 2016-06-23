@@ -2,6 +2,8 @@
 #define CONSERVED_3D_HPP 1
 
 #include "../../3D/GeometryCommon/Vector3D.hpp"
+#include "../common/equation_of_state.hpp"
+#include "computational_cell.hpp"
 
 //! \brief Conserved variables for a 3D computational cell
 class Conserved3D
@@ -63,11 +65,21 @@ public:
  */
 Conserved3D operator*(double s, const Conserved3D& c);
 
+/*! \brief Scalar product operator
+\param s Scalar
+\param c Conserved variable
+\return Product of scalar with conserved
+*/
+Conserved3D operator*(const Conserved3D& c,double s);
+
 /*! \brief Scalar division operator
   \param c Conserved variable
   \param s Scalar
   \return Ratio
  */
 Conserved3D operator/(const Conserved3D& c, double s);
+
+void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res,
+	EquationOfState const& eos,TracerStickerNames const& tsn);
 
 #endif // CONSERVED_3D_HPP

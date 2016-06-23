@@ -26,6 +26,7 @@ public:
 	\param delta_P The pressure ratio for shock detection
 	\param ghost The ghost point generator
 	\param flat_tracers Names of tracers for which the slope is always zero
+	\param skip_key The sticker name to skip cells for taking them into account for the slope limit
 	*/
 	LinearGaussImproved
 		(EquationOfState const& eos,
@@ -35,10 +36,11 @@ public:
 		double theta = 0.5,
 		double delta_P = 0.7,
 		const vector<string>& flat_tracers =
-		vector<string>());
+		vector<string>(),
+		string skip_key=string());
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
-		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames)const;
+		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames,CacheData const& cd)const;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell
@@ -72,6 +74,8 @@ private:
 	const double diffusecoeff_;
 	const double pressure_ratio_;
 	const vector<string> flat_tracers_;
+	const string skip_key_;
+	mutable vector<size_t> to_skip_;
 
 	LinearGaussImproved
 		(const LinearGaussImproved& origin);

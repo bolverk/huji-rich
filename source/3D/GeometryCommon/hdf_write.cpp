@@ -57,3 +57,67 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 	write_std_vector_to_hdf5(file, Nvert, "Number_of_vertices_in_face", datatype);
 	write_std_vector_to_hdf5(file, VerticesInFace, "Vertices_in_face", datatype);
 }
+
+void WriteSnapshot(HDSim3D const& sim, std::string const& filename)
+{
+	H5File file(H5std_string(filename), H5F_ACC_TRUNC);
+	vector<ComputationalCell3D> const& cells = sim.getCells();
+	Tessellation3D const& tess = sim.getTesselation();
+	TracerStickerNames tsn = sim.GetTracerStickerNames();
+	
+	size_t Ncells = tess.GetPointNo();
+
+	vector<double> temp(Ncells);
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetMeshPoint(i).x;
+	write_std_vector_to_hdf5(file, temp, "X");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetMeshPoint(i).y;
+	write_std_vector_to_hdf5(file, temp, "Y");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetMeshPoint(i).z;
+	write_std_vector_to_hdf5(file, temp, "Z");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].density;
+	write_std_vector_to_hdf5(file, temp, "Density");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].pressure;
+	write_std_vector_to_hdf5(file, temp, "Pressure");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].velocity.x;
+	write_std_vector_to_hdf5(file, temp, "Vx");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].velocity.y;
+	write_std_vector_to_hdf5(file, temp, "Vy");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].velocity.z;
+	write_std_vector_to_hdf5(file, temp, "Vz");
+
+	for (size_t j = 0; j < cells[0].tracers.size(); ++j)
+	{
+		for (size_t i = 0; i < Ncells; ++i)
+			temp[i] = cells[i].tracers[j];
+		write_std_vector_to_hdf5(file, temp, tsn.tracer_names[j]);
+	}
+
+	for (size_t j = 0; j < cells[0].stickers.size(); ++j)
+	{
+		for (size_t i = 0; i < Ncells; ++i)
+			temp[i] = cells[i].stickers[j];
+		write_std_vector_to_hdf5(file, temp, tsn.sticker_names[j]);
+	}
+
+	vector<double> time(1, sim.GetTime());
+	write_std_vector_to_hdf5(file,time, "Time");
+
+	vector<int> cycle(1, sim.GetCycle());
+	write_std_vector_to_hdf5(file, cycle, "Cycle");
+}

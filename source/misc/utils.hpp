@@ -373,6 +373,19 @@ template <class T> void ReArrangeVector(vector<T> &v, vector<int> const& indeces
 	for (size_t i = 0; i < v.size(); ++i)
 		v[i] = temp[static_cast<size_t>(indeces[i])];
 }
+
+/*!
+\brief Rearranges the vector according to the indeces
+\param v The vector to rearrange
+\param indeces The rearrangement indeces
+*/
+template <class T> void ReArrangeVector(vector<T> &v, vector<size_t> const& indeces)
+{
+	const vector<T> temp = v;
+	for (size_t i = 0; i < v.size(); ++i)
+		v[i] = temp[indeces[i]];
+}
+
 namespace
 {
 	template<class T> struct index_cmp

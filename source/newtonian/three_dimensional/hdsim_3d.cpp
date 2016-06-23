@@ -1,9 +1,8 @@
 #include <cassert>
 #include "hdsim_3d.hpp"
-#include "extensive_generator.hpp"
 
-HDSim3D::ProgressTracker::ProgressTracker(void):
-time_(0), cycle_(0) {}
+HDSim3D::ProgressTracker::ProgressTracker(void) :
+	time_(0), cycle_(0) {}
 
 void HDSim3D::ProgressTracker::update(double dt)
 {
@@ -22,132 +21,84 @@ double HDSim3D::ProgressTracker::getCycle(void) const
 }
 
 HDSim3D::HDSim3D(Tessellation3D& tess,
-	const vector<ComputationalCell>& cells,
+	const vector<ComputationalCell3D>& cells,
 	const EquationOfState& eos,
 	const PointMotion3D& pm,
-	const TimeStepCalculator& tsc,
+	const TimeStepFunction3D& tsc,
 	const FluxCalculator3D& fc,
-	const CellUpdater3D& cu):
-tess_(tess), eos_(eos), cells_(cells),
-	extensive_(serial_generate(ExtensiveGenerator(cells,tess,eos))),
-	pm_(pm), tsc_(tsc), fc_(fc), cu_(cu), pt_()
+	const CellUpdater3D& cu,
+	const ExtensiveUpdater3D& eu,
+	const TracerStickerNames tsn) :
+	tess_(tess), eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),tsn_(tsn),pt_()
 {
-	assert(tess.GetPointNo()==cells.size());
+	assert(tess.GetPointNo() == cells.size());
+	size_t N = tess.GetPointNo();
+	extensive_.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i], eos_, tsn_);
 }
 
-namespace 
+namespace
 {
-	class PointVelocitiesCalculator: public LazyList<Vector3D>
+	void CalcFaceVelocities(Tessellation3D const& tess, vector<Vector3D> const& point_vel, vector<Vector3D> &res)
 	{
-	public:
-
-		PointVelocitiesCalculator(const PointMotion3D& pm,
-			const Tessellation3D& tess):
-		pm_(pm), tess_(tess) {}
-
-		size_t size(void) const
-		{
-			return tess_.GetPointNo();
-		}
-
-		Vector3D operator[](size_t i) const
-		{
-			return pm_(tess_.GetMeshPoint(i));
-		}
-
-	private:
-		const PointMotion3D& pm_;
-		const Tessellation3D& tess_;
-	};
-
-	void update_extensive(const vector<Conserved3D>& fluxes,
-		double dt,
-		const Tessellation3D& tess,
-		vector<Conserved3D>& extensive)
-	{
-		for(size_t i=0;i<tess.GetTotalFacesNumber();++i)
-		{
-			const Conserved3D delta = dt*tess.GetFace(i).GetArea()*fluxes[i];
-			if(!tess.IsGhostPoint(tess.GetFace(i).neighbors.first))
-				extensive[tess.GetFace(i).neighbors.first] -= delta;
-			if(!tess.IsGhostPoint(tess.GetFace(i).neighbors.second))
-				extensive[tess.GetFace(i).neighbors.second] += delta;
-		}
+		size_t N = tess.GetTotalFacesNumber();
+		res.resize(N);
+		for (size_t i = 0; i < N; ++i)
+			if (tess.BoundaryFace(i))
+				res[i] = Vector3D();
+			else
+				tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
 	}
 
-	class AllCellsUpdater: public LazyList<ComputationalCell>
+	void UpdateTessellation(Tessellation3D &tess, vector<Vector3D> &point_vel,double dt)
 	{
-	public:
-
-		AllCellsUpdater(const Tessellation3D& tess,
-			const vector<Conserved3D>& extensive,
-			const EquationOfState& eos,
-			const CellUpdater3D& cu):
-		tess_(tess), extensive_(extensive), eos_(eos), cu_(cu) {}
-
-		size_t size(void) const
-		{
-			return extensive_.size();
-		}
-
-		ComputationalCell operator[](size_t i) const
-		{
-			return cu_(extensive_[i]/tess_.GetVolume(i),eos_);
-		}
-
-	private:
-		const Tessellation3D& tess_;
-		const vector<Conserved3D>& extensive_;
-		const EquationOfState& eos_;
-		const CellUpdater3D& cu_;
-	};
-
-	class PointPositionUpdater: public LazyList<Vector3D>
-	{
-	public:
-
-		PointPositionUpdater(const Tessellation3D& tess,
-			const vector<Vector3D>& velocities,
-			double dt):
-		tess_(tess), velocities_(velocities), dt_(dt) {}
-
-		size_t size(void) const
-		{
-			return velocities_.size();
-		}
-
-		Vector3D operator[](size_t i) const
-		{
-			return tess_.GetMeshPoint(i)+dt_*velocities_[i];
-		}
-
-	private:
-		const Tessellation3D& tess_;
-		const vector<Vector3D>& velocities_;
-		const double dt_;
-	};
+		vector<Vector3D> points = tess.GetMeshPoints();
+		size_t N = tess.GetPointNo();
+		points.resize(N);
+		for (size_t i = 0; i < N; ++i)
+			points[i] += point_vel[i] * dt;
+		tess.Build(points);
+	}
 }
 
 void HDSim3D::timeAdvance(void)
 {
-	const double dt = tsc_(tess_,cells_,eos_);
-	const vector<Vector3D> point_velocities = 
-		serial_generate(PointVelocitiesCalculator(pm_,tess_));
-	update_extensive(fc_(tess_,cells_,eos_,point_velocities),
-		dt,tess_,extensive_);
-	tess_.Update(serial_generate(PointPositionUpdater(tess_,
-		point_velocities,
-		dt)));
-	cells_ = serial_generate(AllCellsUpdater(tess_,extensive_,eos_,cu_));  
+	vector<Vector3D> point_vel,face_vel;
+	pm_(tess_, cells_, pt_.getTime(), tsn_, point_vel);
+	CalcFaceVelocities(tess_, point_vel, face_vel);
+	const double dt = tsc_(tess_, cells_, eos_,face_vel,pt_.getTime(),tsn_);
+	pm_.ApplyFix(tess_, cells_, pt_.getTime(), dt, point_vel, tsn_);
+	CalcFaceVelocities(tess_, point_vel, face_vel);
+	vector<Conserved3D> fluxes;
+	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
+	eu_(fluxes, tess_, dt, cells_, extensive_, pt_.getTime(), tsn_);
+	UpdateTessellation(tess_, point_vel, dt);
+	cu_(cells_, eos_, tess_, extensive_, tsn_);
 	pt_.update(dt);
 }
 
 const Tessellation3D& HDSim3D::getTesselation(void) const
 {
-  return tess_;
+	return tess_;
 }
 
-const vector<ComputationalCell>& HDSim3D::getCells(void) const
+const vector<ComputationalCell3D>& HDSim3D::getCells(void) const
 {
-  return cells_;
+	return cells_;
+}
+
+double HDSim3D::GetTime(void)const
+{
+	return pt_.getTime();
+}
+
+TracerStickerNames HDSim3D::GetTracerStickerNames(void)const
+{
+	return tsn_;
+}
+
+size_t HDSim3D::GetCycle(void)const
+{
+	return pt_.getCycle();
 }

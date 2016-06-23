@@ -63,10 +63,31 @@ Conserved3D operator*(double s, const Conserved3D& c)
 		     s*c.tracers);
 }
 
+Conserved3D operator*(const Conserved3D& c,double s)
+{
+	return Conserved3D(s*c.mass,
+		s*c.momentum,
+		s*c.energy,
+		s*c.tracers);
+}
+
+
 Conserved3D operator/(const Conserved3D& c, double s)
 {
   return Conserved3D(c.mass/s,
 		     c.momentum/s,
 		     c.energy/s,
 		     c.tracers/s);
+}
+
+void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res,EquationOfState const& eos,
+	TracerStickerNames const& tsn)
+{
+	res.mass = cell.density*vol;
+	res.momentum = cell.velocity*res.mass;
+	res.energy = res.mass*(eos.dp2e(cell.density, cell.pressure, cell.tracers, tsn.tracer_names) + 
+		0.5*ScalarProd(cell.velocity,cell.velocity));
+	size_t N = cell.tracers.size();
+	for (size_t i = 0; i < N;++i)
+		res.tracers[i] = cell.tracers[i]*res.mass;
 }

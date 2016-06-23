@@ -81,4 +81,16 @@ template <class T> void ReArrangeVector(vector<T> &v, vector<size_t> const& inde
 		v[i] = temp[indeces[i]];
 }
 
+/*! \brief Checks whether a number is a nan
+\param x A number
+\return True if nan false otherwise
+*/
+bool is_nan(double x)
+{
+	int b1 = (x >= 0);
+	int b2 = (x<0);
+	return (1 != b1 + b2);
+}
+
+
 #endif //UTILS_HPP

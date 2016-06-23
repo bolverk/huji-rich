@@ -16,7 +16,8 @@ public:
   //! \brief Class constructor
   Eulerian3D(void);
 
-  Vector3D operator()(const Vector3D& pos) const;
+  void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+	  double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
 };
 
 #endif // EULERIAN_3D_HPP

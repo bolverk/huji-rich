@@ -50,6 +50,23 @@ vector<Vector2D> RandSquare(int PointNum, double xl, double xr, double yd,
 	return res;
 }
 
+std::vector<Vector2D> RandPointsCylinder(int PointNum, Vector2D const& ll, Vector2D const& ur)
+{
+	base_generator_type generator;
+	double ran[2];
+	double dx = ur.x - ll.x;
+	double A = 1.0 / log(ur.y / ll.y);
+	vector<Vector2D> res(static_cast<size_t>(PointNum));
+	boost::random::uniform_real_distribution<> dist;
+	for (int i = 0; i < PointNum; ++i)
+	{
+		ran[0] = dist(generator);
+		ran[1] = dist(generator);
+		res[i] = Vector2D(ran[0] * dx - ll.x, exp(ran[1]/A)*ll.y);
+	}
+	return res;
+}
+
 vector<Vector2D> RandSquare(int PointNum, boost::random::mt19937 &eng, double xl, double xr, double yd,
 	double yu)
 {

@@ -34,20 +34,19 @@ class Voronoi3D : public Tessellation3D
 private:
 	Vector3D ll_, ur_;
 	size_t Norg_, bigtet_;
-	tetgenio tetin, tetout;
 
 	std::set<int> set_temp_;
 	std::stack<int> stack_temp_;
 
-	void RunTetGen(vector<Vector3D> const& points, bool voronoi = false);
+	void RunTetGen(vector<Vector3D> const& points,tetgenio &tetin,tetgenio &tetout, bool voronoi = false);
 	Vector3D GetTetraCM(boost::array<Vector3D, 4> const& points)const;
 	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
 	void CalcCellCMVolume(size_t index);
 	double GetRadius(size_t index);
 	double GetMaxRadius(size_t index);
 	vector<vector<size_t> > FindIntersections(vector<Face>	const &box);
-	void CopyData();
-	void CopyDataVoronoi();
+	void CopyData(tetgenio &tetin);
+	void CopyDataVoronoi(tetgenio &tetin);
 	void FillPointTetra(size_t point, size_t initetra);
 	vector<vector<size_t> > FindBoundaryCandidates(Vector3D const& ll, Vector3D const& ur);
 	void BuildBoundary(vector<vector<size_t> > const& candidates);
@@ -124,6 +123,8 @@ public:
 	vector<Vector3D>const& GetFacePoints(void) const;
 
 	vector<size_t>const& GetPointsInFace(size_t index) const;
+
+	std::pair<size_t,size_t> GetFaceNeighbors(size_t face_index)const;
 };
 
 #endif // VORONOI3D_HPP

@@ -2,7 +2,9 @@
 
 Eulerian3D::Eulerian3D(void) {}
 
-Vector3D Eulerian3D::operator()(const Vector3D& /*pos*/) const
+void Eulerian3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& /*cells*/,
+	double /*time*/, TracerStickerNames const& /*tracerstickernames*/, vector<Vector3D> &res) const
 {
-  return Vector3D();
+	res.resize(tess.GetPointNo(), Vector3D());
+	return;
 }

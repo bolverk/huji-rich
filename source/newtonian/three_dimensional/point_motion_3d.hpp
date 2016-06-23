@@ -6,18 +6,34 @@
 #ifndef POINT_MOTION3D_HPP
 #define POINT_MOTION3D_HPP 1
 
-#include "../../3D/GeometryCommon/Vector3D.hpp"
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
+#include "computational_cell.hpp"
 
 //! \brief Abstract class for point motion
 class PointMotion3D
 {
 public:
 
-  /*! \brief Returns the velocity of a mesh generating point
-    \param pos Current position of mesh generating point
-    \return Velocity of said point
-   */
-  virtual Vector3D operator()(const Vector3D& pos) const = 0;
+	/*! \brief Calculates the velocity of all mesh points
+	\param tess The tessellation
+	\param cells Hydrodynamics cells
+	\param time The simulation time
+	\param tracerstickernames The names of the tracers and stickers
+	\param res Velocities of the points, given as output
+	*/
+	virtual void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const = 0;
+
+	/*! \brief Applies a small fix to the velocity of all mesh points once the time step is known
+	\param tess The tessellation
+	\param cells Hydrodynamics cells
+	\param time The simulation time
+	\param velocities Velocities of the points given as input and output
+	\param dt The time step
+	\param tracerstickernames The names of the tracers and stickers
+	*/
+	virtual void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
+		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const;
 
   //! \brief Class destructor
   virtual ~PointMotion3D(void);
