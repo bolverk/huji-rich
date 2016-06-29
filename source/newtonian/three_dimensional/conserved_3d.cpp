@@ -91,3 +91,17 @@ void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved
 	for (size_t i = 0; i < N;++i)
 		res.tracers[i] = cell.tracers[i]*res.mass;
 }
+
+Conserved3D operator+(Conserved3D const& p1, Conserved3D const& p2)
+{
+	Conserved3D res(p1);
+	res += p2;
+	return res;
+}
+
+Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2)
+{
+	Conserved3D res(p1);
+	res -= p2;
+	return res;
+}

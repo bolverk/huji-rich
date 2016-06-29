@@ -174,6 +174,8 @@ public:
 	\return The velocity of the face
 	*/
 	virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
+
+	virtual Vector3D FaceCM(size_t index)const=0;
 };
 
 #endif // TESSELLATION3D_HPP

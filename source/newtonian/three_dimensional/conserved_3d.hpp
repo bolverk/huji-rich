@@ -79,6 +79,11 @@ Conserved3D operator*(const Conserved3D& c,double s);
  */
 Conserved3D operator/(const Conserved3D& c, double s);
 
+Conserved3D operator+(Conserved3D const& p1, Conserved3D const& p2);
+
+Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2);
+
+
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res,
 	EquationOfState const& eos,TracerStickerNames const& tsn);
 

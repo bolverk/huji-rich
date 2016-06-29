@@ -66,6 +66,8 @@ public:
   //! \brief Advances the simulation in time (first order)
   void timeAdvance();
 
+  void timeAdvance2();
+
   /*! \brief Access to tessellation
     \return Tessellation
    */

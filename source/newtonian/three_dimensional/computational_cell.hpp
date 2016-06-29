@@ -55,7 +55,69 @@ public:
 		const Vector3D& velocity_i,
 		const vector<double>& tracers_i,
 		const vector<bool>& stickers_i);
+
+	/*! \brief Self increment operator
+	\param other Addition
+	\return Reference to self
+	*/
+	ComputationalCell3D& operator+=(ComputationalCell3D const& other);
+	/*! \brief Self reduction operator
+	\param other Reduction
+	\return Reference to self
+	*/
+	ComputationalCell3D& operator-=(ComputationalCell3D const& other);
+
+	/*! \brief Self multiplication operator
+	\param s The scalar to multiply
+	\return Reference to self
+	*/
+	ComputationalCell3D& operator*=(double s);
+
+	/*! \brief Self decrement operator
+	\param other difference
+	\return Reference to self
+	*/
+	ComputationalCell3D& operator=(ComputationalCell3D const& other);
 };
+
+/*! \brief Term by term addition
+\param p1 Computational Cell
+\param p2 Computational Cell
+\return Computational Cell
+*/
+ComputationalCell3D operator+(ComputationalCell3D const& p1, ComputationalCell3D const& p2);
+
+/*! \brief Term by term subtraction
+\param p1 Computational Cell
+\param p2 Computational Cell
+\return Computational Cell
+*/
+ComputationalCell3D operator-(ComputationalCell3D const& p1, ComputationalCell3D const& p2);
+
+/*! \brief Scalar division
+\param p Computational Cell
+\param s Scalar
+\return Computational Cell
+*/
+ComputationalCell3D operator/(ComputationalCell3D const& p, double s);
+
+/*! \brief Scalar multiplication on the right
+\param p Computational Cell
+\param s Scalar
+\return Computational Cell
+*/
+ComputationalCell3D operator*(ComputationalCell3D const& p, double s);
+
+/*! \brief Scalar multiplication on the left
+\param s Scalar
+\param p Computational Cell
+\return Computational Cell
+*/
+ComputationalCell3D operator*(double s, ComputationalCell3D const& p);
+
+void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D const& other, double scalar);
+
+void ReplaceComputationalCell(ComputationalCell3D &cell, ComputationalCell3D const& other);
 
 //! \brief Class for 3D spatial interpolations
 class Slope3D
@@ -69,12 +131,16 @@ public:
 
 	//! \brief Slope in the y direction
 	ComputationalCell3D yderivative;
+
+	//! \brief Slope in the z direction
+	ComputationalCell3D zderivative;
 	/*!
 	\brief Class constructor
 	\param x The x derivative
 	\param y The y derivative
+	\param z The z derivative
 	*/
-	Slope3D(ComputationalCell3D const& x, ComputationalCell3D const& y);
+	Slope3D(ComputationalCell3D const& x, ComputationalCell3D const& y, ComputationalCell3D const& z);
 	//! \brief Default constructor
 	Slope3D(void);
 #ifdef RICH_MPI

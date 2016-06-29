@@ -38,6 +38,7 @@ private:
 	std::set<int> set_temp_;
 	std::stack<int> stack_temp_;
 
+	void CalcRigidCM(size_t face_index);
 	void RunTetGen(vector<Vector3D> const& points,tetgenio &tetin,tetgenio &tetout, bool voronoi = false);
 	Vector3D GetTetraCM(boost::array<Vector3D, 4> const& points)const;
 	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
@@ -53,7 +54,6 @@ private:
 	double CalcTetraRadiusCenter(size_t index);
 	vector<Vector3D> CreateBoundaryPoints(vector<vector<size_t> > const& to_duplicate,
 		Vector3D const& ll, Vector3D const& ur)const;
-	Vector3D FaceCM(size_t index)const;
 
 	vector<Vector3D> mesh_points_;
 	vector<Tetrahedron> tetras_;
@@ -71,6 +71,7 @@ private:
 	vector<vector<size_t> > duplicated_points_;
 	Voronoi3D();
 public:
+	Vector3D FaceCM(size_t index)const;
 
 	Voronoi3D(Vector3D const& ll, Vector3D const& ur);
 

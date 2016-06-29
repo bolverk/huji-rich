@@ -48,7 +48,7 @@ namespace
 			if (tess.BoundaryFace(i))
 				res[i] = Vector3D();
 			else
-				tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
+				res[i]=tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
 	}
 
 	void UpdateTessellation(Tessellation3D &tess, vector<Vector3D> &point_vel,double dt)
@@ -60,6 +60,37 @@ namespace
 			points[i] += point_vel[i] * dt;
 		tess.Build(points);
 	}
+
+	void ExtensiveAvg(vector<Conserved3D> &res, vector<Conserved3D> const& other)
+	{
+		assert(res.size() == other.size());
+		size_t N = res.size();
+		for (size_t i = 0; i < N; ++i)
+			res[i] = 0.5*(res[i] + other[i]);
+	}
+}
+
+
+void HDSim3D::timeAdvance2(void)
+{
+	vector<Vector3D> point_vel, face_vel;
+	pm_(tess_, cells_, pt_.getTime(), tsn_, point_vel);
+	CalcFaceVelocities(tess_, point_vel, face_vel);
+	const double dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
+	pm_.ApplyFix(tess_, cells_, pt_.getTime(), dt, point_vel, tsn_);
+	CalcFaceVelocities(tess_, point_vel, face_vel);
+	vector<Conserved3D> fluxes;
+	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
+	vector<Conserved3D> mid_extensives(extensive_);
+	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
+	UpdateTessellation(tess_, point_vel, dt);
+	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+	pt_.update(dt);
+	CalcFaceVelocities(tess_, point_vel, face_vel);
+	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), dt, tsn_);
+	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
+	ExtensiveAvg(extensive_, mid_extensives);
+	cu_(cells_, eos_, tess_, extensive_, tsn_);
 }
 
 void HDSim3D::timeAdvance(void)

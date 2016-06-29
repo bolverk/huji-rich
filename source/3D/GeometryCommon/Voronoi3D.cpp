@@ -215,6 +215,25 @@ void Voronoi3D::RunTetGen(vector<Vector3D> const& points, tetgenio &tetin, tetge
 		tetrahedralize("nQvT1e-17", &tetin, &tetout);
 }
 
+void Voronoi3D::CalcRigidCM(size_t face_index)
+{
+	Vector3D normal = normalize(mesh_points_[FaceNeighbors_[face_index].first] - mesh_points_[FaceNeighbors_[face_index].second]);
+	size_t real, other;
+	if (FaceNeighbors_[face_index].first >= Norg_)
+	{
+		real = FaceNeighbors_[face_index].second;
+		other = FaceNeighbors_[face_index].first;
+	}
+	else
+	{
+		real = FaceNeighbors_[face_index].first;
+		other = FaceNeighbors_[face_index].second;
+	}
+	CM_[other] = CM_[real] - 2 * normal*ScalarProd(normal, CM_[real]-FacePoints_[PointsInFace_[face_index][0]]);
+}
+
+
+
 vector<Vector3D> Voronoi3D::CreateBoundaryPoints(vector<vector<size_t> > const& to_duplicate,
 	Vector3D const& ll, Vector3D const& ur)const
 {
@@ -258,7 +277,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 		ll_.z - 10 * (ur_.z - ll_.z)));
 
 	tetgenio tetin, tetout;
-	RunTetGen(points,tetin,tetout);
+	RunTetGen(mesh_points_,tetin,tetout);
 	CopyData(tetout);
 	duplicated_points_ = FindBoundaryCandidates(ll_, ur_);
 	vector<Vector3D> extra_points = CreateBoundaryPoints(duplicated_points_, ll_, ur_);
@@ -271,7 +290,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	tetout.initialize();
 	RunTetGen(mesh_points_,tetin,tetout,true);
 
-	CM_.resize(Norg_);
+	CM_.resize(mesh_points_.size());
 	volume_.resize(Norg_);
 	// Copy the voronoi data
 	CopyDataVoronoi(tetout);
@@ -321,6 +340,7 @@ void Voronoi3D::CopyDataVoronoi(tetgenio &tetin)
 	FaceNeighbors_.reserve(Nfaces);
 	VecCompare compare(FacePoints_);
 	vector<size_t> temp, temp2;
+	vector<size_t> boundary_faces;
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		size_t N0 = tetin.vfacetlist[i].c1;
@@ -361,10 +381,15 @@ void Voronoi3D::CopyDataVoronoi(tetgenio &tetin)
 				FacesInCell_[N0].push_back(area_.size() - 1);
 			if (N1 < Norg_)
 				FacesInCell_[N1].push_back(area_.size() - 1);
+			if (N1 >= Norg_ || N0 >= Norg_)
+				boundary_faces.push_back(area_.size() - 1);
 		}
 	}
 	for (size_t i = 0; i < Norg_; ++i)
 		CalcCellCMVolume(i);
+	size_t N = boundary_faces.size();
+	for (size_t i = 0; i < N; ++i)
+		CalcRigidCM(i);
 }
 
 void Voronoi3D::CopyData(tetgenio &tetout)
@@ -577,7 +602,6 @@ double Voronoi3D::GetTetraVolume(boost::array<Vector3D, 4> const& points)const
 void Voronoi3D::CalcCellCMVolume(size_t index)
 {
 	// Make sure face is convexhull
-
 	volume_[index] = 0;
 	CM_[index] = Vector3D();
 	size_t Nfaces = FacesInCell_[index].size();
@@ -595,7 +619,7 @@ void Voronoi3D::CalcCellCMVolume(size_t index)
 			tetra[2] = FacePoints_[PointsInFace_[face][j + 2]];
 			double vol = GetTetraVolume(tetra);
 			volume_[index] += abs(vol);
-			CM_[index] += vol*GetTetraCM(tetra);
+			CM_[index] += abs(vol)*GetTetraCM(tetra);
 		}
 	}
 	CM_[index] = CM_[index] / volume_[index];
