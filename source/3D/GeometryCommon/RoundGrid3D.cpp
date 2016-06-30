@@ -12,9 +12,9 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 		tess = &default_tess;
 #ifdef RICH_MPI
 	if (tproc == 0)
-		tess->Initialise(points, bc);
+		tess->Build(points);
 	else
-		tess->Initialise(points, *tproc, bc);
+		tess->Build(points, *tproc);
 #else
 	tess->Build(points);
 #endif
@@ -48,9 +48,9 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 		}
 #ifdef RICH_MPI
 		if (tproc == 0)
-			tess->Update(res);
+			tess->Build(res);
 		else
-			tess->Update(res, *tproc);
+			tess->Build(res, *tproc);
 #else
 		tess->Build(res);
 #endif

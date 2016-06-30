@@ -121,15 +121,25 @@ public:
 	virtual bool BoundaryFace(size_t index) const = 0;
 
 	/*!
-	\brief Returns the indeces of the points that where sent to other processors as ghost points (or to same cpu for single thread) ad boundary points
-	\return The sent points, outer vector is the index of the outer Face and inner vector are the points sent through the face
+	\brief Returns the indeces of the points that were sent to other processors as ghost points 
+	\return The sent points, outer vector is the index of the cpu and inner vector are the points sent through the face
 	*/
 	virtual vector<vector<size_t> >& GetDuplicatedPoints(void) = 0;
 	/*!
-	\brief Returns the indeces of the points that where sent to other processors as ghost points (or to same cpu for single thread) ad boundary points
-	\return The sent points, outer vector is the index of the outer Face and inner vector are the points sent through the face
+	\brief Returns the indeces of the points that were sent to other processors as ghost points
+	\return The sent points, outer vector is the index of the cpu and inner vector are the points sent through the face
 	*/
 	virtual vector<vector<size_t> >const& GetDuplicatedPoints(void)const = 0;
+
+	virtual vector<int> GetDuplicatedProcs(void)const = 0;
+
+	virtual vector<int> GetSentProcs(void)const = 0;
+
+	virtual vector<vector<size_t> > const& GetSentPoints(void)const = 0;
+
+	virtual vector<size_t> const& GetSelfIndex(void) const = 0;
+
+	virtual vector<size_t> const& GetSelfDuplicate(void)const = 0;
 		/*!
 	\brief Returns the total number of points (including ghost)
 	\return The total number of points
