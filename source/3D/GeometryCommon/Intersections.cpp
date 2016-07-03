@@ -47,8 +47,7 @@ bool FaceSphereIntersections(Face const& face, Sphere const& sphere)
 	// Find plane equation
 	Vector3D v1 = face.vertices[1] - face.vertices[0];
 	Vector3D v2 = face.vertices[2] - face.vertices[0];
-	Vector3D normal = CrossProduct(v1, v2);
-	normal = normal / abs(normal);
+	Vector3D normal =  normalize(CrossProduct(v1, v2));
 
 	double D = -ScalarProd(normal, face.vertices[0]);
 	// Find intersecting circle

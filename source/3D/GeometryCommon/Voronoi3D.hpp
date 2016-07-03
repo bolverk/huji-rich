@@ -47,19 +47,22 @@ private:
 		vector<Vector3D> const& points, vector<size_t> &selfindex, vector<int> &sentproc,
 		vector<vector<size_t> > &sentpoints);
 #endif
-	vector<size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, size_t rank, Sphere const& sphere);
+	vector<size_t>  FindIntersectionsSingle(vector<Face> const& box, size_t point, Sphere &sphere);
+	vector<size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, size_t rank,size_t point, Sphere &sphere, bool recursive);
 	size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(size_t point, vector<bool> const& checked, vector<size_t> &res);
 	void CalcRigidCM(size_t face_index);
 	void RunTetGen(vector<Vector3D> const& points,tetgenio &tetin,tetgenio &tetout, bool voronoi = false);
 	Vector3D GetTetraCM(boost::array<Vector3D, 4> const& points)const;
+	//Vector3D GetTetraCM(size_t index)const;
 	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
 	void CalcCellCMVolume(size_t index);
 	double GetRadius(size_t index);
 	double GetMaxRadius(size_t index);
 	vector<std::pair<size_t, size_t> > FindIntersections(
 #ifdef RICH_MPI
-		Tessellation3D const& tproc
+		Tessellation3D const& tproc,
+		bool recursive
 #endif
 		);
 	void CopyData(tetgenio &tetin);
@@ -84,7 +87,7 @@ private:
 	vector<Vector3D> FacePoints_;
 	vector<vector<size_t> > duplicated_points_;
 	vector<int> sentprocs_,duplicatedprocs_;
-	vector<vector<size_t> > sentpoints_;
+	vector<vector<size_t> > sentpoints_, Nghost_;
 	vector<size_t> self_index_,self_duplicate_;
 	Voronoi3D();
 public:
@@ -96,7 +99,7 @@ public:
 
 	void Build(vector<Vector3D> const& points
 #ifdef RICH_MPI
-		, Tessellation3D const& tproc
+		,Tessellation3D const& tproc
 #endif
 		);
 
@@ -157,6 +160,8 @@ public:
 	vector<size_t> const& GetSelfIndex(void) const;
 
 	vector<size_t> const& GetSelfDuplicate(void)const;
+
+	vector<vector<size_t> > const& GetGhostIndeces(void) const;
 };
 
 #endif // VORONOI3D_HPP

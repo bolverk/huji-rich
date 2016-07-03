@@ -140,6 +140,32 @@ void Vector3D::Round()
 	z = my_round(z);
 }
 
+#ifdef RICH_MPI
+size_t Vector3D::getChunkSize(void) const
+{
+	return 3;
+}
+
+vector<double> Vector3D::serialize(void) const
+{
+	vector<double> res(3, 0);
+	res.at(0) = x;
+	res.at(1) = y;
+	res.at(2) = z;
+	return res;
+}
+
+void Vector3D::unserialize
+(const vector<double>& data)
+{
+	assert(data.size() == getChunkSize());
+	x = data.at(0);
+	y = data.at(1);
+	z = data.at(2);
+}
+#endif // RICH_MPI
+
+
 Vector3D operator+(Vector3D const& v1, Vector3D const& v2)
 {
 	Vector3D res;

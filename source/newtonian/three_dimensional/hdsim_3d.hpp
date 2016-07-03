@@ -54,6 +54,9 @@ public:
     \param cu Cell updater
    */
   HDSim3D(Tessellation3D& tess,
+#ifdef RICH_MPI
+	  Tessellation3D& tproc,
+#endif//RICH_MPI
 	  const vector<ComputationalCell3D>& cells,
 	  const EquationOfState& eos,
 	  const PointMotion3D& pm,
@@ -86,6 +89,9 @@ public:
 
 private:
   Tessellation3D& tess_;
+#ifdef RICH_MPI
+  Tessellation3D& tproc_;
+#endif
   const EquationOfState& eos_;
   vector<ComputationalCell3D> cells_;
   vector<Conserved3D> extensive_;

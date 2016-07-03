@@ -63,6 +63,77 @@ ComputationalCell3D& ComputationalCell3D::operator*=(double s)
 	return *this;
 }
 
+#ifdef RICH_MPI
+size_t ComputationalCell3D::getChunkSize(void) const
+{
+	return 5 + tracers.size() + stickers.size();
+}
+
+vector<double> ComputationalCell3D::serialize(void) const
+{
+	vector<double> res(getChunkSize());
+	res.at(0) = density;
+	res.at(1) = pressure;
+	res.at(2) = velocity.x;
+	res.at(3) = velocity.y;
+	res.at(4) = velocity.z;
+	size_t counter = 5;
+	size_t N = tracers.size();
+	for (size_t j = 0; j < N; ++j)
+		res[j + counter] = tracers[j];
+	size_t N2 = stickers.size();
+	for (size_t j = 0; j < N2; ++j)
+		res[j + counter + N] = stickers[j] ? 1 : 0;
+	return res;
+}
+
+void ComputationalCell3D::unserialize
+(const vector<double>& data)
+{
+	assert(data.size() == getChunkSize());
+	density = data.at(0);
+	pressure = data.at(1);
+	velocity.x = data.at(2);
+	velocity.y = data.at(3);
+	velocity.z = data.at(4);
+	size_t counter = 5;
+	size_t N = tracers.size();
+	for (size_t j = 0; j < N; ++j)
+		tracers[j] = data.at(counter + j);
+	size_t N2 = stickers.size();
+	for (size_t i = 0; i < N2; ++i)
+		stickers[i] = data.at(counter + N + i)>0.5;
+}
+
+size_t Slope3D::getChunkSize(void) const
+{
+	return xderivative.getChunkSize() * 3;
+}
+
+vector<double> Slope3D::serialize(void) const
+{
+	vector<double> res(getChunkSize());
+	vector<double> temp(xderivative.serialize());
+	res.reserve(temp.size() * 3);
+	std::copy(temp.begin(), temp.end(), res.begin());
+	temp = yderivative.serialize();
+	std::copy(temp.begin(), temp.end(), res.begin() + yderivative.getChunkSize());
+	temp = zderivative.serialize();
+	std::copy(temp.begin(), temp.end(), res.begin() + zderivative.getChunkSize());
+	return res;
+}
+
+void Slope3D::unserialize(const vector<double>& data)
+{
+	size_t size = xderivative.getChunkSize();
+	xderivative.unserialize(vector<double>(data.begin(), data.begin() + size));
+	yderivative.unserialize(vector<double>(data.begin() + size, data.begin() + 2*size));
+	zderivative.unserialize(vector<double>(data.begin() + 2*size, data.end()));
+}
+
+#endif // RICH_MPI
+
+
 void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D const& other, double scalar)
 {
 	res.density += other.density*scalar;

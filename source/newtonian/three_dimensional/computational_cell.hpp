@@ -78,6 +78,16 @@ public:
 	\return Reference to self
 	*/
 	ComputationalCell3D& operator=(ComputationalCell3D const& other);
+
+#ifdef RICH_MPI
+	size_t getChunkSize(void) const;
+
+	vector<double> serialize(void) const;
+
+	void unserialize
+		(const vector<double>& data);
+#endif // RICH_MPI
+
 };
 
 /*! \brief Term by term addition

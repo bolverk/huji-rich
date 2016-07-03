@@ -1,6 +1,9 @@
 #include "LinearGauss3D.hpp"
 #include "../../misc/utils.hpp"
 #include <boost/array.hpp>
+#ifdef RICH_MPI
+#include "../../mpi/mpi_commands.hpp"
+#endif
 
 namespace
 {
@@ -531,6 +534,14 @@ namespace
 			}
 		}
 	}
+
+#ifdef RICH_MPI
+
+		void exchange_ghost_slopes(Tessellation3D const& tess, vector<Slope3D> & slopes)
+		{
+			MPI_exchange_data(tess, slopes, true);
+		}
+#endif//RICH_MPI
 }
 
 void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm, Vector3D const& target)const
@@ -607,13 +618,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		{
 			ReplaceComputationalCell(res[boundaryedges[i]].first, new_cells[N0]);
 #ifdef RICH_MPI
-			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-				interp2(res[static_cast<size_t>(boundaryedges[i])].first,
-					rslopes_[static_cast<size_t>(edge.neighbors.first)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+			if(tess.BoundaryFace(boundaryedges[i]))
+				interp2(res[boundaryedges[i]].first, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0));
 			else
-				res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
-					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-						edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+				interp2(res[boundaryedges[i]].first,rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0));
 #else
 			interp2(res[boundaryedges[i]].first, ghost_.GetGhostGradient(tess, cells, rslopes_, N0,time,boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0));
@@ -625,13 +634,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			N0 = tess.GetFaceNeighbors(boundaryedges[i]).second;
 			res[boundaryedges[i]].second = new_cells[N0];
 #ifdef RICH_MPI
-			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-				interp2(res[static_cast<size_t>(boundaryedges[i])].second,
-					rslopes_[static_cast<size_t>(edge.neighbors.second)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+			if (tess.BoundaryFace(boundaryedges[i]))
+				interp2(res[boundaryedges[i]].second, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0));
 			else
-				res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
-					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-						edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+				interp2(res[boundaryedges[i]].second, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0));
 #else
 			interp2(res[boundaryedges[i]].second, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0));

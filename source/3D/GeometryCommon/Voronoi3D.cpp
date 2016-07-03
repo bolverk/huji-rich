@@ -477,13 +477,23 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<size_t, siz
 	// Communicate
 	vector<vector<Vector3D> > toadd = MPI_exchange_data(duplicatedprocs_, duplicated_points_, mesh_points_);
 	// Add points
+	Nghost_.clear();
+	Nghost_.resize(toadd.size());
 	for (size_t i = 0; i < toadd.size(); ++i)
 		for (size_t j = 0; j < toadd[i].size(); ++j)
+		{
+			Nghost_[i].push_back(Norg_ + 4 + res.size());
 			res.push_back(toadd[i][j]);
+		}
 	return res;
 }
 #endif //RICH_MPI
 
+
+vector<vector<size_t> > const& Voronoi3D::GetGhostIndeces(void) const
+{
+	return Nghost_;
+}
 
 void Voronoi3D::Build(vector<Vector3D> const & points
 #ifdef RICH_MPI
@@ -525,8 +535,17 @@ void Voronoi3D::Build(vector<Vector3D> const & points
 	CopyData(tetout);
 
 #ifdef RICH_MPI
-	vector<std::pair<size_t, size_t> > ghost_index = FindIntersections(tproc);
+	vector<std::pair<size_t, size_t> > ghost_index = FindIntersections(tproc,false);
 	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index,tproc);
+	mesh_points_.insert(mesh_points_.end(), extra_points.begin(), extra_points.end());
+	tetin.deinitialize();
+	tetin.initialize();
+	tetout.deinitialize();
+	tetout.initialize();
+	RunTetGen(mesh_points_, tetin, tetout);
+	ghost_index = FindIntersections(tproc, true);
+	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc);
+	mesh_points_.resize(Norg_ + 4);
 #else
 	vector<std::pair<size_t, size_t> > ghost_index = FindIntersections();
 	vector<Vector3D> extra_points = CreateBoundaryPoints(ghost_index);
@@ -662,7 +681,8 @@ void Voronoi3D::CopyData(tetgenio &tetout)
 		}
 	}
 
-	R_.resize(Ntetra, -1);
+	R_.resize(Ntetra);
+	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(Ntetra);
 }
 
@@ -714,47 +734,79 @@ double Voronoi3D::GetMaxRadius(size_t index)
 	return 2*res;
 }
 
-vector<size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc,size_t rank,Sphere const& sphere)
+vector<size_t>  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, size_t point, Sphere &sphere)
+{
+	size_t N = PointTetras_[point].size();
+	vector<size_t> res;
+	res.reserve(4);
+	for (size_t j = 0; j < box.size(); ++j)
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			sphere.radius = GetRadius(PointTetras_[point][i]);
+			sphere.center = tetra_centers_[PointTetras_[point][i]];
+			if (FaceSphereIntersections(box[j], sphere))
+			{
+				res.push_back(j);
+				break;
+			}
+		}
+	}
+	return res;
+}
+
+vector<size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc,size_t rank,size_t point,
+	Sphere &sphere,bool recursive)
 {
 	vector<size_t> res;
 	size_t N = tproc.GetPointNo();
 	size_t Nfaces = tproc.GetTotalFacesNumber();
 	vector<bool> visited(Nfaces, false);
 	std::stack<size_t> to_check;
-	vector<size_t> faces = tproc.GetCellFaces(rank);
-	for (size_t i = 0; i < faces.size(); ++i)
-		to_check.push(faces[i]);
-	while (!to_check.empty())
+	size_t Ntetra=PointTetras_[point].size();
+	for (size_t j = 0; j < Ntetra; ++j)
 	{
-		size_t cur = to_check.top();
-		to_check.pop();
-		if (visited[cur])
-			continue;
-		visited[cur] = true;
-		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
-			tproc.GetFaceNeighbors(cur).second);
-		if (FaceSphereIntersections(f, sphere))
+		sphere.radius = GetRadius(PointTetras_[point][j]);
+		sphere.center = tetra_centers_[PointTetras_[point][j]];
+		vector<size_t> faces = tproc.GetCellFaces(rank);
+		for (size_t i = 0; i < faces.size(); ++i)
+			to_check.push(faces[i]);
+		while (!to_check.empty())
 		{
-			res.push_back(cur);
-			if (f.neighbors.first < N)
+			size_t cur = to_check.top();
+			to_check.pop();
+			if (visited[cur])
+				continue;
+			visited[cur] = true;
+			Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
+				tproc.GetFaceNeighbors(cur).second);
+			if (FaceSphereIntersections(f, sphere))
 			{
-				vector<size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
-				for (size_t i = 0; i < faces_temp.size(); ++i)
-					if (!visited[faces_temp[i]])
-						to_check.push(faces_temp[i]);
-			}
-			if (f.neighbors.second < N)
-			{
-				vector<size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
-				for (size_t i = 0; i < faces_temp.size(); ++i)
-					if (!visited[faces_temp[i]])
-						to_check.push(faces_temp[i]);
+				res.push_back(cur);
+				if (recursive)
+				{
+					if (f.neighbors.first < N)
+					{
+						vector<size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
+						for (size_t i = 0; i < faces_temp.size(); ++i)
+							if (!visited[faces_temp[i]])
+								to_check.push(faces_temp[i]);
+					}
+					if (f.neighbors.second < N)
+					{
+						vector<size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
+						for (size_t i = 0; i < faces_temp.size(); ++i)
+							if (!visited[faces_temp[i]])
+								to_check.push(faces_temp[i]);
+					}
+				}
 			}
 		}
 	}
 	std::sort(res.begin(), res.end());
 	return unique(res);
 }
+
 
 void Voronoi3D::GetPointToCheck(size_t point, vector<bool> const& checked,vector<size_t> &res)
 {
@@ -780,7 +832,8 @@ size_t Voronoi3D::GetFirstPointToCheck(void)const
 
 vector<std::pair<size_t,size_t> > Voronoi3D::FindIntersections(
 #ifdef RICH_MPI
-	Tessellation3D const& tproc
+	Tessellation3D const& tproc,
+	bool recursive
 #endif
 	)
 {
@@ -805,24 +858,17 @@ vector<std::pair<size_t,size_t> > Voronoi3D::FindIntersections(
 		checked[cur_loc] = true;
 		// Does sphere have any intersections?
 		bool added = false;
-		sphere.radius = GetMaxRadius(cur_loc);
-		sphere.center = mesh_points_[cur_loc];
 #ifdef RICH_MPI
-		vector<size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<size_t>(rank), sphere);
+		vector<size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<size_t>(rank),cur_loc, sphere,recursive);
+#else
+		vector<size_t> intersecting_faces = FindIntersectionsSingle(box,cur_loc, sphere);
+#endif
 		if (!intersecting_faces.empty())
 		{
 			added = true;
 			for (size_t j = 0; j < intersecting_faces.size(); ++j)
 				res.push_back(std::pair<size_t, size_t>(intersecting_faces[j], cur_loc));
 		}
-#else
-		for (size_t j = 0; j < nbox; ++j)
-			if (FaceSphereIntersections(box[j], sphere))
-			{
-				added = true;
-				res.push_back(std::pair<size_t, size_t>(j, cur_loc));
-			}
-#endif
 		if (added)
 		{
 			GetPointToCheck(cur_loc, checked, point_neigh);

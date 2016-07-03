@@ -21,7 +21,11 @@ public:
 	/*! \brief Builds the tessellation
 	\param points Initial position of mesh generating points
 	*/
-	virtual void Build(vector<Vector3D> const& points) = 0;
+	virtual void Build(vector<Vector3D> const& points
+#ifdef RICH_MPI
+		,Tessellation3D const& tproc
+#endif
+		) = 0;
 
 
 	/*! \brief Get Total number of mesh generating points
@@ -186,6 +190,8 @@ public:
 	virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
 
 	virtual Vector3D FaceCM(size_t index)const=0;
+
+	virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;
 };
 
 #endif // TESSELLATION3D_HPP

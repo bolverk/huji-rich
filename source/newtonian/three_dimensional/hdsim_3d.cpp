@@ -21,6 +21,9 @@ double HDSim3D::ProgressTracker::getCycle(void) const
 }
 
 HDSim3D::HDSim3D(Tessellation3D& tess,
+#ifdef RICH_MPI
+	Tessellation3D& tproc,
+#endif//RICH_MPI
 	const vector<ComputationalCell3D>& cells,
 	const EquationOfState& eos,
 	const PointMotion3D& pm,
@@ -29,7 +32,11 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const CellUpdater3D& cu,
 	const ExtensiveUpdater3D& eu,
 	const TracerStickerNames tsn) :
-	tess_(tess), eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),tsn_(tsn),pt_()
+	tess_(tess), 
+#ifdef RICH_MPI
+	tproc_(tproc),
+#endif
+	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),tsn_(tsn),pt_()
 {
 	assert(tess.GetPointNo() == cells.size());
 	size_t N = tess.GetPointNo();
@@ -51,14 +58,22 @@ namespace
 				res[i]=tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
 	}
 
-	void UpdateTessellation(Tessellation3D &tess, vector<Vector3D> &point_vel,double dt)
+	void UpdateTessellation(Tessellation3D &tess, vector<Vector3D> &point_vel,double dt
+#ifdef RICH_MPI
+		,Tessellation3D const& tproc
+#endif
+		)
 	{
 		vector<Vector3D> points = tess.GetMeshPoints();
 		size_t N = tess.GetPointNo();
 		points.resize(N);
 		for (size_t i = 0; i < N; ++i)
 			points[i] += point_vel[i] * dt;
-		tess.Build(points);
+		tess.Build(points
+#ifdef RICH_MPI
+			,tproc
+#endif
+			);
 	}
 
 	void ExtensiveAvg(vector<Conserved3D> &res, vector<Conserved3D> const& other)
@@ -83,7 +98,11 @@ void HDSim3D::timeAdvance2(void)
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
-	UpdateTessellation(tess_, point_vel, dt);
+	UpdateTessellation(tess_, point_vel, dt
+#ifdef RICH_MPI
+		,tproc_
+#endif
+		);
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
 	pt_.update(dt);
 	CalcFaceVelocities(tess_, point_vel, face_vel);
@@ -104,7 +123,11 @@ void HDSim3D::timeAdvance(void)
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	eu_(fluxes, tess_, dt, cells_, extensive_, pt_.getTime(), tsn_);
-	UpdateTessellation(tess_, point_vel, dt);
+	UpdateTessellation(tess_, point_vel, dt
+#ifdef RICH_MPI
+		, tproc_
+#endif
+		);
 	cu_(cells_, eos_, tess_, extensive_, tsn_);
 	pt_.update(dt);
 }
