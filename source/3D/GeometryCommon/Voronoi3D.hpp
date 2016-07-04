@@ -59,12 +59,10 @@ private:
 	void CalcCellCMVolume(size_t index);
 	double GetRadius(size_t index);
 	double GetMaxRadius(size_t index);
-	vector<std::pair<size_t, size_t> > FindIntersections(
+	vector<std::pair<size_t, size_t> > SerialFindIntersections(void);
 #ifdef RICH_MPI
-		Tessellation3D const& tproc,
-		bool recursive
+	vector<std::pair<size_t, size_t> > FindIntersections(Tessellation3D const& tproc,bool recursive);
 #endif
-		);
 	void CopyData(tetgenio &tetin);
 	void CopyDataVoronoi(tetgenio &tetin);
 	void FillPointTetra(size_t point, size_t initetra);
@@ -97,11 +95,11 @@ public:
 
 	void output(std::string const& filename)const;
 
-	void Build(vector<Vector3D> const& points
+	void Build(vector<Vector3D> const& points);
+
 #ifdef RICH_MPI
-		,Tessellation3D const& tproc
+	void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
 #endif
-		);
 
 	size_t GetPointNo(void) const;
 
@@ -163,5 +161,7 @@ public:
 
 	vector<vector<size_t> > const& GetGhostIndeces(void) const;
 };
+
+bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, size_t index);
 
 #endif // VORONOI3D_HPP
