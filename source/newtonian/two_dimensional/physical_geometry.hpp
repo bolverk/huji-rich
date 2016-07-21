@@ -31,6 +31,12 @@ public:
     \return volume of the cell
    */
   virtual double calcVolume(const vector<Edge>& edge_list) const = 0;
+  
+   /*! \brief Calculates the physical volume of a cell
+    \param chull The convex hull of the cell
+    \return volume of the cell
+   */
+  virtual double calcVolume(const vector<Vector2D>& chull) const = 0;
 
   virtual ~PhysicalGeometry(void);
 };
@@ -46,6 +52,8 @@ public:
   double calcArea(const Edge& edge) const;
 
   double calcVolume(const vector<Edge>& edge_list) const;
+  
+  double calcVolume(const vector<Vector2D>& chull) const;
 };
 
 //! \brief Axis of revolution
@@ -82,6 +90,8 @@ public:
   double calcArea(const Edge& edge) const;
 
   double calcVolume(const vector<Edge>& edge_list) const;
+  
+  double calcVolume(const vector<Vector2D>& chull) const;
 
   /*! \brief Returns the axis of revolution
     \return Axis of revolution

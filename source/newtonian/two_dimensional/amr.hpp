@@ -186,6 +186,8 @@ public:
 	\param time The sim time
 	\param obc Outer boundary conditions
 	\param tracerstickernames The names of the tracers and stickers
+	\param cd The cache data of the tessellation
+	\param pg The physical geometry
 	*/
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes (for parallel runs)
@@ -196,7 +198,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const = 0;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const = 0;
 	/*!
 	\brief Runs the removal
 	\param tess The tessellation
@@ -206,6 +210,8 @@ public:
 	\param time The sim time
 	\param obc The outer boundary conditions
 	\param tracerstickernames The names of the tracers and stickers
+	\param cd The cache data of the tessellation
+	\param pg The physical geometry
 	*/
 #ifdef RICH_MPI
   //!	\param proctess Tessellation of the processes (for parallel runs)
@@ -216,7 +222,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const = 0;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const = 0;
 	//! \brief Virtual destructor
 	virtual ~AMR(void);
 };
@@ -264,7 +272,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -272,7 +282,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 };
 
 //! \brief Non conservative amr
@@ -311,7 +323,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -319,7 +333,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 };
 
 //! \brief Conservative amr using old method to split cells
@@ -362,7 +378,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -370,7 +388,9 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames,
+		CacheData const& cd,
+		PhysicalGeometry const& pg)const;
 };
 
 

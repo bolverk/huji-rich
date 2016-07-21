@@ -20,6 +20,15 @@ double SlabSymmetry::calcVolume(const vector<Edge>& edge_list) const
   return res;
 }
 
+double SlabSymmetry::calcVolume(const vector<Vector2D>& chull) const
+{
+  double res = 0;
+  const Vector2D anchor = chull[0];
+  for(size_t i=1;i<chull.size()-1;++i)
+    res += calc_triangle_area(anchor,chull[i],chull[i+1]);
+  return res;
+}
+
 Axis::Axis(const Vector2D& origin_i,
 	   const Vector2D& direction_i):
   origin(origin_i), direction(direction_i/abs(direction_i)) {}
@@ -75,6 +84,18 @@ double CylindricalSymmetry::calcVolume(const vector<Edge>& edge_list) const
     res += calc_triangular_ring_volume(anchor,
 				       edge_list[i].vertices.first,
 				       edge_list[i].vertices.second,
+				       axis_);
+  return res;
+}
+
+double CylindricalSymmetry::calcVolume(const vector<Vector2D>& chull) const
+{
+  double res = 0;
+  const Vector2D anchor = chull[0];
+  for(size_t i=1;i<chull.size()-1;++i)
+    res += calc_triangular_ring_volume(anchor,
+				       chull[i],
+				       chull[i+1],
 				       axis_);
   return res;
 }
