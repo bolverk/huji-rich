@@ -18,18 +18,19 @@ CellsToRefine::~CellsToRefine() {}
 AMR::~AMR(void) {}
 
 Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& /*tracerstickernames*/) const
+	double volume, TracerStickerNames const& tracerstickernames) const
 {
 	Extensive res;
 	const double mass = volume*cell.density;
 	res.mass = mass;
-	res.energy = eos.dp2e(cell.density, cell.pressure, cell.tracers)*mass +
-		0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-	res.momentum = mass*cell.velocity;
 	size_t N = cell.tracers.size();
 	res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * mass;
+	res.energy = eos.dp2e(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names)*mass +
+		0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+	res.momentum = mass*cell.velocity;
+
 	return res;
 }
 
@@ -45,12 +46,12 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
 	res.velocity = extensive.momentum / extensive.mass;
-	res.pressure = eos.de2p(res.density, extensive.energy / extensive.mass - 0.5*ScalarProd(res.velocity, res.velocity));
 	size_t N = extensive.tracers.size();
 	res.tracers.resize(N);
 	for (size_t i = 0; i < N;++i)
 		res.tracers[i]=extensive.tracers[i] / extensive.mass;
 	res.stickers = old_cell.stickers;
+	res.pressure = eos.de2p(res.density, extensive.energy / extensive.mass - 0.5*ScalarProd(res.velocity, res.velocity),res.tracers,tracerstickernames.tracer_names);
 	return res;
 }
 

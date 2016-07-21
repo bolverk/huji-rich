@@ -409,7 +409,9 @@ namespace
 			Sy2 += (neigh_cm[i].y - cell_cm.y)*(neigh_cm[i].y - cell_cm.y);
 		}
 		res.xderivative = (PhiSy*SxSy - PhiSx*Sy2) / (SxSy*SxSy - Sx2*Sy2);
+		res.xderivative.stickers = cell.stickers;
 		res.yderivative = (PhiSx*SxSy - PhiSy*Sx2) / (SxSy*SxSy - Sx2*Sy2);
+		res.yderivative.stickers = cell.stickers;
 	}
 
 
