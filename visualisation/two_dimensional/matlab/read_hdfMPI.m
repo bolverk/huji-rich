@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,NumberOfPointsInCell,xproc,yproc,NperProc]=read_hdfMPI(filedir,filename,nproc,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
 if(nargin==3),
     ShouldPlot=0;
     WhatToPlot=1;
@@ -27,7 +27,7 @@ else
 end
 NperProc=zeros(nproc,1);
 filename=strcat(filedir,filename);
-[X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,TracerNames,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
+[X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
 xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/x_coordinate');
 yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/y_coordinate');
@@ -35,6 +35,18 @@ h=h5info(strcat(filename,sprintf('_%d.h5',0)));
 for i=1:length(h.Groups)
     if(strcmp(h.Groups(i).Name,'/tracers')==1)
         tracerindex=i;
+        break;
+    end
+end
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/appendices')==1)
+        appendindex=i;
+        break;
+    end
+end
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/stickers')==1)
+        stickerindex=i;
         break;
     end
 end
@@ -53,6 +65,8 @@ for i=1:length(h.Groups)
 end
 
 NumberOfTracers=length(h.Groups(tracerindex).Datasets);
+NumberOfStickers=length(h.Groups(stickerindex).Datasets);
+NumberOfAppendices=length(h.Groups(appendindex).Datasets);
 time=h5read(strcat(filename,sprintf('_%d.h5',0)),'/time');
 
 npoints=0;
@@ -84,10 +98,20 @@ if(NumberOfTracers>0)
 else
     Tracers=[];
 end
+if(NumberOfStickers>0)
+    Stickers=zeros(npoints,NumberOfStickers);
+else
+    Stickers=[];
+end
+if(NumberOfAppendices>0)
+    Appendices=zeros(npoints,NumberOfAppendices);
+else
+    Appendices=[];
+end
 temp=0;
 for i=0:nproc-1
     fname=strcat(filename,sprintf('_%d.h5',i));
-    [Xt,Yt,Pressuret,Densityt,Vxt,Vyt,Pointst,~,Tracerst,~,nincellt]=read_hdf(fname);
+    [Xt,Yt,Pressuret,Densityt,Vxt,Vyt,Pointst,~,Tracerst,~,Stickerst,~,Appendicest,~,nincellt]=read_hdf(fname);
     n=length(Xt);
     NperProc(i+1)=n;
     X(temp+1:temp+n)=Xt;
@@ -103,6 +127,12 @@ for i=0:nproc-1
     NumberOfPointsInCell(temp+1:temp+n)=nincellt;
     if(NumberOfTracers>0)
         Tracers(temp+1:temp+n,:)=Tracerst;
+    end
+    if(NumberOfStickers>0)
+        Stickers(temp+1:temp+n,:)=Stickerst;
+    end
+    if(NumberOfAppendices>0)
+        Appendices(temp+1:temp+n,:)=Appendicest;
     end
     temp=temp+n;
 end

@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Matlab script to read RICH binary files in float/double format
 %
@@ -19,6 +19,9 @@ function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,NumberOfPoi
 %             Points - The vertices of the Voronoi cell
 %             time - The time of the simulation
 %             Tracers - The scalar tracers
+%             TracerNames - The names of the tracers
+%             Stickers - The stickers per cell
+%             StickerNames - The names of the stickers
 %             NumberOfPointsInCell - The number of vertices in each Voronoi
 %             cell
 %   Example : [X,Pressure,Density,Points,xVelocity,yVelocity,time,Tracers,NumberOfPointsInCell]=read_hdf("output.bin",1,1,1)
@@ -71,21 +74,54 @@ for i=1:length(h.Groups)
         break;
     end
 end
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/appendices')==1)
+        appendindex=i;
+        break;
+    end
+end
+for i=1:length(h.Groups)
+    if(strcmp(h.Groups(i).Name,'/stickers')==1)
+        stickerindex=i;
+        break;
+    end
+end
+NumberOfStickers=length(h.Groups(stickerindex).Datasets);
 NumberOfTracers=length(h.Groups(tracerindex).Datasets);
+NumberOfAppendices=length(h.Groups(appendindex).Datasets);
 NumberOfCells=length(Density);
 Vertx=h5read(filename,'/geometry/x_vertices');
 Verty=h5read(filename,'/geometry/y_vertices');
 nVert=h5read(filename,'/geometry/n_vertices');
 Tracers=zeros(NumberOfCells,NumberOfTracers);
-
+Stickers=zeros(NumberOfCells,NumberOfStickers);
+Appendices=zeros(NumberOfCells,NumberOfAppendices);
 
 TracerNames=cell(NumberOfTracers,1);
+StickerNames=cell(NumberOfStickers,1);
+AppendixNames=cell(NumberOfAppendices,1);
 for i=1:NumberOfTracers
     TracerNames{i}= h.Groups(tracerindex).Datasets(i).Name;
 end
 
 for i=1:NumberOfTracers
     Tracers(:,i)=h5read(filename,sprintf('/tracers/%s', h.Groups(tracerindex).Datasets(i).Name));
+end
+
+for i=1:NumberOfStickers
+    StickerNames{i}= h.Groups(stickerindex).Datasets(i).Name;
+end
+
+for i=1:NumberOfStickers
+    Stickers(:,i)=h5read(filename,sprintf('/stickers/%s', h.Groups(stickerindex).Datasets(i).Name));
+end
+
+for i=1:NumberOfAppendices
+    AppendixNames{i}= h.Groups(appendindex).Datasets(i).Name;
+end
+
+for i=1:NumberOfAppendices
+    Appendices(:,i)=h5read(filename,sprintf('/appendices/%s', h.Groups(appendindex).Datasets(i).Name));
 end
 
 draw=WhatToPlot;
