@@ -7,7 +7,14 @@ Slope ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
 	size_t ghost_index, double /*time*/,Edge const& /*edge*/,TracerStickerNames const& /*tracerstickernames*/)const
 {
 	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
-		return Slope();
+	{
+		Slope res;
+		res.xderivative.tracers.resize(cell_.tracers.size(), 0);
+		res.yderivative.tracers.resize(cell_.tracers.size(), 0);
+		res.xderivative.stickers.resize(cell_.stickers.size(), 0);
+		res.yderivative.stickers.resize(cell_.stickers.size(), 0);
+		return res;
+	}
 	else
 		return gradients[ghost_index];
 }
