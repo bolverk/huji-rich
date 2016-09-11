@@ -51,7 +51,7 @@ bool FaceSphereIntersections(Face const& face, Sphere const& sphere)
 
 	double D = -ScalarProd(normal, face.vertices[0]);
 	// Find intersecting circle
-	double d = abs(ScalarProd(normal, sphere.center) + D);
+	double d = std::abs(ScalarProd(normal, sphere.center) + D);
 	if (d > sphere.radius)
 		return false;
 	Vector3D circle_center;

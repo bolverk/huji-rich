@@ -3,7 +3,7 @@ RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
 CC := g++
-LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
+#LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg 
@@ -70,11 +70,11 @@ set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boo
 	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
 
-external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.16/c++/src/H5Cpp.h
-	cd external_libraries/hdf5_dump/hdf5-1.8.16 && \
+external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.17/c++/src/H5Cpp.h
+	cd external_libraries/hdf5_dump/hdf5-1.8.17 && \
 	./configure --enable-cxx --prefix=`cd ../.. && pwd`
-	cd external_libraries/hdf5_dump/hdf5-1.8.16 && make
-	cd external_libraries/hdf5_dump/hdf5-1.8.16 && make install
+	cd external_libraries/hdf5_dump/hdf5-1.8.17 && make
+	cd external_libraries/hdf5_dump/hdf5-1.8.17 && make install
 
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
@@ -86,8 +86,8 @@ external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hp
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
 
-external_libraries/hdf5_dump/hdf5-1.8.16/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.16.tar.gz
-	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.16.tar.gz
+external_libraries/hdf5_dump/hdf5-1.8.17/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.17.tar.gz
+	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.17.tar.gz
 
 external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_59_0.tar.bz2
 	cd external_libraries/boost_dump/ && tar xvf ./boost_1_59_0.tar.bz2
@@ -98,10 +98,10 @@ external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/an
 external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
 	cd external_libraries/ann_tree_dump/ && tar xvf ./ann_1.1.2.tar.gz
 
-external_libraries/hdf5_dump/hdf5-1.8.16.tar.gz:
+external_libraries/hdf5_dump/hdf5-1.8.17.tar.gz:
 	mkdir -p external_libraries/hdf5_dump
 	cd external_libraries/hdf5_dump && \
-	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.16.tar.gz
+	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz
 
 external_libraries/boost_dump/boost_1_59_0.tar.bz2:
 	mkdir -p external_libraries/boost_dump

@@ -28,11 +28,11 @@
 
 // #define NDEBUG
 
-// TetGen default uses the double precision (64 bit) for a real number. 
+// TetGen default uses the double precision (64 bit) for a REALtet number. 
 //   Alternatively, one can use the single precision (32 bit) 'float' if the
 //   memory is limited.
 
-#define REAL double  // #define REAL float
+#define REALtet double  // #define REALtet float
 
 // Maximum number of characters in a file name (including the null).
 
@@ -131,7 +131,7 @@ public:
   typedef struct {
     polygon *polygonlist;
     int numberofpolygons;
-    REAL *holelist;
+    REALtet *holelist;
     int numberofholes;
   } facet;
 
@@ -144,7 +144,7 @@ public:
   //   given in 'vnormal'. 
   typedef struct {
     int v1, v2;
-    REAL vnormal[3];
+    REALtet vnormal[3];
   } voroedge;
 
   // A "vorofacet" is an facet of the Voronoi diagram. It corresponds to a
@@ -163,20 +163,20 @@ public:
   // Additional parameters associated with an input (or mesh) vertex.
   //   These informations are provided by CAD libraries. 
   typedef struct {
-    REAL uv[2];
+    REALtet uv[2];
     int tag;
     int type; // 0, 1, or 2.
   } pointparam;
 
   // Callback functions for meshing PSCs.
-  typedef REAL (* GetVertexParamOnEdge)(void*, int, int);
-  typedef void (* GetSteinerOnEdge)(void*, int, REAL, REAL*);
-  typedef void (* GetVertexParamOnFace)(void*, int, int, REAL*);
-  typedef void (* GetEdgeSteinerParamOnFace)(void*, int, REAL, int, REAL*);
-  typedef void (* GetSteinerOnFace)(void*, int, REAL*, REAL*);
+  typedef REALtet (* GetVertexParamOnEdge)(void*, int, int);
+  typedef void (* GetSteinerOnEdge)(void*, int, REALtet, REALtet*);
+  typedef void (* GetVertexParamOnFace)(void*, int, int, REALtet*);
+  typedef void (* GetEdgeSteinerParamOnFace)(void*, int, REALtet, int, REALtet*);
+  typedef void (* GetSteinerOnFace)(void*, int, REALtet*, REALtet*);
 
   // A callback function for mesh refinement.
-  typedef bool (* TetSizeFunc)(REAL*, REAL*, REAL*, REAL*, REAL*, REAL);
+  typedef bool (* TetSizeFunc)(REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet);
 
   // Items are numbered starting from 'firstnumber' (0 or 1), default is 0.
   int firstnumber; 
@@ -190,15 +190,15 @@ public:
   // 'pointlist':  An array of point coordinates.  The first point's x
   //   coordinate is at index [0] and its y coordinate at index [1], its
   //   z coordinate is at index [2], followed by the coordinates of the
-  //   remaining points.  Each point occupies three REALs. 
+  //   remaining points.  Each point occupies three REALtets. 
   // 'pointattributelist':  An array of point attributes.  Each point's
-  //   attributes occupy 'numberofpointattributes' REALs.
+  //   attributes occupy 'numberofpointattributes' REALtets.
   // 'pointmtrlist': An array of metric tensors at points. Each point's
-  //   tensor occupies 'numberofpointmtr' REALs.
+  //   tensor occupies 'numberofpointmtr' REALtets.
   // 'pointmarkerlist':  An array of point markers; one integer per point.
-  REAL *pointlist;
-  REAL *pointattributelist;
-  REAL *pointmtrlist;
+  REALtet *pointlist;
+  REALtet *pointattributelist;
+  REALtet *pointmtrlist;
   int  *pointmarkerlist;
   pointparam *pointparamlist;
   int numberofpoints;
@@ -211,14 +211,14 @@ public:
   //   second order option (-o2) is applied. Each tetrahedron occupies
   //   'numberofcorners' ints.  The second order nodes are ouput only. 
   // 'tetrahedronattributelist':  An array of tetrahedron attributes.  Each
-  //   tetrahedron's attributes occupy 'numberoftetrahedronattributes' REALs.
+  //   tetrahedron's attributes occupy 'numberoftetrahedronattributes' REALtets.
   // 'tetrahedronvolumelist':  An array of constraints, i.e. tetrahedron's
-  //   volume; one REAL per element.  Input only.
+  //   volume; one REALtet per element.  Input only.
   // 'neighborlist':  An array of tetrahedron neighbors; 4 ints per element. 
   //   Output only.
   int  *tetrahedronlist;
-  REAL *tetrahedronattributelist;
-  REAL *tetrahedronvolumelist;
+  REALtet *tetrahedronattributelist;
+  REALtet *tetrahedronvolumelist;
   int  *neighborlist;
   int numberoftetrahedra;
   int numberofcorners;
@@ -233,37 +233,37 @@ public:
   // 'holelist':  An array of holes (in volume).  Each hole is given by a
   //   seed (point) which lies strictly inside it. The first seed's x, y and z
   //   coordinates are at indices [0], [1] and [2], followed by the
-  //   remaining seeds.  Three REALs per hole. 
-  REAL *holelist;
+  //   remaining seeds.  Three REALtets per hole. 
+  REALtet *holelist;
   int numberofholes;
 
   // 'regionlist': An array of regions (subdomains).  Each region is given by
   //   a seed (point) which lies strictly inside it. The first seed's x, y and
   //   z coordinates are at indices [0], [1] and [2], followed by the regional
   //   attribute at index [3], followed by the maximum volume at index [4]. 
-  //   Five REALs per region.
+  //   Five REALtets per region.
   // Note that each regional attribute is used only if you select the 'A'
   //   switch, and each volume constraint is used only if you select the
   //   'a' switch (with no number following).
-  REAL *regionlist;
+  REALtet *regionlist;
   int numberofregions;
 
   // 'facetconstraintlist':  An array of facet constraints.  Each constraint
   //   specifies a maximum area bound on the subfaces of that facet.  The
   //   first facet constraint is given by a facet marker at index [0] and its
   //   maximum area bound at index [1], followed by the remaining facet con-
-  //   straints. Two REALs per facet constraint.  Note: the facet marker is
+  //   straints. Two REALtets per facet constraint.  Note: the facet marker is
   //   actually an integer.
-  REAL *facetconstraintlist;
+  REALtet *facetconstraintlist;
   int numberoffacetconstraints;
 
   // 'segmentconstraintlist': An array of segment constraints. Each constraint 
   //   specifies a maximum length bound on the subsegments of that segment.
   //   The first constraint is given by the two endpoints of the segment at
   //   index [0] and [1], and the maximum length bound at index [2], followed
-  //   by the remaining segment constraints.  Three REALs per constraint. 
+  //   by the remaining segment constraints.  Three REALtets per constraint. 
   //   Note the segment endpoints are actually integers.
-  REAL *segmentconstraintlist;
+  REALtet *segmentconstraintlist;
   int numberofsegmentconstraints;
 
 
@@ -305,7 +305,7 @@ public:
   // 'vcelllist':  An array of Voronoi cells.  Each entry is an array of
   //   indices pointing into 'vfacetlist'. The 0th entry is used to store
   //   the length of this array.
-  REAL *vpointlist;
+  REALtet *vpointlist;
   voroedge *vedgelist;
   vorofacet *vfacetlist;
   int **vcelllist;
@@ -365,7 +365,7 @@ public:
   static void init(facet* f) {
     f->polygonlist = (polygon *) NULL;
     f->numberofpolygons = 0;
-    f->holelist = (REAL *) NULL;
+    f->holelist = (REALtet *) NULL;
     f->numberofholes = 0;
   }
 
@@ -376,9 +376,9 @@ public:
     mesh_dim = 3;
     useindex = 1;
 
-    pointlist = (REAL *) NULL;
-    pointattributelist = (REAL *) NULL;
-    pointmtrlist = (REAL *) NULL;
+    pointlist = (REALtet *) NULL;
+    pointattributelist = (REALtet *) NULL;
+    pointmtrlist = (REALtet *) NULL;
     pointmarkerlist = (int *) NULL;
     pointparamlist = (pointparam *) NULL;
     numberofpoints = 0;
@@ -386,8 +386,8 @@ public:
     numberofpointmtrs = 0;
 
     tetrahedronlist = (int *) NULL;
-    tetrahedronattributelist = (REAL *) NULL;
-    tetrahedronvolumelist = (REAL *) NULL;
+    tetrahedronattributelist = (REALtet *) NULL;
+    tetrahedronvolumelist = (REALtet *) NULL;
     neighborlist = (int *) NULL;
     numberoftetrahedra = 0;
     numberofcorners = 4; 
@@ -409,19 +409,19 @@ public:
     facetmarkerlist = (int *) NULL;
     numberoffacets = 0; 
 
-    holelist = (REAL *) NULL;
+    holelist = (REALtet *) NULL;
     numberofholes = 0;
 
-    regionlist = (REAL *) NULL;
+    regionlist = (REALtet *) NULL;
     numberofregions = 0;
 
-    facetconstraintlist = (REAL *) NULL;
+    facetconstraintlist = (REALtet *) NULL;
     numberoffacetconstraints = 0;
-    segmentconstraintlist = (REAL *) NULL;
+    segmentconstraintlist = (REALtet *) NULL;
     numberofsegmentconstraints = 0;
 
 
-    vpointlist = (REAL *) NULL;
+    vpointlist = (REALtet *) NULL;
     vedgelist = (voroedge *) NULL;
     vfacetlist = (vorofacet *) NULL; 
     vcelllist = (int **) NULL; 
@@ -446,15 +446,15 @@ public:
   {
     int i, j;
 
-    if (pointlist != (REAL *) NULL) {
+    if (pointlist != (REALtet *) NULL) {
       delete [] pointlist;
 	  pointlist = NULL;
     }
-    if (pointattributelist != (REAL *) NULL) {
+    if (pointattributelist != (REALtet *) NULL) {
       delete [] pointattributelist;
 	  pointattributelist = NULL;
     }
-    if (pointmtrlist != (REAL *) NULL) {
+    if (pointmtrlist != (REALtet *) NULL) {
       delete [] pointmtrlist;
 	  pointmtrlist = NULL;
     }
@@ -471,11 +471,11 @@ public:
       delete [] tetrahedronlist;
 	  tetrahedronlist = NULL;
     }
-    if (tetrahedronattributelist != (REAL *) NULL) {
+    if (tetrahedronattributelist != (REALtet *) NULL) {
       delete [] tetrahedronattributelist;
 	  tetrahedronattributelist = NULL;
     }
-    if (tetrahedronvolumelist != (REAL *) NULL) {
+    if (tetrahedronvolumelist != (REALtet *) NULL) {
       delete [] tetrahedronvolumelist;
 	  tetrahedronvolumelist = NULL;
     }
@@ -530,7 +530,7 @@ public:
         }
         delete [] f->polygonlist;
 		f->polygonlist = NULL;
-        if (f->holelist != (REAL *) NULL) {
+        if (f->holelist != (REALtet *) NULL) {
           delete [] f->holelist;
 		  f->holelist = NULL;
         }
@@ -543,23 +543,23 @@ public:
 	  facetmarkerlist = NULL;
     }
 
-    if (holelist != (REAL *) NULL) {
+    if (holelist != (REALtet *) NULL) {
       delete [] holelist;
 	  holelist = NULL;
     }
-    if (regionlist != (REAL *) NULL) {
+    if (regionlist != (REALtet *) NULL) {
       delete [] regionlist;
 	  regionlist = NULL;
     }
-    if (facetconstraintlist != (REAL *) NULL) {
+    if (facetconstraintlist != (REALtet *) NULL) {
       delete [] facetconstraintlist;
 	  facetconstraintlist = NULL;
     }
-    if (segmentconstraintlist != (REAL *) NULL) {
+    if (segmentconstraintlist != (REALtet *) NULL) {
       delete [] segmentconstraintlist;
 	  segmentconstraintlist = NULL;
     }
-    if (vpointlist != (REAL *) NULL) {
+    if (vpointlist != (REALtet *) NULL) {
       delete [] vpointlist;
 	  vpointlist = NULL;
     }
@@ -674,17 +674,17 @@ public:
   int hilbert_order;                                           // '-b///', 52.
   int hilbert_limit;                                             // '-b//'  8.
   int brio_threshold;                                              // '-b' 64.
-  REAL brio_ratio;                                             // '-b/' 0.125.
-  REAL facet_ang_tol;                                          // '-p', 179.9.
-  REAL maxvolume;                                               // '-a', -1.0.
-  REAL minratio;                                                 // '-q', 0.0.
-  REAL mindihedral;                                              // '-q', 5.0.
-  REAL optmaxdihedral;                                               // 165.0.
-  REAL optminsmtdihed;                                               // 179.0.
-  REAL optminslidihed;                                               // 179.0.  
-  REAL epsilon;                                               // '-T', 1.0e-8.
-  REAL minedgelength;                                                  // 0.0.
-  REAL coarsen_percent;                                         // -R1/#, 1.0.
+  REALtet brio_ratio;                                             // '-b/' 0.125.
+  REALtet facet_ang_tol;                                          // '-p', 179.9.
+  REALtet maxvolume;                                               // '-a', -1.0.
+  REALtet minratio;                                                 // '-q', 0.0.
+  REALtet mindihedral;                                              // '-q', 5.0.
+  REALtet optmaxdihedral;                                               // 165.0.
+  REALtet optminsmtdihed;                                               // 179.0.
+  REALtet optminslidihed;                                               // 179.0.  
+  REALtet epsilon;                                               // '-T', 1.0e-8.
+  REALtet minedgelength;                                                  // 0.0.
+  REALtet coarsen_percent;                                         // -R1/#, 1.0.
 
   // Strings of command line arguments and input/output file names.
   char commandline[1024];
@@ -830,11 +830,11 @@ public:
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-void exactinit(int, int, int, REAL, REAL, REAL);
-REAL orient3d(REAL *pa, REAL *pb, REAL *pc, REAL *pd);
-REAL insphere(REAL *pa, REAL *pb, REAL *pc, REAL *pd, REAL *pe);
-REAL orient4d(REAL *pa, REAL *pb, REAL *pc, REAL *pd, REAL *pe,
-              REAL ah, REAL bh, REAL ch, REAL dh, REAL eh);
+void exactinit(int, int, int, REALtet, REALtet, REALtet);
+REALtet orient3d(REALtet *pa, REALtet *pb, REALtet *pc, REALtet *pd);
+REALtet insphere(REALtet *pa, REALtet *pb, REALtet *pc, REALtet *pd, REALtet *pe);
+REALtet orient4d(REALtet *pa, REALtet *pb, REALtet *pc, REALtet *pd, REALtet *pe,
+              REALtet ah, REALtet bh, REALtet ch, REALtet dh, REALtet eh);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -890,7 +890,7 @@ public:
   // The structure of a tetrahedron is an array of pointers.  Its actual size
   //   (the length of the array) is determined at runtime.
 
-  typedef REAL **tetrahedron;
+  typedef REALtet **tetrahedron;
 
   // The subface data structure.  It includes the following fields:
   //   - a list of three adjoining subfaces;
@@ -901,7 +901,7 @@ public:
   //   - an integer for boundary marker;
   //   - an integer for type, flags, etc.
 
-  typedef REAL **shellface;
+  typedef REALtet **shellface;
 
   // The point data structure.  It includes the following fields:
   //   - x, y and z coordinates;
@@ -915,10 +915,10 @@ public:
   //   - an integer for boundary marker (point index);
   //   - an integer for point type (and flags).
   //   - an integer for geometry tag (optional, for -s switch).
-  // The structure of a point is an array of REALs.  Its acutal size is 
+  // The structure of a point is an array of REALtets.  Its acutal size is 
   //   determined at the runtime.
 
-  typedef REAL *point;
+  typedef REALtet *point;
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -1107,7 +1107,7 @@ public:
   public:
     triface tt; 
     face ss;
-    REAL key, cent[6];  // circumcenter or cos(dihedral angles) at 6 edges.
+    REALtet key, cent[6];  // circumcenter or cos(dihedral angles) at 6 edges.
     point forg, fdest, fapex, foppo, noppo;
     badface *nextitem; 
     badface() : key(0), forg(0), fdest(0), fapex(0), foppo(0), noppo(0),
@@ -1138,7 +1138,7 @@ public:
     triface refinetet;
     face refinesh;
     int smlenflag; // for useinsertradius.
-    REAL smlen; // for useinsertradius.
+    REALtet smlen; // for useinsertradius.
     point parentpt;
 
     insertvertexflags() {
@@ -1180,11 +1180,11 @@ public:
 
     // Optimization flags.
     int remove_ndelaunay_edge; // Remove a non-Delaunay edge.
-    REAL bak_tetprism_vol; // The value to be minimized.
-    REAL tetprism_vol_sum;
+    REALtet bak_tetprism_vol; // The value to be minimized.
+    REALtet tetprism_vol_sum;
     int remove_large_angle; // Remove a large dihedral angle at edge.
-    REAL cosdihed_in; // The input cosine of the dihedral angle (> 0).
-    REAL cosdihed_out; // The improved cosine of the dihedral angle.
+    REALtet cosdihed_in; // The input cosine of the dihedral angle (> 0).
+    REALtet cosdihed_out; // The improved cosine of the dihedral angle.
 
     // Boundary recovery flags.
     int checkflipeligibility;
@@ -1233,10 +1233,10 @@ public:
     int min_max_dihedangle;  // Minimize the maximum dihedral angle. 
 
     // The initial and improved value.
-    REAL initval, imprval;
+    REALtet initval, imprval;
 
     int numofsearchdirs;
-    REAL searchstep;
+    REALtet searchstep;
     int maxiter;  // Maximum smoothing iterations (disabled by -1).
     int smthiter; // Performed iterations.
 
@@ -1332,7 +1332,7 @@ public:
   face recentsh;
 
   // PI is the ratio of a circle's circumference to its diameter.
-  static REAL PI;
+  static REALtet PI;
 
   // Array (size = numberoftetrahedra * 6) for storing high-order nodes of
   //   tetrahedra (only used when -o2 switch is selected).
@@ -1341,7 +1341,7 @@ public:
   // Various variables.
   int numpointattrib;                          // Number of point attributes.
   int numelemattrib;                     // Number of tetrahedron attributes.
-  int sizeoftensor;                     // Number of REALs per metric tensor.
+  int sizeoftensor;                     // Number of REALtets per metric tensor.
   int pointmtrindex;           // Index to find the metric tensor of a point.
   int pointparamindex;       // Index to find the u,v coordinates of a point.
   int point2simindex;         // Index to find a simplex adjacent to a point.
@@ -1359,13 +1359,13 @@ public:
   int useinsertradius;       // Save the insertion radius for Steiner points.
   long samples;               // Number of random samples for point location.
   unsigned long randomseed;                    // Current random number seed.
-  REAL cosmaxdihed, cosmindihed;    // The cosine values of max/min dihedral.
-  REAL cossmtdihed;     // The cosine value of a bad dihedral to be smoothed.
-  REAL cosslidihed;      // The cosine value of the max dihedral of a sliver.
-  REAL minfaceang, minfacetdihed;     // The minimum input (dihedral) angles.
-  REAL tetprism_vol_sum;   // The total volume of tetrahedral-prisms (in 4D).
-  REAL longest;                          // The longest possible edge length.
-  REAL xmax, xmin, ymax, ymin, zmax, zmin;         // Bounding box of points.
+  REALtet cosmaxdihed, cosmindihed;    // The cosine values of max/min dihedral.
+  REALtet cossmtdihed;     // The cosine value of a bad dihedral to be smoothed.
+  REALtet cosslidihed;      // The cosine value of the max dihedral of a sliver.
+  REALtet minfaceang, minfacetdihed;     // The minimum input (dihedral) angles.
+  REALtet tetprism_vol_sum;   // The total volume of tetrahedral-prisms (in 4D).
+  REALtet longest;                          // The longest possible edge length.
+  REALtet xmax, xmin, ymax, ymin, zmax, zmin;         // Bounding box of points.
 
   // Counters.
   long insegments;                               // Number of input segments.
@@ -1437,10 +1437,10 @@ public:
   inline void setdest(triface& t, point p);
   inline void setapex(triface& t, point p);
   inline void setoppo(triface& t, point p);
-  inline REAL elemattribute(tetrahedron* ptr, int attnum);
-  inline void setelemattribute(tetrahedron* ptr, int attnum, REAL value);
-  inline REAL volumebound(tetrahedron* ptr);
-  inline void setvolumebound(tetrahedron* ptr, REAL value);
+  inline REALtet elemattribute(tetrahedron* ptr, int attnum);
+  inline void setelemattribute(tetrahedron* ptr, int attnum, REALtet value);
+  inline REALtet volumebound(tetrahedron* ptr);
+  inline void setvolumebound(tetrahedron* ptr, REALtet value);
   inline int  elemindex(tetrahedron* ptr);
   inline void setelemindex(tetrahedron* ptr, int value);
   inline int  elemmarker(tetrahedron* ptr);
@@ -1488,8 +1488,8 @@ public:
   inline void senextself(face& s);
   inline void senext2(face& s1, face& s2);
   inline void senext2self(face& s);
-  inline REAL areabound(face& s);
-  inline void setareabound(face& s, REAL value);
+  inline REALtet areabound(face& s);
+  inline void setareabound(face& s, REALtet value);
   inline int shellmark(face& s);
   inline void setshellmark(face& s, int value);
   inline void sinfect(face& s);
@@ -1535,8 +1535,8 @@ public:
   inline void setpointtype(point pt, enum verttype value);
   inline int  pointgeomtag(point pt);
   inline void setpointgeomtag(point pt, int value);
-  inline REAL pointgeomuv(point pt, int i);
-  inline void setpointgeomuv(point pt, int i, REAL value);
+  inline REALtet pointgeomuv(point pt, int i);
+  inline void setpointgeomuv(point pt, int i, REALtet value);
   inline void pinfect(point pt);
   inline void puninfect(point pt);
   inline bool pinfected(point pt);
@@ -1557,8 +1557,8 @@ public:
   inline void setpoint2ppt(point pt, point value);
   inline tetrahedron point2bgmtet(point pt);
   inline void setpoint2bgmtet(point pt, tetrahedron value);
-  inline void setpointinsradius(point pt, REAL value);
-  inline REAL getpointinsradius(point pt);
+  inline void setpointinsradius(point pt, REALtet value);
+  inline REALtet getpointinsradius(point pt);
 
   // Advanced primitives.
   inline void point2tetorg(point pt, triface& t);
@@ -1613,48 +1613,48 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
   // Symbolic perturbations (robust)
-  REAL insphere_s(REAL*, REAL*, REAL*, REAL*, REAL*);
-  REAL orient4d_s(REAL*, REAL*, REAL*, REAL*, REAL*, 
-                  REAL, REAL, REAL, REAL, REAL);
+  REALtet insphere_s(REALtet*, REALtet*, REALtet*, REALtet*, REALtet*);
+  REALtet orient4d_s(REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, 
+                  REALtet, REALtet, REALtet, REALtet, REALtet);
 
   // Triangle-edge intersection test (robust)
   int tri_edge_2d(point, point, point, point, point, point, int, int*, int*);
-  int tri_edge_tail(point, point, point, point, point, point, REAL, REAL, int,
+  int tri_edge_tail(point, point, point, point, point, point, REALtet, REALtet, int,
                     int*, int*);
   int tri_edge_test(point, point, point, point, point, point, int, int*, int*);
 
   // Triangle-triangle intersection test (robust)
-  int tri_edge_inter_tail(point, point, point, point, point, REAL, REAL);
+  int tri_edge_inter_tail(point, point, point, point, point, REALtet, REALtet);
   int tri_tri_inter(point, point, point, point, point, point);
 
   // Linear algebra functions
-  inline REAL dot(REAL* v1, REAL* v2);
-  inline void cross(REAL* v1, REAL* v2, REAL* n);
-  bool lu_decmp(REAL lu[4][4], int n, int* ps, REAL* d, int N);
-  void lu_solve(REAL lu[4][4], int n, int* ps, REAL* b, int N);
+  inline REALtet dot(REALtet* v1, REALtet* v2);
+  inline void cross(REALtet* v1, REALtet* v2, REALtet* n);
+  bool lu_decmp(REALtet lu[4][4], int n, int* ps, REALtet* d, int N);
+  void lu_solve(REALtet lu[4][4], int n, int* ps, REALtet* b, int N);
 
   // An embedded 2-dimensional geometric predicate (non-robust)
-  REAL incircle3d(point pa, point pb, point pc, point pd);
+  REALtet incircle3d(point pa, point pb, point pc, point pd);
 
   // Geometric calculations (non-robust)
-  REAL orient3dfast(REAL *pa, REAL *pb, REAL *pc, REAL *pd);
-  inline REAL norm2(REAL x, REAL y, REAL z);
-  inline REAL distance(REAL* p1, REAL* p2);
-  void facenormal(point pa, point pb, point pc, REAL *n, int pivot, REAL *lav);
-  REAL shortdistance(REAL* p, REAL* e1, REAL* e2);
-  REAL triarea(REAL* pa, REAL* pb, REAL* pc);
-  REAL interiorangle(REAL* o, REAL* p1, REAL* p2, REAL* n);
-  void projpt2edge(REAL* p, REAL* e1, REAL* e2, REAL* prj);
-  void projpt2face(REAL* p, REAL* f1, REAL* f2, REAL* f3, REAL* prj);
-  REAL facedihedral(REAL* pa, REAL* pb, REAL* pc1, REAL* pc2);
-  bool tetalldihedral(point, point, point, point, REAL*, REAL*, REAL*);
-  void tetallnormal(point, point, point, point, REAL N[4][3], REAL* volume);
-  REAL tetaspectratio(point, point, point, point);
-  bool circumsphere(REAL*, REAL*, REAL*, REAL*, REAL* cent, REAL* radius);
-  bool orthosphere(REAL*,REAL*,REAL*,REAL*,REAL,REAL,REAL,REAL,REAL*,REAL*);
-  void planelineint(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
-  int linelineint(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
-  REAL tetprismvol(REAL* pa, REAL* pb, REAL* pc, REAL* pd);
+  REALtet orient3dfast(REALtet *pa, REALtet *pb, REALtet *pc, REALtet *pd);
+  inline REALtet norm2(REALtet x, REALtet y, REALtet z);
+  inline REALtet distance(REALtet* p1, REALtet* p2);
+  void facenormal(point pa, point pb, point pc, REALtet *n, int pivot, REALtet *lav);
+  REALtet shortdistance(REALtet* p, REALtet* e1, REALtet* e2);
+  REALtet triarea(REALtet* pa, REALtet* pb, REALtet* pc);
+  REALtet interiorangle(REALtet* o, REALtet* p1, REALtet* p2, REALtet* n);
+  void projpt2edge(REALtet* p, REALtet* e1, REALtet* e2, REALtet* prj);
+  void projpt2face(REALtet* p, REALtet* f1, REALtet* f2, REALtet* f3, REALtet* prj);
+  REALtet facedihedral(REALtet* pa, REALtet* pb, REALtet* pc1, REALtet* pc2);
+  bool tetalldihedral(point, point, point, point, REALtet*, REALtet*, REALtet*);
+  void tetallnormal(point, point, point, point, REALtet N[4][3], REALtet* volume);
+  REALtet tetaspectratio(point, point, point, point);
+  bool circumsphere(REALtet*, REALtet*, REALtet*, REALtet*, REALtet* cent, REALtet* radius);
+  bool orthosphere(REALtet*,REALtet*,REALtet*,REALtet*,REALtet,REALtet,REALtet,REALtet,REALtet*,REALtet*);
+  void planelineint(REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet*);
+  int linelineint(REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet*, REALtet*);
+  REALtet tetprismvol(REALtet* pa, REALtet* pb, REALtet* pc, REALtet* pd);
   bool calculateabovepoint(arraypool*, point*, point*, point*);
   void calculateabovepoint4(point, point, point, point);
 
@@ -1766,10 +1766,10 @@ public:
   int  transgc[8][3][8], tsb1mod3[8];
   void hilbert_init(int n);
   int  hilbert_split(point* vertexarray, int arraysize, int gc0, int gc1,
-                     REAL, REAL, REAL, REAL, REAL, REAL);
+                     REALtet, REALtet, REALtet, REALtet, REALtet, REALtet);
   void hilbert_sort3(point* vertexarray, int arraysize, int e, int d,
-                     REAL, REAL, REAL, REAL, REAL, REAL, int depth);
-  void brio_multiscale_sort(point*,int,int threshold,REAL ratio,int* depth);
+                     REALtet, REALtet, REALtet, REALtet, REALtet, REALtet, int depth);
+  void brio_multiscale_sort(point*,int,int threshold,REALtet ratio,int* depth);
 
   // Point location.
   unsigned long randomnation(unsigned int choices);
@@ -1799,8 +1799,8 @@ public:
 
   enum locateresult slocate(point, face*, int, int, int);
   enum interresult sscoutsegment(face*, point);
-  void scarveholes(int, REAL*);
-  void triangulate(int, arraypool*, arraypool*, int, REAL*);
+  void scarveholes(int, REALtet*);
+  void triangulate(int, arraypool*, arraypool*, int, REALtet*);
 
   void unifysubfaces(face*, face*);
   void unifysegments();
@@ -1809,7 +1809,7 @@ public:
   void meshsurface();
 
   void interecursive(shellface** subfacearray, int arraysize, int axis,
-                     REAL, REAL, REAL, REAL, REAL, REAL, int* internum);
+                     REALtet, REALtet, REALtet, REALtet, REALtet, REALtet, int* internum);
   void detectinterfaces();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1966,7 +1966,7 @@ public:
   void reconstructmesh();
 
   int  scoutpoint(point, triface*, int randflag);
-  REAL getpointmeshsize(point, triface*, int iloc);
+  REALtet getpointmeshsize(point, triface*, int iloc);
   void interpolatemeshsize();
 
   void insertconstrainedpoints(point *insertarray, int arylen, int rejflag);
@@ -2018,18 +2018,18 @@ public:
 
   int checkseg4encroach(point pa, point pb, point checkpt);
   int checkseg4split(face *chkseg, point&, int&);
-  int splitsegment(face *splitseg, point encpt, REAL, point, point, int, int);
+  int splitsegment(face *splitseg, point encpt, REALtet, point, point, int, int);
   void repairencsegs(int chkencflag);
 
   void enqueuesubface(memorypool*, face*);
-  int checkfac4encroach(point, point, point, point checkpt, REAL*, REAL*);
-  int checkfac4split(face *chkfac, point& encpt, int& qflag, REAL *ccent);
-  int splitsubface(face *splitfac, point, point, int qflag, REAL *ccent, int);
+  int checkfac4encroach(point, point, point, point checkpt, REALtet*, REALtet*);
+  int checkfac4split(face *chkfac, point& encpt, int& qflag, REALtet *ccent);
+  int splitsubface(face *splitfac, point, point, int qflag, REALtet *ccent, int);
   void repairencfacs(int chkencflag);
 
   void enqueuetetrahedron(triface*);
-  int checktet4split(triface *chktet, int& qflag, REAL *ccent);
-  int splittetrahedron(triface* splittet,int qflag,REAL *ccent, int);
+  int checktet4split(triface *chktet, int& qflag, REALtet *ccent);
+  int splittetrahedron(triface* splittet,int qflag,REALtet *ccent, int);
   void repairbadtets(int chkencflag);
 
   void delaunayrefinement();
@@ -2049,7 +2049,7 @@ public:
   int  smoothpoint(point smtpt, arraypool*, int ccw, optparameters *opm);
   long improvequalitybysmoothing(optparameters *opm);
 
-  int  splitsliver(triface *, REAL, int);
+  int  splitsliver(triface *, REALtet, int);
   long removeslivers(int);
 
   void optimizemesh();
@@ -2508,23 +2508,23 @@ inline void tetgenmesh:: setoppo(triface& t, point p) {
 
 // Check or set a tetrahedron's attributes.
 
-inline REAL tetgenmesh::elemattribute(tetrahedron* ptr, int attnum) {
-  return ((REAL *) (ptr))[elemattribindex + attnum];
+inline REALtet tetgenmesh::elemattribute(tetrahedron* ptr, int attnum) {
+  return ((REALtet *) (ptr))[elemattribindex + attnum];
 }
 
 inline void tetgenmesh::setelemattribute(tetrahedron* ptr, int attnum, 
-  REAL value) {
-  ((REAL *) (ptr))[elemattribindex + attnum] = value;
+  REALtet value) {
+  ((REALtet *) (ptr))[elemattribindex + attnum] = value;
 }
 
 // Check or set a tetrahedron's maximum volume bound.
 
-inline REAL tetgenmesh::volumebound(tetrahedron* ptr) {
-  return ((REAL *) (ptr))[volumeboundindex];
+inline REALtet tetgenmesh::volumebound(tetrahedron* ptr) {
+  return ((REALtet *) (ptr))[volumeboundindex];
 }
 
-inline void tetgenmesh::setvolumebound(tetrahedron* ptr, REAL value) {
-  ((REAL *) (ptr))[volumeboundindex] = value;
+inline void tetgenmesh::setvolumebound(tetrahedron* ptr, REALtet value) {
+  ((REALtet *) (ptr))[volumeboundindex] = value;
 }
 
 // Get or set a tetrahedron's index (only used for output).
@@ -2816,14 +2816,14 @@ inline void tetgenmesh::senext2self(face& s)
 
 // Check or set a subface's maximum area bound.
 
-inline REAL tetgenmesh::areabound(face& s) 
+inline REALtet tetgenmesh::areabound(face& s) 
 {
-  return ((REAL *) (s.sh))[areaboundindex];
+  return ((REALtet *) (s.sh))[areaboundindex];
 }
 
-inline void tetgenmesh::setareabound(face& s, REAL value) 
+inline void tetgenmesh::setareabound(face& s, REALtet value) 
 {
-  ((REAL *) (s.sh))[areaboundindex] = value;
+  ((REALtet *) (s.sh))[areaboundindex] = value;
 }
 
 // These two primitives read or set a shell marker.  Shell markers are used
@@ -3153,11 +3153,11 @@ inline void tetgenmesh::setpointgeomtag(point pt, int value) {
 
 // Read and set the u,v coordinates of the point (used by -s option).
 
-inline REAL tetgenmesh::pointgeomuv(point pt, int i) {
+inline REALtet tetgenmesh::pointgeomuv(point pt, int i) {
   return pt[pointparamindex + i];
 }
 
-inline void tetgenmesh::setpointgeomuv(point pt, int i, REAL value) {
+inline void tetgenmesh::setpointgeomuv(point pt, int i, REALtet value) {
   pt[pointparamindex + i] = value;
 }
 
@@ -3253,12 +3253,12 @@ inline void tetgenmesh::setpoint2bgmtet(point pt, tetrahedron value) {
 
 
 // The primitives for saving and getting the insertion radius.
-inline void tetgenmesh::setpointinsradius(point pt, REAL value)
+inline void tetgenmesh::setpointinsradius(point pt, REALtet value)
 {
   pt[pointmtrindex + sizeoftensor - 1] = value;
 }
 
-inline REAL tetgenmesh::getpointinsradius(point pt)
+inline REALtet tetgenmesh::getpointinsradius(point pt)
 {
   return pt[pointmtrindex + sizeoftensor - 1];
 }
@@ -3335,13 +3335,13 @@ inline tetgenmesh::point tetgenmesh::farsdest(face& s)
 ///////////////////////////////////////////////////////////////////////////////
 
 // dot() returns the dot product: v1 dot v2.
-inline REAL tetgenmesh::dot(REAL* v1, REAL* v2) 
+inline REALtet tetgenmesh::dot(REALtet* v1, REALtet* v2) 
 {
   return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
 // cross() computes the cross product: n = v1 cross v2.
-inline void tetgenmesh::cross(REAL* v1, REAL* v2, REAL* n) 
+inline void tetgenmesh::cross(REALtet* v1, REALtet* v2, REALtet* n) 
 {
   n[0] =   v1[1] * v2[2] - v2[1] * v1[2];
   n[1] = -(v1[0] * v2[2] - v2[0] * v1[2]);
@@ -3349,14 +3349,14 @@ inline void tetgenmesh::cross(REAL* v1, REAL* v2, REAL* n)
 }
 
 // distance() computes the Euclidean distance between two points.
-inline REAL tetgenmesh::distance(REAL* p1, REAL* p2)
+inline REALtet tetgenmesh::distance(REALtet* p1, REALtet* p2)
 {
   return sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) +
               (p2[1] - p1[1]) * (p2[1] - p1[1]) +
               (p2[2] - p1[2]) * (p2[2] - p1[2]));
 }
 
-inline REAL tetgenmesh::norm2(REAL x, REAL y, REAL z)
+inline REALtet tetgenmesh::norm2(REALtet x, REALtet y, REALtet z)
 {
   return (x) * (x) + (y) * (y) + (z) * (z);
 }

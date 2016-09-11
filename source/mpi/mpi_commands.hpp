@@ -9,6 +9,7 @@
 #include "../tessellation/tessellation.hpp"
 #include "../misc/serializable.hpp"
 #include "../misc/utils.hpp"
+#include "../3D/GeometryCommon/Tessellation3D.hpp"
 
 using std::vector;
 
