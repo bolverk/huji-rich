@@ -12,8 +12,10 @@
 //! \brief LagrangianHLLC Riemann solver for an Eulerian grid
 class LagrangianHLLC : public RiemannSolver
 {
+private:
+	const bool massflux_;
 public:
-	LagrangianHLLC(void);
+	LagrangianHLLC(bool massflux=true);
 
 	Conserved operator()
 		(Primitive const& left,

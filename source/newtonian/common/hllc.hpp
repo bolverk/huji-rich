@@ -1,7 +1,7 @@
 /*! \file hllc.hpp
-  \brief HLLC riemann solver on an eulerian grid
-  \details This file is based on a code originally written by Omer Bromberg
-  \author Almog Yalinewich
+\brief HLLC riemann solver on an eulerian grid
+\details This file is based on a code originally written by Omer Bromberg
+\author Almog Yalinewich
 */
 
 #ifndef HLLC_HPP
@@ -10,14 +10,18 @@
 #include "riemann_solver.hpp"
 
 //! \brief HLLC Riemann solver for an Eulerian grid
-class Hllc: public RiemannSolver
+class Hllc : public RiemannSolver
 {
+private:
+	const bool massflux_;
 public:
 
-  Conserved operator()
-  (Primitive const& left,
-   Primitive const& right,
-   double velocity) const;
+	Hllc(bool massflux = true);
+
+	Conserved operator()
+		(Primitive const& left,
+			Primitive const& right,
+			double velocity) const;
 };
 
-#endif //HLLC_EULERIAN_HPP
+#endif //HLLC_HPP

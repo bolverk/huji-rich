@@ -1,4 +1,4 @@
-function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,NumberOfPointsInCell]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
+function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,NumberOfPointsInCell,Faces,Vertices]=read_hdf(filename,ShouldPlot,WhatToPlot,LogScale,edgestrength,tracernametoplot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Matlab script to read RICH binary files in float/double format
 %

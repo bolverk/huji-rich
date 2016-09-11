@@ -93,7 +93,7 @@ namespace {
 	}
 }
 
-LagrangianHLLC::LagrangianHLLC(void) :energy(0)
+LagrangianHLLC::LagrangianHLLC(bool massflux) : massflux_(massflux),energy(0)
 {}
 
 Conserved LagrangianHLLC::operator()
@@ -111,6 +111,18 @@ Conserved LagrangianHLLC::operator()
 	local_left.Velocity -= velocity*normaldir;
 	local_right.Velocity -= velocity*normaldir;
 
+	Conserved f_gr;
+	if (!massflux_)
+	{
+		WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right);
+
+		local_left.Velocity -= ws2.center*normaldir;
+		local_right.Velocity -= ws2.center*normaldir;
+		velocity += ws2.center;
+		energy = ws2.center;
+	}
+
+
 	const Conserved ul = Primitive2Conserved(local_left);
 	const Conserved ur = Primitive2Conserved(local_right);
 
@@ -123,28 +135,31 @@ Conserved LagrangianHLLC::operator()
 	const Conserved usl = starred_state(local_left, ws.left, ws.center);
 	const Conserved usr = starred_state(local_right, ws.right, ws.center);
 
-	Conserved f_gr;
 	if (ws.left > 0)
 	{
 		f_gr = fl;
-		energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density;
+		if(massflux_)
+			energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density;
 	}
 	else if (ws.left <= 0 && ws.center >= 0)
 	{
 		f_gr = fl + ws.left*(usl - ul);
-		energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density +
-			ws.left*local_left.Energy*((ws.left-local_left.Velocity.x)/(ws.left-ws.center)-1)*local_left.Density;
+		if (massflux_)
+			energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density +
+				ws.left*local_left.Energy*((ws.left-local_left.Velocity.x)/(ws.left-ws.center)-1)*local_left.Density;
 	}
 	else if (ws.center < 0 && ws.right >= 0)
 	{
 		f_gr = fr + ws.right*(usr - ur);
-		energy = (ScalarProd(local_right.Velocity, xdir)*local_right.Energy + ws.right*local_right.Energy*
-			((ws.right - local_right.Velocity.x) / (ws.right - ws.center) - 1))*local_right.Density;
+		if (massflux_)
+			energy = (ScalarProd(local_right.Velocity, xdir)*local_right.Energy + ws.right*local_right.Energy*
+				((ws.right - local_right.Velocity.x) / (ws.right - ws.center) - 1))*local_right.Density;
 	}
 	else if (ws.right<0)
 	{
 		f_gr = fr;
-		energy = ScalarProd(local_right.Velocity, xdir)*local_right.Energy*local_right.Density;
+		if (massflux_)
+			energy = ScalarProd(local_right.Velocity, xdir)*local_right.Energy*local_right.Density;
 	}
 	else
 		throw invalid_wave_speeds(local_left,
