@@ -118,6 +118,6 @@ void WriteSnapshot(HDSim3D const& sim, std::string const& filename)
 	vector<double> time(1, sim.GetTime());
 	write_std_vector_to_hdf5(file,time, "Time");
 
-	vector<int> cycle(1, sim.GetCycle());
+	vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
 	write_std_vector_to_hdf5(file, cycle, "Cycle");
 }

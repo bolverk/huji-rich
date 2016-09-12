@@ -17,7 +17,7 @@ public:
 
 	/*! \brief Class constructor
 	\param origin Axes origin
-	\param direction Azimuthal direction (axis of cylinderical symmetry, aka the "z" axis)
+	\param direction Radial direction (a aka the "r" axis)
 	\param eos THe equation of state
 	*/
 	CylindericalGeometry(Vector2D const& origin,Vector2D const& direction,EquationOfState const& eos);
