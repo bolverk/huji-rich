@@ -56,7 +56,7 @@ namespace
 	void calc_naive_slope(ComputationalCell3D const& cell,
 		Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<ComputationalCell3D const*> const& neighbors,
 		vector<Vector3D> const& neighbor_centers, vector<Vector3D> const& neigh_cm,Tessellation3D const& tess,
-		Slope3D &res, Slope3D &temp,size_t index, vector<size_t> const& faces)
+		Slope3D &res, Slope3D &temp,size_t /*index*/, vector<size_t> const& faces)
 	{
 		size_t n = neighbor_centers.size();
 		if (n > 40)
@@ -199,7 +199,7 @@ namespace
 		vector<ComputationalCell3D const*> const& neighbors, Slope3D &slope,ComputationalCell3D &cmax,
 		ComputationalCell3D &cmin,ComputationalCell3D &maxdiff,	ComputationalCell3D &mindiff,
 		TracerStickerNames const& tracerstickernames,string const& skip_key,Tessellation3D const& tess,
-		size_t cell_index, vector<size_t> const& faces)
+		size_t /*cell_index*/, vector<size_t> const& faces)
 	{
 		ReplaceComputationalCell(cmax, cell);
 		ReplaceComputationalCell(cmin, cell);
@@ -338,7 +338,7 @@ namespace
 	void shocked_slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
 		vector<ComputationalCell3D const*> const& neighbors, 
 		Slope3D  &slope, double diffusecoeff, TracerStickerNames const& tracerstickernames,
-		string const& skip_key,Tessellation3D const& tess,size_t cell_index, vector<size_t> const& faces)
+		string const& skip_key,Tessellation3D const& tess,size_t /*cell_index*/, vector<size_t> const& faces)
 	{
 		ComputationalCell3D cmax(cell), cmin(cell);
 		size_t N = faces.size();
@@ -468,12 +468,12 @@ namespace
 			Sz2 += (neigh_cm[i].z - cell_cm.z)*(neigh_cm[i].z - cell_cm.z);
 		}
 		double bottom = SxSz*SxSz*Sy2 + SxSy*SxSy*Sz2 - Sx2*Sy2*Sz2 - 2 * SxSy*SxSz*SzSy + Sx2*SzSy*Sz2;
-		res.xderivative = PhiSz*SxSz*Sy2 + PhiSy*SxSy*Sz2 - PhiSx*Sy2*Sz2 - PhiSz*SxSy*SzSy - PhiSy*SxSz*SzSy + 
-			PhiSx*SzSy*SzSy;
-		res.yderivative = PhiSz*SzSy*Sx2 + PhiSy*SxSz*SxSz - PhiSx*SxSz*SzSy - PhiSz*SxSy*SxSz - PhiSy*Sx2*Sz2 +
-			PhiSx*SxSy*Sz2;
-		res.zderivative = PhiSz*SxSy*SxSy - PhiSy*SxSy*SxSz - PhiSz*Sy2*Sx2 + PhiSx*SxSz*Sy2 + PhiSy*Sx2*SzSy -
-			PhiSx*SxSy*SzSy;
+		res.xderivative = (PhiSz*SxSz*Sy2 + PhiSy*SxSy*Sz2 - PhiSx*Sy2*Sz2 - PhiSz*SxSy*SzSy - PhiSy*SxSz*SzSy + 
+			PhiSx*SzSy*SzSy)/bottom;
+		res.yderivative = (PhiSz*SzSy*Sx2 + PhiSy*SxSz*SxSz - PhiSx*SxSz*SzSy - PhiSz*SxSy*SxSz - PhiSy*Sx2*Sz2 +
+			PhiSx*SxSy*Sz2)/bottom;
+		res.zderivative = (PhiSz*SxSy*SxSy - PhiSy*SxSy*SxSz - PhiSz*Sy2*Sx2 + PhiSx*SxSz*Sy2 + PhiSy*Sx2*SzSy -
+			PhiSx*SxSy*SzSy)/bottom;
 		res.xderivative.stickers = cell.stickers;
 		res.yderivative.stickers = cell.stickers;
 		res.zderivative.stickers = cell.stickers;

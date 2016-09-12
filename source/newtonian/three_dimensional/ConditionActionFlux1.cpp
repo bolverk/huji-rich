@@ -35,7 +35,7 @@ namespace
 
 void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& face_velocities,
 	const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
-	const double time, const double dt, TracerStickerNames const& tracerstickernames) const
+	const double time, const double /*dt*/, TracerStickerNames const& tracerstickernames) const
 {
 	vector<std::pair<ComputationalCell3D, ComputationalCell3D> > face_values;
 	interp_(tess, cells, time, face_values, tracerstickernames);
@@ -68,8 +68,8 @@ namespace
 }
 
 void RegularFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
-	const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-	double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool /*aux*/, Conserved3D &res,
+	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
@@ -85,7 +85,7 @@ namespace
 		cell.velocity -= 2 * ScalarProd(cell.velocity, normal)*normal;
 	}
 
-	void rigid_wall_states(std::pair<ComputationalCell3D, ComputationalCell3D> &face_values,
+	void rigid_wall_states(std::pair<ComputationalCell3D, ComputationalCell3D> &/*face_values*/,
 		Vector3D const& normal, const bool aux)
 	{
 		pair<ComputationalCell3D, ComputationalCell3D> res;
@@ -103,8 +103,8 @@ namespace
 }
 
 void RigidWallFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
-	const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-	double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
+	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
@@ -116,8 +116,8 @@ void RigidWallFlux::operator()(size_t face_index, const Tessellation3D& tess, co
 FreeFlowFlux::FreeFlowFlux(const RiemannSolver& rs) : rs_(rs) {}
 
 void FreeFlowFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
-	const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-	double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
+	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
@@ -132,7 +132,7 @@ void FreeFlowFlux::operator()(size_t face_index, const Tessellation3D& tess, con
 IsBoundaryFace::IsBoundaryFace(void) {}
 
 pair<bool, bool> IsBoundaryFace::operator()(size_t face_index, const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const
+	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	if (!tess.BoundaryFace(face_index))
 		return pair<bool, bool>(false, false);
@@ -145,7 +145,7 @@ pair<bool, bool> IsBoundaryFace::operator()(size_t face_index, const Tessellatio
 IsBulkFace::IsBulkFace(void) {}
 
 pair<bool, bool> IsBulkFace::operator()(size_t face_index, const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const
+	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/)const
 {
 	if (tess.BoundaryFace(face_index))
 		return pair<bool, bool>(false, false);

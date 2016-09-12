@@ -22,8 +22,8 @@ vector<std::pair<size_t, size_t> > Ghost3D::GetOuterFacesIndeces(Tessellation3D 
 
 
 boost::container::flat_map<size_t, ComputationalCell3D> RigidWallGenerator3D::operator()(const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-	tracerstickernames) const
+	const vector<ComputationalCell3D>& cells, double /*time*/, TracerStickerNames const&
+	/*tracerstickernames*/) const
 {
 	boost::container::flat_map<size_t, ComputationalCell3D> res;
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
@@ -50,9 +50,9 @@ boost::container::flat_map<size_t, ComputationalCell3D> RigidWallGenerator3D::op
 	return res;
 }
 
-Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-	TracerStickerNames const& tracerstickernames) const
+Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
+	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/,
+	TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Slope3D res;
 	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);

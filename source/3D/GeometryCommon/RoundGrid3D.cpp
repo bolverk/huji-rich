@@ -17,7 +17,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 #endif
 	double pi = 3.141592653;
 	double eta_ = 0.02, chi_ = 1;
-	int N = tess->GetPointNo();
+	size_t N = tess->GetPointNo();
 	vector<Vector3D> res(points);
 	// Copy the points
 	for (size_t i = 0; i < N; ++i)

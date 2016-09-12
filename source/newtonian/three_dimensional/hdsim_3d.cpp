@@ -154,5 +154,5 @@ TracerStickerNames HDSim3D::GetTracerStickerNames(void)const
 
 size_t HDSim3D::GetCycle(void)const
 {
-	return pt_.getCycle();
+	return static_cast<size_t>(pt_.getCycle());
 }

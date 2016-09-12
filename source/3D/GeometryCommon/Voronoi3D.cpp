@@ -67,7 +67,7 @@ namespace
 			MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
 			talkwithme.push_back(status.MPI_SOURCE);
 		}
-		MPI_Waitall(to_talk_with.size(), &req[0], MPI_STATUSES_IGNORE);
+		MPI_Waitall(static_cast<int>(to_talk_with.size()), &req[0], MPI_STATUSES_IGNORE);
 		vector<int> new_talk_with_me;
 		for (size_t i = 0; i < to_talk_with.size(); ++i)
 			if (std::find(talkwithme.begin(), talkwithme.end(), to_talk_with[i]) != talkwithme.end())
@@ -93,10 +93,10 @@ namespace
 		VecCompare(vector<Vector3D> const& mesh) :points(mesh), R(0) {}
 		bool operator() (size_t i, size_t j)
 		{
-			if (abs(points[i].x - points[j].x) > 1e-8*R)
+			if (std::abs(points[i].x - points[j].x) > 1e-8*R)
 				return points[i].x < points[j].x;
 			else
-				if (abs(points[i].y - points[j].y) > 1e-8*R)
+				if (std::abs(points[i].y - points[j].y) > 1e-8*R)
 					return points[i].y < points[j].y;
 				else
 					return points[i].z < points[j].z;
@@ -169,7 +169,7 @@ namespace
 		Vector3D center = (points[indeces[0]] + points[indeces[1]] + points[indeces[2]]);
 		for (size_t i = 3; i < indeces.size(); ++i)
 			center = center + points[indeces[i]];
-		center = center / indeces.size();
+		center = center / static_cast<double>(indeces.size());
 		vector<double> angles(indeces.size() - 1);
 		size_t Nloop = angles.size();
 		Vector3D main_vector = points[indeces[Nloop]] - center;
@@ -270,7 +270,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		if (static_cast<size_t>(neighbors[i]) < nproc)
 		{
 			realneigh.push_back(neighbors[i]);
-			sentproc.push_back(neighbors[i]);
+			sentproc.push_back(static_cast<int>(neighbors[i]));
 		}
 	size_t Nreal = realneigh.size();
 	sentpoints.resize(sentproc.size());
@@ -377,7 +377,7 @@ Tetrahedron::Tetrahedron(void) {}
 void Voronoi3D::RunTetGen(vector<Vector3D> const& points, tetgenio &tetin, tetgenio &tetout, bool voronoi)
 {
 	tetin.firstnumber = 0;
-	tetin.numberofpoints = points.size();
+	tetin.numberofpoints = static_cast<int>(points.size());
 	size_t N = points.size();
 	tetin.pointlist = new double[N * 3];
 	for (size_t i = 0; i < N; ++i)
@@ -388,9 +388,15 @@ void Voronoi3D::RunTetGen(vector<Vector3D> const& points, tetgenio &tetin, tetge
 	}
 	// Run tetgen
 	if (!voronoi)
-		tetrahedralize("nQT1e-17", &tetin, &tetout);
+	{
+		char msg[] = "nQT1e-17";
+		tetrahedralize(msg, &tetin, &tetout);
+	}
 	else
-		tetrahedralize("nQvT1e-17", &tetin, &tetout);
+	{
+		char msg[] = "nQvT1e-17";
+		tetrahedralize(msg, &tetin, &tetout);
+	}
 }
 
 void Voronoi3D::CalcRigidCM(size_t face_index)
@@ -619,7 +625,7 @@ void Voronoi3D::CopyDataVoronoi(tetgenio &tetin)
 
 		for (size_t j = 0; j < 4; ++j)
 		{
-			if (tetin.tetrahedronlist[i * 4 + j] < Norg_)
+			if (tetin.tetrahedronlist[i * 4 + j] < static_cast<int>(Norg_))
 				PointTetras_[tetin.tetrahedronlist[i * 4 + j]].push_back(i);
 		}
 	}
@@ -711,7 +717,7 @@ void Voronoi3D::CopyData(tetgenio &tetout)
 		for (size_t j = 0; j < 4; ++j)
 		{
 			tetras_[i].points[j] = tetout.tetrahedronlist[counter];
-			if (tetras_[i].points[j] >= Norg_)
+			if (tetras_[i].points[j] >= static_cast<int>(Norg_))
 				bigtet_ = i;
 			tetras_[i].neighbors[j] = tetout.neighborlist[counter];
 			++counter;
@@ -853,7 +859,7 @@ void Voronoi3D::GetPointToCheck(size_t point, vector<bool> const& checked,vector
 	for (size_t i = 0; i < ntetra; ++i)
 	{
 		for (size_t j = 0; j < 4; ++j)
-			if (tetras_[PointTetras_[point][i]].points[j]<Norg_&&!checked[tetras_[PointTetras_[point][i]].points[j]])
+			if (tetras_[PointTetras_[point][i]].points[j]<static_cast<int>(Norg_)&&!checked[tetras_[PointTetras_[point][i]].points[j]])
 				res.push_back(tetras_[PointTetras_[point][i]].points[j]);
 	}
 	std::sort(res.begin(), res.end());
@@ -863,7 +869,7 @@ void Voronoi3D::GetPointToCheck(size_t point, vector<bool> const& checked,vector
 size_t Voronoi3D::GetFirstPointToCheck(void)const
 {
 	for (size_t i = 0; i < 4; ++i)
-		if (tetras_[bigtet_].points[i] < Norg_)
+		if (tetras_[bigtet_].points[i] < static_cast<int>(Norg_))
 			return tetras_[bigtet_].points[i];
 	throw UniversalError("Can't find first point to start boundary search");
 }
@@ -878,7 +884,7 @@ vector<std::pair<size_t,size_t> > Voronoi3D::FindIntersections(Tessellation3D co
 	std::stack<size_t > check_stack;
 	vector<size_t> point_neigh;
 	check_stack.push(cur_loc);
-	size_t nbox = box.size();
+	//size_t nbox = box.size();
 	vector<std::pair<size_t, size_t> > res;
 	Sphere sphere;
 	vector<bool> checked(Norg_, false),will_check(Norg_,false);
@@ -920,7 +926,7 @@ vector<std::pair<size_t, size_t> > Voronoi3D::SerialFindIntersections()
 	std::stack<size_t > check_stack;
 	vector<size_t> point_neigh;
 	check_stack.push(cur_loc);
-	size_t nbox = box.size();
+	//size_t nbox = box.size();
 	vector<std::pair<size_t, size_t> > res;
 	Sphere sphere;
 	vector<bool> checked(Norg_, false), will_check(Norg_, false);
@@ -1039,8 +1045,8 @@ void Voronoi3D::CalcCellCMVolume(size_t index)
 			tetra[1] = FacePoints_[PointsInFace_[face][j + 1]];
 			tetra[2] = FacePoints_[PointsInFace_[face][j + 2]];
 			double vol = GetTetraVolume(tetra);
-			volume_[index] += abs(vol);
-			CM_[index] += abs(vol)*GetTetraCM(tetra);
+			volume_[index] += std::abs(vol);
+			CM_[index] += std::abs(vol)*GetTetraCM(tetra);
 		}
 	}
 	CM_[index] = CM_[index] / volume_[index];
@@ -1065,7 +1071,7 @@ namespace
 	}
 }
 
-void Voronoi3D::output(std::string const& filename)const
+void Voronoi3D::output(std::string const& /*filename*/)const
 {
 	/*
 	std::ofstream file_handle(filename.c_str(), std::ios::binary);
@@ -1260,7 +1266,7 @@ Vector3D Voronoi3D::FaceCM(size_t index)const
 	Vector3D res = FacePoints_[PointsInFace_[index][0]];
 	for (size_t i = 1; i < N; ++i)
 		res += FacePoints_[PointsInFace_[index][i]];
-	return res / N;
+	return res / static_cast<double>(N);
 }
 
 Vector3D Voronoi3D::CalcFaceVelocity(size_t index, Vector3D const& v0, Vector3D const& v1)const
