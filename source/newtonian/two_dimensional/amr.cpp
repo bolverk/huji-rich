@@ -698,7 +698,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i],tracerstickernames);
+		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos,cd.volumes[static_cast<int>(i)], cells[i],tracerstickernames);
 }
 
 void ConservativeAMR::operator()(hdsim &sim)
