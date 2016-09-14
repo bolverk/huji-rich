@@ -125,7 +125,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	tessEdges[3] = std::min(tessEdges[3], upperright.y);
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	const double myarea=std::min(tess.GetVolume(rank), (upperright.x - lowerleft.x)*(upperright.y - lowerleft.y));
+	const double myarea=std::min(tess.GetVolume(rank), (tessEdges[1]- tessEdges[0])*(tessEdges[3] - tessEdges[2]));
 	const double Area = (upperright.x - lowerleft.x)*(upperright.y - lowerleft.y);
 	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
