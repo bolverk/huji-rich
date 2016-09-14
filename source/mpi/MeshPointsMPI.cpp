@@ -115,11 +115,15 @@ namespace
 vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	Vector2D const& lowerleft,Vector2D const& upperright)
 {
-	const double Area=(upperright.x-lowerleft.x)*(upperright.y-lowerleft.y);
-	const boost::array<double,4> tessEdges=FindMaxEdges(tess);
+	boost::array<double,4> tessEdges=FindMaxEdges(tess);
+	tessEdges[0] = std::max(tessEdges[0], lowerleft.x);
+	tessEdges[2] = std::max(tessEdges[2], lowerleft.y);
+	tessEdges[1] = std::min(tessEdges[1], upperright.x);
+	tessEdges[3] = std::min(tessEdges[3], upperright.y);
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	const double myarea=tess.GetVolume(rank);
+	const double Area = std::min((upperright.x - lowerleft.x)*(upperright.y - lowerleft.y),myarea);
 	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
 	res.reserve(static_cast<size_t>(mypoints));
