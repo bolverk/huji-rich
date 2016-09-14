@@ -92,7 +92,7 @@ namespace
 				vector<Vector2D> inter(solution[0].size());
 				double factor = pow(10.0, maxscale - 18);
 				for (size_t i = 0; i < solution[0].size(); ++i)
-					inter[i].Set(static_cast<double>(solution[0][i].X) * factor, static_cast<double>(solution[0][i].Y) * factor);
+					inter[i].Set(static_cast<double>(solution[0][i].X) * factor + cm0.x, static_cast<double>(solution[0][i].Y) * factor + cm0.y);
 				return pg.calcVolume(inter);
 			}
 		}
