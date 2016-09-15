@@ -229,7 +229,7 @@ namespace
 				dphi -= cell;
 			}
 			// density
-			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
+			if (std::abs(dphi.density) > 0.05*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
 				if (dphi.density > 1e-9*cell.density)
 					psi[0] = std::min(psi[0], maxdiff.density / dphi.density);
@@ -238,7 +238,7 @@ namespace
 						psi[0] = std::min(psi[0], mindiff.density / dphi.density);
 			}
 			// pressure
-			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
+			if (std::abs(dphi.pressure) > 0.05*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (dphi.pressure > 1e-9*cell.pressure)
 					psi[1] = std::min(psi[1], maxdiff.pressure / dphi.pressure);
@@ -247,7 +247,7 @@ namespace
 						psi[1] = std::min(psi[1], mindiff.pressure / dphi.pressure);
 			}
 			// xvelocity
-			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
+			if (std::abs(dphi.velocity.x) > 0.05*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
 				if (dphi.velocity.x > std::abs(1e-9*cell.velocity.x))
 					psi[2] = std::min(psi[2], maxdiff.velocity.x / dphi.velocity.x);
@@ -256,7 +256,7 @@ namespace
 						psi[2] = std::min(psi[2], mindiff.velocity.x / dphi.velocity.x);
 			}
 			// yvelocity
-			if (std::abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
+			if (std::abs(dphi.velocity.y) > 0.05*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
 				if (dphi.velocity.y > std::abs(1e-9*cell.velocity.y))
 					psi[3] = std::min(psi[3], maxdiff.velocity.y / dphi.velocity.y);
@@ -269,7 +269,7 @@ namespace
 			{
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
-				if (std::abs(dphi.tracers[j]) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || (
+				if (std::abs(dphi.tracers[j]) > 0.05*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || (
 					centroid_val.tracers[j] * cell_tracer < 0))
 				{
 					if (dphi.tracers[j] > std::abs(1e-9*cell_tracer))
