@@ -6,11 +6,12 @@ function [X,Y,Pressure,Density,Vx,Vy,Points,time,Tracers,TracerNames,Stickers,St
 %             ShouldPlot - 2: indicates to the current figure, 1: indicates
 %             that a new figure is wanted 0: no plot
 %             WhatToPlot - 1: density, 2: pressure, 3: pressure/density, 4:
-%             Entropy (assuming gamma=5/3), 5: Tracer
+%               Entropy (assuming gamma=5/3), 5: Tracer, 6: Appendix
 %             LogScale - 1 Plot Log scaled, 0 linear scale
 %             edgestrength - The intensity of line edges around each
-%             voronoi cell. Values are from 0 to 1 with 1 being very strong
-%             edges and 0 no edges.
+%               voronoi cell. Values are from 0 to 1 with 1 being very strong
+%               edges and 0 no edges.
+%             tracernametoplot - Name of tracer or appendix to plot
 %   Output  : X - The mesh points
 %             Pressure - The pressure
 %             Density - The density
@@ -205,16 +206,31 @@ if(ShouldPlot==1||ShouldPlot==2)
             if(tracernametoplot==0)
                 error('No tracer name given');
             end
-            tracerindex=find(strcmp(a,tracernametoplot));
+            tracerindex=find(strcmp(TracerNames,tracernametoplot));
             if(isempty(tracerindex))
                 error('No tracer with given name');
             end
             if(Log==1)
                 caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)'),'FaceColor','flat','EdgeAlpha',0);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)),'FaceColor','flat','EdgeAlpha',0);
             else
                 caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex)','FaceColor','flat','EdgeAlpha',0.05);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex),'FaceColor','flat','EdgeAlpha',0.05);
+            end
+        case 6
+            if(tracernametoplot==0)
+                error('No appendix name given');
+            end
+            tracerindex=find(strcmp(AppendixNames,tracernametoplot));
+            if(isempty(tracerindex))
+                error('No appendix with given name');
+            end
+            if(Log==1)
+                caxis([min(log10(Appendices(:,tracerindex))) max(log10(Appendices(:,tracerindex)*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Appendices((i-1)*maxdraw+1:maxindex,tracerindex)),'FaceColor','flat','EdgeAlpha',0);
+            else
+                caxis([min((Appendices(:,tracerindex))) max((Appendices(:,tracerindex)*1.01))]);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Appendices((i-1)*maxdraw+1:maxindex,tracerindex),'FaceColor','flat','EdgeAlpha',0.05);
             end
     end
 end
