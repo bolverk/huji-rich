@@ -21,19 +21,8 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, size_t index
 
 namespace
 {
-	void BuildBigTetra(vector<Vector3D> & mesh_points)
+	void BuildBigTetra(Vector3D const& ll,Vector3D const& ur, vector<Vector3D> & mesh_points)
 	{
-		Vector3D ll(mesh_points[0]), ur(mesh_points[0]);
-		size_t N = mesh_points.size();
-		for (size_t i = 0; i < N; ++i)
-		{
-			ll.x = std::min(ll.x, mesh_points[i].x);
-			ll.y = std::min(ll.y, mesh_points[i].y);
-			ll.z = std::min(ll.z, mesh_points[i].z);
-			ur.x = std::max(ur.x, mesh_points[i].x);
-			ur.y = std::max(ur.y, mesh_points[i].y);
-			ur.z = std::max(ur.z, mesh_points[i].z);
-		}
 		double bigratio = 3;
 		mesh_points.push_back(Vector3D(0.5*(ll.x + ur.x), 0.5*(ur.y + ll.y), ur.z + bigratio * (ur.z - ll.z)));
 		mesh_points.push_back(Vector3D(ll.x - bigratio * (ur.x - ll.x), ll.y - bigratio * (ur.y - ll.y),
@@ -43,6 +32,47 @@ namespace
 		mesh_points.push_back(Vector3D(0.5*(ur.x + ll.x), ur.y + bigratio * (ur.y - ll.y),
 			ll.z - bigratio * (ur.z - ll.z)));
 	}
+
+	void BuildBigTetra(Tessellation3D const& tproc, vector<Vector3D> & mesh_points)
+	{
+#ifdef RICH_MPI
+		Vector3D ll, ur;
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		vector<size_t> const& faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+		for (size_t i = 0; i < faces.size(); ++i)
+		{
+			vector<size_t> const& fp = tproc.GetPointsInFace(faces[i]);
+			for (size_t j = 0; j < fp.size(); ++j)
+			{
+				Vector3D const& temp = tproc.GetFacePoints().at(fp[j]);
+				if (i == 0 && j == 0)
+				{
+					ll = temp;
+					ur = ll;
+				}
+				else
+				{
+					ll.x = std::min(ll.x, temp.x);
+					ll.y = std::min(ll.y, temp.y);
+					ll.z = std::min(ll.z, temp.z);
+					ur.x = std::max(ur.x, temp.x);
+					ur.y = std::max(ur.y, temp.y);
+					ur.z = std::max(ur.z, temp.z);
+				}
+			}
+		}
+		double bigratio = 50;
+		mesh_points.push_back(Vector3D(0.5*(ll.x + ur.x), 0.5*(ur.y + ll.y), ur.z + bigratio * (ur.z - ll.z)));
+		mesh_points.push_back(Vector3D(ll.x - bigratio * (ur.x - ll.x), ll.y - bigratio * (ur.y - ll.y),
+			ll.z - bigratio * (ur.z - ll.z)));
+		mesh_points.push_back(Vector3D(ur.x + bigratio * (ur.x - ll.x), ll.y - bigratio * (ur.y - ll.y),
+			ll.z - bigratio * (ur.z - ll.z)));
+		mesh_points.push_back(Vector3D(0.5*(ur.x + ll.x), ur.y + bigratio * (ur.y - ll.y),
+			ll.z - bigratio * (ur.z - ll.z)));
+#endif
+	}
+
 
 #ifdef RICH_MPI
 	void TalkSymmetry(vector<int> & to_talk_with)
@@ -521,7 +551,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	mesh_points_ = new_points;
 	Norg_ = mesh_points_.size();
 	// Build big tetrahedron
-	BuildBigTetra(mesh_points_);
+	BuildBigTetra(tproc,mesh_points_);
 
 	tetgenio tetin, tetout;
 	RunTetGen(mesh_points_, tetin, tetout);
@@ -578,7 +608,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	mesh_points_ = points;
 	Norg_ = mesh_points_.size();
 	// Build big tetrahedron
-	BuildBigTetra(mesh_points_);
+	BuildBigTetra(ll_,ur_,mesh_points_);
 
 	tetgenio tetin, tetout;
 	RunTetGen(mesh_points_, tetin, tetout);
