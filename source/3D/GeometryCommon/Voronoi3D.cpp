@@ -12,9 +12,15 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, size_t index
 	vector<size_t> const& faces = tess.GetCellFaces(index);
 	size_t N = faces.size();
 	for (size_t i = 0; i < N; ++i)
-		if (ScalarProd(tess.GetMeshPoint(index) - tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]],
-			point - tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]]) < 0)
+	{
+		Vector3D const& vecref = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]];
+		Vector3D normal = CrossProduct(tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]] -
+			vecref, tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[2]]
+			- tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]]);
+		double sign = ScalarProd(tess.GetMeshPoint(index) - vecref,normal);
+		if (ScalarProd(point - vecref, normal)*sign < 0)
 			return false;
+	}
 	return true;
 }
 
