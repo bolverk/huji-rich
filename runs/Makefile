@@ -7,35 +7,35 @@ ENDEMIC_SOURCES := $(shell find $(TARGET) -name '*.cpp')
 ENDEMIC_OBJECTS := $(patsubst $(TARGET)/%.cpp,$(DUMP_FOLDER)/%.o,$(ENDEMIC_SOURCES))
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
-	LFLAGS := -pg -lclipper
+	LFLAGS := -pg -lclipper -ltetgen
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
-	LFLAGS := -lclipper
+	LFLAGS := -lclipper -ltetgen
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lclipper
+	LFLAGS := -lclipper -ltetgen
 else ifeq ($(MODE),parallel_profile)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lclipper
+	LFLAGS := -lclipper -ltetgen
 else ifeq ($(MODE),debug_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
 	LINT_FLAGS := -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wmissing-declarations
-	LFLAGS := -pg -lclipper
+	LFLAGS := -pg -lclipper -ltetgen
 else
 	MODE := production
 	OPTIMIZATION_FLAGS := -O3
-	LFLAGS := -lclipper
+	LFLAGS := -lclipper -ltetgen
 endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
