@@ -17,7 +17,7 @@ linkflags = ''
 if compiler=='g++':
     cflags = '-Wfatal-errors'
     if int(debug):
-        cflags +=' -O0 -g -pg'
+        cflags +=' -O0 -g -pg -D_GLIBCXX_DEBUG'
         linkflags = ' -g -pg'
     else:
         cflags +=' -O3'
@@ -38,7 +38,7 @@ elif compiler=='icc':
 elif compiler=='mpiCC':
     cflags = '-DRICH_MPI -Wfatal-errors '
     if int(debug):
-        cflags += ' -O0 -g -pg'
+        cflags += ' -O0 -g -pg -D_GLIBCXX_DEBUG'
     else:
         cflags += ' -O3 -march=native'
 else:
@@ -57,7 +57,7 @@ env = Environment(ENV = os.environ,
                   CPPPATH=[os.environ['RICH_ROOT']+'/source',
                            os.environ['RICH_ROOT']],
                   LIBPATH=['.',os.environ['HDF5_LIB_PATH']],
-                  LIBS=['rich','hdf5','hdf5_cpp'],
+                  LIBS=['rich','hdf5','hdf5_cpp','clipper'],
                   LINKFLAGS=linkflags,
                   CXXFLAGS=cflags)
 env.VariantDir(build_dir,'source')

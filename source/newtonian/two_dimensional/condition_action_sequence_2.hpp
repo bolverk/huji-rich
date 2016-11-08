@@ -3,6 +3,7 @@
 
 #include "condition_action_sequence.hpp"
 #include "spatial_reconstruction.hpp"
+#include "../common/LagrangianHLLC.hpp"
 
 //! \brief Second order flux calculator based on a series of conditions and actions
 class ConditionActionSequence2 : public FluxCalculator
@@ -16,6 +17,7 @@ public:
 
 		/*! \brief Calculates flux
 		\param edge Interface between cells
+		\param index The index of the edge
 		\param tess Tessellation
 		\param cells Computational cells
 		\param eos Equation of state
@@ -28,6 +30,7 @@ public:
 		*/
 		virtual void operator()
 			(const Edge& edge,
+				const size_t index,
 				const Tessellation& tess,
 				const Vector2D& edge_velocity,
 				const vector<ComputationalCell>& cells,
@@ -83,6 +86,7 @@ public:
 
 	void operator()
 		(const Edge& edge,
+			const size_t index,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
@@ -110,6 +114,7 @@ public:
 
 	void operator()
 		(const Edge& edge,
+			const size_t index,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
@@ -136,6 +141,7 @@ public:
 
 	void operator()
 		(const Edge& edge,
+			const size_t index,
 			const Tessellation& tess,
 			const Vector2D& edge_velocity,
 			const vector<ComputationalCell>& cells,
@@ -149,6 +155,63 @@ private:
 	const bool in_;
 	const RigidWallFlux2 wall_;
 	const FreeFlowFlux free_;
+};
+
+//! \brief No mass flux
+class LagrangianFlux : public ConditionActionSequence2::Action2
+{
+private:
+	const LagrangianHLLC& rs_;
+	
+public:
+
+	/*! \brief Class constructor
+	  \param rs Riemann solver
+	\param tracerstickernames The names of the tracers and stickers
+	*/
+	LagrangianFlux(const LagrangianHLLC& rs);
+
+	void operator()
+		(const Edge& edge,
+			const size_t index,
+			const Tessellation& tess,
+			const Vector2D& edge_velocity,
+			const vector<ComputationalCell>& cells,
+			const EquationOfState& eos,
+			const bool aux,
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			Extensive &res, double time,
+			TracerStickerNames const& tracerstickernames) const;
+	
+	mutable vector<double> ws_,edge_vel_;
+};
+
+class LagrangianFluxT : public ConditionActionSequence2::Action2
+{
+private:
+	const LagrangianHLLC& rs_,rs2_;
+	
+public:
+
+	/*! \brief Class constructor
+	  \param rs Riemann solver
+	\param tracerstickernames The names of the tracers and stickers
+	*/
+	LagrangianFluxT(const LagrangianHLLC& rs,const LagrangianHLLC& rs2);
+
+	void operator()
+		(const Edge& edge,
+			const size_t index,
+			const Tessellation& tess,
+			const Vector2D& edge_velocity,
+			const vector<ComputationalCell>& cells,
+			const EquationOfState& eos,
+			const bool aux,
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			Extensive &res, double time,
+			TracerStickerNames const& tracerstickernames) const;
+	
+	mutable vector<double> ws_,edge_vel_;
 };
 
 #endif // CONDITION_ACTION_SEQUENCE2_HPP

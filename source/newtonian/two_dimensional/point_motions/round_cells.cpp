@@ -103,9 +103,11 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 	double time, TracerStickerNames const& tracerstickernames) const
 {
 	vector<Vector2D> res = pm_(tess, cells, time,tracerstickernames);
+	res.resize(static_cast<size_t>(tess.GetPointNo()));
+	size_t N = static_cast<size_t>(tess.GetPointNo());
 	if (!cold_)
 	{
-		for (size_t i = 0; i < res.size(); ++i)
+		for (size_t i = 0; i < N; ++i)
 		{
 			res[i] += calc_dw(i, tess, cells,tracerstickernames);
 		}

@@ -145,12 +145,15 @@ TracerStickerNames const& hdsim::GetTracerStickerNames(void)const
 
 void hdsim::TimeAdvance(void)
 {
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
+
 	vector<Vector2D> point_velocities =
 		point_motion_(tess_, cells_, time_,tracer_sticker_names_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_exchange_data(tess_, cells_, true);
 #endif
 
 	vector<Vector2D> edge_velocities =
@@ -316,13 +319,15 @@ namespace
 
 void hdsim::TimeAdvance2Heun(void)
 {
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
+
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
-	MPI_exchange_data(tess_, cells_, true);
 #endif
-
 
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);

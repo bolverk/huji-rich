@@ -14,6 +14,31 @@ ConditionActionSequence2::~ConditionActionSequence2(void)
 
 namespace 
 {
+	pair<Vector2D, Vector2D> calc_parallel_normal(const Tessellation& tess, const Edge& edge)
+	{
+		const Vector2D p = Parallel(edge);
+		if (edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo())
+			return pair<Vector2D, Vector2D>(p, remove_parallel_component(edge.vertices.first -
+				tess.GetMeshPoint(edge.neighbors.first), p));
+		if (edge.neighbors.second >= 0 && edge.neighbors.second < tess.GetPointNo())
+			return pair<Vector2D, Vector2D>(p, remove_parallel_component(tess.GetMeshPoint(edge.neighbors.second) -
+				edge.vertices.first, p));
+		assert(false);
+	}
+	
+	Extensive convert_conserved_to_extensive(const Conserved& conserved, const pair<ComputationalCell, ComputationalCell>& cells)
+	{
+		Extensive res;
+		res.mass = conserved.Mass;
+		res.momentum = conserved.Momentum;
+		res.energy = conserved.Energy;
+		res.tracers.resize(cells.first.tracers.size());
+		size_t N = res.tracers.size();
+		for (size_t i = 0; i < N; ++i)
+			res.tracers[i] = conserved.Mass*(conserved.Mass>0 ? cells.first.tracers[i] : cells.second.tracers[i]);
+		return res;
+	}
+	
 	void choose_action
 		(const Edge& edge,
 			const Tessellation& tess,
@@ -23,7 +48,7 @@ namespace
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
 		const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
 			pair<ComputationalCell,ComputationalCell> const& edge_values,Extensive &res,double time,
-			TracerStickerNames const& tracerstickernames)
+			TracerStickerNames const& tracerstickernames,size_t index)
 	{
 		for (size_t i = 0; i<sequence.size(); ++i) 
 		{
@@ -41,7 +66,7 @@ namespace
 				(edge, tess, cells,tracerstickernames);
 			if (flag_aux.first)
 			{
-				(*sequence2[i].second)(edge, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res,time,
+				(*sequence2[i].second)(edge,index, tess, edge_velocity, cells, eos, flag_aux.second, edge_values,res,time,
 					tracerstickernames);
 				return;
 			}
@@ -74,7 +99,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			edge_velocities[i],
 			sequence_,
 			sequence2_,
-			edge_values_[i],res[i],time,tracerstickernames);
+			edge_values_[i],res[i],time,tracerstickernames,i);
 	return res;
 }
 
@@ -101,6 +126,7 @@ namespace
 
 void RegularFlux2::operator()
 (const Edge& edge,
+	const size_t /*index*/,
 	const Tessellation& tess,
 	const Vector2D& edge_velocity,
 	const vector<ComputationalCell>& /*cells*/,
@@ -154,6 +180,7 @@ namespace
 
 void RigidWallFlux2::operator()
 (const Edge& edge,
+	const size_t /*index*/,
 	const Tessellation& tess,
 	const Vector2D& /*edge_velocity*/,
 	const vector<ComputationalCell>& /*cells*/,
@@ -200,6 +227,7 @@ Ratchet::Ratchet(const RiemannSolver& rs,bool in) :
 
 void Ratchet::operator()
 (const Edge& edge,
+	const size_t index,
 	const Tessellation& tess,
 	const Vector2D& edge_velocity,
 	const vector<ComputationalCell>& cells,
@@ -214,5 +242,51 @@ void Ratchet::operator()
 	if (ScalarProd(n, cells[static_cast<size_t>(aux ? edge.neighbors.first : edge.neighbors.second)].velocity)*(2*static_cast<double>(in_)-1) < 0)
 		free_.operator()(edge,tess, edge_velocity, cells, eos, aux,res,time,tracerstickernames);
 	else
-		wall_.operator()(edge, tess, edge_velocity, cells, eos, aux,edge_values,res,time,tracerstickernames);
+		wall_.operator()(edge,index, tess, edge_velocity, cells, eos, aux,edge_values,res,time,tracerstickernames);
+}
+
+LagrangianFlux::LagrangianFlux(const LagrangianHLLC& rs):rs_(rs),ws_(vector<double>()),
+	edge_vel_(vector<double>()){}
+	
+void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& /*cells*/,
+	const EquationOfState& eos,const bool /*aux*/,const pair<ComputationalCell, ComputationalCell> & edge_values,Extensive &res, double /*time*/,
+	TracerStickerNames const& tracerstickernames) const
+{
+	size_t N = static_cast<size_t>(tess.GetTotalSidesNumber());
+	ws_.resize(N,0.0);
+	edge_vel_.resize(N,0.0);
+	const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess, edge);
+	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
+	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
+	const Primitive p_right =convert_to_primitive(edge_values.second, eos, tracerstickernames);
+	res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
+	ws_[index] = rs_.energy;
+	edge_vel_[index] = speed;
+}
+
+LagrangianFluxT::LagrangianFluxT(const LagrangianHLLC& rs,const LagrangianHLLC& rs2):rs_(rs),rs2_(rs2),ws_(vector<double>()),
+	edge_vel_(vector<double>()){}
+	
+void LagrangianFluxT::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& /*cells*/,
+	const EquationOfState& eos,const bool /*aux*/,const pair<ComputationalCell, ComputationalCell> & edge_values,Extensive &res, double /*time*/,
+	TracerStickerNames const& tracerstickernames) const
+{
+	size_t N = static_cast<size_t>(tess.GetTotalSidesNumber());
+	ws_.resize(N,0.0);
+	edge_vel_.resize(N,0.0);
+	const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess, edge);
+	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
+	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
+	const Primitive p_right =convert_to_primitive(edge_values.second, eos, tracerstickernames);
+	if(edge_values.first.tracers.size()>14&&edge_values.first.tracers[14]<2.5e8&&edge_values.second.tracers[14]<2.5e8)
+	{
+		res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs2_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
+		ws_[index] = 0;
+	}
+	else
+	{
+		res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
+		ws_[index] = rs_.energy;
+	}
+	edge_vel_[index] = speed;
 }
