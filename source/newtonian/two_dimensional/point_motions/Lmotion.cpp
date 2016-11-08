@@ -69,7 +69,7 @@ double time, TracerStickerNames const& tracerstickernames) const
 #ifdef RICH_MPI
 		MPI_exchange_data(tess, res, true);
 #endif
-		vector<Vector2D> edge_vel = evc_(tess, res);
+		edge_vel = evc_(tess, res);
 		for (size_t j = 0; j < Nedges; ++j)
 		{
 			Edge const& edge = tess.GetEdge(static_cast<int>(j));
