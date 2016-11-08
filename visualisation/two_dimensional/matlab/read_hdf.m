@@ -197,10 +197,10 @@ if(ShouldPlot==1||ShouldPlot==2)
             Entropy=Pressure./Density.^gamma;
             if(Log==1)
                 caxis([min(log10(Entropy)) max(log10(Entropy*1.01))]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',0);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Entropy((i-1)*maxdraw+1:maxindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
             else
                 caxis([min(Entropy) max(Entropy)*1.01]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',0);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Entropy((i-1)*maxdraw+1:maxindex),'FaceColor','flat','EdgeAlpha',edgestrength);
             end
         case 5
             if(tracernametoplot==0)
@@ -212,10 +212,10 @@ if(ShouldPlot==1||ShouldPlot==2)
             end
             if(Log==1)
                 caxis([min(log10(Tracers(:,tracerindex))) max(log10(Tracers(:,tracerindex)*1.01))]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)),'FaceColor','flat','EdgeAlpha',0);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',log10(Tracers((i-1)*maxdraw+1:maxindex,tracerindex)),'FaceColor','flat','EdgeAlpha',edgestrength);
             else
                 caxis([min((Tracers(:,tracerindex))) max((Tracers(:,tracerindex)*1.01))]);
-                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex),'FaceColor','flat','EdgeAlpha',0.05);
+                patch('Faces',Faces(:,(i-1)*maxdraw+1:maxindex)','Vertices',Vertices,'FaceVertexCData',Tracers((i-1)*maxdraw+1:maxindex,tracerindex),'FaceColor','flat','EdgeAlpha',edgestrength);
             end
         case 6
             if(tracernametoplot==0)
