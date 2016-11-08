@@ -1,9 +1,9 @@
 #ifndef LMOTION_HPP
 #define LMOTION_HPP 1
-#include "source/newtonian/two_dimensional/point_motion.hpp"
-#include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
-#include "source/newtonian/common/equation_of_state.hpp"
-#include "source/newtonian/two_dimensional/edge_velocity_calculator.hpp"
+#include "../point_motion.hpp"
+#include "../interpolations/LinearGaussImproved.hpp"
+#include "../../common/equation_of_state.hpp"
+#include "../edge_velocity_calculator.hpp"
 
 class LMotion : public PointMotion
 {

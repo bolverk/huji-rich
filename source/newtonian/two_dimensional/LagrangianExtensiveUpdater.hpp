@@ -1,7 +1,7 @@
 #ifndef LAGEU_HPP
 #define LAGEU_HPP
-#include "source/newtonian/two_dimensional/extensive_updater.hpp"
-#include "source/newtonian/two_dimensional/condition_action_sequence_2.hpp"
+#include "extensive_updater.hpp"
+#include "condition_action_sequence_2.hpp"
 
 class LagrangianExtensiveUpdater : public ExtensiveUpdater
 {
