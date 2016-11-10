@@ -72,7 +72,7 @@ namespace
 
 	bool NegativeVelocityDivergence(size_t index, LinearGaussImproved const& interp,double cs,double R)
 	{
-		Slope slope = interp.GetSlopesUnlimited()[index];
+		Slope const& slope = interp.GetSlopesUnlimited()[index];
 		return (slope.xderivative.velocity.x + slope.yderivative.velocity.y)*R < -0.2*cs;
 	}
 
@@ -83,7 +83,7 @@ namespace
 	}
 */
 	bool BigJump(Vector2D const& Tgrad, size_t index,Tessellation const& tess,vector<ComputationalCell> const& cells,
-		boost::container::flat_map<size_t, ComputationalCell> ghost_cells)
+		boost::container::flat_map<size_t, ComputationalCell> const& ghost_cells)
 	{
 		vector<int> neigh = tess.GetNeighbors(static_cast<int>(index));
 		size_t n = neigh.size();
@@ -110,8 +110,8 @@ namespace
 				}
 			}
 		}
-		return (log(maxP) - log(cells[index].pressure))>0.2 || 
-			(log(maxT)-log(cells[index].pressure/cells[index].density))>0.1;
+		return (maxP > cells[index].pressure*1.22 || 
+			(maxT*cells[index].density>cells[index].pressure/cells[index].density>1.1));
 	}
 
 	bool NegativeThermalEnergy(Extensive const& cell)

@@ -30,6 +30,8 @@ namespace
 		Extensive& extensive = extensives[index];
 		const double volume = cd.volumes[index];
 		res.density = extensive.mass / volume;
+		if (res.density < 0)
+			throw UniversalError("Negative density");
 		res.velocity = extensive.momentum / extensive.mass;
 		const double energy = extensive.energy / extensive.mass -
 			0.5*ScalarProd(res.velocity, res.velocity);

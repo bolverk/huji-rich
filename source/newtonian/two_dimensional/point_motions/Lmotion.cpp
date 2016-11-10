@@ -59,9 +59,8 @@ double time, TracerStickerNames const& tracerstickernames) const
 		right.Velocity = Vector2D(ScalarProd(right.Velocity, n), ScalarProd(right.Velocity, p));
 		ws[j] = GetWs(left,right);
 	}
-	for (size_t i = 0; i < N; ++i)
-		res[i] = cells[i].velocity;
-
+	//for (size_t i = 0; i < N; ++i)
+		//res[i] = cells[i].velocity;
 	for (size_t i = 0; i < Niter; ++i)
 	{
 		temp.assign(N,Vector2D(0,0));
@@ -73,25 +72,33 @@ double time, TracerStickerNames const& tracerstickernames) const
 		for (size_t j = 0; j < Nedges; ++j)
 		{
 			Edge const& edge = tess.GetEdge(static_cast<int>(j));
+			if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
+				continue;
 			double l = edge.GetLength();
 			Vector2D p = normalize(Parallel(edge));
 			Vector2D n = normalize(tess.GetMeshPoint(edge.neighbors.second) -	tess.GetMeshPoint(edge.neighbors.first));
+			double density_ratio = cells[static_cast<size_t>(edge.neighbors.first)].density /
+				cells[static_cast<size_t>(edge.neighbors.second)].density;
+			density_ratio = std::pow(std::max(density_ratio, 1.0 / density_ratio),0.5);
 			double v = ScalarProd(n, edge_vel.at(j));
 			double cur_ws=ws[j]-v;
 			if (edge.neighbors.first < static_cast<int>(N))
 			{
-				temp[edge.neighbors.first] += l*cur_ws * n;
-				CellLength[edge.neighbors.first] += l*Vector2D(std::abs(p.x),std::abs(p.y));
+				temp[edge.neighbors.first] += density_ratio*l*cur_ws * n;
+				CellLength[edge.neighbors.first] += density_ratio*l*Vector2D(std::abs(p.x),std::abs(p.y));
 			}
 			if (edge.neighbors.second < static_cast<int>(N))
 			{
-				temp[edge.neighbors.second] += l*cur_ws * n;
-				CellLength[edge.neighbors.second] += l*Vector2D(std::abs(p.x), std::abs(p.y));
+				temp[edge.neighbors.second] += density_ratio*l*cur_ws * n;
+				CellLength[edge.neighbors.second] += density_ratio*l*Vector2D(std::abs(p.x), std::abs(p.y));
 			}
 		}
  
 		for (size_t j = 0; j < N; ++j)
-			res[j] +=  0.4*Vector2D(temp[j].x / CellLength[j].x, temp[j].y / CellLength[j].y);
+		{
+			const double R = tess.GetWidth(static_cast<int>(j));
+			res[j] += 0.75*Vector2D(temp[j].x / CellLength[j].y, temp[j].y / CellLength[j].x);
+		}
 	}
 	return res;
 }

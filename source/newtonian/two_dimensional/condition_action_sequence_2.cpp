@@ -278,7 +278,8 @@ void LagrangianFluxT::operator()(const Edge& edge,const size_t index,const Tesse
 	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
 	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
 	const Primitive p_right =convert_to_primitive(edge_values.second, eos, tracerstickernames);
-	if(edge_values.first.tracers.size()>14&&edge_values.first.tracers[14]<2.5e8&&edge_values.second.tracers[14]<2.5e8)
+	//if(edge_values.first.tracers.size()>14&&edge_values.first.tracers[14]<2.5e8&&edge_values.second.tracers[14]<2.5e8)
+	if (edge.neighbors.first > tess.GetPointNo() || edge.neighbors.second > tess.GetPointNo())
 	{
 		res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs2_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
 		ws_[index] = 0;
