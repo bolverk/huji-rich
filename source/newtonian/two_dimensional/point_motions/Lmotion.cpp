@@ -43,7 +43,6 @@ double time, TracerStickerNames const& tracerstickernames) const
 	interp_(tess, cells, time, edge_values, tracerstickernames, cd);
 	size_t Nedges=edge_values.size();
 	vector<double> ws(Nedges, 0);
-	//vector<double> cur_ws(ws);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess, res, true);
 #endif
@@ -59,8 +58,8 @@ double time, TracerStickerNames const& tracerstickernames) const
 		right.Velocity = Vector2D(ScalarProd(right.Velocity, n), ScalarProd(right.Velocity, p));
 		ws[j] = GetWs(left,right);
 	}
-	//for (size_t i = 0; i < N; ++i)
-		//res[i] = cells[i].velocity;
+	for (size_t i = 0; i < N; ++i)
+		res[i] = cells[i].velocity;
 	for (size_t i = 0; i < Niter; ++i)
 	{
 		temp.assign(N,Vector2D(0,0));
@@ -93,12 +92,9 @@ double time, TracerStickerNames const& tracerstickernames) const
 				CellLength[edge.neighbors.second] += density_ratio*l*Vector2D(std::abs(p.x), std::abs(p.y));
 			}
 		}
- 
+
 		for (size_t j = 0; j < N; ++j)
-		{
-			const double R = tess.GetWidth(static_cast<int>(j));
 			res[j] += 0.75*Vector2D(temp[j].x / CellLength[j].y, temp[j].y / CellLength[j].x);
-		}
 	}
 	return res;
 }
