@@ -111,7 +111,7 @@ namespace
 			}
 		}
 		return (maxP > cells[index].pressure*1.22 || 
-			(maxT*cells[index].density>cells[index].pressure/cells[index].density>1.1));
+			((maxT*cells[index].density)>(cells[index].pressure*1.1)));
 	}
 
 	bool NegativeThermalEnergy(Extensive const& cell)
