@@ -122,7 +122,9 @@ ComputationalCell operator*(double s, ComputationalCell const& p);
 
 void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& other, double scalar);
 
-void ReplaceComputationalCell(ComputationalCell &cell, ComputationalCell const& other);
+void ReplaceComputationalCell(ComputationalCell &res, ComputationalCell const& other);
+
+void ReplaceComputationalCellDiff(ComputationalCell &res, ComputationalCell const& first, ComputationalCell const& second);
 
 //! \brief Class for spatial interpolations
 class Slope

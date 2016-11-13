@@ -156,13 +156,12 @@ namespace
 		return cond1 || cond2;
 	}
 
-	ComputationalCell interp(ComputationalCell const& cell, Slope const& slope,
+	void interp(ComputationalCell& res,ComputationalCell const& cell, Slope const& slope,
 		Vector2D const& target, Vector2D const& cm)
 	{
-		ComputationalCell res(cell);
+		ReplaceComputationalCell(res, cell);
 		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
-		return res;
 	}
 
 	void interp2(ComputationalCell &res, Slope const& slope,
@@ -181,7 +180,7 @@ namespace
 		ComputationalCell &mindiff,
 		TracerStickerNames const& tracerstickernames,
 		string const& skip_key,
-		Tessellation const& tess)
+		Tessellation const& tess, vector<double> &psi)
 	{
 		ReplaceComputationalCell(cmax, cell);
 		ReplaceComputationalCell(cmin, cell);
@@ -213,9 +212,11 @@ namespace
 		ReplaceComputationalCell(mindiff, cmin);
 		mindiff -= cell;
 		// limit the slope
-		ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[0]), cm);
+		ComputationalCell centroid_val;
+		interp(centroid_val, cell, slope, CalcCentroid(*edge_list[0]), cm);
 		ComputationalCell dphi = centroid_val - cell;
-		vector<double> psi(4 + cell.tracers.size(), 1);
+		psi.resize(4 + cell.tracers.size());
+		psi.assign(psi.size(), 1);
 		const size_t nedges = edge_list.size();
 		for (size_t i = 0; i < nedges; ++i)
 		{
@@ -301,9 +302,11 @@ namespace
 	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<const Edge*> const& edge_list,
 		Slope  &slope, double diffusecoeff,TracerStickerNames const& tracerstickernames,
-		string const& skip_key)
+		string const& skip_key,ComputationalCell &cmax,ComputationalCell &cmin,ComputationalCell &maxdiff,
+		ComputationalCell &mindiff,vector<double> &psi)
 	{
-		ComputationalCell cmax(cell), cmin(cell);
+		ReplaceComputationalCell(cmax, cell);
+		ReplaceComputationalCell(cmin, cell);
 		// Find maximum values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
@@ -324,15 +327,19 @@ namespace
 				cmin.tracers[j] = std::min(cmin.tracers[j], cell_temp.tracers[j]);
 			}
 		}
-		ComputationalCell maxdiff = cmax - cell, mindiff = cmin - cell;
+		ReplaceComputationalCellDiff(maxdiff, cmax, cell);
+		ReplaceComputationalCellDiff(mindiff, cmin, cell);
 		// limit the slope
-		vector<double> psi(4 + cell.tracers.size(), 1);
+		ComputationalCell centroid_val;
+		ComputationalCell dphi;
+		psi.resize(4 + cell.tracers.size());
+		psi.assign(psi.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
 			if (!skip_key.empty() && safe_retrieve(neighbors[i]->stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
-			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[i]), cm);
-			ComputationalCell dphi = centroid_val - cell;
+			interp(centroid_val,cell, slope, CalcCentroid(*edge_list[i]), cm);
+			ReplaceComputationalCellDiff(dphi,centroid_val,cell);
 			// density
 			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
@@ -436,7 +443,8 @@ namespace
 			vector<Vector2D> &neighbor_mesh_list,
 			vector<Vector2D> &neighbor_cm_list,
 			TracerStickerNames const& tracerstickernames,
-			string const& skip_key)
+			string const& skip_key,
+			vector<double> &psi)
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
 		GetNeighborCM(tess, edge_list, cell_index, neighbor_cm_list);
@@ -476,11 +484,11 @@ namespace
 				eos.dp2c(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names)))
 			{
 				slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, temp2, temp3,
-					temp4, temp5,tracerstickernames,skip_key,tess);
+					temp4, temp5,tracerstickernames,skip_key,tess,psi);
 			}
 			else
 			{
-				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff,tracerstickernames,skip_key);
+				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff,tracerstickernames,skip_key,temp2,temp3,temp4,temp5,psi);
 			}
 		}
 	}
@@ -489,7 +497,9 @@ namespace
 ComputationalCell LinearGaussImproved::Interp(ComputationalCell const& cell, size_t cell_index, Vector2D const& cm,
 	Vector2D const& target)const
 {
-	return interp(cell, rslopes_[cell_index], target, cm);
+	ComputationalCell res;
+	interp(res,cell, rslopes_[cell_index], target, cm);
+	return res;
 }
 
 LinearGaussImproved::LinearGaussImproved
@@ -546,6 +556,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	ComputationalCell temp3(cells[0]);
 	ComputationalCell temp4(cells[0]);
 	ComputationalCell temp5(cells[0]);
+	vector<double> psi;
 	vector<const Edge *> edge_list;
 	vector<Vector2D> neighbor_mesh_list;
 	vector<Vector2D> neighbor_cm_list;
@@ -555,15 +566,14 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
-			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_);
+			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_,psi);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{
 			Edge const& edge = *edge_list[j];
 			if (edge.neighbors.first == static_cast<int>(i))
 			{
-				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].first,
-					new_cells[i]);
+				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].first,new_cells[i]);
 				interp2(res[static_cast<size_t>(edge_index[j])].first,
 					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(static_cast<int>(i)));
 				if (edge.neighbors.second > static_cast<int>(CellNumber))
@@ -571,8 +581,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			}
 			else
 			{
-				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].second,
-					new_cells[i]);
+				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].second,new_cells[i]);
 				interp2(res[static_cast<size_t>(edge_index[j])].second,
 					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(static_cast<int>(i)));
 				if (edge.neighbors.first > static_cast<int>(CellNumber))
@@ -600,7 +609,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 						edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 #else
-			res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
+			interp(res[static_cast<size_t>(boundaryedges[i])].first,res[static_cast<size_t>(boundaryedges[i])].first,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 #endif //RICH_MPI
@@ -617,7 +626,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 					ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 						edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #else
-			res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
+			interp(res[static_cast<size_t>(boundaryedges[i])].second,res[static_cast<size_t>(boundaryedges[i])].second,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #endif //RICH_MPI

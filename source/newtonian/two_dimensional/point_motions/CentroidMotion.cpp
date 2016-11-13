@@ -7,20 +7,21 @@
 
 namespace
 {
-	vector<size_t> ConvexIndeces(vector<Vector2D> const& points,Vector2D const& meshpoint)
+	void ConvexIndeces(vector<Vector2D> const& points,Vector2D const& meshpoint,vector<size_t> &convex_index)
 	{
 		// Start building the convexhull
 		size_t n = points.size();
 		vector<double> angles(n);
 		for (size_t i = 0; i<n; ++i)
 			angles.at(i) = atan2(points.at(i).y - meshpoint.y, points.at(i).x - meshpoint.x);
-		return sort_index(angles);
+		sort_index(angles, convex_index);
 	}
 
-	vector<Vector2D> GetConvexPoints(vector<Vector2D> const& chull, Vector2D const& meshpoint, double R)
+	void GetConvexPoints(vector<Vector2D> const& chull, Vector2D const& meshpoint, double R,
+		vector<Vector2D> &res)
 	{
 		Edge e1, e2;
-		vector<Vector2D> res(chull.size());
+		res.resize(chull.size());
 		for (size_t i = 0; i < res.size(); ++i)
 		{
 			Vector2D normal = chull[static_cast<size_t>(i)] - meshpoint;
@@ -60,7 +61,6 @@ namespace
 				throw eo;
 			}
 		}
-		return res;
 	}
 
 	Vector2D GetCM(vector<Vector2D> const& chull,Vector2D const& meshpoint)
@@ -76,24 +76,23 @@ namespace
 		return res / area;
 	}
 
-	vector<Vector2D> GetOrgChullPoints(Tessellation const& tess,vector<size_t> const& indeces)
+	void GetOrgChullPoints(Tessellation const& tess,vector<size_t> const& indeces, vector<Vector2D> &res)
 	{
-		vector<Vector2D> res(indeces.size());
+		res.resize(indeces.size());
 		for (size_t i = 0; i < indeces.size(); ++i)
 			res[i] = tess.GetMeshPoint(static_cast<int>(indeces[i]));
-		return res;
 	}
 
-	vector<Vector2D> GetChullVelocity(Tessellation const & tess, vector<Vector2D> const& orgvel,
+	void GetChullVelocity(Tessellation const & tess, vector<Vector2D> const& orgvel,
 		vector<size_t> const& indeces,
 #ifdef RICH_MPI
 	int /*point*/
 #else
 		int point
 #endif
-		)
+		,vector<Vector2D> &res)
 	{
-		vector<Vector2D> res(indeces.size());
+		res.resize(indeces.size());
 		const size_t N = static_cast<size_t>(tess.GetPointNo());
 		for (size_t i = 0; i < indeces.size(); ++i)
 		{
@@ -117,7 +116,6 @@ namespace
 #endif
 			}
 		}
-		return res;
 	}
 	
 	Vector2D GetCorrectedVelociy(Vector2D const& cm,Vector2D const& meshpoint,Vector2D const& w,
@@ -152,7 +150,9 @@ namespace
 		size_t N = static_cast<size_t>(tess.GetPointNo());
 		vector<Vector2D> res(N);
 		vector<Vector2D> cur_w(w);
+		vector<size_t> convex_index;
 		vector<vector<size_t> > neighbor_indeces(N);
+		vector<Vector2D> chull,chull2,hull_vel;
 		for (size_t i = 0; i < N; ++i)
 		{
 			vector<int> neigh = tess.GetNeighbors(static_cast<int>(i));
@@ -165,14 +165,15 @@ namespace
 			{
 				if (!ShouldCalc(toignore, cells[i],tracerstickernames))
 					continue;
-				vector<Vector2D> chull = GetOrgChullPoints(tess, neighbor_indeces[i]);
-				vector<size_t> convex_index = ConvexIndeces(chull, tess.GetMeshPoint(static_cast<int>(i)));
+				GetOrgChullPoints(tess, neighbor_indeces[i],chull);
+				ConvexIndeces(chull, tess.GetMeshPoint(static_cast<int>(i)), convex_index);
 				chull = VectorValues(chull,convex_index);
-				chull = chull + dt*GetChullVelocity(tess, cur_w,VectorValues(neighbor_indeces[i],convex_index)
-					,static_cast<int>(i));
-				chull = GetConvexPoints(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt,
-					tess.GetWidth(static_cast<int>(i)));
-				Vector2D cm = GetCM(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt);
+				GetChullVelocity(tess, cur_w, VectorValues(neighbor_indeces[i], convex_index)
+					, static_cast<int>(i), hull_vel);
+				chull = chull + dt*hull_vel;
+				GetConvexPoints(chull, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt,
+					tess.GetWidth(static_cast<int>(i)),chull2);
+				Vector2D cm = GetCM(chull2, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt);
 				res[i] = GetCorrectedVelociy(cm, tess.GetMeshPoint(static_cast<int>(i)), w[i], dt, reduce_factor,
 					tess.GetWidth(static_cast<int>(i)),eos,cells[i]);
 			}

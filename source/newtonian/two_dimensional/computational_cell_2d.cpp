@@ -115,16 +115,32 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
   cell.density = other.density;
   cell.pressure = other.pressure;
   cell.velocity = other.velocity;
-  assert(cell.tracers.size() == other.tracers.size());
-  assert(cell.stickers.size() == other.stickers.size());
-  size_t N = cell.tracers.size();
+  size_t N = other.tracers.size();
+  cell.tracers.resize(N);
   for (size_t j = 0; j < N; ++j)
 	  cell.tracers[j] = other.tracers[j];
-  N = cell.stickers.size();
+  N = other.stickers.size();
+  cell.stickers.resize(N);
   for (size_t i = 0; i < N; ++i)
 	  cell.stickers[i] = other.stickers[i];
 }
 
+void ReplaceComputationalCellDiff(ComputationalCell &cell, ComputationalCell const& first, ComputationalCell const& second)
+{
+	cell.density = first.density-second.density;
+	cell.pressure = first.pressure-second.pressure;
+	cell.velocity = first.velocity-second.velocity;
+	assert(first.tracers.size() == second.tracers.size());
+	size_t N = first.tracers.size();
+	cell.tracers.resize(N);
+	for (size_t j = 0; j < N; ++j)
+		cell.tracers[j] = first.tracers[j]-second.tracers[j];
+	assert(first.stickers.size() == second.stickers.size());
+	N = first.stickers.size();
+	cell.stickers.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		cell.stickers[i] = first.stickers[i];
+}
 
 Slope::Slope(void) :xderivative(ComputationalCell()), yderivative(ComputationalCell()) {}
 
