@@ -86,7 +86,7 @@ namespace
 	void GetChullVelocity(Tessellation const & tess, vector<Vector2D> const& orgvel,
 		vector<size_t> const& indeces,
 #ifdef RICH_MPI
-	int /*point*/
+	int point
 #else
 		int point
 #endif
@@ -100,9 +100,6 @@ namespace
 				res[i] = orgvel[indeces[i]];
 			else
 			{
-#ifdef RICH_MPI
-				res[i] = orgvel[indeces[i]];
-#else
 				if (tess.GetOriginalIndex(static_cast<int>(indeces[i]) == static_cast<int>(indeces[i])))
 				{
 					Vector2D normal = tess.GetMeshPoint(point) - tess.GetMeshPoint(static_cast<int>(indeces[i]));
@@ -111,7 +108,9 @@ namespace
 					res[i] = vel - 2*normal*ScalarProd(vel,normal);
 				}
 				else
-
+#ifdef RICH_MPI
+					res[i] = orgvel[indeces[i]];
+#else
 					res[i] = orgvel[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(indeces[i])))];
 #endif
 			}
@@ -141,6 +140,45 @@ namespace
 				return false;
 		}
 		return true;
+	}
+
+	vector<int> GetBoundaryEdges(Tessellation const& tess)
+	{
+		vector<int> res;
+		int N = tess.GetTotalSidesNumber();
+		for (int i = 0; i < N; ++i)
+		{
+			Edge const& edge = tess.GetEdge(i);
+			if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
+				res.push_back(i);
+		}
+		return res;
+	}
+
+	void SlowNearBoundary(vector<Vector2D> &res, vector<int> const&edges, Tessellation const& tess,double dt)
+	{
+		size_t N = edges.size();
+		int Npoints = tess.GetPointNo();
+		Vector2D n;
+		size_t vel_index;
+		for (size_t i = 0; i < N; ++i)
+		{
+			Edge const& edge = tess.GetEdge(edges[i]);
+			if (edge.neighbors.first < Npoints)
+			{
+				n = tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first);
+				vel_index = static_cast<size_t>(edge.neighbors.first);
+			}
+			else
+			{
+				n = tess.GetMeshPoint(edge.neighbors.first) - tess.GetMeshPoint(edge.neighbors.second);
+				vel_index = static_cast<size_t>(edge.neighbors.second);
+			}
+			double l = abs(n);
+			double dx = ScalarProd(n, res[vel_index] * dt) / l;
+			if (dx > 0.5*l)
+				res[vel_index] += ((0.1*l- dx)/(dt*l))*n;
+		}
 	}
 
 	vector<Vector2D> GetCorrectedVelocities(Tessellation const& tess,vector<Vector2D> const& w,double dt,
@@ -179,6 +217,8 @@ namespace
 			}
 			cur_w = res;
 		}
+		vector<int> edges = GetBoundaryEdges(tess);
+		SlowNearBoundary(res, edges, tess, dt);
 		// check output
 		for (size_t i = 0; i < res.size(); ++i)
 		{
