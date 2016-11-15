@@ -6,7 +6,7 @@
 class LagrangianExtensiveUpdater : public ExtensiveUpdater
 {
 public:
-	LagrangianExtensiveUpdater(LagrangianFluxT const& fc,ExtensiveUpdater const& beu, EquationOfState const& eos);
+	LagrangianExtensiveUpdater(LagrangianFlux const& fc,ExtensiveUpdater const& beu, EquationOfState const& eos);
 
 	void operator()
 	(const vector<Extensive>& fluxes,
@@ -19,7 +19,7 @@ public:
 	double time, TracerStickerNames const& tracerstickersnames) const;
 	
 private:
-	LagrangianFluxT const& fc_;
+	LagrangianFlux const& fc_;
 	ExtensiveUpdater const& beu_;
 	EquationOfState const& eos_;
 }; 

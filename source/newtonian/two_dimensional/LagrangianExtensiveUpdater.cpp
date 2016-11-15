@@ -19,7 +19,7 @@ namespace
 	}
 }
 
-LagrangianExtensiveUpdater::LagrangianExtensiveUpdater(LagrangianFluxT const& fc, ExtensiveUpdater const& beu,
+LagrangianExtensiveUpdater::LagrangianExtensiveUpdater(LagrangianFlux const& fc, ExtensiveUpdater const& beu,
 	EquationOfState const& eos)
 	:fc_(fc),beu_(beu),eos_(eos) {}
 
@@ -34,9 +34,13 @@ vector<Extensive>& extensives,
 double time, TracerStickerNames const& tracerstickernames) const
 { 
 	beu_(fluxes, pg, tess, dt, cd, cells, extensives,time, tracerstickernames);
-
+	size_t Npoints = static_cast<size_t>(tess.GetPointNo());
+	vector<double> R(Npoints, 0);
+	for (size_t i = 0; i < Npoints; ++i)
+		R[i] = tess.GetWidth(static_cast<int>(i));
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	Extensive delta = dt*cd.areas[0] * fluxes[0];
+	Extensive toadd(delta);
 	vector<double> dV(tess.GetPointNo(), 0);
 	fc_.edge_vel_.resize(edge_list.size(),0);
 	fc_.ws_.resize(edge_list.size(),0);
@@ -54,32 +58,26 @@ double time, TracerStickerNames const& tracerstickernames) const
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
 		if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
 			continue;
+		double Rcell = 0;
+		if (edge.neighbors.first < static_cast<int>(Npoints))
+			Rcell = R[static_cast<size_t>(edge.neighbors.first)];
+		if (edge.neighbors.second < static_cast<int>(Npoints))
+			Rcell = std::max(Rcell,R[static_cast<size_t>(edge.neighbors.second)]);
+		if (std::abs(ws)*dt > 0.01*Rcell)
+			continue;
 		double L = cd.areas[i];
-		/*bool first = cells[edge.neighbors.first].pressure*cells[edge.neighbors.second].density >
-			cells[edge.neighbors.first].density*cells[edge.neighbors.second].pressure;
-		Extensive toadd = cell_to_extensive(first ? cells[edge.neighbors.first] : cells[edge.neighbors.second]
-			,eos_, L*std::abs(ws)*dt, tracerstickernames);*/
 		if (edge.neighbors.first < tess.GetPointNo())
 		{
-			Extensive toadd= (L*(ws)*dt / (cd.volumes[edge.neighbors.first] + dV[edge.neighbors.first]))
-				*extensives[static_cast<size_t>(edge.neighbors.first)];
+			ReplaceExtensive(toadd, extensives[static_cast<size_t>(edge.neighbors.first)]);
+			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.first] + dV[edge.neighbors.first]));
 			extensives[static_cast<size_t>(edge.neighbors.first)] -= toadd;
-			/*toadd.tracers[1] = 0;
-			if(ws>0)
-				extensives[static_cast<size_t>(edge.neighbors.first)] -= toadd;
-			else
-				extensives[static_cast<size_t>(edge.neighbors.first)] += toadd;*/
 		}
 		if (edge.neighbors.second < tess.GetPointNo())
 		{
-			Extensive toadd = (L*(ws)*dt / (cd.volumes[edge.neighbors.second] + dV[edge.neighbors.second]))
-				*extensives[static_cast<size_t>(edge.neighbors.second)];
+			ReplaceExtensive(toadd, extensives[static_cast<size_t>(edge.neighbors.second)]);
+			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.second] + dV[edge.neighbors.second]));
 			extensives[static_cast<size_t>(edge.neighbors.second)] += toadd;
-			/*toadd.tracers[1] = 0;
-			if (ws>0)
-				extensives[static_cast<size_t>(edge.neighbors.second)] += toadd;
-			else
-				extensives[static_cast<size_t>(edge.neighbors.second)] -= toadd;*/
 		}
 	}
+	fc_.Reset();
 }
