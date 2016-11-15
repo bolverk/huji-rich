@@ -157,19 +157,47 @@ private:
 	const FreeFlowFlux free_;
 };
 
-//! \brief No mass flux
 class LagrangianFlux : public ConditionActionSequence2::Action2
 {
-private:
-	const LagrangianHLLC& rs_;
-	
 public:
 
+	class LagrangianCriteria
+	{
+	public:
+		/*! \brief Criteria for calculating mass flux or not
+		\param edge Interface between cells
+		\param index The index of the edge
+		\param tess Tessellation
+		\param cells Computational cells
+		\param eos Equation of state
+		\param aux Auxiliary variable for assymetric problems (true means the relevant cell is on the left side, false mean right)
+		\param edge_values The interpolated values at the edge
+		\param edge_velocity Velocity of the edges
+		\param time The time
+		\param tracerstickernames The names of the tracers and stickers
+		\return True if there is no mass flux false otherwise
+		*/
+		virtual bool operator()(const Edge& edge,
+			const size_t index,
+			const Tessellation& tess,
+			const Vector2D& edge_velocity,
+			const vector<ComputationalCell>& cells,
+			const EquationOfState& eos,
+			const bool aux,
+			const pair<ComputationalCell, ComputationalCell> & edge_values,
+			double time,
+			TracerStickerNames const& tracerstickernames) const = 0;
+
+		virtual ~LagrangianCriteria();
+	};
+
 	/*! \brief Class constructor
-	  \param rs Riemann solver
+	  \param rs Riemann solver with no mass flux
+	  \param rs2 Riemann solver with mass flux
 	\param tracerstickernames The names of the tracers and stickers
+	\param criteria The criteria for calculating mass flux
 	*/
-	LagrangianFlux(const LagrangianHLLC& rs);
+	LagrangianFlux(const LagrangianHLLC& rs,const LagrangianHLLC& rs2,LagrangianCriteria const& criteria);
 
 	void operator()
 		(const Edge& edge,
@@ -182,36 +210,31 @@ public:
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
 			TracerStickerNames const& tracerstickernames) const;
+
+	void Reset(void)const;
 	
 	mutable vector<double> ws_,edge_vel_;
+private:
+	const LagrangianHLLC& rs_, rs2_;
+	LagrangianCriteria const& criteria_;
 };
 
-class LagrangianFluxT : public ConditionActionSequence2::Action2
+//! \brief Criteria for having mass flux at outer edges of domain
+class WallsMassFlux : public LagrangianFlux::LagrangianCriteria
 {
-private:
-	const LagrangianHLLC& rs_,rs2_;
-	
 public:
+	WallsMassFlux();
 
-	/*! \brief Class constructor
-	  \param rs Riemann solver
-	\param tracerstickernames The names of the tracers and stickers
-	*/
-	LagrangianFluxT(const LagrangianHLLC& rs,const LagrangianHLLC& rs2);
-
-	void operator()
-		(const Edge& edge,
-			const size_t index,
-			const Tessellation& tess,
-			const Vector2D& edge_velocity,
-			const vector<ComputationalCell>& cells,
-			const EquationOfState& eos,
-			const bool aux,
-			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
-	
-	mutable vector<double> ws_,edge_vel_;
+	bool operator()(const Edge& edge,
+		const size_t index,
+		const Tessellation& tess,
+		const Vector2D& edge_velocity,
+		const vector<ComputationalCell>& cells,
+		const EquationOfState& eos,
+		const bool aux,
+		const pair<ComputationalCell, ComputationalCell> & edge_values,
+		double time,
+		TracerStickerNames const& tracerstickernames) const;
 };
 
 #endif // CONDITION_ACTION_SEQUENCE2_HPP

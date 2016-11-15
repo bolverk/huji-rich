@@ -245,30 +245,18 @@ void Ratchet::operator()
 		wall_.operator()(edge,index, tess, edge_velocity, cells, eos, aux,edge_values,res,time,tracerstickernames);
 }
 
-LagrangianFlux::LagrangianFlux(const LagrangianHLLC& rs):rs_(rs),ws_(vector<double>()),
+LagrangianFlux::LagrangianFlux(const LagrangianHLLC& rs,const LagrangianHLLC& rs2,
+	LagrangianFlux::LagrangianCriteria const& criteria):rs_(rs),rs2_(rs2),criteria_(criteria),ws_(vector<double>()),
 	edge_vel_(vector<double>()){}
 	
-void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& /*cells*/,
-	const EquationOfState& eos,const bool /*aux*/,const pair<ComputationalCell, ComputationalCell> & edge_values,Extensive &res, double /*time*/,
-	TracerStickerNames const& tracerstickernames) const
+void LagrangianFlux::Reset(void)const
 {
-	size_t N = static_cast<size_t>(tess.GetTotalSidesNumber());
-	ws_.resize(N,0.0);
-	edge_vel_.resize(N,0.0);
-	const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess, edge);
-	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
-	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
-	const Primitive p_right =convert_to_primitive(edge_values.second, eos, tracerstickernames);
-	res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
-	ws_[index] = rs_.energy;
-	edge_vel_[index] = speed;
+	ws_.assign(ws_.size(), 0);
+	edge_vel_.assign(edge_vel_.size(), 0);
 }
 
-LagrangianFluxT::LagrangianFluxT(const LagrangianHLLC& rs,const LagrangianHLLC& rs2):rs_(rs),rs2_(rs2),ws_(vector<double>()),
-	edge_vel_(vector<double>()){}
-	
-void LagrangianFluxT::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& /*cells*/,
-	const EquationOfState& eos,const bool /*aux*/,const pair<ComputationalCell, ComputationalCell> & edge_values,Extensive &res, double /*time*/,
+void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& cells,
+	const EquationOfState& eos,const bool aux,const pair<ComputationalCell, ComputationalCell> & edge_values,Extensive &res, double time,
 	TracerStickerNames const& tracerstickernames) const
 {
 	size_t N = static_cast<size_t>(tess.GetTotalSidesNumber());
@@ -278,16 +266,35 @@ void LagrangianFluxT::operator()(const Edge& edge,const size_t index,const Tesse
 	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
 	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
 	const Primitive p_right =convert_to_primitive(edge_values.second, eos, tracerstickernames);
-	//if(edge_values.first.tracers.size()>14&&edge_values.first.tracers[14]<2.5e8&&edge_values.second.tracers[14]<2.5e8)
-	if (tess.GetOriginalIndex(edge.neighbors.first)==tess.GetOriginalIndex(edge.neighbors.second))
+	if (criteria_(edge, index, tess, edge_velocity, cells, eos, aux, edge_values, time, tracerstickernames))
+	{
+		res = convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right, speed, p_n.second, p_n.first), edge_values);
+		ws_[index] = rs_.energy;
+	}
+	else
 	{
 		res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs2_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
 		ws_[index] = 0;
 	}
-	else
-	{
-		res =	convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right,speed, p_n.second, p_n.first), edge_values);
-		ws_[index] = rs_.energy;
-	}
 	edge_vel_[index] = speed;
 }
+
+LagrangianFlux::LagrangianCriteria::~LagrangianCriteria() {}
+
+WallsMassFlux::WallsMassFlux() {}
+
+bool WallsMassFlux::operator()(const Edge& edge,
+	const size_t /*index*/,
+	const Tessellation& tess,
+	const Vector2D& /*edge_velocity*/,
+	const vector<ComputationalCell>& /*cells*/,
+	const EquationOfState& /*eos*/,
+	const bool /*aux*/,
+	const pair<ComputationalCell, ComputationalCell> & /*edge_values*/,
+	double /*time*/,
+	TracerStickerNames const& /*tracerstickernames*/) const
+{
+	return !(tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second));
+}
+
+
