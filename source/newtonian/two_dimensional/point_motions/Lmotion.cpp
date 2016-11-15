@@ -38,7 +38,7 @@ double time, TracerStickerNames const& tracerstickernames) const
 	pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	SlabSymmetry pg;
 	CacheData cd(tess, pg);
-	vector<double> CellLength(N);
+	vector<Vector2D> CellLength(N);
 	vector<Vector2D> temp(N);
 	interp_(tess, cells, time, edge_values, tracerstickernames, cd);
 	size_t Nedges=edge_values.size();
@@ -68,14 +68,16 @@ double time, TracerStickerNames const& tracerstickernames) const
 		density_ratios[j]=cells[static_cast<size_t>(edge.neighbors.first)].density /
 			cells[static_cast<size_t>(edge.neighbors.second)].density;
 		density_ratios[j] = std::max(density_ratios[j], 1.0 / density_ratios[j]);
-
+		if (edge.neighbors.first < static_cast<int>(N))
+			CellLength[edge.neighbors.first] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
+		if (edge.neighbors.second < static_cast<int>(N))
+			CellLength[edge.neighbors.second] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
 	}
 	for (size_t i = 0; i < N; ++i)
 		res[i] = cells[i].velocity;
 	for (size_t i = 0; i < Niter; ++i)
 	{
 		temp.assign(N,Vector2D(0,0));
-		CellLength.assign(N,0);
 #ifdef RICH_MPI
 		MPI_exchange_data(tess, res, true);
 #endif
@@ -87,27 +89,29 @@ double time, TracerStickerNames const& tracerstickernames) const
 			double l = edge_length[j];
 			//Vector2D p = normalize(Parallel(edge));
 			double density_ratio = density_ratios[j];
-			density_ratio = std::max(density_ratio, 1.0 / density_ratio);
 			double v = ScalarProd(normals[j], edge_vel.at(j));
 			double cur_ws=ws[j]-v;
 			Edge const& edge = tess.GetEdge(static_cast<int>(j));
 			if (edge.neighbors.first < static_cast<int>(N))
 			{
-				temp[edge.neighbors.first] += density_ratio*l*cur_ws * normals[j];
-				CellLength[edge.neighbors.first] += density_ratio*l;
+				temp[edge.neighbors.first] += (density_ratio*l*cur_ws) * normals[j];
+				//CellLength[edge.neighbors.first] += density_ratio*l;
 				//CellLength[edge.neighbors.first] += density_ratio*l*Vector2D(std::abs(p.x),std::abs(p.y));
 			}
 			if (edge.neighbors.second < static_cast<int>(N))
 			{
-				temp[edge.neighbors.second] += density_ratio*l*cur_ws * normals[j];
-				CellLength[edge.neighbors.second] += density_ratio*l;
+				temp[edge.neighbors.second] += (density_ratio*l*cur_ws) * normals[j];
+				//CellLength[edge.neighbors.second] += density_ratio*l;
 				//CellLength[edge.neighbors.second] += density_ratio*l*Vector2D(std::abs(p.x), std::abs(p.y));
 			}
 		}
 
 		for (size_t j = 0; j < N; ++j)
-			//res[j] += Vector2D(temp[j].x / CellLength[j].y, temp[j].y / CellLength[j].x)*abs(CellLength[j]);
-			res[j] += (1.5 / CellLength[j])*temp[j];
+		{
+			res[j].x += (1.75 / CellLength[j].x)*temp[j].x;
+			res[j].y += (1.75 / CellLength[j].y)*temp[j].y;
+		}
+			//res[j] += Vector2D(temp[j].x / CellLength[j].y, temp[j].y / CellLength[j].x)*abs(CellLength[j]);	
 	}
 	return res;
 }
