@@ -45,7 +45,7 @@ namespace
 					meshpoint.Set(0, 0);
 					for (size_t j = 0; j < res.size(); ++j)
 						meshpoint += chull[j];
-					meshpoint *= (1.0/res.size());
+					meshpoint *= (1.0/static_cast<double>(res.size()));
 					vector<size_t> convex_indeces;
 					ConvexIndeces(chull, meshpoint, convex_indeces);
 					chull=VectorValues(chull, convex_indeces);
