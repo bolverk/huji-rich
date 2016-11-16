@@ -61,10 +61,10 @@ double time, TracerStickerNames const& tracerstickernames) const
 		double Cs = 0;
 		Vector2D n = normalize(tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first));
 		Cs = eos_.dp2c(cells[static_cast<size_t>(edge.neighbors.first)].density,
-			cells[static_cast<size_t>(edge.neighbors.first)].pressure) + abs(fc_.edge_vel_[i] 
+			cells[static_cast<size_t>(edge.neighbors.first)].pressure) + std::abs(fc_.edge_vel_[i] 
 			- ScalarProd(n,cells[static_cast<size_t>(edge.neighbors.first)].velocity));
 		Cs = std::min(Cs,eos_.dp2c(cells[static_cast<size_t>(edge.neighbors.second)].density,
-			cells[static_cast<size_t>(edge.neighbors.second)].pressure) + abs(fc_.edge_vel_[i]
+			cells[static_cast<size_t>(edge.neighbors.second)].pressure) + std::abs(fc_.edge_vel_[i]
 			- ScalarProd(n, cells[static_cast<size_t>(edge.neighbors.second)].velocity)));
 		double density_ratio = cells[static_cast<size_t>(edge.neighbors.first)].density /
 			cells[static_cast<size_t>(edge.neighbors.second)].density;
