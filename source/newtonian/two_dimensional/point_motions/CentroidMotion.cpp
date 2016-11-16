@@ -1,6 +1,7 @@
 #include "CentroidMotion.hpp"
 #include "../../../tessellation/ConvexHull.hpp"
 #include "../../../misc/simple_io.hpp"
+#include "../../../tessellation/VoronoiMesh.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif
@@ -17,11 +18,12 @@ namespace
 		sort_index(angles, convex_index);
 	}
 
-	void GetConvexPoints(vector<Vector2D> const& chull, Vector2D const& meshpoint, double R,
+	void GetConvexPoints(vector<Vector2D> &chull,Vector2D meshpoint, double R,
 		vector<Vector2D> &res)
 	{
 		Edge e1, e2;
 		res.resize(chull.size());
+		bool retry = false;
 		for (size_t i = 0; i < res.size(); ++i)
 		{
 			Vector2D normal = chull[static_cast<size_t>(i)] - meshpoint;
@@ -36,29 +38,44 @@ namespace
 			e2.vertices.second = e2.vertices.first - 1000 * R*Vector2D(normal.y, -normal.x);
 			if (!SegmentIntersection(e1, e2, res[i]))
 			{
-				UniversalError eo("No intersection in centroid motion");
-#ifdef RICH_MPI
-				int rank;
-				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-				eo.AddEntry("Rank", rank);
-#endif
-				eo.AddEntry("mesh.x", meshpoint.x);
-				eo.AddEntry("mesh.y", meshpoint.y);
-				eo.AddEntry("R", R);
-				for (size_t k = 0; k < chull.size(); ++k)
+				if (!PointInCell(chull, meshpoint)&&!retry)
 				{
-					eo.AddEntry("chull x", chull[k].x);
-					eo.AddEntry("chull y", chull[k].y);
+					retry = true;
+					i = 0;
+					meshpoint.Set(0, 0);
+					for (size_t j = 0; j < res.size(); ++j)
+						meshpoint += chull[j];
+					meshpoint *= (1.0/res.size());
+					vector<size_t> convex_indeces;
+					ConvexIndeces(chull, meshpoint, convex_indeces);
+					chull=VectorValues(chull, convex_indeces);
 				}
-				eo.AddEntry("e1.vertices.first.x", e1.vertices.first.x);
-				eo.AddEntry("e1.vertices.first.y", e1.vertices.first.y);
-				eo.AddEntry("e1.vertices.second.x", e1.vertices.second.x);
-				eo.AddEntry("e1.vertices.second.y", e1.vertices.second.y);
-				eo.AddEntry("e2.vertices.first.x", e2.vertices.first.x);
-				eo.AddEntry("e2.vertices.first.y", e2.vertices.first.y);
-				eo.AddEntry("e2.vertices.second.x", e2.vertices.second.x);
-				eo.AddEntry("e2.vertices.second.y", e2.vertices.second.y);
-				throw eo;
+				else
+				{
+					UniversalError eo("No intersection in centroid motion");
+#ifdef RICH_MPI
+					int rank;
+					MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+					eo.AddEntry("Rank", rank);
+#endif
+					eo.AddEntry("mesh.x", meshpoint.x);
+					eo.AddEntry("mesh.y", meshpoint.y);
+					eo.AddEntry("R", R);
+					for (size_t k = 0; k < chull.size(); ++k)
+					{
+						eo.AddEntry("chull x", chull[k].x);
+						eo.AddEntry("chull y", chull[k].y);
+					}
+					eo.AddEntry("e1.vertices.first.x", e1.vertices.first.x);
+					eo.AddEntry("e1.vertices.first.y", e1.vertices.first.y);
+					eo.AddEntry("e1.vertices.second.x", e1.vertices.second.x);
+					eo.AddEntry("e1.vertices.second.y", e1.vertices.second.y);
+					eo.AddEntry("e2.vertices.first.x", e2.vertices.first.x);
+					eo.AddEntry("e2.vertices.first.y", e2.vertices.first.y);
+					eo.AddEntry("e2.vertices.second.x", e2.vertices.second.x);
+					eo.AddEntry("e2.vertices.second.y", e2.vertices.second.y);
+					throw eo;
+				}
 			}
 		}
 	}

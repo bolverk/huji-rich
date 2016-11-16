@@ -58,12 +58,22 @@ double time, TracerStickerNames const& tracerstickernames) const
 		Edge const& edge = tess.GetEdge(static_cast<int>(i));
 		if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
 			continue;
-		double Rcell = 0;
-		if (edge.neighbors.first < static_cast<int>(Npoints))
-			Rcell = R[static_cast<size_t>(edge.neighbors.first)];
-		if (edge.neighbors.second < static_cast<int>(Npoints))
-			Rcell = std::max(Rcell,R[static_cast<size_t>(edge.neighbors.second)]);
-		if (std::abs(ws)*dt > 0.01*Rcell)
+		double Cs = 0;
+		Vector2D n = normalize(tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first));
+		Cs = eos_.dp2c(cells[static_cast<size_t>(edge.neighbors.first)].density,
+			cells[static_cast<size_t>(edge.neighbors.first)].pressure) + abs(fc_.edge_vel_[i] 
+			- ScalarProd(n,cells[static_cast<size_t>(edge.neighbors.first)].velocity));
+		Cs = std::min(Cs,eos_.dp2c(cells[static_cast<size_t>(edge.neighbors.second)].density,
+			cells[static_cast<size_t>(edge.neighbors.second)].pressure) + abs(fc_.edge_vel_[i]
+			- ScalarProd(n, cells[static_cast<size_t>(edge.neighbors.second)].velocity)));
+		double density_ratio = cells[static_cast<size_t>(edge.neighbors.first)].density /
+			cells[static_cast<size_t>(edge.neighbors.second)].density;
+		density_ratio = std::max(density_ratio, 1.0 / density_ratio);
+		double p_ratio = cells[static_cast<size_t>(edge.neighbors.first)].pressure /
+			cells[static_cast<size_t>(edge.neighbors.second)].pressure;
+		p_ratio = std::max(p_ratio, 1.0 / p_ratio);
+
+		if (std::abs(ws) * (std::max(p_ratio,density_ratio)-1)> 0.005*Cs)
 			continue;
 		double L = cd.areas[i];
 		if (edge.neighbors.first < tess.GetPointNo())
