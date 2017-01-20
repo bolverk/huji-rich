@@ -3,6 +3,7 @@
 
 namespace
 {
+  /*
 	Extensive cell_to_extensive(const ComputationalCell& cell,EquationOfState const& eos,double vol,
 		TracerStickerNames const& tsn)
 	{
@@ -17,6 +18,7 @@ namespace
 			res.tracers[i] = res.mass*cell.tracers[i];
 		return res;
 	}
+  */
 }
 
 LagrangianExtensiveUpdater::LagrangianExtensiveUpdater(LagrangianFlux const& fc, ExtensiveUpdater const& beu,
@@ -79,13 +81,13 @@ double time, TracerStickerNames const& tracerstickernames) const
 		if (edge.neighbors.first < tess.GetPointNo())
 		{
 			ReplaceExtensive(toadd, extensives[static_cast<size_t>(edge.neighbors.first)]);
-			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.first] + dV[edge.neighbors.first]));
+			toadd *= (L*(ws)*dt / (cd.volumes[static_cast<size_t>(edge.neighbors.first)] + dV[static_cast<size_t>(edge.neighbors.first)]));
 			extensives[static_cast<size_t>(edge.neighbors.first)] -= toadd;
 		}
 		if (edge.neighbors.second < tess.GetPointNo())
 		{
 			ReplaceExtensive(toadd, extensives[static_cast<size_t>(edge.neighbors.second)]);
-			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.second] + dV[edge.neighbors.second]));
+			toadd *= (L*(ws)*dt / (cd.volumes[static_cast<size_t>(edge.neighbors.second)] + dV[static_cast<size_t>(edge.neighbors.second)]));
 			extensives[static_cast<size_t>(edge.neighbors.second)] += toadd;
 		}
 	}

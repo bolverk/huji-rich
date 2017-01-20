@@ -194,7 +194,6 @@ public:
 	/*! \brief Class constructor
 	  \param rs Riemann solver with no mass flux
 	  \param rs2 Riemann solver with mass flux
-	\param tracerstickernames The names of the tracers and stickers
 	\param criteria The criteria for calculating mass flux
 	*/
 	LagrangianFlux(const LagrangianHLLC& rs,const LagrangianHLLC& rs2,LagrangianCriteria const& criteria);
