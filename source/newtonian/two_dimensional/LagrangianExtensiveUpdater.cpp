@@ -1,24 +1,6 @@
 #include "LagrangianExtensiveUpdater.hpp"
 #include "../../misc/utils.hpp"
 
-namespace
-{
-	Extensive cell_to_extensive(const ComputationalCell& cell,EquationOfState const& eos,double vol,
-		TracerStickerNames const& tsn)
-	{
-		Extensive res;
-		res.mass = vol*cell.density;
-		res.momentum = res.mass*cell.velocity;
-		res.energy = 0.5*ScalarProd(cell.velocity, cell.velocity)*res.mass + eos.dp2e(cell.density, cell.pressure,
-			cell.tracers,tsn.tracer_names)*res.mass;
-		res.tracers.resize(cell.tracers.size());
-		size_t N = res.tracers.size();
-		for (size_t i = 0; i < N; ++i)
-			res.tracers[i] = res.mass*cell.tracers[i];
-		return res;
-	}
-}
-
 LagrangianExtensiveUpdater::LagrangianExtensiveUpdater(LagrangianFlux const& fc, ExtensiveUpdater const& beu,
 	EquationOfState const& eos)
 	:fc_(fc),beu_(beu),eos_(eos) {}
