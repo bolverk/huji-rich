@@ -30,7 +30,7 @@ LMotion::LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,E
 vector<Vector2D> LMotion::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 double time, TracerStickerNames const& tracerstickernames) const
 {
-	size_t N = tess.GetPointNo();
+  size_t N = static_cast<size_t>(tess.GetPointNo());
 	size_t Niter = 10;
 	vector<Vector2D> res(N,Vector2D(0,0));
 	vector<std::pair<ComputationalCell, ComputationalCell> > edge_values;
@@ -69,9 +69,9 @@ double time, TracerStickerNames const& tracerstickernames) const
 			cells[static_cast<size_t>(edge.neighbors.second)].density;
 		density_ratios[j] = std::max(density_ratios[j], 1.0 / density_ratios[j]);
 		if (edge.neighbors.first < static_cast<int>(N))
-			CellLength[edge.neighbors.first] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
+		  CellLength[static_cast<size_t>(edge.neighbors.first)] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
 		if (edge.neighbors.second < static_cast<int>(N))
-			CellLength[edge.neighbors.second] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
+		  CellLength[static_cast<size_t>(edge.neighbors.second)] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
 	}
 	for (size_t i = 0; i < N; ++i)
 		res[i] = cells[i].velocity;
@@ -94,13 +94,13 @@ double time, TracerStickerNames const& tracerstickernames) const
 			Edge const& edge = tess.GetEdge(static_cast<int>(j));
 			if (edge.neighbors.first < static_cast<int>(N))
 			{
-				temp[edge.neighbors.first] += (density_ratio*l*cur_ws) * normals[j];
+			  temp[static_cast<size_t>(edge.neighbors.first)] += (density_ratio*l*cur_ws) * normals[j];
 				//CellLength[edge.neighbors.first] += density_ratio*l;
 				//CellLength[edge.neighbors.first] += density_ratio*l*Vector2D(std::abs(p.x),std::abs(p.y));
 			}
 			if (edge.neighbors.second < static_cast<int>(N))
 			{
-				temp[edge.neighbors.second] += (density_ratio*l*cur_ws) * normals[j];
+			  temp[static_cast<size_t>(edge.neighbors.second)] += (density_ratio*l*cur_ws) * normals[j];
 				//CellLength[edge.neighbors.second] += density_ratio*l;
 				//CellLength[edge.neighbors.second] += density_ratio*l*Vector2D(std::abs(p.x), std::abs(p.y));
 			}
