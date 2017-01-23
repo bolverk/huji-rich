@@ -55,6 +55,42 @@ Conserved3D& Conserved3D::operator+=(const Conserved3D& diff)
   return *this;
 }
 
+#ifdef RICH_MPI
+size_t Conserved3D::getChunkSize(void) const
+{
+	return 5 + tracers.size();
+}
+
+vector<double> Conserved3D::serialize(void) const
+{
+	vector<double> res(getChunkSize());
+	res.at(0) = mass;
+	res.at(1) = energy;
+	res.at(2) = momentum.x;
+	res.at(3) = momentum.y;
+	res.at(4) = momentum.z;
+	size_t counter = 5;
+	size_t N = tracers.size();
+	for (size_t j = 0; j < N; ++j)
+		res[j + counter] = tracers[j];
+	return res;
+}
+
+void Conserved3D::unserialize(const vector<double>& data)
+{
+	assert(data.size() == getChunkSize());
+	mass = data.at(0);
+	energy = data.at(1);
+	momentum.x = data.at(2);
+	momentum.y = data.at(3);
+	momentum.z = data.at(4);
+	size_t counter = 5;
+	size_t N = tracers.size();
+	for (size_t j = 0; j < N; ++j)
+		tracers[j] = data.at(counter + j);
+}
+#endif
+
 Conserved3D operator*(double s, const Conserved3D& c)
 {
   return Conserved3D(s*c.mass,

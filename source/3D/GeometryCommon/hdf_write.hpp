@@ -12,16 +12,16 @@
 #include "../../newtonian/three_dimensional/hdsim_3d.hpp"
 
 //! \brief Container for snapshot data
-class Snapshot
+class Snapshot3D
 {
 public:
 
 	//! \brief Default constructor
-	Snapshot(void);
+	Snapshot3D(void);
 
 	//! \brief Copy constructor
 	//! \param source Source
-	Snapshot(const Snapshot& source);
+	Snapshot3D(const Snapshot3D& source);
 
 	//! \brief Mesh points
 	vector<Vector3D> mesh_points;

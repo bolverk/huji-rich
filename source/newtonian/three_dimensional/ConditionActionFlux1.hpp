@@ -82,14 +82,14 @@ private:
 };
 
 //! \brief Calculates flux between two regular bulk cells
-class RegularFlux : public ConditionActionFlux1::Action3D
+class RegularFlux3D : public ConditionActionFlux1::Action3D
 {
 public:
 
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit RegularFlux(const RiemannSolver& rs);
+	explicit RegularFlux3D(const RiemannSolver& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -102,14 +102,14 @@ private:
 };
 
 //! \brief Calculates flux assuming rigid wall boundary conditions
-class RigidWallFlux : public ConditionActionFlux1::Action3D
+class RigidWallFlux3D : public ConditionActionFlux1::Action3D
 {
 public:
 
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit RigidWallFlux(const RiemannSolver& rs);
+	explicit RigidWallFlux3D(const RiemannSolver& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -121,14 +121,14 @@ private:
 };
 
 //! \brief Estimate flux assuming free flow boundary conditions
-class FreeFlowFlux : public ConditionActionFlux1::Action3D
+class FreeFlowFlux3D : public ConditionActionFlux1::Action3D
 {
 public:
 
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit FreeFlowFlux(const RiemannSolver& rs);
+	explicit FreeFlowFlux3D(const RiemannSolver& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -140,36 +140,36 @@ private:
 };
 
 //! \brief Checks if a certain face is a boundary face
-class IsBoundaryFace : public ConditionActionFlux1::Condition3D
+class IsBoundaryFace3D : public ConditionActionFlux1::Condition3D
 {
 public:
 
-	IsBoundaryFace(void);
+	IsBoundaryFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const;
 };
 
 //! \brief Check if an interface is inside the domain
-class IsBulkFace : public ConditionActionFlux1::Condition3D
+class IsBulkFace3D : public ConditionActionFlux1::Condition3D
 {
 public:
 
-	IsBulkFace(void);
+	IsBulkFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const;
 };
 
 //! \brief Determines if the interface is between a regular and a special cell
-class RegularSpecialEdge : public ConditionActionFlux1::Condition3D
+class RegularSpecialEdge3D : public ConditionActionFlux1::Condition3D
 {
 public:
 
 	/*! \brief Class constructor
 	\param sticker_name Sticker name
 	*/
-	explicit RegularSpecialEdge(const string& sticker_name);
+	explicit RegularSpecialEdge3D(const string& sticker_name);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const;

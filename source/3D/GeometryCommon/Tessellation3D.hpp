@@ -143,8 +143,7 @@ public:
 
 	virtual vector<size_t> const& GetSelfIndex(void) const = 0;
 
-	virtual vector<size_t> const& GetSelfDuplicate(void)const = 0;
-		/*!
+	/*!
 	\brief Returns the total number of points (including ghost)
 	\return The total number of points
 	*/

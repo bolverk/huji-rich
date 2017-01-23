@@ -8,17 +8,12 @@
 
 #include <vector>
 #include <cmath>
-#ifdef RICH_MPI
 #include "../../misc/serializable.hpp"
-#endif // RICH_MPI
 
 using std::vector;
 
 //! \brief 3D Mathematical vector
-class Vector3D
-#ifdef RICH_MPI
-	: public Serializable
-#endif // RICH_MPI
+class Vector3D : public Serializable
 {
 public:
 
@@ -104,27 +99,11 @@ public:
 	*/
 	void Round();
 
-#ifdef RICH_MPI
-	/*! \brief Serializer
-	\param ar Archiver
-	\param int Version
-	*/
-	template<class Archive>
-	void serialize
-		(Archive& ar,
-			const unsigned int /*version*/)
-	{
-		ar & x;
-		ar & y;
-	}
-
+	size_t getChunkSize(void) const;
+	
 	vector<double> serialize(void) const;
 
-	size_t getChunkSize(void) const;
-
-	void unserialize
-		(const vector<double>& data);
-#endif // RICH_MPI
+	void unserialize(const vector<double>& data);
 };
 
 /*! \brief Norm of a vector
@@ -194,7 +173,7 @@ double Projection(Vector3D const& v1, Vector3D const& v2);
 \param a  (in radians)
 \return Rotated vector
 */
-Vector3D RotateX(Vector3D const& v, double a);
+Vector3D RotateX(Vector3D const& v, double a );
 
 /*! \brief Rotates a 3D-vector around the Y axis
 \param v Vector

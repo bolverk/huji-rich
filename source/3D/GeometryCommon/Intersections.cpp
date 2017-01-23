@@ -6,8 +6,8 @@ namespace
 	bool PointInPolygon(Face const& face, Vector3D const& point)
 	{
 		Vector3D normal = CrossProduct(face.vertices[0] - point, face.vertices[1] - point);
-		size_t Nloop = face.vertices.size() - 1;
-		for (size_t i = 0; i < Nloop; ++i)
+		std::size_t Nloop = face.vertices.size() - 1;
+		for (std::size_t i = 0; i < Nloop; ++i)
 			if (ScalarProd(CrossProduct(face.vertices[i + 1] - point, face.vertices[(i + 2) % (Nloop + 1)] - point),
 				normal) < 0)
 				return false;
@@ -58,11 +58,11 @@ bool FaceSphereIntersections(Face const& face, Sphere const& sphere)
 	circle_center.x = sphere.center.x - (ScalarProd(normal, sphere.center) + D)*normal.x;
 	circle_center.y = sphere.center.y - (ScalarProd(normal, sphere.center) + D)*normal.y;
 	circle_center.z = sphere.center.z - (ScalarProd(normal, sphere.center) + D)*normal.z;
-	size_t Nloop = face.vertices.size();
+	std::size_t Nloop = face.vertices.size();
 	double R = sqrt(sphere.radius*sphere.radius - d*d);
 	if (PointInPolygon(face, circle_center))
 		return true;
-	for (size_t i = 0; i < Nloop; ++i)
+	for (std::size_t i = 0; i < Nloop; ++i)
 	{
 		if (CircleSegmentIntersect(face.vertices[(i + 1) % Nloop], face.vertices[i], circle_center, R))
 			return true;

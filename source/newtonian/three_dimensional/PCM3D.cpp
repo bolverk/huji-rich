@@ -15,11 +15,17 @@ void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCel
 		if (n0 < Npoints)
 			res[i].first = cells[n0];
 		else
-			res[i].first = ghosts.at(n0);
+			if (ghosts.find(n0) == ghosts.end())
+				res[i].first = cells.at(n0);
+			else
+				res[i].first = ghosts.at(n0);
 		size_t n1 = tess.GetFaceNeighbors(i).second;
 		if (n1 < Npoints)
 			res[i].second = cells[n1];
 		else
-			res[i].second = ghosts.at(n1);
+			if (ghosts.find(n1) == ghosts.end())
+				res[i].first = cells.at(n1);
+			else
+				res[i].first = ghosts.at(n1);
 	}
 }

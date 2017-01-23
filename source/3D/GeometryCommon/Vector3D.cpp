@@ -4,8 +4,6 @@
 
 #define EPSILON 1e-12
 
-using namespace std;
-
 namespace
 {
 	static inline double my_round(double val)
@@ -55,6 +53,28 @@ x(ix), y(iy), z(iz) {}
 Vector3D::Vector3D(const Vector3D& v) :
 x(v.x), y(v.y), z(v.z) {}
 
+size_t Vector3D::getChunkSize(void) const
+{
+	return 3;
+}
+
+vector<double> Vector3D::serialize(void) const
+{
+	vector<double> res(3);
+	res[0] = x;
+	res[1] = y;
+	res[2] = z;
+	return res;
+}
+
+void Vector3D::unserialize(const vector<double>& data)
+{
+	assert(data.size() == 3);
+	x = data[0];
+	y = data[1];
+	z = data[2];
+}
+
 void Vector3D::Set(double ix, double iy, double iz)
 {
 	x = ix;
@@ -100,7 +120,7 @@ Vector3D& Vector3D::operator-=(Vector3D const& v)
 // if their coordinates agree up to precision EPSILON
 bool Vector3D::operator==(Vector3D const& v)
 {
-	return (abs(x - v.x) < EPSILON) && (abs(y - v.y) < EPSILON) && (abs(z - v.z) < EPSILON);
+	return (std::abs(x - v.x) < EPSILON) && (std::abs(y - v.y) < EPSILON) && (std::abs(z - v.z) < EPSILON);
 }
 
 void Vector3D::RotateX(double a)
@@ -139,32 +159,6 @@ void Vector3D::Round()
 	y = my_round(y);
 	z = my_round(z);
 }
-
-#ifdef RICH_MPI
-size_t Vector3D::getChunkSize(void) const
-{
-	return 3;
-}
-
-vector<double> Vector3D::serialize(void) const
-{
-	vector<double> res(3, 0);
-	res.at(0) = x;
-	res.at(1) = y;
-	res.at(2) = z;
-	return res;
-}
-
-void Vector3D::unserialize
-(const vector<double>& data)
-{
-	assert(data.size() == getChunkSize());
-	x = data.at(0);
-	y = data.at(1);
-	z = data.at(2);
-}
-#endif // RICH_MPI
-
 
 Vector3D operator+(Vector3D const& v1, Vector3D const& v2)
 {
@@ -251,7 +245,7 @@ void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & v
 	vY.resize(vIn.size());
 	vZ.resize(vIn.size());
 
-	for (size_t ii = 0; ii < vIn.size(); ++ii)
+	for (std::size_t ii = 0; ii < vIn.size(); ++ii)
 	{
 		vX[ii] = vIn[ii].x;
 		vY[ii] = vIn[ii].y;

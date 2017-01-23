@@ -3,10 +3,10 @@
 
 using namespace H5;
 
-Snapshot::Snapshot(void) :
+Snapshot3D::Snapshot3D(void) :
 	mesh_points(){}
 
-Snapshot::Snapshot(const Snapshot& source) :
+Snapshot3D::Snapshot3D(const Snapshot3D& source) :
 	mesh_points(source.mesh_points){}
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)

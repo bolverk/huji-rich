@@ -10,52 +10,62 @@ class Conserved3D
 {
 public:
 
-  //! \brief Mass
-  double mass;
+	//! \brief Mass
+	double mass;
 
-  //! \brief Momentum
-  Vector3D momentum;
+	//! \brief Momentum
+	Vector3D momentum;
 
-  //! \brief Energy
-  double energy;
+	//! \brief Energy
+	double energy;
 
-  //! \brief Tracers
-  vector<double> tracers;
+	//! \brief Tracers
+	vector<double> tracers;
 
-  //! \brief Class constructor (sets everything to zero)
-  Conserved3D(void);
+	//! \brief Class constructor (sets everything to zero)
+	Conserved3D(void);
 
-  /*! \brief Class constructor (does not initialize tracers)
-    \param mass_i Mass
-    \param momentum_i Momentum
-    \param energy_i Energy
-   */
-  Conserved3D(double mass_i,
-	      const Vector3D& momentum_i,
-	      double energy_i);
+	/*! \brief Class constructor (does not initialize tracers)
+	  \param mass_i Mass
+	  \param momentum_i Momentum
+	  \param energy_i Energy
+	 */
+	Conserved3D(double mass_i,
+		const Vector3D& momentum_i,
+		double energy_i);
 
-  /*! \brief Class constructor
-    \param mass_i Mass
-    \param momentum_i Momentum
-    \param energy_i Energy
-    \param tracers_i Tracers
-   */
-  Conserved3D(double mass_i,
-	      const Vector3D& momentum_i,
-	      double energy_i,
-	      const vector<double>& tracers_i);
+	/*! \brief Class constructor
+	  \param mass_i Mass
+	  \param momentum_i Momentum
+	  \param energy_i Energy
+	  \param tracers_i Tracers
+	 */
+	Conserved3D(double mass_i,
+		const Vector3D& momentum_i,
+		double energy_i,
+		const vector<double>& tracers_i);
 
-  /*! \brief Reduction operator
-    \param diff Difference
-    \return Reference to self
-   */
-  Conserved3D& operator-=(const Conserved3D& diff);
+	/*! \brief Reduction operator
+	  \param diff Difference
+	  \return Reference to self
+	 */
+	Conserved3D& operator-=(const Conserved3D& diff);
 
-  /*! \brief Addition operator
-    \param diff Difference
-    \return Reference to self
-   */
-  Conserved3D& operator+=(const Conserved3D& diff);
+	/*! \brief Addition operator
+	  \param diff Difference
+	  \return Reference to self
+	 */
+	Conserved3D& operator+=(const Conserved3D& diff);
+
+#ifdef RICH_MPI
+	size_t getChunkSize(void) const;
+
+	vector<double> serialize(void) const;
+
+	void unserialize
+	(const vector<double>& data);
+#endif // RICH_MPI
+
 };
 
 /*! \brief Scalar product operator
@@ -70,7 +80,7 @@ Conserved3D operator*(double s, const Conserved3D& c);
 \param c Conserved variable
 \return Product of scalar with conserved
 */
-Conserved3D operator*(const Conserved3D& c,double s);
+Conserved3D operator*(const Conserved3D& c, double s);
 
 /*! \brief Scalar division operator
   \param c Conserved variable
@@ -85,6 +95,6 @@ Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2);
 
 
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res,
-	EquationOfState const& eos,TracerStickerNames const& tsn);
+	EquationOfState const& eos, TracerStickerNames const& tsn);
 
 #endif // CONSERVED_3D_HPP

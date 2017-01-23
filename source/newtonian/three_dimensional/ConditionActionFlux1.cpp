@@ -49,7 +49,7 @@ ConditionActionFlux1::Condition3D::~Condition3D(void) {}
 
 ConditionActionFlux1::Action3D::~Action3D(void) {}
 
-RegularFlux::RegularFlux(const RiemannSolver& rs) :
+RegularFlux3D::RegularFlux3D(const RiemannSolver& rs) :
 	rs_(rs) {}
 
 namespace
@@ -67,7 +67,7 @@ namespace
 	}
 }
 
-void RegularFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
+void RegularFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool /*aux*/, Conserved3D &res,
 	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
@@ -76,7 +76,7 @@ void RegularFlux::operator()(size_t face_index, const Tessellation3D& tess, cons
 	RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos, tracerstickernames);
 }
 
-RigidWallFlux::RigidWallFlux(const RiemannSolver& rs) : rs_(rs) {}
+RigidWallFlux3D::RigidWallFlux3D(const RiemannSolver& rs) : rs_(rs) {}
 
 namespace
 {
@@ -102,7 +102,7 @@ namespace
 	}
 }
 
-void RigidWallFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
+void RigidWallFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
 	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
@@ -113,9 +113,9 @@ void RigidWallFlux::operator()(size_t face_index, const Tessellation3D& tess, co
 	RotateSolveBack3D(normal, rigid_states.first, rigid_states.second, face_velocity, rs_, res, eos, tracerstickernames);
 }
 
-FreeFlowFlux::FreeFlowFlux(const RiemannSolver& rs) : rs_(rs) {}
+FreeFlowFlux3D::FreeFlowFlux3D(const RiemannSolver& rs) : rs_(rs) {}
 
-void FreeFlowFlux::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
+void FreeFlowFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
 	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
@@ -129,9 +129,9 @@ void FreeFlowFlux::operator()(size_t face_index, const Tessellation3D& tess, con
 	RotateSolveBack3D(normal, states.first, states.second, face_velocity, rs_, res, eos, tracerstickernames);
 }
 
-IsBoundaryFace::IsBoundaryFace(void) {}
+IsBoundaryFace3D::IsBoundaryFace3D(void) {}
 
-pair<bool, bool> IsBoundaryFace::operator()(size_t face_index, const Tessellation3D& tess,
+pair<bool, bool> IsBoundaryFace3D::operator()(size_t face_index, const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	if (!tess.BoundaryFace(face_index))
@@ -142,9 +142,9 @@ pair<bool, bool> IsBoundaryFace::operator()(size_t face_index, const Tessellatio
 		return pair<bool, bool>(true, true);
 }
 
-IsBulkFace::IsBulkFace(void) {}
+IsBulkFace3D::IsBulkFace3D(void) {}
 
-pair<bool, bool> IsBulkFace::operator()(size_t face_index, const Tessellation3D& tess,
+pair<bool, bool> IsBulkFace3D::operator()(size_t face_index, const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/)const
 {
 	if (tess.BoundaryFace(face_index))
@@ -153,10 +153,10 @@ pair<bool, bool> IsBulkFace::operator()(size_t face_index, const Tessellation3D&
 		return pair<bool, bool>(true, false);
 }
 
-RegularSpecialEdge::RegularSpecialEdge(const string& sticker_name) :
+RegularSpecialEdge3D::RegularSpecialEdge3D(const string& sticker_name) :
 	sticker_name_(sticker_name) {}
 
-pair<bool, bool> RegularSpecialEdge::operator()(size_t face_index, const Tessellation3D& tess,
+pair<bool, bool> RegularSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const
 {
 	if (safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers, tracerstickernames.sticker_names,
