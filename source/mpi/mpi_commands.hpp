@@ -292,6 +292,8 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 
 vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<double> > &tosend);
 
+vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > &tosend);
+
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
 
