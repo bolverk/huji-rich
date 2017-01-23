@@ -117,9 +117,9 @@ vector<double> Slope3D::serialize(void) const
 	res.reserve(temp.size() * 3);
 	std::copy(temp.begin(), temp.end(), res.begin());
 	temp = yderivative.serialize();
-	std::copy(temp.begin(), temp.end(), res.begin() + yderivative.getChunkSize());
+	std::copy(temp.begin(), temp.end(), res.begin() + xderivative.getChunkSize());
 	temp = zderivative.serialize();
-	std::copy(temp.begin(), temp.end(), res.begin() + zderivative.getChunkSize());
+	std::copy(temp.begin(), temp.end(), res.begin() + xderivative.getChunkSize() + yderivative.getChunkSize());
 	return res;
 }
 

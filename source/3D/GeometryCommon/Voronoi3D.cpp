@@ -553,10 +553,11 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 	vector<vector<Vector3D> > toadd = MPI_exchange_data(duplicatedprocs_, to_send, del_.points_);
 	// Add points
 	Nghost_.resize(toadd.size());
+	size_t temp_add = del_.points_.size();
 	for (std::size_t i = 0; i < toadd.size(); ++i)
 		for (std::size_t j = 0; j < toadd[i].size(); ++j)
 		{
-			Nghost_[i].push_back(Norg_ + 4 + res.size());
+			Nghost_[i].push_back(temp_add + res.size());
 			res.push_back(toadd[i][j]);
 		}
 	return res;
