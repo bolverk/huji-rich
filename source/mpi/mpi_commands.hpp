@@ -290,6 +290,7 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 	return torecv;
 }
 
+vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<double> > &tosend);
 
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
