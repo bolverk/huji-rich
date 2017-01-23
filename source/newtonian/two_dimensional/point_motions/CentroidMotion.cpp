@@ -4,6 +4,7 @@
 #include "../../../tessellation/VoronoiMesh.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
+#include "../../../mpi/mpi_commands.hpp"
 #endif
 
 namespace
@@ -135,13 +136,15 @@ namespace
 	}
 	
 	Vector2D GetCorrectedVelociy(Vector2D const& cm,Vector2D const& meshpoint,Vector2D const& w,
-		double dt,double reduce_factor,double R,EquationOfState const& eos,ComputationalCell const& cell)
+		double dt,double reduce_factor,double R,EquationOfState const& eos,ComputationalCell const& cell,TracerStickerNames
+		const &tsn)
 	{
 		Vector2D temp = cm - meshpoint - dt*w;
 		if(abs(temp)<1e-6*R)
 			return (cm - meshpoint) / dt;
 		const double distance_reduce = std::min(abs(temp) / R,1.0);
-		const double toadd_velocity = reduce_factor*distance_reduce * std::max(abs(w), eos.dp2c(cell.density, cell.pressure));
+		const double toadd_velocity = reduce_factor*distance_reduce * std::max(abs(w), 
+			eos.dp2c(cell.density, cell.pressure,cell.tracers,tsn.tracer_names));
 		return (w + temp*(toadd_velocity / abs(temp)));
 	}
 
@@ -230,9 +233,12 @@ namespace
 					tess.GetWidth(static_cast<int>(i)),chull2);
 				Vector2D cm = GetCM(chull2, tess.GetMeshPoint(static_cast<int>(i)) + cur_w[i] * dt);
 				res[i] = GetCorrectedVelociy(cm, tess.GetMeshPoint(static_cast<int>(i)), w[i], dt, reduce_factor,
-					tess.GetWidth(static_cast<int>(i)),eos,cells[i]);
+					tess.GetWidth(static_cast<int>(i)),eos,cells[i],tracerstickernames);
 			}
 			cur_w = res;
+#ifdef RICH_MPI
+			MPI_exchange_data(tess, cur_w, true);
+#endif
 		}
 		vector<int> edges = GetBoundaryEdges(tess);
 		SlowNearBoundary(res, edges, tess, dt);

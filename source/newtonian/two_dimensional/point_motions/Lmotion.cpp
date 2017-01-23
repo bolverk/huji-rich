@@ -1,5 +1,6 @@
 #include "Lmotion.hpp"
 #include "../simple_flux_calculator.hpp"
+#include "../../../misc/utils.hpp"
 #ifdef RICH_MPI
 #include "../../../mpi/mpi_commands.hpp"
 #endif //RICH_MPI
@@ -24,13 +25,27 @@ namespace
 	}
 }
 
-LMotion::LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc) :interp_(interp), eos_(eos),
-	evc_(evc){}
+LMotion::LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc,
+	vector<string> skip_keys) :interp_(interp), eos_(eos),evc_(evc),skip_key_(skip_keys){}
+
+namespace
+{
+	bool CheckSkip(vector<size_t> const& skip_indeces, Edge const& edge,vector<ComputationalCell> const& cells)
+	{
+		if (skip_indeces.empty())
+			return false;
+		for (size_t i = 0; i < skip_indeces.size(); ++i)
+			if (cells[static_cast<size_t>(edge.neighbors.first)].stickers[skip_indeces[i]]||
+				cells[static_cast<size_t>(edge.neighbors.second)].stickers[skip_indeces[i]])
+				return true;
+		return false;
+	}
+}
 
 vector<Vector2D> LMotion::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 double time, TracerStickerNames const& tracerstickernames) const
 {
-  size_t N = static_cast<size_t>(tess.GetPointNo());
+	size_t N = tess.GetPointNo();
 	size_t Niter = 10;
 	vector<Vector2D> res(N,Vector2D(0,0));
 	vector<std::pair<ComputationalCell, ComputationalCell> > edge_values;
@@ -43,6 +58,17 @@ double time, TracerStickerNames const& tracerstickernames) const
 	interp_(tess, cells, time, edge_values, tracerstickernames, cd);
 	size_t Nedges=edge_values.size();
 	vector<double> ws(Nedges, 0),edge_length(Nedges),density_ratios(Nedges,0);
+	vector<size_t> skip_indeces;
+	for (size_t i = 0; i < skip_key_.size(); ++i)
+	{
+		size_t loc = static_cast<size_t>(binary_find(tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), 
+			skip_key_[i]) - tracerstickernames.sticker_names.begin());
+		if (loc >= tracerstickernames.sticker_names.size())
+			throw("Can not find skip key");
+		skip_indeces.push_back(loc);
+	}
+
+
 #ifdef RICH_MPI
 	MPI_exchange_data(tess, res, true);
 #endif
@@ -60,18 +86,20 @@ double time, TracerStickerNames const& tracerstickernames) const
 		left.Velocity = Vector2D(ScalarProd(left.Velocity, normals[j]), ScalarProd(left.Velocity, p));
 		right.Velocity = Vector2D(ScalarProd(right.Velocity, normals[j]), ScalarProd(right.Velocity, p));
 		ws[j] = GetWs(left,right);
-		if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
+		if ((tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))||
+			CheckSkip(skip_indeces,edge,cells))
 		{
 			to_calc[j] = false;
-			continue;
+			density_ratios[j] = 1;
 		}
-		density_ratios[j]=cells[static_cast<size_t>(edge.neighbors.first)].density /
-			cells[static_cast<size_t>(edge.neighbors.second)].density;
+		else
+			density_ratios[j]=cells[static_cast<size_t>(edge.neighbors.first)].density /
+				cells[static_cast<size_t>(edge.neighbors.second)].density;
 		density_ratios[j] = std::max(density_ratios[j], 1.0 / density_ratios[j]);
 		if (edge.neighbors.first < static_cast<int>(N))
-		  CellLength[static_cast<size_t>(edge.neighbors.first)] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
+			CellLength[edge.neighbors.first] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
 		if (edge.neighbors.second < static_cast<int>(N))
-		  CellLength[static_cast<size_t>(edge.neighbors.second)] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
+			CellLength[edge.neighbors.second] += (density_ratios[j] * edge_length[j])*Vector2D(std::abs(p.y), std::abs(p.x));
 	}
 	for (size_t i = 0; i < N; ++i)
 		res[i] = cells[i].velocity;
@@ -94,13 +122,13 @@ double time, TracerStickerNames const& tracerstickernames) const
 			Edge const& edge = tess.GetEdge(static_cast<int>(j));
 			if (edge.neighbors.first < static_cast<int>(N))
 			{
-			  temp[static_cast<size_t>(edge.neighbors.first)] += (density_ratio*l*cur_ws) * normals[j];
+				temp[edge.neighbors.first] += (density_ratio*l*cur_ws) * normals[j];
 				//CellLength[edge.neighbors.first] += density_ratio*l;
 				//CellLength[edge.neighbors.first] += density_ratio*l*Vector2D(std::abs(p.x),std::abs(p.y));
 			}
 			if (edge.neighbors.second < static_cast<int>(N))
 			{
-			  temp[static_cast<size_t>(edge.neighbors.second)] += (density_ratio*l*cur_ws) * normals[j];
+				temp[edge.neighbors.second] += (density_ratio*l*cur_ws) * normals[j];
 				//CellLength[edge.neighbors.second] += density_ratio*l;
 				//CellLength[edge.neighbors.second] += density_ratio*l*Vector2D(std::abs(p.x), std::abs(p.y));
 			}

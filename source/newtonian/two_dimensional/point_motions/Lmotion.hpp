@@ -11,8 +11,10 @@ private:
 	LinearGaussImproved const& interp_;
 	EquationOfState const& eos_;
 	EdgeVelocityCalculator const& evc_;
+	vector<string> const skip_key_;
 public: 
-	LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc);
+	LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc,
+		vector<string> skip_keys=vector<string>());
 	
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 	double time, TracerStickerNames const& tracerstickernames) const;
