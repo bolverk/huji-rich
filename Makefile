@@ -60,7 +60,7 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libtetgen.a
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a 
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_59_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
@@ -86,18 +86,6 @@ external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hp
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
 	
-external_libraries/include/tetgen.h:
-	mkdir -p external_libraries/dump_tetgen
-
-external_libraries/dump_tetgen/predicates.o:
-	cd external_libraries/dump_tetgen && g++ -c -O3 predicates.cxx -o predicates.o
-	
-external_libraries/dump_tetgen/tetgen.o: external_libraries/dump_tetgen/predicates.o
-	cd external_libraries/dump_tetgen && g++ -c -O3 tetgen.cxx predicates.o -o tetgen.o
-	
-external_libraries/lib/libtetgen.a: external_libraries/dump_tetgen/tetgen.o
-	ar cr $@ $^ 
-
 external_libraries/hdf5_dump/hdf5-1.8.17/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.17.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.17.tar.gz
 
