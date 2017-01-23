@@ -28,4 +28,18 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points,Vector3D const& ll,V
 		   Tessellation3D const* tproc=0,
 	#endif
 	Tessellation3D *tess=0);
+
+#ifdef RICH_MPI
+/*!
+\brief Makes the cells rounder
+\param points The initial points
+\param ll The lower left corner of the domain
+\param ur The upper right corner of the domain
+\param NumberIt The number of correction iterations
+\return The points that give a rounder tessellation
+*/
+vector<Vector3D> RoundGrid3DSingle(vector<Vector3D> const& points, Vector3D const& ll, Vector3D const& ur,
+	size_t NumberIt = 10);
+#endif
+
 #endif //ROUNDGRID3D

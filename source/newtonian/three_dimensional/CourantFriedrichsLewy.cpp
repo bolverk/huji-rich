@@ -1,6 +1,9 @@
 #include "CourantFriedrichsLewy.hpp"
 #include "../../misc/utils.hpp"
 #include "../../misc/lazy_list.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 
 CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl):
 cfl_(cfl)
@@ -50,5 +53,9 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 	const EquationOfState& eos,const vector<Vector3D>& face_velocities, const double /*time*/,
 	TracerStickerNames const& tracerstickernames) const
 {
-	return cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos,face_velocities,tracerstickernames));
+	double res = cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos,face_velocities,tracerstickernames));
+#ifdef RICH_MPI
+	MPI_Allreduce(&res, &res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+#endif
+	return res;
 }

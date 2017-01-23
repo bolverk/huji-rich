@@ -419,7 +419,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 Voronoi3D::Voronoi3D()
 {}
 
-Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur) {}
+Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur),Norg_(0) {}
 
 void Voronoi3D::CalcRigidCM(std::size_t face_index)
 {
