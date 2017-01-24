@@ -14,6 +14,13 @@ else ifeq ($(MODE),intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper 
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),intel_parallel)
+	PREXECUTE := mpirun -np $(NUM_PROCESSES)
+	CC := mpiCC
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
+	LINT_FLAGS := 
+	LFLAGS := -lclipper 
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
@@ -23,7 +30,7 @@ else ifeq ($(MODE),parallel)
 else ifeq ($(MODE),parallel_profile)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg
+	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg -O3
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper 
 else ifeq ($(MODE),debug_parallel)

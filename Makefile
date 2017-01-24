@@ -22,7 +22,12 @@ else ifeq ($(MODE),debug_parallel)
 	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
 	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise 
+	LINT_FLAGS := 
+	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),intel_parallel)
+	CC := mpiCC
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
