@@ -5,13 +5,12 @@
 #include "Tetrahedron.hpp"
 #include <string>
 #include <vector>
-#include <stack>
 #include <set>
 
 
 using std::vector;
 using std::string;
-using std::stack;
+//using std::stack;
 
 class Delaunay3D
 {
@@ -52,7 +51,7 @@ private:
 	boost::array<Vector3D, 5> b5_temp_;
 	boost::array<std::size_t, 4> b4s_temp_,b4s_temp2_;
 	boost::array<std::size_t, 8> b8s_temp_;
-	stack<std::size_t> to_check_;
+	vector<std::size_t> to_check_;
 	std::size_t last_checked_;
 };
 

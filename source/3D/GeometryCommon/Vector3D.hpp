@@ -50,6 +50,7 @@ public:
 	//! \brief Component in the z direction
 	double z;
 
+	double tedummymp;
 	/*! \brief Addition
 	\param v Vector to be added
 	\return Reference to sum
