@@ -37,7 +37,8 @@ private:
 		vector<Vector3D> const& points, vector<std::size_t> &selfindex, vector<int> &sentproc,
 		vector<vector<std::size_t> > &sentpoints);
 #endif
-	vector<std::size_t>  FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere);
+	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
+		vector<size_t> &intersecting_faces);
 	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point, Sphere &sphere, bool recursive);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res);

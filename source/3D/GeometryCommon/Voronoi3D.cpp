@@ -651,19 +651,20 @@ void Voronoi3D::CalcAllCM(void)
 		{
 			tetra[1] = tetra_centers_[PointsInFace_[i][j + 1]];
 			tetra[2] = tetra_centers_[PointsInFace_[i][j + 2]];
+			double vol = 0;
 			if (N0 < Norg_)
 			{
 				tetra[3] = del_.points_[N0];
-				double vol = GetTetraVolume(tetra);
-				CM_[N0] += std::abs(vol)*GetTetraCM(tetra);
-				volume_[N0] += std::abs(vol);
+				vol = std::abs(GetTetraVolume(tetra));
+				volume_[N0] += vol;
+				CM_[N0] += vol*GetTetraCM(tetra);
 			}
 			if (N1 < Norg_)
 			{
 				tetra[3] = del_.points_[N1];
-				double vol = GetTetraVolume(tetra);
-				CM_[N1] += std::abs(vol)*GetTetraCM(tetra);
-				volume_[N1] += std::abs(vol);
+				vol = std::abs(GetTetraVolume(tetra));
+				volume_[N1] += vol;
+				CM_[N1] += vol*GetTetraCM(tetra);
 			}
 		}
 	}
@@ -807,11 +808,11 @@ double Voronoi3D::GetMaxRadius(std::size_t index)
 	return 2 * res;
 }
 
-vector<std::size_t>  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere)
+void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
+	vector<size_t> &intersecting_faces)
 {
+	intersecting_faces.clear();
 	std::size_t N = PointTetras_[point].size();
-	vector<std::size_t> res;
-	res.reserve(4);
 	for (std::size_t j = 0; j < box.size(); ++j)
 	{
 		for (std::size_t i = 0; i < N; ++i)
@@ -820,12 +821,11 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box,
 			sphere.center = tetra_centers_[PointTetras_[point][i]];
 			if (FaceSphereIntersections(box[j], sphere))
 			{
-				res.push_back(j);
+				intersecting_faces.push_back(j);
 				break;
 			}
 		}
 	}
-	return res;
 }
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
@@ -950,6 +950,15 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 
 vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections()
 {
+	if (Norg_ < 50)
+	{
+		vector<std::pair<std::size_t, std::size_t> > res;
+		res.reserve(Norg_ * 6);
+		for (size_t i = 0; i < Norg_; ++i)
+			for (size_t j = 0; j < 6; ++j)
+				res.push_back(std::pair<std::size_t, std::size_t>(j, i));
+		return res;
+	}
 	vector<Face> box = BuildBox(ll_, ur_);
 	std::size_t cur_loc = GetFirstPointToCheck();
 	std::stack<std::size_t > check_stack;
@@ -959,6 +968,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 	Sphere sphere;
 	vector<bool> checked(Norg_, false), will_check(Norg_, false);
 	will_check[cur_loc] = true;
+	vector<size_t> intersecting_faces;
 	while (!check_stack.empty())
 	{
 		cur_loc = check_stack.top();
@@ -966,7 +976,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 		checked[cur_loc] = true;
 		// Does sphere have any intersections?
 		bool added = false;
-		vector<std::size_t> intersecting_faces = FindIntersectionsSingle(box, cur_loc, sphere);
+		FindIntersectionsSingle(box, cur_loc, sphere, intersecting_faces);
 		if (!intersecting_faces.empty())
 		{
 			added = true;
@@ -1024,7 +1034,8 @@ Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
 {
 	Vector3D res;
 	for (std::size_t i = 0; i < 4; ++i)
-		res += 0.25*points[i];
+		res += points[i];
+	res *= 0.25;
 	return res;
 }
 
