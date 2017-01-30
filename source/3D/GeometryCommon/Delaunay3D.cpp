@@ -571,10 +571,10 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 	}
 }
 
-void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p)
+void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p,size_t p_loc,size_t other_point_loc)
 {
-	std::size_t p_loc = GetPointLocationInTetra(tetras_[tetra0], p);
-	std::size_t other_point_loc = GetOppositePoint(tetras_[tetra1], tetra0);
+	//std::size_t p_loc = GetPointLocationInTetra(tetras_[tetra0], p);
+	//std::size_t other_point_loc = GetOppositePoint(tetras_[tetra1], tetra0);
 	for (std::size_t i = 0; i < 3;++i)
 		b3_temp_[i] = points_[tetras_[tetra0].points[(p_loc + i + 1) % 4]];
 	Vector3D intersection = PlaneLineIntersection(b3_temp_, points_[p], 
@@ -612,7 +612,8 @@ void Delaunay3D::InsertPoint(std::size_t index)
 	{
 		std::size_t cur_check = to_check_.back();
 		to_check_.pop_back();
-		std::size_t to_flip = tetras_[cur_check].neighbors[GetPointLocationInTetra(tetras_[cur_check], index)];
+		size_t p_loc = GetPointLocationInTetra(tetras_[cur_check], index);
+		std::size_t to_flip = tetras_[cur_check].neighbors[p_loc];
 		if (to_flip == outside_neighbor_ || (empty_tetras_.find(cur_check) != empty_tetras_.end()))
 			continue;
 		/// check here that we have correct sign for insphere test !!
@@ -620,10 +621,11 @@ void Delaunay3D::InsertPoint(std::size_t index)
 		b5_temp_[1] = points_[tetras_[cur_check].points[1]];
 		b5_temp_[2] = points_[tetras_[cur_check].points[2]];
 		b5_temp_[3] = points_[tetras_[cur_check].points[3]];
-		b5_temp_[4] = points_[tetras_[to_flip].points[GetOppositePoint(tetras_[to_flip], cur_check)]];
-		if (insphere(b5_temp_) < 0)
+		size_t other_point_loc = GetOppositePoint(tetras_[to_flip], cur_check);
+		b5_temp_[4] = points_[tetras_[to_flip].points[other_point_loc]];
+		if (insphere(b5_temp_) < -0)
 		{
-			FindFlip(cur_check, to_flip,index);
+			FindFlip(cur_check, to_flip,index,p_loc,other_point_loc);
 		}
 	}
 }

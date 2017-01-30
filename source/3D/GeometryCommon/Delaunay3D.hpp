@@ -42,7 +42,7 @@ private:
 	void flip23(std::size_t tetra0, std::size_t tetra1,std::size_t location0);
 	void flip32(std::size_t tetra0, std::size_t tetra1, std::size_t location0, std::size_t shared_loction);
 	void flip44(std::size_t tetra0, std::size_t tetra1, std::size_t location0, std::size_t neigh0, std::size_t neigh1);
-	void FindFlip(std::size_t tetrao, std::size_t tetra1, std::size_t p);
+	void FindFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p, size_t p_loc, size_t other_point_loc);
 	void ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p);
 	std::size_t FindThirdNeighbor(std::size_t tetra0, std::size_t tetra1);
 

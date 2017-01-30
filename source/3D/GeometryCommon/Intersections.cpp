@@ -45,8 +45,10 @@ namespace
 bool FaceSphereIntersections(Face const& face, Sphere const& sphere)
 {	
 	// Find plane equation
-	Vector3D v1 = face.vertices[1] - face.vertices[0];
-	Vector3D v2 = face.vertices[2] - face.vertices[0];
+	Vector3D v1 = face.vertices[1];
+	v1-=face.vertices[0];
+	Vector3D v2 = face.vertices[2];
+	v2-=face.vertices[0];
 	Vector3D normal = CrossProduct(v1, v2);
 	double D = -ScalarProd(normal, face.vertices[0])/sqrt(ScalarProd(normal,normal));
 	

@@ -181,9 +181,12 @@ namespace
 		Vector3D V2 = face_points[indeces.back()] - face_points[indeces[0]];
 		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) < 0)
 		{
-			temp = indeces;
-			for (size_t i = 0; i < temp.size(); ++i)
-				indeces[i] = temp[temp.size() - i - 1];
+			temp.resize(indeces.size());
+			temp.assign(indeces.begin(), indeces.end());
+			//temp = indeces;
+			int N = static_cast<int>(temp.size());
+			for (int i = 0; i < N; ++i)
+				indeces[static_cast<size_t>(i)] = temp[static_cast<size_t>(N - i - 1)];
 		}
 	}
 
@@ -191,9 +194,13 @@ namespace
 	{
 		for (size_t i = 0; i < 4; ++i)
 		{
-			if (cur_tetra.points[i] != N0&&cur_tetra.points[i] != N1)
-				if (cur_tetra.neighbors[i] != last_tetra)
-					return cur_tetra.neighbors[i];
+			size_t point = cur_tetra.points[i];
+			if (point != N0&& point != N1)
+			{
+				size_t neigh = cur_tetra.neighbors[i];
+				if (neigh != last_tetra)
+					return neigh;
+			}
 		}
 		assert(false);
 	}
@@ -576,7 +583,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	// Clear data
 	PointTetras_.clear();
 	R_.clear();
+	R_.reserve(points.size() * 7);
 	tetra_centers_.clear();
+	tetra_centers_.reserve(points.size() * 7);
 	del_.Clean();
 	// Voronoi Data
 	FacesInCell_.clear();
@@ -678,7 +687,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	// Clear data
 	PointTetras_.clear();
 	R_.clear();
+	R_.reserve(points.size() * 7);
 	tetra_centers_.clear();
+	tetra_centers_.reserve(points.size() * 7);
 	del_.Clean();
 	// Voronoi Data
 	FacesInCell_.clear();
@@ -720,13 +731,13 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 void Voronoi3D::BuildVoronoi(void)
 {
 	FacesInCell_.resize(Norg_);
-	PointTetras_.resize(Norg_);
+	area_.reserve(Norg_ * 10);
 	FaceNeighbors_.reserve(Norg_ * 10);
 	PointsInFace_.reserve(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
 	{
 		FacesInCell_[i].reserve(20);
-		PointTetras_[i].reserve(20);
+		//PointTetras_[i].reserve(20);
 	}
 	vector<size_t> temp, temp2;
 	// Build all voronoi points
@@ -775,14 +786,14 @@ void Voronoi3D::BuildVoronoi(void)
 						CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]));
 						if (temp2.size() < 3)
 							continue;
-						temp = temp2;
+						//temp = temp2;
 						FaceNeighbors_.push_back(std::pair<size_t, size_t>(N0, N1));
-						PointsInFace_.push_back(temp);
+						PointsInFace_.push_back(temp2);
 						FacesInCell_[N0].push_back(PointsInFace_.size() - 1);
 						if (N1 < Norg_)
 							FacesInCell_[N1].push_back(PointsInFace_.size() - 1);
 						// Make faces right handed
-						MakeRightHandFace(PointsInFace_.back(), del_.points_[N0], tetra_centers_, temp);
+						MakeRightHandFace(PointsInFace_.back(), del_.points_[N0], tetra_centers_, temp2);
 						area_.push_back(CalcFaceArea(PointsInFace_.back(), tetra_centers_));
 					}
 				}
@@ -1001,9 +1012,12 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 
 double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 {
-	Vector3D v2(del_.points_[del_.tetras_[index].points[1]] - del_.points_[del_.tetras_[index].points[0]]);
-	Vector3D v3(del_.points_[del_.tetras_[index].points[2]] - del_.points_[del_.tetras_[index].points[0]]);
-	Vector3D v4(del_.points_[del_.tetras_[index].points[3]] - del_.points_[del_.tetras_[index].points[0]]);
+	Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
+	v2-=del_.points_[del_.tetras_[index].points[0]];
+	Vector3D v3(del_.points_[del_.tetras_[index].points[2]]);
+	v3-=del_.points_[del_.tetras_[index].points[0]];
+	Vector3D v4(del_.points_[del_.tetras_[index].points[3]]);
+	v4-=del_.points_[del_.tetras_[index].points[0]];
 	Mat33<double> m_a(v2.x, v2.y, v2.z,
 		v3.x, v3.y, v3.z,
 		v4.x, v4.y, v4.z);
