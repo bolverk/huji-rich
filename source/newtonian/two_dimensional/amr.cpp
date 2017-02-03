@@ -812,6 +812,9 @@ void ConservativeAMR::UpdateCellsRefine
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, cd.volumes[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -924,7 +927,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 		{
 			size_t toadd = static_cast<size_t>(lower_bound(ToRemovepair.first.begin(), ToRemovepair.first.end(),
 				oldtess->GetOriginalIndex(mpi_check[i][j])) - ToRemovepair.first.begin());
-			ConvexHull(chull, tess, mpi_check[i][j]-toadd);
+			ConvexHull(chull, tess, mpi_check[i][j]-static_cast<int>(toadd));
 			const double v = AreaOverlap(chull, chulls_mpi[i], pg);
 			extensives[static_cast<size_t>(mpi_check[i][j])] += v*mpi_extensives[i];
 		}
@@ -935,6 +938,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	RemoveVector(cells, ToRemovepair.first);
 
 	N = static_cast<size_t>(tess.GetPointNo());
+	cells.resize(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < N; ++i)
 		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos,cd.volumes[i], cells[i],tracerstickernames);
 #ifdef RICH_MPI

@@ -659,6 +659,10 @@ void hdsim::recalculatePrimitives(void)
 {
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
 		cache_data_,tracer_sticker_names_);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
+
 }
 
 void hdsim::recalculateExtensives(void)
