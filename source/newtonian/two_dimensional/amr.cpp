@@ -1,6 +1,8 @@
 #include "amr.hpp"
 #include "../../tessellation/VoronoiMesh.hpp"
-
+#ifdef RICH_MPI
+#include "../../mpi/mpi_commands.hpp"
+#endif
 //#define debug_amr 1
 
 #ifdef debug_amr
@@ -57,6 +59,220 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 
 namespace
 {
+#ifdef RICH_MPI
+	Extensive Cell2Intensive(ComputationalCell const& cell,EquationOfState const& eos,
+		TracerStickerNames const& ts)
+	{
+		Extensive res;
+		const double mass = cell.density;
+		res.mass = mass;
+		res.energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, ts.tracer_names)*mass +
+			0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+		res.momentum = mass*cell.velocity;
+		size_t N = cell.tracers.size();
+		res.tracers.resize(N);
+		for (size_t j = 0; j < N; ++j)
+			res.tracers[j] = cell.tracers[j] * mass;
+		return res;
+	}
+
+	vector<vector<int> > GetSentIndeces(Tessellation const& tess, vector<size_t> const& ToRemove,vector<vector<size_t> > &
+		RemoveIndex)
+	{
+		RemoveIndex.clear();
+		vector<vector<int> > sentpoints = tess.GetDuplicatedPoints();
+		vector<vector<int> > sort_indeces(sentpoints.size());
+		vector<vector<int> > res(sentpoints.size());
+		RemoveIndex.resize(sentpoints.size());
+		int Nprocs = static_cast<int>(sentpoints.size());
+		// sort vectors for fast search
+		for (int i = 0; i < Nprocs; ++i)
+		{
+			sort_index(sentpoints[i], sort_indeces[i]);
+			sort(sentpoints[i].begin(), sentpoints[i].end());
+		}
+		// search the vectors
+		int Nremove = static_cast<int>(ToRemove.size());
+		for (int i = 0; i < Nremove; ++i)
+		{
+			for (int j = 0; j < Nprocs; ++j)
+			{
+				vector<int>::const_iterator it = std::lower_bound(sentpoints[static_cast<size_t>(j)].begin(), sentpoints[static_cast<size_t>(j)].end(),
+					ToRemove[static_cast<size_t>(i)]);
+				if ((it != sentpoints[static_cast<size_t>(j)].end()) && (*it == static_cast<int>(ToRemove[static_cast<size_t>(i)])))
+				{
+					res[static_cast<size_t>(j)].push_back(sort_indeces[static_cast<size_t>(j)][static_cast<size_t>(it -
+						sentpoints[static_cast<size_t>(j)].begin())]);
+					RemoveIndex[static_cast<size_t>(j)].push_back(static_cast<size_t>(i));
+				}
+			}
+		}
+		return res;
+	}
+
+	void SendRecvOuterMerits(Tessellation const& tess, vector<vector<int> > &sent_indeces,vector<double> const& merits,
+		vector<vector<size_t> > const& RemoveIndex,vector<vector<int> > &recv_indeces,vector<vector<double> > &recv_mertis)
+	{
+		vector<vector<double> > send_merits(sent_indeces.size());
+		size_t Nproc = send_merits.size();
+		for (size_t i = 0; i < Nproc; ++i)
+			send_merits[i]=VectorValues(merits, RemoveIndex[i]);
+		recv_indeces = MPI_exchange_data(tess.GetDuplicatedProcs(), sent_indeces);
+		recv_mertis = MPI_exchange_data(tess.GetDuplicatedProcs(), send_merits);
+	}
+
+	vector<size_t> KeepMPINeighbors(Tessellation const& tess, vector<size_t> const& ToRemove,vector<double> const& merits,
+		vector<vector<int> > &recv_indeces,vector<vector<double> > &recv_mertis)
+	{
+		vector<vector<int> > const& Nghost = tess.GetGhostIndeces();
+		size_t Nproc = recv_indeces.size();
+		for (size_t i = 0; i < Nproc; ++i)
+		{
+			recv_indeces[i] = VectorValues(Nghost[i], recv_indeces[i]);
+			vector<size_t> temp = sort_index(recv_indeces[i]);
+			sort(recv_indeces[i].begin(), recv_indeces[i].end());
+			recv_mertis[i] = VectorValues(recv_mertis[i], temp);
+		}
+		
+		int N = tess.GetPointNo();
+		size_t Nremove = ToRemove.size();
+		vector<int> neigh;
+		vector<size_t> RemoveFinal;
+		for (size_t i = 0; i < Nremove; ++i)
+		{
+			bool good = true;
+			tess.GetNeighbors(static_cast<int>(ToRemove[i]), neigh);
+			size_t Nneigh = neigh.size();
+			for (size_t j = 0; j < Nneigh; ++j)
+			{
+				if (neigh[j] >= N)
+				{
+					for (size_t k = 0; k < Nproc; ++k)
+					{
+						vector<int>::const_iterator it = binary_find(recv_indeces[k].begin(), recv_indeces[k].end(),neigh[j]);
+						if (it != recv_indeces[k].end())
+						{
+							if (recv_mertis[k][static_cast<size_t>(it - recv_indeces[k].begin())] > merits[i])
+							{
+								good = false;
+								break;
+							}
+						}
+					}
+					if (!good)
+						break;
+				}
+			}
+			if (good)
+				RemoveFinal.push_back(ToRemove[i]);
+		}
+		return RemoveFinal;
+	}
+
+	void ExchangeOuterRemoveData(Tessellation const& tess, vector<size_t> const& ToRemove,vector<vector<int> >
+		&to_check,vector<vector<Vector2D> > &chulls_res,vector<Extensive> const& extensives,vector<Extensive> & mpi_extensives,
+		CacheData const& cd)
+	{
+		chulls_res.clear();
+		to_check.clear();
+		mpi_extensives.clear();
+		vector<vector<int> > Nghost = tess.GetGhostIndeces();
+		vector<vector<int> > sort_indeces(Nghost.size());
+		int Nprocs = static_cast<int>(Nghost.size());
+		// sort vectors for fast search
+		for (int i = 0; i < Nprocs; ++i)
+		{
+			sort_index(Nghost[i], sort_indeces[i]);
+			sort(Nghost[i].begin(), Nghost[i].end());
+		}
+		vector<vector<Extensive> > myremove(Nprocs);
+		vector<vector<vector<Vector2D> > > chulls(Nprocs);
+		vector<vector<vector<int> > > remove_neigh(Nprocs);
+		size_t Nremove = ToRemove.size();
+		int Np = tess.GetPointNo();
+		vector<int> neigh;
+		vector<Vector2D> tempV2D;
+		for (size_t i = 0; i < Nremove; ++i)
+		{
+			bool calculated = false;
+			tess.GetNeighbors(static_cast<int>(ToRemove[i]), neigh);
+			size_t Nneigh = neigh.size();
+			for (size_t k = 0; k < static_cast<size_t>(Nprocs); ++k)
+			{
+				vector<int> temp_add;
+				bool should_add=false;
+				for (size_t j = 0; j < Nneigh; ++j)
+				{
+					if (neigh[j] >= Np && tess.GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
+					{
+						vector<int>::const_iterator it = binary_find(Nghost[k].begin(), Nghost[k].end(), neigh[j]);
+						if (it != Nghost[k].end())
+						{
+							should_add=true;
+							if (!calculated)
+							{
+								ConvexHull(tempV2D, tess, static_cast<int>(ToRemove[i]));
+								calculated = true;
+							}
+							temp_add.push_back(sort_indeces[k][static_cast<size_t>(it - Nghost[k].begin())]);
+						}
+					}
+				}
+				if (should_add)
+				{
+					chulls[k].push_back(tempV2D);
+					remove_neigh[k].push_back(temp_add);
+					myremove[k].push_back((1.0/cd.volumes[ToRemove[i]]) * extensives[ToRemove[i]]);
+				}
+			}
+		}
+		// Exchange the data
+		chulls=MPI_exchange_data(tess, chulls, tess.GetMeshPoint(0));
+		remove_neigh=MPI_exchange_data(tess, remove_neigh);
+		vector<vector<Extensive> > mpi_recv_extensives = MPI_exchange_data(tess.GetDuplicatedProcs(), myremove,extensives[0]);
+		mpi_extensives = CombineVectors(mpi_recv_extensives);
+		//convert  remove_neigh to indeces of real points via duplciated points
+		vector<vector<int> > duplicated_points = tess.GetDuplicatedPoints();
+		// sort vectors for fast search
+		/*for (int i = 0; i < Nprocs; ++i)
+		{
+			sort_index(duplicated_points[i], sort_indeces[i]);
+			sort(duplicated_points[i].begin(), duplicated_points[i].end());
+		}*/
+		for (size_t i = 0; i < static_cast<size_t>(Nprocs); ++i)
+		{
+			for (size_t j = 0; j < remove_neigh[i].size(); ++j)
+			{
+				for (size_t k = 0; k < remove_neigh[i][j].size(); ++k)
+				{
+					/*vector<int>::const_iterator it = binary_find(duplicated_points[i].begin(), duplicated_points[i].end(), remove_neigh[i][j][k]);
+					if (it != duplicated_points[i].end())
+					{
+					size_t loc = static_cast<size_t>(it - duplicated_points[i].begin());
+						remove_neigh[i][j][k] = duplicated_points[i][sort_indeces[i][loc]];
+					}*/
+					remove_neigh[i][j][k]=duplicated_points[i][remove_neigh[i][j][k]];
+				}
+			}
+		}
+		to_check = CombineVectors(remove_neigh);
+		chulls_res = CombineVectors(chulls);
+	}
+
+	void DealWithMPINeighbors(Tessellation const& tess, vector<size_t> &ToRemove, vector<double> &merits,
+		vector<vector<int> > &to_check, vector<vector<Vector2D> > &chulls_res,
+		vector<Extensive> const& extensives, vector<Extensive> & mpi_extensives,CacheData const& cd)
+	{
+		vector<vector<size_t> > RemoveIndex;
+		vector<vector<int> > sent_indeces = GetSentIndeces(tess, ToRemove, RemoveIndex);
+		vector<vector<int> > recv_indeces;
+		vector<vector<double> > recv_mertis;
+		SendRecvOuterMerits(tess, sent_indeces, merits, RemoveIndex, recv_indeces, recv_mertis);
+		ToRemove = KeepMPINeighbors(tess, ToRemove, merits, recv_indeces, recv_mertis);
+		ExchangeOuterRemoveData(tess, ToRemove, to_check, chulls_res,extensives, mpi_extensives,cd);
+	}
+#endif
+
 	double AreaOverlap(vector<Vector2D> const& poly0, vector<Vector2D> const& poly1,PhysicalGeometry const& pg)
 	{
 		// returns the overlap of p1 with p0
@@ -137,10 +353,10 @@ namespace
 		return 4 * 3.14*tess.GetVolume(index) / (L*L);
 	}
 
-	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const&
-		candidates, Tessellation const& tess)
+	void RemoveNeighbors(vector<double> &merits, vector<size_t> &candidates, Tessellation const& tess)
 	{
-		vector<size_t> result;
+		vector<size_t> candidates_new;
+		vector<double> merits_new;
 		if (merits.size() != candidates.size())
 			throw UniversalError("Merits and Candidates don't have same size in RemoveNeighbors");
 		// Make sure there are no neighbors
@@ -177,10 +393,12 @@ namespace
 			}
 			if (good)
 			{
-				result.push_back(candidates[i]);
+				candidates_new.push_back(candidates[i]);
+				merits_new.push_back(merits[i]);
 			}
 		}
-		return result;
+		candidates = candidates_new;
+		merits = merits_new;
 	}
 
 	Extensive GetNewExtensive(vector<Extensive> const& extensives,Tessellation const& tess,size_t N,size_t location,
@@ -625,17 +843,20 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	indeces = unique_index(ToRemovepair.first);
 	ToRemovepair.first = unique(ToRemovepair.first);
 	ToRemovepair.second = VectorValues(ToRemovepair.second, indeces);
+	RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 #ifdef RICH_MPI
-	ToRemovepair.first = RemoveNearBoundaryPoints(ToRemovepair.first, tess,ToRemovepair.second);
+	vector<vector<int> > mpi_check;
+	vector<vector<Vector2D> > chulls_mpi;
+	vector<Extensive> mpi_extensives;
+	DealWithMPINeighbors(tess, ToRemovepair.first, ToRemovepair.second, mpi_check, chulls_mpi,extensives, mpi_extensives,cd);
 #endif
 
-	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
 	// save copy of old tessellation
 	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
-	vector<double> old_vol(ToRemove.size());
-	for (size_t i = 0; i < ToRemove.size(); ++i)
-		old_vol[i] = cd.volumes[ToRemove[i]];
-	RemoveVector(cor, ToRemove);
+	vector<double> old_vol(ToRemovepair.first.size());
+	for (size_t i = 0; i < ToRemovepair.first.size(); ++i)
+		old_vol[i] = cd.volumes[ToRemovepair.first[i]];
+	RemoveVector(cor, ToRemovepair.first);
 
 #ifdef debug_amr
 	WriteTess(tess, "c:/vold.h5");
@@ -653,18 +874,18 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 
 	// Fix the extensives
 	vector<Vector2D> temp;
-	for (size_t i = 0; i < ToRemove.size(); ++i)
+	vector<Vector2D> chull;
+	for (size_t i = 0; i < ToRemovepair.first.size(); ++i)
 	{
-		vector<int> neigh = oldtess->GetNeighbors(static_cast<int>(ToRemove[i]));
-		vector<Vector2D> chull;
-		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
+		vector<int> neigh = oldtess->GetNeighbors(static_cast<int>(ToRemovepair.first[i]));
+		ConvexHull(chull, *oldtess, static_cast<int>(ToRemovepair.first[i]));
 		const double TotalV = old_vol[i];
 		temp.clear();
 		double dv = 0;
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
-			size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(),
-				oldtess->GetOriginalIndex(neigh[j])) - ToRemove.begin());
+			size_t toadd = static_cast<size_t>(lower_bound(ToRemovepair.first.begin(), ToRemovepair.first.end(),
+				oldtess->GetOriginalIndex(neigh[j])) - ToRemovepair.first.begin());
 			temp.clear();
 			if (neigh[j] < static_cast<int>(N))
 			{
@@ -672,8 +893,11 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			}
 			else
 			{
-				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
+				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemovepair.first[i]))
 				{
+#ifdef RICH_MPI
+					continue;
+#endif
 					ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(
 						oldtess->GetOriginalIndex(neigh[j]) )- toadd));
 					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
@@ -684,21 +908,38 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 			{
 				const double v = AreaOverlap(chull, temp,pg);
 				dv += v;
-				extensives[static_cast<size_t>(oldtess->GetOriginalIndex(neigh[j]))] += (v / TotalV)*extensives[ToRemove[i]];
+				extensives[static_cast<size_t>(oldtess->GetOriginalIndex(neigh[j]))] += (v / TotalV)*extensives[ToRemovepair.first[i]];
 			}
 		}
-		if (dv > (1 + 1e-5)*TotalV || dv < (1 - 1e-5)*TotalV)
+		/*if (dv > (1 + 1e-5)*TotalV || dv < (1 - 1e-5)*TotalV)
 		{
 			std::cout << "Real volume: " << TotalV << " AMR volume: " << dv << std::endl;
 			throw UniversalError("Not same volume in amr remove");
+		}*/
+	}
+#ifdef RICH_MPI
+	for (size_t i = 0; i < mpi_check.size(); ++i)
+	{
+		for (size_t j = 0; j < mpi_check[i].size(); ++j)
+		{
+			size_t toadd = static_cast<size_t>(lower_bound(ToRemovepair.first.begin(), ToRemovepair.first.end(),
+				oldtess->GetOriginalIndex(mpi_check[i][j])) - ToRemovepair.first.begin());
+			ConvexHull(chull, tess, mpi_check[i][j]-toadd);
+			const double v = AreaOverlap(chull, chulls_mpi[i], pg);
+			extensives[static_cast<size_t>(mpi_check[i][j])] += v*mpi_extensives[i];
 		}
 	}
-	RemoveVector(extensives, ToRemove);
-	RemoveVector(cells, ToRemove);
+#endif
+
+	RemoveVector(extensives, ToRemovepair.first);
+	RemoveVector(cells, ToRemovepair.first);
 
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
 		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos,cd.volumes[i], cells[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void ConservativeAMR::operator()(hdsim &sim)
@@ -842,176 +1083,6 @@ void NonConservativeAMR::operator()(hdsim &sim)
 	// redo cache data
 	sim.getCacheData().reset();
 }
-
-ConservativeAMROld::ConservativeAMROld
-(CellsToRefine const& refine,
-	CellsToRemove const& remove,
-	LinearGaussImproved *slopes,
-	AMRCellUpdater* cu,
-	AMRExtensiveUpdater* eu) :
-	refine_(refine),
-	remove_(remove),
-	scu_(vector<string>()),
-	seu_(),
-	cu_(cu),
-	eu_(eu),
-	interp_(slopes)
-{
-	if (!cu)
-		cu_ = &scu_;
-	if(!eu)
-		eu_ = &seu_;
-}
-
-void ConservativeAMROld::UpdateCellsRefine
-(Tessellation &tess,
-	OuterBoundary const& obc,
-	vector<ComputationalCell> &cells,
-	EquationOfState const& eos,
-	vector<Extensive> &extensives,
-	double time,
-#ifdef RICH_MPI
-	Tessellation const& proctess,
-#endif
-	TracerStickerNames const& tracerstickernames,
-	CacheData const& cd,
-	PhysicalGeometry const& /*pg*/)const
-{
-	size_t N = static_cast<size_t>(tess.GetPointNo());
-	// Find the primitive of each point and the new location
-	vector<std::pair<size_t, Vector2D> > NewPoints;
-	vector<Vector2D> Moved;
-	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time,tracerstickernames);
-#ifndef RICH_MPI
-	if (ToRefine.empty())
-		return;
-#endif // RICH_MPI
-	sort(ToRefine.begin(), ToRefine.end());
-#ifdef RICH_MPI
-	vector<double> merit;
-	ToRefine = RemoveNearBoundaryPoints(ToRefine, tess,merit);
-#endif
-	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc);
-
-	// Rebuild tessellation
-	vector<Vector2D> cor = tess.GetMeshPoints();
-	cor.resize(N);
-	cells.resize(N);
-	if (interp_ != 0)
-		interp_->GetSlopesUnlimited().resize(N);
-
-	for (size_t i = 0; i < NewPoints.size(); ++i)
-	{
-		cor.push_back(NewPoints[i].second);
-		cells.push_back(cells[NewPoints[i].first]);
-		interp_->GetSlopesUnlimited().push_back(interp_->GetSlopesUnlimited().at(NewPoints[i].first));
-	}
-#ifdef RICH_MPI
-	tess.Update(cor, proctess);
-#else
-	tess.Update(cor);
-#endif
-	cd.reset();
-	extensives.resize(N + NewPoints.size());
-	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos,cd.volumes[i],tracerstickernames);
-}
-
-void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
-	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-	EquationOfState const& eos, double time,
-#ifdef RICH_MPI
-	Tessellation const& proctess,
-#endif
-	TracerStickerNames const& tracerstickernames,
-	CacheData const& cd,
-	PhysicalGeometry const& pg)const
-{
-	size_t N = static_cast<size_t>(tess.GetPointNo());
-	// Rebuild tessellation
-	vector<Vector2D> cor = tess.GetMeshPoints();
-	cor.resize(N);
-	cells.resize(N);
-	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time,tracerstickernames);
-#ifndef RICH_MPI
-	if (ToRemovepair.first.empty())
-		return;
-#endif // RICH_MPI
-#ifdef RICH_MPI
-	ToRemovepair.first = RemoveNearBoundaryPoints(ToRemovepair.first, tess,ToRemovepair.second);
-#endif
-	vector<size_t> ToRemove = RemoveNeighbors(ToRemovepair.second, ToRemovepair.first, tess);
-	// save copy of old tessellation
-	boost::scoped_ptr<Tessellation> oldtess(tess.clone());
-	vector<double> old_vol(ToRemove.size());
-	for (size_t i = 0; i < ToRemove.size(); ++i)
-		old_vol[i] = cd.volumes[ToRemove[i]];
-	RemoveVector(cor, ToRemove);
-#ifdef RICH_MPI
-	tess.Update(cor, proctess);
-#else
-	tess.Update(cor);
-#endif
-	cd.reset();
-	// Fix the extensives
-	vector<Vector2D> temp;
-	for (size_t i = 0; i < ToRemove.size(); ++i)
-	{
-		vector<int> neigh = oldtess->GetNeighbors(static_cast<int>(ToRemove[i]));
-		vector<Vector2D> chull;
-		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
-		const double TotalV = old_vol[i];
-		Extensive oldcell = extensives[ToRemove[i]];
-		temp.clear();
-		for (size_t j = 0; j < neigh.size(); ++j)
-		{
-			size_t toadd = static_cast<size_t>(lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j]) - ToRemove.begin());
-			if (neigh[j] < static_cast<int>(N))
-			{
-				ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
-			}
-			else
-			{
-				if (oldtess->GetOriginalIndex(neigh[j]) != static_cast<int>(ToRemove[i]))
-				{
-					ConvexHull(temp, tess, static_cast<int>(static_cast<size_t>(neigh[j]) - toadd));
-					temp = temp + (oldtess->GetMeshPoint(neigh[j]) -
-						oldtess->GetMeshPoint(oldtess->GetOriginalIndex(neigh[j])));
-				}
-			}
-			if (!temp.empty())
-			{
-				const double v = AreaOverlap(chull, temp,pg);
-				extensives[static_cast<size_t>(oldtess->GetOriginalIndex(neigh[j]))] += (v / TotalV)*extensives[ToRemove[i]];
-			}
-		}
-	}
-	RemoveVector(extensives, ToRemove);
-	RemoveVector(cells, ToRemove);
-	N = static_cast<size_t>(tess.GetPointNo());
-	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos,cd.volumes[i], cells[i],tracerstickernames);
-}
-
-void ConservativeAMROld::operator()(hdsim &sim)
-{
-	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(), sim.getTime(),
-#ifdef RICH_MPI
-		sim.GetProcTessellation(),
-#endif
-		sim.GetTracerStickerNames(), sim.getCacheData(), sim.getPhysicalGeometry());
-	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(), sim.getTime(),
-#ifdef RICH_MPI
-		sim.GetProcTessellation(),
-#endif
-		sim.GetTracerStickerNames(), sim.getCacheData(), sim.getPhysicalGeometry());
-	// redo cache data
-	sim.getCacheData().reset();
-}
-
-
 
 #ifdef RICH_MPI
 vector<size_t> AMR::RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,

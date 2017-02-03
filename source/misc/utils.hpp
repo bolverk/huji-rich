@@ -655,6 +655,42 @@ template<class S, class T> const T& safe_retrieve
 	assert(it != m.end());
 	return it->second;
 }
+/*!
+\brief Reduces the dimension of the input vector
+\param data The vector to reduce its dimension
+\retrun The reduced vector
+*/
+template<class T> vector<vector<T> > CombineVectors(vector<vector<vector<T> > > const& data)
+{
+	size_t counter = 0;
+	size_t out_size = data.size();
+	for (size_t i = 0; i < out_size; ++i)
+		counter += data[i].size();
+	vector<vector<T> > res(counter);
+	counter = 0;
+	for (size_t i = 0; i < out_size; ++i)
+	{
+		for (size_t j = 0; j < data[i].size(); ++j)
+		{
+			res[counter] = data[i][j];
+			++counter;
+		}
+	}
+	return res;
+}
+
+/*!
+\brief Reduces the dimension of the input vector
+\param data The vector to reduce its dimension
+\retrun The reduced vector
+*/
+template<class T> vector<T>  CombineVectors(vector<vector<T> > const& data)
+{
+	vector<T> res;
+	for (size_t i = 0; i < data.size(); ++i)
+		res.insert(res.end(), data[i].begin(), data[i].end());
+	return res;
+}
 
 /*! \brief Non constant version of safe retrieve
 \param m flat map

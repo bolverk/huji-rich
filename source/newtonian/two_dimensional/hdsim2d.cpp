@@ -134,6 +134,9 @@ hdsim::hdsim
 		for (size_t j = 0; j < sindex.size(); ++j)
 			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
 	}
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
 }
 
 hdsim::~hdsim(void) {}
@@ -145,10 +148,6 @@ TracerStickerNames const& hdsim::GetTracerStickerNames(void)const
 
 void hdsim::TimeAdvance(void)
 {
-#ifdef RICH_MPI
-	MPI_exchange_data(tess_, cells_, true);
-#endif
-
 	vector<Vector2D> point_velocities =
 		point_motion_(tess_, cells_, time_,tracer_sticker_names_);
 
@@ -232,6 +231,10 @@ void hdsim::TimeAdvance(void)
 	cache_data_.reset();
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_);
+
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
 
 	time_ += dt;
 	cycle_++;
@@ -319,10 +322,6 @@ namespace
 
 void hdsim::TimeAdvance2Heun(void)
 {
-#ifdef RICH_MPI
-	MPI_exchange_data(tess_, cells_, true);
-#endif
-
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
 
 #ifdef RICH_MPI
@@ -438,6 +437,10 @@ void hdsim::TimeAdvance2Heun(void)
 	extensives_ = average_extensive(mid_extensives, extensives_);
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
 
 	time_ += dt;
 	++cycle_;
