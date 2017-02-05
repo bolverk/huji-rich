@@ -367,8 +367,7 @@ void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Ve
 {
 	std::size_t Norg = points.size();
 	Norg_ = Norg;
-	points_.reserve(static_cast<std::size_t>(Norg+std::pow(Norg,0.6666)*14));
-//	points_ = points;
+	points_.reserve(Norg+ static_cast<std::size_t>(std::pow(Norg,0.6666)*14));
 	points_.assign(points.begin(), points.end());
 	// Create large tetra points
 	double factor = 50;

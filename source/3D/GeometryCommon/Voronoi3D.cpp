@@ -1192,9 +1192,7 @@ vector<std::size_t>const& Voronoi3D::GetCellFaces(std::size_t index) const
 
 vector<Vector3D>& Voronoi3D::GetMeshPoints(void)
 {
-	vector<Vector3D> points(del_.points_.begin(), del_.points_.end());
-	return points;
-	//return del_.points_;
+	return del_.points_;
 }
 
 vector<std::size_t> Voronoi3D::GetNeighbors(std::size_t index)const
