@@ -4,6 +4,26 @@
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
+Tessellation3D& HDSim3D::getTesselation(void)
+{
+	return tess_;
+}
+vector<ComputationalCell3D>& HDSim3D::getCells(void)
+{
+	return cells_;
+}
+
+vector<Conserved3D>& HDSim3D::getExtensives(void)
+{
+	return extensive_;
+}
+
+
+const vector<Conserved3D>& HDSim3D::getExtensives(void) const
+{
+	return extensive_;
+}
+
 HDSim3D::ProgressTracker::ProgressTracker(void) :
 	time_(0), cycle_(0) {}
 

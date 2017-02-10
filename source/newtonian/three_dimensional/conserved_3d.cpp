@@ -124,6 +124,7 @@ void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved
 	res.energy = res.mass*(eos.dp2e(cell.density, cell.pressure, cell.tracers, tsn.tracer_names) + 
 		0.5*ScalarProd(cell.velocity,cell.velocity));
 	size_t N = cell.tracers.size();
+	res.tracers.resize(N);
 	for (size_t i = 0; i < N;++i)
 		res.tracers[i] = cell.tracers[i]*res.mass;
 }

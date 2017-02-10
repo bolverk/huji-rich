@@ -130,7 +130,13 @@ public:
 
 	Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const;
 
+	vector<Vector3D>& GetFacePoints(void);
+
+	vector<double>& GetAllArea(void);
+
 	vector<Vector3D>const& GetFacePoints(void) const;
+
+	vector<vector<size_t> >& GetAllCellFaces(void);
 
 	vector<std::size_t>const& GetPointsInFace(std::size_t index) const;
 
@@ -145,6 +151,22 @@ public:
 	vector<std::size_t> const& GetSelfIndex(void) const;
 
 	vector<vector<std::size_t> > const& GetGhostIndeces(void) const;
+
+	void GetNeighbors(size_t index, vector<size_t> &res)const;
+
+	std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
+
+	void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts,size_t toduplicate);
+
+	vector<double>& GetAllVolumes(void);
+
+	std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
+
+	vector<vector<size_t> > & GetAllPointsInFace(void);
+
+	size_t& GetPointNo(void);
+
+	bool IsPointOutsideBox(size_t index)const;
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);

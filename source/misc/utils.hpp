@@ -246,6 +246,15 @@ template <class T> vector<T> VectorValues
 	return result;
 }
 
+template <class T> void FlipVector(vector<T> &v)
+{
+	vector<T> temp(v);
+	size_t N = temp.size();
+	for (size_t i = 0; i < N; ++i)
+		temp[i] = v[N - i - 1];
+	v = temp;
+}
+
 /*!
 \brief Returns the sum of the vector
 \param v The vector to sum

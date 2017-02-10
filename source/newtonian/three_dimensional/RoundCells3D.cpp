@@ -95,6 +95,8 @@ Vector3D RoundCells3D::calc_dw(size_t i, const Tessellation3D& tess, double dt, 
 		cells[i].tracers, tracerstickernames.tracer_names));
 	for (size_t j = 0; j < N; ++j)
 	{
+		if (tess.IsPointOutsideBox(neigh[j]))
+			continue;
 		cs = std::max(cs, eos_.dp2c(cells[neigh[j]].density, cells[neigh[j]].pressure,
 			cells[static_cast<size_t>(neigh[j])].tracers));
 		cs = std::max(cs, abs(cells[neigh[j]].velocity));

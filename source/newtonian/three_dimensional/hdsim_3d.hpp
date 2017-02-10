@@ -81,6 +81,18 @@ public:
    */
   const vector<ComputationalCell3D>& getCells(void) const;
 
+  const vector<Conserved3D>& getExtensives(void) const;
+
+  Tessellation3D& getTesselation(void);
+
+  /*! \brief Access to computational cells
+  \return Computational cells
+  */
+  vector<ComputationalCell3D>& getCells(void);
+
+  vector<Conserved3D>& getExtensives(void);
+
+
   double GetTime(void)const;
 
   TracerStickerNames GetTracerStickerNames(void)const;

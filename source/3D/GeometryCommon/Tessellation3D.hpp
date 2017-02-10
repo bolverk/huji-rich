@@ -33,6 +33,8 @@ public:
 	*/
 	virtual size_t GetPointNo(void) const = 0;
 
+	virtual size_t& GetPointNo(void) = 0;
+
 	/*! \brief Returns Position of mesh generating point
 	\param index Mesh generating point index
 	\return Position of mesh generating point
@@ -44,6 +46,8 @@ public:
 	\return The area of the face
 	*/
 	virtual double GetArea(size_t index) const = 0;
+
+	virtual vector<double>& GetAllArea(void) = 0;
 
 
 	/*! \brief Returns Position of Cell's Center of Mass
@@ -75,11 +79,19 @@ public:
 	*/
 	virtual vector<size_t>const& GetCellFaces(size_t index) const = 0;
 
+	virtual vector<vector<size_t> >& GetAllCellFaces(void) = 0;
+
 	/*!
 	\brief Returns a reference to the point vector
 	\returns The reference
 	*/
 	virtual vector<Vector3D>& GetMeshPoints(void) = 0;
+
+	/*!
+	\brief Returns a reference to the points composing the faces vector
+	\returns The reference
+	*/
+	virtual vector<Vector3D>& GetFacePoints(void) = 0;
 
 	/*!
 	\brief Returns a reference to the points composing the faces vector
@@ -94,6 +106,8 @@ public:
 	*/
 	virtual vector<size_t>const& GetPointsInFace(size_t index) const = 0;
 
+	virtual vector<vector<size_t> > & GetAllPointsInFace(void) = 0;
+
 	/*!
 	\brief Returns a list of the neighbors of a cell
 	\param index The cell to check
@@ -101,6 +115,13 @@ public:
 	*/
 
 	virtual vector<size_t> GetNeighbors(size_t index)const = 0;
+	/*!
+	\brief Returns a list of the neighbors of a cell
+	\param index The cell to check
+	\param res The neighbors, returned
+	*/
+
+	virtual void GetNeighbors(size_t index,vector<size_t> &res)const = 0;
 
 	/*!
 	\brief Cloning function
@@ -156,6 +177,12 @@ public:
 	virtual vector<Vector3D>& GetAllCM(void) = 0;
 
 	/*!
+	\brief Returns the volumes of the cells
+	\return The volumes
+	*/
+	virtual vector<double>& GetAllVolumes(void) = 0;
+
+	/*!
 	\brief Returns the neighbors and neighbors of the neighbors of a cell
 	\param point The index of the cell to calculate for
 	\param result The neighbors and their neighbors indeces
@@ -164,6 +191,8 @@ public:
 
 
 	virtual std::pair<size_t,size_t> GetFaceNeighbors(size_t face_index)const = 0;
+
+	virtual std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void) = 0;
 
 	/*!
 	\brief Returns a vector normal to the face whose magnitude is the seperation between the neighboring points
@@ -191,6 +220,12 @@ public:
 	virtual Vector3D FaceCM(size_t index)const=0;
 
 	virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;
+
+	virtual std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const = 0;
+
+	virtual void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, size_t toduplicate) = 0;
+
+	virtual bool IsPointOutsideBox(size_t index)const = 0;
 };
 
 #endif // TESSELLATION3D_HPP

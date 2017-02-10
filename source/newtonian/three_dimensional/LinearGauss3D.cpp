@@ -577,7 +577,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	ComputationalCell3D temp5(cells[0]);
 	vector<Vector3D> neighbor_mesh_list;
 	vector<Vector3D> neighbor_cm_list;
-	res.resize(tess.GetTotalFacesNumber());
+	res.resize(tess.GetTotalFacesNumber(),pair<ComputationalCell3D,ComputationalCell3D>(cells[0],cells[0]));
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,

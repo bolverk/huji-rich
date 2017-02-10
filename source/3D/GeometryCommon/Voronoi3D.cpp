@@ -681,6 +681,54 @@ void Voronoi3D::CalcAllCM(void)
 		CM_[i] *= (1.0 / volume_[i]);
 }
 
+std::pair<Vector3D, Vector3D> Voronoi3D::GetBoxCoordinates(void)const
+{
+	return std::pair<Vector3D, Vector3D>(ll_, ur_);
+}
+
+void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, size_t toduplicate)
+{
+	assert(points.size() > 0);
+	// Clear data
+	PointTetras_.clear();
+	R_.clear();
+	R_.reserve(points.size());
+	tetra_centers_.clear();
+	tetra_centers_.reserve(points.size() * 7);
+	del_.Clean();
+	// Voronoi Data
+	FacesInCell_.clear();
+	PointsInFace_.clear();
+	FaceNeighbors_.clear();
+	CM_.clear();
+	volume_.clear();
+	area_.clear();
+	Norg_ = points.size();
+	duplicatedprocs_.clear();
+	duplicated_points_.clear();
+	Nghost_.clear();
+
+	del_.Build(points, ur_, ll_);
+	vector<std::pair<size_t, size_t> > duplicate(6);
+	for (size_t i = 0; i < 6; ++i)
+		duplicate[i] = std::pair<size_t, size_t>(i, toduplicate);
+	vector<Vector3D> extra_points = CreateBoundaryPoints(duplicate);
+	extra_points.insert(extra_points.begin(), ghosts.begin(), ghosts.end());
+	del_.BuildExtra(extra_points);
+
+	R_.resize(del_.tetras_.size());
+	std::fill(R_.begin(), R_.end(), -1);
+	tetra_centers_.resize(R_.size());
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
+
+	CM_.resize(Norg_);
+	volume_.resize(Norg_, 0);
+	// Create Voronoi
+	BuildVoronoi();
+	CalcAllCM();
+}
+
+
 void Voronoi3D::Build(vector<Vector3D> const & points)
 {
 	assert(points.size() > 0);
@@ -735,10 +783,7 @@ void Voronoi3D::BuildVoronoi(void)
 	FaceNeighbors_.reserve(Norg_ * 10);
 	PointsInFace_.reserve(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
-	{
 		FacesInCell_[i].reserve(20);
-		//PointTetras_[i].reserve(20);
-	}
 	vector<size_t> temp, temp2;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
@@ -1208,6 +1253,17 @@ vector<std::size_t> Voronoi3D::GetNeighbors(std::size_t index)const
 	return res;
 }
 
+void Voronoi3D::GetNeighbors(size_t index, vector<size_t> &res)const
+{
+	std::size_t N = FacesInCell_[index].size();
+	res.resize(N);
+	for (std::size_t i = 0; i < N; ++i)
+	{
+		std::size_t face = FacesInCell_[index][i];
+		res[i] = FaceNeighbors_[face].first == index ? FaceNeighbors_[face].second :
+			FaceNeighbors_[face].first;
+	}
+}
 
 Tessellation3D* Voronoi3D::clone(void) const
 {
@@ -1223,6 +1279,11 @@ bool Voronoi3D::NearBoundary(std::size_t index) const
 			return true;
 	}
 	return false;
+}
+
+bool Voronoi3D::IsPointOutsideBox(size_t index)const
+{
+	return !PointInDomain(ll_, ur_, del_.points_[index]);
 }
 
 bool Voronoi3D::BoundaryFace(std::size_t index) const
@@ -1278,6 +1339,28 @@ void Voronoi3D::GetNeighborNeighbors(vector<std::size_t> &result, std::size_t po
 	}
 	sort(result.begin(), result.end());
 	result = unique(result);
+	sort(neigh.begin(), neigh.end());
+	result = RemoveList(result, neigh);
+}
+
+vector<vector<size_t> > & Voronoi3D::GetAllPointsInFace(void)
+{
+	return PointsInFace_;
+}
+
+size_t& Voronoi3D::GetPointNo(void)
+{
+	return Norg_;
+}
+
+std::vector<std::pair<size_t, size_t> >& Voronoi3D::GetAllFaceNeighbors(void)
+{
+	return FaceNeighbors_;
+}
+
+vector<double>& Voronoi3D::GetAllVolumes(void)
+{
+	return volume_;
 }
 
 Vector3D Voronoi3D::Normal(std::size_t faceindex)const
@@ -1315,10 +1398,26 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 	return w;
 }
 
-vector<Vector3D>const& Voronoi3D::GetFacePoints(void) const
+vector<double>& Voronoi3D::GetAllArea(void)
+{
+	return area_;
+}
+
+vector<vector<size_t> >& Voronoi3D::GetAllCellFaces(void)
+{
+	return FacesInCell_;
+}
+
+vector<Vector3D>& Voronoi3D::GetFacePoints(void) 
 {
 	return tetra_centers_;
 }
+
+vector<Vector3D>const& Voronoi3D::GetFacePoints(void)const
+{
+	return tetra_centers_;
+}
+
 
 vector<std::size_t>const& Voronoi3D::GetPointsInFace(std::size_t index) const
 {

@@ -57,6 +57,7 @@ Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, c
 	Slope3D res;
 	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
 	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
+	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
 	return res;
 }
 
