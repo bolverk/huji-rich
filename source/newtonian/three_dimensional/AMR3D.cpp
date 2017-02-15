@@ -27,10 +27,9 @@ namespace
 		nneigh = res2;
 	}
 
-	void RemoveBadAspectRatio(Tessellation3D const& tess, vector<double> &merits, vector<size_t> &toremove)
+	void RemoveBadAspectRatio(Tessellation3D const& tess, vector<size_t> &toremove)
 	{
 		vector<size_t> remove_res;
-		vector<double> merit_res;
 		size_t N = toremove.size();
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -45,10 +44,8 @@ namespace
 			if ((A*A*A) < (v*v * 300))
 			{
 				remove_res.push_back(toremove[i]);
-				merit_res.push_back(merits[i]);
 			}
 		}
-		merits = merit_res;
 		toremove = remove_res;
 	}
 
@@ -123,7 +120,7 @@ namespace
 				max_loc = i;
 			}
 		}
-		return point*0.85 + 0.15*tess.GetMeshPoint(neigh[max_loc]);
+		return point*0.99999 + 0.00001*tess.GetMeshPoint(neigh[max_loc]);
 	}
 
 	/*void GetNeighborPoints(Tessellation3D const& tess, size_t index, vector<size_t> &neigh, vector<size_t> &nneigh)
@@ -133,33 +130,16 @@ namespace
 	}*/
 
 	void BuildLocalVoronoi(Tessellation3D &local, Tessellation3D const& tess, vector<size_t> const& real_points, 
-		vector<size_t> const& nneigh,Vector3D const& newpoint,size_t torefine)
+		Vector3D const& newpoint,size_t torefine)
 	{
 		size_t Nreal = real_points.size();
 		vector<Vector3D> points,ghost;
-		points.reserve(Nreal + nneigh.size() + 1);
 		points.push_back(newpoint);
 		points.push_back(tess.GetMeshPoint(torefine));
+		ghost.reserve(Nreal);
 		for (size_t i = 0; i < Nreal; ++i)
-			points.push_back(tess.GetMeshPoint(real_points[i]));
-		Nreal = nneigh.size();
-		for (size_t i = 0; i < Nreal; ++i)
-			if(nneigh[i]!=torefine)
-				ghost.push_back(tess.GetMeshPoint(nneigh[i]));
-		size_t counter = 2;
+			ghost.push_back(tess.GetMeshPoint(real_points[i]));
 		local.BuildNoBox(points, ghost, 0);
-	}
-
-	bool IsRefineConserving(Tessellation3D const& local,size_t Nreal)
-	{
-		vector<size_t> const& faces = local.GetCellFaces(0);
-		size_t Nfaces = faces.size();
-		for (size_t i = 0; i < Nfaces; ++i)
-		{
-			if (local.GetFaceNeighbors(faces[i]).second >= Nreal && !local.IsPointOutsideBox(local.GetFaceNeighbors(faces[i]).second))
-				return false;
-		}
-		return true;
 	}
 
 	Conserved3D CalcNewExtensives(Tessellation3D const& tess, Tessellation3D const& local, size_t torefine, vector<size_t> const& neigh,
@@ -186,162 +166,101 @@ namespace
 		return newpoint;
 	}
 
-	void GetBadIndeces(Tessellation3D const& tess, vector<size_t> const& neigh, size_t torefine, vector<size_t> &bad_faces)
-	{
-		bad_faces.clear();
-		vector<size_t> const& faces = tess.GetCellFaces(torefine);
-		size_t Nfaces = faces.size();
-		for (size_t i = 0; i < Nfaces; ++i)
-			bad_faces.push_back(faces[i]);
-		size_t Nneigh = neigh.size();
-		size_t Norg = tess.GetPointNo();
-		for (size_t i = 0; i < Nneigh; ++i)
-		{
-			if (neigh[i] >= Norg)
-				continue;
-			vector<size_t> const& neigh_faces = tess.GetCellFaces(neigh[i]);
-			size_t Nfaces2 = neigh_faces.size();
-			for (size_t j = 0; j < Nfaces2; ++j)
-			{
-				std::pair<size_t, size_t> const& temp = tess.GetFaceNeighbors(neigh_faces[j]);
-				size_t other = temp.first == neigh[i] ? temp.second : temp.first;
-				if (std::binary_search(neigh.begin(), neigh.end(), other) || tess.IsPointOutsideBox(other))
-					bad_faces.push_back(neigh_faces[j]);
-			}
-		}
-		sort(bad_faces.begin(), bad_faces.end());
-		bad_faces = unique(bad_faces);
-	}
-
 	void FixVoronoi(Tessellation3D &local, Tessellation3D &tess, vector<size_t> &neigh,size_t torefine,
-		double &vol,Vector3D &CM,vector<size_t> const& nneigh,vector<Vector3D> &newboundary,vector<size_t> &newboundary_faces,
-		size_t Nsplit)
+		double &vol,Vector3D &CM,size_t Nsplit,size_t Ntotal0,size_t index)
 	{
 		// neigh is sorted
-		size_t Norg = tess.GetPointNo();
-
-		size_t Nlocal = neigh.size() + 2;
-		size_t Nall = Nlocal + nneigh.size();
-		vector<std::pair<size_t,size_t> >const& localfaceneigh = local.GetAllFaceNeighbors();
+		vector<std::pair<size_t, size_t> >const& localfaceneigh = local.GetAllFaceNeighbors();
 		vector<std::pair<size_t, size_t> >& full_faceneigh = tess.GetAllFaceNeighbors();
 		vector<vector<size_t> >& full_facepoints = tess.GetAllPointsInFace();
 		vector<vector<size_t> >& full_cellfaces = tess.GetAllCellFaces();
-		full_cellfaces.resize(full_cellfaces.size() + 1);
 		vector<double> & full_area = tess.GetAllArea();
-		size_t Nfaceslocal = localfaceneigh.size();
-
 		vector<Vector3D>& full_vertices = tess.GetFacePoints();
-		size_t Nvert = full_vertices.size();
 
-		tess.GetAllCellFaces()[torefine].clear();
-		vector<vector<size_t> > & all_cell_faces = tess.GetAllCellFaces();
-		for (size_t i = 0; i < neigh.size(); ++i)
+		size_t Norg = tess.GetPointNo();
+		vector<size_t> faces = tess.GetCellFaces(torefine);
+		size_t Nfaces = faces.size();
+		// Remove old face reference
+		for (size_t i = 0; i < Nfaces; ++i)
 		{
-			if (tess.IsGhostPoint(neigh[i]))
+			size_t other = tess.GetFaceNeighbors(faces[i]).first==torefine ? tess.GetFaceNeighbors(faces[i]).second :
+				tess.GetFaceNeighbors(faces[i]).first;
+			if (tess.IsPointOutsideBox(other))
 				continue;
-			vector<size_t> faces = tess.GetCellFaces(neigh[i]);
-			vector<size_t> toremove;
-			for (size_t j = 0; j < faces.size(); ++j)
-			{
-				std::pair<size_t, size_t> face_neigh = tess.GetFaceNeighbors(faces[j]);
-				size_t other = face_neigh.first == neigh[i] ? face_neigh.second : face_neigh.first;
-				if (tess.IsPointOutsideBox(other) || std::binary_search(neigh.begin(), neigh.end(), other) || other==torefine)
-					toremove.push_back(j);
-			}
-			RemoveVector(all_cell_faces[neigh[i]], toremove);
+			RemoveVal(full_cellfaces[other], faces[i]);
 		}
+		full_cellfaces[torefine].clear();
 
-		vector<size_t> temp;
-		size_t Ntotal = tess.GetMeshPoints().size();
-		std::pair<size_t, size_t> new_face_neigh;
-		for (size_t i = 0; i < Nfaceslocal; ++i)
-		{
-			if (localfaceneigh[i].second < Nlocal || ((localfaceneigh[i].first < Nlocal) && local.IsPointOutsideBox(localfaceneigh[i].second)))
-			{
-				if (localfaceneigh[i].first == 0)
-					new_face_neigh.first = Ntotal;
-				else
-					if (localfaceneigh[i].first == 1)
-						new_face_neigh.first = torefine;
-					else
-						new_face_neigh.first = neigh[localfaceneigh[i].first - 2];				
-				if (localfaceneigh[i].second == 1)
-					new_face_neigh.second = torefine;
-				else
-					if (localfaceneigh[i].second < Nlocal)
-					{
-						new_face_neigh.second = neigh[localfaceneigh[i].second - 2];
-						if (tess.IsGhostPoint(new_face_neigh.first) && tess.IsGhostPoint(new_face_neigh.second))
-							continue;
-					}
-					else
-						if (localfaceneigh[i].second < Nall+4)
-						{
-							new_face_neigh.second = nneigh[localfaceneigh[i].second - Nlocal-4];
-							if (tess.IsGhostPoint(new_face_neigh.first) && tess.IsGhostPoint(new_face_neigh.second))
-								continue;
-						}
-						else
-						{
-							new_face_neigh.second = Ntotal + newboundary.size();
-							if (tess.IsGhostPoint(new_face_neigh.first) && tess.IsGhostPoint(new_face_neigh.second))
-								continue;
-							newboundary.push_back(local.GetMeshPoint(localfaceneigh[i].second));
-							newboundary_faces.push_back(full_faceneigh.size());
-						}
-				temp = local.GetPointsInFace(i);
-				size_t N = temp.size();
-				for (size_t j = 0; j < N; ++j)
-					temp[j] += Nvert;
-				if (new_face_neigh.second < new_face_neigh.first)
-				{
-					size_t ttemp = new_face_neigh.second;
-					new_face_neigh.second = new_face_neigh.first;
-					new_face_neigh.first = ttemp;
-					FlipVector(temp);
-				}
-				full_facepoints.push_back(temp);				
-				full_faceneigh.push_back(new_face_neigh);
-				full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
-				if(new_face_neigh.second<Norg)
-					full_cellfaces.at(new_face_neigh.second).push_back(full_faceneigh.size() - 1);
-				else
-					if (new_face_neigh.second == Ntotal)
-					{
-						full_cellfaces.resize(Norg + Nsplit);
-						full_cellfaces.back().push_back(full_faceneigh.size() - 1);
-					}
-				full_area.push_back(local.GetArea(i));
-			}
-		}
-		for (size_t i = 0; i < neigh.size(); ++i)
-		{
-			if (neigh[i] < Norg)
-			{
-				tess.GetAllVolumes()[neigh[i]] = local.GetVolume(i+2);
-				tess.GetAllCM()[neigh[i]] = local.GetCellCM(i + 2);
-			}
-		}
 		tess.GetAllVolumes()[torefine] = local.GetVolume(1);
+		tess.GetAllCM()[torefine] = local.GetCellCM(1);
 		vol = local.GetVolume(0);
 		CM = local.GetCellCM(0);
-		tess.GetAllCM()[torefine] = local.GetCellCM(1);
-		full_vertices.insert(full_vertices.end(),local.GetFacePoints().begin(), local.GetFacePoints().end());
 
-
-		for (size_t i = 0; i < neigh.size(); ++i)
+		// Add new faces
+		vector<size_t> temp;
+		std::pair<size_t, size_t> new_face_neigh;
+		faces = local.GetCellFaces(0);
+		faces.insert(faces.end(), local.GetCellFaces(1).begin(), local.GetCellFaces(1).end());
+		sort(faces.begin(), faces.end());
+		faces = unique(faces);
+		Nfaces = faces.size();
+		size_t Ntotal = tess.GetMeshPoints().size();
+		size_t Nlocal = neigh.size() + 6;
+		size_t Nvert = full_vertices.size();
+		full_cellfaces.resize(Ntotal0 + index + 1);
+		for (size_t i = 0; i < Nfaces; ++i)
 		{
-			if (tess.GetPointNo() <= neigh[i])
-				continue;
+			if (localfaceneigh[faces[i]].first == 0)
+				new_face_neigh.first = Ntotal0+index;
+			else
+				if (localfaceneigh[faces[i]].first == 1)
+					new_face_neigh.first = torefine;
+				else
+					new_face_neigh.first = neigh[localfaceneigh[faces[i]].first - 6];
+			if (localfaceneigh[i].second == 1)
+				new_face_neigh.second = torefine;
+			else
+			{
+				if (localfaceneigh[faces[i]].second < Nlocal)
+					new_face_neigh.second = neigh[localfaceneigh[faces[i]].second - 6];
+				else
+				{
+					new_face_neigh.second = Ntotal;
+					tess.GetMeshPoints().push_back(local.GetMeshPoint(localfaceneigh[faces[i]].second));
+					tess.GetAllCM().push_back(local.GetMeshPoint(localfaceneigh[faces[i]].second) + local.GetMeshPoint(0)
+						- CM);
+				}
+			}
+			temp = local.GetPointsInFace(faces[i]);
+			size_t N = temp.size();
+			for (size_t j = 0; j < N; ++j)
+				temp[j] += Nvert;
+			if (new_face_neigh.second < new_face_neigh.first)
+			{
+				size_t ttemp = new_face_neigh.second;
+				new_face_neigh.second = new_face_neigh.first;
+				new_face_neigh.first = ttemp;
+				FlipVector(temp);
+			}
+			full_facepoints.push_back(temp);
+			full_faceneigh.push_back(new_face_neigh);
 
-			vector<size_t> t, t2;
-			tess.GetNeighbors(neigh[i], t);
-			local.GetNeighbors(i + 2, t2);
-			assert(t.size() == t2.size());
+			if (new_face_neigh.first<Norg || ((new_face_neigh.first>=Ntotal0)&&(new_face_neigh.first<Ntotal0+index)))
+				full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
+			else
+			{
+				assert(new_face_neigh.first == Ntotal0+index);
+				full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
+			}
+
+			if (new_face_neigh.second<Norg || ((new_face_neigh.second >= Ntotal0) && (new_face_neigh.second<=Ntotal0 + index)))
+				full_cellfaces.at(new_face_neigh.second).push_back(full_faceneigh.size() - 1);
+			full_area.push_back(local.GetArea(i));
 		}
+		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
 
-	void FixBadIndeces(Tessellation3D &tess, vector<size_t> const& bad_indeces,size_t Norg2,size_t new_add)
+	void FixBadIndeces(Tessellation3D &tess, vector<size_t> const& bad_indeces,size_t Norg2,size_t Nsplit,size_t Ntotal0)
 	{
 		size_t Norg = tess.GetPointNo();
 		for (size_t i = 0; i < Norg; ++i)
@@ -355,15 +274,31 @@ namespace
 				faces[j] -= toremove;
 			}
 		}
-		for (size_t i = Norg2; i < Norg; ++i)
+
+		size_t Nfaces = tess.GetAllFaceNeighbors().size();
+		for (size_t i = 0; i < Nfaces; ++i)
 		{
-			vector<size_t> const& faces = tess.GetAllCellFaces()[i];
-			size_t nfaces = faces.size();
-			for (size_t j = 0; j < nfaces; ++j)
+			if (tess.GetFaceNeighbors(i).first >= Ntotal0)
 			{
-				std::pair<size_t, size_t> neigh = tess.GetAllFaceNeighbors()[faces[j]];
-				neigh.second -= new_add;
+				if (tess.GetFaceNeighbors(i).first < Ntotal0 + Nsplit)
+					tess.GetAllFaceNeighbors()[i].first += Norg - Ntotal0-Nsplit;
 			}
+			else
+			{
+				if (tess.GetFaceNeighbors(i).first >= (Norg - Nsplit))
+					tess.GetAllFaceNeighbors()[i].first += Nsplit;
+			}
+			if (tess.GetFaceNeighbors(i).second >= Ntotal0)
+			{
+				if (tess.GetFaceNeighbors(i).second < Ntotal0 + Nsplit)
+					tess.GetAllFaceNeighbors()[i].second += Norg - Ntotal0-Nsplit;
+			}
+			else
+			{
+				if (tess.GetFaceNeighbors(i).second >= (Norg - Nsplit))
+					tess.GetAllFaceNeighbors()[i].second += Nsplit;
+			}
+
 		}
 	}
 }
@@ -424,6 +359,7 @@ AMR3D::AMR3D(EquationOfState const& eos,CellsToRefine3D const& refine, CellsToRe
 		eu_ = &seu_;
 }
 
+
 void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& eos,
 	vector<Conserved3D> &extensives, double time,
 #ifdef RICH_MPI
@@ -432,76 +368,75 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	TracerStickerNames const& tracerstickernames)const
 {
 	size_t Norg = tess.GetPointNo();
-	std::pair<vector<size_t>,vector<double> > ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
+	size_t Ntotal0 = tess.GetMeshPoints().size();
+	extensives.resize(Norg);
+	cells.resize(Norg);
+	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
 	vector<size_t> indeces;
-	sort_index(ToRefine.first, indeces);
-	sort(ToRefine.first.begin(), ToRefine.first.end());
-	ToRefine.second=VectorValues(ToRefine.second, indeces);
-	RemoveBadAspectRatio(tess, ToRefine.second, ToRefine.first);
-	ToRefine.first = RemoveNeighbors(ToRefine.second, ToRefine.first, tess);
-	if (ToRefine.first.empty())
+	sort_index(ToRefine, indeces);
+	sort(ToRefine.begin(), ToRefine.end());
+	RemoveBadAspectRatio(tess, ToRefine);
+	if (ToRefine.empty())
 		return;
-	size_t Nsplit = ToRefine.first.size();
+	size_t Nsplit = ToRefine.size();
 	Voronoi3D vlocal(tess.GetBoxCoordinates().first,tess.GetBoxCoordinates().second);
-	vector<size_t> neigh, nneigh,bad_faces,all_bad_faces,refined, newboundary_faces;
+	vector<size_t> neigh, bad_faces,all_bad_faces,refined, newboundary_faces;
 	double newvol;
 	Vector3D newCM;
-	vector<Vector3D> newpoints, newCMs,newboundary;
+	vector<Vector3D> newpoints, newCMs;
 	vector<double> newvols;
-	vector<Conserved3D> newcells;
-	size_t new_add = tess.GetMeshPoints().size() - Norg;
+	tess.GetMeshPoints().resize(Ntotal0 + Nsplit);
 	for (size_t i = 0; i < Nsplit; ++i)
 	{
-		tess.GetNeighbors(ToRefine.first[i], neigh);
+		tess.GetNeighbors(ToRefine[i], neigh);
 		sort(neigh.begin(), neigh.end());
-		tess.GetNeighborNeighbors(nneigh, ToRefine.first[i]);
-		RemoveVal(nneigh, ToRefine.first[i]);
-		//CleanOuterPoints(neigh, nneigh, tess);
-		Vector3D NewPoint = GetNewPoint(tess, neigh, ToRefine.first[i]);
-		BuildLocalVoronoi(vlocal, tess, neigh, nneigh, NewPoint, ToRefine.first[i]);
-		if (IsRefineConserving(vlocal, neigh.size() + 2))
-		{
-			Conserved3D newcell = CalcNewExtensives(tess, vlocal, ToRefine.first[i], neigh,
-				cells, eos, tracerstickernames, extensives);
-			refined.push_back(ToRefine.first[i]);
-			GetBadIndeces(tess, neigh, ToRefine.first[i], bad_faces);
-			FixVoronoi(vlocal, tess, neigh, ToRefine.first[i], newvol, newCM,nneigh,newboundary,newboundary_faces,
-				newpoints.size()+1);
-
-			tess.GetMeshPoints().push_back(NewPoint);
-			newvols.push_back(newvol);
-			newCMs.push_back(newCM);
-			newpoints.push_back(NewPoint);
-			newcells.push_back(newcell);
-			all_bad_faces.insert(all_bad_faces.end(), bad_faces.begin(), bad_faces.end());
-		}
+		Vector3D NewPoint = GetNewPoint(tess, neigh, ToRefine[i]);
+		BuildLocalVoronoi(vlocal, tess, neigh, NewPoint, ToRefine[i]);
+		bad_faces = tess.GetCellFaces(ToRefine[i]);
+		/////////////
+		double oldv = tess.GetVolume(ToRefine[i]);
+		double newv = vlocal.GetVolume(0) + vlocal.GetVolume(1);
+		assert(oldv > 0.9999*newv&&newv > 0.9999*oldv);
+		///////////
+		FixVoronoi(vlocal, tess, neigh, ToRefine[i], newvol, newCM,Nsplit,Ntotal0,i);
+		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(ToRefine[i]), extensives[ToRefine[i]], eos, tracerstickernames);
+		tess.GetMeshPoints()[Ntotal0 + i] = NewPoint;
+		newvols.push_back(newvol);
+		newCMs.push_back(newCM);
+		newpoints.push_back(NewPoint);
+		all_bad_faces.insert(all_bad_faces.end(), bad_faces.begin(), bad_faces.end());
 	}
 	sort(all_bad_faces.begin(), all_bad_faces.end());
 	all_bad_faces = unique(all_bad_faces);
-	// Fix the old data and insert new data
-	extensives.insert(extensives.begin() + Norg, newcells.begin(), newcells.end());
-	vector<Vector3D> & allpoints = tess.GetMeshPoints();
-	size_t Ntemp = allpoints.size();
-	allpoints.insert(allpoints.begin() + Norg, newpoints.begin(), newpoints.end());
-	allpoints.resize(Ntemp);
-	allpoints.insert(allpoints.end(), newboundary.begin(), newboundary.end());
-	for (size_t i = 0; i < newboundary_faces.size(); ++i)
-		tess.GetAllFaceNeighbors()[newboundary_faces[i]].second = Ntemp + i;
-	size_t &Norg2 = tess.GetPointNo();
-	Norg2 += newpoints.size();
 	vector<double> & allvol = tess.GetAllVolumes();
 	allvol.insert(allvol.begin() + Norg, newvols.begin(), newvols.end());
 	vector<Vector3D> & allCM = tess.GetAllCM();
 	allCM.insert(allCM.begin() + Norg, newCMs.begin(), newCMs.end());
-	cells.resize(Norg);
-	// do new cells
+	// do new cells 
+	extensives.resize(Norg + Nsplit);
 	for (size_t i = 0; i < newCMs.size(); ++i)
-		cells.push_back(cu_->ConvertExtensiveToPrimitve3D(extensives[i + Norg], eos, newvols[i], cells[refined[i]], tracerstickernames));
+	{
+		cells.push_back(cells[ToRefine[i]]);
+		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(Norg+i), extensives[Norg+i], eos, tracerstickernames);
+	}
+	// Fix the old data and insert new data
+	vector<Vector3D> & allpoints = tess.GetMeshPoints();
+	size_t Ntemp = allpoints.size();
+	allpoints.insert(allpoints.begin() + Norg, newpoints.begin(), newpoints.end());
+	allpoints.erase(allpoints.begin() + Ntotal0 + Nsplit, allpoints.begin() + Ntotal0 + 2 * Nsplit);
+	for (size_t i = 0; i < newboundary_faces.size(); ++i)
+		tess.GetAllFaceNeighbors()[newboundary_faces[i]].second = Ntemp + i;
+	size_t &Norg2 = tess.GetPointNo();
+	Norg2 += newpoints.size();
+	vector<vector<size_t> > temp_cell_faces(tess.GetAllCellFaces().begin() + Ntotal0, tess.GetAllCellFaces().begin() + Nsplit +Ntotal0);
+	std::copy(temp_cell_faces.begin(), temp_cell_faces.end(), tess.GetAllCellFaces().begin() + Norg);
+	tess.GetAllCellFaces().resize(Norg2);
+
 	RemoveVector(tess.GetAllFaceNeighbors(), all_bad_faces);
 	RemoveVector(tess.GetAllArea(),all_bad_faces);
 	RemoveVector(tess.GetAllPointsInFace(), all_bad_faces);
 	// Fix all the indeces
-	FixBadIndeces(tess, all_bad_faces,Norg,new_add);
+	FixBadIndeces(tess, all_bad_faces,Norg,Nsplit,Ntotal0);
 }
 
 void AMR3D::operator() (HDSim3D &sim)

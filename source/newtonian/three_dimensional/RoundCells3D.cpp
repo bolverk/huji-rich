@@ -8,6 +8,48 @@ RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, 
 
 namespace
 {
+	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R,size_t index, vector<Vector3D> & velocities)
+	{
+		Vector3D const& point = tess.GetMeshPoint(index);
+		vector<size_t> neigh = tess.GetNeighbors(index);
+		size_t N = neigh.size();
+		size_t min_loc = 0;
+		double min_d = abs(point - tess.GetMeshPoint(neigh[0]));
+		for (size_t i = 1; i < N; ++i)
+		{
+			double d = abs(point - tess.GetMeshPoint(neigh[i]));
+			if (d < min_d)
+			{
+				min_d = d;
+				min_loc = i;
+			}
+		}
+		if (min_d < 0.2*R)
+		{
+			size_t face = tess.GetCellFaces(index)[min_loc];
+			vector<Vector3D> const& vertices = tess.GetFacePoints();
+			vector<size_t> const& indeces = tess.GetPointsInFace(face);
+			Vector3D normal = CrossProduct(vertices[indeces[1]] - vertices[indeces[0]], vertices[indeces[2]] 
+				- vertices[indeces[0]]);
+			normal *= (1.0 / abs(normal));
+			Vector3D v_par = velocity - normal*ScalarProd(normal, velocity);
+			size_t other = tess.GetFaceNeighbors(face).first == index ? tess.GetFaceNeighbors(face).second :
+				tess.GetFaceNeighbors(face).first;
+			if (!tess.IsPointOutsideBox(other))
+			{
+				if (index < other)
+				{
+					v_par *= 0.5;
+					Vector3D temp =velocities[other] - normal*ScalarProd(normal, velocities[other]);
+					v_par += 0.5*temp;
+				}
+				else
+					v_par = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+			}
+			velocity = normal*ScalarProd(normal, velocity) + v_par;
+		}
+	}
+
 	void CorrectPointsOverShoot(vector<Vector3D> &v, double dt, Tessellation3D const& tess,Vector3D const& ll,
 		Vector3D const& ur)
 	{
@@ -66,29 +108,31 @@ namespace
 	}
 }
 
-Vector3D RoundCells3D::calc_dw(size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	TracerStickerNames const& tracerstickernames) const
+void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities) const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
 	const double d = abs(s - r);
 	const double R = tess.GetWidth(i);
 	if (d < 0.9*eta_*R)
-		return Vector3D(0, 0,0);
+		return;
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names), abs(cells[i].velocity));
-	return chi_*c*(s - r) / R;
+	velocity += chi_*c*(s - r) / R;
+	if (d > 0.2*R)
+		SlowDown(velocity, tess, R, i,velocities);
 }
 
-Vector3D RoundCells3D::calc_dw(size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-	TracerStickerNames const& tracerstickernames)const
+void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
+	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities)const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
 	const double d = abs(s - r);
 	const double R = tess.GetWidth(i);
 	if (d < 0.9*eta_*R)
-		return Vector3D(0, 0,0);
+		return;
 	vector<size_t> neigh = tess.GetNeighbors(i);
 	size_t N = neigh.size();
 	double cs = std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
@@ -102,31 +146,35 @@ Vector3D RoundCells3D::calc_dw(size_t i, const Tessellation3D& tess, double dt, 
 		cs = std::max(cs, abs(cells[neigh[j]].velocity));
 	}
 	const double c_dt = d / dt;
-	return chi_*std::min(c_dt, cs)*(s - r) / R;
+	velocity += chi_*std::min(c_dt, cs)*(s - r) / R;
+	if (d > 0.2*R)
+		SlowDown(velocity, tess, R, i,velocities);
 }
 
 void RoundCells3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 	double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const
 {
 	pm_(tess, cells, time, tracerstickernames,res);
-	if (!cold_)
-	{
-		size_t n = res.size();
-		for (size_t i = 0; i < n; ++i)
-			res[i] += calc_dw(i, tess, cells, tracerstickernames);
-	}
+	const size_t n = tess.GetPointNo();
+	for (size_t i = 0; i < n; ++i)
+		SlowDown(res[i], tess, tess.GetWidth(i), i, res);
 }
 
 void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
 	double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const
 {
 	pm_.ApplyFix(tess, cells, time, dt, velocities, tracerstickernames);
-	velocities.resize(static_cast<size_t>(tess.GetPointNo()));
+	const size_t n = tess.GetPointNo();
 	if (cold_)
-	{
-		const size_t n = velocities.size();
+	{		
 		for (size_t i = 0; i < n; ++i)
-			velocities.at(i) += calc_dw(i, tess, dt, cells, tracerstickernames);
+			calc_dw(velocities.at(i),i, tess, dt, cells, tracerstickernames,velocities);
 	}
+	else
+	{
+		for (size_t i = 0; i < n; ++i)
+			calc_dw(velocities.at(i), i, tess, cells, tracerstickernames,velocities);
+	}
+	velocities.resize(n);
 	CorrectPointsOverShoot(velocities, dt, tess, ll_,ur_);
 }

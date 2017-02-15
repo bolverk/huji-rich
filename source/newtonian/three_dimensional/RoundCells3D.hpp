@@ -34,11 +34,11 @@ public:
 		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const;
 private:
 
-	Vector3D calc_dw(size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		TracerStickerNames const& tracerstickernames) const;
+	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		TracerStickerNames const& tracerstickernames,vector<Vector3D> & velocities) const;
 
-	Vector3D calc_dw(size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-		TracerStickerNames const& tracerstickernames)const;
+	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
+		TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities)const;
 
 	const PointMotion3D& pm_;
 	const EquationOfState& eos_;
