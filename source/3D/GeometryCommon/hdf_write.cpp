@@ -44,6 +44,9 @@ namespace
 
 Snapshot3D::Snapshot3D(void) :
 	mesh_points(),
+#ifdef RICH_MPI
+	proc_points(),
+#endif
 	volumes(),
 	cells(),
 	time(),
@@ -52,6 +55,9 @@ Snapshot3D::Snapshot3D(void) :
 
 Snapshot3D::Snapshot3D(const Snapshot3D& source) :
 	mesh_points(source.mesh_points),
+#ifdef RICH_MPI
+	proc_points(source.proc_points),
+#endif
 	volumes(source.volumes),
 	cells(source.cells),
 	time(source.time),
@@ -85,7 +91,7 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 	}
 	IntType datatype(PredType::NATIVE_ULLONG);
 	datatype.setOrder(H5T_ORDER_LE);
-	write_std_vector_to_hdf5(file, Nfaces, "Number_of_faces_in_cell",datatype);
+	write_std_vector_to_hdf5(file, Nfaces, "Number_of_faces_in_cell", datatype);
 	write_std_vector_to_hdf5(file, FacesInCell, "Faces_in_cell", datatype);
 	Npoints = tri.GetFacePoints().size();
 	for (size_t i = 0; i < Npoints; ++i)
@@ -114,7 +120,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 	vector<ComputationalCell3D> const& cells = sim.getCells();
 	Tessellation3D const& tess = sim.getTesselation();
 	TracerStickerNames tsn = sim.GetTracerStickerNames();
-	
+
 	size_t Ncells = tess.GetPointNo();
 
 	vector<double> temp(Ncells);
@@ -130,6 +136,24 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetMeshPoint(i).z;
 	write_std_vector_to_hdf5(file, temp, "Z");
+
+#ifdef RICH_MPI
+	// MPI
+	Tessellation3D const& tproc = sim.getProcTesselation();
+	Ncells = tproc.GetPointNo();
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tproc.GetMeshPoint(i).x;
+	write_std_vector_to_hdf5(file, temp, "proc_X");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tproc.GetMeshPoint(i).y;
+	write_std_vector_to_hdf5(file, temp, "proc_Y");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tproc.GetMeshPoint(i).z;
+	write_std_vector_to_hdf5(file, temp, "proc_Z");
+	Ncells = tess.GetPointNo();
+#endif
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].density;
@@ -173,7 +197,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 	write_std_vector_to_hdf5(file, temp, "Volume");
 
 	vector<double> time(1, sim.GetTime());
-	write_std_vector_to_hdf5(file,time, "Time");
+	write_std_vector_to_hdf5(file, time, "Time");
 
 	vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
 	write_std_vector_to_hdf5(file, cycle, "Cycle");
@@ -187,38 +211,35 @@ Snapshot3D ReadSnapshot3D
 
 	// Mesh points
 	{
-		const vector<double> x =read_double_vector_from_hdf5(file, "X");
-		const vector<double> y =read_double_vector_from_hdf5(file, "Y");
+		const vector<double> x = read_double_vector_from_hdf5(file, "X");
+		const vector<double> y = read_double_vector_from_hdf5(file, "Y");
 		const vector<double> z = read_double_vector_from_hdf5(file, "Z");
 		res.mesh_points.resize(x.size());
 		for (size_t i = 0; i < x.size(); ++i)
-			res.mesh_points.at(i) = Vector3D(x.at(i), y.at(i),z.at(i));
+			res.mesh_points.at(i) = Vector3D(x.at(i), y.at(i), z.at(i));
 	}
 
 #ifdef RICH_MPI
 	// MPI
+	if (!mpioverride)
 	{
-		if (!mpioverride)
-		{
-			const vector<double> x =
-				read_double_vector_from_hdf5(mpi, "x_coordinate");
-			const vector<double> y =
-				read_double_vector_from_hdf5(mpi, "y_coordinate");
-			res.proc_points.resize(x.size());
-			for (size_t i = 0; i < x.size(); ++i)
-				res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
-		}
+		const vector<double> px = read_double_vector_from_hdf5(file, "proc_X");
+		const vector<double> py = read_double_vector_from_hdf5(file, "Proc_Y");
+		const vector<double> pz = read_double_vector_from_hdf5(file, "Proc_Z");
+		res.proc_points.resize(px.size());
+		for (size_t i = 0; i < px.size(); ++i)
+			res.proc_points.at(i) = Vector3D(px.at(i), py.at(i), pz.at(i));
 	}
 #endif
 
 	// Hydrodynamic
 	{
 		const vector<double> density = read_double_vector_from_hdf5(file, "Density");
-		const vector<double> pressure =	read_double_vector_from_hdf5(file, "Pressure");
+		const vector<double> pressure = read_double_vector_from_hdf5(file, "Pressure");
 		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
 		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
 		const vector<double> z_velocity = read_double_vector_from_hdf5(file, "Vz");
-		
+
 		Group g_tracers = file.openGroup("tracers");
 		Group g_stickers = file.openGroup("stickers");
 		vector<vector<double> > tracers(g_tracers.getNumObjs());
@@ -259,7 +280,7 @@ Snapshot3D ReadSnapshot3D
 
 	// Misc
 	{
-		const vector<double> time =	read_double_vector_from_hdf5(file, "Time");
+		const vector<double> time = read_double_vector_from_hdf5(file, "Time");
 		res.time = time.at(0);
 
 		const vector<double> volume = read_double_vector_from_hdf5(file, "Volume");

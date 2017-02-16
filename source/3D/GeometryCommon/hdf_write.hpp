@@ -26,6 +26,11 @@ public:
 	//! \brief Mesh points
 	vector<Vector3D> mesh_points;
 
+#ifdef RICH_MPI
+	//! \brief Processors Mesh points
+	vector<Vector3D> proc_points;
+#endif
+
 	//! \brief Volume of cells
 	vector<double> volumes;
 

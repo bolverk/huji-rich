@@ -8,6 +8,14 @@ Tessellation3D& HDSim3D::getTesselation(void)
 {
 	return tess_;
 }
+
+#ifdef RICH_MPI
+const Tessellation3D& HDSim3D::getProcTesselation(void) const
+{
+	return tproc_;
+}
+#endif
+
 vector<ComputationalCell3D>& HDSim3D::getCells(void)
 {
 	return cells_;
