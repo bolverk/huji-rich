@@ -43,11 +43,6 @@ public:
 	//! \brief Cycle number
 	int cycle;
 
-#ifdef RICH_MPI
-	//! \brief Locations of cpus
-	vector<Vector3D> proc_points;
-#endif
-
 	//! \brief THe names of the tracers and stickers
 	TracerStickerNames tracerstickernames;
 };
