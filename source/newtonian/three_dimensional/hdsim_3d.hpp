@@ -39,9 +39,8 @@ public:
      */
     double getCycle(void) const;
 
-  private:
-    double time_;
-    int cycle_;
+    double time;
+    size_t cycle;
   };
 
   /*! \brief Class constructor
@@ -98,6 +97,10 @@ public:
   TracerStickerNames GetTracerStickerNames(void)const;
 
   size_t GetCycle(void)const;
+
+  void SetCycle(size_t cycle);
+
+  void SetTime(double t);
 
 private:
   Tessellation3D& tess_;

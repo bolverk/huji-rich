@@ -25,9 +25,36 @@ public:
 
 	//! \brief Mesh points
 	vector<Vector3D> mesh_points;
+
+	//! \brief Volume of cells
+	vector<double> volumes;
+
+	//! \brief Computational cells
+	vector<ComputationalCell3D> cells;
+
+	//! \brief Time
+	double time;
+
+	//! \brief Cycle number
+	int cycle;
+
+#ifdef RICH_MPI
+	//! \brief Locations of cpus
+	vector<Vector3D> proc_points;
+#endif
+
+	//! \brief THe names of the tracers and stickers
+	TracerStickerNames tracerstickernames;
 };
+
+/*! \brief Load snapshot data into memory
+\param fname File name
+\param mpioverride Flag for not reading mpi data when MPI is on
+\return Snapshot data
+*/
+Snapshot3D ReadSnapshot3D(const string& fname, bool mpioverride = false);
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
-void WriteSnapshot(HDSim3D const& sim, std::string const& filename);
+void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename);
 #endif // HDF_WRITE

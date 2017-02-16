@@ -2,6 +2,8 @@
 #include "../../3D/GeometryCommon/Voronoi3D.hpp"
 #include "../../misc/utils.hpp"
 
+//#define debug_amr 1
+
 namespace
 {
 	void CleanOuterPoints(vector<size_t> &neigh, vector<size_t> &nneigh, Tessellation3D const&tess)
@@ -41,7 +43,8 @@ namespace
 			{
 				A += tess.GetArea(faces[j]);
 			}			
-			if ((A*A*A) < (v*v * 300))
+			if (((A*A*A) < (v*v * 300))&&(abs(tess.GetMeshPoint(toremove[i])-tess.GetCellCM(toremove[i]))<
+				0.2*tess.GetWidth(toremove[i])))
 			{
 				remove_res.push_back(toremove[i]);
 			}
@@ -102,6 +105,36 @@ namespace
 		return result;
 	}
 
+	void CheckCorrect(Tessellation3D const& tess)
+	{
+		size_t N = tess.GetPointNo();
+		for (size_t i = 0; i < N; ++i)
+		{
+			vector<size_t> const& faces = tess.GetCellFaces(i);
+			size_t Nfaces = faces.size();
+			double A = 0;
+			Vector3D sum;
+			for (size_t j = 0; j < Nfaces; ++j)
+			{
+				double a = tess.GetArea(faces[j]);
+				A += a;
+				vector<Vector3D> const& vertices = tess.GetFacePoints();
+				vector<size_t> indeces = tess.GetPointsInFace(faces[j]);
+				Vector3D normal = CrossProduct(vertices[indeces[1]] - vertices[indeces[0]],
+					vertices[indeces[2]] - vertices[indeces[0]]);
+				normal *= (1.0 / abs(normal));
+				if (tess.GetFaceNeighbors(faces[j]).second == i)
+					normal *= -1;
+				sum += normal*a;
+			}
+			vector<size_t> neigh;
+			if (abs(sum) > 1e-5*A)
+				tess.GetNeighbors(i, neigh);
+			assert(abs(sum) < 1e-4*A);
+			assert(PointInPoly(tess, tess.GetMeshPoint(i), i));
+		}
+	}
+
 	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index)
 	{
 		size_t Nneigh = neigh.size();
@@ -120,14 +153,9 @@ namespace
 				max_loc = i;
 			}
 		}
-		return point*0.99999 + 0.00001*tess.GetMeshPoint(neigh[max_loc]);
+		return point*0.999999 + (1- 0.999999)*tess.GetMeshPoint(neigh[max_loc]);
 	}
 
-	/*void GetNeighborPoints(Tessellation3D const& tess, size_t index, vector<size_t> &neigh, vector<size_t> &nneigh)
-	{
-		tess.GetNeighbors(index, neigh);
-		tess.GetNeighborNeighbors(nneigh, index);
-	}*/
 
 	void BuildLocalVoronoi(Tessellation3D &local, Tessellation3D const& tess, vector<size_t> const& real_points, 
 		Vector3D const& newpoint,size_t torefine)
@@ -244,7 +272,6 @@ namespace
 			}
 			full_facepoints.push_back(temp);
 			full_faceneigh.push_back(new_face_neigh);
-
 			if (new_face_neigh.first<Norg || ((new_face_neigh.first>=Ntotal0)&&(new_face_neigh.first<Ntotal0+index)))
 				full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
 			else
@@ -437,6 +464,9 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	RemoveVector(tess.GetAllPointsInFace(), all_bad_faces);
 	// Fix all the indeces
 	FixBadIndeces(tess, all_bad_faces,Norg,Nsplit,Ntotal0);
+#ifdef debug_amr
+	CheckCorrect(tess);
+#endif
 }
 
 void AMR3D::operator() (HDSim3D &sim)

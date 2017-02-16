@@ -3,11 +3,61 @@
 
 using namespace H5;
 
+namespace
+{
+
+	template<class T> vector<T> read_vector_from_hdf5
+	(const CommonFG& file,
+		const string& caption,
+		const DataType& datatype)
+	{
+		DataSet dataset = file.openDataSet(caption);
+		DataSpace filespace = dataset.getSpace();
+		hsize_t dims_out[2];
+		filespace.getSimpleExtentDims(dims_out, NULL);
+		const size_t NX = static_cast<size_t>(dims_out[0]);
+		vector<T> result(NX);
+		dataset.read(&result[0], datatype);
+		return result;
+	}
+
+	vector<double> read_double_vector_from_hdf5
+	(CommonFG& file, string const& caption)
+	{
+		return read_vector_from_hdf5<double>
+			(file,
+				caption,
+				PredType::NATIVE_DOUBLE);
+	}
+
+	vector<int> read_int_vector_from_hdf5
+	(const CommonFG& file,
+		const string& caption)
+	{
+		return read_vector_from_hdf5<int>
+			(file,
+				caption,
+				PredType::NATIVE_INT);
+	}
+}
+
+
 Snapshot3D::Snapshot3D(void) :
-	mesh_points(){}
+	mesh_points(),
+	volumes(),
+	cells(),
+	time(),
+	cycle(),
+	tracerstickernames() {}
 
 Snapshot3D::Snapshot3D(const Snapshot3D& source) :
-	mesh_points(source.mesh_points){}
+	mesh_points(source.mesh_points),
+	volumes(source.volumes),
+	cells(source.cells),
+	time(source.time),
+	cycle(source.cycle),
+	tracerstickernames(source.tracerstickernames)
+{}
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 {
@@ -58,7 +108,7 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 	write_std_vector_to_hdf5(file, VerticesInFace, "Vertices_in_face", datatype);
 }
 
-void WriteSnapshot(HDSim3D const& sim, std::string const& filename)
+void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 {
 	H5File file(H5std_string(filename), H5F_ACC_TRUNC);
 	vector<ComputationalCell3D> const& cells = sim.getCells();
@@ -101,18 +151,21 @@ void WriteSnapshot(HDSim3D const& sim, std::string const& filename)
 		temp[i] = cells[i].velocity.z;
 	write_std_vector_to_hdf5(file, temp, "Vz");
 
+	Group tracers = file.createGroup("/tracers");
+	Group stickers = file.createGroup("/stickers");
+
 	for (size_t j = 0; j < cells[0].tracers.size(); ++j)
 	{
 		for (size_t i = 0; i < Ncells; ++i)
 			temp[i] = cells[i].tracers[j];
-		write_std_vector_to_hdf5(file, temp, tsn.tracer_names[j]);
+		write_std_vector_to_hdf5(tracers, temp, tsn.tracer_names[j]);
 	}
 
 	for (size_t j = 0; j < cells[0].stickers.size(); ++j)
 	{
 		for (size_t i = 0; i < Ncells; ++i)
 			temp[i] = cells[i].stickers[j];
-		write_std_vector_to_hdf5(file, temp, tsn.sticker_names[j]);
+		write_std_vector_to_hdf5(stickers, temp, tsn.sticker_names[j]);
 	}
 
 	for (size_t i = 0; i < Ncells; ++i)
@@ -124,4 +177,96 @@ void WriteSnapshot(HDSim3D const& sim, std::string const& filename)
 
 	vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
 	write_std_vector_to_hdf5(file, cycle, "Cycle");
+}
+
+Snapshot3D ReadSnapshot3D
+(const string& fname, bool mpioverride)
+{
+	Snapshot3D res;
+	H5File file(fname, H5F_ACC_RDONLY);
+
+	// Mesh points
+	{
+		const vector<double> x =read_double_vector_from_hdf5(file, "X");
+		const vector<double> y =read_double_vector_from_hdf5(file, "Y");
+		const vector<double> z = read_double_vector_from_hdf5(file, "Z");
+		res.mesh_points.resize(x.size());
+		for (size_t i = 0; i < x.size(); ++i)
+			res.mesh_points.at(i) = Vector3D(x.at(i), y.at(i),z.at(i));
+	}
+
+#ifdef RICH_MPI
+	// MPI
+	{
+		if (!mpioverride)
+		{
+			const vector<double> x =
+				read_double_vector_from_hdf5(mpi, "x_coordinate");
+			const vector<double> y =
+				read_double_vector_from_hdf5(mpi, "y_coordinate");
+			res.proc_points.resize(x.size());
+			for (size_t i = 0; i < x.size(); ++i)
+				res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
+		}
+	}
+#endif
+
+	// Hydrodynamic
+	{
+		const vector<double> density = read_double_vector_from_hdf5(file, "Density");
+		const vector<double> pressure =	read_double_vector_from_hdf5(file, "Pressure");
+		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
+		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
+		const vector<double> z_velocity = read_double_vector_from_hdf5(file, "Vz");
+		
+		Group g_tracers = file.openGroup("tracers");
+		Group g_stickers = file.openGroup("stickers");
+		vector<vector<double> > tracers(g_tracers.getNumObjs());
+		vector<string> tracernames(tracers.size());
+		for (hsize_t n = 0; n < g_tracers.getNumObjs(); ++n)
+		{
+			const H5std_string name = g_tracers.getObjnameByIdx(n);
+			tracernames[n] = name;
+			tracers[n] = read_double_vector_from_hdf5(g_tracers, name);
+		}
+
+		vector<vector<int> > stickers(g_stickers.getNumObjs());
+		vector<string> stickernames(stickers.size());
+		for (hsize_t n = 0; n < g_stickers.getNumObjs(); ++n)
+		{
+			const H5std_string name = g_stickers.getObjnameByIdx(n);
+			stickernames[n] = name;
+			stickers[n] = read_int_vector_from_hdf5(g_stickers, name);
+		}
+		res.tracerstickernames.sticker_names = stickernames;
+		res.tracerstickernames.tracer_names = tracernames;
+		res.cells.resize(density.size());
+		for (size_t i = 0; i < res.cells.size(); ++i)
+		{
+			res.cells.at(i).density = density.at(i);
+			res.cells.at(i).pressure = pressure.at(i);
+			res.cells.at(i).velocity.x = x_velocity.at(i);
+			res.cells.at(i).velocity.y = y_velocity.at(i);
+			res.cells.at(i).velocity.z = z_velocity.at(i);
+			res.cells.at(i).tracers.resize(tracernames.size());
+			for (size_t j = 0; j < tracernames.size(); ++j)
+				res.cells.at(i).tracers.at(j) = tracers.at(j).at(i);
+			res.cells.at(i).stickers.resize(stickernames.size());
+			for (size_t j = 0; j < stickernames.size(); ++j)
+				res.cells.at(i).stickers.at(j) = stickers.at(j).at(i) == 1;
+		}
+	}
+
+	// Misc
+	{
+		const vector<double> time =	read_double_vector_from_hdf5(file, "Time");
+		res.time = time.at(0);
+
+		const vector<double> volume = read_double_vector_from_hdf5(file, "Volume");
+		res.volumes = volume;
+		const vector<int> cycle = read_int_vector_from_hdf5(file, "Cycle");
+		res.cycle = cycle.at(0);
+	}
+
+	return res;
 }

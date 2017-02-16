@@ -100,7 +100,7 @@ public:
 	virtual vector<Vector3D>const& GetFacePoints(void) const = 0;
 
 	/*!
-	\brief Returns a reference to the indeces of the points composing a face
+	\brief Returns a reference to the indeces of the points composing a face. Points are order in a right hand fashion, normal pointing towards the first neighbor
 	\param index The index of the face
 	\returns The reference
 	*/

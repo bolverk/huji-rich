@@ -24,7 +24,7 @@ namespace
 				min_loc = i;
 			}
 		}
-		if (min_d < 0.2*R)
+		if (min_d < 0.3*R)
 		{
 			size_t face = tess.GetCellFaces(index)[min_loc];
 			vector<Vector3D> const& vertices = tess.GetFacePoints();
@@ -120,7 +120,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& te
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names), abs(cells[i].velocity));
 	velocity += chi_*c*(s - r) / R;
-	if (d > 0.2*R)
+	if (d > 0.15*R)
 		SlowDown(velocity, tess, R, i,velocities);
 }
 
@@ -147,7 +147,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	const double c_dt = d / dt;
 	velocity += chi_*std::min(c_dt, cs)*(s - r) / R;
-	if (d > 0.2*R)
+	if (d > 0.15*R)
 		SlowDown(velocity, tess, R, i,velocities);
 }
 

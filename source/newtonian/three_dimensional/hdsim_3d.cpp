@@ -25,22 +25,22 @@ const vector<Conserved3D>& HDSim3D::getExtensives(void) const
 }
 
 HDSim3D::ProgressTracker::ProgressTracker(void) :
-	time_(0), cycle_(0) {}
+	time(0), cycle(0) {}
 
 void HDSim3D::ProgressTracker::update(double dt)
 {
-	++cycle_;
-	time_ += dt;
+	++cycle;
+	time += dt;
 }
 
 double HDSim3D::ProgressTracker::getTime(void) const
 {
-	return time_;
+	return time;
 }
 
 double HDSim3D::ProgressTracker::getCycle(void) const
 {
-	return cycle_;
+	return cycle;
 }
 
 HDSim3D::HDSim3D(Tessellation3D& tess,
@@ -218,4 +218,14 @@ TracerStickerNames HDSim3D::GetTracerStickerNames(void)const
 size_t HDSim3D::GetCycle(void)const
 {
 	return static_cast<size_t>(pt_.getCycle());
+}
+
+void HDSim3D::SetCycle(size_t cycle)
+{
+	pt_.cycle = cycle;
+}
+
+void HDSim3D::SetTime(double t)
+{
+	pt_.time = t;
 }
