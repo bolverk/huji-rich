@@ -151,7 +151,7 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 	if (!SmallThermalEnergy(extensive))
 		return;
 
-	assert(entropy_index_ < extensive.tracers.size() && entropy_index_ >= 0);
+	assert(entropy_index_ < extensive.tracers.size());
 
 	double new_d = extensive.mass / tess.GetVolume(index);
 	double new_entropy = eos_.dp2s(new_d, NewPressure(extensive, eos_, new_d));

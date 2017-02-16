@@ -37,7 +37,7 @@ public:
     /*! \brief Returns the number of times time advance was called
       \return Cycle number
      */
-    double getCycle(void) const;
+    size_t getCycle(void) const;
 
     double time;
     size_t cycle;

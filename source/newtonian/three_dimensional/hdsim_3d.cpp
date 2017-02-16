@@ -46,7 +46,7 @@ double HDSim3D::ProgressTracker::getTime(void) const
 	return time;
 }
 
-double HDSim3D::ProgressTracker::getCycle(void) const
+size_t HDSim3D::ProgressTracker::getCycle(void) const
 {
 	return cycle;
 }

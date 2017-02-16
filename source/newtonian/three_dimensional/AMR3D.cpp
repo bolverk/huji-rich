@@ -52,14 +52,6 @@ namespace
 		toremove = remove_res;
 	}
 
-#ifdef RICH_MPI
-	void RemoveNeighbors()
-	{
-		bal
-	}
-
-#endif
-
 	vector<size_t> RemoveNeighbors(vector<double> const& merits, vector<size_t> const& candidates, 
 		Tessellation3D const& tess)
 	{
@@ -195,7 +187,7 @@ namespace
 	}
 
 	void FixVoronoi(Tessellation3D &local, Tessellation3D &tess, vector<size_t> &neigh,size_t torefine,
-		double &vol,Vector3D &CM,size_t Nsplit,size_t Ntotal0,size_t index)
+		double &vol,Vector3D &CM,size_t Ntotal0,size_t index)
 	{
 		// neigh is sorted
 		vector<std::pair<size_t, size_t> >const& localfaceneigh = local.GetAllFaceNeighbors();
@@ -287,7 +279,7 @@ namespace
 		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
 
-	void FixBadIndeces(Tessellation3D &tess, vector<size_t> const& bad_indeces,size_t Norg2,size_t Nsplit,size_t Ntotal0)
+	void FixBadIndeces(Tessellation3D &tess, vector<size_t> const& bad_indeces,size_t Nsplit,size_t Ntotal0)
 	{
 		size_t Norg = tess.GetPointNo();
 		for (size_t i = 0; i < Norg; ++i)
@@ -335,7 +327,7 @@ AMRCellUpdater3D::~AMRCellUpdater3D(void) {}
 AMRExtensiveUpdater3D::~AMRExtensiveUpdater3D(void){}
 
 Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& tracerstickernames) const
+	double volume, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Conserved3D res;
 	const double mass = volume*cell.density;
@@ -390,7 +382,7 @@ AMR3D::AMR3D(EquationOfState const& eos,CellsToRefine3D const& refine, CellsToRe
 void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& eos,
 	vector<Conserved3D> &extensives, double time,
 #ifdef RICH_MPI
-	Tessellation3D const& proctess,
+	Tessellation3D const& /*proctess*/,
 #endif
 	TracerStickerNames const& tracerstickernames)const
 {
@@ -425,7 +417,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 		double newv = vlocal.GetVolume(0) + vlocal.GetVolume(1);
 		assert(oldv > 0.9999*newv&&newv > 0.9999*oldv);
 		///////////
-		FixVoronoi(vlocal, tess, neigh, ToRefine[i], newvol, newCM,Nsplit,Ntotal0,i);
+		FixVoronoi(vlocal, tess, neigh, ToRefine[i], newvol, newCM,Ntotal0,i);
 		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(ToRefine[i]), extensives[ToRefine[i]], eos, tracerstickernames);
 		tess.GetMeshPoints()[Ntotal0 + i] = NewPoint;
 		newvols.push_back(newvol);
@@ -463,7 +455,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	RemoveVector(tess.GetAllArea(),all_bad_faces);
 	RemoveVector(tess.GetAllPointsInFace(), all_bad_faces);
 	// Fix all the indeces
-	FixBadIndeces(tess, all_bad_faces,Norg,Nsplit,Ntotal0);
+	FixBadIndeces(tess, all_bad_faces,Nsplit,Ntotal0);
 #ifdef debug_amr
 	CheckCorrect(tess);
 #endif
@@ -471,7 +463,11 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 
 void AMR3D::operator() (HDSim3D &sim)
 {
-	UpdateCellsRefine(sim.getTesselation(), sim.getCells(), eos_, sim.getExtensives(), sim.GetTime(), sim.GetTracerStickerNames());
+	UpdateCellsRefine(sim.getTesselation(), sim.getCells(), eos_, sim.getExtensives(), sim.GetTime(), 
+#ifdef RICH_MPI
+		sim.getProcTesselation(),
+#endif
+		sim.GetTracerStickerNames());
 }
 
 AMR3D::~AMR3D(void){}
