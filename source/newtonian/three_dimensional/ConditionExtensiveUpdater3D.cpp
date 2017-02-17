@@ -65,7 +65,7 @@ namespace
 	}
 
 	bool BigJump(Vector3D const& Tgrad, size_t index, Tessellation3D const& tess, vector<ComputationalCell3D> const& cells,
-		boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells,vector<size_t> &neigh)
+		boost::container::flat_map<size_t, ComputationalCell3D> const& ghost_cells,vector<size_t> &neigh)
 	{
 		tess.GetNeighbors(index,neigh);
 		size_t n = neigh.size();
@@ -76,7 +76,7 @@ namespace
 		{
 			if (ScalarProd(point - tess.GetMeshPoint(neigh[i]), Tgrad)<0)
 			{
-				if (neigh[i] < N || !tess.IsGhostPoint(neigh[i]))
+				if (neigh[i] < N || !tess.IsPointOutsideBox(neigh[i]))
 				{
 					maxT = std::max(maxT, cells[neigh[i]].pressure / cells[neigh[i]].density);
 					maxP = std::max(maxP, cells[neigh[i]].pressure);
