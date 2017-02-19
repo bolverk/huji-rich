@@ -26,26 +26,10 @@
  *
  * A test is composed of a c++ file test.cpp and a python file test.py. The c++ file activates the function to be tested, and usually writes the result to a file, and the python file analyses the results and decides whether they are acceptable or not. Each test should be in a separate folder inside the folder "tests".
  *
- * The syntax for running all the tests is simply
+ * Read the wiki in order to learn how to use the code.
  *
- * \code 
- * ./run_test.py
- * \endcode
  * 
- * This will go over all available tests, run each one, display a message saying whether it passed or failed, and delete the temporary folder. To run just a single test and retain the temporary folder, use
- *
- * \code 
- * ./run_test.py [path to folder]
- * \endcode
- *
- * Tests can also be run in parallel, under python's <a href="http://docs.python.org/2/library/multiprocessing.html"> multiprocessing </a> module, using
- *
- * \code
- * python ./parallel_run_tests.py
- * \endcode
- *
- * The results are not printed to the screen, but to a file called "test_report.txt".
- * 
+ 
  * \subsection lint Lint
  *
  * All code must be checked using a <a href="http://en.wikipedia.org/wiki/Lint_(software)"> lint software </a>.
