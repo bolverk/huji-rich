@@ -142,6 +142,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 	Group mpi = file.createGroup("/mpi");
 	Tessellation3D const& tproc = sim.getProcTesselation();
 	Ncells = tproc.GetPointNo();
+	temp.resize(Ncells);
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tproc.GetMeshPoint(i).x;
 	write_std_vector_to_hdf5(mpi, temp, "proc_X");
@@ -154,6 +155,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 		temp[i] = tproc.GetMeshPoint(i).z;
 	write_std_vector_to_hdf5(mpi, temp, "proc_Z");
 	Ncells = tess.GetPointNo();
+	temp.resize(Ncells);
 #endif
 
 	for (size_t i = 0; i < Ncells; ++i)
