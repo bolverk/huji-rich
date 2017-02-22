@@ -89,9 +89,9 @@ namespace
 				ReplaceComputationalCell(temp.xderivative, *neighbors[i]);
 				temp.xderivative *= r_ij.x*A;
 				ReplaceComputationalCell(temp.yderivative, *neighbors[i]);
-				temp.xderivative *= r_ij.y*A;
+				temp.yderivative *= r_ij.y*A;
 				ReplaceComputationalCell(temp.zderivative, *neighbors[i]);
-				temp.xderivative *= r_ij.z*A;
+				temp.zderivative *= r_ij.z*A;
 			}
 			else
 			{
