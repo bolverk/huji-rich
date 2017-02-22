@@ -560,7 +560,8 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	const size_t CellNumber = tess.GetPointNo();
 	vector<size_t> boundaryedges;
 	// Get ghost points
-	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells = ghost_.operator()(tess, cells, time, tracerstickersnames);
+	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
+	ghost_.operator()(tess, cells, time, tracerstickersnames,ghost_cells);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell3D> new_cells(cells);
 	new_cells.resize(tess.GetTotalPointNumber());

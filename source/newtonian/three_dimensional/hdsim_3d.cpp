@@ -1,5 +1,7 @@
 #include <cassert>
 #include "hdsim_3d.hpp"
+#include "../../3D/GeometryCommon/HilbertOrder3D.hpp"
+#include "../../misc/utils.hpp"
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
@@ -146,6 +148,19 @@ void HDSim3D::timeAdvance2(void)
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
+
+	if (pt_.cycle % 10 == 0)
+	{
+		vector<Vector3D> &mesh = tess_.GetMeshPoints();
+		mesh.resize(tess_.GetPointNo());
+		vector<size_t> order = HilbertOrder3D(mesh);
+		mesh = VectorValues(mesh, order);
+		mid_extensives = VectorValues(mid_extensives, order);
+		extensive_ = VectorValues(extensive_, order);
+		cells_ = VectorValues(cells_, order);
+		point_vel = VectorValues(point_vel, order);
+	}
+
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
 		proc_update_->Update(tproc_, tess_);

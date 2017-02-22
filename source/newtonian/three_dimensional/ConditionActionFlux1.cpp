@@ -85,10 +85,9 @@ namespace
 		cell.velocity -= 2 * ScalarProd(cell.velocity, normal)*normal;
 	}
 
-	void rigid_wall_states(std::pair<ComputationalCell3D, ComputationalCell3D> &/*face_values*/,
+	void rigid_wall_states(std::pair<ComputationalCell3D, ComputationalCell3D> &res,
 		Vector3D const& normal, const bool aux)
 	{
-		pair<ComputationalCell3D, ComputationalCell3D> res;
 		if (aux)
 		{
 			res.second = res.first;

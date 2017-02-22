@@ -1,4 +1,5 @@
 #include "Ghost3D.hpp"
+#include "../../misc/utils.hpp"
 
 Ghost3D::~Ghost3D(void) {}
 
@@ -21,14 +22,14 @@ vector<std::pair<size_t, size_t> > Ghost3D::GetOuterFacesIndeces(Tessellation3D 
 }
 
 
-boost::container::flat_map<size_t, ComputationalCell3D> RigidWallGenerator3D::operator()(const Tessellation3D& tess,
+void RigidWallGenerator3D::operator()(const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& cells, double /*time*/, TracerStickerNames const&
-	/*tracerstickernames*/) const
+	/*tracerstickernames*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
 {
-	boost::container::flat_map<size_t, ComputationalCell3D> res;
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
 	size_t N = ghosts.size();
 	vector<std::pair<size_t, ComputationalCell3D> > temp(N);
+	vector<size_t> indeces(N);
 	for (size_t i = 0; i < N; ++i)
 	{
 		size_t ghost_index = 0, real_index = 0;
@@ -45,9 +46,14 @@ boost::container::flat_map<size_t, ComputationalCell3D> RigidWallGenerator3D::op
 		Vector3D normal = normalize(tess.GetMeshPoint(ghost_index) - tess.GetMeshPoint(real_index));
 		temp[i] = std::pair<size_t, ComputationalCell3D>(ghost_index, cells[real_index]);
 		temp[i].second.velocity -= 2*normal*ScalarProd(normal, temp[i].second.velocity);
+		indeces[i] = ghost_index;
 	}
-	res.insert(temp.begin(), temp.end());
-	return res;
+	vector<size_t> indeces2;
+	sort_index(indeces, indeces2);
+	res.clear();
+	res.reserve(N);
+	for (size_t i = 0; i < N; ++i)
+		res.insert(res.begin()+i, temp[indeces2[i]]);
 }
 
 Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
@@ -61,14 +67,14 @@ Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, c
 	return res;
 }
 
-boost::container::flat_map<size_t, ComputationalCell3D> FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
+void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& cells, double /*time*/, TracerStickerNames const&
-	/*tracerstickernames*/) const
+	/*tracerstickernames*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
 {
-	boost::container::flat_map<size_t, ComputationalCell3D> res;
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
 	size_t N = ghosts.size();
 	vector<std::pair<size_t, ComputationalCell3D> > temp(N);
+	vector<size_t> indeces(N);
 	for (size_t i = 0; i < N; ++i)
 	{
 		size_t ghost_index = 0, real_index = 0;
@@ -84,9 +90,14 @@ boost::container::flat_map<size_t, ComputationalCell3D> FreeFlowGenerator3D::ope
 		}
 		Vector3D normal = normalize(tess.GetMeshPoint(ghost_index) - tess.GetMeshPoint(real_index));
 		temp[i] = std::pair<size_t, ComputationalCell3D>(ghost_index, cells[real_index]);
+		indeces[i] = ghost_index;
 	}
-	res.insert(temp.begin(), temp.end());
-	return res;
+	vector<size_t> indeces2;
+	sort_index(indeces, indeces2);
+	res.clear();
+	res.reserve(N);
+	for (size_t i = 0; i < N; ++i)
+		res.insert(res.begin() + i, temp[indeces2[i]]);
 }
 
 Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,

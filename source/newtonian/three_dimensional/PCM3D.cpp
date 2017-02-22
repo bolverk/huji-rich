@@ -9,7 +9,8 @@ void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCel
 	size_t Nfaces = tess.GetTotalFacesNumber();
 	size_t Npoints = tess.GetPointNo();
 	res.resize(Nfaces);
-	boost::container::flat_map<size_t, ComputationalCell3D> ghosts = ghost_(tess, cells, time, tracerstickersnames);
+	boost::container::flat_map<size_t, ComputationalCell3D> ghosts;
+	ghost_(tess, cells, time, tracerstickersnames,ghosts);
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		size_t n0 = tess.GetFaceNeighbors(i).first;

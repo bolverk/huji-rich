@@ -22,11 +22,11 @@ public:
 	\param cells The computational cells
 	\param time The time
 	\param tracerstickernames The names of the tracers and stickers
-	\return A map where the key is the index of the ghost cell and the value is its' comuptational cell
+	\param res A map where the key is the index of the ghost cell and the value is its' comuptational cell
 	*/
-	virtual boost::container::flat_map<size_t, ComputationalCell3D> operator() (const Tessellation3D& tess,
+	virtual void operator() (const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames) const = 0;
+		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const = 0;
 
 	/*!
 	\brief Calculates the gradients for the ghost cells
@@ -56,9 +56,9 @@ public:
 class RigidWallGenerator3D : public Ghost3D
 {
 public:
-	boost::container::flat_map<size_t, ComputationalCell3D> operator() (const Tessellation3D& tess,
+	void operator() (const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames) const;
+		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> & res) const;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
@@ -68,9 +68,9 @@ public:
 class FreeFlowGenerator3D : public Ghost3D
 {
 public:
-	boost::container::flat_map<size_t, ComputationalCell3D> operator() (const Tessellation3D& tess,
+	void operator() (const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames) const;
+		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,

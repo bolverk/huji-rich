@@ -138,13 +138,13 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 	{
 		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(), ts.tracer_names.end(), string("Entropy")) - ts.tracer_names.begin());
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_.operator()(tess, cells, time, ts, ghost_cells_);
 		dt_ = dt;
 	}
 	if (lasttime_ < time || dt < dt_ || dt > dt_)
 	{
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_.operator()(tess, cells, time, ts, ghost_cells_);
 		dt_ = dt;
 	}
 
