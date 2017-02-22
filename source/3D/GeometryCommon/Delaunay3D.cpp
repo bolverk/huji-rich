@@ -10,12 +10,15 @@
 
 namespace
 {
-	Vector3D PlaneLineIntersection(boost::array<Vector3D, 3> const& plane, Vector3D const& A, Vector3D const& B)
+	bool PlaneLineIntersection(boost::array<Vector3D, 3> const& plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
 		Vector3D N = CrossProduct(plane[1] - plane[0], plane[2] - plane[0]);
 		Vector3D mu = B - A;
+		if (ScalarProd(mu, N) < ((mu.x*mu.x + mu.y*mu.y + mu.z*mu.z)*1e-6))
+			return false;
 		double m = ScalarProd(N, plane[0] - A) / ScalarProd(N, mu);
-		return A + m*mu;
+		res = A + m*mu;
+		return true;
 	}
 
 	std::size_t GetOppositePoint(Tetrahedron const& tetra, std::size_t neighbor)
@@ -576,10 +579,14 @@ void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p,si
 	//std::size_t other_point_loc = GetOppositePoint(tetras_[tetra1], tetra0);
 	for (std::size_t i = 0; i < 3;++i)
 		b3_temp_[i] = points_[tetras_[tetra0].points[(p_loc + i + 1) % 4]];
-	Vector3D intersection = PlaneLineIntersection(b3_temp_, points_[p], 
-		points_[tetras_[tetra1].points[other_point_loc]]);
-	std::pair<std::size_t, double> outside_intersection = InTriangle(b3_temp_, intersection);
-	
+	Vector3D intersection;
+	bool good_intersection = PlaneLineIntersection(b3_temp_, points_[p],
+		points_[tetras_[tetra1].points[other_point_loc]],intersection);
+	std::pair<std::size_t, double> outside_intersection;
+	if (!good_intersection)
+		outside_intersection.second = 0;
+	else
+		outside_intersection= InTriangle(b3_temp_, intersection);
 	if (outside_intersection.second<1e-6)
 	{
 		ExactFlip(tetra0, tetra1, p);
