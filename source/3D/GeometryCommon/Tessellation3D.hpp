@@ -21,12 +21,14 @@ public:
 	/*! \brief Builds the tessellation
 	\param points Initial position of mesh generating points
 	*/
-	virtual void Build(vector<Vector3D> const& points
-#ifdef RICH_MPI
-		,Tessellation3D const& tproc
-#endif
-		) = 0;
+	virtual void Build(vector<Vector3D> const& points) = 0;
 
+#ifdef RICH_MPI
+	/*! \brief Builds the tessellation
+	\param points Initial position of mesh generating points
+	*/
+	virtual void Build(vector<Vector3D> const& points, Tessellation3D const& tproc) = 0;
+#endif
 
 	/*! \brief Get Total number of mesh generating points
 	\return Number of mesh generating points
