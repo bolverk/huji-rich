@@ -10,6 +10,7 @@
 #include "flux_calculator_3d.hpp"
 #include "cell_updater_3d.hpp"
 #include "extensive_updater3d.hpp"
+#include "../../mpi/ProcessorUpdate3D.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
@@ -51,6 +52,7 @@ public:
     \param tsc Time step calculator
     \param fc Flux calculator
     \param cu Cell updater
+	\param proc_update How to load balance
    */
   HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
@@ -63,7 +65,11 @@ public:
 	  const FluxCalculator3D& fc,
 	  const CellUpdater3D& cu,
 	  const ExtensiveUpdater3D & eu,
-	  const TracerStickerNames tsn);
+	  const TracerStickerNames tsn
+#ifdef RICH_MPI
+	  ,const ProcessorUpdate3D* proc_update = 0
+#endif
+  );
 
   //! \brief Advances the simulation in time (first order)
   void timeAdvance();
@@ -124,6 +130,9 @@ private:
   const ExtensiveUpdater3D& eu_;
   const TracerStickerNames tsn_;
   ProgressTracker pt_;
+#ifdef RICH_MPI
+  const ProcessorUpdate3D* proc_update_;
+#endif
 };
 
 #endif // HDSIM_3D_HPP

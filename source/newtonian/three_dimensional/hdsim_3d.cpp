@@ -62,12 +62,19 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const FluxCalculator3D& fc,
 	const CellUpdater3D& cu,
 	const ExtensiveUpdater3D& eu,
-	const TracerStickerNames tsn) :
+	const TracerStickerNames tsn
+#ifdef RICH_MPI
+	,const ProcessorUpdate3D* proc_update
+#endif
+) :
 	tess_(tess), 
 #ifdef RICH_MPI
 	tproc_(tproc),
 #endif
 	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),tsn_(tsn),pt_()
+#ifdef RICH_MPI
+	,proc_update_(proc_update)
+#endif
 {
 	assert(tess.GetPointNo() == cells.size());
 #ifdef RICH_MPI
@@ -139,6 +146,10 @@ void HDSim3D::timeAdvance2(void)
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
+#ifdef RICH_MPI
+	if (proc_update_ != 0)
+		proc_update_->Update(tproc_, tess_);
+#endif
 	UpdateTessellation(tess_, point_vel, dt
 #ifdef RICH_MPI
 		,tproc_
