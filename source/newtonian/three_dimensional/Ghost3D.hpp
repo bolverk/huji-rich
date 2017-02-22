@@ -65,5 +65,18 @@ public:
 		TracerStickerNames const& tracerstickernames) const;
 };
 
+class FreeFlowGenerator3D : public Ghost3D
+{
+public:
+	boost::container::flat_map<size_t, ComputationalCell3D> operator() (const Tessellation3D& tess,
+		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
+		tracerstickernames) const;
+
+	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
+		TracerStickerNames const& tracerstickernames) const;
+};
+
+
 
 #endif // GHOST3D_HPP
