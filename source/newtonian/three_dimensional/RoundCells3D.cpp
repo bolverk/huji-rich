@@ -29,8 +29,8 @@ namespace
 			size_t face = tess.GetCellFaces(index)[min_loc];
 			vector<Vector3D> const& vertices = tess.GetFacePoints();
 			vector<size_t> const& indeces = tess.GetPointsInFace(face);
-			Vector3D normal = CrossProduct(vertices[indeces[1]] - vertices[indeces[0]], vertices[indeces[2]] 
-				- vertices[indeces[0]]);
+			Vector3D normal = tess.GetMeshPoint(tess.GetFaceNeighbors(face).first) -
+				tess.GetMeshPoint(tess.GetFaceNeighbors(face).second);
 			normal *= (1.0 / abs(normal));
 			Vector3D v_par = velocity - normal*ScalarProd(normal, velocity);
 			size_t other = tess.GetFaceNeighbors(face).first == index ? tess.GetFaceNeighbors(face).second :

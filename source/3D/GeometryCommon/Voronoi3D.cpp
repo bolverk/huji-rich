@@ -18,9 +18,8 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 	for (std::size_t i = 0; i < N; ++i)
 	{
 		Vector3D const& vecref = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]];
-		Vector3D normal = CrossProduct(tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]] -
-			vecref, tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[2]]
-			- tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]]);
+		Vector3D normal = tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).first) -
+			tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).second);
 		double sign = ScalarProd(tess.GetMeshPoint(index) - vecref, normal);
 		if (ScalarProd(point - vecref, normal)*sign < 0)
 			return false;
@@ -279,13 +278,19 @@ namespace
 	}
 #endif //RICH_MPI
 
-	double CalcFaceArea(vector<std::size_t> const& indeces, vector<Vector3D> const& points)
+	std::pair<double,Vector3D> CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points)
 	{
 		std::size_t Nloop = indeces.size() - 2;
 		Vector3D temp;
+		double Atot = 0;
 		for (std::size_t i = 0; i < Nloop; ++i)
-			temp += CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]);
-		return 0.5*abs(temp);
+		{
+			double A = 0.5*abs(CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]));
+			temp += (A / 3)*(points[indeces[i + 2]]+ points[indeces[i + 1]]+ points[indeces[0]]);
+			Atot += A;
+		}
+		temp *= (1.0 / Atot);
+		return std::pair<double, Vector3D>(Atot, temp);
 	}
 
 	bool PointInVertices(b_array_4 const& points, std::size_t point)
@@ -592,6 +597,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	PointsInFace_.clear();
 	FaceNeighbors_.clear();
 	CM_.clear();
+	Face_CM_.clear();
 	volume_.clear();
 	area_.clear();
 	Nghost_.clear();
@@ -701,6 +707,7 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 	PointsInFace_.clear();
 	FaceNeighbors_.clear();
 	CM_.clear();
+	Face_CM_.clear();
 	volume_.clear();
 	area_.clear();
 	Norg_ = points.size();
@@ -744,6 +751,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	PointsInFace_.clear();
 	FaceNeighbors_.clear();
 	CM_.clear();
+	Face_CM_.clear();
 	volume_.clear();
 	area_.clear();
 	Norg_ = points.size();
@@ -780,6 +788,7 @@ void Voronoi3D::BuildVoronoi(void)
 {
 	FacesInCell_.resize(Norg_);
 	area_.reserve(Norg_ * 10);
+	Face_CM_.reserve(Norg_ * 10);
 	FaceNeighbors_.reserve(Norg_ * 10);
 	PointsInFace_.reserve(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
@@ -839,7 +848,9 @@ void Voronoi3D::BuildVoronoi(void)
 							FacesInCell_[N1].push_back(PointsInFace_.size() - 1);
 						// Make faces right handed
 						MakeRightHandFace(PointsInFace_.back(), del_.points_[N0], tetra_centers_, temp2);
-						area_.push_back(CalcFaceArea(PointsInFace_.back(), tetra_centers_));
+						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(PointsInFace_.back(), tetra_centers_);
+						area_.push_back(AreaCM.first);
+						Face_CM_.push_back(AreaCM.second);
 					}
 				}
 			}
@@ -1375,11 +1386,7 @@ bool Voronoi3D::IsGhostPoint(std::size_t index)const
 
 Vector3D Voronoi3D::FaceCM(std::size_t index)const
 {
-	std::size_t N = PointsInFace_[index].size();
-	Vector3D res = tetra_centers_[PointsInFace_[index][0]];
-	for (std::size_t i = 1; i < N; ++i)
-		res += tetra_centers_[PointsInFace_[index][i]];
-	return res / static_cast<double>(N);
+	return Face_CM_[index];
 }
 
 Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const
@@ -1401,6 +1408,11 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 vector<double>& Voronoi3D::GetAllArea(void)
 {
 	return area_;
+}
+
+vector<Vector3D>& Voronoi3D::GetAllFaceCM(void)
+{
+	return Face_CM_;
 }
 
 vector<vector<size_t> >& Voronoi3D::GetAllCellFaces(void)

@@ -43,7 +43,7 @@ namespace
 			{
 				A += tess.GetArea(faces[j]);
 			}			
-			if (((A*A*A) < (v*v * 300))&&(abs(tess.GetMeshPoint(toremove[i])-tess.GetCellCM(toremove[i]))<
+			if (((A*A*A) < (v*v * 250))&&(abs(tess.GetMeshPoint(toremove[i])-tess.GetCellCM(toremove[i]))<
 				0.2*tess.GetWidth(toremove[i])))
 			{
 				remove_res.push_back(toremove[i]);
@@ -134,6 +134,8 @@ namespace
 		Vector3D const& point = tess.GetMeshPoint(index);
 		Vector3D other = tess.GetMeshPoint(neigh[0]);
 		double max_dist = ScalarProd(point - other, point - other);		
+		//double min_dist = max_dist;
+		//size_t min_loc = 0;
 		size_t max_loc = 0;
 		for (size_t i = 1; i < Nneigh; ++i)
 		{
@@ -144,8 +146,16 @@ namespace
 				max_dist = temp;
 				max_loc = i;
 			}
+			/*if (temp < min_dist)
+			{
+				min_dist = temp;
+				min_loc = i;
+			}*/
 		}
+		//Vector3D normal = CrossProduct(tess.GetMeshPoint(neigh[max_loc]) - point, tess.GetMeshPoint(neigh[min_loc]) - point);
+		//normal *= 1e-6*tess.GetWidth(index) / abs(normal);
 		return point*0.999999 + (1- 0.999999)*tess.GetMeshPoint(neigh[max_loc]);
+		//return point + normal;
 	}
 
 
@@ -195,6 +205,7 @@ namespace
 		vector<vector<size_t> >& full_facepoints = tess.GetAllPointsInFace();
 		vector<vector<size_t> >& full_cellfaces = tess.GetAllCellFaces();
 		vector<double> & full_area = tess.GetAllArea();
+		vector<Vector3D> &full_face_cm = tess.GetAllFaceCM();
 		vector<Vector3D>& full_vertices = tess.GetFacePoints();
 
 		size_t Norg = tess.GetPointNo();
@@ -275,6 +286,7 @@ namespace
 			if (new_face_neigh.second<Norg || ((new_face_neigh.second >= Ntotal0) && (new_face_neigh.second<=Ntotal0 + index)))
 				full_cellfaces.at(new_face_neigh.second).push_back(full_faceneigh.size() - 1);
 			full_area.push_back(local.GetArea(i));
+			full_face_cm.push_back(local.FaceCM(i));
 		}
 		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
@@ -425,6 +437,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 		newpoints.push_back(NewPoint);
 		all_bad_faces.insert(all_bad_faces.end(), bad_faces.begin(), bad_faces.end());
 	}
+
 	sort(all_bad_faces.begin(), all_bad_faces.end());
 	all_bad_faces = unique(all_bad_faces);
 	vector<double> & allvol = tess.GetAllVolumes();
@@ -454,8 +467,29 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	RemoveVector(tess.GetAllFaceNeighbors(), all_bad_faces);
 	RemoveVector(tess.GetAllArea(),all_bad_faces);
 	RemoveVector(tess.GetAllPointsInFace(), all_bad_faces);
+	RemoveVector(tess.GetAllFaceCM(), all_bad_faces);
 	// Fix all the indeces
 	FixBadIndeces(tess, all_bad_faces,Nsplit,Ntotal0);
+
+	// Deal with mpi
+/*#ifdef RICH_MPI
+	// Find all outer points
+	vector<size_t> outer_points;
+	for (size_t i = 0; i < Nsplit; ++i)
+	{
+		tess.GetNeighbors(Norg+i, neigh);
+		size_t Nneigh = neigh.size();
+		for (size_t j = 0; j < Nneigh; ++j)
+		{
+			if (neigh[j] >= Norg && !tess.IsPointOutsideBox(neigh[j]))
+				outer_points.push_back(neigh[j]);
+		}
+	}
+
+#endif
+*/
+
+
 #ifdef debug_amr
 	CheckCorrect(tess);
 #endif

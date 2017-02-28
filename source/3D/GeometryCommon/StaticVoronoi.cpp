@@ -1452,3 +1452,9 @@ vector<std::size_t> const& StaticVoronoi::GetSelfIndex(void) const
 {
 	return self_index_;
 }
+
+
+vector<Vector3D>& StaticVoronoi::GetAllFaceCM(void)
+{
+	return Face_CM_;
+}

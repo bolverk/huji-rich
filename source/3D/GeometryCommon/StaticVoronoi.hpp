@@ -67,7 +67,7 @@ private:
 	vector<vector<std::size_t> > FacesInCell_;
 	vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
 	vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
-	vector<Vector3D> CM_;
+	vector<Vector3D> CM_,Face_CM_;
 	vector<double> volume_;
 	vector<double> area_;
 	vector<vector<std::size_t> > duplicated_points_;
@@ -76,6 +76,8 @@ private:
 	vector<std::size_t> self_index_;
 	StaticVoronoi();
 public:
+	vector<Vector3D>& GetAllFaceCM(void);
+
 	Vector3D FaceCM(std::size_t index)const;
 
 	StaticVoronoi(Vector3D const& ll, Vector3D const& ur);

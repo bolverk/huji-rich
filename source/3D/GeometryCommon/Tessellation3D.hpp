@@ -219,6 +219,8 @@ public:
 	*/
 	virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
 
+	virtual vector<Vector3D>& GetAllFaceCM(void) = 0;
+
 	virtual Vector3D FaceCM(size_t index)const=0;
 
 	virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;

@@ -64,6 +64,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const FluxCalculator3D& fc,
 	const CellUpdater3D& cu,
 	const ExtensiveUpdater3D& eu,
+	const SourceTerm3D &source,
 	const TracerStickerNames tsn
 #ifdef RICH_MPI
 	,const ProcessorUpdate3D* proc_update
@@ -73,7 +74,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	tproc_(tproc),
 #endif
-	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),tsn_(tsn),pt_()
+	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),source_(source),tsn_(tsn),pt_()
 #ifdef RICH_MPI
 	,proc_update_(proc_update)
 #endif
@@ -147,6 +148,7 @@ void HDSim3D::timeAdvance2(void)
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
+	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt, tsn_, mid_extensives);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
 
 	if (pt_.cycle % 10 == 0)
@@ -187,6 +189,7 @@ void HDSim3D::timeAdvance2(void)
 	pt_.update(dt);
 	CalcFaceVelocities(tess_, point_vel, face_vel);
 	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), dt, tsn_);
+	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt, tsn_, mid_extensives);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
 	ExtensiveAvg(extensive_, mid_extensives);
 	cu_(cells_, eos_, tess_, extensive_, tsn_);
@@ -211,6 +214,7 @@ void HDSim3D::timeAdvance(void)
 	CalcFaceVelocities(tess_, point_vel, face_vel);
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
+	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt, tsn_, extensive_);
 	eu_(fluxes, tess_, dt, cells_, extensive_, pt_.getTime(), tsn_);
 	UpdateTessellation(tess_, point_vel, dt
 #ifdef RICH_MPI

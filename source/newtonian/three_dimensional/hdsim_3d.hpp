@@ -11,6 +11,7 @@
 #include "cell_updater_3d.hpp"
 #include "extensive_updater3d.hpp"
 #include "../../mpi/ProcessorUpdate3D.hpp"
+#include "SourceTerm3D.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
@@ -65,6 +66,7 @@ public:
 	  const FluxCalculator3D& fc,
 	  const CellUpdater3D& cu,
 	  const ExtensiveUpdater3D & eu,
+	  const	SourceTerm3D &source,
 	  const TracerStickerNames tsn
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
@@ -104,7 +106,6 @@ public:
 
   vector<Conserved3D>& getExtensives(void);
 
-
   double GetTime(void)const;
 
   TracerStickerNames GetTracerStickerNames(void)const;
@@ -128,6 +129,7 @@ private:
   const FluxCalculator3D& fc_;
   const CellUpdater3D& cu_;
   const ExtensiveUpdater3D& eu_;
+  const	SourceTerm3D &source_;
   const TracerStickerNames tsn_;
   ProgressTracker pt_;
 #ifdef RICH_MPI
