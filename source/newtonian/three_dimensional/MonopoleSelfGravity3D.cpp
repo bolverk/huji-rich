@@ -7,7 +7,7 @@ MonopoleSelfGravity3D::MonopoleSelfGravity3D(size_t resolution,double smoothleng
 smoothlength_(smoothlength){}
 
 void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
+	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const& /*tracerstickernames*/,
 	vector<Vector3D> &acc) const
 {
 	size_t N = tess.GetPointNo();
@@ -34,7 +34,7 @@ void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<
 	// Create radius list
 	vector<double> m_radius(resolution_),r_list(resolution_);
 	for (size_t i = 0; i < resolution_; ++i)
-		r_list[i] = dr*i;
+		r_list[i] = dr*static_cast<double>(i);
 	// Find mass in radius
 	for (size_t i = 0; i < N; ++i)
 	{

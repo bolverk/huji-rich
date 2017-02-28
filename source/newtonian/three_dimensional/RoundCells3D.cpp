@@ -27,8 +27,8 @@ namespace
 		if (min_d < 0.3*R)
 		{
 			size_t face = tess.GetCellFaces(index)[min_loc];
-			vector<Vector3D> const& vertices = tess.GetFacePoints();
-			vector<size_t> const& indeces = tess.GetPointsInFace(face);
+			//vector<Vector3D> const& vertices = tess.GetFacePoints();
+			//vector<size_t> const& indeces = tess.GetPointsInFace(face);
 			Vector3D normal = tess.GetMeshPoint(tess.GetFaceNeighbors(face).first) -
 				tess.GetMeshPoint(tess.GetFaceNeighbors(face).second);
 			normal *= (1.0 / abs(normal));

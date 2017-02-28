@@ -34,7 +34,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 	Vector3D point;
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
-	for (int i = 0; i < PointNum; ++i)
+	for (size_t i = 0; i < PointNum; ++i)
 	{
 		ran[0] = dist(generator);
 		ran[1] = dist(generator);
@@ -113,7 +113,7 @@ vector<Vector3D> RandPointsMPI(Voronoi3D const& tproc, size_t np)
 	double TotVolume = (tproc.GetBoxCoordinates().second.x - tproc.GetBoxCoordinates().first.x)*
 		(tproc.GetBoxCoordinates().second.y - tproc.GetBoxCoordinates().first.y)*
 		(tproc.GetBoxCoordinates().second.z - tproc.GetBoxCoordinates().first.z);
-	np = floor(v*np / TotVolume + 0.5);
+	np = static_cast<size_t>(floor(v*static_cast<double>(np) / TotVolume + 0.5));
 	vector<Vector3D> res;
 	double ran[3];
 	boost::random::uniform_real_distribution<> dist;
