@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <stack>
 #include "Mat33.hpp"
+#include "Predicates3D.hpp"
 #include "../../misc/utils.hpp"
 #include <fstream>
 #include <iostream>
@@ -760,6 +761,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	Nghost_.clear();
 
 	del_.Build(points,ur_,ll_);
+
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(R_.size());
@@ -1068,12 +1070,13 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 
 double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 {
-	Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
+/*	Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
 	v2-=del_.points_[del_.tetras_[index].points[0]];
 	Vector3D v3(del_.points_[del_.tetras_[index].points[2]]);
 	v3-=del_.points_[del_.tetras_[index].points[0]];
 	Vector3D v4(del_.points_[del_.tetras_[index].points[3]]);
 	v4-=del_.points_[del_.tetras_[index].points[0]];
+	
 	Mat33<double> m_a(v2.x, v2.y, v2.z,
 		v3.x, v3.y, v3.z,
 		v4.x, v4.y, v4.z);
@@ -1094,10 +1097,29 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		ScalarProd(v4, v4), v4.x, v4.y);
 	double Dz = m_Dz.determinant();
 
-	double c = 0;
-
 	tetra_centers_[index] = Vector3D(Dx / (2 * a), Dy / (2 * a), Dz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
-	return 0.5*sqrt(Dx*Dx + Dy*Dy + Dz*Dz - 4 * a*c) / std::abs(a);
+*/
+	boost::array<Vector3D, 4> temp_points;
+	boost::array<Vector3D, 5> temp_points2;
+	for (size_t i = 0; i < 4; ++i)
+		temp_points[i] = del_.points_[del_.tetras_[index].points[i]];
+	double aa = orient3d(temp_points);
+	for (size_t i = 0; i < 4; ++i)
+		temp_points2[i] = del_.points_[del_.tetras_[index].points[i]];
+	temp_points2[4] = Vector3D(0, 0, 0);
+	double cc = insphere(temp_points2);
+	temp_points2[4] = Vector3D(1, 0, 0);
+	double dx = insphere(temp_points2);
+	temp_points2[4] = Vector3D(0, 1, 0);
+	double dy = insphere(temp_points2);
+	temp_points2[4] = Vector3D(0, 0, 1);
+	double dz = insphere(temp_points2);
+	double Dx = (dx + aa - cc);
+	double Dy = (dy + aa - cc);
+	double Dz = (dz + aa - cc);
+	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
+
+	return 0.5*sqrt(Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc) / std::abs(aa);
 }
 
 Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
@@ -1111,11 +1133,11 @@ Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
 
 double Voronoi3D::GetTetraVolume(boost::array<Vector3D, 4> const& points)const
 {
-	Mat33<double> mat(points[1].x - points[0].x, points[1].y - points[0].y, points[1].z - points[0].z,
+	/*Mat33<double> mat(points[1].x - points[0].x, points[1].y - points[0].y, points[1].z - points[0].z,
 		points[2].x - points[0].x, points[2].y - points[0].y, points[2].z - points[0].z,
 		points[3].x - points[0].x, points[3].y - points[0].y, points[3].z - points[0].z);
-	double det = mat.determinant();
-	return det / 6.0;
+	double det = mat.determinant();*/
+	return std::abs(orient3d(points)) / 6.0;
 }
 
 void Voronoi3D::CalcCellCMVolume(std::size_t index)
@@ -1233,7 +1255,7 @@ std::size_t Voronoi3D::GetTotalFacesNumber(void) const
 
 double Voronoi3D::GetWidth(std::size_t index) const
 {
-	return pow(3 * volume_[index] * 0.25 / M_PI, 0.333333333);
+	return std::pow(3 * volume_[index] * 0.25 / M_PI, 0.3333333333);
 }
 
 double Voronoi3D::GetVolume(std::size_t index) const

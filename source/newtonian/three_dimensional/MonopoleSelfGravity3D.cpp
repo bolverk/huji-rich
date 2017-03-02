@@ -67,11 +67,10 @@ void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<
 	{
 		Vector3D point = tess.GetMeshPoint(i)-CMtot;
 		double r = abs(point);
-		double R = tess.GetWidth(i);
 		double m = LinearInterpolation(r_list, m_radius, r);
-		if(r>(3*R))
+		if(r>(smoothlength_))
 			acc[i] = point*m*(-1.0/(r*r*r));
 		else
-			acc[i] = point*m*(-1.0 / (r*r*r+R*R*R));
+			acc[i] = point*m*(-1.0 / (smoothlength_*smoothlength_*smoothlength_));
 	}
 }

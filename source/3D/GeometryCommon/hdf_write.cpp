@@ -41,6 +41,7 @@ namespace
 	}
 }
 
+DiagnosticAppendix3D::~DiagnosticAppendix3D() {}
 
 Snapshot3D::Snapshot3D(void) :
 	mesh_points(),
@@ -114,7 +115,7 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 	write_std_vector_to_hdf5(file, VerticesInFace, "Vertices_in_face", datatype);
 }
 
-void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
+void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vector<DiagnosticAppendix3D*>& appendices)
 {
 	H5File file(H5std_string(filename), H5F_ACC_TRUNC);
 	vector<ComputationalCell3D> const& cells = sim.getCells();
@@ -204,6 +205,10 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename)
 
 	vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
 	write_std_vector_to_hdf5(file, cycle, "Cycle");
+
+	// Appendices
+	for (size_t i = 0; i < appendices.size(); ++i)
+		write_std_vector_to_hdf5(file,(*(appendices.at(i)))(sim),appendices.at(i)->getName());
 }
 
 Snapshot3D ReadSnapshot3D

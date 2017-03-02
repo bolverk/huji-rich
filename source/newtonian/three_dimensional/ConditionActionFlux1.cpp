@@ -5,13 +5,7 @@ ConditionActionFlux1::ConditionActionFlux1(const vector<pair<const Condition3D*,
 	sequence_(sequence),interp_(interp) {}
 
 ConditionActionFlux1::~ConditionActionFlux1(void)
-{
-	for (size_t i = 0; i < sequence_.size(); ++i)
-	{
-		delete sequence_[i].first;
-		delete sequence_[i].second;
-	}
-}
+{}
 
 namespace
 {

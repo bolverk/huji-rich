@@ -11,6 +11,24 @@
 #include "Voronoi3D.hpp"
 #include "../../newtonian/three_dimensional/hdsim_3d.hpp"
 
+class DiagnosticAppendix3D
+{
+public:
+
+	/*! \brief Calculates additional data
+	\param sim Hydrodynamic simulation
+	\return Calculated data
+	*/
+	virtual vector<double> operator()(const HDSim3D& sim) const = 0;
+
+	/*! \brief Returns the name of the new field
+	*/
+	virtual string getName(void) const = 0;
+
+	//! \brief Class destructor
+	virtual ~DiagnosticAppendix3D(void);
+};
+
 //! \brief Container for snapshot data
 class Snapshot3D
 {
@@ -56,5 +74,6 @@ Snapshot3D ReadSnapshot3D(const string& fname, bool mpioverride = false);
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
-void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename);
+void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
+	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>());
 #endif // HDF_WRITE
