@@ -233,8 +233,8 @@ Snapshot3D ReadSnapshot3D
 	{
 		Group mpi = file.openGroup("mpi");
 		const vector<double> px = read_double_vector_from_hdf5(mpi, "proc_X");
-		const vector<double> py = read_double_vector_from_hdf5(mpi, "Proc_Y");
-		const vector<double> pz = read_double_vector_from_hdf5(mpi, "Proc_Z");
+		const vector<double> py = read_double_vector_from_hdf5(mpi, "proc_Y");
+		const vector<double> pz = read_double_vector_from_hdf5(mpi, "proc_Z");
 		res.proc_points.resize(px.size());
 		for (size_t i = 0; i < px.size(); ++i)
 			res.proc_points.at(i) = Vector3D(px.at(i), py.at(i), pz.at(i));
