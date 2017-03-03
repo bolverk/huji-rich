@@ -80,6 +80,20 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 {
 	assert(tess.GetPointNo() == cells.size());
+	// sort tracers and stickers
+	size_t N = cells_.size();
+	vector<size_t> tindex = sort_index(tsn_.tracer_names);
+	vector<size_t> sindex = sort_index(tsn_.sticker_names);
+	tsn_.tracer_names = VectorValues(tsn_.tracer_names, tindex);
+	tsn_.sticker_names = VectorValues(tsn_.sticker_names, sindex);
+	for (size_t i = 0; i < N; ++i)
+	{
+		for (size_t j = 0; j < tindex.size(); ++j)
+			cells_[i].tracers[j] = cells[i].tracers[tindex[j]];
+		for (size_t j = 0; j < sindex.size(); ++j)
+			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
+	}
+
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
 #endif
