@@ -230,6 +230,8 @@ public:
 	virtual void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, size_t toduplicate) = 0;
 
 	virtual bool IsPointOutsideBox(size_t index)const = 0;
+
+	virtual void output(std::string const& filename)const=0;
 };
 
 #endif // TESSELLATION3D_HPP

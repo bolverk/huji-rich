@@ -138,14 +138,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		if ((ur.y - point.y) < ((1 - close)*wx))
 			dy = -wx*(1 - close);
 		else
-			dy = 0.5*(ur.x - point.x);
+			dy = 0.5*(ur.y - point.y);
 	}
 	if ((point.y + dy) < (ll.y + (1 - close)*wx))
 	{
 		if ((-ll.y + point.y) < ((1 - close)*wx))
 			dy = wx*(1 - close);
 		else
-			dy = -0.5*(-ll.x + point.x);
+			dy = -0.5*(-ll.y + point.y);
 	}
 	if (point.z + dz > (ur.z - (1 - close)*wx))
 	{

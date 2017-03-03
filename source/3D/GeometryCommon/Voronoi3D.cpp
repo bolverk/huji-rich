@@ -11,6 +11,7 @@
 #include <iostream>
 #include <boost/container/flat_map.hpp>
 #include "Intersections.hpp"
+#include "../../misc/int2str.hpp"
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index)
 {
@@ -384,6 +385,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		eo.AddEntry("Point number", static_cast<double>(i));
 		eo.AddEntry("Point x cor", points[i].x);
 		eo.AddEntry("Point y cor", points[i].y);
+		vproc.output("vproc_" + int2str(rank) + ".h5");
 		throw eo;
 	}
 	// Send/Recv the points
