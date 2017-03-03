@@ -81,7 +81,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 {
 	assert(tess.GetPointNo() == cells.size());
 	// sort tracers and stickers
-	size_t N = cells_.size();
+	size_t N = tess.GetPointNo();
 	vector<size_t> tindex = sort_index(tsn_.tracer_names);
 	vector<size_t> sindex = sort_index(tsn_.sticker_names);
 	tsn_.tracer_names = VectorValues(tsn_.tracer_names, tindex);
@@ -97,7 +97,6 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
 #endif
-	size_t N = tess.GetPointNo();
 	extensive_.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i], eos_, tsn_);
