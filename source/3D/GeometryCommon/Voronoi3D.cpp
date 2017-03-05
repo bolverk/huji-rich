@@ -132,11 +132,17 @@ namespace
 		for (size_t i = 1; i < indeces.size(); ++i)
 		{
 			Vector3D diff = points[indeces[i]] - points[indeces[i - 1]];
-			if (ScalarProd(diff, diff) > R*R*1e-14)
+			R = std::max(R, abs(diff));
+		}
+		R = std::max(R, abs(points[indeces.back()] - points[indeces[0]]));
+		for (size_t i = 1; i < indeces.size(); ++i)
+		{
+			Vector3D diff = points[indeces[i]] - points[indeces[i - 1]];
+			if (ScalarProd(diff, diff) > R*R*1e-13)
 				res.push_back(indeces[i]);
 		}
 		Vector3D diff = points[indeces.back()] - points[indeces[0]];
-		if (ScalarProd(diff, diff) < R*R*1e-14)
+		if (ScalarProd(diff, diff) < R*R*1e-13)
 			res.pop_back();
 	}
 
