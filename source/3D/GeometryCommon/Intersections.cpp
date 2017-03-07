@@ -42,15 +42,9 @@ namespace
 	}
 }
 
-bool FaceSphereIntersections(Face const& face, Sphere const& sphere)
+bool FaceSphereIntersections(Face const& face, Sphere const& sphere, Vector3D const& normal)
 {	
 	// Find plane equation
-	Vector3D v1 = face.vertices[1];
-	v1-=face.vertices[0];
-	Vector3D v2 = face.vertices[2];
-	v2-=face.vertices[0];
-	Vector3D normal = CrossProduct(v1, v2);
-	normal *= (1.0 / sqrt(ScalarProd(normal, normal)));
 	double D = -ScalarProd(normal, face.vertices[0]);
 	
 	// Find intersecting circle

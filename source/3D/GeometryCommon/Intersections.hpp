@@ -9,6 +9,6 @@ struct Sphere
 	double radius;
 };
 
-bool FaceSphereIntersections(Face const& face, Sphere const& sphere);
+bool FaceSphereIntersections(Face const& face, Sphere const& sphere,Vector3D const& normal);
 
 #endif //INTERSECTIONS_HPP

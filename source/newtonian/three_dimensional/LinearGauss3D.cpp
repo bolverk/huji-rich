@@ -210,8 +210,6 @@ namespace
 			ComputationalCell3D const& cell_temp = *neighbors[i];
 			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
-			if (tess.BoundaryFace(faces[i]))
-				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
 			cmax.velocity.x = std::max(cmax.velocity.x, cell_temp.velocity.x);
@@ -239,8 +237,6 @@ namespace
 		const size_t nedges = faces.size();
 		for (size_t i = 0; i < nedges; ++i)
 		{
-			if (tess.BoundaryFace(faces[i]))
-				continue;
 			if (i > 0)
 			{
 				ReplaceComputationalCell(centroid_val, cell);
@@ -592,7 +588,15 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 				ReplaceComputationalCell(res[faces[j]].first,new_cells[i]);
 				interp2(res[faces[j]].first,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i));
-				CheckCell(res[faces[j]].first);
+				try
+				{
+					CheckCell(res[faces[j]].first);
+				}
+				catch (UniversalError &eo)
+				{
+					eo.AddEntry("Face", static_cast<double>(faces[j]));
+					eo.AddEntry("Cell", static_cast<double>(i));
+				}
 				if (tess.GetFaceNeighbors(faces[j]).second > CellNumber)
 					boundaryedges.push_back(faces[j]);
 			}
@@ -600,7 +604,15 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 				ReplaceComputationalCell(res[faces[j]].second,new_cells[i]);
 				interp2(res[faces[j]].second,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i));
-				CheckCell(res[faces[j]].second);
+				try
+				{
+					CheckCell(res[faces[j]].second);
+				}
+				catch (UniversalError &eo)
+				{
+					eo.AddEntry("Face", static_cast<double>(faces[j]));
+					eo.AddEntry("Cell", static_cast<double>(i));
+				}
 				if (tess.GetFaceNeighbors(faces[j]).first > CellNumber)
 					boundaryedges.push_back(faces[j]);
 			}
@@ -627,8 +639,16 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 #else
 			interp2(res[boundaryedges[i]].first, ghost_.GetGhostGradient(tess, cells, rslopes_, N0,time,boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0));
-			CheckCell(res[boundaryedges[i]].first);
 #endif //RICH_MPI
+			try
+			{
+				CheckCell(res[boundaryedges[i]].first);
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
+				eo.AddEntry("Cell", static_cast<double>(N0));
+			}
 		}
 		else
 		{
@@ -643,8 +663,16 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 #else
 			interp2(res[boundaryedges[i]].second, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0));
-			CheckCell(res[boundaryedges[i]].second);
 #endif //RICH_MPI
+			try
+			{
+				CheckCell(res[boundaryedges[i]].second);
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
+				eo.AddEntry("Cell", static_cast<double>(N0));
+			}
 		}
 	}
 }

@@ -15,6 +15,7 @@
 #include <set>
 #include <boost/array.hpp>
 #include "Tessellation3D.hpp"
+#include <boost/container/flat_set.hpp>
 
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
@@ -39,7 +40,9 @@ private:
 #endif
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 		vector<size_t> &intersecting_faces);
-	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point, Sphere &sphere, bool recursive);
+	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, 
+		std::size_t point, Sphere &sphere, bool recursive, boost::container::flat_set<size_t> &visited,
+		std::stack<std::size_t> &to_check);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
@@ -49,14 +52,16 @@ private:
 	double GetRadius(std::size_t index);
 	double GetMaxRadius(std::size_t index);
 	void CalcAllCM(void);
-	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(void);
+	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
+	vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
 #ifdef RICH_MPI
 	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, bool recursive);
 	vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 		Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
 #endif
 	double CalcTetraRadiusCenter(std::size_t index);
-	vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate);
+	vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
+		vector<vector<size_t> > &past_duplicate);
 	void BuildVoronoi(void);
 
 	Delaunay3D del_;
@@ -88,6 +93,8 @@ public:
 
 #ifdef RICH_MPI
 	void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
+
+	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode);
 #endif
 
 	std::size_t GetPointNo(void) const;
