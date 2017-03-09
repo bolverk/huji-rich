@@ -499,6 +499,7 @@ void Voronoi3D::CalcRigidCM(std::size_t face_index)
 vector<Vector3D> Voronoi3D::CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 	vector<vector<size_t> > &past_duplicate)
 {
+	vector<std::pair<std::size_t, std::size_t> > to_add;
 	vector<Face> faces = BuildBox(ll_, ur_);
 	vector<Vector3D> res;
 	bool first_time = past_duplicate.empty();
@@ -506,11 +507,15 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPoints(vector<std::pair<std::size_t, s
 		past_duplicate.resize(faces.size());
 	for (std::size_t i = 0; i < to_duplicate.size(); ++i)
 	{
-		if(first_time||!std::binary_search(past_duplicate[to_duplicate[i].first].begin(), 
-			past_duplicate[to_duplicate[i].first].end(),to_duplicate[i].second))
-		res.push_back(MirrorPoint(faces[to_duplicate[i].first], del_.points_[to_duplicate[i].second]));
-		past_duplicate[to_duplicate[i].first].push_back(to_duplicate[i].second);
+		if (first_time || !std::binary_search(past_duplicate[to_duplicate[i].first].begin(),
+			past_duplicate[to_duplicate[i].first].end(), to_duplicate[i].second))
+		{
+			res.push_back(MirrorPoint(faces[to_duplicate[i].first], del_.points_[to_duplicate[i].second]));
+			to_add.push_back(to_duplicate[i]);
+		}
 	}
+	for(size_t i=0;i<to_add.size();++i)
+		past_duplicate[to_add[i].first].push_back(to_add[i].second);
 	for (size_t i = 0; i < past_duplicate.size(); ++i)
 			std::sort(past_duplicate[i].begin(), past_duplicate[i].end());
 	return res;
@@ -773,13 +778,16 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 	Nghost_.clear();
 
 	del_.Build(points, ur_, ll_);
-	vector<std::pair<size_t, size_t> > duplicate(6);
-	for (size_t i = 0; i < 6; ++i)
-		duplicate[i] = std::pair<size_t, size_t>(i, toduplicate);
-	vector<vector<size_t> > past_duplicates;
-	vector<Vector3D> extra_points = CreateBoundaryPoints(duplicate,past_duplicates);
-	extra_points.insert(extra_points.begin(), ghosts.begin(), ghosts.end());
-	del_.BuildExtra(extra_points);
+	if (toduplicate < (points.size() + ghosts.size()))
+	{
+		vector<std::pair<size_t, size_t> > duplicate(6);
+		for (size_t i = 0; i < 6; ++i)
+			duplicate[i] = std::pair<size_t, size_t>(i, toduplicate);
+		vector<vector<size_t> > past_duplicates;
+		vector<Vector3D> extra_points = CreateBoundaryPoints(duplicate, past_duplicates);
+		extra_points.insert(extra_points.begin(), ghosts.begin(), ghosts.end());
+		del_.BuildExtra(extra_points);
+	}
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
