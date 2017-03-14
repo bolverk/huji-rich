@@ -713,6 +713,11 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 }
 #endif
 
+vector<vector<std::size_t> >& Voronoi3D::GetGhostIndeces(void)
+{
+	return Nghost_;
+}
+
 void Voronoi3D::CalcAllCM(void)
 {
 	size_t Nfaces = FaceNeighbors_.size();
@@ -788,6 +793,8 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 		extra_points.insert(extra_points.begin(), ghosts.begin(), ghosts.end());
 		del_.BuildExtra(extra_points);
 	}
+	else
+		del_.BuildExtra(ghosts);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);

@@ -161,6 +161,8 @@ public:
 
 	vector<vector<std::size_t> > const& GetGhostIndeces(void) const;
 
+	vector<vector<std::size_t> >& GetGhostIndeces(void);
+
 	void GetNeighbors(size_t index, vector<size_t> &res)const;
 
 	std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;

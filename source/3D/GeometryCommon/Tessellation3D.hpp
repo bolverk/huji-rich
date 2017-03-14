@@ -225,6 +225,8 @@ public:
 
 	virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;
 
+	virtual vector<vector<size_t> > & GetGhostIndeces(void) = 0;
+
 	virtual std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const = 0;
 
 	virtual void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, size_t toduplicate) = 0;
