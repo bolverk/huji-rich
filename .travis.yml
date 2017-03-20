@@ -15,7 +15,7 @@ addons:
     - gcc-4.8
     - g++-4.8
     - libhdf5-serial-dev
-    - libboost1.55-all-dev
+    - libboost1.59-all-dev
 install:
 - make
 - make MODE=clang
