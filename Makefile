@@ -85,7 +85,7 @@ external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hp
 
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
-	
+
 external_libraries/dump_clipper/dclipper.o: external_libraries/include/clipper.hpp
 	cd external_libraries/dump_clipper && g++ -c -O0 -g -pg -D_GLIBCXX_DEBUG cpp/clipper.cpp -o dclipper.o
 
@@ -93,16 +93,16 @@ external_libraries/lib/libdclipper.a: external_libraries/dump_clipper/dclipper.o
 	ar cr $@ $^ 
 
 external_libraries/hdf5_dump/hdf5-1.8.18/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz
-	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.18.tar.gz
+	cd external_libraries/hdf5_dump/ && tar xf ./hdf5-1.8.18.tar.gz
 
 external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_59_0.tar.bz2
-	cd external_libraries/boost_dump/ && tar xvf ./boost_1_59_0.tar.bz2
+	cd external_libraries/boost_dump/ && tar xf ./boost_1_59_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
 	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
 
 external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
-	cd external_libraries/ann_tree_dump/ && tar xvf ./ann_1.1.2.tar.gz
+	cd external_libraries/ann_tree_dump/ && tar xf ./ann_1.1.2.tar.gz
 
 external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz:
 	mkdir -p external_libraries/hdf5_dump
