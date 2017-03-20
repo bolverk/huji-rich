@@ -1,11 +1,19 @@
+sudo: false
 language: cpp
 compiler:
 - gcc
-- clang
 os:
 - linux
 before_install:
-- make set_environ_vars.sh && `cat set_environ_vars.sh`
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+addons:
+  apt:	
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
 install:
+- make set_environ_vars.sh && `cat set_environ_vars.sh`
 - make
 - make MODE=clang
