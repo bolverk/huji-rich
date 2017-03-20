@@ -17,6 +17,7 @@ addons:
     - libhdf5-serial-dev
 install:
 - make external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp
-- export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_59_0
+- make external_libraries/lib/libdclipper.a
+- export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_59_0:`pwd`/external_libraries/include
 - make
 - make MODE=clang
