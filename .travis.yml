@@ -1,0 +1,11 @@
+language: cpp
+compiler:
+- gcc
+- clang
+os:
+- linux
+before_install:
+- make set_environ_vars.sh && `cat set_environ_vars.sh`
+install:
+- make
+- make MODE=clang
