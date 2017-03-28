@@ -58,6 +58,7 @@ private:
 	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, bool recursive);
 	vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 		Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
+	//void CleanDuplicate(vector<std::pair<size_t, size_t> > const& ghost_index, Tessellation3D const& tproc);
 #endif
 	double CalcTetraRadiusCenter(std::size_t index);
 	vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
@@ -167,7 +168,7 @@ public:
 
 	std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
 
-	void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts,size_t toduplicate);
+	void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts,vector<size_t> toduplicate);
 
 	vector<double>& GetAllVolumes(void);
 

@@ -319,7 +319,7 @@ template <class T> vector<T> RemoveList(vector<T> const&v, vector<T> const&list)
 {
 	vector<T> res;
 	for (std::size_t i = 0; i < v.size(); ++i)
-		if (!binary_search(list.begin(), list.end(), v[i]))
+		if (!std::binary_search(list.begin(), list.end(), v[i]))
 			res.push_back(v[i]);
 	return res;
 }

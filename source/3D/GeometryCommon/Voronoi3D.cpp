@@ -759,7 +759,7 @@ std::pair<Vector3D, Vector3D> Voronoi3D::GetBoxCoordinates(void)const
 	return std::pair<Vector3D, Vector3D>(ll_, ur_);
 }
 
-void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, size_t toduplicate)
+void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, vector<size_t> toduplicate)
 {
 	assert(points.size() > 0);
 	// Clear data
@@ -783,18 +783,16 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 	Nghost_.clear();
 
 	del_.Build(points, ur_, ll_);
-	if (toduplicate < (points.size() + ghosts.size()))
+	del_.BuildExtra(ghosts);
+	vector<std::pair<size_t, size_t> > duplicate(6);
+	for (size_t j = 0; j < toduplicate.size(); ++j)
 	{
-		vector<std::pair<size_t, size_t> > duplicate(6);
 		for (size_t i = 0; i < 6; ++i)
-			duplicate[i] = std::pair<size_t, size_t>(i, toduplicate);
+			duplicate[i] = std::pair<size_t, size_t>(i, toduplicate[j]);
 		vector<vector<size_t> > past_duplicates;
 		vector<Vector3D> extra_points = CreateBoundaryPoints(duplicate, past_duplicates);
-		extra_points.insert(extra_points.begin(), ghosts.begin(), ghosts.end());
 		del_.BuildExtra(extra_points);
 	}
-	else
-		del_.BuildExtra(ghosts);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -806,6 +804,10 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 	// Create Voronoi
 	BuildVoronoi();
 	CalcAllCM();
+	CM_.resize(del_.points_.size());
+	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
+		if (BoundaryFace(i))
+			CalcRigidCM(i);
 }
 
 
@@ -1527,6 +1529,7 @@ void Voronoi3D::GetNeighborNeighbors(vector<std::size_t> &result, std::size_t po
 	vector<std::size_t> neigh = GetNeighbors(point);
 	result = neigh;
 	std::size_t N = neigh.size();
+	std::sort(neigh.begin(), neigh.end());
 	vector<std::size_t> temp;
 	for (std::size_t i = 0; i < N; ++i)
 	{
@@ -1536,10 +1539,10 @@ void Voronoi3D::GetNeighborNeighbors(vector<std::size_t> &result, std::size_t po
 			result.insert(result.end(), temp.begin(), temp.end());
 		}
 	}
-	sort(result.begin(), result.end());
+	std::sort(result.begin(), result.end());
 	result = unique(result);
-	sort(neigh.begin(), neigh.end());
 	result = RemoveList(result, neigh);
+	RemoveVal(result, point);
 }
 
 vector<vector<size_t> > & Voronoi3D::GetAllPointsInFace(void)
