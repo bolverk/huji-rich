@@ -228,7 +228,6 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 			{
 				double a = tess.GetArea(faces[j]);
 				A += a;
-				vector<Vector3D> const& vertices = tess.GetFacePoints();
 				vector<size_t> indeces = tess.GetPointsInFace(faces[j]);
 				Vector3D normal2 = tess.GetFaceNeighbors(faces[j]).first == i ? normalize(tess.GetMeshPoint(tess.GetFaceNeighbors(faces[j]).second) -
 					tess.GetMeshPoint(tess.GetFaceNeighbors(faces[j]).first)) :
@@ -443,7 +442,6 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		vector<Vector3D> &full_face_cm = tess.GetAllFaceCM();
 		vector<Vector3D>& full_vertices = tess.GetFacePoints();
 
-		size_t Norg = tess.GetPointNo();
 		size_t Nrefine_neigh = refined_neigh.size();
 		// Remove old face reference
 		for (size_t i = 0; i < Nrefine_neigh; ++i)
@@ -486,8 +484,8 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 				{
 					temp2 = local.GetPointsInFace(temp[j]);
 					size_t N = temp2.size();
-					for (size_t j = 0; j < N; ++j)
-						temp2[j] += Nvert;
+					for (size_t k = 0; k < N; ++k)
+						temp2[k] += Nvert;
 					full_facepoints.push_back(temp2);
 					full_faceneigh.push_back(new_face_neigh);
 					full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
@@ -617,14 +615,12 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		size_t nvert = full_vertices.size();
 		for (size_t i = 0; i < Nfaces; ++i)
 		{
-			bool added = false;
 			if (localfaceneigh[i].first < Nneigh)
 			{
 				N0 = localfaceneigh[i].first;
 				N1 = localfaceneigh[i].second;
 				if (N1 < Nneigh)
 				{
-					added = true;
 					vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
 						neigh[N1]);
 					size_t n0 = neigh[N0];
@@ -663,7 +659,6 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 				{
 					if (N1 >= Nlocal)
 					{
-						added = true;
 						// We made a new boundary point
 						assert(local.IsPointOutsideBox(N1));
 						// Add new point

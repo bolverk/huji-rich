@@ -70,7 +70,11 @@ public:
 \param mpioverride Flag for not reading mpi data when MPI is on
 \return Snapshot data
 */
-Snapshot3D ReadSnapshot3D(const string& fname, bool mpioverride = false);
+Snapshot3D ReadSnapshot3D(const string& fname
+#ifdef RICH_MPI
+	,bool mpioverride = false
+#endif
+);
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 

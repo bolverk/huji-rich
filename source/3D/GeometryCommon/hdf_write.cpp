@@ -212,7 +212,11 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 }
 
 Snapshot3D ReadSnapshot3D
-(const string& fname, bool mpioverride)
+(const string& fname
+#ifdef RICH_MPI
+	, bool mpioverride
+#endif
+)
 {
 	Snapshot3D res;
 	H5File file(fname, H5F_ACC_RDONLY);
