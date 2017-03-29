@@ -2,7 +2,7 @@
 #include "../../3D/GeometryCommon/Voronoi3D.hpp"
 #include "../../misc/utils.hpp"
 
-#define debug_amr 1
+//#define debug_amr 1
 
 namespace
 {
@@ -102,6 +102,25 @@ namespace
 		return sent_points;
 	}
 #endif
+
+	void RecalcOuterCM(Tessellation3D &tess)
+	{
+		vector<std::pair<size_t,size_t> > const& allfaceneigh = tess.GetAllFaceNeighbors();
+		size_t Nfaces = allfaceneigh.size();
+		size_t Norg = tess.GetPointNo();
+		for (size_t i = 0; i < Nfaces; ++i)
+		{
+			if (allfaceneigh[i].second > Norg && tess.IsPointOutsideBox(allfaceneigh[i].second))
+			{
+				Vector3D normal = normalize(tess.GetMeshPoint(allfaceneigh[i].second) - 
+					tess.GetMeshPoint(allfaceneigh[i].first));
+				double distance = abs(tess.GetCellCM(allfaceneigh[i].first) - tess.GetFacePoints()
+					[tess.GetPointsInFace(i)[0]]);
+				tess.GetAllCM()[allfaceneigh[i].second] = tess.GetCellCM(allfaceneigh[i].first) +
+					(2 * distance)*normal;
+			}
+		}
+	}
 
 	void CleanOuterPoints(vector<size_t> &neigh, vector<size_t> &nneigh, Tessellation3D const&tess)
 	{
@@ -220,7 +239,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 			vector<size_t> neigh;
 			if (abs(sum) > 1e-5*A)
 				tess.GetNeighbors(i, neigh);
-			assert(abs(sum) < 1e-4*A);
+			assert(abs(sum) < 1e-3*A);
 			assert(PointInPoly(tess, tess.GetMeshPoint(i), i));
 		}
 	}
@@ -232,8 +251,6 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		Vector3D const& point = tess.GetMeshPoint(index);
 		Vector3D other = tess.GetMeshPoint(neigh[0]);
 		double max_dist = ScalarProd(point - other, point - other);		
-		//double min_dist = max_dist;
-		//size_t min_loc = 0;
 		size_t max_loc = 0;
 		for (size_t i = 1; i < Nneigh; ++i)
 		{
@@ -244,17 +261,9 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 				max_dist = temp;
 				max_loc = i;
 			}
-			/*if (temp < min_dist)
-			{
-				min_dist = temp;
-				min_loc = i;
-			}*/
 		}
-		//Vector3D normal = CrossProduct(tess.GetMeshPoint(neigh[max_loc]) - point, tess.GetMeshPoint(neigh[min_loc]) - point);
-		//normal *= 1e-6*tess.GetWidth(index) / abs(normal);
-		double eps = 1e-4;
+		double eps = 1e-5;
 		return point*(1-eps) + eps*tess.GetMeshPoint(neigh[max_loc]);
-		//return point + normal;
 	}
 
 	void BuildLocalVoronoi(Tessellation3D &local, Tessellation3D const& tess, vector<size_t> const& real_points, 
@@ -588,17 +597,15 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		dv.clear();
 		dv.resize(neigh.size(),0);
 		double Vtot = 0;
-		vector<double> dv_temp;
 		for (size_t i = 0; i < neigh.size(); ++i)
 		{
-			dv_temp.push_back(tess.GetVolume(neigh[i]));
 			dv[i] = local.GetVolume(i) - tess.GetAllVolumes()[neigh[i]];
 			tess.GetAllVolumes()[neigh[i]] = local.GetVolume(i);
 			tess.GetAllCM()[neigh[i]] = local.GetCellCM(i);
 			Vtot += dv[i];
 		}
 		double Vold = tess.GetVolume(toremove);
-		assert(Vold > 0.9999*Vtot && Vtot > 0.9999*Vold);
+		assert(Vold > 0.999*Vtot && Vtot > 0.999*Vold);
 		// Add new faces /Update old
 		size_t Nlocal = neigh.size() + nneigh.size() + 4;
 		Nfaces = localfaceneigh.size();
@@ -881,11 +888,12 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	vector<size_t> neigh,nneigh,temp,bad_faces,temp2;
 	vector<double> dv;
 	Voronoi3D local(tess.GetBoxCoordinates().first, tess.GetBoxCoordinates().second);
-
+#ifdef debug_amr
 	Voronoi3D local2(tess.GetBoxCoordinates().first, tess.GetBoxCoordinates().second);
 	vector<Vector3D> mesh = tess.GetMeshPoints();
 	mesh.resize(tess.GetPointNo());
-
+	local2.Build(mesh);
+#endif
 	for (size_t i = 0; i < NRemove; ++i)
 	{
 		neigh.clear();
@@ -907,8 +915,35 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 		}
 		std::sort(neigh.begin(), neigh.end());
 		std::sort(nneigh.begin(), nneigh.end());
-
 		BuildLocalVoronoiRemove(local, tess, neigh, nneigh);
+
+#ifdef debug_amr
+		vector<double> dv2;
+		double vold;
+		if (i > 0)
+		{
+			vold = local2.GetVolume(137 - i);
+		}
+		for (size_t j = 0; j < neigh.size(); ++j)
+		{
+			size_t toremove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.begin() + i,
+				neigh[j]) - ToRemove.first.begin());
+			dv2.push_back(local2.GetVolume(neigh[j] - toremove));
+		}
+		mesh.erase(mesh.begin() + ToRemove.first[i] - i);
+		local2.Build(mesh);
+		vector<double> vall, vsmall,vbegin;
+		for (size_t j = 0; j < neigh.size(); ++j)
+		{
+			vbegin.push_back(tess.GetVolume(neigh[j]));
+			vsmall.push_back(local.GetVolume(j));
+			size_t toremove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.begin() + i + 1,
+				neigh[j]) - ToRemove.first.begin());
+			vall.push_back(local2.GetVolume(neigh[j] - toremove));
+			dv2[j] -= vall.back();
+		}
+#endif
+
 		FixVoronoiRemove(local, tess, neigh, nneigh, ToRemove.first[i], dv, bad_faces);
 		FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, ToRemove.first[i], neigh, *cu_, eos);
 	}
@@ -968,7 +1003,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	UpdateCellsRemove(sim.getTesselation(), sim.getCells(),  sim.getExtensives(), eos_, sim.GetTime(),
 		sim.GetTracerStickerNames());
 	// Recalc CM for outerpoints
-	
+	RecalcOuterCM(sim.getTesselation());
 }
 
 AMR3D::~AMR3D(void){}

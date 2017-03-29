@@ -752,6 +752,32 @@ void Voronoi3D::CalcAllCM(void)
 	}
 	for (size_t i = 0; i < Norg_; ++i)
 		CM_[i] *= (1.0 / volume_[i]);
+	// Recalc points with high aspect ratio
+	for (size_t i = 0; i < Norg_; ++i)
+	{
+		if (abs(CM_[i] - del_.points_[i]) > 0.3*GetWidth(i))
+		{
+			tetra[3] = CM_[i];
+			CM_[i] = Vector3D();
+			volume_[i] = 0;
+			Nfaces = FacesInCell_[i].size();
+			for (size_t k = 0; k < Nfaces; ++k)
+			{
+				size_t Face = FacesInCell_[i][k];
+				size_t Npoints = PointsInFace_[Face].size();
+				tetra[0] = tetra_centers_[PointsInFace_[Face][0]];
+				for (std::size_t j = 0; j < Npoints - 2; ++j)
+				{
+					tetra[1] = tetra_centers_[PointsInFace_[Face][j + 1]];
+					tetra[2] = tetra_centers_[PointsInFace_[Face][j + 2]];					
+					double vol = std::abs(GetTetraVolume(tetra));
+					volume_[i] += vol;
+					CM_[i] += vol*GetTetraCM(tetra);
+				}
+			}
+			CM_[i] *= (1.0 / volume_[i]);
+		}
+	}
 }
 
 std::pair<Vector3D, Vector3D> Voronoi3D::GetBoxCoordinates(void)const
