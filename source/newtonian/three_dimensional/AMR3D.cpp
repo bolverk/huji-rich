@@ -996,6 +996,9 @@ void AMR3D::operator() (HDSim3D &sim)
 #endif
 		sim.GetTracerStickerNames());
 	UpdateCellsRemove(sim.getTesselation(), sim.getCells(),  sim.getExtensives(), eos_, sim.GetTime(),
+#ifdef RICH_MPI
+		sim.getProcTesselation(),
+#endif
 		sim.GetTracerStickerNames());
 	// Recalc CM for outerpoints
 	RecalcOuterCM(sim.getTesselation());

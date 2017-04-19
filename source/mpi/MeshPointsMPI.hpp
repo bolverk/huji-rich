@@ -10,7 +10,6 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
 #include "../tessellation/ConvexHull.hpp"
-#include "../tessellation/VoronoiMesh.hpp"
 #include "../misc/utils.hpp"
 
 /*!
