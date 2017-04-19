@@ -14,23 +14,23 @@ namespace
 		const vector<int>& edge_index=tess.GetCellEdges(rank);
 		const int n=static_cast<int>(edge_index.size());
 		boost::array<double,4> res;
-		res[0]=min(tess.GetEdge(edge_index[0]).vertices.first.x,
+		res[0]=std::min(tess.GetEdge(edge_index[0]).vertices.first.x,
 			tess.GetEdge(edge_index[0]).vertices.second.x);
-		res[1]=max(tess.GetEdge(edge_index[0]).vertices.first.x,
+		res[1]= std::max(tess.GetEdge(edge_index[0]).vertices.first.x,
 			tess.GetEdge(edge_index[0]).vertices.second.x);
-		res[2]=min(tess.GetEdge(edge_index[0]).vertices.first.y,
+		res[2]= std::min(tess.GetEdge(edge_index[0]).vertices.first.y,
 			tess.GetEdge(edge_index[0]).vertices.second.y);
-		res[3]=max(tess.GetEdge(edge_index[0]).vertices.first.y,
+		res[3]= std::max(tess.GetEdge(edge_index[0]).vertices.first.y,
 			tess.GetEdge(edge_index[0]).vertices.second.y);
 		for(size_t i=1;i<static_cast<size_t>(n);++i)
 		{
-			res[0]=min(min(tess.GetEdge(edge_index[i]).vertices.first.x,
+			res[0]= std::min(std::min(tess.GetEdge(edge_index[i]).vertices.first.x,
 				tess.GetEdge(edge_index[i]).vertices.second.x),res[0]);
-			res[1]=max(max(tess.GetEdge(edge_index[i]).vertices.first.x,
+			res[1]= std::max(std::max(tess.GetEdge(edge_index[i]).vertices.first.x,
 				tess.GetEdge(edge_index[i]).vertices.second.x),res[1]);
-			res[2]=min(min(tess.GetEdge(edge_index[i]).vertices.first.y,
+			res[2]= std::min(std::min(tess.GetEdge(edge_index[i]).vertices.first.y,
 				tess.GetEdge(edge_index[i]).vertices.second.y),res[2]);
-			res[3]=max(max(tess.GetEdge(edge_index[i]).vertices.first.y,
+			res[3]= std::max(std::max(tess.GetEdge(edge_index[i]).vertices.first.y,
 				tess.GetEdge(edge_index[i]).vertices.second.y),res[3]);
 		}
 		return res;
@@ -45,15 +45,15 @@ namespace
 		etemp.vertices.second=cpoints[1];
 		double mincellR=abs(cpoints[0]-center);
 		double maxcellR(mincellR);
-		mincellR=min(mincellR,DistanceToEdge(center,etemp));
+		mincellR= std::min(mincellR,DistanceToEdge(center,etemp));
 		int npoints=static_cast<int>(cpoints.size());
 		for(size_t i=1;i<static_cast<size_t>(npoints);++i)
 		{
 			double temp=abs(cpoints[i]-center);
-			maxcellR=max(maxcellR,temp);
+			maxcellR= std::max(maxcellR,temp);
 			etemp.vertices.first=cpoints[i];
 			etemp.vertices.second=cpoints[(i+1)%static_cast<size_t>(npoints)];
-			mincellR=min(min(mincellR,temp),DistanceToEdge(center,etemp));
+			mincellR= std::min(std::min(mincellR,temp),DistanceToEdge(center,etemp));
 		}
 		// Get the maximum and minimum angles
 		double maxangle,minangle;

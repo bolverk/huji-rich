@@ -67,7 +67,7 @@ namespace
 					if (it != Nghost[k].end())
 					{
 						good = true;
-						int_temp.push_back(sort_indeces[k][static_cast<int>(it - Nghost[k].begin())]);
+						int_temp.push_back(static_cast<int>(sort_indeces[k][static_cast<size_t>(it - Nghost[k].begin())]));
 					}
 				}
 				if (!int_temp.empty())
@@ -98,7 +98,7 @@ namespace
 		for (size_t i = 0; i < recv_neigh.size(); ++i)
 			for (size_t j = 0; j < recv_neigh[i].size(); ++j)
 				for (size_t k = 0; k < recv_neigh[i][j].size(); ++k)
-					recv_neigh[i][j][k] = tess.GetDuplicatedPoints()[i][recv_neigh[i][j][k]];
+					recv_neigh[i][j][k] = static_cast<int>(tess.GetDuplicatedPoints()[i][recv_neigh[i][j][k]]);
 		return sent_points;
 	}
 #endif
@@ -869,7 +869,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
 	EquationOfState const& eos, double time,
 #ifdef RICH_MPI
-	Tessellation3D const& proctess,
+	Tessellation3D const& /*proctess*/,
 #endif
 	TracerStickerNames const& tracerstickernames)const
 {
