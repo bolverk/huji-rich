@@ -67,7 +67,7 @@ public:
 	  const CellUpdater3D& cu,
 	  const ExtensiveUpdater3D & eu,
 	  const	SourceTerm3D &source,
-	  const TracerStickerNames tsn
+	  TracerStickerNames &tsn
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif
@@ -130,7 +130,7 @@ private:
   const CellUpdater3D& cu_;
   const ExtensiveUpdater3D& eu_;
   const	SourceTerm3D &source_;
-  mutable TracerStickerNames tsn_;
+  TracerStickerNames &tsn_;
   ProgressTracker pt_;
 #ifdef RICH_MPI
   const ProcessorUpdate3D* proc_update_;

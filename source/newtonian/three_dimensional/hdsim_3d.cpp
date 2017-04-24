@@ -65,7 +65,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const CellUpdater3D& cu,
 	const ExtensiveUpdater3D& eu,
 	const SourceTerm3D &source,
-	const TracerStickerNames tsn
+	TracerStickerNames &tsn
 #ifdef RICH_MPI
 	,const ProcessorUpdate3D* proc_update
 #endif

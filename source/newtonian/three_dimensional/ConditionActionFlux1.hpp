@@ -89,7 +89,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit RegularFlux3D(const RiemannSolver& rs);
+	explicit RegularFlux3D(const RiemannSolver3D& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -98,7 +98,7 @@ public:
 
 private:
 
-	const RiemannSolver& rs_;
+	const RiemannSolver3D& rs_;
 };
 
 //! \brief Calculates flux assuming rigid wall boundary conditions
@@ -109,7 +109,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit RigidWallFlux3D(const RiemannSolver& rs);
+	explicit RigidWallFlux3D(const RiemannSolver3D& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -117,7 +117,7 @@ public:
 		const& face_values) const;
 
 private:
-	const RiemannSolver& rs_;
+	const RiemannSolver3D& rs_;
 };
 
 //! \brief Estimate flux assuming free flow boundary conditions
@@ -128,7 +128,7 @@ public:
 	/*! \brief Class constructor
 	\param rs Riemann solver
 	*/
-	explicit FreeFlowFlux3D(const RiemannSolver& rs);
+	explicit FreeFlowFlux3D(const RiemannSolver3D& rs);
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
@@ -136,7 +136,7 @@ public:
 		const& face_values) const;
 
 private:
-	const RiemannSolver& rs_;
+	const RiemannSolver3D& rs_;
 };
 
 //! \brief Checks if a certain face is a boundary face

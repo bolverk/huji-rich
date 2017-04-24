@@ -10,7 +10,7 @@
 #include "../../3D/GeometryCommon/Tessellation3D.hpp"
 #include "computational_cell.hpp"
 #include "../common/equation_of_state.hpp"
-#include "../common/riemann_solver.hpp"
+#include "RiemannSolver3D.hpp"
 
 //! \brief Abstract class for flux calculator
 class FluxCalculator3D
@@ -37,6 +37,6 @@ public:
 };
 
 void RotateSolveBack3D(Vector3D const& normal, ComputationalCell3D const& left, ComputationalCell3D const& right,
-	Vector3D const& face_velocity,RiemannSolver const& rs, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn);
+	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn);
 
 #endif // FLUX_CALCULATOR_HPP

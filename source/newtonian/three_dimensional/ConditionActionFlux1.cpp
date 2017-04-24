@@ -43,7 +43,7 @@ ConditionActionFlux1::Condition3D::~Condition3D(void) {}
 
 ConditionActionFlux1::Action3D::~Action3D(void) {}
 
-RegularFlux3D::RegularFlux3D(const RiemannSolver& rs) :
+RegularFlux3D::RegularFlux3D(const RiemannSolver3D& rs) :
 	rs_(rs) {}
 
 namespace
@@ -70,7 +70,7 @@ void RegularFlux3D::operator()(size_t face_index, const Tessellation3D& tess, co
 	RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos, tracerstickernames);
 }
 
-RigidWallFlux3D::RigidWallFlux3D(const RiemannSolver& rs) : rs_(rs) {}
+RigidWallFlux3D::RigidWallFlux3D(const RiemannSolver3D& rs) : rs_(rs) {}
 
 namespace
 {
@@ -106,7 +106,7 @@ void RigidWallFlux3D::operator()(size_t face_index, const Tessellation3D& tess, 
 	RotateSolveBack3D(normal, rigid_states.first, rigid_states.second, face_velocity, rs_, res, eos, tracerstickernames);
 }
 
-FreeFlowFlux3D::FreeFlowFlux3D(const RiemannSolver& rs) : rs_(rs) {}
+FreeFlowFlux3D::FreeFlowFlux3D(const RiemannSolver3D& rs) : rs_(rs) {}
 
 void FreeFlowFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
