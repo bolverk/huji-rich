@@ -162,7 +162,7 @@ namespace
 		return loc;
 	}
 
-	void CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R)
+	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R)
 	{
 		res.clear();
 		res.push_back(indeces[0]);
@@ -175,12 +175,13 @@ namespace
 		for (size_t i = 1; i < indeces.size(); ++i)
 		{
 			Vector3D diff = points[indeces[i]] - points[indeces[i - 1]];
-			if (ScalarProd(diff, diff) > R*R*1e-13)
+			if (ScalarProd(diff, diff) > R*R*1e-10)
 				res.push_back(indeces[i]);
 		}
 		Vector3D diff = points[indeces.back()] - points[indeces[0]];
-		if (ScalarProd(diff, diff) < R*R*1e-13)
+		if (ScalarProd(diff, diff) < R*R*1e-10)
 			res.pop_back();
+		return R;
 	}
 
 	size_t SetPointTetras(vector<vector<size_t> > &PointTetras, size_t Norg, vector<Tetrahedron> const& tetras,
@@ -945,6 +946,7 @@ void Voronoi3D::BuildVoronoi(void)
 			CalcTetraRadiusCenter(i);
 		}
 	// Organize the faces and assign them to cells
+	vector<size_t> temp3;
 	for (size_t i = 0; i < Ntetra; ++i)
 	{
 		if (del_.empty_tetras_.find(i) == del_.empty_tetras_.end())
@@ -980,20 +982,24 @@ void Voronoi3D::BuildVoronoi(void)
 							cur_check = next_check;
 						}
 						assert(temp.size() > 2);
-						CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]));
+						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]));
 						if (temp2.size() < 3)
 							continue;
-						//temp = temp2;
-						FaceNeighbors_.push_back(std::pair<size_t, size_t>(N0, N1));
+						// Make faces right handed
+						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3);
+						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
+						if (AreaCM.first < Asize*Asize*1e-4)
+							continue;
+						area_.push_back(AreaCM.first);
+						Face_CM_.push_back(AreaCM.second);
 						PointsInFace_.push_back(temp2);
+
+						FaceNeighbors_.push_back(std::pair<size_t, size_t>(N0, N1));
+						
 						FacesInCell_[N0].push_back(PointsInFace_.size() - 1);
 						if (N1 < Norg_)
 							FacesInCell_[N1].push_back(PointsInFace_.size() - 1);
-						// Make faces right handed
-						MakeRightHandFace(PointsInFace_.back(), del_.points_[N0], tetra_centers_, temp2);
-						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(PointsInFace_.back(), tetra_centers_);
-						area_.push_back(AreaCM.first);
-						Face_CM_.push_back(AreaCM.second);
+						
 					}
 				}
 			}
@@ -1264,35 +1270,6 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 
 double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 {
-/*	Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
-	v2-=del_.points_[del_.tetras_[index].points[0]];
-	Vector3D v3(del_.points_[del_.tetras_[index].points[2]]);
-	v3-=del_.points_[del_.tetras_[index].points[0]];
-	Vector3D v4(del_.points_[del_.tetras_[index].points[3]]);
-	v4-=del_.points_[del_.tetras_[index].points[0]];
-	
-	Mat33<double> m_a(v2.x, v2.y, v2.z,
-		v3.x, v3.y, v3.z,
-		v4.x, v4.y, v4.z);
-	double a = m_a.determinant();
-
-	Mat33<double> m_Dx(ScalarProd(v2, v2), v2.y, v2.z,
-		ScalarProd(v3, v3), v3.y, v3.z,
-		ScalarProd(v4, v4), v4.y, v4.z);
-	double Dx = m_Dx.determinant();
-
-	Mat33<double> m_Dy(ScalarProd(v2, v2), v2.x, v2.z,
-		ScalarProd(v3, v3), v3.x, v3.z,
-		ScalarProd(v4, v4), v4.x, v4.z);
-	double Dy = -m_Dy.determinant();
-
-	Mat33<double> m_Dz(ScalarProd(v2, v2), v2.x, v2.y,
-		ScalarProd(v3, v3), v3.x, v3.y,
-		ScalarProd(v4, v4), v4.x, v4.y);
-	double Dz = m_Dz.determinant();
-
-	tetra_centers_[index] = Vector3D(Dx / (2 * a), Dy / (2 * a), Dz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
-*/
 	boost::array<Vector3D, 4> temp_points;
 	boost::array<Vector3D, 5> temp_points2;
 	for (size_t i = 0; i < 4; ++i)
@@ -1311,6 +1288,47 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double Dx = (dx + aa - cc);
 	double Dy = (dy + aa - cc);
 	double Dz = (dz + aa - cc);
+	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
+
+	if (std::abs(dx-cc)<std::max(std::abs(dx),std::abs(cc))*1e-5)
+	{
+		Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
+		v2 -= del_.points_[del_.tetras_[index].points[0]];
+		Vector3D v3(del_.points_[del_.tetras_[index].points[2]]);
+		v3 -= del_.points_[del_.tetras_[index].points[0]];
+		Vector3D v4(del_.points_[del_.tetras_[index].points[3]]);
+		v4 -= del_.points_[del_.tetras_[index].points[0]];
+
+		Mat33<double> m_a(v2.x, v2.y, v2.z,
+			v3.x, v3.y, v3.z,
+			v4.x, v4.y, v4.z);
+		double a = m_a.determinant();
+
+		Mat33<double> m_Dx(ScalarProd(v2, v2), v2.y, v2.z,
+			ScalarProd(v3, v3), v3.y, v3.z,
+			ScalarProd(v4, v4), v4.y, v4.z);
+		double DDx = m_Dx.determinant();
+
+		Mat33<double> m_Dy(ScalarProd(v2, v2), v2.x, v2.z,
+			ScalarProd(v3, v3), v3.x, v3.z,
+			ScalarProd(v4, v4), v4.x, v4.z);
+		double DDy = -m_Dy.determinant();
+
+		Mat33<double> m_Dz(ScalarProd(v2, v2), v2.x, v2.y,
+			ScalarProd(v3, v3), v3.x, v3.y,
+			ScalarProd(v4, v4), v4.x, v4.y);
+		double DDz = m_Dz.determinant();
+
+		Vector3D center = Vector3D(DDx / (2 * a), DDy / (2 * a), DDz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
+		if (tetra_centers_[index].x/ center.x > 0.999 && tetra_centers_[index].y/center.y > 0.999 && tetra_centers_[index].z/ center.z > 0.999
+			&& 0.999 < center.x/ tetra_centers_[index].x && 0.999 < center.y/ tetra_centers_[index].y && 0.999 < center.z/ tetra_centers_[index].z)
+		{
+			tetra_centers_[index] = center;
+			return 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
+		}
+	}
+
+
 	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
 
 	return 0.5*sqrt(Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc) / std::abs(aa);
