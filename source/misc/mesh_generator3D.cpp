@@ -66,6 +66,25 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 	return res;
 }
 
+vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax)
+{
+	typedef boost::mt19937_64 base_generator_type;
+	base_generator_type generator;
+	boost::random::uniform_real_distribution<> dist;
+	vector<Vector3D> res;
+	res.reserve(PointNum);
+	while (res.size() < PointNum)
+	{
+		double r = std::pow(dist(generator)*(Rmax*Rmax*Rmax - Rmin*Rmin*Rmin)+ Rmin*Rmin*Rmin,0.333333333);
+		double phi = 2 * M_PI*dist(generator);
+		double t = acos(2 * dist(generator) - 1);
+		Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
+		if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
+			res.push_back(point);
+	}
+	return res;
+}
+
 vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax)
 {
 	typedef boost::mt19937_64 base_generator_type;
