@@ -43,15 +43,22 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell
 		MPI_Barrier(MPI_COMM_WORLD);
 		procmove.Update(tproc, local);
 		points = local.UpdateMPIPoints(tproc, rank, local.del_.points_, selfindex, sentproc, sentpoints);
-		MPI_exchange_data(tproc, cells, false);
+		local.sentpoints_ = sentpoints;
+		local.self_index_ = selfindex;
+		local.sentprocs_ = sentproc;
 		local.Norg_ = points.size();
+		MPI_exchange_data(local, cells, false);
 		local.del_.points_ = points;
 	}
 	ConstNumberPerProc3D procmove2(0.1, 2.1, 2);
 	MPI_Barrier(MPI_COMM_WORLD);
 	procmove2.Update(tproc, local);
 	points = local.UpdateMPIPoints(tproc, rank, local.del_.points_, selfindex, sentproc, sentpoints);
-	MPI_exchange_data(tproc, cells, false);
+	local.sentpoints_ = sentpoints;
+	local.self_index_ = selfindex;
+	local.sentprocs_ = sentproc;
+	local.Norg_ = points.size();
+	MPI_exchange_data(local, cells, false);
 }
 
 #endif
