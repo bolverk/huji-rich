@@ -18,21 +18,72 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 {
 	vector<std::size_t> const& faces = tess.GetCellFaces(index);
 	std::size_t N = faces.size();
+	boost::array<Vector3D,4> vec;
 	for (std::size_t i = 0; i < N; ++i)
 	{
-		Vector3D const& vecref = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]];
-		Vector3D normal = tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).first) -
-			tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).second);
-		double sign = ScalarProd(tess.GetMeshPoint(index) - vecref, normal);
-		if (ScalarProd(point - vecref, normal)*sign < 0)
+		vec[0] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]];
+		vec[1] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]];
+		vec[2] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[2]];
+		vec[3] = tess.GetMeshPoint(index);
+		double sgn1 = orient3d(vec);
+		vec[3] = point;
+		double sgn2 = orient3d(vec);
+		if (sgn1*sgn2 <= 0)
 			return false;
 	}
 	return true;
 }
 
+namespace
+{
+
+	void binary_write_single_int(int n, std::ofstream& fh)
+	{
+		fh.write(reinterpret_cast<const char*>(&n), sizeof(int));
+	}
+
+	void binary_write_single_double(double d, std::ofstream& fh)
+	{
+		fh.write(reinterpret_cast<const char*>(&d), sizeof(double));
+	}
+
+	void binary_write_single_size_t(std::size_t n, std::ofstream& fh)
+	{
+		fh.write(reinterpret_cast<const char*>(&n), sizeof(std::size_t));
+	}
+
+	vector<Vector3D> read_data(string fname)
+	{
+		vector<Vector3D> res;
+		std::ifstream fh(fname.c_str(), std::ios::binary);
+		int norg = 0;
+		fh.read(reinterpret_cast<char*>(&norg), sizeof(int));
+
+		res.reserve(norg);
+		// Points
+		for (int i = 0; i < norg; ++i)
+		{
+			double x = 0, y = 0, z = 0;
+			fh.read(reinterpret_cast<char*>(&x), sizeof(double));
+			fh.read(reinterpret_cast<char*>(&y), sizeof(double));
+			fh.read(reinterpret_cast<char*>(&z), sizeof(double));
+			res.push_back(Vector3D(x, y, z));
+		}
+		return res;
+	}
+}
+
 
 namespace
 {
+	bool ShouldCalcTetraRadius(Tetrahedron const& T, size_t Norg)
+	{
+		for (size_t i = 0; i < 4; ++i)
+			if (T.points[i] < Norg)
+				return true;
+		return false;
+	}
+
 	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<bool> &future_check, size_t Norg,
 		Delaunay3D const& del,vector<vector<size_t> > const& PointsInTetra)
 	{
@@ -429,7 +480,8 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		eo.AddEntry("Point number", static_cast<double>(i));
 		eo.AddEntry("Point x cor", points[i].x);
 		eo.AddEntry("Point y cor", points[i].y);
-		vproc.output("vproc_" + int2str(rank) + ".h5");
+		eo.AddEntry("Point z cor", points[i].z);
+		vproc.output("vproc_" + int2str(rank) + ".bin");
 		throw eo;
 	}
 	// Send/Recv the points
@@ -683,6 +735,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
 	del_.BuildExtra(extra_points);
+
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(R_.size());
@@ -699,6 +752,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 
 	CM_.resize(del_.points_.size());
 	volume_.resize(Norg_);
+
 	// Create Voronoi
 	BuildVoronoi();
 	CalcAllCM();
@@ -869,9 +923,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
 	vector<std::pair<std::size_t, std::size_t> > ghost_index = SerialFirstIntersections();
-	//vector<std::pair<std::size_t, std::size_t> > ghost_index = SerialFindIntersections(true);
 	vector<vector<size_t> > past_duplicates;
 	vector<Vector3D> extra_points = CreateBoundaryPoints(ghost_index, past_duplicates);
+
 	del_.BuildExtra(extra_points);
 
 	R_.resize(del_.tetras_.size());
@@ -943,7 +997,8 @@ void Voronoi3D::BuildVoronoi(void)
 	for (size_t i = 0; i < Ntetra; ++i)
 		if (del_.empty_tetras_.find(i) == del_.empty_tetras_.end())
 		{
-			CalcTetraRadiusCenter(i);
+			if(ShouldCalcTetraRadius(del_.tetras_[i],Norg_))
+				CalcTetraRadiusCenter(i);
 		}
 	// Organize the faces and assign them to cells
 	vector<size_t> temp3;
@@ -988,7 +1043,7 @@ void Voronoi3D::BuildVoronoi(void)
 						// Make faces right handed
 						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3);
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < Asize*Asize*1e-4)
+						if (AreaCM.first < Asize*Asize*1e-6)
 							continue;
 						area_.push_back(AreaCM.first);
 						Face_CM_.push_back(AreaCM.second);
@@ -1133,6 +1188,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	std::stack<std::size_t > check_stack;
 	vector<std::size_t> point_neigh;
 	vector<std::pair<std::size_t, std::size_t> > res;
+	if (Norg_ == 0)
+		return res;
 	Sphere sphere;
 	vector<bool> checked(Norg_, false), will_check(Norg_, false);
 	FirstCheckList(check_stack, will_check, Norg_, del_,PointTetras_);
@@ -1378,24 +1435,6 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
 	CM_[index] = CM_[index] / volume_[index];
 }
 
-namespace
-{
-
-	void binary_write_single_int(int n, std::ofstream& fh)
-	{
-		fh.write(reinterpret_cast<const char*>(&n), sizeof(int));
-	}
-
-	void binary_write_single_double(double d, std::ofstream& fh)
-	{
-		fh.write(reinterpret_cast<const char*>(&d), sizeof(double));
-	}
-
-	void binary_write_single_size_t(std::size_t n, std::ofstream& fh)
-	{
-		fh.write(reinterpret_cast<const char*>(&n), sizeof(std::size_t));
-	}
-}
 
 void Voronoi3D::output(std::string const& filename)const
 {

@@ -24,9 +24,17 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		size_t n0 = tess.GetFaceNeighbors(i).first;
 		size_t n1 = tess.GetFaceNeighbors(i).second;
 		if (n0 < N)
+		{
 			extensives[n0] -= delta;
+			extensives[n0].internal_energy -= delta.energy - ScalarProd(cells[n0].velocity, delta.momentum) +
+				0.5*ScalarProd(cells[n0].velocity, cells[n0].velocity)*delta.mass;
+		}
 		if (n1 < N)
+		{
 			extensives[n1] += delta;
+			extensives[n1].internal_energy += delta.energy - ScalarProd(cells[n1].velocity, delta.momentum) +
+				0.5*ScalarProd(cells[n1].velocity, cells[n1].velocity)*delta.mass;
+		}
 	}
 	size_t n = tess.GetPointNo();
 	for (size_t i = 0; i < n; ++i)
@@ -115,17 +123,21 @@ namespace
 	{
 		const double Ek = 0.5 * ScalarProd(extensive.momentum, extensive.momentum) /  extensive.mass;
 		const double density = extensive.mass / vol;
-		extensive.energy = Ek + eos.dp2e(density, eos.sd2p(extensive.tracers[entropy_index] / extensive.mass, density))
+		double Et = eos.dp2e(density, eos.sd2p(extensive.tracers[entropy_index] / extensive.mass, density))
 			*extensive.mass;
+		if (extensive.internal_energy<0 || Et>extensive.internal_energy*1.03 || Et < extensive.internal_energy*0.97)
+		{
+			extensive.internal_energy = Et;
+			extensive.energy = Ek + Et;
+		}
 	}
 
 	double NewPressure(Conserved3D const& extensive, EquationOfState const& eos, double new_d)
 	{
-		double new_p = extensive.energy - ScalarProd(extensive.momentum, extensive.momentum)*0.5 / extensive.mass;
-		new_p /= extensive.mass;
-		if (new_p < 0)
+		double new_e = extensive.internal_energy / extensive.mass;
+		if (new_e < 0)
 			return 0;
-		return eos.de2p(new_d, new_p);
+		return eos.de2p(new_d, new_e);
 	}
 }
 

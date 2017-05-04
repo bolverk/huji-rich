@@ -19,4 +19,3 @@ public:
 };
 
 #endif //HLLC3D_HPP
-#pragma once

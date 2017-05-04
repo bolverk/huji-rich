@@ -99,7 +99,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 	extensive_.resize(N);
 	for (size_t i = 0; i < N; ++i)
-		PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i], eos_, tsn_);
+		PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i]);
 }
 
 namespace

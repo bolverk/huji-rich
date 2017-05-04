@@ -320,13 +320,12 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 	}
 
 	Conserved3D CalcNewExtensives(Tessellation3D const& tess, Tessellation3D const& local, size_t torefine, vector<size_t> const& neigh,
-		vector<ComputationalCell3D> const& cells,EquationOfState const& eos,TracerStickerNames const& tsn,
-		vector<Conserved3D> &extensives)
+		vector<ComputationalCell3D> const& cells,vector<Conserved3D> &extensives)
 	{
 		Conserved3D res;
-		PrimitiveToConserved(cells[torefine], tess.GetVolume(torefine),res,eos,tsn);
+		PrimitiveToConserved(cells[torefine], tess.GetVolume(torefine),res);
 		Conserved3D newpoint(res);
-		PrimitiveToConserved(cells[torefine], local.GetVolume(1), extensives[torefine], eos, tsn);
+		PrimitiveToConserved(cells[torefine], local.GetVolume(1), extensives[torefine]);
 		newpoint -= extensives[torefine];
 		assert(newpoint.mass > 0);
 		size_t Nreal = neigh.size();
@@ -336,8 +335,8 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 				continue;
 			double dV = tess.GetVolume(neigh[i]) - local.GetVolume(i + 2);
 			assert(dV > -1e-10*tess.GetVolume(neigh[i]));
-			PrimitiveToConserved(cells[neigh[i]], dV, res, eos, tsn);
-			PrimitiveToConserved(cells[neigh[i]], local.GetVolume(i + 2), extensives[neigh[i]], eos, tsn);
+			PrimitiveToConserved(cells[neigh[i]], dV, res);
+			PrimitiveToConserved(cells[neigh[i]], local.GetVolume(i + 2), extensives[neigh[i]]);
 			newpoint += res;
 		}
 		return newpoint;
@@ -752,7 +751,7 @@ AMR3D::AMR3D(EquationOfState const& eos,CellsToRefine3D const& refine, CellsToRe
 }
 
 
-void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& eos,
+void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& /*eos*/,
 	vector<Conserved3D> &extensives, double time,
 #ifdef RICH_MPI
 	Tessellation3D const& /*proctess*/,
@@ -791,7 +790,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 		assert(oldv > 0.999*newv&&newv > 0.999*oldv);
 		///////////
 		FixVoronoi(vlocal, tess, neigh, ToRefine[i], newvol, newCM,Ntotal0,i);
-		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(ToRefine[i]), extensives[ToRefine[i]], eos, tracerstickernames);
+		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(ToRefine[i]), extensives[ToRefine[i]]);
 		tess.GetMeshPoints()[Ntotal0 + i] = NewPoint;
 		newvols.push_back(newvol);
 		newCMs.push_back(newCM);
@@ -827,7 +826,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	for (size_t i = 0; i < newCMs.size(); ++i)
 	{
 		cells.push_back(cells[ToRefine[i]]);
-		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(Norg+i), extensives[Norg+i], eos, tracerstickernames);
+		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(Norg+i), extensives[Norg+i]);
 	}
 	// Fix the old data and insert new data
 	vector<Vector3D> & allpoints = tess.GetMeshPoints();

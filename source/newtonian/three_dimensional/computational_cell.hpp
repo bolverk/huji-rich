@@ -23,6 +23,9 @@ public:
 	//! \brief Pressure
 	double pressure;
 
+	//! \brief Internal energy
+	double internal_energy;
+
 	//! \brief Velocity
 	Vector3D velocity;
 
@@ -39,19 +42,22 @@ public:
 	  \param density_i Density
 	  \param pressure_i Pressure
 	  \param velocity_i Velocity
+	  \param internal_energy_i Internal energy per unit mass
 	  */
 	ComputationalCell3D(double density_i,
-		double pressure_i,
+		double pressure_i,double internal_energy_i,
 		const Vector3D& velocity_i);
 
 	/*! \brief Class constructor
 	  \param density_i Density
 	  \param pressure_i Pressure
+	  \param internal_energy_i Internal energy per unit mass
 	  \param velocity_i Velocity
 	  \param tracers_i Tracers
 	  */
 	ComputationalCell3D(double density_i,
 		double pressure_i,
+		double internal_energy_i,
 		const Vector3D& velocity_i,
 		const vector<double>& tracers_i,
 		const vector<bool>& stickers_i);

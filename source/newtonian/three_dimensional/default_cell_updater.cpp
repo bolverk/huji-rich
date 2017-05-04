@@ -21,8 +21,11 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 		const double vol = tess.GetVolume(i);
 		res[i].density = extensive.mass / vol;
 		res[i].velocity = extensive.momentum / extensive.mass;
-		const double energy = extensive.energy / extensive.mass -
-			0.5*ScalarProd(res[i].velocity, res[i].velocity);
+		double energy = extensive.internal_energy / extensive.mass;
+		if(energy<0)
+			energy = extensive.energy / extensive.mass - 0.5*ScalarProd(res[i].velocity, res[i].velocity);
+		extensive.energy = extensive.mass*(energy + 0.5*ScalarProd(res[i].velocity, res[i].velocity));
+		//const double energy = extensive.energy / extensive.mass - 0.5*ScalarProd(res[i].velocity,res[i].velocity);
 		res[i].stickers = res[i].stickers;
 		for (size_t j = 0; j < Ntracers; ++j)
 			res[i].tracers[j] = extensive.tracers[j] / extensive.mass;
@@ -39,6 +42,7 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 			throw eo;
 		}
 		res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers, tracerstickernames.tracer_names);
+		res[i].internal_energy = energy;
 		if (entropy_index_ < res[i].tracers.size())
 		{
 			res[i].tracers[entropy_index_] = eos.dp2s(res[i].density, res[i].pressure, res[i].tracers,

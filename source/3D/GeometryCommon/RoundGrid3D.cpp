@@ -1,5 +1,9 @@
 #include "RoundGrid3D.hpp"
 
+#include "../../misc/simple_io.hpp"
+#include "../../misc/int2str.hpp"
+#include <fstream>
+
 vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll, Vector3D const& ur,
 	size_t NumberIt,
 #ifdef RICH_MPI
@@ -15,11 +19,9 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 #else
 	tess->Build(points);
 #endif
-	double pi = 3.141592653;
 	double eta_ = 0.02, chi_ = 1;
 	size_t N = tess->GetPointNo();
 	vector<Vector3D> res(points);
-
 	for (size_t j = 0; j < NumberIt; ++j)
 	{
 #ifdef RICH_MPI
@@ -29,7 +31,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 #endif
 		for (size_t i = 0; i < N; ++i)
 		{
-			double R = sqrt(3*tess->GetVolume(i) / (4*pi));
+			double R = tess->GetWidth(i);
 			Vector3D s = tess->GetCellCM(i);
 			Vector3D r = tess->GetMeshPoint(i);
 			double d = abs(s - r);
@@ -59,19 +61,16 @@ vector<Vector3D> RoundGrid3DSingle(vector<Vector3D> const& points, Vector3D cons
 	size_t NumberIt)
 {
 	Voronoi3D tess(ll, ur);
-	double pi = 3.141592653;
 	double eta_ = 0.02, chi_ = 1;
-	size_t N = tess.GetPointNo();
+	tess.Build(points);
+	size_t N = tess.GetPointNo(); //build tess first
 	vector<Vector3D> res(points);
-	// Copy the points
-	for (size_t i = 0; i < N; ++i)
-		res[i] = tess.GetMeshPoint(i);
 
 	for (size_t j = 0; j < NumberIt; ++j)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
-			double R = sqrt(3 * tess.GetVolume(i) / (4 * pi));
+			double R = tess.GetWidth(i);
 			Vector3D s = tess.GetCellCM(i);
 			Vector3D r = tess.GetMeshPoint(i);
 			double d = abs(s - r);
@@ -82,7 +81,8 @@ vector<Vector3D> RoundGrid3DSingle(vector<Vector3D> const& points, Vector3D cons
 				dw = chi_*0.5*(s - r);
 			res[i] = tess.GetMeshPoint(i) + dw;
 		}
-		tess.Build(res);
+		if(j<(NumberIt-1))
+			tess.Build(res); 
 	}
 	return res;
 }

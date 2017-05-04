@@ -53,14 +53,13 @@ namespace
 		return res;
 	}
 
-	double TotalEnergyDensity3D(ComputationalCell3D const& p,EquationOfState const& eos,TracerStickerNames const& tsn)
+	double TotalEnergyDensity3D(ComputationalCell3D const& p)
 	{
-		return p.density*(0.5*pow(abs(p.velocity), 2) + eos.dp2e(p.density, p.pressure, p.tracers, tsn.tracer_names));
+		return p.density*(0.5*pow(abs(p.velocity), 2) + p.internal_energy);
 	}
 
 
-	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss,EquationOfState const& eos,
-		TracerStickerNames const& tsn)
+	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss)
 	{
 		const double dk = state.density;
 		const double pk = state.pressure;
@@ -68,21 +67,22 @@ namespace
 		const double vk = state.velocity.y;
 		const double wk = state.velocity.z;
 		const double ds = dk*(sk - uk) / (sk - ss);
-		const double ek = TotalEnergyDensity3D(state,eos,tsn);
+		const double ek = TotalEnergyDensity3D(state);
 		Conserved3D res;
 		res.mass = ds;
 		res.momentum.x = ds*ss;
 		res.momentum.y = ds*vk;
 		res.momentum.z = ds*wk;
 		res.energy = ek*ds / dk + ds*(ss - uk)*(ss + pk / dk / (sk - uk));
+		res.internal_energy = 0;
 		return res;
 	}
 
-	Conserved3D PrimitiveToFlux(ComputationalCell3D const& p,EquationOfState const& eos,TracerStickerNames const& tsn)
+	Conserved3D PrimitiveToFlux(ComputationalCell3D const& p)
 	{
 		return Conserved3D(p.density*p.velocity.x,
 			p.pressure*Vector3D(1,0,0) + p.density*p.velocity.x*p.velocity,
-			(TotalEnergyDensity3D(p,eos,tsn) + p.pressure)*	p.velocity.x);
+			(TotalEnergyDensity3D(p) + p.pressure)*	p.velocity.x,0);
 	}
 
 }
@@ -107,16 +107,16 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 	local_right.velocity.z = 0;
 
 	Conserved3D ul, ur; 
-	PrimitiveToConserved(local_left, 1, ul, eos, tsn);
-	PrimitiveToConserved(local_right, 1, ur, eos, tsn);
+	PrimitiveToConserved(local_left, 1, ul);
+	PrimitiveToConserved(local_right, 1, ur);
 
-	const Conserved3D fl = PrimitiveToFlux(local_left, eos,tsn);
-	const Conserved3D fr = PrimitiveToFlux(local_right, eos, tsn);
+	const Conserved3D fl = PrimitiveToFlux(local_left);
+	const Conserved3D fr = PrimitiveToFlux(local_right);
 
 	const WaveSpeeds ws = estimate_wave_speeds(local_left, local_right,eos,tsn);
 
-	const Conserved3D usl = starred_state(local_left, ws.left, ws.center,eos,tsn);
-	const Conserved3D usr = starred_state(local_right, ws.right, ws.center,eos,tsn);
+	const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
+	const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 
 	Conserved3D f_gr;
 	if (ws.left > 0)
@@ -137,5 +137,6 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 	else
 		f_gr.momentum += (right.velocity - normaldir*ScalarProd(right.velocity, normaldir))*f_gr.mass;
 
+	f_gr.internal_energy = 0;
 	return f_gr;
 }

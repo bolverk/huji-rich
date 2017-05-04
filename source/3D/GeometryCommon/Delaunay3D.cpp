@@ -5,6 +5,7 @@
 #include <fstream>
 #include "HilbertOrder3D.hpp"
 #include <boost/foreach.hpp>
+#include <iostream>
 
 //#define runcheks 1
 
@@ -363,7 +364,9 @@ void Delaunay3D::BuildExtra(vector<Vector3D> const& points)
 
 	assert(to_check_.empty());
 	for (std::size_t i = 0; i < points.size(); ++i)
+	{
 		InsertPoint(order[i] + Nstart);
+	}
 }
 
 void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Vector3D const& minv)

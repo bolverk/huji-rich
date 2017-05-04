@@ -27,7 +27,7 @@ public:
 	\param flat_tracers Names of tracers for which the slope is always zero
 	\param skip_key The sticker name to skip cells for taking them into account for the slope limit
 	*/
-	LinearGauss3D(EquationOfState const& eos,Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
+	LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
 		double theta = 0.5,double delta_P = 0.7,const vector<string>& flat_tracers = vector<string>(),
 		string skip_key = string());
 
@@ -41,7 +41,8 @@ public:
 	\param target The location of the interpolation
 	\param res The interpolated value
 	*/
-	void Interp(ComputationalCell3D &res,ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm, Vector3D const& target)const;
+	void Interp(ComputationalCell3D &res,ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm, Vector3D const& target,
+		EquationOfState const& eos,TracerStickerNames const& tsn)const;
 
 	/*!
 	\brief Returns the gradients
@@ -57,6 +58,7 @@ public:
 
 private:
 	EquationOfState const& eos_;
+	TracerStickerNames const& tsn_;
 	Ghost3D const& ghost_;
 	mutable vector<Slope3D> rslopes_;
 	mutable vector<Slope3D> naive_rslopes_;

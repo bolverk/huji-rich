@@ -19,6 +19,9 @@ public:
 	//! \brief Energy
 	double energy;
 
+	//! \brief Internal energy
+	double internal_energy;
+
 	//! \brief Tracers
 	vector<double> tracers;
 
@@ -29,20 +32,24 @@ public:
 	  \param mass_i Mass
 	  \param momentum_i Momentum
 	  \param energy_i Energy
+	  \param internal_energy_i Internal energy
 	 */
 	Conserved3D(double mass_i,
 		const Vector3D& momentum_i,
-		double energy_i);
+		double energy_i,
+		double internal_energy_i);
 
 	/*! \brief Class constructor
 	  \param mass_i Mass
 	  \param momentum_i Momentum
 	  \param energy_i Energy
+	  \param internal_energy_i Internal energy
 	  \param tracers_i Tracers
 	 */
 	Conserved3D(double mass_i,
 		const Vector3D& momentum_i,
 		double energy_i,
+		double internal_energy_i,
 		const vector<double>& tracers_i);
 
 	/*! \brief Reduction operator
@@ -94,7 +101,6 @@ Conserved3D operator+(Conserved3D const& p1, Conserved3D const& p2);
 Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2);
 
 
-void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res,
-	EquationOfState const& eos, TracerStickerNames const& tsn);
+void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res);
 
 #endif // CONSERVED_3D_HPP
