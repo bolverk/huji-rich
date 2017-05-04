@@ -18,6 +18,7 @@
 #include <boost/container/flat_set.hpp>
 
 #ifdef RICH_MPI
+#include "../../newtonian/three_dimensional/computational_cell.hpp"
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
