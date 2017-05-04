@@ -1,5 +1,6 @@
 #include "hdf_write.hpp"
 #include "hdf5_utils.hpp"
+#include "../../misc/int2str.hpp"
 
 using namespace H5;
 
@@ -310,3 +311,33 @@ Snapshot3D ReadSnapshot3D
 
 	return res;
 }
+
+#ifdef RICH_MPI
+Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number)
+{
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// Read the data
+	Snapshot3D snap;
+	for (int i = 0; i < static_cast<int>(snapshot_number); ++i)
+	{
+		Snapshot3D temp = ReadSnapshot3D(filename + int2str(i) + ".h5", false);
+		if (i == 0)
+		{
+			snap.time = temp.time;
+			snap.cycle = temp.cycle;
+			snap.tracerstickernames = temp.tracerstickernames;
+		}
+		size_t N = temp.cells.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			if (PointInPoly(proctess, temp.mesh_points[i], static_cast<size_t>(rank)))
+			{
+				snap.cells.push_back(temp.cells[i]);
+				snap.mesh_points.push_back(temp.mesh_points[i]);
+			}
+		}
+	}
+	return snap;
+}
+#endif

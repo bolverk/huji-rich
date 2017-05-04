@@ -76,6 +76,10 @@ Snapshot3D ReadSnapshot3D(const string& fname
 #endif
 );
 
+#ifdef RICH_MPI
+Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number);
+#endif
+
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
