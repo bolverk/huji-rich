@@ -9,6 +9,7 @@
 
 #include "mpi_commands.hpp"
 #include "ConstNumberPerProc3D.hpp"
+#include "../newtonian/three_dimensional/computational_cell.hpp"
 #include "../3D/GeometryCommon/Voronoi3D.hpp"
 
 /*!
@@ -19,7 +20,12 @@
 \param speed How fast to make the correction each iteration in units of cpu cell size
 \param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 */
-void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 100, double speed = 0.04, int mode = 2,double round = 1.5);
+void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 100, double speed = 0.04, int mode = 2,
+	double round = 1.5);
+
+void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter = 100, double speed = 0.04, int mode = 2,
+	double round = 1.5);
+
 
 #endif // RICH_MPI
 

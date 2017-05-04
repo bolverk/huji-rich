@@ -96,6 +96,8 @@ public:
 	void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
 
 	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round);
+
+	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round);
 #endif
 
 	std::size_t GetPointNo(void) const;
