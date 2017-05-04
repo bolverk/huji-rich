@@ -168,6 +168,10 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 	write_std_vector_to_hdf5(file, temp, "Pressure");
 
 	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = cells[i].internal_energy;
+	write_std_vector_to_hdf5(file, temp, "InternalEnergy");
+
+	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].velocity.x;
 	write_std_vector_to_hdf5(file, temp, "Vx");
 
@@ -249,6 +253,7 @@ Snapshot3D ReadSnapshot3D
 	{
 		const vector<double> density = read_double_vector_from_hdf5(file, "Density");
 		const vector<double> pressure = read_double_vector_from_hdf5(file, "Pressure");
+		const vector<double> energy = read_double_vector_from_hdf5(file, "InternalEnergy");
 		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
 		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
 		const vector<double> z_velocity = read_double_vector_from_hdf5(file, "Vz");
@@ -279,6 +284,7 @@ Snapshot3D ReadSnapshot3D
 		{
 			res.cells.at(i).density = density.at(i);
 			res.cells.at(i).pressure = pressure.at(i);
+			res.cells.at(i).internal_energy = energy.at(i);
 			res.cells.at(i).velocity.x = x_velocity.at(i);
 			res.cells.at(i).velocity.y = y_velocity.at(i);
 			res.cells.at(i).velocity.z = z_velocity.at(i);
