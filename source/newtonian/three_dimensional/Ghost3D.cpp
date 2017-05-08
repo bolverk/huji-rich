@@ -88,7 +88,6 @@ void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
 			ghost_index = tess.GetFaceNeighbors(ghosts[i].first).second;
 			real_index = tess.GetFaceNeighbors(ghosts[i].first).first;
 		}
-		Vector3D normal = normalize(tess.GetMeshPoint(ghost_index) - tess.GetMeshPoint(real_index));
 		temp[i] = std::pair<size_t, ComputationalCell3D>(ghost_index, cells[real_index]);
 		indeces[i] = ghost_index;
 	}
