@@ -1,13 +1,14 @@
 #include "ConstNumberPerProc3D.hpp"
 #ifdef RICH_MPI
 #include "../misc/serializable.hpp"
+#include "mpi_commands.hpp"
 #include <mpi.h>
 #endif
 
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
-ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode) :
+ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode, int CMmode) :
 	speed_(speed), RoundSpeed_(RoundSpeed),	mode_(mode) {}
 
 #ifdef RICH_MPI
@@ -74,9 +75,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	// Moving according to pressure
 	if (mode_ == 1 || mode_ == 2)
 	{
-		const double neigheps = 0.2;
 		vector<size_t> neigh = tproc.GetNeighbors(rank);
-		for (size_t i = 0; i < neigh.size(); ++i)
+		size_t Nneigh = neigh.size();
+		
+		const double neigheps = 0.2;
+		for (size_t i = 0; i < Nneigh; ++i)
 		{
 			if (static_cast<int>(neigh[i]) >= nproc)
 				continue;
@@ -85,15 +88,20 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			const double dist = abs(tproc.GetMeshPoint(static_cast<size_t>(rank))-(tproc.GetMeshPoint(neigh[i])));
 			if (dist < neigheps*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]))
 			{
-				dx += neigheps*(point.x - tproc.GetMeshPoint(neigh[i]).x)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / dist;
-				dy += neigheps*(point.y - tproc.GetMeshPoint(neigh[i]).y)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / dist;
-				dz += neigheps*(point.z - tproc.GetMeshPoint(neigh[i]).z)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / dist;
+				dx += (point.x - tproc.GetMeshPoint(neigh[i]).x)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / (dist*neigheps);
+				dy += (point.y - tproc.GetMeshPoint(neigh[i]).y)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / (dist*neigheps);
+				dz += (point.z - tproc.GetMeshPoint(neigh[i]).z)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / (dist*neigheps);
 			}
 			else
 			{
-				dx -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)] / (IdealPerProc*dist);
-				dy -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)] / (IdealPerProc*dist);
-				dz -= (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*(otherpoint.z - point.z)*R[static_cast<size_t>(rank)] / (IdealPerProc*dist);
+				double merit = (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				if (merit < 0)
+					merit = std::max(merit, -2.0);
+				else
+					merit = std::min(merit, 2.0);
+				dx -= merit*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)];
+				dy -= merit*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)];
+				dz -= merit*(otherpoint.z - point.z)*R[static_cast<size_t>(rank)];
 			}
 		}
 	}
