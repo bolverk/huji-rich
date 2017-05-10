@@ -425,7 +425,7 @@ namespace
 			// zvelocity
 			if (std::abs(dphi.velocity.z) > 0.1*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
 			{
-				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
+				if (std::abs(dphi.velocity.z) > 1e-9*cell.velocity.z)
 					psi[4] = std::min(psi[4], std::max(diffusecoeff*(neighbors[i]->velocity.z - cell.velocity.z) / dphi.velocity.z, 0.0));
 			}
 			// tracers
