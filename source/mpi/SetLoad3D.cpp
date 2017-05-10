@@ -25,7 +25,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double spe
 		if (rank == 0)
 			std::cout << load << std::endl;
 	}
-	ConstNumberPerProc3D procmove2(0.1, 2.1, 2,CMmode);
+	ConstNumberPerProc3D procmove2(0.1, 2.1, 2);
 	MPI_Barrier(MPI_COMM_WORLD);
 	procmove2.Update(tproc, local);
 	points = local.UpdateMPIPoints(tproc, rank, local.del_.points_, selfindex, sentproc, sentpoints);
