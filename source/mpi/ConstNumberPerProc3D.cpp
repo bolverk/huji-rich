@@ -8,7 +8,7 @@
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
-ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode, int CMmode) :
+ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode) :
 	speed_(speed), RoundSpeed_(RoundSpeed),	mode_(mode) {}
 
 #ifdef RICH_MPI
