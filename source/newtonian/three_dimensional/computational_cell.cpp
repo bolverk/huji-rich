@@ -33,8 +33,8 @@ ComputationalCell3D& ComputationalCell3D::operator+=(ComputationalCell3D const& 
 {
 	this->density += other.density;
 	this->pressure += other.pressure;
-	this->velocity += other.velocity;
 	this->internal_energy += other.internal_energy;
+	this->velocity += other.velocity;
 	assert(this->tracers.size() == other.tracers.size());
 	size_t N = this->tracers.size();
 	for (size_t j = 0; j < N; ++j)
@@ -201,8 +201,8 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 {
 	cell.density = other.density;
 	cell.pressure = other.pressure;
-	cell.velocity = other.velocity;
 	cell.internal_energy = other.internal_energy;
+	cell.velocity = other.velocity;
 	assert(cell.tracers.size() == other.tracers.size());
 	assert(cell.stickers.size() == other.stickers.size());
 	size_t N = cell.tracers.size();

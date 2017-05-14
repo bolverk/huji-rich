@@ -14,8 +14,9 @@ namespace
 	bool PlaneLineIntersection(boost::array<Vector3D, 3> const& plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
 		Vector3D N = CrossProduct(plane[1] - plane[0], plane[2] - plane[0]);
+		N *= (1.0/abs(N));
 		Vector3D mu = B - A;
-		if (ScalarProd(mu, N) < ((mu.x*mu.x + mu.y*mu.y + mu.z*mu.z)*1e-6))
+		if (std::abs(ScalarProd(mu, N)) < (abs(mu)*1e-4))
 			return false;
 		double m = ScalarProd(N, plane[0] - A) / ScalarProd(N, mu);
 		res = A + m*mu;
@@ -578,8 +579,6 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 
 void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p,size_t p_loc,size_t other_point_loc)
 {
-	//std::size_t p_loc = GetPointLocationInTetra(tetras_[tetra0], p);
-	//std::size_t other_point_loc = GetOppositePoint(tetras_[tetra1], tetra0);
 	for (std::size_t i = 0; i < 3;++i)
 		b3_temp_[i] = points_[tetras_[tetra0].points[(p_loc + i + 1) % 4]];
 	Vector3D intersection;

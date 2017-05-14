@@ -190,7 +190,7 @@ namespace
 		return res;
 	}
 
-	void interp2(ComputationalCell3D &res, Slope3D const& slope,
+	void interp23D(ComputationalCell3D &res, Slope3D const& slope,
 		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos, TracerStickerNames const& tsn,
 		bool pressure_calc)
 	{
@@ -248,7 +248,7 @@ namespace
 			if (i > 0)
 			{
 				ReplaceComputationalCell(centroid_val, cell);
-				interp2(centroid_val, slope, tess.FaceCM(faces[i]), cm,eos,tracerstickernames,false);
+				interp23D(centroid_val, slope, tess.FaceCM(faces[i]), cm,eos,tracerstickernames,false);
 				ReplaceComputationalCell(dphi, centroid_val);
 				dphi -= cell;
 			}
@@ -608,6 +608,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	vector<Vector3D> neighbor_mesh_list;
 	vector<Vector3D> neighbor_cm_list;
 	res.resize(tess.GetTotalFacesNumber(),pair<ComputationalCell3D,ComputationalCell3D>(cells[0],cells[0]));
+	ComputationalCell3D* cell_ref = 0;
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
@@ -619,11 +620,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		{
 			if (tess.GetFaceNeighbors(faces[j]).first == i)
 			{
-				ReplaceComputationalCell(res[faces[j]].first,new_cells[i]);
-				interp2(res[faces[j]].first,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
+				cell_ref = &res[faces[j]].first;
+				ReplaceComputationalCell(*cell_ref,new_cells[i]);
+				interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 				try
 				{
-					CheckCell(res[faces[j]].first);
+					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
 				{
@@ -635,11 +637,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			}
 			else
 			{
-				ReplaceComputationalCell(res[faces[j]].second,new_cells[i]);
-				interp2(res[faces[j]].second,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
+				cell_ref = &res[faces[j]].second;
+				ReplaceComputationalCell(*cell_ref,new_cells[i]);
+				interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 				try
 				{
-					CheckCell(res[faces[j]].second);
+					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
 				{
@@ -662,20 +665,21 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		size_t N0 = tess.GetFaceNeighbors(boundaryedges[i]).first;
 		if(N0 > CellNumber)
 		{
-			ReplaceComputationalCell(res[boundaryedges[i]].first, new_cells[N0]);
+			cell_ref = &res[boundaryedges[i]].first;
+			ReplaceComputationalCell(*cell_ref, new_cells[N0]);
 #ifdef RICH_MPI
 			if(tess.BoundaryFace(boundaryedges[i]))
-				interp2(res[boundaryedges[i]].first, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
 			else
-				interp2(res[boundaryedges[i]].first,rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
+				interp23D(*cell_ref,rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
 #else
-			interp2(res[boundaryedges[i]].first, ghost_.GetGhostGradient(tess, cells, rslopes_, N0,time,boundaryedges[i],
+			interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0,time,boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0),eos_,tsn_,true);
 #endif //RICH_MPI
 			try
 			{
-				CheckCell(res[boundaryedges[i]].first);
+				CheckCell(*cell_ref);
 			}
 			catch (UniversalError &eo)
 			{
@@ -686,20 +690,21 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		else
 		{
 			N0 = tess.GetFaceNeighbors(boundaryedges[i]).second;
-			res[boundaryedges[i]].second = new_cells[N0];
+			cell_ref = &res[boundaryedges[i]].second;
+			ReplaceComputationalCell(*cell_ref, new_cells[N0]);
 #ifdef RICH_MPI
 			if (tess.BoundaryFace(boundaryedges[i]))
-				interp2(res[boundaryedges[i]].second, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
 			else
-				interp2(res[boundaryedges[i]].second, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
+				interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0),eos_,tsn_,true);
 #else
-			interp2(res[boundaryedges[i]].second, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+			interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0),eos_,tsn_,true);
 #endif //RICH_MPI
 			try
 			{
-				CheckCell(res[boundaryedges[i]].second);
+				CheckCell(*cell_ref);
 			}
 			catch (UniversalError &eo)
 			{

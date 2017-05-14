@@ -217,19 +217,21 @@ namespace
 	{
 		res.clear();
 		res.push_back(indeces[0]);
-		for (size_t i = 1; i < indeces.size(); ++i)
+		size_t N = indeces.size();
+		Vector3D diff;
+		for (size_t i = 1; i < N; ++i)
 		{
-			Vector3D diff = points[indeces[i]] - points[indeces[i - 1]];
+			diff = points[indeces[i]] - points[indeces[i - 1]];
 			R = std::max(R, abs(diff));
 		}
 		R = std::max(R, abs(points[indeces.back()] - points[indeces[0]]));
-		for (size_t i = 1; i < indeces.size(); ++i)
+		for (size_t i = 1; i <N; ++i)
 		{
-			Vector3D diff = points[indeces[i]] - points[indeces[i - 1]];
+			diff = points[indeces[i]] - points[indeces[i - 1]];
 			if (ScalarProd(diff, diff) > R*R*1e-10)
 				res.push_back(indeces[i]);
 		}
-		Vector3D diff = points[indeces.back()] - points[indeces[0]];
+		diff = points[indeces.back()] - points[indeces[0]];
 		if (ScalarProd(diff, diff) < R*R*1e-10)
 			res.pop_back();
 		return R;
