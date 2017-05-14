@@ -39,8 +39,8 @@ private:
 	void InsertPoint(std::size_t index);
 	std::size_t Walk(std::size_t point, std::size_t first_guess);
 	void flip14(std::size_t point,std::size_t tetra);
-	void flip23(std::size_t tetra0, std::size_t tetra1,std::size_t location0);
-	void flip32(std::size_t tetra0, std::size_t tetra1, std::size_t location0, std::size_t shared_loction);
+	void flip23(std::size_t tetra0, std::size_t tetra1,std::size_t location0,bool flat_check);
+	void flip32(std::size_t tetra0, std::size_t tetra1, std::size_t location0, std::size_t shared_loction, bool flat_check);
 	void flip44(std::size_t tetra0, std::size_t tetra1, std::size_t location0, std::size_t neigh0, std::size_t neigh1);
 	void FindFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p, size_t p_loc, size_t other_point_loc);
 	void ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p);

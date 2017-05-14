@@ -947,7 +947,6 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 
 	del_.BuildExtra(extra_points);
 
-
 	size_t counter = 0;
 	vector<bool> real_duplicate(del_.points_.size(), false);
 	for (size_t i = 0; i < del_.tetras_.size(); ++i)
