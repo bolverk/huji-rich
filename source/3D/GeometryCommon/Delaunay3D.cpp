@@ -39,16 +39,29 @@ namespace
 		assert(false);
 	}
 
-	std::pair<std::size_t,double> InTriangle(boost::array<Vector3D, 3> const& triangle, Vector3D const& p)
+	std::pair<std::size_t,double> InTriangle(boost::array<Vector3D, 3> &triangle, Vector3D &p)
 	{
 		// returns the smallest area of the cross product in units of the triangle area, negative if outside
-		Vector3D a = CrossProduct(triangle[1] - triangle[0], p - triangle[0]);
+		/*Vector3D a = CrossProduct(triangle[1] - triangle[0], p - triangle[0]);
 		Vector3D b = CrossProduct(triangle[2] - triangle[1], p - triangle[1]);
 		Vector3D c = CrossProduct(triangle[0] - triangle[2], p - triangle[2]);
-		Vector3D d = CrossProduct(triangle[1] - triangle[0], triangle[2] - triangle[0]);
-		double ad = ScalarProd(d, a);
-		double bd = ScalarProd(d, b);
-		double cd = ScalarProd(d, c);
+		Vector3D d = CrossProduct(triangle[1] - triangle[0], triangle[2] - triangle[0]);*/
+		Vector3D temp,d;
+		triangle[1] -= triangle[0];
+		triangle[2] -= triangle[0];
+		CrossProduct(triangle[1], triangle[2], d);
+		p -= triangle[0];
+		CrossProduct(triangle[1], p, temp);
+		double ad = ScalarProd(d, temp);
+		p -= triangle[1];
+		triangle[2] -= triangle[1];
+		CrossProduct(triangle[2], p, temp);
+		double bd = ScalarProd(d, temp);
+		p -= triangle[2];
+		triangle[2] += triangle[1];
+		CrossProduct(p, triangle[2], temp);
+		double cd = ScalarProd(d, temp);
+
 		std::pair<std::size_t, double> res(0, 0);
 		if (ad < 0)
 			++res.first;

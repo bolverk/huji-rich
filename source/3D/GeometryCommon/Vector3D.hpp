@@ -210,6 +210,9 @@ double distance(Vector3D const& v1, Vector3D const& v2);
 */
 Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2);
 
+void CrossProduct(Vector3D const& v1, Vector3D const& v2,Vector3D &res);
+
+
 /*! \brief Splits a vector of 3D points to components
 \param vIn Input vector of 3D points
 \param vX Vector of x coordinates (out)

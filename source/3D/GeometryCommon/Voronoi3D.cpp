@@ -213,26 +213,26 @@ namespace
 		return loc;
 	}
 
-	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R)
+	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R,
+		vector<double> &diffs)
 	{
 		res.clear();
 		res.push_back(indeces[0]);
 		size_t N = indeces.size();
-		Vector3D diff;
+		diffs.resize(N);
 		for (size_t i = 1; i < N; ++i)
 		{
-			diff = points[indeces[i]] - points[indeces[i - 1]];
-			R = std::max(R, abs(diff));
+			diffs[i] = abs(points[indeces[i]] - points[indeces[i - 1]]);
+			R = std::max(R, diffs[i]);
 		}
-		R = std::max(R, abs(points[indeces.back()] - points[indeces[0]]));
+		diffs[0] = abs(points[indeces.back()] - points[indeces[0]]);
+		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i <N; ++i)
 		{
-			diff = points[indeces[i]] - points[indeces[i - 1]];
-			if (ScalarProd(diff, diff) > R*R*1e-10)
+			if (diffs[i] > R*1e-5)
 				res.push_back(indeces[i]);
 		}
-		diff = points[indeces.back()] - points[indeces[0]];
-		if (ScalarProd(diff, diff) < R*R*1e-10)
+		if (diffs[0] < R*1e-5)
 			res.pop_back();
 		return R;
 	}
@@ -1003,6 +1003,7 @@ void Voronoi3D::BuildVoronoi(void)
 		}
 	// Organize the faces and assign them to cells
 	vector<size_t> temp3;
+	vector<double> diffs;
 	for (size_t i = 0; i < Ntetra; ++i)
 	{
 		if (del_.empty_tetras_.find(i) == del_.empty_tetras_.end())
@@ -1038,7 +1039,7 @@ void Voronoi3D::BuildVoronoi(void)
 							cur_check = next_check;
 						}
 						assert(temp.size() > 2);
-						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]));
+						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]),diffs);
 						if (temp2.size() < 3)
 							continue;
 						// Make faces right handed
