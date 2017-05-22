@@ -136,15 +136,8 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 	if (*it == xi)
 		return y[static_cast<std::size_t>(it - x.begin())];
 
-	// Are we near the edge?
-	if (it == x.end() - 1)
-		return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*
-		(y[static_cast<std::size_t>(it - 1 - x.begin())] -
-			y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
-	else
-		return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*
-		(y[static_cast<std::size_t>(it + 1 - x.begin())] -
-			y[static_cast<std::size_t>(it - x.begin())]) / (*(it + 1) - *it);
+	return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*	(y[static_cast<std::size_t>(it - 1 - x.begin())] 
+		- y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
 }
 
 /*! \brief Returns the minimal term in a vector

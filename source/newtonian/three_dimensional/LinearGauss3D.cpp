@@ -59,7 +59,7 @@ namespace
 		Slope3D &res, Slope3D &temp,size_t /*index*/, vector<size_t> const& faces)
 	{
 		size_t n = neighbor_centers.size();
-		if (n > 40)
+		if (n > 60)
 		{
 			UniversalError eo("Cell has too many neighbors in calc naive slope");
 			eo.AddEntry("Cell x cor", center.x);

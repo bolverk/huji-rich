@@ -155,9 +155,11 @@ void RoundCells3D::operator()(const Tessellation3D& tess, const vector<Computati
 	double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const
 {
 	pm_(tess, cells, time, tracerstickernames,res);
+#ifndef RICH_MPI
 	const size_t n = tess.GetPointNo();
 	for (size_t i = 0; i < n; ++i)
 		SlowDown(res[i], tess, tess.GetWidth(i), i, res);
+#endif
 }
 
 void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
