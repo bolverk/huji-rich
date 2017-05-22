@@ -246,6 +246,7 @@ template <class T>
 vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > const& tosend,
 	vector<T>const& cells)
 {
+	assert(!cells.empty());
 	vector<MPI_Request> req(totalkwith.size());
 	vector<vector<double> > tempsend(totalkwith.size());
 	vector<double> temprecv;
