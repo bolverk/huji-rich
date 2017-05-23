@@ -177,6 +177,10 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 		for (size_t i = 0; i < n; ++i)
 			calc_dw(velocities.at(i), i, tess, cells, tracerstickernames,velocities);
 	}
+#ifdef RICH_MPI
+	for (size_t i = 0; i < n; ++i)
+		SlowDown(velocities[i], tess, tess.GetWidth(i), i, velocities);
+#endif
 	velocities.resize(n);
 	CorrectPointsOverShoot(velocities, dt, tess, ll_,ur_);
 }
