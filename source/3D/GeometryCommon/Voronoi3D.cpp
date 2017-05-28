@@ -733,8 +733,12 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
 	vector<vector<size_t> > self_duplicate;
-	vector<std::pair<std::size_t, std::size_t> > ghost_index = FindIntersections(tproc, false); // intersecting tproc face, point index
-	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
+	vector<std::pair<std::size_t, std::size_t> > ghost_index;
+	MPIFirstIntersections(tproc, ghost_index);
+	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
+
+	ghost_index = FindIntersections(tproc, false); // intersecting tproc face, point index
+	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
 	del_.BuildExtra(extra_points);
 
@@ -1226,6 +1230,48 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 		}
 	}
 	return res;
+}
+
+void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pair<std::size_t, std::size_t> > ghost_index)
+{
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	vector<size_t> neigh = tproc.GetNeighbors(static_cast<size_t>(rank));
+	vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+	size_t Nneigh = neigh.size();
+	vector<Vector3D> neigh_points(Nneigh);
+	for (size_t i = 0; i < Nneigh; ++i)
+		neigh_points[i] = tproc.GetMeshPoint(neigh[i]);
+	size_t Ntetra = del_.tetras_.size();
+	for (size_t i = 0; i < Ntetra; ++i)
+	{
+		for (size_t j = 0; j < 4; ++j)
+		{
+			if (del_.tetras_[i].points[j] >= Norg_)
+			{
+				for (size_t k = 0; k < 4; ++k)
+				{
+					if (del_.tetras_[i].points[k] < Norg_)
+					{
+						size_t index = 0;
+						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
+						double r = abs(neigh_points[0] - point);
+						for (size_t z = 1; z < Nneigh; ++z)
+						{
+							double temp = abs(neigh_points[z] - point);
+							if (temp < r)
+							{
+								r = temp;
+								index = z;
+							}
+						}
+						ghost_index.push_back(std::pair<size_t, size_t>(faces[index], del_.tetras_[i].points[k]));
+					}
+				}
+				break;
+			}
+		}
+	}
 }
 #endif //RICH_MPI
 
