@@ -6,7 +6,7 @@
 class LagrangianExtensiveUpdater : public ExtensiveUpdater
 {
 public:
-	LagrangianExtensiveUpdater(LagrangianFlux const& fc,ExtensiveUpdater const& beu, EquationOfState const& eos);
+	LagrangianExtensiveUpdater(LagrangianFlux const& fc,ExtensiveUpdater const& beu);
 
 	void operator()
 	(const vector<Extensive>& fluxes,
@@ -21,6 +21,5 @@ public:
 private:
 	LagrangianFlux const& fc_;
 	ExtensiveUpdater const& beu_;
-	EquationOfState const& eos_;
 }; 
 #endif //LAGEU_HPP
