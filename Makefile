@@ -14,7 +14,7 @@ else ifeq ($(MODE),parallel)
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_check)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -D_GLIBCXX_DEBUG
+	OPTIMIZATION_FLAGS := -DRICH_MPI -Og -g -D_GLIBCXX_DEBUG
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
