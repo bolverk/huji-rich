@@ -169,4 +169,45 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vect
 	return res;
 }
 
+vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > &tosend)
+{
+	vector<MPI_Request> req(totalkwith.size());
+	vector<size_t> temprecv;
+	size_t temp = 0;
+	for (size_t i = 0; i < totalkwith.size(); ++i)
+	{
+		size_t size = tosend[i].size();
+		if (size == 0)
+			MPI_Isend(&temp, 1, my_MPI_SIZE_T, totalkwith[i], 8, MPI_COMM_WORLD, &req[i]);
+		else
+			MPI_Isend(&tosend[i][0], size, my_MPI_SIZE_T, totalkwith[i], 9, MPI_COMM_WORLD, &req[i]);
+	}
+	vector<vector<size_t> > torecv(totalkwith.size());
+	for (size_t i = 0; i < totalkwith.size(); ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, my_MPI_SIZE_T, &count);
+		temprecv.resize(static_cast<size_t>(count));
+		MPI_Recv(&temprecv[0], count, my_MPI_SIZE_T, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 9)
+		{
+			size_t location = static_cast<size_t>(std::find(totalkwith.begin(), totalkwith.end(), status.MPI_SOURCE) -
+				totalkwith.begin());
+			if (location >= totalkwith.size())
+				throw UniversalError("Bad location in mpi exchange");
+			torecv[location] = temprecv;
+		}
+		else
+		{
+			if (status.MPI_TAG != 8)
+				throw UniversalError("Recv bad mpi tag");
+		}
+	}
+	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
+	return torecv;
+}
+
 #endif

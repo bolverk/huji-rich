@@ -11,6 +11,20 @@
 #include "../misc/utils.hpp"
 #include "../3D/GeometryCommon/Tessellation3D.hpp"
 
+#if SIZE_MAX == UCHAR_MAX
+#define my_MPI_SIZE_T MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+#define my_MPI_SIZE_T MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+#define my_MPI_SIZE_T MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+#define my_MPI_SIZE_T MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+#define my_MPI_SIZE_T MPI_UNSIGNED_LONG_LONG
+#else
+#error "what is happening here?"
+#endif
+
 using std::vector;
 
 /*!
@@ -343,6 +357,7 @@ vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vec
 
 vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<int> > > const& tosend);
 
+vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > &tosend);
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
 
