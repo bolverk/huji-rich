@@ -1,4 +1,5 @@
 #include "QuadrupoleGravity3D.hpp"
+#include <iostream>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif
@@ -10,13 +11,10 @@ namespace
 		vector<double>::const_iterator it = std::upper_bound(x.begin(), x.end(), xi);
 		assert(it != x.end() && it != x.begin() &&
 			"X out of range in Linear Interp");
+		index = std::max(static_cast<size_t>(it - x.begin()),static_cast<size_t>(1));
 		if (*it == xi)
-		{
-			index = x.size() - 1;
 			return y[static_cast<std::size_t>(it - x.begin())];
-		}
 
-		index = static_cast<size_t>(it - x.begin());
 		return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*
 			(y[static_cast<std::size_t>(it - 1 - x.begin())] -
 				y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
@@ -209,16 +207,15 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 		mr2.assign(Nmid, 0);
 		for (size_t i = 0; i < N; ++i)
 		{
-			size_t index = static_cast<size_t>(std::lower_bound(edges.begin(), edges.end(), abs(tess.GetMeshPoint(i) - CM)) - edges.begin() - 1);
-			mr2[index] += tess.GetVolume(i)*cells[i].density;
+			double r_temp = abs(tess.GetMeshPoint(i) - CM);
+			size_t index = static_cast<size_t>(std::lower_bound(edges.begin(), edges.end(), r_temp) - edges.begin() - 1);
+			mr2[index] += tess.GetVolume(i)*cells[i].density/(r_temp*r_temp+smoothlength_*smoothlength_);
 		}
 #ifdef RICH_MPI
 		vector<double> temp(Nmid, 0);
 		MPI_Allreduce(&mr2[0], &temp[0], static_cast<int>(Nmid), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		mr2 = temp;
 #endif
-		for (size_t i = 0; i < Nmid; ++i)
-			mr2[i] /= (r_mid_[i] * r_mid_[i]+ smoothlength_*smoothlength_);
 		for (size_t i = 1; i < Nmid + 1; ++i)
 		{
 			Mrtot[i] = Mrtot[i - 1] + mr2[i - 1];
@@ -244,6 +241,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	double A21 = 3.0 / 2.0, A22 = 0.25*A21;
 	// Find mass and Q moments in radius
 	Vector3D diff;
+
 	for (size_t i = 0; i < N; ++i)
 	{
 		diff = tess.GetMeshPoint(i);
@@ -327,6 +325,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 			}
 		}
 	}
+
 	// Sum up all the mass and moments
 #ifdef RICH_MPI
 	vector<double> temp(m_radius.size(), 0);
@@ -434,8 +433,10 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 
 	// Calc acceleration
 	vector<double> r_list(r_mid_);
+	m_radius.insert(m_radius.begin(), 0);
+	m_radius.push_back(m_radius.back()*1.00000001);
 	r_list.insert(r_list.begin(), 0);
-	r_list.push_back(r_list.back() + 0.5*r_list.back()-r_list[resolution-1]);
+	r_list.push_back(r_list.back() + 0.5*(r_list.back()-r_list[resolution-1]));
 	QIn20.insert(QIn20.begin(), QIn20[0]);
 	QIn20.push_back(QIn20.back());
 	QOut20.insert(QOut20.begin(), QOut20[0]);
@@ -457,6 +458,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	QOut22_real.insert(QOut22_real.begin(), QOut22_real[0]);
 	QOut22_real.push_back(QOut22_real.back());
 	acc.resize(N);
+
 	for (size_t i = 0; i < N; ++i)
 	{
 		Vector3D point = tess.GetMeshPoint(i) - CMtot;
@@ -470,6 +472,11 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 			acc[i] -= qadd;
 		}
 		else
-			acc[i] = point*m*(-1.0 / (r*r*r+smoothlength_*smoothlength_*smoothlength_));
+		{
+			acc[i] = point*m*(-1.0 / (r*r*r + smoothlength_*smoothlength_*smoothlength_));
+			Vector3D qadd = CalcQuadGrad(r_list, QIn20, QIn21_real, QIn22_real, QOut20, QOut21_real, QOut22_real, QIn21_I,
+				QIn22_I, QOut21_I, QOut22_I, point);
+			acc[i] -= qadd;
+		}
 	}
 }
