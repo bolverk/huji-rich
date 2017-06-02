@@ -44,6 +44,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		IdealPerProc += NPerProc[i];
 	IdealPerProc /= nproc;
+	double load = 0;
+	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
+		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
 	// Move point according to density
 	if (mode_ == 1 || mode_ == 3)
 	{
@@ -105,7 +108,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			}
 		}
 	}
-	const double FarFraction = 0.65;
+	const double FarFraction = load > 3 ? 1.1 : 0.65;
 	old_dx = (old_dx>0) ? std::min(old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]);
 	old_dy = (old_dy > 0) ? std::min(old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]);
 	old_dz = (old_dz > 0) ? std::min(old_dz, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dz, FarFraction*speed_*R[static_cast<size_t>(rank)]);
