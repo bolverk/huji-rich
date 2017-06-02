@@ -348,6 +348,7 @@ namespace
 
 	void TalkSymmetry(vector<int> & to_talk_with)
 	{
+		assert(to_talk_with.size() > 0);
 		int wsize;
 		MPI_Comm_size(MPI_COMM_WORLD, &wsize);
 		vector<int> totalk(static_cast<std::size_t>(wsize), 0);
@@ -652,7 +653,11 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 		std::sort(to_send[i].begin(), to_send[i].end());
 		to_send[i] = unique(to_send[i]);
 		vector<size_t> temp;
-		for (size_t j = 0; j < to_send[i].size(); ++j)
+		size_t Nsend = to_send[i].size();
+		vector<size_t> indeces = sort_index(duplicated_points_[i]);
+		sort(duplicated_points_[i].begin(), duplicated_points_[i].end());
+
+		for (size_t j = 0; j < Nsend; ++j)
 		{
 			if (duplicated_points_[i].empty() ||
 				!std::binary_search(duplicated_points_[i].begin(), duplicated_points_[i].end(), to_send[i][j]))
@@ -660,12 +665,20 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 		}
 		to_send[i] = temp;
 		duplicated_points_[i].insert(duplicated_points_[i].end(), temp.begin(), temp.end());
+		Nsend = indeces.size();
+		temp = duplicated_points_[i];
+		for (size_t j = 0; j < Nsend; ++j)
+			duplicated_points_[i][indeces[j]] = temp[j];	
 	}
 	for (size_t i = 0; i < box_candidates.size(); ++i)
 	{
 		std::sort(box_candidates[i].begin(), box_candidates[i].end());
 		box_candidates[i] = unique(box_candidates[i]);
+		vector<size_t> indeces = sort_index(self_duplicate[i]);
+		sort(self_duplicate[i].begin(), self_duplicate[i].end());
+
 		vector<size_t> temp;
+
 		for (size_t j = 0; j < box_candidates[i].size(); ++j)
 		{
 			if (self_duplicate[i].empty() ||
@@ -677,6 +690,10 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 		}
 		self_duplicate[i].insert(self_duplicate[i].end(), temp.begin(), temp.end());
 		box_candidates[i] = temp;
+		size_t Nsend = indeces.size();
+		temp = self_duplicate[i];
+		for (size_t j = 0; j < Nsend; ++j)
+			self_duplicate[i][indeces[j]] = temp[j];
 	}
 	// Communicate
 	vector<vector<Vector3D> > toadd = MPI_exchange_data(duplicatedprocs_, to_send, del_.points_);
@@ -725,6 +742,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector3D> new_points = UpdateMPIPoints(tproc, rank, points, self_index_, sentprocs_, sentpoints_);
 	Norg_ = new_points.size();
+	assert(Norg_ > 0);
 	std::pair<Vector3D, Vector3D> bounding_box = GetBoundingBox(tproc, rank);
 	del_.Build(new_points,bounding_box.second,bounding_box.first);
 	R_.resize(del_.tetras_.size());
@@ -736,6 +754,11 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	vector<std::pair<std::size_t, std::size_t> > ghost_index;
 	MPIFirstIntersections(tproc, ghost_index);
 	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
+	del_.BuildExtra(extra_points);
+	R_.resize(del_.tetras_.size());
+	std::fill(R_.begin(), R_.end(), -1);
+	tetra_centers_.resize(R_.size());
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
 	ghost_index = FindIntersections(tproc, false); // intersecting tproc face, point index
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
@@ -1232,16 +1255,23 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	return res;
 }
 
-void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pair<std::size_t, std::size_t> > ghost_index)
+void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pair<std::size_t, std::size_t> > &ghost_index)
 {
+	ghost_index.clear();
 	int rank = 0;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<size_t> neigh = tproc.GetNeighbors(static_cast<size_t>(rank));
 	vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 	size_t Nneigh = neigh.size();
-	vector<Vector3D> neigh_points(Nneigh);
+	vector<Vector3D> face_norm(Nneigh),face_point(Nneigh);
 	for (size_t i = 0; i < Nneigh; ++i)
-		neigh_points[i] = tproc.GetMeshPoint(neigh[i]);
+	{
+		vector<Vector3D> const& all_points = tproc.GetFacePoints();
+		vector<size_t> const& face_points = tproc.GetPointsInFace(faces[i]);
+		face_point[i] = all_points[face_points[0]];
+		face_norm[i] = tproc.GetMeshPoint(tproc.GetFaceNeighbors(faces[i]).first) - tproc.GetMeshPoint(tproc.GetFaceNeighbors(faces[i]).second);
+		face_norm[i] *= 1.0 / abs(face_norm[i]);
+	}
 	size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
 	{
@@ -1255,10 +1285,10 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 					{
 						size_t index = 0;
 						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
-						double r = abs(neigh_points[0] - point);
+						double r = std::abs(ScalarProd(face_norm[0], point - face_point[0]));
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
-							double temp = abs(neigh_points[z] - point);
+							double temp = std::abs(ScalarProd(face_norm[z], point - face_point[z]));
 							if (temp < r)
 							{
 								r = temp;
