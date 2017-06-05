@@ -10,20 +10,7 @@
 #include "../misc/serializable.hpp"
 #include "../misc/utils.hpp"
 #include "../3D/GeometryCommon/Tessellation3D.hpp"
-
-#if SIZE_MAX == UCHAR_MAX
-#define my_MPI_SIZE_T MPI_UNSIGNED_CHAR
-#elif SIZE_MAX == USHRT_MAX
-#define my_MPI_SIZE_T MPI_UNSIGNED_SHORT
-#elif SIZE_MAX == UINT_MAX
-#define my_MPI_SIZE_T MPI_UNSIGNED
-#elif SIZE_MAX == ULONG_MAX
-#define my_MPI_SIZE_T MPI_UNSIGNED_LONG
-#elif SIZE_MAX == ULLONG_MAX
-#define my_MPI_SIZE_T MPI_UNSIGNED_LONG_LONG
-#else
-#error "what is happening here?"
-#endif
+#include "stdint.h"
 
 using std::vector;
 
@@ -351,13 +338,99 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 	return torecv;
 }
 
+template <class T>
+vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<vector<T > > > const& tosend,
+	T const& demo)
+{
+	vector<vector<vector<T > > > res(totalkwith.size());
+	vector<MPI_Request> req(2*totalkwith.size());
+	vector<vector<vector<double> > > tempsend(2*totalkwith.size());
+	vector<vector<int> > send_sizes(totalkwith.size());
+	vector<T> temprecv;
+	double temp = 0;
+	for (size_t i = 0; i < totalkwith.size(); ++i)
+	{
+		bool isempty = tosend[i].empty();
+		if (!isempty)
+		{
+			send_sizes[i].reserve(tosend[i].size());
+			for (size_t j = 0; j < tosend[i].size(); ++j)
+				send_sizes[i].push_back(static_cast<int>(tosend[i][j].size()));
+			tempsend[i] = list_serialize(tosend[i]);		
+		}
+		else
+			send_sizes[i].push_back(-1);
+		int size = static_cast<int>(tempsend[i].size());
+		if (size == 0)
+		{
+			MPI_Isend(&temp, 1, MPI_DOUBLE, totalkwith[i], 4, MPI_COMM_WORLD, &req[2 * i]);
+			MPI_Isend(&send_sizes[i][0], 1, MPI_INT, totalkwith[i], 5, MPI_COMM_WORLD, &req[2 * i + 1]);
+		}
+		else
+		{
+			MPI_Isend(&tempsend[i][0], size, MPI_DOUBLE, totalkwith[i], 6, MPI_COMM_WORLD, &req[2 * i]);
+			MPI_Isend(&send_sizes[i][0], static_cast<int>(send_sizes[i].size()), MPI_INT, totalkwith[i], 7, MPI_COMM_WORLD, &req[2 * i + 1]);
+		}
+	}
+	vector<vector<double> > srecv(totalkwith.size());
+	vector<vector<int> > irecv(totalkwith.size());
+	for (size_t i = 0; i < 2 * totalkwith.size(); ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		if (status.MPI_TAG % 2 == 1)
+		{
+			MPI_Get_count(&status, MPI_INT, &count);
+			size_t location = static_cast<size_t>(std::find(totalkwith.begin(), totalkwith.end(), status.MPI_SOURCE) -
+				totalkwith.begin());
+			if (location >= totalkwith.size())
+				throw UniversalError("Bad location in mpi exchange");
+			irecv[location].resize(static_cast<size_t>(count));
+			MPI_Recv(&irecv[location][0], count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+		else
+		{
+			MPI_Get_count(&status, MPI_DOUBLE, &count);
+			size_t location = static_cast<size_t>(std::find(totalkwith.begin(), totalkwith.end(), status.MPI_SOURCE) -
+				totalkwith.begin());
+			if (location >= totalkwith.size())
+				throw UniversalError("Bad location in mpi exchange");
+			srecv[location].resize(static_cast<size_t>(count));
+			MPI_Recv(&srecv[location][0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+	}
+	for (size_t i = 0; i < totalkwith.size(); ++i)
+	{
+		vector<T> T_temp = list_unserialize(srecv[i], demo);
+		if (T_temp.empty())
+			continue;
+		size_t counter = 0;
+		for (size_t j = 0; j < irecv[i].size(); ++j)
+		{
+			if (irecv[i][j] < 1)
+				continue;
+			size_t size_add = static_cast<size_t>(irecv[i][j]);
+			vector<T> T_add(T_temp.begin() + counter, T_temp.begin() + counter + size_add);
+			res[i].push_back(T_add);
+			counter += size_add;
+		}
+	}
+	MPI_Waitall(static_cast<int>(2*totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
+	return res;
+}
+
+
 vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<double> > &tosend);
 
 vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > &tosend);
 
 vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<int> > > const& tosend);
 
-vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > &tosend);
+vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<size_t> > > const& tosend);
+
+vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > const& tosend);
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
 
