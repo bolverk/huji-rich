@@ -58,14 +58,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + (point.z - otherpoint.z)*(point.z - otherpoint.z)
 				+ 0.5*R[static_cast<size_t>(rank)] * R[i]);
-			double temp = (NPerProc[i] - IdealPerProc)*R[static_cast<size_t>(rank)] * R[i] *
-				(point.x - otherpoint.x) / (pow(dist, 3)*IdealPerProc);
+			double temp = (NPerProc[i] - IdealPerProc)* 
+				(point.x - otherpoint.x) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dx -= temp;
-			temp = (NPerProc[i] - IdealPerProc)*R[static_cast<size_t>(rank)] * R[i] *
-				(point.y - otherpoint.y) / (pow(dist, 3)*IdealPerProc);
+			temp = (NPerProc[i] - IdealPerProc)* 
+				(point.y - otherpoint.y) / (pow(dist/ R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dy -= temp;
-			temp = (NPerProc[i] - IdealPerProc)*R[static_cast<size_t>(rank)] * R[i] *
-				(point.z - otherpoint.z) / (pow(dist, 3)*IdealPerProc);
+			temp = (NPerProc[i] - IdealPerProc)* 
+				(point.z - otherpoint.z) / (pow(dist/ R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dz -= temp;
 		}
 	}
