@@ -181,7 +181,7 @@ vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<
 		if (size == 0)
 			MPI_Isend(&temp, 1, MPI_UNSIGNED_LONG_LONG, totalkwith[i], 8, MPI_COMM_WORLD, &req[i]);
 		else
-			MPI_Isend(&tosend[i][0], size, MPI_UNSIGNED_LONG_LONG, totalkwith[i], 9, MPI_COMM_WORLD, &req[i]);
+			MPI_Isend(&tosend[i][0], static_cast<int>(size), MPI_UNSIGNED_LONG_LONG, totalkwith[i], 9, MPI_COMM_WORLD, &req[i]);
 	}
 	vector<vector<size_t> > torecv(totalkwith.size());
 	for (size_t i = 0; i < totalkwith.size(); ++i)
