@@ -85,7 +85,7 @@ vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vec
 	return torecv;
 }
 
-vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<int> > > const& cells)
+vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<int> > > &cells)
 {
 	vector<int> correspondents = tess.GetDuplicatedProcs();
 	vector<vector<vector<int> > > res(correspondents.size());
@@ -169,7 +169,7 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vect
 	return res;
 }
 
-vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > const& tosend)
+vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > &tosend)
 {
 	assert(sizeof(size_t) == 8);
 	vector<MPI_Request> req(totalkwith.size());
@@ -211,7 +211,7 @@ vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<
 	return torecv;
 }
 
-vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<size_t> > > const& cells)
+vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<size_t> > > &cells)
 {
 	assert(sizeof(size_t) == 8);
 	vector<int> correspondents = tess.GetDuplicatedProcs();
