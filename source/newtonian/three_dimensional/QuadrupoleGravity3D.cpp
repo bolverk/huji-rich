@@ -191,9 +191,6 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	CMtot *= (1.0 / Mtot);
 	int rank = 0;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 25)
-		std::cout << "CM " << CMtot.x << " " << CMtot.y << " " << CMtot.z << std::endl;
-
 
 	// GetCM, assume center for now
 	size_t Nmid = edges_.size()-1;
