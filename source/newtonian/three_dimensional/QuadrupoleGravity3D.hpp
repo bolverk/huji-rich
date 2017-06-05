@@ -6,7 +6,7 @@
 class QuadrupoleGravity3D : public Acceleration3D
 {
 private:
-	mutable vector<double> r_mid_;
+	mutable vector<double> edges_;
 	const double smoothlength_;
 public:
 	QuadrupoleGravity3D(size_t res, double smoothlength);

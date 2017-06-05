@@ -166,6 +166,7 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 	assert(entropy_index_ < extensive.tracers.size());
 
 	double new_d = extensive.mass / tess.GetVolume(index);
+	assert(new_d > 0);
 	double new_entropy = eos_.dp2s(new_d, NewPressure(extensive, eos_, new_d));
 	if (new_entropy*extensive.mass < extensive.tracers[entropy_index_])
 	{
