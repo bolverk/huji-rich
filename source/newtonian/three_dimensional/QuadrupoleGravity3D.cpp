@@ -375,8 +375,9 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 		potential.resize(N);
 		vector<double> phis(Np, 0);
 		phis.back() = -Mtot / edges_.back();
-		for (size_t i = 1; i < Np; ++i)
+		for (size_t i = 1; i < Np-1; ++i)
 			phis[Np - i - 1] = phis[Np - i] + m_radius[Np - i] * (1.0/edges_[Np - i] - 1.0/edges_[Np-i-1]);
+		phis[0] = phis[1];
 		for (size_t i = 0; i < N; ++i)
 		{
 			Vector3D point = tess.GetMeshPoint(i) - CMtot;
