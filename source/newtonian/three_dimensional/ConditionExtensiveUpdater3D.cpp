@@ -1,6 +1,7 @@
 #include "ConditionExtensiveUpdater3D.hpp"
 #include "../../misc/utils.hpp"
 #include <iostream>
+#include <cfloat>
 
 ConditionExtensiveUpdater3D::Condition3D::~Condition3D() {}
 
@@ -51,7 +52,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 }
 
 ColdFlowsUpdate3D::ColdFlowsUpdate3D(EquationOfState const& eos, Ghost3D const& ghost, LinearGauss3D const& interp) :
-	eos_(eos), ghost_(ghost), interp_(interp), lasttime_(0), dt_(0), entropy_index_(1000000), ghost_cells_(boost::container::
+	eos_(eos), ghost_(ghost), interp_(interp), lasttime_(-DBL_MAX), dt_(0), entropy_index_(1000000), ghost_cells_(boost::container::
 		flat_map<size_t, ComputationalCell3D>()) {}
 
 namespace
@@ -80,10 +81,12 @@ namespace
 		size_t N = tess.GetPointNo();
 		double maxT = 0, maxP = 0;
 		const Vector3D point = tess.GetMeshPoint(index);
+		size_t counter = 0;
 		for (size_t i = 0; i < n; ++i)
 		{
 			if (ScalarProd(point - tess.GetMeshPoint(neigh[i]), Tgrad)<0)
 			{
+				++counter;
 				if (neigh[i] < N || !tess.IsPointOutsideBox(neigh[i]))
 				{
 					maxT = std::max(maxT, cells[neigh[i]].pressure / cells[neigh[i]].density);
@@ -99,6 +102,8 @@ namespace
 				}
 			}
 		}
+		if (counter == 0)
+			return false;
 		return (log(maxP) - log(cells[index].pressure))>0.2 ||
 			(log(maxT) - log(cells[index].pressure / cells[index].density))>0.1;
 	}

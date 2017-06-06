@@ -1,5 +1,6 @@
 #include "QuadrupoleGravity3D.hpp"
 #include <iostream>
+#include "../../misc/simple_io.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif
@@ -162,9 +163,8 @@ namespace
 	}
 }
 
-QuadrupoleGravity3D::QuadrupoleGravity3D(size_t res, double smoothlength) :edges_(vector<double>(res+1,-1)),
-smoothlength_(smoothlength) 
-{}
+QuadrupoleGravity3D::QuadrupoleGravity3D(size_t res, double smoothlength,bool output) :edges_(vector<double>(res+1,-1)),
+smoothlength_(smoothlength),output_(output),potential(vector<double>()){}
 
 void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const& /*tracerstickernames*/,
@@ -189,8 +189,6 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	MPI_Barrier(MPI_COMM_WORLD);
 #endif
 	CMtot *= (1.0 / Mtot);
-	int rank = 0;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	// GetCM, assume center for now
 	size_t Nmid = edges_.size()-1;
@@ -231,6 +229,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 		for (size_t i = 1; i < Nmid; ++i)
 			edges_[i] = LinearInterpolation(Mrtot, temp, dr_all[i-1]);
 	}
+
 	size_t resolution = Nmid;
 	vector<double> m_radius(resolution+1,0), QIn20(resolution+1,0), QIn21_real(resolution+1,0),
 		QIn21_I(resolution+1,0), QOut20(resolution+1,0), QOut21_real(resolution+1,0), QOut21_I(resolution+1,0),
@@ -367,6 +366,34 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 			Vector3D qadd = CalcQuadGrad(edges_, QIn20, QIn21_real, QIn22_real, QOut20, QOut21_real, QOut22_real, QIn21_I,
 				QIn22_I, QOut21_I, QOut22_I, point);
 			acc[i] -= qadd;
+		}
+	}
+
+	if (output_)
+	{
+		size_t Np = edges_.size();
+		potential.resize(N);
+		vector<double> phis(Np, 0);
+		phis.back() = -Mtot / edges_.back();
+		for (size_t i = 1; i < Np; ++i)
+			phis[Np - i - 1] = phis[Np - i] + m_radius[Np - i] * (1.0/edges_[Np - i] - 1.0/edges_[Np-i-1]);
+		for (size_t i = 0; i < N; ++i)
+		{
+			Vector3D point = tess.GetMeshPoint(i) - CMtot;
+			double r = abs(point);
+			size_t index = 0;
+			double phi_m = LinearInterp(edges_, phis, r,index);
+			double phi_Q = LinearInterp2(edges_, QIn20, r,index);
+			phi_Q += LinearInterp2(edges_, QIn21_real, r,index);
+			phi_Q += LinearInterp2(edges_, QIn22_real, r, index);
+			phi_Q += LinearInterp2(edges_, QIn21_I, r, index);
+			phi_Q += LinearInterp2(edges_, QIn22_I, r, index);
+			phi_Q += LinearInterp2(edges_, QOut20, r, index);
+			phi_Q += LinearInterp2(edges_, QOut21_I, r, index);
+			phi_Q += LinearInterp2(edges_, QOut22_I, r, index);
+			phi_Q += LinearInterp2(edges_, QOut21_real, r, index);
+			phi_Q += LinearInterp2(edges_, QOut22_real, r, index);
+			potential[i] = phi_m + phi_Q;
 		}
 	}
 }
