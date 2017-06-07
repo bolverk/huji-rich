@@ -1133,6 +1133,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, bool recursive,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check)
 {
+	double R = tproc.GetWidth(rank);
 	vector<std::size_t> res;
 	std::size_t N = tproc.GetPointNo();
 	assert(to_check.empty());
@@ -1161,14 +1162,14 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 				res.push_back(cur);
 				if (recursive)
 				{
-					if (f.neighbors.first < N && f.neighbors.first != rank)
+					if (f.neighbors.first < N && f.neighbors.first != rank && abs(tproc.GetMeshPoint(rank)-tproc.GetMeshPoint(f.neighbors.first))<20*R)
 					{
 						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)
 							if (visited.find(faces_temp[i])==visited.end())
 								to_check.push(faces_temp[i]);
 					}
-					if (f.neighbors.second < N && f.neighbors.second != rank)
+					if (f.neighbors.second < N && f.neighbors.second != rank && abs(tproc.GetMeshPoint(rank) - tproc.GetMeshPoint(f.neighbors.second))<20 * R)
 					{
 						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)

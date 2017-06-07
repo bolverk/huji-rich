@@ -210,8 +210,8 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 			size_t index = static_cast<size_t>(std::lower_bound(edges_.begin(), edges_.end(), r_temp) - edges_.begin());
 			mr2[index] += tess.GetVolume(i)*cells[i].density/(r_temp*r_temp+smoothlength_*smoothlength_);
 		}
+		vector<double> temp(Nmid + 1, 0);
 #ifdef RICH_MPI
-		vector<double> temp(Nmid+1, 0);
 		MPI_Allreduce(&mr2[0], &temp[0], static_cast<int>(Nmid+1), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		MPI_Barrier(MPI_COMM_WORLD);
 		mr2 = temp;
