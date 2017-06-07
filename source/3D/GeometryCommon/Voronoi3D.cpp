@@ -1131,9 +1131,9 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 }
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
-	Sphere &sphere, bool recursive,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check)
+	Sphere &sphere, bool recursive,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
+	Vector3D const& vpoint)
 {
-	double R = tproc.GetWidth(rank);
 	vector<std::size_t> res;
 	std::size_t N = tproc.GetPointNo();
 	assert(to_check.empty());
@@ -1151,6 +1151,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		visited.insert(cur);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
+		size_t other = f.neighbors.first == rank ? f.neighbors.second : f.neighbors.first;
+		if (other < N)
+		{
+			double R = tproc.GetWidth(other);
+			if (abs(tproc.GetMeshPoint(other) - vpoint) > 20 * R)
+				continue;
+		}	
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
 		for (std::size_t j = 0; j < Ntetra; ++j)
@@ -1162,14 +1169,14 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 				res.push_back(cur);
 				if (recursive)
 				{
-					if (f.neighbors.first < N && f.neighbors.first != rank && abs(tproc.GetMeshPoint(rank)-tproc.GetMeshPoint(f.neighbors.first))<20*R)
+					if (f.neighbors.first < N && f.neighbors.first != rank)
 					{
 						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)
 							if (visited.find(faces_temp[i])==visited.end())
 								to_check.push(faces_temp[i]);
 					}
-					if (f.neighbors.second < N && f.neighbors.second != rank && abs(tproc.GetMeshPoint(rank) - tproc.GetMeshPoint(f.neighbors.second))<20 * R)
+					if (f.neighbors.second < N && f.neighbors.second != rank)
 					{
 						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)
@@ -1234,7 +1241,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 		// Does sphere have any intersections?
 		bool added = false;
 		vector<std::size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
-			recursive, visited, intersection_check);
+			recursive, visited, intersection_check,del_.points_[cur_loc]);
 		if (!intersecting_faces.empty())
 		{
 			added = true;

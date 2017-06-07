@@ -43,7 +43,7 @@ private:
 		vector<size_t> &intersecting_faces);
 	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, 
 		std::size_t point, Sphere &sphere, bool recursive, boost::container::flat_set<size_t> &visited,
-		std::stack<std::size_t> &to_check);
+		std::stack<std::size_t> &to_check,Vector3D const& vpoint);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
