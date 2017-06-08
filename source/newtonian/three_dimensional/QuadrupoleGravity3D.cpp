@@ -384,17 +384,17 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 			double r = abs(point);
 			size_t index = 0;
 			double phi_m = LinearInterp(edges_, phis, r,index);
-			double phi_Q = LinearInterp2(edges_, QIn20, r,index);
-			phi_Q += LinearInterp2(edges_, QIn21_real, r,index);
-			phi_Q += LinearInterp2(edges_, QIn22_real, r, index);
-			phi_Q += LinearInterp2(edges_, QIn21_I, r, index);
-			phi_Q += LinearInterp2(edges_, QIn22_I, r, index);
-			phi_Q += LinearInterp2(edges_, QOut20, r, index);
-			phi_Q += LinearInterp2(edges_, QOut21_I, r, index);
-			phi_Q += LinearInterp2(edges_, QOut22_I, r, index);
-			phi_Q += LinearInterp2(edges_, QOut21_real, r, index);
-			phi_Q += LinearInterp2(edges_, QOut22_real, r, index);
-			potential[i] = phi_m + phi_Q;
+			double Phi = -LinearInterp2(edges_, QIn20, r,index)*(2 * point.z*point.z - point.x * point.x - point.y * point.y) / (r*r*r*r*r);
+			Phi -= LinearInterp2(edges_, QOut20, r, index)*(2 * point.z*point.z - point.x * point.x - point.y * point.y);
+			Phi += 2 * LinearInterp2(edges_,QIn21_real, r, index)*point.x*point.z / (r*r*r*r*r);
+			Phi += 2 * LinearInterp2(edges_,QIn21_I, r, index)*point.y*point.z / (r*r*r*r*r);
+			Phi += 2 * LinearInterp2(edges_,QOut21_real, r, index)*point.x*point.z;
+			Phi += 2 * LinearInterp2(edges_,QOut21_I, r, index)*point.y*point.z;
+			Phi -= 2 * LinearInterp2(edges_,QIn22_real, r, index)*(point.x*point.x - point.y*point.y) / (r*r*r*r*r);
+			Phi -= 4 * LinearInterp2(edges_,QIn22_I , r, index)*point.y*point.x / (r*r*r*r*r);
+			Phi -= 2 * LinearInterp2(edges_,QOut22_real, r, index)*(point.x*point.x - point.y*point.y);
+			Phi -= 4 * LinearInterp2(edges_,QOut22_I, r, index)*point.y*point.x;
+			potential[i] = phi_m + Phi;
 		}
 	}
 }
