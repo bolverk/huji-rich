@@ -73,7 +73,7 @@ public:
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	SimpleAMRCellUpdater3D(vector<string> toskip=vector<string>());
+	SimpleAMRCellUpdater3D(vector<string> toskip = vector<string>());
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
@@ -109,10 +109,10 @@ public:
 	\param cells The computational cells
 	\param time The sim time
 	\param tracerstickernames The names of the tracers and stickers
-	\return The indeces of cells to remove 
+	\return The indeces of cells to remove
 	*/
-	virtual vector<size_t> ToRefine(Tessellation3D const& tess, 
-		vector<ComputationalCell3D> const& cells, double time,TracerStickerNames const& tracerstickernames)const = 0;
+	virtual vector<size_t> ToRefine(Tessellation3D const& tess,
+		vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickernames)const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~CellsToRefine3D(void);
@@ -171,11 +171,10 @@ public:
 	\param slopes Slopes
 	\param eos Equation of state
 	*/
-	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine,CellsToRemove3D const& remove,LinearGauss3D *slopes = 0,AMRCellUpdater3D* cu = 0,
+	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove, LinearGauss3D *slopes = 0, AMRCellUpdater3D* cu = 0,
 		AMRExtensiveUpdater3D* eu = 0);
 	//! Class destructor
 	~AMR3D();
 };
 
 #endif // AMR3D_HPP
-
