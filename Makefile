@@ -3,7 +3,7 @@ RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
 CC := g++
-#LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
+LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg 
@@ -11,10 +11,6 @@ ifeq ($(MODE),debug)
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
-	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
-else ifeq ($(MODE),parallel_check)
-	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -Og -g -D_GLIBCXX_DEBUG
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
@@ -26,12 +22,7 @@ else ifeq ($(MODE),debug_parallel)
 	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
 	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise 
-	LINT_FLAGS := 
-	ARCHIVER_FUNC := xiar
-else ifeq ($(MODE),intel_parallel)
-	CC := mpiCC
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
@@ -69,7 +60,7 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a 
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libdclipper.a external_libraries/rebound/librebound.so
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_59_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
@@ -84,7 +75,12 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.8.18/c++
 	./configure --enable-cxx --prefix=`cd ../.. && pwd`
 	cd external_libraries/hdf5_dump/hdf5-1.8.18 && make
 	cd external_libraries/hdf5_dump/hdf5-1.8.18 && make install
-
+	
+external_libraries/rebound/librebound.so:
+	git clone http://github.com/hannorein/rebound external_libraries/rebound
+	cd external_libraries/rebound && make
+	cp external_libraries/rebound/src/rebound.h external_libraries/include
+	
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
 	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include
@@ -94,18 +90,24 @@ external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hp
 
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
-	
+
+external_libraries/dump_clipper/dclipper.o: external_libraries/include/clipper.hpp
+	cd external_libraries/dump_clipper && g++ -c -O0 -g -pg -D_GLIBCXX_DEBUG cpp/clipper.cpp -o dclipper.o
+
+external_libraries/lib/libdclipper.a: external_libraries/dump_clipper/dclipper.o
+	ar cr $@ $^ 
+
 external_libraries/hdf5_dump/hdf5-1.8.18/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz
-	cd external_libraries/hdf5_dump/ && tar xvf ./hdf5-1.8.18.tar.gz
+	cd external_libraries/hdf5_dump/ && tar xf ./hdf5-1.8.18.tar.gz
 
 external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_59_0.tar.bz2
-	cd external_libraries/boost_dump/ && tar xvf ./boost_1_59_0.tar.bz2
+	cd external_libraries/boost_dump/ && tar xf ./boost_1_59_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
 	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
 
 external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
-	cd external_libraries/ann_tree_dump/ && tar xvf ./ann_1.1.2.tar.gz
+	cd external_libraries/ann_tree_dump/ && tar xf ./ann_1.1.2.tar.gz
 
 external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz:
 	mkdir -p external_libraries/hdf5_dump

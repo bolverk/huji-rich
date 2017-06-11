@@ -411,7 +411,10 @@ void Delaunay3D::flip44(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	flip32(neigh0, neigh1, location0, shared_location,true);
 }
 
-Delaunay3D::Delaunay3D()
+Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(std::set<std::size_t> ()),Norg_(0),outside_neighbor_(0),
+	b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),b4_temp_(boost::array<Vector3D, 4> ()),b5_temp_(boost::array<Vector3D, 5> ()),
+	b4s_temp_(boost::array<std::size_t, 4>()),b4s_temp2_(boost::array<std::size_t, 4>()),b8s_temp_(boost::array<std::size_t, 8>()),
+	to_check_(vector<std::size_t>()),last_checked_(0)
 {
 	to_check_.reserve(100);
 }

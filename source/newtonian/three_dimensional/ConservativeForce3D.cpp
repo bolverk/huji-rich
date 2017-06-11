@@ -22,7 +22,7 @@ namespace
 	}
 }
 
-ConservativeForce3D::ConservativeForce3D(const Acceleration3D& acc,bool mass_flux) : acc_(acc),mass_flux_(mass_flux) {}
+ConservativeForce3D::ConservativeForce3D(const Acceleration3D& acc,bool mass_flux) : acc_(acc),mass_flux_(mass_flux),dt_(0) {}
 
 ConservativeForce3D::~ConservativeForce3D(void) {}
 

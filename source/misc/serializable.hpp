@@ -51,6 +51,8 @@ namespace {
 vector<double> list_serialize
 (const vector<Serializable*>& los);
 
+template <class S> vector<double> list_serialize(const vector<S> los);
+
 template <class S> vector<double>
 list_serialize
 (const vector<S> los)
@@ -70,6 +72,8 @@ list_serialize
   }
   return res;
 }
+
+template<class T> vector<T> list_unserialize(const vector<double>& data, const T& t);
 
 template<class T> vector<T> list_unserialize
 (const vector<double>& data,

@@ -45,6 +45,7 @@ public:
   \param ll Lazily evaluated list
   \return std::vector
 */
+template<class T> vector<T> serial_generate(const LazyList<T>& ll);
 template<class T> vector<T> serial_generate(const LazyList<T>& ll)
 {
   vector<T> res(ll.size());
@@ -58,6 +59,8 @@ template<class T> vector<T> serial_generate(const LazyList<T>& ll)
   \param s Scalar
   \return Each term of v multiplied by s
 */
+template<class T> vector<T> termwise_product(const vector<T>& v,
+					     const T& s);
 template<class T> vector<T> termwise_product(const vector<T>& v,
 					     const T& s)
 {
@@ -93,6 +96,8 @@ template<class T> vector<T> termwise_product(const vector<T>& v,
   \return The first max_index number of terms from v
 */
 template<class T> vector<T> trim_top(const vector<T>& v,
+				     const size_t max_index);
+template<class T> vector<T> trim_top(const vector<T>& v,
 				     const size_t max_index)
 {
   class Trimmer: public LazyList<T>
@@ -126,6 +131,7 @@ template<class T> vector<T> trim_top(const vector<T>& v,
   \param vec The vector to count
   \return The number of elements
 */
+template<class T> int ElementNumber(vector<vector<T> > const& vec);
 template<class T> int ElementNumber(vector<vector<T> > const& vec)
 {
   size_t res=0;
@@ -140,6 +146,8 @@ template<class T> int ElementNumber(vector<vector<T> > const& vec)
   \param indeces The indeces in vec to change
   \param data The data to put inside vec
 */
+template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
+				    vector<T> const& data);
 template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
 				    vector<T> const& data)
 {
@@ -158,7 +166,8 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
   \param i2m lazy list
   \return Sum of all terms of i2m
  */
-template<class T> T lazy_sum(const LazyList<T>& i2m)
+template<class T> T lazy_sum(const LazyList<T>& i2m);
+ template<class T> T lazy_sum(const LazyList<T>& i2m)
 {
   T res = i2m[0];
   for(size_t i=1;i<i2m.size();++i)
@@ -170,6 +179,7 @@ template<class T> T lazy_sum(const LazyList<T>& i2m)
   \param i2m Lazy list
   \return Max term of lazy list
  */
+ template<class T> T lazy_max(const LazyList<T>& i2m);
 template<class T> T lazy_max(const LazyList<T>& i2m)
 {
   T res = i2m(0);
@@ -182,7 +192,8 @@ template<class T> T lazy_max(const LazyList<T>& i2m)
   \param i2m Lazy list
   \return Min term of lazy list
  */
-template<class T> T lazy_min(const LazyList<T>& i2m)
+template<class T> T lazy_min(const LazyList<T>& i2m);
+ template<class T> T lazy_min(const LazyList<T>& i2m)
 {
   T res = i2m[0];
   for(size_t i=1;i<i2m.size();++i)

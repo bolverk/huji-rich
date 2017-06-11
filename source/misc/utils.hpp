@@ -404,7 +404,7 @@ namespace
 	template<class T> struct Wrapper
 	{
 		index_cmp<vector<T> > *cmp;
-		Wrapper(index_cmp<vector<T> > *cmp) : cmp(cmp) {}
+		Wrapper(index_cmp<vector<T> > *cmp2) : cmp(cmp2) {}
 		bool operator() (const size_t lhs, const size_t rhs) const
 		{
 			return (*cmp)(lhs, rhs);

@@ -122,7 +122,7 @@ namespace
 		}
 	}
 
-	void CleanOuterPoints(vector<size_t> &neigh, vector<size_t> &nneigh, Tessellation3D const&tess)
+	/*void CleanOuterPoints(vector<size_t> &neigh, vector<size_t> &nneigh, Tessellation3D const&tess)
 	{
 		nneigh=RemoveList(nneigh, neigh);
 		size_t Norg = tess.GetPointNo();
@@ -144,7 +144,7 @@ namespace
 		neigh = res;
 		nneigh = res2;
 	}
-
+*/
 	void RemoveBadAspectRatio(Tessellation3D const& tess, vector<size_t> &toremove)
 	{
 		vector<size_t> remove_res;
@@ -215,7 +215,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		return std::pair<vector<size_t>, vector<double> >(result_names, result_merits);
 	}
 
-	void CheckCorrect(Tessellation3D const& tess)
+	/*void CheckCorrect(Tessellation3D const& tess)
 	{
 		size_t N = tess.GetPointNo();
 		for (size_t i = 0; i < N; ++i)
@@ -242,7 +242,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 			assert(PointInPoly(tess, tess.GetMeshPoint(i), i));
 		}
 	}
-
+*/
 	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index)
 	{
 		size_t Nneigh = neigh.size();
@@ -294,6 +294,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		local.BuildNoBox(points, ghost, toduplicate);
 	}
 
+#ifdef RICH_MPI
 	void BuildLocalVoronoiMPI(Tessellation3D &local, Tessellation3D const& tess, vector<int> const& neigh_points,
 		Vector3D const& newpoint,size_t refined_index)
 	{
@@ -319,7 +320,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		local.BuildNoBox(points, ghost, vector<size_t>());
 	}
 
-	Conserved3D CalcNewExtensives(Tessellation3D const& tess, Tessellation3D const& local, size_t torefine, vector<size_t> const& neigh,
+	/*Conserved3D CalcNewExtensives(Tessellation3D const& tess, Tessellation3D const& local, size_t torefine, vector<size_t> const& neigh,
 		vector<ComputationalCell3D> const& cells,vector<Conserved3D> &extensives)
 	{
 		Conserved3D res;
@@ -340,8 +341,8 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 			newpoint += res;
 		}
 		return newpoint;
-	}
-
+	}*/
+#endif
 	void FixVoronoi(Tessellation3D &local, Tessellation3D &tess, vector<size_t> &neigh,size_t torefine,
 		double &vol,Vector3D &CM,size_t Ntotal0,size_t index)
 	{
@@ -428,7 +429,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		}
 		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
-
+#ifdef RICH_MPI
 	void FixVoronoiMPI(Tessellation3D &local, Tessellation3D &tess, size_t refinedghost,
 		vector<int> const& refined_neigh,Vector3D const& newpoint,vector<size_t> &bad_faces)
 	{
@@ -496,7 +497,7 @@ std::pair<vector<size_t>,vector<double> > RemoveNeighbors(vector<double> const& 
 		tess.GetMeshPoints().push_back(newpoint);
 		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
-
+#endif
 	void FixBadIndeces(Tessellation3D &tess, vector<size_t> const& bad_indeces,size_t Nsplit,size_t Ntotal0)
 	{
 		size_t Norg = tess.GetPointNo();
@@ -742,7 +743,7 @@ CellsToRemove3D::~CellsToRemove3D(void) {}
 CellsToRefine3D::~CellsToRefine3D(void) {}
 
 AMR3D::AMR3D(EquationOfState const& eos,CellsToRefine3D const& refine, CellsToRemove3D const& remove, LinearGauss3D *slopes, AMRCellUpdater3D* cu,
-	AMRExtensiveUpdater3D* eu) :eos_(eos),refine_(refine), remove_(remove), interp_(slopes), cu_(cu), eu_(eu)
+	AMRExtensiveUpdater3D* eu) :eos_(eos),refine_(refine), remove_(remove),scu_(SimpleAMRCellUpdater3D()),seu_(SimpleAMRExtensiveUpdater3D()), cu_(cu), eu_(eu), interp_(slopes)
 {
 	if (!cu)
 		cu_ = &scu_;

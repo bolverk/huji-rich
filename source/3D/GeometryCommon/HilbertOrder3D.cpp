@@ -24,7 +24,7 @@ public:
 
 };
 // Constructor - uses the reference Hilbert curve shape:
-HilbertCurve3D_shape::HilbertCurve3D_shape()
+HilbertCurve3D_shape::HilbertCurve3D_shape() : m_vShapePoints(boost::array<Vector3D, 7>())
 {
 	m_vShapePoints[0] = Vector3D(0, 0, -1);
 	m_vShapePoints[1] = Vector3D(0, 1, 0);
@@ -89,7 +89,8 @@ private:
 };
 
 // Constructor - performs all required initiallizations and preprocessing:
-HilbertCurve3D::HilbertCurve3D()
+HilbertCurve3D::HilbertCurve3D() :m_vRotatedShapes(boost::array<HilbertCurve3D_shape, NUMBER_OF_SHAPES> ()), m_vRotations(boost::array < vector<int>, NUMBER_OF_SHAPES >()),
+m_vShapeRecursion(boost::array< boost::array<int, 8> , NUMBER_OF_SHAPES>())
 {
 	int rot[MAX_ROTATION_LENGTH];
 	int iRotLength;

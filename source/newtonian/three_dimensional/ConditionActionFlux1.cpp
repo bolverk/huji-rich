@@ -46,7 +46,7 @@ ConditionActionFlux1::Action3D::~Action3D(void) {}
 RegularFlux3D::RegularFlux3D(const RiemannSolver3D& rs) :
 	rs_(rs) {}
 
-namespace
+/*namespace
 {
 	void conserved_to_extensive
 		(const Conserved3D& c, const ComputationalCell& cell, Conserved3D &res)
@@ -59,7 +59,7 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 			res.tracers[i] = cell.tracers[i] * c.mass;
 	}
-}
+}*/
 
 void RegularFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool /*aux*/, Conserved3D &res,

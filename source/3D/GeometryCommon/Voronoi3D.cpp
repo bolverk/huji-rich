@@ -47,12 +47,12 @@ namespace
 		fh.write(reinterpret_cast<const char*>(&d), sizeof(double));
 	}
 
-	void binary_write_single_size_t(std::size_t n, std::ofstream& fh)
+	/*void binary_write_single_size_t(std::size_t n, std::ofstream& fh)
 	{
 		fh.write(reinterpret_cast<const char*>(&n), sizeof(std::size_t));
-	}
+	}*/
 
-	vector<Vector3D> read_data(string fname)
+	/*vector<Vector3D> read_data(string fname)
 	{
 		vector<Vector3D> res;
 		std::ifstream fh(fname.c_str(), std::ios::binary);
@@ -70,7 +70,7 @@ namespace
 			res.push_back(Vector3D(x, y, z));
 		}
 		return res;
-	}
+	}*/
 }
 
 
@@ -187,7 +187,7 @@ namespace
 		res[5].vertices.push_back(points[6]);
 		return res;
 	}
-
+#ifdef RICH_MPI
 	vector<Vector3D> GetBoxNormals(Vector3D const& ll,Vector3D const& ur)
 	{
 		vector<Face> faces = BuildBox(ll, ur);
@@ -212,7 +212,7 @@ namespace
 		}
 		return loc;
 	}
-
+#endif
 	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R,
 		vector<double> &diffs)
 	{
@@ -393,10 +393,10 @@ namespace
 		return std::pair<double, Vector3D>(Atot, temp);
 	}
 
-	bool PointInVertices(b_array_4 const& points, std::size_t point)
+	/*bool PointInVertices(b_array_4 const& points, std::size_t point)
 	{
 		return !(std::find(points.begin(), points.end(), point) == points.end());
-	}
+	}*/
 
 	bool PointInDomain(Vector3D const& ll, Vector3D const& ur, Vector3D const& point)
 	{
@@ -530,10 +530,20 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 #endif //RICH_MPI
 
 
-Voronoi3D::Voronoi3D()
+Voronoi3D::Voronoi3D():ll_(Vector3D()),ur_(Vector3D()),Norg_(0),bigtet_(0),set_temp_(std::set<int>()),stack_temp_(std::stack<int>()),
+	del_(Delaunay3D()),PointTetras_(vector<vector<std::size_t> > ()),R_(vector<double> ()),tetra_centers_(vector<Vector3D>()),
+	FacesInCell_(vector<vector<std::size_t> > ()), PointsInFace_(vector<vector<std::size_t> >()),FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> > ()),
+	CM_(vector<Vector3D> ()),Face_CM_(vector<Vector3D> ()),volume_(vector<double> ()),area_(vector<double> ()),duplicated_points_(vector<vector<std::size_t> > ()),
+	sentprocs_(vector<int> ()), duplicatedprocs_(vector<int> ()),sentpoints_(vector<vector<std::size_t> > ()), Nghost_(vector<vector<std::size_t> > ()),
+	self_index_(vector<std::size_t> ())
 {}
 
-Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur),Norg_(0) {}
+Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur),Norg_(0),bigtet_(0),set_temp_(std::set<int>()),stack_temp_(std::stack<int>()),
+	del_(Delaunay3D()),PointTetras_(vector<vector<std::size_t> > ()),R_(vector<double> ()),tetra_centers_(vector<Vector3D>()),
+	FacesInCell_(vector<vector<std::size_t> > ()), PointsInFace_(vector<vector<std::size_t> >()),FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> > ()),
+	CM_(vector<Vector3D> ()),Face_CM_(vector<Vector3D> ()),volume_(vector<double> ()),area_(vector<double> ()),duplicated_points_(vector<vector<std::size_t> > ()),
+	sentprocs_(vector<int> ()), duplicatedprocs_(vector<int> ()),sentpoints_(vector<vector<std::size_t> > ()), Nghost_(vector<vector<std::size_t> > ()),
+	self_index_(vector<std::size_t> ()) {}
 
 void Voronoi3D::CalcRigidCM(std::size_t face_index)
 {
