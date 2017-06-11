@@ -16,7 +16,6 @@ double time, TracerStickerNames const& ts) const
 { 
 	beu_(fluxes, pg, tess, dt, cd, cells, extensives,time, ts);
 	vector<Extensive> extensives_local(extensives);
-	size_t Npoints = static_cast<size_t>(tess.GetPointNo());
 	Extensive toadd(extensives[0]);
 	size_t t_index=static_cast<size_t>(binary_find(ts.tracer_names.begin(),ts.tracer_names.end(),string("Temperature"))-ts.tracer_names.begin());
 	assert(t_index<ts.tracer_names.size());
