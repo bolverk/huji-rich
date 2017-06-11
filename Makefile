@@ -10,7 +10,7 @@ ifeq ($(MODE),debug)
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
@@ -80,6 +80,8 @@ external_libraries/rebound/librebound.so:
 	git clone http://github.com/hannorein/rebound external_libraries/rebound
 	cd external_libraries/rebound && make
 	cp external_libraries/rebound/src/rebound.h external_libraries/include
+	cp external_libraries/rebound/src/tools.h external_libraries/include
+	cp external_libraries/rebound/src/output.h external_libraries/include
 	
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
