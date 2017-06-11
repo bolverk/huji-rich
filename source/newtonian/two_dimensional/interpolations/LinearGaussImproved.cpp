@@ -220,8 +220,8 @@ namespace
 		const size_t nedges = edge_list.size();
 		for (size_t i = 0; i < nedges; ++i)
 		{
-			if (tess.GetOriginalIndex(edge_list[i]->neighbors.first) == tess.GetOriginalIndex(edge_list[i]->neighbors.second))
-				continue;
+			//if (tess.GetOriginalIndex(edge_list[i]->neighbors.first) == tess.GetOriginalIndex(edge_list[i]->neighbors.second))
+			//	continue;
 			if (i > 0)
 			{
 				ReplaceComputationalCell(centroid_val, cell);
