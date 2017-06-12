@@ -421,6 +421,7 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 	return res;
 }
 
+void MPI_exchange_data2(const Tessellation3D& tess, vector<double>& cells, bool ghost_or_sent);
 
 vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<double> > &tosend);
 
