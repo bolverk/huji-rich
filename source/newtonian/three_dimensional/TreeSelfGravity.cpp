@@ -70,7 +70,7 @@ void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<Compu
 	{
 		vector<Vector3D> vtemp;
 		for (size_t i = 1; i < static_cast<size_t>(ws); ++i)
-			cum_num[i] = cum_num[i - 1];
+			cum_num[i] = point_num[i - 1];
 		for (size_t i = 1; i < static_cast<size_t>(ws); ++i)
 			cum_num[i] += cum_num[i - 1];
 		MPI_Status status;
