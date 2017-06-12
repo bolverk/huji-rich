@@ -37,6 +37,10 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 			eo.AddEntry("Cell x momentum", extensive.momentum.x);
 			eo.AddEntry("Cell y momentum", extensive.momentum.y);
 			eo.AddEntry("Cell z momentum", extensive.momentum.z);
+			eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
+			eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
+			eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
+			eo.AddEntry("Cell volume", vol);
 			eo.AddEntry("Cell energy", extensive.energy);
 			eo.AddEntry("Cell thermal energy per unit mass", energy);
 			throw eo;
