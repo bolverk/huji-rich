@@ -74,7 +74,7 @@ void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<Compu
 		for (size_t i = 1; i < static_cast<size_t>(ws); ++i)
 			cum_num[i] += cum_num[i - 1];
 		MPI_Status status;
-		for (int i = 1; i < ws; ++i)
+		for (int i = 0; i < (2*ws-2); ++i)
 		{
 			MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			int count = 0;
