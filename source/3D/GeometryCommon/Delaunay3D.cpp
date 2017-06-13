@@ -6,7 +6,6 @@
 #include "HilbertOrder3D.hpp"
 #include <boost/foreach.hpp>
 #include <iostream>
-
 //#define runcheks 1
 
 namespace
@@ -725,6 +724,16 @@ std::size_t Delaunay3D::Walk(std::size_t point, std::size_t first_guess)
 			{
 				good = false;
 				cur_facet = tetras_[cur_facet].neighbors[i];
+				if(cur_facet == outside_neighbor_)
+				{
+					std::cout<<"Walk wanted to goto outside neighbor"<<std::endl;
+					std::cout<<"point "<<point<<" "<<points_[point].x<<" "<<points_[point].y<<" "<<points_[point].z<<" "<<std::endl;
+					std::cout<<"Big tetrahedron "<<points_[Norg_].x<<" "<<points_[Norg_].y<<" "<<points_[Norg_].z<<" "<<std::endl;
+					std::cout<<"Big tetrahedron "<<points_[Norg_+1].x<<" "<<points_[Norg_+1].y<<" "<<points_[Norg_+1].z<<" "<<std::endl;
+					std::cout<<"Big tetrahedron "<<points_[Norg_+2].x<<" "<<points_[Norg_+2].y<<" "<<points_[Norg_+2].z<<" "<<std::endl;
+					std::cout<<"Big tetrahedron "<<points_[Norg_+3].x<<" "<<points_[Norg_+3].y<<" "<<points_[Norg_+3].z<<" "<<std::endl;
+					throw;
+				}
 				break;
 			}
 		}

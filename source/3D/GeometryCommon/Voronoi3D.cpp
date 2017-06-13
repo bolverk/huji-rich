@@ -1161,13 +1161,12 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		visited.insert(cur);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
-		size_t other = f.neighbors.first == rank ? f.neighbors.second : f.neighbors.first;
-		if (other < N)
-		{
-			double R = tproc.GetWidth(other);
-			if (abs(tproc.GetMeshPoint(other) - vpoint) > 20 * R)
-				continue;
-		}	
+		double R = f.neighbors.first<N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
+		if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R)
+			continue;
+		R = f.neighbors.second<N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
+		if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R)
+			continue;
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
 		for (std::size_t j = 0; j < Ntetra; ++j)
@@ -1176,6 +1175,18 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			sphere.center = tetra_centers_[PointTetras_[point][j]];
 			if (FaceSphereIntersections(f, sphere,normal))
 			{
+				if(f.neighbors.first<N)
+				{
+					double R = tproc.GetWidth(f.neighbors.first);
+					if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R)
+						continue;
+				}
+				if(f.neighbors.second<N)
+				{
+					double R = tproc.GetWidth(f.neighbors.second);
+					if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R)
+						continue;
+				}
 				res.push_back(cur);
 				if (recursive)
 				{
