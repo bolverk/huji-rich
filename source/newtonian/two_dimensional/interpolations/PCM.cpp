@@ -17,11 +17,21 @@ void PCM::operator()(const Tessellation & tess, const vector<ComputationalCell>&
 		if (edge.neighbors.first < Npoints)
 			res[i].first = cells[static_cast<size_t>(edge.neighbors.first)];
 		else
-			res[i].first = ghost_cells[static_cast<size_t>(edge.neighbors.first)];
+#ifdef RICH_MPI
+			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+				res[i].first = cells.at(static_cast<size_t>(edge.neighbors.first));
+			else
+#endif
+				res[i].first = ghost_cells[static_cast<size_t>(edge.neighbors.first)];
 		if (edge.neighbors.second < Npoints)
 			res[i].second = cells[static_cast<size_t>(edge.neighbors.second)];
 		else
-			res[i].second = ghost_cells[static_cast<size_t>(edge.neighbors.second)];
+#ifdef RICH_MPI
+			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+				res[i].second = cells.at(static_cast<size_t>(edge.neighbors.second));
+			else
+#endif
+				res[i].second = ghost_cells[static_cast<size_t>(edge.neighbors.second)];
 
 	}
 }
