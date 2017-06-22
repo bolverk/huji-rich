@@ -150,11 +150,7 @@ private:
 		TracerStickerNames const& tracerstickernames)const;
 
 	void UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
-		EquationOfState const& eos, double time,
-#ifdef RICH_MPI
-		Tessellation3D const& proctess,
-#endif
-		TracerStickerNames const& tracerstickernames)const;
+		EquationOfState const& eos, double time,TracerStickerNames const& tracerstickernames)const;
 public:
 	/*!
 	\brief Runs the AMR
