@@ -1,15 +1,20 @@
 #include "RoundCells3D.hpp"
+#include "../../misc/utils.hpp"
 #ifdef RICH_MPI
-#include <mpi.h>
+#include "../../mpi/mpi_commands.hpp"
 #endif
 
 RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi,double eta, bool cold) : pm_(pm), eos_(eos), ll_(ll),ur_(ur),chi_(chi), eta_(eta), cold_(cold) {}
+	double chi,double eta, bool cold, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll),ur_(ur),chi_(chi), 
+	eta_(eta), cold_(cold),no_move_(no_move) {}
 
 namespace
 {
-	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R,size_t index, vector<Vector3D> & velocities)
+	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R,size_t index, vector<Vector3D> & velocities,
+		vector<char> const& nomove)
 	{
+		if (nomove[index]==1)
+			return;
 		Vector3D const& point = tess.GetMeshPoint(index);
 		vector<size_t> neigh = tess.GetNeighbors(index);
 		size_t N = neigh.size();
@@ -37,14 +42,21 @@ namespace
 				tess.GetFaceNeighbors(face).first;
 			if (!tess.IsPointOutsideBox(other))
 			{
-				if (index < other)
+				if (nomove.at(other)==1)
 				{
-					v_par *= 0.5;
-					Vector3D temp =velocities[other] - normal*ScalarProd(normal, velocities[other]);
-					v_par += 0.5*temp;
+					v_par = Vector3D();
 				}
 				else
-					v_par = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+				{
+					if (index < other)
+					{
+						v_par *= 0.5;
+						Vector3D temp = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+						v_par += 0.5*temp;
+					}
+					else
+						v_par = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+				}
 			}
 			velocity = normal*ScalarProd(normal, velocity) + v_par;
 		}
@@ -109,7 +121,7 @@ namespace
 }
 
 void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities) const
+	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities,vector<char> const& nomove) const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
@@ -120,12 +132,11 @@ void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& te
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names), abs(cells[i].velocity));
 	velocity += chi_*c*(s - r) / R;
-	if (d > 0.15*R)
-		SlowDown(velocity, tess, R, i,velocities);
+	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
 
 void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities)const
+	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove)const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
@@ -147,18 +158,42 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	const double c_dt = d / dt;
 	velocity += chi_*std::min(c_dt, cs)*(s - r) / R;
-	if (d > 0.15*R)
-		SlowDown(velocity, tess, R, i,velocities);
+	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
 
 void RoundCells3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 	double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const
 {
 	pm_(tess, cells, time, tracerstickernames,res);
-#ifndef RICH_MPI
 	const size_t n = tess.GetPointNo();
+	if (n == 0)
+		return;
+	size_t Nstick = tracerstickernames.sticker_names.size();
+	vector<char> nomove(n, 0);
+	vector<size_t> no_move_indeces;
+	for (size_t i = 0; i < Nstick; ++i)
+	{
+		vector<std::string>::const_iterator it = std::find(no_move_.begin(), no_move_.end(),
+			tracerstickernames.sticker_names.at(i));
+		if (it != no_move_.end())
+			no_move_indeces.push_back(i);
+	}
+	Nstick = no_move_indeces.size();
 	for (size_t i = 0; i < n; ++i)
-		SlowDown(res[i], tess, tess.GetWidth(i), i, res);
+	{
+		for (size_t j = 0; j < Nstick; ++j)
+		{
+			if (cells[i].stickers[no_move_indeces[j]])
+			{
+				res[i] = Vector3D();
+				nomove[i] = 1;
+				break;
+			}
+		}
+	}
+#ifndef RICH_MPI
+	for (size_t i = 0; i < n; ++i)
+		SlowDown(res[i], tess, tess.GetWidth(i), i, res,nomove);
 #endif
 }
 
@@ -167,19 +202,58 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 {
 	pm_.ApplyFix(tess, cells, time, dt, velocities, tracerstickernames);
 	const size_t n = tess.GetPointNo();
+	if (n == 0)
+		return;
+	vector<char> nomove(n, 0);
+	size_t Nstick = tracerstickernames.sticker_names.size();
+	vector<size_t> no_move_indeces;
+	for (size_t i = 0; i < Nstick; ++i)
+	{
+		vector<std::string>::const_iterator it = std::find(no_move_.begin(), no_move_.end(),
+			tracerstickernames.sticker_names.at(i));
+		if (it != no_move_.end())
+			no_move_indeces.push_back(i);
+	}
+	Nstick = no_move_indeces.size();
+	for (size_t i = 0; i < n; ++i)
+	{
+		for (size_t j = 0; j < Nstick; ++j)
+		{
+			if (cells[i].stickers[no_move_indeces[j]])
+			{
+				velocities[i] = Vector3D();
+				nomove[i] = 1;
+				break;
+			}
+		}
+	}
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, nomove, true);
+#endif
+
 	if (cold_)
 	{		
 		for (size_t i = 0; i < n; ++i)
-			calc_dw(velocities.at(i),i, tess, dt, cells, tracerstickernames,velocities);
+		{
+			if (nomove[i]==0)
+				calc_dw(velocities.at(i), i, tess, dt, cells, tracerstickernames, velocities,nomove);
+			else
+				velocities.at(i) = Vector3D();
+		}	
 	}
 	else
 	{
 		for (size_t i = 0; i < n; ++i)
-			calc_dw(velocities.at(i), i, tess, cells, tracerstickernames,velocities);
+		{
+			if(nomove[i] == 0)
+				calc_dw(velocities.at(i), i, tess, cells, tracerstickernames, velocities,nomove);
+			else
+				velocities.at(i) = Vector3D();
+		}
 	}
 #ifdef RICH_MPI
 	for (size_t i = 0; i < n; ++i)
-		SlowDown(velocities[i], tess, tess.GetWidth(i), i, velocities);
+		SlowDown(velocities[i], tess, tess.GetWidth(i), i, velocities,nomove);
 #endif
 	velocities.resize(n);
 	CorrectPointsOverShoot(velocities, dt, tess, ll_,ur_);

@@ -25,7 +25,7 @@ public:
 	\param cold Switch for cold flows
 	*/
 	RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos,Vector3D const& ll,Vector3D const& ur,
-		double chi = 0.25, double eta = 0.02, bool cold = false);
+		double chi = 0.25, double eta = 0.02, bool cold = false,vector<std::string> no_move=vector<std::string>());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
@@ -35,10 +35,10 @@ public:
 private:
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		TracerStickerNames const& tracerstickernames,vector<Vector3D> & velocities) const;
+		TracerStickerNames const& tracerstickernames,vector<Vector3D> & velocities, vector<char> const& nomove) const;
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-		TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities)const;
+		TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove)const;
 
 	const PointMotion3D& pm_;
 	const EquationOfState& eos_;
@@ -46,6 +46,7 @@ private:
 	const double chi_;
 	const double eta_;
 	const bool cold_;
+	const vector<std::string> no_move_;
 };
 
 #endif // ROUND_CELLS3D_HPP

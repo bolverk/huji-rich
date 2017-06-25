@@ -109,9 +109,9 @@ public:
 	\param cells The computational cells
 	\param time The sim time
 	\param tracerstickernames The names of the tracers and stickers
-	\return The indeces of cells to remove
+	\return The indeces of cells to remove and the direction to split (can be given empty)
 	*/
-	virtual vector<size_t> ToRefine(Tessellation3D const& tess,
+	virtual std::pair<vector<size_t>,vector<Vector3D> > ToRefine(Tessellation3D const& tess,
 		vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickernames)const = 0;
 
 	//! \brief Virtual destructor

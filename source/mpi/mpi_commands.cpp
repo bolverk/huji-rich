@@ -296,4 +296,81 @@ vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, v
 	return res;
 }
 
+void MPI_exchange_data(const Tessellation3D& tess, vector<char>& cells, bool ghost_or_sent)
+{
+	if (cells.empty())
+		throw UniversalError("Empty cell vector in MPI_exchange_data");
+	vector<int> correspondents;
+	vector<vector<size_t> > duplicated_points;
+	if (ghost_or_sent)
+	{
+		correspondents = tess.GetDuplicatedProcs();
+		duplicated_points = tess.GetDuplicatedPoints();
+	}
+	else
+	{
+		correspondents = tess.GetSentProcs();
+		duplicated_points = tess.GetSentPoints();
+	}
+	vector<MPI_Request> req(correspondents.size());
+	vector<vector<char> > tempsend(correspondents.size());
+	vector<char> temprecv;
+	double temp = 0;
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		bool isempty = duplicated_points[i].empty();
+		if (!isempty)
+			tempsend[i] = VectorValues(cells, duplicated_points[i]);
+		int size = static_cast<int>(tempsend[i].size());
+		if (size == 0)
+			MPI_Isend(&temp, 1, MPI_CHAR, correspondents[i], 4, MPI_COMM_WORLD, &req[i]);
+		else
+			MPI_Isend(&tempsend[i][0], size, MPI_CHAR, correspondents[i], 5, MPI_COMM_WORLD, &req[i]);
+	}
+	const vector<vector<size_t> >& ghost_indices = tess.GetGhostIndeces();
+	if (ghost_or_sent)
+		cells.resize(tess.GetTotalPointNumber(), cells[0]);
+	else
+		cells = VectorValues(cells, tess.GetSelfIndex());
+	vector<vector<char> > torecv(correspondents.size());
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		MPI_Get_count(&status, MPI_CHAR, &count);
+		temprecv.resize(static_cast<size_t>(count));
+		MPI_Recv(&temprecv[0], count, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if (status.MPI_TAG == 5)
+		{
+			size_t location = static_cast<size_t>(std::find(correspondents.begin(), correspondents.end(), status.MPI_SOURCE) -
+				correspondents.begin());
+			if (location >= correspondents.size())
+				throw UniversalError("Bad location in mpi exchange");
+			torecv[location] =temprecv;
+		}
+		else
+		{
+			if (status.MPI_TAG != 4)
+				throw UniversalError("Recv bad mpi tag");
+		}
+	}
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		if (ghost_or_sent)
+		{
+			for (size_t j = 0; j < torecv[i].size(); ++j)
+				cells.at(ghost_indices.at(i).at(j)) = torecv[i][j];
+		}
+		else
+		{
+			for (size_t j = 0; j < torecv[i].size(); ++j)
+				cells.push_back(torecv[i][j]);
+		}
+	}
+	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
+}
+
+
 #endif

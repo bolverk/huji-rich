@@ -344,7 +344,7 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 {
 	vector<vector<vector<T > > > res(totalkwith.size());
 	vector<MPI_Request> req(2*totalkwith.size());
-	vector<vector<vector<double> > > tempsend(2*totalkwith.size());
+	vector<vector<double> > tempsend(2*totalkwith.size());
 	vector<vector<int> > send_sizes(totalkwith.size());
 	vector<T> temprecv;
 	double temp = 0;
@@ -355,8 +355,11 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 		{
 			send_sizes[i].reserve(tosend[i].size());
 			for (size_t j = 0; j < tosend[i].size(); ++j)
+			{
 				send_sizes[i].push_back(static_cast<int>(tosend[i][j].size()));
-			tempsend[i] = list_serialize(tosend[i]);		
+				vector<double> dtemp = list_serialize(tosend[i][j]);
+				tempsend[i].insert(tempsend[i].end(), dtemp.begin(), dtemp.end());
+			}		
 		}
 		else
 			send_sizes[i].push_back(-1);
@@ -431,6 +434,8 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vect
 vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<size_t> > > &tosend);
 
 vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > &tosend);
+
+void MPI_exchange_data(const Tessellation3D& tess, vector<char>& cells, bool ghost_or_sent);
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
 

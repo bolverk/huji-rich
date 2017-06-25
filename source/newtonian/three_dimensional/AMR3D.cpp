@@ -329,27 +329,65 @@ namespace
 		nneigh = res2;
 	}
 
-	void RemoveBadAspectRatio(Tessellation3D const& tess, vector<size_t> &toremove)
+	void RemoveBadAspectRatio(Tessellation3D const& tess, std::pair<vector<size_t>,vector<Vector3D> > &toremove)
 	{
-		vector<size_t> remove_res;
-		size_t N = toremove.size();
+		std::pair<vector<size_t>,vector<Vector3D > > remove_res;
+		size_t N = toremove.first.size();
 		for (size_t i = 0; i < N; ++i)
 		{
-			double v = tess.GetVolume(toremove[i]);
-			vector<size_t> const& faces = tess.GetCellFaces(toremove[i]);
+			double v = tess.GetVolume(toremove.first[i]);
+			vector<size_t> const& faces = tess.GetCellFaces(toremove.first[i]);
 			size_t Nfaces = faces.size();
-			double A = 0;
+			bool good = true;
+			double R = tess.GetWidth(toremove.first[i]);
 			for (size_t j = 0; j < Nfaces; ++j)
 			{
-				A += tess.GetArea(faces[j]);
+				std::pair<size_t,size_t> fneigh = tess.GetFaceNeighbors(faces[j]);
+				if (abs(tess.GetMeshPoint(fneigh.first) - tess.GetMeshPoint(fneigh.second)) < 0.2*R)
+				{
+					good = false;
+					break;
+				}
 			}
-			if (((A*A*A) < (v*v * 250)) && (abs(tess.GetMeshPoint(toremove[i]) - tess.GetCellCM(toremove[i]))<
-				0.2*tess.GetWidth(toremove[i])))
+			if(good)
 			{
-				remove_res.push_back(toremove[i]);
+				remove_res.first.push_back(toremove.first[i]);
+				remove_res.second.push_back(toremove.second[i]);
 			}
 		}
 		toremove = remove_res;
+	}
+
+	std::pair<vector<size_t>, vector<double> > RemoveBadRemovAspectRatio(vector<double> const& merits, vector<size_t> const& candidates,
+		Tessellation3D const& tess)
+	{
+		vector<size_t> result_names;
+		vector<double> result_merits;
+		if (merits.size() != candidates.size())
+			throw UniversalError("Merits and Candidates don't have same size in RemoveNeighbors");
+		vector<size_t> neigh;
+		size_t N = merits.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			bool good = true;
+			tess.GetNeighbors(candidates[i], neigh);
+			size_t Nn = neigh.size();
+			double R = tess.GetWidth(candidates[i]);
+			for (size_t j = 0; j < Nn; ++j)
+			{
+				if (abs(tess.GetMeshPoint(candidates[i]) - tess.GetMeshPoint(neigh[j])) < 0.1*R)
+				{
+					good = false;
+					break;
+				}
+			}
+			if (good)
+			{
+				result_merits.push_back(merits[i]);
+				result_names.push_back(candidates[i]);
+			}
+		}
+		return std::pair<vector<size_t>, vector<double> >(result_names, result_merits);
 	}
 
 	std::pair<vector<size_t>, vector<double> > RemoveNeighbors(vector<double> const& merits, vector<size_t> const& candidates,
@@ -741,10 +779,17 @@ namespace
 		}
 	}
 
-	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index)
+	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index,std::pair<vector<size_t>,
+		vector<Vector3D> > &ToRefine)
 	{
+		if (!ToRefine.second.empty())
+		{
+			size_t loc = ToRefine.first[index];
+			return (tess.GetMeshPoint(loc) + (1e-4*tess.GetWidth(loc)/abs(ToRefine.second.at(index)))*ToRefine.second.at(index));
+		}
 		size_t Nneigh = neigh.size();
 		assert(Nneigh > 0);
+		index = ToRefine.first[index];
 		Vector3D const& point = tess.GetMeshPoint(index);
 		Vector3D other = tess.GetMeshPoint(neigh[0]);
 		double max_dist = ScalarProd(point - other, point - other);
@@ -1216,8 +1261,8 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 	Conserved3D res;
 	const double mass = volume*cell.density;
 	res.mass = mass;
-	res.energy = eos.dp2e(cell.density, cell.pressure, cell.tracers)*mass +
-		0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+	res.internal_energy = cell.internal_energy*mass;
+	res.energy = res.internal_energy + 0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 	res.momentum = mass*cell.velocity;
 	size_t N = cell.tracers.size();
 	res.tracers.resize(N);
@@ -1238,7 +1283,8 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
 	res.velocity = extensive.momentum / extensive.mass;
-	res.pressure = eos.de2p(res.density, extensive.energy / extensive.mass - 0.5*ScalarProd(res.velocity, res.velocity));
+	res.pressure = eos.de2p(res.density, extensive.internal_energy / extensive.mass);
+	res.internal_energy = extensive.internal_energy / extensive.mass;
 	size_t N = extensive.tracers.size();
 	res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
@@ -1274,14 +1320,16 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	size_t Ntotal0 = tess.GetMeshPoints().size();
 	extensives.resize(Norg);
 	cells.resize(Norg);
-	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
+	std::pair<vector<size_t>,vector<Vector3D> > ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
 	vector<size_t> indeces;
-	sort_index(ToRefine, indeces);
-	sort(ToRefine.begin(), ToRefine.end());
+	sort_index(ToRefine.first, indeces);
+	sort(ToRefine.first.begin(), ToRefine.first.end());
+	if (!ToRefine.second.empty())
+		VectorValues(ToRefine.second, indeces);
 	RemoveBadAspectRatio(tess, ToRefine);
-	if (ToRefine.empty())
+	if (ToRefine.first.empty())
 		return;
-	size_t Nsplit = ToRefine.size();
+	size_t Nsplit = ToRefine.first.size();
 	Voronoi3D vlocal(tess.GetBoxCoordinates().first, tess.GetBoxCoordinates().second);
 	vector<size_t> neigh, bad_faces, all_bad_faces, refined, newboundary_faces;
 	double newvol;
@@ -1291,18 +1339,18 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	tess.GetMeshPoints().resize(Ntotal0 + Nsplit);
 	for (size_t i = 0; i < Nsplit; ++i)
 	{
-		tess.GetNeighbors(ToRefine[i], neigh);
+		tess.GetNeighbors(ToRefine.first[i], neigh);
 		sort(neigh.begin(), neigh.end());
-		Vector3D NewPoint = GetNewPoint(tess, neigh, ToRefine[i]);
-		BuildLocalVoronoi(vlocal, tess, neigh, NewPoint, ToRefine[i]);
-		bad_faces = tess.GetCellFaces(ToRefine[i]);
+		Vector3D NewPoint = GetNewPoint(tess, neigh,i,ToRefine);
+		BuildLocalVoronoi(vlocal, tess, neigh, NewPoint, ToRefine.first[i]);
+		bad_faces = tess.GetCellFaces(ToRefine.first[i]);
 		/////////////
-		double oldv = tess.GetVolume(ToRefine[i]);
+		double oldv = tess.GetVolume(ToRefine.first[i]);
 		double newv = vlocal.GetVolume(0) + vlocal.GetVolume(1);
 		assert(oldv > 0.999*newv&&newv > 0.999*oldv);
 		///////////
-		FixVoronoi(vlocal, tess, neigh, ToRefine[i], newvol, newCM, Ntotal0, i);
-		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(ToRefine[i]), extensives[ToRefine[i]]);
+		FixVoronoi(vlocal, tess, neigh, ToRefine.first[i], newvol, newCM, Ntotal0, i);
+		PrimitiveToConserved(cells[ToRefine.first[i]], tess.GetVolume(ToRefine.first[i]), extensives[ToRefine.first[i]]);
 		tess.GetMeshPoints()[Ntotal0 + i] = NewPoint;
 		newvols.push_back(newvol);
 		newCMs.push_back(newCM);
@@ -1314,9 +1362,9 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	vector<vector<Vector3D> > new_points;
 	vector<vector<vector<int> > > recv_neigh;
 	vector<vector<size_t> > splitted_points;
-	vector<size_t> points_tosend = GetMPIRefineSend(tess, ToRefine, Ntotal0);
+	vector<size_t> points_tosend = GetMPIRefineSend(tess, ToRefine.first, Ntotal0);
 	vector<vector<size_t> > sent_points = SendMPIRefine(tess, points_tosend, new_points, recv_neigh, splitted_points,
-		ToRefine, Ntotal0);
+		ToRefine.first, Ntotal0);
 	for (size_t i = 0; i < splitted_points.size(); ++i)
 	{
 		for (size_t j = 0; j < splitted_points[i].size(); ++j)
@@ -1337,8 +1385,9 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	extensives.resize(Norg + Nsplit);
 	for (size_t i = 0; i < newCMs.size(); ++i)
 	{
-		cells.push_back(cells[ToRefine[i]]);
-		PrimitiveToConserved(cells[ToRefine[i]], tess.GetVolume(Norg + i), extensives[Norg + i]);
+		cells.push_back(cells[ToRefine.first[i]]);
+		cells.back().stickers.assign(cells.back().stickers.size(), false);
+		PrimitiveToConserved(cells[ToRefine.first[i]], tess.GetVolume(Norg + i), extensives[Norg + i]);
 	}
 	// Fix the old data and insert new data
 	vector<Vector3D> & allpoints = tess.GetMeshPoints();
@@ -1381,6 +1430,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	EquationOfState const& eos, double time,TracerStickerNames const& tracerstickernames)const
 {
 	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tracerstickernames);
+	ToRemove = RemoveBadRemovAspectRatio(ToRemove.second, ToRemove.first, tess);
 	vector<size_t> indeces = sort_index(ToRemove.first);
 	ToRemove.second = VectorValues(ToRemove.second, indeces);
 	ToRemove.first = VectorValues(ToRemove.first, indeces);
@@ -1512,6 +1562,19 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 			allfaces[i][j] -= to_remove;
 		}
 	}
+
+	// Deal with mpi
+#ifdef RICH_MPI
+	// Update Nghost
+	for (size_t i = 0; i < nghost_remove.size(); ++i)
+	{
+		std::sort(nghost_remove[i].begin(), nghost_remove[i].end());
+		RemoveList(tess.GetGhostIndeces()[i], nghost_remove[i]);
+	}
+	// Update cells and CM
+	MPI_exchange_data(tess, tess.GetAllCM(), true);
+	MPI_exchange_data(tess, cells, true);
+#endif
 
 
 #ifdef debug_amr
