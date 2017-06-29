@@ -175,6 +175,9 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(), ts.tracer_names.end(), string("Entropy")) - ts.tracer_names.begin());
 		lasttime_ = time;
 		ghost_.operator()(tess, cells, time, ts, ghost_cells_);
+#ifdef RICH_MPI
+		MPI_exchange_data(tess, extensives, true);
+#endif
 		dt_ = dt;
 	}
 	if (lasttime_ < time || dt < dt_ || dt > dt_)
