@@ -352,7 +352,8 @@ namespace
 			if(good)
 			{
 				remove_res.first.push_back(toremove.first[i]);
-				remove_res.second.push_back(toremove.second[i]);
+				if(!toremove.second.empty())
+					remove_res.second.push_back(toremove.second[i]);
 			}
 		}
 		toremove = remove_res;
