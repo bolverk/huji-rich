@@ -1094,7 +1094,8 @@ namespace
 		{
 			size_t Nghost2 = ghost[i].size();
 			for (size_t j = 0; j < Nghost2; ++j)
-				ghost[i][j] += Nsplit;
+				if(ghost[i][j]<Ntotal0)
+					ghost[i][j] += Nsplit;
 		}
 	}
 
