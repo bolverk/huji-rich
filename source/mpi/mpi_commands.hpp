@@ -405,6 +405,8 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 	}
 	for (size_t i = 0; i < totalkwith.size(); ++i)
 	{
+		if (irecv[i].at(0) < 1)
+			continue;
 		vector<T> T_temp = list_unserialize(srecv[i], demo);
 		if (T_temp.empty())
 			continue;

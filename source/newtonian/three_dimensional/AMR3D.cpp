@@ -1327,8 +1327,10 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	if (!ToRefine.second.empty())
 		VectorValues(ToRefine.second, indeces);
 	RemoveBadAspectRatio(tess, ToRefine);
+#ifndef RICH_MPI
 	if (ToRefine.first.empty())
 		return;
+#endif
 	size_t Nsplit = ToRefine.first.size();
 	Voronoi3D vlocal(tess.GetBoxCoordinates().first, tess.GetBoxCoordinates().second);
 	vector<size_t> neigh, bad_faces, all_bad_faces, refined, newboundary_faces;
