@@ -2,6 +2,9 @@
 #include "../../misc/utils.hpp"
 #include <iostream>
 #include <cfloat>
+#ifdef RICH_MPI
+#include "../../mpi/mpi_commands.hpp"
+#endif
 
 ConditionExtensiveUpdater3D::Condition3D::~Condition3D() {}
 
@@ -44,11 +47,12 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		{
 			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
 			{
-				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives[i], i, time, tracerstickernames);
+				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives, i, time, tracerstickernames);
 				break;
 			}
 		}
 	}
+	extensives.resize(tess.GetPointNo());
 }
 
 ColdFlowsUpdate3D::ColdFlowsUpdate3D(EquationOfState const& eos, Ghost3D const& ghost, LinearGauss3D const& interp) :
@@ -124,6 +128,21 @@ namespace
 			return false;
 	}
 
+	bool HighRelativeKineticEnergy(Tessellation3D const& tess, size_t index, vector<Conserved3D> const& cells,
+		Conserved3D const& cell)
+	{
+		vector<size_t> neigh;
+		tess.GetNeighbors(index, neigh);
+		size_t N = neigh.size();
+		double maxDV = 0;
+		size_t Norg = tess.GetPointNo();
+		Vector3D Vcell = cell.momentum / cell.mass;
+		for (size_t i = 0; i < N; ++i)
+			if(neigh[i]<Norg||!tess.IsPointOutsideBox(neigh[i]))
+				maxDV = std::max(maxDV, abs(Vcell - cells.at(neigh[i]).momentum/cells[neigh[i]].mass));
+		return 0.001*maxDV*maxDV*cell.mass > cell.internal_energy;
+	}
+
 	void EntropyFix(Conserved3D &extensive, double vol, EquationOfState const& eos, size_t entropy_index)
 	{
 		const double Ek = 0.5 * ScalarProd(extensive.momentum, extensive.momentum) /  extensive.mass;
@@ -147,7 +166,7 @@ namespace
 }
 
 void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& tess, const double dt,
-	const vector<ComputationalCell3D>& cells, Conserved3D& extensive, size_t index, double time, TracerStickerNames const& ts)
+	const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time, TracerStickerNames const& ts)
 	const
 {
 	vector<size_t> neigh;
@@ -156,6 +175,9 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(), ts.tracer_names.end(), string("Entropy")) - ts.tracer_names.begin());
 		lasttime_ = time;
 		ghost_.operator()(tess, cells, time, ts, ghost_cells_);
+#ifdef RICH_MPI
+		MPI_exchange_data(tess, extensives, true);
+#endif
 		dt_ = dt;
 	}
 	if (lasttime_ < time || dt < dt_ || dt > dt_)
@@ -163,15 +185,26 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 		lasttime_ = time;
 		ghost_.operator()(tess, cells, time, ts, ghost_cells_);
 		dt_ = dt;
+#ifdef RICH_MPI
+		MPI_exchange_data(tess, extensives, true);
+#endif
 	}
 
-	if (!SmallThermalEnergy(extensive))
+	if (!SmallThermalEnergy(extensives[index]))
 		return;
 
-	assert(entropy_index_ < extensive.tracers.size());
+	assert(entropy_index_ < extensives[index].tracers.size());
 
-	double new_d = extensive.mass / tess.GetVolume(index);
+	double new_d = extensives[index].mass / tess.GetVolume(index);
 	assert(new_d > 0);
+	if (!HighRelativeKineticEnergy(tess, index, extensives,extensives[index]))
+		return;
+	else
+	{
+		EntropyFix(extensives[index], tess.GetVolume(index), eos_, entropy_index_);
+		return;
+	}
+	/*
 	double new_entropy = eos_.dp2s(new_d, NewPressure(extensive, eos_, new_d));
 	if (new_entropy*extensive.mass < extensive.tracers[entropy_index_])
 	{
@@ -187,11 +220,11 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 		EntropyFix(extensive, tess.GetVolume(index), eos_, entropy_index_);
 		return;
 	}
-	return;
+	return;*/
 }
 
 void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& /*tess*/, const double /*dt*/,
-	const vector<ComputationalCell3D>& /*cells*/, Conserved3D& /*extensive*/, size_t /*index*/, double /*time*/,
+	const vector<ComputationalCell3D>& /*cells*/, vector<Conserved3D> &/*extensives*/, size_t /*index*/, double /*time*/,
 	TracerStickerNames const& /*tracerstickernames*/)const
 {
 	return;

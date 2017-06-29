@@ -38,13 +38,13 @@ public:
 		\param tess Tessellation
 		\param dt Time step
 		\param cells Computational cells
-		\param extensive Extensive variable, input is after the addition of hydro fluxes
+		\param extensives Extensive variables, input is after the addition of hydro fluxes
 		\param index The index of the cell
 		\param time The time
 		\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()	(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
-			const vector<ComputationalCell3D>& cells,Conserved3D& extensive,size_t index,double time,
+			const vector<ComputationalCell3D>& cells,vector<Conserved3D> &extensives,size_t index,double time,
 			TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Action3D(void);
@@ -79,7 +79,7 @@ public:
 	ColdFlowsUpdate3D(EquationOfState const& eos, Ghost3D const& ghost, LinearGauss3D const& interp);
 
 	void operator()	(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
-		const vector<ComputationalCell3D>& cells,Conserved3D& extensive,size_t index,double time,
+		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives,size_t index,double time,
 		TracerStickerNames const& tracerstickernames)const;
 private:
 	EquationOfState const& eos_;
@@ -107,7 +107,7 @@ public:
 
 
 	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
-		const vector<ComputationalCell3D>& cells, Conserved3D& extensive, size_t index, double time,
+		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time,
 		TracerStickerNames const& tracerstickernames)const;
 };
 
