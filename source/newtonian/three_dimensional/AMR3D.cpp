@@ -1087,6 +1087,14 @@ namespace
 				FlipVector(tess.GetAllPointsInFace()[i]);
 			}
 		}
+		vector<vector<size_t> > & ghost = tess.GetGhostIndeces();
+		size_t Nghost = ghost.size();
+		for (size_t i = 0; i < Nghost; ++i)
+		{
+			size_t Nghost2 = ghost[i].size();
+			for (size_t j = 0; j < Nghost2; ++j)
+				ghost[i][j] += Nsplit;
+		}
 	}
 
 	void FixVoronoiRemove(Tessellation3D &local, Tessellation3D &tess, vector<size_t> &neigh, vector<size_t> const& nneigh,
