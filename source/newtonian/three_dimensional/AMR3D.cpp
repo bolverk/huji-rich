@@ -786,7 +786,7 @@ namespace
 		if (!ToRefine.second.empty())
 		{
 			size_t loc = ToRefine.first[index];
-			return (tess.GetMeshPoint(loc) + (1e-4*tess.GetWidth(loc)/abs(ToRefine.second.at(index)))*ToRefine.second.at(index));
+			return (tess.GetMeshPoint(loc) + (3e-5*tess.GetWidth(loc)/abs(ToRefine.second.at(index)))*ToRefine.second.at(index));
 		}
 		size_t Nneigh = neigh.size();
 		assert(Nneigh > 0);
@@ -805,7 +805,7 @@ namespace
 				max_loc = i;
 			}
 		}
-		double eps = 1e-4;
+		double eps = 2e-5;
 		return point*(1 - eps) + eps*tess.GetMeshPoint(neigh[max_loc]);
 	}
 
