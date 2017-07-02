@@ -805,7 +805,7 @@ namespace
 				max_loc = i;
 			}
 		}
-		double eps = 1e-5;
+		double eps = 1e-4;
 		return point*(1 - eps) + eps*tess.GetMeshPoint(neigh[max_loc]);
 	}
 
