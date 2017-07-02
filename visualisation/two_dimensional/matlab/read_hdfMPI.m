@@ -29,8 +29,8 @@ NperProc=zeros(nproc,1);
 filename=strcat(filedir,filename);
 [X,Y,Pressure,Density,Vx,Vy,~,time,Tracers,TracerNames,Stickers,StickerNames,Appendices,AppendixNames,~]=read_hdf(strcat(filename,sprintf('_%d.h5',0)));
 
-xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/x_coordinate');
-yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/y_coordinate');
+xproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/proc_x_coordinate');
+yproc=h5read(strcat(filename,sprintf('_%d.h5',0)),'/mpi/proc_y_coordinate');
 h=h5info(strcat(filename,sprintf('_%d.h5',0)));
 for i=1:length(h.Groups)
     if(strcmp(h.Groups(i).Name,'/tracers')==1)
