@@ -2,6 +2,7 @@
 #include "../../3D/GeometryCommon/Voronoi3D.hpp"
 #include "../../misc/utils.hpp"
 #include <boost/array.hpp>
+#include <iostream>
 
 //#define debug_amr 1
 
@@ -1359,7 +1360,19 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 		/////////////
 		double oldv = tess.GetVolume(ToRefine.first[i]);
 		double newv = vlocal.GetVolume(0) + vlocal.GetVolume(1);
-		assert(oldv > 0.999*newv&&newv > 0.999*oldv);
+		if (oldv < 0.999*newv || newv < 0.999*oldv)
+		{
+#ifdef RICH_MPI
+			int rank = 0;
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+			std::cout << "Warning, refine old volume " << oldv << " new volume " << newv << " split cell " << ToRefine.first[i] << " index " << i << "volumes are " <<
+				vlocal.GetVolume(0) << " " << vlocal.GetVolume(1)<<
+#ifdef RICH_MPI
+				" rank "<<rank<<
+#endif
+			std::endl;
+		}
 		///////////
 		FixVoronoi(vlocal, tess, neigh, ToRefine.first[i], newvol, newCM, Ntotal0, i);
 		PrimitiveToConserved(cells[ToRefine.first[i]], tess.GetVolume(ToRefine.first[i]), extensives[ToRefine.first[i]]);
