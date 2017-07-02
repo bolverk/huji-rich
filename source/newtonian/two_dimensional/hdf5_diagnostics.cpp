@@ -280,13 +280,13 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 			serial_generate
 			(MeshGeneratingPointCoordinate
 				(sim.GetProcTessellation(), &Vector2D::x)),
-			"x_coordinate");
+			"proc_x_coordinate");
 	write_std_vector_to_hdf5
 		(mpi,
 			serial_generate
 			(MeshGeneratingPointCoordinate
 				(sim.GetProcTessellation(), &Vector2D::y)),
-			"y_coordinate");
+			"proc_y_coordinate");
 #endif
 
 	// Hydrodynamic
@@ -370,9 +370,9 @@ Snapshot read_hdf5_snapshot
 		if (!mpioverride)
 		{
 			const vector<double> x =
-				read_double_vector_from_hdf5(mpi, "x_coordinate");
+				read_double_vector_from_hdf5(mpi, "proc_x_coordinate");
 			const vector<double> y =
-				read_double_vector_from_hdf5(mpi, "y_coordinate");
+				read_double_vector_from_hdf5(mpi, "proc_y_coordinate");
 			res.proc_points.resize(x.size());
 			for (size_t i = 0; i < x.size(); ++i)
 				res.proc_points.at(i) = Vector2D(x.at(i), y.at(i));
