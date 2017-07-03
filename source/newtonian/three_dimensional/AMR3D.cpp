@@ -204,7 +204,7 @@ namespace
 			size_t Nneigh = neigh.size();
 			for (size_t j = 0; j < Nneigh; ++j)
 			{
-				if (neigh[j] > Norg && neigh[j]< Ntotal && !tess.IsPointOutsideBox(neigh[j]))
+				if (neigh[j] > Norg && neigh[j] < Ntotal && !tess.IsPointOutsideBox(neigh[j]))
 				{
 					to_send.push_back(newpoints[i]);
 					break;
@@ -330,9 +330,9 @@ namespace
 		nneigh = res2;
 	}
 
-	void RemoveBadAspectRatio(Tessellation3D const& tess, std::pair<vector<size_t>,vector<Vector3D> > &toremove)
+	void RemoveBadAspectRatio(Tessellation3D const& tess, std::pair<vector<size_t>, vector<Vector3D> > &toremove)
 	{
-		std::pair<vector<size_t>,vector<Vector3D > > remove_res;
+		std::pair<vector<size_t>, vector<Vector3D > > remove_res;
 		size_t N = toremove.first.size();
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -343,17 +343,17 @@ namespace
 			double R = tess.GetWidth(toremove.first[i]);
 			for (size_t j = 0; j < Nfaces; ++j)
 			{
-				std::pair<size_t,size_t> fneigh = tess.GetFaceNeighbors(faces[j]);
+				std::pair<size_t, size_t> fneigh = tess.GetFaceNeighbors(faces[j]);
 				if (abs(tess.GetMeshPoint(fneigh.first) - tess.GetMeshPoint(fneigh.second)) < 0.2*R)
 				{
 					good = false;
 					break;
 				}
 			}
-			if(good)
+			if (good)
 			{
 				remove_res.first.push_back(toremove.first[i]);
-				if(!toremove.second.empty())
+				if (!toremove.second.empty())
 					remove_res.second.push_back(toremove.second[i]);
 			}
 		}
@@ -460,7 +460,7 @@ namespace
 				{
 					for (size_t k = 0; k < nproc; ++k)
 					{
-						vector<size_t>::const_iterator it = binary_find(duplicated_indeces[k].begin(), 
+						vector<size_t>::const_iterator it = binary_find(duplicated_indeces[k].begin(),
 							duplicated_indeces[k].end(), neigh[j]);
 						if (it != duplicated_indeces[k].end())
 						{
@@ -473,7 +473,7 @@ namespace
 		}
 		indeces = MPI_exchange_data(tess.GetDuplicatedProcs(), indeces);
 		merit_send = MPI_exchange_data(tess.GetDuplicatedProcs(), merit_send);
-		vector<size_t> all_indeces,temp;
+		vector<size_t> all_indeces, temp;
 		vector<double> all_merits;
 		for (size_t i = 0; i < nproc; ++i)
 		{
@@ -520,18 +520,18 @@ namespace
 		return res;
 	}
 
-	void SendRecvMPIRemoveData(Tessellation3D &tess, vector<size_t> const& to_remove,vector<vector<vector<size_t> > > 
-		&nghost_neigh_index,vector<vector<size_t> > &nghost_remove,vector<vector<vector<size_t> > > & duplicate_neigh_index)
+	void SendRecvMPIRemoveData(Tessellation3D &tess, vector<size_t> const& to_remove, vector<vector<vector<size_t> > >
+		&nghost_neigh_index, vector<vector<size_t> > &nghost_remove, vector<vector<vector<size_t> > > & duplicate_neigh_index)
 	{
 		vector<size_t> temp;
 		size_t Nprocs = tess.GetDuplicatedProcs().size();
 		nghost_neigh_index.resize(Nprocs);
 		duplicate_neigh_index.resize(Nprocs);
-		vector<vector<Vector3D> > to_add_points(Nprocs),to_add_cm(Nprocs);
+		vector<vector<Vector3D> > to_add_points(Nprocs), to_add_cm(Nprocs);
 		nghost_remove.resize(Nprocs);
 		vector<vector<size_t> > duplicated_points = tess.GetDuplicatedPoints();
 		vector<vector<size_t> > ghost_points = tess.GetGhostIndeces();
-		vector<vector<size_t> > sort_indeces(Nprocs),new_send(Nprocs), sort_indecesg(Nprocs);
+		vector<vector<size_t> > sort_indeces(Nprocs), new_send(Nprocs), sort_indecesg(Nprocs);
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			sort_index(duplicated_points[i], sort_indeces[i]);
@@ -552,7 +552,7 @@ namespace
 				{
 					for (size_t k = 0; k < Nprocs; ++k)
 					{
-						vector<size_t>::const_iterator it = binary_find(duplicated_points[k].begin(), 
+						vector<size_t>::const_iterator it = binary_find(duplicated_points[k].begin(),
 							duplicated_points[k].end(), to_remove[i]);
 						if (it != duplicated_points[k].end())
 						{
@@ -638,11 +638,11 @@ namespace
 		}
 
 		// Send/Recv the data
-		nghost_neigh_index=MPI_exchange_data(tess, nghost_neigh_index);
+		nghost_neigh_index = MPI_exchange_data(tess, nghost_neigh_index);
 		duplicate_neigh_index = MPI_exchange_data(tess, duplicate_neigh_index);
-		to_add_points=MPI_exchange_data(tess.GetDuplicatedProcs(), to_add_points,tess.GetMeshPoint(0));
+		to_add_points = MPI_exchange_data(tess.GetDuplicatedProcs(), to_add_points, tess.GetMeshPoint(0));
 		to_add_cm = MPI_exchange_data(tess.GetDuplicatedProcs(), to_add_cm, tess.GetMeshPoint(0));
-		nghost_remove=MPI_exchange_data(tess.GetDuplicatedProcs(), nghost_remove);
+		nghost_remove = MPI_exchange_data(tess.GetDuplicatedProcs(), nghost_remove);
 		// Add the recv points
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
@@ -655,8 +655,8 @@ namespace
 		}
 	}
 
-	void BuildVoronoiMPIRemove(Tessellation3D &tess, size_t &point_to_remove,vector<size_t> &outer_neigh, 
-		vector<size_t> &duplicate_index, size_t rank_index,Tessellation3D &local,vector<size_t> &nneigh)
+	void BuildVoronoiMPIRemove(Tessellation3D &tess, size_t &point_to_remove, vector<size_t> &outer_neigh,
+		vector<size_t> &duplicate_index, size_t rank_index, Tessellation3D &local, vector<size_t> &nneigh)
 	{
 		point_to_remove = tess.GetGhostIndeces()[rank_index].at(point_to_remove);
 		size_t Nouter = outer_neigh.size();
@@ -667,7 +667,7 @@ namespace
 			duplicate_index[i] = tess.GetGhostIndeces()[rank_index].at(duplicate_index[i]);
 		sort(duplicate_index.begin(), duplicate_index.end());
 		vector<size_t> temp;
-		nneigh=outer_neigh;
+		nneigh = outer_neigh;
 		for (size_t i = 0; i < duplicate_index.size(); ++i)
 		{
 			tess.GetNeighbors(duplicate_index[i], temp);
@@ -689,8 +689,8 @@ namespace
 		local.BuildNoBox(points, ghost, toduplicate);
 	}
 
-	void FixVoronoiRemoveMPI(Tessellation3D &tess, Tessellation3D &local,vector<size_t> &neigh,vector<size_t> &bad_faces,
-		vector<double> &dv,vector<size_t> &nneigh,size_t point_to_remove)
+	void FixVoronoiRemoveMPI(Tessellation3D &tess, Tessellation3D &local, vector<size_t> &neigh, vector<size_t> &bad_faces,
+		vector<double> &dv, vector<size_t> &nneigh, size_t point_to_remove)
 	{
 		vector<std::pair<size_t, size_t> >const& localfaceneigh = local.GetAllFaceNeighbors();
 		vector<std::pair<size_t, size_t> >& full_faceneigh = tess.GetAllFaceNeighbors();
@@ -708,7 +708,7 @@ namespace
 			for (size_t j = 0; j < full_cellfaces[neigh[i]].size(); ++j)
 			{
 				size_t face = full_cellfaces[neigh[i]][j];
-				if (full_faceneigh[face].second == point_to_remove || 
+				if (full_faceneigh[face].second == point_to_remove ||
 					(full_faceneigh[face].second >= Norg && tess.IsPointOutsideBox(full_faceneigh[face].second)))
 				{
 					bad_faces.push_back(face);
@@ -768,7 +768,7 @@ namespace
 						full_face_cm.push_back(Vector3D());
 						full_faceneigh.push_back(std::pair<size_t, size_t>(n0, n1));
 						full_cellfaces[n0].push_back(face_index);
-						if (n1<Norg)
+						if (n1 < Norg)
 							full_cellfaces[n1].push_back(face_index);
 					}
 					full_area[face_index] = local.GetArea(i);
@@ -838,13 +838,13 @@ namespace
 		}
 	}
 
-	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index,std::pair<vector<size_t>,
+	Vector3D GetNewPoint(Tessellation3D const& tess, vector<size_t> const& neigh, size_t index, std::pair<vector<size_t>,
 		vector<Vector3D> > &ToRefine)
 	{
 		if (!ToRefine.second.empty())
 		{
 			size_t loc = ToRefine.first[index];
-			return (tess.GetMeshPoint(loc) + (3e-5*tess.GetWidth(loc)/abs(ToRefine.second.at(index)))*ToRefine.second.at(index));
+			return (tess.GetMeshPoint(loc) + (3e-5*tess.GetWidth(loc) / abs(ToRefine.second.at(index)))*ToRefine.second.at(index));
 		}
 		size_t Nneigh = neigh.size();
 		assert(Nneigh > 0);
@@ -901,7 +901,7 @@ namespace
 	{
 		vector<size_t> temp, temp2;
 		vector<Vector3D> points, ghost;
-		for (size_t i = 0; i<neigh_points.size(); ++i)
+		for (size_t i = 0; i < neigh_points.size(); ++i)
 		{
 			tess.GetNeighbors(static_cast<size_t>(neigh_points[i]), temp);
 			temp2.insert(temp2.end(), temp.begin(), temp.end());
@@ -965,7 +965,7 @@ namespace
 		{
 			size_t other = tess.GetFaceNeighbors(faces[i]).first == torefine ? tess.GetFaceNeighbors(faces[i]).second :
 				tess.GetFaceNeighbors(faces[i]).first;
-			if (other < Norg || (other >= Ntotal0 && other <(Ntotal0 + index)))
+			if (other < Norg || (other >= Ntotal0 && other < (Ntotal0 + index)))
 				RemoveVal(full_cellfaces[other], faces[i]);
 		}
 		full_cellfaces[torefine].clear();
@@ -1024,7 +1024,7 @@ namespace
 			full_faceneigh.push_back(new_face_neigh);
 			if (new_face_neigh.first < Norg || (new_face_neigh.first >= Ntotal0 && new_face_neigh.first <= (Ntotal0 + index)))
 				full_cellfaces.at(new_face_neigh.first).push_back(full_faceneigh.size() - 1);
-			if (new_face_neigh.second<Norg || ((new_face_neigh.second >= Ntotal0) && (new_face_neigh.second <= Ntotal0 + index)))
+			if (new_face_neigh.second < Norg || ((new_face_neigh.second >= Ntotal0) && (new_face_neigh.second <= Ntotal0 + index)))
 				full_cellfaces.at(new_face_neigh.second).push_back(full_faceneigh.size() - 1);
 			full_area.push_back(local.GetArea(i));
 			full_face_cm.push_back(local.FaceCM(i));
@@ -1152,7 +1152,7 @@ namespace
 		{
 			size_t Nghost2 = ghost[i].size();
 			for (size_t j = 0; j < Nghost2; ++j)
-				if(ghost[i][j]<Ntotal0)
+				if (ghost[i][j] < Ntotal0)
 					ghost[i][j] += Nsplit;
 		}
 	}
@@ -1160,7 +1160,7 @@ namespace
 	void FixVoronoiRemove(Tessellation3D &local, Tessellation3D &tess, vector<size_t> &neigh, vector<size_t> const& nneigh,
 		size_t toremove, vector<double> &dv, vector<size_t> &bad_faces
 #ifdef RICH_MPI
-		,vector<vector<size_t> > &new_duplicate,vector<vector<size_t> > const& sorted_duplictaed_points
+		, vector<vector<size_t> > &new_duplicate, vector<vector<size_t> > const& sorted_duplictaed_points
 #endif
 	)
 	{
@@ -1266,7 +1266,7 @@ namespace
 						full_face_cm.push_back(Vector3D());
 						full_faceneigh.push_back(std::pair<size_t, size_t>(n0, n1));
 						full_cellfaces[n0].push_back(face_index);
-						if (n1<Norg)
+						if (n1 < Norg)
 							full_cellfaces[n1].push_back(face_index);
 #ifdef RICH_MPI
 						else
@@ -1319,7 +1319,7 @@ namespace
 		TracerStickerNames const& tsn, vector<double> &dv, size_t toremove, vector<size_t> const& neigh,
 		AMRCellUpdater3D const& cu, EquationOfState const& eos
 #ifdef RICH_MPI
-		,AMRExtensiveUpdater3D const& eu
+		, AMRExtensiveUpdater3D const& eu
 #endif
 	)
 	{
@@ -1406,7 +1406,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	size_t Ntotal0 = tess.GetMeshPoints().size();
 	extensives.resize(Norg);
 	cells.resize(Norg);
-	std::pair<vector<size_t>,vector<Vector3D> > ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
+	std::pair<vector<size_t>, vector<Vector3D> > ToRefine = refine_.ToRefine(tess, cells, time, tracerstickernames);
 	vector<size_t> indeces;
 	sort_index(ToRefine.first, indeces);
 	sort(ToRefine.first.begin(), ToRefine.first.end());
@@ -1429,7 +1429,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	{
 		tess.GetNeighbors(ToRefine.first[i], neigh);
 		sort(neigh.begin(), neigh.end());
-		Vector3D NewPoint = GetNewPoint(tess, neigh,i,ToRefine);
+		Vector3D NewPoint = GetNewPoint(tess, neigh, i, ToRefine);
 		BuildLocalVoronoi(vlocal, tess, neigh, NewPoint, ToRefine.first[i]);
 		bad_faces = tess.GetCellFaces(ToRefine.first[i]);
 		/////////////
@@ -1442,11 +1442,11 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
 			std::cout << "Warning, refine old volume " << oldv << " new volume " << newv << " split cell " << ToRefine.first[i] << " index " << i << "volumes are " <<
-				vlocal.GetVolume(0) << " " << vlocal.GetVolume(1)<<
+				vlocal.GetVolume(0) << " " << vlocal.GetVolume(1) <<
 #ifdef RICH_MPI
-				" rank "<<rank<<
+				" rank " << rank <<
 #endif
-			std::endl;
+				std::endl;
 		}
 		///////////
 		FixVoronoi(vlocal, tess, neigh, ToRefine.first[i], newvol, newCM, Ntotal0, i);
@@ -1527,7 +1527,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 }
 
 void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
-	EquationOfState const& eos, double time,TracerStickerNames const& tracerstickernames)const
+	EquationOfState const& eos, double time, TracerStickerNames const& tracerstickernames)const
 {
 	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tracerstickernames);
 	ToRemove = RemoveBadRemovAspectRatio(ToRemove.second, ToRemove.first, tess);
@@ -1536,7 +1536,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	ToRemove.first = VectorValues(ToRemove.first, indeces);
 	ToRemove = RemoveNeighbors(ToRemove.second, ToRemove.first, tess);
 #ifdef RICH_MPI
-	ToRemove = RemoveMPINeighbors(ToRemove.second, ToRemove.first,tess);
+	ToRemove = RemoveMPINeighbors(ToRemove.second, ToRemove.first, tess);
 	vector<vector<size_t> > sorted_duplicated_points = tess.GetDuplicatedPoints();
 	for (size_t i = 0; i < sorted_duplicated_points.size(); ++i)
 		sort(sorted_duplicated_points[i].begin(), sorted_duplicated_points[i].end());
@@ -1553,6 +1553,26 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	mesh.resize(tess.GetPointNo());
 	local2.Build(mesh);
 #endif
+
+#ifdef RICH_MPI
+	vector<vector<vector<size_t> > > nghost_neigh_index, duplicate_neigh_index;
+	vector<vector<vector<Vector3D> > > to_add_points;
+	vector<vector<size_t> > nghost_remove;
+	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index);
+	for (size_t i = 0; i < nghost_neigh_index[i].size(); ++i)
+	{
+		for (size_t j = 0; j < nghost_neigh_index[i][j].size(); ++j)
+		{
+			BuildVoronoiMPIRemove(tess, nghost_remove[i][j], nghost_neigh_index[i][j],
+				duplicate_neigh_index[i][j], i, local, nneigh);
+			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j]);
+			FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, nghost_remove[i][j], neigh, *cu_, eos,
+				*eu_);
+		}
+	}
+
+#endif
+
 	for (size_t i = 0; i < NRemove; ++i)
 	{
 		neigh.clear();
@@ -1582,7 +1602,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 		if (i > 0)
 		{
 			vold = local2.GetVolume(137 - i);
-		}
+	}
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			size_t toremove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.begin() + i,
@@ -1605,33 +1625,16 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 
 		FixVoronoiRemove(local, tess, neigh, nneigh, ToRemove.first[i], dv, bad_faces
 #ifdef RICH_MPI
-			,new_duplicate,sorted_duplicated_points
+			, new_duplicate, sorted_duplicated_points
 #endif
 		);
 		FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, ToRemove.first[i], neigh, *cu_, eos
 #ifdef RICH_MPI
-			,*eu_
+			, *eu_
 #endif
 		);
-	}
-#ifdef RICH_MPI
-	vector<vector<vector<size_t> > > nghost_neigh_index, duplicate_neigh_index;
-	vector<vector<vector<Vector3D> > > to_add_points; 
-	vector<vector<size_t> > nghost_remove;
-	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index,nghost_remove, duplicate_neigh_index);
-	for (size_t i = 0; i < nghost_neigh_index[i].size(); ++i)
-	{
-		for (size_t j = 0; j < nghost_neigh_index[i][j].size(); ++j)
-		{
-			BuildVoronoiMPIRemove(tess, nghost_remove[i][j],nghost_neigh_index[i][j],
-				duplicate_neigh_index[i][j], i, local,nneigh);
-			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j]);
-			FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, nghost_remove[i][j], neigh, *cu_, eos,
-				*eu_);
-		}	
-	}
+}
 
-#endif
 	std::sort(bad_faces.begin(), bad_faces.end());
 	bad_faces = unique(bad_faces);
 	// Remove bad points and faces
@@ -1700,7 +1703,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 			size_t to_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
 				duplicated_points[i][j]) - ToRemove.first.begin());
 			duplicated_points[i][j] -= to_remove;
-		}
+	}
 		for (size_t j = 0; j < ghost_indeces[i].size(); ++j)
 		{
 			size_t to_remove = static_cast<size_t>(std::lower_bound(nneigh.begin(), nneigh.end(),
