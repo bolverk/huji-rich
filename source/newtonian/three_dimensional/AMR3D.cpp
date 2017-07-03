@@ -628,8 +628,8 @@ namespace
 									if (it3 != duplicated_points[k].end())
 										temp2.push_back(sort_indeces[k][static_cast<size_t>(it3 - duplicated_points[k].begin())]);
 								}
-								nghost_neigh_index[k].push_back(temp2);
 							}
+							nghost_neigh_index[k].push_back(temp2);
 						}
 					}
 					break;
