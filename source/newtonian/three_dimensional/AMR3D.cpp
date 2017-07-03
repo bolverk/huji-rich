@@ -1569,10 +1569,11 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	vector<vector<vector<Vector3D> > > to_add_points;
 	vector<vector<size_t> > nghost_remove;
 	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index);
-	for (size_t i = 0; i < nghost_neigh_index[i].size(); ++i)
+	for (size_t i = 0; i < nghost_remove.size(); ++i)
 	{
-		for (size_t j = 0; j < nghost_neigh_index[i][j].size(); ++j)
+		for (size_t j = 0; j < nghost_remove[i].size(); ++j)
 		{
+			assert(!nghost_neigh_index[i][j].empty() && !duplicate_neigh_index[i][j].empty());
 			BuildVoronoiMPIRemove(tess, nghost_remove[i][j], nghost_neigh_index[i][j],
 				duplicate_neigh_index[i][j], i, local, nneigh);
 			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j]);
