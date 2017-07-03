@@ -1724,6 +1724,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 		duplicated_points[i] = RemoveList(duplicated_points[i], ToRemove.first);
 		ghost_indeces[i] = RemoveList(ghost_indeces[i], nneigh);
 	}
+	for (size_t i = 0; i < nneigh.size(); ++i)
+		nneigh[i] -= ToRemove.first.size();
 	RemoveVector(tess.GetMeshPoints(), nneigh);
 	// Update cells and CM
 	MPI_exchange_data(tess, tess.GetAllCM(), true);
