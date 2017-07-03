@@ -661,7 +661,7 @@ namespace
 			outer_neigh[i] = tess.GetGhostIndeces()[rank_index].at(outer_neigh[i]);
 		Nouter = duplicate_index.size();
 		for (size_t i = 0; i < Nouter; ++i)
-			duplicate_index[i] = tess.GetGhostIndeces()[rank_index].at(duplicate_index[i]);
+			duplicate_index[i] = tess.GetDuplicatedPoints()[rank_index].at(duplicate_index[i]);
 		sort(duplicate_index.begin(), duplicate_index.end());
 		vector<size_t> temp;
 		nneigh = outer_neigh;
