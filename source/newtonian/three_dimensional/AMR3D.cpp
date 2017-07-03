@@ -557,7 +557,15 @@ namespace
 						if (it != duplicated_points[k].end())
 						{
 							vector<size_t> temp2;
-							nghost_remove[k].push_back(sort_indeces[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
+							for (size_t z = 0; z < Nneigh; ++z)
+							{
+								vector<size_t>::const_iterator it2 = binary_find(ghost_points[k].begin(),
+									ghost_points[k].end(), temp[z]);
+								if (it2 != ghost_points[k].end())
+									temp2.push_back(sort_indecesg[k][static_cast<size_t>(it2 - ghost_points[k].begin())]);
+							}
+							if (temp2.empty())
+								continue;
 							for (size_t z = 0; z < Nneigh; ++z)
 							{
 								if (temp[z] < Norg)
@@ -567,11 +575,8 @@ namespace
 									if (it3 == duplicated_points[k].end())
 										new_send[k].push_back(temp[z]);
 								}
-								vector<size_t>::const_iterator it2 = binary_find(ghost_points[k].begin(),
-									ghost_points[k].end(), temp[z]);
-								if (it2 != ghost_points[k].end())
-									temp2.push_back(sort_indecesg[k][static_cast<size_t>(it2 - ghost_points[k].begin())]);
 							}
+							nghost_remove[k].push_back(sort_indeces[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
 							duplicate_neigh_index[k].push_back(temp2);
 						}
 					}
@@ -600,8 +605,6 @@ namespace
 		{
 			sort_index(duplicated_points[i], sort_indeces[i]);
 			sort(duplicated_points[i].begin(), duplicated_points[i].end());
-			sort_index(ghost_points[i], sort_indecesg[i]);
-			sort(ghost_points[i].begin(), ghost_points[i].end());
 		}
 		// Create send data of neighboring duplicated points
 		for (size_t i = 0; i < nremove; ++i)
@@ -619,6 +622,16 @@ namespace
 						if (it != duplicated_points[k].end())
 						{
 							vector<size_t> temp2;
+							for (size_t z = 0; z < Nneigh; ++z)
+							{
+								vector<size_t>::const_iterator it2 = binary_find(ghost_points[k].begin(),
+									ghost_points[k].end(), temp[z]);
+								if (it2 != ghost_points[k].end())
+									temp2.push_back(sort_indecesg[k][static_cast<size_t>(it2 - ghost_points[k].begin())]);
+							}
+							if (temp2.empty())
+								continue;
+							temp2.clear();
 							for (size_t z = 0; z < Nneigh; ++z)
 							{
 								vector<size_t>::const_iterator it3 = binary_find(duplicated_points[k].begin(),
