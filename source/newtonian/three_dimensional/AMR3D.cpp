@@ -1576,8 +1576,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 			BuildVoronoiMPIRemove(tess, nghost_remove[i][j], nghost_neigh_index[i][j],
 				duplicate_neigh_index[i][j], i, local, nneigh);
 			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j]);
-			FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, nghost_remove[i][j], neigh, *cu_, eos,
-				*eu_);
+			FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, nghost_remove[i][j], 
+				duplicate_neigh_index[i][j], *cu_, eos,*eu_);
 		}
 	}
 
