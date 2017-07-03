@@ -621,13 +621,10 @@ namespace
 							vector<size_t> temp2;
 							for (size_t z = 0; z < Nneigh; ++z)
 							{
-								if (temp[z] >= Norg)
-								{
-									vector<size_t>::const_iterator it3 = binary_find(duplicated_points[k].begin(),
-										duplicated_points[k].end(), temp[z]);
-									if (it3 != duplicated_points[k].end())
-										temp2.push_back(sort_indeces[k][static_cast<size_t>(it3 - duplicated_points[k].begin())]);
-								}
+								vector<size_t>::const_iterator it3 = binary_find(duplicated_points[k].begin(),
+									duplicated_points[k].end(), temp[z]);
+								if (it3 != duplicated_points[k].end())
+									temp2.push_back(sort_indeces[k][static_cast<size_t>(it3 - duplicated_points[k].begin())]);
 							}
 							nghost_neigh_index[k].push_back(temp2);
 						}
