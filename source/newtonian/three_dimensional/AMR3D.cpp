@@ -759,15 +759,18 @@ namespace
 				N1 = localfaceneigh[i].second;
 				if (N1 < Nneigh || !local.IsPointOutsideBox(N1))
 				{
-					vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
-						neigh[N1]);
+					size_t face_index = 0;
 					size_t n0 = neigh[N0];
 					size_t n1 = neigh[N1];
-					size_t face_index = 0;
-					if (it != neigh_neigh[N0].end())
+					if (N1 < Nneigh)
 					{
-						// We already have this face, just change its points
-						face_index = full_cellfaces[n0][static_cast<size_t>(it - neigh_neigh[N0].begin())];
+						vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
+							neigh[N1]);
+						if (it != neigh_neigh[N0].end())
+						{
+							// We already have this face, just change its points
+							face_index = full_cellfaces[n0][static_cast<size_t>(it - neigh_neigh[N0].begin())];
+						}
 					}
 					else
 					{
