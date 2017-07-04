@@ -700,7 +700,7 @@ namespace
 	}
 
 	void FixVoronoiRemoveMPI(Tessellation3D &tess, Tessellation3D &local, vector<size_t> &neigh, vector<size_t> &bad_faces,
-		vector<double> &dv, vector<size_t> &nneigh, size_t point_to_remove)
+		vector<double> &dv, vector<size_t> &nneigh, size_t point_to_remove,size_t nouter)
 	{
 		vector<std::pair<size_t, size_t> >const& localfaceneigh = local.GetAllFaceNeighbors();
 		vector<std::pair<size_t, size_t> >& full_faceneigh = tess.GetAllFaceNeighbors();
@@ -743,36 +743,36 @@ namespace
 			tess.GetAllCM()[neigh[i]] = local.GetCellCM(i);
 		}
 		// Add new faces /Update old
-		size_t Nlocal = neigh.size() + nneigh.size() + 4;
-		size_t Nfaces = localfaceneigh.size();
 		vector<vector<size_t> > neigh_neigh(Nneigh);
 		for (size_t i = 0; i < Nneigh; ++i)
 			tess.GetNeighbors(neigh[i], neigh_neigh[i]);
-
+		size_t Nlocal = neigh.size() + nneigh.size() + 4;
+		nouter += neigh.size() + 4;
+		size_t Nfaces = localfaceneigh.size();
 		size_t N0, N1;
 		size_t nvert = full_vertices.size();
 		for (size_t i = 0; i < Nfaces; ++i)
 		{
+			bool new_face = true;
 			if (localfaceneigh[i].first < Nneigh)
 			{
 				N0 = localfaceneigh[i].first;
 				N1 = localfaceneigh[i].second;
-				if (N1 < Nneigh || !local.IsPointOutsideBox(N1))
+				if (N1 < nouter)
 				{
+					assert(!local.IsPointOutsideBox(N1));
 					size_t face_index = 0;
 					size_t n0 = neigh[N0];
-					size_t n1 = neigh[N1];
-					if (N1 < Nneigh)
+					size_t n1 = N1 < Nneigh ? neigh[N1] : nneigh[N1 + 4 + Nneigh];
+					vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
+						n1);
+					if (it != neigh_neigh[N0].end())
 					{
-						vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
-							neigh[N1]);
-						if (it != neigh_neigh[N0].end())
-						{
-							// We already have this face, just change its points
-							face_index = full_cellfaces[n0][static_cast<size_t>(it - neigh_neigh[N0].begin())];
-						}
+						// We already have this face, just change its points
+						face_index = full_cellfaces[n0][static_cast<size_t>(it - neigh_neigh[N0].begin())];
+						new_face = false;
 					}
-					else
+					if(new_face)
 					{
 						// New face
 						face_index = full_area.size();
@@ -1579,7 +1579,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 			assert(!nghost_neigh_index[i][j].empty() && !duplicate_neigh_index[i][j].empty());
 			BuildVoronoiMPIRemove(tess, nghost_remove[i][j], nghost_neigh_index[i][j],
 				duplicate_neigh_index[i][j], i, local, nneigh);
-			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j]);
+			FixVoronoiRemoveMPI(tess, local, duplicate_neigh_index[i][j], bad_faces, dv, nneigh, nghost_remove[i][j],
+				nghost_neigh_index[i][j].size());
 			FixExtensiveCellsRemove(cells, tess, extensives, tracerstickernames, dv, nghost_remove[i][j], 
 				duplicate_neigh_index[i][j], *cu_, eos,*eu_);
 		}
