@@ -687,6 +687,10 @@ namespace
 		nneigh = unique(nneigh);
 		nneigh = RemoveList(nneigh, duplicate_index);
 		RemoveVal(nneigh, point_to_remove);
+		vector<size_t> outer2(outer_neigh);
+		sort(outer2.begin(), outer2.end());
+		nneigh = RemoveList(nneigh, outer2);
+		nneigh.insert(nneigh.begin(), outer_neigh.begin(), outer_neigh.end());
 		vector<Vector3D> points, ghost;
 		vector<size_t> toduplicate;
 		for (size_t i = 0; i < duplicate_index.size(); ++i)
