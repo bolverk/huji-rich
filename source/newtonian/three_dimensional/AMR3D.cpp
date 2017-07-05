@@ -1532,6 +1532,11 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	for (size_t i = 0; i < sent_points.size(); ++i)
 		for (size_t j = 0; j < sent_points[i].size(); ++j)
 			tess.GetDuplicatedPoints()[i].push_back(sent_points[i][j]);
+	// Update Nghost
+	for (size_t i = 0; i < tess.GetGhostIndeces().size(); ++i)
+		for (size_t j = 0; j < tess.GetGhostIndeces()[i].size(); ++j)
+			if(tess.GetGhostIndeces()[i][j]<(Ntotal0+Nsplit))
+				tess.GetGhostIndeces()[i][j] += newpoints.size();
 	// Update cells and CM
 	MPI_exchange_data(tess, tess.GetAllCM(), true);
 	MPI_exchange_data(tess, cells, true);
