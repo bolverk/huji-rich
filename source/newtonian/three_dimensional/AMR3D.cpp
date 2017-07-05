@@ -767,7 +767,7 @@ namespace
 					assert(!local.IsPointOutsideBox(N1));
 					size_t face_index = 0;
 					size_t n0 = neigh[N0];
-					size_t n1 = N1 < Nneigh ? neigh[N1] : nneigh[N1 + 4 + Nneigh];
+					size_t n1 = N1 < Nneigh ? neigh[N1] : nneigh.at(N1 - 4 - Nneigh);
 					vector<size_t>::const_iterator it = std::find(neigh_neigh[N0].begin(), neigh_neigh[N0].end(),
 						n1);
 					if (it != neigh_neigh[N0].end())
