@@ -762,7 +762,7 @@ namespace
 			{
 				N0 = localfaceneigh[i].first;
 				N1 = localfaceneigh[i].second;
-				if (N1 < nouter)
+				if (N1 < nouter && N0 < Nneigh)
 				{
 					assert(!local.IsPointOutsideBox(N1));
 					size_t face_index = 0;
