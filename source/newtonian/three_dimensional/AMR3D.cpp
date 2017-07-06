@@ -1352,6 +1352,7 @@ namespace
 #endif
 			cells[neigh[i]] = cu.ConvertExtensiveToPrimitve3D(extensives[neigh[i]], eos, tess.GetVolume(neigh[i]),
 				cells[neigh[i]], tsn);
+			assert(cells.at(neigh.at(i)).density > 0);
 		}
 	}
 }
