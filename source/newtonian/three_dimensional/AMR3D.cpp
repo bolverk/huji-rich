@@ -681,7 +681,9 @@ namespace
 		for (size_t i = 0; i < duplicate_index.size(); ++i)
 		{
 			tess.GetNeighbors(duplicate_index[i], temp);
-			nneigh.insert(nneigh.end(), temp.begin(), temp.end());
+			for (size_t j = 0; j < temp.size(); ++j)
+				if (!tess.IsPointOutsideBox(temp[j]))
+					nneigh.push_back(temp[j]);
 		}
 		sort(nneigh.begin(), nneigh.end());
 		nneigh = unique(nneigh);
