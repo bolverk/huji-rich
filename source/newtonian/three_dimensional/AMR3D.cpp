@@ -265,7 +265,7 @@ namespace
 					vector<size_t>::const_iterator it2 = binary_find(ToRefine.begin(), ToRefine.end(), tosend[i]);
 					assert(it2 != ToRefine.end());
 					sendpoints[k].push_back(tess.GetMeshPoint(static_cast<size_t>(it2 - ToRefine.begin()) + Ntotal0));
-					sent_points[k].push_back(tosend[i]);
+					sent_points[k].push_back(static_cast<size_t>(it2 - ToRefine.begin()) + Norg);
 					sendNghost[k].push_back(int_temp);
 				}
 			}
