@@ -252,7 +252,7 @@ namespace
 					if (it != Nghost[k].end())
 					{
 						good = true;
-						int_temp.push_back(sort_indeces[k][static_cast<int>(it - Nghost[k].begin())]);
+						int_temp.push_back(static_cast<int>(sort_indeces[k][static_cast<size_t>(it - Nghost[k].begin())]));
 					}
 				}
 				if (!int_temp.empty())
@@ -283,7 +283,7 @@ namespace
 		for (size_t i = 0; i < recv_neigh.size(); ++i)
 			for (size_t j = 0; j < recv_neigh[i].size(); ++j)
 				for (size_t k = 0; k < recv_neigh[i][j].size(); ++k)
-					recv_neigh[i][j][k] = tess.GetDuplicatedPoints()[i][recv_neigh[i][j][k]];
+					recv_neigh[i][j][k] = static_cast<int>(tess.GetDuplicatedPoints()[i][recv_neigh[i][j][k]]);
 		return sent_points;
 	}
 #endif
@@ -336,7 +336,6 @@ namespace
 		size_t N = toremove.first.size();
 		for (size_t i = 0; i < N; ++i)
 		{
-			double v = tess.GetVolume(toremove.first[i]);
 			vector<size_t> const& faces = tess.GetCellFaces(toremove.first[i]);
 			size_t Nfaces = faces.size();
 			bool good = true;
@@ -941,7 +940,7 @@ namespace
 	}
 
 	Conserved3D CalcNewExtensives(Tessellation3D const& tess, Tessellation3D const& local, size_t torefine, vector<size_t> const& neigh,
-		vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
+		vector<ComputationalCell3D> const& cells, EquationOfState const& /*eos*/, TracerStickerNames const& /*tsn*/,
 		vector<Conserved3D> &extensives)
 	{
 		Conserved3D res;
@@ -1361,7 +1360,7 @@ AMRCellUpdater3D::~AMRCellUpdater3D(void) {}
 
 AMRExtensiveUpdater3D::~AMRExtensiveUpdater3D(void) {}
 
-Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& /*eos*/,
 	double volume, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Conserved3D res;
@@ -1415,7 +1414,7 @@ AMR3D::AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToR
 }
 
 
-void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& eos,
+void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& /*eos*/,
 	vector<Conserved3D> &extensives, double time,
 #ifdef RICH_MPI
 	Tessellation3D const& /*proctess*/,
