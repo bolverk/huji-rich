@@ -1693,10 +1693,10 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		size_t to_remove = static_cast<size_t>(std::lower_bound(nneigh.begin(), nneigh.end(),
-			face_neigh[i].first) - nneigh.begin());
+			face_neigh[i].first + ToRemove.first.size()) - nneigh.begin());
 		face_neigh[i].first -= to_remove;
 		to_remove = static_cast<size_t>(std::lower_bound(nneigh.begin(), nneigh.end(),
-			face_neigh[i].second) - nneigh.begin());
+			face_neigh[i].second + ToRemove.first.size()) - nneigh.begin());
 		face_neigh[i].second -= to_remove;
 	}
 #endif
