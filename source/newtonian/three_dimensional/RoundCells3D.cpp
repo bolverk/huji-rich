@@ -32,14 +32,12 @@ namespace
 		if (min_d < 0.3*R)
 		{
 			size_t face = tess.GetCellFaces(index)[min_loc];
-			//vector<Vector3D> const& vertices = tess.GetFacePoints();
-			//vector<size_t> const& indeces = tess.GetPointsInFace(face);
-			Vector3D normal = tess.GetMeshPoint(tess.GetFaceNeighbors(face).first) -
-				tess.GetMeshPoint(tess.GetFaceNeighbors(face).second);
-			normal *= (1.0 / abs(normal));
-			Vector3D v_par = velocity - normal*ScalarProd(normal, velocity);
 			size_t other = tess.GetFaceNeighbors(face).first == index ? tess.GetFaceNeighbors(face).second :
 				tess.GetFaceNeighbors(face).first;
+			Vector3D parallel = tess.FaceCM(face) - 0.5*(tess.GetMeshPoint(index)+tess.GetMeshPoint(other));
+			parallel *= (1.0 / abs(parallel));
+			Vector3D v_par = parallel*ScalarProd(velocity, parallel);
+			Vector3D v_norm = velocity - parallel*ScalarProd(velocity, parallel);
 			if (!tess.IsPointOutsideBox(other))
 			{
 				if (nomove.at(other)==1)
@@ -51,14 +49,14 @@ namespace
 					if (index < other)
 					{
 						v_par *= 0.5;
-						Vector3D temp = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+						Vector3D temp = parallel*ScalarProd(velocities[other], parallel);
 						v_par += 0.5*temp;
 					}
 					else
-						v_par = velocities[other] - normal*ScalarProd(normal, velocities[other]);
+						v_par = parallel*ScalarProd(velocities[other], parallel);
 				}
 			}
-			velocity = normal*ScalarProd(normal, velocity) + v_par;
+			velocity =v_norm + v_par;
 		}
 	}
 
