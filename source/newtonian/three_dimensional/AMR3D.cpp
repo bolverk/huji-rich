@@ -520,7 +520,8 @@ namespace
 	}
 
 	void SendRecvMPIRemoveData(Tessellation3D &tess, vector<size_t> const& to_remove, vector<vector<vector<size_t> > >
-		&nghost_neigh_index, vector<vector<size_t> > &nghost_remove, vector<vector<vector<size_t> > > & duplicate_neigh_index)
+		&nghost_neigh_index, vector<vector<size_t> > &nghost_remove, vector<vector<vector<size_t> > > & duplicate_neigh_index,
+		vector<vector<size_t> > &local_duplicate_remove)
 	{
 		vector<size_t> temp;
 		size_t Nprocs = tess.GetDuplicatedProcs().size();
@@ -531,6 +532,8 @@ namespace
 		vector<vector<size_t> > duplicated_points = tess.GetDuplicatedPoints();
 		vector<vector<size_t> > ghost_points = tess.GetGhostIndeces();
 		vector<vector<size_t> > sort_indeces(Nprocs), new_send(Nprocs), sort_indecesg(Nprocs);
+		local_duplicate_remove.clear();
+		local_duplicate_remove.resize(Nprocs);
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			sort_index(duplicated_points[i], sort_indeces[i]);
@@ -577,6 +580,7 @@ namespace
 							}
 							nghost_remove[k].push_back(sort_indeces[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
 							duplicate_neigh_index[k].push_back(temp2);
+							local_duplicate_remove[k].push_back(to_remove[i]);
 						}
 					}
 					break;
@@ -1576,8 +1580,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 #ifdef RICH_MPI
 	vector<vector<vector<size_t> > > nghost_neigh_index, duplicate_neigh_index;
 	vector<vector<vector<Vector3D> > > to_add_points;
-	vector<vector<size_t> > nghost_remove;
-	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index);
+	vector<vector<size_t> > nghost_remove, local_duplicate_remove;
+	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index, local_duplicate_remove);
 	for (size_t i = 0; i < nghost_remove.size(); ++i)
 	{
 		for (size_t j = 0; j < nghost_remove[i].size(); ++j)
@@ -1719,7 +1723,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	vector<vector<size_t> > &ghost_indeces = tess.GetGhostIndeces();
 	for (size_t i = 0; i < duplicated_points.size(); ++i)
 	{
-		duplicated_points[i] = RemoveList(duplicated_points[i], ToRemove.first);
+		std::sort(local_duplicate_remove[i].begin(), local_duplicate_remove[i].end());
+		duplicated_points[i] = RemoveList(duplicated_points[i], local_duplicate_remove[i]);
 		ghost_indeces[i] = RemoveList(ghost_indeces[i], nneigh);
 		for (size_t j = 0; j < duplicated_points[i].size(); ++j)
 		{
