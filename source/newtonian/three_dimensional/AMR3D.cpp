@@ -271,7 +271,7 @@ namespace
 		splitted_points = MPI_exchange_data(tess.GetDuplicatedProcs(), splitted_points);
 		for (size_t i = 0; i < Nprocs; ++i)
 			for (size_t j = 0; j < splitted_points.at(i).size(); ++j)
-				splitted_points[i][j] = tess.GetGhostIndeces()[i][j];
+				splitted_points[i][j] = tess.GetGhostIndeces()[i][splitted_points[i][j]];
 		recv_points = MPI_exchange_data(tess.GetDuplicatedProcs(), sendpoints, tess.GetMeshPoint(0));
 		recv_neigh = MPI_exchange_data(tess, sendNghost);
 		for (size_t i = 0; i < recv_neigh.size(); ++i)
