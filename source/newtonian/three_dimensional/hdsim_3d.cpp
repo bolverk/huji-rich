@@ -152,12 +152,13 @@ void HDSim3D::timeAdvance2(void)
 #endif
 
 	CalcFaceVelocities(tess_, point_vel, face_vel);
-	const double dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
+	double dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
 	pm_.ApplyFix(tess_, cells_, pt_.getTime(), dt, point_vel, tsn_);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_vel, true);
 #endif
 	CalcFaceVelocities(tess_, point_vel, face_vel);
+	dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
