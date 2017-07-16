@@ -260,7 +260,7 @@ namespace
 					vector<size_t>::const_iterator it = binary_find(duplicated_points[k].begin(), duplicated_points[k].end(),
 						ToRefine[tosend[i]-Ntotal0]);
 					splitted_points[k].push_back(sort_indeces_duplicated[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
-					sendpoints[k].push_back(tess.GetMeshPoint(Ntotal0+i));
+					sendpoints[k].push_back(tess.GetMeshPoint(tosend[i]));
 					sent_points[k].push_back(i + Norg);
 					sendNghost[k].push_back(int_temp);
 				}
