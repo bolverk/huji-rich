@@ -1099,7 +1099,15 @@ void Voronoi3D::BuildVoronoi(void)
 			}
 		}
 	}
-
+	// Fix Face CM (this prevents large face velocities for close by points)
+	size_t Nfaces = Face_CM_.size();
+	for (size_t i = 0; i < Nfaces; ++i)
+	{
+		Vector3D mid = 0.5*(del_.points_[FaceNeighbors_[i].first] + del_.points_[FaceNeighbors_[i].second]);
+		Vector3D norm = del_.points_[FaceNeighbors_[i].second] - del_.points_[FaceNeighbors_[i].first];
+		norm *= 1.0/abs(norm);
+		Face_CM_[i] -= ScalarProd(Face_CM_[i] - mid, norm)*norm;
+	}
 }
 
 double Voronoi3D::GetRadius(std::size_t index)
