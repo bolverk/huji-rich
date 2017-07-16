@@ -261,7 +261,7 @@ namespace
 						ToRefine[tosend[i]-Ntotal0]);
 					splitted_points[k].push_back(sort_indeces_duplicated[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
 					sendpoints[k].push_back(tess.GetMeshPoint(tosend[i]));
-					sent_points[k].push_back(i + Norg);
+					sent_points[k].push_back(tosend[i] - Ntotal0 + Norg);
 					sendNghost[k].push_back(int_temp);
 				}
 			}
