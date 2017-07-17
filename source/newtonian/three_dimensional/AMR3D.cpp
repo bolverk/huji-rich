@@ -515,12 +515,14 @@ namespace
 
 	void SendRecvMPIRemoveData(Tessellation3D &tess, vector<size_t> const& to_remove, vector<vector<vector<size_t> > >
 		&nghost_neigh_index, vector<vector<size_t> > &nghost_remove, vector<vector<vector<size_t> > > & duplicate_neigh_index,
-		vector<vector<size_t> > &local_duplicate_remove)
+		vector<vector<size_t> > &local_duplicate_remove,vector<vector<size_t> > &all_remove)
 	{
 		vector<size_t> temp;
 		size_t Nprocs = tess.GetDuplicatedProcs().size();
 		nghost_neigh_index.resize(Nprocs);
 		duplicate_neigh_index.resize(Nprocs);
+		all_remove.clear();
+		all_remove.resize(Nprocs);
 		vector<vector<Vector3D> > to_add_points(Nprocs), to_add_cm(Nprocs);
 		nghost_remove.resize(Nprocs);
 		vector<vector<size_t> > duplicated_points = tess.GetDuplicatedPoints();
@@ -540,6 +542,12 @@ namespace
 		size_t Norg = tess.GetPointNo();
 		for (size_t i = 0; i < nremove; ++i)
 		{
+			for (size_t k = 0; k < Nprocs; ++k)
+			{
+				vector<size_t>::const_iterator it = binary_find(duplicated_points[k].begin(), duplicated_points[k].end(), to_remove[i]);
+				if (it != duplicated_points[k].end())
+					all_remove[k].push_back(sort_indeces[k][static_cast<size_t>(it - duplicated_points[k].begin())]);
+			}
 			tess.GetNeighbors(to_remove[i], temp);
 			size_t Nneigh = temp.size();
 			for (size_t j = 0; j < Nneigh; ++j)
@@ -645,6 +653,7 @@ namespace
 		}
 
 		// Send/Recv the data
+		all_remove = MPI_exchange_data(tess.GetDuplicatedProcs(), all_remove);
 		nghost_neigh_index = MPI_exchange_data(tess, nghost_neigh_index);
 		duplicate_neigh_index = MPI_exchange_data(tess, duplicate_neigh_index);
 		to_add_points = MPI_exchange_data(tess.GetDuplicatedProcs(), to_add_points, tess.GetMeshPoint(0));
@@ -1574,8 +1583,9 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 #ifdef RICH_MPI
 	vector<vector<vector<size_t> > > nghost_neigh_index, duplicate_neigh_index;
 	vector<vector<vector<Vector3D> > > to_add_points;
-	vector<vector<size_t> > nghost_remove, local_duplicate_remove;
-	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index, local_duplicate_remove);
+	vector<vector<size_t> > nghost_remove, local_duplicate_remove,all_remove;
+	SendRecvMPIRemoveData(tess, ToRemove.first, nghost_neigh_index, nghost_remove, duplicate_neigh_index,
+		local_duplicate_remove,all_remove);
 	for (size_t i = 0; i < nghost_remove.size(); ++i)
 	{
 		for (size_t j = 0; j < nghost_remove[i].size(); ++j)
@@ -1682,9 +1692,9 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	}
 #ifdef RICH_MPI
 	nneigh.clear();
-	for (size_t i = 0; i < nghost_remove.size(); ++i)
-		for (size_t j = 0; j < nghost_remove[i].size(); ++j)
-			nneigh.push_back(nghost_remove[i][j]);
+	for (size_t i = 0; i < all_remove.size(); ++i)
+		for (size_t j = 0; j < all_remove[i].size(); ++j)
+			nneigh.push_back(all_remove[i][j]);
 	std::sort(nneigh.begin(), nneigh.end());
 	nneigh = unique(nneigh);
 	for (size_t i = 0; i < Nfaces; ++i)
@@ -1718,8 +1728,8 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	for (size_t i = 0; i < duplicated_points.size(); ++i)
 	{
 		std::sort(local_duplicate_remove[i].begin(), local_duplicate_remove[i].end());
-		duplicated_points[i] = RemoveList(duplicated_points[i], local_duplicate_remove[i]);
-		ghost_indeces[i] = RemoveList(ghost_indeces[i], nneigh);
+		duplicated_points[i] = RemoveList(duplicated_points[i], ToRemove.first);
+		ghost_indeces[i] = RemoveList(ghost_indeces[i], all_remove[i]);
 		for (size_t j = 0; j < duplicated_points[i].size(); ++j)
 		{
 			size_t to_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
