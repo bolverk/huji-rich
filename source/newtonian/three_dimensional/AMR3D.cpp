@@ -668,6 +668,8 @@ namespace
 				tess.GetMeshPoints().push_back(to_add_points[i][j]);
 				tess.GetAllCM().push_back(to_add_cm[i][j]);
 			}
+			for (size_t j = 0; j < all_remove[i].size(); ++j)
+				all_remove[i][j] = tess.GetGhostIndeces()[i][all_remove[i][j]];
 		}
 	}
 
