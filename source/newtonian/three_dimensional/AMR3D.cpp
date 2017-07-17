@@ -432,6 +432,29 @@ namespace
 		return std::pair<vector<size_t>, vector<double> >(result_names, result_merits);
 	}
 #ifdef RICH_MPI
+	std::pair<vector<size_t>, vector<double> > RemoveMPIDoubleOuter(vector<double> const& merits, vector<size_t> const& candidates,
+		Tessellation3D const& tess)
+	{
+		vector<vector<size_t> > duplicated = tess.GetDuplicatedPoints();
+		size_t Nproc = duplicated.size();
+		for (size_t i = 0; i < Nproc; ++i)
+			std::sort(duplicated[i].begin(), duplicated[i].end());
+		vector<size_t> good_indeces;
+		size_t Nremove = merits.size();
+		for (size_t i = 0; i < Nremove; ++i)
+		{
+			size_t counter = 0;
+			for (size_t j = 0; j < Nproc; ++j)
+				if (std::binary_search(duplicated[j].begin(), duplicated[j].end(), candidates[i]))
+					++counter;
+			if (counter < 2)
+				good_indeces.push_back(i);
+		}
+		std::pair<vector<size_t>, vector<double> > res(VectorValues(candidates, good_indeces), 
+			VectorValues(merits, good_indeces));
+		return res;
+	}
+
 	std::pair<vector<size_t>, vector<double> > RemoveMPINeighbors(vector<double> const& merits, vector<size_t> const& candidates,
 		Tessellation3D const& tess)
 	{
@@ -1564,6 +1587,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	ToRemove.first = VectorValues(ToRemove.first, indeces);
 	ToRemove = RemoveNeighbors(ToRemove.second, ToRemove.first, tess);
 #ifdef RICH_MPI
+	ToRemove = RemoveMPIDoubleOuter(ToRemove.second, ToRemove.first, tess);
 	ToRemove = RemoveMPINeighbors(ToRemove.second, ToRemove.first, tess);
 	vector<vector<size_t> > sorted_duplicated_points = tess.GetDuplicatedPoints();
 	for (size_t i = 0; i < sorted_duplicated_points.size(); ++i)
