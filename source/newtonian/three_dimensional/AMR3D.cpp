@@ -1731,7 +1731,7 @@ void AMR3D::UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> 
 	{
 		std::sort(local_duplicate_remove[i].begin(), local_duplicate_remove[i].end());
 		duplicated_points[i] = RemoveList(duplicated_points[i], ToRemove.first);
-		ghost_indeces[i] = RemoveList(ghost_indeces[i], all_remove[i]);
+		ghost_indeces[i] = RemoveList(ghost_indeces[i], nneigh);
 		for (size_t j = 0; j < duplicated_points[i].size(); ++j)
 		{
 			size_t to_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
