@@ -1,6 +1,7 @@
 #include "LinearGauss3D.hpp"
 #include "../../misc/utils.hpp"
 #include <boost/array.hpp>
+#include <iostream>
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
@@ -60,13 +61,8 @@ namespace
 	{
 		size_t n = neighbor_centers.size();
 		if (n > 60)
-		{
-			UniversalError eo("Cell has too many neighbors in calc naive slope");
-			eo.AddEntry("Cell x cor", center.x);
-			eo.AddEntry("Cell y cor", center.y);
-			eo.AddEntry("Cell z cor", center.z);
-			throw eo;
-		}
+			std::cout << "Cell has too many neighbors in calc naive slope, Cell x cor " << center.x <<
+				" Cell y cor " << center.y << " Cell z cor " << center.z << std::endl;
 		// Create the matrix to invert and the vector to compare
 		boost::array<double,9>  m;
 		std::fill_n(m.begin(), 9, 0);
