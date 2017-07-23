@@ -82,6 +82,7 @@ private:
 	vector<vector<std::size_t> > sentpoints_, Nghost_;
 	vector<std::size_t> self_index_;
 	Voronoi3D();
+	Voronoi3D(Voronoi3D const &other);
 public:
 	vector<Vector3D>& GetAllFaceCM(void);
 

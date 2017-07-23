@@ -1075,7 +1075,8 @@ void Voronoi3D::BuildVoronoi(void)
 							last_check = cur_check;
 							cur_check = next_check;
 						}
-						assert(temp.size() > 2);
+						if (temp.size() < 3)
+							continue;
 						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]),diffs);
 						if (temp2.size() < 3)
 							continue;
@@ -1185,14 +1186,14 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			{
 				if(f.neighbors.first<N)
 				{
-					double R = tproc.GetWidth(f.neighbors.first);
-					if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R)
+					double R0 = tproc.GetWidth(f.neighbors.first);
+					if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R0)
 						continue;
 				}
 				if(f.neighbors.second<N)
 				{
-					double R = tproc.GetWidth(f.neighbors.second);
-					if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R)
+					double R0 = tproc.GetWidth(f.neighbors.second);
+					if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R0)
 						continue;
 				}
 				res.push_back(cur);
@@ -1554,7 +1555,8 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
 void Voronoi3D::output(std::string const& filename)const
 {
 
-	std::ofstream file_handle(filename.c_str(), std::ios::binary);
+	std::ofstream file_handle(filename.c_str(), std::ios::out | std::ios::binary);
+	assert(file_handle.is_open());
 	binary_write_single_int(static_cast<int>(Norg_), file_handle);
 
 	// Points
@@ -1667,6 +1669,33 @@ void Voronoi3D::GetNeighbors(size_t index, vector<size_t> &res)const
 Tessellation3D* Voronoi3D::clone(void) const
 {
 	return new Voronoi3D(*this);
+}
+
+Voronoi3D::Voronoi3D(Voronoi3D const &other)
+{
+	ll_ = other.ll_;
+	ur_ = other.ur_;
+	Norg_ = other.Norg_;
+	bigtet_ = other.bigtet_;
+	set_temp_ = other.set_temp_;
+	stack_temp_ = other.stack_temp_;
+	PointsInFace_ = other.PointsInFace_;
+	PointTetras_ = other.PointTetras_;
+	R_ = other.R_;
+	tetra_centers_ = other.tetra_centers_;
+	FaceNeighbors_ = other.FaceNeighbors_;
+	FacesInCell_ = other.FacesInCell_;
+	CM_ = other.CM_;
+	Face_CM_ = other.Face_CM_;
+	volume_ = other.volume_;
+	area_ = other.area_;
+	duplicatedprocs_ = other.duplicatedprocs_;
+	duplicated_points_ = other.duplicated_points_;
+	Nghost_ = other.Nghost_;
+	sentpoints_ = other.sentpoints_;
+	self_index_ = other.self_index_;
+	sentprocs_ = other.sentprocs_;
+	del_ = other.del_;	
 }
 
 bool Voronoi3D::NearBoundary(std::size_t index) const
