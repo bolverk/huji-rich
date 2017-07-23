@@ -296,6 +296,91 @@ vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, v
 	return res;
 }
 
+vector<vector<vector<double> > > MPI_exchange_data(const Tessellation3D& tess, vector<vector<vector<double> > > &cells)
+{
+	vector<int> correspondents = tess.GetDuplicatedProcs();
+	vector<vector<vector<double> > > res(correspondents.size());
+	vector<vector<double> > tempsend(correspondents.size());
+	vector<MPI_Request> req(2 * correspondents.size());
+
+
+	vector<vector<int> > send_sizes(correspondents.size());
+	vector<double> temprecv;
+	vector<int> tempsrecv;
+	double temp = 0;
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		bool isempty = cells[i].empty();
+		if (!isempty)
+		{
+			send_sizes[i].reserve(cells[i].size());
+			for (size_t j = 0; j < cells[i].size(); ++j)
+			{
+				send_sizes[i].push_back(static_cast<int>(cells[i][j].size()));
+				tempsend[i].insert(tempsend[i].end(), cells[i][j].begin(), cells[i][j].end());
+			}
+		}
+		else
+			send_sizes[i].push_back(-1);
+		int size = static_cast<int>(tempsend[i].size());
+		if (size == 0)
+		{
+			MPI_Isend(&temp, 1, MPI_DOUBLE, correspondents[i], 4, MPI_COMM_WORLD, &req[2 * i]);
+			MPI_Isend(&send_sizes[i][0], 1, MPI_INT, correspondents[i], 5, MPI_COMM_WORLD, &req[2 * i + 1]);
+		}
+		else
+		{
+			MPI_Isend(&tempsend[i][0], size, MPI_DOUBLE, correspondents[i], 6, MPI_COMM_WORLD, &req[2 * i]);
+			MPI_Isend(&send_sizes[i][0], static_cast<int>(send_sizes[i].size()), MPI_INT, correspondents[i], 7, MPI_COMM_WORLD, &req[2 * i + 1]);
+		}
+	}
+	vector<vector<int> > srecv(correspondents.size());
+	vector<vector<double> > irecv(correspondents.size());
+	for (size_t i = 0; i < 2 * correspondents.size(); ++i)
+	{
+		MPI_Status status;
+		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		int count;
+		if (status.MPI_TAG % 2 == 0)
+		{
+			MPI_Get_count(&status, MPI_DOUBLE, &count);
+			size_t location = static_cast<size_t>(std::find(correspondents.begin(), correspondents.end(), status.MPI_SOURCE) -
+				correspondents.begin());
+			if (location >= correspondents.size())
+				throw UniversalError("Bad location in mpi exchange");
+			irecv[location].resize(static_cast<size_t>(count));
+			MPI_Recv(&irecv[location][0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+		else
+		{
+			MPI_Get_count(&status, MPI_INT, &count);
+			size_t location = static_cast<size_t>(std::find(correspondents.begin(), correspondents.end(), status.MPI_SOURCE) -
+				correspondents.begin());
+			if (location >= correspondents.size())
+				throw UniversalError("Bad location in mpi exchange");
+			srecv[location].resize(static_cast<size_t>(count));
+			MPI_Recv(&srecv[location][0], count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+	}
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		size_t counter = 0;
+		for (size_t j = 0; j < srecv[i].size(); ++j)
+		{
+			if (srecv[i][j] < 1)
+				continue;
+			size_t size_add = static_cast<size_t>(srecv[i][j]);
+			temprecv.assign(irecv[i].begin() + counter, irecv[i].begin() + counter + size_add);
+			res[i].push_back(temprecv);
+			counter += size_add;
+		}
+	}
+	MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	MPI_Barrier(MPI_COMM_WORLD);
+	return res;
+}
+
+
 void MPI_exchange_data2(const Tessellation3D& tess, vector<double>& cells, bool ghost_or_sent)
 {
 	if (cells.empty())
