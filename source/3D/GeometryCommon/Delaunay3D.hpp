@@ -24,6 +24,10 @@ public:
 
 	Delaunay3D();
 
+	Delaunay3D(Delaunay3D const& other);
+
+	Delaunay3D& operator=(Delaunay3D const& other);
+
 	~Delaunay3D();
 
 	void Build(vector<Vector3D> const& points,Vector3D const& maxv,Vector3D const& minv);
@@ -52,7 +56,7 @@ private:
 	boost::array<std::size_t, 4> b4s_temp_,b4s_temp2_;
 	boost::array<std::size_t, 8> b8s_temp_;
 	vector<std::size_t> to_check_;
-	std::size_t last_checked_;
+	std::size_t last_checked_;	
 };
 
 #endif //DELAUNAY3D_HPP

@@ -84,6 +84,28 @@ namespace
 	}
 
 }
+
+Delaunay3D& Delaunay3D::operator=(Delaunay3D const& other)
+{
+	if (this == &other)
+		return *this;
+	tetras_ = other.tetras_;
+	points_ = other.points_;
+	empty_tetras_ = other.empty_tetras_;
+	Norg_ = other.Norg_;
+	outside_neighbor_ = other.outside_neighbor_;
+	return *this;
+}
+
+Delaunay3D::Delaunay3D(Delaunay3D const& other)
+{
+	tetras_ = other.tetras_;
+	points_ = other.points_;
+	empty_tetras_ = other.empty_tetras_;
+	Norg_ = other.Norg_;
+	outside_neighbor_ = other.outside_neighbor_;
+}
+
 void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t location0,bool flat_check)
 {
 	bool used_empty = false;
@@ -472,7 +494,7 @@ void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Ve
 
 void Delaunay3D::output(string const & filename) const
 {
-	std::ofstream fh(filename.c_str(), std::ostream::binary);
+	std::ofstream fh(filename.c_str(), std::ios::out | std::ostream::binary);
 
 	std::size_t temp = tetras_.size() - empty_tetras_.size();
 	fh.write(reinterpret_cast<const char*>(&temp), sizeof(std::size_t));
