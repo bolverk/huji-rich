@@ -153,6 +153,13 @@ private:
 
 	void UpdateCellsRemove(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
 		EquationOfState const& eos, double time,TracerStickerNames const& tracerstickernames)const;
+
+	void UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
+		EquationOfState const& eos, double time, TracerStickerNames const& tracerstickernames
+#ifdef RICH_MPI
+		,Tessellation3D const& proctess
+#endif
+		)const;
 public:
 	/*!
 	\brief Runs the AMR

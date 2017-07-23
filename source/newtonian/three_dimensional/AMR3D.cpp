@@ -3,6 +3,8 @@
 #include "../../misc/utils.hpp"
 #include <boost/array.hpp>
 #include <iostream>
+#include "../../3D/r3d/Intersection3D.hpp"
+#include <boost/scoped_ptr.hpp>
 
 //#define debug_amr 1
 
@@ -1385,6 +1387,104 @@ namespace
 			assert(cells.at(neigh.at(i)).density > 0);
 		}
 	}
+
+#ifdef RICH_MPI
+	void SendRecvMPIFullRemove(Tessellation3D const& tess, vector<size_t> const& toremove, vector<vector<size_t> >
+		&nghost_index, vector<vector<vector<size_t> > > &duplicated_index, vector<vector<vector<Vector3D> > > &planes,
+		vector<vector<vector<double> > > &planes_d)
+	{
+		vector<size_t> temp;
+		size_t Nprocs = tess.GetDuplicatedProcs().size();
+		nghost_index.clear();
+		nghost_index.resize(Nprocs);
+		duplicated_index.clear();
+		duplicated_index.resize(Nprocs);
+		planes_d.clear();
+		planes_d.resize(Nprocs);
+		planes.clear();
+		planes.resize(Nprocs);
+		vector<vector<size_t> > duplicated_points = tess.GetDuplicatedPoints();
+		vector<vector<size_t> > ghost_points = tess.GetGhostIndeces();
+		vector<vector<size_t> > sort_indeces(Nprocs), sort_indecesg(Nprocs);
+		for (size_t i = 0; i < Nprocs; ++i)
+		{
+			sort_index(duplicated_points[i], sort_indeces[i]);
+			sort(duplicated_points[i].begin(), duplicated_points[i].end());
+			sort_index(ghost_points[i], sort_indecesg[i]);
+			sort(ghost_points[i].begin(), ghost_points[i].end());
+		}
+
+		size_t nremove = toremove.size();
+		size_t Norg = tess.GetPointNo();
+		vector<r3d_plane> r_planes;
+		for (size_t i = 0; i < nremove; ++i)
+		{
+			vector<vector<size_t> > ghosts(Nprocs);
+			tess.GetNeighbors(toremove[i], temp);
+			size_t Nneigh = temp.size();
+			bool added = false;
+			for (size_t j = 0; j < Nneigh; ++j)
+			{
+				if (temp[j] >= Norg)
+				{
+					for (size_t k = 0; k < Nprocs; ++k)
+					{
+						vector<size_t>::const_iterator it = binary_find(ghost_points[k].begin(),
+								ghost_points[k].end(), temp[j]);
+						if (it != ghost_points[k].end())
+						{
+							ghosts[k].push_back(sort_indecesg[k][static_cast<size_t>(it - ghost_points[k].begin())]);
+							added = true;
+						}
+					}
+				}
+			}
+			if (added)
+			{
+				GetPlanes(r_planes, tess, toremove[i]);
+				size_t nplanes = r_planes.size();
+				vector<Vector3D> v_plane(nplanes);
+				vector<double> d_plane(nplanes);
+				for (size_t j = 0; j < nplanes; ++j)
+				{
+					d_plane[j] = r_planes[j].d;
+					v_plane[j].x = r_planes[j].n.x;
+					v_plane[j].y = r_planes[j].n.y;
+					v_plane[j].z = r_planes[j].n.z;
+				}
+				for (size_t k = 0; k < Nprocs; ++k)
+					if (!ghosts[k].empty())
+					{
+						duplicated_index[k].push_back(ghosts[k]);
+						nghost_index[k].push_back(sort_indeces[k][static_cast<size_t>(binary_find(duplicated_points[k].begin(),
+							duplicated_points[k].end(), toremove[i]) - duplicated_points[k].begin())]);
+						planes[k].push_back(v_plane);
+						planes_d[k].push_back(d_plane);
+					}
+			}
+		}
+		// send/recv the data
+		nghost_index = MPI_exchange_data(tess.GetDuplicatedProcs(), nghost_index);
+		duplicated_index = MPI_exchange_data(tess, duplicated_index);
+		planes = MPI_exchange_data(tess.GetDuplicatedProcs(),planes,tess.GetMeshPoint(0));
+		planes_d = MPI_exchange_data(tess, planes_d);
+		// convert the data
+		for (size_t i = 0; i < Nprocs; ++i)
+		{
+			size_t size = nghost_index[i].size();
+			assert(duplicated_index[i].size() == size);
+			for (size_t j = 0; j < size; ++j)
+			{
+				nghost_index[i][j] = tess.GetGhostIndeces()[i].at(nghost_index[i][j]);
+				size_t size2 = duplicated_index[i][j].size();
+				for (size_t k = 0; k < size2; ++k)
+					duplicated_index[i][j][k] = tess.GetDuplicatedPoints()[i].at(duplicated_index[i][j][k]);
+			}	
+		}
+	}
+
+
+#endif
 }
 
 AMRCellUpdater3D::~AMRCellUpdater3D(void) {}
@@ -1574,6 +1674,118 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 
 #ifdef debug_amr
 	CheckCorrect(tess);
+#endif
+}
+
+void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
+	EquationOfState const& eos, double time, TracerStickerNames const& tracerstickernames
+#ifdef RICH_MPI
+	,Tessellation3D const& proctess
+#endif
+	)const
+{
+	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tracerstickernames);
+	vector<size_t> indeces = sort_index(ToRemove.first);
+	ToRemove.second = VectorValues(ToRemove.second, indeces);
+	ToRemove.first = VectorValues(ToRemove.first, indeces);
+	ToRemove = RemoveNeighbors(ToRemove.second, ToRemove.first, tess);
+#ifdef RICH_MPI
+	int i_toremove = static_cast<int>(ToRemove.first.size());
+	int n_recv = 0;
+	MPI_Allreduce(&i_toremove, &n_recv, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	if (n_recv == 0)
+		return;
+	ToRemove = RemoveMPINeighbors(ToRemove.second, ToRemove.first, tess);
+#else
+	if (ToRemove.first.size() == 0)
+		return;
+#endif
+	size_t NRemove = ToRemove.first.size();
+	boost::scoped_ptr<Tessellation3D> oldtess(tess.clone());
+	vector<Vector3D> new_mesh = tess.GetMeshPoints();
+	size_t Norg = tess.GetPointNo();
+	new_mesh.resize(Norg);
+	RemoveVector(new_mesh, ToRemove.first);
+#ifdef RICH_MPI
+	tess.Build(new_mesh,proctess);
+#else
+	tess.Build(new_mesh);
+#endif
+	RemoveVector(extensives, ToRemove.first);
+	vector<size_t> neigh, temp, temp2,changed_cells, changed_cells_old;
+	vector<vector<int> > i_temp;
+	vector<Vector3D> vtemp;
+	r3d_poly poly;
+	// deal with local remove
+	for (size_t i = 0; i < NRemove; ++i)
+	{
+		oldtess->GetNeighbors(ToRemove.first[i], neigh);
+		size_t Nneigh = neigh.size();
+		for (size_t j = 0; j < Nneigh; ++j)
+		{
+			if (neigh[j] >= Norg)
+				continue;
+			size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), neigh[j])
+				- ToRemove.first.begin());
+			std::pair<bool,double> dv = PolyhedraIntersection(*oldtess, tess, neigh[j]-index_remove, ToRemove.first[i], poly, 
+				vtemp, temp, temp2, i_temp);
+			extensives[neigh[j] - index_remove] += eu_->ConvertPrimitveToExtensive3D(cells[ToRemove.first[i]], eos, dv.second,
+				tracerstickernames);
+			changed_cells.push_back(neigh[j] - index_remove);
+			changed_cells_old.push_back(neigh[j]);
+		}
+	}
+	// deal with mpi cells
+#ifdef RICH_MPI
+	vector<vector<size_t> > nghost_index;
+	vector<vector<vector<size_t> > > duplicate_index;
+	vector<vector < vector<Vector3D> > > planes_v;
+	vector<vector < vector<double> > > planes_d;
+	vector<r3d_plane> planes;
+	SendRecvMPIFullRemove(*oldtess, ToRemove.first, nghost_index, duplicate_index, planes_v, planes_d);
+	size_t Nproc = nghost_index.size();
+	for (size_t i = 0; i < Nproc; ++i)
+	{
+		size_t NremoveMPI = duplicate_index[i].size();
+		for (size_t j = 0; j < NremoveMPI; ++j)
+		{
+			// build planes for outer point
+			size_t Nplane = planes_v[i].at(j).size();
+			planes.resize(Nplane);
+			for (size_t k = 0; k < Nplane; ++k)
+			{
+				planes[k].d = planes_d[i][j].at(k);
+				planes[k].n.x = planes_v[i][j].at(k).x;
+				planes[k].n.y = planes_v[i][j][k].y;
+				planes[k].n.z = planes_v[i][j][k].z;
+			}
+			size_t NChangeLocal = duplicate_index[i][j].size();
+			for (size_t k = 0; k < NChangeLocal; ++k)
+			{
+				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), 
+					duplicate_index[i][j].at(k)) - ToRemove.first.begin());
+				std::pair<bool, double> dv = PolyhedraIntersection(tess,*oldtess, duplicate_index[i][j][k] - index_remove,
+					0, poly, vtemp, temp, temp2, i_temp,&planes);
+				extensives[duplicate_index[i][j][k] - index_remove] += eu_->ConvertPrimitveToExtensive3D(
+					cells[nghost_index[i][j]], eos, dv.second,tracerstickernames);
+				changed_cells.push_back(duplicate_index[i][j][k] - index_remove);
+				changed_cells_old.push_back(duplicate_index[i][j][k]);
+			}
+		}
+	}
+#endif
+	std::sort(changed_cells_old.begin(), changed_cells_old.end());
+	changed_cells_old = unique(changed_cells_old);
+	std::sort(changed_cells.begin(), changed_cells.end());
+	changed_cells = unique(changed_cells);
+	size_t Nchange = changed_cells.size();
+	for (size_t i = 0; i < Nchange; ++i)
+		cells[changed_cells_old[i]]=cu_->ConvertExtensiveToPrimitve3D(extensives[changed_cells[i]], eos, 
+			tess.GetVolume(changed_cells[i]),cells[changed_cells_old[i]], tracerstickernames);
+	RemoveVector(cells, ToRemove.first);
+#ifdef RICH_MPI
+	// Update cells and CM
+	MPI_exchange_data(tess, cells, true);
 #endif
 }
 
@@ -1791,10 +2003,16 @@ void AMR3D::operator() (HDSim3D &sim)
 		sim.getProcTesselation(),
 #endif
 		sim.GetTracerStickerNames());
-	UpdateCellsRemove(sim.getTesselation(), sim.getCells(), sim.getExtensives(), eos_, sim.GetTime(),
+/*	UpdateCellsRemove(sim.getTesselation(), sim.getCells(), sim.getExtensives(), eos_, sim.GetTime(),
 		sim.GetTracerStickerNames());
 	// Recalc CM for outerpoints
-	RecalcOuterCM(sim.getTesselation());
+	RecalcOuterCM(sim.getTesselation());*/
+	UpdateCellsRemove2(sim.getTesselation(), sim.getCells(), sim.getExtensives(), eos_, sim.GetTime(),
+		sim.GetTracerStickerNames()
+#ifdef RICH_MPI
+		,sim.getProcTesselation()
+#endif
+	);
 }
 
 AMR3D::~AMR3D(void) {}
