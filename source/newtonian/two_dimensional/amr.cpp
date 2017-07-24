@@ -1015,6 +1015,9 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, cd.volumes[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -1052,6 +1055,9 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, cd.volumes[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void NonConservativeAMR::operator()(hdsim &sim)
