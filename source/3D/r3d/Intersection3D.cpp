@@ -109,9 +109,9 @@ void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
 		Vector3D norm = normalize(tess.GetMeshPoint(neigh.first) - tess.GetMeshPoint(neigh.second));
 		if (neigh.second == index)
 			norm *= -1;
-		plane.n.x = norm.x;
-		plane.n.y = norm.y;
-		plane.n.z = norm.z;
+		plane.n.xyz[0] = norm.x;
+		plane.n.xyz[1] = norm.y;
+		plane.n.xyz[2] = norm.z;
 		Vector3D const& face_cm = tess.FaceCM(newfaces[i]);
 		plane.d = -1 * (norm.x*face_cm.x + norm.y*face_cm.y + norm.z*face_cm.z);
 		res[i] = plane;
@@ -160,13 +160,14 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Te
 	r3d_rvec3 point;
 	for (size_t i = 0; i < npoints; ++i)
 	{
-		point.x = all_vertices[all_indeces[i]].x;
-		point.y = all_vertices[all_indeces[i]].y;
-		point.z = all_vertices[all_indeces[i]].z;
+		point.xyz[0] = all_vertices[all_indeces[i]].x;
+		point.xyz[1] = all_vertices[all_indeces[i]].y;
+		point.xyz[2] = all_vertices[all_indeces[i]].z;
 		points[i] = point;
 	}
 	vector<int*> ptrs(faceinds.size());
-	for (unsigned i = 0, e = ptrs.size(); i<e; ++i) {
+	for (size_t i = 0, e = ptrs.size(); i<e; ++i) 
+	{
 		ptrs[i] = &(faceinds[i][0]);
 	}
 	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0], 
@@ -180,7 +181,7 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Te
 		planes = new vector<r3d_plane>;
 		GetPlanes(*planes, newtess, newcell);
 	}
-	r3d_clip(&poly, &(planes->at(0)), planes->size());
+	r3d_clip(&poly, &(planes->at(0)), static_cast<int>(planes->size()));
 	std::pair<bool, double> res(false,0);
 	if (poly.nverts == 0)
 		res.first = false;
