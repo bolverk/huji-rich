@@ -61,7 +61,7 @@ ColdFlowsUpdate3D::ColdFlowsUpdate3D(EquationOfState const& eos, Ghost3D const& 
 
 namespace
 {
-	Vector3D GetTemperatureGrad(size_t index, LinearGauss3D const& interp, ComputationalCell3D const& cell)
+	/*Vector3D GetTemperatureGrad(size_t index, LinearGauss3D const& interp, ComputationalCell3D const& cell)
 	{
 		Vector3D res;
 		Slope3D const& slope = interp.GetSlopesUnlimited()[index];
@@ -76,8 +76,8 @@ namespace
 		Slope3D const& slope = interp.GetSlopesUnlimited()[index];
 		return (slope.xderivative.velocity.x + slope.yderivative.velocity.y + slope.zderivative.velocity.z)*R < -0.2*cs;
 	}
-
-	bool BigJump(Vector3D const& Tgrad, size_t index, Tessellation3D const& tess, vector<ComputationalCell3D> const& cells,
+	*/
+	/*bool BigJump(Vector3D const& Tgrad, size_t index, Tessellation3D const& tess, vector<ComputationalCell3D> const& cells,
 		boost::container::flat_map<size_t, ComputationalCell3D> const& ghost_cells,vector<size_t> &neigh)
 	{
 		tess.GetNeighbors(index,neigh);
@@ -110,16 +110,16 @@ namespace
 			return false;
 		return (log(maxP) - log(cells[index].pressure))>0.2 ||
 			(log(maxT) - log(cells[index].pressure / cells[index].density))>0.1;
-	}
+	}*/
 
-	bool NegativeThermalEnergy(Conserved3D const& cell)
+	/*bool NegativeThermalEnergy(Conserved3D const& cell)
 	{
 		if (0.50000001*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)
 			return true;
 		else
 			return false;
 	}
-
+	*/
 	bool SmallThermalEnergy(Conserved3D const& cell)
 	{
 		if (0.51*ScalarProd(cell.momentum, cell.momentum) > cell.energy*cell.mass)

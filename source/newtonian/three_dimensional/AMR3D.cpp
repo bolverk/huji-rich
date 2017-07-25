@@ -11,7 +11,7 @@
 namespace
 {
 #ifdef RICH_MPI
-	vector<vector<size_t> > GetSentIndeces(Tessellation3D const& tess, vector<size_t> const& ToRemove,
+	/*vector<vector<size_t> > GetSentIndeces(Tessellation3D const& tess, vector<size_t> const& ToRemove,
 		vector<vector<size_t> > &RemoveIndex)
 	{
 		RemoveIndex.clear();
@@ -104,22 +104,9 @@ namespace
 		}
 		return RemoveFinal;
 	}
-
-	std::pair<int, size_t> GetOtherCpuInfo(vector<int> const& procnames, vector<vector<size_t> > const&
-		duplicated_points, vector<vector<size_t> > const& indeces, size_t point)
-	{
-		size_t nprocs = procnames.size();
-		for (size_t i = 0; i < nprocs; ++i)
-		{
-			vector<size_t>::const_iterator it = binary_find(duplicated_points[i].begin(), duplicated_points[i].end(),
-				point);
-			if (it != duplicated_points[i].end())
-				return std::pair<int, size_t>(procnames[i], indeces[i][static_cast<size_t>(it - duplicated_points[i].begin())]);
-		}
-		throw("No matching cpu in amr remove");
-	}
-
-	void GetSendData(Tessellation3D &tess, vector<size_t> const& ToRemove,
+	*/
+	
+	/*void GetSendData(Tessellation3D &tess, vector<size_t> const& ToRemove,
 		vector<Conserved3D> const& extensives, vector<vector<Conserved3D> > &extensive_remove,
 		vector<vector<vector<Vector3D> > > &new_point_remove, vector<vector<vector<size_t> > > &existing_nghost_remove,
 		vector<vector<vector<int> > > &neigh_cpus)
@@ -193,7 +180,7 @@ namespace
 				neigh_cpus[k].push_back(cpus);
 		}
 	}
-
+	*/
 	vector<size_t> GetMPIRefineSend(Tessellation3D const& tess, size_t Nsplit, size_t Ntotal)
 	{
 		vector<size_t> neigh;
