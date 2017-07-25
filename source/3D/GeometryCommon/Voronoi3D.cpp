@@ -1671,32 +1671,12 @@ Tessellation3D* Voronoi3D::clone(void) const
 	return new Voronoi3D(*this);
 }
 
-Voronoi3D::Voronoi3D(Voronoi3D const &other)
-{
-	ll_ = other.ll_;
-	ur_ = other.ur_;
-	Norg_ = other.Norg_;
-	bigtet_ = other.bigtet_;
-	set_temp_ = other.set_temp_;
-	stack_temp_ = other.stack_temp_;
-	PointsInFace_ = other.PointsInFace_;
-	PointTetras_ = other.PointTetras_;
-	R_ = other.R_;
-	tetra_centers_ = other.tetra_centers_;
-	FaceNeighbors_ = other.FaceNeighbors_;
-	FacesInCell_ = other.FacesInCell_;
-	CM_ = other.CM_;
-	Face_CM_ = other.Face_CM_;
-	volume_ = other.volume_;
-	area_ = other.area_;
-	duplicatedprocs_ = other.duplicatedprocs_;
-	duplicated_points_ = other.duplicated_points_;
-	Nghost_ = other.Nghost_;
-	sentpoints_ = other.sentpoints_;
-	self_index_ = other.self_index_;
-	sentprocs_ = other.sentprocs_;
-	del_ = other.del_;	
-}
+Voronoi3D::Voronoi3D(Voronoi3D const &other) : ll_(other.ll_), ur_(other.ur_), Norg_(other.Norg_), bigtet_(other.bigtet_),
+set_temp_(other.set_temp_), stack_temp_(other.stack_temp_), del_(other.del_), PointTetras_(other.PointTetras_),R_(other.R_),
+tetra_centers_(other.tetra_centers_), FacesInCell_(other.FacesInCell_), PointsInFace_(other.PointsInFace_), 
+FaceNeighbors_(other.FaceNeighbors_),CM_(other.CM_), Face_CM_(other.Face_CM_), volume_(other.volume_), area_(other.area_), 
+duplicated_points_(other.duplicated_points_),sentprocs_(other.sentprocs_),duplicatedprocs_(other.duplicatedprocs_),sentpoints_(other.sentpoints_), 
+Nghost_(other.Nghost_),  self_index_(other.self_index_) {}
 
 bool Voronoi3D::NearBoundary(std::size_t index) const
 {

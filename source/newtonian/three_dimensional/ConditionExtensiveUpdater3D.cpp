@@ -156,13 +156,13 @@ namespace
 		}
 	}
 
-	double NewPressure(Conserved3D const& extensive, EquationOfState const& eos, double new_d)
+	/*double NewPressure(Conserved3D const& extensive, EquationOfState const& eos, double new_d)
 	{
 		double new_e = extensive.internal_energy / extensive.mass;
 		if (new_e < 0)
 			return 0;
 		return eos.de2p(new_d, new_e);
-	}
+	}*/
 }
 
 void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& tess, const double dt,
