@@ -1025,7 +1025,6 @@ namespace
 		}
 		full_vertices.insert(full_vertices.end(), local.GetFacePoints().begin(), local.GetFacePoints().end());
 	}
-
 #ifdef RICH_MPI
 	void FixVoronoiMPI(Tessellation3D &local, Tessellation3D &tess, size_t refinedghost,
 		vector<int> const& refined_neigh, vector<size_t> &bad_faces)

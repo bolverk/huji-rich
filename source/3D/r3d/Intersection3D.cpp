@@ -58,16 +58,16 @@ namespace
 		size_t Nbad = bad_indeces.size();
 		if (Nbad < 1)
 			return;
-		assert(Nbad > 1);
+
 		vector<size_t> new_indeces(Nbad),bad_index(Nbad),total_remove;
 		for (size_t i = 0; i < Nbad; ++i)
 			bad_index[i] = i;
-		while (bad_index.size() > 1)
+		while (bad_index.size() > 0)
 		{
 			vector<size_t> toremove;
 			for (size_t i = 0; i < bad_index.size(); ++i)
 			{
-				if (abs(points[bad_indeces[bad_index[0]]] - points[bad_indeces[bad_index[i]]]) < 0.00001*R)
+				if (abs(points[bad_indeces[bad_index[0]]] - points[bad_indeces[bad_index[i]]]) < 0.0003*R)
 				{
 					new_indeces[bad_index[i]] = bad_indeces[bad_index[0]];
 					toremove.push_back(i);
@@ -76,7 +76,6 @@ namespace
 				}
 			}
 			RemoveVector(bad_index, toremove);
-			assert(bad_index.size() != 1);
 		}
 		for (size_t i = 0; i < Nfaces; ++i)
 		{
@@ -93,6 +92,90 @@ namespace
 		}
 		std::sort(total_remove.begin(), total_remove.end());
 		all_indeces = RemoveList(all_indeces, total_remove);
+	}
+
+	void CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds, double R, 
+		vector<Vector3D> const& points,size_t index,Tessellation3D const& tess)
+	{
+		size_t Nindeces = all_indeces.size();
+		size_t Nfaces = face_inds.size();
+		vector<size_t> counter(Nindeces, 0);
+		vector<size_t> const& faces = tess.GetCellFaces(index);
+		for (size_t i = 0; i < Nfaces; ++i)
+		{
+			size_t Ninface = face_inds[i].size();
+			for (size_t j = 0; j < Ninface; ++j)
+			{
+				vector<size_t>::const_iterator it = binary_find(all_indeces.begin(), all_indeces.end(),
+					static_cast<size_t>(face_inds[i][j]));
+				assert(it != all_indeces.end());
+				++counter[static_cast<size_t>(it - all_indeces.begin())];
+			}
+		}
+		vector<size_t> bad_indeces;
+		for (size_t i = 0; i < Nindeces; ++i)
+		{
+			if (counter[i] < 3)
+			{
+				bad_indeces.push_back(all_indeces[i]);
+				assert(counter[i] == 2);
+			}
+		}
+		size_t Nbad = bad_indeces.size();
+		if (Nbad < 1)
+			return;
+		// Find relevant faces
+		vector<size_t> rel_faces(Nbad);
+		for (size_t j = 0; j < Nbad; ++j)
+		{
+			size_t min_loc = 0;
+			double min_dist = R * 1000;
+			for (size_t i = 0; i < Nfaces; ++i)
+			{
+				if (std::find(face_inds[i].begin(), face_inds[i].end(), bad_indeces[j]) == face_inds[i].end())
+				{
+					size_t other = tess.GetFaceNeighbors(faces[i]).first == index ?
+						tess.GetFaceNeighbors(faces[i]).second : tess.GetFaceNeighbors(faces[i]).first;
+					double rnew = abs(tess.GetMeshPoint(other) - points[bad_indeces[j]]);
+					if (rnew < min_dist)
+					{
+						min_dist = rnew;
+						min_loc = i;
+					}
+				}
+			}
+			rel_faces[j] = min_loc;
+		}
+		// Add the vertex to the face
+		for (size_t j = 0; j < Nbad; ++j)
+		{
+			Vector3D line = points[bad_indeces[j]] - tess.FaceCM(faces[rel_faces[j]]);
+			line *= 1.0 / abs(line);
+			size_t Ninface = face_inds[rel_faces[j]].size();
+			size_t min_loc = 0;
+			double max_angle = -2.0;
+			for (size_t i = 0; i < Ninface; ++i)
+			{
+				Vector3D line2 = points[face_inds[rel_faces[j]][i]] - tess.FaceCM(faces[rel_faces[j]]);
+				line2 *= 1.0 / abs(line2);
+				double tempangle = ScalarProd(line2, line);
+				if (tempangle > max_angle)
+				{
+					max_angle = tempangle;
+					min_loc = i;
+				}
+			}
+			Vector3D c_product1 = CrossProduct(line, points[face_inds[rel_faces[j]][min_loc]] 
+				- tess.FaceCM(faces[rel_faces[j]]));
+			Vector3D c_product2 = CrossProduct(line, points[face_inds[rel_faces[j]][(min_loc+1)%Ninface]]
+				- tess.FaceCM(faces[rel_faces[j]]));
+			if (ScalarProd(c_product1, c_product2) > 0)
+				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + Ninface - 1) % Ninface,
+					bad_indeces[j]);
+			else
+				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + 1) % Ninface,
+					bad_indeces[j]);
+		}
 	}
 }
 
@@ -143,6 +226,7 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Te
 	vector<Vector3D> const& all_vertices = oldtess.GetFacePoints();
 	// make sure no duplicate points
 	CleanDuplicates(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices);
+	CleanDuplicates2(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices, oldcell, oldtess);
 	for (size_t i = 0; i < nfaces; ++i)
 	{
 		numvertsperface[i] = static_cast<int>(faceinds[i].size());
