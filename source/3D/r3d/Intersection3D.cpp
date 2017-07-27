@@ -171,10 +171,10 @@ namespace
 				- tess.FaceCM(faces[rel_faces[j]]));
 			if (ScalarProd(c_product1, c_product2) > 0)
 				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + Ninface - 1) % Ninface,
-					bad_indeces[j]);
+					static_cast<int>(bad_indeces[j]));
 			else
 				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + 1) % Ninface,
-					bad_indeces[j]);
+					static_cast<int>(bad_indeces[j]));
 		}
 	}
 }
