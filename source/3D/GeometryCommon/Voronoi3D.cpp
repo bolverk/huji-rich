@@ -213,7 +213,7 @@ namespace
 		return loc;
 	}
 #endif
-	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> const& points, vector<size_t> &res, double R,
+	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
 		vector<double> &diffs)
 	{
 		res.clear();
@@ -231,9 +231,14 @@ namespace
 		{
 			if (diffs[i] > R*1e-5)
 				res.push_back(indeces[i]);
+			else
+				points[indeces[i]] = points[indeces[i - 1]];
 		}
 		if (diffs[0] < R*1e-5)
+		{
 			res.pop_back();
+			points[indeces[0]] = points[indeces.back()];
+		}
 		return R;
 	}
 
@@ -273,11 +278,27 @@ namespace
 	}
 
 	void MakeRightHandFace(vector<size_t> &indeces, Vector3D const& point, vector<Vector3D> const& face_points,
-		vector<size_t> &temp)
+		vector<size_t> &temp,double areascale)
 	{
-		Vector3D V1 = face_points[indeces[1]] - face_points[indeces[0]];
-		Vector3D V2 = face_points[indeces.back()] - face_points[indeces[0]];
-		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) < 0)
+		Vector3D V1, V2;
+		size_t counter = 0;
+		size_t N = indeces.size();
+		V1 = face_points[indeces[counter+1]] - face_points[indeces[counter]];
+		while (abs(V1) < 0.01*areascale)
+		{
+			++counter;
+			assert(counter < N);
+			V1 = face_points[indeces[(counter + 1)%N]] - face_points[indeces[counter]];
+		}
+		V2 = face_points[indeces[(counter + 2) % N]] - face_points[indeces[(counter+1)%N]];
+		while (abs(V2) < 0.01*areascale)
+		{
+			++counter;
+			assert(counter < 2*N);
+			V2 = face_points[indeces[(counter + 2) % N]] - face_points[indeces[(counter+1)%N]];
+		}
+
+		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) > 0)
 		{
 			temp.resize(indeces.size());
 			temp.assign(indeces.begin(), indeces.end());
@@ -1080,11 +1101,11 @@ void Voronoi3D::BuildVoronoi(void)
 						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]),diffs);
 						if (temp2.size() < 3)
 							continue;
-						// Make faces right handed
-						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3);
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < Asize*Asize*1e-6)
+						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-5 : 1e-6)))
 							continue;
+						// Make faces right handed
+						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, sqrt(AreaCM.first));
 						area_.push_back(AreaCM.first);
 						Face_CM_.push_back(AreaCM.second);
 						PointsInFace_.push_back(temp2);
