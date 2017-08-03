@@ -11,8 +11,10 @@ extern "C"
 
 void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index);
 
-std::pair<bool, double> PolyhedraIntersection(Tessellation3D const& oldtess, Tessellation3D const& newtess, size_t newcell,
-	size_t oldcell, r3d_poly &poly, vector<Vector3D> &vtemp, vector<size_t> &itemp, vector<size_t> &all_indeces,
-	vector<vector<int> > &faceinds,vector<r3d_plane> *planes = 0);
+void GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, vector<size_t> &itemp, vector<size_t> &all_indeces,
+	vector<vector<int> > &faceinds);
+
+std::pair<bool, double> PolyhedraIntersection(Tessellation3D const& newtess, size_t newcell,r3d_poly &poly,
+	vector<r3d_plane> *planes = 0);
 
 #endif //INTERSECTION3D_HPP

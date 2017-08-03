@@ -29,9 +29,64 @@ namespace
 				return false;
 		}
 	};
-
 */
-	void CleanDuplicates(vector<size_t> &all_indeces,vector<vector<int> > &face_inds,double R,vector<Vector3D> const& points)
+	void FixDegenerate(vector<vector<int> > & faceinds, size_t bad_point,vector<size_t> &all_indeces)
+	{
+		size_t Nfaces = faceinds.size();
+		size_t bad_face = 0;
+		size_t bad_before = 0;
+		size_t bad_after = 0;
+		bool found = false;
+		all_indeces.push_back(all_indeces.back() + 1);
+		vector<size_t> containing_faces;
+		for (size_t i = 0; i < Nfaces; ++i)
+		{
+			size_t NinFace = faceinds[i].size();
+			for (size_t j = 0; j < NinFace; ++j)
+			{
+				if (faceinds[i][j] == bad_point && !found)
+				{
+					bad_face = i;
+					bad_after = faceinds[i][(j + 1) % NinFace];
+					bad_before = faceinds[i][(j + NinFace - 1) % NinFace];
+					faceinds[i][j] = all_indeces.back();
+					found = true;
+					break;
+				}
+				else
+					if (faceinds[i][j] == bad_point)
+					{
+						containing_faces.push_back(i);
+						break;
+					}
+			}
+		}
+		size_t counter = 0;
+		for (size_t i = 0; i < containing_faces.size(); ++i)
+		{
+			size_t face = containing_faces[i];
+			size_t NinFace = faceinds[face].size();
+			for (size_t j = 0; j < NinFace; ++j)
+			{
+				if (faceinds[face][j] == bad_after)
+				{
+					faceinds[face].insert(faceinds[face].begin()+(j + 1) % NinFace,all_indeces.back());
+					++counter;
+					break;
+				}
+				if (faceinds[face][j] == bad_before)
+				{
+					faceinds[face].insert(faceinds[face].begin()+j % NinFace,all_indeces.back());
+					++counter;
+					break;
+				}
+			}
+			if (counter == 2)
+				break;
+		}
+	}
+
+	vector<size_t> GetBadPoints(vector<vector<int> > const& face_inds,vector<size_t> &all_indeces)
 	{
 		size_t Nindeces = all_indeces.size();
 		size_t Nfaces = face_inds.size();
@@ -47,18 +102,81 @@ namespace
 				++counter[static_cast<size_t>(it - all_indeces.begin())];
 			}
 		}
-		vector<size_t> bad_indeces;
+		vector<size_t> bad_indeces,to_remove;
 		for (size_t i = 0; i < Nindeces; ++i)
 		{
-			if (counter[i] < 3)
-			{
+			if (counter[i] < 3 &&counter[i]>0)
 				bad_indeces.push_back(all_indeces[i]);
+			if (counter[i] == 0)
+				to_remove.push_back(i);
+		}
+		RemoveVector(all_indeces, to_remove);
+		std::sort(bad_indeces.begin(), bad_indeces.end());
+		return bad_indeces;
+	}
+
+	vector<vector<std::pair<size_t, size_t> > > GetBadFaces(vector<vector<int> > const& face_inds,vector<size_t> const&
+		bad_indeces)
+	{
+		size_t Nbad = bad_indeces.size();
+		size_t Nfaces = face_inds.size();
+		vector<vector<std::pair<size_t, size_t> > > bad_faces(Nbad);
+		for (size_t i = 0; i < Nfaces; ++i)
+		{
+			size_t Ninface = face_inds[i].size();
+			for (size_t j = 0; j < Ninface; ++j)
+			{
+				vector<size_t>::const_iterator it = binary_find(bad_indeces.begin(), bad_indeces.end(),
+					static_cast<size_t>(face_inds[i][j]));
+				if (it != bad_indeces.end())
+					bad_faces[static_cast<size_t>(it - bad_indeces.begin())].push_back(std::pair<size_t, size_t>(i, j));
 			}
 		}
+		return bad_faces;
+	}
+	void CleanDuplicates(vector<size_t> &all_indeces,vector<vector<int> > &face_inds,double R,vector<Vector3D> const& points)
+	{
+		size_t Nindeces = all_indeces.size();
+		size_t Nfaces = face_inds.size();
+		vector<size_t> bad_indeces = GetBadPoints(face_inds, all_indeces);
+		
 		size_t Nbad = bad_indeces.size();
 		if (Nbad < 1)
 			return;
+		
 
+		vector<double> dist;
+		vector<size_t> sort_ind;
+		while (Nbad > 0)
+		{
+			Nindeces = all_indeces.size();
+			dist.resize(Nindeces);
+			vector<vector<std::pair<size_t, size_t> > > bad_faces = GetBadFaces(face_inds, bad_indeces);
+			for (size_t i = 0; i < Nbad; ++i)
+			{
+				for (size_t j = 0; j < Nindeces; ++j)
+				{
+					if (bad_indeces[i] == all_indeces[j])
+						dist[j] = R * 100;
+					else
+						dist[j] = abs(points[all_indeces[j]] - points[bad_indeces[i]]);
+				}
+				sort_index(dist, sort_ind);
+				size_t value = std::min(bad_indeces[i], all_indeces[sort_ind[0]]);
+				if (value < bad_indeces[i])
+				{
+					for (size_t j = 0; j < bad_faces[i].size(); ++j)
+						face_inds[bad_faces[i][j].first][bad_faces[i][j].second] = static_cast<int>(value);
+				}
+				else
+					if(!std::binary_search(bad_indeces.begin(),bad_indeces.end(),all_indeces[sort_ind[0]]))
+						for (size_t j = 0; j < bad_faces[i].size(); ++j)
+							face_inds[bad_faces[i][j].first][bad_faces[i][j].second] = static_cast<int>(all_indeces[sort_ind[0]]);
+			}
+			bad_indeces = GetBadPoints(face_inds, all_indeces);
+			Nbad = bad_indeces.size();
+		}
+/*
 		vector<size_t> new_indeces(Nbad),bad_index(Nbad),total_remove;
 		for (size_t i = 0; i < Nbad; ++i)
 			bad_index[i] = i;
@@ -67,7 +185,7 @@ namespace
 			vector<size_t> toremove;
 			for (size_t i = 0; i < bad_index.size(); ++i)
 			{
-				if (abs(points[bad_indeces[bad_index[0]]] - points[bad_indeces[bad_index[i]]]) < 0.0003*R)
+				if (abs(points[bad_indeces[bad_index[0]]] - points[bad_indeces[bad_index[i]]]) < 0.0005*R)
 				{
 					new_indeces[bad_index[i]] = bad_indeces[bad_index[0]];
 					toremove.push_back(i);
@@ -91,11 +209,37 @@ namespace
 			}
 		}
 		std::sort(total_remove.begin(), total_remove.end());
-		all_indeces = RemoveList(all_indeces, total_remove);
+		all_indeces = RemoveList(all_indeces, total_remove);*/
+	}
+
+	void RemoveTooMany(vector<vector<int> > &face_inds,vector<size_t> &too_many)
+	{
+		size_t Nface = face_inds.size();
+		vector<size_t> to_remove;
+		for (size_t k = 0; k < too_many.size(); ++k)
+		{
+			for (size_t i = 0; i < Nface; ++i)
+			{
+				to_remove.clear();
+				size_t Npoints = face_inds[i].size();
+				bool found = false;
+				for (size_t j = 0; j < Npoints; ++j)
+				{
+					if (face_inds[i][j] == too_many[k])
+					{
+						if (found)
+							to_remove.push_back(j);
+						found = true;
+					}
+				}
+				if (!to_remove.empty())
+					RemoveVector(face_inds[i], to_remove);
+			}
+		}
 	}
 
 	void CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds, double R, 
-		vector<Vector3D> const& points,size_t index,Tessellation3D const& tess)
+		vector<Vector3D> const& points,size_t index,Tessellation3D const& tess,vector<size_t> &degn_points)
 	{
 		size_t Nindeces = all_indeces.size();
 		size_t Nfaces = face_inds.size();
@@ -112,16 +256,22 @@ namespace
 				++counter[static_cast<size_t>(it - all_indeces.begin())];
 			}
 		}
-		vector<size_t> bad_indeces;
+		vector<size_t> bad_indeces,too_many;
 		for (size_t i = 0; i < Nindeces; ++i)
 		{
 			if (counter[i] < 3)
 			{
 				bad_indeces.push_back(all_indeces[i]);
-				assert(counter[i] == 2);
+				//assert(counter[i] == 2);
+			}
+			if (counter[i] > 3)
+			{
+				too_many.push_back(all_indeces[i]);
 			}
 		}
-		size_t Nbad = bad_indeces.size();
+		if (!too_many.empty())
+			RemoveTooMany(face_inds, too_many);
+	/*	size_t Nbad = bad_indeces.size();
 		if (Nbad < 1)
 			return;
 		// Find relevant faces
@@ -170,11 +320,33 @@ namespace
 			Vector3D c_product2 = CrossProduct(line, points[face_inds[rel_faces[j]][(min_loc+1)%Ninface]]
 				- tess.FaceCM(faces[rel_faces[j]]));
 			if (ScalarProd(c_product1, c_product2) > 0)
-				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + Ninface - 1) % Ninface,
+				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + min_loc,
 					static_cast<int>(bad_indeces[j]));
 			else
 				face_inds[rel_faces[j]].insert(face_inds[rel_faces[j]].begin() + (min_loc + 1) % Ninface,
 					static_cast<int>(bad_indeces[j]));
+		}*/
+		counter.assign(Nindeces, 0);
+		for (size_t i = 0; i < Nfaces; ++i)
+		{
+			size_t Ninface = face_inds[i].size();
+			for (size_t j = 0; j < Ninface; ++j)
+			{
+				vector<size_t>::const_iterator it = binary_find(all_indeces.begin(), all_indeces.end(),
+					static_cast<size_t>(face_inds[i][j]));
+				assert(it != all_indeces.end());
+				++counter[static_cast<size_t>(it - all_indeces.begin())];
+			}
+		}
+		degn_points.clear();
+		for (size_t i = 0; i < Nindeces; ++i)
+		{
+			assert(counter[i] > 2);
+			if (counter[i] > 3) // degenerate case with a vertex shared by 4 faces, remove smallest face
+			{
+				FixDegenerate(face_inds, all_indeces[i], all_indeces);
+				degn_points.push_back(all_indeces[i]);
+			}
 		}
 	}
 }
@@ -201,11 +373,9 @@ void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
 	}
 }
 
-std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Tessellation3D const & newtess, 
-	size_t newcell, size_t oldcell,r3d_poly &poly,vector<Vector3D> &vtemp,vector<size_t> &itemp,vector<size_t> &all_indeces,
-	vector<vector<int> > &faceinds, vector<r3d_plane> *planes)
+void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vector<size_t> &itemp, vector<size_t> &all_indeces,
+	vector<vector<int> > &faceinds)
 {
-	vtemp.clear();
 	itemp.clear();
 	all_indeces.clear();
 	faceinds.clear();
@@ -224,9 +394,14 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Te
 	std::sort(all_indeces.begin(), all_indeces.end());
 	all_indeces = unique(all_indeces);
 	vector<Vector3D> const& all_vertices = oldtess.GetFacePoints();
+	for (size_t i = 0; i < nfaces; ++i)
+		if (oldtess.GetFaceNeighbors(oldfaces[i]).second == oldcell)
+			FlipVector(faceinds[i]);
 	// make sure no duplicate points
 	CleanDuplicates(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices);
-	CleanDuplicates2(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices, oldcell, oldtess);
+	size_t Npoints = all_indeces.size();
+	vector<size_t> degn_points;
+	CleanDuplicates2(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices, oldcell, oldtess, degn_points);
 	for (size_t i = 0; i < nfaces; ++i)
 	{
 		numvertsperface[i] = static_cast<int>(faceinds[i].size());
@@ -236,28 +411,40 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & oldtess, Te
 				faceinds[i][j])) - all_indeces.begin());
 			faceinds[i][j] = static_cast<int>(index);
 		}
-		if (oldtess.GetFaceNeighbors(oldfaces[i]).second == oldcell)
-			FlipVector(faceinds[i]);
 	}
 	size_t npoints = all_indeces.size();
 	vector<r3d_rvec3> points(npoints);
 	r3d_rvec3 point;
 	for (size_t i = 0; i < npoints; ++i)
 	{
-		point.xyz[0] = all_vertices[all_indeces[i]].x;
-		point.xyz[1] = all_vertices[all_indeces[i]].y;
-		point.xyz[2] = all_vertices[all_indeces[i]].z;
+		if (i >= Npoints)
+		{
+			point.xyz[0] = all_vertices[degn_points[i-Npoints]].x;
+			point.xyz[1] = all_vertices[degn_points[i - Npoints]].y;
+			point.xyz[2] = all_vertices[degn_points[i - Npoints]].z;
+		}
+		else
+		{
+			point.xyz[0] = all_vertices[all_indeces[i]].x;
+			point.xyz[1] = all_vertices[all_indeces[i]].y;
+			point.xyz[2] = all_vertices[all_indeces[i]].z;
+		}
 		points[i] = point;
 	}
 	vector<int*> ptrs(faceinds.size());
-	for (size_t i = 0, e = ptrs.size(); i<e; ++i) 
+	for (size_t i = 0, e = ptrs.size(); i<e; ++i)
 	{
 		ptrs[i] = &(faceinds[i][0]);
 	}
-	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0], 
+	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0],
 		static_cast<r3d_int>(numvertsperface.size()));
 	int test = r3d_is_good(&poly);
 	assert(test == 1);
+}
+
+std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & newtess,size_t newcell,r3d_poly &poly,
+	vector<r3d_plane> *planes)
+{
 	bool allocated = false;
 	if (planes == 0)
 	{
