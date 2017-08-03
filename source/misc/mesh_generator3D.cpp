@@ -47,6 +47,27 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 	return res;
 }
 
+vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, boost::mt19937_64 &generator)
+{
+	double ran[3];
+	Vector3D diff = ur - ll;
+	vector<Vector3D> res;
+	Vector3D point;
+	boost::random::uniform_real_distribution<> dist;
+	for (size_t i = 0; i < PointNum; ++i)
+	{
+		ran[0] = dist(generator);
+		ran[1] = dist(generator);
+		ran[2] = dist(generator);
+		point.x = ran[0] * diff.x + ll.x;
+		point.y = ran[1] * diff.y + ll.y;
+		point.z = ran[2] * diff.z + ll.z;
+		res.push_back(point);
+	}
+	return res;
+}
+
+
 vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax)
 {
 	typedef boost::mt19937_64 base_generator_type;

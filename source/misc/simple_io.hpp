@@ -42,6 +42,10 @@ void write_vector(vector<double> const& v,
 void write_vector(vector<int> const& v,
 		  string const& fname);
 
+void write_vector(vector<size_t> const& v,
+	string const& fname);
+
+
 /*! \brief Reads a single number from a file
 \param fname Name of the file
 \return The number

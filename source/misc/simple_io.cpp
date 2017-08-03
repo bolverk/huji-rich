@@ -32,6 +32,14 @@ void write_vector(vector<int> const& v,
   f.close();
 }
 
+void write_vector(vector<size_t> const& v,
+	string const& fname)
+{
+	ofstream f(fname.c_str());
+	for (size_t i = 0; i<v.size(); ++i)
+		f << v[i] << endl;
+	f.close();
+}
 namespace {
   bool missing_file_data(string const& fname)
   {
