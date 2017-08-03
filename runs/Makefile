@@ -7,53 +7,52 @@ ENDEMIC_SOURCES := $(shell find $(TARGET) -name '*.cpp')
 ENDEMIC_OBJECTS := $(patsubst $(TARGET)/%.cpp,$(DUMP_FOLDER)/%.o,$(ENDEMIC_SOURCES))
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
-	LFLAGS := -pg -lclipper -lrebound
+	LFLAGS := -pg -lclipper -lrebound -lr3d
 else ifeq ($(MODE),intel)
 	CC := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
-	LFLAGS := -lclipper -lrebound
+	LFLAGS := -lclipper -lrebound -lr3d
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),intel_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
 	LINT_FLAGS := 
-	LFLAGS := -lclipper -lreboundmpi
+	LFLAGS := -lclipper -lreboundmpi -lr3d
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DMPI -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lclipper -lreboundmpi
+	LFLAGS := -lclipper -lreboundmpi -lr3d
 else ifeq ($(MODE),parallel_check)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -Og -g -D_GLIBCXX_DEBUG
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lclipper -lreboundmpi
+	LFLAGS := -lclipper -lreboundmpi -lr3d
 else ifeq ($(MODE),parallel_profile)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg -O3
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
-	LFLAGS := -lclipper -lreboundmpi
+	LFLAGS := -lclipper -lreboundmpi -lr3d
 else ifeq ($(MODE),debug_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DMPI -DOMPI_SKIP_MPICXX
 	LINT_FLAGS := -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wmissing-declarations
-	LFLAGS := -pg -lclipper -lreboundmpi
+	LFLAGS := -pg -lclipper -lreboundmpi -lr3d
 else
 	MODE := production
 	OPTIMIZATION_FLAGS := -O3
-	LFLAGS := -lclipper -lrebound
+	LFLAGS := -lclipper -lrebound -lr3d
 endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
 $(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
-	cp $(TARGET)/*.txt $(DUMP_FOLDER) 2> /dev/null; return 0
 	cd $(DUMP_FOLDER) && $(PREXECUTE) ./test.exe
 
 $(DUMP_FOLDER)/test.exe: $(ENDEMIC_OBJECTS) | ../library_$(MODE)/librich.a
