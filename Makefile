@@ -95,7 +95,7 @@ external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	ar cr $@ $^ 
 
 source/3D/r3d/r3d.o: source/3D/r3d/r3d.h
-	cd source/3D/r3D && $(CCC) -c -O3 r3d.c -o r3d.o
+	cd source/3D/r3d && $(CCC) -c -O3 r3d.c -o r3d.o
 
 external_libraries/lib/libr3d.a: source/3D/r3d/r3d.o
 	ar cr $@ $^ 

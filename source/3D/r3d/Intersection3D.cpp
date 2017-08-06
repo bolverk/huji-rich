@@ -33,7 +33,6 @@ namespace
 	void FixDegenerate(vector<vector<int> > & faceinds, size_t bad_point,vector<size_t> &all_indeces)
 	{
 		size_t Nfaces = faceinds.size();
-		size_t bad_face = 0;
 		size_t bad_before = 0;
 		size_t bad_after = 0;
 		bool found = false;
@@ -44,17 +43,16 @@ namespace
 			size_t NinFace = faceinds[i].size();
 			for (size_t j = 0; j < NinFace; ++j)
 			{
-				if (faceinds[i][j] == bad_point && !found)
+				if (faceinds[i][j] == static_cast<int>(bad_point) && !found)
 				{
-					bad_face = i;
 					bad_after = faceinds[i][(j + 1) % NinFace];
 					bad_before = faceinds[i][(j + NinFace - 1) % NinFace];
-					faceinds[i][j] = all_indeces.back();
+					faceinds[i][j] = static_cast<int>(all_indeces.back());
 					found = true;
 					break;
 				}
 				else
-					if (faceinds[i][j] == bad_point)
+					if (faceinds[i][j] == static_cast<int>(bad_point))
 					{
 						containing_faces.push_back(i);
 						break;
@@ -68,15 +66,15 @@ namespace
 			size_t NinFace = faceinds[face].size();
 			for (size_t j = 0; j < NinFace; ++j)
 			{
-				if (faceinds[face][j] == bad_after)
+				if (faceinds[face][j] == static_cast<int>(bad_after))
 				{
-					faceinds[face].insert(faceinds[face].begin()+(j + 1) % NinFace,all_indeces.back());
+					faceinds[face].insert(faceinds[face].begin()+(j + 1) % NinFace, static_cast<int>(all_indeces.back()));
 					++counter;
 					break;
 				}
-				if (faceinds[face][j] == bad_before)
+				if (faceinds[face][j] == static_cast<int>(bad_before))
 				{
-					faceinds[face].insert(faceinds[face].begin()+j % NinFace,all_indeces.back());
+					faceinds[face].insert(faceinds[face].begin()+j % NinFace, static_cast<int>(all_indeces.back()));
 					++counter;
 					break;
 				}
@@ -137,7 +135,6 @@ namespace
 	void CleanDuplicates(vector<size_t> &all_indeces,vector<vector<int> > &face_inds,double R,vector<Vector3D> const& points)
 	{
 		size_t Nindeces = all_indeces.size();
-		size_t Nfaces = face_inds.size();
 		vector<size_t> bad_indeces = GetBadPoints(face_inds, all_indeces);
 		
 		size_t Nbad = bad_indeces.size();
@@ -225,7 +222,7 @@ namespace
 				bool found = false;
 				for (size_t j = 0; j < Npoints; ++j)
 				{
-					if (face_inds[i][j] == too_many[k])
+					if (face_inds[i][j] == static_cast<int>(too_many[k]))
 					{
 						if (found)
 							to_remove.push_back(j);
@@ -238,13 +235,11 @@ namespace
 		}
 	}
 
-	void CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds, double R, 
-		vector<Vector3D> const& points,size_t index,Tessellation3D const& tess,vector<size_t> &degn_points)
+	void CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds, vector<size_t> &degn_points)
 	{
 		size_t Nindeces = all_indeces.size();
 		size_t Nfaces = face_inds.size();
 		vector<size_t> counter(Nindeces, 0);
-		vector<size_t> const& faces = tess.GetCellFaces(index);
 		for (size_t i = 0; i < Nfaces; ++i)
 		{
 			size_t Ninface = face_inds[i].size();
@@ -401,7 +396,7 @@ void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 	CleanDuplicates(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices);
 	size_t Npoints = all_indeces.size();
 	vector<size_t> degn_points;
-	CleanDuplicates2(all_indeces, faceinds, oldtess.GetWidth(oldcell), all_vertices, oldcell, oldtess, degn_points);
+	CleanDuplicates2(all_indeces, faceinds, degn_points);
 	for (size_t i = 0; i < nfaces; ++i)
 	{
 		numvertsperface[i] = static_cast<int>(faceinds[i].size());

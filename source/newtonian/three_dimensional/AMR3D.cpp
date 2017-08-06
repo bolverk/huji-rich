@@ -1715,9 +1715,11 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 				planes[k].n.xyz[2] = planes_v[i][j][k].z;
 			}
 			size_t NChangeLocal = duplicate_index[i][j].size();
-			GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly2, temp, temp2, i_temp);
 			for (size_t k = 0; k < NChangeLocal; ++k)
 			{
+				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
+					duplicate_index[i][j].at(k)) - ToRemove.first.begin());
+				GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly2, temp, temp2, i_temp);
 				// copy poly
 				poly2.nverts = poly.nverts;
 				for (int k = 0; k < poly2.nverts; ++k)
@@ -1728,8 +1730,6 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 						poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
 					}
 				}
-				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), 
-					duplicate_index[i][j].at(k)) - ToRemove.first.begin());
 				std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly,&planes);
 				extensives[duplicate_index[i][j][k] - index_remove] += eu_->ConvertPrimitveToExtensive3D(
 					cells[nghost_index[i][j]], eos, dv.second,tracerstickernames);

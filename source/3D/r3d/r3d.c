@@ -145,10 +145,10 @@ void r3d_reduce(r3d_poly* poly, r3d_real* moments, r3d_int polyorder) {
 	
 	// for keeping track of which edges have been visited
 	r3d_int **emarks = (r3d_int **)malloc(*nverts * sizeof(r3d_int*));
-	for (int i = 0; i < *nverts; ++i)
+	for (i = 0; i < *nverts; ++i)
 	{
 		emarks[i] = (r3d_int *)malloc(3 * sizeof(r3d_int));
-		for (int j = 0; j < 3; ++j)
+		for (j = 0; j < 3; ++j)
 			emarks[i][j] = 0;
 	}
 	
@@ -260,7 +260,7 @@ void r3d_reduce(r3d_poly* poly, r3d_real* moments, r3d_int polyorder) {
 	}
 
 	// free memory
-	for (int i = 0; i < *nverts; ++i)
+	for (i = 0; i < *nverts; ++i)
 		free(emarks[i]);
 	free(emarks);
 }
