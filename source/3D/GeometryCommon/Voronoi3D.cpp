@@ -231,13 +231,13 @@ namespace
 		{
 			if (diffs[i] > R*1e-5)
 				res.push_back(indeces[i]);
-			else
-				points[indeces[i]] = points[indeces[i - 1]];
+			//else
+			//	points[indeces[i]] = points[indeces[i - 1]];
 		}
 		if (diffs[0] < R*1e-5)
 		{
 			res.pop_back();
-			points[indeces[0]] = points[indeces.back()];
+			//points[indeces[0]] = points[indeces.back()];
 		}
 		return R;
 	}
@@ -506,6 +506,53 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		eo.AddEntry("Point y cor", points[i].y);
 		eo.AddEntry("Point z cor", points[i].z);
 		vproc.output("vproc_" + int2str(rank) + ".bin");
+		vector<size_t> faces_error = vproc.GetCellFaces(static_cast<size_t>(rank));
+		for (size_t j = 0; j < faces_error.size(); ++j)
+		{
+			vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
+			boost::array<Vector3D,4> vec;
+			vec[0] =f_points[0];
+			vec[1] = f_points[1];
+			vec[2] = f_points[2];
+			vec[3] = points[i];
+			double sgn1 = orient3d(vec);
+			vec[3] = vproc.GetMeshPoint(static_cast<size_t>(rank));
+			double sgn2 = orient3d(vec);
+			if(sgn1*sgn2<=0)
+			for (size_t k = 0; k < f_points.size(); ++k)
+				std::cout << "Bad face in Rank " << rank << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
+					<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
+			/*for (size_t k = 0; k < f_points.size(); ++k)
+			{
+				std::cout << "Rank " << rank << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
+					<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
+			}*/
+		}
+		for (std::size_t l = 0; l < Nreal; ++l)
+		{
+			faces_error = vproc.GetCellFaces(static_cast<size_t>(realneigh[l]));
+			for (size_t j = 0; j < faces_error.size(); ++j)
+			{
+				vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
+			boost::array<Vector3D,4> vec;
+			vec[0] =f_points[0];
+			vec[1] = f_points[1];
+			vec[2] = f_points[2];
+			vec[3] = points[i];
+			double sgn1 = orient3d(vec);
+			vec[3] = vproc.GetMeshPoint(static_cast<size_t>(realneigh[l]));
+			double sgn2 = orient3d(vec);
+			if(sgn1*sgn2<=0)
+			for (size_t k = 0; k < f_points.size(); ++k)
+			std::cout << "Bad point in neigh Rank " << realneigh[l] << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
+						<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
+				/*for (size_t k = 0; k < f_points.size(); ++k)
+				{
+					std::cout << "Rank " << realneigh[l] << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
+						<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
+				}*/
+			}
+		}
 		throw eo;
 	}
 	// Send/Recv the points
@@ -541,7 +588,14 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		}
 	}
 	// Point exchange
-	vector<vector<Vector3D> > incoming = MPI_exchange_data(sentproc, sentpoints, points);
+	vector<vector<Vector3D> > incoming;
+	if (points.empty())
+	{
+		vector<Vector3D> dummy(1);
+		incoming = MPI_exchange_data(sentproc, sentpoints, dummy);
+	}
+	else
+		incoming = MPI_exchange_data(sentproc, sentpoints, points);
 	// Combine the vectors
 	for (std::size_t i = 0; i < incoming.size(); ++i)
 		for (std::size_t j = 0; j < incoming[i].size(); ++j)

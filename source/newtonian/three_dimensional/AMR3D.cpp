@@ -1722,12 +1722,12 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 				GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly2, temp, temp2, i_temp);
 				// copy poly
 				poly2.nverts = poly.nverts;
-				for (int k = 0; k < poly2.nverts; ++k)
+				for (int kk = 0; kk < poly2.nverts; ++kk)
 				{
 					for (size_t l = 0; l < 3; ++l)
 					{
-						poly2.verts[k].pos.xyz[l] = poly.verts[k].pos.xyz[l];
-						poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
+						poly2.verts[kk].pos.xyz[l] = poly.verts[kk].pos.xyz[l];
+						poly2.verts[kk].pnbrs[l] = poly.verts[kk].pnbrs[l];
 					}
 				}
 				std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly,&planes);

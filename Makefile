@@ -7,7 +7,7 @@ CCC := gcc
 LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O0 -g -pg 
+	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++0x
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
@@ -15,11 +15,11 @@ else ifeq ($(MODE),parallel)
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DMPI -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DMPI -DOMPI_SKIP_MPICXX -std=c++0x
 	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
 	CC := icpc
@@ -32,7 +32,7 @@ else ifeq ($(MODE),clang)
 	LINT_FLAGS := 
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O3 -march=native
+	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++0x
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
