@@ -45,7 +45,7 @@ double Tillotson::de2pI(double d, double e)const
 	double A = A_*mu;
 	double B = B_*mu*mu;
 	double res = (a_ + b_ / (e / c + 1))*d*e + A + B;
-	return std::max(res,(a_+b_)*d*e*0.1);
+	return std::max(res,(a_+b_)*d*e*0.001);
 }
 
 double Tillotson::de2pII(double d, double e)const
@@ -63,7 +63,7 @@ double Tillotson::de2pIV(double d, double e)const
 	double A = A_*mu;
 	double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 	double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-	return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_+b_)*d*e*0.1);
+	return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_+b_)*d*e*0.001);
 }
 
 double Tillotson::dep2cI(double d, double e, double p) const
@@ -137,14 +137,14 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	}
 	else
 	{
-		double PIV = std::max((a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B, (a_+b_)*d*EIV_*0.1);
+		double PIV = std::max((a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B, (a_+b_)*d*EIV_*0.001);
 		if (p <= PIV)
 		{
 			return dp2EI(d, p);
 		}
 		double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 		double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-		double PCV = std::max(a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_+b_)*d*ECV_*0.1);
+		double PCV = std::max(a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_+b_)*d*ECV_*0.001);
 		if (p >= PCV)
 		{
 			return dp2EIV(d, p);
@@ -153,10 +153,6 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 		{
 			temp_d_ = d;
 			temp_p_ = p;
-			/*double e1 = dp2EI(d, p);
-			double e4 = dp2EIV(d, p);
-			double emin = std::min(e1, e4);
-			double emax = std::max(e1, e4);*/
 			boost::uintmax_t it = 50;
 			std::pair<double,double> res = boost::math::tools::bisect(dp2eII(*this), EIV_, ECV_, 
 				boost::math::tools::eps_tolerance<double>(30) , it);
