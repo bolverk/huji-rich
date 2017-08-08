@@ -742,15 +742,20 @@ std::size_t Delaunay3D::Walk(std::size_t point, std::size_t first_guess)
 			if ((orient3d(b4_temp_)*sign)>0)
 			{
 				good = false;
+				size_t old_facet = cur_facet;
 				cur_facet = tetras_[cur_facet].neighbors[i];
 				if(cur_facet == outside_neighbor_)
 				{
 					std::cout<<"Walk wanted to goto outside neighbor"<<std::endl;
+					std::cout << "Total of "<< Norg_ << " points" << std::endl;
 					std::cout<<"point "<<point<<" "<<points_[point].x<<" "<<points_[point].y<<" "<<points_[point].z<<" "<<std::endl;
 					std::cout<<"Big tetrahedron "<<points_[Norg_].x<<" "<<points_[Norg_].y<<" "<<points_[Norg_].z<<" "<<std::endl;
 					std::cout<<"Big tetrahedron "<<points_[Norg_+1].x<<" "<<points_[Norg_+1].y<<" "<<points_[Norg_+1].z<<" "<<std::endl;
 					std::cout<<"Big tetrahedron "<<points_[Norg_+2].x<<" "<<points_[Norg_+2].y<<" "<<points_[Norg_+2].z<<" "<<std::endl;
 					std::cout<<"Big tetrahedron "<<points_[Norg_+3].x<<" "<<points_[Norg_+3].y<<" "<<points_[Norg_+3].z<<" "<<std::endl;
+					std::cout << "Came from face " << old_facet << std::endl;
+					for (size_t j = 0; j < 3; ++j)
+						std::cout <<"point "<< tetras_[old_facet].points[(i + static_cast<size_t>(j) + 1) % 4]<<" "<< b4_temp_[j].x << " " << b4_temp_[j].y << " " << b4_temp_[j].z << std::endl;
 					throw;
 				}
 				break;
