@@ -231,13 +231,13 @@ namespace
 		{
 			if (diffs[i] > R*1e-5)
 				res.push_back(indeces[i]);
-			//else
-			//	points[indeces[i]] = points[indeces[i - 1]];
+			else
+				points[indeces[i]] = points[indeces[i - 1]];
 		}
 		if (diffs[0] < R*1e-5)
 		{
 			res.pop_back();
-			//points[indeces[0]] = points[indeces.back()];
+			points[indeces[0]] = points[indeces.back()];
 		}
 		return R;
 	}
@@ -510,23 +510,11 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		for (size_t j = 0; j < faces_error.size(); ++j)
 		{
 			vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
-			boost::array<Vector3D,4> vec;
-			vec[0] =f_points[0];
-			vec[1] = f_points[1];
-			vec[2] = f_points[2];
-			vec[3] = points[i];
-			double sgn1 = orient3d(vec);
-			vec[3] = vproc.GetMeshPoint(static_cast<size_t>(rank));
-			double sgn2 = orient3d(vec);
-			if(sgn1*sgn2<=0)
 			for (size_t k = 0; k < f_points.size(); ++k)
-				std::cout << "Bad face in Rank " << rank << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
-					<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
-			/*for (size_t k = 0; k < f_points.size(); ++k)
 			{
 				std::cout << "Rank " << rank << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
 					<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
-			}*/
+			}
 		}
 		for (std::size_t l = 0; l < Nreal; ++l)
 		{
@@ -534,23 +522,11 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 			for (size_t j = 0; j < faces_error.size(); ++j)
 			{
 				vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
-			boost::array<Vector3D,4> vec;
-			vec[0] =f_points[0];
-			vec[1] = f_points[1];
-			vec[2] = f_points[2];
-			vec[3] = points[i];
-			double sgn1 = orient3d(vec);
-			vec[3] = vproc.GetMeshPoint(static_cast<size_t>(realneigh[l]));
-			double sgn2 = orient3d(vec);
-			if(sgn1*sgn2<=0)
-			for (size_t k = 0; k < f_points.size(); ++k)
-			std::cout << "Bad point in neigh Rank " << realneigh[l] << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
-						<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
-				/*for (size_t k = 0; k < f_points.size(); ++k)
+				for (size_t k = 0; k < f_points.size(); ++k)
 				{
 					std::cout << "Rank " << realneigh[l] << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
 						<< " " << f_points[k].y << " " << f_points[k].z << std::endl;
-				}*/
+				}
 			}
 		}
 		throw eo;
@@ -839,7 +815,16 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	vector<std::pair<std::size_t, std::size_t> > ghost_index;
 	MPIFirstIntersections(tproc, ghost_index);
 	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
-	del_.BuildExtra(extra_points);
+	try
+	{
+		del_.BuildExtra(extra_points);
+	}
+	catch (UniversalError &eo)
+	{
+		string fname("extra_" + int2str(rank) + ".bin");
+		output_buildextra(fname);
+		throw eo;
+	}
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(R_.size());
@@ -848,7 +833,16 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	ghost_index = FindIntersections(tproc, false); // intersecting tproc face, point index
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
-	del_.BuildExtra(extra_points);
+	try
+	{
+		del_.BuildExtra(extra_points);
+	}
+	catch (UniversalError &eo)
+	{
+		string fname("extra_" + int2str(rank) + ".bin");
+		output_buildextra(fname);
+		throw eo;
+	}
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -858,7 +852,16 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	ghost_index = FindIntersections(tproc, true);
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
-	del_.BuildExtra(extra_points);
+	try
+	{
+		del_.BuildExtra(extra_points);
+	}
+	catch (UniversalError &eo)
+	{
+		string fname("extra_" + int2str(rank) + ".bin");
+		output_buildextra(fname);
+		throw eo;
+	}
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(R_.size());
@@ -1670,6 +1673,35 @@ void Voronoi3D::output(std::string const& filename)const
 
 	file_handle.close();
 }
+
+void Voronoi3D::output_buildextra(std::string const& filename)const
+{
+
+	std::ofstream file_handle(filename.c_str(), std::ios::out | std::ios::binary);
+	assert(file_handle.is_open());
+	size_t stemp = del_.points_.size();
+	binary_write_single_int(static_cast<int>(stemp), file_handle);
+
+	// Points
+	for (std::size_t i = 0; i < stemp; ++i)
+	{
+		binary_write_single_double(del_.points_[i].x, file_handle);
+		binary_write_single_double(del_.points_[i].y, file_handle);
+		binary_write_single_double(del_.points_[i].z, file_handle);
+	}
+
+	binary_write_single_int(static_cast<int>(duplicatedprocs_.size()), file_handle);
+	// Procs
+	for (std::size_t i = 0; i < duplicatedprocs_.size(); ++i)
+	{
+		binary_write_single_int(static_cast<int>(duplicatedprocs_[i]), file_handle);
+		binary_write_single_int(static_cast<int>(Nghost_[i].size()), file_handle);
+		for(size_t j=0;Nghost_[i].size();++j)
+			binary_write_single_int(static_cast<int>(Nghost_[i][j]), file_handle);
+	}
+	file_handle.close();
+}
+
 
 std::size_t Voronoi3D::GetPointNo(void) const
 {

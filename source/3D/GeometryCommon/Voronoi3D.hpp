@@ -39,6 +39,7 @@ private:
 		vector<Vector3D> const& points, vector<std::size_t> &selfindex, vector<int> &sentproc,
 		vector<vector<std::size_t> > &sentpoints);
 #endif
+	void output_buildextra(std::string const& filename)const;
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 		vector<size_t> &intersecting_faces);
 	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, 
