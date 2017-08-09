@@ -20,9 +20,9 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 	vector<Vector3D> const& points = tess.GetFacePoints();
 	std::size_t N = faces.size();
 	boost::array<Vector3D,4> vec;
-	double R = tess.GetWidth(index);
 	for (std::size_t i = 0; i < N; ++i)
 	{
+		double R = sqrt(tess.GetArea(faces[i]));
 		Vector3D V1, V2;
 		size_t counter = 0;
 		vector<size_t> const& InFace = tess.GetPointsInFace(faces[i]);
