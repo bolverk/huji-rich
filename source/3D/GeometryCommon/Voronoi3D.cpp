@@ -1696,7 +1696,10 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
 	assert(file_handle.is_open());
 	size_t stemp = del_.points_.size();
 	binary_write_single_int(static_cast<int>(stemp), file_handle);
-
+#ifdef RICH_MPI
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
 	// Points
 	for (std::size_t i = 0; i < stemp; ++i)
 	{
@@ -1711,6 +1714,9 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
 	{
 		binary_write_single_int(static_cast<int>(duplicatedprocs_[i]), file_handle);
 		binary_write_single_int(static_cast<int>(Nghost_[i].size()), file_handle);
+#ifdef RICH_MPI
+		std::cout << "Rank " << rank << " writing to proc " << duplicatedprocs_[i] << " " << Nghost_[i].size() << " points" << std::endl;
+#endif
 		for(size_t j=0;Nghost_[i].size();++j)
 			binary_write_single_int(static_cast<int>(Nghost_[i][j]), file_handle);
 	}
