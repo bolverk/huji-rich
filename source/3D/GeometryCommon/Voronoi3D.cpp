@@ -836,6 +836,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	}
 	catch (UniversalError &eo)
 	{
+		std::cout << "Error in first extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
 		throw eo;
@@ -854,6 +855,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	}
 	catch (UniversalError &eo)
 	{
+		std::cout << "Error in second extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
 		throw eo;
@@ -873,6 +875,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	}
 	catch (UniversalError &eo)
 	{
+		std::cout << "Error in third extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
 		throw eo;
@@ -1710,7 +1713,8 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
 
 	binary_write_single_int(static_cast<int>(duplicatedprocs_.size()), file_handle);
 	// Procs
-	for (std::size_t i = 0; i < duplicatedprocs_.size(); ++i)
+	assert(duplicatedprocs_.size() == Nghost_.size());
+	for (size_t i = 0; i < duplicatedprocs_.size(); ++i)
 	{
 		binary_write_single_int(static_cast<int>(duplicatedprocs_[i]), file_handle);
 		binary_write_single_int(static_cast<int>(Nghost_[i].size()), file_handle);
