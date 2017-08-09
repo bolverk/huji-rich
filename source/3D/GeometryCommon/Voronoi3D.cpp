@@ -17,18 +17,33 @@
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index)
 {
 	vector<std::size_t> const& faces = tess.GetCellFaces(index);
+	vector<Vector3D> const& points = tess.GetFacePoints();
 	std::size_t N = faces.size();
 	boost::array<Vector3D,4> vec;
+	double R = tess.GetWidth(index);
 	for (std::size_t i = 0; i < N; ++i)
 	{
-		vec[0] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[0]];
-		vec[1] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[1]];
-		vec[2] = tess.GetFacePoints()[tess.GetPointsInFace(faces[i])[2]];
-		vec[3] = tess.GetMeshPoint(index);
-		double sgn1 = orient3d(vec);
-		vec[3] = point;
-		double sgn2 = orient3d(vec);
-		if (sgn1*sgn2 <= 0)
+		Vector3D V1, V2;
+		size_t counter = 0;
+		vector<size_t> const& InFace = tess.GetPointsInFace(faces[i]);
+		size_t NinFace = InFace.size();
+		V1 = points[InFace[(counter + 1) % NinFace]] - points[InFace[counter]];
+		while (abs(V1) < 0.01*R)
+		{
+			++counter;
+			assert(counter < NinFace);
+			V1 = points[InFace[(counter + 1) % NinFace]] - points[InFace[counter]];
+		}
+		V2 = points[InFace[(counter + 2) % NinFace]] - points[InFace[(counter + 1) % NinFace]];
+		while (abs(V2) < 0.01*R)
+		{
+			++counter;
+			assert(counter < 2 * N);
+			V2 = points[InFace[(counter + 2) % NinFace]] - points[InFace[(counter + 1) % NinFace]];
+		}
+
+		if (ScalarProd(CrossProduct(V1, V2), point - points[InFace[0]]) *ScalarProd(CrossProduct(V1, V2), 
+			tess.GetMeshPoint(index) - points[InFace[0]]) < 0)
 			return false;
 	}
 	return true;
