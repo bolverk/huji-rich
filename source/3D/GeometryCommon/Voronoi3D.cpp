@@ -1718,10 +1718,10 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
 	{
 		binary_write_single_int(static_cast<int>(duplicatedprocs_[i]), file_handle);
 		binary_write_single_int(static_cast<int>(Nghost_[i].size()), file_handle);
-#ifdef RICH_MPI
-		std::cout << "Rank " << rank << " writing to proc " << duplicatedprocs_[i] << " " << Nghost_[i].size() << " points out of " <<duplicatedprocs_.size()<<" procs"<< std::endl;
-#endif
-		for(size_t j=0;Nghost_[i].size();++j)
+//#ifdef RICH_MPI
+	//	std::cout << "Rank " << rank << " writing to proc " << duplicatedprocs_[i] << " " << Nghost_[i].size() << " points out of " <<duplicatedprocs_.size()<<" procs"<< std::endl;
+//#endif
+		for(size_t j=0;j<Nghost_[i].size();++j)
 			binary_write_single_int(static_cast<int>(Nghost_[i][j]), file_handle);
 	}
 	file_handle.close();
