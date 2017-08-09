@@ -756,7 +756,8 @@ std::size_t Delaunay3D::Walk(std::size_t point, std::size_t first_guess)
 					std::cout << "Came from face " << old_facet << std::endl;
 					for (size_t j = 0; j < 3; ++j)
 						std::cout <<"point "<< tetras_[old_facet].points[(i + static_cast<size_t>(j) + 1) % 4]<<" "<< b4_temp_[j].x << " " << b4_temp_[j].y << " " << b4_temp_[j].z << std::endl;
-					throw;
+					UniversalError eo("Bad Walk");
+					throw eo;
 				}
 				break;
 			}
