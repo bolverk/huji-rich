@@ -425,7 +425,7 @@ namespace
 			temp += (A / 3)*(points[indeces[i + 2]]+ points[indeces[i + 1]]+ points[indeces[0]]);
 			Atot += A;
 		}
-		temp *= (1.0 / Atot);
+		temp *= (1.0 / (Atot + DBL_MIN*100)); //prevent overflow
 		return std::pair<double, Vector3D>(Atot, temp);
 	}
 
