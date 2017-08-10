@@ -1177,7 +1177,7 @@ void Voronoi3D::BuildVoronoi(void)
 						if (temp2.size() < 3)
 							continue;
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-5 : 1e-6)))
+						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
 							continue;
 						// Make faces right handed
 						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, sqrt(AreaCM.first));
