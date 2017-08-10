@@ -3,6 +3,7 @@
 #include <mpi.h>
 #endif
 #include <algorithm>
+#include <cfloat>
 #include <stack>
 #include "Mat33.hpp"
 #include "Predicates3D.hpp"
