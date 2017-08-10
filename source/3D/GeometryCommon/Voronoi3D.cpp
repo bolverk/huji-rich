@@ -244,17 +244,10 @@ namespace
 		diffs[0] = abs(points[indeces.back()] - points[indeces[0]]);
 		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i <N; ++i)
-		{
 			if (diffs[i] > R*1e-5)
 				res.push_back(indeces[i]);
-			else
-				points[indeces[i]] = points[indeces[i - 1]];
-		}
 		if (diffs[0] < R*1e-5)
-		{
 			res.pop_back();
-			points[indeces[0]] = points[indeces.back()];
-		}
 		return R;
 	}
 
