@@ -154,8 +154,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 			cells[static_cast<size_t>(neigh[j])].tracers));
 		cs = std::max(cs, abs(cells[neigh[j]].velocity));
 	}
-	const double c_dt = d / dt;
-	velocity += chi_*std::min(c_dt, cs)*(s - r) / R;
+	const double c_dt = std::min(d / dt,3*cs);
+	velocity += chi_*c_dt*(s - r) / R;
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
 
