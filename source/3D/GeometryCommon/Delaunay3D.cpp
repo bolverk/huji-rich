@@ -462,6 +462,7 @@ void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Ve
 	points_.assign(points.begin(), points.end());
 	// Create large tetra points
 	double factor = 100;
+	double dx = std::max(std::max(maxv.x - minv.x,maxv.y-minv.y),maxv.z-minv.z);
 	points_.push_back(Vector3D(minv.x - 1.01*factor * (maxv.x - minv.x), minv.y - factor * (maxv.y - minv.y), minv.z - factor * (maxv.z - minv.z)));
 	points_.push_back(Vector3D(0.5*(minv.x + maxv.x), maxv.y + 1.02*factor *(maxv.y - minv.y), minv.z - factor * (maxv.z - minv.z)));
 	points_.push_back(Vector3D(maxv.x + 0.99*factor * (maxv.x - minv.x), minv.y - factor * (maxv.y - minv.y), minv.z - factor * (maxv.z - minv.z)));
