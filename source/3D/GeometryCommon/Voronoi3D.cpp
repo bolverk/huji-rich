@@ -312,7 +312,6 @@ namespace
 			temp.resize(indeces.size());
 			temp.assign(indeces.begin(), indeces.end());
 			//temp = indeces;
-			int N = static_cast<int>(temp.size());
 			for (int i = 0; i < N; ++i)
 				indeces[static_cast<size_t>(i)] = temp[static_cast<size_t>(N - i - 1)];
 		}
