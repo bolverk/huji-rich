@@ -109,20 +109,23 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		}
 	}
 	const double FarFraction = load > 3 ? 1.1 : 0.65;
-	old_dx = (old_dx>0) ? std::min(old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dx, FarFraction*speed_*R[static_cast<size_t>(rank)]);
-	old_dy = (old_dy > 0) ? std::min(old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dy, FarFraction*speed_*R[static_cast<size_t>(rank)]);
-	old_dz = (old_dz > 0) ? std::min(old_dz, FarFraction*speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dz, FarFraction*speed_*R[static_cast<size_t>(rank)]);
-	dx = (dx > 0) ? std::min(dx, speed_*R[static_cast<size_t>(rank)]) : -std::min(-dx, speed_*R[static_cast<size_t>(rank)]);
-	dy = (dy > 0) ? std::min(dy, speed_*R[static_cast<size_t>(rank)]) : -std::min(-dy, speed_*R[static_cast<size_t>(rank)]);
-	dz = (dz > 0) ? std::min(dz, speed_*R[static_cast<size_t>(rank)]) : -std::min(-dz, speed_*R[static_cast<size_t>(rank)]);
-	// Combine the two additions
-	dx += old_dx;
-	dy += old_dy;
-	dz += old_dz;
+	old_dx *= FarFraction;
+	old_dy *= FarFraction;
+	old_dz *= FarFraction;
+	old_dx += dx;
+	old_dy += dy;
+	old_dz += dz;
+
+	old_dx = (old_dx>0) ? std::min(old_dx, 0.25*R[static_cast<size_t>(rank)]) : -std::min(-old_dx, 0.25*R[static_cast<size_t>(rank)]);
+	old_dy = (old_dy > 0) ? std::min(old_dy, 0.25*R[static_cast<size_t>(rank)]) : -std::min(-old_dy, 0.25*R[static_cast<size_t>(rank)]);
+	old_dz = (old_dz > 0) ? std::min(old_dz, 0.25*R[static_cast<size_t>(rank)]) : -std::min(-old_dz, 0.25*R[static_cast<size_t>(rank)]);
 	// Add the round cells
-	dx += dxround;
-	dy += dyround;
-	dz += dzround;
+	old_dx += dxround;
+	old_dy += dyround;
+	old_dz += dzround;
+	dx = (old_dx>0) ? std::min(old_dx, speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dx, speed_*R[static_cast<size_t>(rank)]);
+	dy = (old_dy > 0) ? std::min(old_dy, speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dy, speed_*R[static_cast<size_t>(rank)]);
+	dz = (old_dz > 0) ? std::min(old_dz, speed_*R[static_cast<size_t>(rank)]) : -std::min(-old_dz, speed_*R[static_cast<size_t>(rank)]);
 	// Make sure not out of bounds
 	point = tproc.GetMeshPoint(rank);
 	const double close = 0.999;
