@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <boost/math/tools/roots.hpp>
 #include <iostream>
+#include "../../misc/universal_error.hpp"
 
 Tillotson::Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV,double
 	alpha,double beta):
@@ -45,7 +46,7 @@ double Tillotson::de2pI(double d, double e)const
 	double A = A_*mu;
 	double B = B_*mu*mu;
 	double res = (a_ + b_ / (e / c + 1))*d*e + A + B;
-	return std::max(res,(a_+b_)*d*e*0.00001);
+	return std::max(res,(a_+b_)*d*e*1e-8);
 }
 
 double Tillotson::de2pII(double d, double e)const
@@ -63,7 +64,7 @@ double Tillotson::de2pIV(double d, double e)const
 	double A = A_*mu;
 	double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 	double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-	return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_+b_)*d*e*0.00001);
+	return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_+b_)*d*e*1e-8);
 }
 
 double Tillotson::dep2cI(double d, double e, double p) const
@@ -137,14 +138,14 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	}
 	else
 	{
-		double PIV = std::max((a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B, (a_+b_)*d*EIV_*0.00001);
+		double PIV = std::max((a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B, (a_+b_)*d*EIV_*1e-8);
 		if (p <= PIV)
 		{
 			return dp2EI(d, p);
 		}
 		double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 		double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-		double PCV = std::max(a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_+b_)*d*ECV_*0.00001);
+		double PCV = std::max(a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_+b_)*d*ECV_*1e-8);
 		if (p >= PCV)
 		{
 			return dp2EIV(d, p);
@@ -158,8 +159,19 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 				boost::math::tools::eps_tolerance<double>(30) , it);
 			double result = 0.5*(res.first + res.second);
 			double newp = de2p(d, result);
-			if(newp>PIV*2)
-				assert(std::abs(p - newp) < 0.001*p);
+			if (newp > PIV * 2)
+			{
+				if (std::abs(p - newp) > 0.001*p)
+				{
+					UniversalError eo("No dp2e convergence");
+					eo.AddEntry("Density", d);
+					eo.AddEntry("Pressure", p);
+					eo.AddEntry("New Pressure", newp);
+					eo.AddEntry("EIV", EIV_);
+					eo.AddEntry("ECV", ECV_);
+					throw eo;
+				}
+			}
 			assert(result > 0);
 			return result;
 		}
