@@ -36,7 +36,30 @@ void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessell
 	fluxes.resize(tess.GetTotalFacesNumber(), extensives[0]);
 	size_t Nloop = fluxes.size();
 	for (size_t i = 0; i < Nloop; ++i)
-		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, tracerstickernames,face_values[i]);
+	{
+		if (face_values[i].first.density < 0 || face_values[i].first.pressure < 0 || face_values[i].first.internal_energy < 0
+			|| face_values[i].second.density < 0 || face_values[i].second.pressure < 0 || face_values[i].second.internal_energy < 0)
+		{
+			UniversalError eo("Bad input to flux calculator");
+			eo.AddEntry("Face", static_cast<double>(i));
+			eo.AddEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(i).first));
+			eo.AddEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(i).second));
+			eo.AddEntry("First input Density", face_values[i].first.density);
+			eo.AddEntry("First input pressure", face_values[i].first.pressure);
+			eo.AddEntry("First input internal energy", face_values[i].first.internal_energy);
+			eo.AddEntry("Second input Density", face_values[i].second.density);
+			eo.AddEntry("Second input pressure", face_values[i].second.pressure);
+			eo.AddEntry("Second input internal energy", face_values[i].second.internal_energy);
+			eo.AddEntry("First cell Density", cells[tess.GetFaceNeighbors(i).first].density);
+			eo.AddEntry("First cell pressure", cells[tess.GetFaceNeighbors(i).first].pressure);
+			eo.AddEntry("First cell internal energy", cells[tess.GetFaceNeighbors(i).first].internal_energy);
+			eo.AddEntry("Second cell Density", cells[tess.GetFaceNeighbors(i).second].density);
+			eo.AddEntry("Second cell pressure", cells[tess.GetFaceNeighbors(i).second].pressure);
+			eo.AddEntry("Second cell internal energy", cells[tess.GetFaceNeighbors(i).second].internal_energy);
+			throw eo;
+		}
+		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, tracerstickernames, face_values[i]);
+	}
 }
 
 ConditionActionFlux1::Condition3D::~Condition3D(void) {}
