@@ -169,6 +169,10 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 					eo.AddEntry("New Pressure", newp);
 					eo.AddEntry("EIV", EIV_);
 					eo.AddEntry("ECV", ECV_);
+					eo.AddEntry("First energy", res.first);
+					eo.AddEntry("Second energy", res.second);
+					eo.AddEntry("First pressure", de2p(d,res.first));
+					eo.AddEntry("Second pressure", de2p(d, res.second));
 					throw eo;
 				}
 			}
