@@ -39,7 +39,13 @@ namespace {
 
 double IdealGas::dp2c(double d, double p, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
-  assert(g_>0 && p>0 && d>0);
+	if (g_ < 0 || p < 0 || d < 0)
+	{
+		UniversalError eo("Negative quantity in ideal gas");
+		eo.AddEntry("Density", d);
+		eo.AddEntry("Pressure",p);
+		throw eo;
+	}
   return sqrt(g_*p/d);
 }
 
