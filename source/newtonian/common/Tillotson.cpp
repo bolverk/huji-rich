@@ -155,8 +155,18 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 			temp_d_ = d;
 			temp_p_ = p;
 			boost::uintmax_t it = 50;
-			std::pair<double,double> res = boost::math::tools::bisect(dp2eII(*this), EIV_, ECV_, 
-				boost::math::tools::eps_tolerance<double>(30) , it);
+			std::pair<double, double> res;
+			if (d * 1000 < rho0_)
+			{
+				res=boost::math::tools::bisect(dp2eII(*this), EIV_, ECV_,
+					boost::math::tools::eps_tolerance<double>(30), it);
+			}
+			else
+			{
+				it = 100;
+				res = boost::math::tools::bisect(dp2eII(*this), EIV_, ECV_,
+					boost::math::tools::eps_tolerance<double>(40), it);
+			}
 			double result = 0.5*(res.first + res.second);
 			double newp = de2p(d, result);
 			if (newp > PIV * 2)
