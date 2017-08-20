@@ -1259,11 +1259,14 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		visited.insert(cur);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
-		double R = f.neighbors.first<N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
-		if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R)
+		double R = tproc.GetWidth(f.neighbors.first);
+		if(f.neighbors.second<N)
+			R=std::max(R, tproc.GetWidth(f.neighbors.second));
+		R = f.neighbors.first<N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
+		if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 10 * R && f.neighbors.first < N)
 			continue;
 		R = f.neighbors.second<N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
-		if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R)
+		if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 10 * R && f.neighbors.second < N)
 			continue;
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
