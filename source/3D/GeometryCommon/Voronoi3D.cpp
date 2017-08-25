@@ -1245,7 +1245,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, bool recursive,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	Vector3D const& vpoint)
+	Vector3D const& /*vpoint*/)
 {
 	vector<std::size_t> res;
 	std::size_t N = tproc.GetPointNo();
