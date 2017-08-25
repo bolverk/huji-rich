@@ -1172,6 +1172,11 @@ void Voronoi3D::BuildVoronoi(void)
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
 						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
 							continue;
+						if(N1>=Norg_&&N1<(Norg_+4)
+						   {
+							UniversalError eo("Neighboring big tet point");
+							throw eo;
+						   }
 						// Make faces right handed
 						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, sqrt(AreaCM.first));
 						area_.push_back(AreaCM.first);
@@ -1259,15 +1264,6 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		visited.insert(cur);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
-		double R = tproc.GetWidth(f.neighbors.first);
-		if(f.neighbors.second<N)
-			R=std::max(R, tproc.GetWidth(f.neighbors.second));
-		R = f.neighbors.first<N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
-		if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 10 * R && f.neighbors.first < N)
-			continue;
-		R = f.neighbors.second<N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
-		if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 10 * R && f.neighbors.second < N)
-			continue;
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
 		for (std::size_t j = 0; j < Ntetra; ++j)
@@ -1276,18 +1272,6 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			sphere.center = tetra_centers_[PointTetras_[point][j]];
 			if (FaceSphereIntersections(f, sphere,normal))
 			{
-				if(f.neighbors.first<N)
-				{
-					double R0 = tproc.GetWidth(f.neighbors.first);
-					if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 20 * R0)
-						continue;
-				}
-				if(f.neighbors.second<N)
-				{
-					double R0 = tproc.GetWidth(f.neighbors.second);
-					if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 20 * R0)
-						continue;
-				}
 				res.push_back(cur);
 				if (recursive)
 				{
