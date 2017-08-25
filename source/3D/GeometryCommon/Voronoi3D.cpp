@@ -1172,7 +1172,7 @@ void Voronoi3D::BuildVoronoi(void)
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
 						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
 							continue;
-						if(N1>=Norg_&&N1<(Norg_+4)
+						if(N1>=Norg_&&N1<(Norg_+4))
 						   {
 							UniversalError eo("Neighboring big tet point");
 							throw eo;
