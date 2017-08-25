@@ -1378,6 +1378,8 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 	vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 	size_t Nneigh = neigh.size();
 	vector<Vector3D> face_norm(Nneigh),face_point(Nneigh);
+	vector<size_t> to_add;
+	double R = tproc.GetWidth(static_cast<size_t>(rank));
 	for (size_t i = 0; i < Nneigh; ++i)
 	{
 		vector<Vector3D> const& all_points = tproc.GetFacePoints();
@@ -1397,9 +1399,12 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 				{
 					if (del_.tetras_[i].points[k] < Norg_)
 					{
+						to_add.clear();
 						size_t index = 0;
 						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
 						double r = std::abs(ScalarProd(face_norm[0], point - face_point[0]));
+						if (r < 0.2*R)
+							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
 							double temp = std::abs(ScalarProd(face_norm[z], point - face_point[z]));
@@ -1408,8 +1413,14 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 								r = temp;
 								index = z;
 							}
+							if (temp < 0.2*R)
+								to_add.push_back(z);
 						}
-						ghost_index.push_back(std::pair<size_t, size_t>(faces[index], del_.tetras_[i].points[k]));
+						to_add.push_back(index);
+						std::sort(to_add.begin(), to_add.end());
+						to_add = unique(to_add);
+						for(size_t l=0;l<to_add.size();++l)
+							ghost_index.push_back(std::pair<size_t, size_t>(faces[to_add[l]], del_.tetras_[i].points[k]));
 					}
 				}
 				break;

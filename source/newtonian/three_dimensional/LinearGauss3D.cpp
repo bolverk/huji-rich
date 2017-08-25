@@ -10,7 +10,7 @@ namespace
 {
 	void CheckCell(ComputationalCell3D const& cell)
 	{
-		if (cell.density < 0 || cell.pressure < 0)
+		if (cell.density < 0 || cell.pressure < 0 || cell.internal_energy<0)
 			throw UniversalError("Bad cell after interpolation in LinearGauss3D");
 	}
 
