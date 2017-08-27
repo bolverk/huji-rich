@@ -839,7 +839,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	tetra_centers_.resize(R_.size());
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
-	ghost_index = FindIntersections(tproc, false); // intersecting tproc face, point index
+	ghost_index = FindIntersections(tproc, 1); // intersecting tproc face, point index
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
 	try
@@ -859,8 +859,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	tetra_centers_.resize(R_.size());
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
-	ghost_index = FindIntersections(tproc, true);
-	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
+	ghost_index = FindIntersections(tproc, 2);
+	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
 
 	try
 	{
@@ -869,6 +869,26 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	catch (UniversalError &eo)
 	{
 		std::cout << "Error in third extra rank " << rank << std::endl;
+		string fname("extra_" + int2str(rank) + ".bin");
+		output_buildextra(fname);
+		throw eo;
+	}
+
+	R_.resize(del_.tetras_.size());
+	std::fill(R_.begin(), R_.end(), -1);
+	tetra_centers_.resize(R_.size());
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
+
+	ghost_index = FindIntersections(tproc, 3);
+	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
+
+	try
+	{
+		del_.BuildExtra(extra_points);
+	}
+	catch (UniversalError &eo)
+	{
+		std::cout << "Error in fourth extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
 		throw eo;
@@ -1244,7 +1264,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 }
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
-	Sphere &sphere, bool recursive,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
+	Sphere &sphere, size_t mode,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
 	Vector3D const& /*vpoint*/)
 {
 	vector<std::size_t> res;
@@ -1252,6 +1272,22 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 	assert(to_check.empty());
 	std::size_t Ntetra = PointTetras_[point].size();
 	vector<std::size_t> faces = tproc.GetCellFaces(rank);
+	if (mode == 2)
+	{
+		vector<size_t> nneigh,ntemp;
+		tproc.GetNeighborNeighbors(nneigh, rank);
+		size_t ws = tproc.GetPointNo();
+		for (size_t i = 0; i < nneigh.size(); ++i)
+		{
+			if (nneigh[i] < ws)
+			{
+				ntemp = tproc.GetCellFaces(nneigh[i]);
+				faces.insert(faces.end(), ntemp.begin(), ntemp.end());
+			}
+		}
+		std::sort(faces.begin(), faces.end());
+		faces = unique(faces);
+	}
 	for (std::size_t i = 0; i < faces.size(); ++i)
 		to_check.push(faces[i]);
 	visited.clear();
@@ -1273,7 +1309,7 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			if (FaceSphereIntersections(f, sphere,normal))
 			{
 				res.push_back(cur);
-				if (recursive)
+				if (mode==3)
 				{
 					if (f.neighbors.first < N && f.neighbors.first != rank)
 					{
@@ -1322,7 +1358,7 @@ std::size_t Voronoi3D::GetFirstPointToCheck(void)const
 }
 
 #ifdef RICH_MPI
-vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessellation3D const& tproc, bool recursive)
+vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessellation3D const& tproc, size_t mode)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -1347,7 +1383,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 		// Does sphere have any intersections?
 		bool added = false;
 		vector<std::size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
-			recursive, visited, intersection_check,del_.points_[cur_loc]);
+			mode, visited, intersection_check,del_.points_[cur_loc]);
 		if (!intersecting_faces.empty())
 		{
 			added = true;

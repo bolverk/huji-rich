@@ -43,7 +43,7 @@ private:
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 		vector<size_t> &intersecting_faces);
 	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, 
-		std::size_t point, Sphere &sphere, bool recursive, boost::container::flat_set<size_t> &visited,
+		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
 		std::stack<std::size_t> &to_check,Vector3D const& vpoint);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res);
@@ -57,7 +57,7 @@ private:
 	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
 	vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
 #ifdef RICH_MPI
-	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, bool recursive);
+	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode);
 	vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 		Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
 	void MPIFirstIntersections(Tessellation3D const& tproc, vector<std::pair<std::size_t, std::size_t> > &ghost_index);
