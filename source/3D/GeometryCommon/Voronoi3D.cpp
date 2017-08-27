@@ -1439,7 +1439,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 						size_t index = 0;
 						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
 						double r = std::abs(ScalarProd(face_norm[0], point - face_point[0]));
-						if (r < 0.15*R)
+						if (r < 0.05*R)
 							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
@@ -1449,7 +1449,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 								r = temp;
 								index = z;
 							}
-							if (temp < 0.15*R)
+							if (temp < 0.05*R)
 								to_add.push_back(z);
 						}
 						to_add.push_back(index);
