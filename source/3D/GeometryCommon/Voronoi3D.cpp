@@ -1265,7 +1265,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	Vector3D const& /*vpoint*/)
+	Vector3D const& vpoint)
 {
 	vector<std::size_t> res;
 	std::size_t N = tproc.GetPointNo();
@@ -1300,6 +1300,15 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		visited.insert(cur);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
+		if (mode == 1 || mode == 2)
+		{
+			double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
+			if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 10 * R)
+				continue;
+			R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
+			if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 10 * R)
+				continue;
+		}
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
 		for (std::size_t j = 0; j < Ntetra; ++j)
