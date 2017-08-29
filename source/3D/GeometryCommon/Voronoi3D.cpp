@@ -1434,18 +1434,12 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 	vector<size_t> neigh = tproc.GetNeighbors(static_cast<size_t>(rank));
 	vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 	size_t Nneigh = neigh.size();
-	vector<Vector3D> face_norm(Nneigh),face_point(Nneigh);
 	vector<size_t> to_add;
-	double R = tproc.GetWidth(static_cast<size_t>(rank));
+	vector<Vector3D> neigh_points(Nneigh);
 	for (size_t i = 0; i < Nneigh; ++i)
-	{
-		vector<Vector3D> const& all_points = tproc.GetFacePoints();
-		vector<size_t> const& face_points = tproc.GetPointsInFace(faces[i]);
-		face_point[i] = all_points[face_points[0]];
-		face_norm[i] = tproc.GetMeshPoint(tproc.GetFaceNeighbors(faces[i]).first) - tproc.GetMeshPoint(tproc.GetFaceNeighbors(faces[i]).second);
-		face_norm[i] *= 1.0 / abs(face_norm[i]);
-	}
+		neigh_points[i] = tproc.GetMeshPoint(neigh[i]);
 	size_t Ntetra = del_.tetras_.size();
+	Vector3D proc_point = tproc.GetMeshPoint(static_cast<size_t>(rank));
 	for (size_t i = 0; i < Ntetra; ++i)
 	{
 		for (size_t j = 0; j < 4; ++j)
@@ -1459,18 +1453,21 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 						to_add.clear();
 						size_t index = 0;
 						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
-						double r = std::abs(ScalarProd(face_norm[0], point - face_point[0]));
-						if (r < 0.05*R)
+						double r0 = abs(point - proc_point);
+						double r1 = abs(point - neigh_points[0]);
+						double ratio = r0 > r1 ? r1 / r0 : r0 / r1;
+						if (ratio > 0.95)
 							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
-							double temp = std::abs(ScalarProd(face_norm[z], point - face_point[z]));
-							if (temp < r)
+							r1 = abs(point - neigh_points[i]);
+							double temp = r0 > r1 ? r1 / r0 : r0 / r1;
+							if (temp > ratio)
 							{
-								r = temp;
+								ratio = temp;
 								index = z;
 							}
-							if (temp < 0.05*R)
+							if (temp > 0.95)
 								to_add.push_back(z);
 						}
 						to_add.push_back(index);
