@@ -832,6 +832,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 		std::cout << "Error in first extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
+		tproc.output("vproc_" + int2str(rank) + ".bin");
 		throw eo;
 	}
 	R_.resize(del_.tetras_.size());
@@ -851,6 +852,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 		std::cout << "Error in second extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
+		tproc.output("vproc_" + int2str(rank) + ".bin");
 		throw eo;
 	}
 
@@ -871,6 +873,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 		std::cout << "Error in third extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
+		tproc.output("vproc_" + int2str(rank) + ".bin");
 		throw eo;
 	}
 
@@ -891,6 +894,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 		std::cout << "Error in fourth extra rank " << rank << std::endl;
 		string fname("extra_" + int2str(rank) + ".bin");
 		output_buildextra(fname);
+		tproc.output("vproc_" + int2str(rank) + ".bin");
 		throw eo;
 	}
 	R_.resize(del_.tetras_.size());
@@ -1460,7 +1464,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 						double r0 = abs(point - proc_point);
 						double r1 = abs(point - neigh_points[0]);
 						double ratio = r0 > r1 ? r1 / r0 : r0 / r1;
-						if (ratio > 0.95 && r0<2*radii[0])
+						if (ratio > 0.95 && r1<2*radii[0])
 							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
