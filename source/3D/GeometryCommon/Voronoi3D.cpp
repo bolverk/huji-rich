@@ -1436,8 +1436,12 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 	size_t Nneigh = neigh.size();
 	vector<size_t> to_add;
 	vector<Vector3D> neigh_points(Nneigh);
+	vector<double> radii(Nneigh);
 	for (size_t i = 0; i < Nneigh; ++i)
+	{
 		neigh_points[i] = tproc.GetMeshPoint(neigh[i]);
+		radii[i] = neigh[i] >= tproc.GetPointNo() ? tproc.GetWidth(static_cast<size_t>(rank)) : tproc.GetWidth(neigh[i]);			
+	}
 	size_t Ntetra = del_.tetras_.size();
 	Vector3D proc_point = tproc.GetMeshPoint(static_cast<size_t>(rank));
 	for (size_t i = 0; i < Ntetra; ++i)
@@ -1456,7 +1460,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 						double r0 = abs(point - proc_point);
 						double r1 = abs(point - neigh_points[0]);
 						double ratio = r0 > r1 ? r1 / r0 : r0 / r1;
-						if (ratio > 0.95)
+						if (ratio > 0.95 && r0<radii[0])
 							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
@@ -1467,7 +1471,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 								ratio = temp;
 								index = z;
 							}
-							if (temp > 0.95)
+							if (temp > 0.95 && r1<radii[z]) 
 								to_add.push_back(z);
 						}
 						to_add.push_back(index);
