@@ -1460,18 +1460,18 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 						double r0 = abs(point - proc_point);
 						double r1 = abs(point - neigh_points[0]);
 						double ratio = r0 > r1 ? r1 / r0 : r0 / r1;
-						if (ratio > 0.95 && r0<radii[0])
+						if (ratio > 0.95 && r0<2*radii[0])
 							to_add.push_back(0);
 						for (size_t z = 1; z < Nneigh; ++z)
 						{
 							r1 = abs(point - neigh_points[z]);
 							double temp = r0 > r1 ? r1 / r0 : r0 / r1;
-							if (temp > ratio)
+							if (temp > ratio && r1<3*radii[z])
 							{
 								ratio = temp;
 								index = z;
 							}
-							if (temp > 0.95 && r1<radii[z]) 
+							if (temp > 0.95 && r1<2*radii[z]) 
 								to_add.push_back(z);
 						}
 						to_add.push_back(index);
