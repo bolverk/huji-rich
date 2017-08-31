@@ -1474,7 +1474,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 								index = z;
 							}
 						}
-						if(mind_1*radii[index]<5)
+						if(mind_1*radii[index]>0.25)
 							to_add.push_back(index);
 						std::sort(to_add.begin(), to_add.end());
 						to_add = unique(to_add);
