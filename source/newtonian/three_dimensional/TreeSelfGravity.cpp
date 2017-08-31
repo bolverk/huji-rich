@@ -9,7 +9,7 @@ extern "C"
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
-TreeSelfGravity::TreeSelfGravity(size_t nx, size_t ny, size_t nz) :nx_(nx), ny_(ny), nz_(nz) {}
+TreeSelfGravity::TreeSelfGravity(size_t nx, size_t ny, size_t nz,double opening) :nx_(nx), ny_(ny), nz_(nz),opening_(opening) {}
 
 void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells,
 	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const & /*tracerstickernames*/,
@@ -26,7 +26,7 @@ void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<Compu
 	r->integrator = reb_simulation::REB_INTEGRATOR_NONE;
 	r->gravity = reb_simulation::REB_GRAVITY_TREE;
 	r->boundary = reb_simulation::REB_BOUNDARY_NONE;
-	r->opening_angle2 = 0.5;          // This constant determines the accuracy of the tree code gravity estimate.
+	r->opening_angle2 = opening_;          // This constant determines the accuracy of the tree code gravity estimate.
 	r->G = 1;
 	r->softening = 0;         // Gravitational softening length
 	r->dt = DBL_MIN * 100;         // Timestep
