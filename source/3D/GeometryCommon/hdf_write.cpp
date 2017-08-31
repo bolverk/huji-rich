@@ -139,6 +139,18 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 		temp[i] = tess.GetMeshPoint(i).z;
 	write_std_vector_to_hdf5(file, temp, "Z");
 
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetCellCM(i).x;
+	write_std_vector_to_hdf5(file, temp, "CMx");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetCellCM(i).y;
+	write_std_vector_to_hdf5(file, temp, "CMy");
+
+	for (size_t i = 0; i < Ncells; ++i)
+		temp[i] = tess.GetCellCM(i).z;
+	write_std_vector_to_hdf5(file, temp, "CMz");
+
 #ifdef RICH_MPI
 	// MPI
 	Group mpi = file.createGroup("/mpi");
