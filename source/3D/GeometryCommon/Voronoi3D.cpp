@@ -377,7 +377,6 @@ namespace
 
 	void TalkSymmetry(vector<int> & to_talk_with)
 	{
-		assert(to_talk_with.size() > 0);
 		int wsize;
 		MPI_Comm_size(MPI_COMM_WORLD, &wsize);
 		vector<int> totalk(static_cast<std::size_t>(wsize), 0);
@@ -1475,7 +1474,8 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc,vector<std::pa
 								index = z;
 							}
 						}
-						to_add.push_back(index);
+						if(mind_1*radii[index]<5)
+							to_add.push_back(index);
 						std::sort(to_add.begin(), to_add.end());
 						to_add = unique(to_add);
 						for(size_t l=0;l<to_add.size();++l)
