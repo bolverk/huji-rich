@@ -46,7 +46,7 @@ private:
 		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
 		std::stack<std::size_t> &to_check,Vector3D const& vpoint);
 	std::size_t GetFirstPointToCheck(void)const;
-	void GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res);
+	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
 	Vector3D GetTetraCM(boost::array<Vector3D, 4> const& points)const;
 	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
@@ -57,7 +57,8 @@ private:
 	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
 	vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
 #ifdef RICH_MPI
-	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode);
+	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode,
+		vector<unsigned char> &checked_clear);
 	vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 		Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
 	void MPIFirstIntersections(Tessellation3D const& tproc, vector<std::pair<std::size_t, std::size_t> > &ghost_index);

@@ -100,13 +100,13 @@ namespace
 		return false;
 	}
 
-	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<bool> &future_check, size_t Norg,
+	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<unsigned char> &future_check, size_t Norg,
 		Delaunay3D const& del,vector<vector<size_t> > const& PointsInTetra)
 	{
 		check_stack.empty();;
-		future_check.resize(Norg, false);
+		future_check.resize(Norg, 0);
 		size_t Ntetra = del.tetras_.size();
-		vector<bool> tetra_check(Ntetra, false);
+		vector<unsigned char> tetra_check(Ntetra, 0);
 		
 		/*for (size_t i = 0; i < Ntetra; ++i)
 		{
@@ -137,7 +137,7 @@ namespace
 						{
 							size_t ntet = PointsInTetra[tetra.points[k]].size();
 							for (size_t z = 0; z < ntet; ++z)
-								tetra_check[PointsInTetra[tetra.points[k]][z]] = true;
+								tetra_check[PointsInTetra[tetra.points[k]][z]] = 1;
 						}
 					}
 					break;
@@ -146,18 +146,18 @@ namespace
 		}
 		for (size_t i = 0; i < Ntetra; ++i)
 		{
-			if (tetra_check[i])
+			if (tetra_check[i] == 1)
 			{
 				Tetrahedron const& tetra = del.tetras_[i];
 				for (size_t j = 0; j < 4; ++j)
 				{
 					if (tetra.points[j] < Norg)
-						future_check[tetra.points[j]] = true;
+						future_check[tetra.points[j]] = 1;
 				}
 			}
 		}
 		for (size_t i = 0; i < Norg; ++i)
-			if (future_check[i])
+			if (future_check[i]==1)
 				check_stack.push(i);
 	}
 
@@ -838,8 +838,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	std::fill(R_.begin(), R_.end(), -1);
 	tetra_centers_.resize(R_.size());
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
-
-	ghost_index = FindIntersections(tproc, 1); // intersecting tproc face, point index
+	vector<unsigned char> checked_clear(Norg_, 0);
+	ghost_index = FindIntersections(tproc, 1,checked_clear); // intersecting tproc face, point index
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
 	try
@@ -860,7 +860,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	tetra_centers_.resize(R_.size());
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
-	ghost_index = FindIntersections(tproc, 2);
+	ghost_index = FindIntersections(tproc, 2, checked_clear);
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
 
 	try
@@ -881,7 +881,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	tetra_centers_.resize(R_.size());
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
-	ghost_index = FindIntersections(tproc, 3);
+	ghost_index = FindIntersections(tproc, 3, checked_clear);
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc,self_duplicate);
 
 	try
@@ -1097,7 +1097,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	del_.BuildExtra(extra_points);
 
 	size_t counter = 0;
-	vector<bool> real_duplicate(del_.points_.size(), false);
+	vector<unsigned char> real_duplicate(del_.points_.size(), 0);
 	for (size_t i = 0; i < del_.tetras_.size(); ++i)
 	{
 		for (size_t j = 0; j < 4; ++j)
@@ -1106,14 +1106,14 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 			{
 				for (size_t k = 0; k < 4; ++k)
 					if (del_.tetras_[i].points[k] >= Norg_)
-						real_duplicate[del_.tetras_[i].points[k]] = true;
+						real_duplicate[del_.tetras_[i].points[k]] = 1;
 				break;
 			}
 		}
 	}
 	for (size_t i = 0; i < real_duplicate.size(); ++i)
 	{
-		if (real_duplicate[i])
+		if (real_duplicate[i] == 1)
 			++counter;
 	}
 
@@ -1359,14 +1359,14 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 }
 
 
-void Voronoi3D::GetPointToCheck(std::size_t point, vector<bool> const& checked, vector<std::size_t> &res)
+void Voronoi3D::GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res)
 {
 	res.clear();
 	std::size_t ntetra = PointTetras_[point].size();
 	for (std::size_t i = 0; i < ntetra; ++i)
 	{
 		for (std::size_t j = 0; j < 4; ++j)
-			if (del_.tetras_[PointTetras_[point][i]].points[j] < Norg_ && !checked[del_.tetras_[PointTetras_[point][i]].points[j]])
+			if (del_.tetras_[PointTetras_[point][i]].points[j] < Norg_ && checked[del_.tetras_[PointTetras_[point][i]].points[j]] == 0)
 				res.push_back(del_.tetras_[PointTetras_[point][i]].points[j]);
 	}
 	std::sort(res.begin(), res.end());
@@ -1382,7 +1382,8 @@ std::size_t Voronoi3D::GetFirstPointToCheck(void)const
 }
 
 #ifdef RICH_MPI
-vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessellation3D const& tproc, size_t mode)
+vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessellation3D const& tproc, size_t mode,
+	vector<unsigned char> &checked_clear)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -1394,7 +1395,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	if (Norg_ == 0)
 		return res;
 	Sphere sphere;
-	vector<bool> checked(Norg_, false), will_check(Norg_, false);
+	vector<unsigned char> checked(Norg_, 0), will_check(Norg_, 0);
 	FirstCheckList(check_stack, will_check, Norg_, del_,PointTetras_);
 	size_t cur_loc;
 	std::stack<size_t> intersection_check;
@@ -1404,6 +1405,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 		cur_loc = check_stack.top();
 		check_stack.pop();
 		checked[cur_loc] = true;
+		if (checked_clear[cur_loc]==1)
+			continue;
 		// Does sphere have any intersections?
 		bool added = false;
 		vector<std::size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
@@ -1414,6 +1417,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 			for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
 				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], cur_loc));
 		}
+		else
+			checked_clear[cur_loc] = 1;
 		if (added)
 		{
 			GetPointToCheck(cur_loc, checked, point_neigh);
@@ -1502,7 +1507,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFirstIntersections
 	vector<std::size_t> point_neigh;
 	vector<std::pair<std::size_t, std::size_t> > res;
 	Sphere sphere;
-	vector<bool> checked(Norg_, false), will_check(Norg_, false);
+	vector<unsigned char>  will_check(Norg_, 0);
 	std::size_t cur_loc;
 	std::stack<std::size_t > check_stack;
 	FirstCheckList(check_stack, will_check, Norg_, del_, PointTetras_);
@@ -1542,7 +1547,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 	vector<std::size_t> point_neigh;
 	vector<std::pair<std::size_t, std::size_t> > res;
 	Sphere sphere;
-	vector<bool> checked(Norg_, false), will_check(Norg_, false);
+	vector<unsigned char> checked(Norg_, 0), will_check(Norg_, 0);
 	std::size_t cur_loc;
 	if (first_run)
 	{
