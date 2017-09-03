@@ -14,9 +14,9 @@ else ifeq ($(MODE),intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lrebound -lr3d
 	ARCHIVER_FUNC := xiar
-else ifeq ($(MODE),intel_parallel)
+else ifeq ($(MODE),parallel_intel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
-	CC := mpiCC
+	CC := mpic++
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lreboundmpi -lr3d
