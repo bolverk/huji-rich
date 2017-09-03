@@ -26,6 +26,11 @@ else ifeq ($(MODE),intel)
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),parallel_intel)
+	CC := mpic++
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++0x -DMPI -DOMPI_SKIP_MPICXX
+	LINT_FLAGS = 
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
