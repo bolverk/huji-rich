@@ -1324,13 +1324,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			if (mode == 2)
 			{
 				double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
-				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 25 * R)
+				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 50 * R)
 				{
 					skipped = true;
 					continue;
 				}
 				R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
-				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 25 * R)
+				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 50 * R)
 				{
 					skipped = true;
 					continue;
