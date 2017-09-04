@@ -1268,7 +1268,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 
 vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	Vector3D const& vpoint)
+	Vector3D const& vpoint,bool &skipped)
 {
 	vector<std::size_t> res;
 	std::size_t N = tproc.GetPointNo();
@@ -1294,6 +1294,7 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 	for (std::size_t i = 0; i < faces.size(); ++i)
 		to_check.push(faces[i]);
 	visited.clear();
+	skipped = false;
 	while (!to_check.empty())
 	{
 		std::size_t cur = to_check.top();
@@ -1307,10 +1308,16 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		{
 			double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
 			if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 5 * R)
+			{
+				skipped = true;
 				continue;
+			}
 			R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
 			if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 5 * R)
+			{
+				skipped = true;
 				continue;
+			}
 		}
 		else
 		{
@@ -1318,10 +1325,16 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			{
 				double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
 				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 25 * R)
+				{
+					skipped = true;
 					continue;
+				}
 				R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
 				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 25 * R)
+				{
+					skipped = true;
 					continue;
+				}
 			}
 		}
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
@@ -1400,6 +1413,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	size_t cur_loc;
 	std::stack<size_t> intersection_check;
 	boost::container::flat_set<size_t> visited;
+	bool skipped = false;
 	while (!check_stack.empty())
 	{
 		cur_loc = check_stack.top();
@@ -1410,7 +1424,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 		// Does sphere have any intersections?
 		bool added = false;
 		vector<std::size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
-			mode, visited, intersection_check,del_.points_[cur_loc]);
+			mode, visited, intersection_check,del_.points_[cur_loc],skipped);
 		if (!intersecting_faces.empty())
 		{
 			added = true;
@@ -1418,7 +1432,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], cur_loc));
 		}
 		else
-			checked_clear[cur_loc] = 1;
+			if(!skipped)
+				checked_clear[cur_loc] = 1;
 		if (added)
 		{
 			GetPointToCheck(cur_loc, checked, point_neigh);
