@@ -1658,7 +1658,6 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 			ScalarProd(v3, v3), v3.x, v3.y,
 			ScalarProd(v4, v4), v4.x, v4.y);
 		double DDz = m_Dz.determinant();
-		double rtemp = Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc;
 		Vector3D center = Vector3D(DDx / (2 * a), DDy / (2 * a), DDz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
 		tetra_centers_[index] = center;
 		return 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
