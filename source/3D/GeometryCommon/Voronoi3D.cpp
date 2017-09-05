@@ -1680,7 +1680,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		eo.AddEntry("dx", dx);
 		eo.AddEntry("dy", dy);
 		eo.AddEntry("dz", dz);
-		eo.AddEntry("tetra", index);
+		eo.AddEntry("tetra", static_cast<double>(index));
 		throw eo;
 	}
 	return 0.5*sqrt(rtemp) / std::abs(aa);
