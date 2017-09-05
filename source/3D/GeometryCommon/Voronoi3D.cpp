@@ -1627,8 +1627,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double Dx = (dx + aa - cc);
 	double Dy = (dy + aa - cc);
 	double Dz = (dz + aa - cc);
-	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
-
+	
 	if (std::abs(dx-cc)<std::max(std::abs(dx),std::abs(cc))*1e-4 || 
 		std::abs(dy - cc)<std::max(std::abs(dy), std::abs(cc))*1e-4 ||
 		std::abs(dz - cc)<std::max(std::abs(dz), std::abs(cc))*1e-4)
@@ -1659,17 +1658,11 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 			ScalarProd(v3, v3), v3.x, v3.y,
 			ScalarProd(v4, v4), v4.x, v4.y);
 		double DDz = m_Dz.determinant();
-
+		double rtemp = Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc;
 		Vector3D center = Vector3D(DDx / (2 * a), DDy / (2 * a), DDz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
-		if (tetra_centers_[index].x/ center.x > 0.999 && tetra_centers_[index].y/center.y > 0.999 && tetra_centers_[index].z/ center.z > 0.999
-			&& 0.999 < center.x/ tetra_centers_[index].x && 0.999 < center.y/ tetra_centers_[index].y && 0.999 < center.z/ tetra_centers_[index].z)
-		{
-			tetra_centers_[index] = center;
-			return 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
-		}
+		tetra_centers_[index] = center;
+		return 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	}
-
-
 	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
 	double rtemp = Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc;
 	if (rtemp < 0)
