@@ -1275,8 +1275,12 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 	assert(to_check.empty());
 	std::size_t Ntetra = PointTetras_[point].size();
 	vector<std::size_t> faces = tproc.GetCellFaces(rank);
+	vector<size_t> neigh;
 	if (mode == 2)
 	{
+		tproc.GetNeighbors(rank, neigh);
+		neigh.push_back(rank);
+		std::sort(neigh.begin(), neigh.end());
 		vector<size_t> nneigh,ntemp;
 		tproc.GetNeighborNeighbors(nneigh, rank);
 		size_t ws = tproc.GetPointNo();
@@ -1324,13 +1328,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			if (mode == 2)
 			{
 				double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
-				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 50 * R)
+				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 25 * R)
 				{
 					skipped = true;
 					continue;
 				}
 				R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
-				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 50 * R)
+				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 25 * R)
 				{
 					skipped = true;
 					continue;
@@ -1345,6 +1349,12 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			sphere.center = tetra_centers_[PointTetras_[point][j]];
 			if (FaceSphereIntersections(f, sphere,normal))
 			{
+				if (mode != 2)
+					skipped = true;
+				else
+					if (!std::binary_search(neigh.begin(), neigh.end(), f.neighbors.first) ||
+						!std::binary_search(neigh.begin(), neigh.end(), f.neighbors.second))
+						skipped = true;
 				res.push_back(cur);
 				if (mode==3)
 				{
@@ -1431,9 +1441,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 			for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
 				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], cur_loc));
 		}
-		else
-			if(!skipped)
-				checked_clear[cur_loc] = 1;
+		if(!skipped)
+			checked_clear[cur_loc] = 1;
 		if (added)
 		{
 			GetPointToCheck(cur_loc, checked, point_neigh);
