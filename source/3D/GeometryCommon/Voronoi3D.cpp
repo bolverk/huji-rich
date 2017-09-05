@@ -1671,8 +1671,19 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 
 
 	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
-
-	return 0.5*sqrt(Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc) / std::abs(aa);
+	double rtemp = Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc;
+	if (rtemp < 0)
+	{
+		UniversalError eo("Negative tetra radius");
+		eo.AddEntry("aa", aa);
+		eo.AddEntry("cc", cc);
+		eo.AddEntry("dx", dx);
+		eo.AddEntry("dy", dy);
+		eo.AddEntry("dz", dz);
+		eo.AddEntry("tetra", index);
+		throw eo;
+	}
+	return 0.5*sqrt(rtemp) / std::abs(aa);
 }
 
 Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
