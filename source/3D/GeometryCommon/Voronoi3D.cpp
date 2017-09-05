@@ -1298,7 +1298,7 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 	for (std::size_t i = 0; i < faces.size(); ++i)
 		to_check.push(faces[i]);
 	visited.clear();
-	skipped = false;
+	skipped = true;
 	while (!to_check.empty())
 	{
 		std::size_t cur = to_check.top();
@@ -1313,13 +1313,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
 			if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 5 * R)
 			{
-				skipped = true;
+				skipped = false;
 				continue;
 			}
 			R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
 			if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 5 * R)
 			{
-				skipped = true;
+				skipped = false;
 				continue;
 			}
 		}
@@ -1330,13 +1330,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 				double R = f.neighbors.first < N ? tproc.GetWidth(f.neighbors.first) : tproc.GetWidth(rank);
 				if (abs(tproc.GetMeshPoint(f.neighbors.first) - vpoint) > 25 * R)
 				{
-					skipped = true;
+					skipped = false;
 					continue;
 				}
 				R = f.neighbors.second < N ? tproc.GetWidth(f.neighbors.second) : tproc.GetWidth(rank);
 				if (abs(tproc.GetMeshPoint(f.neighbors.second) - vpoint) > 25 * R)
 				{
-					skipped = true;
+					skipped = false;
 					continue;
 				}
 			}
@@ -1350,11 +1350,11 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 			if (FaceSphereIntersections(f, sphere,normal))
 			{
 				if (mode != 2)
-					skipped = true;
+					skipped = false;
 				else
 					if (!std::binary_search(neigh.begin(), neigh.end(), f.neighbors.first) ||
 						!std::binary_search(neigh.begin(), neigh.end(), f.neighbors.second))
-						skipped = true;
+						skipped = false;
 				res.push_back(cur);
 				if (mode==3)
 				{
@@ -1441,7 +1441,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 			for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
 				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], cur_loc));
 		}
-		if(!skipped)
+		if(skipped&&!added)
 			checked_clear[cur_loc] = 1;
 		if (added)
 		{
