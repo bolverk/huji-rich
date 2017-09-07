@@ -114,8 +114,28 @@ namespace
 			eo.AddEntry("Cell x cor", center.x);
 			eo.AddEntry("Cell y cor", center.y);
 			eo.AddEntry("Cell z cor", center.z);
+			eo.AddEntry("Cell CMx cor", cell_cm.x);
+			eo.AddEntry("Cell CMy cor", cell_cm.y);
+			eo.AddEntry("Cell CMz cor", cell_cm.z);
 			eo.AddEntry("Cell volume", cell_volume);
 			eo.AddEntry("Det was", det);
+			for (size_t i = 0; i < faces.size(); ++i)
+			{
+				Vector3D c_ij = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
+				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
+				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
+				eo.AddEntry("Neighbor z", neighbor_centers[i].z);
+				eo.AddEntry("Face", faces[i]);
+				eo.AddEntry("Neighbor Cx", c_ij.x);
+				eo.AddEntry("Neighbor Cy", c_ij.y);
+				eo.AddEntry("Neighbor Cz", c_ij.z);
+				eo.AddEntry("Face Cx", tess.FaceCM(faces[i]).x);
+				eo.AddEntry("Face Cy", tess.FaceCM(faces[i]).y);
+				eo.AddEntry("Face Cz", tess.FaceCM(faces[i]).z);
+				eo.AddEntry("Face area", tess.GetArea(faces[i]));
+			}
+			for (size_t i = 0; i < 9; ++i)
+				eo.AddEntry("M", m[i]);
 			throw eo;
 		}
 		// Invert the matrix
