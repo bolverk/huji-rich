@@ -125,7 +125,7 @@ namespace
 				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
 				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
 				eo.AddEntry("Neighbor z", neighbor_centers[i].z);
-				eo.AddEntry("Face", faces[i]);
+				eo.AddEntry("Face", static_cast<double>(faces[i]));
 				eo.AddEntry("Neighbor Cx", c_ij.x);
 				eo.AddEntry("Neighbor Cy", c_ij.y);
 				eo.AddEntry("Neighbor Cz", c_ij.z);
