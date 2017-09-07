@@ -65,7 +65,7 @@ namespace
 				" Cell y cor " << center.y << " Cell z cor " << center.z << std::endl;
 		// Create the matrix to invert and the vector to compare
 		boost::array<double,9>  m;
-		std::fill_n(m.begin(), 9, 0);
+		std::fill_n(m.begin(), 9, 0.0);
 		for (size_t i = 0; i < n; ++i)
 		{
 			Vector3D c_ij = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);

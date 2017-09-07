@@ -1638,8 +1638,12 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double Dz = (dz + aa - cc);
 	double rtemp = Dx*Dx + Dy*Dy + Dz*Dz + 4 * aa*cc;
 	if (std::abs(dx-cc)<std::max(std::abs(dx),std::abs(cc))*1e-4 || 
+		std::abs(dx - cc)>std::abs(aa)*1e4||
 		std::abs(dy - cc)<std::max(std::abs(dy), std::abs(cc))*1e-4 ||
-		std::abs(dz - cc)<std::max(std::abs(dz), std::abs(cc))*1e-4 || rtemp<0)
+		std::abs(dy - cc)>std::abs(aa)*1e4 ||
+		std::abs(dz - cc)<std::max(std::abs(dz), std::abs(cc))*1e-4 || 
+		std::abs(dz - cc)>std::abs(aa)*1e4 ||
+		rtemp<0 )
 	{
 		Vector3D v2(del_.points_[del_.tetras_[index].points[1]]);
 		v2 -= del_.points_[del_.tetras_[index].points[0]];
