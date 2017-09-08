@@ -1675,7 +1675,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		tetra_centers_[index] = center;
 		double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 		// Sanity check
-		if (abs(temp_points[0] - center) > 0.001*abs(center))
+		if (abs(temp_points[0] - center) > 0.001*Rres)
 		{
 			UniversalError eo("Wrong tetra radius");
 			eo.AddEntry("R", Rres);
@@ -1715,7 +1715,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	}
 	double Rres = 0.5*sqrt(rtemp) / std::abs(aa);
 	// Sanity check
-	if (abs(temp_points[0] - tetra_centers_[index]) > 0.001*abs(tetra_centers_[index]))
+	if (abs(temp_points[0] - tetra_centers_[index]) > 0.001*Rres)
 	{
 		UniversalError eo("Wrong tetra radius");
 		eo.AddEntry("R", Rres);
