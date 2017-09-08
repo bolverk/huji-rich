@@ -1673,7 +1673,33 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		double DDz = m_Dz.determinant();
 		Vector3D center = Vector3D(DDx / (2 * a), DDy / (2 * a), DDz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
 		tetra_centers_[index] = center;
-		return 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
+		double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
+		// Sanity check
+		if (abs(temp_points[0] - center) > 0.001*abs(center))
+		{
+			UniversalError eo("Wrong tetra radius");
+			eo.AddEntry("R", Rres);
+			eo.AddEntry("Diff r", abs(temp_points[0] - center));
+			eo.AddEntry("aa", aa);
+			eo.AddEntry("cc", cc);
+			eo.AddEntry("dx", dx);
+			eo.AddEntry("dy", dy);
+			eo.AddEntry("dz", dz);
+			eo.AddEntry("DDx", DDx);
+			eo.AddEntry("DDy", DDy);
+			eo.AddEntry("DDz", DDz);
+			eo.AddEntry("a", a);
+			eo.AddEntry("tetra", static_cast<double>(index));
+			for (size_t j = 0; j < 4; ++j)
+			{
+				eo.AddEntry("Point index", static_cast<double>(del_.tetras_[index].points[j]));
+				eo.AddEntry("Tetra Point x", temp_points[j].x);
+				eo.AddEntry("Tetra Point y", temp_points[j].y);
+				eo.AddEntry("Tetra Point z", temp_points[j].z);
+			}
+			throw eo;
+		}
+		return Rres;
 	}
 	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
 	if (rtemp < 0)
@@ -1687,7 +1713,29 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		eo.AddEntry("tetra", static_cast<double>(index));
 		throw eo;
 	}
-	return 0.5*sqrt(rtemp) / std::abs(aa);
+	double Rres = 0.5*sqrt(rtemp) / std::abs(aa);
+	// Sanity check
+	if (abs(temp_points[0] - tetra_centers_[index]) > 0.001*abs(tetra_centers_[index]))
+	{
+		UniversalError eo("Wrong tetra radius");
+		eo.AddEntry("R", Rres);
+		eo.AddEntry("Diff r", abs(temp_points[0] - tetra_centers_[index]));
+		eo.AddEntry("aa", aa);
+		eo.AddEntry("cc", cc);
+		eo.AddEntry("dx", dx);
+		eo.AddEntry("dy", dy);
+		eo.AddEntry("dz", dz);
+		eo.AddEntry("tetra", static_cast<double>(index));
+		for (size_t j = 0; j < 4; ++j)
+		{
+			eo.AddEntry("Point index", static_cast<double>(del_.tetras_[index].points[j]));
+			eo.AddEntry("Tetra Point x", temp_points[j].x);
+			eo.AddEntry("Tetra Point y", temp_points[j].y);
+			eo.AddEntry("Tetra Point z", temp_points[j].z);
+		}
+		throw eo;
+	}
+	return Rres;
 }
 
 Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
