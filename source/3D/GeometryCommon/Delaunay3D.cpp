@@ -13,7 +13,11 @@ namespace
 	bool PlaneLineIntersection(boost::array<Vector3D, 3> const& plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
 		Vector3D N = CrossProduct(plane[1] - plane[0], plane[2] - plane[0]);
-		N *= (1.0/abs(N));
+		double Nsize = abs(N);
+		double Rmin = std::min(std::min(abs(plane[1] - plane[0]), abs(plane[2] - plane[0])), abs(plane[1] - plane[2]));
+		if (Nsize > (Rmin*Rmin * 100))
+			return false;
+		N *= (1.0/Nsize);
 		Vector3D mu = B - A;
 		if (std::abs(ScalarProd(mu, N)) < (abs(mu)*1e-4))
 			return false;
