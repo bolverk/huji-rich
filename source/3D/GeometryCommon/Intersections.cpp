@@ -56,9 +56,9 @@ bool FaceSphereIntersections(Face const& face, Sphere const& sphere, Vector3D co
 	circle_center.y = sphere.center.y - (ScalarProd(normal, sphere.center) + D)*normal.y;
 	circle_center.z = sphere.center.z - (ScalarProd(normal, sphere.center) + D)*normal.z;
 	std::size_t Nloop = face.vertices.size();
-	double R = sqrt(sphere.radius*sphere.radius - d*d);
 	if (PointInPolygon(face, circle_center))
 		return true;
+	double R = sqrt(sphere.radius*sphere.radius - d*d);
 	for (std::size_t i = 0; i < Nloop; ++i)
 	{
 		if (CircleSegmentIntersect(face.vertices[(i + 1) % Nloop], face.vertices[i], circle_center, R))
