@@ -21,6 +21,26 @@ void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<Compu
 	Vector3D diff = box.second - box.first;
 	double boxsize = std::max(std::max(diff.x, diff.y), diff.z);
 
+#ifdef RICH_MPI
+	// find all point CM
+	Vector3D localCM;
+	for (size_t i = 0; i < Norg; ++i)
+		localCM += tess.GetCellCM(i);
+	vector<double> cm_d(3, 0), cm_d_i(3, 0);
+	cm_d[0] = localCM.x;
+	cm_d[1] = localCM.y;
+	cm_d[2] = localCM.z;
+	MPI_Allreduce(&cm_d[0], &cm_d_i[0], 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	int ntotal = static_cast<int> (Norg);
+	int Ntotal_in = 0;
+	MPI_Allreduce(&ntotal, &Ntotal_in, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	localCM.x = cm_d_i[0] / static_cast<double>(Ntotal_in);
+	localCM.y = cm_d_i[1] / static_cast<double>(Ntotal_in);
+	localCM.z = cm_d_i[2] / static_cast<double>(Ntotal_in);
+	CM -= localCM;
+	boxsize += std::max(std::max(std::abs(localCM.x), std::abs(localCM.y)), std::abs(localCM.z));
+#endif
+
 	struct reb_simulation* const r = reb_create_simulation();
 	// Setup constants
 	r->integrator = reb_simulation::REB_INTEGRATOR_NONE;
@@ -232,6 +252,8 @@ void TreeSelfGravity::operator()(const Tessellation3D & tess, const vector<Compu
 		}
 	}
 	*/
+
+
 	struct reb_particle pt = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 	for (size_t i = 0; i < Norg; ++i)
 	{
