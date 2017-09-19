@@ -431,7 +431,7 @@ namespace
 	{
 	public:
 		Compare comp;
-		PairComp(Compare comp_) : comp(comp_) {}
+		explicit PairComp(Compare comp_) : comp(comp_) {}
 		bool operator() (const std::pair<size_t, RAIter>& a,
 			const std::pair<size_t, RAIter>& b) const {
 			return comp(*a.second, *b.second);

@@ -40,6 +40,8 @@ public:
   
 	//! \brief Class destructor
 	~facet();
+
+  facet& operator=(const facet& other);
 };
 
 #endif //FACET_HPP

@@ -15,7 +15,7 @@ class LagrangianHLLC : public RiemannSolver
 private:
 	const bool massflux_;
 public:
-	LagrangianHLLC(bool massflux=true);
+  explicit LagrangianHLLC(bool massflux=true);
 
 	Conserved operator()
 		(Primitive const& left,

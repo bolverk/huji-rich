@@ -38,6 +38,8 @@ public:
   */
   Face(Face const& other);
 
+  Face& operator=(const Face& other);
+
   /*! \brief Returns the area of the face
     \return Length
   */

@@ -25,6 +25,8 @@ public:
   //! \param source Source
   Snapshot(const Snapshot& source);
 
+  Snapshot& operator=(const Snapshot& other);
+
   //! \brief Mesh points
   vector<Vector2D> mesh_points;
 

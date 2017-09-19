@@ -311,9 +311,9 @@ void UpdateConservedIntensive(Tessellation const& tessellation,
 	}
 }
 
-Primitive RotatePrimitive(Vector2D const& normaldir,
-	Vector2D const& paraldir,
-	Primitive const& p)
+Primitive RotatePrimitive(const Vector2D& normaldir,
+			  const Vector2D& paraldir,
+			  const Primitive& p)
 {
 	Primitive res = p;
 	res.Velocity.Set(Projection(p.Velocity, normaldir),

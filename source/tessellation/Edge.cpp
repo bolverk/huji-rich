@@ -12,6 +12,13 @@ Edge::Edge(Edge const& other):
 vertices(other.vertices),
 	neighbors(other.neighbors) {}
 
+Edge& Edge::operator=(const Edge& other)
+{
+  vertices = other.vertices;
+  neighbors = other.neighbors;
+  return *this;
+}
+
 Edge::Edge(Vector2D const& p1, Vector2D const& p2,
 	int neighbor1, int neighbor2):
 vertices(p1,p2), neighbors(neighbor1, neighbor2) {}

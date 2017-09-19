@@ -39,6 +39,8 @@ public:
    */
   Extensive& operator=(const Extensive& origin);
 
+  Extensive(const Extensive& other);
+
   /*! \brief Self difference operator
     \param diff Difference
     \return Reference to self

@@ -30,9 +30,9 @@
   \param cell Primitive variables
   \return Rotated cell
  */
-Primitive RotatePrimitive(const Vector2D& n,
-	const Vector2D& p,
-	const Primitive& cell);
+Primitive RotatePrimitive(const Vector2D& normaldir,
+			  const Vector2D& paraldir,
+			  const Primitive& p);
 
 /*! \brief Rotates flux from the edge frame back to the lab frame
   \param c Flux

@@ -7,6 +7,13 @@ Face::Face(vector<Vector3D> const& vert,size_t neighbor1,size_t neighbor2):
 
 Face::Face(void): vertices(), neighbors() {}
 
+Face& Face::operator=(const Face& other)
+{
+  vertices = other.vertices;
+  neighbors = other.neighbors;
+  return *this;
+}
+
   Face::~Face(void)
   {}
 

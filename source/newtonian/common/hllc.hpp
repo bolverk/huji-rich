@@ -16,7 +16,7 @@ private:
 	const bool massflux_;
 public:
 
-	Hllc(bool massflux = true);
+  explicit Hllc(bool massflux = true);
 
 	Conserved operator()
 		(Primitive const& left,

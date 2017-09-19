@@ -50,6 +50,8 @@ public:
 	\return The copy
   */
   Conserved& operator=(Conserved const&other);
+
+  Conserved(const Conserved& other);
 };
 
 //! \brief Primitive hydrodynamic variables
@@ -129,6 +131,8 @@ public:
 	\return The copy
   */
   Primitive& operator=(Primitive const&other);
+
+  Primitive(const Primitive& other);
 };
 
 /*! \brief Checks if on of the fields of Primitive is a nan
