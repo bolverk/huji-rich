@@ -16,6 +16,7 @@ public:
 
 	/*! \brief Class constructor
 	  \param cfl CFL number
+	  \param source The source term for the simulation
 	 */
 	explicit CourantFriedrichsLewy(double cfl,SourceTerm3D const& source);
 

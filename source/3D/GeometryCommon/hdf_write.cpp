@@ -1,5 +1,5 @@
 #include "hdf_write.hpp"
-#include "hdf5_utils.hpp"
+#include "../../misc/hdf5_utils.hpp"
 #include "../../misc/int2str.hpp"
 
 using namespace H5;

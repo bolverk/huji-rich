@@ -54,6 +54,7 @@ public:
 	  \param internal_energy_i Internal energy per unit mass
 	  \param velocity_i Velocity
 	  \param tracers_i Tracers
+	  \param stickers_i Stickers
 	  */
 	ComputationalCell3D(double density_i,
 		double pressure_i,

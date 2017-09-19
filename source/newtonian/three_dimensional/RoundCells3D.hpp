@@ -1,4 +1,4 @@
-/*! \file RoundCElls.hpp
+/*! \file RoundCells3D.hpp
 \author Elad Steinberg
 \brief Correction to point velocities that keeps cells round
 */
@@ -19,10 +19,12 @@ public:
 	/*! \brief Class constructor
 	\param pm Base point motion
 	\param eos Equation of state
-	\param outer The outer boudnary conditions, used for preventing points from getting outside the box. If periodic then no fix is applied
+	\param ll The lower left corner of the domain
+	\param ur The upper right corner of the domain
 	\param chi chi parameter in equation 63
 	\param eta eta parameter in equation 63
 	\param cold Switch for cold flows
+	\param no_move List of stickers not to move the cells for
 	*/
 	RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos,Vector3D const& ll,Vector3D const& ur,
 		double chi = 0.25, double eta = 0.02, bool cold = false,vector<std::string> no_move=vector<std::string>());

@@ -26,6 +26,7 @@ public:
 #ifdef RICH_MPI
 	/*! \brief Builds the tessellation
 	\param points Initial position of mesh generating points
+	\param tproc The tessellation of the domain decomposition
 	*/
 	virtual void Build(vector<Vector3D> const& points, Tessellation3D const& tproc) = 0;
 #endif

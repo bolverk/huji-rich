@@ -1116,7 +1116,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 		if (real_duplicate[i] == 1)
 			++counter;
 	}
-
+	del_.CheckCorrect();
+	std::cout << "Check ok" << std::endl;
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);

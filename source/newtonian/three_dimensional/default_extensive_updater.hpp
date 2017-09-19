@@ -1,4 +1,4 @@
-/*! \file extensive_generator.hpp
+/*! \file default_extensive_updater.hpp
   \brief Generates extensive conserved variables
   \author Almog Yalinewich
  */

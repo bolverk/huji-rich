@@ -1,4 +1,4 @@
-/*! \file time_step_calculator.hpp
+/*! \file time_step_function3D.hpp
   \brief Abstract class for time step calculator
   \author Almog Yalinewich
  */

@@ -18,6 +18,7 @@ class FluxCalculator3D
 public:
 
   /*! \brief Calculates the fluxes
+  \param extensives The extensive variables
     \param tess Tessellation
     \param cells Computational cells
     \param eos Equation of state
@@ -26,7 +27,6 @@ public:
 	\param dt The timestep
 	\param time The time
 	\param tracerstickernames The names of the stickers and tracers
-	\param face_values The primitive values at the face
    */
   virtual void operator()(vector<Conserved3D> &fluxes,const Tessellation3D& tess,const vector<Vector3D>& edge_velocities,
 	  const vector<ComputationalCell3D>& cells,const vector<Conserved3D>& extensives,const EquationOfState& eos,

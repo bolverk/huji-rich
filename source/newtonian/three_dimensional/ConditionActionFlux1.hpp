@@ -1,4 +1,4 @@
-/*! \file FirstOrderHydroFlux.hpp
+/*! \file ConditionActionFlux1.hpp
   \brief First order flux calculator based on a series of conditions and actions
   \author Elad Steinberg
  */
@@ -10,7 +10,7 @@
 #include "flux_calculator_3d.hpp"
 #include "../common/riemann_solver.hpp"
 #include "../../misc/utils.hpp"
-#include "SpatitalReconstruction3D.hpp"
+#include "SpatialReconstruction3D.hpp"
 
 using namespace std;
 
@@ -65,6 +65,7 @@ public:
 	/*!
 	\brief Class constructor
 	 \param sequence Series of condition and action action pairs. Both have to be dynamically allocated pointers, and will be explicitly destructed upon descruction of the class
+	 \param interp The interpolation class
 	*/
 	explicit ConditionActionFlux1(const vector<pair<const Condition3D*, const Action3D*> >& sequence,
 		SpatialReconstruction3D const& interp);

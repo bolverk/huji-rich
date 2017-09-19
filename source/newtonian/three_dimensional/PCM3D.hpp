@@ -6,7 +6,7 @@
 #ifndef PCM3D_HPP
 #define PCM3D_HPP 1
 
-#include "SpatitalReconstruction3D.hpp"
+#include "SpatialReconstruction3D.hpp"
 #include "Ghost3D.hpp"
 
 //! \brief Piecewise constant interpolation

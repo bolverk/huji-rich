@@ -28,9 +28,9 @@ int EstimateHilbertIterationNum(vector<Vector3D> const& cor);
 void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPointsOut);
 
 /*!
-\brief Scale a vector of 3D points to the unit-cube
-\param vPointsIn The input points
-\param vPointsOut (out) The output points
+\brief Find points with same indeces
+\param vD_sorted The input points, sorted
+\param vOut (out) The list of points with same indeces
 */
 void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<vector<std::size_t> > & vOut);
 

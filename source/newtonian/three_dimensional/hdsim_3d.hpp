@@ -53,7 +53,11 @@ public:
     \param tsc Time step calculator
     \param fc Flux calculator
     \param cu Cell updater
+	\param eu Extensive updater
+	\param source Source term
+	\param tsn The names of the stickers and tracers
 	\param proc_update How to load balance
+	\param tproc The tessellation of the domian decomposition
    */
   HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
@@ -75,7 +79,7 @@ public:
 
   //! \brief Advances the simulation in time (first order)
   void timeAdvance();
-
+  //! \brief Advances the simulation in time (second order)
   void timeAdvance2();
 
   /*! \brief Access to tessellation
@@ -94,26 +98,42 @@ public:
     \return Computational cells
    */
   const vector<ComputationalCell3D>& getCells(void) const;
-
+  /*! \brief Access to extensive cells
+  \return Extensive cells
+  */
   const vector<Conserved3D>& getExtensives(void) const;
-
+  /*! \brief Access to tessellation
+  \return Tessellation
+  */
   Tessellation3D& getTesselation(void);
 
   /*! \brief Access to computational cells
   \return Computational cells
   */
   vector<ComputationalCell3D>& getCells(void);
-
+  /*! \brief Access to extensive cells
+  \return Extensive cells
+  */
   vector<Conserved3D>& getExtensives(void);
-
+  /*! \brief Get the time of the simulation
+  \return The current time of the simulation
+  */
   double GetTime(void)const;
-
+  /*! \brief Access to the names of the stickers and tracers
+  \return The names of the stickers and tracers
+  */
   TracerStickerNames GetTracerStickerNames(void)const;
-
+  /*! \brief Get the cycle number of the simulation
+  \return The current cycle of the simulation
+  */
   size_t GetCycle(void)const;
-
+  /*! \brief Change the cycle of the simulation
+  \param cycle The new cycle of the simulation
+  */
   void SetCycle(size_t cycle);
-
+  /*! \brief Change the time of the simulation
+  \param t The new time of the simulation
+  */
   void SetTime(double t);
 
 private:

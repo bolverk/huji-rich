@@ -7,7 +7,7 @@
 #define LINEAR_GAUSS3D_HPP 1
 
 #include "../common/equation_of_state.hpp"
-#include "SpatitalReconstruction3D.hpp"
+#include "SpatialReconstruction3D.hpp"
 #include <cmath>
 #include "../../misc/universal_error.hpp"
 #include "Ghost3D.hpp"
@@ -26,6 +26,7 @@ public:
 	\param ghost The ghost point generator
 	\param flat_tracers Names of tracers for which the slope is always zero
 	\param skip_key The sticker name to skip cells for taking them into account for the slope limit
+	\param tsn The names of the stickers and tracers
 	*/
 	LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
 		double theta = 0.5,double delta_P = 0.7,const vector<string>& flat_tracers = vector<string>(),
@@ -40,6 +41,8 @@ public:
 	\param cm The cell's center of mass
 	\param target The location of the interpolation
 	\param res The interpolated value
+	\param tsn The names of the stickers and tracers
+	\param eos The equation of state
 	*/
 	void Interp(ComputationalCell3D &res,ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm, Vector3D const& target,
 		EquationOfState const& eos,TracerStickerNames const& tsn)const;

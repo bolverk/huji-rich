@@ -36,6 +36,7 @@ class ConservativeForce3D : public SourceTerm3D
 public:
 	/*! \brief Class constructor
 	\param acc The acceleration force
+	\param mass_flux TO include the mass flux term in the calculation or not (eq.  94 or eq. 82 in Arepo)
 	*/
 	explicit ConservativeForce3D(const Acceleration3D& acc,bool mass_flux);
 
