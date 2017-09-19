@@ -48,13 +48,17 @@ double time, TracerStickerNames const& ts) const
 		if (edge.neighbors.first < tess.GetPointNo())
 		{
 			ReplaceExtensive(toadd, extensives_local[static_cast<size_t>(edge.neighbors.first)]);
-			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.first] + dV[edge.neighbors.first] - dv_ws[edge.neighbors.first]));
+			toadd *= (L*(ws)*dt / (cd.volumes[static_cast<size_t>(edge.neighbors.first)] + 
+					       dV[static_cast<size_t>(edge.neighbors.first)] - 
+					       dv_ws[static_cast<size_t>(edge.neighbors.first)]));
 			extensives[static_cast<size_t>(edge.neighbors.first)] -= toadd; 
 		}
 		if (edge.neighbors.second < tess.GetPointNo())
 		{
 			ReplaceExtensive(toadd, extensives_local[static_cast<size_t>(edge.neighbors.second)]);
-			toadd *= (L*(ws)*dt / (cd.volumes[edge.neighbors.second] + dV[edge.neighbors.second] + dv_ws[edge.neighbors.second]));
+			toadd *= (L*(ws)*dt / (cd.volumes[static_cast<size_t>(edge.neighbors.second)] + 
+					       dV[static_cast<size_t>(edge.neighbors.second)] + 
+					       dv_ws[static_cast<size_t>(edge.neighbors.second)]));
 			extensives[static_cast<size_t>(edge.neighbors.second)] += toadd;
 		}
 	}
