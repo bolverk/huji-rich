@@ -38,8 +38,10 @@ public:
   ~ConsecutiveSnapshots(void);
 
 private:
-  std::auto_ptr<Trigger> trigger_;
-  std::auto_ptr<Index2FileName> i2fn_;
+  //std::auto_ptr<Trigger> trigger_;
+  std::unique_ptr<Trigger> trigger_;
+  //  std::auto_ptr<Index2FileName> i2fn_;
+  std::unique_ptr<Index2FileName> i2fn_;
   int counter_;
   const vector<DiagnosticAppendix*> appendices_;
 };
