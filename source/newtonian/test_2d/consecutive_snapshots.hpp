@@ -38,10 +38,13 @@ public:
   ~ConsecutiveSnapshots(void);
 
 private:
-  //std::auto_ptr<Trigger> trigger_;
+#if (__cplusplus >= 201103L)
   std::unique_ptr<Trigger> trigger_;
-  //  std::auto_ptr<Index2FileName> i2fn_;
   std::unique_ptr<Index2FileName> i2fn_;
+#else
+  std::auto_ptr<Trigger> trigger_;
+  std::auto_ptr<Index2FileName> i2fn_;
+#endif
   int counter_;
   const vector<DiagnosticAppendix*> appendices_;
 };

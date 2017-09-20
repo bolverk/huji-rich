@@ -45,13 +45,21 @@ public:
   void operator()(const hdsim& sim);
 
 private:
-  //  std::auto_ptr<Trigger> p_trigger_;
+
+#if (__cplusplus >= 201103L)
   std::unique_ptr<Trigger> p_trigger_;
+#else
+  std::auto_ptr<Trigger> p_trigger_;
+#endif
   int count_;
-  //  std::auto_ptr<Index2FileName> p_i2f_;
+
+#if (__cplusplus >= 201103L)
   std::unique_ptr<Index2FileName> p_i2f_;
-  //  std::auto_ptr<LocalContourCriterion> p_lcc_;
   std::unique_ptr<LocalContourCriterion> p_lcc_;
+#else
+  std::auto_ptr<Index2FileName> p_i2f_;
+  std::auto_ptr<LocalContourCriterion> p_lcc_;
+#endif
 };
 
 #endif // CONTOUR_HPP
