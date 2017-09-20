@@ -15,7 +15,7 @@ addons:
     - gcc-4.8
     - g++-4.8
     - libhdf5-serial-dev
-build:
+install:
 - make external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp
 - mkdir -p external_libraries/lib/
 - mkdir -p external_libraries/include/
@@ -23,3 +23,4 @@ build:
 - export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_59_0:`pwd`/external_libraries/include
 - make
 - make MODE=clang
+build: make
