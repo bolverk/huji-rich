@@ -24,3 +24,4 @@ install:
 - make
 - make MODE=clang
 build: make
+script: make
