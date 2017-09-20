@@ -53,7 +53,7 @@ public:
 			const EquationOfState& eos,
 			const double time,
 			const double dt,
-			TracerStickerNames const& tracerstickernames) const;
+			const TracerStickerNames& tracerstickernames) const;
 
 private:
 	const RiemannSolver& rs_;

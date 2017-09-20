@@ -95,6 +95,7 @@ public:
 
 	/*!
 	\brief Cloning function
+	\return Pointer to clone
 	*/
 	virtual Tessellation3D* clone(void) const = 0;
 

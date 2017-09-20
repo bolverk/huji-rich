@@ -39,6 +39,9 @@ public:
    */
   Extensive& operator=(const Extensive& origin);
 
+  /*! \brief copy constructor
+    \param other Source from which to copy data
+  */
   Extensive(const Extensive& other);
 
   /*! \brief Self difference operator

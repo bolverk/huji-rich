@@ -51,6 +51,9 @@ public:
   */
   Conserved& operator=(Conserved const&other);
 
+  /*! \brief Copy constructor
+    \param other Source from which to copy
+   */
   Conserved(const Conserved& other);
 };
 
@@ -59,6 +62,7 @@ class Primitive
 {
 public:
 
+  //! \brief Stores the number of variables
   enum {NUMBER_PRIMITIVE_VARIABLES=6};
 
   Primitive(void);
@@ -92,6 +96,7 @@ public:
   double SoundSpeed;
 
   //! \brief Returns the numbers of members
+  //! \return Number of variables
   int GetVarNo(void) const;
 
   /*! \brief Operator for adding members of two primitives
@@ -132,6 +137,9 @@ public:
   */
   Primitive& operator=(Primitive const&other);
 
+  /*! \brief Copy constructor
+    \param other Source from which to copy
+   */
   Primitive(const Primitive& other);
 };
 

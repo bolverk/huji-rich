@@ -180,6 +180,10 @@ public:
 	(const std::vector<std::string>& tracers,
 	 const std::vector<std::string>& stickers);
 
+  /*! \brief Copy operator
+    \param other Source to copy from
+    \return Reference to self
+   */
   TracerStickerNames& operator=(const TracerStickerNames& other);
 
 	//! \brief Class destructor

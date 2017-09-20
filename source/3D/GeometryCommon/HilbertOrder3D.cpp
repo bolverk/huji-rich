@@ -16,6 +16,8 @@ public:
 	//! \brief Class constructor
 	HilbertCurve3D_shape();
 	//! \brief Comparison
+  //! \param shape of hilbert curve
+  //! \return True if two shapes are the same
 	bool operator==(HilbertCurve3D_shape & shape);
 	//! \brief An array of the 7 unit vector steps defining the shape
 	vector<Vector3D> m_vShapePoints;
@@ -53,7 +55,11 @@ class HilbertCurve3D
 public:
 	//! \brief Constructor
 	HilbertCurve3D(void);
-	//! \brief Calculate the Hilbert curve distance of a given point, given a required number of iterations
+  /*! \brief Calculate the Hilbert curve distance of a given point, given a required number of iterations
+    \param rvPoint Pivot
+    \param numOfIterations Number of iterations
+    \return Position index
+   */
 	size_t Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations);
 
 private:
