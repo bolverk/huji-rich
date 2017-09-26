@@ -42,6 +42,9 @@ vector<double> arange(double x_min, double x_max, double dx);
 \return The addition of the two vectors
 */
 template <class T> vector<T> operator+
+(vector<T> const& v1, vector<T> const& v2);
+
+template <class T> vector<T> operator+
 (vector<T> const& v1, vector<T> const& v2)
 {
 	assert(v1.size() == v2.size() && "Vectors must have the same length");
@@ -57,6 +60,9 @@ template <class T> vector<T> operator+
 \return New vector with sums as terms
 */
 template<class T> vector<T> operator+
+(const vector<T>& v, const T& t);
+
+template<class T> vector<T> operator+
 (const vector<T>& v, const T& t)
 {
 	vector<T> res(v.size());
@@ -71,6 +77,9 @@ template<class T> vector<T> operator+
 \return New vector with sums as terms
 */
 template<class T> vector<T> operator+
+(const T& t, const vector<T>& v);
+
+template<class T> vector<T> operator+
 (const T& t, const vector<T>& v)
 {
 	return v + t;
@@ -81,6 +90,9 @@ template<class T> vector<T> operator+
 \param t Addition
 \return Reference to united vector
 */
+template<class T> vector<T>& operator+=
+(vector<T>& v, const T& t);
+
 template<class T> vector<T>& operator+=
 (vector<T>& v, const T& t)
 {
@@ -94,6 +106,9 @@ template<class T> vector<T>& operator+=
 \param v2 Right argument
 \return  The subtraction between the vectors
 */
+template <class T> vector<T> operator-
+(vector<T> const& v1, vector<T> const& v2);
+
 template <class T> vector<T> operator-
 (vector<T> const& v1, vector<T> const& v2)
 {
@@ -112,6 +127,9 @@ template <class T> vector<T> operator-
 \return The mulitplication of the vector
 */
 template <class T> vector<T> operator*
+(double d, vector<T> const& v);
+
+template <class T> vector<T> operator*
 (double d, vector<T> const& v)
 {
 	vector<T> res(v.size());
@@ -127,6 +145,9 @@ template <class T> vector<T> operator*
 \param xi The interpolation location
 \return f(xi)
 */
+template <typename T>
+T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi);
+
 template <typename T>
 T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 {
@@ -158,6 +179,9 @@ double max(vector<double> const& v);
 \param indeces The cells to remove
 */
 template <class T> void RemoveVector
+(vector<T> &v, vector<int> &indeces);
+
+template <class T> void RemoveVector
 (vector<T> &v, vector<int> &indeces)
 {
 	if (indeces.empty())
@@ -184,6 +208,9 @@ template <class T> void RemoveVector
 \param indeces The cells to remove
 */
 template <class T> void RemoveVector
+(vector<T> &v, vector<std::size_t> &indeces);
+
+template <class T> void RemoveVector
 (vector<T> &v, vector<std::size_t> &indeces)
 {
 	if (indeces.empty())
@@ -209,6 +236,8 @@ template <class T> void RemoveVector
 \param index The indeces to return
 \return The reduced vector
 */
+template <class T> vector<T> VectorValues(vector<T> const&v, vector<int> const &index);
+
 template <class T> vector<T> VectorValues(vector<T> const&v, vector<int> const &index)
 {
 	if (index.empty() || v.empty())
@@ -228,6 +257,10 @@ template <class T> vector<T> VectorValues(vector<T> const&v, vector<int> const &
 */
 template <class T> vector<T> VectorValues
 (vector<T> const&v,
+	vector<std::size_t> const &index);
+
+template <class T> vector<T> VectorValues
+(vector<T> const&v,
 	vector<std::size_t> const &index)
 {
 	if (index.empty() || v.empty())
@@ -238,6 +271,7 @@ template <class T> vector<T> VectorValues
 		result.at(i) = v.at(index.at(i));
 	return result;
 }
+template <class T> void FlipVector(vector<T> &v);
 
 template <class T> void FlipVector(vector<T> &v)
 {
@@ -253,6 +287,8 @@ template <class T> void FlipVector(vector<T> &v)
 \param v The vector to sum
 \return The sum
 */
+template <class T> T VectorSum(vector<T> const&v);
+
 template <class T> T VectorSum(vector<T> const&v)
 {
 	if (v.empty())
@@ -268,6 +304,8 @@ template <class T> T VectorSum(vector<T> const&v)
 \param v The input vector, must be SORTED!!
 \return The unique vector
 */
+template <class T> vector<T> unique(vector<T> const& v);
+
 template <class T> vector<T> unique(vector<T> const& v)
 {
 	std::size_t n = v.size();
@@ -289,6 +327,8 @@ template <class T> vector<T> unique(vector<T> const& v)
 \param v The input vector, must be SORTED!!
 \return The unique vector indeces
 */
+template <class T> vector<int> unique_index(vector<T> const& v);
+
 template <class T> vector<int> unique_index(vector<T> const& v)
 {
 	if (v.empty())
@@ -308,6 +348,8 @@ template <class T> vector<int> unique_index(vector<T> const& v)
 \param list The values to be taken out of v
 \return The new vector
 */
+template <class T> vector<T> RemoveList(vector<T> const&v, vector<T> const&list);
+
 template <class T> vector<T> RemoveList(vector<T> const&v, vector<T> const&list)
 {
 	vector<T> res;
@@ -322,6 +364,7 @@ template <class T> vector<T> RemoveList(vector<T> const&v, vector<T> const&list)
 \param vec The vector to change
 \param val The value to remove
 */
+template <class T> void RemoveVal(vector<T> &vec, T val);
 
 template <class T> void RemoveVal(vector<T> &vec, T val)
 {
@@ -341,6 +384,8 @@ template <class T> void RemoveVal(vector<T> &vec, T val)
 \param val The value to check inside the vector
 \return True if the value is in the vector, false otherwise
 */
+template <class T> bool InVector(vector<T> const&vec, T val);
+
 template <class T> bool InVector(vector<T> const&vec, T val)
 {
 	int n = vec.size();
@@ -356,6 +401,8 @@ template <class T> bool InVector(vector<T> const&vec, T val)
 \param val The value to look for
 \return The index of the vector which first equals to val, throws exception if not found
 */
+template <class T> int IndexInVector(vector<T> const&vec, T val);
+
 template <class T> int IndexInVector(vector<T> const&vec, T val)
 {
 	int n = vec.size();
@@ -369,6 +416,8 @@ template <class T> int IndexInVector(vector<T> const&vec, T val)
 \param v The vector to rearrange
 \param indeces The rearrangement indeces
 */
+template <class T> void ReArrangeVector(vector<T> &v, vector<int> const& indeces);
+
 template <class T> void ReArrangeVector(vector<T> &v, vector<int> const& indeces)
 {
 	const vector<T> temp = v;
@@ -381,6 +430,8 @@ template <class T> void ReArrangeVector(vector<T> &v, vector<int> const& indeces
 \param v The vector to rearrange
 \param indeces The rearrangement indeces
 */
+template <class T> void ReArrangeVector(vector<T> &v, vector<std::size_t> const& indeces);
+
 template <class T> void ReArrangeVector(vector<T> &v, vector<std::size_t> const& indeces)
 {
 	const vector<T> temp = v;
@@ -415,6 +466,8 @@ namespace
 \param arr The array to sort
 \param res The indeces of the sort that is given as the output
 */
+template<class T> void sort_index(const vector<T> & arr, vector<int>& res);
+
 template<class T> void sort_index(const vector<T> & arr, vector<int>& res)
 {
 	res.resize(arr.size());
@@ -429,6 +482,8 @@ template<class T> void sort_index(const vector<T> & arr, vector<int>& res)
 \param arr The array to sort
 \param res The indeces of the sort that is given as the output
 */
+template<class T> void sort_index(const vector<T> & arr, vector<std::size_t>& res);
+
 template<class T> void sort_index(const vector<T> & arr, vector<std::size_t>& res)
 {
 	res.resize(arr.size());
@@ -444,6 +499,8 @@ template<class T> void sort_index(const vector<T> & arr, vector<std::size_t>& re
 \param arr The array to sort
 \return The indeces of the sort that is given as the output
 */
+template<class T> vector<std::size_t> sort_index(const vector<T> & arr);
+
 template<class T> vector<std::size_t> sort_index(const vector<T> & arr)
 {
 	vector<std::size_t> res(arr.size());
@@ -478,6 +535,10 @@ namespace
 */
 template <class RAIter, class Compare>
 void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
+	std::vector<std::size_t>& indexes);
+
+template <class RAIter, class Compare>
+void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
 	std::vector<std::size_t>& indexes)
 {
 
@@ -502,6 +563,9 @@ void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
 \param v2 vector
 \return vector
 */
+template<class T> vector<T> join(vector<T> const& v1,
+	vector<T> const& v2);
+
 template<class T> vector<T> join(vector<T> const& v1,
 	vector<T> const& v2)
 {
@@ -538,6 +602,10 @@ public:
 */
 template<class T> vector<T> binary_unite(vector<T> const& v1,
 	vector<T> const& v2,
+	BinaryOperation<T> const& bin_op);
+
+template<class T> vector<T> binary_unite(vector<T> const& v1,
+	vector<T> const& v2,
 	BinaryOperation<T> const& bin_op)
 {
 	assert(v1.size() == v2.size());
@@ -549,6 +617,8 @@ template<class T> vector<T> binary_unite(vector<T> const& v1,
 }
 
 //! \brief Abstract class for an unary operation
+template<class T> class UnaryOperation;
+
 template<class T> class UnaryOperation
 {
 public:
@@ -568,6 +638,9 @@ public:
 \return Vector
 */
 template<class T> vector<T> apply_to_each_term(vector<T> const& v,
+	UnaryOperation<T> const& un_op);
+
+template<class T> vector<T> apply_to_each_term(vector<T> const& v,
 	UnaryOperation<T> const& un_op)
 {
 	vector<T> res(v.size());
@@ -581,6 +654,8 @@ template<class T> vector<T> apply_to_each_term(vector<T> const& v,
 \param index 0 for first member, 1 for second, error otherwise
 \return Either first or second members of pair
 */
+template<class T> T pair_member(const std::pair<T, T>& p, int index);
+
 template<class T> T pair_member(const std::pair<T, T>& p, int index)
 {
 	assert((0 == index) || (1 == index));
@@ -592,6 +667,8 @@ template<class T> T pair_member(const std::pair<T, T>& p, int index)
 \param index 0 for first, 1 for second, error otherwise
 \param val Value to be written
 */
+template<class T> void set_pair_member(std::pair<T, T>& p, int index, const T& val);
+
 template<class T> void set_pair_member(std::pair<T, T>& p, int index, const T& val)
 {
 	assert((0 == index) || (1 == index));
@@ -605,6 +682,8 @@ template<class T> void set_pair_member(std::pair<T, T>& p, int index, const T& v
 \param source Source vector
 \return Source vector converted to new type
 */
+template<class T, class S> vector<T> list_static_cast(const vector<S>& source);
+
 template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
 {
 	vector<T> res(source.size());
@@ -617,6 +696,8 @@ template<class T, class S> vector<T> list_static_cast(const vector<S>& source)
 \param subject Vector that will be modifies
 \param addendum Vector that will be added
 */
+template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum);
+
 template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& addendum)
 {
 	if (!addendum.empty())
@@ -629,6 +710,9 @@ template<class T> void insert_all_to_back(vector<T>& subject, const vector<T>& a
 \param val The value to search for
 \return iterator of found object or end if not found
 */
+template<class Iter, class T>
+Iter binary_find(Iter begin, Iter end, T val);
+
 template<class Iter, class T>
 Iter binary_find(Iter begin, Iter end, T val)
 {
@@ -648,6 +732,9 @@ Iter binary_find(Iter begin, Iter end, T val)
 \return Value corresponding to key
 */
 template<class S, class T> typename vector<T>::const_reference safe_retrieve
+(vector<T> const& data, vector<S> const& keys, const S& key);
+
+template<class S, class T> typename vector<T>::const_reference safe_retrieve
 (vector<T> const& data, vector<S> const& keys, const S& key)
 {
 	assert(data.size() == keys.size());
@@ -664,6 +751,9 @@ template<class S, class T> typename vector<T>::const_reference safe_retrieve
 \return Value corresponding to key
 */
 template<class S, class T> typename vector<T>::reference safe_retrieve
+(vector<T> &data, vector<S> const& keys, const S& key);
+
+template<class S, class T> typename vector<T>::reference safe_retrieve
 (vector<T> &data, vector<S> const& keys, const S& key)
 {
 	assert(data.size() == keys.size());
@@ -679,6 +769,10 @@ template<class S, class T> typename vector<T>::reference safe_retrieve
 */
 template<class S, class T> const T& safe_retrieve
 (const boost::container::flat_map<S, T>& m,
+	const S& s);
+
+template<class S, class T> const T& safe_retrieve
+(const boost::container::flat_map<S, T>& m,
 	const S& s)
 {
 	typename boost::container::flat_map<S, T>::const_iterator it =
@@ -692,6 +786,10 @@ template<class S, class T> const T& safe_retrieve
 \param s Key
 \return Value corresponding to key
 */
+template<class S, class T> T& safe_retrieve
+(boost::container::flat_map<S, T>& m,
+	const S& s);
+
 template<class S, class T> T& safe_retrieve
 (boost::container::flat_map<S, T>& m,
 	const S& s)

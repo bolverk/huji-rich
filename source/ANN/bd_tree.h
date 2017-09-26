@@ -63,14 +63,15 @@ class ANNbd_shrink : public ANNkd_node	// splitting node of a kd-tree
 	int					n_bnds;			// number of bounding halfspaces
 	ANNorthHSArray		bnds;			// list of bounding halfspaces
 	ANNkd_ptr			child[2];		// in and out children
+	ANNbd_shrink(const ANNbd_shrink& /*other*/) :n_bnds(0), bnds(0) {};
+	ANNbd_shrink& operator=(const ANNbd_shrink& /*other*/) { return *this; }
 public:
 	ANNbd_shrink(						// constructor
 		int				nb,				// number of bounding halfspaces
 		ANNorthHSArray	bds,			// list of bounding halfspaces
 		ANNkd_ptr ic=NULL, ANNkd_ptr oc=NULL)	// children
+		:n_bnds(nb), bnds(bds)
 		{
-			n_bnds			= nb;				// cutting dimension
-			bnds			= bds;				// assign bounds
 			child[ANN_IN]	= ic;				// set children
 			child[ANN_OUT]	= oc;
 		}
@@ -96,9 +97,9 @@ public:
 	virtual void ann_pri_search(ANNdist);		// priority search
 	virtual void ann_FR_search(ANNdist); 		// fixed-radius search
 
-	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const {};
-	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-		std::vector<ANNpoint> const& normals, ANNorthRect &bb) {};
+	void GetAcc(ANNpoint /*qpoint*/, ANNpoint /*res*/, double /*angle2*/, ANNorthRect &/*bb*/) const {};
+	void GetToSend(std::vector<ANNpointArray> const& /*faces*/, std::vector<size_t>const& /*Nfaces*/, vector<ANNkd_ptr>& /*nodes*/, double/* angle2*/,
+		std::vector<ANNpoint> const& /*normals*/, ANNorthRect &/*bb*/) {};
 };
 
 #endif

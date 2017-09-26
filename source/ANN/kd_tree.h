@@ -44,7 +44,9 @@ using namespace std;					// make std:: available
 //----------------------------------------------------------------------
 
 class ANNkd_node{						// generic kd-tree node (empty shell)
+	
 public:
+	ANNkd_node() :mass(0), Q(boost::array<double, 6>()) {}
 	virtual ~ANNkd_node() {}					// virtual distroyer
 
 	virtual void ann_search(ANNdist) = 0;		// tree search
@@ -97,17 +99,16 @@ typedef void (*ANNkd_splitter)(			// splitting routine for kd-trees
 
 class ANNkd_leaf: public ANNkd_node		// leaf node for kd-tree
 {
+private:
 	int					n_pts;			// no. points in bucket
 	ANNidxArray			bkt;			// bucket of points
+	ANNkd_leaf& operator=(const ANNkd_leaf& /*other*/) { return *this; }
+	ANNkd_leaf(const ANNkd_leaf& /*other*/):n_pts(0),bkt(0) {}
 public:
 	ANNkd_leaf(							// constructor
 		int				n,				// number of points
 		ANNidxArray		b)				// bucket
-		{
-			n_pts		= n;			// number of points in bucket
-			bkt			= b;			// the bucket
-			mass = 0;
-		}
+		:n_pts(n), bkt(b) {}
 
 	ANNkd_leaf(							// constructor
 		int				n,				// number of points
@@ -115,6 +116,7 @@ public:
 		double m,
 		boost::array<double, 6> const& Qs,
 		ANNpoint pt)				// bucket
+		:n_pts(n), bkt(b)
 	{
 		n_pts = n;			// number of points in bucket
 		bkt = b;			// the bucket
@@ -173,15 +175,16 @@ class ANNkd_split : public ANNkd_node	// splitting node of a kd-tree
 	ANNcoord			cd_bnds[2];		// lower and upper bounds of
 										// rectangle along cut_dim
 	ANNkd_ptr			child[2];		// left and right children
+	ANNkd_split& operator=(const ANNkd_split /*other*/) { return *this; }
+	ANNkd_split(const ANNkd_split &/*other*/) :cut_dim(0), cut_val(0) {}
 public:
 	ANNkd_split(						// constructor
 		int cd,							// cutting dimension
 		ANNcoord cv,					// cutting value
 		ANNcoord lv, ANNcoord hv,				// low and high values
 		ANNkd_ptr lc=NULL, ANNkd_ptr hc=NULL)	// children
+		:cut_dim(cd), cut_val(cv)
 		{
-			cut_dim		= cd;					// cutting dimension
-			cut_val		= cv;					// cutting value
 			cd_bnds[ANN_LO] = lv;				// lower bound for rectangle
 			cd_bnds[ANN_HI] = hv;				// upper bound for rectangle
 			child[ANN_LO]	= lc;				// left child

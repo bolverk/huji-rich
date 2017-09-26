@@ -72,12 +72,12 @@ class ANNmin_k {
 	int			k;						// max number of keys to store
 	int			n;						// number of keys currently active
 	mk_node		*mk;					// the list itself
-
+	ANNmin_k(const ANNmin_k& /*other*/) :k(0), n(0),mk(0) {}
+	ANNmin_k& operator=(const ANNmin_k /*other*/) { return *this; }
 public:
 	ANNmin_k(int max)					// constructor (given max size)
+		:k(max), n(0),mk(0)
 		{
-			n = 0;						// initially no items
-			k = max;					// maximum number of items
 			mk = new mk_node[max+1];	// sorted array of keys
 		}
 

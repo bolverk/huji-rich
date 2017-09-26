@@ -64,6 +64,7 @@ public:
 	}
 
 	ANNkdStats()			// basic constructor
+		: dim(0),n_pts(0),bkt_size(0),n_lf(0),n_tl(0),n_spl(0),n_shr(0),depth(0),sum_ar(0),avg_ar(0)
 	{ reset(); }
 
 	void merge(const ANNkdStats &st);	// merge stats from child 
@@ -96,7 +97,9 @@ public :
 		maxVal = -ANN_DBL_MAX; 
 	}
 
-	ANNsampStat() { reset(); }		// constructor
+	ANNsampStat() 
+		: n(0),sum(0),sum2(0),minVal(0), maxVal(0)
+	{ reset(); }		// constructor
 
 	void operator+=(double x)		// add sample
 	{

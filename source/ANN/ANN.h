@@ -518,63 +518,6 @@ public:
 };
 
 //----------------------------------------------------------------------
-//	Brute-force nearest neighbor search:
-//		The brute-force search structure is very simple but inefficient.
-//		It has been provided primarily for the sake of comparison with
-//		and validation of the more complex search structures.
-//
-//		Query processing is the same as described above, but the value
-//		of epsilon is ignored, since all distance calculations are
-//		performed exactly.
-//
-//		WARNING: This data structure is very slow, and should not be
-//		used unless the number of points is very small.
-//
-//		Internal information:
-//		---------------------
-//		This data structure bascially consists of the array of points
-//		(each a pointer to an array of coordinates).  The search is
-//		performed by a simple linear scan of all the points.
-//----------------------------------------------------------------------
-
-class DLL_API ANNbruteForce: public ANNpointSet {
-	int				dim;				// dimension
-	int				n_pts;				// number of points
-	ANNpointArray	pts;				// point array
-public:
-	ANNbruteForce(						// constructor from point array
-		ANNpointArray	pa,				// point array
-		int				n,				// number of points
-		int				dd);			// dimension
-
-	~ANNbruteForce();					// destructor
-
-	void annkSearch(					// approx k near neighbor search
-		ANNpoint		q,				// query point
-		int				k,				// number of near neighbors to return
-		ANNidxArray		nn_idx,			// nearest neighbor array (modified)
-		ANNdistArray	dd,				// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
-
-	int annkFRSearch(					// approx fixed-radius kNN search
-		ANNpoint		q,				// query point
-		ANNdist			sqRad,			// squared radius
-		int				k = 0,			// number of near neighbors to return
-		ANNidxArray		nn_idx = NULL,	// nearest neighbor array (modified)
-		ANNdistArray	dd = NULL,		// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
-
-	int theDim()						// return dimension of space
-		{ return dim; }
-
-	int nPoints()						// return number of points
-		{ return n_pts; }
-
-	ANNpointArray thePoints()			// return pointer to points
-		{  return pts;  }
-};
-
-//----------------------------------------------------------------------
 // kd- and bd-tree splitting and shrinking rules
 //		kd-trees supports a collection of different splitting rules.
 //		In addition to the standard kd-tree splitting rule proposed
@@ -722,6 +665,8 @@ protected:
 		ANNpointArray pa = NULL,		// point array (optional)
 		ANNidxArray pi = NULL);			// point indices (optional)
 
+	ANNkd_tree& operator=(const ANNkd_tree &/*tree*/) { return *this; }
+	ANNkd_tree(ANNkd_tree const& /*other*/) :dim(0),n_pts(0),bkt_size(0),pts(0),pidx(0),root(0),bnd_box_lo(0),bnd_box_hi(0){};
 public:
 	ANNkd_tree(							// build skeleton tree
 		int				n = 0,			// number of points

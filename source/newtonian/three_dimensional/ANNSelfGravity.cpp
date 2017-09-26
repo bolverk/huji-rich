@@ -5,6 +5,7 @@
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
+#ifdef RICH_MPI
 namespace
 {
 	void CallTreeGetSend(ANNkd_tree* tree, Tessellation3D const& tproc, std::vector<size_t>const& faces, vector<ANNkd_ptr>& nodes,
@@ -42,7 +43,7 @@ namespace
 		
 	}
 }
-
+#endif
 ANNSelfGravity::ANNSelfGravity(double opening,Tessellation3D const* tproc) : opening_(opening),tproc_(tproc){}
 
 void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells,
@@ -54,7 +55,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<double> masses(Norg);
 	std::vector<boost::array<double, 6> >  Q(Norg);
 
-	ANNpointArray dpoints = annAllocPts(Norg, 3);
+	ANNpointArray dpoints = annAllocPts(static_cast<int>(Norg), 3);
 	for (size_t i = 0; i < Norg; ++i)
 	{
 		Vector3D const& vec = tess.GetCellCM(i);
@@ -64,7 +65,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		masses[i] = tess.GetVolume(i)*cells[i].density;
 		Q[i].assign(0);
 	}
-	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses,Q, Norg, 3, 1, ANN_KD_SL_MIDPT);
+	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses,Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
 
 
 #ifdef RICH_MPI
@@ -77,7 +78,6 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<vector<Vector3D> > send_CM;
 	vector<int> totalkwith;
 	vector<ANNkd_ptr> nodes;
-	double Rcpu = tproc_->GetWidth(static_cast<size_t>(rank));
 	vector<double> mass_temp;
 	vector<Vector3D> cm_temp;
 	vector<double> Q_temp;
@@ -113,7 +113,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	size_t toadd = 0;
 	for (size_t i = 0; i < send_masses.size(); ++i)
 		toadd += send_masses[i].size();
-	dpoints = annAllocPts(Norg+toadd, 3);
+	dpoints = annAllocPts(static_cast<int>(Norg+toadd), 3);
 	masses.resize(Norg + toadd);
 	Q.resize(Norg + toadd);
 	for (size_t i = 0; i < Norg; ++i)
@@ -137,7 +137,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 			++counter;
 		}
 	}
-	atree = new ANNkd_tree(dpoints, masses,Q, Norg+toadd, 3, 1, ANN_KD_SL_MIDPT);
+	atree = new ANNkd_tree(dpoints, masses,Q, static_cast<int>(Norg+toadd), 3, 1, ANN_KD_SL_MIDPT);
 #endif
 
 	// Get acc

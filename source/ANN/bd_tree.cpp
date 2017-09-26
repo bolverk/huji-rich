@@ -161,6 +161,14 @@ ANNbd_tree::ANNbd_tree(					// construct from point array
 
 enum ANNdecomp {SPLIT, SHRINK};			// decomposition methods
 
+ANNdecomp trySimpleShrink(				// try a simple shrink
+	ANNpointArray		pa,				// point array
+	ANNidxArray			pidx,			// point indices to store in subtree
+	int					n,				// number of points
+	int					dim,			// dimension of space
+	const ANNorthRect	&bnd_box,		// current bounding box
+	ANNorthRect			&inner_box);		// inner box if shrinking (returned)
+
 //----------------------------------------------------------------------
 //	trySimpleShrink - Attempt a simple shrink
 //
@@ -232,6 +240,15 @@ ANNdecomp trySimpleShrink(				// try a simple shrink
 const float	BD_MAX_SPLIT_FAC = 0.5;		// maximum number of splits allowed
 const float	BD_FRACTION = 0.5;			// ...to reduce points by this fraction
 										// ...This must be < 1.
+ANNdecomp tryCentroidShrink(			// try a centroid shrink
+	ANNpointArray		pa,				// point array
+	ANNidxArray			pidx,			// point indices to store in subtree
+	int					n,				// number of points
+	int					dim,			// dimension of space
+	const ANNorthRect	&bnd_box,		// current bounding box
+	ANNkd_splitter		splitter,		// splitting procedure
+	ANNorthRect			&inner_box);	// inner box if shrinking (returned)
+
 
 ANNdecomp tryCentroidShrink(			// try a centroid shrink
 	ANNpointArray		pa,				// point array
@@ -243,7 +260,7 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 	ANNorthRect			&inner_box)		// inner box if shrinking (returned)
 {
 	int n_sub = n;						// number of points in subset
-	int n_goal = (int) (n*BD_FRACTION); // number of point in goal
+	int n_goal = (int) (BD_FRACTION*(float)n); // number of point in goal
 	int n_splits = 0;					// number of splits needed
 										// initialize inner box to bounding box
 	annAssignRect(dim, inner_box, bnd_box);
@@ -266,7 +283,7 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 			n_sub -= n_lo;
 		}
 	}
-    if (n_splits > dim*BD_MAX_SPLIT_FAC)// took too many splits
+    if (n_splits > (int)((float)dim*BD_MAX_SPLIT_FAC))// took too many splits
 		return SHRINK;					// shrink to final subset
 	else
 		return SPLIT;
@@ -275,6 +292,16 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 //----------------------------------------------------------------------
 //	selectDecomp - select which decomposition to use
 //----------------------------------------------------------------------
+ANNdecomp selectDecomp(			// select decomposition method
+	ANNpointArray		pa,				// point array
+	ANNidxArray			pidx,			// point indices to store in subtree
+	int					n,				// number of points
+	int					dim,			// dimension of space
+	const ANNorthRect	&bnd_box,		// current bounding box
+	ANNkd_splitter		splitter,		// splitting procedure
+	ANNshrinkRule		shrink,			// shrinking rule
+	ANNorthRect			&inner_box);	// inner box if shrinking (returned)
+
 
 ANNdecomp selectDecomp(			// select decomposition method
 	ANNpointArray		pa,				// point array

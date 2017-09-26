@@ -197,7 +197,7 @@ void ANNkd_tree::getStats(						// get tree statistics
 	ANNorthRect bnd_box(dim, bnd_box_lo, bnd_box_hi);
 	if (root != NULL) {							// if nonempty tree
 		root->getStats(dim, st, bnd_box);		// get statistics
-		st.avg_ar = st.sum_ar / st.n_lf;		// average leaf asp ratio
+		st.avg_ar = st.sum_ar / (float)st.n_lf;		// average leaf asp ratio
 	}
 }
 
@@ -275,6 +275,7 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 		int n,							// number of points
 		int dd,							// dimension
 		int bs)							// bucket size
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
 {  SkeletonTree(n, dd, bs);  }			// construct skeleton tree
 
 //----------------------------------------------------------------------
@@ -443,6 +444,7 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 	int					dd,				// dimension
 	int					bs,				// bucket size
 	ANNsplitRule		split)			// splitting method
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
 {
 	SkeletonTree(n, dd, bs);			// set up the basic stuff
 	pts = pa;							// where the points are
@@ -484,6 +486,7 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 	int					dd,				// dimension
 	int					bs,				// bucket size
 	ANNsplitRule		split)			// splitting method
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
 {
 	SkeletonTree(n, dd, bs);			// set up the basic stuff
 	pts = pa;							// where the points are
@@ -661,6 +664,9 @@ double DistanceToFace(ANNpointArray face, size_t Nface,const double* qpoint, dou
 	annDeallocPt(ptemp);
 	return sqrt(min_face_dist);
 }
+
+double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, const double* qpoint,
+	double maxdist, std::vector<ANNpoint>const& normals);
 
 double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, const double* qpoint, 
 	double maxdist, std::vector<ANNpoint>const& normals)

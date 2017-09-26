@@ -21,6 +21,9 @@ using std::vector;
 \param ghost_or_sent True for ghost cells false for sent cells.
 */
 template<class T>
+void MPI_exchange_data(const Tessellation& tess, vector<T>& cells, bool ghost_or_sent);
+
+template<class T>
 void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_sent)
 {
 	if (cells.empty())
@@ -104,6 +107,9 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 \param cells The data to send/recv
 \param ghost_or_sent True for ghost cells false for sent cells.
 */
+template<class T>
+void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent);
+
 template<class T>
 void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent)
 {
@@ -190,6 +196,10 @@ void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_
 \return Th recv data ordered by cpu
 */
 template <class T>
+vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > const& tosend,
+	vector<T>const& cells);
+
+template <class T>
 vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith,vector<vector<int> > const& tosend,
 	vector<T>const& cells)
 {
@@ -246,6 +256,10 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith,vector<vector
 */
 template <class T>
 vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > const& tosend,
+	vector<T>const& cells);
+
+template <class T>
+vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<size_t> > const& tosend,
 	vector<T>const& cells)
 {
 	assert(!cells.empty());
@@ -293,6 +307,9 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 }
 
 template <class T>
+vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<T> > const& tosend, T const& demo);
+
+template <class T>
 vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<T> > const& tosend,T const& demo)
 {
 	vector<MPI_Request> req(totalkwith.size());
@@ -337,6 +354,10 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
+
+template <class T>
+vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<vector<T > > > const& tosend,
+	T const& demo);
 
 template <class T>
 vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<vector<T > > > const& tosend,

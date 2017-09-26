@@ -185,6 +185,7 @@ void ANNbd_shrink::dump(				// dump a shrinking node
 
 ANNkd_tree::ANNkd_tree(					// build from dump file
 	istream				&in)					// input stream for dump file
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
 {
 	int the_dim;								// local dimension
 	int the_n_pts;								// local number of points

@@ -60,12 +60,12 @@ class ANNpr_queue {
 	int			n;						// number of items in queue
 	int			max_size;				// maximum queue size
 	pq_node		*pq;					// the priority queue (array of nodes)
-
+	ANNpr_queue& operator=(const ANNpr_queue& /*other*/) { return *this; }
+	ANNpr_queue(const ANNpr_queue& /*other*/) :n(0), max_size(0), pq(0) {}
 public:
 	ANNpr_queue(int max)				// constructor (given max size)
+		:n(0), max_size(max), pq(0)
 		{
-			n = 0;						// initially empty
-			max_size = max;				// maximum number of items
 			pq = new pq_node[max+1];	// queue is array [1..max] of nodes
 		}
 
