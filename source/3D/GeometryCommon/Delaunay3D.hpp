@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <set>
-
+#include <boost/container/flat_set.hpp>
 
 using std::vector;
 using std::string;
@@ -17,7 +17,7 @@ class Delaunay3D
 public:
 	vector<Tetrahedron> tetras_;
 	vector<Vector3D> points_;
-	std::set<std::size_t> empty_tetras_;
+	boost::container::flat_set<size_t> empty_tetras_;
 	std::size_t Norg_;
 	std::size_t outside_neighbor_;
 

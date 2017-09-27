@@ -252,7 +252,7 @@ namespace
 	}
 
 	size_t SetPointTetras(vector<vector<size_t> > &PointTetras, size_t Norg, vector<Tetrahedron> const& tetras,
-		std::set<size_t> const& empty_tetras)
+		boost::container::flat_set<size_t> const& empty_tetras)
 	{
 		PointTetras.clear();
 		PointTetras.resize(Norg);
@@ -940,13 +940,10 @@ void Voronoi3D::CalcAllCM(void)
 			tetra[1] = tetra_centers_[PointsInFace_[i][j + 1]];
 			tetra[2] = tetra_centers_[PointsInFace_[i][j + 2]];
 			double vol = 0;
-			if (N0 < Norg_)
-			{
-				tetra[3] = del_.points_[N0];
-				vol = std::abs(GetTetraVolume(tetra));
-				volume_[N0] += vol;
-				CM_[N0] += vol*GetTetraCM(tetra);
-			}
+			tetra[3] = del_.points_[N0];
+			vol = std::abs(GetTetraVolume(tetra));
+			volume_[N0] += vol;
+			CM_[N0] += vol*GetTetraCM(tetra);
 			if (N1 < Norg_)
 			{
 				tetra[3] = del_.points_[N1];
@@ -1621,9 +1618,9 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	boost::array<Vector3D, 5> temp_points2;
 	for (size_t i = 0; i < 4; ++i)
 		temp_points[i] = del_.points_[del_.tetras_[index].points[i]];
-	double aa = orient3d(temp_points);
 	for (size_t i = 0; i < 4; ++i)
 		temp_points2[i] = del_.points_[del_.tetras_[index].points[i]];
+	double aa = orient3d(temp_points);
 	temp_points2[4] = Vector3D(0, 0, 0);
 	double cc = insphere(temp_points2);
 	temp_points2[4] = Vector3D(1, 0, 0);

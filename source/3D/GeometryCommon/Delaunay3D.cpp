@@ -19,9 +19,10 @@ namespace
 			return false;
 		N *= (1.0/Nsize);
 		Vector3D mu = B - A;
-		if (std::abs(ScalarProd(mu, N)) < (abs(mu)*1e-4))
+		double sp = ScalarProd(mu, N);
+		if (std::abs(sp) < (abs(mu)*1e-4))
 			return false;
-		double m = ScalarProd(N, plane[0] - A) / ScalarProd(N, mu);
+		double m = ScalarProd(N, plane[0] - A) / sp;
 		res = A + m*mu;
 		return true;
 	}
@@ -433,11 +434,12 @@ void Delaunay3D::flip44(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	flip32(neigh0, neigh1, location0, shared_location,true);
 }
 
-Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(std::set<std::size_t> ()),Norg_(0),outside_neighbor_(0),
+Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(boost::container::flat_set<size_t> ()),Norg_(0),outside_neighbor_(0),
 	b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),b4_temp_(boost::array<Vector3D, 4> ()),b5_temp_(boost::array<Vector3D, 5> ()),
 	b4s_temp_(boost::array<std::size_t, 4>()),b4s_temp2_(boost::array<std::size_t, 4>()),b8s_temp_(boost::array<std::size_t, 8>()),
 	to_check_(vector<std::size_t>()),last_checked_(0)
 {
+	empty_tetras_.reserve(15);
 	to_check_.reserve(100);
 }
 
@@ -715,7 +717,6 @@ void Delaunay3D::InsertPoint(std::size_t index)
 		std::size_t to_flip = tetras_[cur_check].neighbors[p_loc];
 		if (to_flip == outside_neighbor_ || (empty_tetras_.find(cur_check) != empty_tetras_.end()))
 			continue;
-		/// check here that we have correct sign for insphere test !!
 		b5_temp_[0] = points_[tetras_[cur_check].points[0]];
 		b5_temp_[1] = points_[tetras_[cur_check].points[1]];
 		b5_temp_[2] = points_[tetras_[cur_check].points[2]];
