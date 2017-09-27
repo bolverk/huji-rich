@@ -229,24 +229,29 @@ namespace
 		return loc;
 	}
 #endif
+
 	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
 		vector<double> &diffs)
 	{
+		R *= R;
 		res.clear();
 		res.push_back(indeces[0]);
 		size_t N = indeces.size();
 		diffs.resize(N);
+		Vector3D temp;
 		for (size_t i = 1; i < N; ++i)
 		{
-			diffs[i] = abs(points[indeces[i]] - points[indeces[i - 1]]);
+			temp = points[indeces[i]] - points[indeces[i - 1]];
+			diffs[i] = ScalarProd(temp, temp);
 			R = std::max(R, diffs[i]);
 		}
-		diffs[0] = abs(points[indeces.back()] - points[indeces[0]]);
+		temp = points[indeces.back()] - points[indeces[0]];
+		diffs[0] = ScalarProd(temp, temp);
 		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i <N; ++i)
-			if (diffs[i] > R*1e-5)
+			if (diffs[i] > R*1e-10)
 				res.push_back(indeces[i]);
-		if (diffs[0] < R*1e-5)
+		if (diffs[0] < R*1e-10)
 			res.pop_back();
 		return R;
 	}
@@ -593,7 +598,7 @@ Voronoi3D::Voronoi3D():ll_(Vector3D()),ur_(Vector3D()),Norg_(0),bigtet_(0),set_t
 	FacesInCell_(vector<vector<std::size_t> > ()), PointsInFace_(vector<vector<std::size_t> >()),FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> > ()),
 	CM_(vector<Vector3D> ()),Face_CM_(vector<Vector3D> ()),volume_(vector<double> ()),area_(vector<double> ()),duplicated_points_(vector<vector<std::size_t> > ()),
 	sentprocs_(vector<int> ()), duplicatedprocs_(vector<int> ()),sentpoints_(vector<vector<std::size_t> > ()), Nghost_(vector<vector<std::size_t> > ()),
-	self_index_(vector<std::size_t> ())
+	self_index_(vector<std::size_t> ()), temp_points_(boost::array<Vector3D, 4>()), temp_points2_(boost::array<Vector3D, 5>())
 {}
 
 Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur),Norg_(0),bigtet_(0),set_temp_(std::set<int>()),stack_temp_(std::stack<int>()),
@@ -601,7 +606,7 @@ Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur),N
 	FacesInCell_(vector<vector<std::size_t> > ()), PointsInFace_(vector<vector<std::size_t> >()),FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> > ()),
 	CM_(vector<Vector3D> ()),Face_CM_(vector<Vector3D> ()),volume_(vector<double> ()),area_(vector<double> ()),duplicated_points_(vector<vector<std::size_t> > ()),
 	sentprocs_(vector<int> ()), duplicatedprocs_(vector<int> ()),sentpoints_(vector<vector<std::size_t> > ()), Nghost_(vector<vector<std::size_t> > ()),
-	self_index_(vector<std::size_t> ()) {}
+	self_index_(vector<std::size_t> ()), temp_points_(boost::array<Vector3D, 4>()), temp_points2_(boost::array<Vector3D, 5>()) {}
 
 void Voronoi3D::CalcRigidCM(std::size_t face_index)
 {
@@ -1149,6 +1154,9 @@ void Voronoi3D::BuildVoronoi(void)
 	// Organize the faces and assign them to cells
 	vector<size_t> temp3;
 	vector<double> diffs;
+	vector<vector<size_t> > Neighbors(Norg_);
+	for (size_t i = 0; i < Norg_; ++i)
+		Neighbors[i].reserve(20);
 	for (size_t i = 0; i < Ntetra; ++i)
 	{
 		if (del_.empty_tetras_.find(i) == del_.empty_tetras_.end())
@@ -1168,7 +1176,9 @@ void Voronoi3D::BuildVoronoi(void)
 						N0 = N1;
 						N1 = ttemp;
 					}
-					if (ShouldBuildFace(N0, N1, FacesInCell_, FaceNeighbors_, Norg_))
+					if (N0 >= Norg_ || std::find(Neighbors[N0].begin(),Neighbors[N0].end(),N1)!=Neighbors[N0].end())
+						continue;
+					//if (ShouldBuildFace(N0, N1, FacesInCell_, FaceNeighbors_, Norg_))
 					{
 						temp.clear();
 						temp.push_back(i);
@@ -1205,8 +1215,12 @@ void Voronoi3D::BuildVoronoi(void)
 						FaceNeighbors_.push_back(std::pair<size_t, size_t>(N0, N1));
 						
 						FacesInCell_[N0].push_back(PointsInFace_.size() - 1);
+						Neighbors[N0].push_back(N1);
 						if (N1 < Norg_)
+						{
 							FacesInCell_[N1].push_back(PointsInFace_.size() - 1);
+							Neighbors[N1].push_back(N0);
+						}
 						
 					}
 				}
@@ -1614,21 +1628,19 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
 
 double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 {
-	boost::array<Vector3D, 4> temp_points;
-	boost::array<Vector3D, 5> temp_points2;
 	for (size_t i = 0; i < 4; ++i)
-		temp_points[i] = del_.points_[del_.tetras_[index].points[i]];
+		temp_points_[i] = del_.points_[del_.tetras_[index].points[i]];
 	for (size_t i = 0; i < 4; ++i)
-		temp_points2[i] = del_.points_[del_.tetras_[index].points[i]];
-	double aa = orient3d(temp_points);
-	temp_points2[4] = Vector3D(0, 0, 0);
-	double cc = insphere(temp_points2);
-	temp_points2[4] = Vector3D(1, 0, 0);
-	double dx = insphere(temp_points2);
-	temp_points2[4] = Vector3D(0, 1, 0);
-	double dy = insphere(temp_points2);
-	temp_points2[4] = Vector3D(0, 0, 1);
-	double dz = insphere(temp_points2);
+		temp_points2_[i] = del_.points_[del_.tetras_[index].points[i]];
+	double aa = orient3d(temp_points_);
+	temp_points2_[4] = Vector3D(0, 0, 0);
+	double cc = insphere(temp_points2_);
+	temp_points2_[4] = Vector3D(1, 0, 0);
+	double dx = insphere(temp_points2_);
+	temp_points2_[4] = Vector3D(0, 1, 0);
+	double dy = insphere(temp_points2_);
+	temp_points2_[4] = Vector3D(0, 0, 1);
+	double dz = insphere(temp_points2_);
 	double Dx = (dx + aa - cc);
 	double Dy = (dy + aa - cc);
 	double Dz = (dz + aa - cc);
@@ -1671,12 +1683,12 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		tetra_centers_[index] = center;
 		double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 		// Sanity check
-		double Rcheck = abs(temp_points[0] - center);
+		double Rcheck = abs(temp_points_[0] - center);
 		if ( Rcheck > 1.02*Rres || Rcheck*1.02 < Rres)
 		{
 			UniversalError eo("Wrong tetra radius");
 			eo.AddEntry("R", Rres);
-			eo.AddEntry("Diff r", abs(temp_points[0] - center));
+			eo.AddEntry("Diff r", abs(temp_points_[0] - center));
 			eo.AddEntry("aa", aa);
 			eo.AddEntry("cc", cc);
 			eo.AddEntry("dx", dx);
@@ -1690,9 +1702,9 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 			for (size_t j = 0; j < 4; ++j)
 			{
 				eo.AddEntry("Point index", static_cast<double>(del_.tetras_[index].points[j]));
-				eo.AddEntry("Tetra Point x", temp_points[j].x);
-				eo.AddEntry("Tetra Point y", temp_points[j].y);
-				eo.AddEntry("Tetra Point z", temp_points[j].z);
+				eo.AddEntry("Tetra Point x", temp_points_[j].x);
+				eo.AddEntry("Tetra Point y", temp_points_[j].y);
+				eo.AddEntry("Tetra Point z", temp_points_[j].z);
 			}
 			throw eo;
 		}
@@ -1712,12 +1724,12 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	}
 	double Rres = 0.5*sqrt(rtemp) / std::abs(aa);
 	// Sanity check
-	double Rcheck = abs(temp_points[0] - tetra_centers_[index]);
+	double Rcheck = abs(temp_points_[0] - tetra_centers_[index]);
 	if (Rcheck > 1.02*Rres || Rcheck*1.02 < Rres)
 	{
 		UniversalError eo("Wrong tetra radius");
 		eo.AddEntry("R", Rres);
-		eo.AddEntry("Diff r", abs(temp_points[0] - tetra_centers_[index]));
+		eo.AddEntry("Diff r", abs(temp_points_[0] - tetra_centers_[index]));
 		eo.AddEntry("aa", aa);
 		eo.AddEntry("cc", cc);
 		eo.AddEntry("dx", dx);
@@ -1727,9 +1739,9 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		for (size_t j = 0; j < 4; ++j)
 		{
 			eo.AddEntry("Point index", static_cast<double>(del_.tetras_[index].points[j]));
-			eo.AddEntry("Tetra Point x", temp_points[j].x);
-			eo.AddEntry("Tetra Point y", temp_points[j].y);
-			eo.AddEntry("Tetra Point z", temp_points[j].z);
+			eo.AddEntry("Tetra Point x", temp_points_[j].x);
+			eo.AddEntry("Tetra Point y", temp_points_[j].y);
+			eo.AddEntry("Tetra Point z", temp_points_[j].z);
 		}
 		throw eo;
 	}
@@ -1941,7 +1953,7 @@ set_temp_(other.set_temp_), stack_temp_(other.stack_temp_), del_(other.del_), Po
 tetra_centers_(other.tetra_centers_), FacesInCell_(other.FacesInCell_), PointsInFace_(other.PointsInFace_), 
 FaceNeighbors_(other.FaceNeighbors_),CM_(other.CM_), Face_CM_(other.Face_CM_), volume_(other.volume_), area_(other.area_), 
 duplicated_points_(other.duplicated_points_),sentprocs_(other.sentprocs_),duplicatedprocs_(other.duplicatedprocs_),sentpoints_(other.sentpoints_), 
-Nghost_(other.Nghost_),  self_index_(other.self_index_) {}
+Nghost_(other.Nghost_),  self_index_(other.self_index_),temp_points_(boost::array<Vector3D, 4>()),temp_points2_(boost::array<Vector3D, 5>()) {}
 
 bool Voronoi3D::NearBoundary(std::size_t index) const
 {

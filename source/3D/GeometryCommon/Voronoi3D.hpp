@@ -85,6 +85,9 @@ private:
 	vector<std::size_t> self_index_;
 	Voronoi3D();
 	Voronoi3D(Voronoi3D const &other);
+	boost::array<Vector3D, 4> temp_points_;
+	boost::array<Vector3D, 5> temp_points2_;
+
 public:
 	vector<Vector3D>& GetAllFaceCM(void);
 
