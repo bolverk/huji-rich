@@ -56,7 +56,9 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 	double res = cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos,face_velocities,tracerstickernames));
 	res = 1.0 / std::max(source_.SuggestInverseTimeStep()/cfl_, 1.0 / res);
 #ifdef RICH_MPI
-	MPI_Allreduce(&res, &res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+	double new_res = 0;
+	MPI_Allreduce(&res, &new_res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+	res = new_res;
 #endif
 	if (first_try_ && dt_first_ > 0)
 	{
