@@ -55,7 +55,7 @@ namespace
 
 	double TotalEnergyDensity3D(ComputationalCell3D const& p)
 	{
-		return p.density*(0.5*pow(abs(p.velocity), 2) + p.internal_energy);
+		return p.density*(0.5*ScalarProd(p.velocity,p.velocity) + p.internal_energy);
 	}
 
 

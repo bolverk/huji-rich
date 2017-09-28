@@ -10,17 +10,24 @@
 
 namespace
 {
-	bool PlaneLineIntersection(boost::array<Vector3D, 3> const& plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
+	bool PlaneLineIntersection(boost::array<Vector3D, 3> &plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
-		Vector3D N = CrossProduct(plane[1] - plane[0], plane[2] - plane[0]);
-		double Nsize = abs(N);
-		double Rmin = std::min(std::min(abs(plane[1] - plane[0]), abs(plane[2] - plane[0])), abs(plane[1] - plane[2]));
-		if (Nsize > (Rmin*Rmin * 100))
+		plane[1] -= plane[0];
+		plane[2] -= plane[0];
+		Vector3D N = CrossProduct(plane[1], plane[2]);
+		double Nsize = ScalarProd(N, N);
+		double Rmin = std::min(ScalarProd(plane[1], plane[1]),ScalarProd(plane[2], plane[2]));
+		plane[1] -= plane[2];
+		Rmin = std::min(Rmin,ScalarProd(plane[1], plane[1]));
+		plane[1] += plane[2];
+		plane[1] += plane[0];
+		plane[2] += plane[0];
+		if (Nsize > (Rmin*Rmin * 1e4))
 			return false;
-		N *= (1.0/Nsize);
-		Vector3D mu = B - A;
+		Vector3D mu = B;
+		mu -= A;
 		double sp = ScalarProd(mu, N);
-		if (std::abs(sp) < (abs(mu)*1e-4))
+		if (sp*sp < ScalarProd(mu,mu)*Nsize*1e-8)
 			return false;
 		double m = ScalarProd(N, plane[0] - A) / sp;
 		res = A + m*mu;
@@ -46,10 +53,6 @@ namespace
 	std::pair<std::size_t,double> InTriangle(boost::array<Vector3D, 3> &triangle, Vector3D &p)
 	{
 		// returns the smallest area of the cross product in units of the triangle area, negative if outside
-		/*Vector3D a = CrossProduct(triangle[1] - triangle[0], p - triangle[0]);
-		Vector3D b = CrossProduct(triangle[2] - triangle[1], p - triangle[1]);
-		Vector3D c = CrossProduct(triangle[0] - triangle[2], p - triangle[2]);
-		Vector3D d = CrossProduct(triangle[1] - triangle[0], triangle[2] - triangle[0]);*/
 		Vector3D temp,d;
 		triangle[1] -= triangle[0];
 		triangle[2] -= triangle[0];
@@ -106,7 +109,7 @@ Delaunay3D::Delaunay3D(Delaunay3D const& other) :  tetras_(other.tetras_),points
 	outside_neighbor_(other.outside_neighbor_),b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),
 	b4_temp_(boost::array<Vector3D, 4>()), b5_temp_(boost::array<Vector3D, 5>()),b4s_temp_(boost::array<std::size_t, 4> ()),
 	b4s_temp2_(boost::array<std::size_t, 4> ()),b8s_temp_(boost::array<std::size_t, 8> ()),to_check_(vector<std::size_t>()),
-	last_checked_(0){}
+	last_checked_(0), tet_temp0_(Tetrahedron()), tet_temp1_(Tetrahedron()), newtet_(Tetrahedron()) {}
 
 void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t location0,bool flat_check)
 {
@@ -120,91 +123,92 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	}
 
 	// location is the location of the point in tetra that is not in the joint triangle
-	Tetrahedron newtet, oldtet0(tetras_[tetra0]), oldtet1(tetras_[tetra1]);
-	std::size_t location1 = GetOppositePoint(oldtet1, tetra0);
+	tet_temp0_ = tetras_[tetra0];
+	tet_temp1_ = tetras_[tetra1];
+	std::size_t location1 = GetOppositePoint(tet_temp1_, tetra0);
 
-	newtet.points[1] = oldtet0.points[(location0 + 1) % 4];
-	newtet.points[2] = oldtet0.points[(location0 + 2) % 4];
+	newtet_.points[1] = tet_temp0_.points[(location0 + 1) % 4];
+	newtet_.points[2] = tet_temp0_.points[(location0 + 2) % 4];
 
 	if (location0 % 2 == 1)
 	{
-		newtet.points[0] = oldtet1.points[location1];
-		newtet.points[3] = oldtet0.points[location0];
-		newtet.neighbors[3] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 3) % 4])];
-		newtet.neighbors[0] = oldtet0.neighbors[(location0 + 3) % 4];
-		if (newtet.neighbors[0] != outside_neighbor_)
-			tetras_[newtet.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[0]], tetra0)] = Nloc;
-		if (newtet.neighbors[3] != outside_neighbor_)
-			tetras_[newtet.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[3]], tetra1)] = Nloc;
+		newtet_.points[0] = tet_temp1_.points[location1];
+		newtet_.points[3] = tet_temp0_.points[location0];
+		newtet_.neighbors[3] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 3) % 4])];
+		newtet_.neighbors[0] = tet_temp0_.neighbors[(location0 + 3) % 4];
+		if (newtet_.neighbors[0] != outside_neighbor_)
+			tetras_[newtet_.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[0]], tetra0)] = Nloc;
+		if (newtet_.neighbors[3] != outside_neighbor_)
+			tetras_[newtet_.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[3]], tetra1)] = Nloc;
 	}
 	else
 	{
-		newtet.points[3] = oldtet1.points[location1];
-		newtet.points[0] = oldtet0.points[location0];
-		newtet.neighbors[0] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 3) % 4])];
-		newtet.neighbors[3] = oldtet0.neighbors[(location0 + 3) % 4];
-		if (newtet.neighbors[0] != outside_neighbor_)
-			tetras_[newtet.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[0]], tetra1)] = Nloc;
-		if (newtet.neighbors[3] != outside_neighbor_)
-			tetras_[newtet.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[3]], tetra0)] = Nloc;
+		newtet_.points[3] = tet_temp1_.points[location1];
+		newtet_.points[0] = tet_temp0_.points[location0];
+		newtet_.neighbors[0] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 3) % 4])];
+		newtet_.neighbors[3] = tet_temp0_.neighbors[(location0 + 3) % 4];
+		if (newtet_.neighbors[0] != outside_neighbor_)
+			tetras_[newtet_.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[0]], tetra1)] = Nloc;
+		if (newtet_.neighbors[3] != outside_neighbor_)
+			tetras_[newtet_.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[3]], tetra0)] = Nloc;
 	}
-	newtet.neighbors[1] = tetra0;
-	newtet.neighbors[2] = tetra1;
+	newtet_.neighbors[1] = tetra0;
+	newtet_.neighbors[2] = tetra1;
 	
 	if (used_empty)
-		tetras_[Nloc] = newtet;
+		tetras_[Nloc] = newtet_;
 	else
-		tetras_.push_back(newtet);
+		tetras_.push_back(newtet_);
 
 	if (location0 % 2 == 0)
 	{
-		tetras_[tetra0].points[0] = oldtet0.points[location0];
-		tetras_[tetra0].points[3] = oldtet1.points[location1];
-		tetras_[tetra0].neighbors[0] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 1) % 4])];
-		tetras_[tetra0].neighbors[3] = oldtet0.neighbors[(location0 + 1) % 4];
+		tetras_[tetra0].points[0] = tet_temp0_.points[location0];
+		tetras_[tetra0].points[3] = tet_temp1_.points[location1];
+		tetras_[tetra0].neighbors[0] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 1) % 4])];
+		tetras_[tetra0].neighbors[3] = tet_temp0_.neighbors[(location0 + 1) % 4];
 		if (tetras_[tetra0].neighbors[0] != outside_neighbor_)
 			tetras_[tetras_[tetra0].neighbors[0]].neighbors[GetOppositePoint(tetras_[tetras_[tetra0].neighbors[0]], tetra1)] = tetra0;
 	}
 	else
 	{
-		tetras_[tetra0].points[3] = oldtet0.points[location0];
-		tetras_[tetra0].points[0] = oldtet1.points[location1];
-		tetras_[tetra0].neighbors[0] = oldtet0.neighbors[(location0 + 1) % 4];
-		tetras_[tetra0].neighbors[3] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 1) % 4])];
+		tetras_[tetra0].points[3] = tet_temp0_.points[location0];
+		tetras_[tetra0].points[0] = tet_temp1_.points[location1];
+		tetras_[tetra0].neighbors[0] = tet_temp0_.neighbors[(location0 + 1) % 4];
+		tetras_[tetra0].neighbors[3] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 1) % 4])];
 		if (tetras_[tetra0].neighbors[3] != outside_neighbor_)
 			tetras_[tetras_[tetra0].neighbors[3]].neighbors[GetOppositePoint(tetras_[tetras_[tetra0].neighbors[3]], tetra1)] = tetra0;
 	}
-	tetras_[tetra0].points[1] = oldtet0.points[(location0 + 2) % 4];
-	tetras_[tetra0].points[2] = oldtet0.points[(location0 + 3) % 4];
+	tetras_[tetra0].points[1] = tet_temp0_.points[(location0 + 2) % 4];
+	tetras_[tetra0].points[2] = tet_temp0_.points[(location0 + 3) % 4];
 	tetras_[tetra0].neighbors[1] = tetra1;
 	tetras_[tetra0].neighbors[2] = Nloc;
 
 	if (location0 % 2 == 0)
 	{
-		tetras_[tetra1].points[0] = oldtet0.points[location0];
-		tetras_[tetra1].points[3] = oldtet1.points[location1];
-		tetras_[tetra1].neighbors[0] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 2) % 4])];
-		tetras_[tetra1].neighbors[3] = oldtet0.neighbors[(location0 + 2) % 4];
+		tetras_[tetra1].points[0] = tet_temp0_.points[location0];
+		tetras_[tetra1].points[3] = tet_temp1_.points[location1];
+		tetras_[tetra1].neighbors[0] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 2) % 4])];
+		tetras_[tetra1].neighbors[3] = tet_temp0_.neighbors[(location0 + 2) % 4];
 		if (tetras_[tetra1].neighbors[3] != outside_neighbor_)
 			tetras_[tetras_[tetra1].neighbors[3]].neighbors[GetOppositePoint(tetras_[tetras_[tetra1].neighbors[3]], tetra0)] = tetra1;
 	}
 	else
 	{
-		tetras_[tetra1].points[3] = oldtet0.points[location0];
-		tetras_[tetra1].points[0] = oldtet1.points[location1];
-		tetras_[tetra1].neighbors[3] = oldtet1.neighbors[GetPointLocationInTetra(
-			oldtet1, oldtet0.points[(location0 + 2) % 4])];
-		tetras_[tetra1].neighbors[0] = oldtet0.neighbors[(location0 + 2) % 4];
+		tetras_[tetra1].points[3] = tet_temp0_.points[location0];
+		tetras_[tetra1].points[0] = tet_temp1_.points[location1];
+		tetras_[tetra1].neighbors[3] = tet_temp1_.neighbors[GetPointLocationInTetra(
+			tet_temp1_, tet_temp0_.points[(location0 + 2) % 4])];
+		tetras_[tetra1].neighbors[0] = tet_temp0_.neighbors[(location0 + 2) % 4];
 		if (tetras_[tetra1].neighbors[0] != outside_neighbor_)
 			tetras_[tetras_[tetra1].neighbors[0]].neighbors[GetOppositePoint(tetras_[tetras_[tetra1].neighbors[0]], tetra0)] = tetra1;
 	}
-	tetras_[tetra1].points[1] = oldtet0.points[(location0 + 3) % 4];
-	tetras_[tetra1].points[2] = oldtet0.points[(location0 + 1) % 4];
+	tetras_[tetra1].points[1] = tet_temp0_.points[(location0 + 3) % 4];
+	tetras_[tetra1].points[2] = tet_temp0_.points[(location0 + 1) % 4];
 	tetras_[tetra1].neighbors[1] = Nloc;
 	tetras_[tetra1].neighbors[2] = tetra0;
 
@@ -215,7 +219,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		double orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc = GetPointLocationInTetra(tetras_[Nloc], oldtet0.points[location0]);
+			std::size_t my_loc = GetPointLocationInTetra(tetras_[Nloc], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[Nloc].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], Nloc);
 			for (int i = 0; i < 3; ++i)
@@ -239,7 +243,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra0], oldtet0.points[location0]);
+			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra0], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[tetra0].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], tetra0);
 			for (int i = 0; i < 3; ++i)
@@ -262,7 +266,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra1], oldtet0.points[location0]);
+			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra1], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[tetra1].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], tetra1);
 			for (int i = 0; i < 3; ++i)
@@ -304,99 +308,99 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 
 	std::size_t location1 = GetOppositePoint(tetras_[tetra1], tetra0);
 	std::size_t third_tetra = tetras_[tetra0].neighbors[shared_loction];
-	Tetrahedron newtet, old(tetras_[tetra0]);
+	tet_temp0_ = tetras_[tetra0];
 
 	if (location0 % 2 == 0)
 	{
-		newtet.points[0] = tetras_[tetra0].points[location0];
-		newtet.points[1] = tetras_[tetra0].points[shared_loction];
-		newtet.neighbors[0] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
+		newtet_.points[0] = tetras_[tetra0].points[location0];
+		newtet_.points[1] = tetras_[tetra0].points[shared_loction];
+		newtet_.neighbors[0] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
 			tetras_[tetra1], tetras_[tetra0].points[other_point2])];
-		newtet.neighbors[1] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
+		newtet_.neighbors[1] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
 			tetras_[third_tetra], tetras_[tetra0].points[other_point2])];
-		if (newtet.neighbors[0] != outside_neighbor_)
-			tetras_[newtet.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[0]], tetra1)] = tetra0;
-		if (newtet.neighbors[1] != outside_neighbor_)
-			tetras_[newtet.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[1]], third_tetra)] = tetra0;
+		if (newtet_.neighbors[0] != outside_neighbor_)
+			tetras_[newtet_.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[0]], tetra1)] = tetra0;
+		if (newtet_.neighbors[1] != outside_neighbor_)
+			tetras_[newtet_.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[1]], third_tetra)] = tetra0;
 	}
 	else
 	{
-		newtet.points[1] = tetras_[tetra0].points[location0];
-		newtet.points[0] = tetras_[tetra0].points[shared_loction];
-		newtet.neighbors[1] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
+		newtet_.points[1] = tetras_[tetra0].points[location0];
+		newtet_.points[0] = tetras_[tetra0].points[shared_loction];
+		newtet_.neighbors[1] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
 			tetras_[tetra1], tetras_[tetra0].points[other_point2])];
-		newtet.neighbors[0] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
+		newtet_.neighbors[0] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
 			tetras_[third_tetra], tetras_[tetra0].points[other_point2])];
-		if (newtet.neighbors[1] != outside_neighbor_)
-			tetras_[newtet.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[1]], tetra1)] = tetra0;
-		if (newtet.neighbors[0] != outside_neighbor_)
-			tetras_[newtet.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[0]], third_tetra)] = tetra0;
+		if (newtet_.neighbors[1] != outside_neighbor_)
+			tetras_[newtet_.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[1]], tetra1)] = tetra0;
+		if (newtet_.neighbors[0] != outside_neighbor_)
+			tetras_[newtet_.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[0]], third_tetra)] = tetra0;
 	}
-	newtet.points[2] = tetras_[tetra0].points[other_point];
-	newtet.points[3] = tetras_[tetra1].points[location1];
+	newtet_.points[2] = tetras_[tetra0].points[other_point];
+	newtet_.points[3] = tetras_[tetra1].points[location1];
 
-	newtet.neighbors[2] = tetra1;
-	newtet.neighbors[3] = tetras_[tetra0].neighbors[other_point2];
+	newtet_.neighbors[2] = tetra1;
+	newtet_.neighbors[3] = tetras_[tetra0].neighbors[other_point2];
 	if (flat_check)
 	{
 		for (int i = 0; i < 4; ++i)
-			b4_temp_[static_cast<size_t>(i)] = points_[newtet.points[static_cast<size_t>(i)]];
+			b4_temp_[static_cast<size_t>(i)] = points_[newtet_.points[static_cast<size_t>(i)]];
 		if (orient3d(b4_temp_) > 0)
 		{
-			std::size_t temp = newtet.points[0];
-			newtet.points[0] = newtet.points[1];
-			newtet.points[1] = temp;
-			temp = newtet.neighbors[0];
-			newtet.neighbors[0] = newtet.neighbors[1];
-			newtet.neighbors[1] = temp;
+			std::size_t temp = newtet_.points[0];
+			newtet_.points[0] = newtet_.points[1];
+			newtet_.points[1] = temp;
+			temp = newtet_.neighbors[0];
+			newtet_.neighbors[0] = newtet_.neighbors[1];
+			newtet_.neighbors[1] = temp;
 		}
 	}
-	tetras_[tetra0] = newtet;
+	tetras_[tetra0] = newtet_;
 	
 	if (location0 % 2 == 1)
 	{
-		newtet.points[0] = old.points[location0];
-		newtet.points[1] = old.points[shared_loction];
-		newtet.neighbors[0] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
-			tetras_[tetra1], old.points[other_point])];
-		newtet.neighbors[1] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
-			tetras_[third_tetra], old.points[other_point])];
-		if (newtet.neighbors[1] != outside_neighbor_)
-			tetras_[newtet.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[1]], third_tetra)] = tetra1;
+		newtet_.points[0] = tet_temp0_.points[location0];
+		newtet_.points[1] = tet_temp0_.points[shared_loction];
+		newtet_.neighbors[0] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
+			tetras_[tetra1], tet_temp0_.points[other_point])];
+		newtet_.neighbors[1] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
+			tetras_[third_tetra], tet_temp0_.points[other_point])];
+		if (newtet_.neighbors[1] != outside_neighbor_)
+			tetras_[newtet_.neighbors[1]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[1]], third_tetra)] = tetra1;
 	}
 	else
 	{
-		newtet.points[1] = old.points[location0];
-		newtet.points[0] = old.points[shared_loction];
-		newtet.neighbors[1] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
-			tetras_[tetra1], old.points[other_point])];
-		newtet.neighbors[0] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
-			tetras_[third_tetra], old.points[other_point])];
-		if (newtet.neighbors[0] != outside_neighbor_)
-			tetras_[newtet.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[0]], third_tetra)] = tetra1;
+		newtet_.points[1] = tet_temp0_.points[location0];
+		newtet_.points[0] = tet_temp0_.points[shared_loction];
+		newtet_.neighbors[1] = tetras_[tetra1].neighbors[GetPointLocationInTetra(
+			tetras_[tetra1], tet_temp0_.points[other_point])];
+		newtet_.neighbors[0] = tetras_[third_tetra].neighbors[GetPointLocationInTetra(
+			tetras_[third_tetra], tet_temp0_.points[other_point])];
+		if (newtet_.neighbors[0] != outside_neighbor_)
+			tetras_[newtet_.neighbors[0]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[0]], third_tetra)] = tetra1;
 	}	
-	newtet.points[2] = old.points[other_point2];
-	newtet.points[3] = tetras_[tetra1].points[location1];
+	newtet_.points[2] = tet_temp0_.points[other_point2];
+	newtet_.points[3] = tetras_[tetra1].points[location1];
 
-	newtet.neighbors[2] = tetra0;
-	newtet.neighbors[3] = old.neighbors[other_point];
-	if (newtet.neighbors[3] != outside_neighbor_)
-		tetras_[newtet.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet.neighbors[3]], tetra0)] = tetra1;
+	newtet_.neighbors[2] = tetra0;
+	newtet_.neighbors[3] = tet_temp0_.neighbors[other_point];
+	if (newtet_.neighbors[3] != outside_neighbor_)
+		tetras_[newtet_.neighbors[3]].neighbors[GetOppositePoint(tetras_[newtet_.neighbors[3]], tetra0)] = tetra1;
 	if (flat_check)
 	{
 		for (int i = 0; i < 4; ++i)
-			b4_temp_[static_cast<size_t>(i)] = points_[newtet.points[static_cast<size_t>(i)]];
+			b4_temp_[static_cast<size_t>(i)] = points_[newtet_.points[static_cast<size_t>(i)]];
 		if (orient3d(b4_temp_) > 0)
 		{
-			std::size_t temp = newtet.points[0];
-			newtet.points[0] = newtet.points[1];
-			newtet.points[1] = temp;
-			temp = newtet.neighbors[0];
-			newtet.neighbors[0] = newtet.neighbors[1];
-			newtet.neighbors[1] = temp;
+			std::size_t temp = newtet_.points[0];
+			newtet_.points[0] = newtet_.points[1];
+			newtet_.points[1] = temp;
+			temp = newtet_.neighbors[0];
+			newtet_.neighbors[0] = newtet_.neighbors[1];
+			newtet_.neighbors[1] = temp;
 		}
 	}
-	tetras_[tetra1] = newtet;
+	tetras_[tetra1] = newtet_;
 
 	to_check_.push_back(tetra0);
 	to_check_.push_back(tetra1);
@@ -437,7 +441,7 @@ void Delaunay3D::flip44(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(boost::container::flat_set<size_t> ()),Norg_(0),outside_neighbor_(0),
 	b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),b4_temp_(boost::array<Vector3D, 4> ()),b5_temp_(boost::array<Vector3D, 5> ()),
 	b4s_temp_(boost::array<std::size_t, 4>()),b4s_temp2_(boost::array<std::size_t, 4>()),b8s_temp_(boost::array<std::size_t, 8>()),
-	to_check_(vector<std::size_t>()),last_checked_(0)
+	to_check_(vector<std::size_t>()),last_checked_(0), tet_temp0_(Tetrahedron()),tet_temp1_(Tetrahedron()), newtet_(Tetrahedron())
 {
 	empty_tetras_.reserve(15);
 	to_check_.reserve(100);
@@ -491,9 +495,7 @@ void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Ve
 	
 	assert(to_check_.empty());
 	for (std::size_t i = 0; i < Norg; ++i)
-	{
 		InsertPoint(order[i]);
-	}
 }
 
 void Delaunay3D::output(string const & filename) const

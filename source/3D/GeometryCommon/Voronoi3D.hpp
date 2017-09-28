@@ -42,9 +42,9 @@ private:
 	void output_buildextra(std::string const& filename)const;
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 		vector<size_t> &intersecting_faces);
-	vector<std::size_t> FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, 
+	void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
 		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
-		std::stack<std::size_t> &to_check,Vector3D const& vpoint,bool &skipped);
+		std::stack<std::size_t> &to_check,Vector3D const& vpoint,bool &skipped, vector<std::size_t> &faces);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);

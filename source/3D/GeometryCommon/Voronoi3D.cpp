@@ -94,10 +94,11 @@ namespace
 {
 	bool ShouldCalcTetraRadius(Tetrahedron const& T, size_t Norg)
 	{
+		bool res = false;
 		for (size_t i = 0; i < 4; ++i)
 			if (T.points[i] < Norg)
-				return true;
-		return false;
+				res = true;
+		return res;
 	}
 
 	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<unsigned char> &future_check, size_t Norg,
@@ -241,11 +242,13 @@ namespace
 		Vector3D temp;
 		for (size_t i = 1; i < N; ++i)
 		{
-			temp = points[indeces[i]] - points[indeces[i - 1]];
+			temp = points[indeces[i]];
+			temp -= points[indeces[i - 1]];
 			diffs[i] = ScalarProd(temp, temp);
 			R = std::max(R, diffs[i]);
 		}
-		temp = points[indeces.back()] - points[indeces[0]];
+		temp = points[indeces.back()];
+		temp -= points[indeces[0]];
 		diffs[0] = ScalarProd(temp, temp);
 		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i <N; ++i)
@@ -297,19 +300,23 @@ namespace
 		Vector3D V1, V2;
 		size_t counter = 0;
 		size_t N = indeces.size();
-		V1 = face_points[indeces[counter+1]] - face_points[indeces[counter]];
-		while (abs(V1) < 0.01*areascale)
+		V1 = face_points[indeces[counter + 1]];
+		V1 -= face_points[indeces[counter]];
+		while(ScalarProd(V1,V1)<1e-4*areascale*areascale)
 		{
 			++counter;
 			assert(counter < N);
-			V1 = face_points[indeces[(counter + 1)%N]] - face_points[indeces[counter]];
+			V1 = face_points[indeces[(counter + 1) % N]];
+			V1 -= face_points[indeces[counter]];
 		}
-		V2 = face_points[indeces[(counter + 2) % N]] - face_points[indeces[(counter+1)%N]];
-		while (abs(V2) < 0.01*areascale)
+		V2 = face_points[indeces[(counter + 2) % N]];
+		V2 -= face_points[indeces[(counter + 1) % N]];
+		while (ScalarProd(V2, V2)<1e-4*areascale*areascale)
 		{
 			++counter;
 			assert(counter < 2*N);
-			V2 = face_points[indeces[(counter + 2) % N]] - face_points[indeces[(counter+1)%N]];
+			V2 = face_points[indeces[(counter + 2) % N]];
+			V2 -= face_points[indeces[(counter + 1) % N]];
 		}
 
 		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) > 0)
@@ -419,7 +426,9 @@ namespace
 		for (std::size_t i = 0; i < Nloop; ++i)
 		{
 			double A = 0.5*abs(CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]));
-			temp += (A / 3)*(points[indeces[i + 2]]+ points[indeces[i + 1]]+ points[indeces[0]]);
+			temp += 0.3333333333333333*A*points[indeces[i + 2]];
+			temp += 0.3333333333333333*A*points[indeces[i + 1]];
+			temp += 0.3333333333333333*A*points[indeces[0]];
 			Atot += A;
 		}
 		temp *= (1.0 / (Atot + DBL_MIN*100)); //prevent overflow
@@ -1234,12 +1243,15 @@ void Voronoi3D::BuildVoronoi(void)
 	}
 	// Fix Face CM (this prevents large face velocities for close by points)
 	size_t Nfaces = Face_CM_.size();
+	Vector3D mid,norm;
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
-		Vector3D mid = 0.5*(del_.points_[FaceNeighbors_[i].first] + del_.points_[FaceNeighbors_[i].second]);
-		Vector3D norm = del_.points_[FaceNeighbors_[i].second] - del_.points_[FaceNeighbors_[i].first];
-		norm *= 1.0/abs(norm);
-		Face_CM_[i] -= ScalarProd(Face_CM_[i] - mid, norm)*norm;
+		mid = del_.points_[FaceNeighbors_[i].first];
+		mid += del_.points_[FaceNeighbors_[i].second];
+		mid *= 0.5;
+		norm = del_.points_[FaceNeighbors_[i].second];
+		norm -= del_.points_[FaceNeighbors_[i].first];
+		Face_CM_[i] -= ScalarProd(Face_CM_[i] - mid, norm)*norm / ScalarProd(norm,norm);
 	}
 }
 
@@ -1281,15 +1293,15 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 	}
 }
 
-vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const& tproc, std::size_t rank, std::size_t point,
+void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode,boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	Vector3D const& vpoint,bool &skipped)
+	Vector3D const& vpoint,bool &skipped, vector<std::size_t> &faces)
 {
-	vector<std::size_t> res;
+	res.clear();
 	std::size_t N = tproc.GetPointNo();
 	assert(to_check.empty());
 	std::size_t Ntetra = PointTetras_[point].size();
-	vector<std::size_t> faces = tproc.GetCellFaces(rank);
+	faces = tproc.GetCellFaces(rank);
 	vector<size_t> neigh;
 	if (mode == 2)
 	{
@@ -1393,13 +1405,13 @@ vector<std::size_t>  Voronoi3D::FindIntersectionsRecursive(Tessellation3D const&
 		}
 	}
 	std::sort(res.begin(), res.end());
-	return unique(res);
+	res=unique(res);
 }
 
 
 void Voronoi3D::GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res)
 {
-	res.clear();
+	res.resize(0);
 	std::size_t ntetra = PointTetras_[point].size();
 	for (std::size_t i = 0; i < ntetra; ++i)
 	{
@@ -1439,6 +1451,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	std::stack<size_t> intersection_check;
 	boost::container::flat_set<size_t> visited;
 	bool skipped = false;
+	vector<std::size_t> intersecting_faces;
+	vector<size_t> vtemp;
 	while (!check_stack.empty())
 	{
 		cur_loc = check_stack.top();
@@ -1448,8 +1462,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 			continue;
 		// Does sphere have any intersections?
 		bool added = false;
-		vector<std::size_t> intersecting_faces = FindIntersectionsRecursive(tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
-			mode, visited, intersection_check,del_.points_[cur_loc],skipped);
+		FindIntersectionsRecursive(intersecting_faces,tproc, static_cast<std::size_t>(rank), cur_loc, sphere,
+			mode, visited, intersection_check,del_.points_[cur_loc],skipped,vtemp);
 		if (!intersecting_faces.empty())
 		{
 			added = true;

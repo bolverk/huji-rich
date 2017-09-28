@@ -17,8 +17,8 @@ Primitive Conserved2Primitive
 {
   const double density = c.Mass;
   const Vector2D velocity = c.Momentum / c.Mass;
-  const double energy = c.Energy/c.Mass -
-    0.5*pow(abs(velocity),2);
+  const double energy = c.Energy / c.Mass -
+	  0.5*ScalarProd(velocity, velocity);
   assert(energy>=0 &&
 	 "Thermal energy is negative");
   /*

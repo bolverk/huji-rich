@@ -57,6 +57,7 @@ private:
 	boost::array<std::size_t, 8> b8s_temp_;
 	vector<std::size_t> to_check_;
 	std::size_t last_checked_;	
+	Tetrahedron tet_temp0_, tet_temp1_, newtet_;
 };
 
 #endif //DELAUNAY3D_HPP

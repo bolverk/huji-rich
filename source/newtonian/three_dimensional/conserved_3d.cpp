@@ -123,7 +123,8 @@ Conserved3D operator/(const Conserved3D& c, double s)
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res)
 {
 	res.mass = cell.density*vol;
-	res.momentum = cell.velocity*res.mass;
+	res.momentum = cell.velocity;
+	res.momentum *= res.mass;
 	res.internal_energy = res.mass*cell.internal_energy;
 	res.energy = res.mass*0.5*ScalarProd(cell.velocity,cell.velocity) + res.internal_energy;
 	size_t N = cell.tracers.size();

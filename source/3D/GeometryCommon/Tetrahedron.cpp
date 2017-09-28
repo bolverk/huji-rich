@@ -10,3 +10,12 @@ Tetrahedron::Tetrahedron(Tetrahedron const & other) : points(other.points),neigh
 
 Tetrahedron::~Tetrahedron()
 {}
+
+Tetrahedron & Tetrahedron::operator=(Tetrahedron const & other)
+{
+	if (&other == this)
+		return *this;
+	points = other.points;
+	neighbors = other.neighbors;
+	return *this;
+}

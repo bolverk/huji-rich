@@ -66,9 +66,13 @@ namespace
 		// Create the matrix to invert and the vector to compare
 		boost::array<double,9>  m;
 		std::fill_n(m.begin(), 9, 0.0);
+		Vector3D c_ij;
 		for (size_t i = 0; i < n; ++i)
 		{
-			Vector3D c_ij = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
+			c_ij = neigh_cm[i];
+			c_ij += cell_cm;
+			c_ij *= -0.5;
+			c_ij += tess.FaceCM(faces[i]);
 			const Vector3D r_ij = normalize(neighbor_centers[i] - center);
 			const double A = tess.GetArea(faces[i]);
 			m[0] -= c_ij.x*r_ij.x*A;
@@ -99,8 +103,9 @@ namespace
 			ComputationalCellAddMult(temp.yderivative, cell, r_ij.y*A);
 			ComputationalCellAddMult(temp.zderivative, cell, r_ij.z*A);
 		}
+		double v_inv = 1.0 / cell_volume;
 		for (size_t i = 0; i < 9; ++i)
-			m[i] /= cell_volume;
+			m[i] *= cell_volume;
 		m[0] += 1;
 		m[4] += 1;
 		m[8] += 1;
@@ -604,6 +609,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 {
 	const size_t CellNumber = tess.GetPointNo();
 	vector<size_t> boundaryedges;
+	boundaryedges.reserve(static_cast<size_t>(std::pow(1.0*CellNumber,0.6666)*8.0));
 	// Get ghost points
 	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
 	ghost_.operator()(tess, cells, time, tracerstickersnames,ghost_cells);

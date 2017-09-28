@@ -222,7 +222,7 @@ double CalcAngle(Vector3D const& v1, Vector3D const& v2)
 
 Vector3D Reflect(Vector3D const& v, Vector3D const& normal)
 {
-	return v - 2 * ScalarProd(v, normal)*normal / pow(abs(normal), 2);
+	return v - 2 * ScalarProd(v, normal)*normal / ScalarProd(normal,normal);
 }
 
 double distance(Vector3D const& v1, Vector3D const& v2)

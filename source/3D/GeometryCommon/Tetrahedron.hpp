@@ -15,6 +15,8 @@ public:
 	~Tetrahedron();
 
 	boost::array<std::size_t, 4> points, neighbors;
+
+	Tetrahedron& operator=(Tetrahedron const& other);
 };
 
 #endif //TETRAHEDRON_HPP
