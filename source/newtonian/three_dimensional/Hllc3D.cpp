@@ -94,8 +94,12 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 	ComputationalCell3D local_left = left;
 	ComputationalCell3D local_right = right;
 
-	local_left.velocity -= velocity*normaldir;
-	local_right.velocity -= velocity*normaldir;
+	local_left.velocity.x -= velocity*normaldir.x;
+	local_left.velocity.y -= velocity*normaldir.y;
+	local_left.velocity.z -= velocity*normaldir.z;
+	local_right.velocity.x -= velocity*normaldir.x;
+	local_right.velocity.y -= velocity*normaldir.y;
+	local_right.velocity.z -= velocity*normaldir.z;
 
 	double par_left = abs(local_left.velocity - ScalarProd(local_left.velocity,normaldir)*normaldir);
 	double par_right = abs(local_right.velocity - ScalarProd(local_right.velocity, normaldir)*normaldir);

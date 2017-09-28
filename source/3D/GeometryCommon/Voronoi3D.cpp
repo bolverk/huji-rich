@@ -933,6 +933,7 @@ void Voronoi3D::CalcAllCM(void)
 {
 	size_t Nfaces = FaceNeighbors_.size();
 	boost::array<Vector3D, 4> tetra;
+	Vector3D vtemp;
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		size_t N0 = FaceNeighbors_[i].first;
@@ -948,13 +949,17 @@ void Voronoi3D::CalcAllCM(void)
 			tetra[3] = del_.points_[N0];
 			vol = std::abs(GetTetraVolume(tetra));
 			volume_[N0] += vol;
-			CM_[N0] += vol*GetTetraCM(tetra);
+			vtemp = GetTetraCM(tetra);
+			vtemp *= vol;
+			CM_[N0] += vtemp;
 			if (N1 < Norg_)
 			{
 				tetra[3] = del_.points_[N1];
 				vol = std::abs(GetTetraVolume(tetra));
 				volume_[N1] += vol;
-				CM_[N1] += vol*GetTetraCM(tetra);
+				vtemp = GetTetraCM(tetra);
+				vtemp *= vol;
+				CM_[N1] += vtemp;
 			}
 		}
 	}
@@ -1631,7 +1636,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	for (size_t i = 0; i < 4; ++i)
 		temp_points_[i] = del_.points_[del_.tetras_[index].points[i]];
 	for (size_t i = 0; i < 4; ++i)
-		temp_points2_[i] = del_.points_[del_.tetras_[index].points[i]];
+		temp_points2_[i] = temp_points_[i];
 	double aa = orient3d(temp_points_);
 	temp_points2_[4] = Vector3D(0, 0, 0);
 	double cc = insphere(temp_points2_);
@@ -1710,7 +1715,8 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		}
 		return Rres;
 	}
-	tetra_centers_[index] = Vector3D(Dx / (2 * aa), Dy / (2 * aa), Dz / (2 * aa));
+	double a_inv = 0.5 / aa;
+	tetra_centers_[index] = Vector3D(Dx *a_inv, Dy *a_inv, Dz *a_inv);
 	if (rtemp < 0)
 	{
 		UniversalError eo("Negative tetra radius");
@@ -1722,7 +1728,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		eo.AddEntry("tetra", static_cast<double>(index));
 		throw eo;
 	}
-	double Rres = 0.5*sqrt(rtemp) / std::abs(aa);
+	double Rres = sqrt(rtemp) *std::abs(a_inv);
 	// Sanity check
 	double Rcheck = abs(temp_points_[0] - tetra_centers_[index]);
 	if (Rcheck > 1.02*Rres || Rcheck*1.02 < Rres)
@@ -2071,12 +2077,15 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 	Vector3D r0 = GetMeshPoint(p0);
 	Vector3D r1 = GetMeshPoint(p1);
 	Vector3D r_diff = r1 - r0;
-	double abs_r_diff = abs(r_diff);
+	double abs_r_diff = ScalarProd(r_diff, r_diff);
 
 	Vector3D f = FaceCM(index);
-
-	Vector3D delta_w = ScalarProd((v0 - v1), (f - (r1 + r0) / 2)) * r_diff / (abs_r_diff * abs_r_diff);
-	Vector3D w = (v0 + v1) / 2 + delta_w;
+	r1 += r0;
+	r1 *= 0.5;
+	f -= r1;
+	Vector3D delta_w = ScalarProd((v0 - v1), f) * r_diff / abs_r_diff;
+	Vector3D w = (v0 + v1) *0.5;
+	w+=delta_w;
 	return w;
 }
 
