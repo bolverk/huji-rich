@@ -138,7 +138,10 @@ namespace
 		assert(res.size() == other.size());
 		size_t N = res.size();
 		for (size_t i = 0; i < N; ++i)
-			res[i] = 0.5*(res[i] + other[i]);
+		{
+			res[i] += other[i];
+			res[i] *= 0.5;
+		}
 	}
 }
 

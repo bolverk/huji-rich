@@ -64,6 +64,12 @@ public:
 	 */
 	Conserved3D& operator+=(const Conserved3D& diff);
 
+	/*! \brief Self multiplication operator
+	\param s The scalar to multiply
+	\return Reference to self
+	*/
+	Conserved3D& operator*=(double s);
+
 #ifdef RICH_MPI
 	size_t getChunkSize(void) const;
 

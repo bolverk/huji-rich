@@ -146,3 +146,15 @@ Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2)
 	res -= p2;
 	return res;
 }
+
+Conserved3D& Conserved3D::operator*=(double s)
+{
+	this->mass *= s;
+	this->momentum *= s;
+	this->energy *= s;
+	this->internal_energy *= s;
+	size_t N = this->tracers.size();
+	for (size_t j = 0; j < N; ++j)
+		this->tracers[j] *= s;
+	return *this;
+}
