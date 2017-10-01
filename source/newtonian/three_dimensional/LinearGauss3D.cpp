@@ -105,7 +105,7 @@ namespace
 		}
 		double v_inv = 1.0 / cell_volume;
 		for (size_t i = 0; i < 9; ++i)
-			m[i] *= cell_volume;
+			m[i] *= v_inv;
 		m[0] += 1;
 		m[4] += 1;
 		m[8] += 1;
@@ -609,7 +609,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 {
 	const size_t CellNumber = tess.GetPointNo();
 	vector<size_t> boundaryedges;
-	boundaryedges.reserve(static_cast<size_t>(std::pow(1.0*CellNumber,0.6666)*8.0));
+	boundaryedges.reserve(static_cast<size_t>(std::pow(static_cast<double>(CellNumber),0.6666)*8.0));
 	// Get ghost points
 	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
 	ghost_.operator()(tess, cells, time, tracerstickersnames,ghost_cells);

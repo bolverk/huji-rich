@@ -344,7 +344,7 @@ namespace
 		assert(false);
 	}
 
-	bool ShouldBuildFace(size_t N0, size_t N1, vector<vector<std::size_t> > const& FacesInCell,
+	/*bool ShouldBuildFace(size_t N0, size_t N1, vector<vector<std::size_t> > const& FacesInCell,
 		vector<std::pair<std::size_t, std::size_t> > const& FaceNeighbors, size_t Norg)
 	{
 		if (N0 >= Norg)
@@ -355,7 +355,7 @@ namespace
 				return false;
 		return true;
 	}
-
+	*/
 	bool IsOuterTetra(size_t Norg, Tetrahedron const& tetra)
 	{
 		for (size_t j = 0; j < 4; ++j)
@@ -363,7 +363,7 @@ namespace
 				return true;
 		return false;
 	}
-
+	
 #ifdef RICH_MPI
 	std::pair<Vector3D, Vector3D> GetBoundingBox(Tessellation3D const& tproc, int rank)
 	{
