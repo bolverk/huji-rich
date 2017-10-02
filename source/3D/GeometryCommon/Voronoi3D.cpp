@@ -1224,7 +1224,7 @@ void Voronoi3D::BuildVoronoi(void)
 						if (temp2.size() < 3)
 							continue;
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < (Asize*Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
+						if (AreaCM.first < (Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
 							continue;
 						if(N1>=Norg_&&N1<(Norg_+4))
 						   {
