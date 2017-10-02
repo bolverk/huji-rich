@@ -24,7 +24,6 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 	for (std::size_t i = 0; i < N; ++i)
 	{
 		double R = sqrt(tess.GetArea(faces[i]));
-		size_t N0 = 0;
 		size_t N1 = 0;
 		size_t N2 = 0;
 		Vector3D V1, V2;
