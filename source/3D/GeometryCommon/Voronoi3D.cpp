@@ -49,8 +49,8 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 			N2 = (counter + 2) % NinFace;
 		}
 		vec[0] = points[InFace[0]];
-		vec[1] = points.at(N1);
-		vec[2] = points.at(N2);
+		vec[1] = points[InFace.at(N1)];
+		vec[2] = points[InFace.at(N2)];
 		vec[3] = tess.GetMeshPoint(index);
 		double s1 = orient3d(vec);
 		vec[3] = point;
