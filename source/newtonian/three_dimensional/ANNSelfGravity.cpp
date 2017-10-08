@@ -67,7 +67,6 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	}
 	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses,Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
 
-
 #ifdef RICH_MPI
 	// Get essential tree from other cpu
 	assert(tproc_ != 0);
@@ -81,6 +80,9 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<double> mass_temp;
 	vector<Vector3D> cm_temp;
 	vector<double> Q_temp;
+	/*vector<int> m_size(Nproc, 0);
+	vector<double> m_send,CM_send,Q_send;
+	size_t counter = 0;*/
 	for (size_t i = 0; i < Nproc; ++i)
 	{
 		if (i == static_cast<size_t>(rank))
@@ -90,19 +92,27 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		CallTreeGetSend(atree, *tproc_, faces, nodes, opening_);
 		cm_temp.clear();
 		mass_temp.clear();
+		Q_temp.clear();
 		for (size_t j = 0; j < nodes.size(); ++j)
 		{
 			cm_temp.push_back(Vector3D(nodes[j]->CM[0], nodes[j]->CM[1], nodes[j]->CM[2]));
 			mass_temp.push_back(nodes[j]->mass);
 			for (size_t k = 0; k < 6; ++k)
 				Q_temp.push_back(nodes[j]->Q[k]);
+			/*m_send.push_back(nodes[j]->mass);
+			CM_send.push_back(nodes[j]->CM[0]);
+			CM_send.push_back(nodes[j]->CM[1]);
+			CM_send.push_back(nodes[j]->CM[2]);*/
 		}
 		send_CM.push_back(cm_temp);
 		send_masses.push_back(mass_temp);
 		send_Q.push_back(Q_temp);
+		//m_size[i] = static_cast<int>(send_masses.size());
 		totalkwith.push_back(static_cast<int>(i));
 	}
 	// send/recv data
+	//vector<int> m_rec(Norg);
+	//MPI_Alltoall(&m_size[0],1,MPI_INT, &m_rec[0], 1, MPI_INT,MPI_COMM_WORLD);
 	send_masses=MPI_exchange_data(totalkwith, send_masses);
 	send_Q = MPI_exchange_data(totalkwith, send_Q);
 	send_CM = MPI_exchange_data(totalkwith, send_CM,Vector3D());

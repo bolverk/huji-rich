@@ -411,19 +411,19 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		double qz = lo->CM[2] - ptr->CM[2];
 		double qr2 = qx*qx + qy*qy + qz*qz;
 		ptr->Q[0] = lo->Q[0] + lo->mass*(3 * qx*qx - qr2);
-		ptr->Q[1] = lo->Q[1] + lo->mass*qx*qy;
-		ptr->Q[2] = lo->Q[2] + lo->mass*qx*qz;
+		ptr->Q[1] = lo->Q[1] + 3*lo->mass*qx*qy;
+		ptr->Q[2] = lo->Q[2] + 3*lo->mass*qx*qz;
 		ptr->Q[3] = lo->Q[3] + lo->mass*(3 * qy*qy - qr2);
-		ptr->Q[4] = lo->Q[4] + lo->mass*qz*qy;
+		ptr->Q[4] = lo->Q[4] + 3*lo->mass*qz*qy;
 		qx = hi->CM[0] - ptr->CM[0];
 		qy = hi->CM[1] - ptr->CM[1];
 		qz = hi->CM[2] - ptr->CM[2];
 		qr2 = qx*qx + qy*qy + qz*qz;
 		ptr->Q[0] += hi->Q[0] + hi->mass*(3 * qx*qx - qr2);
-		ptr->Q[1] += hi->Q[1] + hi->mass*qx*qy;
-		ptr->Q[2] += hi->Q[2] + hi->mass*qx*qz;
+		ptr->Q[1] += hi->Q[1] + 3*hi->mass*qx*qy;
+		ptr->Q[2] += hi->Q[2] + 3*hi->mass*qx*qz;
 		ptr->Q[3] += hi->Q[3] + hi->mass*(3 * qy*qy - qr2);
-		ptr->Q[4] += hi->Q[4] + hi->mass*qz*qy;
+		ptr->Q[4] += hi->Q[4] + 3*hi->mass*qz*qy;
 		ptr->Q[5] = -ptr->Q[0] -ptr-> Q[3];
 		return ptr;						// return pointer to this node
 	}
@@ -536,19 +536,19 @@ void ANNkd_split::GetAcc(ANNpoint qpoint, ANNpoint res, double angle2,ANNorthRec
 	{
 		double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
 		for (int i = 0; i < 3; ++i)
-			res[i] += mass*(qpoint[i] - CM[i]) * r3;
+			res[i] -= mass*(qpoint[i] - CM[i]) * r3;
 		double Qfactor = r3 / dist_toq;
 		double dx = qpoint[0] - CM[0];
 		double dy = qpoint[1] - CM[1];
 		double dz = qpoint[2] - CM[2];
-		res[0] -= Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
-		res[1] -= Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
-		res[2] -= Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
+		res[0] += Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
+		res[1] += Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
+		res[2] += Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
 		double mrr = dx*dx*Q[0] + dy*dy*Q[3] + dz*dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
 		Qfactor *= -5 * mrr / (2 * dist_toq);
-		res[0] -= Qfactor*dx;
-		res[1] -= Qfactor*dy;
-		res[2] -= Qfactor*dz;
+		res[0] += Qfactor*dx;
+		res[1] += Qfactor*dy;
+		res[2] += Qfactor*dz;
 		return;
 	}
 
@@ -579,7 +579,7 @@ void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint res, double /*angle2*/, ANNort
 		return;
 	double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
 	for (int i = 0; i < 3; ++i)
-		res[i] += mass*(qpoint[i] - CM[i]) *r3;
+		res[i] -= mass*(qpoint[i] - CM[i]) *r3;
 	double sumQ = 0;
 	for (size_t i = 0; i < 6; ++i)
 		sumQ += std::abs(Q[i]);
@@ -589,14 +589,14 @@ void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint res, double /*angle2*/, ANNort
 	double dx = qpoint[0] - CM[0];
 	double dy = qpoint[1] - CM[1];
 	double dz = qpoint[2] - CM[2];
-	res[0] -= Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
-	res[1] -= Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
-	res[2] -= Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
+	res[0] += Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
+	res[1] += Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
+	res[2] += Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
 	double mrr = dx*dx*Q[0] + dy*dy*Q[3] + dz*dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
 	Qfactor *= -5 * mrr / (2 * dist_toq);
-	res[0] -= Qfactor*dx;
-	res[1] -= Qfactor*dy;
-	res[2] -= Qfactor*dz;
+	res[0] += Qfactor*dx;
+	res[1] += Qfactor*dy;
+	res[2] += Qfactor*dz;
 }
 
 namespace
