@@ -650,7 +650,10 @@ double DistanceToFace(ANNpointArray face, size_t Nface,const double* qpoint, dou
 	ptemp[1] = qpoint[1] - d*normal[1];
 	ptemp[2] = qpoint[2] - d*normal[2];
 	if (PointInface(face, Nface, ptemp))
+	{
+		annDeallocPt(ptemp);
 		return std::abs(d);
+	}
 	double min_face_dist = 0;
 	for (size_t i = 0; i < 3; ++i)
 		min_face_dist += (qpoint[i] - face[0][i])*(qpoint[i] - face[0][i]);

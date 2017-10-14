@@ -46,8 +46,8 @@ public:
 template <typename T>
 inline T Mat33<T>::determinant() const
 {
-	return at(0, 0)*at(1, 1)*at(2, 2) + at(0, 1)*at(1, 2)*at(2, 0) + at(0, 2)*at(1, 0)*at(2, 1)
-		- at(0, 2)*at(1, 1)*at(2, 0) - at(0, 1)*at(1, 0)*at(2, 2) - at(0, 0)*at(1, 2)*at(2, 1);
+	return at(0, 0)*(at(1, 1)*at(2, 2) - at(1, 2)*at(2, 1)) + at(0, 1)*(at(1, 2)*at(2, 0) - at(1, 0)*at(2, 2))
+		+ at(0, 2)*(at(1, 0)*at(2, 1) - at(1, 1)*at(2, 0));
 }
 
 template <typename T>
