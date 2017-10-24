@@ -140,7 +140,7 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 			if(neigh[i]<Norg||!tess.IsPointOutsideBox(neigh[i]))
 				maxDV = std::max(maxDV, abs(Vcell - cells.at(neigh[i]).momentum/cells[neigh[i]].mass));
-		return 0.001*maxDV*maxDV*cell.mass > cell.internal_energy;
+		return 0.005*maxDV*maxDV*cell.mass > cell.internal_energy;
 	}
 
 	void EntropyFix(Conserved3D &extensive, double vol, EquationOfState const& eos, size_t entropy_index)
