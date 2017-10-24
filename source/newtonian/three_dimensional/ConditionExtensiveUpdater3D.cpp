@@ -149,20 +149,9 @@ namespace
 		const double density = extensive.mass / vol;
 		double Et = eos.dp2e(density, eos.sd2p(extensive.tracers[entropy_index] / extensive.mass, density))
 			*extensive.mass;
-		if (extensive.internal_energy<0 || Et>extensive.internal_energy*1.03 || Et < extensive.internal_energy*0.97)
-		{
-			extensive.internal_energy = Et;
-			extensive.energy = Ek + Et;
-		}
+		extensive.internal_energy = Et;
+		extensive.energy = Ek + Et;
 	}
-
-	/*double NewPressure(Conserved3D const& extensive, EquationOfState const& eos, double new_d)
-	{
-		double new_e = extensive.internal_energy / extensive.mass;
-		if (new_e < 0)
-			return 0;
-		return eos.de2p(new_d, new_e);
-	}*/
 }
 
 void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& tess, const double dt,
@@ -204,23 +193,6 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 		EntropyFix(extensives[index], tess.GetVolume(index), eos_, entropy_index_);
 		return;
 	}
-	/*
-	double new_entropy = eos_.dp2s(new_d, NewPressure(extensive, eos_, new_d));
-	if (new_entropy*extensive.mass < extensive.tracers[entropy_index_])
-	{
-		EntropyFix(extensive, tess.GetVolume(index), eos_, entropy_index_);
-		return;
-	}
-
-	Vector3D Tgrad = GetTemperatureGrad(index, interp_, cells[index]);
-	if ((!BigJump(Tgrad, index, tess, cells, ghost_cells_, neigh) &&
-		!NegativeVelocityDivergence(index, interp_, eos_.dp2c(cells[index].density, cells[index].pressure), tess.GetWidth(index)))
-		|| NegativeThermalEnergy(extensive))
-	{
-		EntropyFix(extensive, tess.GetVolume(index), eos_, entropy_index_);
-		return;
-	}
-	return;*/
 }
 
 void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& /*tess*/, const double /*dt*/,
