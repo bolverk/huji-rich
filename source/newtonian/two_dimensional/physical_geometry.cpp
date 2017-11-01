@@ -112,8 +112,7 @@ Vector2D CylindricalSymmetry::calcCentroid(const vector<Vector2D>& chull) const
 	{
 		Vector2D q1 = change_coordinate(chull[i], axis_);
 		Vector2D q2 = change_coordinate(chull[i+1], axis_);
-		//double dv = M_PI*0.333333333*(q2.y + q1.y + anchor.y)*abs(CrossProduct(q1 - anchor, q2 - anchor));
-		double dv = 0.5*abs(CrossProduct(q2 - anchor, q1 - anchor));
+		double dv = 0.5*std::abs(CrossProduct(q2 - anchor, q1 - anchor));
 		V += dv;
 		res += dv*Vector2D((2 * anchor.x*anchor.y + q1.x*anchor.y + q2.x*anchor.y + q1.y*anchor.x + q1.y*q1.x * 2 + q1.y*q2.x
 			+ q2.y*anchor.x + q2.y*q1.x + 2 * q2.x*q2.y) / 12.0, (anchor.y*anchor.y + anchor.y*q1.y + anchor.y*q2.y
