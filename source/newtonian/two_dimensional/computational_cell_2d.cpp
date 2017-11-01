@@ -147,6 +147,14 @@ Slope::Slope(void) :xderivative(ComputationalCell()), yderivative(ComputationalC
 Slope::Slope(ComputationalCell const & x, ComputationalCell const & y) : xderivative(x), yderivative(y)
 {}
 
+TracerStickerNames& TracerStickerNames::operator=
+(const TracerStickerNames& other)
+{
+  tracer_names = other.tracer_names;
+  sticker_names = other.sticker_names;
+  return *this;
+}
+
 TracerStickerNames::TracerStickerNames(void)
 	: tracer_names(vector<string>()), sticker_names(vector<string>()) {}
 
@@ -154,7 +162,9 @@ TracerStickerNames::~TracerStickerNames(void) {}
 
 TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
 
-TracerStickerNames::TracerStickerNames(std::vector<std::string> tracers, std::vector<std::string> stickers):
+TracerStickerNames::TracerStickerNames
+(const std::vector<std::string>& tracers, 
+ const std::vector<std::string>& stickers):
 	tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI

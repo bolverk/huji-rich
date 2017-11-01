@@ -60,22 +60,6 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 namespace
 {
 #ifdef RICH_MPI
-	Extensive Cell2Intensive(ComputationalCell const& cell,EquationOfState const& eos,
-		TracerStickerNames const& ts)
-	{
-		Extensive res;
-		const double mass = cell.density;
-		res.mass = mass;
-		res.energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, ts.tracer_names)*mass +
-			0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-		res.momentum = mass*cell.velocity;
-		size_t N = cell.tracers.size();
-		res.tracers.resize(N);
-		for (size_t j = 0; j < N; ++j)
-			res.tracers[j] = cell.tracers[j] * mass;
-		return res;
-	}
-
 	vector<vector<int> > GetSentIndeces(Tessellation const& tess, vector<size_t> const& ToRemove,vector<vector<size_t> > &
 		RemoveIndex)
 	{
@@ -1031,6 +1015,9 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, cd.volumes[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
@@ -1068,6 +1055,9 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
 		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, cd.volumes[i],tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, cells, true);
+#endif
 }
 
 void NonConservativeAMR::operator()(hdsim &sim)

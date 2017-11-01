@@ -38,6 +38,12 @@ public:
   */
   Face(Face const& other);
 
+  /*! \brief Copy operator
+    \param other Source from which to copy data
+    \return Reference to self
+   */
+  Face& operator=(const Face& other);
+
   /*! \brief Returns the area of the face
     \return Length
   */

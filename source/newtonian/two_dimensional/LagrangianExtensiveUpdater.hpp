@@ -3,9 +3,14 @@
 #include "extensive_updater.hpp"
 #include "condition_action_sequence_2.hpp"
 
+//! \brief Extensive variables updater that minimises the effects of numerical mass transfer
 class LagrangianExtensiveUpdater : public ExtensiveUpdater
 {
 public:
+  /*! \brief Class constructor
+    \param fc Flux calculator
+    \param beu Extensive variables updater
+   */
 	LagrangianExtensiveUpdater(LagrangianFlux const& fc,ExtensiveUpdater const& beu);
 
 	void operator()

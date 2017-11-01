@@ -14,6 +14,13 @@ facet::facet(const TripleConstRef<int>& vertices_i,
   vertices(vertices_i),
   neighbors(neighbors_i) {}
 
+facet& facet::operator=(const facet& other)
+{
+  vertices = other.vertices;
+  neighbors = other.neighbors;
+  return *this;
+}
+
 facet::~facet()
 {
 }

@@ -16,7 +16,10 @@ private:
 	const bool massflux_;
 public:
 
-	Hllc(bool massflux = true);
+  /*! \brief Class constructor
+    \param massflux Determines whether a correction for the mass flux should be applied
+   */
+  explicit Hllc(bool massflux = true);
 
 	Conserved operator()
 		(Primitive const& left,

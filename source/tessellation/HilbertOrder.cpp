@@ -19,6 +19,9 @@ namespace
     int N;
     int n;
     int pow2;
+
+  private:
+    AllLocalData& operator=(const AllLocalData& other);
   };
 
   class Context

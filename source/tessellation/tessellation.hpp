@@ -150,6 +150,7 @@ virtual void GetNeighbors(int index,vector<int> &neigh)const = 0;
 
 /*!
 	\brief Cloning function
+	\return Pointer to clone
 */
 virtual Tessellation* clone(void) const=0;
 

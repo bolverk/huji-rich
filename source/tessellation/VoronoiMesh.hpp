@@ -33,7 +33,7 @@ public:
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const;
 
-	Tessellation* clone(void)const;
+	VoronoiMesh* clone(void)const;
 
 	vector<int> GetNeighbors(int index)const;
 
@@ -48,6 +48,12 @@ public:
 	int GetOriginalIndex(int point) const;
 
 #ifdef RICH_MPI
+  /*! \brief Initialise the tessellation
+    \param points List of mesh generating points
+    \param vproc Tessellation of processors
+    \param outer Outer boundary condition
+    \param reorder Determines whether to apply Hilbert order
+   */
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
 		OuterBoundary const* outer,bool reorder=true);
 #endif
@@ -90,6 +96,12 @@ public:
 	VoronoiMesh(VoronoiMesh const& other);
 
   #ifdef RICH_MPI
+  /*! \brief Updates the tessellation
+    \param points List of points
+    \param vproc Tessellation of processors
+    \param reorder Whether to apply hilbert order
+    \return List of hilbert order indices
+   */
 	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool reorder=false);
 #endif // RICH_MPI
 

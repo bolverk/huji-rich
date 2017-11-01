@@ -157,10 +157,12 @@ private:
 	const FreeFlowFlux free_;
 };
 
+//! \brief A flux scheme that minimises mass transfer between cells
 class LagrangianFlux : public ConditionActionSequence2::Action2
 {
 public:
 
+  //! \brief Condition on when to apply mass transfer fix
 	class LagrangianCriteria
 	{
 	public:
@@ -210,9 +212,14 @@ public:
 			Extensive &res, double time,
 			TracerStickerNames const& tracerstickernames) const;
 
-	void Reset(void)const;
-	
-	mutable vector<double> ws_,edge_vel_;
+  /*! \brief Resets the internal variables
+   */
+	void Reset(void) const;
+
+  //! \brief Velocity of the interfaces
+  mutable vector<double> ws_;
+  //! \brief Velocity of the edges
+  mutable vector<double> edge_vel_;
 private:
 	const LagrangianHLLC& rs_, rs2_;
 	LagrangianCriteria const& criteria_;

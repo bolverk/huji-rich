@@ -431,7 +431,7 @@ namespace
 	{
 	public:
 		Compare comp;
-		PairComp(Compare comp_) : comp(comp_) {}
+		explicit PairComp(Compare comp_) : comp(comp_) {}
 		bool operator() (const std::pair<size_t, RAIter>& a,
 			const std::pair<size_t, RAIter>& b) const {
 			return comp(*a.second, *b.second);
@@ -658,7 +658,7 @@ template<class S, class T> const T& safe_retrieve
 /*!
 \brief Reduces the dimension of the input vector
 \param data The vector to reduce its dimension
-\retrun The reduced vector
+\return The reduced vector
 */
 template<class T> vector<vector<T> > CombineVectors(vector<vector<vector<T> > > const& data)
 {
@@ -682,7 +682,7 @@ template<class T> vector<vector<T> > CombineVectors(vector<vector<vector<T> > > 
 /*!
 \brief Reduces the dimension of the input vector
 \param data The vector to reduce its dimension
-\retrun The reduced vector
+\return The reduced vector
 */
 template<class T> vector<T>  CombineVectors(vector<vector<T> > const& data)
 {

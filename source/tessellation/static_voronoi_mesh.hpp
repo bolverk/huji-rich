@@ -49,6 +49,12 @@ public:
 	int GetOriginalIndex(int point) const;
 
 #ifdef RICH_MPI
+  /*! \brief Initialises the tessellation
+    \param points List of mesh generating points
+    \param vproc Tessellation of the processors
+    \param outer Outer boundary conditions
+    \param HilbertOrder Whether to apply Hilbert order
+   */
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
 		OuterBoundary const* outer,bool HilbertOrder=true);
 #endif
@@ -69,6 +75,12 @@ public:
   StaticVoronoiMesh(StaticVoronoiMesh const& other);
 
   #ifdef RICH_MPI
+  /*! \brief Updates the tessellation
+    \param points List of mesh generating points
+    \param vproc Tessellation of the processors
+    \param HilbertOrder Whether to apply hilbert order
+    \return Indices of the hilbert order
+   */
 	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool HilbertOrder = false);
 #endif // RICH_MPI
 

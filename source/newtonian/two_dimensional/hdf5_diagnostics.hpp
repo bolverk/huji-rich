@@ -25,6 +25,12 @@ public:
   //! \param source Source
   Snapshot(const Snapshot& source);
 
+  /*! \brief Copy operator
+    \param other Source to copy from
+    \return Reference to self
+   */
+  Snapshot& operator=(const Snapshot& other);
+
   //! \brief Mesh points
   vector<Vector2D> mesh_points;
 
@@ -66,6 +72,7 @@ public:
   virtual vector<double> operator()(const hdsim& sim) const = 0;
 
   /*! \brief Returns the name of the new field
+    \return Name of new field
    */
   virtual string getName(void) const = 0;
 

@@ -124,6 +124,7 @@ public:
    double edge=3);
 
   /*! \brief Returns the equation of state
+    \return Ideal gas equation of state
    */
   IdealGas const& getEOS(void) const;
 

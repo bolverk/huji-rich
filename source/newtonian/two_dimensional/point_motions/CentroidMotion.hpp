@@ -20,7 +20,7 @@ class CentroidMotion : public PointMotion
 public:
 
 	/*! \brief Class constructor
-	\param Base class of point motion on which to apply the fix
+	\param bpm class of point motion on which to apply the fix
 	\param reduction_factor The factor to reduce the correction velocity (1/reduction_factor is the number of iterations to fix)
 	\param niter The number of correction iterations to apply
 	\param eos The equation of state

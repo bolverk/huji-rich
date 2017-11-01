@@ -29,6 +29,7 @@ public:
 	//! \brief Defualt constructor. Sets vertices and friends to zero.
 	facet();
 	//! \brief Copy constructor.
+  //! \param other Source from which to copy data
 	facet(const facet & other);
 
   /*! \brief Class constructor
@@ -40,6 +41,11 @@ public:
   
 	//! \brief Class destructor
 	~facet();
+  /*! \brief Copy operator
+    \param other Source to copy from
+    \return Reference to self
+   */
+  facet& operator=(const facet& other);
 };
 
 #endif //FACET_HPP

@@ -38,7 +38,7 @@ public:
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
 			const CacheData& cd,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const TracerStickerNames& tracerstickernames) const = 0;
 
 	//! \brief Class destructor
 	virtual ~CellUpdater(void);

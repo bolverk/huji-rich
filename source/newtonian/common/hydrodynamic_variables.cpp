@@ -48,6 +48,11 @@ bool primitive_has_nan(Primitive const& p)
     is_nan(p.SoundSpeed);
 }
 
+Conserved::Conserved(const Conserved& other):
+  Mass(other.Mass),
+  Momentum(other.Momentum),
+  Energy(other.Energy) {}
+
 Conserved::Conserved(double mass,
 		     Vector2D const& momentum,
 		     double energy):
@@ -63,6 +68,13 @@ Conserved& Conserved::operator=(Conserved const&other)
   Momentum=other.Momentum;
   return *this;
 }
+
+Primitive::Primitive(const Primitive& other):
+  Density(other.Density),
+  Pressure(other.Pressure),
+  Velocity(other.Velocity),
+  Energy(other.Energy),
+  SoundSpeed(other.SoundSpeed) {}
 
 Primitive& Primitive::operator+=(Primitive const& p)
 {

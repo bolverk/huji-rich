@@ -22,6 +22,16 @@ Snapshot::Snapshot(const Snapshot& source) :
 	tracerstickernames(source.tracerstickernames) 
 {}
 
+Snapshot& Snapshot::operator=(const Snapshot& other)
+{
+  mesh_points = other.mesh_points;
+  cells = other.cells;
+  time = other.time;
+  cycle = other.cycle;
+  tracerstickernames = other.tracerstickernames;
+  return *this;
+}
+
 DiagnosticAppendix::~DiagnosticAppendix(void) {}
 
 namespace 

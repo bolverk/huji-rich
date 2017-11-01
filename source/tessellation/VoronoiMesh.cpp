@@ -599,7 +599,7 @@ vector<int> VoronoiMesh::GetLiteralNeighbors(int index)const
 	return res;
 }
 
-Tessellation* VoronoiMesh::clone(void)const
+VoronoiMesh* VoronoiMesh::clone(void)const
 {
 	return new VoronoiMesh(*this);
 }

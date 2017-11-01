@@ -29,6 +29,12 @@ public:
   Edge(Vector2D const& p1, Vector2D const& p2,
        int neighbor1, int neighbor2);
 
+  /*! \brief copy operator
+    \param other Source from which to copy data
+    \return Reference to self
+   */
+  Edge& operator=(const Edge& other);
+
   Edge(void);
 
   ~Edge(void);

@@ -15,12 +15,17 @@ class LagrangianHLLC : public RiemannSolver
 private:
 	const bool massflux_;
 public:
-	LagrangianHLLC(bool massflux=true);
+  /*! \brief Class constructor
+    \param massflux Whether to apply correction for mass flux
+   */
+  explicit LagrangianHLLC(bool massflux=true);
 
 	Conserved operator()
 		(Primitive const& left,
 			Primitive const& right,
 			double velocity) const;
+
+  //! \brief Energy
 	mutable double energy;
 };
 

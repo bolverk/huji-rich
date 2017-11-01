@@ -190,6 +190,7 @@ public:
   // Diagnostics
 
   /*! \brief Returns the number of vertices
+    \return Number of vertices
    */
   int GetVertexNo(void) const;
 
@@ -200,6 +201,7 @@ public:
   double GetVertexPosition(size_t i) const;
 
   /*! \brief Returns the number of cells
+    \return Number of cells
    */
   int GetCellNo(void) const;
 

@@ -1,6 +1,12 @@
 #include "extensive.hpp"
 #include "../../misc/utils.hpp"
 
+Extensive::Extensive(const Extensive& other):
+  mass(other.mass),
+  energy(other.energy),
+  momentum(other.momentum),
+  tracers(other.tracers) {}
+
 Extensive::Extensive(void):
   mass(0),
   energy(0),

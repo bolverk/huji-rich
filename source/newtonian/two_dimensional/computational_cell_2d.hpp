@@ -176,7 +176,16 @@ public:
 	\param tracers The names of the tracers
 	\param stickers The names of the stickers
 	*/
-	TracerStickerNames(std::vector<std::string> tracers,std::vector<std::string> stickers);
+	TracerStickerNames
+	(const std::vector<std::string>& tracers,
+	 const std::vector<std::string>& stickers);
+
+  /*! \brief Copy operator
+    \param other Source to copy from
+    \return Reference to self
+   */
+  TracerStickerNames& operator=(const TracerStickerNames& other);
+
 	//! \brief Class destructor
 	~TracerStickerNames(void);
 };

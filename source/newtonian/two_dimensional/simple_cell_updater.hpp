@@ -88,7 +88,7 @@ public:
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
 			const CacheData& cd,
-			TracerStickerNames const& tracerstickernames) const;
+			const TracerStickerNames& tracerstickernames) const;
 
 	~SimpleCellUpdater(void);
 

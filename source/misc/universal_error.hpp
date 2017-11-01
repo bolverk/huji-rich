@@ -26,19 +26,24 @@ public:
   void Append2ErrorMessage(std::string const& msg);
 
   /*! \brief Adds an entry to the list
+    \param field Entry title
+    \param value Value of entry
    */
   void AddEntry(std::string const& field,
 		double value);
 
   /*! \brief Returns the error message
+    \return Error message
    */
   std::string const& GetErrorMessage(void) const;
 
   /*! \brief Returns entry fields
+    \return Textual fields
    */
   std::vector<std::string> const& GetFields(void) const;
 
   /*! \brief Returns entry values
+    \return Numerical values
    */
   std::vector<double> const& GetValues(void) const;
 
