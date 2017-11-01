@@ -82,6 +82,6 @@ size_t CacheData::CMCalculator::size(void) const
 Vector2D CacheData::CMCalculator::operator[](const size_t i) const
 {
 	vector<Vector2D> chull;
-	ConvexHull(chull, tess_, i);
+	ConvexHull(chull, tess_, static_cast<int>(i));
 	return pg_.calcCentroid(chull);
 }
