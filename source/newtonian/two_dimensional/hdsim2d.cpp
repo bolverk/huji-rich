@@ -331,9 +331,11 @@ void hdsim::TimeAdvance2Heun(void)
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+
+	dt = tsf_(tess_, cells_, eos_, edge_velocities, time_, tracer_sticker_names_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);

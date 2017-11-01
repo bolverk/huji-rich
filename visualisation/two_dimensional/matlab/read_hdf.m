@@ -136,6 +136,9 @@ end
 if(ShouldPlot==1||ShouldPlot==2)
     Vertices=zeros(maxfaces*NumberOfCells,2);
     Faces=zeros(maxfaces,NumberOfCells);
+else
+    Faces=0;
+    Vertices=0;
 end
 NumberOfPointsInCell=zeros(NumberOfCells,1);
 Points=zeros(NumberOfCells,maxfaces,2);

@@ -14,6 +14,21 @@
 class CacheData
 {
 private:
+	class CMCalculator : public LazyList<Vector2D>
+	{
+	public:
+
+		CMCalculator(const Tessellation& tess,
+			const PhysicalGeometry& pg);
+
+		size_t size(void) const;
+
+		Vector2D operator[](const size_t i) const;
+
+	private:
+		const Tessellation& tess_;
+		const PhysicalGeometry& pg_;
+	};
 
   class VolumeCalculator: public LazyList<double>
   {
@@ -49,7 +64,7 @@ private:
 
   const VolumeCalculator volume_func_;
   const AreaCalculator area_func_;
-
+  const CMCalculator cm_func_;
 public:
 
   /*! \brief Class constructor
@@ -67,6 +82,9 @@ public:
 
   //! \brief List of areas of interfaces
   const CachedLazyList<double> areas;
+
+  //! \brief List of center of masses of the cells
+  const CachedLazyList<Vector2D> CMs;
 };
 
 #endif // CACHE_DATA_HPP

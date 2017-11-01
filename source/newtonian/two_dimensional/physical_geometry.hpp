@@ -38,6 +38,12 @@ public:
    */
   virtual double calcVolume(const vector<Vector2D>& chull) const = 0;
 
+  /*! \brief Calculates the centroid of a cell
+  \param chull The convex hull of the cell
+  \return centroid of the cell
+  */
+  virtual Vector2D calcCentroid(const vector<Vector2D>& chull) const = 0;
+
   virtual ~PhysicalGeometry(void);
 };
 
@@ -54,6 +60,8 @@ public:
   double calcVolume(const vector<Edge>& edge_list) const;
   
   double calcVolume(const vector<Vector2D>& chull) const;
+
+  Vector2D calcCentroid(const vector<Vector2D>& chull) const;
 };
 
 //! \brief Axis of revolution
@@ -92,6 +100,8 @@ public:
   double calcVolume(const vector<Edge>& edge_list) const;
   
   double calcVolume(const vector<Vector2D>& chull) const;
+
+  Vector2D calcCentroid(const vector<Vector2D>& chull) const;
 
   /*! \brief Returns the axis of revolution
     \return Axis of revolution

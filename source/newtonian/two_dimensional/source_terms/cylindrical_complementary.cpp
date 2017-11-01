@@ -43,8 +43,13 @@ vector<Extensive> CylindricalComplementary::operator()
 	for (size_t i = 0; i < res.size(); ++i) 
 	{
 		const double p = cells[i].pressure;
-		const double r = distance_from_axis
-			(tess.GetCellCM(static_cast<int>(i)), axis_);
+		/*const double rdist = distance_from_axis(tess.GetCellCM(static_cast<int>(i)), axis_);
+		const double R = tess.GetWidth(static_cast<int>(i);
+		rdist>15*R ? rdist : 
+		const double r = std::max(distance_from_axis
+		(tess.GetCellCM(static_cast<int>(i)), axis_), tess.GetWidth(static_cast<int>(i)));*/
+		//const double r = distance_from_axis(tess.GetCellCM(static_cast<int>(i)), axis_);
+		const double r = distance_from_axis(cd.CMs[i], axis_);
 		const double volume = cd.volumes[i];
 		res[i].mass = 0;
 		res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
