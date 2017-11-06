@@ -16,7 +16,7 @@ else ifeq ($(MODE),intel)
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
-	CC := mpicpc
+	CC := mpiicpc
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
 	LINT_FLAGS := 
 	LFLAGS := -lclipper - -lr3d
