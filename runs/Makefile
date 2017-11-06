@@ -19,7 +19,7 @@ else ifeq ($(MODE),parallel_intel)
 	CC := mpiicpc
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
 	LINT_FLAGS := 
-	LFLAGS := -lclipper - -lr3d
+	LFLAGS := -lclipper -lr3d
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
