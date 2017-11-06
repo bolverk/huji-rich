@@ -18,4 +18,7 @@ using std::vector;
 */
 vector<std::size_t> HilbertOrder3D(vector<Vector3D> const& cor);
 
+
+vector<std::size_t> GetGlobalHibertIndeces(vector<Vector3D> const& cor,Vector3D const& ll, Vector3D const& ur,size_t &Hmax);
+
 #endif // HILBERTORDER_HPP

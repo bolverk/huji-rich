@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
+
 
 #define NUMBER_OF_SHAPES 24
 #define MAX_ROTATION_LENGTH 5
@@ -421,6 +425,29 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 	}
 
 	return d;
+}
+
+vector<std::size_t> GetGlobalHibertIndeces(vector<Vector3D> const& cor,Vector3D const& ll,Vector3D const& ur,size_t &Hmax)
+{
+	vector<std::size_t> res;
+	int Nlocal = static_cast<int>(cor.size()), Ntotal = Nlocal;
+#ifdef RICH_MPI
+	MPI_Allreduce(&Nlocal, &Ntotal, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+#endif
+	std::size_t Niter = (size_t)ceil(log(pow((double)Ntotal, (1.0 / 3.0))) / log(2.0))+4;
+	Hmax = std::pow(static_cast<size_t>(2), 3*Niter);
+	HilbertCurve3D oHilbert;
+	Vector3D dx = ur - ll,vtemp;
+	std::size_t Ncor = cor.size();
+	res.resize(Ncor);
+	for (size_t i = 0; i < Ncor; ++i)
+	{
+		vtemp.x = (cor[i].x - ll.x) / dx.x;
+		vtemp.y = (cor[i].y - ll.y) / dx.y;
+		vtemp.z = (cor[i].z - ll.z) / dx.z;
+		res[i]=oHilbert.Hilbert3D_xyz2d(vtemp, Niter);
+	}
+	return res;
 }
 
 vector<std::size_t> HilbertOrder3D(vector<Vector3D> const& cor)
