@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "universal_error.hpp"
 #include <cassert>
+#include <iostream>
 #include "boost/container/flat_map.hpp"
 
 using std::vector;
@@ -152,8 +153,19 @@ template <typename T>
 T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 {
 	typename vector<T>::const_iterator it = upper_bound(x.begin(), x.end(), xi);
-	assert(it != x.end() && it != x.begin() &&
-		"X out of range in Linear Interpolation");
+	if (it == x.end())
+	{
+		std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
+		throw;
+	}
+	if (it == x.begin())
+	{
+		if (*it < x.at(0))
+		{
+			std::cout << "X too small in LinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
+			throw;
+		}
+	}
 	if (*it == xi)
 		return y[static_cast<std::size_t>(it - x.begin())];
 

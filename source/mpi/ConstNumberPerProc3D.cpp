@@ -3,7 +3,21 @@
 #include "../misc/serializable.hpp"
 #include "mpi_commands.hpp"
 #include <mpi.h>
+#include "HilbertProcPositions.hpp"
 #endif
+
+namespace
+{
+	Vector3D GetProcCM(Tessellation3D const& tess)
+	{
+		size_t Ncor = tess.GetPointNo();
+		Vector3D res;
+		for (size_t i = 0; i < Ncor; ++i)
+			res += tess.GetMeshPoint(i);
+		res *= 1.0 / static_cast<double>(Ncor);
+		return res;
+	}
+}
 
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
@@ -47,14 +61,29 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	double load = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
+	if (load>2.5)
+	{
+		vector<Vector3D> res = HilbertProcPositions(tlocal);
+		tproc.Build(res);
+		return;
+	}
+
+	Vector3D RankCM = GetProcCM(tlocal);
+	vector<double> tosend = list_serialize(vector<Vector3D>(1, RankCM));
+	vector<double> torecv(static_cast<size_t>(nproc) * 3);
+	MPI_Gather(&tosend[0], 3, MPI_DOUBLE, &torecv[0], 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&torecv[0], nproc * 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	vector<Vector3D> RankCMs = list_unserialize(torecv, RankCM);
+
 	// Move point according to density
 	if (mode_ == 1 || mode_ == 3)
 	{
+		point = RankCM;
 		for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		{
 			if (i == static_cast<size_t>(rank))
 				continue;
-			Vector3D otherpoint = tproc.GetCellCM(i);
+			Vector3D otherpoint = RankCMs[i];
 			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + (point.z - otherpoint.z)*(point.z - otherpoint.z)
 				+ 0.5*R[static_cast<size_t>(rank)] * R[i]);
@@ -86,9 +115,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		{
 			if (static_cast<int>(neigh[i]) >= nproc)
 				continue;
-			Vector3D otherpoint = tproc.GetMeshPoint(neigh[i]);
-			point = tproc.GetMeshPoint(rank);
-			const double dist = abs(tproc.GetMeshPoint(static_cast<size_t>(rank))-(tproc.GetMeshPoint(neigh[i])));
+			Vector3D otherpoint = RankCMs[neigh[i]];
+			point = RankCM;
+			const double dist = abs(point - otherpoint);
 			if (dist < neigheps*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]))
 			{
 				dx += (point.x - tproc.GetMeshPoint(neigh[i]).x)*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]) / (dist*neigheps);
@@ -177,8 +206,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	}
 	Vector3D cor = tproc.GetMeshPoint(static_cast<size_t>(rank)) + Vector3D(dx, dy,dz);
 	// Have all processors have the same points
-	vector<double> tosend = list_serialize(vector<Vector3D>(1, cor));
-	vector<double> torecv(static_cast<size_t>(nproc) * 3);
+	tosend = list_serialize(vector<Vector3D>(1, cor));
 	MPI_Gather(&tosend[0], 3, MPI_DOUBLE, &torecv[0], 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&torecv[0], nproc * 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	vector<Vector3D> cortemp = list_unserialize(torecv, cor);

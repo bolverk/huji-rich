@@ -32,6 +32,6 @@ public:
 private:
 	const double speed_;
 	const double RoundSpeed_;
-	const int mode_;
+	const int mode_;	
 };
 #endif //CONSTPERPROC3D
