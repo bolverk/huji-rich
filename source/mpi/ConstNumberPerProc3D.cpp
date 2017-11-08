@@ -61,7 +61,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	double load = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
-	if (load>2.5)
+	if (load>3.5)
 	{
 		vector<Vector3D> res = HilbertProcPositions(tlocal);
 		tproc.Build(res);
