@@ -8,7 +8,7 @@
 
 namespace
 {
-	Vector3D GetProcCM(Tessellation3D const& tess)
+	/*Vector3D GetProcCM(Tessellation3D const& tess)
 	{
 		size_t Ncor = tess.GetPointNo();
 		Vector3D res;
@@ -16,7 +16,7 @@ namespace
 			res += tess.GetMeshPoint(i);
 		res *= 1.0 / static_cast<double>(Ncor);
 		return res;
-	}
+	}*/
 }
 
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
@@ -68,13 +68,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		return;
 	}
 
-	Vector3D RankCM = GetProcCM(tlocal);
-	vector<double> tosend = list_serialize(vector<Vector3D>(1, RankCM));
+	//Vector3D RankCM = GetProcCM(tlocal);
+	Vector3D RankCM = tproc.GetCellCM(static_cast<size_t>(rank));
+	/*vector<double> tosend = list_serialize(vector<Vector3D>(1, RankCM));
 	vector<double> torecv(static_cast<size_t>(nproc) * 3);
 	MPI_Gather(&tosend[0], 3, MPI_DOUBLE, &torecv[0], 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&torecv[0], nproc * 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	vector<Vector3D> RankCMs = list_unserialize(torecv, RankCM);
-
+	vector<Vector3D> RankCMs = list_unserialize(torecv, RankCM);*/
+	vector<Vector3D> RankCMs = tproc.GetAllCM();
 	// Move point according to density
 	if (mode_ == 1 || mode_ == 3)
 	{
@@ -206,7 +207,8 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	}
 	Vector3D cor = tproc.GetMeshPoint(static_cast<size_t>(rank)) + Vector3D(dx, dy,dz);
 	// Have all processors have the same points
-	tosend = list_serialize(vector<Vector3D>(1, cor));
+	vector<double> tosend = list_serialize(vector<Vector3D>(1, cor));
+	vector<double> torecv(nproc * 3, 0);
 	MPI_Gather(&tosend[0], 3, MPI_DOUBLE, &torecv[0], 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&torecv[0], nproc * 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	vector<Vector3D> cortemp = list_unserialize(torecv, cor);
