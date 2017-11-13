@@ -10,12 +10,12 @@ namespace
 {
 	/*Vector3D GetProcCM(Tessellation3D const& tess)
 	{
-		size_t Ncor = tess.GetPointNo();
-		Vector3D res;
-		for (size_t i = 0; i < Ncor; ++i)
-			res += tess.GetMeshPoint(i);
-		res *= 1.0 / static_cast<double>(Ncor);
-		return res;
+	size_t Ncor = tess.GetPointNo();
+	Vector3D res;
+	for (size_t i = 0; i < Ncor; ++i)
+	res += tess.GetMeshPoint(i);
+	res *= 1.0 / static_cast<double>(Ncor);
+	return res;
 	}*/
 }
 
@@ -23,7 +23,7 @@ ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
 ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode) :
-	speed_(speed), RoundSpeed_(RoundSpeed),	mode_(mode) {}
+	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode) {}
 
 #ifdef RICH_MPI
 void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const
@@ -31,6 +31,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	int nproc = static_cast<int>(tproc.GetPointNo());
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
 	vector<double> R(static_cast<size_t>(nproc));
 	double dx = 0;
 	double dy = 0;
@@ -52,8 +53,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	// Find out how many points each proc has
 	vector<int> NPerProc(static_cast<size_t>(nproc));
 	int mypointnumber = static_cast<int>(tlocal.GetPointNo() + 1);
+
 	MPI_Gather(&mypointnumber, 1, MPI_INT, &NPerProc[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Bcast(&NPerProc[0], nproc, MPI_INT, 0, MPI_COMM_WORLD);
+
 	int IdealPerProc = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		IdealPerProc += NPerProc[i];
@@ -61,7 +65,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	double load = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
-	if (load>3.5)
+
+
+	if (load>3.75)
 	{
 		vector<Vector3D> res = HilbertProcPositions(tlocal);
 		tproc.Build(res);
@@ -88,14 +94,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + (point.z - otherpoint.z)*(point.z - otherpoint.z)
 				+ 0.5*R[static_cast<size_t>(rank)] * R[i]);
-			double temp = (NPerProc[i] - IdealPerProc)* 
+			double temp = (NPerProc[i] - IdealPerProc)*
 				(point.x - otherpoint.x) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dx -= temp;
-			temp = (NPerProc[i] - IdealPerProc)* 
-				(point.y - otherpoint.y) / (pow(dist/ R[static_cast<size_t>(rank)], 3)*IdealPerProc);
+			temp = (NPerProc[i] - IdealPerProc)*
+				(point.y - otherpoint.y) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dy -= temp;
-			temp = (NPerProc[i] - IdealPerProc)* 
-				(point.z - otherpoint.z) / (pow(dist/ R[static_cast<size_t>(rank)], 3)*IdealPerProc);
+			temp = (NPerProc[i] - IdealPerProc)*
+				(point.z - otherpoint.z) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
 			dz -= temp;
 		}
 	}
@@ -110,7 +116,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	{
 		vector<size_t> neigh = tproc.GetNeighbors(rank);
 		size_t Nneigh = neigh.size();
-		
+
 		const double neigheps = 0.2;
 		for (size_t i = 0; i < Nneigh; ++i)
 		{
@@ -163,14 +169,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	Vector3D ll = tproc.GetBoxCoordinates().first;
 	Vector3D ur = tproc.GetBoxCoordinates().second;
 	const Vector3D center(0.5*(ll + ur));
-	if (point.x + dx > (ur.x - (1 - close)*wx)) 
+	if (point.x + dx > (ur.x - (1 - close)*wx))
 	{
 		if ((ur.x - point.x) < ((1 - close)*wx))
 			dx = -wx*(1 - close);
 		else
 			dx = 0.5*(ur.x - point.x);
 	}
-	if ((point.x + dx) < (ll.x + (1 - close)*wx)) 
+	if ((point.x + dx) < (ll.x + (1 - close)*wx))
 	{
 		if ((-ll.x + point.x) < ((1 - close)*wx))
 			dx = wx*(1 - close);
@@ -205,7 +211,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		else
 			dz = -0.5*(-ll.z + point.z);
 	}
-	Vector3D cor = tproc.GetMeshPoint(static_cast<size_t>(rank)) + Vector3D(dx, dy,dz);
+	Vector3D cor = tproc.GetMeshPoint(static_cast<size_t>(rank)) + Vector3D(dx, dy, dz);
 	// Have all processors have the same points
 	vector<double> tosend = list_serialize(vector<Vector3D>(1, cor));
 	vector<double> torecv(nproc * 3, 0);
