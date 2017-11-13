@@ -23,7 +23,7 @@ ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
 ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode) :
-	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode),run_counter_(0) {}
+	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode),run_counter_(100) {}
 
 #ifdef RICH_MPI
 void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const
