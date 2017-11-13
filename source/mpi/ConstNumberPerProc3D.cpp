@@ -23,7 +23,7 @@ ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
 ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode) :
-	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode) {}
+	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode),run_counter_(0) {}
 
 #ifdef RICH_MPI
 void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const
@@ -67,13 +67,14 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
 
 
-	if (load>3.75)
+	if (load>3.75 && run_counter_ > 10)
 	{
 		vector<Vector3D> res = HilbertProcPositions(tlocal);
 		tproc.Build(res);
+		run_counter_ = 0;
 		return;
 	}
-
+	++run_counter_;
 	//Vector3D RankCM = GetProcCM(tlocal);
 	Vector3D RankCM = tproc.GetCellCM(static_cast<size_t>(rank));
 	/*vector<double> tosend = list_serialize(vector<Vector3D>(1, RankCM));
