@@ -67,6 +67,9 @@ public:
 	double CM[3];
 	boost::array<double, 6> Q;
 	virtual void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const = 0;
+
+	virtual void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const = 0;
+
 	virtual void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb) = 0;
 };
@@ -140,6 +143,7 @@ public:
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
 	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const;
+	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
 };
@@ -211,7 +215,7 @@ public:
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
 	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const;
-
+	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
 };

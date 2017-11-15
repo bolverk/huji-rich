@@ -151,6 +151,44 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 #endif
 
 	// Get acc
+
+	int Nbatch = 8;
+	ANNpointArray anqpoints = annAllocPts(Nbatch, 3);
+	ANNpointArray accress = annAllocPts(Nbatch, 3);
+	std::vector<ANNpoint> qpoints(Nbatch), accpoints(Nbatch);
+	for (size_t i = 0; i < Nbatch; ++i)
+	{
+		qpoints[i] = anqpoints[i];
+		accpoints[i] = accress[i];
+	}
+	size_t counter = 0;
+	while(counter<Norg)
+	{
+		size_t Ninner = std::min(Norg - counter, static_cast<size_t>(Nbatch));
+		qpoints.resize(Ninner);
+		accpoints.resize(Ninner);
+		for (int j = 0; j < Ninner; ++j)
+		{
+			Vector3D const& vec = tess.GetCellCM(counter);
+			qpoints[j][0] = vec.x;
+			qpoints[j][1] = vec.y;
+			qpoints[j][2] = vec.z;
+			accpoints[j][0] = 0;
+			accpoints[j][1] = 0;
+			accpoints[j][2] = 0;		
+			++counter;
+		}
+		atree->GetAcc(qpoints, accpoints, opening_);
+		for (int j = 0; j < Ninner; ++j)
+		{
+			acc[counter - Ninner + j].x = accpoints[j][0];
+			acc[counter - Ninner + j].y = accpoints[j][1];
+			acc[counter - Ninner + j].z = accpoints[j][2];
+		}
+	}
+	annDeallocPts(anqpoints);
+	annDeallocPts(accress);	
+/*
 	ANNpoint anqpoint, accres;
 	anqpoint = annAllocPt(3);
 	accres = annAllocPt(3);
@@ -168,10 +206,11 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		acc[i].y = accres[1];
 		acc[i].z = accres[2];
 	}
-	// Cleanup
-	annDeallocPts(dpoints);
 	annDeallocPt(anqpoint);
 	annDeallocPt(accres);
+	*/
+	// Cleanup
+	annDeallocPts(dpoints);
 	delete atree;
 	annClose();
 

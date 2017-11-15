@@ -738,6 +738,8 @@ public:
 
 	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2) const;
 
+	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2) const;
+
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, std::vector<ANNkd_ptr> & nodes, double angle2,
 		std::vector<ANNpoint> const& normals);
 };								
