@@ -152,9 +152,9 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 
 	// Get acc
 
-	int Nbatch = 8;
-	ANNpointArray anqpoints = annAllocPts(Nbatch, 3);
-	ANNpointArray accress = annAllocPts(Nbatch, 3);
+	size_t Nbatch = 8;
+	ANNpointArray anqpoints = annAllocPts(static_cast<int>(Nbatch), 3);
+	ANNpointArray accress = annAllocPts(static_cast<int>(Nbatch), 3);
 	std::vector<ANNpoint> qpoints(Nbatch), accpoints(Nbatch);
 	for (size_t i = 0; i < Nbatch; ++i)
 	{
@@ -164,7 +164,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	size_t counter = 0;
 	while(counter<Norg)
 	{
-		size_t Ninner = std::min(Norg - counter, static_cast<size_t>(Nbatch));
+		size_t Ninner = std::min(Norg - counter, Nbatch);
 		qpoints.resize(Ninner);
 		accpoints.resize(Ninner);
 		for (int j = 0; j < Ninner; ++j)
