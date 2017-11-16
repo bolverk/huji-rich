@@ -167,7 +167,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		size_t Ninner = std::min(Norg - counter2, Nbatch);
 		qpoints.resize(Ninner);
 		accpoints.resize(Ninner);
-		for (int j = 0; j < Ninner; ++j)
+		for (size_t j = 0; j < Ninner; ++j)
 		{
 			Vector3D const& vec = tess.GetCellCM(counter2);
 			qpoints[j][0] = vec.x;
@@ -179,7 +179,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 			++counter2;
 		}
 		atree->GetAcc(qpoints, accpoints, opening_);
-		for (int j = 0; j < Ninner; ++j)
+		for (size_t j = 0; j < Ninner; ++j)
 		{
 			acc[counter2 - Ninner + j].x = accpoints[j][0];
 			acc[counter2 - Ninner + j].y = accpoints[j][1];
