@@ -5,8 +5,8 @@
 #include <mpi.h>
 #endif
 
-CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl, SourceTerm3D const& source):
-cfl_(cfl),source_(source),first_try_(true),dt_first_(-1)
+CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl, double SourceCFL, SourceTerm3D const& source):
+cfl_(cfl),sourcecfl_(SourceCFL),source_(source),first_try_(true),dt_first_(-1)
 {
 	assert(cfl_<1 && "cfl number must be smaller than 1");
 }
@@ -54,7 +54,7 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 	TracerStickerNames const& tracerstickernames) const
 {
 	double res = cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos,face_velocities,tracerstickernames));
-	res = 1.0 / std::max(source_.SuggestInverseTimeStep()/cfl_, 1.0 / res);
+	res = 1.0 / std::max(source_.SuggestInverseTimeStep()/sourcecfl_, 1.0 / res);
 #ifdef RICH_MPI
 	double new_res = 0;
 	MPI_Allreduce(&res, &new_res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);

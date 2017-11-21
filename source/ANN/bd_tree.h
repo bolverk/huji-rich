@@ -101,6 +101,9 @@ public:
 
 	virtual void GetAcc(std::vector<ANNpoint> &/*qpoint*/, vector<ANNpoint> &/*res*/, double /*angle2*/, ANNorthRect &/*bb*/) 
 		const {};
+	
+	virtual void GetAcc(std::vector<ANNpoint> &/*qpoint*/, vector<ANNpoint> &/*res*/, double /*angle2*/, ANNorthRect &/*bb*/,
+		boost::array<double, 4> const& /*qCM*/)	const {};
 
 	void GetToSend(std::vector<ANNpointArray> const& /*faces*/, std::vector<size_t>const& /*Nfaces*/, vector<ANNkd_ptr>& /*nodes*/, double/* angle2*/,
 		std::vector<ANNpoint> const& /*normals*/, ANNorthRect &/*bb*/) {};

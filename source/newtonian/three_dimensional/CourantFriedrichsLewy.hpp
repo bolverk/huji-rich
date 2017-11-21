@@ -17,8 +17,9 @@ public:
 	/*! \brief Class constructor
 	  \param cfl CFL number
 	  \param source The source term for the simulation
+	  \param SourceCFL CFL number for the source term
 	 */
-	explicit CourantFriedrichsLewy(double cfl,SourceTerm3D const& source);
+	explicit CourantFriedrichsLewy(double cfl,double SourceCFL, SourceTerm3D const& source);
 
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
 		const vector<Vector3D>& face_velocities,const double time, TracerStickerNames const& tracerstickernames) const;
@@ -26,7 +27,7 @@ public:
 	void SetTimeStep(double dt);
 
 private:
-	const double cfl_;
+	const double cfl_,sourcecfl_;
 	SourceTerm3D const& source_;
 	mutable bool first_try_;
 	double dt_first_;

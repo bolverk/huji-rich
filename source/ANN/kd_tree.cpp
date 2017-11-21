@@ -526,10 +526,110 @@ void ANNkd_tree::GetAcc(ANNpoint qpoint, ANNpoint res,double angle2) const
 	root->GetAcc(qpoint, res, angle2,bb);
 }
 
+namespace
+{
+	_forceinline double fastsqrt(float x)
+	{
+		float res = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
+		return static_cast<double>(res*x);
+	}
+}
+
 void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2) const
 {
 	ANNorthRect bb(3, bnd_box_lo, bnd_box_hi);
-	root->GetAcc(qpoint, res, angle2, bb);
+	boost::array<double, 3> qMin,qMax;
+	qMax[0] = qpoint[0][0];
+	qMax[1] = qpoint[0][1];
+	qMax[2] = qpoint[0][2];
+	qMin = qMax;
+	size_t N = qpoint.size();
+	for (size_t i = 1; i < N; ++i)
+	{
+		for (size_t j = 0; j < 3; ++j)
+		{
+			qMax[j] = std::max(qMax[j], qpoint[i][j]);
+			qMin[j] = std::min(qMin[j], qpoint[i][j]);
+		}
+	}
+	boost::array<double, 4> qCM;
+	qCM[0] = 0.5*(qMax[0]+qMin[0]);
+	qCM[1] = 0.5*(qMax[1] + qMin[1]);
+	qCM[2] = 0.5*(qMax[2] + qMin[2]);
+	qCM[3] = fastsqrt(static_cast<float>((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
+		(qMax[2] - qMin[2])*(qMax[2] - qMin[2])));
+	root->GetAcc(qpoint, res, angle2, bb,qCM);
+}
+
+void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
+	boost::array<double, 4> const& qCM) const
+{
+	double lv = bb.lo[cut_dim];
+	double hv = bb.hi[cut_dim];
+	double maxbox = annDist(3, bb.lo, bb.hi);
+	int counter = 0;
+	size_t N = qpoint.size();
+	double dist_toq = 0;
+	for (int i = 0; i < 3; ++i)
+		dist_toq += (qCM[i] - CM[i])*(qCM[i] - CM[i]);
+	dist_toq -= 2*qCM[3]*fastsqrt(static_cast<float>(dist_toq))-qCM[3]*qCM[3];
+	if (dist_toq*angle2 > maxbox)
+		counter = 1;
+	if (counter > 0)
+	{
+		for (size_t k = 0; k < N; ++k)
+		{
+			double dist_toq = 0;
+			for (int i = 0; i < 3; ++i)
+				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
+			if (dist_toq*angle2 > maxbox)
+			{
+				double r3 = 1.0 / (dist_toq*std::sqrt(dist_toq));
+				for (int i = 0; i < 3; ++i)
+					res[k][i] -= mass*(qpoint[k][i] - CM[i]) * r3;
+				double Qfactor = r3 / dist_toq;
+				double dx = qpoint[k][0] - CM[0];
+				double dy = qpoint[k][1] - CM[1];
+				double dz = qpoint[k][2] - CM[2];
+				res[k][0] += Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
+				res[k][1] += Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
+				res[k][2] += Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
+				double mrr = dx*dx*Q[0] + dy*dy*Q[3] + dz*dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+				Qfactor *= -5 * mrr / (2 * dist_toq);
+				res[k][0] += Qfactor*dx;
+				res[k][1] += Qfactor*dy;
+				res[k][2] += Qfactor*dz;
+			}
+			else
+			{
+				if (child[1] != KD_TRIVIAL)
+				{
+					bb.lo[cut_dim] = cut_val;
+					child[1]->GetAcc(qpoint[k], res[k], angle2, bb);
+					bb.lo[cut_dim] = lv;
+				}
+				if (child[0] != KD_TRIVIAL)
+				{
+					bb.hi[cut_dim] = cut_val;
+					child[0]->GetAcc(qpoint[k], res[k], angle2, bb);
+					bb.hi[cut_dim] = hv;
+				}
+			}
+		}
+		return;
+	}
+	if (child[1] != KD_TRIVIAL)
+	{
+		bb.lo[cut_dim] = cut_val;
+		child[1]->GetAcc(qpoint, res, angle2, bb);
+		bb.lo[cut_dim] = lv;
+	}
+	if (child[0] != KD_TRIVIAL)
+	{
+		bb.hi[cut_dim] = cut_val;
+		child[0]->GetAcc(qpoint, res, angle2, bb);
+		bb.hi[cut_dim] = hv;
+	}
 }
 
 void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const
@@ -714,6 +814,40 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 	}
 }
 
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double /*angle2*/, ANNorthRect &bb,
+	boost::array<double, 4> const& /*qCM*/) const
+{
+	double maxbox = annDist(3, bb.lo, bb.hi);
+	size_t N = qpoint.size();
+	for (size_t k = 0; k < N; ++k)
+	{
+		double dist_toq = 0;
+		for (int i = 0; i < 3; ++i)
+			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
+		if (dist_toq < maxbox*1e-6) //prevent self force
+			continue;
+		double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
+		for (int i = 0; i < 3; ++i)
+			res[k][i] -= mass*(qpoint[k][i] - CM[i]) *r3;
+		double sumQ = 0;
+		for (size_t i = 0; i < 6; ++i)
+			sumQ += std::abs(Q[i]);
+		if (sumQ < mass*dist_toq*1e-6)
+			continue;
+		double Qfactor = r3 / dist_toq;
+		double dx = qpoint[k][0] - CM[0];
+		double dy = qpoint[k][1] - CM[1];
+		double dz = qpoint[k][2] - CM[2];
+		res[k][0] += Qfactor*(dx*Q[0] + dy*Q[1] + dz*Q[2]);
+		res[k][1] += Qfactor*(dx*Q[1] + dy*Q[3] + dz*Q[4]);
+		res[k][2] += Qfactor*(dx*Q[2] + dy*Q[4] + dz*Q[5]);
+		double mrr = dx*dx*Q[0] + dy*dy*Q[3] + dz*dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+		Qfactor *= -5 * mrr / (2 * dist_toq);
+		res[k][0] += Qfactor*dx;
+		res[k][1] += Qfactor*dy;
+		res[k][2] += Qfactor*dz;
+	}
+}
 
 namespace
 {
