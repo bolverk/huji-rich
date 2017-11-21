@@ -28,6 +28,7 @@
 //		Added annClose() to eliminate KD_TRIVIAL memory leak.
 //----------------------------------------------------------------------
 
+#include <xmmintrin.h>
 #include "kd_tree.h"					// kd-tree declarations
 #include "kd_split.h"					// kd-tree splitting rules
 #include "kd_util.h"					// kd-tree utilities
