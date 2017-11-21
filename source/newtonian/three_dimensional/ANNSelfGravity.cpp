@@ -50,6 +50,15 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const & /*tracerstickernames*/,
 	vector<Vector3D>& acc) const
 {
+#ifdef RICH_MPI
+	assert(tproc_ != 0);
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#ifdef timing
+	double t0 = MPI_Wtime();
+#endif
+#endif
+
 	size_t Norg = tess.GetPointNo();
 	acc.resize(Norg);
 	vector<double> masses(Norg);
@@ -68,10 +77,13 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
 
 #ifdef RICH_MPI
+#ifdef timing
+	double t1 = MPI_Wtime();
+	if (rank == 0)
+		std::cout << "Self build time " << t1 - t0 << std::endl;
+#endif
+
 	// Get essential tree from other cpu
-	assert(tproc_ != 0);
-	int rank = 0;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	size_t Nproc = tproc_->GetPointNo();
 	vector<ANNkd_ptr> nodes;
 	vector<double> mass_temp;
@@ -102,7 +114,11 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	annDeallocPts(dpoints);
 	delete atree;
 	annClose();
-
+#ifdef timing
+	t0 = MPI_Wtime();
+	if (rank == 0)
+		std::cout << "Self send calc time " << t0 - t1 << std::endl;
+#endif
 
 	// send/recv data
 	vector<int> m_rec_size(Nproc);
@@ -137,8 +153,8 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	for (size_t i = 0; i < toadd; ++i)
 	{
 		dpoints[Norg + i][0] = m_recv[i * 3];
-		dpoints[Norg + i][1] = m_recv[i * 3+1];
-		dpoints[Norg + i][2] = m_recv[i * 3+2];
+		dpoints[Norg + i][1] = m_recv[i * 3 + 1];
+		dpoints[Norg + i][2] = m_recv[i * 3 + 2];
 	}
 
 	for (size_t i = 0; i < Nproc; ++i)
@@ -161,6 +177,11 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		Q[Norg + i][4] = m_recv[i * 6 + 4];
 		Q[Norg + i][5] = m_recv[i * 6 + 5];
 	}
+#ifdef timing
+	t1 = MPI_Wtime();
+	if (rank == 0)
+		std::cout << "Comm time " << t1 - t0 << std::endl;
+#endif
 
 	//rebuild tree	
 	for (size_t i = 0; i < Norg; ++i)
@@ -171,6 +192,11 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		dpoints[i][2] = vec.z;
 	}
 	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg + toadd), 3, 1, ANN_KD_SL_MIDPT);
+#ifdef timing
+	t0 = MPI_Wtime();
+	if (rank == 0)
+		std::cout << "Big tree time " << t0 - t1 << std::endl;
+#endif
 #endif
 
 	// Get acc
@@ -184,7 +210,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		accpoints[i] = accress[i];
 	}
 	size_t counter2 = 0;
-	while (counter2<Norg)
+	while (counter2 < Norg)
 	{
 		size_t Ninner = std::min(Norg - counter2, Nbatch);
 		qpoints.resize(Ninner);
@@ -208,6 +234,14 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 			acc[counter2 - Ninner + j].z = accpoints[j][2];
 		}
 	}
+#ifdef RICH_MPI
+#ifdef timing
+	t1 = MPI_Wtime();
+	if (rank == 0)
+		std::cout << "Walk time " << t1 - t0 << std::endl;
+#endif
+#endif
+
 	// Cleanup
 	annDeallocPts(anqpoints);
 	annDeallocPts(accress);
