@@ -528,7 +528,7 @@ void ANNkd_tree::GetAcc(ANNpoint qpoint, ANNpoint res,double angle2) const
 
 namespace
 {
-	_forceinline double fastsqrt(float x)
+	double fastsqrt(float x)
 	{
 		float res = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
 		return static_cast<double>(res*x);
