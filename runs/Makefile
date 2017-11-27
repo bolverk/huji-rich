@@ -14,6 +14,13 @@ else ifeq ($(MODE),intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),parallel_intel)
+	PREXECUTE := mpiexec -np $(NUM_PROCESSES)
+	CC := mpiicpc
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI 
+	LINT_FLAGS := 
+	LFLAGS := -lclipper
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
