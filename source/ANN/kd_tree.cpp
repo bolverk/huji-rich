@@ -557,8 +557,11 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	qCM[0] = 0.5*(qMax[0]+qMin[0]);
 	qCM[1] = 0.5*(qMax[1] + qMin[1]);
 	qCM[2] = 0.5*(qMax[2] + qMin[2]);
-	qCM[3] = fastsqrt(static_cast<float>((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
+	if (N > 1)
+		qCM[3] = fastsqrt(static_cast<float>((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
 		(qMax[2] - qMin[2])*(qMax[2] - qMin[2])));
+	else
+		qCM[3] = 0;
 	root->GetAcc(qpoint, res, angle2, bb,qCM);
 }
 
@@ -573,7 +576,8 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	double dist_toq = 0;
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qCM[i] - CM[i])*(qCM[i] - CM[i]);
-	dist_toq -= 2*qCM[3]*fastsqrt(static_cast<float>(dist_toq))-qCM[3]*qCM[3];
+	if(N > 1)
+		dist_toq -= 2*qCM[3]*fastsqrt(static_cast<float>(dist_toq))-qCM[3]*qCM[3];
 	if (dist_toq*angle2 > maxbox)
 		counter = 1;
 	if (counter > 0)
