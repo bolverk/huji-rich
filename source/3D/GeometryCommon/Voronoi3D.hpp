@@ -44,7 +44,7 @@ private:
 		vector<size_t> &intersecting_faces);
 	void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
 		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
-		std::stack<std::size_t> &to_check,Vector3D const& vpoint,bool &skipped, vector<std::size_t> &faces);
+		std::stack<std::size_t> &to_check,bool &skipped, vector<std::size_t> &faces, vector<size_t> const& past_duplicate);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);

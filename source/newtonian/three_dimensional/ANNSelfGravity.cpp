@@ -86,10 +86,8 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	// Get essential tree from other cpu
 	size_t Nproc = tproc_->GetPointNo();
 	vector<ANNkd_ptr> nodes;
-	vector<double> mass_temp;
-
 	vector<int> m_size(Nproc, 0);
-	vector<double> m_send, CM_send, Q_send;
+	vector<double> m_send;
 
 	for (size_t i = 0; i < Nproc; ++i)
 	{
@@ -98,18 +96,16 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		nodes.clear();
 		vector<size_t> const& faces = tproc_->GetCellFaces(i);
 		CallTreeGetSend(atree, *tproc_, faces, nodes, opening_);
-		mass_temp.clear();
 		for (size_t j = 0; j < nodes.size(); ++j)
 		{
-			mass_temp.push_back(nodes[j]->mass);
 			m_send.push_back(nodes[j]->mass);
-			CM_send.push_back(nodes[j]->CM[0]);
-			CM_send.push_back(nodes[j]->CM[1]);
-			CM_send.push_back(nodes[j]->CM[2]);
+			m_send.push_back(nodes[j]->CM[0]);
+			m_send.push_back(nodes[j]->CM[1]);
+			m_send.push_back(nodes[j]->CM[2]);
 			for (size_t k = 0; k < 6; ++k)
-				Q_send.push_back(nodes[j]->Q[k]);
+				m_send.push_back(nodes[j]->Q[k]);
 		}
-		m_size[i] = static_cast<int>(mass_temp.size());
+		m_size[i] = static_cast<int>(nodes.size()*10);
 	}
 	annDeallocPts(dpoints);
 	delete atree;
@@ -132,50 +128,23 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<double> m_recv(r_disp.back() + m_rec_size.back(), 0);
 
 	MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
-	size_t toadd = m_recv.size();
+	assert(m_recv.size() % 10 == 0);
+	size_t toadd = m_recv.size()/10;
 	dpoints = annAllocPts(static_cast<int>(Norg + toadd), 3);
 	masses.resize(Norg + toadd);
 	Q.resize(Norg + toadd);
 	for (size_t i = 0; i < toadd; ++i)
-		masses[Norg + i] = m_recv[i];
-
-	for (size_t i = 0; i < Nproc; ++i)
 	{
-		m_rec_size[i] *= 3;
-		m_size[i] *= 3;
-	}
-	for (size_t i = 1; i < Nproc; ++i)
-		s_disp[i] = s_disp[i - 1] + m_size[i - 1];
-	for (size_t i = 1; i < Nproc; ++i)
-		r_disp[i] = r_disp[i - 1] + m_rec_size[i - 1];
-	m_recv.resize(m_recv.size() * 3);
-	MPI_Alltoallv(&CM_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
-	for (size_t i = 0; i < toadd; ++i)
-	{
-		dpoints[Norg + i][0] = m_recv[i * 3];
-		dpoints[Norg + i][1] = m_recv[i * 3 + 1];
-		dpoints[Norg + i][2] = m_recv[i * 3 + 2];
-	}
-
-	for (size_t i = 0; i < Nproc; ++i)
-	{
-		m_rec_size[i] *= 2;
-		m_size[i] *= 2;
-	}
-	for (size_t i = 1; i < Nproc; ++i)
-		s_disp[i] = s_disp[i - 1] + m_size[i - 1];
-	for (size_t i = 1; i < Nproc; ++i)
-		r_disp[i] = r_disp[i - 1] + m_rec_size[i - 1];
-	m_recv.resize(m_recv.size() * 2);
-	MPI_Alltoallv(&Q_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
-	for (size_t i = 0; i < toadd; ++i)
-	{
-		Q[Norg + i][0] = m_recv[i * 6];
-		Q[Norg + i][1] = m_recv[i * 6 + 1];
-		Q[Norg + i][2] = m_recv[i * 6 + 2];
-		Q[Norg + i][3] = m_recv[i * 6 + 3];
-		Q[Norg + i][4] = m_recv[i * 6 + 4];
-		Q[Norg + i][5] = m_recv[i * 6 + 5];
+		masses[Norg + i] = m_recv[i * 10];
+		dpoints[Norg + i][0] = m_recv[i * 10+1];
+		dpoints[Norg + i][1] = m_recv[i * 10+2];
+		dpoints[Norg + i][2] = m_recv[i * 10 + 3];
+		Q[Norg + i][0] = m_recv[i * 10 + 4];
+		Q[Norg + i][1] = m_recv[i * 10 + 5];
+		Q[Norg + i][2] = m_recv[i * 10 + 6];
+		Q[Norg + i][3] = m_recv[i * 10 + 7];
+		Q[Norg + i][4] = m_recv[i * 10 + 8];
+		Q[Norg + i][5] = m_recv[i * 10 + 9];
 	}
 #ifdef timing
 	t1 = MPI_Wtime();
