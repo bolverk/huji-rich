@@ -287,7 +287,7 @@ r3d_int r3d_is_good(r3d_poly* poly) {
 		// or if any edges are obviously invalid
 		for(np = 0; np < 3; ++np) {
 			if(vertbuffer[v].pnbrs[np] == vertbuffer[v].pnbrs[(np+1)%3]) {
-				printf("Double edge.\n");
+				printf("Double edge. Vertice %d \n",v);
 				return 0;
 			}
 			if(vertbuffer[v].pnbrs[np] >= *nverts) {
