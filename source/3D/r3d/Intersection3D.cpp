@@ -434,6 +434,27 @@ void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0],
 		static_cast<r3d_int>(numvertsperface.size()));
 	int test = r3d_is_good(&poly);
+	if (test != 1)
+	{
+		all_indeces.clear();
+		std::cout << "Bad polygon in cell " << oldcell << std::endl;
+		for (size_t i = 0; i < nfaces; ++i)
+		{
+			itemp = oldtess.GetPointsInFace(oldfaces[i]);
+			std::cout << "Face " << oldfaces[i] << " points:";
+			for (size_t j = 0; j < itemp.size(); ++j)
+				std::cout << " " << itemp[j] << " ";
+			std::cout << std::endl;
+			all_indeces.insert(all_indeces.end(), itemp.begin(), itemp.end());
+		}
+		sort(all_indeces.begin(), all_indeces.end());
+		all_indeces = unique(all_indeces);
+		for (size_t i = 0; i < all_indeces.size(); ++i)
+		{
+			Vector3D p = all_vertices[all_indeces[i]];
+			std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
+		}
+	}
 	assert(test == 1);
 }
 
