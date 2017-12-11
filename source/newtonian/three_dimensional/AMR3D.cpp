@@ -424,7 +424,13 @@ namespace
 	std::pair<vector<size_t>, vector<double> > RemoveMPINeighbors(vector<double> const& merits, vector<size_t> const& candidates,
 		Tessellation3D const& tess)
 	{
-		vector<vector<size_t> > const& duplicated_indeces = tess.GetDuplicatedPoints();
+		vector<vector<size_t> > duplicated_indeces = tess.GetDuplicatedPoints();
+		vector<vector<size_t> > sort_indeces(duplicated_indeces.size());
+		for (size_t i = 0; i < duplicated_indeces.size(); ++i)
+		{
+			sort_index(duplicated_indeces[i], sort_indeces[i]);
+			std::sort(duplicated_indeces[i].begin(), duplicated_indeces[i].end());
+		}
 		size_t nproc = duplicated_indeces.size();
 		vector<vector<size_t> > indeces(nproc);
 		vector<vector<double> > merit_send(nproc);
@@ -443,10 +449,10 @@ namespace
 					for (size_t k = 0; k < nproc; ++k)
 					{
 						vector<size_t>::const_iterator it = binary_find(duplicated_indeces[k].begin(),
-							duplicated_indeces[k].end(), neigh[j]);
+							duplicated_indeces[k].end(), candidates[i]);
 						if (it != duplicated_indeces[k].end())
 						{
-							indeces[k].push_back(static_cast<size_t>(it - duplicated_indeces[k].begin()));
+							indeces[k].push_back(sort_indeces[k][static_cast<size_t>(it - duplicated_indeces[k].begin())]);
 							merit_send[k].push_back(merits[i]);
 						}
 					}
@@ -462,13 +468,13 @@ namespace
 			if (!indeces[i].empty())
 			{
 				indeces[i] = VectorValues(tess.GetGhostIndeces()[i], indeces[i]);
-				sort_index(indeces[i], temp);
-				sort(indeces[i].begin(), indeces[i].end());
 				all_indeces.insert(all_indeces.end(), indeces[i].begin(), indeces[i].end());
-				merit_send[i] = VectorValues(merit_send[i], temp);
 				all_merits.insert(all_merits.end(), merit_send[i].begin(), merit_send[i].end());
 			}
 		}
+		sort_index(all_indeces, temp);
+		std::sort(all_indeces.begin(), all_indeces.end());
+		all_merits = VectorValues(all_merits, temp);
 		// remove neighbors
 		std::pair<vector<size_t>, vector<double> > res;
 		res.first.reserve(Nreomve);
@@ -1519,6 +1525,7 @@ void AMR3D::UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> 
 	vector<Vector3D> newpoints, newCMs;
 	vector<double> newvols;
 	tess.GetMeshPoints().resize(Ntotal0 + Nsplit);
+	tess.GetAllCellFaces().resize(Ntotal0);
 	for (size_t i = 0; i < Nsplit; ++i)
 	{
 		tess.GetNeighbors(ToRefine.first[i], neigh);
@@ -1719,7 +1726,7 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 			{
 				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
 					duplicate_index[i][j].at(k)) - ToRemove.first.begin());
-				GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly2, temp, temp2, i_temp);
+				GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly, temp, temp2, i_temp);
 				// copy poly
 				poly2.nverts = poly.nverts;
 				for (int kk = 0; kk < poly2.nverts; ++kk)
@@ -1730,7 +1737,7 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 						poly2.verts[kk].pnbrs[l] = poly.verts[kk].pnbrs[l];
 					}
 				}
-				std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly,&planes);
+				std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly2,&planes);
 				extensives[duplicate_index[i][j][k] - index_remove] += eu_->ConvertPrimitveToExtensive3D(
 					cells[nghost_index[i][j]], eos, dv.second,tracerstickernames);
 				changed_cells.push_back(duplicate_index[i][j][k] - index_remove);
