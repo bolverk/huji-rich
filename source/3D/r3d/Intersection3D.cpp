@@ -436,8 +436,26 @@ void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 	int test = r3d_is_good(&poly);
 	if (test != 1)
 	{
-		all_indeces.clear();
 		std::cout << "Bad polygon in cell " << oldcell << std::endl;
+		std::cout << "Given to poly build:" << std::endl;
+		for (size_t i = 0; i < npoints; ++i)
+		{
+			if (i >= Npoints)
+				std::cout << "Point " << degn_points[i - Npoints] << " " << all_vertices[degn_points[i - Npoints]].x <<
+					" " << all_vertices[degn_points[i - Npoints]].y << " " << all_vertices[degn_points[i - Npoints]].z<<std::endl;
+			else
+				std::cout << "Point " << all_indeces[i] << " " << all_vertices[all_indeces[i]].x <<
+					" " << all_vertices[all_indeces[i]].y << " " << all_vertices[all_indeces[i]].z<<std::endl;
+		}
+		for (size_t i = 0; i < ptrs.size(); ++i)
+		{
+			std::cout << "Face " << i;
+			for (size_t j = 0; j < faceinds[i].size(); ++j)
+				std::cout << " " << faceinds[i][j] << " ";
+			std::cout << std::endl;
+		}
+
+		all_indeces.clear();
 		for (size_t i = 0; i < nfaces; ++i)
 		{
 			itemp = oldtess.GetPointsInFace(oldfaces[i]);
