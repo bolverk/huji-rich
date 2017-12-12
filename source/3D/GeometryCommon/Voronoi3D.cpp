@@ -1764,7 +1764,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	// Sanity check
 	double Rcheck = abs(del_.points_[del_.tetras_[index].points[0]] - center);
-	if (Rcheck > 1.01*Rres || Rcheck*1.01 < Rres)
+	if (Rcheck > 1.001*Rres || Rcheck*1.001 < Rres)
 	{
 		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
 		V0[0] = del_.points_[del_.tetras_[index].points[0]].x;

@@ -1,35 +1,58 @@
 #include "Intersection3D.hpp"
 #include <algorithm>
 #include "../../misc/utils.hpp"
+#include <limits>
+#include <boost/container/flat_map.hpp>
 
 namespace
-{/*
-	class my_cmp
-	{ 
-	private:
-		const Vector3D point_;
+{
+	double AbsDiff(r3d_rvec3 const& v1, r3d_rvec3 const& v2)
+	{
+		double res = 0;
+		res += (v1.xyz[0] - v2.xyz[0])*(v1.xyz[0] - v2.xyz[0]);
+		res += (v1.xyz[1] - v2.xyz[1])*(v1.xyz[1] - v2.xyz[1]);
+		res += (v1.xyz[2] - v2.xyz[2])*(v1.xyz[2] - v2.xyz[2]);
+		return std::sqrt(res);
+	}
 
-	public:
-		my_cmp(Vector3D const& p) :point_(p) {}
-		
-		bool operator()(Vector3D const& v1, Vector3D const& v2)
+	void FixBadOrder(vector<vector<int> > & faceinds, vector<r3d_rvec3> &all_vert,double R)
+	{
+		size_t Nfaces = faceinds.size();
+		size_t Npoints = all_vert.size();
+		size_t smax = std::numeric_limits<size_t>::max();
+		boost::container::flat_map<size_t,  size_t > right_neighbor;
+		right_neighbor.reserve(Npoints);
+		for (size_t i = 0; i < Npoints; ++i)
+			right_neighbor.insert(std::pair<size_t,size_t>(i,smax));
+		vector<int > toremove;
+		for (size_t i = 0; i < Nfaces; ++i)
 		{
-			double R = 1e-6*std::max(abs(v1), abs(v2));
-			if (v1.x < (v2.x - R))
-				return true;
-			if (v1.x > (v2.x + R))
-				return false;
-			if (v1.y < (v2.y - R))
-				return true;
-			if (v1.y > (v2.y + R))
-				return false;
-			if (v1.z < (v2.z - R))
-				return true;
-			else
-				return false;
+			size_t NinFace = faceinds[i].size();
+			for (size_t j = 0; j < NinFace; ++j)
+			{
+				if (right_neighbor[faceinds[i][j]] == smax)
+					right_neighbor[faceinds[i][j]] = faceinds[i][(j + 1) % NinFace];
+				else
+				{
+					double Rdiff = AbsDiff(all_vert[faceinds[i][j]], all_vert[faceinds[i][(j + 1) % NinFace]]);
+					if (Rdiff > 1e-3*R)
+					{
+						std::cout << "R " << R << " Rdiff " << Rdiff << std::endl;
+					}
+					assert(Rdiff < 1e-3*R);
+					toremove.push_back(faceinds[i][j]);
+				}
+			}
 		}
-	};
-*/
+		std::sort(toremove.begin(), toremove.end());
+		toremove = unique(toremove);
+		// remove points that have bad order (these should be duplicate points)
+		for (size_t i = 0; i < Nfaces; ++i)
+			faceinds[i] = RemoveList(faceinds[i], toremove);
+		for (size_t i = 0; i < toremove.size(); ++i)
+			RemoveVector(all_vert, toremove);
+	}
+
 	void FixDegenerate(vector<vector<int> > & faceinds, size_t bad_point,vector<size_t> &all_indeces)
 	{
 		size_t Nfaces = faceinds.size();
@@ -344,6 +367,45 @@ namespace
 			}
 		}
 	}
+
+	void OrganizeToPolyData(vector<vector<int> > &faceinds, vector<int> &numvertsperface, vector<size_t> &all_indeces,
+		vector<Vector3D> const& all_vertices, size_t Npoints, vector<size_t> const& degn_points,
+		vector<r3d_rvec3> &points, vector<int*> &ptrs)
+	{
+		size_t nfaces = faceinds.size();
+		for (size_t i = 0; i < nfaces; ++i)
+		{
+			numvertsperface[i] = static_cast<int>(faceinds[i].size());
+			for (size_t j = 0; j < faceinds[i].size(); ++j)
+			{
+				size_t index = static_cast<size_t>(binary_find(all_indeces.begin(), all_indeces.end(), static_cast<size_t>(
+					faceinds[i][j])) - all_indeces.begin());
+				faceinds[i][j] = static_cast<int>(index);
+			}
+		}
+		size_t npoints = all_indeces.size();
+		r3d_rvec3 point;
+		for (size_t i = 0; i < npoints; ++i)
+		{
+			if (i >= Npoints)
+			{
+				point.xyz[0] = all_vertices[degn_points[i - Npoints]].x;
+				point.xyz[1] = all_vertices[degn_points[i - Npoints]].y;
+				point.xyz[2] = all_vertices[degn_points[i - Npoints]].z;
+			}
+			else
+			{
+				point.xyz[0] = all_vertices[all_indeces[i]].x;
+				point.xyz[1] = all_vertices[all_indeces[i]].y;
+				point.xyz[2] = all_vertices[all_indeces[i]].z;
+			}
+			points[i] = point;
+		}
+		for (size_t i = 0, e = ptrs.size(); i<e; ++i)
+		{
+			ptrs[i] = &(faceinds[i][0]);
+		}
+	}
 }
 
 void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
@@ -397,80 +459,62 @@ void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 	size_t Npoints = all_indeces.size();
 	vector<size_t> degn_points;
 	CleanDuplicates2(all_indeces, faceinds, degn_points);
-	for (size_t i = 0; i < nfaces; ++i)
-	{
-		numvertsperface[i] = static_cast<int>(faceinds[i].size());
-		for (size_t j = 0; j < faceinds[i].size(); ++j)
-		{
-			size_t index = static_cast<size_t>(binary_find(all_indeces.begin(), all_indeces.end(), static_cast<size_t>(
-				faceinds[i][j])) - all_indeces.begin());
-			faceinds[i][j] = static_cast<int>(index);
-		}
-	}
 	size_t npoints = all_indeces.size();
 	vector<r3d_rvec3> points(npoints);
-	r3d_rvec3 point;
-	for (size_t i = 0; i < npoints; ++i)
-	{
-		if (i >= Npoints)
-		{
-			point.xyz[0] = all_vertices[degn_points[i-Npoints]].x;
-			point.xyz[1] = all_vertices[degn_points[i - Npoints]].y;
-			point.xyz[2] = all_vertices[degn_points[i - Npoints]].z;
-		}
-		else
-		{
-			point.xyz[0] = all_vertices[all_indeces[i]].x;
-			point.xyz[1] = all_vertices[all_indeces[i]].y;
-			point.xyz[2] = all_vertices[all_indeces[i]].z;
-		}
-		points[i] = point;
-	}
 	vector<int*> ptrs(faceinds.size());
-	for (size_t i = 0, e = ptrs.size(); i<e; ++i)
-	{
-		ptrs[i] = &(faceinds[i][0]);
-	}
+	OrganizeToPolyData(faceinds, numvertsperface, all_indeces, all_vertices, Npoints, degn_points,
+		points, ptrs);
 	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0],
 		static_cast<r3d_int>(numvertsperface.size()));
 	int test = r3d_is_good(&poly);
 	if (test != 1)
 	{
-		std::cout << "Bad polygon in cell " << oldcell << std::endl;
-		std::cout << "Given to poly build:" << std::endl;
-		for (size_t i = 0; i < npoints; ++i)
-		{
-			if (i >= Npoints)
-				std::cout << "Point " << degn_points[i - Npoints] << " " << all_vertices[degn_points[i - Npoints]].x <<
-					" " << all_vertices[degn_points[i - Npoints]].y << " " << all_vertices[degn_points[i - Npoints]].z<<std::endl;
-			else
-				std::cout << "Point " << all_indeces[i] << " " << all_vertices[all_indeces[i]].x <<
-					" " << all_vertices[all_indeces[i]].y << " " << all_vertices[all_indeces[i]].z<<std::endl;
-		}
-		for (size_t i = 0; i < ptrs.size(); ++i)
-		{
-			std::cout << "Face " << i;
-			for (size_t j = 0; j < faceinds[i].size(); ++j)
-				std::cout << " " << faceinds[i][j] << " ";
-			std::cout << std::endl;
-		}
-
-		all_indeces.clear();
+		FixBadOrder(faceinds, points, oldtess.GetWidth(oldcell));
 		for (size_t i = 0; i < nfaces; ++i)
+			numvertsperface[i] = static_cast<int>(faceinds[i].size());
+		for (size_t i = 0, e = ptrs.size(); i < e; ++i)
+			ptrs[i] = &(faceinds[i][0]);
+		r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0],
+			static_cast<r3d_int>(numvertsperface.size()));
+		test = r3d_is_good(&poly);
+		if (test != 1)
 		{
-			itemp = oldtess.GetPointsInFace(oldfaces[i]);
-			std::cout << "Face " << oldfaces[i] << " points:";
-			for (size_t j = 0; j < itemp.size(); ++j)
-				std::cout << " " << itemp[j] << " ";
-			std::cout << std::endl;
-			all_indeces.insert(all_indeces.end(), itemp.begin(), itemp.end());
-		}
-		sort(all_indeces.begin(), all_indeces.end());
-		all_indeces = unique(all_indeces);
-		for (size_t i = 0; i < all_indeces.size(); ++i)
-		{
-			Vector3D p = all_vertices[all_indeces[i]];
-			std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
+			std::cout << "Bad polygon in cell " << oldcell << std::endl;
+			std::cout << "Given to poly build:" << std::endl;
+			for (size_t i = 0; i < npoints; ++i)
+			{
+				if (i >= Npoints)
+					std::cout << "Point " << degn_points[i - Npoints] << " " << all_vertices[degn_points[i - Npoints]].x <<
+					" " << all_vertices[degn_points[i - Npoints]].y << " " << all_vertices[degn_points[i - Npoints]].z << std::endl;
+				else
+					std::cout << "Point " << all_indeces[i] << " " << all_vertices[all_indeces[i]].x <<
+					" " << all_vertices[all_indeces[i]].y << " " << all_vertices[all_indeces[i]].z << std::endl;
+			}
+			for (size_t i = 0; i < ptrs.size(); ++i)
+			{
+				std::cout << "Face " << i;
+				for (size_t j = 0; j < faceinds[i].size(); ++j)
+					std::cout << " " << faceinds[i][j] << " ";
+				std::cout << std::endl;
+			}
+
+			all_indeces.clear();
+			for (size_t i = 0; i < nfaces; ++i)
+			{
+				itemp = oldtess.GetPointsInFace(oldfaces[i]);
+				std::cout << "Face " << oldfaces[i] << " points:";
+				for (size_t j = 0; j < itemp.size(); ++j)
+					std::cout << " " << itemp[j] << " ";
+				std::cout << std::endl;
+				all_indeces.insert(all_indeces.end(), itemp.begin(), itemp.end());
+			}
+			sort(all_indeces.begin(), all_indeces.end());
+			all_indeces = unique(all_indeces);
+			for (size_t i = 0; i < all_indeces.size(); ++i)
+			{
+				Vector3D p = all_vertices[all_indeces[i]];
+				std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
+			}
 		}
 	}
 	assert(test == 1);
