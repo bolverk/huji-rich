@@ -879,29 +879,31 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 	{
 		oldtess->GetNeighbors(ToRemove.first[i], neigh);
 		size_t Nneigh = neigh.size();
-		GetPoly(*oldtess, ToRemove.first[i], poly, temp, temp2, i_temp);
-		for (size_t j = 0; j < Nneigh; ++j)
+		if (GetPoly(*oldtess, ToRemove.first[i], poly, temp, temp2, i_temp))
 		{
-			if (neigh[j] >= Norg)
-				continue;
-			// copy poly
-			poly2.nverts = poly.nverts;
-			for (int k = 0; k < poly2.nverts; ++k)
+			for (size_t j = 0; j < Nneigh; ++j)
 			{
-				for (size_t l = 0; l < 3; ++l)
+				if (neigh[j] >= Norg)
+					continue;
+				// copy poly
+				poly2.nverts = poly.nverts;
+				for (int k = 0; k < poly2.nverts; ++k)
 				{
-					poly2.verts[k].pos.xyz[l] = poly.verts[k].pos.xyz[l];
-					poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
+					for (size_t l = 0; l < 3; ++l)
+					{
+						poly2.verts[k].pos.xyz[l] = poly.verts[k].pos.xyz[l];
+						poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
+					}
 				}
-			}
 
-			size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), neigh[j])
-				- ToRemove.first.begin());
-			std::pair<bool, double> dv = PolyhedraIntersection(tess, neigh[j] - index_remove, poly2);
-			extensives[neigh[j] - index_remove] += eu_->ConvertPrimitveToExtensive3D(cells[ToRemove.first[i]], eos, dv.second,
-				tracerstickernames);
-			changed_cells.push_back(neigh[j] - index_remove);
-			changed_cells_old.push_back(neigh[j]);
+				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), neigh[j])
+					- ToRemove.first.begin());
+				std::pair<bool, double> dv = PolyhedraIntersection(tess, neigh[j] - index_remove, poly2);
+				extensives[neigh[j] - index_remove] += eu_->ConvertPrimitveToExtensive3D(cells[ToRemove.first[i]], eos, dv.second,
+					tracerstickernames);
+				changed_cells.push_back(neigh[j] - index_remove);
+				changed_cells_old.push_back(neigh[j]);
+			}
 		}
 	}
 	// deal with mpi cells
@@ -933,22 +935,24 @@ void AMR3D::UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D>
 			{
 				size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
 					duplicate_index[i][j].at(k)) - ToRemove.first.begin());
-				GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly, temp, temp2, i_temp);
-				// copy poly
-				poly2.nverts = poly.nverts;
-				for (int kk = 0; kk < poly2.nverts; ++kk)
+				if (GetPoly(tess, duplicate_index[i][j][k] - index_remove, poly, temp, temp2, i_temp))
 				{
-					for (size_t l = 0; l < 3; ++l)
+					// copy poly
+					poly2.nverts = poly.nverts;
+					for (int kk = 0; kk < poly2.nverts; ++kk)
 					{
-						poly2.verts[kk].pos.xyz[l] = poly.verts[kk].pos.xyz[l];
-						poly2.verts[kk].pnbrs[l] = poly.verts[kk].pnbrs[l];
+						for (size_t l = 0; l < 3; ++l)
+						{
+							poly2.verts[kk].pos.xyz[l] = poly.verts[kk].pos.xyz[l];
+							poly2.verts[kk].pnbrs[l] = poly.verts[kk].pnbrs[l];
+						}
 					}
+					std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly2, &planes);
+					extensives[duplicate_index[i][j][k] - index_remove] += eu_->ConvertPrimitveToExtensive3D(
+						cells[nghost_index[i][j]], eos, dv.second, tracerstickernames);
+					changed_cells.push_back(duplicate_index[i][j][k] - index_remove);
+					changed_cells_old.push_back(duplicate_index[i][j][k]);
 				}
-				std::pair<bool, double> dv = PolyhedraIntersection(*oldtess, 0, poly2, &planes);
-				extensives[duplicate_index[i][j][k] - index_remove] += eu_->ConvertPrimitveToExtensive3D(
-					cells[nghost_index[i][j]], eos, dv.second, tracerstickernames);
-				changed_cells.push_back(duplicate_index[i][j][k] - index_remove);
-				changed_cells_old.push_back(duplicate_index[i][j][k]);
 			}
 		}
 	}

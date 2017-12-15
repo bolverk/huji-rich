@@ -289,9 +289,9 @@ namespace
 		diffs[0] = ScalarProd(temp, temp);
 		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i < N; ++i)
-			if (diffs[i] > R*1e-10)
+			if (diffs[i] > R*1e-13)
 				res.push_back(indeces[i]);
-		if (diffs[0] < R*1e-10)
+		if (diffs[0] < R*1e-13)
 			res.pop_back();
 		return R;
 	}
@@ -1305,7 +1305,6 @@ void Voronoi3D::BuildVoronoi(void)
 					}
 					if (N0 >= Norg_ || std::find(Neighbors[N0].begin(), Neighbors[N0].end(), N1) != Neighbors[N0].end())
 						continue;
-					//if (ShouldBuildFace(N0, N1, FacesInCell_, FaceNeighbors_, Norg_))
 					{
 						temp.clear();
 						temp.push_back(i);
@@ -1326,7 +1325,7 @@ void Voronoi3D::BuildVoronoi(void)
 						if (temp2.size() < 3)
 							continue;
 						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < (Asize * (IsPointOutsideBox(N1) ? 1e-4 : 1e-6)))
+						if (AreaCM.first < (Asize * (IsPointOutsideBox(N1) ? 1e-13 : 1e-14)))
 							continue;
 						if (N1 >= Norg_&&N1 < (Norg_ + 4))
 						{
@@ -1763,9 +1762,18 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	tetra_centers_[index] = center;
 	double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	// Sanity check
-	double Rcheck = abs(del_.points_[del_.tetras_[index].points[0]] - center);
-	if (Rcheck > 1.001*Rres || Rcheck*1.001 < Rres)
-	{
+	double Rcheck0 = abs(del_.points_[del_.tetras_[index].points[0]] - center);
+	double Rcheck1 = abs(del_.points_[del_.tetras_[index].points[1]] - center);
+	double tol = 1 + 1e-6;
+	if ((Rcheck0 > (Rcheck1*tol)) || (Rcheck1 > (Rcheck0*tol)))
+		return CalcTetraRadiusCenterHiPrecision(index);
+	if (Rcheck0 > 1.0001*Rres || Rcheck0*1.0001 < Rres)
+		return CalcTetraRadiusCenterHiPrecision(index);
+	return Rres;
+}
+
+double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
+{
 		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
 		V0[0] = del_.points_[del_.tetras_[index].points[0]].x;
 		V0[1] = del_.points_[del_.tetras_[index].points[0]].y;
@@ -1833,17 +1841,13 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 		mat[8] = V4[1];
 		boost::multiprecision::cpp_dec_float_50 bDz = Calc33Det(mat);
 		boost::multiprecision::cpp_dec_float_50 temp = (bDx / (2 * ba) + V0[0]);
-		center.x = temp.convert_to<double>();
+		tetra_centers_[index].x = temp.convert_to<double>();
 		temp = (bDy / (2 * ba) + V0[1]);
-		center.y = temp.convert_to<double>();
+		tetra_centers_[index].y = temp.convert_to<double>();
 		temp = (bDz / (2 * ba) + V0[2]);
-		center.z = temp.convert_to<double>();
-		tetra_centers_[index] = center;
+		tetra_centers_[index].z = temp.convert_to<double>();
 		temp = (boost::multiprecision::sqrt(bDx*bDx + bDy*bDy + bDz*bDz) / ba);
-		Rres = 0.5 * temp.convert_to<double>();
-		return Rres;
-	}
-	return Rres;
+		return 0.5 * temp.convert_to<double>();;
 }
 
 Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
@@ -1857,10 +1861,6 @@ Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
 
 double Voronoi3D::GetTetraVolume(boost::array<Vector3D, 4> const& points)const
 {
-	/*Mat33<double> mat(points[1].x - points[0].x, points[1].y - points[0].y, points[1].z - points[0].z,
-	points[2].x - points[0].x, points[2].y - points[0].y, points[2].z - points[0].z,
-	points[3].x - points[0].x, points[3].y - points[0].y, points[3].z - points[0].z);
-	double det = mat.determinant();*/
 	return std::abs(orient3d(points)) / 6.0;
 }
 

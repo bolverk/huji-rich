@@ -261,7 +261,7 @@ void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
 	}
 }
 
-void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vector<size_t> &itemp, vector<size_t> &all_indeces,
+bool GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vector<size_t> &itemp, vector<size_t> &all_indeces,
 	vector<vector<int> > &faceinds)
 {
 	itemp.clear();
@@ -343,9 +343,11 @@ void GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 				Vector3D p = all_vertices[all_indeces[i]];
 				std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
 			}
+			return false;
 		}
+		return true;
 	}
-	assert(test == 1);
+	return true;
 }
 
 std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & newtess,size_t newcell,r3d_poly &poly,

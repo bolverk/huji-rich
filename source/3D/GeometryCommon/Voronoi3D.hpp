@@ -56,6 +56,7 @@ private:
 	void CalcAllCM(void);
 	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
 	vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
+	double CalcTetraRadiusCenterHiPrecision(std::size_t index);
 #ifdef RICH_MPI
 	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode,
 		vector<unsigned char> &checked_clear);
@@ -87,7 +88,6 @@ private:
 	Voronoi3D(Voronoi3D const &other);
 	boost::array<Vector3D, 4> temp_points_;
 	boost::array<Vector3D, 5> temp_points2_;
-
 public:
 	vector<Vector3D>& GetAllFaceCM(void);
 
