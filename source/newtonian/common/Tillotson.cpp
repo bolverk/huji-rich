@@ -18,7 +18,7 @@ double Tillotson::dp2EI(double d, double p) const
 	double sqr = sqrt(4 * a_*c*d*(p - A - B) + std::pow(A + B + (a_ + b_)*c*d - p, 2));
 	double first_part = p - A - B - a_*c*d - b_*c*d;
 	double E = (first_part + sqr) / 	(2 * a_*d);
-	E = std::max(E, 0.0);
+	assert(E > 0);
 	return E;
 }
 
@@ -46,7 +46,7 @@ double Tillotson::de2pI(double d, double e)const
 	double A = A_*mu;
 	double B = B_*mu*mu;
 	double res = (a_ + b_ / (e / c + 1))*d*e + A + B;
-	return std::max(res,(a_+b_)*d*e*1e-7);
+	return res;
 }
 
 double Tillotson::de2pII(double d, double e)const
@@ -59,20 +59,24 @@ double Tillotson::de2pII(double d, double e)const
 double Tillotson::de2pIV(double d, double e)const
 {
 	double eta = d / rho0_;
+	if (alpha_>35*eta*eta)
+		return a_*d*e;
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double A = A_*mu;
 	double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 	double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-	return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_+b_)*d*e*1e-7);
+	return a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta);
 }
 
 double Tillotson::dep2cI(double d, double e, double p) const
 {
 	double eta = d / rho0_;
+	double mu = eta - 1;
 	double w0 = e / (E0_*eta*eta) + 1;
-	double gamma = a_ + b_ / w0;
-	return ((gamma + 1)*p + (A_ + B_*(eta*eta - 1))) / d + b_*(w0 - 1)*(2 * e - p / d) / (w0*w0);
+	double res = (A_ + 2 * B_*mu) / rho0_ + 2 * b_*e*e / (eta*eta*E0_*w0*w0) + e*(a_ + b_ / w0) + p*(b_ + a_*w0*w0) / (d*w0);
+	res = std::max(res, 1e-10*E0_);
+	return std::sqrt(res);
 }
 
 double Tillotson::dep2cIV(double d, double e, double p) const
@@ -80,36 +84,15 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	double eta = d / rho0_;
 	double mu = eta - 1;
 	double w0 = e / (E0_*eta*eta) + 1;
-	double z = 1.0 / eta - 1;
-	double gamma = a_ + b_*std::exp(-beta_*z*z);
-	return (gamma + 1)*p / d + A_*std::exp(-(alpha_*z + beta_*z*z))*(1 + mu*(alpha_ + 2 * beta_*z - eta) / (eta*eta)) / rho0_
-		+ b_*d*e*std::exp(-beta_*z*z)*(2 * beta_*z*w0 / rho0_ + (p / d - 2 * e) / (E0_*d)) / (w0*w0*eta*eta);
+	double z =1.0 - 1.0 / eta;
+	double afactor = std::exp(-alpha_*z*z);
+	double res0 = p*(a_ + b_*afactor / (w0*w0))/d;
+	double res1 = a_*e + afactor*(A_*std::exp(beta_*z)*(eta - 2 * alpha_ / (eta*eta) + (4 * alpha_ - beta_) / eta + beta_ - 2 * alpha_) / d +
+		e*b_*(1 + 3 * e / (E0_*eta*eta) - 2 * alpha_*z*w0 / eta) / w0);
+	double res = std::max(res0 + res1, 1e-10*E0_);
+	return std::sqrt(res);
 }
 
-/*struct dp2eII
-{ 
-	dp2eII(Tillotson const& eos) : eos_(eos)
-	{}
-
-	std::pair<double, double> operator()(double e)
-	{
-		double eta = eos_.temp_d_ / eos_.rho0_;
-		double mu = eta - 1;
-		double c = eos_.E0_*eta*eta;
-		double A = eos_.A_*mu;
-		double B = eos_.B_*mu*mu;
-		double exp_alpha = std::exp(-eos_.alpha_*std::pow(eos_.rho0_ / eos_.temp_d_ - 1, 2));
-		double exp_beta = std::exp(-eos_.beta_*(eos_.rho0_ / eos_.temp_d_ - 1));
-		double res = eos_.temp_p_ - eos_.de2pII(eos_.temp_d_, e);
-		double slope = (B*std::pow(c + e, 2) - A*(-1 + exp_alpha*exp_beta)*std::pow(c + e, 2) +
-			eos_.temp_d_*(-eos_.a_*std::pow(c + e, 2)*(eos_.ECV_ - eos_.EIV_) + eos_.b_* c*(-(-1 + exp_alpha)*e*e +
-				c*(-eos_.ECV_ + 2 * e - 2 * exp_alpha*e + exp_alpha*eos_.EIV_)))) / (std::pow(c + e, 2)* (eos_.ECV_ - eos_.EIV_));
-		return std::make_pair(res, slope);
-	}
-private:
-	Tillotson const& eos_;                               
-};
-*/
 struct dp2eII
 {
 	dp2eII(Tillotson const& eos) : eos_(eos)
@@ -138,14 +121,14 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	}
 	else
 	{
-		double PIV = std::max((a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B, (a_+b_)*d*EIV_*1e-7);
+		double PIV = (a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B;
 		if (p <= PIV)
 		{
 			return dp2EI(d, p);
 		}
 		double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
 		double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
-		double PCV = std::max(a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_+b_)*d*ECV_*1e-7);
+		double PCV = a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta);
 		if (p >= PCV)
 		{
 			return dp2EIV(d, p);
