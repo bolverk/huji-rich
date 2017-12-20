@@ -431,7 +431,7 @@ namespace
 			double diffusecoeff,
 			double pressure_ratio,
 			EquationOfState const& eos,
-			const vector<string>& flat_tracers,
+			const vector<string>& calc_tracers,
 			Slope &naive_slope_,
 			Slope & res,
 			Slope & temp1,
@@ -469,13 +469,13 @@ namespace
 
 		naive_slope_ = res;
 
-		for (size_t i = 0; i < flat_tracers.size(); ++i)
+		for (size_t i = 0; i < res.xderivative.tracers.size(); ++i)
 		{
-			size_t tindex = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-				flat_tracers[i]) - tracerstickernames.tracer_names.begin());
-			assert(tindex < tracerstickernames.tracer_names.size());
-			res.xderivative.tracers[tindex] = 0;
-			res.yderivative.tracers[tindex] = 0;
+			if (std::find(calc_tracers.begin(), calc_tracers.end(), tracerstickernames.tracer_names[i]) == calc_tracers.end())
+			{
+				res.xderivative.tracers[i] = 0;
+				res.yderivative.tracers[i] = 0;
+			}
 		}
 
 		if (slf)
@@ -509,7 +509,7 @@ LinearGaussImproved::LinearGaussImproved
 	double delta_v,
 	double theta,
 	double delta_P,
-	const vector<string>& flat_tracers,
+	const vector<string>& calc_tracers,
 	string skip_key) :
 	eos_(eos),
 	ghost_(ghost),
@@ -519,7 +519,7 @@ LinearGaussImproved::LinearGaussImproved
 	shockratio_(delta_v),
 	diffusecoeff_(theta),
 	pressure_ratio_(delta_P),
-	flat_tracers_(flat_tracers),
+	calc_tracers_(calc_tracers),
 	skip_key_(skip_key),
 	to_skip_(){}
 
@@ -565,7 +565,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		vector<int> const& edge_index = tess.GetCellEdges(static_cast<int>(i));
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
-			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
+			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
 			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_,psi);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
