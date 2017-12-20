@@ -24,12 +24,12 @@ public:
 	\param theta The theta from tess in slope limiter.
 	\param delta_P The pressure ratio for shock detection
 	\param ghost The ghost point generator
-	\param flat_tracers Names of tracers for which the slope is always zero
+	\param calc_tracers Names of tracers for which to calc the slope for
 	\param skip_key The sticker name to skip cells for taking them into account for the slope limit
 	\param tsn The names of the stickers and tracers
 	*/
 	LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
-		double theta = 0.5,double delta_P = 0.7,const vector<string>& flat_tracers = vector<string>(),
+		double theta = 0.5,double delta_P = 0.7,const vector<string>& calc_tracers = vector<string>(),
 		string skip_key = string());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
@@ -69,7 +69,7 @@ private:
 	const double shockratio_;
 	const double diffusecoeff_;
 	const double pressure_ratio_;
-	const vector<string> flat_tracers_;
+	const vector<string> calc_tracers_;
 	const string skip_key_;
 	mutable vector<size_t> to_skip_;
 

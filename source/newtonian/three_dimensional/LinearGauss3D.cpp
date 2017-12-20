@@ -531,7 +531,7 @@ namespace
 
 	void calc_slope(Tessellation3D const& tess,vector<ComputationalCell3D> const& cells,size_t cell_index,bool slf,
 		double shockratio,double diffusecoeff,double pressure_ratio,EquationOfState const& eos,
-		const vector<string>& flat_tracers,Slope3D &naive_slope_,Slope3D & res,	Slope3D &temp1,ComputationalCell3D &temp2,
+		const vector<string>& calc_tracers,Slope3D &naive_slope_,Slope3D & res,	Slope3D &temp1,ComputationalCell3D &temp2,
 		ComputationalCell3D &temp3,ComputationalCell3D &temp4,ComputationalCell3D &temp5,vector<Vector3D> &neighbor_mesh_list,
 		vector<Vector3D> &neighbor_cm_list,TracerStickerNames const& tracerstickernames,string const& skip_key)
 	{
@@ -558,14 +558,14 @@ namespace
 
 		naive_slope_ = res;
 
-		for (size_t i = 0; i < flat_tracers.size(); ++i)
+		for (size_t i = 0; i < res.xderivative.tracers.size(); ++i)
 		{
-			size_t tindex = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-				flat_tracers[i]) - tracerstickernames.tracer_names.begin());
-			assert(tindex < tracerstickernames.tracer_names.size());
-			res.xderivative.tracers[tindex] = 0;
-			res.yderivative.tracers[tindex] = 0;
-			res.zderivative.tracers[tindex] = 0;
+			if (std::find(calc_tracers.begin(), calc_tracers.end(), tracerstickernames.tracer_names[i]) == calc_tracers.end())
+			{
+				res.xderivative.tracers[i] = 0;
+				res.yderivative.tracers[i] = 0;
+				res.zderivative.tracers[i] = 0;
+			}
 		}
 
 		if (slf)
@@ -600,9 +600,9 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn,Ghost3D const& ghost,bool slf,double delta_v,double theta,
-	double delta_P,const vector<string>& flat_tracers,string skip_key) : eos_(eos),tsn_(tsn), ghost_(ghost),rslopes_(),
+	double delta_P,const vector<string>& calc_tracers,string skip_key) : eos_(eos),tsn_(tsn), ghost_(ghost),rslopes_(),
 	naive_rslopes_(),slf_(slf),shockratio_(delta_v),diffusecoeff_(theta),pressure_ratio_(delta_P),
-	flat_tracers_(flat_tracers),skip_key_(skip_key),to_skip_() {}
+	calc_tracers_(calc_tracers),skip_key_(skip_key),to_skip_() {}
 
 void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const
@@ -634,7 +634,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
-			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
+			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
 			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_);
 		vector<size_t> const& faces = tess.GetCellFaces(i);
 		const size_t nloop = faces.size();
