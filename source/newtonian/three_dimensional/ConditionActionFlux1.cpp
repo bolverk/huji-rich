@@ -37,8 +37,8 @@ void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessell
 	size_t Nloop = fluxes.size();
 	for (size_t i = 0; i < Nloop; ++i)
 	{
-		if (face_values[i].first.density < 0 || face_values[i].first.pressure < 0 || face_values[i].first.internal_energy < 0
-			|| face_values[i].second.density < 0 || face_values[i].second.pressure < 0 || face_values[i].second.internal_energy < 0)
+		if (face_values[i].first.density < 0 ||  face_values[i].first.internal_energy < 0
+			|| face_values[i].second.density < 0  || face_values[i].second.internal_energy < 0)
 		{
 			UniversalError eo("Bad input to flux calculator");
 			eo.AddEntry("Face", static_cast<double>(i));

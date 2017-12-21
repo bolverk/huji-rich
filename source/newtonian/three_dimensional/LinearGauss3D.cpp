@@ -218,8 +218,8 @@ namespace
 		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
-		if(pressure_calc)
-			res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+		if (pressure_calc)
+			eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
 	}
 
 	void slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
