@@ -10,7 +10,7 @@ namespace
 {
 	void CheckCell(ComputationalCell3D const& cell)
 	{
-		if (cell.density < 0 || cell.pressure < 0 || cell.internal_energy<0)
+		if (cell.density < 0 || cell.internal_energy<0)
 			throw UniversalError("Bad cell after interpolation in LinearGauss3D");
 	}
 
@@ -219,7 +219,7 @@ namespace
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if (pressure_calc)
-			res.pressure = eos.de2p(res.density, res.pressure, res.tracers, tsn.tracer_names);
+			res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
 	}
 
 	void slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
@@ -343,6 +343,9 @@ namespace
 				}
 			}
 		}
+		psi[1] = std::min(psi[1], psi[5]);
+		psi[5] = psi[1];
+
 		slope.xderivative.density *= psi[0];
 		slope.yderivative.density *= psi[0];
 		slope.zderivative.density *= psi[0];
@@ -466,6 +469,10 @@ namespace
 				++counter;
 			}
 		}
+
+		psi[1] = std::min(psi[1], psi[5]);
+		psi[5] = psi[1];
+
 		slope.xderivative.density *= psi[0];
 		slope.yderivative.density *= psi[0];
 		slope.zderivative.density *= psi[0];
