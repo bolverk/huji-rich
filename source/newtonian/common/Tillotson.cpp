@@ -82,7 +82,6 @@ double Tillotson::dep2cI(double d, double e, double p) const
 double Tillotson::dep2cIV(double d, double e, double p) const
 {
 	double eta = d / rho0_;
-	double mu = eta - 1;
 	double w0 = e / (E0_*eta*eta) + 1;
 	double z =1.0 - 1.0 / eta;
 	double afactor = std::exp(-alpha_*z*z);
