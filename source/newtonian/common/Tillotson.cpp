@@ -41,7 +41,6 @@ double Tillotson::dp2EIV(double d, double p) const
 double Tillotson::de2pI(double d, double e)const
 {
 	double eta = d / rho0_;
-	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double AB = (A_ - 2 * B_)*eta + (B_ - A_) + B_*eta*eta;
 	double res = (a_ + b_ / (e / c + 1))*d*e + AB;
