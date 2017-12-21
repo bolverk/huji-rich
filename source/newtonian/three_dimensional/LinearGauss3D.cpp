@@ -207,7 +207,7 @@ namespace
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if(pressure_calc)
-			res.internal_energy = eos.dp2e(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+			res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
 		return res;
 	}
 
@@ -219,7 +219,7 @@ namespace
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if (pressure_calc)
-			res.internal_energy = eos.de2p(res.density, res.pressure, res.tracers, tsn.tracer_names);
+			res.pressure = eos.de2p(res.density, res.pressure, res.tracers, tsn.tracer_names);
 	}
 
 	void slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
