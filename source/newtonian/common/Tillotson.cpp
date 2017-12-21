@@ -18,6 +18,10 @@ double Tillotson::dp2EI(double d, double p) const
 	double sqr = sqrt(4 * a_*c*d*(p - A - B) + std::pow(A + B + (a_ + b_)*c*d - p, 2));
 	double first_part = p - A - B - a_*c*d - b_*c*d;
 	double E = (first_part + sqr) / 	(2 * a_*d);
+	if (E < 0)
+	{
+		std::cout << "d " << d << " p " << p << std::endl;
+	}
 	assert(E > 0);
 	return E;
 }
@@ -34,6 +38,10 @@ double Tillotson::dp2EIV(double d, double p) const
 	double AB = exp_alpha*exp_beta;
 	double E = (p - AB - a_*c*d - b*c*d + sqrt(4 * a_*c*d*(p - AB) + std::pow(AB + (a_ + b)*c*d - p, 2))) /
 		(2 * a_*d);
+	if (E < 0)
+	{
+		std::cout << "d " << d << " p " << p << std::endl;
+	}
 	assert(E > 0);
 	return E;
 }
