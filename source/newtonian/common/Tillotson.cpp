@@ -119,7 +119,6 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double A = A_*mu;
-	double B = B_*mu*mu;
 	if (d >= rho0_)
 	{
 		return dp2EI(d, p);
