@@ -144,7 +144,14 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 			temp_p_ = p;
 			boost::uintmax_t it = 50;
 			std::pair<double, double> res;
-			res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
+			try
+			{
+				res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
+			}
+			catch (boost::exception const& eo)
+			{
+				std::cout << " EIV_ " << EIV_ << " ECV_ " << ECV_ << " density " << d << " pressure " << p << " PIV " << PIV << " PCV " << PCV << std::endl;
+			}
 			double result = 0.5*(res.first + res.second);
 			double newp = de2p(d, result);
 			if (newp > PIV * 2)
