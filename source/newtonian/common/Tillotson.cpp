@@ -149,7 +149,7 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 			double newp = de2p(d, result);
 			if (newp > PIV * 2)
 			{
-				if (std::abs(p - newp) > 0.001*p)
+				if (std::abs(p - newp) > 0.001*std::abs(p))
 				{
 					UniversalError eo("No dp2e convergence");
 					eo.AddEntry("Density", d);
