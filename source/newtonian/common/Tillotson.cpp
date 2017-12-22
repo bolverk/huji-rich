@@ -126,7 +126,7 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	}
 	else
 	{
-		double PIV = (a_ + b_ / (EIV_ / c + 1))*d*EIV_ + A + B;
+		double PIV = de2pI(d, EIV_);
 		if (p <= PIV)
 		{
 			return dp2EI(d, p);
