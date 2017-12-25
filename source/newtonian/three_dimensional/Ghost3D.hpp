@@ -77,6 +77,57 @@ public:
 		TracerStickerNames const& tracerstickernames) const;
 };
 
+class ConstantPrimitiveGenerator3D : public Ghost3D
+{
+private:
+	const ComputationalCell3D cell_;
+public:
+	ConstantPrimitiveGenerator3D(ComputationalCell3D const& cell);
+
+	void operator() (const Tessellation3D& tess,
+		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
+		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const;
+
+	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
+		TracerStickerNames const& tracerstickernames) const;
+};
+
+class SeveralGhostGenerator3D : public Ghost3D
+{
+public:
+	class GhostCriteria3D
+	{
+	public:
+		/*!
+		\brief Chooses the ghost generator
+		\param tess The tessellation
+		\param index The index of the mesh point to calculate for
+		\return The index in the ghost generator vector to choose from
+		*/
+		virtual size_t GhostChoose(Tessellation3D const& tess, size_t index)const = 0;
+
+		virtual ~GhostCriteria3D(void);
+	};
+
+	/*! \brief Class constructor
+	\param ghosts List of ghost generators
+	\param ghostchooser Criteria for when to use each ghost generator
+	*/
+	SeveralGhostGenerator3D(vector<Ghost3D*> ghosts, GhostCriteria3D const& ghostchooser);
+
+	void operator() (const Tessellation3D& tess,
+		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
+		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const;
+
+	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
+		TracerStickerNames const& tracerstickernames) const;
+private:
+	vector<Ghost3D*> ghosts_;
+	GhostCriteria3D const& ghost_chooser_;
+};
+
 
 
 #endif // GHOST3D_HPP
