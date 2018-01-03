@@ -289,9 +289,9 @@ namespace
 		diffs[0] = ScalarProd(temp, temp);
 		R = std::max(R, diffs[0]);
 		for (size_t i = 1; i < N; ++i)
-			if (diffs[i] > R*1e-13)
+			if (diffs[i] > R*1e-15)
 				res.push_back(indeces[i]);
-		if (diffs[0] < R*1e-13)
+		if (diffs[0] < R*1e-15)
 			res.pop_back();
 		return R;
 	}
@@ -1764,7 +1764,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	// Sanity check
 	double Rcheck0 = abs(del_.points_[del_.tetras_[index].points[0]] - center);
 	double Rcheck1 = abs(del_.points_[del_.tetras_[index].points[1]] - center);
-	double tol = 1 + 1e-6;
+	double tol = 1 + 1e-4;
 	if ((Rcheck0 > (Rcheck1*tol)) || (Rcheck1 > (Rcheck0*tol)))
 		return CalcTetraRadiusCenterHiPrecision(index);
 	if (Rcheck0 > 1.0001*Rres || Rcheck0*1.0001 < Rres)
