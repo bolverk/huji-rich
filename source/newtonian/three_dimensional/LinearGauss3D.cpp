@@ -207,7 +207,16 @@ namespace
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if(pressure_calc)
+			try
+		{
 			res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("density", res.density);
+			eo.AddEntry("internal energy", res.internal_energy);
+			throw eo;
+		}
 		return res;
 	}
 
@@ -219,7 +228,16 @@ namespace
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if (pressure_calc)
+			try
+		{
 			res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("density", res.density);
+			eo.AddEntry("internal energy", res.internal_energy);
+			throw eo;
+		}
 	}
 
 	void slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
@@ -603,7 +621,23 @@ namespace
 void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm,
 	Vector3D const& target,EquationOfState const& eos,TracerStickerNames const& tsn)const
 {
-	res = interp(cell, rslopes_[cell_index], target, cm,eos,tsn,true);
+	try
+	{
+		res = interp(cell, rslopes_[cell_index], target, cm, eos, tsn, true);
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Cell density", cell.density);
+		eo.AddEntry("Cell internal energy", cell.internal_energy);
+		eo.AddEntry("cell index", static_cast<double>(cell_index));
+		eo.AddEntry("CMx", cm.x);
+		eo.AddEntry("CMy", cm.y);
+		eo.AddEntry("CMz", cm.z);
+		eo.AddEntry("Targetx", target.x);
+		eo.AddEntry("Targety", target.y);
+		eo.AddEntry("Targetz", target.z);
+		throw eo;
+	}
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn,Ghost3D const& ghost,bool slf,double delta_v,double theta,
@@ -651,13 +685,15 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 				cell_ref = &res[faces[j]].first;
 				ReplaceComputationalCell(*cell_ref,new_cells[i]);
-				interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 				try
 				{
+					interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
 				{
+					eo.AddEntry("Old density", new_cells[i].density);
+					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.AddEntry("Face", static_cast<double>(faces[j]));
 					eo.AddEntry("Cell", static_cast<double>(i));
 				}
@@ -668,13 +704,15 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 				cell_ref = &res[faces[j]].second;
 				ReplaceComputationalCell(*cell_ref,new_cells[i]);
-				interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 				try
 				{
+					interp23D(*cell_ref,rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i),eos_,tsn_,true);
 					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
 				{
+					eo.AddEntry("Old density", new_cells[i].density);
+					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.AddEntry("Face", static_cast<double>(faces[j]));
 					eo.AddEntry("Cell", static_cast<double>(i));
 				}
@@ -696,6 +734,8 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		{
 			cell_ref = &res[boundaryedges[i]].first;
 			ReplaceComputationalCell(*cell_ref, new_cells[N0]);
+			try
+			{
 #ifdef RICH_MPI
 			if(tess.BoundaryFace(boundaryedges[i]))
 				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
@@ -706,14 +746,29 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0,time,boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0),eos_,tsn_,true);
 #endif //RICH_MPI
-			try
-			{
+			
 				CheckCell(*cell_ref);
 			}
 			catch (UniversalError &eo)
 			{
+				eo.AddEntry("old density", new_cells[N0].density);
+				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
 				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
 				eo.AddEntry("Cell", static_cast<double>(N0));
+#ifdef RICH_MPI
+				int rank = 0;
+				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+				eo.AddEntry("Rank", static_cast<double>(rank));
+				for (size_t j = 0; j<tess.GetGhostIndeces().size(); ++j)
+					for (size_t k = 0; k<tess.GetGhostIndeces()[j].size(); ++k)
+						if (tess.GetGhostIndeces()[j][k] == N0)
+						{
+							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
+							eo.AddEntry("Point recv index", static_cast<double>(k));
+							eo.AddEntry("Point proc index", static_cast<double>(j));
+						}
+#endif
+				throw eo;
 			}
 		}
 		else
@@ -721,6 +776,8 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			N0 = tess.GetFaceNeighbors(boundaryedges[i]).second;
 			cell_ref = &res[boundaryedges[i]].second;
 			ReplaceComputationalCell(*cell_ref, new_cells[N0]);
+			try
+			{
 #ifdef RICH_MPI
 			if (tess.BoundaryFace(boundaryedges[i]))
 				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
@@ -731,14 +788,29 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 				tracerstickersnames), tess.FaceCM(boundaryedges[i]),tess.GetCellCM(N0),eos_,tsn_,true);
 #endif //RICH_MPI
-			try
-			{
+			
 				CheckCell(*cell_ref);
 			}
 			catch (UniversalError &eo)
 			{
+				eo.AddEntry("old density", new_cells[N0].density);
+				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
 				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
 				eo.AddEntry("Cell", static_cast<double>(N0));
+#ifdef RICH_MPI
+				int rank = 0;
+				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+				eo.AddEntry("Rank", static_cast<double>(rank));
+				for(size_t j=0;j<tess.GetGhostIndeces().size();++j)
+					for (size_t k = 0; k<tess.GetGhostIndeces()[j].size(); ++k)
+						if (tess.GetGhostIndeces()[j][k] == N0)
+						{
+							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
+							eo.AddEntry("Point recv index", static_cast<double>(k));
+							eo.AddEntry("Point proc index", static_cast<double>(j));
+						}
+#endif
+				throw eo;
 			}
 		}
 	}

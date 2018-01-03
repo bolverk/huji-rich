@@ -118,6 +118,9 @@ namespace
 			for (size_t j = 0; j < Nindeces; ++j)
 				dist[j] = abs(points[all_good[j]] - points[to_change]);
 			size_t min_loc = static_cast<size_t>(std::distance(dist.begin(),std::min_element(dist.begin(), dist.end())));
+			size_t max_loc = static_cast<size_t>(std::distance(dist.begin(), std::max_element(dist.begin(), dist.end())));
+			if (dist[min_loc] > dist[max_loc] * 1e-6)
+				continue;
 			for (size_t j = 0; j < Nfaces; ++j)
 				for (size_t k = 0; k < face_inds[j].size(); ++k)
 					if (face_inds[j][k] == static_cast<int>(to_change))

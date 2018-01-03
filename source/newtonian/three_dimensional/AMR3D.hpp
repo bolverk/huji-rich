@@ -133,30 +133,6 @@ private:
 	AMR3D(AMR3D const& amr);
 	AMR3D& operator=(AMR3D const&);
 	
-#ifdef RICH_MPI
-
-	/*! \brief Removes points because they are near the edge of a cpu domain
-	\param ToRemove Candidates for AMR
-	\param merits The merits for points to be removed. given as input and output. should be empty vector for refinement
-	\param tess Tessellation
-	\return The new indices and merits of points
-	*/
-	vector<size_t> RemoveNearBoundaryPoints(vector<size_t> const&ToRemove,
-		Tessellation3D const& tess, vector<double> &merits)const;
-#endif
-	void UpdateCellsRefine(Tessellation3D &tess, vector<ComputationalCell3D> &cells, EquationOfState const& eos,
-		vector<Conserved3D> &extensives, double time,
-#ifdef RICH_MPI
-		Tessellation3D const& proctess,
-#endif
-		TracerStickerNames const& tracerstickernames)const;
-
-	void UpdateCellsRemove2(Tessellation3D &tess, vector<ComputationalCell3D> &cells, vector<Conserved3D> &extensives,
-		EquationOfState const& eos, double time, TracerStickerNames const& tracerstickernames
-#ifdef RICH_MPI
-		,Tessellation3D const& proctess
-#endif
-		)const;
 public:
 	/*!
 	\brief Runs the AMR
@@ -164,16 +140,14 @@ public:
 	*/
 	void operator() (HDSim3D &sim);
 
-
 	/*! \brief Class constructor
 	\param refine Refinement scheme
 	\param remove Removal scheme
 	\param cu Cell updater
 	\param eu Extensive updater
-	\param slopes Slopes
 	\param eos Equation of state
 	*/
-	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove, LinearGauss3D *slopes = 0, AMRCellUpdater3D* cu = 0,
+	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove, AMRCellUpdater3D* cu = 0,
 		AMRExtensiveUpdater3D* eu = 0);
 	//! Class destructor
 	~AMR3D();
