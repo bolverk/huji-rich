@@ -177,7 +177,7 @@ public:
 
 	std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
 
-	void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts,vector<size_t> toduplicate);
+	void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate);
 
 	vector<double>& GetAllVolumes(void);
 

@@ -634,6 +634,8 @@ namespace
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			extensive_tosend[i].resize(neigh_index[i].size());
+			for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
+				extensive_tosend[i][j].tracers.resize(extensives[0].tracers.size(), 0);
 			size_t counter = 0;
 			for (size_t j = 0; j < neigh_index[i].size(); ++j)
 			{
@@ -669,7 +671,6 @@ namespace
 						// add and remove the extensive
 						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
 						extensives[cur_check] -= toadd;
-						extensive_tosend[i][j].tracers.resize(toadd.tracers.size());
 						extensive_tosend[i][j] += toadd;
 						oldtess.GetNeighbors(cur_check, temp);
 						size_t Nneigh = temp.size();

@@ -230,7 +230,7 @@ public:
 
 	virtual std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const = 0;
 
-	virtual void BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, vector<size_t> toduplicate) = 0;
+	virtual void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts, vector<size_t> toduplicate) = 0;
 
 	virtual bool IsPointOutsideBox(size_t index)const = 0;
 

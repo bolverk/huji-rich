@@ -34,9 +34,11 @@ namespace
 					double Rdiff = AbsDiff(all_vert[faceinds[i][j]], all_vert[faceinds[i][(j + 1) % NinFace]]);
 					if (Rdiff > 1e-3*R)
 					{
-						std::cout << "R " << R << " Rdiff " << Rdiff << std::endl;
+						std::cout << "R " << R << " Rdiff " << Rdiff <<" face "<<i<<" points "<< all_vert[faceinds[i][j]].xyz[0]
+							<<" "<<all_vert[faceinds[i][j]].xyz[1] << " " << all_vert[faceinds[i][j]].xyz[2] 
+							<< " " << all_vert[faceinds[i][(j + 1) % NinFace]].xyz[0] << " " << all_vert[faceinds[i][(j + 1) % NinFace]].xyz[1]
+							<< " " << all_vert[faceinds[i][(j + 1) % NinFace]].xyz[2] <<std::endl;
 					}
-					assert(Rdiff < 1e-3*R);
 					toremove.push_back(faceinds[i][j]);
 				}
 			}

@@ -8,6 +8,7 @@
 #include "Mat33.hpp"
 #include "Predicates3D.hpp"
 #include "../../misc/utils.hpp"
+#include "../../misc/io3D.hpp"
 #include <fstream>
 #include <iostream>
 #include <boost/container/flat_map.hpp>
@@ -89,41 +90,6 @@ namespace
 		return points[0] * (points[4] * points[8] - points[5] * points[7]) + points[1] * (points[5] * points[6] - points[3] * points[8])
 			+ points[2] * (points[3] * points[7] - points[4] * points[6]);
 	}
-
-	void binary_write_single_int(int n, std::ofstream& fh)
-	{
-		fh.write(reinterpret_cast<const char*>(&n), sizeof(int));
-	}
-
-	void binary_write_single_double(double d, std::ofstream& fh)
-	{
-		fh.write(reinterpret_cast<const char*>(&d), sizeof(double));
-	}
-
-	/*void binary_write_single_size_t(std::size_t n, std::ofstream& fh)
-	{
-	fh.write(reinterpret_cast<const char*>(&n), sizeof(std::size_t));
-	}*/
-
-	/*vector<Vector3D> read_data(string fname)
-	{
-	vector<Vector3D> res;
-	std::ifstream fh(fname.c_str(), std::ios::binary);
-	int norg = 0;
-	fh.read(reinterpret_cast<char*>(&norg), sizeof(int));
-
-	res.reserve(norg);
-	// Points
-	for (int i = 0; i < norg; ++i)
-	{
-	double x = 0, y = 0, z = 0;
-	fh.read(reinterpret_cast<char*>(&x), sizeof(double));
-	fh.read(reinterpret_cast<char*>(&y), sizeof(double));
-	fh.read(reinterpret_cast<char*>(&z), sizeof(double));
-	res.push_back(Vector3D(x, y, z));
-	}
-	return res;
-	}*/
 }
 
 
@@ -339,7 +305,7 @@ namespace
 		size_t N = indeces.size();
 		V1 = face_points[indeces[counter + 1]];
 		V1 -= face_points[indeces[counter]];
-		while (ScalarProd(V1, V1) < 1e-4*areascale*areascale)
+		while (ScalarProd(V1, V1) < 1e-14*areascale*areascale)
 		{
 			++counter;
 			assert(counter < N);
@@ -348,7 +314,7 @@ namespace
 		}
 		V2 = face_points[indeces[(counter + 2) % N]];
 		V2 -= face_points[indeces[(counter + 1) % N]];
-		while (ScalarProd(V2, V2) < 1e-4*areascale*areascale)
+		while (ScalarProd(V2, V2) < 1e-14*areascale*areascale)
 		{
 			++counter;
 			assert(counter < 2 * N);
@@ -1120,7 +1086,7 @@ std::pair<Vector3D, Vector3D> Voronoi3D::GetBoxCoordinates(void)const
 	return std::pair<Vector3D, Vector3D>(ll_, ur_);
 }
 
-void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> const& ghosts, vector<size_t> toduplicate)
+void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts, vector<size_t> toduplicate)
 {
 	assert(points.size() > 0);
 	// Clear data
@@ -1144,7 +1110,8 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<Vector3D> cons
 	Nghost_.clear();
 
 	del_.Build(points, ur_, ll_);
-	del_.BuildExtra(ghosts);
+	for(size_t i=0;i<ghosts.size();++i)
+		del_.BuildExtra(ghosts[i]);
 	vector<std::pair<size_t, size_t> > duplicate(6);
 	for (size_t j = 0; j < toduplicate.size(); ++j)
 	{
@@ -1764,10 +1731,12 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	// Sanity check
 	double Rcheck0 = abs(del_.points_[del_.tetras_[index].points[0]] - center);
 	double Rcheck1 = abs(del_.points_[del_.tetras_[index].points[1]] - center);
-	double tol = 1 + 1e-4;
-	if ((Rcheck0 > (Rcheck1*tol)) || (Rcheck1 > (Rcheck0*tol)))
+	double Rcheck2 = abs(del_.points_[del_.tetras_[index].points[2]] - center);
+	double Rcheck3 = abs(del_.points_[del_.tetras_[index].points[3]] - center);
+	double tol = 1 + 1e-10;
+	if (((Rcheck0+Rcheck1+Rcheck2+Rcheck3)*tol<(4*Rcheck0))|| ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)>(tol*4 * Rcheck0)))
 		return CalcTetraRadiusCenterHiPrecision(index);
-	if (Rcheck0 > 1.0001*Rres || Rcheck0*1.0001 < Rres)
+	if (Rcheck0 > tol*Rres || Rcheck0*tol < Rres)
 		return CalcTetraRadiusCenterHiPrecision(index);
 	return Rres;
 }
@@ -1937,10 +1906,11 @@ void Voronoi3D::output(std::string const& filename)const
 
 void Voronoi3D::output_buildextra(std::string const& filename)const
 {
-
 	std::ofstream file_handle(filename.c_str(), std::ios::out | std::ios::binary);
 	assert(file_handle.is_open());
-	size_t stemp = del_.points_.size();
+	size_t stemp = Norg_;
+	binary_write_single_int(static_cast<int>(stemp), file_handle);
+	stemp = del_.points_.size();
 	binary_write_single_int(static_cast<int>(stemp), file_handle);
 #ifdef RICH_MPI
 	int rank = 0;
