@@ -182,8 +182,6 @@ namespace
 		vector<size_t> too_many;
 		for (size_t i = 0; i < Nindeces; ++i)
 		{
-			if (counter[i] < 3)
-				throw;
 			if (counter[i] > 3)
 				too_many.push_back(all_indeces[i]);
 		}
