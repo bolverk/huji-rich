@@ -10,6 +10,19 @@
 
 namespace
 {
+	bool InsideBigTetra(Vector3D const& tocheck, vector<Vector3D> const& cor, size_t Norg)
+	{
+		for (size_t i = 0; i < 4; ++i)
+		{
+			Vector3D normal = CrossProduct(cor[Norg + (1 + i) % 4] - cor[Norg + i], cor[Norg + (2 + i) % 4] - cor[Norg + i]);
+			double s1 = ScalarProd(normal, cor[Norg + (3 + i) % 4] - cor[Norg + i]);
+			double s2 = ScalarProd(normal, tocheck - cor[Norg + i]);
+			if (s1*s2 < 0)
+				return false;
+		}
+		return true;
+	}
+
 	bool PlaneLineIntersection(boost::array<Vector3D, 3> &plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
 		plane[1] -= plane[0];
@@ -460,7 +473,8 @@ void Delaunay3D::BuildExtra(vector<Vector3D> const& points)
 	assert(to_check_.empty());
 	for (std::size_t i = 0; i < points.size(); ++i)
 	{
-		InsertPoint(order[i] + Nstart);
+		if(InsideBigTetra(points_[order[i] + Nstart],points_,Norg_))
+			InsertPoint(order[i] + Nstart);
 	}
 }
 
