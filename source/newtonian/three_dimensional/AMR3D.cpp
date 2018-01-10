@@ -592,7 +592,7 @@ namespace
 			}
 			else
 			{
-				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume[Norg+i], tsn);
+				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg+i), tsn);
 				extensives[ToRefine[i]] -= extensives[Norg2 + i];
 				std::cout << "Warning no good poly localrefine" << std::endl;
 			}
