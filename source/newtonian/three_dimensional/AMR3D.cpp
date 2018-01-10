@@ -545,48 +545,56 @@ namespace
 		{
 			checked.clear();
 			// Get new cell poly
-			GetPoly(tess, Norg + i, poly, temp, temp2, i_temp);
-			// Get neigh to check
-			oldtess.GetNeighbors(ToRefine[i], neigh);
-			size_t Nneigh = neigh.size();
-			for (size_t j = 0; j < Nneigh; ++j)
-				tocheck.push(neigh[j]);
-			tocheck.push(ToRefine[i]);
-			while (!tocheck.empty()) 
+			if (GetPoly(tess, Norg + i, poly, temp, temp2, i_temp))
 			{
-				size_t cur_check = tocheck.top();
-				tocheck.pop();
-				// did we check this cell yet?
-				if (checked.count(cur_check) == 1)
-					continue;
-				else // keep track of visted cells
-					checked.insert(cur_check);
-				if (cur_check >= Norg2)
-					continue;
-				// copy poly
-				poly2.nverts = poly.nverts;
-				for (int k = 0; k < poly2.nverts; ++k)
+				// Get neigh to check
+				oldtess.GetNeighbors(ToRefine[i], neigh);
+				size_t Nneigh = neigh.size();
+				for (size_t j = 0; j < Nneigh; ++j)
+					tocheck.push(neigh[j]);
+				tocheck.push(ToRefine[i]);
+				while (!tocheck.empty())
 				{
-					for (size_t l = 0; l < 3; ++l)
+					size_t cur_check = tocheck.top();
+					tocheck.pop();
+					// did we check this cell yet?
+					if (checked.count(cur_check) == 1)
+						continue;
+					else // keep track of visted cells
+						checked.insert(cur_check);
+					if (cur_check >= Norg2)
+						continue;
+					// copy poly
+					poly2.nverts = poly.nverts;
+					for (int k = 0; k < poly2.nverts; ++k)
 					{
-						poly2.verts[k].pos.xyz[l] = poly.verts[k].pos.xyz[l];
-						poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
+						for (size_t l = 0; l < 3; ++l)
+						{
+							poly2.verts[k].pos.xyz[l] = poly.verts[k].pos.xyz[l];
+							poly2.verts[k].pnbrs[l] = poly.verts[k].pnbrs[l];
+						}
+					}
+					// Check intersectrion
+					std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly2);
+					if (dv.first)
+					{
+						// Remove extensive from neigh cell and add to new cell
+						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
+						extensives[cur_check] -= toadd;
+						extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
+						extensives[Norg2 + i] += toadd;
+						oldtess.GetNeighbors(cur_check, neigh);
+						Nneigh = neigh.size();
+						for (size_t j = 0; j < Nneigh; ++j)
+							tocheck.push(neigh[j]);
 					}
 				}
-				// Check intersectrion
-				std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly2);
-				if (dv.first)
-				{
-					// Remove extensive from neigh cell and add to new cell
-					Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
-					extensives[cur_check] -= toadd;
-					extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
-					extensives[Norg2 + i] += toadd;
-					oldtess.GetNeighbors(cur_check, neigh);
-					Nneigh = neigh.size();
-					for (size_t j = 0; j < Nneigh; ++j)
-						tocheck.push(neigh[j]);
-				}
+			}
+			else
+			{
+				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume[Norg+i], tsn);
+				extensives[ToRefine[i]] -= extensives[Norg2 + i];
+				std::cout << "Warning no good poly localrefine" << std::endl;
 			}
 		}
 	}
@@ -664,19 +672,23 @@ namespace
 						checked.insert(cur_check);
 					if (cur_check >= Norg)
 						continue;
-					GetPoly(oldtess, cur_check, poly, temp, temp2, i_temp);
-					std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly, &r_planes);
-					if (dv.first)
+					if (GetPoly(oldtess, cur_check, poly, temp, temp2, i_temp))
 					{
-						// add and remove the extensive
-						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
-						extensives[cur_check] -= toadd;
-						extensive_tosend[i][j] += toadd;
-						oldtess.GetNeighbors(cur_check, temp);
-						size_t Nneigh = temp.size();
-						for (size_t k = 0; k < Nneigh; ++k)
-							tocheck.push(temp[k]);
+						std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly, &r_planes);
+						if (dv.first)
+						{
+							// add and remove the extensive
+							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
+							extensives[cur_check] -= toadd;
+							extensive_tosend[i][j] += toadd;
+							oldtess.GetNeighbors(cur_check, temp);
+							size_t Nneigh = temp.size();
+							for (size_t k = 0; k < Nneigh; ++k)
+								tocheck.push(temp[k]);
+						}
 					}
+					else
+						std::cout << "warning bad poly in MPIRefine" << std::endl;
 				}
 			}
 		}
