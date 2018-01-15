@@ -780,6 +780,8 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 		for (size_t j = 0; j < Nsend; ++j)
 			self_duplicate[i][indeces[j]] = temp[j];
 	}
+	if (to_send.empty())
+		return res;
 	// Communicate
 	vector<vector<Vector3D> > toadd = MPI_exchange_data(duplicatedprocs_, to_send, del_.points_);
 	// Add points
