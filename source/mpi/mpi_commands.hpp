@@ -97,7 +97,8 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 				cells.push_back(torecv[i][j]);
 		}
 	}
-	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -184,7 +185,8 @@ void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_
 				cells.push_back(torecv[i][j]);
 		}
 	}
-	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -242,7 +244,8 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith,vector<vector
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -301,7 +304,8 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -350,7 +354,8 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -442,7 +447,8 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 			counter += size_add;
 		}
 	}
-	MPI_Waitall(static_cast<int>(2*totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(2*totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return res;
 }

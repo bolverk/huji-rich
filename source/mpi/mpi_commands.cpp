@@ -38,7 +38,8 @@ vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -80,7 +81,8 @@ vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vec
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -164,7 +166,8 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vect
 			counter += size_add;
 		}
 	}
-	MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return res;
 }
@@ -206,7 +209,8 @@ vector<vector<size_t> > MPI_exchange_data(const vector<int>& totalkwith, vector<
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return torecv;
 }
@@ -291,7 +295,8 @@ vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, v
 			counter += size_add;
 		}
 	}
-	MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return res;
 }
@@ -375,7 +380,8 @@ vector<vector<vector<double> > > MPI_exchange_data(const Tessellation3D& tess, v
 			counter += size_add;
 		}
 	}
-	MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(2 * correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	return res;
 }
@@ -499,7 +505,8 @@ void MPI_exchange_data(const Tessellation3D& tess, vector<char>& cells, bool gho
 				cells.push_back(torecv[i][j]);
 		}
 	}
-	MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
+	if (!req.empty())
+		MPI_Waitall(static_cast<int>(correspondents.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 

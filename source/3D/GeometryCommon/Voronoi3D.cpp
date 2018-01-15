@@ -412,7 +412,8 @@ namespace
 			MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
 			talkwithme.push_back(status.MPI_SOURCE);
 		}
-		MPI_Waitall(static_cast<int>(to_talk_with.size()), &req[0], MPI_STATUSES_IGNORE);
+		if(!to_talk_with.empty())
+			MPI_Waitall(static_cast<int>(to_talk_with.size()), &req[0], MPI_STATUSES_IGNORE);
 		vector<int> new_talk_with_me;
 		for (std::size_t i = 0; i < to_talk_with.size(); ++i)
 			if (std::find(talkwithme.begin(), talkwithme.end(), to_talk_with[i]) != talkwithme.end())
@@ -780,8 +781,6 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
 		for (size_t j = 0; j < Nsend; ++j)
 			self_duplicate[i][indeces[j]] = temp[j];
 	}
-	if (to_send.empty())
-		return res;
 	// Communicate
 	vector<vector<Vector3D> > toadd = MPI_exchange_data(duplicatedprocs_, to_send, del_.points_);
 	// Add points
