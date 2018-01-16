@@ -65,8 +65,8 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libdclipper.a
-	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_59_0)
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libdclipper.a
+	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_66_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
 	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH):$(MY_ANN_PATH) > set_environ_vars.sh
@@ -100,8 +100,8 @@ external_libraries/lib/libdclipper.a: external_libraries/dump_clipper/dclipper.o
 external_libraries/hdf5_dump/hdf5-1.8.18/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xf ./hdf5-1.8.18.tar.gz
 
-external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_59_0.tar.bz2
-	cd external_libraries/boost_dump/ && tar xf ./boost_1_59_0.tar.bz2
+external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp: | external_libraries/boost_dump/boost_1_66_0.tar.bz2
+	cd external_libraries/boost_dump/ && tar xf ./boost_1_66_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
 	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
@@ -114,11 +114,11 @@ external_libraries/hdf5_dump/hdf5-1.8.18.tar.gz:
 	cd external_libraries/hdf5_dump && \
 	wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.18/src/hdf5-1.8.18.tar.gz
 
-external_libraries/boost_dump/boost_1_59_0.tar.bz2:
+external_libraries/boost_dump/boost_1_66_0.tar.bz2:
 	mkdir -p external_libraries/boost_dump
 	cd external_libraries/boost_dump && \
-	wget 'http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.bz2/download'
-	cd external_libraries/boost_dump && mv download boost_1_59_0.tar.bz2
+	wget 'http://sourceforge.net/projects/boost/files/boost/1.66.0/boost_1_66_0.tar.bz2/download'
+	cd external_libraries/boost_dump && mv download boost_1_66_0.tar.bz2
 
 external_libraries/ann_tree_dump/ann_1.1.2.tar.gz:
 	mkdir -p external_libraries/ann_tree_dump
