@@ -529,10 +529,10 @@ void ANNkd_tree::GetAcc(ANNpoint qpoint, ANNpoint res,double angle2) const
 
 namespace
 {
-	double fastsqrt(float x)
+	double fastsqrt(double x)
 	{
-		float res = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
-		return static_cast<double>(res*x);
+		double res = static_cast<double>(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(static_cast<float>(x)))));
+		return x*res*(1.5 - 0.5*res*res*x);
 	}
 }
 
@@ -558,8 +558,8 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	qCM[1] = 0.5*(qMax[1] + qMin[1]);
 	qCM[2] = 0.5*(qMax[2] + qMin[2]);
 	if (N > 1)
-		qCM[3] = fastsqrt(static_cast<float>((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
-		(qMax[2] - qMin[2])*(qMax[2] - qMin[2])));
+		qCM[3] = fastsqrt((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
+		(qMax[2] - qMin[2])*(qMax[2] - qMin[2]));
 	else
 		qCM[3] = 0;
 	root->GetAcc(qpoint, res, angle2, bb,qCM);
@@ -577,7 +577,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qCM[i] - CM[i])*(qCM[i] - CM[i]);
 	if(N > 1)
-		dist_toq -= 2*qCM[3]*fastsqrt(static_cast<float>(dist_toq))-qCM[3]*qCM[3];
+		dist_toq -= 2*qCM[3]*fastsqrt(dist_toq)-qCM[3]*qCM[3];
 	if (dist_toq*angle2 > maxbox)
 		counter = 1;
 	if (counter > 0)
@@ -589,7 +589,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 			if (dist_toq*angle2 > maxbox)
 			{
-				double r3 = 1.0 / (dist_toq*std::sqrt(dist_toq));
+				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass*(qpoint[k][i] - CM[i]) * r3;
 				double Qfactor = r3 / dist_toq;
@@ -664,7 +664,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 			if (dist_toq*angle2 > maxbox)
 			{
-				double r3 = 1.0 / (dist_toq*std::sqrt(dist_toq));
+				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass*(qpoint[k][i] - CM[i]) * r3;
 				double Qfactor = r3 / dist_toq;
@@ -720,7 +720,7 @@ void ANNkd_split::GetAcc(ANNpoint qpoint, ANNpoint res, double angle2,ANNorthRec
 		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
 	if (dist_toq*angle2 > maxbox)
 	{
-		double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 		for (int i = 0; i < 3; ++i)
 			res[i] -= mass*(qpoint[i] - CM[i]) * r3;
 		double Qfactor = r3 / dist_toq;
@@ -763,7 +763,7 @@ void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint res, double /*angle2*/, ANNort
 		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
 	if (dist_toq < maxbox*1e-6) //prevent self force
 		return;
-	double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
+	double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 	for (int i = 0; i < 3; ++i)
 		res[i] -= mass*(qpoint[i] - CM[i]) *r3;
 	double sumQ = 0;
@@ -796,7 +796,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 		if (dist_toq < maxbox*1e-6) //prevent self force
 			continue;
-		double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass*(qpoint[k][i] - CM[i]) *r3;
 		double sumQ = 0;
@@ -831,7 +831,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &re
 			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 		if (dist_toq < maxbox*1e-6) //prevent self force
 			continue;
-		double r3 = 1.0 / (dist_toq*sqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass*(qpoint[k][i] - CM[i]) *r3;
 		double sumQ = 0;
@@ -920,7 +920,7 @@ double DistanceToFace(ANNpointArray face, size_t Nface,const double* qpoint, dou
 		min_face_dist = std::min(min_face_dist, temp);
 	}
 	annDeallocPt(ptemp);
-	return sqrt(min_face_dist);
+	return fastsqrt(min_face_dist);
 }
 
 double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, const double* qpoint,
@@ -949,7 +949,7 @@ void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector
 	std::vector<ANNpoint> const& normals, ANNorthRect &bb)
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
-	double dist = DistanceToFaces(faces, Nfaces, CM, sqrt(maxbox / angle2), normals);
+	double dist = DistanceToFaces(faces, Nfaces, CM, fastsqrt(maxbox / angle2), normals);
 	if (dist*dist*angle2 > maxbox)
 	{
 		nodes.push_back(this);

@@ -15,6 +15,7 @@ class Tillotson : public EquationOfState
 	friend  struct dp2eII;
 private:
 	double a_, b_, A_, B_, rho0_, E0_, EIV_, ECV_,alpha_,beta_;
+	const bool negative_pressure_;
 	mutable double temp_d_, temp_p_;
 
 	double dp2EI(double d, double p)const;
@@ -26,7 +27,7 @@ private:
 	double dep2cIV(double d, double e, double p)const;
 public:
 	Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV,double alpha,
-		double beta);
+		double beta,bool negative_pressure=false);
 
 	 double dp2e(double d, double p, tvector const& tracers = tvector(), 
 		 vector<string> const& tracernames = vector<string>())const;
