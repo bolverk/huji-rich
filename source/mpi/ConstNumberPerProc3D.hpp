@@ -16,8 +16,9 @@ public:
 	\param speed The maximum change (in cell radii) of the processor movement
 	\param RoundSpeed By which factor is the rounding mechanisim larger than the movement speed of the mesh points
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
+	\param Hilbert Flag to use hilbert ordering for load balance
 	*/
-	ConstNumberPerProc3D(double speed = 0.03,double RoundSpeed = 2, int mode = 1);
+	ConstNumberPerProc3D(double speed = 0.03,double RoundSpeed = 2, int mode = 1,bool Hilbert=false);
 
 	/*!
 	\brief Updates the load balance, does one iteration
@@ -33,6 +34,7 @@ private:
 	const double speed_;
 	const double RoundSpeed_;
 	const int mode_;
+	const bool Hilbert_;
 	mutable int run_counter_;
 };
 #endif //CONSTPERPROC3D
