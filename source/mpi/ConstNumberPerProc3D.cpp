@@ -49,7 +49,6 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		dyround = RoundSpeed_*speed_*(CM.y - point.y);
 		dzround = RoundSpeed_*speed_*(CM.z - point.z);
 	}
-	point = CM;
 	// Find out how many points each proc has
 	vector<int> NPerProc(static_cast<size_t>(nproc));
 	int mypointnumber = static_cast<int>(tlocal.GetPointNo() + 1);
@@ -81,9 +80,8 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	MPI_Gather(&tosend[0], 3, MPI_DOUBLE, &torecv[0], 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&torecv[0], nproc * 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	vector<Vector3D> RankCMs = list_unserialize(torecv, RankCM);
-	//vector<Vector3D> RankCMs = tproc.GetAllCM();
+	double MyR = R[static_cast<size_t>(rank)];
 	// Move point according to density
-	point = tproc.GetMeshPoint(static_cast<size_t>(rank));
 	if (mode_ == 1 || mode_ == 3)
 	{
 		for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
@@ -91,17 +89,17 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			if (i == static_cast<size_t>(rank))
 				continue;
 			Vector3D otherpoint = RankCMs[i];
-			double dist = sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
+			double dist = std::sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + (point.z - otherpoint.z)*(point.z - otherpoint.z)
-				+ 0.5*R[static_cast<size_t>(rank)] * R[i]);
+				+ 0.5*MyR * R[i]);
 			double temp = (NPerProc[i] - IdealPerProc)*
-				(point.x - otherpoint.x) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
+				(point.x - otherpoint.x) * MyR*MyR*MyR/ (dist*dist*dist*IdealPerProc);
 			dx -= speed_*temp;
 			temp = (NPerProc[i] - IdealPerProc)*
-				(point.y - otherpoint.y) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
+				(point.y - otherpoint.y) * MyR*MyR*MyR / (dist*dist*dist*IdealPerProc);
 			dy -= speed_*temp;
 			temp = (NPerProc[i] - IdealPerProc)*
-				(point.z - otherpoint.z) / (pow(dist / R[static_cast<size_t>(rank)], 3)*IdealPerProc);
+				(point.z - otherpoint.z) * MyR*MyR*MyR / (dist*dist*dist*IdealPerProc);
 			dz -= speed_*temp;
 		}
 	}
@@ -126,10 +124,10 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			const double mind = neigheps*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]);
 			if (dist < mind)
 			{
-				double speed2 = speed_ * 7 * (mind - dist) / mind;
-				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x)*R[static_cast<size_t>(rank)] / dist;
-				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y)*R[static_cast<size_t>(rank)] / dist;
-				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z)*R[static_cast<size_t>(rank)] / dist;
+				double speed2 = speed_ * 3 * (mind - dist) / mind;
+				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x)*MyR / dist;
+				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y)*MyR / dist;
+				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z)*MyR / dist;
 			}
 			else
 			{
@@ -140,13 +138,13 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 				else
 					merit = std::min(merit, 2.0);
 				const double dist_1 = 1.0 / abs(point - otherpoint);
-				dx -= speed_*dist_1*merit*(otherpoint.x - point.x)*R[static_cast<size_t>(rank)];
-				dy -= speed_*dist_1*merit*(otherpoint.y - point.y)*R[static_cast<size_t>(rank)];
-				dz -= speed_*dist_1*merit*(otherpoint.z - point.z)*R[static_cast<size_t>(rank)];
+				dx -= speed_*dist_1*merit*(otherpoint.x - point.x)*MyR;
+				dy -= speed_*dist_1*merit*(otherpoint.y - point.y)*MyR;
+				dz -= speed_*dist_1*merit*(otherpoint.z - point.z)*MyR;
 			}
 		}
 	}
-	const double FarFraction = load > 3 ? 0.9 : 0.5;
+	const double FarFraction = load > 3 ? 0.8 : 0.5;
 	old_dx *= FarFraction;
 	old_dy *= FarFraction;
 	old_dz *= FarFraction;
