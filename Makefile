@@ -6,37 +6,37 @@ CC := g++
 LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O0 -g -pg 
+	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++0x
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -std=c++0x
 	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
 	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -std=c++0x
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
 	CC := mpiicpc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI -std=c++0x
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
-	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
+	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++0x
 	LINT_FLAGS := 
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O3 -march=native
+	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++0x
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
