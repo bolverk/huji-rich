@@ -614,10 +614,10 @@ namespace
 		{
 			oldtess.GetNeighbors(ToRefine[i], temp);
 			temp2.clear();
-			for (size_t i = 0; i < temp.size(); ++i)
+			for (size_t j = 0; j < temp.size(); ++j)
 			{
-				if (temp[i] >= Norg && !oldtess.IsPointOutsideBox(temp[i]))
-					temp2.push_back(temp[i]);
+				if (temp[j] >= Norg && !oldtess.IsPointOutsideBox(temp[j]))
+					temp2.push_back(temp[j]);
 			}
 			if (!temp2.empty())
 			{
