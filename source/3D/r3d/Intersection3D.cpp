@@ -281,7 +281,7 @@ bool GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 			faceinds[i][j] = static_cast<int>(itemp[j]);
 		all_indeces.insert(all_indeces.end(), itemp.begin(), itemp.end());
 	}
-	vector<int> numvertsperface(nfaces);
+	
 	std::sort(all_indeces.begin(), all_indeces.end());
 	all_indeces = unique(all_indeces);
 	vector<Vector3D> const& all_vertices = oldtess.GetFacePoints();
@@ -296,9 +296,15 @@ bool GetPoly(Tessellation3D const & oldtess,size_t oldcell, r3d_poly &poly, vect
 	CleanDuplicates2(all_indeces, faceinds);
 	nfaces = faceinds.size();
 	size_t npoints = all_indeces.size();
+	vector<int> numvertsperface(nfaces);
 	vector<r3d_rvec3> points(npoints);
 	vector<int*> ptrs(faceinds.size());
 	OrganizeToPolyData(faceinds, numvertsperface, all_indeces, all_vertices, points, ptrs);
+	if (points.size() > 128)
+	{
+		std::cout << "Too many points in cells refine " << points.size() << std::endl;
+		return false;
+	}
 	r3d_init_poly(&poly, &points[0], static_cast<r3d_int>(points.size()), &ptrs[0], &numvertsperface[0],
 		static_cast<r3d_int>(numvertsperface.size()));
 	int test = r3d_is_good(&poly);
