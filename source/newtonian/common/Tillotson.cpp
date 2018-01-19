@@ -83,27 +83,28 @@ double Tillotson::de2pIV(double d, double e)const
 		return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_ + b_)*d*e*1e-7);
 }
 
-double Tillotson::dep2cI(double d, double e, double p) const
+double Tillotson::dep2cI(double d, double e, double /*p*/) const
 {
 	double eta = d / rho0_;
-	double mu = eta - 1;
 	double w0 = e / (E0_*eta*eta) + 1;
-	double res = (A_ + 2 * B_*mu) / rho0_ + 2 * b_*e*e / (eta*eta*E0_*w0*w0) + e*(a_ + b_ / w0) + p*(b_ + a_*w0*w0) / (d*w0);
+	double mu = eta - 1;
+	double res = 2 * B_*mu / rho0_ + A_ / rho0_ + 2 * b_*e*e / (E0_*eta*eta*w0*w0) + (b_ + a_*w0*w0)*(A_*mu + B_*mu*mu + d*e*(a_ + b_ / w0))
+		/ (d*w0*w0) + e*(a_+b_/w0);
 	res = std::max(res, 1e-10*E0_);
-	return std::sqrt(res);
+	return res;
 }
 
 double Tillotson::dep2cIV(double d, double e, double p) const
 {
 	double eta = d / rho0_;
 	double w0 = e / (E0_*eta*eta) + 1;
-	double z = 1.0 - 1.0 / eta;
+	double z = 1.0 / eta - 1.0;
 	double afactor = std::exp(-alpha_*z*z);
-	double res0 = p*(a_ + b_*afactor / (w0*w0)) / d;
-	double res1 = a_*e + afactor*(A_*std::exp(beta_*z)*(eta - 2 * alpha_ / (eta*eta) + (4 * alpha_ - beta_) / eta + beta_ - 2 * alpha_) / d +
-		e*b_*(1 + 3 * e / (E0_*eta*eta) - 2 * alpha_*z*w0 / eta) / w0);
+	double res0 = p*(a_ + b_*afactor / w0 + 1) / d;
+	double res1 = A_*std::exp(beta_*z)*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
+	res1 += b_*d*e*afactor*(2 * alpha_*z*w0 / rho0_ + (p / d - 2 * e) / (E0_*d)) / (w0*w0*eta*eta);
 	double res = std::max(res0 + res1, 1e-10*E0_);
-	return std::sqrt(res);
+	return res;
 }
 
 struct dp2eII
@@ -217,7 +218,7 @@ double Tillotson::dp2c(double d, double p, tvector const & /*tracers*/, vector<s
 	{
 		double res = dep2cI(d, e, p);
 		assert(res > 0);
-		return sqrt(res);
+		return std::sqrt(res);
 	}
 	else
 	{
@@ -225,13 +226,15 @@ double Tillotson::dp2c(double d, double p, tvector const & /*tracers*/, vector<s
 		{
 			double res = dep2cIV(d, e, p);
 			assert(res > 0);
-			return sqrt(res);
+			return std::sqrt(res);
 		}
 		else
 		{
-			double res = (dep2cIV(d, e, p)*(ECV_ - e) + dep2cI(d, e, p)*(e - EIV_)) / (ECV_ - EIV_);
+			double c1 = dep2cI(d, e, de2pI(d,e));
+			double c4 = dep2cIV(d, e, de2pIV(d,e));
+			double res = std::sqrt((c4*(ECV_ - e) + c1*(e - EIV_)) / (ECV_ - EIV_));
 			assert(res > 0);
-			return sqrt(res);
+			return res;
 		}
 	}
 }
