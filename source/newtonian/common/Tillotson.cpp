@@ -101,7 +101,7 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	double z = 1.0 / eta - 1.0;
 	double afactor = std::exp(-alpha_*z*z);
 	double res0 = p*(a_ + b_*afactor / w0 + 1) / d;
-	double res1 = A_*std::exp(beta_*z)*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
+	double res1 = A_*std::exp(-beta_*z)*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
 	res1 += b_*d*e*afactor*(2 * alpha_*z*w0 / rho0_ + (p / d - 2 * e) / (E0_*d)) / (w0*w0*eta*eta);
 	double res = std::max(res0 + res1, 1e-10*E0_);
 	return res;
