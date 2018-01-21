@@ -90,9 +90,14 @@ void r3d_clip(r3d_poly* poly, r3d_plane* planes, r3d_int nplanes) {
 					vertbuffer[vnext].pos, sdists[vcur],
 					vertbuffer[*nverts].pos);
 				(*nverts)++;
+				if (*nverts >= R3D_MAX_VERTS)
+				{
+					printf("Too many vertices in clip \n");
+					*nverts = 0;
+					return;
+				}
 			}
 		}
-
 		// for each new vert, search around the faces for its new neighbors
 		// and doubly-link everything
 		for(vstart = onv; vstart < *nverts; ++vstart) {
