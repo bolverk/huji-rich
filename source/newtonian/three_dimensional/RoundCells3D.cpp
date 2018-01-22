@@ -146,6 +146,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	size_t N = neigh.size();
 	double cs = std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names));
+	double minD = d;
 	for (size_t j = 0; j < N; ++j)
 	{
 		if (tess.IsPointOutsideBox(neigh[j]))
@@ -153,9 +154,10 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 		cs = std::max(cs, eos_.dp2c(cells[neigh[j]].density, cells[neigh[j]].pressure,
 			cells[static_cast<size_t>(neigh[j])].tracers));
 		cs = std::max(cs, abs(cells[neigh[j]].velocity));
+		minD = std::min(minD, abs(tess.GetCellCM(neigh[j]) - tess.GetMeshPoint(neigh[j])));
 	}
-	cs = std::max(cs, 0.005*d / dt);
-	const double c_dt = std::min(d / dt,3*cs);
+	cs = std::max(cs, 0.01*minD / dt);
+	const double c_dt = std::min(d / dt,cs);
 	velocity += chi_*c_dt*(s - r) / R;
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
