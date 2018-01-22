@@ -129,7 +129,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& te
 		return;
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names), abs(cells[i].velocity));
-	velocity += chi_*c*(s - r) / R;
+	velocity += chi_*c*(s - r) / std::max(R,d);
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
 
@@ -158,7 +158,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	cs = std::max(cs, 0.01*minD / dt);
 	const double c_dt = std::min(d / dt,cs);
-	velocity += chi_*c_dt*(s - r) / R;
+	velocity += chi_*c_dt*(s - r) / std::max(R, d);
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
 
