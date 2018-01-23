@@ -87,7 +87,6 @@ double Tillotson::dep2cI(double d, double e, double p) const
 {
 	double eta = d / rho0_;
 	double w0 = e / (E0_*eta*eta) + 1;
-	double mu = eta - 1;
 	double gamma = a_ + b_ / w0;
 	double res = (gamma + 1)*p / d + (A_ + B_*(eta*eta - 1)) / d + b_*(w0 - 1)*(2 * e - p / d)/(w0*w0);
 	res = std::max(res, 1e-10*E0_);
