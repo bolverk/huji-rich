@@ -25,7 +25,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 	boost::array<Vector3D, 4> vec;
 	for (std::size_t i = 0; i < N; ++i)
 	{
-		double R = sqrt(tess.GetArea(faces[i]));
+		double R = fastsqrt(tess.GetArea(faces[i]));
 		size_t N1 = 0;
 		size_t N2 = 0;
 		Vector3D V1, V2;
@@ -808,9 +808,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	// Clear data
 	PointTetras_.clear();
 	R_.clear();
-	R_.reserve(points.size() * 7);
+	R_.reserve(points.size() * 11);
 	tetra_centers_.clear();
-	tetra_centers_.reserve(points.size() * 7);
+	tetra_centers_.reserve(points.size() *11);
 	del_.Clean();
 	// Voronoi Data
 	FacesInCell_.clear();
@@ -989,6 +989,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	if (rank == 0)
 		std::cout << "Fourth ghost build time " << t1 - t0 << std::endl;
 #endif
+	std::vector<std::pair<size_t, size_t> >().swap(ghost_index);
+	std::vector<Vector3D>().swap(extra_points);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -1000,6 +1002,10 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 
 	// Create Voronoi
 	BuildVoronoi();
+
+	std::vector<double>().swap(R_);
+	std::vector<std::vector<size_t> >().swap(PointTetras_);
+
 	CalcAllCM();
 	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
 		if (BoundaryFace(i))
@@ -1132,6 +1138,9 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 	volume_.resize(Norg_, 0);
 	// Create Voronoi
 	BuildVoronoi();
+
+
+
 	CalcAllCM();
 	CM_.resize(del_.points_.size());
 	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
@@ -1146,10 +1155,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	// Clear data
 	PointTetras_.clear();
 	R_.clear();
-	R_.reserve(points.size() * 7);
+	R_.reserve(points.size() * 11);
 	tetra_centers_.clear();
-	tetra_centers_.reserve(points.size() * 7);
-	del_.Clean();
+	tetra_centers_.reserve(points.size() * 11);
 	// Voronoi Data
 	FacesInCell_.clear();
 	PointsInFace_.clear();
@@ -1193,26 +1201,9 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 
 	del_.BuildExtra(extra_points);
 
-	size_t counter = 0;
-	vector<unsigned char> real_duplicate(del_.points_.size(), 0);
-	for (size_t i = 0; i < del_.tetras_.size(); ++i)
-	{
-		for (size_t j = 0; j < 4; ++j)
-		{
-			if (del_.tetras_[i].points[j] < Norg_)
-			{
-				for (size_t k = 0; k < 4; ++k)
-					if (del_.tetras_[i].points[k] >= Norg_)
-						real_duplicate[del_.tetras_[i].points[k]] = 1;
-				break;
-			}
-		}
-	}
-	for (size_t i = 0; i < real_duplicate.size(); ++i)
-	{
-		if (real_duplicate[i] == 1)
-			++counter;
-	}
+	std::vector<std::pair<size_t, size_t> >().swap(ghost_index);
+	std::vector<std::vector<size_t> >().swap(past_duplicates);
+	std::vector<Vector3D>().swap(extra_points);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -1222,6 +1213,11 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	volume_.resize(Norg_, 0);
 	// Create Voronoi
 	BuildVoronoi();
+
+	std::vector<double>().swap(R_);
+	std::vector<std::vector<size_t> >().swap(PointTetras_);
+	std::vector<Tetrahedron>().swap(del_.tetras_);
+
 	CalcAllCM();
 	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
 		if (BoundaryFace(i))
@@ -1301,7 +1297,7 @@ void Voronoi3D::BuildVoronoi(void)
 							throw eo;
 						}
 						// Make faces right handed
-						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, sqrt(AreaCM.first));
+						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, fastsqrt(AreaCM.first));
 						area_.push_back(AreaCM.first);
 						Face_CM_.push_back(AreaCM.second);
 						PointsInFace_.push_back(temp2);
@@ -1333,6 +1329,13 @@ void Voronoi3D::BuildVoronoi(void)
 		norm -= del_.points_[FaceNeighbors_[i].first];
 		Face_CM_[i] -= ScalarProd(Face_CM_[i] - mid, norm)*norm / ScalarProd(norm, norm);
 	}
+
+	area_.shrink_to_fit();
+	Face_CM_.shrink_to_fit();
+	FaceNeighbors_.shrink_to_fit();
+	PointsInFace_.shrink_to_fit();
+	for (size_t i = 0; i < Norg_; ++i)
+		FacesInCell_[i].shrink_to_fit();
 }
 
 double Voronoi3D::GetRadius(std::size_t index)
@@ -1359,7 +1362,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 	for (std::size_t j = 0; j < box.size(); ++j)
 	{
 		Vector3D normal = CrossProduct(box[j].vertices[1] - box[j].vertices[0], box[j].vertices[2] - box[j].vertices[0]);
-		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
+		normal *= (1.0 / fastsqrt(ScalarProd(normal, normal)));
 		for (std::size_t i = 0; i < N; ++i)
 		{
 			sphere.radius = GetRadius(PointTetras_[point][i]);
@@ -1432,7 +1435,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
-		normal *= (1.0 / std::sqrt(ScalarProd(normal, normal)));
+		normal *= (1.0 / fastsqrt(ScalarProd(normal, normal)));
 
 		// Quick check if there is no intersection for sure
 		double maxR = GetRadius(PointTetras_[point].at(0));
@@ -1608,7 +1611,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFirstIntersections
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		normals[i] = CrossProduct(box[i].vertices[1] - box[i].vertices[0], box[i].vertices[2] - box[i].vertices[0]);
-		normals[i] *= (1.0 / std::sqrt(ScalarProd(normals[i], normals[i])));
+		normals[i] *= (1.0 / fastsqrt(ScalarProd(normals[i], normals[i])));
 	}
 	vector<std::size_t> point_neigh;
 	vector<std::pair<std::size_t, std::size_t> > res;
@@ -1728,7 +1731,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double DDz = m_Dz.determinant();
 	Vector3D center = Vector3D(DDx / (2 * a), DDy / (2 * a), DDz / (2 * a)) + del_.points_[del_.tetras_[index].points[0]];
 	tetra_centers_[index] = center;
-	double Rres = 0.5*sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
+	double Rres = 0.5*std::sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	// Sanity check
 	double Rcheck0 = abs(del_.points_[del_.tetras_[index].points[0]] - center);
 	double Rcheck1 = abs(del_.points_[del_.tetras_[index].points[1]] - center);
