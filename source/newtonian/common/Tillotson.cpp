@@ -70,7 +70,7 @@ double Tillotson::de2pII(double d, double e)const
 double Tillotson::de2pIV(double d, double e)const
 {
 	double eta = d / rho0_;
-	if (alpha_ > 35 * eta*eta)
+	if (alpha_ > 100 * eta*eta)
 		return a_*d*e;
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
