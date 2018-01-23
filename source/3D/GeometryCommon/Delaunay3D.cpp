@@ -480,6 +480,7 @@ void Delaunay3D::BuildExtra(vector<Vector3D> const& points)
 
 void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Vector3D const& minv)
 {
+	empty_tetras_.clear();
 	std::size_t Norg = points.size();
 	Norg_ = Norg;
 	points_.reserve(Norg+ static_cast<std::size_t>(std::pow(Norg,0.6666)*14));
