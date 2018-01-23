@@ -83,13 +83,13 @@ double Tillotson::de2pIV(double d, double e)const
 		return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_ + b_)*d*e*1e-7);
 }
 
-double Tillotson::dep2cI(double d, double e, double /*p*/) const
+double Tillotson::dep2cI(double d, double e, double p) const
 {
 	double eta = d / rho0_;
 	double w0 = e / (E0_*eta*eta) + 1;
 	double mu = eta - 1;
-	double res = 2 * B_*mu / rho0_ + A_ / rho0_ + 2 * b_*e*e / (E0_*eta*eta*w0*w0) + (b_ + a_*w0*w0)*(A_*mu + B_*mu*mu + d*e*(a_ + b_ / w0))
-		/ (d*w0*w0) + e*(a_+b_/w0);
+	double gamma = a_ + b_ / w0;
+	double res = (gamma + 1)*p / d + (A_ + B_*(eta*eta - 1)) / d + b_*(w0 - 1)*(2 * e - p / d)/(w0*w0);
 	res = std::max(res, 1e-10*E0_);
 	return res;
 }
@@ -230,9 +230,9 @@ double Tillotson::dp2c(double d, double p, tvector const & /*tracers*/, vector<s
 		}
 		else
 		{
-			double c1 = dep2cI(d, e, de2pI(d,e));
-			double c4 = dep2cIV(d, e, de2pIV(d,e));
-			double res = std::sqrt((c4*(ECV_ - e) + c1*(e - EIV_)) / (ECV_ - EIV_));
+			double c1 = dep2cI(d, e, p);
+			double c4 = dep2cIV(d, e, p);
+			double res = std::sqrt((c1*(ECV_ - e) + c4*(e - EIV_)) / (ECV_ - EIV_));
 			assert(res > 0);
 			return res;
 		}
