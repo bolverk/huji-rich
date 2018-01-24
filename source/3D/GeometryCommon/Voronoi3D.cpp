@@ -835,7 +835,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 			<< tproc.GetCellCM(static_cast<size_t>(rank)).y << "," << tproc.GetCellCM(static_cast<size_t>(rank)).z << std::endl;
 		std::cout << "Rank point " << tproc.GetMeshPoint(static_cast<size_t>(rank)).x << ","
 			<< tproc.GetMeshPoint(static_cast<size_t>(rank)).y << "," << tproc.GetMeshPoint(static_cast<size_t>(rank)).z << std::endl;
-		std::cout << "Rank R " << tproc.GetWidth(static_cast<size_t>(R)) << std::endl;
+		std::cout << "Rank R " << tproc.GetWidth(static_cast<size_t>(rank)) << std::endl;
 	}
 	assert(Norg_ > 0);
 	std::pair<Vector3D, Vector3D> bounding_box = GetBoundingBox(tproc, rank);
