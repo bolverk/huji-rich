@@ -29,15 +29,17 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		size_t n1 = tess.GetFaceNeighbors(i).second;
 		if (n0 < N)
 		{
+			double Ek = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
 			extensives[n0] -= delta;
-			extensives[n0].internal_energy -= delta.energy - ScalarProd(cells[n0].velocity, delta.momentum) +
-				0.5*ScalarProd(cells[n0].velocity, cells[n0].velocity)*delta.mass;
+			double Eknew = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
+			extensives[n0].internal_energy -= delta.energy - (Eknew - Ek);
 		}
 		if (n1 < N)
 		{
+			double Ek = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
 			extensives[n1] += delta;
-			extensives[n1].internal_energy += delta.energy - ScalarProd(cells[n1].velocity, delta.momentum) +
-				0.5*ScalarProd(cells[n1].velocity, cells[n1].velocity)*delta.mass;
+			double Eknew = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
+			extensives[n1].internal_energy += delta.energy - (Eknew - Ek);
 		}
 	}
 	size_t n = tess.GetPointNo();
