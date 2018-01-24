@@ -828,6 +828,15 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector3D> new_points = UpdateMPIPoints(tproc, rank, points, self_index_, sentprocs_, sentpoints_);
 	Norg_ = new_points.size();
+	if (Norg_ == 0)
+	{
+		std::cout << "Zero Norg in rank " <<rank<<std::endl;
+		std::cout << "Rank CM " << tproc.GetCellCM(static_cast<size_t>(rank)).x << ","
+			<< tproc.GetCellCM(static_cast<size_t>(rank)).y << "," << tproc.GetCellCM(static_cast<size_t>(rank)).z << std::endl;
+		std::cout << "Rank point " << tproc.GetMeshPoint(static_cast<size_t>(rank)).x << ","
+			<< tproc.GetMeshPoint(static_cast<size_t>(rank)).y << "," << tproc.GetMeshPoint(static_cast<size_t>(rank)).z << std::endl;
+		std::cout << "Rank R " << tproc.GetWidth(static_cast<size_t>(R)) << std::endl;
+	}
 	assert(Norg_ > 0);
 	std::pair<Vector3D, Vector3D> bounding_box = GetBoundingBox(tproc, rank);
 
