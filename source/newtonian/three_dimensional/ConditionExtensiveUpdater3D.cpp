@@ -32,7 +32,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			double Ek = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
 			extensives[n0] -= delta;
 			double Eknew = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
-			extensives[n0].internal_energy -= delta.energy - (Eknew - Ek);
+			extensives[n0].internal_energy -= delta.energy + (Eknew - Ek);
 		}
 		if (n1 < N)
 		{
