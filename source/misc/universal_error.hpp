@@ -53,4 +53,9 @@ private:
   std::vector<double> values_;
 };
 
+/*! \brief Prints the contents of the error
+\param eo The error object
+*/
+void DisplayError(UniversalError const& eo);
+
 #endif // UNIVERSAL_ERROR_HPP

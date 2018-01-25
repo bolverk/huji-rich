@@ -1,4 +1,5 @@
 #include "universal_error.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -35,3 +36,11 @@ vector<double> const& UniversalError::GetValues(void) const
 }
 
 UniversalError::~UniversalError(void) {}
+
+void DisplayError(UniversalError const& eo)
+{
+	std::cout.precision(14);
+	std::cout << eo.GetErrorMessage() << std::endl;
+	for (size_t i = 0; i<eo.GetFields().size(); ++i)
+		std::cout << eo.GetFields()[i] << " = " << eo.GetValues()[i] << std::endl;
+}
