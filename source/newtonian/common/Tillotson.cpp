@@ -3,6 +3,7 @@
 #include <boost/math/tools/roots.hpp>
 #include <iostream>
 #include "../../misc/universal_error.hpp"
+#include "../../misc/utils.hpp"
 
 Tillotson::Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV, double
 	alpha, double beta, bool negative_pressure) :
@@ -14,10 +15,11 @@ double Tillotson::dp2EI(double d, double p) const
 	double eta = d / rho0_;
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
-	double A = A_*mu;
-	double B = B_*mu*mu;
-	double sqr = sqrt(4 * a_*c*d*(p - A - B) + std::pow(A + B + (a_ + b_)*c*d - p, 2));
-	double first_part = p - A - B - a_*c*d - b_*c*d;
+	double AB = (A_ - 2 * B_)*eta + (B_ - A_) + B_*eta*eta;
+	double A_B = A_ - B_;
+	double sqr = std::sqrt(d*c * 2 * (a_ - b_)*(p - (A_B + eta*B_)*(eta - 1)) + d*d*c*c*(a_ + b_)*(a_ + b_) + (p - (eta - 1)*(A_B + eta*B_))
+		*(p - (eta - 1)*(A_B + eta*B_)));
+	double first_part = p - AB - a_*c*d - b_*c*d;
 	double E = (first_part + sqr) / (2 * a_*d);
 	if (E < 0)
 	{
@@ -56,7 +58,7 @@ double Tillotson::de2pI(double d, double e)const
 	if (negative_pressure_)
 		res = (a_ + b_ / (e / c + 1))*d*e + AB;
 	else
-		res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, (a_ + b_)*d*e*1e-7);
+		res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, a_*d*e*1e-7);
 	return res;
 }
 
@@ -80,7 +82,7 @@ double Tillotson::de2pIV(double d, double e)const
 	if (negative_pressure_)
 		return a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta);
 	else
-		return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), (a_ + b_)*d*e*1e-7);
+		return std::max(a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta), a_ *d*e*1e-7);
 }
 
 double Tillotson::dep2cI(double d, double e, double p) const
@@ -210,9 +212,11 @@ double Tillotson::de2c(double d, double e, tvector const & tracers, vector<strin
 	return dp2c(d, p, tracers, tracernames);
 }
 
-double Tillotson::dp2c(double d, double p, tvector const & /*tracers*/, vector<string> const & /*tracernames*/) const
+double Tillotson::dp2c(double d, double p, tvector const & tracers, vector<string> const & tracernames) const
 {
-	double e = dp2e(d, p);
+	std::vector<string>::const_iterator it = binary_find(tracernames.begin(), tracernames.end(), string("Ethermal"));
+	assert(it != tracernames.end());
+	double e = tracers[static_cast<size_t>(it-tracernames.begin())];
 	if (d >= rho0_ || e <= EIV_)
 	{
 		double res = dep2cI(d, e, p);
