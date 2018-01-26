@@ -20,6 +20,13 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 	TracerStickerNames const& tracerstickernames) const
 {
 	size_t N = tess.GetPointNo();
+	std::vector<double> oldEk(N, 0), oldEtherm(N, 0),oldE(N,0);
+	for (size_t i = 0; i < N; ++i)
+	{
+		oldEk[i] = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass;
+		oldEtherm[i] = extensives[i].internal_energy;
+		oldE[i] = extensives[i].energy;
+	}
 	size_t Nfluxes = fluxes.size();
 	Conserved3D delta;
 	for (size_t i = 0; i < Nfluxes; ++i)
@@ -45,6 +52,12 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 	size_t n = tess.GetPointNo();
 	for (size_t i = 0; i < n; ++i)
 	{
+		double dEtherm = extensives[i].internal_energy - oldEtherm[i];
+		double dEk = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass - oldEk[i];
+		double dE = extensives[i].energy - oldE[i];
+		if(dEtherm*(dE-dEk)>0)
+			if (std::abs(dEtherm) > 0.999 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.001*std::abs(dE - dEk))
+				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
 			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
