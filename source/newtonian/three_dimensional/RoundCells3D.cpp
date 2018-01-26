@@ -152,7 +152,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 		if (tess.IsPointOutsideBox(neigh[j]))
 			continue;
 		cs = std::max(cs, eos_.dp2c(cells[neigh[j]].density, cells[neigh[j]].pressure,
-			cells[static_cast<size_t>(neigh[j])].tracers));
+			cells[static_cast<size_t>(neigh[j])].tracers,tracerstickernames.tracer_names));
 		cs = std::max(cs, abs(cells[neigh[j]].velocity));
 		minD = std::min(minD, abs(tess.GetCellCM(neigh[j]) - tess.GetMeshPoint(neigh[j])));
 	}
