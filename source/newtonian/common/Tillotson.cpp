@@ -13,7 +13,6 @@ Tillotson::Tillotson(double a, double b, double A, double B, double rho0, double
 double Tillotson::dp2EI(double d, double p) const
 {
 	double eta = d / rho0_;
-	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double AB = (A_ - 2 * B_)*eta + (B_ - A_) + B_*eta*eta;
 	double A_B = A_ - B_;
