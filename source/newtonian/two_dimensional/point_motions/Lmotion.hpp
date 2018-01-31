@@ -5,22 +5,15 @@
 #include "../../common/equation_of_state.hpp"
 #include "../edge_velocity_calculator.hpp"
 
-//! \brief Point motion that minimises mass transfer between cells
 class LMotion : public PointMotion
 {
 private:
-	LinearGaussImproved const& interp_;
+	SpatialReconstruction const& interp_;
 	EquationOfState const& eos_;
 	EdgeVelocityCalculator const& evc_;
 	vector<string> const skip_key_;
 public: 
-  /*! \brief Class constructor
-    \param interp Interpolation method
-    \param eos Equation of state
-    \param evc Scheme for calculating the edge velocity
-    \param skip_keys List of labels which mark cells that should be skipped
-   */
-	LMotion(LinearGaussImproved const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc,
+	LMotion(SpatialReconstruction const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc,
 		vector<string> skip_keys=vector<string>());
 	
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
