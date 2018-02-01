@@ -119,8 +119,8 @@ double time, TracerStickerNames const& tracerstickernames) const
 
 		for (size_t j = 0; j < N; ++j)
 		{
-			res[j].x += (0.2 / std::max(CellLength[j].x,0.1))*temp[j].x;
-			res[j].y += (0.2 / std::max(CellLength[j].y,0.1))*temp[j].y;
+			res[j].x += (0.2 / CellLength[j].x)*temp[j].x;
+			res[j].y += (0.2 / CellLength[j].y)*temp[j].y;
 		}
 	}
 	return res;
