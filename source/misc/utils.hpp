@@ -11,6 +11,7 @@
 #include "universal_error.hpp"
 #include <cassert>
 #include "boost/container/flat_map.hpp"
+#include <iostream>
 
 using std::vector;
 
