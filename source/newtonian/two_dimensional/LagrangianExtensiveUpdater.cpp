@@ -25,7 +25,7 @@ double time, TracerStickerNames const& ts) const
 	vector<double> areas(edge_list.size(),0),volumes(tess.GetPointNo(),0);
 	for (size_t i = 0; i<edge_list.size(); ++i)
 		areas[i]=cd.areas[i];
-	for (size_t i = 0; i<tess.GetPointNo(); ++i)
+	for (size_t i = 0; istatic_cast<size_t>(<tess.GetPointNo()); ++i)
 		volumes[i]=cd.volumes[i];
 	
 	for (size_t i = 0; i<edge_list.size(); ++i)
