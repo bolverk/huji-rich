@@ -50,19 +50,9 @@ double time, TracerStickerNames const& ts) const
 			double a = (cd.volumes[i]+dV[i])/(cd.volumes[i]+dV[i]+dv_ws[i]);
 			assert(std::isfinite(a));
 			assert(a>0);
-			amax=std::max(amax,a);
-			amin=std::min(amin,a);
 			extensives[i]*=a;
 		}
 	}
-	double ares;
-	MPI_Reduce(&amax,&ares,1,MPI_DOUBLE,MPI_MAX,0,MPI_COMM_WORLD);
-	if(rank==0)
-		std::cout<<"max a "<<ares<<std::endl;
-	MPI_Reduce(&amin,&ares,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
-	if(rank==0)
-		std::cout<<"min a "<<ares<<std::endl;
-	MPI_Barrier(MPI_COMM_WORLD);
 //	if(rank==0)
 	//	std::cout<<"finished beu3"<<std::endl;
 	/*
