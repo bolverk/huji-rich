@@ -14,7 +14,7 @@ namespace
 		Vector3D res;
 		for (size_t i = 0; i < Ncor; ++i)
 			res += tess.GetMeshPoint(i);
-		res *= 1.0 / static_cast<double>(Ncor);
+		res *= 1.0 / static_cast<double>(std::max(static_cast<size_t>(1),Ncor));
 		return res;
 	}
 }
@@ -31,7 +31,6 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	int nproc = static_cast<int>(tproc.GetPointNo());
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
 	vector<double> R(static_cast<size_t>(nproc));
 	double dx = 0;
 	double dy = 0;
@@ -65,7 +64,6 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
 
-
 	if (Hilbert_ && load > 3.75 && (run_counter_ % 100 == 0))
 	{
 		vector<Vector3D> res = HilbertProcPositions(tlocal);
@@ -92,17 +90,18 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			double dist = std::sqrt((point.x - otherpoint.x)*(point.x - otherpoint.x) +
 				(point.y - otherpoint.y)*(point.y - otherpoint.y) + (point.z - otherpoint.z)*(point.z - otherpoint.z)
 				+ 0.5*MyR * R[i]);
-			double temp = (NPerProc[i] - IdealPerProc)*
-				(point.x - otherpoint.x) * MyR*MyR*MyR/ (dist*dist*dist*IdealPerProc);
+			double min_volume = 0.35*std::min(tproc.GetVolume(i), 0.5*dist*dist*dist);
+			double merit = static_cast<double>(NPerProc[i] - IdealPerProc) / IdealPerProc;
+			merit = std::max(merit, -0.5);
+			double temp = merit*(point.x - otherpoint.x) * min_volume / (dist*dist*dist);
 			dx -= speed_*temp;
-			temp = (NPerProc[i] - IdealPerProc)*
-				(point.y - otherpoint.y) * MyR*MyR*MyR / (dist*dist*dist*IdealPerProc);
+			temp = merit*(point.y - otherpoint.y) * min_volume / (dist*dist*dist);
 			dy -= speed_*temp;
-			temp = (NPerProc[i] - IdealPerProc)*
-				(point.z - otherpoint.z) * MyR*MyR*MyR / (dist*dist*dist*IdealPerProc);
+			temp = merit*(point.z - otherpoint.z) * min_volume / (dist*dist*dist);
 			dz -= speed_*temp;
 		}
 	}
+	point = tproc.GetMeshPoint(static_cast<size_t>(rank));
 	double old_dx = dx;
 	double old_dy = dy;
 	double old_dz = dz;
@@ -115,62 +114,70 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		vector<size_t> neigh = tproc.GetNeighbors(rank);
 		size_t Nneigh = neigh.size();
 
-		const double neigheps = 0.1;
+		const double neigheps = 0.05;
 		for (size_t i = 0; i < Nneigh; ++i)
 		{
 			if (static_cast<int>(neigh[i]) >= nproc)
 				continue;
 			const double dist = abs(point - tproc.GetMeshPoint(neigh[i]));
-			const double mind = neigheps*std::min(R[static_cast<size_t>(rank)], R[neigh[i]]);
+			const double mind = neigheps*std::min(MyR, R[neigh[i]]);
 			if (dist < mind)
 			{
-				double speed2 = speed_ * 3 * (mind - dist) / mind;
-				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x)*MyR / dist;
-				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y)*MyR / dist;
-				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z)*MyR / dist;
+				double speed2 = speed_ * 10 * (mind - dist) *MyR/ (dist*dist);
+				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x);
+				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y);
+				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z);
 			}
 			else
 			{
 				Vector3D otherpoint = RankCMs[neigh[i]];
-				double merit = (NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				merit = merit*merit*merit;
 				if (merit < 0)
-					merit = std::max(merit, -2.0);
+					merit = std::max(merit, -5.0);
 				else
-					merit = std::min(merit, 2.0);
-				const double dist_1 = 1.0 / abs(point - otherpoint);
-				dx -= speed_*dist_1*merit*(otherpoint.x - point.x)*MyR;
-				dy -= speed_*dist_1*merit*(otherpoint.y - point.y)*MyR;
-				dz -= speed_*dist_1*merit*(otherpoint.z - point.z)*MyR;
+					merit = std::min(merit, 5.0);
+				dx -= speed_*merit*(otherpoint.x - point.x);
+				dy -= speed_*merit*(otherpoint.y - point.y);
+				dz -= speed_*merit*(otherpoint.z - point.z);
 			}
 		}
 	}
-	const double FarFraction = load > 3 ? 0.8 : 0.5;
-	old_dx *= FarFraction;
-	old_dy *= FarFraction;
-	old_dz *= FarFraction;
+
 	old_dx += dx;
 	old_dy += dy;
 	old_dz += dz;
 
-	double r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
-	if (r_dx > 0.25*R[static_cast<size_t>(rank)])
+	// Get min distance to other points
+	vector<size_t> neigh = tproc.GetNeighbors(rank);
+	size_t Nneigh = neigh.size();
+	double mind_1 = 0;
+	for (size_t i = 0; i < Nneigh; ++i)
 	{
-		r_dx *= sqrt(3.0);
-		old_dx *= 0.25*R[static_cast<size_t>(rank)] / r_dx;
-		old_dy *= 0.25*R[static_cast<size_t>(rank)] / r_dx;
-		old_dz *= 0.25*R[static_cast<size_t>(rank)] / r_dx;
+		if (static_cast<int>(neigh[i]) >= nproc)
+			continue;
+		const double dist = abs(point - tproc.GetMeshPoint(neigh[i]));
+		mind_1 = std::max(mind_1, 1.0 / dist);
+	}
+	double maxR = std::min(MyR, 2.5/mind_1);
+	double r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
+	if (r_dx >speed_*maxR)
+	{
+		old_dx *= speed_*maxR / r_dx;
+		old_dy *= speed_*maxR / r_dx;
+		old_dz *= speed_*maxR / r_dx;
 	}
 	// Add the round cells
-	old_dx += dxround;
-	old_dy += dyround;
-	old_dz += dzround;
+	double round_reduce = std::min(1.0, maxR / MyR);
+	old_dx += dxround*round_reduce;
+	old_dy += dyround*round_reduce;
+	old_dz += dzround*round_reduce;
 	r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
-	if (r_dx > speed_*R[static_cast<size_t>(rank)])
+	if (r_dx > speed_*maxR)
 	{
-		r_dx *= sqrt(3.0);
-		old_dx *= speed_*R[static_cast<size_t>(rank)] / r_dx;
-		old_dy *= speed_*R[static_cast<size_t>(rank)] / r_dx;
-		old_dz *= speed_*R[static_cast<size_t>(rank)] / r_dx;
+		old_dx *= speed_*maxR/ r_dx;
+		old_dy *= speed_*maxR / r_dx;
+		old_dz *= speed_*maxR / r_dx;
 	}
 	dx = old_dx;
 	dy = old_dy;
