@@ -131,7 +131,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			else
 			{
 				Vector3D otherpoint = RankCMs[neigh[i]];
-				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / NPerProc[neigh[i];
+				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / NPerProc[neigh[i]];
 				if (merit < 0)
 					merit = std::max(merit, -5.0);
 				else
