@@ -40,14 +40,6 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	// Make cell rounder
 	const Vector3D& CM = tproc.GetCellCM(rank);
 	Vector3D point = tproc.GetMeshPoint(rank);
-	const double d = abs(CM - tproc.GetMeshPoint(rank));
-	double dxround = 0, dyround = 0, dzround = 0;
-	if (d > 0.1*R[static_cast<size_t>(rank)])
-	{
-		dxround = RoundSpeed_*speed_*(CM.x - point.x);
-		dyround = RoundSpeed_*speed_*(CM.y - point.y);
-		dzround = RoundSpeed_*speed_*(CM.z - point.z);
-	}
 	// Find out how many points each proc has
 	vector<int> NPerProc(static_cast<size_t>(nproc));
 	int mypointnumber = static_cast<int>(tlocal.GetPointNo() + 1);
@@ -63,6 +55,19 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	double load = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
+	
+	double NewSpeed = speed_;
+	if (load > 3)
+		NewSpeed *= std::min(std::pow(load - 2, 3), 0.25 / speed_);
+
+	const double d = abs(CM - tproc.GetMeshPoint(rank));
+	double dxround = 0, dyround = 0, dzround = 0;
+	if (d > 0.1*R[static_cast<size_t>(rank)])
+	{
+		dxround = RoundSpeed_*NewSpeed*(CM.x - point.x);
+		dyround = RoundSpeed_*NewSpeed*(CM.y - point.y);
+		dzround = RoundSpeed_*NewSpeed*(CM.z - point.z);
+	}
 
 	if (Hilbert_ && load > 3.75 && (run_counter_ % 100 == 0))
 	{
@@ -94,11 +99,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			double merit = static_cast<double>(NPerProc[i] - IdealPerProc) / IdealPerProc;
 			merit = std::max(merit, -0.5);
 			double temp = merit*(point.x - otherpoint.x) * min_volume / (dist*dist*dist);
-			dx -= speed_*temp;
+			dx -= NewSpeed*temp;
 			temp = merit*(point.y - otherpoint.y) * min_volume / (dist*dist*dist);
-			dy -= speed_*temp;
+			dy -= NewSpeed*temp;
 			temp = merit*(point.z - otherpoint.z) * min_volume / (dist*dist*dist);
-			dz -= speed_*temp;
+			dz -= NewSpeed*temp;
 		}
 	}
 	point = tproc.GetMeshPoint(static_cast<size_t>(rank));
@@ -123,7 +128,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			const double mind = neigheps*std::min(MyR, R[neigh[i]]);
 			if (dist < mind)
 			{
-				double speed2 = speed_ * 10 * (mind - dist) *MyR/ (dist*dist);
+				double speed2 = NewSpeed * 10 * (mind - dist) *MyR/ (dist*dist);
 				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x);
 				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y);
 				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z);
@@ -136,9 +141,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 					merit = std::max(merit, -5.0);
 				else
 					merit = std::min(merit, 5.0);
-				dx -= speed_*merit*(otherpoint.x - point.x);
-				dy -= speed_*merit*(otherpoint.y - point.y);
-				dz -= speed_*merit*(otherpoint.z - point.z);
+				dx -= NewSpeed*merit*(otherpoint.x - point.x);
+				dy -= NewSpeed*merit*(otherpoint.y - point.y);
+				dz -= NewSpeed*merit*(otherpoint.z - point.z);
 			}
 		}
 	}
@@ -160,11 +165,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	}
 	double maxR = std::min(MyR, 2.5/mind_1);
 	double r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
-	if (r_dx >speed_*maxR)
+	if (r_dx >NewSpeed*maxR)
 	{
-		old_dx *= speed_*maxR / r_dx;
-		old_dy *= speed_*maxR / r_dx;
-		old_dz *= speed_*maxR / r_dx;
+		old_dx *= NewSpeed*maxR / r_dx;
+		old_dy *= NewSpeed*maxR / r_dx;
+		old_dz *= NewSpeed*maxR / r_dx;
 	}
 	// Add the round cells
 	double round_reduce = std::min(1.0, maxR / MyR);
@@ -172,11 +177,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	old_dy += dyround*round_reduce;
 	old_dz += dzround*round_reduce;
 	r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
-	if (r_dx > speed_*maxR)
+	if (r_dx > NewSpeed*maxR)
 	{
-		old_dx *= speed_*maxR/ r_dx;
-		old_dy *= speed_*maxR / r_dx;
-		old_dz *= speed_*maxR / r_dx;
+		old_dx *= NewSpeed*maxR/ r_dx;
+		old_dy *= NewSpeed*maxR / r_dx;
+		old_dz *= NewSpeed*maxR / r_dx;
 	}
 	dx = old_dx;
 	dy = old_dy;
