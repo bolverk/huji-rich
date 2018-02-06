@@ -16,7 +16,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double spe
 	int ntotal;
 	for (size_t i = 0; i < Niter; ++i)
 	{
-		double load = procmove.GetLoadImbalance(local, ntotal);
+		procmove.GetLoadImbalance(local, ntotal);
 		MPI_Barrier(MPI_COMM_WORLD);
 		procmove.Update(tproc, local);
 		points = local.UpdateMPIPoints(tproc, rank, local.del_.points_, selfindex, sentproc, sentpoints);
