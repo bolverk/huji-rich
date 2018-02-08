@@ -30,7 +30,8 @@ public:
 
 	~Delaunay3D();
 
-	void Build(vector<Vector3D> const& points,Vector3D const& maxv,Vector3D const& minv);
+	void Build(vector<Vector3D> const& points,Vector3D const& maxv,Vector3D const& minv,
+		std::vector<size_t> &order = std::vector<size_t>());
 
 	void BuildExtra(vector<Vector3D> const& points);
 

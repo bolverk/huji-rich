@@ -13,6 +13,7 @@
 #include <iostream>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
+#include "HilbertOrder3D.hpp"
 #include "Intersections.hpp"
 #include "../../misc/int2str.hpp"
 #include <boost/multiprecision/cpp_dec_float.hpp>
@@ -237,7 +238,6 @@ namespace
 	double CleanDuplicates(vector<size_t> &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
 		vector<double> &diffs)
 	{
-		R *= R;
 		res.clear();
 		res.push_back(indeces[0]);
 		size_t N = indeces.size();
@@ -305,7 +305,8 @@ namespace
 		size_t N = indeces.size();
 		V1 = face_points[indeces[counter + 1]];
 		V1 -= face_points[indeces[counter]];
-		while (ScalarProd(V1, V1) < 1e-14*areascale*areascale)
+		double AScale = 1e-14*areascale;
+		while (ScalarProd(V1, V1) < AScale)
 		{
 			++counter;
 			assert(counter < N);
@@ -314,19 +315,18 @@ namespace
 		}
 		V2 = face_points[indeces[(counter + 2) % N]];
 		V2 -= face_points[indeces[(counter + 1) % N]];
-		while (ScalarProd(V2, V2) < 1e-14*areascale*areascale)
+		while (ScalarProd(V2, V2) < AScale)
 		{
 			++counter;
 			assert(counter < 2 * N);
 			V2 = face_points[indeces[(counter + 2) % N]];
 			V2 -= face_points[indeces[(counter + 1) % N]];
 		}
-
+		// Do we need to flip handness?
 		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) > 0)
 		{
 			temp.resize(indeces.size());
 			temp.assign(indeces.begin(), indeces.end());
-			//temp = indeces;
 			for (int i = 0; i < static_cast<int>(N); ++i)
 				indeces[static_cast<size_t>(i)] = temp[static_cast<size_t>(N - i - 1)];
 		}
@@ -422,27 +422,22 @@ namespace
 	}
 #endif //RICH_MPI
 
-	std::pair<double, Vector3D> CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points)
+	void CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points,double &Area,Vector3D &CM)
 	{
 		std::size_t Nloop = indeces.size() - 2;
-		Vector3D temp;
-		double Atot = 0;
+		Area = 0;
+		Vector3D temp_cross;
 		for (std::size_t i = 0; i < Nloop; ++i)
 		{
-			double A = 0.5*abs(CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]));
-			temp += 0.3333333333333333*A*points[indeces[i + 2]];
-			temp += 0.3333333333333333*A*points[indeces[i + 1]];
-			temp += 0.3333333333333333*A*points[indeces[0]];
-			Atot += A;
+			temp_cross= CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]);
+			double A = 0.3333333333333333*0.5*fastsqrt(ScalarProd(temp_cross, temp_cross));
+			CM += A*points[indeces[i + 2]];
+			CM += A*points[indeces[i + 1]];
+			CM += A*points[indeces[0]];
+			Area += A;
 		}
-		temp *= (1.0 / (Atot + DBL_MIN * 100)); //prevent overflow
-		return std::pair<double, Vector3D>(Atot, temp);
+		CM *= (1.0 / (Area + DBL_MIN * 100)); //prevent overflow
 	}
-
-	/*bool PointInVertices(b_array_4 const& points, std::size_t point)
-	{
-	return !(std::find(points.begin(), points.end(), point) == points.end());
-	}*/
 
 	bool PointInDomain(Vector3D const& ll, Vector3D const& ur, Vector3D const& point)
 	{
@@ -844,8 +839,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	MPI_Barrier(MPI_COMM_WORLD);
 	double t0 = MPI_Wtime();
 #endif
-
-	del_.Build(new_points, bounding_box.second, bounding_box.first);
+	std::vector<size_t> order = HilbertOrder3D(new_points);
+	del_.Build(new_points, bounding_box.second, bounding_box.first,order);
 
 #ifdef timing
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -1010,7 +1005,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	volume_.resize(Norg_);
 
 	// Create Voronoi
-	BuildVoronoi();
+	BuildVoronoi(order);
 
 	std::vector<double>().swap(R_);
 	std::vector<std::vector<size_t> >().swap(PointTetras_);
@@ -1124,10 +1119,12 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 	duplicatedprocs_.clear();
 	duplicated_points_.clear();
 	Nghost_.clear();
-
-	del_.Build(points, ur_, ll_);
-	for(size_t i=0;i<ghosts.size();++i)
+	std::vector<size_t> order = HilbertOrder3D(points);
+	del_.Build(points, ur_, ll_,order);
+	for (size_t i = 0; i < ghosts.size(); ++i)
+	{
 		del_.BuildExtra(ghosts[i]);
+	}
 	vector<std::pair<size_t, size_t> > duplicate(6);
 	for (size_t j = 0; j < toduplicate.size(); ++j)
 	{
@@ -1146,9 +1143,7 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 	CM_.resize(Norg_);
 	volume_.resize(Norg_, 0);
 	// Create Voronoi
-	BuildVoronoi();
-
-
+	BuildVoronoi(order);
 
 	CalcAllCM();
 	CM_.resize(del_.points_.size());
@@ -1179,8 +1174,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	duplicatedprocs_.clear();
 	duplicated_points_.clear();
 	Nghost_.clear();
-
-	del_.Build(points, ur_, ll_);
+	std::vector<size_t> order = HilbertOrder3D(points);
+	del_.Build(points, ur_, ll_,order);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -1207,8 +1202,8 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 	ghost_index = SerialFindIntersections(false);
 	extra_points = CreateBoundaryPoints(ghost_index, past_duplicates);
-
 	del_.BuildExtra(extra_points);
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 
 	std::vector<std::pair<size_t, size_t> >().swap(ghost_index);
 	std::vector<std::vector<size_t> >().swap(past_duplicates);
@@ -1221,7 +1216,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	CM_.resize(del_.points_.size());
 	volume_.resize(Norg_, 0);
 	// Create Voronoi
-	BuildVoronoi();
+	BuildVoronoi(order);
 
 	std::vector<double>().swap(R_);
 	std::vector<std::vector<size_t> >().swap(PointTetras_);
@@ -1233,13 +1228,13 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 			CalcRigidCM(i);
 }
 
-void Voronoi3D::BuildVoronoi(void)
+void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 {
 	FacesInCell_.resize(Norg_);
-	area_.reserve(Norg_ * 10);
-	Face_CM_.reserve(Norg_ * 10);
-	FaceNeighbors_.reserve(Norg_ * 10);
-	PointsInFace_.reserve(Norg_ * 10);
+	area_.resize(Norg_ * 10);
+	Face_CM_.resize(Norg_ * 10);
+	FaceNeighbors_.resize(Norg_ * 10);
+	PointsInFace_.resize(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
 		FacesInCell_[i].reserve(20);
 	vector<size_t> temp, temp2;
@@ -1254,80 +1249,79 @@ void Voronoi3D::BuildVoronoi(void)
 	// Organize the faces and assign them to cells
 	vector<size_t> temp3;
 	vector<double> diffs;
-	vector<vector<size_t> > Neighbors(Norg_);
+
+	size_t FaceCounter = 0;
+	boost::container::flat_set<size_t> neigh_set;
+	std::vector<size_t> *temp_points_in_face;
 	for (size_t i = 0; i < Norg_; ++i)
-		Neighbors[i].reserve(20);
-	for (size_t i = 0; i < Ntetra; ++i)
 	{
-		if (del_.empty_tetras_.find(i) == del_.empty_tetras_.end())
+		neigh_set.clear();
+		size_t point = order[i];
+		size_t ntet = PointTetras_[point].size();
+		// for each point loop over its tetras
+		for (size_t j = 0; j < ntet; ++j)
 		{
-			Tetrahedron const& tetra = del_.tetras_[i];
-			if (IsOuterTetra(Norg_, tetra))
-				continue;
-			for (size_t j = 0; j < 3; ++j)
+			const size_t tetcheck = PointTetras_[point][j];
+			for (size_t k = 0; k < 4; ++k)
 			{
-				for (size_t k = j + 1; k < 4; ++k)
+				size_t point_other = del_.tetras_[tetcheck].points[k];
+				if (point_other != point && point_other > point)
 				{
-					size_t N0 = tetra.points[j];
-					size_t N1 = tetra.points[k];
-					if (N0 > N1)
-					{
-						size_t ttemp = N0;
-						N0 = N1;
-						N1 = ttemp;
-					}
-					if (N0 >= Norg_ || std::find(Neighbors[N0].begin(), Neighbors[N0].end(), N1) != Neighbors[N0].end())
-						continue;
+					// Did we already build this face?
+					if (neigh_set.count(point_other) == 0)
 					{
 						temp.clear();
-						temp.push_back(i);
-						size_t next_check = NextLoopTetra(tetra, i, N0, N1);
+						// Find all tetras for face
+						temp.push_back(tetcheck);
+						size_t next_check = NextLoopTetra(del_.tetras_[tetcheck], tetcheck, point, point_other);
 						size_t cur_check = next_check;
-						size_t last_check = i;
-						while (next_check != i)
+						size_t last_check = tetcheck;
+						while (next_check != tetcheck)
 						{
 							Tetrahedron const& tet_check = del_.tetras_[cur_check];
 							temp.push_back(cur_check);
-							next_check = NextLoopTetra(tet_check, last_check, N0, N1);
+							next_check = NextLoopTetra(tet_check, last_check, point, point_other);
 							last_check = cur_check;
 							cur_check = next_check;
 						}
+						// Is face too small?
 						if (temp.size() < 3)
 							continue;
-						double Asize = CleanDuplicates(temp, tetra_centers_, temp2, abs(del_.points_[N0] - del_.points_[N1]), diffs);
-						if (temp2.size() < 3)
+						temp_points_in_face = &PointsInFace_[FaceCounter];
+						temp_points_in_face->reserve(8);
+						double Asize = CleanDuplicates(temp, tetra_centers_, *temp_points_in_face, ScalarProd(del_.points_[point] 
+							- del_.points_[point_other], del_.points_[point] 	- del_.points_[point_other]), diffs);
+						if (temp_points_in_face->size() < 3)
 							continue;
-						std::pair<double, Vector3D> AreaCM = CalcFaceAreaCM(temp2, tetra_centers_);
-						if (AreaCM.first < (Asize * (IsPointOutsideBox(N1) ? 1e-13 : 1e-14)))
+
+						CalcFaceAreaCM(*temp_points_in_face, tetra_centers_,area_[FaceCounter],Face_CM_[FaceCounter]);
+						if (area_[FaceCounter] < (Asize * (IsPointOutsideBox(point_other) ? 1e-13 : 1e-14)))
 							continue;
-						if (N1 >= Norg_&&N1 < (Norg_ + 4))
+						if (point_other >= Norg_&&point_other < (Norg_ + 4))
 						{
 							UniversalError eo("Neighboring big tet point");
 							throw eo;
 						}
 						// Make faces right handed
-						MakeRightHandFace(temp2, del_.points_[N0], tetra_centers_, temp3, fastsqrt(AreaCM.first));
-						area_.push_back(AreaCM.first);
-						Face_CM_.push_back(AreaCM.second);
-						PointsInFace_.push_back(temp2);
+						MakeRightHandFace(*temp_points_in_face, del_.points_[point], tetra_centers_, temp3, area_[FaceCounter]);
+						FaceNeighbors_[FaceCounter].first = point;
+						FaceNeighbors_[FaceCounter].second = point_other;
 
-						FaceNeighbors_.push_back(std::pair<size_t, size_t>(N0, N1));
-
-						FacesInCell_[N0].push_back(PointsInFace_.size() - 1);
-						Neighbors[N0].push_back(N1);
-						if (N1 < Norg_)
+						FacesInCell_[point].push_back(FaceCounter);
+						if (point_other < Norg_)
 						{
-							FacesInCell_[N1].push_back(PointsInFace_.size() - 1);
-							Neighbors[N1].push_back(N0);
+							FacesInCell_[point_other].push_back(FaceCounter);
 						}
-
+						neigh_set.insert(point_other);
+						++FaceCounter;
 					}
 				}
 			}
 		}
 	}
+
 	// Fix Face CM (this prevents large face velocities for close by points)
-	size_t Nfaces = Face_CM_.size();
+	size_t Nfaces = FaceCounter;
 	Vector3D mid, norm;
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
@@ -1339,9 +1333,13 @@ void Voronoi3D::BuildVoronoi(void)
 		Face_CM_[i] -= ScalarProd(Face_CM_[i] - mid, norm)*norm / ScalarProd(norm, norm);
 	}
 
+	area_.resize(FaceCounter);
 	area_.shrink_to_fit();
+	Face_CM_.resize(FaceCounter);
 	Face_CM_.shrink_to_fit();
+	FaceNeighbors_.resize(FaceCounter);
 	FaceNeighbors_.shrink_to_fit();
+	PointsInFace_.resize(FaceCounter);
 	PointsInFace_.shrink_to_fit();
 	for (size_t i = 0; i < Norg_; ++i)
 		FacesInCell_[i].shrink_to_fit();

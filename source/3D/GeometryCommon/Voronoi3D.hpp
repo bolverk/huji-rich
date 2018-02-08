@@ -67,7 +67,7 @@ private:
 	double CalcTetraRadiusCenter(std::size_t index);
 	vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 		vector<vector<size_t> > &past_duplicate);
-	void BuildVoronoi(void);
+	void BuildVoronoi(std::vector<size_t> const& order);
 
 	Delaunay3D del_;
 	vector<vector<std::size_t> > PointTetras_; // The tetras containing each point

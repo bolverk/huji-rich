@@ -466,10 +466,9 @@ Delaunay3D::~Delaunay3D()
 
 void Delaunay3D::BuildExtra(vector<Vector3D> const& points)
 {
-	vector<std::size_t> order = HilbertOrder3D(points);
 	size_t Nstart = points_.size();
 	points_.insert(points_.end(), points.begin(), points.end());
-
+	std::vector<size_t> order = HilbertOrder3D(points);
 	assert(to_check_.empty());
 	for (std::size_t i = 0; i < points.size(); ++i)
 	{
@@ -478,7 +477,8 @@ void Delaunay3D::BuildExtra(vector<Vector3D> const& points)
 	}
 }
 
-void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Vector3D const& minv)
+void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Vector3D const& minv,
+	std::vector<size_t> &order)
 {
 	empty_tetras_.clear();
 	std::size_t Norg = points.size();
@@ -506,9 +506,10 @@ void Delaunay3D::Build(vector<Vector3D> const & points, Vector3D const& maxv, Ve
 	tetras_.reserve(points_.capacity() * 7);
 	tetras_.push_back(tetra);
 	last_checked_ = 0;
-	vector<std::size_t> order = HilbertOrder3D(points);
 	
 	assert(to_check_.empty());
+	if (order.empty())
+		order = HilbertOrder3D(points);
 	for (std::size_t i = 0; i < Norg; ++i)
 		InsertPoint(order[i]);
 }
