@@ -424,6 +424,7 @@ namespace
 
 	void CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points,double &Area,Vector3D &CM)
 	{
+		CM.Set(0.0, 0.0, 0.0);
 		std::size_t Nloop = indeces.size() - 2;
 		Area = 0;
 		Vector3D temp_cross;
