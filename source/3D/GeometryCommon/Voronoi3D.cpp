@@ -358,7 +358,7 @@ namespace
 	return false;
 	return true;
 	}
-	*/
+	
 	bool IsOuterTetra(size_t Norg, Tetrahedron const& tetra)
 	{
 		for (size_t j = 0; j < 4; ++j)
@@ -366,7 +366,7 @@ namespace
 				return true;
 		return false;
 	}
-
+	*/
 #ifdef RICH_MPI
 	std::pair<Vector3D, Vector3D> GetBoundingBox(Tessellation3D const& tproc, int rank)
 	{
