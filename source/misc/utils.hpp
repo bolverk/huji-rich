@@ -560,7 +560,7 @@ void sort_index(RAIter iterBegin, RAIter iterEnd, Compare comp,
 	RAIter iter;
 	std::size_t k;
 	for (iter = iterBegin, k = 0; iter != iterEnd; iter++, k++) {
-		pv.push_back(std::pair<int, RAIter>(k, iter));
+		pv.push_back(std::pair<size_t, RAIter>(k, iter));
 	}
 	PairComp<RAIter, Compare> compy(comp);
 	std::sort(pv.begin(), pv.end(), compy);

@@ -481,7 +481,7 @@ vector<std::size_t> HilbertOrder3D(vector<Vector3D> const& cor)
 	// Run throught the points, and calculate the Hilbert distance of each:
 	for (size_t ii = 0; ii < N; ++ii)
 	{
-		vOut[ii]=oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], numOfIterations+6);
+		vOut[ii]=oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], numOfIterations+8);
 		//vOut.push_back(oHilbert.Hilbert3D_xyz2d(vAdjustedPoints[ii], 2));
 	}
 	// Get the sorting indices:
