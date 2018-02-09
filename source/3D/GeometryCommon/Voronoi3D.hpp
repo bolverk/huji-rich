@@ -48,7 +48,7 @@ private:
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
-	Vector3D GetTetraCM(boost::array<Vector3D, 4> const& points)const;
+	void GetTetraCM(boost::array<Vector3D, 4> const& points, Vector3D &CM)const;
 	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
 	void CalcCellCMVolume(std::size_t index);
 	double GetRadius(std::size_t index);

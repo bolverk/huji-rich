@@ -268,7 +268,7 @@ namespace
 		PointTetras.clear();
 		PointTetras.resize(Norg);
 		for (size_t i = 0; i < Norg; ++i)
-			PointTetras[i].reserve(40);
+			PointTetras[i].reserve(32);
 		size_t Ntetra = tetras.size();
 		size_t bigtet(0);
 		bool has_good, has_big;
@@ -287,7 +287,6 @@ namespace
 						has_good = true;
 					}
 					else
-						//if (temp < Norg + 4)
 						has_big = true;
 				}
 				if (has_big&&has_good)
@@ -435,7 +434,7 @@ namespace
 			CM += A*points[indeces[i + 2]];
 			CM += A*points[indeces[i + 1]];
 			CM += A*points[indeces[0]];
-			Area += A;
+			Area += 3.0*A;
 		}
 		CM *= (1.0 / (Area + DBL_MIN * 100)); //prevent overflow
 	}
@@ -1038,10 +1037,10 @@ void Voronoi3D::CalcAllCM(void)
 	{
 		size_t N0 = FaceNeighbors_[i].first;
 		size_t N1 = FaceNeighbors_[i].second;
-		size_t Npoints = PointsInFace_[i].size();
+		size_t Npoints = PointsInFace_[i].size()-2;
 
 		tetra[0] = tetra_centers_[PointsInFace_[i][0]];
-		for (std::size_t j = 0; j < Npoints - 2; ++j)
+		for (std::size_t j = 0; j < Npoints; ++j)
 		{
 			tetra[1] = tetra_centers_[PointsInFace_[i][j + 1]];
 			tetra[2] = tetra_centers_[PointsInFace_[i][j + 2]];
@@ -1049,7 +1048,7 @@ void Voronoi3D::CalcAllCM(void)
 			tetra[3] = del_.points_[N0];
 			vol = std::abs(GetTetraVolume(tetra));
 			volume_[N0] += vol;
-			vtemp = GetTetraCM(tetra);
+			 GetTetraCM(tetra, vtemp);
 			vtemp *= vol;
 			CM_[N0] += vtemp;
 			if (N1 < Norg_)
@@ -1057,7 +1056,7 @@ void Voronoi3D::CalcAllCM(void)
 				tetra[3] = del_.points_[N1];
 				vol = std::abs(GetTetraVolume(tetra));
 				volume_[N1] += vol;
-				vtemp = GetTetraCM(tetra);
+				GetTetraCM(tetra, vtemp);
 				vtemp *= vol;
 				CM_[N1] += vtemp;
 			}
@@ -1068,7 +1067,7 @@ void Voronoi3D::CalcAllCM(void)
 	// Recalc points with high aspect ratio
 	for (size_t i = 0; i < Norg_; ++i)
 	{
-		if (abs(CM_[i] - del_.points_[i]) > 0.3*GetWidth(i))
+		if (abs(CM_[i] - del_.points_[i]) > 0.4*GetWidth(i))
 		{
 			tetra[3] = CM_[i];
 			CM_[i] = Vector3D();
@@ -1085,7 +1084,8 @@ void Voronoi3D::CalcAllCM(void)
 					tetra[2] = tetra_centers_[PointsInFace_[Face][j + 2]];
 					double vol = std::abs(GetTetraVolume(tetra));
 					volume_[i] += vol;
-					CM_[i] += vol*GetTetraCM(tetra);
+					GetTetraCM(tetra, vtemp);
+					CM_[i] += vol*vtemp;
 				}
 			}
 			CM_[i] *= (1.0 / volume_[i]);
@@ -1857,13 +1857,12 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 		return 0.5 * temp.convert_to<double>();;
 }
 
-Vector3D Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points)const
+void Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points,Vector3D &CM)const
 {
-	Vector3D res;
+	CM.Set(0, 0, 0);
 	for (std::size_t i = 0; i < 4; ++i)
-		res += points[i];
-	res *= 0.25;
-	return res;
+		CM += points[i];
+	CM *= 0.25;
 }
 
 double Voronoi3D::GetTetraVolume(boost::array<Vector3D, 4> const& points)const
@@ -1878,6 +1877,7 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
 	std::size_t Nfaces = FacesInCell_[index].size();
 	boost::array<Vector3D, 4> tetra;
 	tetra[3] = del_.points_[index];
+	Vector3D vtemp;
 	for (std::size_t i = 0; i < Nfaces; ++i)
 	{
 		std::size_t face = FacesInCell_[index][i];
@@ -1890,7 +1890,8 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
 			tetra[2] = tetra_centers_[PointsInFace_[face][j + 2]];
 			double vol = GetTetraVolume(tetra);
 			fvol += std::abs(vol);
-			CM_[index] += std::abs(vol)*GetTetraCM(tetra);
+			GetTetraCM(tetra, vtemp);
+			CM_[index] += std::abs(vol)*vtemp;
 		}
 		volume_[index] += fvol;
 	}
