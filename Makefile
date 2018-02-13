@@ -13,6 +13,10 @@ else ifeq ($(MODE),parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
+else ifeq ($(MODE),parallel_time)
+	CC := mpiCC
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -Dtiming
+	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x

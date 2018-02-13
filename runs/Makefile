@@ -27,6 +27,12 @@ else ifeq ($(MODE),parallel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
+else ifeq ($(MODE),parallel_time)
+	PREXECUTE := mpirun -np $(NUM_PROCESSES)
+	CC := mpiCC
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX -Dtiming
+	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
+	LFLAGS := -lclipper -lr3d
 else ifeq ($(MODE),parallel_check)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
