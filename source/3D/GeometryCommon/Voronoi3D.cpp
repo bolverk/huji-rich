@@ -44,7 +44,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 		}
 		V2 = points[InFace[(counter + 2) % NinFace]] - points[InFace[N1]];
 		N2 = (counter + 2) % NinFace;
-		while (abs(V2) < 0.01*R || abs(CrossProduct(V1,V2))<0.0001*tess.GetArea(faces[i]))
+		while (abs(V2) < 0.01*R || abs(CrossProduct(V1, V2)) < 0.0001*tess.GetArea(faces[i]))
 		{
 			++counter;
 			assert(counter < 2 * NinFace);
@@ -357,7 +357,7 @@ namespace
 	return false;
 	return true;
 	}
-	
+
 	bool IsOuterTetra(size_t Norg, Tetrahedron const& tetra)
 	{
 		for (size_t j = 0; j < 4; ++j)
@@ -411,7 +411,7 @@ namespace
 			MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
 			talkwithme.push_back(status.MPI_SOURCE);
 		}
-		if(!to_talk_with.empty())
+		if (!to_talk_with.empty())
 			MPI_Waitall(static_cast<int>(to_talk_with.size()), &req[0], MPI_STATUSES_IGNORE);
 		vector<int> new_talk_with_me;
 		for (std::size_t i = 0; i < to_talk_with.size(); ++i)
@@ -421,7 +421,7 @@ namespace
 	}
 #endif //RICH_MPI
 
-	void CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points,double &Area,Vector3D &CM)
+	void CalcFaceAreaCM(vector<std::size_t> const& indeces, vector<Vector3D> const& points, double &Area, Vector3D &CM)
 	{
 		CM.Set(0.0, 0.0, 0.0);
 		std::size_t Nloop = indeces.size() - 2;
@@ -429,7 +429,7 @@ namespace
 		Vector3D temp_cross;
 		for (std::size_t i = 0; i < Nloop; ++i)
 		{
-			temp_cross= CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]);
+			temp_cross = CrossProduct(points[indeces[i + 2]] - points[indeces[0]], points[indeces[i + 1]] - points[indeces[0]]);
 			double A = 0.3333333333333333*0.5*fastsqrt(ScalarProd(temp_cross, temp_cross));
 			CM += A*points[indeces[i + 2]];
 			CM += A*points[indeces[i + 1]];
@@ -805,7 +805,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	R_.clear();
 	R_.reserve(points.size() * 11);
 	tetra_centers_.clear();
-	tetra_centers_.reserve(points.size() *11);
+	tetra_centers_.reserve(points.size() * 11);
 	del_.Clean();
 	// Voronoi Data
 	FacesInCell_.clear();
@@ -825,7 +825,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	Norg_ = new_points.size();
 	if (Norg_ == 0)
 	{
-		std::cout << "Zero Norg in rank " <<rank<<std::endl;
+		std::cout << "Zero Norg in rank " << rank << std::endl;
 		std::cout << "Rank CM " << tproc.GetCellCM(static_cast<size_t>(rank)).x << ","
 			<< tproc.GetCellCM(static_cast<size_t>(rank)).y << "," << tproc.GetCellCM(static_cast<size_t>(rank)).z << std::endl;
 		std::cout << "Rank point " << tproc.GetMeshPoint(static_cast<size_t>(rank)).x << ","
@@ -840,7 +840,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	double t0 = MPI_Wtime();
 #endif
 	std::vector<size_t> order = HilbertOrder3D(new_points);
-	del_.Build(new_points, bounding_box.second, bounding_box.first,order);
+	del_.Build(new_points, bounding_box.second, bounding_box.first, order);
 
 #ifdef timing
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -1038,7 +1038,7 @@ void Voronoi3D::CalcAllCM(void)
 	{
 		size_t N0 = FaceNeighbors_[i].first;
 		size_t N1 = FaceNeighbors_[i].second;
-		size_t Npoints = PointsInFace_[i].size()-2;
+		size_t Npoints = PointsInFace_[i].size() - 2;
 
 		tetra[0] = tetra_centers_[PointsInFace_[i][0]];
 		for (std::size_t j = 0; j < Npoints; ++j)
@@ -1049,7 +1049,7 @@ void Voronoi3D::CalcAllCM(void)
 			tetra[3] = del_.points_[N0];
 			vol = std::abs(GetTetraVolume(tetra));
 			volume_[N0] += vol;
-			 GetTetraCM(tetra, vtemp);
+			GetTetraCM(tetra, vtemp);
 			vtemp *= vol;
 			CM_[N0] += vtemp;
 			if (N1 < Norg_)
@@ -1122,7 +1122,7 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 	duplicated_points_.clear();
 	Nghost_.clear();
 	std::vector<size_t> order = HilbertOrder3D(points);
-	del_.Build(points, ur_, ll_,order);
+	del_.Build(points, ur_, ll_, order);
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
 		del_.BuildExtra(ghosts[i]);
@@ -1177,7 +1177,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	duplicated_points_.clear();
 	Nghost_.clear();
 	std::vector<size_t> order = HilbertOrder3D(points);
-	del_.Build(points, ur_, ll_,order);
+	del_.Build(points, ur_, ll_, order);
 
 	R_.resize(del_.tetras_.size());
 	std::fill(R_.begin(), R_.end(), -1);
@@ -1291,12 +1291,12 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 							continue;
 						temp_points_in_face = &PointsInFace_[FaceCounter];
 						temp_points_in_face->reserve(8);
-						double Asize = CleanDuplicates(temp, tetra_centers_, *temp_points_in_face, ScalarProd(del_.points_[point] 
-							- del_.points_[point_other], del_.points_[point] 	- del_.points_[point_other]), diffs);
+						double Asize = CleanDuplicates(temp, tetra_centers_, *temp_points_in_face, ScalarProd(del_.points_[point]
+							- del_.points_[point_other], del_.points_[point] - del_.points_[point_other]), diffs);
 						if (temp_points_in_face->size() < 3)
 							continue;
 
-						CalcFaceAreaCM(*temp_points_in_face, tetra_centers_,area_[FaceCounter],Face_CM_[FaceCounter]);
+						CalcFaceAreaCM(*temp_points_in_face, tetra_centers_, area_[FaceCounter], Face_CM_[FaceCounter]);
 						if (area_[FaceCounter] < (Asize * (IsPointOutsideBox(point_other) ? 1e-13 : 1e-14)))
 							continue;
 						if (point_other >= Norg_&&point_other < (Norg_ + 4))
@@ -1393,6 +1393,46 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 	}
 }
 
+void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
+	Sphere &sphere, std::vector<Face> const& faces, bool &skipped, std::vector<size_t> const& face_index)
+{
+	res.clear();
+	std::size_t Ntetra = PointTetras_[point].size();
+	size_t Nfaces = faces.size();
+	skipped = true;
+	for (size_t i = 0; i < Nfaces; ++i)
+	{
+		Face const& f = faces[i];
+		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
+		normal *= (1.0 / fastsqrt(ScalarProd(normal, normal)));
+
+		// Quick check if there is no intersection for sure
+		double maxR = GetRadius(PointTetras_[point].at(0));
+		for (std::size_t j = 1; j < Ntetra; ++j)
+			maxR = std::max(maxR, GetRadius(PointTetras_[point][j]));
+		sphere.radius = 2 * maxR;
+		sphere.center = GetMeshPoint(point);
+		if (!FaceSphereIntersections(f, sphere, normal))
+			continue;
+
+		for (std::size_t j = 0; j < Ntetra; ++j)
+		{
+			sphere.radius = GetRadius(PointTetras_[point][j]);
+			sphere.center = tetra_centers_[PointTetras_[point][j]];
+			if (FaceSphereIntersections(f, sphere, normal))
+			{
+				res.push_back(face_index[i]);
+				skipped = false;
+				break;
+			}
+		}
+	}
+	std::sort(res.begin(), res.end());
+	res = unique(res);
+}
+
+
+
 void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
 	bool &skipped, vector<std::size_t> &faces, vector<size_t> const& past_duplicate)
@@ -1433,7 +1473,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (!std::binary_search(neigh.begin(), neigh.end(), fneigh.first))
 					{
-						if (fneigh.first < tproc.GetPointNo() && abs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>30 
+						if (fneigh.first < tproc.GetPointNo() && abs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>30
 							* tproc.GetWidth(fneigh.first))
 							continue;
 						to_check.push(faces[j]);
@@ -1495,7 +1535,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 						{
 							if (visited.find(faces_temp[i]) == visited.end())
 							{
-								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.first ? 
+								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.first ?
 									tproc.GetFaceNeighbors(faces_temp[i]).second : tproc.GetFaceNeighbors(faces_temp[i]).first;
 								if (other < tproc.GetPointNo() && abs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
 									continue;
@@ -1559,29 +1599,51 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	if (Norg_ == 0)
 		return res;
 	Sphere sphere;
-	std::stack<size_t> intersection_check;
-	boost::container::flat_set<size_t> visited;
 	bool skipped = false;
 	vector<std::size_t> intersecting_faces;
-	vector<size_t> past_duplicate, vtemp;
-
-	vector<vector<size_t> > sorted_to_duplicate = duplicated_points_;
-	for (size_t i = 0; i < sorted_to_duplicate.size(); ++i)
-		std::sort(sorted_to_duplicate[i].begin(), sorted_to_duplicate[i].end());
-	vector<size_t> duplicatedprocs(duplicatedprocs_.size());
-	for (size_t i = 0; i < duplicatedprocs_.size(); ++i)
-		duplicatedprocs[i] = static_cast<size_t>(duplicatedprocs_[i]);
-	for (size_t i = 0; i < Norg_; ++i)
+	// First attempt, only copy from neighboring cpus
+	if (mode == 1)
 	{
-		if (checked_clear[i] == 1)
-			continue;
-		GetPastDuplicate(i, past_duplicate, sorted_to_duplicate, duplicatedprocs);
-		FindIntersectionsRecursive(intersecting_faces, tproc, static_cast<std::size_t>(rank), i, sphere,
-			mode, visited, intersection_check, skipped, vtemp, past_duplicate);
-		for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
-			res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], i));
-		if (intersecting_faces.empty())
-			checked_clear[i] = 1;
+		// Create faces to check for intersection
+		std::vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+		std::vector<Face> cell_faces(faces.size());
+		for (size_t i = 0; i < cell_faces.size(); ++i)
+			cell_faces[i] = Face(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(faces[i])),
+				tproc.GetFaceNeighbors(faces[i]).first, tproc.GetFaceNeighbors(faces[i]).second);
+		// Search for intersections
+		for (size_t i = 0; i < Norg_; ++i)
+		{
+			FindIntersectionsFirstMPI(intersecting_faces, i, sphere, cell_faces, skipped, faces);
+			for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
+				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], i));
+			if (intersecting_faces.empty())
+				checked_clear[i] = 1;
+		}
+
+	}
+	else
+	{
+		std::stack<size_t> intersection_check;
+		boost::container::flat_set<size_t> visited;
+		vector<size_t> past_duplicate, vtemp;
+		vector<vector<size_t> > sorted_to_duplicate = duplicated_points_;
+		for (size_t i = 0; i < sorted_to_duplicate.size(); ++i)
+			std::sort(sorted_to_duplicate[i].begin(), sorted_to_duplicate[i].end());
+		vector<size_t> duplicatedprocs(duplicatedprocs_.size());
+		for (size_t i = 0; i < duplicatedprocs_.size(); ++i)
+			duplicatedprocs[i] = static_cast<size_t>(duplicatedprocs_[i]);
+		for (size_t i = 0; i < Norg_; ++i)
+		{
+			if (checked_clear[i] == 1)
+				continue;
+			GetPastDuplicate(i, past_duplicate, sorted_to_duplicate, duplicatedprocs);
+			FindIntersectionsRecursive(intersecting_faces, tproc, static_cast<std::size_t>(rank), i, sphere,
+				mode, visited, intersection_check, skipped, vtemp, past_duplicate);
+			for (std::size_t j = 0; j < intersecting_faces.size(); ++j)
+				res.push_back(std::pair<std::size_t, std::size_t>(intersecting_faces[j], i));
+			if (intersecting_faces.empty())
+				checked_clear[i] = 1;
+		}
 	}
 	return res;
 }
@@ -1781,7 +1843,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	double Rcheck2 = abs(del_.points_[del_.tetras_[index].points[2]] - center);
 	double Rcheck3 = abs(del_.points_[del_.tetras_[index].points[3]] - center);
 	double tol = 1 + 1e-10;
-	if (((Rcheck0+Rcheck1+Rcheck2+Rcheck3)*tol<(4*Rcheck0))|| ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)>(tol*4 * Rcheck0)))
+	if (((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)*tol < (4 * Rcheck0)) || ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3) > (tol * 4 * Rcheck0)))
 		return CalcTetraRadiusCenterHiPrecision(index);
 	if (Rcheck0 > tol*Rres || Rcheck0*tol < Rres)
 		return CalcTetraRadiusCenterHiPrecision(index);
@@ -1790,83 +1852,83 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 
 double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 {
-		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
-		V0[0] = del_.points_[del_.tetras_[index].points[0]].x;
-		V0[1] = del_.points_[del_.tetras_[index].points[0]].y;
-		V0[2] = del_.points_[del_.tetras_[index].points[0]].z;
-		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V2;
-		V2[0] = del_.points_[del_.tetras_[index].points[1]].x;
-		V2[1] = del_.points_[del_.tetras_[index].points[1]].y;
-		V2[2] = del_.points_[del_.tetras_[index].points[1]].z;
-		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V3;
-		V3[0] = del_.points_[del_.tetras_[index].points[2]].x;
-		V3[1] = del_.points_[del_.tetras_[index].points[2]].y;
-		V3[2] = del_.points_[del_.tetras_[index].points[2]].z;
-		boost::array<boost::multiprecision::cpp_dec_float_50, 3> V4;
-		V4[0] = del_.points_[del_.tetras_[index].points[3]].x;
-		V4[1] = del_.points_[del_.tetras_[index].points[3]].y;
-		V4[2] = del_.points_[del_.tetras_[index].points[3]].z;
-		V2[0] -= V0[0];
-		V2[1] -= V0[1];
-		V2[2] -= V0[2];
-		V3[0] -= V0[0];
-		V3[1] -= V0[1];
-		V3[2] -= V0[2];
-		V4[0] -= V0[0];
-		V4[1] -= V0[1];
-		V4[2] -= V0[2];
-		boost::array<boost::multiprecision::cpp_dec_float_50, 9> mat;
-		mat[0] = V2[0];
-		mat[1] = V2[1];
-		mat[2] = V2[2];
-		mat[3] = V3[0];
-		mat[4] = V3[1];
-		mat[5] = V3[2];
-		mat[6] = V4[0];
-		mat[7] = V4[1];
-		mat[8] = V4[2];
-		boost::multiprecision::cpp_dec_float_50 ba = Calc33Det(mat);
-		mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
-		mat[1] = V2[1];
-		mat[2] = V2[2];
-		mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
-		mat[4] = V3[1];
-		mat[5] = V3[2];
-		mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
-		mat[7] = V4[1];
-		mat[8] = V4[2];
-		boost::multiprecision::cpp_dec_float_50 bDx = Calc33Det(mat);
-		mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
-		mat[1] = V2[0];
-		mat[2] = V2[2];
-		mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
-		mat[4] = V3[0];
-		mat[5] = V3[2];
-		mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
-		mat[7] = V4[0];
-		mat[8] = V4[2];
-		boost::multiprecision::cpp_dec_float_50 bDy = -Calc33Det(mat);
-		mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
-		mat[1] = V2[0];
-		mat[2] = V2[1];
-		mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
-		mat[4] = V3[0];
-		mat[5] = V3[1];
-		mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
-		mat[7] = V4[0];
-		mat[8] = V4[1];
-		boost::multiprecision::cpp_dec_float_50 bDz = Calc33Det(mat);
-		boost::multiprecision::cpp_dec_float_50 temp = (bDx / (2 * ba) + V0[0]);
-		tetra_centers_[index].x = temp.convert_to<double>();
-		temp = (bDy / (2 * ba) + V0[1]);
-		tetra_centers_[index].y = temp.convert_to<double>();
-		temp = (bDz / (2 * ba) + V0[2]);
-		tetra_centers_[index].z = temp.convert_to<double>();
-		temp = (boost::multiprecision::sqrt(bDx*bDx + bDy*bDy + bDz*bDz) / ba);
-		return 0.5 * temp.convert_to<double>();;
+	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
+	V0[0] = del_.points_[del_.tetras_[index].points[0]].x;
+	V0[1] = del_.points_[del_.tetras_[index].points[0]].y;
+	V0[2] = del_.points_[del_.tetras_[index].points[0]].z;
+	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V2;
+	V2[0] = del_.points_[del_.tetras_[index].points[1]].x;
+	V2[1] = del_.points_[del_.tetras_[index].points[1]].y;
+	V2[2] = del_.points_[del_.tetras_[index].points[1]].z;
+	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V3;
+	V3[0] = del_.points_[del_.tetras_[index].points[2]].x;
+	V3[1] = del_.points_[del_.tetras_[index].points[2]].y;
+	V3[2] = del_.points_[del_.tetras_[index].points[2]].z;
+	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V4;
+	V4[0] = del_.points_[del_.tetras_[index].points[3]].x;
+	V4[1] = del_.points_[del_.tetras_[index].points[3]].y;
+	V4[2] = del_.points_[del_.tetras_[index].points[3]].z;
+	V2[0] -= V0[0];
+	V2[1] -= V0[1];
+	V2[2] -= V0[2];
+	V3[0] -= V0[0];
+	V3[1] -= V0[1];
+	V3[2] -= V0[2];
+	V4[0] -= V0[0];
+	V4[1] -= V0[1];
+	V4[2] -= V0[2];
+	boost::array<boost::multiprecision::cpp_dec_float_50, 9> mat;
+	mat[0] = V2[0];
+	mat[1] = V2[1];
+	mat[2] = V2[2];
+	mat[3] = V3[0];
+	mat[4] = V3[1];
+	mat[5] = V3[2];
+	mat[6] = V4[0];
+	mat[7] = V4[1];
+	mat[8] = V4[2];
+	boost::multiprecision::cpp_dec_float_50 ba = Calc33Det(mat);
+	mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
+	mat[1] = V2[1];
+	mat[2] = V2[2];
+	mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
+	mat[4] = V3[1];
+	mat[5] = V3[2];
+	mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
+	mat[7] = V4[1];
+	mat[8] = V4[2];
+	boost::multiprecision::cpp_dec_float_50 bDx = Calc33Det(mat);
+	mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
+	mat[1] = V2[0];
+	mat[2] = V2[2];
+	mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
+	mat[4] = V3[0];
+	mat[5] = V3[2];
+	mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
+	mat[7] = V4[0];
+	mat[8] = V4[2];
+	boost::multiprecision::cpp_dec_float_50 bDy = -Calc33Det(mat);
+	mat[0] = V2[0] * V2[0] + V2[1] * V2[1] + V2[2] * V2[2];
+	mat[1] = V2[0];
+	mat[2] = V2[1];
+	mat[3] = V3[0] * V3[0] + V3[1] * V3[1] + V3[2] * V3[2];
+	mat[4] = V3[0];
+	mat[5] = V3[1];
+	mat[6] = V4[0] * V4[0] + V4[1] * V4[1] + V4[2] * V4[2];
+	mat[7] = V4[0];
+	mat[8] = V4[1];
+	boost::multiprecision::cpp_dec_float_50 bDz = Calc33Det(mat);
+	boost::multiprecision::cpp_dec_float_50 temp = (bDx / (2 * ba) + V0[0]);
+	tetra_centers_[index].x = temp.convert_to<double>();
+	temp = (bDy / (2 * ba) + V0[1]);
+	tetra_centers_[index].y = temp.convert_to<double>();
+	temp = (bDz / (2 * ba) + V0[2]);
+	tetra_centers_[index].z = temp.convert_to<double>();
+	temp = (boost::multiprecision::sqrt(bDx*bDx + bDy*bDy + bDz*bDz) / ba);
+	return 0.5 * temp.convert_to<double>();;
 }
 
-void Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points,Vector3D &CM)const
+void Voronoi3D::GetTetraCM(boost::array<Vector3D, 4> const& points, Vector3D &CM)const
 {
 	CM.Set(0, 0, 0);
 	for (std::size_t i = 0; i < 4; ++i)
