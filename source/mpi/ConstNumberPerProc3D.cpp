@@ -14,7 +14,7 @@ namespace
 		Vector3D res;
 		for (size_t i = 0; i < Ncor; ++i)
 			res += tess.GetMeshPoint(i);
-		res *= 1.0 / static_cast<double>(std::max(static_cast<size_t>(1),Ncor));
+		res *= 1.0 / static_cast<double>(std::max(static_cast<size_t>(1), Ncor));
 		return res;
 	}
 }
@@ -22,8 +22,8 @@ namespace
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 
 
-ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode,bool Hilbert) :
-	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode),Hilbert_(Hilbert),run_counter_(100) {}
+ConstNumberPerProc3D::ConstNumberPerProc3D(double speed, double RoundSpeed, int mode, bool Hilbert) :
+	speed_(speed), RoundSpeed_(RoundSpeed), mode_(mode), Hilbert_(Hilbert), run_counter_(100) {}
 
 #ifdef RICH_MPI
 void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const
@@ -55,10 +55,10 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	double load = 0;
 	for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 		load = std::max(load, static_cast<double>(NPerProc[i]) / static_cast<double>(IdealPerProc));
-	
+
 	double NewSpeed = speed_;
 	if (load > 3)
-		NewSpeed *= std::min(std::pow(load - 2, 3), 0.25 / speed_);
+		NewSpeed *= std::min(std::pow(load - 2, 3), 0.15 / speed_);
 
 	const double d = abs(CM - tproc.GetMeshPoint(rank));
 	double dxround = 0, dyround = 0, dzround = 0;
@@ -128,7 +128,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			const double mind = neigheps*std::min(MyR, R[neigh[i]]);
 			if (dist < mind)
 			{
-				double speed2 = NewSpeed * 10 * (mind - dist) *MyR/ (dist*dist);
+				double speed2 = NewSpeed * 10 * (mind - dist) *MyR / (dist*dist);
 				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x);
 				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y);
 				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z);
@@ -136,14 +136,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			else
 			{
 				Vector3D otherpoint = RankCMs[neigh[i]];
-				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / NPerProc[neigh[i]];
-				if (merit < 0)
-					merit = std::max(merit, -5.0);
-				else
-					merit = std::min(merit, 5.0);
-				dx -= NewSpeed*merit*(otherpoint.x - point.x);
-				dy -= NewSpeed*merit*(otherpoint.y - point.y);
-				dz -= NewSpeed*merit*(otherpoint.z - point.z);
+				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				double dr = abs(otherpoint - point);
+				dx -= NewSpeed*merit*(otherpoint.x - point.x)*MyR / dr;
+				dy -= NewSpeed*merit*(otherpoint.y - point.y)*MyR / dr;
+				dz -= NewSpeed*merit*(otherpoint.z - point.z)*MyR / dr;
 			}
 		}
 	}
@@ -163,9 +160,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		const double dist = abs(point - tproc.GetMeshPoint(neigh[i]));
 		mind_1 = std::max(mind_1, 1.0 / dist);
 	}
-	double maxR = std::min(MyR, 2.5/mind_1);
+	double maxR = std::min(MyR, 1.5 / mind_1);
 	double r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
-	if (r_dx >NewSpeed*maxR)
+	if (r_dx > NewSpeed*maxR)
 	{
 		old_dx *= NewSpeed*maxR / r_dx;
 		old_dy *= NewSpeed*maxR / r_dx;
@@ -179,7 +176,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
 	if (r_dx > NewSpeed*maxR)
 	{
-		old_dx *= NewSpeed*maxR/ r_dx;
+		old_dx *= NewSpeed*maxR / r_dx;
 		old_dy *= NewSpeed*maxR / r_dx;
 		old_dz *= NewSpeed*maxR / r_dx;
 	}
