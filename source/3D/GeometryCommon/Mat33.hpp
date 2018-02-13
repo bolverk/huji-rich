@@ -77,7 +77,7 @@ template<typename T>
 inline Mat33<T> Mat33<T>::transpose() const
 {
 	Mat33<T> res;
-	for (size_t i = 0; i; < 3; ++i)
+	for (size_t i = 0; i < 3; ++i)
 		for (size_t j = 0; j < 3; ++j)
 			res._data[i][j] = _data[j][i];
 	return res;
