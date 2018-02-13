@@ -1315,6 +1315,14 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 						}
 						neigh_set.insert(point_other);
 						++FaceCounter;
+						// realloc memory if needed
+						if (FaceCounter == FaceNeighbors_.size())
+						{
+							area_.resize(static_cast<size_t>(static_cast<double>(area_.size())*1.25));
+							Face_CM_.resize(static_cast<size_t>(static_cast<double>(Face_CM_.size())*1.25));
+							FaceNeighbors_.resize(static_cast<size_t>(static_cast<double>(FaceNeighbors_.size())*1.25));
+							PointsInFace_.resize(static_cast<size_t>(static_cast<double>(PointsInFace_.size())*1.25));
+						}
 					}
 				}
 			}
