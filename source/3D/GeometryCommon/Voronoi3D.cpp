@@ -993,6 +993,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	if (rank == 0)
 		std::cout << "Fourth ghost build time " << t1 - t0 << std::endl;
 #endif
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
 	std::vector<std::pair<size_t, size_t> >().swap(ghost_index);
 	std::vector<Vector3D>().swap(extra_points);
 
