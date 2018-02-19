@@ -22,8 +22,11 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 		res[i].density = extensive.mass / vol;
 		res[i].velocity = extensive.momentum / extensive.mass;
 		double energy = extensive.internal_energy / extensive.mass;
-		if(energy<0)
+		if (energy < 0)
+		{
 			energy = extensive.energy / extensive.mass - 0.5*ScalarProd(res[i].velocity, res[i].velocity);
+			extensive.internal_energy = energy*extensive.mass;
+		}
 		extensive.energy = extensive.mass*(energy + 0.5*ScalarProd(res[i].velocity, res[i].velocity));
 		//const double energy = extensive.energy / extensive.mass - 0.5*ScalarProd(res[i].velocity,res[i].velocity);
 		res[i].stickers = res[i].stickers;

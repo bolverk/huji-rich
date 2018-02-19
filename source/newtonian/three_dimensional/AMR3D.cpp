@@ -736,7 +736,15 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
 	res.velocity = extensive.momentum / extensive.mass;
-	res.pressure = eos.de2p(res.density, extensive.internal_energy / extensive.mass);
+	try
+	{
+		res.pressure = eos.de2p(res.density, extensive.internal_energy / extensive.mass);
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Density", res.density);
+		throw eo;
+	}
 	res.internal_energy = extensive.internal_energy / extensive.mass;
 	size_t N = extensive.tracers.size();
 	res.tracers.resize(N);
@@ -836,15 +844,34 @@ void AMR3D::operator() (HDSim3D &sim)
 	cells.resize(NorgNew);
 	for (size_t i = 0; i < (Norg-ToRemove.first.size()); ++i)
 	{
-		cells[i] = cu_->ConvertExtensiveToPrimitve3D(extensives[i], eos, tess.GetVolume(i), cells[i], tsn);
+		try
+		{
+			cells[i] = cu_->ConvertExtensiveToPrimitve3D(extensives[i], eos, tess.GetVolume(i), cells[i], tsn);
+		}
+		catch (UniversalError & eo)
+		{
+			eo.AddEntry("First loop", static_cast<double>(i));
+			eo.AddEntry("Norg", static_cast<double>(Norg));
+			throw eo;
+		}
 	}		
 	for (size_t i = 0; i< ToRefine.first.size(); ++i)
 	{
 		size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), 
 			ToRefine.first[i]) - ToRemove.first.begin());
-		cells[(Norg - ToRemove.first.size()) + i] = cu_->ConvertExtensiveToPrimitve3D(extensives[(Norg - 
-			ToRemove.first.size())+ i], eos, tess.GetVolume((Norg - ToRemove.first.size()) + i), 
-			cells[ToRefine.first[i] - index_remove], tsn);
+		try
+		{
+			cells[(Norg - ToRemove.first.size()) + i] = cu_->ConvertExtensiveToPrimitve3D(extensives[(Norg -
+				ToRemove.first.size()) + i], eos, tess.GetVolume((Norg - ToRemove.first.size()) + i),
+				cells[ToRefine.first[i] - index_remove], tsn);
+		}
+		catch (UniversalError & eo)
+		{
+			eo.AddEntry("Second loop", static_cast<double>(i));
+			eo.AddEntry("Norg", static_cast<double>(Norg));
+			eo.AddEntry("Nrefine", static_cast<double>(ToRefine.first.size()));
+			throw eo;
+		}
 	}
 #ifdef RICH_MPI
 	// Update cells
