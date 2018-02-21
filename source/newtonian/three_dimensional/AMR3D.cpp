@@ -697,7 +697,7 @@ namespace
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
-				extensives[refined_points[changed_byouter[i][j]]] += extensive_tosend[i][j];
+				extensives[oldtess.GetPointNo() + changed_byouter[i][j]] += extensive_tosend[i][j];
 		}
 	}
 #endif
