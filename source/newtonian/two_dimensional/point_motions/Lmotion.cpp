@@ -1,4 +1,5 @@
 #include "Lmotion.hpp"
+#include <iostream>
 #include "../simple_flux_calculator.hpp"
 #include "../../../misc/utils.hpp"
 #ifdef RICH_MPI
@@ -25,109 +26,81 @@ namespace
 	}
 }
 
-LMotion::LMotion(SpatialReconstruction const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc,
-	vector<string> skip_keys) :interp_(interp), eos_(eos),evc_(evc),skip_key_(skip_keys){}
-
-namespace
-{
-	char CheckSkip(vector<size_t> const& skip_indeces, Edge const& edge,vector<ComputationalCell> const& cells)
-	{
-		for (size_t i = 0; i < skip_indeces.size(); ++i)
-			if (cells[static_cast<size_t>(edge.neighbors.first)].stickers[skip_indeces[i]]||
-				cells[static_cast<size_t>(edge.neighbors.second)].stickers[skip_indeces[i]])
-				return 0;
-		return 2;
-	}
-}
+LMotion::LMotion(SpatialReconstruction const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc) :interp_(interp), eos_(eos),evc_(evc){}
 
 vector<Vector2D> LMotion::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
-double time, TracerStickerNames const& tracerstickernames) const
+double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
 	size_t N = tess.GetPointNo();
-	size_t Niter = 20;
-	vector<Vector2D> res(N,Vector2D(0,0));
+	vector<Vector2D> res(N, Vector2D(0, 0));
+	for (size_t i = 0; i < N; ++i)
+		res[i] = cells[i].velocity;
+	return res;
+}
+
+vector<Vector2D> LMotion::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
+double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tracerstickernames)const
+{
+	int N = tess.GetPointNo();
+	vector<Vector2D> res(N, Vector2D(0, 0));
+	std::vector<double> TotalArea(N, 0);
 	vector<std::pair<ComputationalCell, ComputationalCell> > edge_values;
 	edge_values.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
-	pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
+		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	SlabSymmetry pg;
 	CacheData cd(tess, pg);
-	vector<Vector2D> CellLength(N);
-	vector<Vector2D> temp(N);
 	interp_(tess, cells, time, edge_values, tracerstickernames, cd);
-	size_t Nedges=edge_values.size();
-	vector<double> ws(Nedges, 0),edge_length(Nedges);
-	vector<size_t> skip_indeces;
-	for (size_t i = 0; i < skip_key_.size(); ++i)
-	{
-		size_t loc = static_cast<size_t>(binary_find(tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), 
-			skip_key_[i]) - tracerstickernames.sticker_names.begin());
-		if (loc >= tracerstickernames.sticker_names.size())
-			throw("Can not find skip key");
-		skip_indeces.push_back(loc);
-	}
-#ifdef RICH_MPI
-	MPI_exchange_data(tess, res, true);
-#endif
-	vector<Vector2D> edge_vel = evc_(tess, res);
-	vector<Vector2D> normals(Nedges);
-	vector<char> to_calc(Nedges, 2);
+	size_t Nedges = edge_values.size();
+	vector<double> ws(Nedges, 0), edge_length(Nedges);
+	std::vector<Vector2D> normals(Nedges);
 	for (size_t j = 0; j < Nedges; ++j)
 	{
 		Edge const& edge = tess.GetEdge(static_cast<int>(j));
 		edge_length[j] = cd.areas[j];
+		if (edge.neighbors.first < N)
+			TotalArea[static_cast<size_t>(edge.neighbors.first)] += edge_length[j];
+		if (edge.neighbors.second < N)
+			TotalArea[static_cast<size_t>(edge.neighbors.second)] += edge_length[j];
 		Primitive left = convert_to_primitive(edge_values[j].first, eos_, tracerstickernames);
 		Primitive right = convert_to_primitive(edge_values[j].second, eos_, tracerstickernames);
 		Vector2D p = normalize(Parallel(edge));
-		normals[j] = normalize(tess.GetMeshPoint(edge.neighbors.second) -	tess.GetMeshPoint(edge.neighbors.first));
+		normals[j] = normalize(tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first));
 		left.Velocity = Vector2D(ScalarProd(left.Velocity, normals[j]), ScalarProd(left.Velocity, p));
 		right.Velocity = Vector2D(ScalarProd(right.Velocity, normals[j]), ScalarProd(right.Velocity, p));
-		ws[j] = GetWs(left,right);
-		to_calc[j] = CheckSkip(skip_indeces,edge,cells);
-		if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
-			to_calc[j] = 0;
-		if (edge.neighbors.first < static_cast<int>(N))
-			CellLength[edge.neighbors.first] += edge_length[j]*Vector2D(std::abs(p.y), std::abs(p.x));
-		if (edge.neighbors.second < static_cast<int>(N))
-			CellLength[edge.neighbors.second] += edge_length[j]*Vector2D(std::abs(p.y), std::abs(p.x));
+		ws[j] = GetWs(left, right);
 	}
-	for (size_t i = 0; i < N; ++i)
-		res[i] = cells[i].velocity;
-	for (size_t i = 0; i < Niter; ++i)
+	vector<int> edges;
+	size_t indexX = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
+		string("AreaX")) - tracerstickernames.tracer_names.begin());
+	size_t indexY = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
+		string("AreaY")) - tracerstickernames.tracer_names.begin());
+	size_t Ntracers = tracerstickernames.tracer_names.size();
+	for (size_t i = 0; i < static_cast<size_t>(N); ++i)
 	{
-		temp.assign(N,Vector2D(0,0));
-#ifdef RICH_MPI
-		MPI_exchange_data(tess, res, true);
-#endif
-		edge_vel = evc_(tess, res);
-		for (size_t j = 0; j < Nedges; ++j)
+		edges = tess.GetCellEdges(static_cast<int>(i));
+		double A = cd.volumes[i];
+		Vector2D CM = A*cd.CMs[i];
+		for (size_t j = 0; j < edges.size(); ++j)
 		{
-			double l = edge_length[j];
-			double v = ScalarProd(normals[j], edge_vel.at(j));
-			double cur_ws=ws[j]-v;
-			if(to_calc[j]==0)
-				cur_ws = 0;
-			Edge const& edge = tess.GetEdge(static_cast<int>(j));
-			if (edge.neighbors.first < static_cast<int>(N))
-			{
-				temp[edge.neighbors.first] += (l*cur_ws) * normals[j];
-			}
-			if (edge.neighbors.second < static_cast<int>(N))
-			{
-				temp[edge.neighbors.second] += (l*cur_ws) * normals[j];
-			}
+			double Atemp = edge_length[edges[j]] * dt*ws[edges[j]];
+			if (tess.GetEdge(edges[j]).neighbors.second == static_cast<int>(i))
+				Atemp *= -1;
+			Vector2D CMtemp = (tess.GetEdge(edges[j]).vertices.first + tess.GetEdge(edges[j]).vertices.second)*0.5 + ws[edges[j]] * 0.5
+				*normals[edges[j]]*dt;
+			CM += Atemp*CMtemp;
+			A += Atemp;
 		}
-
-		for (size_t j = 0; j < N; ++j)
+		res[i] = (CM / A - cd.CMs[i])/dt;
+		if (indexX < Ntracers && indexY < Ntracers)
 		{
-			res[j].x += (0.2 / CellLength[j].x)*temp[j].x;
-			res[j].y += (0.2 / CellLength[j].y)*temp[j].y;
+			double m = 4.0*cells[i].density*cd.volumes[i]/(dt*std::sqrt(TotalArea[i]));
+			Vector2D toadd(m*cells[i].tracers[indexX], m*cells[i].tracers[indexY]);
+			double v = abs(res[i]);
+			double t = abs(toadd);
+			if (t > 0.15*v)
+				 toadd = toadd*(0.15*v / t);
+			res[i] += toadd;
 		}
 	}
 	return res;
-}
-
-vector<Vector2D> LMotion::ApplyFix(Tessellation const& /*tess*/, vector<ComputationalCell> const& /*cells*/, double /*time*/,
-double /*dt*/, vector<Vector2D> const& velocities, TracerStickerNames const& /*tracerstickernames*/)const
-{
-	return velocities;
 }

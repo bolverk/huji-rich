@@ -86,6 +86,8 @@ vector<Extensive> ConditionActionSequence2::operator()
 	const double /*dt*/,
 	TracerStickerNames const& tracerstickernames) const
 {
+	for (size_t i = 0; i < sequence2_.size(); ++i)
+		sequence2_[i].second->Reset();
 	edge_values_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	interp_.operator()(tess, cells, time,edge_values_,tracerstickernames,cd);

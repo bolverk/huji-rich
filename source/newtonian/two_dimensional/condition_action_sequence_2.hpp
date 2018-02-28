@@ -40,6 +40,8 @@ public:
 				Extensive &res,
 				double time,
 				TracerStickerNames const& tracerstickernames) const = 0;
+		
+		virtual void Reset(void) const {}
 
 		virtual ~Action2(void);
 	};
@@ -223,6 +225,7 @@ public:
 private:
 	const LagrangianHLLC& rs_, rs2_;
 	LagrangianCriteria const& criteria_;
+	mutable int last_;
 };
 
 //! \brief Criteria for having mass flux at outer edges of domain
