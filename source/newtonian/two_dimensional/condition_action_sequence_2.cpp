@@ -265,6 +265,7 @@ void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessel
 	size_t N = static_cast<size_t>(tess.GetTotalSidesNumber());
 	ws_.resize(N,0.0);
 	edge_vel_.resize(N,0.0);
+	Lag_calc_.resize(N, false);
 	const pair<Vector2D, Vector2D> p_n = calc_parallel_normal(tess, edge);
 	const double speed = ScalarProd(p_n.second, edge_velocity) / abs(p_n.second);
 	const Primitive p_left =convert_to_primitive(edge_values.first, eos, tracerstickernames);
