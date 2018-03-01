@@ -255,6 +255,7 @@ void LagrangianFlux::Reset(void)const
 {
 	ws_.assign(ws_.size(), 0);
 	edge_vel_.assign(edge_vel_.size(), 0);
+	Lag_calc_.assign(Lag_calc_.size(), false);
 }
 
 void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessellation& tess,const Vector2D& edge_velocity,const vector<ComputationalCell>& cells,
@@ -272,6 +273,7 @@ void LagrangianFlux::operator()(const Edge& edge,const size_t index,const Tessel
 	{
 		res = convert_conserved_to_extensive(rotate_solve_rotate_back(rs_, p_left, p_right, speed, p_n.second, p_n.first), edge_values);
 		ws_[index] = rs_.energy;
+		Lag_calc_[index] = true;
 	}
 	else
 	{

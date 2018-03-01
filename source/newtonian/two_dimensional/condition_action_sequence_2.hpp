@@ -222,6 +222,8 @@ public:
   mutable vector<double> ws_;
   //! \brief Velocity of the edges
   mutable vector<double> edge_vel_;
+  //! \brief Was this edge calculated Lagrangialy
+  mutable vector<bool> Lag_calc_;
 private:
 	const LagrangianHLLC& rs_, rs2_;
 	LagrangianCriteria const& criteria_;
