@@ -43,11 +43,13 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 			delta.energy = p_star*v_new*cd.areas[i] * dt;
 		else
 		{
-			if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.first) != edge.neighbors.second)
+			if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second))
 				delta.energy = cd.areas[i] * dt*v_new*cells[static_cast<size_t>(edge.neighbors.first)].pressure;
 			else
-				if (tess.GetOriginalIndex(edge.neighbors.second) != edge.neighbors.first)
+				if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
 					delta.energy = cd.areas[i] * dt*v_new*cells[static_cast<size_t>(edge.neighbors.second)].pressure;
+				else
+					delta.energy = 0;
 		}
 		if (bracketed(0, edge.neighbors.first, tess.GetPointNo()))
 		{

@@ -93,7 +93,7 @@ double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tra
 		res[i] = (CM / A - cd.CMs[i])/dt;
 		if (indexX < Ntracers && indexY < Ntracers)
 		{
-			double m = 4.0*cells[i].density*cd.volumes[i]/(dt*std::sqrt(TotalArea[i]));
+			double m = 5.5*cells[i].density*cd.volumes[i]/(dt*std::sqrt(TotalArea[i]));
 			Vector2D toadd(m*cells[i].tracers[indexX], m*cells[i].tracers[indexY]);
 			double v = abs(res[i]);
 			double t = abs(toadd);
