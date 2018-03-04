@@ -10,8 +10,8 @@
 
 namespace
 {
-	void RemoveRefineNeighborRemove(Tessellation3D const& tess, std::vector<size_t> const& remove, 
-		std::vector<size_t> &refine,std::vector<Vector3D> &refine_direction)
+	void RemoveRefineNeighborRemove(Tessellation3D const& tess, std::vector<size_t> const& remove,
+		std::vector<size_t> &refine, std::vector<Vector3D> &refine_direction)
 	{
 		vector<size_t> neigh;
 		size_t Nrefine = refine.size();
@@ -35,7 +35,7 @@ namespace
 			if (good)
 			{
 				newrefine.push_back(refine[i]);
-				if(!refine_direction.empty())
+				if (!refine_direction.empty())
 					new_direction.push_back(refine_direction[i]);
 			}
 		}
@@ -179,10 +179,10 @@ namespace
 	}
 #endif //RICH_MPI
 
-	std::vector<Vector3D> GetNewPoints(Tessellation3D const& tess,std::pair<vector<size_t>,
+	std::vector<Vector3D> GetNewPoints(Tessellation3D const& tess, std::pair<vector<size_t>,
 		vector<Vector3D> > &ToRefine
 #ifdef RICH_MPI
-		,Tessellation3D const& tproc
+		, Tessellation3D const& tproc
 #endif
 	)
 	{
@@ -232,7 +232,7 @@ namespace
 		}
 		// Make sure point is inside domian
 #ifndef RICH_MPI
-		std::pair<Vector3D,Vector3D> bb = tess.GetBoxCoordinates();
+		std::pair<Vector3D, Vector3D> bb = tess.GetBoxCoordinates();
 #endif
 		for (size_t i = 0; i < Nrefine; ++i)
 		{
@@ -395,7 +395,7 @@ namespace
 					if (it != ghost_points[k].end())
 					{
 						indeces_toadd.push_back(sort_indecesg[k][static_cast<size_t>(it - ghost_points[k].begin())]);
-						changed_byouter[k].push_back(i);
+						changed_byouter[k].push_back(refined_points[i]);
 					}
 				}
 				if (!indeces_toadd.empty())
@@ -425,7 +425,9 @@ namespace
 			{
 				size_t size2 = neigh_index[i][j].size();
 				for (size_t k = 0; k < size2; ++k)
+				{
 					neigh_index[i][j][k] = oldtess.GetDuplicatedPoints()[i].at(neigh_index[i][j][k]);
+				}
 			}
 		}
 	}
@@ -433,7 +435,7 @@ namespace
 
 	void LocalRemove(Tessellation3D const& oldtess, std::vector<size_t> const& ToRemove, AMRExtensiveUpdater3D const& eu,
 		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
-		Tessellation3D const& tess,std::vector<Conserved3D> &extensives)
+		Tessellation3D const& tess, std::vector<Conserved3D> &extensives)
 	{
 		std::vector<size_t> neigh, temp, temp2;
 		r3d_poly poly, poly2;
@@ -473,9 +475,9 @@ namespace
 	}
 
 #ifdef RICH_MPI
-	void MPIRemove(Tessellation3D const& oldtess,Tessellation3D const& tess,std::vector<size_t> const& ToRemove,
-		AMRExtensiveUpdater3D const& eu,EquationOfState const& eos,TracerStickerNames const& tsn,
-		std::vector<ComputationalCell3D> const& cells,std::vector<Conserved3D> &extensives)
+	void MPIRemove(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRemove,
+		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, TracerStickerNames const& tsn,
+		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives)
 	{
 		vector<vector<size_t> > nghost_index;
 		vector<vector<vector<size_t> > > duplicate_index;
@@ -529,12 +531,12 @@ namespace
 	}
 #endif
 
-	void LocalRefine(Tessellation3D const& oldtess,Tessellation3D const& tess,std::vector<size_t> const& ToRefine,
-		std::vector<ComputationalCell3D> const& cells,EquationOfState const& eos,TracerStickerNames const& tsn,
-		AMRExtensiveUpdater3D const&eu,std::vector<Conserved3D> &extensives)
+	void LocalRefine(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRefine,
+		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
+		AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives)
 	{
 		size_t Nrefine = ToRefine.size();
-		std::vector<size_t> neigh,temp,temp2;
+		std::vector<size_t> neigh, temp, temp2;
 		std::vector<std::vector<int> > i_temp;
 		r3d_poly poly, poly2;
 		boost::container::flat_set<size_t> checked;
@@ -592,7 +594,7 @@ namespace
 			}
 			else
 			{
-				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg+i), tsn);
+				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg + i), tsn);
 				extensives[ToRefine[i]] -= extensives[Norg2 + i];
 				std::cout << "Warning no good poly localrefine" << std::endl;
 			}
@@ -621,7 +623,7 @@ namespace
 			}
 			if (!temp2.empty())
 			{
-				refined_points.push_back(tess.GetPointNo()-Nrefine+i);
+				refined_points.push_back(tess.GetPointNo() - Nrefine + i);
 				to_send.push_back(temp2);
 			}
 		}
@@ -630,7 +632,7 @@ namespace
 		std::vector<std::vector<std::vector<size_t> > > neigh_index;
 		std::vector < std::vector<double> > planes;
 		std::vector<std::vector<size_t> > changed_byouter;
-		SendRecvMPIRefine(tess, to_send, refined_points, oldtess, neigh_index, planes, n_planes,changed_byouter);
+		SendRecvMPIRefine(tess, to_send, refined_points, oldtess, neigh_index, planes, n_planes, changed_byouter);
 		// Find the intersections
 		r3d_poly poly;
 		std::vector<r3d_plane> r_planes;
@@ -692,12 +694,12 @@ namespace
 				}
 			}
 		}
-		// send/recv the extensive 
 		extensive_tosend = MPI_exchange_data(oldtess.GetDuplicatedProcs(), extensive_tosend, extensives.at(0));
+		size_t Nremove = oldtess.GetPointNo() + Nrefine - tess.GetPointNo();
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
-				extensives[oldtess.GetPointNo() + changed_byouter[i][j]] += extensive_tosend[i][j];
+				extensives[changed_byouter[i][j] + Nremove] += extensive_tosend[i][j];
 		}
 	}
 #endif
@@ -797,7 +799,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	if (!ToRefine.second.empty())
 		VectorValues(ToRefine.second, indeces);
 	// remove neighboring refine/remove
-	RemoveRefineNeighborRemove(tess, ToRemove.first, ToRefine.first,ToRefine.second);
+	RemoveRefineNeighborRemove(tess, ToRemove.first, ToRefine.first, ToRefine.second);
 
 	// Do we need to rebuild tess ?
 	int ntotal = static_cast<int>(ToRemove.first.size() + ToRefine.first.size());
@@ -809,7 +811,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Get new points from refine
 	std::vector<Vector3D> new_points = GetNewPoints(tess, ToRefine
 #ifdef RICH_MPI
-		,sim.getProcTesselation()
+		, sim.getProcTesselation()
 #endif
 	);
 	// Create copy of old tess
@@ -826,7 +828,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	tess.Build(new_mesh);
 #endif
 	// Fix extensives for refine
-	extensives.resize(oldtess->GetPointNo()+ToRefine.first.size());
+	extensives.resize(oldtess->GetPointNo() + ToRefine.first.size());
 	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, tsn, *eu_, extensives);
 #ifdef RICH_MPI
 	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, tsn, cells, extensives);
@@ -835,6 +837,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	RemoveVector(extensives, ToRemove.first);
 	// Add the removed extensive to the neighboring cells
 	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tsn, tess, extensives);
+
 #ifdef RICH_MPI
 	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, tsn, cells, extensives);
 #endif
@@ -842,7 +845,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	RemoveVector(cells, ToRemove.first);
 	size_t NorgNew = tess.GetPointNo();
 	cells.resize(NorgNew);
-	for (size_t i = 0; i < (Norg-ToRemove.first.size()); ++i)
+	for (size_t i = 0; i < (Norg - ToRemove.first.size()); ++i)
 	{
 		try
 		{
@@ -854,10 +857,10 @@ void AMR3D::operator() (HDSim3D &sim)
 			eo.AddEntry("Norg", static_cast<double>(Norg));
 			throw eo;
 		}
-	}		
+	}
 	for (size_t i = 0; i< ToRefine.first.size(); ++i)
 	{
-		size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(), 
+		size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
 			ToRefine.first[i]) - ToRemove.first.begin());
 		try
 		{
