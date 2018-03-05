@@ -393,13 +393,11 @@ namespace
 					vector<size_t>::const_iterator it = binary_find(ghost_points[k].begin(),
 						ghost_points[k].end(), to_send[i][j]);
 					if (it != ghost_points[k].end())
-					{
 						indeces_toadd.push_back(sort_indecesg[k][static_cast<size_t>(it - ghost_points[k].begin())]);
-						changed_byouter[k].push_back(refined_points[i]);
-					}
 				}
 				if (!indeces_toadd.empty())
 				{
+					changed_byouter[k].push_back(refined_points[i]);
 					neigh_index[k].push_back(indeces_toadd);
 					size_t nplanes = r_planes.size();
 					for (size_t j = 0; j < nplanes; ++j)
