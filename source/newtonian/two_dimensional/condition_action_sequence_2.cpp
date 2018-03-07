@@ -249,7 +249,7 @@ void Ratchet::operator()
 
 LagrangianFlux::LagrangianFlux(const LagrangianHLLC& rs,const LagrangianHLLC& rs2,
 	LagrangianFlux::LagrangianCriteria const& criteria):ws_(vector<double>()),edge_vel_(vector<double>()),
-	rs_(rs),rs2_(rs2),criteria_(criteria){}
+	Lag_calc_(vector<bool>()),rs_(rs),rs2_(rs2),criteria_(criteria){}
 	
 void LagrangianFlux::Reset(void)const
 {
