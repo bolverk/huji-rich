@@ -227,7 +227,6 @@ public:
 private:
 	const LagrangianHLLC& rs_, rs2_;
 	LagrangianCriteria const& criteria_;
-	mutable int last_;
 };
 
 //! \brief Criteria for having mass flux at outer edges of domain
