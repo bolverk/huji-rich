@@ -24,8 +24,8 @@ namespace
 
 LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos) :interp_(interp), eos_(eos) {}
 
-void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double time,
-	TracerStickerNames const & tracerstickernames, vector<Vector3D>& res) const
+void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double /*time*/,
+	TracerStickerNames const & /*tracerstickernames*/, vector<Vector3D>& res) const
 {
 	size_t N = tess.GetPointNo();
 	res.resize(N);
