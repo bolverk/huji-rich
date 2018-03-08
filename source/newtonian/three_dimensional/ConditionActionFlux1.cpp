@@ -225,3 +225,5 @@ void LagrangianFlux3D::Reset(void) const
 	edge_vel_.assign(edge_vel_.size(), 0);
 	Lag_calc_.assign(Lag_calc_.size(), false);
 }
+
+LagrangianFlux3D::LagrangianCriteria3D::~LagrangianCriteria3D(){}
