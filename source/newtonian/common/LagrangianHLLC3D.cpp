@@ -1,6 +1,4 @@
-#include "Hllc3D.hpp"
-#include "../../misc/universal_error.hpp"
-#include "../../misc/utils.hpp"
+#include "LagrangianHLLC3D.hpp"
 
 using namespace std;
 
@@ -10,14 +8,14 @@ namespace
 	{
 	public:
 
-		WaveSpeeds(double left_i,double center_i,double right_i) :left(left_i),center(center_i),right(right_i) {}
-		const double left;
-		const double center;
-		const double right;
+		WaveSpeeds(double left_i, double center_i, double right_i) :left(left_i), center(center_i), right(right_i) {}
+		double left;
+		double center;
+		double right;
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos,TracerStickerNames const& tsn)
+		EquationOfState const &eos, TracerStickerNames const& tsn)
 	{
 		const double dl = left.density;
 		const double pl = left.pressure;
@@ -34,8 +32,8 @@ namespace
 		return WaveSpeeds(sl, ss, sr);
 	}
 
-	UniversalError invalid_wave_speeds(ComputationalCell3D const& left,ComputationalCell3D const& right,
-		double velocity,double left_wave_speed,double center_wave_speed,double right_wave_speed)
+	UniversalError invalid_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
+		double velocity, double left_wave_speed, double center_wave_speed, double right_wave_speed)
 	{
 		UniversalError res("Invalid wave speeds in hllc solver");
 		res.AddEntry("left density", left.density);
@@ -55,9 +53,8 @@ namespace
 
 	double TotalEnergyDensity3D(ComputationalCell3D const& p)
 	{
-		return p.density*(0.5*ScalarProd(p.velocity,p.velocity) + p.internal_energy);
+		return p.density*(0.5*ScalarProd(p.velocity, p.velocity) + p.internal_energy);
 	}
-
 
 	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss)
 	{
@@ -81,14 +78,16 @@ namespace
 	Conserved3D PrimitiveToFlux(ComputationalCell3D const& p)
 	{
 		return Conserved3D(p.density*p.velocity.x,
-			p.pressure*Vector3D(1,0,0) + p.density*p.velocity.x*p.velocity,
-			(TotalEnergyDensity3D(p) + p.pressure)*	p.velocity.x,0);
+			p.pressure*Vector3D(1, 0, 0) + p.density*p.velocity.x*p.velocity,
+			(TotalEnergyDensity3D(p) + p.pressure)*	p.velocity.x, 0);
 	}
 
 }
 
-Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell3D const& right,double velocity,
-	EquationOfState const& eos, TracerStickerNames const& tsn,Vector3D const& normaldir) const
+LagrangianHLLC3D::LagrangianHLLC3D(bool mass_flux) :massflux_(mass_flux), ws(0) {}
+
+Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
+	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
 
 	ComputationalCell3D local_left = left;
@@ -101,7 +100,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 	local_right.velocity.y -= velocity*normaldir.y;
 	local_right.velocity.z -= velocity*normaldir.z;
 
-	double par_left = abs(local_left.velocity - ScalarProd(local_left.velocity,normaldir)*normaldir);
+	double par_left = abs(local_left.velocity - ScalarProd(local_left.velocity, normaldir)*normaldir);
 	double par_right = abs(local_right.velocity - ScalarProd(local_right.velocity, normaldir)*normaldir);
 	local_left.velocity.x = ScalarProd(local_left.velocity, normaldir);
 	local_left.velocity.y = par_left;
@@ -110,29 +109,40 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 	local_right.velocity.y = par_right;
 	local_right.velocity.z = 0;
 
-	Conserved3D ul, ur; 
+	Conserved3D ul, ur;
 	PrimitiveToConserved(local_left, 1, ul);
 	PrimitiveToConserved(local_right, 1, ur);
 
 	const Conserved3D fl = PrimitiveToFlux(local_left);
 	const Conserved3D fr = PrimitiveToFlux(local_right);
 
-	const WaveSpeeds ws = estimate_wave_speeds(local_left, local_right,eos,tsn);
+	WaveSpeeds ws_estimate = estimate_wave_speeds(local_left, local_right, eos, tsn);
 
-	const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
-	const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
+	if (!massflux_)
+	{
+		local_left.velocity -= ws_estimate.center*normaldir;
+		local_right.velocity -= ws_estimate.center*normaldir;
+		velocity += ws_estimate.center;
+		ws = ws_estimate.center;
+		ws_estimate.center = 0;
+		ws_estimate.left -= ws;
+		ws_estimate.right -= ws;
+	}
+
+	const Conserved3D usl = starred_state(local_left, ws_estimate.left, ws_estimate.center);
+	const Conserved3D usr = starred_state(local_right, ws_estimate.right, ws_estimate.center);
 
 	Conserved3D f_gr;
-	if (ws.left > 0)
+	if (ws_estimate.left > 0)
 		f_gr = fl;
-	else if (ws.left <= 0 && ws.center >= 0)
-		f_gr = fl + ws.left*(usl - ul);
-	else if (ws.center < 0 && ws.right >= 0)
-		f_gr = fr + ws.right*(usr - ur);
-	else if (ws.right < 0)
+	else if (ws_estimate.left <= 0 && ws_estimate.center >= 0)
+		f_gr = fl + ws_estimate.left*(usl - ul);
+	else if (ws_estimate.center < 0 && ws_estimate.right >= 0)
+		f_gr = fr + ws_estimate.right*(usr - ur);
+	else if (ws_estimate.right < 0)
 		f_gr = fr;
 	else
-		throw invalid_wave_speeds(local_left,local_right,velocity,ws.left,ws.center,ws.right);
+		throw invalid_wave_speeds(local_left, local_right, velocity, ws_estimate.left, ws_estimate.center, ws_estimate.right);
 
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
@@ -140,7 +150,6 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left,ComputationalCell
 		f_gr.momentum += (left.velocity - normaldir*ScalarProd(left.velocity, normaldir))*f_gr.mass;
 	else
 		f_gr.momentum += (right.velocity - normaldir*ScalarProd(right.velocity, normaldir))*f_gr.mass;
-
 	f_gr.internal_energy = 0;
 	return f_gr;
 }

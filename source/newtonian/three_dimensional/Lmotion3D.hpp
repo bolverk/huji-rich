@@ -1,0 +1,21 @@
+#ifndef LMOTION3D_HPP
+#define LMOTION3D_HPP 1
+#include "point_motion_3d.hpp"
+#include "LinearGauss3D.hpp"
+
+class LMotion3D : public PointMotion3D
+{
+private:
+	LinearGauss3D const& interp_;
+	EquationOfState const& eos_;
+
+public:
+	LMotion3D(LinearGauss3D const& interp, EquationOfState const& eos);
+
+	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
+
+	void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
+		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const;
+};
+#endif //LMOTION3D_HPP

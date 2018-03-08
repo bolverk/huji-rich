@@ -31,6 +31,8 @@ void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessell
 	const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
 	const double time, const double /*dt*/, TracerStickerNames const& tracerstickernames) const
 {
+	for (size_t i = 0; i < sequence_.size(); ++i)
+		sequence_[i].second->Reset();
 	vector<std::pair<ComputationalCell3D, ComputationalCell3D> > face_values;
 	interp_(tess, cells, time, face_values, tracerstickernames);
 	fluxes.resize(tess.GetTotalFacesNumber(), extensives[0]);
@@ -187,4 +189,39 @@ pair<bool, bool> RegularSpecialEdge3D::operator()(size_t face_index, const Tesse
 		sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);
+}
+
+LagrangianFlux3D::LagrangianFlux3D(const LagrangianHLLC3D & rs, const LagrangianHLLC3D & rs2, 
+	LagrangianCriteria3D const & criteria):ws_(std::vector<double>()), edge_vel_(std::vector<double>()),
+	Lag_calc_(std::vector<bool>()), rs_(rs), rs2_(rs2), criteria_(criteria) {}
+
+void LagrangianFlux3D::operator()(size_t face_index, const Tessellation3D & tess, const Vector3D & face_velocity, 
+	const vector<ComputationalCell3D>& cells, const EquationOfState & eos, const bool aux, Conserved3D & res, double time, 
+	TracerStickerNames const & tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D> const & face_values) const
+{
+	size_t N = tess.GetTotalFacesNumber();
+	ws_.resize(N, 0.0);
+	edge_vel_.resize(N, 0.0);
+	Lag_calc_.resize(N, false);
+	const Vector3D normal = normalize(tess.Normal(face_index));
+	if (criteria_(face_index, tess, face_velocity, cells, eos, aux, face_values, time, tracerstickernames))
+	{
+		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos, tracerstickernames);
+		ws_[face_index] = rs_.ws;
+		Lag_calc_[face_index] = true;
+	}
+	else
+	{
+		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs2_, res, eos, tracerstickernames);
+		ws_[face_index] = 0;
+		Lag_calc_[face_index] = false;
+	}
+	edge_vel_[face_index] = ScalarProd(normal, face_velocity);
+}
+
+void LagrangianFlux3D::Reset(void) const
+{
+	ws_.assign(ws_.size(), 0);
+	edge_vel_.assign(edge_vel_.size(), 0);
+	Lag_calc_.assign(Lag_calc_.size(), false);
 }

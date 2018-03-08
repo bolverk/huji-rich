@@ -49,8 +49,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			extensives[n1].internal_energy += delta.energy - (Eknew - Ek);
 		}
 	}
-	size_t n = tess.GetPointNo();
-	for (size_t i = 0; i < n; ++i)
+
+	for (size_t i = 0; i < N; ++i)
 	{
 		double dEtherm = extensives[i].internal_energy - oldEtherm[i];
 		double dEk = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass - oldEk[i];
