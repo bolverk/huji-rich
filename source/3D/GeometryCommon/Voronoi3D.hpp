@@ -109,6 +109,8 @@ public:
 	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round);
 #endif
 
+	void BuildDebug(int rank);
+
 	std::size_t GetPointNo(void) const;
 
 	Vector3D GetMeshPoint(std::size_t index) const;

@@ -840,6 +840,16 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	double t0 = MPI_Wtime();
 #endif
 	std::vector<size_t> order = HilbertOrder3D(new_points);
+
+#ifdef vdebug
+	std::vector<Vector3D> bbox;
+	bbox.push_back(bounding_box.first);
+	bbox.push_back(bounding_box.second);
+	write_vecst(order, "order_" + int2str(rank) + ".bin");
+	write_vec3d(new_points, "points0_" + int2str(rank) + ".bin");
+	write_vec3d(bbox, "bb_" + int2str(rank) + ".bin");
+#endif
+
 	del_.Build(new_points, bounding_box.second, bounding_box.first, order);
 
 #ifdef timing
@@ -866,6 +876,11 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 #endif
 
 	vector<Vector3D> extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
+
+#ifdef vdebug
+	write_vec3d(extra_points, "points1_" + int2str(rank) + ".bin");
+#endif
+
 	try
 	{
 		del_.BuildExtra(extra_points);
@@ -901,6 +916,10 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 #endif
 
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
+
+#ifdef vdebug
+	write_vec3d(extra_points, "points2_" + int2str(rank) + ".bin");
+#endif
 
 	try
 	{
@@ -938,6 +957,10 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
 
+#ifdef vdebug
+	write_vec3d(extra_points, "points3_" + int2str(rank) + ".bin");
+#endif
+
 	try
 	{
 		del_.BuildExtra(extra_points);
@@ -973,6 +996,10 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 #endif
 
 	extra_points = CreateBoundaryPointsMPI(ghost_index, tproc, self_duplicate);
+
+#ifdef vdebug
+	write_vec3d(extra_points, "points4_" + int2str(rank) + ".bin");
+#endif
 
 	try
 	{
@@ -1149,6 +1176,43 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 
 	CalcAllCM();
 	CM_.resize(del_.points_.size());
+	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
+		if (BoundaryFace(i))
+			CalcRigidCM(i);
+}
+
+void Voronoi3D::BuildDebug(int rank)
+{
+	std::vector<size_t> order = read_vecst("order_" + int2str(rank) + ".bin");
+	std::vector<Vector3D> points = read_vec3d("points0_" + int2str(rank) + ".bin");
+	Norg_ = points.size();
+	std::vector<Vector3D> bb = read_vec3d("bb" + int2str(rank) + ".bin");
+	del_.Build(points, bb[1], bb[0],order);
+	points = read_vec3d("points1_" + int2str(rank) + ".bin");
+	del_.BuildExtra(points);
+	points = read_vec3d("points2_" + int2str(rank) + ".bin");
+	del_.BuildExtra(points);
+	points = read_vec3d("points3_" + int2str(rank) + ".bin");
+	del_.BuildExtra(points);
+	points = read_vec3d("points4_" + int2str(rank) + ".bin");
+	del_.BuildExtra(points);
+	
+	bigtet_ = SetPointTetras(PointTetras_, Norg_, del_.tetras_, del_.empty_tetras_);
+
+	R_.resize(del_.tetras_.size());
+	std::fill(R_.begin(), R_.end(), -1);
+	tetra_centers_.resize(R_.size());
+
+	CM_.resize(del_.points_.size());
+	volume_.resize(Norg_, 0);
+	// Create Voronoi
+	BuildVoronoi(order);
+
+	std::vector<double>().swap(R_);
+	std::vector<std::vector<size_t> >().swap(PointTetras_);
+	std::vector<Tetrahedron>().swap(del_.tetras_);
+
+	CalcAllCM();
 	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
 		if (BoundaryFace(i))
 			CalcRigidCM(i);
