@@ -688,7 +688,11 @@ namespace
 						}
 					}
 					else
-						std::cout << "warning bad poly in MPIRefine" << std::endl;
+					{
+						int rank = 0;
+						MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+						std::cout << "warning bad poly in MPIRefine in rank " <<rank<< std::endl;
+					}
 				}
 			}
 		}
