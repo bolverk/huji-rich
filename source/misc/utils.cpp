@@ -6,6 +6,7 @@
 #include <x86intrin.h>
 #endif
 #include <cfloat>
+#include <cmath>
 
 bool is_nan(double x)
 {
