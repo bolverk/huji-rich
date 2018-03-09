@@ -109,13 +109,6 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	local_right.velocity.y = par_right;
 	local_right.velocity.z = 0;
 
-	Conserved3D ul, ur;
-	PrimitiveToConserved(local_left, 1, ul);
-	PrimitiveToConserved(local_right, 1, ur);
-
-	const Conserved3D fl = PrimitiveToFlux(local_left);
-	const Conserved3D fr = PrimitiveToFlux(local_right);
-
 	WaveSpeeds ws_estimate = estimate_wave_speeds(local_left, local_right, eos, tsn);
 
 	if (!massflux_)
@@ -128,6 +121,13 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 		ws_estimate.left -= ws;
 		ws_estimate.right -= ws;
 	}
+
+	Conserved3D ul, ur;
+	PrimitiveToConserved(local_left, 1, ul);
+	PrimitiveToConserved(local_right, 1, ur);
+
+	const Conserved3D fl = PrimitiveToFlux(local_left);
+	const Conserved3D fr = PrimitiveToFlux(local_right);
 
 	const Conserved3D usl = starred_state(local_left, ws_estimate.left, ws_estimate.center);
 	const Conserved3D usr = starred_state(local_right, ws_estimate.right, ws_estimate.center);
