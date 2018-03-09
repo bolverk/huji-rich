@@ -1186,7 +1186,7 @@ void Voronoi3D::BuildDebug(int rank)
 	std::vector<size_t> order = read_vecst("order_" + int2str(rank) + ".bin");
 	std::vector<Vector3D> points = read_vec3d("points0_" + int2str(rank) + ".bin");
 	Norg_ = points.size();
-	std::vector<Vector3D> bb = read_vec3d("bb" + int2str(rank) + ".bin");
+	std::vector<Vector3D> bb = read_vec3d("bb_" + int2str(rank) + ".bin");
 	del_.Build(points, bb[1], bb[0],order);
 	points = read_vec3d("points1_" + int2str(rank) + ".bin");
 	del_.BuildExtra(points);

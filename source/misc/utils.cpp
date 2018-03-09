@@ -5,6 +5,7 @@
 #else
 #include <x86intrin.h>
 #endif
+#include <cfloat>
 
 bool is_nan(double x)
 {
@@ -49,6 +50,8 @@ double max(vector<double> const& v)
 
 double fastsqrt(double x)
 {
+	if (x<FLT_MIN || x > FLT_MAX)
+		return std::sqrt(x);
 	double res = static_cast<double>(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(static_cast<float>(x)))));
 	return x*res*(1.5 - 0.5*res*res*x);
 }
