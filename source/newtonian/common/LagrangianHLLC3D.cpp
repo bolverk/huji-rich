@@ -113,8 +113,8 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 
 	if (!massflux_)
 	{
-		local_left.velocity -= ws_estimate.center*normaldir;
-		local_right.velocity -= ws_estimate.center*normaldir;
+		local_left.velocity.x -= ws_estimate.center;
+		local_right.velocity.x -= ws_estimate.center;
 		velocity += ws_estimate.center;
 		ws = ws_estimate.center;
 		ws_estimate.center = 0;
