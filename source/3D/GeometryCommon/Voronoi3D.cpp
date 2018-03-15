@@ -47,19 +47,37 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 		while (abs(V2) < 0.01*R || abs(CrossProduct(V1, V2)) < 0.0001*tess.GetArea(faces[i]))
 		{
 			++counter;
-			assert(counter < 2 * NinFace);
+			if (counter > 2 * NinFace)
+				break;
 			V2 = points[InFace[(counter + 2) % NinFace]] - points[InFace[N1]];
 			N2 = (counter + 2) % NinFace;
 		}
-		vec[0] = points[InFace[0]];
-		vec[1] = points[InFace.at(N1)];
-		vec[2] = points[InFace.at(N2)];
-		vec[3] = tess.GetMeshPoint(index);
-		double s1 = orient3d(vec);
-		vec[3] = point;
-		double s2 = orient3d(vec);
-		if (s1*s2 < -0)
-			return false;
+		if (counter > 2 * NinFace)
+		{
+			std::cout << "Weird face in PointInPoly, cell " << index << " face " << faces[i] << " i " << i <<
+				" face area "<< tess.GetArea(faces[i])<< std::endl;
+			for (size_t j = 0; j < NinFace; ++j)
+				std::cout << "Point j " << points[InFace[j]].x << "," << points[InFace[j]].y << "," << points[InFace[j]].z << std::endl;
+			Vector3D normal = tess.GetFaceNeighbors(faces[i]).second == index ? 
+				tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).second) 
+				- tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).first) :
+				tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).first)
+				- tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).second);
+			if (ScalarProd(normal, point - points[InFace[0]]) < 0)
+				return false;
+		}
+		else
+		{
+			vec[0] = points[InFace[0]];
+			vec[1] = points[InFace.at(N1)];
+			vec[2] = points[InFace.at(N2)];
+			vec[3] = tess.GetMeshPoint(index);
+			double s1 = orient3d(vec);
+			vec[3] = point;
+			double s2 = orient3d(vec);
+			if (s1*s2 < -0)
+				return false;
+		}
 	}
 	return true;
 }

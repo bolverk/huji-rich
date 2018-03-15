@@ -41,7 +41,7 @@ Vector3D RotateZ(Vector3D const& v, double a)
 
 double abs(Vector3D const& v)
 {
-	return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+	return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
 Vector3D::Vector3D(void) :
