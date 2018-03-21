@@ -29,6 +29,13 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 		extensives[i].tracers[indexX] *= 0.85;
 		extensives[i].tracers[indexY] *= 0.85;
 	}
+
+	boost::container::flat_map<size_t,ComputationalCell> ghosts = ghost_(tess, cells, time, tracerstickernames);
+	vector<ComputationalCell> newcells(cells);
+	newcells.resize(tess.GetTotalPointNumber());
+	for (boost::container::flat_map<size_t, ComputationalCell>::iterator it = ghosts.begin(); it != ghosts.end(); ++it)
+		newcells[it->first] = it->second;
+
 	for (size_t i = 0; i < edge_list.size(); ++i)
 	{
 		const Edge& edge = edge_list[i];
@@ -44,22 +51,22 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 			if (v_new*v_star > 0)
 			{
 				if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first)
-					&& p_star > 1.2*cells[static_cast<size_t>(edge.neighbors.second)].pressure)
-					v_new = std::max(v_new, ScalarProd(cells[static_cast<size_t>(edge.neighbors.second)].velocity,
+					&& p_star > 1.2*newcells[static_cast<size_t>(edge.neighbors.second)].pressure)
+					v_new = std::max(v_new, ScalarProd(newcells[static_cast<size_t>(edge.neighbors.second)].velocity,
 						normal));
 				if (v_new < 0 && tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first)
-					&& p_star > 1.2*cells[static_cast<size_t>(edge.neighbors.first)].pressure)
-					v_new = std::min(v_new, ScalarProd(cells[static_cast<size_t>(edge.neighbors.first)].velocity,
+					&& p_star > 1.2*newcells[static_cast<size_t>(edge.neighbors.first)].pressure)
+					v_new = std::min(v_new, ScalarProd(newcells[static_cast<size_t>(edge.neighbors.first)].velocity,
 						normal));
 				delta.energy = p_star*v_new*cd.areas[i] * dt;
 			}
 			else
 			{
 				if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second))
-					delta.energy = cd.areas[i] * dt*v_new*cells[static_cast<size_t>(edge.neighbors.first)].pressure;
+					delta.energy = cd.areas[i] * dt*v_new*newcells[static_cast<size_t>(edge.neighbors.first)].pressure;
 				else
 					if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
-						delta.energy = cd.areas[i] * dt*v_new*cells[static_cast<size_t>(edge.neighbors.second)].pressure;
+						delta.energy = cd.areas[i] * dt*v_new*newcells[static_cast<size_t>(edge.neighbors.second)].pressure;
 					else
 						delta.energy = 0;
 			}
