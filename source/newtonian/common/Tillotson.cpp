@@ -22,7 +22,7 @@ double Tillotson::dp2EI(double d, double p) const
 	double E = (first_part + sqr) / (2 * a_*d);
 	if (E < 0)
 	{
-		std::cout << "d " << d << " p " << p << std::endl;
+		std::cout << "d " << d << " p " << p <<" first part "<<first_part<<" sqr "<<sqr<< std::endl;
 	}
 	assert(E > 0);
 	return E;
