@@ -89,7 +89,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 		cells[i].tracers,tracerstickernames.tracer_names));
 	for (size_t j = 0; j < N; ++j)
 	{
-		if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(i) || neigh[j]>N)
+		if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(i) || neigh[j]>static_cast<int>(N))
 			continue;
 		cs = std::max(cs, eos_.dp2c(cells[static_cast<size_t>(neigh[j])].density, cells[static_cast<size_t>(neigh[j])].pressure,
 			cells[static_cast<size_t>(neigh[j])].tracers));
