@@ -74,7 +74,7 @@ namespace {
   (const hdsim1D& sim)
   {
     assert(sim.GetCellNo()>10);
-    return sim.GetCell(sim.GetCellNo()-10).Density>1.2;
+    return sim.GetCell(static_cast<size_t>(sim.GetCellNo())-10).Density>1.2;
     //return sim.GetCycle()>1e5;
   }
 

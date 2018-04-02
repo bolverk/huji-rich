@@ -20,6 +20,11 @@ public:
    */
   explicit UniversalError(std::string const& err_msg);
 
+  /* \brief Copy constructor
+     \param origin Original
+   */
+  UniversalError(const UniversalError& origin);
+
   /*! \brief Appends std::string to the error message
     \param msg Message to append
    */

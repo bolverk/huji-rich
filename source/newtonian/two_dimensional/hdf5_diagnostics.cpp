@@ -257,7 +257,8 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 		(file,
 			vector<int>(1, sim.getCycle()),
 			"cycle");
-	vector<double> area(sim.getTessellation().GetPointNo(),0);
+	vector<double> area
+	  (static_cast<size_t>(sim.getTessellation().GetPointNo()), 0);
 	for(size_t i=0;i<area.size();++i)
 		area[i]=sim.getCacheData().volumes[i];
 	write_std_vector_to_hdf5(file,area,"Volumes");

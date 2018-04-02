@@ -7,6 +7,11 @@ UniversalError::UniversalError(string const& err_msg):
   fields_(vector<string>()),
   values_(vector<double>()) {}
 
+UniversalError::UniversalError(const UniversalError& origin):
+  err_msg_(origin.err_msg_),
+  fields_(origin.fields_),
+  values_(origin.values_) {}
+
 void UniversalError::Append2ErrorMessage(string const& msg)
 {
   err_msg_ += msg;

@@ -88,6 +88,8 @@ public:
   WrongBCSidesOrderException(double down, double up,
 			     double left, double right);
 
+  WrongBCSidesOrderException(const WrongBCSidesOrderException& origin);
+
   ~WrongBCSidesOrderException(void);
 
   /*! \brief Returns the y coordinate of the upper boundary

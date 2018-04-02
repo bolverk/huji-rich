@@ -44,6 +44,8 @@ public:
 		virtual void Reset(void) const {}
 
 		virtual ~Action2(void);
+	private:
+	  //	  Action2(const Action2&);
 	};
 
 	/*! \brief Class constructor
@@ -225,8 +227,9 @@ public:
   //! \brief Was this edge calculated Lagrangialy
   mutable vector<bool> Lag_calc_;
 private:
-	const LagrangianHLLC& rs_, rs2_;
-	LagrangianCriteria const& criteria_;
+  const LagrangianHLLC& rs_;
+  const LagrangianHLLC& rs2_;
+  const LagrangianCriteria& criteria_;
 };
 
 //! \brief Criteria for having mass flux at outer edges of domain

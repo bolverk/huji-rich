@@ -60,6 +60,13 @@ WrongBCSidesOrderException::WrongBCSidesOrderException (double down, double up, 
 :	_up(up), _down(down), _left(left), _right(right)
 {}
 
+WrongBCSidesOrderException::WrongBCSidesOrderException
+(const WrongBCSidesOrderException& origin):
+  _up(origin._up),
+  _down(origin._down),
+  _left(origin._left),
+  _right(origin._right) {}
+
 WrongBCSidesOrderException::~WrongBCSidesOrderException(void)
 {
 }

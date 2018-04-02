@@ -18,11 +18,12 @@ double time, TracerStickerNames const& ts) const
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	fc_.edge_vel_.resize(edge_list.size(),0);
 	fc_.ws_.resize(edge_list.size(),0);
-	size_t N = tess.GetPointNo();
+	size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<double> dV(N, 0);
 	vector<double> dv_ws(dV);
 	
-	vector<double> areas(edge_list.size(),0),volumes(tess.GetPointNo(),0);
+	vector<double> areas(edge_list.size(),0),
+	  volumes(static_cast<size_t>(tess.GetPointNo()),0);
 	for (size_t i = 0; i<edge_list.size(); ++i)
 		areas[i]=cd.areas[i];
 	for (size_t i = 0; i<static_cast<size_t>(tess.GetPointNo()); ++i)

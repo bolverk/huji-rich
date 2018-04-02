@@ -223,8 +223,10 @@ void RigidWallFlux2::operator()
 
 Ratchet::Ratchet(const RiemannSolver& rs,bool in) :	
   in_(in),
-  wall_(RigidWallFlux2(rs)),
-  free_(FreeFlowFlux(rs)) {}
+  //  wall_(RigidWallFlux2(rs)),
+  wall_(rs),
+  //free_(FreeFlowFlux(rs)) {}
+  free_(rs) {}
 
 
 void Ratchet::operator()
@@ -247,9 +249,16 @@ void Ratchet::operator()
 		wall_.operator()(edge,index, tess, edge_velocity, cells, eos, aux,edge_values,res,time,tracerstickernames);
 }
 
-LagrangianFlux::LagrangianFlux(const LagrangianHLLC& rs,const LagrangianHLLC& rs2,
-	LagrangianFlux::LagrangianCriteria const& criteria):ws_(vector<double>()),edge_vel_(vector<double>()),
-	Lag_calc_(vector<bool>()),rs_(rs),rs2_(rs2),criteria_(criteria){}
+LagrangianFlux::LagrangianFlux
+(const LagrangianHLLC& rs,
+ const LagrangianHLLC& rs2,
+ const LagrangianFlux::LagrangianCriteria& criteria):
+  ws_(vector<double>()),
+  edge_vel_(vector<double>()),
+  Lag_calc_(vector<bool>()),
+  rs_(rs),
+  rs2_(rs2),
+  criteria_(criteria) {}
 	
 void LagrangianFlux::Reset(void)const
 {

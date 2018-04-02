@@ -26,12 +26,12 @@ namespace
 	}
 }
 
-LMotion::LMotion(SpatialReconstruction const& interp, EquationOfState const& eos,EdgeVelocityCalculator const& evc) :interp_(interp), eos_(eos),evc_(evc){}
+LMotion::LMotion(SpatialReconstruction const& interp, EquationOfState const& eos /*,EdgeVelocityCalculator const& evc*/) :interp_(interp), eos_(eos) /*,evc_(evc)*/ {}
 
 vector<Vector2D> LMotion::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
 double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
 {
-	size_t N = tess.GetPointNo();
+  size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<Vector2D> res(N, Vector2D(0, 0));
 	for (size_t i = 0; i < N; ++i)
 		res[i] = cells[i].velocity;
@@ -42,8 +42,8 @@ vector<Vector2D> LMotion::ApplyFix(Tessellation const& tess, vector<Computationa
 double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tracerstickernames)const
 {
 	int N = tess.GetPointNo();
-	vector<Vector2D> res(N, Vector2D(0, 0));
-	std::vector<double> TotalArea(N, 0);
+	vector<Vector2D> res(static_cast<size_t>(N), Vector2D(0, 0));
+	std::vector<double> TotalArea(static_cast<size_t>(N), 0);
 	vector<std::pair<ComputationalCell, ComputationalCell> > edge_values;
 	edge_values.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
@@ -82,11 +82,12 @@ double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tra
 		Vector2D CM = A*cd.CMs[i];
 		for (size_t j = 0; j < edges.size(); ++j)
 		{
-			double Atemp = edge_length[edges[j]] * dt*ws[edges[j]];
+		  double Atemp = edge_length[static_cast<size_t>(edges[j])] *
+		    dt*ws[static_cast<size_t>(edges[j])];
 			if (tess.GetEdge(edges[j]).neighbors.second == static_cast<int>(i))
 				Atemp *= -1;
-			Vector2D CMtemp = (tess.GetEdge(edges[j]).vertices.first + tess.GetEdge(edges[j]).vertices.second)*0.5 + ws[edges[j]] * 0.5
-				*normals[edges[j]]*dt;
+			Vector2D CMtemp = (tess.GetEdge(edges[j]).vertices.first + tess.GetEdge(edges[j]).vertices.second)*0.5 + ws[static_cast<size_t>(edges[j])] * 0.5
+			  *normals[static_cast<size_t>(edges[j])]*dt;
 			CM += Atemp*CMtemp;
 			A += Atemp;
 		}
