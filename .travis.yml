@@ -16,7 +16,7 @@ addons:
     - g++-4.8
     - libhdf5-serial-dev
 install:
-- make external_libraries/boost_dump/boost_1_59_0/boost/container/static_vector.hpp
+- make external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp
 - mkdir -p external_libraries/lib/
 - mkdir -p external_libraries/include/
 - make external_libraries/lib/libclipper.a
