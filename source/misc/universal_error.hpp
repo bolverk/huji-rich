@@ -20,7 +20,7 @@ public:
    */
   explicit UniversalError(std::string const& err_msg);
 
-  /* \brief Copy constructor
+  /*! \brief Copy constructor
      \param origin Original
    */
   UniversalError(const UniversalError& origin);

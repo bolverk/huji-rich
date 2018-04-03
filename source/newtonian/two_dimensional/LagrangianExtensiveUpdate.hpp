@@ -5,9 +5,17 @@
 #include "ConditionExtensiveUpdater.hpp"
 #include "interpolations/LinearGaussImproved.hpp"
 
+/*! \brief Updates extensive in such a way that minimises advection
+ */
 class LagrangianExtensiveUpdate : public ExtensiveUpdater
 {
 public:
+  /*! \brief Class constructor
+    \param lflux Flux calculator
+    \param eos Equation of state
+    \param ghost Scheme to create ghost points
+    \param interp Interpolation scheme
+   */
 	LagrangianExtensiveUpdate(LagrangianFlux const& lflux, EquationOfState const& eos, GhostPointGenerator
 		const& ghost, LinearGaussImproved const& interp);
 

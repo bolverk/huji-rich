@@ -40,7 +40,9 @@ public:
 				Extensive &res,
 				double time,
 				TracerStickerNames const& tracerstickernames) const = 0;
-		
+
+	  /*! \brief Return instance to initial state
+	   */
 		virtual void Reset(void) const {}
 
 		virtual ~Action2(void);

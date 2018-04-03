@@ -79,7 +79,7 @@ private:
 
 public:
 
-  /*! Class constructor
+  /*! \brief Class constructor
     \param down y coordinate of the lower boundary
     \param up y coordinate of the upper boundary
     \param left x coordinate of the left boundary
@@ -88,6 +88,9 @@ public:
   WrongBCSidesOrderException(double down, double up,
 			     double left, double right);
 
+  /*! \brief Copy constructor
+    \param origin Original
+   */
   WrongBCSidesOrderException(const WrongBCSidesOrderException& origin);
 
   ~WrongBCSidesOrderException(void);

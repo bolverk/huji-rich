@@ -2,7 +2,7 @@
 
 using namespace std;
 
-UniversalError::UniversalError(string const& err_msg):
+UniversalError::UniversalError(std::string const& err_msg):
   err_msg_(err_msg),
   fields_(vector<string>()),
   values_(vector<double>()) {}

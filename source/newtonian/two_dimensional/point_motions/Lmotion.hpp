@@ -5,6 +5,8 @@
 #include "../../common/equation_of_state.hpp"
 #include "../edge_velocity_calculator.hpp"
 
+/*! \brief Point motion that minimises advection
+ */ 
 class LMotion : public PointMotion
 {
 private:
@@ -12,7 +14,11 @@ private:
 	EquationOfState const& eos_;
   //	EdgeVelocityCalculator const& evc_;
 
-public: 
+public:
+  /*! \brief Class constructor
+    \param interp Interpolation scheme
+    \param eos Equation of state
+   */
   LMotion(SpatialReconstruction const& interp, EquationOfState const& eos /*,EdgeVelocityCalculator const& evc*/);
 	
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
