@@ -218,8 +218,8 @@ vector<vector<vector<T> > > MPI_exchange_data(const Tessellation& tess, vector<v
 	vector<MPI_Request> req(2*correspondents.size());
 	vector<vector<double> > tempsend(correspondents.size());
 	vector<vector<int> > send_sizes(tempsend.size());
-	vector<double> temprecv;
-	vector<int> tempirecv;
+	//	vector<double> temprecv;
+	//	vector<int> tempirecv;
 	double temp = 0;
 	for (size_t i = 0; i < correspondents.size(); ++i)
 	{
