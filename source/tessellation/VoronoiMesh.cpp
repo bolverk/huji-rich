@@ -67,6 +67,7 @@ namespace
 		return res;
 	}
 
+  /*
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -78,6 +79,8 @@ namespace
 		}
 		return true;
 	}
+  */
+  /*
 
 	template <typename T>
 	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
@@ -93,6 +96,7 @@ namespace
 		}
 		return res;
 	}
+  */
 }
 
 VoronoiMesh::VoronoiMesh

@@ -34,6 +34,7 @@ public:
   virtual ~Serializable(void);
 };
 
+#ifdef RICH_MPI
 namespace {
   template<class T> vector<T> chunk
   (const vector<T>& source,
@@ -47,6 +48,7 @@ namespace {
     return res;
   }
 }
+#endif // RICH_MPI
 
 vector<double> list_serialize
 (const vector<Serializable*>& los);
