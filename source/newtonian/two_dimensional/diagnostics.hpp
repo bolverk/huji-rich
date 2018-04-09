@@ -53,11 +53,6 @@ Extensive total_conserved(hdsim const& sim);
 double total_tracer(const hdsim& sim,
 		    const int index);
 
-/*! \brief Displays the UniversalError information
-  \param eo Th UniversalError
-*/
-void DisplayError(UniversalError const& eo);
-
 /*! \brief Writes all the error information to a file
   \param fname File name
   \param eo Error object
