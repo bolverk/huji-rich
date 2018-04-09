@@ -11,15 +11,15 @@ ifeq ($(MODE),debug)
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_time)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -Dtiming
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -Dtiming -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
@@ -27,7 +27,7 @@ else ifeq ($(MODE),debug_parallel)
 	LINT_FLAGS := 
 else ifeq ($(MODE),parallel_check)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++0x
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++0x -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),intel)
 	CC := icpc
@@ -45,7 +45,7 @@ else ifeq ($(MODE),clang)
 	LINT_FLAGS := 
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++0x
+	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++0x -fno-expensive-optimizations
 endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
