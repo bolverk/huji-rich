@@ -108,42 +108,53 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	local_right.velocity.x = ScalarProd(local_right.velocity, normaldir);
 	local_right.velocity.y = par_right;
 	local_right.velocity.z = 0;
-
-	WaveSpeeds ws_estimate = estimate_wave_speeds(local_left, local_right, eos, tsn);
-
+	Conserved3D f_gr;
 	if (!massflux_)
 	{
-		local_left.velocity.x -= ws_estimate.center;
-		local_right.velocity.x -= ws_estimate.center;
-		velocity += ws_estimate.center;
-		ws = ws_estimate.center;
-		ws_estimate.center = 0;
-		ws_estimate.left -= ws;
-		ws_estimate.right -= ws;
+		const double dl = local_left.density;
+		const double pl = local_left.pressure;
+		const double vl = local_left.velocity.x;
+		const double cl = eos.dp2c(dl, pl, local_left.tracers, tsn.tracer_names);
+		const double dr = local_right.density;
+		const double pr = local_right.pressure;
+		const double vr = local_right.velocity.x;
+		const double cr = eos.dp2c(dr, pr, local_right.tracers, tsn.tracer_names);
+		const double sl = std::min(vl - cl, vr - cr);
+		const double sr = std::max(vl + cl, vr + cr);
+		const double denom = 1.0/ (dl*(sl - vl) - dr*(sr - vr));
+		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr))*denom;
+		const double ps = dl*(sl - vl)*(pr - dr*(vr - vl)*(sr - vr)) *denom - pl*dr*(sr - vr) *denom;
+		ws = ss;
+		f_gr.energy = ps*ss;
+		f_gr.momentum.Set(ps, 0, 0);
+		f_gr.mass = 0;
 	}
-
-	Conserved3D ul, ur;
-	PrimitiveToConserved(local_left, 1, ul);
-	PrimitiveToConserved(local_right, 1, ur);
-
-	const Conserved3D fl = PrimitiveToFlux(local_left);
-	const Conserved3D fr = PrimitiveToFlux(local_right);
-
-	const Conserved3D usl = starred_state(local_left, ws_estimate.left, ws_estimate.center);
-	const Conserved3D usr = starred_state(local_right, ws_estimate.right, ws_estimate.center);
-
-	Conserved3D f_gr;
-	if (ws_estimate.left > 0)
-		f_gr = fl;
-	else if (ws_estimate.left <= 0 && ws_estimate.center >= 0)
-		f_gr = fl + ws_estimate.left*(usl - ul);
-	else if (ws_estimate.center < 0 && ws_estimate.right >= 0)
-		f_gr = fr + ws_estimate.right*(usr - ur);
-	else if (ws_estimate.right < 0)
-		f_gr = fr;
 	else
-		throw invalid_wave_speeds(local_left, local_right, velocity, ws_estimate.left, ws_estimate.center, ws_estimate.right);
+	{
+		WaveSpeeds ws_estimate = estimate_wave_speeds(local_left, local_right, eos, tsn);
 
+		Conserved3D ul, ur;
+		PrimitiveToConserved(local_left, 1, ul);
+		PrimitiveToConserved(local_right, 1, ur);
+
+		const Conserved3D fl = PrimitiveToFlux(local_left);
+		const Conserved3D fr = PrimitiveToFlux(local_right);
+
+		const Conserved3D usl = starred_state(local_left, ws_estimate.left, ws_estimate.center);
+		const Conserved3D usr = starred_state(local_right, ws_estimate.right, ws_estimate.center);
+
+
+		if (ws_estimate.left > 0)
+			f_gr = fl;
+		else if (ws_estimate.left <= 0 && ws_estimate.center >= 0)
+			f_gr = fl + ws_estimate.left*(usl - ul);
+		else if (ws_estimate.center < 0 && ws_estimate.right >= 0)
+			f_gr = fr + ws_estimate.right*(usr - ur);
+		else if (ws_estimate.right < 0)
+			f_gr = fr;
+		else
+			throw invalid_wave_speeds(local_left, local_right, velocity, ws_estimate.left, ws_estimate.center, ws_estimate.right);
+	}
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
 	if (f_gr.mass > 0)

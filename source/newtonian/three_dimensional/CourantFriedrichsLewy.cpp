@@ -71,4 +71,5 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 void CourantFriedrichsLewy::SetTimeStep(double dt)
 {
 	dt_first_ = dt;
+	first_try_ = true;
 }
