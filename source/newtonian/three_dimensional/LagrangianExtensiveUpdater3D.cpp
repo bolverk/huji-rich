@@ -109,16 +109,19 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 #endif
 			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank << std::endl;
 			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " << 
-				extensives[i].internal_energy <<" volume "<<tess.GetVolume(i)<<std::endl;
+				extensives[i].internal_energy <<" momentum"<<abs(extensives[i].momentum)<<" volume "<<tess.GetVolume(i)
+				<<std::endl;
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
 				abs(cells[i].velocity) << std::endl;
 			vector<size_t> temp = tess.GetCellFaces(i);
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
+				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
+				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				double Area = tess.GetArea(temp[j]) * dt;
-				std::cout << "Face " << temp[j] << " neigh " << tess.GetFaceNeighbors(temp[j]).first << "," <<
-					tess.GetFaceNeighbors(temp[j]).second << " mass=" << fluxes[temp[j]].mass*Area << " energy " <<
-					fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area << std::endl;
+				std::cout << "Face " << temp[j] << " neigh " << N0 << "," <<N1<< " mass=" << fluxes[temp[j]].mass*Area << 
+					" energy " <<fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
+					" Area*dt "<<Area<< std::endl;
 			}
 			assert(false);
 		}
