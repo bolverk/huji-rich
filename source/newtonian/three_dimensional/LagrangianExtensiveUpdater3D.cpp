@@ -1,4 +1,7 @@
 #include "LagrangianExtensiveUpdater3D.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 
 LagrangianExtensiveUpdater3D::LagrangianExtensiveUpdater3D(LagrangianFlux3D const & lflux, EquationOfState const & eos,
 	Ghost3D const & ghost, const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*,
@@ -97,6 +100,28 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 		if (dEtherm*(dE - dEk) > 0)
 			if (std::abs(dEtherm) > 0.999 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.001*std::abs(dE - dEk))
 				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
+		// check cell
+		if (extensives[i].mass < 0 || extensives[i].energy < 0 || extensives[i].internal_energy < 0)
+		{
+			int rank = 0;
+#ifdef RICH_MPI
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank << std::endl;
+			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " << 
+				extensives[i].internal_energy <<" volume "<<tess.GetVolume(i)<<std::endl;
+			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
+				abs(cells[i].velocity) << std::endl;
+			vector<size_t> temp = tess.GetCellFaces(i);
+			for (size_t j = 0; j < temp.size(); ++j)
+			{
+				double Area = tess.GetArea(temp[j]) * dt;
+				std::cout << "Face " << temp[j] << " neigh " << tess.GetFaceNeighbors(temp[j]).first << "," <<
+					tess.GetFaceNeighbors(temp[j]).second << " mass=" << fluxes[temp[j]].mass*Area << " energy " <<
+					fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area << std::endl;
+			}
+			assert(false);
+		}
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
 			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
