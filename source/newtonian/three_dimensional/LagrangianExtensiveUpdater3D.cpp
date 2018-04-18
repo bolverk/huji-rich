@@ -62,10 +62,18 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 			else
 			{
 				if (v_new > 0 && !tess.IsPointOutsideBox(n0))
-					delta.energy = tess.GetArea(i) * dt*v_new*std::min(p_star,cells[n0].pressure);
+				{
+					double newp = std::min(p_star, cells[n0].pressure);
+					delta.energy = tess.GetArea(i) * dt*v_new*newp;
+					delta.momentum *= newp / p_star;
+				}
 				else
 					if (!tess.IsPointOutsideBox(n1))
-						delta.energy = tess.GetArea(i) * dt*v_new*std::min(p_star, cells[n1].pressure);
+					{
+						double newp = std::min(p_star, cells[n1].pressure);
+						delta.energy = tess.GetArea(i) * dt*v_new*newp;
+						delta.momentum *= newp / p_star;
+					}
 					else
 						delta.energy = 0;
 			}
