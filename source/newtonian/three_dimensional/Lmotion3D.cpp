@@ -22,7 +22,8 @@ namespace
 	}
 }
 
-LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos) :interp_(interp), eos_(eos) {}
+LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos, double max_v_correction) 
+	:interp_(interp), eos_(eos),max_v_correction_(max_v_correction){}
 
 void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double /*time*/,
 	TracerStickerNames const & /*tracerstickernames*/, vector<Vector3D>& res) const
@@ -94,8 +95,8 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 			Vector3D toadd(m*cells[i].tracers[indexX], m*cells[i].tracers[indexY], m*cells[i].tracers[indexX]);
 			double v = abs(velocities[i]);
 			double t = abs(toadd);
-			if (t > 0.15*v)
-				toadd = toadd*(0.15*v / t);
+			if (t > max_v_correction_*v)
+				toadd = toadd*(max_v_correction_*v / t);
 			velocities[i] += toadd;
 		}
 	}
