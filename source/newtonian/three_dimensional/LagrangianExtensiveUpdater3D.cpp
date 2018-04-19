@@ -116,9 +116,9 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
 			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank << std::endl;
-			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " << 
-				extensives[i].internal_energy <<" momentum"<<abs(extensives[i].momentum)<<" volume "<<tess.GetVolume(i)
-				<<std::endl;
+			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " <<
+				extensives[i].internal_energy << " momentum" << abs(extensives[i].momentum) << " volume " << tess.GetVolume(i)
+				<< std::endl;
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
 				abs(cells[i].velocity) << std::endl;
 			vector<size_t> temp = tess.GetCellFaces(i);
@@ -127,9 +127,40 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
 				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				double Area = tess.GetArea(temp[j]) * dt;
-				std::cout << "Face " << temp[j] << " neigh " << N0 << "," <<N1<< " mass=" << fluxes[temp[j]].mass*Area << 
-					" energy " <<fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
-					" Area*dt "<<Area<< std::endl;
+				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass*Area <<
+					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
+					" Area*dt " << Area << std::endl;
+				if (lflux_.Lag_calc_[temp[j]])
+				{
+					Vector3D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
+					double p_star = abs(fluxes[temp[j]].momentum);
+					double v_star = fluxes[temp[j]].energy / p_star;
+					double v_new = (v_star - lflux_.ws_[temp[j]]);
+					if (v_new*v_star > 0)
+					{
+						if (v_new > 0 && !tess.IsPointOutsideBox(N1) && p_star > 1.2*cells[N1].pressure)
+							v_new = std::max(v_new, ScalarProd(cells[N1].velocity, normal));
+						if (v_new < 0 && !tess.IsPointOutsideBox(N0) && p_star > 1.2*cells[N0].pressure)
+							v_new = std::min(v_new, ScalarProd(cells[N0].velocity, normal));
+					}
+					else
+					{
+						if (v_new > 0 && !tess.IsPointOutsideBox(N0))
+						{
+							double newp = std::min(p_star, cells[N0].pressure);
+							p_star = newp;
+						}
+						else
+							if (!tess.IsPointOutsideBox(N1))
+							{
+								double newp = std::min(p_star, cells[N1].pressure);
+								p_star = newp;
+							}
+							else
+								v_new = 0;
+					}
+					std::cout << "Pstar " << p_star << " Ustar " << v_new << std::endl;
+				}
 			}
 			assert(false);
 		}
