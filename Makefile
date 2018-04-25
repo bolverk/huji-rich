@@ -31,10 +31,12 @@ else ifeq ($(MODE),parallel_check)
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),intel)
 	CC := icpc
+	CCC := icc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
+	CCC := icc
 	CC := mpiicpc
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++0x -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = 
