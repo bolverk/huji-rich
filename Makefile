@@ -100,13 +100,13 @@ external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hp
 	cd external_libraries/dump_clipper && g++ -c -O3 cpp/clipper.cpp -o clipper.o
 
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
-	ar cr $@ $^ 
+	$(ARCHIVER_FUNC) cr $@ $^ 
 
 source/3D/r3d/r3d.o: source/3D/r3d/r3d.h
 	cd source/3D/r3d && $(CCC) -c -O3 r3d.c -o r3d.o
 
 external_libraries/lib/libr3d.a: source/3D/r3d/r3d.o
-	ar cr $@ $^ 
+	$(ARCHIVER_FUNC) cr $@ $^ 
 
 external_libraries/dump_clipper/dclipper.o: external_libraries/include/clipper.hpp
 	cd external_libraries/dump_clipper && g++ -c -O0 -g -pg -D_GLIBCXX_DEBUG cpp/clipper.cpp -o dclipper.o
