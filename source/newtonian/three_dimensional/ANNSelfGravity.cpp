@@ -72,7 +72,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		dpoints[i][1] = vec.y;
 		dpoints[i][2] = vec.z;
 		masses[i] = tess.GetVolume(i)*cells[i].density;
-		Q[i].assign(0);
+		Q[i].fill(0);
 	}
 	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
 
