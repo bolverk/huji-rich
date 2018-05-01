@@ -46,7 +46,7 @@ using namespace std;					// make std:: available
 class ANNkd_node{						// generic kd-tree node (empty shell)
 	
 public:
-	ANNkd_node() :mass(0), Q(boost::array<double, 6>()) {}
+	ANNkd_node() :mass(0), Q(std::array<double, 6>()) {}
 	virtual ~ANNkd_node() {}					// virtual distroyer
 
 	virtual void ann_search(ANNdist) = 0;		// tree search
@@ -65,13 +65,13 @@ public:
 
 	double mass;
 	double CM[3];
-	boost::array<double, 6> Q;
+	std::array<double, 6> Q;
 	virtual void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const = 0;
 
 	virtual void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const = 0;
 
 	virtual void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
-		boost::array<double,4> const& qCM) const = 0;
+		std::array<double,4> const& qCM) const = 0;
 
 	virtual void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb) = 0;
@@ -120,7 +120,7 @@ public:
 		int				n,				// number of points
 		ANNidxArray		b,
 		double m,
-		boost::array<double, 6> const& Qs,
+		std::array<double, 6> const& Qs,
 		ANNpoint pt)				// bucket
 		:n_pts(n), bkt(b)
 	{
@@ -148,7 +148,7 @@ public:
 	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2, ANNorthRect &bb) const;
 	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const;
 	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
-		boost::array<double, 4> const& qCM) const;
+		std::array<double, 4> const& qCM) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
 };
@@ -224,7 +224,7 @@ public:
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
 	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
-		boost::array<double, 4> const& qCM) const;
+		std::array<double, 4> const& qCM) const;
 };
 
 //----------------------------------------------------------------------
@@ -244,7 +244,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray		pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices to store in subtree
 	vector<double> const& masses,
-	std::vector<boost::array<double, 6> > const& Qs,
+	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dim,			// dimension of space
 	int					bsp,			// bucket space

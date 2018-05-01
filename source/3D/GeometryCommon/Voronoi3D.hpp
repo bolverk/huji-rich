@@ -13,7 +13,7 @@
 #include "Intersections.hpp"
 #include <stack>
 #include <set>
-#include <boost/array.hpp>
+#include <array>
 #include "Tessellation3D.hpp"
 #include <boost/container/flat_set.hpp>
 
@@ -22,8 +22,8 @@
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
-typedef boost::array<std::size_t, 4> b_array_4;
-typedef boost::array<std::size_t, 3> b_array_3;
+typedef std::array<std::size_t, 4> b_array_4;
+typedef std::array<std::size_t, 3> b_array_3;
 
 class Voronoi3D : public Tessellation3D
 {
@@ -41,7 +41,7 @@ private:
 #endif
 	void output_buildextra(std::string const& filename)const;
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
-		vector<size_t> &intersecting_faces);
+		vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
 	void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
 		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
 		std::stack<std::size_t> &to_check,bool &skipped, vector<std::size_t> &faces, vector<size_t> const& past_duplicate);
@@ -50,8 +50,8 @@ private:
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
-	void GetTetraCM(boost::array<Vector3D, 4> const& points, Vector3D &CM)const;
-	double GetTetraVolume(boost::array<Vector3D, 4> const& points)const;
+	void GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const;
+	double GetTetraVolume(std::array<Vector3D, 4> const& points)const;
 	void CalcCellCMVolume(std::size_t index);
 	double GetRadius(std::size_t index);
 	double GetMaxRadius(std::size_t index);
@@ -88,8 +88,8 @@ private:
 	vector<std::size_t> self_index_;
 	Voronoi3D();
 	Voronoi3D(Voronoi3D const &other);
-	boost::array<Vector3D, 4> temp_points_;
-	boost::array<Vector3D, 5> temp_points2_;
+	std::array<Vector3D, 4> temp_points_;
+	std::array<Vector3D, 5> temp_points2_;
 public:
 	vector<Vector3D>& GetAllFaceCM(void);
 

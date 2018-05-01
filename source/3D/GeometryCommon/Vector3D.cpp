@@ -202,14 +202,6 @@ Vector3D operator/(Vector3D const& v, double d)
 	return res;
 }
 
-double ScalarProd(Vector3D const& v1,
-	Vector3D const& v2)
-{
-	return v1.x*v2.x +
-		v1.y*v2.y + 
-		v1.z*v2.z;
-}
-
 double Projection(Vector3D const& v1, Vector3D const& v2)
 {
 	return ScalarProd(v1, v2) / abs(v2);
@@ -228,22 +220,6 @@ Vector3D Reflect(Vector3D const& v, Vector3D const& normal)
 double distance(Vector3D const& v1, Vector3D const& v2)
 {
 	return abs(v1 - v2);
-}
-
-Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2)
-{
-	double x = v1.y*v2.z - v1.z*v2.y;
-	double y = v1.z*v2.x - v1.x*v2.z;
-	double z = v1.x*v2.y - v1.y*v2.x;
-
-	return Vector3D(x, y, z);
-}
-
-void CrossProduct(Vector3D const& v1, Vector3D const& v2, Vector3D &res)
-{
-	res.x = v1.y*v2.z - v1.z*v2.y;
-	res.y = v1.z*v2.x - v1.x*v2.z;
-	res.z = v1.x*v2.y - v1.y*v2.x;
 }
 
 void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & vY, vector<double> & vZ)

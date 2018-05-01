@@ -3,10 +3,10 @@
 
 #include <vector>
 #include "Vector3D.hpp"
-#include <boost/array.hpp>
+#include <array>
 
-double orient3d(boost::array<Vector3D,4> const& points);
+double orient3d(std::array<Vector3D,4> const& points);
 
-double insphere(boost::array<Vector3D, 5> const& points);
+double insphere(std::array<Vector3D, 5> const& points);
 
 #endif //PREDICATES3D_HPP

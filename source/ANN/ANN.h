@@ -90,7 +90,7 @@
 //----------------------------------------------------------------------
 
 #include <vector>
-#include <boost/array.hpp>
+#include <array>
 #include <cstdlib>			// standard lib includes
 #include <cmath>			// math includes
 #include <iostream>			// I/O streams
@@ -683,7 +683,7 @@ public:
 	ANNkd_tree(							// build from point array
 		ANNpointArray	pa,				// point array
 		std::vector<double> const& masses,
-		std::vector<boost::array<double,6> > const& Qs,
+		std::vector<std::array<double,6> > const& Qs,
 		int				n,				// number of points
 		int				dd,				// dimension
 		int				bs = 1,			// bucket size

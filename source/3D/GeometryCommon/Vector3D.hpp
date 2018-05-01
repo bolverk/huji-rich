@@ -13,7 +13,7 @@
 using std::vector;
 
 //! \brief 3D Mathematical vector
-class Vector3D : public Serializable
+class alignas(32) Vector3D : public Serializable
 {
 public:
 
@@ -152,7 +152,11 @@ Vector3D operator/(Vector3D const& v, double d);
 \param v2 3D vector
 \return Scalar product of v1 and v2
 */
-double ScalarProd(Vector3D const& v1, Vector3D const& v2);
+inline double ScalarProd(Vector3D const& v1, Vector3D const& v2)
+{
+	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+}
+
 
 /*! \brief Returns the angle between two vectors (in radians)
 \param v1 First vector
@@ -208,9 +212,17 @@ double distance(Vector3D const& v1, Vector3D const& v2);
 \param v2 Second vector
 \return Cross product between v1 and v2
 */
-Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2);
+inline Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2)
+{
+	return Vector3D(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
+}
 
-void CrossProduct(Vector3D const& v1, Vector3D const& v2,Vector3D &res);
+inline void CrossProduct(Vector3D const& v1, Vector3D const& v2,Vector3D &res)
+{
+	res.x = v1.y*v2.z - v1.z*v2.y;
+	res.y = v1.z*v2.x - v1.x*v2.z;
+	res.z = v1.x*v2.y - v1.y*v2.x;
+}
 
 
 /*! \brief Splits a vector of 3D points to components

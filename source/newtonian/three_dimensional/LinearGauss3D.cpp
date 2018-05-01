@@ -126,7 +126,7 @@ namespace
 			eo.AddEntry("Det was", det);
 			for (size_t i = 0; i < faces.size(); ++i)
 			{
-				Vector3D c_ij = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
+				c_ij = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
 				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
 				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
 				eo.AddEntry("Neighbor z", neighbor_centers[i].z);

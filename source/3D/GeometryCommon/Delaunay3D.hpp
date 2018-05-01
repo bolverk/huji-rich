@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <array>
 #include <boost/container/flat_set.hpp>
 
 using std::vector;
@@ -50,11 +51,11 @@ private:
 	void ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p);
 	std::size_t FindThirdNeighbor(std::size_t tetra0, std::size_t tetra1);
 
-	boost::array<Vector3D, 3> b3_temp_,b3_temp2_;
-	boost::array<Vector3D, 4> b4_temp_;
-	boost::array<Vector3D, 5> b5_temp_;
-	boost::array<std::size_t, 4> b4s_temp_,b4s_temp2_;
-	boost::array<std::size_t, 8> b8s_temp_;
+	std::array<Vector3D, 3> b3_temp_,b3_temp2_;
+	std::array<Vector3D, 4> b4_temp_;
+	std::array<Vector3D, 5> b5_temp_;
+	std::array<std::size_t, 4> b4s_temp_,b4s_temp2_;
+	std::array<std::size_t, 8> b8s_temp_;
 	vector<std::size_t> to_check_;
 	std::size_t last_checked_;	
 	Tetrahedron tet_temp0_, tet_temp1_, newtet_;

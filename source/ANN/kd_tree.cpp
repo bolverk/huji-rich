@@ -364,7 +364,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray		pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	vector<double> const& masses,
-	std::vector<boost::array<double, 6> > const& Qs,
+	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dim,			// dimension of space
 	int					bsp,			// bucket space
@@ -482,7 +482,7 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 ANNkd_tree::ANNkd_tree(					// construct from point array
 	ANNpointArray		pa,				// point array (with at least n pts)
 	vector<double> const& masses,
-	std::vector<boost::array<double, 6> > const& Qs,
+	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dd,				// dimension
 	int					bs,				// bucket size
@@ -539,7 +539,7 @@ namespace
 void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2) const
 {
 	ANNorthRect bb(3, bnd_box_lo, bnd_box_hi);
-	boost::array<double, 3> qMin,qMax;
+	std::array<double, 3> qMin,qMax;
 	qMax[0] = qpoint[0][0];
 	qMax[1] = qpoint[0][1];
 	qMax[2] = qpoint[0][2];
@@ -553,7 +553,7 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 			qMin[j] = std::min(qMin[j], qpoint[i][j]);
 		}
 	}
-	boost::array<double, 4> qCM;
+	std::array<double, 4> qCM;
 	qCM[0] = 0.5*(qMax[0]+qMin[0]);
 	qCM[1] = 0.5*(qMax[1] + qMin[1]);
 	qCM[2] = 0.5*(qMax[2] + qMin[2]);
@@ -566,7 +566,7 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 }
 
 void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
-	boost::array<double, 4> const& qCM) const
+	std::array<double, 4> const& qCM) const
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
@@ -584,7 +584,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	{
 		for (size_t k = 0; k < N; ++k)
 		{
-			double dist_toq = 0;
+			dist_toq = 0;
 			for (int i = 0; i < 3; ++i)
 				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 			if (dist_toq*angle2 > maxbox)
@@ -820,7 +820,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 }
 
 void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double /*angle2*/, ANNorthRect &bb,
-	boost::array<double, 4> const& /*qCM*/) const
+	std::array<double, 4> const& /*qCM*/) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	size_t N = qpoint.size();

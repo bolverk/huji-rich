@@ -202,6 +202,9 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 	double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const
 {
 	pm_.ApplyFix(tess, cells, time, dt, velocities, tracerstickernames);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess, velocities, true);
+#endif
 	const size_t n = tess.GetPointNo();
 	if (n == 0)
 		return;

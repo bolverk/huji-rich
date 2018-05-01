@@ -23,7 +23,7 @@ namespace
 		return true;
 	}
 
-	bool PlaneLineIntersection(boost::array<Vector3D, 3> &plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
+	bool PlaneLineIntersection(std::array<Vector3D, 3> &plane, Vector3D const& A, Vector3D const& B, Vector3D &res)
 	{
 		plane[1] -= plane[0];
 		plane[2] -= plane[0];
@@ -49,9 +49,9 @@ namespace
 
 	std::size_t GetOppositePoint(Tetrahedron const& tetra, std::size_t neighbor)
 	{
-		for(boost::array<size_t,4>::const_iterator it = tetra.neighbors.begin();it!= tetra.neighbors.end();++it)
-			if (*it == neighbor)
-				return static_cast<size_t>(it- tetra.neighbors.begin());
+		for(size_t i = 0;i < 4;i++)
+			if (tetra.neighbors[i]==neighbor)
+				return i;
 		assert(false);
 	}
 
@@ -63,7 +63,7 @@ namespace
 		assert(false);
 	}
 
-	std::pair<std::size_t,double> InTriangle(boost::array<Vector3D, 3> &triangle, Vector3D &p)
+	std::pair<std::size_t,double> InTriangle(std::array<Vector3D, 3> &triangle, Vector3D &p)
 	{
 		// returns the smallest area of the cross product in units of the triangle area, negative if outside
 		Vector3D temp,d;
@@ -119,9 +119,9 @@ Delaunay3D& Delaunay3D::operator=(Delaunay3D const& other)
 }
 
 Delaunay3D::Delaunay3D(Delaunay3D const& other) :  tetras_(other.tetras_),points_(other.points_),empty_tetras_(other.empty_tetras_),Norg_(other.Norg_),
-	outside_neighbor_(other.outside_neighbor_),b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),
-	b4_temp_(boost::array<Vector3D, 4>()), b5_temp_(boost::array<Vector3D, 5>()),b4s_temp_(boost::array<std::size_t, 4> ()),
-	b4s_temp2_(boost::array<std::size_t, 4> ()),b8s_temp_(boost::array<std::size_t, 8> ()),to_check_(vector<std::size_t>()),
+	outside_neighbor_(other.outside_neighbor_),b3_temp_(std::array<Vector3D, 3> ()),b3_temp2_(std::array<Vector3D, 3> ()),
+	b4_temp_(std::array<Vector3D, 4>()), b5_temp_(std::array<Vector3D, 5>()),b4s_temp_(std::array<std::size_t, 4> ()),
+	b4s_temp2_(std::array<std::size_t, 4> ()),b8s_temp_(std::array<std::size_t, 8> ()),to_check_(vector<std::size_t>()),
 	last_checked_(0), tet_temp0_(Tetrahedron()), tet_temp1_(Tetrahedron()), newtet_(Tetrahedron()) {}
 
 void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t location0,bool flat_check)
@@ -227,16 +227,16 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 
 	if(flat_check)
 	{
-		for (int i = 0; i < 4; ++i)
-			b4_temp_[static_cast<size_t>(i)] = points_[tetras_[Nloc].points[static_cast<size_t>(i)]];
+		for (size_t i = 0; i < 4; ++i)
+			b4_temp_[i] = points_[tetras_[Nloc].points[i]];
 		double orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
 			std::size_t my_loc = GetPointLocationInTetra(tetras_[Nloc], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[Nloc].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], Nloc);
-			for (int i = 0; i < 3; ++i)
-				b4_temp_[static_cast<size_t>(i)] = points_[tetras_[Nloc].points[(my_loc + static_cast<size_t>(i) + 1) % 4]];
+			for (size_t i = 0; i < 3; ++i)
+				b4_temp_[i] = points_[tetras_[Nloc].points[(my_loc + (i) + 1) % 4]];
 			b4_temp_[3] = points_[tetras_[neigh].points[opp]];
 			double o = orient3d(b4_temp_);
 			o *= 1.0 - static_cast<double>(2 * (location0 % 2));
@@ -251,16 +251,16 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 			}
 		}
 	
-		for (int i = 0; i < 4; ++i)
-			b4_temp_[i] = points_[tetras_[tetra0].points[static_cast<size_t>(i)]];
+		for (size_t i = 0; i < 4; ++i)
+			b4_temp_[i] = points_[tetras_[tetra0].points[i]];
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
 			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra0], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[tetra0].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], tetra0);
-			for (int i = 0; i < 3; ++i)
-				b4_temp_[static_cast<size_t>(i)] = points_[tetras_[tetra0].points[(my_loc + static_cast<size_t>(i) + 1) % 4]];
+			for (size_t i = 0; i < 3; ++i)
+				b4_temp_[i] = points_[tetras_[tetra0].points[(my_loc + i + 1) % 4]];
 			b4_temp_[3] = points_[tetras_[neigh].points[opp]];
 			double o = orient3d(b4_temp_);
 			o *= 1.0 - static_cast<double>(2 * (location0 % 2));
@@ -274,16 +274,16 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 				tetras_[tetra0].neighbors[1] = temp;
 			}
 		}
-		for (int i = 0; i < 4; ++i)
-			b4_temp_[static_cast<size_t>(i)] = points_[tetras_[tetra1].points[static_cast<size_t>(i)]];
+		for (size_t i = 0; i < 4; ++i)
+			b4_temp_[i] = points_[tetras_[tetra1].points[i]];
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
 			std::size_t my_loc = GetPointLocationInTetra(tetras_[tetra1], tet_temp0_.points[location0]);
 			std::size_t neigh = tetras_[tetra1].neighbors[my_loc];
 			std::size_t opp = GetOppositePoint(tetras_[neigh], tetra1);
-			for (int i = 0; i < 3; ++i)
-				b4_temp_[static_cast<size_t>(i)] = points_[tetras_[tetra1].points[(my_loc + static_cast<size_t>(i) + 1) % 4]];
+			for (size_t i = 0; i < 3; ++i)
+				b4_temp_[i] = points_[tetras_[tetra1].points[(my_loc + i + 1) % 4]];
 			b4_temp_[3] = points_[tetras_[neigh].points[opp]];
 			double o = orient3d(b4_temp_);
 			o *= 1.0 - static_cast<double>(2 * (location0 % 2));
@@ -356,8 +356,8 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	newtet_.neighbors[3] = tetras_[tetra0].neighbors[other_point2];
 	if (flat_check)
 	{
-		for (int i = 0; i < 4; ++i)
-			b4_temp_[static_cast<size_t>(i)] = points_[newtet_.points[static_cast<size_t>(i)]];
+		for (size_t i = 0; i < 4; ++i)
+			b4_temp_[i] = points_[newtet_.points[i]];
 		if (orient3d(b4_temp_) > 0)
 		{
 			std::size_t temp = newtet_.points[0];
@@ -452,8 +452,8 @@ void Delaunay3D::flip44(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 }
 
 Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(boost::container::flat_set<size_t> ()),Norg_(0),outside_neighbor_(0),
-	b3_temp_(boost::array<Vector3D, 3> ()),b3_temp2_(boost::array<Vector3D, 3> ()),b4_temp_(boost::array<Vector3D, 4> ()),b5_temp_(boost::array<Vector3D, 5> ()),
-	b4s_temp_(boost::array<std::size_t, 4>()),b4s_temp2_(boost::array<std::size_t, 4>()),b8s_temp_(boost::array<std::size_t, 8>()),
+	b3_temp_(std::array<Vector3D, 3> ()),b3_temp2_(std::array<Vector3D, 3> ()),b4_temp_(std::array<Vector3D, 4> ()),b5_temp_(std::array<Vector3D, 5> ()),
+	b4s_temp_(std::array<std::size_t, 4>()),b4s_temp2_(std::array<std::size_t, 4>()),b8s_temp_(std::array<std::size_t, 8>()),
 	to_check_(vector<std::size_t>()),last_checked_(0), tet_temp0_(Tetrahedron()),tet_temp1_(Tetrahedron()), newtet_(Tetrahedron())
 {
 	empty_tetras_.reserve(15);
@@ -567,22 +567,18 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 	std::size_t other_point = 0;
 	std::size_t in_counter = 0;
 	std::size_t flat_counter = 0;
-	boost::array<std::size_t, 3> out_check;
+	std::array<std::size_t, 3> out_check;
 	Tetrahedron const& T0 = tetras_[tetra0];
 	Tetrahedron const& T1 = tetras_[tetra1];
 	std::size_t p_loc = GetPointLocationInTetra(T0, p);
 	for (int i = 0; i < 3; ++i)
 		b3_temp_[i] = points_[T0.points[(p_loc + 1 + static_cast<size_t>(i)) % 4]];
 
-	for (std::size_t i = 0; i < 4; ++i)
-	{
+	size_t i;
+	for (i = 0; i < 4; i++)
 		if (T1.neighbors[i] == tetra0)
-		{
-			other_point = T1.points[i];
 			break;
-		}
-	}
-
+	other_point = T1.points[i];
 	b4_temp_[0] = b3_temp_[1];
 	b4_temp_[1] = b3_temp_[2];
 	b4_temp_[2] = points_[p];
@@ -758,10 +754,10 @@ std::size_t Delaunay3D::Walk(std::size_t point, std::size_t first_guess)
 	{
 		++counter;
 		good = true;
-		for (std::size_t i = 0; i < 4; ++i)
+		for (size_t i = 0; i < 4; ++i)
 		{
-			for (int j = 0; j < 3; ++j)
-				b4_temp_[static_cast<size_t>(j)] = points_[tetras_[cur_facet].points[(i + static_cast<size_t>(j) + 1) % 4]];
+			for (size_t j = 0; j < 3; j++)
+				b4_temp_[j] = points_[tetras_[cur_facet].points[(i + j + 1) % 4]];
 			int sign = 2 * static_cast<int>(i % 2) - 1;
 			if ((orient3d(b4_temp_)*sign)>0)
 			{
@@ -794,22 +790,22 @@ std::size_t Delaunay3D::Walk(std::size_t point, std::size_t first_guess)
 void Delaunay3D::flip14(std::size_t point, std::size_t tetra)
 {
 	Tetrahedron toadd;
-	boost::array<std::size_t, 3> Nloc;
+	std::array<std::size_t, 3> Nloc;
 	bool cleared_empty = false;
 	if (empty_tetras_.size()>3)
 	{
 		cleared_empty = true;
-		for (int i = 0; i < 3; ++i)
+		for (size_t i = 0; i < 3; i++)
 		{
-			Nloc[static_cast<size_t>(i)] = *empty_tetras_.begin();
+			Nloc[i] = *empty_tetras_.begin();
 			empty_tetras_.erase(empty_tetras_.begin());
 		}	
 	}
 	else
 	{
 		size_t Ntet = tetras_.size();
-		for (int i = 0; i < 3; ++i)
-			Nloc[static_cast<size_t>(i)] = Ntet + i;
+		for (size_t i = 0; i < 3; i++)
+			Nloc[i] = Ntet + i;
 	}
 
 	toadd.neighbors[0] = Nloc[1];

@@ -62,7 +62,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	size_t Norg = tess.GetPointNo();
 	acc.resize(Norg);
 	vector<double> masses(Norg);
-	std::vector<boost::array<double, 6> >  Q(Norg);
+	std::vector<std::array<double, 6> >  Q(Norg);
 
 	ANNpointArray dpoints = annAllocPts(static_cast<int>(Norg), 3);
 	for (size_t i = 0; i < Norg; ++i)

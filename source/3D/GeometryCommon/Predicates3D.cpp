@@ -1448,7 +1448,7 @@ namespace
 	}
 }
 
-double orient3d(boost::array<Vector3D, 4> const& points)
+double orient3d(std::array<Vector3D, 4> const& points)
 {
 	double pa[3], pb[3], pc[3], pd[3];
 	pa[0] = points[0].x;
@@ -1472,7 +1472,7 @@ double orient3d(boost::array<Vector3D, 4> const& points)
 
 }*/
 
-double insphere(boost::array<Vector3D, 5> const& points)
+double insphere(std::array<Vector3D, 5> const& points)
 {
 	double pa[3], pb[3], pc[3], pd[3],pe[3];
 	pa[0] = points[0].x;
