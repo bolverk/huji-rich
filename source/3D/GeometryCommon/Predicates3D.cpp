@@ -426,8 +426,21 @@ namespace
 	}
 
 
-	double orient3dadapt(double *pa, double * pb, double * pc, double * pd, double permanent)
+	double orient3dadapt(std::array<Vector3D, 4> const& points, double permanent)
 	{
+		double pa[3], pb[3], pc[3], pd[3];
+		pa[0] = points[0].x;
+		pa[1] = points[0].y;
+		pa[2] = points[0].z;
+		pb[0] = points[1].x;
+		pb[1] = points[1].y;
+		pb[2] = points[1].z;
+		pc[0] = points[2].x;
+		pc[1] = points[2].y;
+		pc[2] = points[2].z;
+		pd[0] = points[3].x;
+		pd[1] = points[3].y;
+		pd[2] = points[3].z;
 		double adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
 		double det, errbound;
 
@@ -835,48 +848,7 @@ namespace
 		return finnow[finlength - 1];
 	}
 
-	double orient3d(double *pa, double * pb, double * pc, double * pd)
-	{
-		double adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
-		double bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
-		double det;
-		double permanent, errbound;
-
-		adx = pa[0] - pd[0];
-		bdx = pb[0] - pd[0];
-		cdx = pc[0] - pd[0];
-		ady = pa[1] - pd[1];
-		bdy = pb[1] - pd[1];
-		cdy = pc[1] - pd[1];
-		adz = pa[2] - pd[2];
-		bdz = pb[2] - pd[2];
-		cdz = pc[2] - pd[2];
-
-		bdxcdy = bdx * cdy;
-		cdxbdy = cdx * bdy;
-
-		cdxady = cdx * ady;
-		adxcdy = adx * cdy;
-
-		adxbdy = adx * bdy;
-		bdxady = bdx * ady;
-
-		det = adz * (bdxcdy - cdxbdy)
-			+ bdz * (cdxady - adxcdy)
-			+ cdz * (adxbdy - bdxady);
-
-		permanent = (Absolute(bdxcdy) + Absolute(cdxbdy)) * Absolute(adz)
-			+ (Absolute(cdxady) + Absolute(adxcdy)) * Absolute(bdz)
-			+ (Absolute(adxbdy) + Absolute(bdxady)) * Absolute(cdz);
-		errbound = o3derrboundA * permanent;
-		if ((det > errbound) || (-det > errbound)) {
-			return det;
-		}
-
-		return orient3dadapt(pa, pb, pc, pd, permanent);
-	}
-
-
+	
 
 	double insphereexact(double *pa, double * pb, double * pc, double * pd, double * pe)
 	{
@@ -1450,20 +1422,43 @@ namespace
 
 double orient3d(std::array<Vector3D, 4> const& points)
 {
-	double pa[3], pb[3], pc[3], pd[3];
-	pa[0] = points[0].x;
-	pa[1] = points[0].y;
-	pa[2] = points[0].z;
-	pb[0] = points[1].x;
-	pb[1] = points[1].y;
-	pb[2] = points[1].z;
-	pc[0] = points[2].x;
-	pc[1] = points[2].y;
-	pc[2] = points[2].z;
-	pd[0] = points[3].x;
-	pd[1] = points[3].y;
-	pd[2] = points[3].z;
-	return orient3d(pa,pb,pc,pd);
+	double adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
+	double bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
+	double det;
+	double permanent, errbound;
+
+	adx = points[0].x - points[3].x;
+	bdx = points[1].x - points[3].x;
+	cdx = points[2].x - points[3].x;
+	ady = points[0].y - points[3].y;
+	bdy = points[1].y - points[3].y;
+	cdy = points[2].y - points[3].y;
+	adz = points[0].z - points[3].z;
+	bdz = points[1].z - points[3].z;
+	cdz = points[2].z - points[3].z;
+
+	bdxcdy = bdx * cdy;
+	cdxbdy = cdx * bdy;
+
+	cdxady = cdx * ady;
+	adxcdy = adx * cdy;
+
+	adxbdy = adx * bdy;
+	bdxady = bdx * ady;
+
+	det = adz * (bdxcdy - cdxbdy)
+		+ bdz * (cdxady - adxcdy)
+		+ cdz * (adxbdy - bdxady);
+
+	permanent = (Absolute(bdxcdy) + Absolute(cdxbdy)) * Absolute(adz)
+		+ (Absolute(cdxady) + Absolute(adxcdy)) * Absolute(bdz)
+		+ (Absolute(adxbdy) + Absolute(bdxady)) * Absolute(cdz);
+	errbound = o3derrboundA * permanent;
+	if ((det > errbound) || (-det > errbound)) {
+		return det;
+	}
+
+	return orient3dadapt(points,permanent);
 }
 
 /*double orient2d(boost::array<Vector3D, 3> const& points)

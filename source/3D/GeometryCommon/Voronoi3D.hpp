@@ -16,6 +16,7 @@
 #include <array>
 #include "Tessellation3D.hpp"
 #include <boost/container/flat_set.hpp>
+#include <boost/align.hpp>
 
 #ifdef RICH_MPI
 #include "../../newtonian/three_dimensional/computational_cell.hpp"
@@ -79,8 +80,8 @@ private:
 	vector<vector<std::size_t> > FacesInCell_;
 	vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
 	vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
-	vector<Vector3D> CM_,Face_CM_;
-	vector<double> volume_;
+	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > CM_,Face_CM_;
+	vector<double, boost::alignment::aligned_allocator<double, 32> > volume_;
 	vector<double> area_;
 	vector<vector<std::size_t> > duplicated_points_;
 	vector<int> sentprocs_, duplicatedprocs_;
@@ -91,7 +92,7 @@ private:
 	std::array<Vector3D, 4> temp_points_;
 	std::array<Vector3D, 5> temp_points2_;
 public:
-	vector<Vector3D>& GetAllFaceCM(void);
+	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& GetAllFaceCM(void);
 
 	Vector3D FaceCM(std::size_t index)const;
 
@@ -143,7 +144,9 @@ public:
 
 	std::size_t GetTotalPointNumber(void)const;
 
-	vector<Vector3D>& GetAllCM(void);
+	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& GetAllCM(void);
+
+	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > GetAllCM(void)const;
 
 	void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const;
 
@@ -183,7 +186,9 @@ public:
 
 	void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate);
 
-	vector<double>& GetAllVolumes(void);
+	vector<double, boost::alignment::aligned_allocator<double, 32> >& GetAllVolumes(void);
+
+	vector<double, boost::alignment::aligned_allocator<double, 32> > GetAllVolumes(void)const;
 
 	std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
 

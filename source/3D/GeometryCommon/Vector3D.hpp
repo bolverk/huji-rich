@@ -13,7 +13,7 @@
 using std::vector;
 
 //! \brief 3D Mathematical vector
-class alignas(32) Vector3D : public Serializable
+class Vector3D : public Serializable
 {
 public:
 
@@ -67,7 +67,7 @@ public:
 	\return The assigned value
 	*/
 	Vector3D& operator=(Vector3D const& v);
-
+	
 	/*! \brief Scalar product
 	\param s Scalar
 	\return Reference to the vector multiplied by scalar

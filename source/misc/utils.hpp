@@ -12,6 +12,7 @@
 #include <cassert>
 #include <iostream>
 #include "boost/container/flat_map.hpp"
+#include <boost/align.hpp>
 
 using std::vector;
 
@@ -261,6 +262,20 @@ template <class T> vector<T> VectorValues(vector<T> const&v, vector<int> const &
 	return result;
 }
 
+template <class T> vector<T> VectorValues(vector<T,boost::alignment::aligned_allocator<T,32> > const&v, vector<int> const &index);
+
+template <class T> vector<T> VectorValues(vector<T, boost::alignment::aligned_allocator<T, 32> > const&v, vector<int> const &index)
+{
+	if (index.empty() || v.empty())
+		return vector<T>();
+
+	vector<T> result(index.size());
+	for (std::size_t i = 0; i < index.size(); ++i)
+		result.at(i) = v.at(static_cast<std::size_t>(index.at(i)));
+	return result;
+}
+
+
 /*!
 \brief Returns only the values with indeces in index
 \param v The vector to check
@@ -283,6 +298,22 @@ template <class T> vector<T> VectorValues
 		result.at(i) = v.at(index.at(i));
 	return result;
 }
+
+template <class T> vector<T> VectorValues(vector<T,boost::alignment::aligned_allocator<T,32> > const&v,vector<std::size_t> const &index);
+
+template <class T> vector<T> VectorValues(vector<T, boost::alignment::aligned_allocator<T, 32> > const&v,
+	vector<std::size_t> const &index)
+{
+	if (index.empty() || v.empty())
+		return vector<T>();
+
+	vector<T> result(index.size());
+	for (std::size_t i = 0; i < index.size(); ++i)
+		result.at(i) = v.at(index.at(i));
+	return result;
+}
+
+
 template <class T> void FlipVector(vector<T> &v);
 
 template <class T> void FlipVector(vector<T> &v)

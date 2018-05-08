@@ -21,6 +21,9 @@ namespace
 			size_t NFace = facepoints.size();
 			Nfaces[j] = NFace;
 			annfaces[j] = annAllocPts(static_cast<int>(NFace), 3);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 			for (size_t i = 0; i < NFace; ++i)
 			{
 				annfaces[j][i][0] = facepoints[i].x;
@@ -61,18 +64,29 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 
 	size_t Norg = tess.GetPointNo();
 	acc.resize(Norg);
-	vector<double> masses(Norg);
+	vector<double,boost::alignment::aligned_allocator<double,32> > masses(Norg);
 	std::vector<std::array<double, 6> >  Q(Norg);
 
 	ANNpointArray dpoints = annAllocPts(static_cast<int>(Norg), 3);
+	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > AllCM = tess.GetAllCM();
+	vector<double, boost::alignment::aligned_allocator<double, 32> > volumes = tess.GetAllVolumes();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < Norg; ++i)
 	{
-		Vector3D const& vec = tess.GetCellCM(i);
-		dpoints[i][0] = vec.x;
-		dpoints[i][1] = vec.y;
-		dpoints[i][2] = vec.z;
-		masses[i] = tess.GetVolume(i)*cells[i].density;
-		Q[i].fill(0);
+		dpoints[i][0] = AllCM[i].x;
+		dpoints[i][1] = AllCM[i].y;
+		dpoints[i][2] = AllCM[i].z;
+		masses[i] = volumes[i]*cells[i].density;
+	}
+	for (size_t i = 0; i < Norg; ++i)
+	{
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+		for (size_t j = 0; j < 6; j++)
+			Q[i][j] = 0;
 	}
 	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
 
@@ -133,6 +147,9 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	dpoints = annAllocPts(static_cast<int>(Norg + toadd), 3);
 	masses.resize(Norg + toadd);
 	Q.resize(Norg + toadd);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < toadd; ++i)
 	{
 		masses[Norg + i] = m_recv[i * 10];
@@ -153,12 +170,14 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 #endif
 
 	//rebuild tree	
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < Norg; ++i)
 	{
-		Vector3D const& vec = tess.GetCellCM(i);
-		dpoints[i][0] = vec.x;
-		dpoints[i][1] = vec.y;
-		dpoints[i][2] = vec.z;
+		dpoints[i][0] = AllCM[i].x;
+		dpoints[i][1] = AllCM[i].y;
+		dpoints[i][2] = AllCM[i].z;
 	}
 	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg + toadd), 3, 1, ANN_KD_SL_MIDPT);
 #ifdef timing
@@ -173,6 +192,9 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	ANNpointArray anqpoints = annAllocPts(static_cast<int>(Nbatch), 3);
 	ANNpointArray accress = annAllocPts(static_cast<int>(Nbatch), 3);
 	std::vector<ANNpoint> qpoints(Nbatch), accpoints(Nbatch);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < Nbatch; ++i)
 	{
 		qpoints[i] = anqpoints[i];
@@ -184,18 +206,23 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		size_t Ninner = std::min(Norg - counter2, Nbatch);
 		qpoints.resize(Ninner);
 		accpoints.resize(Ninner);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 		for (size_t j = 0; j < Ninner; ++j)
 		{
-			Vector3D const& vec = tess.GetCellCM(counter2);
-			qpoints[j][0] = vec.x;
-			qpoints[j][1] = vec.y;
-			qpoints[j][2] = vec.z;
+			qpoints[j][0] = AllCM[counter2].x;
+			qpoints[j][1] = AllCM[counter2].y;
+			qpoints[j][2] = AllCM[counter2].z;
 			accpoints[j][0] = 0;
 			accpoints[j][1] = 0;
 			accpoints[j][2] = 0;
 			++counter2;
 		}
 		atree->GetAcc(qpoints, accpoints, opening_);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 		for (size_t j = 0; j < Ninner; ++j)
 		{
 			acc[counter2 - Ninner + j].x = accpoints[j][0];

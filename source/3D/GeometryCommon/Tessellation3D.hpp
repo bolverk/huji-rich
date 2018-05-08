@@ -7,6 +7,7 @@
 #define TESSELLATION3D_HPP 1
 
 #include <vector>
+#include <boost/align.hpp>
 #include "Face.hpp"
 
 using std::vector;
@@ -177,13 +178,25 @@ public:
 	\brief Returns the center of masses of the cells
 	\return The CM's
 	*/
-	virtual vector<Vector3D>& GetAllCM(void) = 0;
+	virtual vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& GetAllCM(void) = 0;
+
+	/*!
+	\brief Returns the center of masses of the cells
+	\return The CM's
+	*/
+	virtual vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > GetAllCM(void) const = 0;
 
 	/*!
 	\brief Returns the volumes of the cells
 	\return The volumes
 	*/
-	virtual vector<double>& GetAllVolumes(void) = 0;
+	virtual vector<double, boost::alignment::aligned_allocator<double, 32> >& GetAllVolumes(void) = 0;
+
+	/*!
+	\brief Returns the volumes of the cells
+	\return The volumes
+	*/
+	virtual vector<double, boost::alignment::aligned_allocator<double, 32> > GetAllVolumes(void)const = 0;
 
 	/*!
 	\brief Returns the neighbors and neighbors of the neighbors of a cell
@@ -220,7 +233,7 @@ public:
 	*/
 	virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
 
-	virtual vector<Vector3D>& GetAllFaceCM(void) = 0;
+	virtual vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& GetAllFaceCM(void) = 0;
 
 	virtual Vector3D FaceCM(size_t index)const=0;
 

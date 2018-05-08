@@ -243,7 +243,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray		pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices to store in subtree
-	vector<double> const& masses,
+	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dim,			// dimension of space

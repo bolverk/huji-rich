@@ -37,6 +37,9 @@ ComputationalCell3D& ComputationalCell3D::operator+=(ComputationalCell3D const& 
 	this->velocity += other.velocity;
 	assert(this->tracers.size() == other.tracers.size());
 	size_t N = this->tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		this->tracers[j] += other.tracers[j];
 	return *this;
@@ -50,6 +53,9 @@ ComputationalCell3D& ComputationalCell3D::operator-=(ComputationalCell3D const& 
 	this->velocity -= other.velocity;
 	assert(this->tracers.size() == other.tracers.size());
 	size_t N = this->tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		this->tracers[j] -= other.tracers[j];
 	return *this;
@@ -84,9 +90,15 @@ vector<double> ComputationalCell3D::serialize(void) const
 	res.at(5) = internal_energy;
 	size_t counter = 6;
 	size_t N = tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		res[j + counter] = tracers[j];
 	size_t N2 = stickers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N2; ++j)
 		res[j + counter + N] = stickers[j] ? 1 : 0;
 	return res;
@@ -104,9 +116,15 @@ void ComputationalCell3D::unserialize
 	internal_energy = data.at(5);
 	size_t counter = 6;
 	size_t N = tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		tracers[j] = data.at(counter + j);
 	size_t N2 = stickers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < N2; ++i)
 		stickers[i] = data.at(counter + N + i)>0.5;
 }
@@ -146,8 +164,11 @@ void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D cons
 	res.pressure += other.pressure*scalar;
 	res.internal_energy += other.internal_energy*scalar;
 	res.velocity += other.velocity*scalar;
-	assert(res.tracers.size() == other.tracers.size());
+	//assert(res.tracers.size() == other.tracers.size());
 	size_t N = res.tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		res.tracers[j] += other.tracers[j] * scalar;
 }
@@ -206,9 +227,15 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	assert(cell.tracers.size() == other.tracers.size());
 	assert(cell.stickers.size() == other.stickers.size());
 	size_t N = cell.tracers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 0; j < N; ++j)
 		cell.tracers[j] = other.tracers[j];
 	N = cell.stickers.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 0; i < N; ++i)
 		cell.stickers[i] = other.stickers[i];
 }

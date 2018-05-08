@@ -88,7 +88,7 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-
+#include <boost/align.hpp>
 #include <vector>
 #include <array>
 #include <cstdlib>			// standard lib includes
@@ -682,7 +682,7 @@ public:
 
 	ANNkd_tree(							// build from point array
 		ANNpointArray	pa,				// point array
-		std::vector<double> const& masses,
+		std::vector<double,boost::alignment::aligned_allocator<double,32> > const& masses,
 		std::vector<std::array<double,6> > const& Qs,
 		int				n,				// number of points
 		int				dd,				// dimension
