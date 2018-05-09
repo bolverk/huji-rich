@@ -1148,10 +1148,10 @@ void Voronoi3D::CalcAllCM(void)
 				{
 					tetra[1] = tetra_centers_[PointsInFace_[Face][j + 1]];
 					tetra[2] = tetra_centers_[PointsInFace_[Face][j + 2]];
-					double vol = std::abs(GetTetraVolume(tetra));
-					volume_[i] += vol;
+					double vol2 = std::abs(GetTetraVolume(tetra));
+					volume_[i] += vol2;
 					GetTetraCM(tetra, vtemp);
-					CM_[i] += vol*vtemp;
+					CM_[i] += vol2*vtemp;
 				}
 			}
 			CM_[i] *= (1.0 / volume_[i]);

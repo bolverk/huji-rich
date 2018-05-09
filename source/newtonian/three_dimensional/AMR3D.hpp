@@ -129,7 +129,6 @@ private:
 	SimpleAMRExtensiveUpdater3D seu_;
 	AMRCellUpdater3D* cu_;
 	AMRExtensiveUpdater3D* eu_;
-	LinearGauss3D *interp_;
 	AMR3D(AMR3D const& amr);
 	AMR3D& operator=(AMR3D const&);
 	
