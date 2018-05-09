@@ -53,7 +53,11 @@ ANNdist annDist(						// interpoint squared distance
 	register ANNcoord dist;
 
 	dist = 0;
-	for (d = 0; d < dim; d++) {
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
+	for (d = 0; d < dim; d++) 
+	{
 		diff = p[d] - q[d];
 		dist = ANN_SUM(dist, ANN_POW(diff));
 	}
@@ -106,47 +110,19 @@ void annPrintPt(						// print a point
 //		another.  The two rectangles must have the same dimension
 //		(and it is not possible to test this here).
 //----------------------------------------------------------------------
-
-ANNpoint annAllocPt(int dim, ANNcoord c)		// allocate 1 point
-{
-	ANNpoint p = new ANNcoord[dim];
-	for (int i = 0; i < dim; i++) p[i] = c;
-	return p;
-}
    
-ANNpointArray annAllocPts(int n, int dim)		// allocate n pts in dim
+ANNpointArray annAllocPts(int n, int /*dim*/)		// allocate n pts in dim
 {
-	ANNpointArray pa = new ANNpoint[n];			// allocate points
-	ANNpoint	  p  = new ANNcoord[n*dim];		// allocate space for coords
-	for (int i = 0; i < n; i++) {
-		pa[i] = &(p[i*dim]);
-	}
+	ANNpointArray pa(static_cast<size_t>(n));
 	return pa;
 }
 
-void annDeallocPt(ANNpoint &p)					// deallocate 1 point
-{
-	delete [] p;
-	p = NULL;
-}
-   
-void annDeallocPts(ANNpointArray &pa)			// deallocate points
-{
-	delete [] pa[0];							// dealloc coordinate storage
-	delete [] pa;								// dealloc points
-	pa = NULL;
-}
-   
-ANNpoint annCopyPt(int dim, ANNpoint source)	// copy point
-{
-	ANNpoint p = new ANNcoord[dim];
-	for (int i = 0; i < dim; i++) p[i] = source[i];
-	return p;
-}
-   
 												// assign one rect to another
 void annAssignRect(int dim, ANNorthRect &dest, const ANNorthRect &source)
 {
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (int i = 0; i < dim; i++) {
 		dest.lo[i] = source.lo[i];
 		dest.hi[i] = source.hi[i];

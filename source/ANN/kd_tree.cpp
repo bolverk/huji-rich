@@ -112,7 +112,7 @@ void ANNkd_tree::Print(					// print entire tree
 		out << "    Points:\n";
 		for (int i = 0; i < n_pts; i++) {
 			out << "\t" << i << ": ";
-			annPrintPt(pts[i], dim, out);
+			annPrintPt(pts->operator[](i), dim, out);
 			out << "\n";
 		}
 	}
@@ -212,8 +212,6 @@ ANNkd_tree::~ANNkd_tree()				// tree destructor
 {
 	if (root != NULL) delete root;
 	if (pidx != NULL) delete [] pidx;
-	if (bnd_box_lo != NULL) annDeallocPt(bnd_box_lo);
-	if (bnd_box_hi != NULL) annDeallocPt(bnd_box_hi);
 }
 
 //----------------------------------------------------------------------
@@ -253,7 +251,7 @@ void ANNkd_tree::SkeletonTree(			// construct skeleton tree
 	dim = dd;							// initialize basic elements
 	n_pts = n;
 	bkt_size = bs;
-	pts = pa;							// initialize points array
+	pts = &pa;							// initialize points array
 
 	root = NULL;						// no associated tree yet
 
@@ -267,7 +265,6 @@ void ANNkd_tree::SkeletonTree(			// construct skeleton tree
 		pidx = pi;						// yes, use them
 	}
 
-	bnd_box_lo = bnd_box_hi = NULL;		// bounding box is nonexistent
 	if (KD_TRIVIAL == NULL)				// no trivial leaf node yet?
 		KD_TRIVIAL = new ANNkd_leaf(0, IDX_TRIVIAL);	// allocate it
 }
@@ -276,7 +273,7 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 		int n,							// number of points
 		int dd,							// dimension
 		int bs)							// bucket size
-	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
 {  SkeletonTree(n, dd, bs);  }			// construct skeleton tree
 
 //----------------------------------------------------------------------
@@ -315,7 +312,7 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 //----------------------------------------------------------------------
 
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	int					n,				// number of points
 	int					dim,			// dimension of space
@@ -361,7 +358,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 } 
 
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
@@ -440,22 +437,22 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 //----------------------------------------------------------------------
 
 ANNkd_tree::ANNkd_tree(					// construct from point array
-	ANNpointArray		pa,				// point array (with at least n pts)
+	ANNpointArray const& pa,				// point array (with at least n pts)
 	int					n,				// number of points
 	int					dd,				// dimension
 	int					bs,				// bucket size
 	ANNsplitRule		split)			// splitting method
-	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
 {
 	SkeletonTree(n, dd, bs);			// set up the basic stuff
-	pts = pa;							// where the points are
+	pts = &pa;							// where the points are
 	if (n == 0) return;					// no points--no sweat
 
-	ANNorthRect bnd_box(dd);			// bounding box for points
+	ANNorthRect bnd_box;			// bounding box for points
 	annEnclRect(pa, pidx, n, dd, bnd_box);// construct bounding rectangle
 										// copy to tree structure
-	bnd_box_lo = annCopyPt(dd, bnd_box.lo);
-	bnd_box_hi = annCopyPt(dd, bnd_box.hi);
+	bnd_box_lo =  bnd_box.lo;
+	bnd_box_hi = bnd_box.hi;
 
 	switch (split) {					// build by rule
 	case ANN_KD_STD:					// standard kd-splitting rule
@@ -480,24 +477,24 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 }
 
 ANNkd_tree::ANNkd_tree(					// construct from point array
-	ANNpointArray		pa,				// point array (with at least n pts)
+	ANNpointArray const& pa,				// point array (with at least n pts)
 	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dd,				// dimension
 	int					bs,				// bucket size
 	ANNsplitRule		split)			// splitting method
-	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
 {
 	SkeletonTree(n, dd, bs);			// set up the basic stuff
-	pts = pa;							// where the points are
+	pts = &pa;							// where the points are
 	if (n == 0) return;					// no points--no sweat
 
-	ANNorthRect bnd_box(dd);			// bounding box for points
+	ANNorthRect bnd_box;			// bounding box for points
 	annEnclRect(pa, pidx, n, dd, bnd_box);// construct bounding rectangle
 										  // copy to tree structure
-	bnd_box_lo = annCopyPt(dd, bnd_box.lo);
-	bnd_box_hi = annCopyPt(dd, bnd_box.hi);
+	bnd_box_lo =  bnd_box.lo;
+	bnd_box_hi =  bnd_box.hi;
 
 	switch (split) {					// build by rule
 	case ANN_KD_STD:					// standard kd-splitting rule
@@ -521,7 +518,7 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 	}
 }
 
-void ANNkd_tree::GetAcc(ANNpoint qpoint, ANNpoint res,double angle2) const
+void ANNkd_tree::GetAcc(ANNpoint qpoint, ANNpoint &res,double angle2) const
 {
 	ANNorthRect bb(3, bnd_box_lo, bnd_box_hi);
 	root->GetAcc(qpoint, res, angle2,bb);
@@ -536,7 +533,8 @@ namespace
 	}
 }
 
-void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2) const
+void  ANNkd_tree::GetAcc(std::vector<ANNpoint,boost::alignment::aligned_allocator<ANNpoint,32> > &qpoint, 
+	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2) const
 {
 	ANNorthRect bb(3, bnd_box_lo, bnd_box_hi);
 	std::array<double, 3> qMin,qMax;
@@ -565,7 +563,8 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	root->GetAcc(qpoint, res, angle2, bb,qCM);
 }
 
-void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
+void ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
+	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb,
 	std::array<double, 4> const& qCM) const
 {
 	double lv = bb.lo[cut_dim];
@@ -574,6 +573,9 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	int counter = 0;
 	size_t N = qpoint.size();
 	double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qCM[i] - CM[i])*(qCM[i] - CM[i]);
 	if(N > 1)
@@ -585,11 +587,17 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 		for (size_t k = 0; k < N; ++k)
 		{
 			dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 			for (int i = 0; i < 3; ++i)
 				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 			if (dist_toq*angle2 > maxbox)
 			{
 				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass*(qpoint[k][i] - CM[i]) * r3;
 				double Qfactor = r3 / dist_toq;
@@ -637,7 +645,8 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	}
 }
 
-void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const
+void  ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
+	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
@@ -647,6 +656,9 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 	for (size_t k = 0; k < N; ++k)
 	{
 		double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 		if (dist_toq*angle2 > maxbox)
@@ -660,11 +672,17 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 		for (size_t k = 0; k < N; ++k)
 		{
 			double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 			for (int i = 0; i < 3; ++i)
 				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 			if (dist_toq*angle2 > maxbox)
 			{
 				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass*(qpoint[k][i] - CM[i]) * r3;
 				double Qfactor = r3 / dist_toq;
@@ -712,15 +730,21 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 	}
 }
 
-void ANNkd_split::GetAcc(ANNpoint qpoint, ANNpoint res, double angle2,ANNorthRect &bb) const
+void ANNkd_split::GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2,ANNorthRect &bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
 	if (dist_toq*angle2 > maxbox)
 	{
 		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			res[i] -= mass*(qpoint[i] - CM[i]) * r3;
 		double Qfactor = r3 / dist_toq;
@@ -755,18 +779,27 @@ void ANNkd_split::GetAcc(ANNpoint qpoint, ANNpoint res, double angle2,ANNorthRec
 	}
 }
 
-void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint res, double /*angle2*/, ANNorthRect &bb) const
+void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint &res, double /*angle2*/, ANNorthRect &bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
 	if (dist_toq < maxbox*1e-6) //prevent self force
 		return;
 	double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (int i = 0; i < 3; ++i)
 		res[i] -= mass*(qpoint[i] - CM[i]) *r3;
 	double sumQ = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (size_t i = 0; i < 6; ++i)
 		sumQ += std::abs(Q[i]);
 	if (sumQ < mass*dist_toq*1e-6)
@@ -785,21 +818,31 @@ void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint res, double /*angle2*/, ANNort
 	res[2] += Qfactor*dz;
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double /*angle2*/, ANNorthRect &bb) const
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> >& qpoint, 
+	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> >& res, double /*angle2*/, ANNorthRect &bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	size_t N = qpoint.size();
 	for (size_t k = 0; k < N; ++k)
 	{
 		double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 		if (dist_toq < maxbox*1e-6) //prevent self force
 			continue;
 		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass*(qpoint[k][i] - CM[i]) *r3;
 		double sumQ = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (size_t i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
 		if (sumQ < mass*dist_toq*1e-6)
@@ -819,7 +862,8 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 	}
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double /*angle2*/, ANNorthRect &bb,
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
+	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double /*angle2*/, ANNorthRect &bb,
 	std::array<double, 4> const& /*qCM*/) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
@@ -827,14 +871,23 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &re
 	for (size_t k = 0; k < N; ++k)
 	{
 		double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
 		if (dist_toq < maxbox*1e-6) //prevent self force
 			continue;
 		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass*(qpoint[k][i] - CM[i]) *r3;
 		double sumQ = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (size_t i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
 		if (sumQ < mass*dist_toq*1e-6)
@@ -856,7 +909,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &re
 
 namespace
 {
-	void CrossProduct(ANNpoint v1, ANNpoint v2, double* res)
+	void CrossProduct(ANNpoint v1, ANNpoint v2, ANNpoint &res)
 	{
 		res[0] = v1[1]*v2[2] - v1[2] *v2[1];
 		res[1] = v1[2] *v2[1] - v1[1] *v2[2];
@@ -870,7 +923,7 @@ namespace
 
 	bool PointInface(ANNpointArray face, size_t Nface, ANNpoint point)
 	{
-		double normal[3],temp0[3],temp1[3],res[3];
+		ANNpoint normal,temp0,temp1,res;
 		temp0[0] = face[0][0] - point[0];
 		temp0[1] = face[0][1] - point[1];
 		temp0[2] = face[0][2] - point[2];
@@ -879,7 +932,10 @@ namespace
 		temp1[2] = face[1][2] - point[2];
 		CrossProduct(temp0, temp1, normal);
 		--Nface;
-		for (size_t i = 0; i < Nface; ++i)
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+		for (size_t i = 0; i < Nface; i++)
 		{
 			temp0[0] = face[i + 1][0] - point[0];
 			temp0[1] = face[i + 1][1] - point[1];
@@ -895,31 +951,38 @@ namespace
 	}
 }
 
-double DistanceToFace(ANNpointArray face, size_t Nface,const double* qpoint, double maxdist, ANNpoint normal)
+double DistanceToFace(ANNpointArray const& face, size_t Nface,const double* qpoint, double maxdist, ANNpoint normal)
 {
 	double d = (qpoint[0] - face[0][0])*normal[0] + (qpoint[1] - face[0][1])*normal[1] + (qpoint[2] - face[0][2])*normal[2];
 	if (std::abs(d) > maxdist)
 		return std::abs(d);
-	ANNpoint ptemp=annAllocPt(3);
+	ANNpoint ptemp;
 	ptemp[0] = qpoint[0] - d*normal[0];
 	ptemp[1] = qpoint[1] - d*normal[1];
 	ptemp[2] = qpoint[2] - d*normal[2];
 	if (PointInface(face, Nface, ptemp))
 	{
-		annDeallocPt(ptemp);
 		return std::abs(d);
 	}
 	double min_face_dist = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 	for (size_t i = 0; i < 3; ++i)
 		min_face_dist += (qpoint[i] - face[0][i])*(qpoint[i] - face[0][i]);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t j = 1; j < Nface; ++j)
 	{
 		double temp = 0;
+#ifdef __INTEL_COMPILER
+#pragma simd
+#endif
 		for (size_t i = 0; i < 3; ++i)
 			temp += (qpoint[i] - face[j][i])*(qpoint[i] - face[j][i]);
 		min_face_dist = std::min(min_face_dist, temp);
 	}
-	annDeallocPt(ptemp);
 	return fastsqrt(min_face_dist);
 }
 
@@ -930,7 +993,8 @@ double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size
 	double maxdist, std::vector<ANNpoint>const& normals)
 {
 	double res = DistanceToFace(faces[0], Nface[0], qpoint, maxdist, normals[0]);
-	for (size_t i = 1; i < faces.size(); ++i)
+	size_t Nfaces = faces.size();
+	for (size_t i = 1; i < Nfaces; ++i)
 	{
 		double temp= DistanceToFace(faces[i], Nface[i], qpoint, maxdist, normals[i]);
 		res = std::min(res, temp);

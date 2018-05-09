@@ -33,7 +33,7 @@
 //----------------------------------------------------------------------
 
 void kd_split(							// standard (optimized) kd-splitter
-	ANNpointArray		pa,				// point array (unaltered)
+	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -43,7 +43,7 @@ void kd_split(							// standard (optimized) kd-splitter
 	int					&n_lo);			// num of points on low side (returned)
 
 void midpt_split(						// midpoint kd-splitter
-	ANNpointArray		pa,				// point array (unaltered)
+	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -53,7 +53,7 @@ void midpt_split(						// midpoint kd-splitter
 	int					&n_lo);			// num of points on low side (returned)
 
 void sl_midpt_split(					// sliding midpoint kd-splitter
-	ANNpointArray		pa,				// point array (unaltered)
+	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -63,7 +63,7 @@ void sl_midpt_split(					// sliding midpoint kd-splitter
 	int					&n_lo);			// num of points on low side (returned)
 
 void fair_split(						// fair-split kd-splitter
-	ANNpointArray		pa,				// point array (unaltered)
+	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -73,7 +73,7 @@ void fair_split(						// fair-split kd-splitter
 	int					&n_lo);			// num of points on low side (returned)
 
 void sl_fair_split(						// sliding fair-split kd-splitter
-	ANNpointArray		pa,				// point array (unaltered)
+	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points

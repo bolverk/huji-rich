@@ -91,32 +91,28 @@ void annPrintPt(				// print a point
 class ANNorthRect {
 private:
 	ANNorthRect& operator=(const ANNorthRect & /*other*/) { return *this; }
-	ANNorthRect(const ANNorthRect& /*other)*/) :lo(0),hi(0){}
+	ANNorthRect(const ANNorthRect& /*other)*/) :lo(ANNpoint()),hi(ANNpoint()){}
 public:
 	ANNpoint		lo;			// rectangle lower bounds
 	ANNpoint		hi;			// rectangle upper bounds
 //
-	ANNorthRect(				// basic constructor
-	int				dd,			// dimension of space
-	ANNcoord		l=0,		// default is empty
-	ANNcoord		h=0):lo(0),hi(0)
-	{  lo = annAllocPt(dd, l);  hi = annAllocPt(dd, h); }
+	ANNorthRect():lo(ANNpoint()),hi(ANNpoint())
+	{}
 
 	ANNorthRect(				// (almost a) copy constructor
 	int				dd,			// dimension
 	const			ANNorthRect &r) // rectangle to copy
-		:lo(0), hi(0)
-	{  lo = annCopyPt(dd, r.lo);  hi = annCopyPt(dd, r.hi);  }
+		:lo(r.lo), hi(r.hi){ }
 
 	ANNorthRect(				// construct from points
 	int				dd,			// dimension
 	ANNpoint		l,			// low point
 	ANNpoint		h)			// hight point
-		:lo(0), hi(0)
-	{  lo = annCopyPt(dd, l);  hi = annCopyPt(dd, h);  }
+		:lo(l), hi(h)
+	{}
 
 	~ANNorthRect()				// destructor
-    {  annDeallocPt(lo);  annDeallocPt(hi);  }
+    {}
 
 	ANNbool inside(int dim, ANNpoint p);// is point p inside rectangle?
 };

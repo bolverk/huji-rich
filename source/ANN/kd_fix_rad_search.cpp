@@ -46,7 +46,7 @@ int				ANNkdFRDim;				// dimension of space
 ANNpoint		ANNkdFRQ;				// query point
 ANNdist			ANNkdFRSqRad;			// squared radius search bound
 double			ANNkdFRMaxErr;			// max tolerable squared error
-ANNpointArray	ANNkdFRPts;				// the points
+ANNpointArray const* ANNkdFRPts;				// the points
 ANNmin_k*		ANNkdFRPointMK;			// set of k closest points
 int				ANNkdFRPtsVisited;		// total points visited
 int				ANNkdFRPtsInRange;		// number of points in the range
@@ -148,15 +148,15 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist)
 void ANNkd_leaf::ann_FR_search(ANNdist /*box_dist*/)
 {
 	register ANNdist dist;				// distance to data point
-	register ANNcoord* pp;				// data coordinate pointer
-	register ANNcoord* qq;				// query coordinate pointer
+	register ANNcoord const* pp;				// data coordinate pointer
+	register ANNcoord const* qq;				// query coordinate pointer
 	register ANNcoord t;
 	register int d;
 
 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
 
-		pp = ANNkdFRPts[bkt[i]];		// first coord of next data point
-		qq = ANNkdFRQ;					// first coord of query point
+		pp = &ANNkdFRPts->operator[](bkt[i])[0];		// first coord of next data point
+		qq = &ANNkdFRQ[0];					// first coord of query point
 		dist = 0;
 
 		for(d = 0; d < ANNkdFRDim; d++) {

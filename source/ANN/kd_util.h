@@ -36,14 +36,14 @@ double annAspectRatio(			// compute aspect ratio of box
 	const ANNorthRect	&bnd_box);		// bounding cube
 
 void annEnclRect(				// compute smallest enclosing rectangle
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					dim,			// dimension
 	ANNorthRect &bnds);					// bounding cube (returned)
 
 void annEnclCube(				// compute smallest enclosing cube
-	ANNpointArray		pa,				// point array
+	ANNpointArray const&	pa,				// point array
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					dim,			// dimension
@@ -56,13 +56,13 @@ ANNdist annBoxDistance(			// compute distance from point to box
 	int					dim);			// dimension of space
 
 ANNcoord annSpread(				// compute point spread along dimension
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					d);				// dimension to check
 
 void annMinMax(					// compute min and max coordinates along dim
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					d,				// dimension to check
@@ -70,13 +70,13 @@ void annMinMax(					// compute min and max coordinates along dim
 	ANNcoord&			max);			// maximum value (returned)
 
 int annMaxSpread(				// compute dimension of max spread
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					dim);			// dimension of space
 
 void annMedianSplit(			// split points along median value
-	ANNpointArray		pa,				// points to split
+	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					d,				// dimension along which to split
@@ -84,7 +84,7 @@ void annMedianSplit(			// split points along median value
 	int					n_lo);			// split into n_lo and n-n_lo
 
 void annPlaneSplit(				// split points by a plane
-	ANNpointArray		pa,				// points to split
+	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					d,				// dimension along which to split
@@ -93,7 +93,7 @@ void annPlaneSplit(				// split points by a plane
 	int					&br2);			// second break (values == cv)
 
 void annBoxSplit(				// split points by a box
-	ANNpointArray		pa,				// points to split
+	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					dim,			// dimension of space
@@ -101,7 +101,7 @@ void annBoxSplit(				// split points by a box
 	int					&n_in);			// number of points inside (returned)
 
 int annSplitBalance(			// determine balance factor of a split
-	ANNpointArray		pa,				// points to split
+	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
 	int					d,				// dimension along which to split

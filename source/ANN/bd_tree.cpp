@@ -74,7 +74,7 @@ void ANNbd_shrink::getStats(					// get subtree statistics
 	ANNorthRect			&bnd_box)				// bounding box
 {
 	ANNkdStats ch_stats;						// stats for children
-	ANNorthRect inner_box(dim);					// inner box of shrink
+	ANNorthRect inner_box;					// inner box of shrink
 
 	annBnds2Box(bnd_box,						// enclosing box
 				dim,							// dimension
@@ -104,7 +104,7 @@ void ANNbd_shrink::getStats(					// get subtree statistics
 //----------------------------------------------------------------------
 
 ANNkd_ptr rbd_tree(						// recursive construction of bd-tree
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	int					n,				// number of points
 	int					dim,			// dimension of space
@@ -114,7 +114,7 @@ ANNkd_ptr rbd_tree(						// recursive construction of bd-tree
 	ANNshrinkRule		shrink);		// shrinking rule
 
 ANNbd_tree::ANNbd_tree(					// construct from point array
-	ANNpointArray		pa,				// point array (with at least n pts)
+	ANNpointArray const& pa,				// point array (with at least n pts)
 	int					n,				// number of points
 	int					dd,				// dimension
 	int					bs,				// bucket size
@@ -122,15 +122,15 @@ ANNbd_tree::ANNbd_tree(					// construct from point array
 	ANNshrinkRule		shrink)			// shrinking rule
 	: ANNkd_tree(n, dd, bs)				// build skeleton base tree
 {
-	pts = pa;							// where the points are
+	pts = &pa;							// where the points are
 	if (n == 0) return;					// no points--no sweat
 
-	ANNorthRect bnd_box(dd);			// bounding box for points
+	ANNorthRect bnd_box;			// bounding box for points
 										// construct bounding rectangle
 	annEnclRect(pa, pidx, n, dd, bnd_box);
 										// copy to tree structure
-	bnd_box_lo = annCopyPt(dd, bnd_box.lo);
-	bnd_box_hi = annCopyPt(dd, bnd_box.hi);
+	bnd_box_lo = bnd_box.lo;
+	bnd_box_hi = bnd_box.hi;
 
 	switch (split) {					// build by rule
 	case ANN_KD_STD:					// standard kd-splitting rule
@@ -360,7 +360,7 @@ ANNdecomp selectDecomp(			// select decomposition method
 //----------------------------------------------------------------------
 
 ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	int					n,				// number of points
 	int					dim,			// dimension of space
@@ -371,7 +371,7 @@ ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
 {
 	ANNdecomp decomp;					// decomposition method
 
-	ANNorthRect inner_box(dim);			// inner box (if shrinking)
+	ANNorthRect inner_box;			// inner box (if shrinking)
 
 	if (n <= bsp) {						// n small, make a leaf node
 		if (n == 0)						// empty leaf node

@@ -374,8 +374,8 @@ const ANNbool	ANN_ALLOW_SELF_MATCH	= ANNtrue;
 //		when returning the results of k-nearest neighbor queries.
 //----------------------------------------------------------------------
 
-typedef ANNcoord* ANNpoint;			// a point
-typedef ANNpoint* ANNpointArray;	// an array of points 
+typedef std::array<double,3> ANNpoint;			// a point
+typedef std::vector<ANNpoint> ANNpointArray;	// an array of points 
 typedef ANNdist*  ANNdistArray;		// an array of distances 
 typedef ANNidx*   ANNidxArray;		// an array of point indices
 
@@ -421,23 +421,10 @@ DLL_API ANNdist annDist(
 	ANNpoint		p,			// points
 	ANNpoint		q);
 
-DLL_API ANNpoint annAllocPt(
-	int				dim,		// dimension
-	ANNcoord		c = 0);		// coordinate value (all equal)
 
 DLL_API ANNpointArray annAllocPts(
 	int				n,			// number of points
 	int				dim);		// dimension
-
-DLL_API void annDeallocPt(
-	ANNpoint		&p);		// deallocate 1 point
-   
-DLL_API void annDeallocPts(
-	ANNpointArray	&pa);		// point array
-
-DLL_API ANNpoint annCopyPt(
-	int				dim,		// dimension
-	ANNpoint		source);	// point to copy
 
 //----------------------------------------------------------------------
 //Overall structure: ANN supports a number of different data structures
@@ -514,7 +501,7 @@ public:
 	virtual int theDim() = 0;			// return dimension of space
 	virtual int nPoints() = 0;			// return number of points
 										// return pointer to points
-	virtual ANNpointArray thePoints() = 0;
+	virtual ANNpointArray const& thePoints() = 0;
 };
 
 //----------------------------------------------------------------------
@@ -652,7 +639,7 @@ protected:
 	int				dim;				// dimension of space
 	int				n_pts;				// number of points in tree
 	int				bkt_size;			// bucket size
-	ANNpointArray	pts;				// the points
+	ANNpointArray const* pts;				// the points
 	ANNidxArray		pidx;				// point indices (to pts array)
 	ANNkd_ptr		root;				// root of kd-tree
 	ANNpoint		bnd_box_lo;			// bounding box low point
@@ -662,11 +649,11 @@ protected:
 		int				n,				// number of points
 		int				dd,				// dimension
 		int				bs,				// bucket size
-		ANNpointArray pa = NULL,		// point array (optional)
+		ANNpointArray pa = ANNpointArray(),		// point array (optional)
 		ANNidxArray pi = NULL);			// point indices (optional)
 
 	ANNkd_tree& operator=(const ANNkd_tree &/*tree*/) { return *this; }
-	ANNkd_tree(ANNkd_tree const& /*other*/) :dim(0),n_pts(0),bkt_size(0),pts(0),pidx(0),root(0),bnd_box_lo(0),bnd_box_hi(0){};
+	ANNkd_tree(ANNkd_tree const& /*other*/) :dim(0),n_pts(0),bkt_size(0),pts(0),pidx(0),root(0),bnd_box_lo(ANNpoint()),bnd_box_hi(ANNpoint()){};
 public:
 	ANNkd_tree(							// build skeleton tree
 		int				n = 0,			// number of points
@@ -674,14 +661,14 @@ public:
 		int				bs = 1);		// bucket size
 
 	ANNkd_tree(							// build from point array
-		ANNpointArray	pa,				// point array
+		ANNpointArray const& pa,				// point array
 		int				n,				// number of points
 		int				dd,				// dimension
 		int				bs = 1,			// bucket size
 		ANNsplitRule	split = ANN_KD_SUGGEST);	// splitting method
 
 	ANNkd_tree(							// build from point array
-		ANNpointArray	pa,				// point array
+		ANNpointArray const& pa,				// point array
 		std::vector<double,boost::alignment::aligned_allocator<double,32> > const& masses,
 		std::vector<std::array<double,6> > const& Qs,
 		int				n,				// number of points
@@ -722,8 +709,8 @@ public:
 	int nPoints()						// return number of points
 		{ return n_pts; }
 
-	ANNpointArray thePoints()			// return pointer to points
-		{  return pts;  }
+	ANNpointArray const& thePoints()			// return pointer to points
+		{  return *pts;  }
 
 	virtual void Print(					// print the tree (for debugging)
 		ANNbool			with_pts,		// print points as well?
@@ -736,9 +723,10 @@ public:
 	virtual void getStats(				// compute tree statistics
 		ANNkdStats&		st);			// the statistics (modified)
 
-	void GetAcc(ANNpoint qpoint, ANNpoint res, double angle2) const;
+	void GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2) const;
 
-	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2) const;
+	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
+		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2) const;
 
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, std::vector<ANNkd_ptr> & nodes, double angle2,
 		std::vector<ANNpoint> const& normals);
@@ -766,7 +754,7 @@ public:
 		: ANNkd_tree(n, dd, bs) {}		// build base kd-tree
 
 	ANNbd_tree(							// build from point array
-		ANNpointArray	pa,				// point array
+		ANNpointArray const& pa,				// point array
 		int				n,				// number of points
 		int				dd,				// dimension
 		int				bs = 1,			// bucket size

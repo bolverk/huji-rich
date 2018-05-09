@@ -42,7 +42,7 @@ const double FS_ASPECT_RATIO = 2.5;		// maximum allowed aspect ratio
 //----------------------------------------------------------------------
 
 void kd_split(
-	ANNpointArray		pa,				// point array (permuted on return)
+	ANNpointArray const& pa,				// point array (permuted on return)
 	ANNidxArray			pidx,			// point indices
 	const ANNorthRect	&/*bnds*/,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -74,7 +74,7 @@ void kd_split(
 //----------------------------------------------------------------------
 
 void midpt_split(
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -144,7 +144,7 @@ void midpt_split(
 //----------------------------------------------------------------------
 
 void sl_midpt_split(
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -241,7 +241,7 @@ void sl_midpt_split(
 //----------------------------------------------------------------------
 
 void fair_split(
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points
@@ -344,7 +344,7 @@ void fair_split(
 //----------------------------------------------------------------------
 
 void sl_fair_split(
-	ANNpointArray		pa,				// point array
+	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices (permuted on return)
 	const ANNorthRect	&bnds,			// bounding rectangle for cell
 	int					n,				// number of points

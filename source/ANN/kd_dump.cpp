@@ -109,7 +109,7 @@ void ANNkd_tree::Dump(					// dump entire tree
 		out << "points " << dim << " " << n_pts << "\n";
 		for (int i = 0; i < n_pts; i++) {
 			out << i << " ";
-			annPrintPt(pts[i], dim, out);
+			annPrintPt(pts->operator[](i), dim, out);
 			out << "\n";
 		}
 	}
@@ -185,7 +185,7 @@ void ANNbd_shrink::dump(				// dump a shrinking node
 
 ANNkd_tree::ANNkd_tree(					// build from dump file
 	istream				&in)					// input stream for dump file
-	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(0), bnd_box_hi(0)
+	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
 {
 	int the_dim;								// local dimension
 	int the_n_pts;								// local number of points
@@ -315,8 +315,6 @@ static ANNkd_ptr annReadDump(
 		in >> the_dim;							// read dimension
 		in >> the_n_pts;						// number of points
 		in >> the_bkt_size;						// bucket size
-		the_bnd_box_lo = annAllocPt(the_dim);	// allocate bounding box pts
-		the_bnd_box_hi = annAllocPt(the_dim);
 
 		for (j = 0; j < the_dim; j++) {			// read bounding box low
 			in >> the_bnd_box_lo[j];

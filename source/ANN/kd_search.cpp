@@ -79,7 +79,7 @@
 int				ANNkdDim;				// dimension of space
 ANNpoint		ANNkdQ;					// query point
 double			ANNkdMaxErr;			// max tolerable squared error
-ANNpointArray	ANNkdPts;				// the points
+ANNpointArray const* ANNkdPts;				// the points
 ANNmin_k		*ANNkdPointMK;			// set of k closest points
 
 //----------------------------------------------------------------------
@@ -172,8 +172,8 @@ void ANNkd_split::ann_search(ANNdist box_dist)
 void ANNkd_leaf::ann_search(ANNdist /*box_dist*/)
 {
 	register ANNdist dist;				// distance to data point
-	register ANNcoord* pp;				// data coordinate pointer
-	register ANNcoord* qq;				// query coordinate pointer
+	register ANNcoord const* pp;				// data coordinate pointer
+	register ANNcoord const* qq;				// query coordinate pointer
 	register ANNdist min_dist;			// distance to k-th closest point
 	register ANNcoord t;
 	register int d;
@@ -182,8 +182,8 @@ void ANNkd_leaf::ann_search(ANNdist /*box_dist*/)
 
 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
 
-		pp = ANNkdPts[bkt[i]];			// first coord of next data point
-		qq = ANNkdQ;					// first coord of query point
+		pp = &ANNkdPts->operator[](bkt[i])[0];			// first coord of next data point
+		qq = &ANNkdQ[0];					// first coord of query point
 		dist = 0;
 
 		for(d = 0; d < ANNkdDim; d++) {
