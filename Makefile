@@ -7,38 +7,38 @@ CCC := gcc
 LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++0x
+	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++11
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -fno-expensive-optimizations
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_time)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x -DOMPI_SKIP_MPICXX -Dtiming -fno-expensive-optimizations
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -Dtiming -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x -fno-expensive-optimizations
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++11 -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DOMPI_SKIP_MPICXX -std=c++0x
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DOMPI_SKIP_MPICXX -std=c++11
 	LINT_FLAGS := 
 else ifeq ($(MODE),parallel_check)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++0x -fno-expensive-optimizations
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++11 -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),intel)
 	CC := icpc
 	CCC := icc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -std=c++11
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
 	CCC := icc
 	CC := mpiicpc
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++0x -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)

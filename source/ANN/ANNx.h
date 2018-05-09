@@ -68,7 +68,6 @@ void annError(					// ANN error routine
 
 void annPrintPt(				// print a point
 	ANNpoint		pt,			// the point
-	int				dim,		// the dimension
 	std::ostream	&out);		// output stream
 
 //----------------------------------------------------------------------
@@ -91,7 +90,6 @@ void annPrintPt(				// print a point
 class ANNorthRect {
 private:
 	ANNorthRect& operator=(const ANNorthRect & /*other*/) { return *this; }
-	ANNorthRect(const ANNorthRect& /*other)*/) :lo(ANNpoint()),hi(ANNpoint()){}
 public:
 	ANNpoint		lo;			// rectangle lower bounds
 	ANNpoint		hi;			// rectangle upper bounds
@@ -100,12 +98,10 @@ public:
 	{}
 
 	ANNorthRect(				// (almost a) copy constructor
-	int				dd,			// dimension
 	const			ANNorthRect &r) // rectangle to copy
 		:lo(r.lo), hi(r.hi){ }
 
 	ANNorthRect(				// construct from points
-	int				dd,			// dimension
 	ANNpoint		l,			// low point
 	ANNpoint		h)			// hight point
 		:lo(l), hi(h)
@@ -114,11 +110,10 @@ public:
 	~ANNorthRect()				// destructor
     {}
 
-	ANNbool inside(int dim, ANNpoint p);// is point p inside rectangle?
+	ANNbool inside(ANNpoint p);// is point p inside rectangle?
 };
 
 void annAssignRect(				// assign one rect to another
-	int				dim,		// dimension (both must be same)
 	ANNorthRect		&dest,		// destination (modified)
 	const ANNorthRect &source);	// source
 

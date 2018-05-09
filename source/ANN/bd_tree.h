@@ -87,7 +87,6 @@ public:
 		}
 
 	virtual void getStats(						// get tree statistics
-				int dim,						// dimension of space
 				ANNkdStats &st,					// statistics
 				ANNorthRect &bnd_box);			// bounding box
 	virtual void print(int level, ostream &out);// print node

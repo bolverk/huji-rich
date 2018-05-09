@@ -69,7 +69,6 @@ void ANNbd_shrink::print(				// print shrinking node
 //----------------------------------------------------------------------
 
 void ANNbd_shrink::getStats(					// get subtree statistics
-	int					dim,					// dimension of space
 	ANNkdStats			&st,					// stats (modified)
 	ANNorthRect			&bnd_box)				// bounding box
 {
@@ -77,17 +76,16 @@ void ANNbd_shrink::getStats(					// get subtree statistics
 	ANNorthRect inner_box;					// inner box of shrink
 
 	annBnds2Box(bnd_box,						// enclosing box
-				dim,							// dimension
 				n_bnds,							// number of bounds
 				bnds,							// bounds array
 				inner_box);						// inner box (modified)
 												// get stats for inner child
 	ch_stats.reset();							// reset
-	child[ANN_IN]->getStats(dim, ch_stats, inner_box);
+	child[ANN_IN]->getStats(ch_stats, inner_box);
 	st.merge(ch_stats);							// merge them
 												// get stats for outer child
 	ch_stats.reset();							// reset
-	child[ANN_OUT]->getStats(dim, ch_stats, bnd_box);
+	child[ANN_OUT]->getStats(ch_stats, bnd_box);
 	st.merge(ch_stats);							// merge them
 
 	st.depth++;									// increment depth
@@ -116,38 +114,37 @@ ANNkd_ptr rbd_tree(						// recursive construction of bd-tree
 ANNbd_tree::ANNbd_tree(					// construct from point array
 	ANNpointArray const& pa,				// point array (with at least n pts)
 	int					n,				// number of points
-	int					dd,				// dimension
 	int					bs,				// bucket size
 	ANNsplitRule		split,			// splitting rule
 	ANNshrinkRule		shrink)			// shrinking rule
-	: ANNkd_tree(n, dd, bs)				// build skeleton base tree
+	: ANNkd_tree(n, bs)				// build skeleton base tree
 {
 	pts = &pa;							// where the points are
 	if (n == 0) return;					// no points--no sweat
 
 	ANNorthRect bnd_box;			// bounding box for points
 										// construct bounding rectangle
-	annEnclRect(pa, pidx, n, dd, bnd_box);
+	annEnclRect(pa, pidx, n,3,bnd_box);
 										// copy to tree structure
 	bnd_box_lo = bnd_box.lo;
 	bnd_box_hi = bnd_box.hi;
 
 	switch (split) {					// build by rule
 	case ANN_KD_STD:					// standard kd-splitting rule
-		root = rbd_tree(pa, pidx, n, dd, bs, bnd_box, kd_split, shrink);
+		root = rbd_tree(pa, pidx, n, 3, bs, bnd_box, kd_split, shrink);
 		break;
 	case ANN_KD_MIDPT:					// midpoint split
-		root = rbd_tree(pa, pidx, n, dd, bs, bnd_box, midpt_split, shrink);
+		root = rbd_tree(pa, pidx, n, 3, bs, bnd_box, midpt_split, shrink);
 		break;
 	case ANN_KD_SUGGEST:				// best (in our opinion)
 	case ANN_KD_SL_MIDPT:				// sliding midpoint split
-		root = rbd_tree(pa, pidx, n, dd, bs, bnd_box, sl_midpt_split, shrink);
+		root = rbd_tree(pa, pidx, n, 3, bs, bnd_box, sl_midpt_split, shrink);
 		break;
 	case ANN_KD_FAIR:					// fair split
-		root = rbd_tree(pa, pidx, n, dd, bs, bnd_box, fair_split, shrink);
+		root = rbd_tree(pa, pidx, n, 3, bs, bnd_box, fair_split, shrink);
 		break;
 	case ANN_KD_SL_FAIR:				// sliding fair split
-		root = rbd_tree(pa, pidx, n, dd, bs,
+		root = rbd_tree(pa, pidx, n, 3, bs,
 						bnd_box, sl_fair_split, shrink);
 		break;
 	default:
@@ -244,7 +241,6 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 	ANNpointArray		pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	int					n,				// number of points
-	int					dim,			// dimension of space
 	const ANNorthRect	&bnd_box,		// current bounding box
 	ANNkd_splitter		splitter,		// splitting procedure
 	ANNorthRect			&inner_box);	// inner box if shrinking (returned)
@@ -254,7 +250,6 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 	ANNpointArray		pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
 	int					n,				// number of points
-	int					dim,			// dimension of space
 	const ANNorthRect	&bnd_box,		// current bounding box
 	ANNkd_splitter		splitter,		// splitting procedure
 	ANNorthRect			&inner_box)		// inner box if shrinking (returned)
@@ -263,14 +258,14 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 	int n_goal = (int) (BD_FRACTION*(float)n); // number of point in goal
 	int n_splits = 0;					// number of splits needed
 										// initialize inner box to bounding box
-	annAssignRect(dim, inner_box, bnd_box);
+	annAssignRect(inner_box, bnd_box);
 
 	while (n_sub > n_goal) {			// keep splitting until goal reached
 		int cd;							// cut dim from splitter (ignored)
 		ANNcoord cv;					// cut value from splitter (ignored)
 		int n_lo;						// number of points on low side
 										// invoke splitting procedure
-		(*splitter)(pa, pidx, inner_box, n_sub, dim, cd, cv, n_lo);
+		(*splitter)(pa, pidx, inner_box, n_sub, 3, cd, cv, n_lo);
 		n_splits++;						// increment split count
 
 		if (n_lo >= n_sub/2) {			// most points on low side
@@ -283,7 +278,7 @@ ANNdecomp tryCentroidShrink(			// try a centroid shrink
 			n_sub -= n_lo;
 		}
 	}
-    if (n_splits > (int)((float)dim*BD_MAX_SPLIT_FAC))// took too many splits
+    if (n_splits > (int)((float)3*BD_MAX_SPLIT_FAC))// took too many splits
 		return SHRINK;					// shrink to final subset
 	else
 		return SPLIT;
@@ -330,7 +325,7 @@ ANNdecomp selectDecomp(			// select decomposition method
 	case ANN_BD_CENTROID:				// centroid shrink
 		decomp = tryCentroidShrink(
 				pa, pidx,				// points and indices
-				n, dim,					// number of points and dimension
+				n, 				// number of points and dimension
 				bnd_box,				// current bounding box
 				splitter,				// splitting procedure
 				inner_box);				// inner box if shrinking (returned)
@@ -419,7 +414,6 @@ ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
 				pa,						// points to split
 				pidx,					// point indices
 				n,						// number of points
-				dim,					// dimension
 				inner_box,				// inner box
 				n_in);					// number of points inside (returned)
 

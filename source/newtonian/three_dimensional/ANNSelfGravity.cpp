@@ -81,7 +81,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		for (size_t j = 0; j < 6; j++)
 			Q[i][j] = 0;
 	}
-	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 3, 1, ANN_KD_SL_MIDPT);
+	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 1, ANN_KD_SL_MIDPT);
 
 #ifdef RICH_MPI
 #ifdef timing
@@ -171,7 +171,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		dpoints[i][1] = AllCM[i].y;
 		dpoints[i][2] = AllCM[i].z;
 	}
-	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg + toadd), 3, 1, ANN_KD_SL_MIDPT);
+	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg + toadd), 1, ANN_KD_SL_MIDPT);
 #ifdef timing
 	t0 = MPI_Wtime();
 	if (rank == 0)

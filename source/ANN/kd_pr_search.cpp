@@ -95,7 +95,7 @@ void ANNkd_tree::annkPriSearch(
 	ANNprMaxErr = ANN_POW(1.0 + eps);
 	ANN_FLOP(2)							// increment floating ops
 
-	ANNprDim = dim;						// copy arguments to static equivs
+	ANNprDim = 3;						// copy arguments to static equivs
 	ANNprQ = q;
 	ANNprPts = pts;
 	ANNptsVisited = 0;					// initialize count of points visited
@@ -104,7 +104,7 @@ void ANNkd_tree::annkPriSearch(
 
 										// distance to root box
 	ANNdist box_dist = annBoxDistance(q,
-				bnd_box_lo, bnd_box_hi, dim);
+				bnd_box_lo, bnd_box_hi,3);
 
 	ANNprBoxPQ = new ANNpr_queue(n_pts);// create priority queue for boxes
 	ANNprBoxPQ->insert(box_dist, root); // insert root in priority queue

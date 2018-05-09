@@ -96,7 +96,6 @@ void annBoxSplit(				// split points by a box
 	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
-	int					dim,			// dimension of space
 	ANNorthRect			&box,			// the box
 	int					&n_in);			// number of points inside (returned)
 
@@ -116,7 +115,6 @@ void annBox2Bnds(				// convert inner box to bounds
 
 void annBnds2Box(				// convert bounds to inner box
 	const ANNorthRect	&bnd_box,		// enclosing box
-	int					dim,			// dimension of space
 	int					n_bnds,			// number of bounds
 	ANNorthHSArray		bnds,			// bounds array
 	ANNorthRect			&inner_box);	// inner box (returned)

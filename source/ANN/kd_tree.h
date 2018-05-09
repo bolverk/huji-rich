@@ -54,7 +54,6 @@ public:
 	virtual void ann_FR_search(ANNdist) = 0;	// fixed-radius search
 
 	virtual void getStats(						// get tree statistics
-				int dim,						// dimension of space
 				ANNkdStats &st,					// statistics
 				ANNorthRect &bnd_box) = 0;		// bounding box
 												// print node
@@ -137,7 +136,6 @@ public:
 	~ANNkd_leaf() { }					// destructor (none)
 
 	virtual void getStats(						// get tree statistics
-				int dim,						// dimension of space
 				ANNkdStats &st,					// statistics
 				ANNorthRect &bnd_box);			// bounding box
 	virtual void print(int level, ostream &out);// print node
@@ -213,7 +211,6 @@ public:
 		}
 
 	virtual void getStats(						// get tree statistics
-				int dim,						// dimension of space
 				ANNkdStats &st,					// statistics
 				ANNorthRect &bnd_box);			// bounding box
 	virtual void print(int level, ostream &out);// print node

@@ -333,15 +333,14 @@ void annBoxSplit(				// split points by a box
 	ANNpointArray const& pa,				// points to split
 	ANNidxArray			pidx,			// point indices
 	int					n,				// number of points
-	int					dim,			// dimension of space
 	ANNorthRect			&box,			// the box
 	int					&n_in)			// number of points inside (returned)
 {
 	int l = 0;
 	int r = n-1;
 	for(;;) {							// partition pa[0..n-1] about box
-		while (l < n && box.inside(dim, PP(l))) l++;
-		while (r >= 0 && !box.inside(dim, PP(r))) r--;
+		while (l < n && box.inside(PP(l))) l++;
+		while (r >= 0 && !box.inside(PP(r))) r--;
 		if (l > r) break;
 		PASWAP(l,r);
 		l++; r--;
@@ -425,12 +424,11 @@ void annBox2Bnds(						// convert inner box to bounds
 
 void annBnds2Box(
 	const ANNorthRect	&bnd_box,		// enclosing box
-	int					dim,			// dimension of space
 	int					n_bnds,			// number of bounds
 	ANNorthHSArray		bnds,			// bounds array
 	ANNorthRect			&inner_box)		// inner box (returned)
 {
-	annAssignRect(dim, inner_box, bnd_box);		// copy bounding box to inner
+	annAssignRect(inner_box, bnd_box);		// copy bounding box to inner
 
 	for (int i = 0; i < n_bnds; i++) {
 		bnds[i].project(inner_box.lo);			// project each endpoint

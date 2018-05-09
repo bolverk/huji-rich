@@ -94,7 +94,7 @@ void ANNkd_tree::annkSearch(
 	double				eps)			// the error bound
 {
 
-	ANNkdDim = dim;						// copy arguments to static equivs
+	ANNkdDim = 3;						// copy arguments to static equivs
 	ANNkdQ = q;
 	ANNkdPts = pts;
 	ANNptsVisited = 0;					// initialize count of points visited
@@ -108,7 +108,7 @@ void ANNkd_tree::annkSearch(
 
 	ANNkdPointMK = new ANNmin_k(k);		// create set for closest k points
 										// search starting at the root
-	root->ann_search(annBoxDistance(q, bnd_box_lo, bnd_box_hi, dim));
+	root->ann_search(annBoxDistance(q, bnd_box_lo, bnd_box_hi, 3));
 
 	for (int i = 0; i < k; i++) {		// extract the k-th closest points
 		dd[i] = ANNkdPointMK->ith_smallest_key(i);

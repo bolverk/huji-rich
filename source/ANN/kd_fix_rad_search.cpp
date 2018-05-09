@@ -63,7 +63,7 @@ int ANNkd_tree::annkFRSearch(
 	ANNdistArray		dd,				// the approximate nearest neighbor
 	double				eps)			// the error bound
 {
-	ANNkdFRDim = dim;					// copy arguments to static equivs
+	ANNkdFRDim = 3;					// copy arguments to static equivs
 	ANNkdFRQ = q;
 	ANNkdFRSqRad = sqRad;
 	ANNkdFRPts = pts;
@@ -75,7 +75,7 @@ int ANNkd_tree::annkFRSearch(
 
 	ANNkdFRPointMK = new ANNmin_k(k);	// create set for closest k points
 										// search starting at the root
-	root->ann_FR_search(annBoxDistance(q, bnd_box_lo, bnd_box_hi, dim));
+	root->ann_FR_search(annBoxDistance(q, bnd_box_lo, bnd_box_hi,3));
 
 	for (int i = 0; i < k; i++) {		// extract the k-th closest points
 		if (dd != NULL)

@@ -498,7 +498,6 @@ public:
 		double			eps=0.0			// error bound
 		) = 0;							// pure virtual (defined elsewhere)
 
-	virtual int theDim() = 0;			// return dimension of space
 	virtual int nPoints() = 0;			// return number of points
 										// return pointer to points
 	virtual ANNpointArray const& thePoints() = 0;
@@ -636,7 +635,6 @@ typedef ANNkd_node*	ANNkd_ptr;	// pointer to a kd-tree node
 
 class DLL_API ANNkd_tree: public ANNpointSet {
 protected:
-	int				dim;				// dimension of space
 	int				n_pts;				// number of points in tree
 	int				bkt_size;			// bucket size
 	ANNpointArray const* pts;				// the points
@@ -647,23 +645,20 @@ protected:
 
 	void SkeletonTree(					// construct skeleton tree
 		int				n,				// number of points
-		int				dd,				// dimension
 		int				bs,				// bucket size
 		ANNpointArray pa = ANNpointArray(),		// point array (optional)
 		ANNidxArray pi = NULL);			// point indices (optional)
 
 	ANNkd_tree& operator=(const ANNkd_tree &/*tree*/) { return *this; }
-	ANNkd_tree(ANNkd_tree const& /*other*/) :dim(0),n_pts(0),bkt_size(0),pts(0),pidx(0),root(0),bnd_box_lo(ANNpoint()),bnd_box_hi(ANNpoint()){};
+	ANNkd_tree(ANNkd_tree const& /*other*/) :n_pts(0),bkt_size(0),pts(0),pidx(0),root(0),bnd_box_lo(ANNpoint()),bnd_box_hi(ANNpoint()){};
 public:
 	ANNkd_tree(							// build skeleton tree
 		int				n = 0,			// number of points
-		int				dd = 0,			// dimension
 		int				bs = 1);		// bucket size
 
 	ANNkd_tree(							// build from point array
 		ANNpointArray const& pa,				// point array
 		int				n,				// number of points
-		int				dd,				// dimension
 		int				bs = 1,			// bucket size
 		ANNsplitRule	split = ANN_KD_SUGGEST);	// splitting method
 
@@ -672,7 +667,6 @@ public:
 		std::vector<double,boost::alignment::aligned_allocator<double,32> > const& masses,
 		std::vector<std::array<double,6> > const& Qs,
 		int				n,				// number of points
-		int				dd,				// dimension
 		int				bs = 1,			// bucket size
 		ANNsplitRule	split = ANN_KD_SUGGEST);	// splitting method
 
@@ -702,9 +696,6 @@ public:
 		ANNidxArray		nn_idx = NULL,	// nearest neighbor array (modified)
 		ANNdistArray	dd = NULL,		// dist to near neighbors (modified)
 		double			eps=0.0);		// error bound
-
-	int theDim()						// return dimension of space
-		{ return dim; }
 
 	int nPoints()						// return number of points
 		{ return n_pts; }
@@ -749,14 +740,12 @@ class DLL_API ANNbd_tree: public ANNkd_tree {
 public:
 	ANNbd_tree(							// build skeleton tree
 		int				n,				// number of points
-		int				dd,				// dimension
 		int				bs = 1)			// bucket size
-		: ANNkd_tree(n, dd, bs) {}		// build base kd-tree
+		: ANNkd_tree(n, bs) {}		// build base kd-tree
 
 	ANNbd_tree(							// build from point array
 		ANNpointArray const& pa,				// point array
 		int				n,				// number of points
-		int				dd,				// dimension
 		int				bs = 1,			// bucket size
 		ANNsplitRule	split  = ANN_KD_SUGGEST,	// splitting rule
 		ANNshrinkRule	shrink = ANN_BD_SUGGEST);	// shrinking rule

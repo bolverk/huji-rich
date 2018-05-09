@@ -6,60 +6,60 @@ PREXECUTE :=
 ENDEMIC_SOURCES := $(shell find $(TARGET) -name '*.cpp')
 ENDEMIC_OBJECTS := $(patsubst $(TARGET)/%.cpp,$(DUMP_FOLDER)/%.o,$(ENDEMIC_SOURCES))
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O0 -g -pg
+	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++11
 	LFLAGS := -pg -lclipper -lr3d
 else ifeq ($(MODE),intel)
 	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise
+	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -std=c++11
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lr3d
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiicpc
-	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise 
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xHost -fp-model precise  -std=c++11
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lr3d
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX -std=c++11
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
 else ifeq ($(MODE),parallel_time)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX -Dtiming
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -DOMPI_SKIP_MPICXX -Dtiming -std=c++11
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
 else ifeq ($(MODE),parallel_check)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -Og -g -D_GLIBCXX_DEBUG
+	OPTIMIZATION_FLAGS := -DRICH_MPI -Og -g -D_GLIBCXX_DEBUG -std=c++11
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
 else ifeq ($(MODE),parallel_profile)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg -O3
+	OPTIMIZATION_FLAGS := -DRICH_MPI -g -pg -O3 -std=c++11
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
 else ifeq ($(MODE),debug_parallel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DOMPI_SKIP_MPICXX -std=c++11
 	LINT_FLAGS := -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wmissing-declarations
 	LFLAGS := -pg -lclipper  -lr3d
 else ifeq ($(MODE),parallel_check)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := mpiCC
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++11
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Wmissing-declarations -Wno-long-long
 	LFLAGS := -lclipper -lr3d
 else
 	MODE := production
-	OPTIMIZATION_FLAGS := -O3
+	OPTIMIZATION_FLAGS := -O3 -std=c++11
 	LFLAGS := -lclipper -lr3d
 endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)

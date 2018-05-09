@@ -111,7 +111,7 @@ namespace
 		std::size_t &N3,std::size_t &N4)
 	{
 		N3 = T0.neighbors[loc_in_0];
-		size_t loc1;
+		size_t loc1=0;
 		GetPointLocationInTetra(T1, T0.points[loc_in_0], loc1);
 		N4 = T1.neighbors[loc1];
 		for (std::size_t i = 0; i < 4; ++i)
@@ -154,7 +154,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	// location is the location of the point in tetra that is not in the joint triangle
 	tet_temp0_ = tetras_[tetra0];
 	tet_temp1_ = tetras_[tetra1];
-	size_t location1;
+	size_t location1=0;
 	GetOppositePoint(tet_temp1_, tetra0, location1);
 
 	newtet_.points[1] = tet_temp0_.points[(location0 + 1) % 4];
@@ -164,7 +164,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[0] = tet_temp1_.points[location1];
 		newtet_.points[3] = tet_temp0_.points[location0];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 3) % 4], loctemp);
 		newtet_.neighbors[3] = tet_temp1_.neighbors[loctemp];
 		newtet_.neighbors[0] = tet_temp0_.neighbors[(location0 + 3) % 4];
@@ -183,7 +183,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[3] = tet_temp1_.points[location1];
 		newtet_.points[0] = tet_temp0_.points[location0];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 3) % 4], loctemp);
 		newtet_.neighbors[0] = tet_temp1_.neighbors[loctemp];
 		newtet_.neighbors[3] = tet_temp0_.neighbors[(location0 + 3) % 4];
@@ -210,7 +210,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		tetras_[tetra0].points[0] = tet_temp0_.points[location0];
 		tetras_[tetra0].points[3] = tet_temp1_.points[location1];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 1) % 4], loctemp);
 		tetras_[tetra0].neighbors[0] = tet_temp1_.neighbors[loctemp];
 		tetras_[tetra0].neighbors[3] = tet_temp0_.neighbors[(location0 + 1) % 4];
@@ -225,7 +225,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		tetras_[tetra0].points[3] = tet_temp0_.points[location0];
 		tetras_[tetra0].points[0] = tet_temp1_.points[location1];
 		tetras_[tetra0].neighbors[0] = tet_temp0_.neighbors[(location0 + 1) % 4];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 1) % 4], loctemp);
 		tetras_[tetra0].neighbors[3] = tet_temp1_.neighbors[loctemp];
 		if (tetras_[tetra0].neighbors[3] != outside_neighbor_)
@@ -243,7 +243,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		tetras_[tetra1].points[0] = tet_temp0_.points[location0];
 		tetras_[tetra1].points[3] = tet_temp1_.points[location1];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 2) % 4], loctemp);
 		tetras_[tetra1].neighbors[0] = tet_temp1_.neighbors[loctemp];
 		tetras_[tetra1].neighbors[3] = tet_temp0_.neighbors[(location0 + 2) % 4];
@@ -257,7 +257,7 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		tetras_[tetra1].points[0] = tet_temp1_.points[location1];
 		tetras_[tetra1].points[3] = tet_temp0_.points[location0];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tet_temp1_, tet_temp0_.points[(location0 + 2) % 4], loctemp);
 		tetras_[tetra1].neighbors[0] = tet_temp0_.neighbors[(location0 + 2) % 4];
 		tetras_[tetra1].neighbors[3] = tet_temp1_.neighbors[loctemp];
@@ -279,10 +279,10 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		double orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc; 
+			std::size_t my_loc=0; 
 			GetPointLocationInTetra(tetras_[Nloc], tet_temp0_.points[location0],my_loc);
 			std::size_t neigh = tetras_[Nloc].neighbors[my_loc];
-			std::size_t opp; 
+			std::size_t opp=0; 
 			GetOppositePoint(tetras_[neigh], Nloc,opp);
 			for (size_t i = 0; i < 3; ++i)
 				b4_temp_[i] = points_[tetras_[Nloc].points[(my_loc + (i) + 1) % 4]];
@@ -305,10 +305,10 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc; 
+			std::size_t my_loc=0; 
 			GetPointLocationInTetra(tetras_[tetra0], tet_temp0_.points[location0],my_loc);
 			std::size_t neigh = tetras_[tetra0].neighbors[my_loc];
-			std::size_t opp; 
+			std::size_t opp=0; 
 			GetOppositePoint(tetras_[neigh], tetra0,opp);
 			for (size_t i = 0; i < 3; ++i)
 				b4_temp_[i] = points_[tetras_[tetra0].points[(my_loc + i + 1) % 4]];
@@ -330,10 +330,10 @@ void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 		orient = orient3d(b4_temp_);
 		if (std::abs(orient) == 0)
 		{
-			std::size_t my_loc;
+			std::size_t my_loc=0;
 			GetPointLocationInTetra(tetras_[tetra1], tet_temp0_.points[location0],my_loc);
 			std::size_t neigh = tetras_[tetra1].neighbors[my_loc];
-			std::size_t opp; 
+			std::size_t opp=0; 
 			GetOppositePoint(tetras_[neigh], tetra1,opp);
 			for (size_t i = 0; i < 3; ++i)
 				b4_temp_[i] = points_[tetras_[tetra1].points[(my_loc + i + 1) % 4]];
@@ -372,7 +372,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 			other_point2 = i;
 	}
 
-	std::size_t location1;
+	std::size_t location1=0;
 	GetOppositePoint(tetras_[tetra1], tetra0,location1);
 	std::size_t third_tetra = tetras_[tetra0].neighbors[shared_loction];
 	tet_temp0_ = tetras_[tetra0];
@@ -381,7 +381,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[0] = tetras_[tetra0].points[location0];
 		newtet_.points[1] = tetras_[tetra0].points[shared_loction];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tetras_[tetra1], tetras_[tetra0].points[other_point2], loctemp);
 		newtet_.neighbors[0] = tetras_[tetra1].neighbors[loctemp];
 		GetPointLocationInTetra(tetras_[third_tetra], tetras_[tetra0].points[other_point2], loctemp);
@@ -401,7 +401,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[0] = tetras_[tetra0].points[shared_loction];
 		newtet_.points[1] = tetras_[tetra0].points[location0];		
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tetras_[tetra1], tetras_[tetra0].points[other_point2], loctemp);
 		newtet_.neighbors[1] = tetras_[tetra1].neighbors[loctemp];
 		GetPointLocationInTetra(tetras_[third_tetra], tetras_[tetra0].points[other_point2], loctemp);
@@ -442,7 +442,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[0] = tet_temp0_.points[location0];
 		newtet_.points[1] = tet_temp0_.points[shared_loction];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tetras_[tetra1], tet_temp0_.points[other_point], loctemp);
 		newtet_.neighbors[0] = tetras_[tetra1].neighbors[loctemp];
 		GetPointLocationInTetra(tetras_[third_tetra], tet_temp0_.points[other_point], loctemp);
@@ -457,7 +457,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	{
 		newtet_.points[0] = tet_temp0_.points[shared_loction];
 		newtet_.points[1] = tet_temp0_.points[location0];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetPointLocationInTetra(tetras_[tetra1], tet_temp0_.points[other_point], loctemp);
 		newtet_.neighbors[1] = tetras_[tetra1].neighbors[loctemp];
 		GetPointLocationInTetra(tetras_[third_tetra], tet_temp0_.points[other_point], loctemp);
@@ -475,7 +475,7 @@ void Delaunay3D::flip32(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 	newtet_.neighbors[3] = tet_temp0_.neighbors[other_point];
 	if (newtet_.neighbors[3] != outside_neighbor_)
 	{
-		size_t loctemp;
+		size_t loctemp=0;
 		GetOppositePoint(tetras_[newtet_.neighbors[3]], tetra0, loctemp);
 		tetras_[newtet_.neighbors[3]].neighbors[loctemp] = tetra1;
 	}
@@ -650,7 +650,7 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 	std::array<std::size_t, 3> out_check;
 	Tetrahedron const& T0 = tetras_[tetra0];
 	Tetrahedron const& T1 = tetras_[tetra1];
-	std::size_t p_loc;
+	std::size_t p_loc=0;
 	GetPointLocationInTetra(T0, p, p_loc);
 	for (int i = 0; i < 3; ++i)
 		b3_temp_[i] = points_[T0.points[(p_loc + 1 + static_cast<size_t>(i)) % 4]];
@@ -730,7 +730,7 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 			std::size_t N_shared = FindThirdNeighbor(tetra0, tetra1);
 			if (N_shared == 1)
 			{
-				std::size_t shared_loc;
+				std::size_t shared_loc=0;
 				GetOppositePoint(tetras_[tetra0], b8s_temp_[0],shared_loc);
 				flip32(tetra0, tetra1, p_loc, shared_loc,true);
 				return;
@@ -741,7 +741,7 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 				{
 					for (std::size_t i = 0; i < 3; ++i)
 					{
-						std::size_t N3, N4;
+						std::size_t N3=0, N4=0;
 						if (out_check[i] == 1 && Are44(T0, T1, (p_loc + i + 1) % 4, tetras_, N3, N4))
 						{
 							flip44(tetra0, tetra1, p_loc, N3, N4);
@@ -759,7 +759,7 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 				std::size_t N_shared = FindThirdNeighbor(tetra0, tetra1);
 				if (N_shared == 1)
 				{
-					std::size_t shared_loc;
+					std::size_t shared_loc=0;
 					GetOppositePoint(tetras_[tetra0], b8s_temp_[0],shared_loc);
 					flip32(tetra0, tetra1, p_loc, shared_loc,true);
 					return;
@@ -799,7 +799,7 @@ void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p,si
 		std::size_t Nshared = FindThirdNeighbor(tetra0, tetra1);
 		if (Nshared == 1)
 		{
-			std::size_t shared_loc;
+			std::size_t shared_loc=0;
 			GetOppositePoint(tetras_[tetra0], b8s_temp_[0],shared_loc);
 			flip32(tetra0, tetra1, p_loc, shared_loc,false);
 		}
@@ -815,12 +815,12 @@ void Delaunay3D::InsertPoint(std::size_t index)
 	{
 		std::size_t cur_check = to_check_.back();
 		to_check_.pop_back();
-		size_t p_loc;
+		size_t p_loc=0;
 		GetPointLocationInTetra(tetras_[cur_check], index,p_loc);
 		std::size_t to_flip = tetras_[cur_check].neighbors[p_loc];
 		if (to_flip == outside_neighbor_ || (empty_tetras_.find(cur_check) != empty_tetras_.end()))
 			continue;
-		size_t other_point_loc;
+		size_t other_point_loc=0;
 		GetOppositePoint(tetras_[to_flip], cur_check,other_point_loc);
 		b5_temp_[4] = points_[tetras_[to_flip].points[other_point_loc]];
 		b5_temp_[0] = points_[tetras_[cur_check].points[0]];
@@ -909,7 +909,7 @@ void Delaunay3D::flip14(std::size_t point, std::size_t tetra)
 	if (toadd.neighbors[2] != outside_neighbor_)
 	{
 		size_t temploc = toadd.neighbors[2];
-		size_t loctemp;
+		size_t loctemp=0;
 		GetOppositePoint(tetras_[temploc], tetra, loctemp);
 		tetras_[toadd.neighbors[2]].neighbors[loctemp] = Nloc[0];
 	}
@@ -928,7 +928,7 @@ void Delaunay3D::flip14(std::size_t point, std::size_t tetra)
 	toadd.points[3] = point;
 	if (toadd.neighbors[3] != outside_neighbor_)
 	{
-		size_t loctemp;
+		size_t loctemp=0;
 		GetOppositePoint(tetras_[toadd.neighbors[3]], tetra, loctemp);
 		tetras_[toadd.neighbors[3]].neighbors[loctemp] = Nloc[1];
 	}
@@ -947,7 +947,7 @@ void Delaunay3D::flip14(std::size_t point, std::size_t tetra)
 	toadd.points[3] = point;
 	if (toadd.neighbors[3] != outside_neighbor_)
 	{
-		size_t loctemp;
+		size_t loctemp=0;
 		GetOppositePoint(tetras_[toadd.neighbors[3]], tetra, loctemp);
 		tetras_[toadd.neighbors[3]].neighbors[loctemp] = Nloc[2];
 	}

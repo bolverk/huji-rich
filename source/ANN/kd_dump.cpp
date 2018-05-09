@@ -106,21 +106,21 @@ void ANNkd_tree::Dump(					// dump entire tree
 	out << "#ANN " << ANNversion << "\n";
 	out.precision(ANNcoordPrec);		// use full precision in dumping
 	if (with_pts) {						// print point coordinates
-		out << "points " << dim << " " << n_pts << "\n";
+		out << "points " << 3 << " " << n_pts << "\n";
 		for (int i = 0; i < n_pts; i++) {
 			out << i << " ";
-			annPrintPt(pts->operator[](i), dim, out);
+			annPrintPt(pts->operator[](i), out);
 			out << "\n";
 		}
 	}
 	out << "tree "						// print tree elements
-		<< dim << " "
+		<< 3 << " "
 		<< n_pts << " "
 		<< bkt_size << "\n";
 
-	annPrintPt(bnd_box_lo, dim, out);	// print lower bound
+	annPrintPt(bnd_box_lo, out);	// print lower bound
 	out << "\n";
-	annPrintPt(bnd_box_hi, dim, out);	// print upper bound
+	annPrintPt(bnd_box_hi, out);	// print upper bound
 	out << "\n";
 
 	if (root == NULL)					// empty tree?
@@ -185,7 +185,7 @@ void ANNbd_shrink::dump(				// dump a shrinking node
 
 ANNkd_tree::ANNkd_tree(					// build from dump file
 	istream				&in)					// input stream for dump file
-	:dim(0), n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
+	:n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
 {
 	int the_dim;								// local dimension
 	int the_n_pts;								// local number of points
@@ -205,7 +205,7 @@ ANNkd_tree::ANNkd_tree(					// build from dump file
 		the_bnd_box_lo, the_bnd_box_hi);		// bounding box info (returned)
 
 												// create a skeletal tree
-	SkeletonTree(the_n_pts, the_dim, the_bkt_size, the_pts, the_pidx);
+	SkeletonTree(the_n_pts, the_bkt_size, the_pts, the_pidx);
 
 	bnd_box_lo = the_bnd_box_lo;
 	bnd_box_hi = the_bnd_box_hi;
@@ -234,7 +234,7 @@ ANNbd_tree::ANNbd_tree(					// build bd-tree from dump file
 		the_bnd_box_lo, the_bnd_box_hi);		// bounding box info (returned)
 
 												// create a skeletal tree
-	SkeletonTree(the_n_pts, the_dim, the_bkt_size, the_pts, the_pidx);
+	SkeletonTree(the_n_pts,the_bkt_size, the_pts, the_pidx);
 	bnd_box_lo = the_bnd_box_lo;
 	bnd_box_hi = the_bnd_box_hi;
 

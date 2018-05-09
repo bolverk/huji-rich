@@ -73,12 +73,11 @@ ANNdist annDist(						// interpoint squared distance
 
 void annPrintPt(						// print a point
 	ANNpoint			pt,				// the point
-	int					dim,			// the dimension
 	std::ostream		&out)			// output stream
 {
-	for (int j = 0; j < dim; j++) {
+	for (int j = 0; j < 3; j++) {
 		out << pt[j];
-		if (j < dim-1) out << " ";
+		if (j < 3-1) out << " ";
 	}
 }
 
@@ -118,21 +117,21 @@ ANNpointArray annAllocPts(int n, int /*dim*/)		// allocate n pts in dim
 }
 
 												// assign one rect to another
-void annAssignRect(int dim, ANNorthRect &dest, const ANNorthRect &source)
+void annAssignRect(ANNorthRect &dest, const ANNorthRect &source)
 {
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (int i = 0; i < dim; i++) {
+	for (int i = 0; i < 3; i++) {
 		dest.lo[i] = source.lo[i];
 		dest.hi[i] = source.hi[i];
 	}
 }
 
 												// is point inside rectangle?
-ANNbool ANNorthRect::inside(int dim, ANNpoint p)
+ANNbool ANNorthRect::inside(ANNpoint p)
 {
-	for (int i = 0; i < dim; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (p[i] < lo[i] || p[i] > hi[i]) return ANNfalse;
 	}
 	return ANNtrue;
