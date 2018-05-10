@@ -6,6 +6,7 @@
 #include "HilbertProcPositions.hpp"
 #endif
 
+#ifdef RICH_MPI
 namespace
 {
 	Vector3D GetProcCM(Tessellation3D const& tess)
@@ -18,6 +19,7 @@ namespace
 		return res;
 	}
 }
+#endif
 
 ConstNumberPerProc3D::~ConstNumberPerProc3D(void) {}
 

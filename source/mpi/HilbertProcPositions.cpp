@@ -8,17 +8,15 @@
 
 namespace
 {
+#ifdef RICH_MPI
 	vector<unsigned long long> SortAllPoints(size_t Ncor, size_t Nproc, vector<size_t> &Hindeces, Tessellation3D const& tess)
 	{
 		assert(Hindeces.size() == Ncor && Ncor>0);
 		double segfraction = 0.04;
 		int Ncor2 = static_cast<int>(Ncor);
 		int Ntotal;
-#ifdef RICH_MPI
 		MPI_Allreduce(&Ncor2, &Ntotal, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#else
 		Ntotal = Ncor2;
-#endif
 		double Npart = static_cast<double>(Ntotal)*segfraction / static_cast<double>(Nproc);
 		vector<Vector3D> cor(Ncor);
 		for (size_t i = 0; i < Ncor; ++i)
@@ -49,9 +47,8 @@ namespace
 			segment_indeces.back() = Hindeces.back();
 		}
 
-		int nsegments_local = static_cast<int>(segment_indeces.size());
 		vector<int> nsegments_per_proc(Nproc), no_disp(Nproc, 0);
-#ifdef RICH_MPI
+		int nsegments_local = static_cast<int>(segment_indeces.size());
 		MPI_Allgather(&nsegments_local, 1, MPI_INT, &nsegments_per_proc[0], 1, MPI_INT, MPI_COMM_WORLD);
 		int seg_size_total = 0;
 		for (size_t i = 0; i < Nproc; ++i)
@@ -75,11 +72,8 @@ namespace
 		res_segments.back() = all_segments.back();
 
 		return res_segments;
-#else
-		return segment_indeces;
-#endif
 	}
-
+	
 	vector<Vector3D> GetNewProcPoints(vector<unsigned long long> const& Hxcor, Tessellation3D const& tess,
 		vector<size_t> const& H_indeces, size_t Nproc)
 	{
@@ -99,8 +93,6 @@ namespace
 			maxv[index].y = std::max(maxv[index].y, cor.y);
 			maxv[index].z = std::max(maxv[index].z, cor.z);
 		}
-
-#ifdef RICH_MPI
 
 		vector<double> sendtemp(Nproc * 3, 0), recvtemp(Nproc * 3, 0);
 		for (size_t i = 0; i < Nproc; ++i)
@@ -130,29 +122,27 @@ namespace
 			minv[i].y = recvtemp[3 * i + 1];
 			minv[i].z = recvtemp[3 * i + 2];
 		}
-#endif
 
 		for (size_t i = 0; i < Nproc; ++i)
 			maxv[i] = 0.5*(maxv[i] + minv[i]);
 
 		return maxv;
 	}
+#endif
+
 }
 
 vector<Vector3D> HilbertProcPositions(Tessellation3D const & tess)
 {
-	int ws = 32, rank = 0;
-#ifdef RICH_MPI
-	MPI_Comm_size(MPI_COMM_WORLD, &ws);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-	size_t Nproc = static_cast<size_t>(ws);
 	size_t Ncor = tess.GetPointNo();
-	int Ntotal = static_cast<int>(Ncor);
+	vector<Vector3D> res(Ncor);
 #ifdef RICH_MPI
+	int ws = 32;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	size_t Nproc = static_cast<size_t>(ws);
+	int Ntotal = static_cast<int>(Ncor);
 	int Ncor2 = static_cast<int>(Ncor);
 	MPI_Allreduce(&Ncor2, &Ntotal, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-#endif
 	vector<Vector3D> cor(Ncor);
 	for (size_t i = 0; i < Ncor; ++i)
 		cor[i] = tess.GetMeshPoint(i);
@@ -160,6 +150,7 @@ vector<Vector3D> HilbertProcPositions(Tessellation3D const & tess)
 	vector<size_t> H_indeces = GetGlobalHibertIndeces(cor, tess.GetBoxCoordinates().first, tess.GetBoxCoordinates().second, Hmax);
 	vector<size_t> H_indeces2(H_indeces);
 	vector<unsigned long long> Hindex = SortAllPoints(Ncor, Nproc, H_indeces, tess);
-	vector<Vector3D> res = GetNewProcPoints(Hindex, tess, H_indeces2, Nproc);
+	res = GetNewProcPoints(Hindex, tess, H_indeces2, Nproc);
+#endif
 	return res;
 }

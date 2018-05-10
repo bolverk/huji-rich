@@ -430,8 +430,9 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 vector<std::size_t> GetGlobalHibertIndeces(vector<Vector3D> const& cor,Vector3D const& ll,Vector3D const& ur,size_t &Hmax)
 {
 	vector<std::size_t> res;
-	int Nlocal = static_cast<int>(cor.size()), Ntotal = Nlocal;
 #ifdef RICH_MPI
+	int Nlocal = static_cast<int>(cor.size());
+	int Ntotal = Nlocal;
 	MPI_Allreduce(&Nlocal, &Ntotal, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #endif
 	std::size_t Niter = 20;

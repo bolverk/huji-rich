@@ -84,6 +84,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 
 namespace
 {
+#ifdef RICH_MPI
 	void GetPastDuplicate(size_t point, vector<size_t> &res, vector<vector<size_t> > const& sorted_to_duplicate,
 		vector<size_t> const& procs)
 	{
@@ -94,8 +95,8 @@ namespace
 				res.push_back(procs[i]);
 		}
 	}
-
-	boost::multiprecision::cpp_dec_float_50 Calc33Det(boost::array<boost::multiprecision::cpp_dec_float_50, 9> const& points)
+#endif
+	boost::multiprecision::cpp_dec_float_50 Calc33Det(std::array<boost::multiprecision::cpp_dec_float_50, 9> const& points)
 	{
 		return points[0] * (points[4] * points[8] - points[5] * points[7]) + points[1] * (points[5] * points[6] - points[3] * points[8])
 			+ points[2] * (points[3] * points[7] - points[4] * points[6]);
@@ -254,16 +255,14 @@ namespace
 #pragma vector aligned
 #pragma simd
 #endif
-		for (size_t i = 1; i < N; ++i)
+		for (size_t i = 0; i < N; ++i)
 		{
 			diffs[i] = ScalarProd(vtemp[i], vtemp[i]);
 			R = std::max(R, diffs[i]);
 		}
-		for (size_t i = 1; i < N; ++i)
+		for (size_t i = 0; i < N; ++i)
 			if (diffs[i] > R*1e-15)
 				res.push_back(indeces[i]);
-		if (diffs[0] < R*1e-15)
-			res.pop_back();
 		return R;
 	}
 
@@ -1985,19 +1984,19 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 
 double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 {
-	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
+	std::array<boost::multiprecision::cpp_dec_float_50, 3> V0;
 	V0[0] = del_.points_[del_.tetras_[index].points[0]].x;
 	V0[1] = del_.points_[del_.tetras_[index].points[0]].y;
 	V0[2] = del_.points_[del_.tetras_[index].points[0]].z;
-	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V2;
+	std::array<boost::multiprecision::cpp_dec_float_50, 3> V2;
 	V2[0] = del_.points_[del_.tetras_[index].points[1]].x;
 	V2[1] = del_.points_[del_.tetras_[index].points[1]].y;
 	V2[2] = del_.points_[del_.tetras_[index].points[1]].z;
-	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V3;
+	std::array<boost::multiprecision::cpp_dec_float_50, 3> V3;
 	V3[0] = del_.points_[del_.tetras_[index].points[2]].x;
 	V3[1] = del_.points_[del_.tetras_[index].points[2]].y;
 	V3[2] = del_.points_[del_.tetras_[index].points[2]].z;
-	boost::array<boost::multiprecision::cpp_dec_float_50, 3> V4;
+	std::array<boost::multiprecision::cpp_dec_float_50, 3> V4;
 	V4[0] = del_.points_[del_.tetras_[index].points[3]].x;
 	V4[1] = del_.points_[del_.tetras_[index].points[3]].y;
 	V4[2] = del_.points_[del_.tetras_[index].points[3]].z;
@@ -2010,7 +2009,7 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 	V4[0] -= V0[0];
 	V4[1] -= V0[1];
 	V4[2] -= V0[2];
-	boost::array<boost::multiprecision::cpp_dec_float_50, 9> mat;
+	std::array<boost::multiprecision::cpp_dec_float_50, 9> mat;
 	mat[0] = V2[0];
 	mat[1] = V2[1];
 	mat[2] = V2[2];
