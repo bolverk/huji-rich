@@ -60,7 +60,7 @@ $(LIBRARY_FOLDER)/$(LIB_FILE): $(OBJECTS)
 $(OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
 	$(CC) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
-	$(CC) -MM $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CC) -MM $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$@,g' -i $(LIBRARY_FOLDER)/$*.d
 
 $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp

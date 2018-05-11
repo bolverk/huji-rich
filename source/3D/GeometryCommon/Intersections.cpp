@@ -45,20 +45,19 @@ namespace
 bool FaceSphereIntersections(Face const& face, Sphere const& sphere, Vector3D const& normal)
 {	
 	// Find plane equation
-	double D = -ScalarProd(normal, face.vertices[0]);
+	double D = ScalarProd(normal, sphere.center - face.vertices[0]);
 	
 	// Find intersecting circle
-	double d = std::abs(ScalarProd(normal, sphere.center) + D);
-	if (d > sphere.radius)
+	if (std::abs(D) > sphere.radius)
 		return false;
 	Vector3D circle_center;
-	circle_center.x = sphere.center.x - (ScalarProd(normal, sphere.center) + D)*normal.x;
-	circle_center.y = sphere.center.y - (ScalarProd(normal, sphere.center) + D)*normal.y;
-	circle_center.z = sphere.center.z - (ScalarProd(normal, sphere.center) + D)*normal.z;
+	circle_center.x = sphere.center.x - D*normal.x;
+	circle_center.y = sphere.center.y - D*normal.y;
+	circle_center.z = sphere.center.z - D*normal.z;
 	std::size_t Nloop = face.vertices.size();
 	if (PointInPolygon(face, circle_center))
 		return true;
-	double R = sqrt(sphere.radius*sphere.radius - d*d);
+	double R = sqrt(sphere.radius*sphere.radius - D*D);
 	for (std::size_t i = 0; i < Nloop; ++i)
 	{
 		if (CircleSegmentIntersect(face.vertices[(i + 1) % Nloop], face.vertices[i], circle_center, R))

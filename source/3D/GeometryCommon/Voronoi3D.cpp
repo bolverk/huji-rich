@@ -236,7 +236,6 @@ namespace
 		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &vtemp)
 	{
 		res.clear();
-		res.push_back(indeces[0]);
 		size_t N = indeces.size();
 		diffs.resize(N);
 		vtemp.resize(N);
@@ -1734,7 +1733,6 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 			if (intersecting_faces.empty())
 				checked_clear[i] = 1;
 		}
-
 	}
 	else
 	{
