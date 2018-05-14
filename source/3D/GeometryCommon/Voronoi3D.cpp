@@ -1338,7 +1338,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
-//		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
+		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
 			CalcTetraRadiusCenter(i);
 	// Organize the faces and assign them to cells
 	vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp3;
