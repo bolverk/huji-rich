@@ -41,6 +41,12 @@ else ifeq ($(MODE),parallel_intel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = 
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),parallel_intel_check)
+	CCC := icc
+	CC := mpiicpc
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O2 -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -D_GLIBCXX_DEBUG -fp-trap=common
+	LINT_FLAGS = 
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
