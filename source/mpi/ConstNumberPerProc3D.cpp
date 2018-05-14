@@ -62,7 +62,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	if (load > 3)
 		NewSpeed *= std::min(std::pow(load - 2, 3), 0.15 / speed_);
 
-	const double d = abs(CM - tproc.GetMeshPoint(rank));
+	const double d = fastabs(CM - tproc.GetMeshPoint(rank));
 	double dxround = 0, dyround = 0, dzround = 0;
 	if (d > 0.1*R[static_cast<size_t>(rank)])
 	{
@@ -126,7 +126,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		{
 			if (static_cast<int>(neigh[i]) >= nproc)
 				continue;
-			const double dist = abs(point - tproc.GetMeshPoint(neigh[i]));
+			const double dist = fastabs(point - tproc.GetMeshPoint(neigh[i]));
 			const double mind = neigheps*std::min(MyR, R[neigh[i]]);
 			if (dist < mind)
 			{
@@ -139,7 +139,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			{
 				Vector3D otherpoint = RankCMs[neigh[i]];
 				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
-				double dr = abs(otherpoint - point);
+				double dr = fastabs(otherpoint - point);
 				dx -= NewSpeed*merit*(otherpoint.x - point.x)*MyR / dr;
 				dy -= NewSpeed*merit*(otherpoint.y - point.y)*MyR / dr;
 				dz -= NewSpeed*merit*(otherpoint.z - point.z)*MyR / dr;
@@ -159,11 +159,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	{
 		if (static_cast<int>(neigh[i]) >= nproc)
 			continue;
-		const double dist = abs(point - tproc.GetMeshPoint(neigh[i]));
+		const double dist = fastabs(point - tproc.GetMeshPoint(neigh[i]));
 		mind_1 = std::max(mind_1, 1.0 / dist);
 	}
 	double maxR = std::min(MyR, 1.5 / mind_1);
-	double r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
+	double r_dx = fastabs(Vector3D(old_dx, old_dy, old_dz));
 	if (r_dx > NewSpeed*maxR)
 	{
 		old_dx *= NewSpeed*maxR / r_dx;
@@ -175,7 +175,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	old_dx += dxround*round_reduce;
 	old_dy += dyround*round_reduce;
 	old_dz += dzround*round_reduce;
-	r_dx = abs(Vector3D(old_dx, old_dy, old_dz));
+	r_dx = fastabs(Vector3D(old_dx, old_dy, old_dz));
 	if (r_dx > NewSpeed*maxR)
 	{
 		old_dx *= NewSpeed*maxR / r_dx;

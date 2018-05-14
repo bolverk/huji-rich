@@ -35,7 +35,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 		size_t NinFace = InFace.size();
 		N1 = 1;
 		V1 = points[InFace[(counter + 1) % NinFace]] - points[InFace[0]];
-		while (abs(V1) < 0.01*R)
+		while (fastabs(V1) < 0.01*R)
 		{
 			++counter;
 			assert(counter < NinFace);
@@ -44,7 +44,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 		}
 		V2 = points[InFace[(counter + 2) % NinFace]] - points[InFace[N1]];
 		N2 = (counter + 2) % NinFace;
-		while (abs(V2) < 0.01*R || abs(CrossProduct(V1, V2)) < 0.0001*tess.GetArea(faces[i]))
+		while (fastabs(V2) < 0.01*R || fastabs(CrossProduct(V1, V2)) < 0.0001*tess.GetArea(faces[i]))
 		{
 			++counter;
 			if (counter > 2 * NinFace)
@@ -250,10 +250,6 @@ namespace
 			vtemp[i] *= -1;
 			vtemp[i] += points[indeces[i]];
 		}
-#ifdef __INTEL_COMPILER
-#pragma vector aligned
-#pragma simd
-#endif
 		for (size_t i = 0; i < N; ++i)
 		{
 			diffs[i] = ScalarProd(vtemp[i], vtemp[i]);
@@ -347,21 +343,18 @@ namespace
 
 	size_t NextLoopTetra(Tetrahedron const& cur_tetra, size_t last_tetra, size_t N0, size_t N1)
 	{
-		size_t res = 0;
-		bool added = true;
+		size_t i = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-		for (size_t i = 0; i < 4; i++)
+		for (; i < 4; i++)
 		{
 			size_t point = cur_tetra.points[i];
-			if (point != N0&& point != N1 && cur_tetra.neighbors[i] != last_tetra && added)
-			{
-				res += cur_tetra.neighbors[i];
-				added = false;
-			}
+			if (point != N0&& point != N1 && cur_tetra.neighbors[i] != last_tetra)
+				break;
 		}
-		return res;
+		assert(i<4);
+		return cur_tetra.neighbors[i];
 	}
 
 #ifdef RICH_MPI
@@ -376,6 +369,9 @@ namespace
 		{
 			vector<size_t> const& findex = tproc.GetPointsInFace(faces[i]);
 			size_t Nindex = findex.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 			for (size_t j = 0; j < Nindex; j++)
 			{
 				ll.x = std::min(ll.x, face_points[findex[j]].x);
@@ -436,10 +432,6 @@ namespace
 		Nloop -= 2;
 		Area = 0;
 		Atemp.resize(Nloop);
-#ifdef __INTEL_COMPILER
-#pragma vector aligned
-#pragma ivdep
-#endif
 		for (size_t i = 0; i < Nloop; i++)
 		{
 			Vector3D temp3(CrossProduct(Vector3D(points[i + 1].x - points[0].x,
@@ -1097,6 +1089,9 @@ void Voronoi3D::CalcAllCM(void)
 		size_t N1 = FaceNeighbors_[i].second;
 		size_t Npoints = PointsInFace_[i].size();
 		vectemp.resize(Npoints);
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 		for (size_t j = 0; j < Npoints; ++j)
 			vectemp[j] = tetra_centers_[PointsInFace_[i][j]];
 		Npoints -= 2;	
@@ -1131,7 +1126,7 @@ void Voronoi3D::CalcAllCM(void)
 	// Recalc points with high aspect ratio
 	for (size_t i = 0; i < Norg_; ++i)
 	{
-		if (abs(CM_[i] - del_.points_[i]) > 0.4*GetWidth(i))
+		if (fastabs(CM_[i] - del_.points_[i]) > 0.4*GetWidth(i))
 		{
 			tetra[3] = CM_[i];
 			CM_[i] = Vector3D();
@@ -1343,7 +1338,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
-		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
+//		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
 			CalcTetraRadiusCenter(i);
 	// Organize the faces and assign them to cells
 	vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp3;
@@ -1357,6 +1352,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	for (size_t i = 0; i < Norg_; ++i)
 	{
 		neigh_set.clear();
+		neigh_set.reserve(20);
 		size_t point = order[i];
 		size_t ntet = PointTetras_[point].size();
 		// for each point loop over its tetras
@@ -1557,7 +1553,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 		{
 			size_t other = tproc.GetFaceNeighbors(faces[i]).first == rank ? tproc.GetFaceNeighbors(faces[i]).second :
 				tproc.GetFaceNeighbors(faces[i]).first;
-			if (other < tproc.GetPointNo() && abs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+			if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
 				continue;
 			to_check.push(faces[i]);
 		}
@@ -1581,7 +1577,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (!std::binary_search(neigh.begin(), neigh.end(), fneigh.first))
 					{
-						if (fneigh.first < tproc.GetPointNo() && abs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>30
+						if (fneigh.first < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>30
 							* tproc.GetWidth(fneigh.first))
 							continue;
 						to_check.push(faces[j]);
@@ -1592,7 +1588,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (!std::binary_search(neigh.begin(), neigh.end(), fneigh.second))
 					{
-						if (fneigh.second < tproc.GetPointNo() && abs(tproc.GetCellCM(fneigh.second) - del_.points_[point])>30
+						if (fneigh.second < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.second) - del_.points_[point])>30
 							* tproc.GetWidth(fneigh.second))
 							continue;
 						to_check.push(faces[j]);
@@ -1645,7 +1641,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 							{
 								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.first ?
 									tproc.GetFaceNeighbors(faces_temp[i]).second : tproc.GetFaceNeighbors(faces_temp[i]).first;
-								if (other < tproc.GetPointNo() && abs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
 									continue;
 								to_check.push(faces_temp[i]);
 							}
@@ -1659,7 +1655,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 							{
 								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.second ?
 									tproc.GetFaceNeighbors(faces_temp[i]).second : tproc.GetFaceNeighbors(faces_temp[i]).first;
-								if (other < tproc.GetPointNo() && abs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
 									continue;
 								to_check.push(faces_temp[i]);
 							}
@@ -1791,12 +1787,12 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc, vector<std::p
 					{
 						to_add.clear();
 						Vector3D const& point = del_.points_[del_.tetras_[i].points[k]];
-						double r0 = abs(point - proc_point);
+						double r0 = fastabs(point - proc_point);
 						size_t index = 0;
 						double mind_1 = 0;
 						for (size_t z = 0; z < Nneigh; ++z)
 						{
-							double r1 = abs(point - neigh_points[z]);
+							double r1 = fastabs(point - neigh_points[z]);
 							double temp = r0 > r1 ? r1 / r0 : r0 / r1;
 							if (temp > 0.9 && r1 < 2 * radii[z])
 								to_add.push_back(z);
@@ -1968,11 +1964,11 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	tetra_centers_[index] = center;
 	double Rres = 0.5*std::sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	// Sanity check
-	double Rcheck0 = abs(del_.points_[del_.tetras_[index].points[0]] - center);
-	double Rcheck1 = abs(del_.points_[del_.tetras_[index].points[1]] - center);
-	double Rcheck2 = abs(del_.points_[del_.tetras_[index].points[2]] - center);
-	double Rcheck3 = abs(del_.points_[del_.tetras_[index].points[3]] - center);
-	double tol = 1 + 1e-10;
+	double Rcheck0 = fastabs(del_.points_[del_.tetras_[index].points[0]] - center);
+	double Rcheck1 = fastabs(del_.points_[del_.tetras_[index].points[1]] - center);
+	double Rcheck2 = fastabs(del_.points_[del_.tetras_[index].points[2]] - center);
+	double Rcheck3 = fastabs(del_.points_[del_.tetras_[index].points[3]] - center);
+	double tol = 1 + 1e-6;
 	if (((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)*tol < (4 * Rcheck0)) || ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3) > (tol * 4 * Rcheck0)))
 		return CalcTetraRadiusCenterHiPrecision(index);
 	if (Rcheck0 > tol*Rres || Rcheck0*tol < Rres)

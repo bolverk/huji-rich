@@ -36,7 +36,7 @@ namespace
 			vector<size_t> const& faces = tess_.GetCellFaces(i);
 			size_t Nloop = faces.size();
 			for (size_t j = 0; j < Nloop; ++j)
-				res = fmax(res,(c + abs(v - face_velocities_[faces[j]])));
+				res = fmax(res,(c + fastabs(v - face_velocities_[faces[j]])));
 			return tess_.GetWidth(i) / res;
 		}
 

@@ -19,10 +19,10 @@ namespace
 		vector<size_t> neigh = tess.GetNeighbors(index);
 		size_t N = neigh.size();
 		size_t min_loc = 0;
-		double min_d = abs(point - tess.GetMeshPoint(neigh[0]));
+		double min_d = fastabs(point - tess.GetMeshPoint(neigh[0]));
 		for (size_t i = 1; i < N; ++i)
 		{
-			double d = abs(point - tess.GetMeshPoint(neigh[i]));
+			double d = fastabs(point - tess.GetMeshPoint(neigh[i]));
 			if (d < min_d)
 			{
 				min_d = d;
@@ -35,7 +35,7 @@ namespace
 			size_t other = tess.GetFaceNeighbors(face).first == index ? tess.GetFaceNeighbors(face).second :
 				tess.GetFaceNeighbors(face).first;
 			Vector3D parallel = tess.FaceCM(face) - 0.5*(tess.GetMeshPoint(index)+tess.GetMeshPoint(other));
-			parallel *= (1.0 / abs(parallel));
+			parallel *= (1.0 / fastabs(parallel));
 			Vector3D v_par = parallel*ScalarProd(velocity, parallel);
 			Vector3D v_norm = velocity - parallel*ScalarProd(velocity, parallel);
 			if (!tess.IsPointOutsideBox(other))
@@ -72,42 +72,42 @@ namespace
 			double R = tess.GetWidth(i);
 			if ((v[i].x*dt * 2 + point.x)>ur.x)
 			{
-				double factor = 0.25*(ur.x - point.x)*inv_dt / abs(v[i]);
+				double factor = 0.25*(ur.x - point.x)*inv_dt / fastabs(v[i]);
 				if (R*0.1 > (ur.x - point.x))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].y*dt * 2 + point.y)>ur.y)
 			{
-				double factor = 0.25*(ur.y - point.y)*inv_dt / abs(v[i]);
+				double factor = 0.25*(ur.y - point.y)*inv_dt / fastabs(v[i]);
 				if (R*0.1 > (ur.y - point.y))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].z*dt * 2 + point.z)>ur.z)
 			{
-				double factor = 0.25*(ur.z - point.z)*inv_dt / abs(v[i]);
+				double factor = 0.25*(ur.z - point.z)*inv_dt / fastabs(v[i]);
 				if (R*0.1 > (ur.z - point.z))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].x*dt * 2 + point.x) < ll.x)
 			{
-				double factor = 0.25*(point.x - ll.x)*inv_dt / abs(v[i]);
+				double factor = 0.25*(point.x - ll.x)*inv_dt / fastabs(v[i]);
 				if (R*0.1 > (point.x - ll.x))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].y*dt * 2 + point.y)<ll.y)
 			{
-				double factor = 0.25*(point.y - ll.y)*	inv_dt / abs(v[i]);
+				double factor = 0.25*(point.y - ll.y)*	inv_dt / fastabs(v[i]);
 				if (R*0.1 > (point.y - ll.y))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
 			}
 			if ((v[i].z*dt * 2 + point.z)<ll.z)
 			{
-				double factor = 0.25*(point.z - ll.z)*	inv_dt / abs(v[i]);
+				double factor = 0.25*(point.z - ll.z)*	inv_dt / fastabs(v[i]);
 				if (R*0.1 > (point.z - ll.z))
 					factor *= -0.1;
 				v[i] = v[i] * factor;
@@ -123,12 +123,12 @@ void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& te
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
-	const double d = abs(s - r);
+	const double d = fastabs(s - r);
 	const double R = tess.GetWidth(i);
 	if (d < 0.9*eta_*R)
 		return;
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
-		cells[i].tracers, tracerstickernames.tracer_names), abs(cells[i].velocity));
+		cells[i].tracers, tracerstickernames.tracer_names), fastabs(cells[i].velocity));
 	velocity += chi_*c*(s - r) / std::max(R,d);
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
@@ -138,13 +138,13 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
-	const double d = abs(s - r);
+	const double d = fastabs(s - r);
 	const double R = tess.GetWidth(i);
 	if (d < 0.9*eta_*R)
 		return;
 	vector<size_t> neigh = tess.GetNeighbors(i);
 	size_t N = neigh.size();
-	double cs = std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
+	double cs = std::max(fastabs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
 		cells[i].tracers, tracerstickernames.tracer_names));
 	double minD = d;
 	for (size_t j = 0; j < N; ++j)
@@ -153,8 +153,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 			continue;
 		cs = std::max(cs, eos_.dp2c(cells[neigh[j]].density, cells[neigh[j]].pressure,
 			cells[static_cast<size_t>(neigh[j])].tracers,tracerstickernames.tracer_names));
-		cs = std::max(cs, abs(cells[neigh[j]].velocity));
-		minD = std::min(minD, abs(tess.GetCellCM(neigh[j]) - tess.GetMeshPoint(neigh[j])));
+		cs = std::max(cs, fastabs(cells[neigh[j]].velocity));
+		minD = std::min(minD, fastabs(tess.GetCellCM(neigh[j]) - tess.GetMeshPoint(neigh[j])));
 	}
 	cs = std::max(cs, 0.01*minD / dt);
 	const double c_dt = std::min(d / dt,cs);

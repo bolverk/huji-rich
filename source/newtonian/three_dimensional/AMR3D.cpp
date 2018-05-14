@@ -201,7 +201,7 @@ namespace
 			for (size_t i = 0; i < Nrefine; ++i)
 			{
 				double R = tess.GetWidth(ToRefine.first[i]);
-				Vector3D newpoint = tess.GetMeshPoint(ToRefine.first[i]) + 0.25*R*ToRefine.second[i] / abs(ToRefine.second[i]);
+				Vector3D newpoint = tess.GetMeshPoint(ToRefine.first[i]) + 0.25*R*ToRefine.second[i] / fastabs(ToRefine.second[i]);
 				res.push_back(newpoint);
 			}
 		}

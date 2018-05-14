@@ -21,21 +21,21 @@ namespace
 		double d = ScalarProd(AC, AB);
 		if (d < 0)
 		{
-			if (abs(AC)>R)
+			if (fastabs(AC)>R)
 				return false;
 			else
 				return true;
 		}
-		double LAB = abs(AB);
+		double LAB = fastabs(AB);
 		if (d > LAB*LAB)
 		{
-			if (abs(center - p1) > R)
+			if (fastabs(center - p1) > R)
 				return false;
 			else
 				return true;
 		}
 		Vector3D closest = p0 + AB*d / (LAB*LAB);
-		if (abs(center - closest) > R)
+		if (fastabs(center - closest) > R)
 			return false;
 		else
 			return true;

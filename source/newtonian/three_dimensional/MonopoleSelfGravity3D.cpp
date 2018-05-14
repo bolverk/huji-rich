@@ -38,7 +38,7 @@ void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<
 	// Find mass in radius
 	for (size_t i = 0; i < N; ++i)
 	{
-		double r = abs(tess.GetMeshPoint(i)-CMtot);
+		double r = fastabs(tess.GetMeshPoint(i)-CMtot);
 		double fraction = r / dr;
 		size_t whole = static_cast<size_t>(fraction);
 		double m = tess.GetVolume(i)*cells[i].density;
@@ -66,7 +66,7 @@ void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<
 	for (size_t i = 0; i < N; ++i)
 	{
 		Vector3D point = tess.GetMeshPoint(i)-CMtot;
-		double r = abs(point);
+		double r = fastabs(point);
 		double m = LinearInterpolation(r_list, m_radius, r);
 		if(r>(smoothlength_))
 			acc[i] = point*m*(-1.0/(r*r*r));

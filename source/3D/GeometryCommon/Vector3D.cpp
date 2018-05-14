@@ -1,6 +1,7 @@
 #include <cmath>
 #include <math.h>
 #include "Vector3D.hpp"
+#include "../../misc/utils.hpp"
 
 #define EPSILON 1e-12
 
@@ -43,6 +44,12 @@ double abs(Vector3D const& v)
 {
 	return std::sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
+
+double fastabs(Vector3D const& v)
+{
+	return fastsqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
 
 Vector3D::Vector3D(void) :
 x(0), y(0), z(0) {}

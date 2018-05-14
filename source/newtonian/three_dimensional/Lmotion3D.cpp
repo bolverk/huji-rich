@@ -55,9 +55,9 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 			TotalArea[tess.GetFaceNeighbors(j).second] += face_area[j];
 		normals[j] = normalize(tess.GetMeshPoint(tess.GetFaceNeighbors(j).second) -
 			tess.GetMeshPoint(tess.GetFaceNeighbors(j).first));
-		double par_left = abs(edge_values[j].first.velocity - ScalarProd(edge_values[j].first.velocity, normals[j])
+		double par_left = fastabs(edge_values[j].first.velocity - ScalarProd(edge_values[j].first.velocity, normals[j])
 			*normals[j]);
-		double par_right = abs(edge_values[j].second.velocity - ScalarProd(edge_values[j].second.velocity, normals[j])
+		double par_right = fastabs(edge_values[j].second.velocity - ScalarProd(edge_values[j].second.velocity, normals[j])
 			*normals[j]);
 		edge_values[j].first.velocity.x = ScalarProd(edge_values[j].first.velocity, normals[j]);
 		edge_values[j].first.velocity.y = par_left;
@@ -93,8 +93,8 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 		{
 			double m = 5.5*cells[i].density*tess.GetVolume(i) / (dt*TotalArea[i]);
 			Vector3D toadd(m*cells[i].tracers[indexX], m*cells[i].tracers[indexY], m*cells[i].tracers[indexX]);
-			double v = abs(velocities[i]);
-			double t = abs(toadd);
+			double v = fastabs(velocities[i]);
+			double t = fastabs(toadd);
 			if (t > max_v_correction_*v)
 				toadd = toadd*(max_v_correction_*v / t);
 			velocities[i] += toadd;

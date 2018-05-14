@@ -36,7 +36,7 @@ void ConservativeForce3D::operator()(const Tessellation3D& tess,const vector<Com
 	dt_ = 0;
 	for (size_t i = 0; i < N; ++i)
 	{
-		dt_ = std::max(dt_, std::sqrt(abs(acc[i])/ tess.GetWidth(i)));
+		dt_ = std::max(dt_, std::sqrt(fastabs(acc[i])/ tess.GetWidth(i)));
 		double volume = tess.GetVolume(i);
 		extensives[i].momentum += volume*cells[i].density*acc[i]*dt;
 		if (mass_flux_)

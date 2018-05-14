@@ -112,6 +112,12 @@ public:
 */
 double abs(Vector3D const& v);
 
+/*! \brief Norm of a vector, less accurate
+\param v Three dimensional vector
+\return Norm of v
+*/
+double fastabs(Vector3D const& v);
+
 /*! \brief Term by term addition
 \param v1 First vector
 \param v2 Second vector

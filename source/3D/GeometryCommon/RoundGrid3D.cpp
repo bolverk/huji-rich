@@ -34,7 +34,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 			double R = tess->GetWidth(i);
 			Vector3D s = tess->GetCellCM(i);
 			Vector3D r = tess->GetMeshPoint(i);
-			double d = abs(s - r);
+			double d = fastabs(s - r);
 			Vector3D dw;
 			if (d / eta_ / R < 0.95)
 				dw = 0 * s;
@@ -73,7 +73,7 @@ vector<Vector3D> RoundGrid3DSingle(vector<Vector3D> const& points, Vector3D cons
 			double R = tess.GetWidth(i);
 			Vector3D s = tess.GetCellCM(i);
 			Vector3D r = tess.GetMeshPoint(i);
-			double d = abs(s - r);
+			double d = fastabs(s - r);
 			Vector3D dw;
 			if (d / eta_ / R < 0.95)
 				dw = 0 * s;

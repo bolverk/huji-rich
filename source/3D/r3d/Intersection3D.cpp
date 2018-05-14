@@ -118,7 +118,7 @@ namespace
 			Nindeces = all_good.size();
 			dist.resize(Nindeces);
 			for (size_t j = 0; j < Nindeces; ++j)
-				dist[j] = abs(points[all_good[j]] - points[to_change]);
+				dist[j] = fastabs(points[all_good[j]] - points[to_change]);
 			size_t min_loc = static_cast<size_t>(std::distance(dist.begin(),std::min_element(dist.begin(), dist.end())));
 			size_t max_loc = static_cast<size_t>(std::distance(dist.begin(), std::max_element(dist.begin(), dist.end())));
 			if (dist[min_loc] > dist[max_loc] * 1e-6)

@@ -100,8 +100,8 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	local_right.velocity.y -= velocity*normaldir.y;
 	local_right.velocity.z -= velocity*normaldir.z;
 
-	double par_left = abs(local_left.velocity - ScalarProd(local_left.velocity, normaldir)*normaldir);
-	double par_right = abs(local_right.velocity - ScalarProd(local_right.velocity, normaldir)*normaldir);
+	double par_left = fastabs(local_left.velocity - ScalarProd(local_left.velocity, normaldir)*normaldir);
+	double par_right = fastabs(local_right.velocity - ScalarProd(local_right.velocity, normaldir)*normaldir);
 	local_left.velocity.x = ScalarProd(local_left.velocity, normaldir);
 	local_left.velocity.y = par_left;
 	local_left.velocity.z = 0;
