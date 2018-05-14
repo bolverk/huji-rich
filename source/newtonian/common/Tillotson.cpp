@@ -34,8 +34,10 @@ double Tillotson::dp2EIV(double d, double p) const
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double A = A_*mu;
-	double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
-	double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
+	double eta2 = alpha_*(rho0_ / d - 1) * (rho0_ / d - 1);
+	double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
+	double eta3 = beta_*(rho0_ / d - 1);
+	double exp_beta = (eta3 > 100) ? 0 : A*std::exp(-eta3);
 	double b = b_*exp_alpha;
 	double AB = exp_alpha*exp_beta;
 	double E = (p - AB - a_*c*d - b*c*d + sqrt(4 * a_*c*d*(p - AB) + std::pow(AB + (a_ + b)*c*d - p, 2))) /
@@ -77,8 +79,10 @@ double Tillotson::de2pIV(double d, double e)const
 	double mu = eta - 1;
 	double c = E0_*eta*eta;
 	double A = A_*mu;
-	double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
-	double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
+	double eta2 = alpha_*(rho0_ / d - 1) * (rho0_ / d - 1);
+	double exp_alpha = (eta2>100) ? 0 : std::exp(-eta2);
+	double eta3 = beta_*(rho0_ / d - 1);
+	double exp_beta = (eta3>100) ? 0 : A*std::exp(-eta3);
 	if (negative_pressure_)
 		return a_*d*e + exp_alpha*(b_*d*e / (e / c + 1) + exp_beta);
 	else
@@ -100,9 +104,10 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	double eta = d / rho0_;
 	double w0 = e / (E0_*eta*eta) + 1;
 	double z = 1.0 / eta - 1.0;
-	double afactor = std::exp(-alpha_*z*z);
+	double afactor = (alpha_*z*z > 100) ? 0 : std::exp(-alpha_*z*z);
 	double res0 = p*(a_ + b_*afactor / w0 + 1) / d;
-	double res1 = A_*std::exp(-beta_*z)*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
+	double bfactor = (beta_*z > 100) ? 0 : std::exp(-beta_*z);
+	double res1 = A_*bfactor*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
 	res1 += b_*d*e*afactor*(2 * alpha_*z*w0 / rho0_ + (p / d - 2 * e) / (E0_*d)) / (w0*w0*eta*eta);
 	double res = std::max(res0 + res1, 1e-10*E0_);
 	return res;
@@ -140,8 +145,12 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 		{
 			return dp2EI(d, p);
 		}
-		double exp_alpha = std::exp(-alpha_*std::pow(rho0_ / d - 1, 2));
-		double exp_beta = A*std::exp(-beta_*(rho0_ / d - 1));
+		double eta2 = alpha_*(rho0_ / d - 1) * (rho0_ / d - 1);
+		double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
+		double eta3 = beta_*(rho0_ / d - 1);
+		double exp_beta = (eta3 > 100) ? 0 : A*std::exp(-eta3);
+
+
 		double PCV = 0;
 		if (negative_pressure_)
 			PCV = a_*d*ECV_ + exp_alpha*(b_*d*ECV_ / (ECV_ / c + 1) + exp_beta);
