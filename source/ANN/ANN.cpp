@@ -53,7 +53,7 @@ ANNdist annDist(						// interpoint squared distance
 
 	dist = 0;
 #ifdef __INTEL_COMPILER
-#pragma simd
+#pragma ivdep
 #endif
 	for (d = 0; d < dim; d++) 
 	{

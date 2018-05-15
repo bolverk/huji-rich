@@ -65,7 +65,7 @@ public:
 	double mass;
 	double CM[3];
 	std::array<double, 6> Q;
-	virtual void GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const = 0;
+	virtual void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const = 0;
 
 	virtual void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
 		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const = 0;
@@ -145,7 +145,7 @@ public:
 	virtual void ann_pri_search(ANNdist);		// priority search
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
-	void GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
+	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
 	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
 		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const;
 	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
@@ -220,7 +220,7 @@ public:
 	virtual void ann_pri_search(ANNdist);		// priority search
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
-	void GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
+	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
 	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
 		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,

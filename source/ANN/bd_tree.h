@@ -96,7 +96,7 @@ public:
 	virtual void ann_pri_search(ANNdist);		// priority search
 	virtual void ann_FR_search(ANNdist); 		// fixed-radius search
 
-	void GetAcc(ANNpoint /*qpoint*/, ANNpoint& /*res*/, double /*angle2*/, ANNorthRect &/*bb*/) const {};
+	void GetAcc(ANNpoint const& /*qpoint*/, ANNpoint& /*res*/, double /*angle2*/, ANNorthRect &/*bb*/) const {};
 
 	virtual void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &/*qpoint*/, 
 		vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &/*res*/, double /*angle2*/, ANNorthRect &/*bb*/)

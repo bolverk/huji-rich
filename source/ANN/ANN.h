@@ -714,7 +714,7 @@ public:
 	virtual void getStats(				// compute tree statistics
 		ANNkdStats&		st);			// the statistics (modified)
 
-	void GetAcc(ANNpoint qpoint, ANNpoint &res, double angle2) const;
+	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2) const;
 
 	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
 		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2) const;
