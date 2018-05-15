@@ -49,7 +49,6 @@ ANNdist annDist(						// interpoint squared distance
 	ANNpoint			q)
 {
 	register int d;
-	register ANNcoord diff;
 	register ANNcoord dist;
 
 	dist = 0;
@@ -58,8 +57,8 @@ ANNdist annDist(						// interpoint squared distance
 #endif
 	for (d = 0; d < dim; d++) 
 	{
-		diff = p[d] - q[d];
-		dist = ANN_SUM(dist, ANN_POW(diff));
+		ANNcoord diff = p[d] - q[d];
+		dist += diff*diff;
 	}
 	ANN_FLOP(3*dim)					// performance counts
 	ANN_PTS(1)

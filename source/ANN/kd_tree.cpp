@@ -536,8 +536,14 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint,boost::alignment::aligned_allocato
 	qMax[2] = qpoint[0][2];
 	qMin = qMax;
 	size_t N = qpoint.size();
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (size_t i = 1; i < N; ++i)
 	{
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 		for (size_t j = 0; j < 3; ++j)
 		{
 			qMax[j] = std::max(qMax[j], qpoint[i][j]);
@@ -776,22 +782,16 @@ void ANNkd_leaf::GetAcc(ANNpoint qpoint, ANNpoint &res, double /*angle2*/, ANNor
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
-#ifdef __INTEL_COMPILER
-#pragma simd
-#endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
 	if (dist_toq < maxbox*1e-6) //prevent self force
 		return;
 	double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
-#ifdef __INTEL_COMPILER
-#pragma simd
-#endif
 	for (int i = 0; i < 3; ++i)
 		res[i] -= mass*(qpoint[i] - CM[i]) *r3;
 	double sumQ = 0;
 #ifdef __INTEL_COMPILER
-#pragma simd
+#pragma ivdep
 #endif
 	for (size_t i = 0; i < 6; ++i)
 		sumQ += std::abs(Q[i]);

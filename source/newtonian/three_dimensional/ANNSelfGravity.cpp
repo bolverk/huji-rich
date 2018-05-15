@@ -186,7 +186,6 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	std::vector<ANNpoint,boost::alignment::aligned_allocator<ANNpoint,32> > qpoints(Nbatch), accpoints(Nbatch);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
-#pragma vector aligned
 #endif
 	for (size_t i = 0; i < Nbatch; ++i)
 	{
@@ -215,7 +214,6 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		counter2+=Ninner;
 		atree->GetAcc(qpoints, accpoints, opening_);
 #ifdef __INTEL_COMPILER
-#pragma vector aligned
 #pragma ivdep
 #endif
 		for (size_t j = 0; j < Ninner; ++j)
