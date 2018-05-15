@@ -14,7 +14,7 @@ namespace
 	{
 		int sum = 0;
 #ifdef __INTEL_COMPILER
-#pragma simd
+#pragma ivdep
 #endif
 		for (size_t i = 0; i < 4; ++i)
 		{
@@ -54,7 +54,7 @@ namespace
 	void GetOppositePoint(Tetrahedron const& tetra, std::size_t neighbor,size_t &res)
 	{
 #ifdef __INTEL_COMPILER
-#pragma simd
+#pragma ivdep
 #endif
 		for (size_t i=0; i < 4; i++)
 			if (tetra.neighbors[i] == neighbor)
@@ -67,7 +67,7 @@ namespace
 	void GetPointLocationInTetra(Tetrahedron const& tetra, std::size_t point,size_t &res)
 	{
 #ifdef __INTEL_COMPILER
-#pragma simd
+#pragma ivdep
 #endif
 		for (size_t i = 0; i < 4; i++)
 			if (tetra.points[i] == point)

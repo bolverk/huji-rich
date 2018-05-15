@@ -441,7 +441,7 @@ namespace
 		}
 #ifdef __INTEL_COMPILER
 #pragma vector aligned
-#pragma simd
+#pragma ivdep
 #endif
 		for (size_t i = 0; i < Nloop; i++)
 		{
