@@ -63,7 +63,7 @@ public:
 	friend class ANNkd_tree;					// allow kd-tree to access us
 
 	double mass;
-	double CM[3];
+	ANNpoint CM;
 	std::array<double, 6> Q;
 	virtual void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const = 0;
 

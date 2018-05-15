@@ -418,8 +418,15 @@ typedef ANNidx*   ANNidxArray;		// an array of point indices
    
 DLL_API ANNdist annDist(
 	int				dim,		// dimension of space
-	ANNpoint		p,			// points
-	ANNpoint		q);
+	ANNpoint const&		p,			// points
+	ANNpoint const&		q);
+
+DLL_API ANNdist annDist2(
+	int				dim,		// dimension of space
+	ANNpoint const&		p,			// points
+	ANNpoint const&		q,
+	ANNpoint const&  cm);
+
 
 
 DLL_API ANNpointArray annAllocPts(

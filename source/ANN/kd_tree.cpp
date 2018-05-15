@@ -568,7 +568,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocat
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
-	double maxbox = annDist(3, bb.lo, bb.hi);
+	double maxbox = annDist2(3, bb.lo, bb.hi,CM);
 	int counter = 0;
 	size_t N = qpoint.size();
 	double dist_toq = 0;
@@ -649,7 +649,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_alloca
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
-	double maxbox = annDist(3, bb.lo, bb.hi);
+	double maxbox = annDist2(3, bb.lo, bb.hi,CM);
 	size_t counter = 0;
 	size_t N = qpoint.size();
 	for (size_t k = 0; k < N; ++k)
@@ -731,7 +731,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_alloca
 
 void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2,ANNorthRect &bb) const
 {
-	double maxbox = annDist(3, bb.lo, bb.hi);
+	double maxbox = annDist2(3, bb.lo, bb.hi,CM);
 	double dist_toq = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -944,7 +944,8 @@ namespace
 	}
 }
 
-double DistanceToFace(ANNpointArray const& face, size_t Nface,const double* qpoint, double maxdist, ANNpoint normal)
+double DistanceToFace(ANNpointArray const& face, size_t Nface, std::array<double, 3> const&  qpoint, double maxdist, 
+	ANNpoint normal)
 {
 	double d = (qpoint[0] - face[0][0])*normal[0] + (qpoint[1] - face[0][1])*normal[1] + (qpoint[2] - face[0][2])*normal[2];
 	if (std::abs(d) > maxdist)
@@ -979,11 +980,11 @@ double DistanceToFace(ANNpointArray const& face, size_t Nface,const double* qpoi
 	return fastsqrt(min_face_dist);
 }
 
-double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, const double* qpoint,
-	double maxdist, std::vector<ANNpoint>const& normals);
+double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, std::array<double, 3> const&  
+	qpoint, double maxdist, std::vector<ANNpoint>const& normals);
 
-double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, const double* qpoint, 
-	double maxdist, std::vector<ANNpoint>const& normals)
+double DistanceToFaces(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nface, std::array<double,3> const& 
+	qpoint, double maxdist, std::vector<ANNpoint>const& normals)
 {
 	double res = DistanceToFace(faces[0], Nface[0], qpoint, maxdist, normals[0]);
 	size_t Nfaces = faces.size();
@@ -1005,7 +1006,7 @@ void ANNkd_tree::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<
 void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 	std::vector<ANNpoint> const& normals, ANNorthRect &bb)
 {
-	double maxbox = annDist(3, bb.lo, bb.hi);
+	double maxbox = annDist2(3, bb.lo, bb.hi,CM);
 	double dist = DistanceToFaces(faces, Nfaces, CM, fastsqrt(maxbox / angle2), normals);
 	if (dist*dist*angle2 > maxbox)
 	{

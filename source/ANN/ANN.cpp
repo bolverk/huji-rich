@@ -45,26 +45,45 @@ using namespace std;					// make std:: accessible
 
 ANNdist annDist(						// interpoint squared distance
 	int					dim,
-	ANNpoint			p,
-	ANNpoint			q)
+	ANNpoint const&			p,
+	ANNpoint const&			q)
 {
 	register int d;
 	register ANNcoord dist;
+	register ANNcoord diff;
 
 	dist = 0;
-#ifdef __INTEL_COMPILER
-#pragma ivdep
-#endif
+//#ifdef __INTEL_COMPILER
+//#pragma ivdep
+//#endif
 	for (d = 0; d < dim; d++) 
 	{
-		ANNcoord diff = p[d] - q[d];
-		dist += diff*diff;
+		diff = p[d] - q[d];
+		dist = ANN_SUM(dist, ANN_POW(diff));
 	}
 	ANN_FLOP(3*dim)					// performance counts
 	ANN_PTS(1)
 	ANN_COORD(dim)
 	return dist;
 }
+
+ANNdist annDist2(						// interpoint squared distance
+	int					dim,
+	ANNpoint	const&		p,
+	ANNpoint const&			q,ANNpoint const& cm)
+{
+	ANNcoord dist=0;
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+	for (int d = 0; d < dim; d++)
+	{
+		ANNcoord diff = std::max(std::abs(p[d] - cm[d]),std::abs(q[d]-cm[d]));
+		dist += diff*diff;
+	}
+	return dist;
+}
+
 
 //----------------------------------------------------------------------
 //	annPrintPoint() prints a point to a given output stream.
