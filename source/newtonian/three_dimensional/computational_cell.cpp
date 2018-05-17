@@ -224,13 +224,15 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	cell.pressure = other.pressure;
 	cell.internal_energy = other.internal_energy;
 	cell.velocity = other.velocity;
-	size_t N = cell.tracers.size();
+	size_t N = other.tracers.size();
+	cell.tracers.resize(N);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 	for (size_t j = 0; j < N; ++j)
 		cell.tracers[j] = other.tracers[j];
-	N = cell.stickers.size();
+	N = other.stickers.size();
+	cell.stickers.resize(N);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
