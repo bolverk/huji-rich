@@ -244,8 +244,9 @@ void ColdFlowsUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const 
 }
 
 void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& /*tess*/, const double /*dt*/,
-	const vector<ComputationalCell3D>& /*cells*/, vector<Conserved3D> &/*extensives*/, size_t /*index*/, double /*time*/,
+	const vector<ComputationalCell3D>& /*cells*/, vector<Conserved3D> &extensives, size_t index, double /*time*/,
 	TracerStickerNames const& /*tracerstickernames*/)const
 {
+	assert(extensives[index].internal_energy > 0);
 	return;
 }
