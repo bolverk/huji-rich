@@ -148,18 +148,18 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 					double v_new = (v_star - lflux_.ws_[temp[j]]);
 					if (v_new*v_star > 0)
 					{
-						if (v_new > 0 && !tess.IsPointOutsideBox(n1) && p_star > 1.2*cells[n1].pressure)
+						if (v_new > 0 && !tess.IsPointOutsideBox(N1) && p_star > 1.2*cells[N1].pressure)
 						{
-							double Ek = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
-							double Eknew = 0.5*ScalarProd(extensives[n1].momentum + delta.momentum,
-								extensives[n1].momentum + delta.momentum) / extensives[n1].mass;
+							double Ek = 0.5*ScalarProd(extensives[N1].momentum, extensives[N1].momentum) / extensives[N1].mass;
+							double Eknew = 0.5*ScalarProd(extensives[N1].momentum + delta.momentum,
+								extensives[N1].momentum + delta.momentum) / extensives[N1].mass;
 							v_new = std::max(v_new, (Eknew - Ek) / std::max(1e-50, p_star));
 						}
-						if (v_new < 0 && !tess.IsPointOutsideBox(n0) && p_star > 1.2*cells[n0].pressure)
+						if (v_new < 0 && !tess.IsPointOutsideBox(N0) && p_star > 1.2*cells[N0].pressure)
 						{
-							double Ek = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
-							double Eknew = 0.5*ScalarProd(extensives[n0].momentum - delta.momentum,
-								extensives[n0].momentum - delta.momentum) / extensives[n0].mass;
+							double Ek = 0.5*ScalarProd(extensives[N0].momentum, extensives[N0].momentum) / extensives[N0].mass;
+							double Eknew = 0.5*ScalarProd(extensives[N0].momentum - delta.momentum,
+								extensives[N0].momentum - delta.momentum) / extensives[N0].mass;
 							v_new = std::min(v_new, (Ek - Eknew) / std::max(1e-50, p_star));
 						}
 					}
