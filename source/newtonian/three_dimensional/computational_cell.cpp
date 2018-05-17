@@ -224,8 +224,6 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	cell.pressure = other.pressure;
 	cell.internal_energy = other.internal_energy;
 	cell.velocity = other.velocity;
-	assert(cell.tracers.size() == other.tracers.size());
-	assert(cell.stickers.size() == other.stickers.size());
 	size_t N = cell.tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
