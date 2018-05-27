@@ -120,7 +120,6 @@ namespace {
     VoronoiMesh tess_;
     const IdealGas eos_;
 #ifdef RICH_MPI
-	//Eulerian point_motion_;
 	Lagrangian point_motion_;
 #else
     Lagrangian point_motion_;
@@ -134,22 +133,6 @@ namespace {
     const SimpleCellUpdater cu_;
     hdsim sim_;
   };
-
-  /*  void my_main_loop(hdsim& sim)
-  {
-    SafeTimeTermination term_cond(0.04,1e6);
-#ifdef BUGMODE
-	boost::mpi::communicator world;
-	WriteData diag("process_temp_" + int2str(world.rank()) + ".h5");
-#else
-    WriteTime diag("time.txt");
-#endif
-    main_loop(sim,
-	      term_cond,
-	      &hdsim::TimeAdvance,
-	      &diag);
-  }
-  */
 }
 
 int main(void)
@@ -166,13 +149,6 @@ int main(void)
   for (size_t i = 0; i < 100; ++i)
   {
 	  sim.TimeAdvance();
-	  /*
-#ifdef RICH_MPI
-	  write_snapshot_to_hdf5(sim, "snap_"+int2str(sim.getCycle())+"_"+int2str(rank)+".h5");
-#else
-	  write_snapshot_to_hdf5(sim, "snap_" + int2str(sim.getCycle()) + ".h5");
-#endif
-*/
   }
 
 #ifdef RICH_MPI
