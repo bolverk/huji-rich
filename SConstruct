@@ -27,7 +27,7 @@ elif compiler=='clang++':
         cflags += ' -O0 -g -pg'
         linkflags = ' -g -pg'
     else:
-		cflags += ' -O3 -march=native'
+        cflags += ' -O3 -march=native'
 elif compiler=='profile':
     cflags = ' -Wfatal-errors '
     cflags += ' -O3 -g'
