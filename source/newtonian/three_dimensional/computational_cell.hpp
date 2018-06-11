@@ -26,6 +26,9 @@ public:
 	//! \brief Internal energy
 	double internal_energy;
 
+	//! \brief Unique ID
+	size_t ID;
+
 	//! \brief Velocity
 	Vector3D velocity;
 
@@ -43,9 +46,10 @@ public:
 	  \param pressure_i Pressure
 	  \param velocity_i Velocity
 	  \param internal_energy_i Internal energy per unit mass
+	  \param ID_i The ID
 	  */
 	ComputationalCell3D(double density_i,
-		double pressure_i,double internal_energy_i,
+		double pressure_i,double internal_energy_i, size_t ID_i,
 		const Vector3D& velocity_i);
 
 	/*! \brief Class constructor
@@ -55,10 +59,12 @@ public:
 	  \param velocity_i Velocity
 	  \param tracers_i Tracers
 	  \param stickers_i Stickers
+	  \param ID_i The ID
 	  */
 	ComputationalCell3D(double density_i,
 		double pressure_i,
-		double internal_energy_i,
+		double internal_energy_i, 
+		size_t ID_i,
 		const Vector3D& velocity_i,
 		const vector<double>& tracers_i,
 		const vector<bool>& stickers_i);

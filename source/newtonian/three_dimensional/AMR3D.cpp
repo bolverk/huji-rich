@@ -860,6 +860,20 @@ void AMR3D::operator() (HDSim3D &sim)
 			throw eo;
 		}
 	}
+
+	// Get index for ID
+	size_t Nrefine = ToRefine.first.size();
+	size_t Nstart = sim.GetMaxID() + 1;
+#ifdef RICH_MPI
+	int ws = 0, rank = 0;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	std::vector<size_t> nrecv(static_cast<size_t>(ws), 0);
+	MPI_Allgather(&Nrefine, 1, MPI_UNSIGNED_LONG_LONG, &nrecv[0], 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+	for (size_t i = 0; i < static_cast<size_t>(rank); ++i)
+		Nstart += nrecv[i];
+#endif
+	// Add new refined cells	
 	for (size_t i = 0; i< ToRefine.first.size(); ++i)
 	{
 		size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.first.begin(), ToRemove.first.end(),
@@ -869,6 +883,8 @@ void AMR3D::operator() (HDSim3D &sim)
 			cells[(Norg - ToRemove.first.size()) + i] = cu_->ConvertExtensiveToPrimitve3D(extensives[(Norg -
 				ToRemove.first.size()) + i], eos, tess.GetVolume((Norg - ToRemove.first.size()) + i),
 				cells[ToRefine.first[i] - index_remove], tsn);
+			// Add new ID
+			cells[(Norg - ToRemove.first.size()) + i].ID = Nstart + i;
 		}
 		catch (UniversalError & eo)
 		{
@@ -881,6 +897,14 @@ void AMR3D::operator() (HDSim3D &sim)
 #ifdef RICH_MPI
 	// Update cells
 	MPI_exchange_data(tess, cells, true);
+#endif
+	// Update Max ID
+	size_t & MaxID = sim.GetMaxID();
+#ifdef RICH_MPI
+	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
+		MaxID += nrecv[i];
+#else
+	MaxID += Nrefine;
 #endif
 }
 

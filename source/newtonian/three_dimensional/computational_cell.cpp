@@ -1,20 +1,20 @@
 #include "computational_cell.hpp"
 
 ComputationalCell3D::ComputationalCell3D(void):
-  density(0), pressure(0),internal_energy(0), velocity(), tracers(),stickers() {}
+  density(0), pressure(0),internal_energy(0),ID(0), velocity(), tracers(),stickers() {}
 
 ComputationalCell3D::ComputationalCell3D(double density_i,
-				     double pressure_i,double internal_energy_i,
+				     double pressure_i,double internal_energy_i,size_t ID_i,
 				     const Vector3D& velocity_i):
-  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),
+  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
   velocity(velocity_i), tracers(),stickers() {}
 
 ComputationalCell3D::ComputationalCell3D(double density_i,
-				     double pressure_i, double internal_energy_i,
+				     double pressure_i, double internal_energy_i,size_t ID_i,
 				     const Vector3D& velocity_i,
 				     const vector<double>& tracers_i,
 					 const vector<bool>& stickers_i):
-  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),
+  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
   velocity(velocity_i), tracers(tracers_i),stickers(stickers_i) {}
 
 
@@ -26,6 +26,7 @@ ComputationalCell3D& ComputationalCell3D::operator=(ComputationalCell3D const& o
 	velocity = other.velocity;
 	tracers = other.tracers;
 	stickers = other.stickers;
+	ID = other.ID;
 	return *this;
 }
 
@@ -76,7 +77,7 @@ ComputationalCell3D& ComputationalCell3D::operator*=(double s)
 #ifdef RICH_MPI
 size_t ComputationalCell3D::getChunkSize(void) const
 {
-	return 6 + tracers.size() + stickers.size();
+	return 7 + tracers.size() + stickers.size();
 }
 
 vector<double> ComputationalCell3D::serialize(void) const
@@ -88,7 +89,8 @@ vector<double> ComputationalCell3D::serialize(void) const
 	res.at(3) = velocity.y;
 	res.at(4) = velocity.z;
 	res.at(5) = internal_energy;
-	size_t counter = 6;
+	res.at(6) = static_cast<double>(ID);
+	size_t counter = 7;
 	size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -114,7 +116,8 @@ void ComputationalCell3D::unserialize
 	velocity.y = data.at(3);
 	velocity.z = data.at(4);
 	internal_energy = data.at(5);
-	size_t counter = 6;
+	ID = static_cast<size_t>(std::llround(data.at(6)));
+	size_t counter = 7;
 	size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -223,6 +226,7 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	cell.density = other.density;
 	cell.pressure = other.pressure;
 	cell.internal_energy = other.internal_energy;
+	cell.ID = other.ID;
 	cell.velocity = other.velocity;
 	size_t N = other.tracers.size();
 	cell.tracers.resize(N);

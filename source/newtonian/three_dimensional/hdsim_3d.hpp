@@ -136,6 +136,11 @@ public:
   */
   void SetTime(double t);
 
+  /*! \brief Change/get the max ID of the sim
+  \return t The maximum ID number ofr all cells
+  */
+  size_t & GetMaxID(void);
+
 private:
   Tessellation3D& tess_;
 #ifdef RICH_MPI
@@ -155,6 +160,7 @@ private:
 #ifdef RICH_MPI
   const ProcessorUpdate3D* proc_update_;
 #endif
+  size_t Max_ID_;
 };
 
 #endif // HDSIM_3D_HPP

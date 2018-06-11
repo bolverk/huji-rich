@@ -76,7 +76,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),source_(source),tsn_(tsn),pt_()
 #ifdef RICH_MPI
-	,proc_update_(proc_update)
+	,proc_update_(proc_update),Max_ID_(0)
 #endif
 {
 	assert(tess.GetPointNo() == cells.size());
@@ -92,6 +92,29 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 			cells_[i].tracers[j] = cells[i].tracers[tindex[j]];
 		for (size_t j = 0; j < sindex.size(); ++j)
 			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
+	}
+	// Is this a new start?
+	assert(cells_.size() > 1);
+	if (cells_[0].ID == cells_[1].ID)
+	{
+		size_t nstart = 0;
+#ifdef RICH_MPI
+		int ws = 0,rank=0;
+		MPI_Comm_size(MPI_COMM_WORLD, &ws);
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		std::vector<size_t> nrecv(static_cast<size_t>(ws), 0);
+		size_t nsend = N;
+		MPI_Allgather(&nsend, 1, MPI_UNSIGNED_LONG_LONG, &nrecv[0], 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+		for (size_t i = 0; i < static_cast<size_t>(rank); ++i)
+			nstart += nrecv[i];
+#endif
+		for (size_t i = 0; i < N; ++i)
+			cells_[i].ID = nstart + i;
+		Max_ID_ =cells_.back().ID;
+#ifdef RICH_MPI
+		for (size_t i = static_cast<size_t>(rank); i < static_cast<size_t>(ws); ++i)
+			Max_ID_ += nrecv[i];
+#endif
 	}
 
 #ifdef RICH_MPI
@@ -283,4 +306,9 @@ void HDSim3D::SetCycle(size_t cycle)
 void HDSim3D::SetTime(double t)
 {
 	pt_.time = t;
+}
+
+size_t & HDSim3D::GetMaxID(void)
+{
+	return Max_ID_;
 }
