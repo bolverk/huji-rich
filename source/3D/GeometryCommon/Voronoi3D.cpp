@@ -2405,7 +2405,7 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 	Vector3D w = (v0 + v1) *0.5;
 	double w_abs = fastabs(w);
 	if (dw_abs > w_abs)
-		delta_w *= (1 + (std::atan(dw_abs / w_abs) - 0.25 * M_PI)*2) / dw_abs;
+		delta_w *= (1 + (std::atan(dw_abs / w_abs) - 0.25 * M_PI)*2) * (w_abs / dw_abs);
 	w += delta_w;
 	return w;
 }
