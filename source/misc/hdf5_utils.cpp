@@ -50,6 +50,14 @@ void write_std_vector_to_hdf5
      datatype);
 }
 
+void write_std_vector_to_hdf5(const CommonFG& file,const vector<size_t>& data,const string& caption)
+{
+	IntType datatype(PredType::NATIVE_ULLONG);
+	datatype.setOrder(H5T_ORDER_LE);
+	write_std_vector_to_hdf5(file,data,	caption,datatype);
+}
+
+
 HDF5Shortcut::~HDF5Shortcut(void)
 {
   H5File file(H5std_string(fname_), H5F_ACC_TRUNC);

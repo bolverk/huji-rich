@@ -70,6 +70,13 @@ void write_std_vector_to_hdf5
  const vector<int>& data,
  const string& caption);
 
+/*! \brief Writes size_t data to hdf5
+\param file Either an actual file or a group within a file
+\param data Data to be written
+\param caption Name of dataset
+*/
+void write_std_vector_to_hdf5(const CommonFG& file, const vector<size_t>& data, const string& caption);
+
 //! \brief Facilitates writing hdf5 files
 class HDF5Shortcut
 {

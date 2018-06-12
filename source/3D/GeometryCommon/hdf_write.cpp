@@ -197,7 +197,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 	std::vector<size_t> ids(Ncells);
 	for (size_t i = 0; i < Ncells; ++i)
 		ids[i] = cells[i].ID;
-	write_std_vector_to_hdf5(file, ids, "ID", H5T_NATIVE_ULLONG);
+	write_std_vector_to_hdf5(file, ids, "ID");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].velocity.x;
@@ -282,7 +282,14 @@ Snapshot3D ReadSnapshot3D
 		const vector<double> density = read_double_vector_from_hdf5(file, "Density");
 		const vector<double> pressure = read_double_vector_from_hdf5(file, "Pressure");
 		const vector<double> energy = read_double_vector_from_hdf5(file, "InternalEnergy");
-		const vector<size_t> IDs = read_sizet_vector_from_hdf5 (file, "ID");
+		vector<size_t> IDs(density.size(), 0);
+		ssize_t objcount =  file.getNumObjs();
+		for (ssize_t i = 0; i < objcount; ++i)
+		{
+			std::string name = file.getObjnameByIdx(i);
+			if (name.compare(std::string("ID"))==0)
+				IDs = read_sizet_vector_from_hdf5(file, "ID");
+		}
 		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
 		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
 		const vector<double> z_velocity = read_double_vector_from_hdf5(file, "Vz");
