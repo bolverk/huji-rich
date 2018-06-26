@@ -105,14 +105,14 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 		std::vector<size_t> nrecv(static_cast<size_t>(ws), 0);
 		size_t nsend = N;
 		MPI_Allgather(&nsend, 1, MPI_UNSIGNED_LONG_LONG, &nrecv[0], 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
-		for (int i = 0; i < (rank - 1); ++i)
+		for (int i = 0; i < rank; ++i)
 			nstart += nrecv[static_cast<size_t>(i)];
 #endif
 		for (size_t i = 0; i < N; ++i)
 			cells_[i].ID = nstart + i;
 		Max_ID_ =cells_.back().ID;
 #ifdef RICH_MPI
-		for (size_t i = static_cast<size_t>(rank); i < static_cast<size_t>(ws); ++i)
+		for (size_t i = static_cast<size_t>(rank + 1); i < static_cast<size_t>(ws); ++i)
 			Max_ID_ += nrecv[i];
 #endif
 	}
