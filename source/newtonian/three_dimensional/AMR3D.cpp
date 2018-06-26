@@ -740,6 +740,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
 	res.velocity = extensive.momentum / extensive.mass;
+	res.ID  = old_cell.ID;
 	try
 	{
 		res.pressure = eos.de2p(res.density, extensive.internal_energy / extensive.mass);
