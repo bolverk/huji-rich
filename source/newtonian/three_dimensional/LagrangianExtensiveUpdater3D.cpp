@@ -147,7 +147,7 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
 					" Area*dt " << Area << " N0 "<<tess.GetMeshPoint(N0).x<<","<<tess.GetMeshPoint(N0).y<<","
 					<<tess.GetMeshPoint(N0).z<<" N1 "<<tess.GetMeshPoint(N1).x<<","<<tess.GetMeshPoint(N1).y<<","
-					<<tess.GetMeshPoint(N1).z<<std::endl;
+					<<tess.GetMeshPoint(N1).z<<" IDs "<<cells[N0].ID<<" "<<cells[N1].ID<< std::endl;
 				if (lflux_.Lag_calc_[temp[j]])
 				{
 					Vector3D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
