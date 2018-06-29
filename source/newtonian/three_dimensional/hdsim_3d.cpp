@@ -79,6 +79,11 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	,proc_update_(proc_update),Max_ID_(0)
 #endif
 {
+#ifdef RICH_MPI
+	int ws = 0, rank = 0;
+	MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
 	assert(tess.GetPointNo() == cells.size());
 	// sort tracers and stickers
 	size_t N = tess.GetPointNo();
@@ -99,9 +104,6 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	{
 		size_t nstart = 0;
 #ifdef RICH_MPI
-		int ws = 0,rank=0;
-		MPI_Comm_size(MPI_COMM_WORLD, &ws);
-		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		std::vector<size_t> nrecv(static_cast<size_t>(ws), 0);
 		size_t nsend = N;
 		MPI_Allgather(&nsend, 1, MPI_UNSIGNED_LONG_LONG, &nrecv[0], 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
@@ -114,6 +116,17 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 		for (size_t i = static_cast<size_t>(rank + 1); i < static_cast<size_t>(ws); ++i)
 			Max_ID_ += nrecv[i];
+#endif
+	}
+	else
+	{
+		size_t maxid = 0;
+		for (size_t i = 0; i < N; ++i)
+			maxid = std::max(maxid, cells[i].ID);
+#ifdef RICH_MPI
+		MPI_Allreduce(&N, &Max_ID_, 1, MPI_UNSIGNED_LONG_LONG, MPI_MAX, MPI_COMM_WORLD);
+#else
+		Max_ID_ = maxid;
 #endif
 	}
 
