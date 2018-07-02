@@ -76,8 +76,9 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 	eos_(eos), cells_(cells),extensive_(),pm_(pm), tsc_(tsc), fc_(fc), cu_(cu),eu_(eu),source_(source),tsn_(tsn),pt_()
 #ifdef RICH_MPI
-	,proc_update_(proc_update),Max_ID_(0)
+	,proc_update_(proc_update)
 #endif
+	, Max_ID_(0)
 {
 #ifdef RICH_MPI
 	int ws = 0, rank = 0;
