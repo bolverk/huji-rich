@@ -125,7 +125,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 		for (size_t i = 0; i < N; ++i)
 			maxid = std::max(maxid, cells[i].ID);
 #ifdef RICH_MPI
-		MPI_Allreduce(&N, &Max_ID_, 1, MPI_UNSIGNED_LONG_LONG, MPI_MAX, MPI_COMM_WORLD);
+		MPI_Allreduce(&maxid, &Max_ID_, 1, MPI_UNSIGNED_LONG_LONG, MPI_MAX, MPI_COMM_WORLD);
 #else
 		Max_ID_ = maxid;
 #endif
