@@ -151,9 +151,10 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 				if (lflux_.Lag_calc_[temp[j]])
 				{
 					Vector3D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
-					double p_star = abs(fluxes[temp[j]].momentum);
+					double p_star = ScalarProd(fluxes[i].momentum, normal);
 					double v_star = fluxes[temp[j]].energy / p_star;
 					double v_new = (v_star - lflux_.ws_[temp[j]]);
+					std::cout << "Old pstar " << p_star << " vstar " << v_star <<" vnew "<<v_new<<std::endl;
 					if (v_new*v_star > 0)
 					{
 						if (v_new > 0 && !tess.IsPointOutsideBox(N1) && p_star > 1.2*cells[N1].pressure)
