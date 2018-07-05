@@ -56,42 +56,45 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 			double p_star = ScalarProd(fluxes[i].momentum, normal);
 			double v_star = fluxes[i].energy / p_star;
 			double v_new = (v_star - lflux_.ws_[i]);
-			if (v_new*v_star > 0)
+			if (p_star > 0)
 			{
-				if (v_new > 0 && !tess.IsPointOutsideBox(n1) && p_star > 1.2*cells[n1].pressure)
+				if (v_new*v_star > 0)
 				{
-					double Ek = 0.5*ScalarProd(old_extensive[n1].momentum, old_extensive[n1].momentum) / old_extensive[n1].mass;
-					double Eknew = 0.5*ScalarProd(old_extensive[n1].momentum+delta.momentum,
-						old_extensive[n1].momentum+delta.momentum) / old_extensive[n1].mass;
-					v_new = std::max(v_new, (Eknew-Ek)/std::max(1e-50,p_star*FArea));
-				}
-				if (v_new < 0 && !tess.IsPointOutsideBox(n0) && p_star > 1.2*cells[n0].pressure)
-				{
-					double Ek = 0.5*ScalarProd(old_extensive[n0].momentum, old_extensive[n0].momentum) / 
-						old_extensive[n0].mass;
-					double Eknew = 0.5*ScalarProd(old_extensive[n0].momentum - delta.momentum,
-						old_extensive[n0].momentum - delta.momentum) / old_extensive[n0].mass;
-					v_new = std::min(v_new, (Ek- Eknew) / std::max(1e-50, p_star*FArea));
-				}
-				delta.energy = p_star*v_new*tess.GetArea(i) * dt;
-			}
-			else
-			{
-				if (v_new > 0 && !tess.IsPointOutsideBox(n0))
-				{
-					double newp = std::min(p_star, cells[n0].pressure);
-					delta.energy = tess.GetArea(i) * dt*v_new*newp;
-					delta.momentum *= newp / p_star;
+					if (v_new > 0 && !tess.IsPointOutsideBox(n1) && p_star > 1.2*cells[n1].pressure)
+					{
+						double Ek = 0.5*ScalarProd(old_extensive[n1].momentum, old_extensive[n1].momentum) / old_extensive[n1].mass;
+						double Eknew = 0.5*ScalarProd(old_extensive[n1].momentum + delta.momentum,
+							old_extensive[n1].momentum + delta.momentum) / old_extensive[n1].mass;
+						v_new = std::max(v_new, (Eknew - Ek) / std::max(1e-50, p_star*FArea));
+					}
+					if (v_new < 0 && !tess.IsPointOutsideBox(n0) && p_star > 1.2*cells[n0].pressure)
+					{
+						double Ek = 0.5*ScalarProd(old_extensive[n0].momentum, old_extensive[n0].momentum) /
+							old_extensive[n0].mass;
+						double Eknew = 0.5*ScalarProd(old_extensive[n0].momentum - delta.momentum,
+							old_extensive[n0].momentum - delta.momentum) / old_extensive[n0].mass;
+						v_new = std::min(v_new, (Ek - Eknew) / std::max(1e-50, p_star*FArea));
+					}
+					delta.energy = p_star*v_new*tess.GetArea(i) * dt;
 				}
 				else
-					if (!tess.IsPointOutsideBox(n1))
+				{
+					if (v_new > 0 && !tess.IsPointOutsideBox(n0))
 					{
-						double newp = std::min(p_star, cells[n1].pressure);
+						double newp = std::min(p_star, cells[n0].pressure);
 						delta.energy = tess.GetArea(i) * dt*v_new*newp;
 						delta.momentum *= newp / p_star;
 					}
 					else
-						delta.energy = 0;
+						if (!tess.IsPointOutsideBox(n1))
+						{
+							double newp = std::min(p_star, cells[n1].pressure);
+							delta.energy = tess.GetArea(i) * dt*v_new*newp;
+							delta.momentum *= newp / p_star;
+						}
+						else
+							delta.energy = 0;
+				}
 			}
 		}
 		if (n0 < N)

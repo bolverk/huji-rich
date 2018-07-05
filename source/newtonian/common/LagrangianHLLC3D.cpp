@@ -123,7 +123,7 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 		const double sr = std::max(vl + cl, vr + cr);
 		const double denom = 1.0/ (dl*(sl - vl) - dr*(sr - vr));
 		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr))*denom;
-		const double ps = dl*(sl - vl)*(pr - dr*(vr - vl)*(sr - vr)) *denom - pl*dr*(sr - vr) *denom;
+		const double ps = std::max(0.0,dl*(sl - vl)*(pr - dr*(vr - vl)*(sr - vr)) *denom - pl*dr*(sr - vr) *denom);
 		ws = ss;
 		f_gr.energy = ps*ss;
 		f_gr.momentum.Set(ps, 0, 0);
