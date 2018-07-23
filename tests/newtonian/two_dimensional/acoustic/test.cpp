@@ -1,3 +1,6 @@
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#endif // RICH_MPI
 #include <iostream>
 #include "source/newtonian/test_1d/acoustic.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
@@ -61,15 +64,25 @@ namespace {
 
 #ifdef RICH_MPI
 
+  vector<Vector2D> process_positions(const PeriodicBox& boundary)
+  {
+    const Vector2D lower_left = boundary.getBoundaries().first;
+    const Vector2D upper_right = boundary.getBoundaries().second;
+	int ws=0;
+	MPI_Comm_size(MPI_COMM_WORLD,&ws);
+    return RandSquare(ws,lower_left.x,upper_right.x,lower_left.y,upper_right.y);
+  }
+
   vector<Vector2D> my_convex_hull
   (const Tessellation& tess,
    int index)
   {
     vector<Vector2D> res;
-    ConvexHull(res,&tess,index);
+    ConvexHull(res,tess,index);
     return res;
   }
 
+  /*
   vector<Vector2D> distribute_grid
   (const vector<Vector2D>& complete_grid,
    const Tessellation& proc_tess,
@@ -85,6 +98,7 @@ namespace {
       }
     return res;
   }
+  */
 #endif // RICH_MPI
 
   class SimData
@@ -93,11 +107,21 @@ namespace {
 
     SimData(void):
       width_(read_number("width.txt")),
-      init_points_(cartesian_mesh(2*30,2*30,
+      outer_(0,width_,width_,0),
+#ifdef RICH_MPI
+      meta_tess_(process_positions(outer_),outer_),
+      init_points_(SquareMeshM(60,
+			       60,
+			       meta_tess_,
+			       Vector2D(0,0),
+			       Vector2D(width_,width_))),
+      tess_(meta_tess_,init_points_,outer_),
+#else
+      init_points_(cartesian_mesh(60,60,
 				  Vector2D(0,0),
 				  Vector2D(width_,width_))),
-      outer_(0,width_,width_,0),
       tess_(init_points_,outer_),
+#endif // RICH_MPI
       pg_(),
       eos_(read_number("adiabatic_index.txt")),
       init_cond_(read_number("ambient_density.txt"),
@@ -115,7 +139,11 @@ namespace {
       fc_(sr_,rs_),
       eu_(),
       cu_(),
-      sim_(tess_,
+      sim_(
+#ifdef RICH_MPI
+	   meta_tess_,
+#endif // RICH_MPI
+	   tess_,
 	   outer_,
 	   pg_,
 	   calc_init_cond(tess_,eos_,width_),
@@ -136,8 +164,11 @@ namespace {
   private:
 
     double width_;
-    vector<Vector2D> init_points_;
     PeriodicBox outer_;
+#ifdef RICH_MPI
+    VoronoiMesh meta_tess_;
+#endif // RICH_MPI
+    vector<Vector2D> init_points_;
     VoronoiMesh tess_;
     SlabSymmetry pg_;
     IdealGas eos_;
@@ -160,21 +191,38 @@ int main(void)
 {
   try
     {
+#ifdef RICH_MPI
+      MPI_Init(NULL,NULL);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif // RICH_MPI
       SimData sim_data;
       hdsim& sim = sim_data.getSim();
       SafeTimeTermination term_cond(1,1e6);
       WriteTime diag("time.txt");
+#ifdef RICH_MPI
+      write_snapshot_to_hdf5(sim, "initial_"+int2str(rank)+".h5");
+#else
       write_snapshot_to_hdf5(sim, "initial.h5");
+#endif // RICH_MPI
       main_loop(sim, 
 		term_cond,
 		&hdsim::TimeAdvance2Heun,
 		&diag);
+#ifdef RICH_MPI
+      write_snapshot_to_hdf5(sim, "final_"+int2str(rank)+".h5");
+#else
       write_snapshot_to_hdf5(sim, "final.h5");
+#endif // RICH_MPI
     }
   catch(const UniversalError& eo){
     report_error(eo);
     throw;
   }
+
+#ifdef RICH_MPI
+  MPI_Finalize();
+#endif // RICH_MPI
 
   return 0;
 }
