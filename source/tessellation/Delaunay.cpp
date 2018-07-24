@@ -813,7 +813,6 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 
 	// We add the points in a counter clockwise fashion
 	vector<vector<int> > res(edges.size());
-	vector<int> f_add(f.size(), 0);
 	// Walk to an outer point
 	int cur_facet = static_cast<int>(Walk(olength));
 	vector<vector<int> > toduplicate(edges.size());
