@@ -109,7 +109,8 @@ namespace {
       width_(read_number("width.txt")),
       outer_(0,width_,width_,0),
 #ifdef RICH_MPI
-      meta_tess_(process_positions(outer_),outer_),
+      meta_outer_(0,width_,width_,0),
+      meta_tess_(process_positions(outer_),meta_outer_),
       init_points_(SquareMeshM(60,
 			       60,
 			       meta_tess_,
@@ -166,6 +167,7 @@ namespace {
     double width_;
     PeriodicBox outer_;
 #ifdef RICH_MPI
+    const SquareBox meta_outer_;
     VoronoiMesh meta_tess_;
 #endif // RICH_MPI
     vector<Vector2D> init_points_;
@@ -198,7 +200,8 @@ int main(void)
 #endif // RICH_MPI
       SimData sim_data;
       hdsim& sim = sim_data.getSim();
-      SafeTimeTermination term_cond(1,1e6);
+      //      SafeTimeTermination term_cond(1,1e6);
+      SafeTimeTermination term_cond(5e-1,1e6);
       WriteTime diag("time.txt");
 #ifdef RICH_MPI
       write_snapshot_to_hdf5(sim, "initial_"+int2str(rank)+".h5");
