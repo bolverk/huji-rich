@@ -8,17 +8,18 @@
 #endif
 
 using std::abs;
+using std::endl;
+using std::cout;
 
 namespace 
 {
 #ifdef RICH_MPI
 
-  template<class T> void tidy(vector<T>& v)
+  int get_rank(void)
   {
-    if(!v.empty()){
-      sort(v.begin(),v.end());
-      v = unique(v);
-    }
+    int rank = -1;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    return rank;
   }
 
   /*
@@ -66,37 +67,6 @@ namespace
 		}
 		return res;
 	}
-
-  /*
-	template <typename T>
-	bool EmptyVectorVector(vector<vector<T> > const& v)
-	{
-		int n=static_cast<int>(v.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v[static_cast<size_t>(i)].empty())
-				return false;
-		}
-		return true;
-	}
-  */
-  /*
-
-	template <typename T>
-	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
-		vector<vector<T> > const& v2)
-	{
-		vector<vector<T> > res(v1);
-		assert(v1.size()==v2.size());
-		int n=static_cast<int>(v1.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v2[static_cast<size_t>(i)].empty())
-				res[static_cast<size_t>(i)].insert(res[static_cast<size_t>(i)].end(),v2[static_cast<size_t>(i)].begin(),v2[static_cast<size_t>(i)].end());
-		}
-		return res;
-	}
-  */
 }
 
 VoronoiMesh::VoronoiMesh
@@ -119,7 +89,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,&bc,HOrder);
+  Initialise(points,&bc,HOrder);
 }
 
 #ifdef RICH_MPI
@@ -145,7 +115,15 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,proctess,&bc,HOrder);
+  if(get_rank()==0){
+    ofstream dump("init_points.txt");
+    for(size_t i=0;i<points.size();++i){
+      dump << points.at(i).x << " "
+	   << points.at(i).y << endl;
+    }
+    dump.close();
+  }
+  Initialise(points,proctess,&bc,HOrder);
 }
 #endif
 
@@ -1321,6 +1299,28 @@ void VoronoiMesh::Initialise
 	pair<vector<vector<int> >,vector<int> > ptemp=Tri.BuildBoundary(outer, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
+
+	/*
+	if(get_rank()==0){
+	  {
+	    ofstream dump("GhostProcs.txt");
+	    for(size_t i=0;i<GhostProcs.size();++i)
+	      dump << GhostProcs.at(i) << endl;
+	  dump.close();
+	  }
+	  {
+	    ofstream dump("GhostPoints.txt");
+	    for(size_t i=0;i<GhostPoints.size();++i){
+	      for(size_t j=0;j<GhostPoints.at(i).size();++j)
+		dump << GhostPoints.at(i).at(j) << " ";
+	      dump << endl;
+	    }
+	    dump.close();
+	  }
+	  assert(false);
+	}
+	*/
+
 	build_v();
 
 	if (logger)

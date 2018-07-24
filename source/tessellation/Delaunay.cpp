@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Delaunay.hpp"
 #include <vector>
 #include <cmath>
@@ -6,6 +7,8 @@
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
+
+using namespace std;
 
 namespace {
 	pair<int, int> find_diff(const facet& f1, const facet& f2)
@@ -279,6 +282,17 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 	}
 }
 
+namespace{
+  /*
+  int get_rank(void)
+  {
+    int rank = -1;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    return rank;
+  }
+  */
+}
+
 void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const& cpoints)
 {
 	cell_points = cpoints;
@@ -336,6 +350,42 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	for (int i = 0; i < n; ++i)
 		radius[static_cast<size_t>(i)] = CalculateRadius(i);
 	CalcRadius = true;
+
+	/*
+	int rank = -1;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if(rank==0){
+	  {
+	    ofstream dump("facet_vertices.txt");
+	    for(size_t i=0;i<f.size();++i){
+	      dump << f.at(i).vertices.first << " "
+		   << f.at(i).vertices.second << " "
+		   << f.at(i).vertices.third << std::endl;
+	    }
+	    dump.close();
+	  }
+
+	  {
+	    ofstream dump("facet_neighbors.txt");
+	    for(size_t i=0;i<f.size();++i){
+	      dump << f.at(i).neighbors.first << " "
+		   << f.at(i).neighbors.second << " "
+		   << f.at(i).neighbors.third << std::endl;
+	    }
+	    dump.close();
+	  }
+
+	  {
+	    ofstream dump("cor.txt");
+	    for(size_t i=0;i<cor.size();++i){
+	      dump << cor.at(i).x << " "
+		   << cor.at(i).y << std::endl;
+	    }
+	    dump.close();
+	  }
+	  assert(false);
+	}
+	*/
 }
 
 double Delaunay::triangle_area(int index)
@@ -735,22 +785,36 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 	return f_temp;
 }
 
+namespace {
+
+  vector<int> range(int len)
+  {
+    vector<int> res(static_cast<size_t>(len));
+    for(int i=0;i<len;++i)
+	  res.at(static_cast<size_t>(i)) = i;
+    return res;
+  }
+
+  vector<vector<int> > replicate_all_points(const vector<Edge>& edges,
+					    size_t olength)
+  {
+    vector<vector<int> > res(edges.size());
+    const vector<int> my_range = range(static_cast<int>(olength));
+    for(size_t i=0;i<edges.size(); ++i)
+      res.at(i) = my_range;
+    return res;
+  }
+}
+
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
+  if(olength<100)
+    return replicate_all_points(edges, olength);
+
 	// We add the points in a counter clockwise fashion
 	vector<vector<int> > res(edges.size());
-	if (olength < 100)
-	{
-		for (size_t j = 0; j < edges.size(); ++j)
-		{
-			res[static_cast<size_t>(j)].resize(static_cast<size_t>(olength));
-			for (size_t i = 0; i < olength; ++i)
-				res[static_cast<size_t>(j)][i] = static_cast<int>(i);
-		}
-		return res;
-	}
-	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
-	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
+	vector<int> outer_points, f_temp, f_add(f.size(), 0);
+	//	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	// Walk to an outer point
@@ -998,6 +1062,11 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 			vector<vector<int> > corners = AddPeriodic(obc, edges, toduplicate);
 			for (size_t i = 0; i < 4; ++i)
 				toduplicate.push_back(corners[static_cast<size_t>(i)]);
+#ifdef RICH_MPI
+			for (size_t i = 0; i < toduplicate.size(); ++i)
+			  for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			    OrgIndex.push_back(toduplicate[i][j]);
+#endif
 		}
 		else
 		{
@@ -1611,6 +1680,15 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<int> edge_index = tproc.GetCellEdges(rank);
+	/*
+	if(rank==0){
+	  ofstream dump("edge_index.txt");
+	  for(size_t i=0;i<edge_index.size();++i)
+	    dump << edge_index.at(i) << endl;
+	  dump.close();
+	  assert(false);
+	}
+	*/
 	for (size_t i = 0; i < edge_index.size(); ++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
 	vector<Edge> box_edges = obc->GetBoxEdges();
