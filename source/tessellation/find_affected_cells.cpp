@@ -86,16 +86,33 @@ namespace {
 vector<int> find_affected_cells
 (const Tessellation& tess,
  int index,
- const Circle& circle, vector<int> &vtemp)
+ Circle& circle, vector<int> &vtemp,bool periodic)
 {
   vector<int> res;
   vtemp = tess.GetNeighbors(index);
   size_t N = vtemp.size();
   for (size_t i = 0; i < N;++i)
   {
-    if(vtemp[i]<tess.GetPointNo() && 
-       cell_circle_intersect(tess,vtemp[i],circle))
-      res.push_back(vtemp[i]);      
+	  if (vtemp[i] < tess.GetPointNo())
+	  {
+		  if (vtemp[i] < tess.GetPointNo())
+		  {
+			  if (cell_circle_intersect(tess, vtemp[i], circle))
+				  res.push_back(vtemp[i]);
+		  }
+		  else
+		  {
+			  if (periodic)
+			  {
+				  int real_neigh = tess.GetOriginalIndex(vtemp[i]);
+				  Vector2D toadd = tess.GetMeshPoint(vtemp[i]) - tess.GetMeshPoint(real_neigh);
+				  circle.setCenter(circle.getCenter() + toadd);
+				  if (cell_circle_intersect(tess, real_neigh, circle))
+					  res.push_back(vtemp[i]);
+				  circle.setCenter(circle.getCenter() - toadd);
+			  }
+		  }
+	  }
   }
   return res;
 }

@@ -42,6 +42,6 @@ void find_affected_cells_recursive(const Tessellation& tess,
 vector<int> find_affected_cells
 (const Tessellation& tess,
  int index,
- const Circle& circle, vector<int> &vtemp);
+ const Circle& circle, vector<int> &vtemp,bool periodic);
 
 #endif // FIND_AFFECTED_CELLS

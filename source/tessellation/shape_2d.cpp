@@ -18,6 +18,11 @@ double Circle::getRadius(void) const
   return radius_;
 }
 
+void Circle::setCenter(Vector2D const & center)
+{
+	center_ = center;
+}
+
 bool Circle::operator()(Vector2D const& r) const
 {
   return ScalarProd(r-center_,r-center_)<pow(radius_,2);
