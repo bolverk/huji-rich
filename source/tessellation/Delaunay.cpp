@@ -806,22 +806,32 @@ namespace {
   }
 }
 
+  namespace {
+
+    void clean_toduplicate(vector<vector<int> >& toduplicate)
+    {
+      for(size_t i=0;i<toduplicate.size();++i){
+	sort(toduplicate.at(i).begin(),
+	     toduplicate.at(i).end());
+	toduplicate.at(i) = unique(toduplicate.at(i));
+      }
+    }
+  }
+
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
   if(olength<100)
     return replicate_all_points(edges, olength);
 
-	// Walk to an outer point
-	int cur_facet = static_cast<int>(Walk(olength));
-	vector<vector<int> > toduplicate(edges.size());
-	vector<bool> checked(f.size(), false);
-	AddOuterFacets(cur_facet, toduplicate, edges, checked);
-	for (size_t i = 0; i < edges.size(); ++i)
-	{
-		sort(toduplicate[static_cast<size_t>(i)].begin(), toduplicate[static_cast<size_t>(i)].end());
-		toduplicate[static_cast<size_t>(i)] = unique(toduplicate[static_cast<size_t>(i)]);
-	}
-	return toduplicate;
+  // Walk to an outer point
+  vector<vector<int> > toduplicate(edges.size());
+  {
+    int cur_facet = static_cast<int>(Walk(olength));
+    vector<bool> checked(f.size(), false);
+    AddOuterFacets(cur_facet, toduplicate, edges, checked);
+  }
+  clean_toduplicate(toduplicate);
+  return toduplicate;
 }
 
 void Delaunay::AddRigid(vector<Edge> const& edges,
