@@ -715,4 +715,10 @@ template<class S, class T> T& safe_retrieve
 	return it->second;
 }
 
+/*! \brief Fast approximate sqrt
+\param x The value to calculate the sqrt of
+\return Sqrt(x)
+*/
+double fastsqrt(double x);
+
 #endif // UTILS_HPP

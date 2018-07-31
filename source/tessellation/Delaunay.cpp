@@ -7,7 +7,104 @@
 #include <mpi.h>
 #endif // RICH_MPI
 
-namespace {
+namespace 
+{
+	void PeriodicGetRidDuplicatesSingle(std::vector<int> &duplicate, std::vector<Vector2D> &toadd)
+	{
+		if (duplicate.empty())
+			return;
+		assert(duplicate.size() == toadd.size());
+		std::vector<size_t> indeces = sort_index(duplicate);
+		toadd = VectorValues(toadd, indeces);
+		duplicate = VectorValues(duplicate, indeces);
+		size_t N = duplicate.size();
+		std::vector<double> dx(N, 0);
+		std::vector<size_t> toremove;
+		for (size_t i = 0; i < N; ++i)
+			dx[i] = fastabs(toadd[i]);
+		// First clean up new vectors
+		size_t first = 0;
+		for (size_t i = 1; i < N; ++i)
+		{
+			// Are they the same index?
+			if (duplicate[i] == duplicate[first])
+			{
+				for (size_t j = first; j < i; ++j)
+				{
+					//Are they the same direction
+					double dxmax = std::max(std::max(dx[first], dx[j]), 1e-30);
+					if (fastabs(toadd[j] - toadd[i]) < dxmax)
+					{
+						toremove.push_back(i);
+						break;
+					}
+				}
+			}
+			else
+				first = i;
+		}
+		RemoveVector(duplicate, toremove);
+		RemoveVector(toadd, toremove);
+	}
+
+	void PeriodicGetRidDuplicates(std::vector<int> &duplicate, std::vector<Vector2D> &toadd,
+		std::vector<int> const& old_duplicate,std::vector<Vector2D> const& old_toadd)
+	{
+		if (duplicate.empty())
+			return;
+		assert(duplicate.size() == toadd.size());
+		std::vector<size_t> indeces = sort_index(duplicate);
+		toadd = VectorValues(toadd, indeces);
+		duplicate = VectorValues(duplicate, indeces);
+		size_t N = duplicate.size();
+		size_t Nold = old_duplicate.size();
+		std::vector<double> dx(N, 0),dx_old(Nold,0);
+		std::vector<size_t> toremove;
+		for (size_t i = 0; i < N; ++i)
+			dx[i] = fastabs(toadd[i]);
+		for (size_t i = 0; i < Nold; ++i)
+			dx_old[i] = fastabs(old_toadd[i]);
+		// First clean up new vectors
+		PeriodicGetRidDuplicatesSingle(duplicate, toadd);
+		// Now clean up with respect to old vectors
+		toremove.clear();
+		N = duplicate.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			// Are they the same index?
+			size_t index = static_cast<size_t>(std::lower_bound(old_duplicate.begin(), old_duplicate.end(), duplicate[i])
+				- old_duplicate.begin());
+			if(index<Nold)
+			{
+				for (size_t j = index; j < Nold; ++j)
+				{
+					if (old_duplicate[j] != duplicate[i])
+						break;
+					//Are they the same direction
+					double dxmax = std::max(std::max(dx[i], dx_old[j]), 1e-30);
+					if (fastabs(old_toadd[j] - toadd[i]) < dxmax)
+					{
+						toremove.push_back(i);
+						break;
+					}
+				}
+			}
+		}
+		RemoveVector(duplicate, toremove);
+		RemoveVector(toadd, toremove);
+	}
+
+	template<class T> bool is_in
+	(const T& t,
+		const vector<T>& v)
+	{
+		BOOST_FOREACH(const T&m, v) {
+			if (t == m)
+				return true;
+		}
+		return false;
+	}
+
 	pair<int, int> find_diff(const facet& f1, const facet& f2)
 	{
 		if (f1.vertices.first != f2.vertices.first &&
@@ -1212,7 +1309,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	int nproc = tproc.GetPointNo();
 	vector<vector<int> > res;
 	vector<int> vtemp;
-	Vector2D toadd;
+	std::vector<Vector2D> toadd;
 	if (!recursive)
 	{
 		if (!periodic)
@@ -1258,20 +1355,26 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
 				vector<int> cputosendto;
 				if (recursive)
-					find_affected_cells_recursive(tproc,rank, circ, cputosendto);
+					find_affected_cells_recursive(tproc,rank, circ, cputosendto,toadd,periodic);
 				else
-					cputosendto = find_affected_cells(tproc, rank, circ,vtemp,periodic);
-				// Remove self
-				sort(cputosendto.begin(), cputosendto.end());
-				cputosendto = unique(cputosendto);
-				RemoveVal(cputosendto,rank);
-				if (!recursive && !periodic) 
+					cputosendto = find_affected_cells(tproc, rank, circ,vtemp,periodic,toadd);
+				if (!periodic)
 				{
-					const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
-					if (!self_intersection.empty())
-						added = true;
-					BOOST_FOREACH(int sindex, self_intersection)
-						res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+					// Remove self
+					sort(cputosendto.begin(), cputosendto.end());
+					cputosendto = unique(cputosendto);
+					RemoveVal(cputosendto, rank);
+				}
+				if (!recursive) 
+				{
+					if (!periodic)
+					{
+						const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
+						if (!self_intersection.empty())
+							added = true;
+						BOOST_FOREACH(int sindex, self_intersection)
+							res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+					}
 				}
 				else
 				{
@@ -1282,38 +1385,27 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				{
 					added = true;
 					for (size_t j = 0; j < cputosendto.size(); ++j)
-					{
-						int tosendto = cputosendto[j];
-						toadd.Set(0, 0);
-						if (cputosendto[j] >= nproc) // Periodic case
+					{		
+						if (cputosendto[j] == rank)
 						{
-							int real_neigh = tproc.GetOriginalIndex(cputosendto[j]);
-							if (real_neigh == rank)
-							{
-								res[0].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
-								periodic_add_self.push_back(tproc.GetMeshPoint(cputosendto[j]) - tproc.GetMeshPoint(rank));
-								continue;
-							}
-							else
-							{
-								tosendto = real_neigh;
-								toadd = tproc.GetMeshPoint(cputosendto[j]) - tproc.GetMeshPoint(tosendto);
-							}
+							res[0].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+							periodic_add_self.push_back(toadd[j]);
+							continue;
 						}
-						size_t index = static_cast<size_t>(find(neigh.begin(), neigh.end(), tosendto)
+						size_t index = static_cast<size_t>(std::find(neigh.begin(), neigh.end(), cputosendto[j])
 							- neigh.begin());
 						if (index < neigh.size())
 						{
 							toduplicate.at(index).push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
 							if(periodic)
-								periodic_add_others.at(index).push_back(toadd);
+								periodic_add_others.at(index).push_back(toadd[j]);
 						}
 						else
 						{
-							neigh.push_back(tosendto);
+							neigh.push_back(cputosendto[j]);
 							toduplicate.push_back(vector<int>(1, f[static_cast<size_t>(cur_facet)].vertices[i]));
 							if (periodic)
-								periodic_add_others.push_back(vector<Vector2D>(1, toadd));
+								periodic_add_others.push_back(vector<Vector2D>(1, toadd[j]));
 						}
 					}
 				}
@@ -1331,22 +1423,19 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 
 pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(const Tessellation& t_proc,
 	const vector<Edge>& edge_list,const vector<Edge>& box_edges,vector<vector<int> > &NghostIndex,bool periodic,
-	std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> > &periodic_add_others)
+	std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self,std::vector<std::vector<Vector2D> > 
+	&periodic_add_others)
 {
-	vector<int> neighbors_own_edges =
-		calc_neighbors_own_edges(t_proc, edge_list,periodic);
+	cpu_neigh =	calc_neighbors_own_edges(t_proc, edge_list,periodic);
 	const size_t some_outer_point = findSomeOuterPoint();
-
-	vector<vector<int> > to_duplicate(neighbors_own_edges.size());
-	periodic_add_self.clear();
-	periodic_add_others.clear();
+	vector<vector<int> > to_duplicate(cpu_neigh.size());
 	periodic_add_others.resize(to_duplicate.size());
 	vector<bool> checked(olength, false);
 	vector<vector<int> > self_points =
 		AddOuterFacetsMPI
 		(static_cast<int>(some_outer_point),
 			to_duplicate, // indices of points to send
-			neighbors_own_edges, // Rank of processes to send to
+			cpu_neigh, // Rank of processes to send to
 			checked,
 			t_proc,
 			box_edges,periodic,periodic_add_self,periodic_add_others);
@@ -1364,13 +1453,13 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 	}*/
 
 	// Communication
-	vector<vector<Vector2D> > incoming(neighbors_own_edges.size());
-	vector<MPI_Request> req(neighbors_own_edges.size());
-	vector<vector<double> > tosend(neighbors_own_edges.size());
+	vector<vector<Vector2D> > incoming(cpu_neigh.size());
+	vector<MPI_Request> req(cpu_neigh.size());
+	vector<vector<double> > tosend(cpu_neigh.size());
 	double dtemp = 0;
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
-		const int dest = neighbors_own_edges.at(i);
+		const int dest = cpu_neigh[i];
 		std::vector<Vector2D> cortosend = VectorValues(cor, to_duplicate[i]);
 		if (periodic)
 		{
@@ -1388,7 +1477,7 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 			MPI_Isend(&tosend[i][0], size, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &req[i]);
 		}
 	}
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
 		vector<double> temprecv;
 		MPI_Status status;
@@ -1399,9 +1488,9 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
-				status.MPI_SOURCE) - neighbors_own_edges.begin());
-			if (location >= neighbors_own_edges.size())
+			size_t location = static_cast<size_t>(std::find(cpu_neigh.begin(), cpu_neigh.end(),
+				status.MPI_SOURCE) - cpu_neigh.begin());
+			if (location >= cpu_neigh.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
 			{
@@ -1451,27 +1540,11 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 		AddBoundaryPoints(incoming.at(i));
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
-	return pair<vector<vector<int> >, vector<vector<int> > >
+	return std::pair<vector<vector<int> >, vector<vector<int> > >
 		(to_duplicate, self_points);
 }
 
-namespace {
-	template<class T> bool is_in
-		(const T& t,
-			const vector<T>& v)
-	{
-		BOOST_FOREACH(const T&m, v) {
-			if (t == m)
-				return true;
-		}
-		return false;
-	}
-}
-
-vector<vector<int> >
-Delaunay::boundary_intersection_check
-(const vector<Edge>& edges,
-	const vector<vector<int> >& to_duplicate)
+vector<vector<int> > Delaunay::boundary_intersection_check(const vector<Edge>& edges,const vector<vector<int> >& to_duplicate)
 {
 	vector<vector<int> > res;
 	res.reserve(edges.size());
@@ -1495,63 +1568,65 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	vector<vector<int> > &to_duplicate,
 	vector<vector<int> >& self_points,
 	const vector<Edge>& box_edges,
-	vector<vector<int> > &NghostIndex)
+	vector<vector<int> > &NghostIndex,
+	bool periodic,
+	std::vector<int> &cpu_neigh,std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
+	&periodic_add_others)
 {
-	const vector<vector<int> > boundary_points =
-		boundary_intersection_check(box_edges, to_duplicate);
-	vector<vector<int> > real_boundary_points
-		(box_edges.size());
-	for (size_t i = 0; i < boundary_points.size(); ++i)
+	vector<vector<int> > real_boundary_points(box_edges.size());
+	if (!periodic)
 	{
-		sort(self_points.at(i).begin(), self_points.at(i).end());
-		BOOST_FOREACH(int bp, boundary_points.at(i))
+		const vector<vector<int> > boundary_points = boundary_intersection_check(box_edges, to_duplicate);
+		for (size_t i = 0; i < boundary_points.size(); ++i)
 		{
-			if (!binary_search(self_points.at(i).begin(),
-				self_points.at(i).end(),
-				bp))
+			sort(self_points.at(i).begin(), self_points.at(i).end());
+			BOOST_FOREACH(int bp, boundary_points.at(i))
 			{
-				real_boundary_points.at(i).push_back(bp);
+				if (!binary_search(self_points.at(i).begin(),
+					self_points.at(i).end(),
+					bp))
+				{
+					real_boundary_points.at(i).push_back(bp);
+				}
 			}
+			sort(real_boundary_points.at(i).begin(),
+				real_boundary_points.at(i).end());
+			real_boundary_points.at(i) = unique(real_boundary_points.at(i));
 		}
-		sort(real_boundary_points.at(i).begin(),
-			real_boundary_points.at(i).end());
-		real_boundary_points.at(i) = unique(real_boundary_points.at(i));
 	}
 
 	vector<vector<int> > to_duplicate_2 = to_duplicate;
-	BOOST_FOREACH(vector<int>& line, to_duplicate_2)
-		sort(line.begin(), line.end());
-	vector<int> neighbors_own_edges =
-		calc_neighbors_own_edges(t_proc, edge_list);
-	vector<int> old_neighbors = neighbors_own_edges;
+	vector<int> old_neighbors = cpu_neigh;
 	assert(!to_duplicate.empty());
-	BOOST_FOREACH(const vector<int>& line, to_duplicate)
-		assert(!line.empty());
 	vector<bool> checked(olength, false);
 	const size_t some_outer_point = to_duplicate[0][0];
-	AddOuterFacetsMPI
+	std::vector<Vector2D> periodic_add_self2;
+	std::vector<std::vector<Vector2D> > periodic_add_others2;
+	std::vector<std::vector<int> > self_send = AddOuterFacetsMPI
 		(static_cast<int>(some_outer_point),
 			to_duplicate, // indices of points to send
-			neighbors_own_edges, // Rank of processes to send to
+			cpu_neigh, // Rank of processes to send to
 			checked,
 			t_proc,
 			edge_list,
-			true); // recursive
+			periodic,
+			periodic_add_self2,
+			periodic_add_others2,true); // recursive
 
 	// Communication
 	int wsize;
 	MPI_Comm_size(MPI_COMM_WORLD, &wsize);
 	vector<int> totalk(static_cast<size_t>(wsize), 0);
 	vector<int> scounts(totalk.size(), 1);
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
-		totalk[neighbors_own_edges[i]] = 1;
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
+		totalk[cpu_neigh[i]] = 1;
 	int nrecv;
 	MPI_Reduce_scatter(&totalk[0], &nrecv, &scounts[0], MPI_INT, MPI_SUM,
 		MPI_COMM_WORLD);
 
-	vector<MPI_Request> req(neighbors_own_edges.size());
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
-		MPI_Isend(&wsize, 1, MPI_INT, neighbors_own_edges[i], 3, MPI_COMM_WORLD, &req[i]);
+	vector<MPI_Request> req(cpu_neigh.size());
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
+		MPI_Isend(&wsize, 1, MPI_INT, cpu_neigh[i], 3, MPI_COMM_WORLD, &req[i]);
 	vector<int> talkwithme;
 	for (int i = 0; i < nrecv; ++i)
 	{
@@ -1560,59 +1635,67 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		talkwithme.push_back(status.MPI_SOURCE);
 	}
 	vector<size_t> indices;
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
-		if (is_in(neighbors_own_edges[i],talkwithme))
+		if (is_in(cpu_neigh[i],talkwithme))
 			indices.push_back(i);
 	}
 
 	// Symmetrisation
-	neighbors_own_edges =
-		VectorValues
-		(neighbors_own_edges,
-			indices);
-	to_duplicate =
-		VectorValues
-		(to_duplicate,
-			indices);
+	cpu_neigh =	VectorValues(cpu_neigh,indices);
+	to_duplicate = VectorValues(to_duplicate,indices);
+	periodic_add_others = VectorValues(periodic_add_others, indices);
 	// Get rid of duplicate points
 	for (size_t i = 0; i < to_duplicate.size(); ++i)
 	{
-		sort(to_duplicate[i].begin(), to_duplicate[i].end());
-		to_duplicate[i] = unique(to_duplicate[i]);
-	}
-	vector<vector<int> > messages(to_duplicate.size());
-	for (size_t i = 0; i < to_duplicate.size(); ++i) {
-		const vector<int>::const_iterator it =
-			find(old_neighbors.begin(),
-				old_neighbors.end(),
-				neighbors_own_edges.at(i));
-		for (size_t j = 0; j < to_duplicate.at(i).size(); ++j) {
-
-			if (it != old_neighbors.end()) {
-				const size_t my_index = static_cast<size_t>(it - old_neighbors.begin());
-				if (!binary_search
-					(to_duplicate_2.at(my_index).begin(),
-						to_duplicate_2.at(my_index).end(),
-						to_duplicate.at(i).at(j)))
-					messages.at(i).push_back(to_duplicate.at(i).at(j));
-			}
+		if (periodic)
+		{
+			if (i < to_duplicate_2.size())
+				PeriodicGetRidDuplicates(to_duplicate[i], periodic_add_others2[i], to_duplicate_2[i], periodic_add_others[i]);
 			else
-				messages.at(i).push_back(to_duplicate.at(i).at(j));
+				PeriodicGetRidDuplicatesSingle(to_duplicate[i], periodic_add_others2[i]);
+		}
+		else
+		{
+			sort(to_duplicate[i].begin(), to_duplicate[i].end());
+			to_duplicate[i] = unique(to_duplicate[i]);
 		}
 	}
-	MPI_Waitall(static_cast<int>(neighbors_own_edges.size()), &req[0], MPI_STATUSES_IGNORE);
+	vector<vector<int> > messages(to_duplicate.size());
+	if (!periodic)
+	{
+		for (size_t i = 0; i < to_duplicate.size(); ++i)
+		{
+			const vector<int>::const_iterator it = find(old_neighbors.begin(), old_neighbors.end(), cpu_neigh.at(i));
+			for (size_t j = 0; j < to_duplicate.at(i).size(); ++j)
+			{
+				if (it != old_neighbors.end())
+				{
+					const size_t my_index = static_cast<size_t>(it - old_neighbors.begin());
+					if (!binary_search(to_duplicate_2.at(my_index).begin(), to_duplicate_2.at(my_index).end(),
+						to_duplicate.at(i).at(j)))
+						messages.at(i).push_back(to_duplicate.at(i).at(j));
+				}
+				else
+					messages.at(i).push_back(to_duplicate.at(i).at(j));
+			}
+		}
+	}
+	MPI_Waitall(static_cast<int>(cpu_neigh.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Point exchange
 	req.clear();
-	req.resize(neighbors_own_edges.size());
+	req.resize(cpu_neigh.size());
 	double dtemp = 0;
-	vector<vector<Vector2D> > incoming(neighbors_own_edges.size());
-	vector<vector<double> > tosend(neighbors_own_edges.size());
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	vector<vector<Vector2D> > incoming(cpu_neigh.size());
+	vector<vector<double> > tosend(cpu_neigh.size());
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
-		const int dest = neighbors_own_edges.at(i);
-		tosend[i] = list_serialize(VectorValues(cor, messages.at(i)));
+		const int dest = cpu_neigh[i];
+		if(periodic)
+			tosend[i] = list_serialize(VectorValues(cor, to_duplicate[i]));
+		else
+			tosend[i] = list_serialize(VectorValues(cor, messages[i]));
 		int size = static_cast<int>(tosend[i].size());
 		if (size > 0)
 		{
@@ -1623,7 +1706,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		else
 			MPI_Isend(&dtemp, 1, MPI_DOUBLE, dest,1, MPI_COMM_WORLD, &req[i]);
 	}
-	for (size_t i = 0; i < neighbors_own_edges.size(); ++i)
+	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
 		vector<double> temprecv;
 		MPI_Status status;
@@ -1634,9 +1717,9 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) -
-				neighbors_own_edges.begin());
-			if (location >= neighbors_own_edges.size())
+			size_t location = static_cast<size_t>(std::find(cpu_neigh.begin(), cpu_neigh.end(), status.MPI_SOURCE) -
+				cpu_neigh.begin());
+			if (location >= cpu_neigh.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
 			{
@@ -1669,17 +1752,29 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		AddBoundaryPoints(incoming.at(i));
 	}
 
-	AddRigid(box_edges,real_boundary_points);
-	for (size_t i = 0; i < real_boundary_points.size(); ++i)
-		for (size_t j = 0; j < real_boundary_points[i].size(); ++j)
-			OrgIndex.push_back(real_boundary_points[i][j]);
+	// ADD SELF SEND FROM SECOND RUN IN PERIODIC
+	if (periodic)
+	{
+		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self2);
+		AddPeriodicMPI(self_send[0], periodic_add_self2);
+		for (size_t j = 0; j < self_send[0].size(); ++j)
+			OrgIndex.push_back(self_send[0][j]);
+		for (size_t i = 0; i < to_duplicate_2.size(); ++i)
+			to_duplicate[i].insert(to_duplicate[i].begin(), to_duplicate_2[i].begin(), to_duplicate_2[i].end());
+	}
+	else
+	{
+		AddRigid(box_edges, real_boundary_points);
+		for (size_t i = 0; i < real_boundary_points.size(); ++i)
+			for (size_t j = 0; j < real_boundary_points[i].size(); ++j)
+				OrgIndex.push_back(real_boundary_points[i][j]);
 
-	for (size_t i = 0; i < self_points.size(); ++i)
-		if (!real_boundary_points[i].empty())
-			self_points[i].insert(self_points[i].end(), real_boundary_points[i].begin(),
-				real_boundary_points[i].end());
-
-	return  std::pair<vector<vector<int> >,vector<int> > (to_duplicate,neighbors_own_edges);
+		for (size_t i = 0; i < self_points.size(); ++i)
+			if (!real_boundary_points[i].empty())
+				self_points[i].insert(self_points[i].end(), real_boundary_points[i].begin(),
+					real_boundary_points[i].end());
+	}
+	return  std::pair<vector<vector<int> >,vector<int> > (to_duplicate,cpu_neigh);
 }
 
 std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
@@ -1700,10 +1795,13 @@ std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 		box_edges = edges;
 	else
 		box_edges = obc->GetBoxEdges();
-	
-	pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
-		findOuterPoints(tproc, edges, box_edges, Nghost,periodic);
-	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);
+	std::vector<int> cpu_neigh;
+	std::vector<Vector2D> periodic_add_self;
+	std::vector<std::vector<Vector2D> > periodic_add_others;
+	std::pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
+		findOuterPoints(tproc, edges, box_edges, Nghost,periodic, cpu_neigh,periodic_add_self,periodic_add_others);
+	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost,periodic,cpu_neigh,
+		periodic_add_self, periodic_add_others);
 }
 
 int Delaunay::GetOrgIndex(int index)const

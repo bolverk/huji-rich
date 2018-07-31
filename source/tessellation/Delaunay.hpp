@@ -38,15 +38,19 @@ private:
 
 	pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
 		const vector<Edge>& edge_list, const vector<Edge>& box_edges, vector<vector<int> > &NghostIndex, bool periodic,
-		std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> > &periodic_add_others);
+		std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
+		&periodic_add_others);
 
-	pair<vector<vector<int> >, vector<int> > FindOuterPoints2
+	std::pair<vector<vector<int> >, vector<int> > FindOuterPoints2
 	(const Tessellation& t_proc,
 		const vector<Edge>& edge_list,
 		vector<vector<int> > &to_duplicate,
 		vector<vector<int> >& self_points,
 		const vector<Edge>& box_edges,
-		vector<vector<int> > &NghostIndex);
+		vector<vector<int> > &NghostIndex,
+		bool periodic,
+		std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
+		&periodic_add_others);
 
 	vector<vector<int> > boundary_intersection_check
 	(const vector<Edge>& edges,
