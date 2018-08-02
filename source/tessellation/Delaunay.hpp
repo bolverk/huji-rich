@@ -31,9 +31,9 @@ class Delaunay
 {
 private:
 
-#ifdef RICH_MPI
-	vector<int> OrgIndex;
 
+	vector<int> OrgIndex;
+#ifdef RICH_MPI
 	int findSomeOuterPoint(void);
 
 	pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
@@ -128,13 +128,12 @@ private:
 
 public:
 
-#ifdef RICH_MPI
 	/*! \brief Retrieves the original index of a point (in case a point was duplicated)
 	  \param index Index of a point
 	  \return Original index
 	 */
 	int GetOrgIndex(int index)const;
-#endif
+
 	/*! \brief Changes the cor olength
 	  \param n The new length;
 	*/
@@ -293,7 +292,7 @@ public:
 	\param edges The edges of the domain
 	\return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
 	*/
-	vector<vector<int> > BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges);
+	void BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges);
 	/*!
 	\brief Builds the boundary points for parallel runs
 	\param obc The geometrical boundary conditions

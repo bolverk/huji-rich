@@ -194,35 +194,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 	if (point < npoints)
 		return point;
 	else
-	{
-		if (obc->GetBoundaryType() == Rectengular)
-			return Tri.GetOrgIndex(point);
-		int counter = 0;
-		if (point < Nextra)
-		{
-			UniversalError eo("Tried to get original index of non exsistent cell");
-			eo.AddEntry("Tried accessing cell", point);
-			throw eo;
-		}
-		int maxcor = static_cast<int>(Tri.getCor().size());
-		int cumulative = Nextra;
-		while (cumulative < maxcor)
-		{
-			int temp = static_cast<int>(GhostPoints[static_cast<size_t>(counter)].size());
-			if ((cumulative + temp) <= point)
-			{
-				cumulative += temp;
-				++counter;
-			}
-			else
-			{
-				return GhostPoints[static_cast<size_t>(counter)][static_cast<size_t>(point - cumulative)];
-			}
-		}
-		UniversalError eo("Tried to get original index of non exsistent cell");
-		eo.AddEntry("Tried accessing cell", point);
-		throw eo;
-	}
+		return Tri.GetOrgIndex(point);
 }
 
 vector<size_t> VoronoiMesh::GetSelfPoint(void)const
@@ -361,7 +333,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 	Tri.build_delaunay(UpdatePoints(points, obc), calc_procpoints(*obc));
 
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc, _bc->GetBoxEdges());
+	Tri.BuildBoundary(_bc, _bc->GetBoxEdges());
 
 	eps = 1e-8;
 	edges.clear();
@@ -379,39 +351,45 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 	size_t counter = pv.size() + 3;
 	if (_bc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 		{
-			GhostPoints.push_back(toduplicate[i]);
-			GhostProcs.push_back(-1);
-			for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			int NorgIndex = Tri.GetOrgIndex(i);
+			if (NorgIndex < Nextra)
 			{
-				CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
-					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
-				++counter;
+				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
 	}
 	else
 	{
-		for (size_t i = 0; i < 4; ++i)
+		if (_bc->GetBoundaryType() == Rectengular)
 		{
-			GhostPoints.push_back(toduplicate[i]);
-			GhostProcs.push_back(-1);
-			if (_bc->GetBoundaryType() == Rectengular || (i % 2) == 1)
+			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 			{
-				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
 				{
-					CM[counter] = GetReflection(*_bc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
-					++counter;
+					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
-			else
+		}
+		else  // Half periodic case
+		{
+			double dx = _bc->GetGridBoundary(Right) - _bc->GetGridBoundary(Left);
+			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 			{
-				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
 				{
-					CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
-						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
-					++counter;
+					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+					if(dx_temp<1.0001*dx && dx_temp*1.0001>dx)
+						CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+							Tri.get_point(static_cast<size_t>(NorgIndex)));
+					else
+						CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+							- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
 		}
@@ -499,7 +477,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges = obc->GetBoxEdges();
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(obc, box_edges);
+	Tri.BuildBoundary(obc, box_edges);
 
 	eps = 1e-8;
 	edges.clear();
@@ -514,42 +492,48 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 	for (size_t i = 0; i < points.size(); ++i)
 		CM[i] = CalcCellCM(i);
 
-	size_t counter = points.size() + 3;
+	size_t counter = pv.size() + 3;
 	if (obc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = 0; i < 8; ++i)
+		for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 		{
-			GhostPoints.push_back(toduplicate[i]);
-			GhostProcs.push_back(-1);
-			for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			int NorgIndex = Tri.GetOrgIndex(i);
+			if (NorgIndex < Nextra)
 			{
-				CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
-					Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
-				++counter;
+				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
 	}
 	else
 	{
-		for (size_t i = 0; i < 4; ++i)
+		if (obc->GetBoundaryType() == Rectengular)
 		{
-			GhostPoints.push_back(toduplicate[i]);
-			GhostProcs.push_back(-1);
-			if (obc->GetBoundaryType() == Rectengular || (i % 2) == 1)
+			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 			{
-				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
 				{
-					CM[counter] = GetReflection(*obc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
-					++counter;
+					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
-			else
+		}
+		else  // Half periodic case
+		{
+			double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
+			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
 			{
-				for (size_t j = 0; j < toduplicate[i].size(); ++j)
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
 				{
-					CM[counter] = CM[static_cast<size_t>(toduplicate[i][j])] + (Tri.get_point(counter) -
-						Tri.get_point(static_cast<size_t>(GetOriginalIndex(static_cast<int>(counter)))));
-					++counter;
+					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+					if (dx_temp<1.0001*dx && dx_temp*1.0001>dx)
+						CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+							Tri.get_point(static_cast<size_t>(NorgIndex)));
+					else
+						CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
 		}
@@ -1242,6 +1226,7 @@ vector<int> VoronoiMesh::Update
 
 	//Build the delaunay
 	Tri.build_delaunay(newcor, cpoints);
+	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	eps = 1e-8;
 	edges.clear();
 	GhostPoints.clear();
@@ -1260,16 +1245,34 @@ vector<int> VoronoiMesh::Update
 	for (size_t i = 0; i < n; ++i)
 		CM[i] = CalcCellCM(i);
 
-	// we only deal with rigid walls
-	for (size_t i = n + 3; i < CM.size(); ++i)
+	if (obc->GetBoundaryType() == Periodic)
 	{
-		if (static_cast<size_t>(GetOriginalIndex(static_cast<int>(i))) < n)
+		for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
 		{
-			Vector2D const& ghost = Tri.get_point(i);
-			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
-				(ghost.y < obc->GetGridBoundary(Down)) * 3;
-			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(static_cast<int>(i)))]);
+			int NorgIndex = Tri.GetOrgIndex(i);
+			if (NorgIndex < Nextra)
+			{
+				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					Tri.get_point(static_cast<size_t>(NorgIndex)));
+			}
 		}
+	}
+	else
+	{
+		if (obc->GetBoundaryType() == Rectengular)
+		{
+			for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+			{
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
+				{
+					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						- CM[static_cast<size_t>(NorgIndex)];
+				}
+			}
+		}
+		else  // Half periodic case
+			throw(UniversalError("No HalfPeriodic in MPI"));
 	}
 	// communicate the ghost CM
 	vector<vector<Vector2D> > incoming = MPI_exchange_data(GhostProcs, GhostPoints, CM);
@@ -1307,6 +1310,7 @@ void VoronoiMesh::Initialise
 	ConvexHull(cpoints, vproc, rank);
 	//Build the delaunay
 	Tri.build_delaunay(points, cpoints);
+	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	eps = 1e-8;
 	edges.clear();
 	GhostPoints.clear();
@@ -1329,16 +1333,34 @@ void VoronoiMesh::Initialise
 	for (size_t i = 0; i < n; ++i)
 		CM[i] = CalcCellCM(i);
 
-	// we only deal with rigid walls
-	for (size_t i = n + 3; i < CM.size(); ++i)
+	if (obc->GetBoundaryType() == Periodic)
 	{
-		if (static_cast<size_t>(GetOriginalIndex(static_cast<int>(i))) < n)
+		for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
 		{
-			Vector2D const& ghost = Tri.get_point(i);
-			size_t reflect_index = (ghost.y > obc->GetGridBoundary(Up)) + (ghost.x < obc->GetGridBoundary(Left)) * 2 +
-				(ghost.y < obc->GetGridBoundary(Down)) * 3;
-			CM[i] = GetReflection(*obc, reflect_index, CM[static_cast<size_t>(GetOriginalIndex(static_cast<int>(i)))]);
+			int NorgIndex = Tri.GetOrgIndex(i);
+			if (NorgIndex < Nextra)
+			{
+				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					Tri.get_point(static_cast<size_t>(NorgIndex)));
+			}
 		}
+	}
+	else
+	{
+		if (obc->GetBoundaryType() == Rectengular)
+		{
+			for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+			{
+				int NorgIndex = Tri.GetOrgIndex(i);
+				if (NorgIndex < Nextra)
+				{
+					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						- CM[static_cast<size_t>(NorgIndex)];
+				}
+			}
+		}
+		else  // Half periodic case
+			throw(UniversalError("No HalfPeriodic in MPI"));
 	}
 	// communicate the ghost CM
 	vector<vector<Vector2D> > incoming = MPI_exchange_data(GhostProcs, GhostPoints, CM);
@@ -1368,11 +1390,14 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	sentpoints.clear();
 	sentproc.clear();
 	for (size_t i = 0; i < neighbors.size(); ++i)
+	{
 		if (static_cast<size_t>(neighbors[i]) < nproc || obc->GetBoundaryType() == Periodic)
 		{
 			if (static_cast<size_t>(neighbors[i]) >= nproc)
 			{
 				int temp_neigh = vproc.GetOriginalIndex(neighbors[i]);
+				if (temp_neigh == rank)
+					continue;
 				realneigh.push_back(neighbors[i]);
 				vector<Vector2D> temp;
 				ConvexHull(temp, vproc, temp_neigh);
@@ -1391,6 +1416,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				sentproc.push_back(neighbors[i]);
 			}
 		}
+	}
 	sentpoints.resize(sentproc.size());
 
 	for (size_t i = 0; i < npoints; ++i)
@@ -1447,8 +1473,6 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			vector<Vector2D> cellpoints;
 			for (size_t j = 0; j < nproc; ++j)
 			{
-				if (j == static_cast<size_t>(rank))
-					continue;
 				ConvexHull(cellpoints, vproc, static_cast<int>(j));
 				// Create periodic instances of cpu
 				std::vector<Vector2D> moved_point(8,temp);
@@ -1463,6 +1487,12 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				// Check if inside
 				for (size_t k = 0; k < 8; ++k)
 				{
+					if (j == rank)
+					{
+						good = true;
+						selfindex.push_back(i);
+						break;
+					}
 					if (PointInCell(cellpoints, moved_point[k]))
 					{
 						good = true;
@@ -1513,7 +1543,8 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
 		talkwithme.push_back(status.MPI_SOURCE);
 	}
-	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(req.size()>0)
+		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	for (size_t i = 0; i < talkwithme.size(); ++i)
 	{
@@ -1570,7 +1601,8 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(req.size()>0)
+		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	// Combine the vectors

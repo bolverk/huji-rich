@@ -33,7 +33,7 @@ namespace
 				{
 					//Are they the same direction
 					double dxmax = std::max(std::max(dx[first], dx[j]), 1e-30);
-					if (fastabs(toadd[j] - toadd[i]) < dxmax)
+					if (fastabs(toadd[j] - toadd[i]) < dxmax*0.1)
 					{
 						toremove.push_back(i);
 						break;
@@ -82,7 +82,7 @@ namespace
 						break;
 					//Are they the same direction
 					double dxmax = std::max(std::max(dx[i], dx_old[j]), 1e-30);
-					if (fastabs(old_toadd[j] - toadd[i]) < dxmax)
+					if (fastabs(old_toadd[j] - toadd[i]) < dxmax*0.1)
 					{
 						toremove.push_back(i);
 						break;
@@ -868,31 +868,31 @@ void Delaunay::AddPeriodicMPI(std::vector<int> &toduplicate,std::vector<Vector2D
 	assert(periodic_add.size() == toduplicate.size());
 	std::vector<int> toremove;
 	std::vector<Vector2D> toadd;
-		for (size_t j = 0; j < toduplicate.size(); ++j)
-		{
-			Vector2D temp = cor[static_cast<size_t>(toduplicate[j])] + periodic_add[j];
-			if (InTriangle(TripleConstRef<Vector2D>
-				(cor[static_cast<size_t>(olength)],
-					cor[static_cast<size_t>(olength + 1)],
-					cor[static_cast<size_t>(olength + 2)]),
-				temp))
-				toadd.push_back(temp);
-			else
-				toremove.push_back(static_cast<int>(j));
-		}
-		RemoveVector(toduplicate, toremove);
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd, order);
-		try
-		{
-			AddBoundaryPoints(toadd);
-		}
-		catch (UniversalError &eo)
-		{
-			eo.AddEntry("Error in AddRigid", 0);
-			throw;
-		}
-		ReArrangeVector(toduplicate, order);
+	for (size_t j = 0; j < toduplicate.size(); ++j)
+	{
+		Vector2D temp = cor[static_cast<size_t>(toduplicate[j])] + periodic_add[j];
+		if (InTriangle(TripleConstRef<Vector2D>
+			(cor[static_cast<size_t>(olength)],
+				cor[static_cast<size_t>(olength + 1)],
+				cor[static_cast<size_t>(olength + 2)]),
+			temp))
+			toadd.push_back(temp);
+		else
+			toremove.push_back(static_cast<int>(j));
+	}
+	RemoveVector(toduplicate, toremove);
+	vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
+	ReArrangeVector(toadd, order);
+	try
+	{
+		AddBoundaryPoints(toadd);
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Error in AddRigid", 0);
+		throw;
+	}
+	ReArrangeVector(toduplicate, order);
 }
 
 void Delaunay::AddRigid(vector<Edge> const& edges,
@@ -1105,20 +1105,13 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edg
 	}
 }
 
-vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges)
+void Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges)
 {
 	vector<vector<int> > toduplicate = FindOuterPoints(edges);
-#ifdef RICH_MPI
 	OrgIndex.clear();
-#endif
 	if (obc->GetBoundaryType() == Rectengular)
 	{
 		AddRigid(edges, toduplicate);
-#ifdef RICH_MPI
-		for (size_t i = 0; i < toduplicate.size(); ++i)
-			for (size_t j = 0; j < toduplicate[i].size(); ++j)
-				OrgIndex.push_back(toduplicate[i][j]);
-#endif
 	}
 	else
 	{
@@ -1133,7 +1126,9 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 			AddHalfPeriodic(obc, edges, toduplicate);
 		}
 	}
-	return toduplicate;
+	for (size_t i = 0; i < toduplicate.size(); ++i)
+		for (size_t j = 0; j < toduplicate[i].size(); ++j)
+			OrgIndex.push_back(toduplicate[i][j]);
 }
 
 Vector2D Delaunay::GetCircleCenter(int index)const
@@ -1268,6 +1263,12 @@ namespace
 				if (periodic)
 					res.push_back(t_proc.GetOriginalIndex(other));
 		}
+		if (periodic)
+		{
+			std::sort(res.begin(), res.end());
+			res = unique(res);
+			RemoveVal(res, rank);
+		}
 		return res;
 	}
 
@@ -1317,6 +1318,9 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 		else
 			res.resize(1);
 	}
+	else
+		if(periodic)
+			res.resize(1);
 	stack<int> tocheck = initialise_tocheck(FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))), 
 		point));
 	if (recursive)
@@ -1364,6 +1368,14 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 					sort(cputosendto.begin(), cputosendto.end());
 					cputosendto = unique(cputosendto);
 					RemoveVal(cputosendto, rank);
+				}
+				if (periodic && recursive) // Remove self
+				{
+					if (!cputosendto.empty())
+					{
+						cputosendto.erase(cputosendto.begin());
+						toadd.erase(toadd.begin());
+					}
 				}
 				if (!recursive) 
 				{
@@ -1439,6 +1451,8 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 			checked,
 			t_proc,
 			box_edges,periodic,periodic_add_self,periodic_add_others);
+	if (periodic)
+		PeriodicGetRidDuplicatesSingle(self_points[0], periodic_add_self);
 	for (size_t i = 0; i < to_duplicate.size(); ++i)
 	{
 		std::vector<size_t> sindex = sort_index(to_duplicate[i]);
@@ -1506,24 +1520,25 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 			if (status.MPI_TAG != 1)
 				throw UniversalError("Wrong mpi tag");
 	}
-	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(req.size()>0)
+		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	// Incorporate points recieved into triangulation
-	for (size_t i = 0; i < self_points.size(); ++i)
-	{
-		std::vector<size_t> sindex = sort_index(self_points[i]);
-		self_points[i] = VectorValues(self_points[i], sindex);
-		if (periodic)
-			periodic_add_self = VectorValues(periodic_add_self, sindex);
-	}
-/*	BOOST_FOREACH(vector<int> &line, self_points)
-	{
-		sort(line.begin(), line.end());
-		line = unique(line);
-	}*/
 	if (!periodic)
+	{
+		for (size_t i = 0; i < self_points.size(); ++i)
+		{
+			std::vector<size_t> sindex = sort_index(self_points[i]);
+			self_points[i] = VectorValues(self_points[i], sindex);
+		}
 		AddRigid(box_edges, self_points);
+	}
 	else
+	{
+		std::vector<size_t> indeces = sort_index(self_points[0]);
+		self_points[0] = VectorValues(self_points[0], indeces);
+		periodic_add_self = VectorValues(periodic_add_self, indeces);
 		AddPeriodicMPI(self_points[0], periodic_add_self);
+	}
 	for (size_t i = 0; i < self_points.size(); ++i)
 		for (size_t j = 0; j < self_points[i].size(); ++j)
 			OrgIndex.push_back(self_points[i][j]);
@@ -1594,12 +1609,27 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			real_boundary_points.at(i) = unique(real_boundary_points.at(i));
 		}
 	}
+	else
+	{
+		for (size_t i = 0; i < self_points.size(); ++i)
+			sort(self_points.at(i).begin(), self_points.at(i).end());
+	}
 
 	vector<vector<int> > to_duplicate_2 = to_duplicate;
 	vector<int> old_neighbors = cpu_neigh;
-	assert(!to_duplicate.empty());
+	//assert(!to_duplicate.empty());
 	vector<bool> checked(olength, false);
-	const size_t some_outer_point = to_duplicate[0][0];
+	size_t some_outer_point = 0;
+	if (!to_duplicate.empty())
+	{
+		if (!to_duplicate[0].empty())
+			some_outer_point = to_duplicate[0][0];
+		else
+			some_outer_point = self_points.at(0).at(0);
+	}
+	else
+		some_outer_point = self_points.at(0).at(0);
+	
 	std::vector<Vector2D> periodic_add_self2;
 	std::vector<std::vector<Vector2D> > periodic_add_others2;
 	std::vector<std::vector<int> > self_send = AddOuterFacetsMPI
@@ -1681,7 +1711,8 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			}
 		}
 	}
-	MPI_Waitall(static_cast<int>(cpu_neigh.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(req.size()>0)
+		MPI_Waitall(static_cast<int>(cpu_neigh.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Point exchange
 	req.clear();
@@ -1738,7 +1769,8 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			if (status.MPI_TAG != 1)
 				throw UniversalError("Wrong mpi tag");
 	}
-	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
+	if(req.size()>0)
+		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// Incorporate points recieved into triangulation
 	NghostIndex.resize(incoming.size());
@@ -1755,12 +1787,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	// ADD SELF SEND FROM SECOND RUN IN PERIODIC
 	if (periodic)
 	{
-		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self2);
+		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self);
 		AddPeriodicMPI(self_send[0], periodic_add_self2);
 		for (size_t j = 0; j < self_send[0].size(); ++j)
 			OrgIndex.push_back(self_send[0][j]);
-		for (size_t i = 0; i < to_duplicate_2.size(); ++i)
-			to_duplicate[i].insert(to_duplicate[i].begin(), to_duplicate_2[i].begin(), to_duplicate_2[i].end());
 	}
 	else
 	{
@@ -1803,6 +1833,7 @@ std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost,periodic,cpu_neigh,
 		periodic_add_self, periodic_add_others);
 }
+#endif // RICH_MPI
 
 int Delaunay::GetOrgIndex(int index)const
 {
@@ -1811,5 +1842,3 @@ int Delaunay::GetOrgIndex(int index)const
 	else
 		return OrgIndex.at(index - 3 - static_cast<int>(olength));
 }
-
-#endif // RICH_MPI
