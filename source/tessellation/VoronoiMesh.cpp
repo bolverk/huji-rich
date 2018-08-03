@@ -305,6 +305,7 @@ namespace
 		return res;
 	}
 
+	/*
 	Vector2D GetReflection(OuterBoundary const& bc, size_t index, Vector2D const& point)
 	{
 		switch (index)
@@ -319,7 +320,7 @@ namespace
 			return point + Vector2D(0, 2 * (bc.GetGridBoundary(Down) - point.y));
 		}
 		throw UniversalError("Wrong index in VoronoiMesh::GetReflection");
-	}
+	}*/
 }
 
 void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc, bool reorder)
@@ -351,12 +352,12 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 	size_t counter = pv.size() + 3;
 	if (_bc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+		for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 		{
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
@@ -365,12 +366,12 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 	{
 		if (_bc->GetBoundaryType() == Rectengular)
 		{
-			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+			for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+					CM[static_cast<size_t>(i)] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
 						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
@@ -378,17 +379,17 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 		else  // Half periodic case
 		{
 			double dx = _bc->GetGridBoundary(Right) - _bc->GetGridBoundary(Left);
-			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+			for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
 					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					if(dx_temp<1.0001*dx && dx_temp*1.0001>dx)
-						CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 							Tri.get_point(static_cast<size_t>(NorgIndex)));
 					else
-						CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						CM[static_cast<size_t>(i)] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
 							- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
@@ -495,12 +496,12 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 	size_t counter = pv.size() + 3;
 	if (obc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+		for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 		{
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
@@ -509,12 +510,12 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 	{
 		if (obc->GetBoundaryType() == Rectengular)
 		{
-			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+			for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+					CM[static_cast<size_t>(i)] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
 						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}
@@ -522,17 +523,17 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 		else  // Half periodic case
 		{
 			double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
-			for (size_t i = counter; i < Tri.GetCorSize(); ++i)
+			for (int i = static_cast<int>(counter); i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
 					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					if (dx_temp<1.0001*dx && dx_temp*1.0001>dx)
-						CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 							Tri.get_point(static_cast<size_t>(NorgIndex)));
 					else
-						CM[i] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
+						CM[static_cast<size_t>(i)] = Tri.get_point(i) + Tri.get_point(static_cast<size_t>(NorgIndex))
 						- CM[static_cast<size_t>(NorgIndex)];
 				}
 			}

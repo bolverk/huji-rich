@@ -9,6 +9,7 @@
 
 namespace 
 {
+#ifdef RICH_MPI
 	void PeriodicGetRidDuplicatesSingle(std::vector<int> &duplicate, std::vector<Vector2D> &toadd)
 	{
 		if (duplicate.empty())
@@ -46,7 +47,7 @@ namespace
 		RemoveVector(duplicate, toremove);
 		RemoveVector(toadd, toremove);
 	}
-
+	
 	void PeriodicGetRidDuplicates(std::vector<int> &duplicate, std::vector<Vector2D> &toadd,
 		std::vector<int> const& old_duplicate,std::vector<Vector2D> const& old_toadd)
 	{
@@ -93,7 +94,7 @@ namespace
 		RemoveVector(duplicate, toremove);
 		RemoveVector(toadd, toremove);
 	}
-
+#endif
 	template<class T> bool is_in
 	(const T& t,
 		const vector<T>& v)
@@ -148,10 +149,8 @@ Delaunay::Delaunay(void) :
 	cor(vector<Vector2D>()),
 	length(0),
 	olength(0), location_pointer(0), last_loc(0),
+	OrgIndex(vector<int>()),
 	logger(0)
-#ifdef RICH_MPI
-	,OrgIndex(vector<int>())
-#endif
 {}
 
 Delaunay::Delaunay(Delaunay const& other) :
@@ -166,10 +165,8 @@ Delaunay::Delaunay(Delaunay const& other) :
 	olength(other.olength),
 	location_pointer(other.location_pointer),
 	last_loc(other.last_loc),
+	OrgIndex(other.OrgIndex),
 	logger(other.logger)
-#ifdef RICH_MPI
-	,OrgIndex(other.OrgIndex)
-#endif
 {}
 
 Delaunay::~Delaunay(void)

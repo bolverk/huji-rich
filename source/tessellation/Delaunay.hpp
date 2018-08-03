@@ -30,9 +30,6 @@
 class Delaunay
 {
 private:
-
-
-	vector<int> OrgIndex;
 #ifdef RICH_MPI
 	int findSomeOuterPoint(void);
 
@@ -80,6 +77,7 @@ private:
 	size_t olength;
 	int location_pointer;
 	int last_loc;
+	vector<int> OrgIndex;
 
 	bool IsOuterFacet(int facet)const;
 	void add_point(size_t index, stack<std::pair<size_t, size_t> > &flip_stack);
@@ -102,26 +100,17 @@ private:
 	void AddOuterFacets(int tri, vector<vector<int> > &toduplicate, vector<Edge>
 		const& edges, vector<bool> &checked);
 
-	vector<vector<int> > AddOuterFacetsMPI
-	(int point,
-		vector<vector<int> > &toduplicate,
-		vector<int> &neigh,
-		vector<bool> &checked,
-		const Tessellation& tproc,
-		const vector<Edge>& own_edges,
-		bool periodic, std::vector<Vector2D> &periodic_add_self,
-		std::vector<std::vector<Vector2D> >& periodic_add_others,
+	vector<vector<int> > AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,vector<int> &neigh,
+		vector<bool> &checked,const Tessellation& tproc,const vector<Edge>& own_edges,bool periodic, 
+		std::vector<Vector2D> &periodic_add_self,std::vector<std::vector<Vector2D> >& periodic_add_others,
 		bool recursive = false);
 
-	void AddRigid(vector<Edge> const& edges,
-		vector<vector<int> > &toduplicate);
+	void AddRigid(vector<Edge> const& edges,vector<vector<int> > &toduplicate);
 	vector<vector<int> > AddPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,
 		vector<vector<int> > &toduplicate);
-	void AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,
-		vector<vector<int> > &toduplicate);
+	void AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,	vector<vector<int> > &toduplicate);
 	double GetMaxRadius(int point, int startfacet);
-	void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
-		vector<int> const& neigh, vector<vector<int> > &Nghost);
+	void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,vector<int> const& neigh, vector<vector<int> > &Nghost);
 	vector<int> GetOuterFacets(int cur_facet, int real_point, int olength);
 
 	Delaunay& operator=(const Delaunay& origin);
