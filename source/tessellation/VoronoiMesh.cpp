@@ -1487,16 +1487,16 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				// Check if inside
 				for (size_t k = 0; k < 8; ++k)
 				{
-					if (j == rank)
-					{
-						good = true;
-						selfindex.push_back(i);
-						break;
-					}
 					if (PointInCell(cellpoints, moved_point[k]))
 					{
 						good = true;
 						points[i] = moved_point[k];
+						if (j == rank)
+						{
+							res.push_back(moved_point[k]);
+							selfindex.push_back(i);
+							break;
+						}						
 						size_t index = std::find(sentproc.begin(), sentproc.end(), j) - sentproc.begin();
 						if (index >= sentproc.size())
 						{
