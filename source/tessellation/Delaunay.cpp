@@ -1454,8 +1454,10 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 	{
 		std::vector<size_t> sindex = sort_index(to_duplicate[i]);
 		to_duplicate[i] = VectorValues(to_duplicate[i], sindex);
-		if(periodic)
+		if (periodic)
 			periodic_add_others[i] = VectorValues(periodic_add_others[i], sindex);
+		else
+			to_duplicate[i] = unique(to_duplicate[i]);
 	}
 	/*BOOST_FOREACH(vector<int>& line, to_duplicate) 
 	{
@@ -1524,7 +1526,10 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 	{
 		for (size_t i = 0; i < self_points.size(); ++i)
 		{
-			std::vector<size_t> sindex = sort_index(self_points[i]);
+			std::vector<int> sindex;
+			sort_index(self_points[i],sindex);
+			self_points[i] = VectorValues(self_points[i], sindex);
+			sindex = unique_index(self_points[i]);
 			self_points[i] = VectorValues(self_points[i], sindex);
 		}
 		AddRigid(box_edges, self_points);

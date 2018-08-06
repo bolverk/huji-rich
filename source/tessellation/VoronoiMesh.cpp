@@ -1406,9 +1406,10 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	vector<vector<Vector2D> > neigh_chull;
 	sentpoints.clear();
 	sentproc.clear();
+	bool periodic = obc->GetBoundaryType() == Periodic;
 	for (size_t i = 0; i < neighbors.size(); ++i)
 	{
-		if (static_cast<size_t>(neighbors[i]) < nproc || obc->GetBoundaryType() == Periodic)
+		if (static_cast<size_t>(neighbors[i]) < nproc || periodic)
 		{
 			if (static_cast<size_t>(neighbors[i]) >= nproc)
 			{
@@ -1454,9 +1455,9 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				{
 					sentpoints[j].push_back(static_cast<int>(i));
 					good = true;
-					if(neighbors[j]>=nproc) // Do we need to move point?
-						points[i] += vproc.GetMeshPoint(neighbors[i]) 
-						- vproc.GetMeshPoint(vproc.GetOriginalIndex(neighbors[i]));
+					if(periodic && neighbors[j]>=nproc) // Do we need to move point?
+						points[i] += vproc.GetMeshPoint(neighbors[j]) 
+						- vproc.GetMeshPoint(vproc.GetOriginalIndex(neighbors[j]));
 					break;
 				}
 			}
