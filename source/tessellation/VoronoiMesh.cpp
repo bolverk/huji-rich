@@ -23,11 +23,11 @@ namespace
 
 	/*
 	vector<Vector2D> my_convex_hull(const Tessellation& tess,
-					int index)
+	int index)
 	{
-	  vector<Vector2D> res;
-	  ConvexHull(res,tess,index);
-	  return res;
+	vector<Vector2D> res;
+	ConvexHull(res,tess,index);
+	return res;
 	}
 	*/
 #endif
@@ -68,34 +68,34 @@ namespace
 	}
 
 	/*
-	  template <typename T>
-	  bool EmptyVectorVector(vector<vector<T> > const& v)
-	  {
-		  int n=static_cast<int>(v.size());
-		  for(int i=0;i<n;++i)
-		  {
-			  if(!v[static_cast<size_t>(i)].empty())
-				  return false;
-		  }
-		  return true;
-	  }
+	template <typename T>
+	bool EmptyVectorVector(vector<vector<T> > const& v)
+	{
+	int n=static_cast<int>(v.size());
+	for(int i=0;i<n;++i)
+	{
+	if(!v[static_cast<size_t>(i)].empty())
+	return false;
+	}
+	return true;
+	}
 	*/
 	/*
 
-	  template <typename T>
-	  vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
-		  vector<vector<T> > const& v2)
-	  {
-		  vector<vector<T> > res(v1);
-		  assert(v1.size()==v2.size());
-		  int n=static_cast<int>(v1.size());
-		  for(int i=0;i<n;++i)
-		  {
-			  if(!v2[static_cast<size_t>(i)].empty())
-				  res[static_cast<size_t>(i)].insert(res[static_cast<size_t>(i)].end(),v2[static_cast<size_t>(i)].begin(),v2[static_cast<size_t>(i)].end());
-		  }
-		  return res;
-	  }
+	template <typename T>
+	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
+	vector<vector<T> > const& v2)
+	{
+	vector<vector<T> > res(v1);
+	assert(v1.size()==v2.size());
+	int n=static_cast<int>(v1.size());
+	for(int i=0;i<n;++i)
+	{
+	if(!v2[static_cast<size_t>(i)].empty())
+	res[static_cast<size_t>(i)].insert(res[static_cast<size_t>(i)].end(),v2[static_cast<size_t>(i)].begin(),v2[static_cast<size_t>(i)].end());
+	}
+	return res;
+	}
 	*/
 }
 
@@ -308,18 +308,18 @@ namespace
 	/*
 	Vector2D GetReflection(OuterBoundary const& bc, size_t index, Vector2D const& point)
 	{
-		switch (index)
-		{
-		case 0:
-			return point + Vector2D(2 * (bc.GetGridBoundary(Right) - point.x), 0);
-		case 1:
-			return point + Vector2D(0, 2 * (bc.GetGridBoundary(Up) - point.y));
-		case 2:
-			return point + Vector2D(2 * (bc.GetGridBoundary(Left) - point.x), 0);
-		case 3:
-			return point + Vector2D(0, 2 * (bc.GetGridBoundary(Down) - point.y));
-		}
-		throw UniversalError("Wrong index in VoronoiMesh::GetReflection");
+	switch (index)
+	{
+	case 0:
+	return point + Vector2D(2 * (bc.GetGridBoundary(Right) - point.x), 0);
+	case 1:
+	return point + Vector2D(0, 2 * (bc.GetGridBoundary(Up) - point.y));
+	case 2:
+	return point + Vector2D(2 * (bc.GetGridBoundary(Left) - point.x), 0);
+	case 3:
+	return point + Vector2D(0, 2 * (bc.GetGridBoundary(Down) - point.y));
+	}
+	throw UniversalError("Wrong index in VoronoiMesh::GetReflection");
 	}*/
 }
 
@@ -387,7 +387,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 				if (NorgIndex < Nextra)
 				{
 					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
-					if(dx_temp<1.0001*dx && dx_temp*1.0001>dx)
+					if (dx_temp<1.0001*dx && dx_temp*1.0001>dx)
 						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 							Tri.get_point(static_cast<size_t>(NorgIndex)));
 					else
@@ -524,7 +524,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 					Vector2D norm = normalize(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(i)
 						- Tri.get_point(static_cast<size_t>(NorgIndex)) - 2 * norm * ScalarProd(norm,
-						CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
+							CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
 				}
 			}
 		}
@@ -1260,12 +1260,12 @@ vector<int> VoronoiMesh::Update
 
 	if (obc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+		for (int i = Nextra; i < Tri.GetCorSize(); ++i)
 		{
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
@@ -1274,7 +1274,7 @@ vector<int> VoronoiMesh::Update
 	{
 		if (obc->GetBoundaryType() == Rectengular)
 		{
-			for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+			for (int i = Nextra; i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
@@ -1298,7 +1298,7 @@ vector<int> VoronoiMesh::Update
 	// Fix for periodic changes
 	if (obc->GetBoundaryType() == Periodic)
 	{
-		std::vector<Vector2D> & localcor  = Tri.ChangeCor();
+		std::vector<Vector2D> & localcor = Tri.ChangeCor();
 		incoming = MPI_exchange_data(GhostProcs, GhostPoints, localcor);
 		for (size_t i = 0; i < incoming.size(); ++i)
 			for (size_t j = 0; j < incoming.at(i).size(); ++j)
@@ -1359,12 +1359,12 @@ void VoronoiMesh::Initialise
 
 	if (obc->GetBoundaryType() == Periodic)
 	{
-		for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+		for (int i = Nextra; i < Tri.GetCorSize(); ++i)
 		{
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[i] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
 					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
@@ -1373,7 +1373,7 @@ void VoronoiMesh::Initialise
 	{
 		if (obc->GetBoundaryType() == Rectengular)
 		{
-			for (size_t i = Nextra; i < Tri.GetCorSize(); ++i)
+			for (int i = Nextra; i < Tri.GetCorSize(); ++i)
 			{
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
@@ -1473,13 +1473,13 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			for (size_t j = 0; j < neigh_chull.size(); ++j) // check cpu neighbors
 			{
 				if (PointInCell(neigh_chull[j], temp))
-				{		
+				{
 					good = true;
-					if (periodic && neighbors[j] >= nproc) // Do we need to move point?
+					if (periodic && static_cast<size_t>(neighbors[j]) >= nproc) // Do we need to move point?
 						points[i] += vproc.GetMeshPoint(realneigh[j]) - vproc.GetMeshPoint(neighbors[j]);
 					size_t index = std::find(sentproc.begin(), sentproc.end(), realneigh[j]) - sentproc.begin();
 					assert(index < sentproc.size());
-					sentpoints[index].push_back(static_cast<int>(i));	
+					sentpoints[index].push_back(static_cast<int>(i));
 					break;
 				}
 			}
@@ -1515,7 +1515,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			{
 				ConvexHull(cellpoints, vproc, static_cast<int>(j));
 				// Create periodic instances of cpu
-				std::vector<Vector2D> moved_point(8,temp);
+				std::vector<Vector2D> moved_point(8, temp);
 				moved_point[0] += Vector2D(dx, 0);
 				moved_point[1] += Vector2D(-dx, 0);
 				moved_point[2] += Vector2D(dx, dy);
@@ -1531,12 +1531,12 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 					{
 						good = true;
 						points[i] = moved_point[k];
-						if (j == rank)
+						if (static_cast<int>(j) == rank)
 						{
 							res.push_back(moved_point[k]);
 							selfindex.push_back(i);
 							break;
-						}						
+						}
 						size_t index = std::find(sentproc.begin(), sentproc.end(), j) - sentproc.begin();
 						if (index >= sentproc.size())
 						{
@@ -1583,7 +1583,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		MPI_Recv(&wsize, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
 		talkwithme.push_back(status.MPI_SOURCE);
 	}
-	if(req.size()>0)
+	if (req.size() > 0)
 		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 	for (size_t i = 0; i < talkwithme.size(); ++i)
@@ -1641,7 +1641,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				throw UniversalError("Recv bad mpi tag");
 		}
 	}
-	if(req.size()>0)
+	if (req.size() > 0)
 		MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	MPI_Barrier(MPI_COMM_WORLD);
 
