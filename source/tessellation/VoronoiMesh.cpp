@@ -1295,6 +1295,15 @@ vector<int> VoronoiMesh::Update
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
+	// Fix for periodic changes
+	if (obc->GetBoundaryType() == Periodic)
+	{
+		std::vector<Vector2D> & localcor  = Tri.ChangeCor();
+		incoming = MPI_exchange_data(GhostProcs, GhostPoints, localcor);
+		for (size_t i = 0; i < incoming.size(); ++i)
+			for (size_t j = 0; j < incoming.at(i).size(); ++j)
+				CM[NGhostReceived.at(i).at(j)] += localcor[NGhostReceived.at(i).at(j)] - incoming[i][j];
+	}
 
 	return HilbertIndeces;
 }
@@ -1385,6 +1394,16 @@ void VoronoiMesh::Initialise
 	for (size_t i = 0; i < incoming.size(); ++i)
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 			CM[NGhostReceived.at(i).at(j)] = incoming[i][j];
+
+	// Fix for periodic changes
+	if (obc->GetBoundaryType() == Periodic)
+	{
+		std::vector<Vector2D> & localcor = Tri.ChangeCor();
+		incoming = MPI_exchange_data(GhostProcs, GhostPoints, localcor);
+		for (size_t i = 0; i < incoming.size(); ++i)
+			for (size_t j = 0; j < incoming.at(i).size(); ++j)
+				CM[NGhostReceived.at(i).at(j)] += localcor[NGhostReceived.at(i).at(j)] - incoming[i][j];
+	}
 }
 
 
@@ -1416,7 +1435,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				int temp_neigh = vproc.GetOriginalIndex(neighbors[i]);
 				if (temp_neigh == rank)
 					continue;
-				realneigh.push_back(neighbors[i]);
+				realneigh.push_back(temp_neigh);
 				vector<Vector2D> temp;
 				ConvexHull(temp, vproc, temp_neigh);
 				Vector2D to_add_neigh = vproc.GetMeshPoint(neighbors[i]) - vproc.GetMeshPoint(temp_neigh);
@@ -1435,6 +1454,8 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			}
 		}
 	}
+	std::sort(sentproc.begin(), sentproc.end());
+	sentproc = unique(sentproc);
 	sentpoints.resize(sentproc.size());
 
 	for (size_t i = 0; i < npoints; ++i)
@@ -1452,12 +1473,13 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			for (size_t j = 0; j < neigh_chull.size(); ++j) // check cpu neighbors
 			{
 				if (PointInCell(neigh_chull[j], temp))
-				{
-					sentpoints[j].push_back(static_cast<int>(i));
+				{		
 					good = true;
-					if(periodic && neighbors[j]>=nproc) // Do we need to move point?
-						points[i] += vproc.GetMeshPoint(neighbors[j]) 
-						- vproc.GetMeshPoint(vproc.GetOriginalIndex(neighbors[j]));
+					if (periodic && neighbors[j] >= nproc) // Do we need to move point?
+						points[i] += vproc.GetMeshPoint(realneigh[j]) - vproc.GetMeshPoint(neighbors[j]);
+					size_t index = std::find(sentproc.begin(), sentproc.end(), realneigh[j]) - sentproc.begin();
+					assert(index < sentproc.size());
+					sentpoints[index].push_back(static_cast<int>(i));	
 					break;
 				}
 			}

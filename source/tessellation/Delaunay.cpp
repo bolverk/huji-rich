@@ -1455,7 +1455,10 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 		std::vector<size_t> sindex = sort_index(to_duplicate[i]);
 		to_duplicate[i] = VectorValues(to_duplicate[i], sindex);
 		if (periodic)
+		{
 			periodic_add_others[i] = VectorValues(periodic_add_others[i], sindex);
+			PeriodicGetRidDuplicatesSingle(to_duplicate[i], periodic_add_others[i]);
+		}
 		else
 			to_duplicate[i] = unique(to_duplicate[i]);
 	}
@@ -1633,7 +1636,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		some_outer_point = self_points.at(0).at(0);
 	
 	std::vector<Vector2D> periodic_add_self2;
-	std::vector<std::vector<Vector2D> > periodic_add_others2;
+	std::vector<std::vector<Vector2D> > periodic_add_others2(periodic_add_others);
 	std::vector<std::vector<int> > self_send = AddOuterFacetsMPI
 		(static_cast<int>(some_outer_point),
 			to_duplicate, // indices of points to send
@@ -1676,7 +1679,8 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	// Symmetrisation
 	cpu_neigh =	VectorValues(cpu_neigh,indices);
 	to_duplicate = VectorValues(to_duplicate,indices);
-	periodic_add_others = VectorValues(periodic_add_others, indices);
+	if(periodic)
+		periodic_add_others2 = VectorValues(periodic_add_others2, indices);
 	// Get rid of duplicate points
 	for (size_t i = 0; i < to_duplicate.size(); ++i)
 	{
@@ -1725,8 +1729,13 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	for (size_t i = 0; i < cpu_neigh.size(); ++i)
 	{
 		const int dest = cpu_neigh[i];
-		if(periodic)
-			tosend[i] = list_serialize(VectorValues(cor, to_duplicate[i]));
+		if (periodic)
+		{
+			std::vector<Vector2D> corsend = VectorValues(cor, to_duplicate[i]);
+			for (size_t j = 0; j < corsend.size(); ++j)
+				corsend[j] += periodic_add_others2[i][j];
+			tosend[i] = list_serialize(corsend);
+		}
 		else
 			tosend[i] = list_serialize(VectorValues(cor, messages[i]));
 		int size = static_cast<int>(tosend[i].size());
@@ -1793,6 +1802,9 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		AddPeriodicMPI(self_send[0], periodic_add_self2);
 		for (size_t j = 0; j < self_send[0].size(); ++j)
 			OrgIndex.push_back(self_send[0][j]);
+	// Add the dulicates from first run
+		for (size_t i = 0; i < to_duplicate_2.size(); ++i)
+			to_duplicate[i].insert(to_duplicate[i].begin(), to_duplicate_2[i].begin(), to_duplicate_2[i].end());
 	}
 	else
 	{

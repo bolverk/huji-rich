@@ -111,14 +111,13 @@ namespace {
 					{
 						const Vector2D toadd = tess.GetMeshPoint(tess.GetOriginalIndex(vtemp[j])) -
 							tess.GetMeshPoint(vtemp[j]);
-						const Vector2D toaddsinglenew = toaddsingle + toadd;
 						// Make sure not heading back in duplicate space
 						if (!periodic_duplicate_before(added, toadd))
 						{
 							Vector2D oldcenter = circle.getCenter();
 							circle.setCenter(toadd + oldcenter);
 							find_affected_cells2(tess, tess.GetOriginalIndex(vtemp[j]), circle, res, visited, added, periodic,
-								toaddsinglenew,visited_add);
+								toadd,visited_add);
 							circle.setCenter(oldcenter);
 						}
 					}
@@ -152,7 +151,7 @@ vector<int> find_affected_cells(const Tessellation& tess, int index, Circle& cir
 			if (periodic)
 			{
 				int real_neigh = tess.GetOriginalIndex(vtemp[i]);
-				Vector2D toadd = tess.GetMeshPoint(vtemp[i]) - tess.GetMeshPoint(real_neigh);
+				Vector2D toadd = tess.GetMeshPoint(real_neigh) - tess.GetMeshPoint(vtemp[i]) ;
 				circle.setCenter(circle.getCenter() + toadd);
 				if (cell_circle_intersect(tess, real_neigh, circle))
 				{
