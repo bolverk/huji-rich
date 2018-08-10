@@ -1422,6 +1422,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	ConvexHull(cproc, vproc, rank);
 	vector<int> neighbors = vproc.GetNeighbors(rank);
 	vector<int> realneigh;
+	std::vector<size_t> neigh_keep;
 	vector<vector<Vector2D> > neigh_chull;
 	sentpoints.clear();
 	sentproc.clear();
@@ -1443,6 +1444,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 					temp[j] += to_add_neigh;
 				neigh_chull.push_back(temp);
 				sentproc.push_back(temp_neigh);
+				neigh_keep.push_back(i);
 			}
 			else
 			{
@@ -1451,9 +1453,11 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				ConvexHull(temp, vproc, neighbors[i]);
 				neigh_chull.push_back(temp);
 				sentproc.push_back(neighbors[i]);
+				neigh_keep.push_back(i);
 			}
 		}
 	}
+	neighbors = VectorValues(neighbors, neigh_keep);
 	std::sort(sentproc.begin(), sentproc.end());
 	sentproc = unique(sentproc);
 	sentpoints.resize(sentproc.size());
