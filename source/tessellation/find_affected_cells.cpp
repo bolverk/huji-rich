@@ -109,13 +109,14 @@ namespace {
 				else
 					if (periodic)
 					{
-						const Vector2D toadd = tess.GetMeshPoint(tess.GetOriginalIndex(vtemp[j])) -
+						Vector2D toadd = tess.GetMeshPoint(tess.GetOriginalIndex(vtemp[j])) -
 							tess.GetMeshPoint(vtemp[j]);
 						// Make sure not heading back in duplicate space
 						if (!periodic_duplicate_before(added, toadd))
 						{
 							Vector2D oldcenter = circle.getCenter();
 							circle.setCenter(toadd + oldcenter);
+							toadd += toaddsingle;
 							find_affected_cells2(tess, tess.GetOriginalIndex(vtemp[j]), circle, res, visited, added, periodic,
 								toadd,visited_add);
 							circle.setCenter(oldcenter);

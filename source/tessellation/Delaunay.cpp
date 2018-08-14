@@ -698,13 +698,12 @@ int Delaunay::GetTotalLength(void)
 void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 {
 	int n = static_cast<int>(points.size());
+	int N = static_cast<int>(cor.size());
 	stack<std::pair<size_t, size_t> > flip_stack;
-	//	vector<int> order=HilbertOrder(points,n);
+	vector<int> order=HilbertOrder(points,n);
+	cor.insert(cor.end(), points.begin(), points.end());
 	for (int i = 0; i < n; ++i)
-	{
-		cor.push_back(points[static_cast<size_t>(i)]);
-		add_point(cor.size() - 1, flip_stack);
-	}
+		add_point(N + i, flip_stack);
 }
 
 void Delaunay::AddAditionalPoint(Vector2D const& vec)
@@ -878,8 +877,6 @@ void Delaunay::AddPeriodicMPI(std::vector<int> &toduplicate, std::vector<Vector2
 			toremove.push_back(static_cast<int>(j));
 	}
 	RemoveVector(toduplicate, toremove);
-	vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
-	ReArrangeVector(toadd, order);
 	try
 	{
 		AddBoundaryPoints(toadd);
@@ -889,7 +886,6 @@ void Delaunay::AddPeriodicMPI(std::vector<int> &toduplicate, std::vector<Vector2
 		eo.AddEntry("Error in AddRigid", 0);
 		throw;
 	}
-	ReArrangeVector(toduplicate, order);
 }
 
 void Delaunay::AddRigid(vector<Edge> const& edges,
@@ -919,8 +915,6 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 				toremove.push_back(static_cast<int>(j));
 		}
 		RemoveVector(toduplicate[i], toremove);
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd, order);
 		try
 		{
 			AddBoundaryPoints(toadd);
@@ -930,7 +924,6 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 			eo.AddEntry("Error in AddRigid", 0);
 			throw;
 		}
-		ReArrangeVector(toduplicate[i], order);
 	}
 }
 
@@ -1046,11 +1039,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc, vector<Edge
 			toadd.push_back(cor[static_cast<size_t>(corners[static_cast<size_t>(i)][static_cast<size_t>(j)])] + change);
 			//		pointstemp[j]=j;
 		}
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(corners[static_cast<size_t>(i)], order);
-		//	corners[i]=pointstemp;
 	}
 	return corners;
 }
@@ -1094,10 +1083,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edg
 			toadd.push_back(temp + change);
 			//pointstemp[j]=j;
 		}
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
-		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[static_cast<size_t>(i)], order);
 		//toduplicate[i]=pointstemp;
 	}
 }
@@ -1304,6 +1290,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	double procsize = tproc.GetWidth(rank);
 	vector<vector<int> > res;
 	vector<int> vtemp;
 	std::vector<Vector2D> toadd;
@@ -1369,8 +1356,12 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				{
 					if (!cputosendto.empty())
 					{
-						cputosendto.erase(cputosendto.begin());
-						toadd.erase(toadd.begin());
+						std::vector<int> toremove2;
+						for (size_t l = 0; l < cputosendto.size(); ++l)
+							if (cputosendto[l] == rank && fastabs(toadd[l]) < 0.01*procsize)
+								toremove2.push_back(static_cast<int>(l));
+						RemoveVector(cputosendto, toremove2);
+						RemoveVector(toadd, toremove2);
 					}
 				}
 				if (!recursive)
@@ -1616,7 +1607,11 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	else
 	{
 		for (size_t i = 0; i < self_points.size(); ++i)
-			sort(self_points.at(i).begin(), self_points.at(i).end());
+		{
+			std::vector<size_t> sindex = sort_index(self_points[i]);
+			self_points[i] = VectorValues(self_points[i],sindex);
+			periodic_add_self = VectorValues(periodic_add_self, sindex);
+		}
 	}
 
 	vector<vector<int> > to_duplicate_2 = to_duplicate;
