@@ -36,7 +36,7 @@ private:
 	pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
 		const vector<Edge>& edge_list, const vector<Edge>& box_edges, vector<vector<int> > &NghostIndex, bool periodic,
 		std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
-		&periodic_add_others);
+		&periodic_add_others, Vector2D const &ll, Vector2D const &ur);
 
 	std::pair<vector<vector<int> >, vector<int> > FindOuterPoints2
 	(const Tessellation& t_proc,
@@ -47,7 +47,7 @@ private:
 		vector<vector<int> > &NghostIndex,
 		bool periodic,
 		std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
-		&periodic_add_others);
+		&periodic_add_others, Vector2D const &ll, Vector2D const &ur);
 
 	vector<vector<int> > boundary_intersection_check
 	(const vector<Edge>& edges,
@@ -102,8 +102,8 @@ private:
 
 	vector<vector<int> > AddOuterFacetsMPI(int point,vector<vector<int> > &toduplicate,vector<int> &neigh,
 		vector<bool> &checked,const Tessellation& tproc,const vector<Edge>& own_edges,bool periodic, 
-		std::vector<Vector2D> &periodic_add_self,std::vector<std::vector<Vector2D> >& periodic_add_others,
-		bool recursive = false);
+		std::vector<Vector2D> &periodic_add_self,std::vector<std::vector<Vector2D> >& periodic_add_others, 
+		Vector2D const &ll, Vector2D const &ur,	bool recursive = false);
 
 	void AddRigid(vector<Edge> const& edges,vector<vector<int> > &toduplicate);
 	vector<vector<int> > AddPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,

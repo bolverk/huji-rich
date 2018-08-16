@@ -1286,7 +1286,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	Tessellation const &tproc,
 	const vector<Edge>& own_edges,
 	bool periodic, std::vector<Vector2D> &periodic_add_self,
-	std::vector<std::vector<Vector2D> >& periodic_add_others, bool recursive)
+	std::vector<std::vector<Vector2D> >& periodic_add_others, Vector2D const &ll, Vector2D const &ur, bool recursive)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -1342,7 +1342,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
 				vector<int> cputosendto;
 				if (recursive)
-					find_affected_cells_recursive(tproc, rank, circ, cputosendto, toadd, periodic);
+					find_affected_cells_recursive(tproc, rank, circ, cputosendto, toadd, periodic,ll,ur);
 				else
 					cputosendto = find_affected_cells(tproc, rank, circ, vtemp, periodic, toadd);
 				if (!periodic)
@@ -1423,7 +1423,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(const Tessellation& t_proc,
 	const vector<Edge>& edge_list, const vector<Edge>& box_edges, vector<vector<int> > &NghostIndex, bool periodic,
 	std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
-	&periodic_add_others)
+	&periodic_add_others, Vector2D const &ll, Vector2D const &ur)
 {
 	cpu_neigh = calc_neighbors_own_edges(t_proc, edge_list, periodic);
 	const size_t some_outer_point = findSomeOuterPoint();
@@ -1437,7 +1437,7 @@ pair<vector<vector<int> >, vector<vector<int> > > Delaunay::findOuterPoints(cons
 			cpu_neigh, // Rank of processes to send to
 			checked,
 			t_proc,
-			box_edges, periodic, periodic_add_self, periodic_add_others);
+			box_edges, periodic, periodic_add_self, periodic_add_others,ll,ur);
 	if (periodic)
 		PeriodicGetRidDuplicatesSingle(self_points[0], periodic_add_self);
 	for (size_t i = 0; i < to_duplicate.size(); ++i)
@@ -1581,7 +1581,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	vector<vector<int> > &NghostIndex,
 	bool periodic,
 	std::vector<int> &cpu_neigh, std::vector<Vector2D> &periodic_add_self, std::vector<std::vector<Vector2D> >
-	&periodic_add_others)
+	&periodic_add_others, Vector2D const &ll, Vector2D const &ur)
 {
 	vector<vector<int> > real_boundary_points(box_edges.size());
 	if (!periodic)
@@ -1640,7 +1640,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		edge_list,
 		periodic,
 		periodic_add_self2,
-		periodic_add_others2, true); // recursive
+		periodic_add_others2,ll,ur, true); // recursive
 
 									 // Communication
 	int wsize;
@@ -1837,9 +1837,12 @@ std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	std::vector<Vector2D> periodic_add_self;
 	std::vector<std::vector<Vector2D> > periodic_add_others;
 	std::pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
-		findOuterPoints(tproc, edges, box_edges, Nghost, periodic, cpu_neigh, periodic_add_self, periodic_add_others);
+		findOuterPoints(tproc, edges, box_edges, Nghost, periodic, cpu_neigh, periodic_add_self, periodic_add_others,
+			Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down)),
+			Vector2D(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up)));
 	return FindOuterPoints2(tproc, edges, to_duplicate.first, to_duplicate.second, box_edges, Nghost, periodic, cpu_neigh,
-		periodic_add_self, periodic_add_others);
+		periodic_add_self, periodic_add_others, Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down)),
+		Vector2D(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up)));
 }
 #endif // RICH_MPI
 

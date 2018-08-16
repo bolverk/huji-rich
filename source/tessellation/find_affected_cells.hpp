@@ -32,7 +32,7 @@ bool edge_circle_intersect
 void find_affected_cells_recursive(const Tessellation& tess,
 	int index,
 	const Circle& circle,
-	vector<int> & res, std::vector<Vector2D> &added, bool periodic);
+	vector<int> & res, std::vector<Vector2D> &added, bool periodic, Vector2D const& ll, Vector2D const& ur);
 
 /*! \brief Non recursive version of find affected cells. Only searches one degree of separation
   \param tess Tessellation

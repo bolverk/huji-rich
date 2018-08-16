@@ -10,6 +10,8 @@ namespace
 		size_t N = toadd.size();
 		if (N == 0)
 			return false;
+		if (tocheck.x > 2.1 || tocheck.x<-2.1 || tocheck.y>2.1 || tocheck.y < -2.1)
+			return true;
 		double dx = 1e-20;
 		for (size_t i = 0; i < N; ++i)
 			dx = std::max(dx, fastabs(toadd[i]));
@@ -34,8 +36,11 @@ namespace
 		return false;
 	}
 
-	bool contains(const vector<int>& v, const std::vector<Vector2D> & added,Vector2D const& toadd, const int n)
+	bool contains(const vector<int>& v, const std::vector<Vector2D> & added,Vector2D const& toadd, const int n,
+		Vector2D const&ll, Vector2D const& ur)
 	{
+		if (std::abs(toadd.x) > (1.01*(ur.x - ll.x)) || std::abs(toadd.y) > (1.01*(ur.y - ll.y)))
+			return true;
 		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (n == v[i])
@@ -81,11 +86,11 @@ namespace {
 
 	void find_affected_cells2(const Tessellation& tess, int index, Circle circle,
 		vector<int> &res, vector<int>& visited, std::vector<Vector2D> &added, bool periodic, Vector2D const& toaddsingle,
-		std::vector<Vector2D>& visited_add)
+		std::vector<Vector2D>& visited_add,Vector2D const& ll,Vector2D const& ur)
 	{
 		if (periodic)
 		{
-			if (contains(visited, visited_add, toaddsingle, index))
+			if (contains(visited, visited_add, toaddsingle, index,ll,ur))
 				return;
 		}
 		else
@@ -105,7 +110,7 @@ namespace {
 			for (size_t j = 0; j < NN; ++j)
 			{
 				if (vtemp[j] < tess.GetPointNo())
-					find_affected_cells2(tess, vtemp[j], circle, res, visited, added, periodic, toaddsingle,visited_add);
+					find_affected_cells2(tess, vtemp[j], circle, res, visited, added, periodic, toaddsingle,visited_add,ll,ur);
 				else
 					if (periodic)
 					{
@@ -118,7 +123,7 @@ namespace {
 							circle.setCenter(toadd + oldcenter);
 							toadd += toaddsingle;
 							find_affected_cells2(tess, tess.GetOriginalIndex(vtemp[j]), circle, res, visited, added, periodic,
-								toadd,visited_add);
+								toadd,visited_add,ll,ur);
 							circle.setCenter(oldcenter);
 						}
 					}
@@ -167,11 +172,11 @@ vector<int> find_affected_cells(const Tessellation& tess, int index, Circle& cir
 }
 
 void find_affected_cells_recursive(const Tessellation& tess, int index, const Circle& circle,
-	vector<int> &res, std::vector<Vector2D> &added, bool periodic)
+	vector<int> &res, std::vector<Vector2D> &added, bool periodic,Vector2D const& ll,Vector2D const& ur)
 {
 	vector<int> visited;
 	std::vector<Vector2D> visited_add;
 	added.clear();
 	Vector2D toaddsingle;
-	find_affected_cells2(tess, index, circle, res, visited, added, periodic, toaddsingle, visited_add);
+	find_affected_cells2(tess, index, circle, res, visited, added, periodic, toaddsingle, visited_add,ll,ur);
 }
