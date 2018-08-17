@@ -2465,3 +2465,9 @@ vector<std::size_t> const& Voronoi3D::GetSelfIndex(void) const
 {
 	return self_index_;
 }
+
+void Voronoi3D::SetBox(Vector3D const& ll, Vector3D const& ur)
+{
+	ll_ = ll;
+	ur_ = ur;
+}

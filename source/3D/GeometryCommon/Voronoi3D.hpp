@@ -197,6 +197,8 @@ public:
 	size_t& GetPointNo(void);
 
 	bool IsPointOutsideBox(size_t index)const;
+
+	void SetBox(Vector3D const& ll, Vector3D const& ur);
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);
