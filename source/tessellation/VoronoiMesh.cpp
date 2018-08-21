@@ -357,8 +357,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
-					Tri.get_point(static_cast<size_t>(NorgIndex)));
+				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + 
+				  (Tri.get_point(static_cast<size_t>(i)) -
+				   Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
 	}
@@ -371,8 +372,9 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					Vector2D norm = normalize(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
-					CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(i)
+				  Vector2D norm = normalize(Tri.get_point(static_cast<size_t>(i)) - 
+								  Tri.get_point(static_cast<size_t>(NorgIndex)));
+				  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(static_cast<size_t>(i))
 						- Tri.get_point(static_cast<size_t>(NorgIndex)) - 2 * norm * ScalarProd(norm,
 							CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
 				}
@@ -386,14 +388,14 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+				  double dx_temp = fastabs(Tri.get_point(static_cast<size_t>(i)) - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					if (dx_temp<1.0001*dx && dx_temp*1.0001>dx)
-						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(static_cast<size_t>(i)) -
 							Tri.get_point(static_cast<size_t>(NorgIndex)));
 					else
 					{
-						Vector2D norm = normalize(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
-						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(i)
+					  Vector2D norm = normalize(Tri.get_point(static_cast<size_t>(i)) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+					  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(static_cast<size_t>(i))
 							- Tri.get_point(static_cast<size_t>(NorgIndex)) - 2 * norm * ScalarProd(norm,
 								CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					}
@@ -507,7 +509,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 			int NorgIndex = Tri.GetOrgIndex(i);
 			if (NorgIndex < Nextra)
 			{
-				CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+			  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(static_cast<size_t>(i)) -
 					Tri.get_point(static_cast<size_t>(NorgIndex)));
 			}
 		}
@@ -521,8 +523,8 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					Vector2D norm = normalize(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
-					CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(i)
+				  Vector2D norm = normalize(Tri.get_point(static_cast<size_t>(i)) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+				  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(static_cast<size_t>(i))
 						- Tri.get_point(static_cast<size_t>(NorgIndex)) - 2 * norm * ScalarProd(norm,
 							CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
 				}
@@ -536,14 +538,14 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 				int NorgIndex = Tri.GetOrgIndex(i);
 				if (NorgIndex < Nextra)
 				{
-					double dx_temp = fastabs(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+				  double dx_temp = fastabs(Tri.get_point(static_cast<size_t>(i)) - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					if (dx_temp<1.0001*dx && dx_temp*1.0001>dx)
-						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(i) -
+					  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + (Tri.get_point(static_cast<size_t>(i)) -
 							Tri.get_point(static_cast<size_t>(NorgIndex)));
 					else
 					{
-						Vector2D norm = normalize(Tri.get_point(i) - Tri.get_point(static_cast<size_t>(NorgIndex)));
-						CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(i)
+					  Vector2D norm = normalize(Tri.get_point(static_cast<size_t>(i)) - Tri.get_point(static_cast<size_t>(NorgIndex)));
+					  CM[static_cast<size_t>(i)] = CM[static_cast<size_t>(NorgIndex)] + Tri.get_point(static_cast<size_t>(i))
 							- Tri.get_point(static_cast<size_t>(NorgIndex)) - 2 * norm * ScalarProd(norm,
 								CM[static_cast<size_t>(NorgIndex)] - Tri.get_point(static_cast<size_t>(NorgIndex)));
 					}

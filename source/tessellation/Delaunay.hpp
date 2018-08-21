@@ -279,7 +279,7 @@ public:
 	\brief Builds the boundary points
 	\param obc The geometrical boundary conditions
 	\param edges The edges of the domain
-	\return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
+	returns the indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
 	*/
 	void BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges);
 	/*!

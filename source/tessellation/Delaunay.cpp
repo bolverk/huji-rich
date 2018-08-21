@@ -703,7 +703,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	vector<int> order=HilbertOrder(points,n);
 	cor.insert(cor.end(), points.begin(), points.end());
 	for (int i = 0; i < n; ++i)
-		add_point(N + i, flip_stack);
+	  add_point(static_cast<size_t>(N + i), flip_stack);
 }
 
 void Delaunay::AddAditionalPoint(Vector2D const& vec)
@@ -1851,5 +1851,5 @@ int Delaunay::GetOrgIndex(int index)const
 	if (index < static_cast<int>(olength))
 		return static_cast<int>(olength);
 	else
-		return OrgIndex.at(index - 3 - static_cast<int>(olength));
+	  return OrgIndex.at(static_cast<size_t>(index) - 3 - olength);
 }

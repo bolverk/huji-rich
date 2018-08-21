@@ -2,6 +2,7 @@
 #include "geometry.hpp"
 #include "boost/foreach.hpp"
 #include "../misc/utils.hpp"
+#include <cmath>
 
 namespace
 {
@@ -39,7 +40,7 @@ namespace
 	bool contains(const vector<int>& v, const std::vector<Vector2D> & added,Vector2D const& toadd, const int n,
 		Vector2D const&ll, Vector2D const& ur)
 	{
-		if (std::abs(toadd.x) > (1.01*(ur.x - ll.x)) || std::abs(toadd.y) > (1.01*(ur.y - ll.y)))
+		if (fabs(toadd.x) > (1.01*(ur.x - ll.x)) || fabs(toadd.y) > (1.01*(ur.y - ll.y)))
 			return true;
 		for (size_t i = 0; i < v.size(); ++i)
 		{
