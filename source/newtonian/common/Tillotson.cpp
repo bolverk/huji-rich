@@ -223,9 +223,7 @@ double Tillotson::de2c(double d, double e, tvector const & tracers, vector<strin
 
 double Tillotson::dp2c(double d, double p, tvector const & tracers, vector<string> const & tracernames) const
 {
-	std::vector<std::string>::const_iterator it = binary_find(tracernames.begin(), tracernames.end(), std::string("Ethermal"));
-	assert(it != tracernames.end());
-	double e = tracers[static_cast<size_t>(it-tracernames.begin())];
+	double e = dp2e(d,p,tracers,tracernames);
 	if (d >= rho0_ || e <= EIV_)
 	{
 		double res = dep2cI(d, e, p);
