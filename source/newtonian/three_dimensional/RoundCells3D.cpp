@@ -262,3 +262,9 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 	velocities.resize(n);
 	CorrectPointsOverShoot(velocities, dt, tess, ll_,ur_);
 }
+
+void RoundCells3D::ChangeBox(Vector3D const & ll, Vector3D const & ur)
+{
+	ll_ = ll;
+	ur_ = ur;
+}
