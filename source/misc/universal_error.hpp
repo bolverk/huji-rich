@@ -61,6 +61,8 @@ private:
   std::vector<std::string> fields_;
 
   std::vector<double> values_;
+
+  UniversalError& operator=(const UniversalError&);
 };
 
 #endif // UNIVERSAL_ERROR_HPP

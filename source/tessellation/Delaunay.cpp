@@ -700,7 +700,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	int n = static_cast<int>(points.size());
 	int N = static_cast<int>(cor.size());
 	stack<std::pair<size_t, size_t> > flip_stack;
-	vector<int> order=HilbertOrder(points,n);
+	/*vector<int> order=*/HilbertOrder(points,n);
 	cor.insert(cor.end(), points.begin(), points.end());
 	for (int i = 0; i < n; ++i)
 	  add_point(static_cast<size_t>(N + i), flip_stack);

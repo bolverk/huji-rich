@@ -72,6 +72,8 @@ class WrongBCSidesOrderException
 {
 private:
 
+  WrongBCSidesOrderException& operator=(const WrongBCSidesOrderException&);
+
   double _up;
   double _down;
   double _left;
