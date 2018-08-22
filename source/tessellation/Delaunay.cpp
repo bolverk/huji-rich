@@ -94,7 +94,7 @@ namespace
 		RemoveVector(duplicate, toremove);
 		RemoveVector(toadd, toremove);
 	}
-#endif
+
 	template<class T> bool is_in
 	(const T& t,
 		const vector<T>& v)
@@ -105,6 +105,7 @@ namespace
 		}
 		return false;
 	}
+#endif
 
 	pair<int, int> find_diff(const facet& f1, const facet& f2)
 	{
