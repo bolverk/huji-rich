@@ -64,19 +64,56 @@ class SpatProf:
         self.velocity = SineWave(dd*c0/d0,
                                  l,0,0)
 
+def load_data_serial(fname='final.h5'):
+
+    import h5py
+    import numpy
+
+    res = {}
+    with h5py.File(fname,'r') as f:
+        res['geometry'] = {}
+        res['geometry']['x_coordinate'] = numpy.array(f['geometry']['x_coordinate'])
+        res['hydrodynamic'] = {}
+        for varn in ['density','pressure','x_velocity']:
+            res['hydrodynamic'][varn] = numpy.array(f['hydrodynamic'][varn])
+        res['time'] = numpy.array(f['time'])[0]
+    return res
+
+def load_data_parallel():
+
+    import h5py
+    import numpy
+    import glob
+
+    file_list = glob.glob('final_*.h5')
+    partitioned_data = [load_data_serial(fname)
+                        for fname in file_list]
+    res = {}
+    res['geometry'] = {}
+    res['geometry']['x_coordinate'] = numpy.concatenate([part['geometry']['x_coordinate'] 
+                                                         for part in partitioned_data])
+    res['hydrodynamic'] = {}
+    for varn in ['density','pressure','x_velocity']:
+        res['hydrodynamic'][varn] = numpy.concatenate([part['hydrodynamic'][varn]
+                                                       for part in partitioned_data])
+    res['time'] = partitioned_data[0]['time']
+    return res
+
+def load_data():
+
+    import os.path
+
+    if os.path.isfile('final.h5'):
+        return load_data_serial()
+    return load_data_parallel()
+
 def main():
 
-    graphic_flag = False
-    if graphic_flag:
-        import pylab
-
     import numpy
-    import h5py
 
-    initial = h5py.File('initial.h5')
-    final_data = h5py.File('final.h5')
+    final_data = load_data()
 
-    time = numpy.array(final_data['time'])[0]
+    time = final_data['time']
     spat_prof = SpatProf(numpy.loadtxt('ambient_density.txt'),
                          numpy.loadtxt('ambient_pressure.txt'),
                          numpy.loadtxt('adiabatic_index.txt'),
@@ -89,17 +126,6 @@ def main():
                             for x in final_data['geometry']['x_coordinate']]
     analytic['x_velocity'] = [spat_prof.velocity.eval(x-spat_prof.c0*time) \
                             for x in final_data['geometry']['x_coordinate']]
-
-    if graphic_flag:
-        for n, field in enumerate(['density','pressure','x_velocity']):
-            pylab.subplot(3,1,n+1)
-            pylab.plot(final_data['x_coordinate'],
-                       final_data[field],'.')
-            pylab.plot(final_data['x_coordinate'],
-                       analytic[field],'.')
-            pylab.plot(initial['x_coordinate'],
-                       initial[field], '.')
-        pylab.show()
 
     error_norm = dict()
     for i in analytic.keys():

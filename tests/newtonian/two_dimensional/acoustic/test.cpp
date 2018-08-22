@@ -21,6 +21,9 @@
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
 #include "source/tessellation/RoundGrid.hpp"
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#endif // RICH_MPI
 
 using namespace std;
 using namespace simulation2d;
@@ -77,6 +80,7 @@ namespace {
 						 const Tessellation& meta)
   {
     return RoundGrid(RandSquare(2*np*np,
+				meta,
 				outer.getBoundaries().first,
 				outer.getBoundaries().second),
 		     &outer, 30, &meta);
@@ -187,6 +191,8 @@ int main(void)
 {
 #ifdef RICH_MPI
   MPI_Init(NULL, NULL);
+  int rank = -1;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif // RICH_MPI
   try
     {
@@ -194,12 +200,20 @@ int main(void)
       hdsim& sim = sim_data.getSim();
       SafeTimeTermination term_cond(1,1e6);
       WriteTime diag("time.txt");
+#ifdef RICH_MPI
+      write_snapshot_to_hdf5(sim, "initial_"+int2str(rank)+".h5");
+#else
       write_snapshot_to_hdf5(sim, "initial.h5");
+#endif // RICH_MPI
       main_loop(sim, 
 		term_cond,
 		&hdsim::TimeAdvance2Heun,
 		&diag);
+#ifdef RICH_MPI
+      write_snapshot_to_hdf5(sim, "final_"+int2str(rank)+".h5");
+#else
       write_snapshot_to_hdf5(sim, "final.h5");
+#endif // RICH_MPI
     }
   catch(const UniversalError& eo){
     report_error(eo);
