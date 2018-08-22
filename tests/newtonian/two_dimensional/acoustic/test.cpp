@@ -162,8 +162,8 @@ namespace {
     vector<Vector2D> init_points_;
     PeriodicBox outer_;
 #ifdef RICH_MPI
-    vector<Vector2D> points_;
     VoronoiMesh meta_tess_;
+    vector<Vector2D> points_;
 #endif // RICH_MPI
     VoronoiMesh tess_;
     SlabSymmetry pg_;
