@@ -1,4 +1,5 @@
 #include <cmath>
+#include "../misc/utils.hpp"
 #include "geometry.hpp"
 
 using namespace std;
@@ -19,6 +20,12 @@ double abs(Vector2D const& v)
 {
   return sqrt(v.x*v.x+v.y*v.y);
 }
+
+double fastabs(Vector2D const& v)
+{
+	return fastsqrt(v.x*v.x + v.y*v.y);
+}
+
 
 Vector2D::Vector2D(void):
   x(0), y(0) {}

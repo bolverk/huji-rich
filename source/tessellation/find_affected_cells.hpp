@@ -26,22 +26,28 @@ bool edge_circle_intersect
   \param index Current cell index
   \param circle Circle
   \param res List of cell indices that intersect the circle
+  \param added The Vector2D to add to the duplicated point (for periodic boundaries)
+  \param periodic Flag if periodic boundaries
+  \param ll Lower left corner of the domain
+  \param ur Upper right corner of the domain
  */
 void find_affected_cells_recursive(const Tessellation& tess,
-				int index,
-				const Circle& circle,
-				vector<int> & res);
+	int index,
+	const Circle& circle,
+	vector<int> & res, std::vector<Vector2D> &added, bool periodic, Vector2D const& ll, Vector2D const& ur);
 
 /*! \brief Non recursive version of find affected cells. Only searches one degree of separation
   \param tess Tessellation
   \param index Cell index
   \param circle Circle
   \param vtemp Temperaroy object for not reallocating on heap
+  \param periodic Whether periodic boundary conditions are used
+  \param periodic_add List of points to add due to periodic boundary conditions
   \return Vector with indices of affected cells
  */
 vector<int> find_affected_cells
 (const Tessellation& tess,
  int index,
- const Circle& circle, vector<int> &vtemp);
+ Circle& circle, vector<int> &vtemp,bool periodic,std::vector<Vector2D> &periodic_add);
 
 #endif // FIND_AFFECTED_CELLS

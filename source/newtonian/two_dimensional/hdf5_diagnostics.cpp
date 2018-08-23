@@ -12,7 +12,11 @@ Snapshot::Snapshot(void) :
 	cells(),
 	time(),
 	cycle(),
-	tracerstickernames(){}
+	tracerstickernames()
+#ifdef RICH_MPI
+	,proc_points()
+#endif
+{}
 
 Snapshot::Snapshot(const Snapshot& source) :
 	mesh_points(source.mesh_points),
@@ -20,6 +24,9 @@ Snapshot::Snapshot(const Snapshot& source) :
 	time(source.time),
 	cycle(source.cycle),
 	tracerstickernames(source.tracerstickernames) 
+#ifdef RICH_MPI
+	,proc_points(source.proc_points)
+#endif
 {}
 
 Snapshot& Snapshot::operator=(const Snapshot& other)
@@ -29,6 +36,10 @@ Snapshot& Snapshot::operator=(const Snapshot& other)
   time = other.time;
   cycle = other.cycle;
   tracerstickernames = other.tracerstickernames;
+#ifdef RICH_MPI
+  proc_points = other.proc_points;
+#endif // RICH_MPI
+
   return *this;
 }
 

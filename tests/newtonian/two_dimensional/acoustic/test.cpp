@@ -23,6 +23,10 @@
 #include "source/newtonian/two_dimensional/ghost_point_generators/PeriodicGhostGenerator.hpp"
 #include "source/newtonian/two_dimensional/interpolations/LinearGaussImproved.hpp"
 #include "source/newtonian/two_dimensional/periodic_edge_velocities.hpp"
+#include "source/tessellation/RoundGrid.hpp"
+#ifdef RICH_MPI
+#include "source/mpi/MeshPointsMPI.hpp"
+#endif // RICH_MPI
 
 using namespace std;
 using namespace simulation2d;
@@ -64,41 +68,27 @@ namespace {
 
 #ifdef RICH_MPI
 
-  vector<Vector2D> process_positions(const PeriodicBox& boundary)
+  vector<Vector2D> create_meta_points(const PeriodicBox& outer)
   {
-    const Vector2D lower_left = boundary.getBoundaries().first;
-    const Vector2D upper_right = boundary.getBoundaries().second;
-	int ws=0;
-	MPI_Comm_size(MPI_COMM_WORLD,&ws);
-    return RandSquare(ws,lower_left.x,upper_right.x,lower_left.y,upper_right.y);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    return RoundGrid(RandSquare(world_size,
+				outer.getBoundaries().first,
+				outer.getBoundaries().second),
+		     &outer);
   }
 
-  vector<Vector2D> my_convex_hull
-  (const Tessellation& tess,
-   int index)
+  vector<Vector2D> create_mesh_generating_points(int np,
+						 const  PeriodicBox& outer,
+						 const Tessellation& meta)
   {
-    vector<Vector2D> res;
-    ConvexHull(res,tess,index);
-    return res;
+    return RoundGrid(RandSquare(2*np*np,
+				meta,
+				outer.getBoundaries().first,
+				outer.getBoundaries().second),
+		     &outer, 30, &meta);
   }
 
-  /*
-  vector<Vector2D> distribute_grid
-  (const vector<Vector2D>& complete_grid,
-   const Tessellation& proc_tess,
-   const boost::mpi::communicator& world)
-  {
-    vector<Vector2D> res;
-    const vector<Vector2D> ch_list =
-      my_convex_hull(proc_tess,world.get_rank());
-    BOOST_FOREACH(const Vector2D& v, complete_grid)
-      {
-	if(PointInCell(ch_list,v))
-	  res.push_back(v);
-      }
-    return res;
-  }
-  */
 #endif // RICH_MPI
 
   class SimData
@@ -107,21 +97,17 @@ namespace {
 
     SimData(void):
       width_(read_number("width.txt")),
-      outer_(0,width_,width_,0),
-#ifdef RICH_MPI
-      meta_outer_(0,width_,width_,0),
-      meta_tess_(process_positions(outer_),meta_outer_),
-      init_points_(SquareMeshM(60,
-			       60,
-			       meta_tess_,
-			       Vector2D(0,0),
-			       Vector2D(width_,width_))),
-      tess_(meta_tess_,init_points_,outer_),
-#else
-      init_points_(cartesian_mesh(60,60,
+      init_points_(cartesian_mesh(60,
+				  60,
 				  Vector2D(0,0),
 				  Vector2D(width_,width_))),
-      tess_(init_points_,outer_),
+      outer_(0,width_,width_,0),
+#ifdef RICH_MPI
+      meta_tess_(create_meta_points(outer_),outer_),
+      points_(create_mesh_generating_points(60,outer_,meta_tess_)),
+      tess_(meta_tess_,points_,outer_),
+#else
+      tess_(init_points_, outer_),
 #endif // RICH_MPI
       pg_(),
       eos_(read_number("adiabatic_index.txt")),
@@ -165,12 +151,12 @@ namespace {
   private:
 
     double width_;
+    vector<Vector2D> init_points_;
     PeriodicBox outer_;
 #ifdef RICH_MPI
-    const SquareBox meta_outer_;
     VoronoiMesh meta_tess_;
+    vector<Vector2D> points_;
 #endif // RICH_MPI
-    vector<Vector2D> init_points_;
     VoronoiMesh tess_;
     SlabSymmetry pg_;
     IdealGas eos_;
@@ -191,13 +177,13 @@ namespace {
 
 int main(void)
 {
+#ifdef RICH_MPI
+  MPI_Init(NULL, NULL);
+  int rank = -1;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif // RICH_MPI
   try
     {
-#ifdef RICH_MPI
-      MPI_Init(NULL,NULL);
-      int rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-#endif // RICH_MPI
       SimData sim_data;
       hdsim& sim = sim_data.getSim();
       //      SafeTimeTermination term_cond(1,1e6);

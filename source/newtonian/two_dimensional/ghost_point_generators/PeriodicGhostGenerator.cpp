@@ -7,6 +7,7 @@ boost::container::flat_map<size_t, ComputationalCell> PeriodicGhostGenerator::op
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterEdgesIndeces(tess);
 	for (size_t i = 0; i < ghosts.size(); ++i)
 	{
+		
 		Edge const& edge = tess.GetEdge(static_cast<int>(ghosts[i].first));
 		ComputationalCell ctemp = cells[static_cast<size_t>(ghosts[i].second == 2 ? 
 			tess.GetOriginalIndex(edge.neighbors.second) : tess.GetOriginalIndex(edge.neighbors.first))];

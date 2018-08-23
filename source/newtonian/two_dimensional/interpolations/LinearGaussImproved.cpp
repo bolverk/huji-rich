@@ -543,8 +543,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time, tracerstikersnames);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell> new_cells(cells);
-	new_cells.resize
-	  (static_cast<size_t>(tess.GetTotalPointNumber()));
+	new_cells.resize (static_cast<size_t>(tess.GetTotalPointNumber()));
 	for (boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.begin(); it !=
 		ghost_cells.end(); ++it)
 		new_cells[it->first] = it->second;
@@ -601,7 +600,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		{
 			res[static_cast<size_t>(boundaryedges[i])].first = new_cells[static_cast<size_t>(edge.neighbors.first)];
 #ifdef RICH_MPI
-			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+			if (tess.GetOriginalIndex(edge.neighbors.first) > static_cast<int>(CellNumber))
 				interp2(res[static_cast<size_t>(boundaryedges[i])].first,
 					rslopes_[static_cast<size_t>(edge.neighbors.first)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 			else
@@ -618,7 +617,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		{
 			res[static_cast<size_t>(boundaryedges[i])].second = new_cells[static_cast<size_t>(edge.neighbors.second)];
 #ifdef RICH_MPI
-			if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+			if (tess.GetOriginalIndex(edge.neighbors.second) > static_cast<int>(CellNumber))
 				interp2(res[static_cast<size_t>(boundaryedges[i])].second,
 					rslopes_[static_cast<size_t>(edge.neighbors.second)], CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 			else

@@ -251,7 +251,7 @@ private:
 	void GetNeighborNeighborsMPI(vector<int> &result,int point);
 #ifdef RICH_MPI
 	vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
-		vector<Vector2D> const& points, OuterBoundary const* obc, vector<size_t> &selfindex,
+		vector<Vector2D> &points, OuterBoundary const* obc, vector<size_t> &selfindex,
 		vector<int> &sentproc, vector<vector<int> > &sentpoints);
 #endif
 

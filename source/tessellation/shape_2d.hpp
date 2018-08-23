@@ -32,8 +32,7 @@ public:
     \param center Position of the center
     \param radius Radius
    */
-  Circle(Vector2D const& center,
-	 double radius);
+  Circle(Vector2D const& center, double radius);
 
   bool operator()(const Vector2D& r) const;
 
@@ -47,9 +46,14 @@ public:
    */
   double getRadius(void) const;
 
+  /*! \brief Sets a new center to the circle
+  \param center The center of the circle
+  */
+  void setCenter(Vector2D const& center);
+
 private:
 
-  const Vector2D center_;
+  Vector2D center_;
   const double radius_;
 };
 
