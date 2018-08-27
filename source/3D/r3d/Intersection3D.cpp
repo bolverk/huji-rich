@@ -301,7 +301,7 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, vec
 	if (!goodpoly)
 	{
 		std::cout << "Bad polygon in cell " << oldcell << std::endl;
-		all_indeces.clear();
+		/*all_indeces.clear();
 		for (size_t i = 0; i < nfaces; ++i)
 		{
 			itemp = oldtess.GetPointsInFace(oldfaces[i]);
@@ -317,7 +317,7 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, vec
 		{
 			Vector3D p = all_vertices[all_indeces[i]];
 			std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
-		}
+		}*/
 		return false;
 	}
 	nfaces = faceinds.size();
