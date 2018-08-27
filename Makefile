@@ -41,6 +41,12 @@ else ifeq ($(MODE),parallel_intel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX
 	LINT_FLAGS = 
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),nasa_intel)
+	CCC := icc
+	CC := icpc
+	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -xAVX -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -lmpi -lmpi++ -DMPI_NO_CPPBIND
+	LINT_FLAGS = 
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel_check)
 	CCC := icc
 	CC := mpiicpc
