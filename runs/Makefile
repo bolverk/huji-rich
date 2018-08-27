@@ -21,6 +21,13 @@ else ifeq ($(MODE),parallel_intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lr3d
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),nasa_intel)
+	PREXECUTE := mpirun -np $(NUM_PROCESSES)
+	CC := icpc
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xAVX -fp-model precise  -std=c++11 -DMPI_NO_CPPBIND
+	LINT_FLAGS := 
+	LFLAGS := -lclipper -lr3d -lmpi -lmpi++
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel_check)
 	CCC := icc
 	CC := mpiicpc
