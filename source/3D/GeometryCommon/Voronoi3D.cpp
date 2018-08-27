@@ -256,7 +256,7 @@ namespace
 			R = std::max(R, diffs[i]);
 		}
 		for (size_t i = 0; i < N; ++i)
-			if (diffs[i] > R*1e-15)
+			if (diffs[i] > R*1e-16)
 				res.push_back(indeces[i]);
 		return R;
 	}
@@ -1392,7 +1392,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 							continue;
 						CalcFaceAreaCM(*temp_points_in_face, tetra_centers_,clean_vec, area_[FaceCounter], 
 							Face_CM_[FaceCounter],Atempvec);
-						if (area_[FaceCounter] < (Asize * (IsPointOutsideBox(point_other) ? 1e-13 : 1e-14)))
+						if (area_[FaceCounter] < (Asize * (IsPointOutsideBox(point_other) ? 1e-14 : 1e-15)))
 							continue;
 						if (point_other >= Norg_&&point_other < (Norg_ + 4))
 						{
