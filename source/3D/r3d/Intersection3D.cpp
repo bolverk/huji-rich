@@ -211,7 +211,7 @@ namespace
 			if (counter[i] == 0)
 				too_many.push_back(i);
 			else
-				if (counter[i] < 3)
+				if (counter[i] != 3)
 					res = false;
 		RemoveVector(all_indeces, too_many);
 	}
