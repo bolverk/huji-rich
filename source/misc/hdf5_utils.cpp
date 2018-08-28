@@ -23,7 +23,7 @@ HDF5Shortcut& HDF5Shortcut::operator()(const string& field_name,
 }
 
 void write_std_vector_to_hdf5
-(const CommonFG& file,
+(const Group& file,
  const vector<double>& data,
  const string& caption)
 {
@@ -37,7 +37,7 @@ void write_std_vector_to_hdf5
 }
 
 void write_std_vector_to_hdf5
-(const CommonFG& file,
+(const Group& file,
  const vector<int>& data,
  const string& caption)
 {
@@ -50,7 +50,7 @@ void write_std_vector_to_hdf5
      datatype);
 }
 
-void write_std_vector_to_hdf5(const CommonFG& file,const vector<size_t>& data,const string& caption)
+void write_std_vector_to_hdf5(const Group& file,const vector<size_t>& data,const string& caption)
 {
 	IntType datatype(PredType::NATIVE_ULLONG);
 	datatype.setOrder(H5T_ORDER_LE);

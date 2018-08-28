@@ -28,7 +28,7 @@ namespace
 {
 
 	template<class T> vector<T> read_vector_from_hdf5
-		(const CommonFG& file,
+		(const Group& file,
 			const string& caption,
 			const DataType& datatype)
 	{
@@ -43,7 +43,7 @@ namespace
 	}
 
 	vector<double> read_double_vector_from_hdf5
-		(CommonFG& file, string const& caption)
+		(Group& file, string const& caption)
 	{
 		return read_vector_from_hdf5<double>
 			(file,
@@ -52,7 +52,7 @@ namespace
 	}
 
 	vector<int> read_int_vector_from_hdf5
-		(const CommonFG& file,
+		(const Group& file,
 			const string& caption)
 	{
 		return read_vector_from_hdf5<int>

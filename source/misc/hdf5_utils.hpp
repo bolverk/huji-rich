@@ -13,7 +13,7 @@
 using std::string;
 using std::vector;
 using std::pair;
-using H5::CommonFG;
+using H5::Group;
 using H5::PredType;
 using H5::DataSpace;
 using H5::DSetCreatPropList;
@@ -27,7 +27,7 @@ using H5::DataType;
   \param dt Data type
  */
 template<class T> void write_std_vector_to_hdf5
-(const CommonFG& file,
+(const Group& file,
  const vector<T>& data,
  const string& caption,
  const DataType& dt)
@@ -56,7 +56,7 @@ template<class T> void write_std_vector_to_hdf5
   \param caption Name of dataset
  */
 void write_std_vector_to_hdf5
-(const CommonFG& file,
+(const Group& file,
  const vector<double>& data,
  const string& caption);
 
@@ -66,7 +66,7 @@ void write_std_vector_to_hdf5
   \param caption Name of dataset
  */
 void write_std_vector_to_hdf5
-(const CommonFG& file,
+(const Group& file,
  const vector<int>& data,
  const string& caption);
 
@@ -75,7 +75,7 @@ void write_std_vector_to_hdf5
 \param data Data to be written
 \param caption Name of dataset
 */
-void write_std_vector_to_hdf5(const CommonFG& file, const vector<size_t>& data, const string& caption);
+void write_std_vector_to_hdf5(const Group& file, const vector<size_t>& data, const string& caption);
 
 //! \brief Facilitates writing hdf5 files
 class HDF5Shortcut

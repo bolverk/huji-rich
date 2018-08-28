@@ -2256,7 +2256,7 @@ void Voronoi3D::GetNeighbors(size_t index, vector<size_t> &res)const
 
 Tessellation3D* Voronoi3D::clone(void) const
 {
-	return new Voronoi3D(*this);
+	return static_cast<Tessellation3D*>(boost::alignment::aligned_alloc(32, sizeof(Voronoi3D)));
 }
 
 Voronoi3D::Voronoi3D(Voronoi3D const &other) : ll_(other.ll_), ur_(other.ur_), Norg_(other.Norg_), bigtet_(other.bigtet_),
