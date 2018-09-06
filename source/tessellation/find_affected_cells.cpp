@@ -108,8 +108,8 @@ namespace {
 					added.push_back(toaddsingle);
 			vector<int> vtemp = tess.GetNeighbors(index);
 			size_t NN = vtemp.size();
-			Vector2D llperiodic = 2 * ll - ur;
-			Vector2D urperiodic = 2 * ur - ll;
+			Vector2D llperiodic = 2.1 * ll - 1.1*ur;
+			Vector2D urperiodic = 2.1 * ur - 1.1*ll;
 			for (size_t j = 0; j < NN; ++j)
 			{
 				if (vtemp[j] < tess.GetPointNo())
