@@ -6,12 +6,12 @@
 
 namespace
 {
-	bool periodic_duplicate_before(std::vector<Vector2D> const& toadd, Vector2D const& tocheck)
+	bool periodic_duplicate_before(std::vector<Vector2D> const& toadd, Vector2D const& tocheck,Vector2D const& ll,Vector2D const& ur)
 	{
 		size_t N = toadd.size();
 		if (N == 0)
 			return false;
-		if (tocheck.x > 2.1 || tocheck.x<-2.1 || tocheck.y>2.1 || tocheck.y < -2.1)
+		if (tocheck.x > ur.x || tocheck.x<ll.x || tocheck.y>ur.y || tocheck.y < ll.y)
 			return true;
 		double dx = 1e-20;
 		for (size_t i = 0; i < N; ++i)
@@ -108,6 +108,8 @@ namespace {
 					added.push_back(toaddsingle);
 			vector<int> vtemp = tess.GetNeighbors(index);
 			size_t NN = vtemp.size();
+			Vector2D llperiodic = 2 * ll - ur;
+			Vector2D urperiodic = 2 * ur - ll;
 			for (size_t j = 0; j < NN; ++j)
 			{
 				if (vtemp[j] < tess.GetPointNo())
@@ -118,7 +120,7 @@ namespace {
 						Vector2D toadd = tess.GetMeshPoint(tess.GetOriginalIndex(vtemp[j])) -
 							tess.GetMeshPoint(vtemp[j]);
 						// Make sure not heading back in duplicate space
-						if (!periodic_duplicate_before(added, toadd))
+						if (!periodic_duplicate_before(added, toadd,llperiodic,urperiodic))
 						{
 							Vector2D oldcenter = circle.getCenter();
 							circle.setCenter(toadd + oldcenter);
