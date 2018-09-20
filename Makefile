@@ -113,7 +113,7 @@ external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_librari
 external_libraries/hdf5_dump/hdf5-1.10.3.tar.gz:
 	mkdir -p external_libraries/hdf5_dump
 	cd external_libraries/hdf5_dump && \
-	wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.10.3/src/hdf5-1.10.3.tar.gz
+	wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.3/src/hdf5-1.10.3.tar.gz
 
 external_libraries/boost_dump/boost_1_66_0.tar.bz2:
 	mkdir -p external_libraries/boost_dump
