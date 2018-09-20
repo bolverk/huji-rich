@@ -52,7 +52,7 @@ namespace
 	}
 
 	void PeriodicGetRidDuplicates(std::vector<int> &duplicate, std::vector<Vector2D> &toadd,
-		std::vector<int> const& old_duplicate, std::vector<Vector2D> const& old_toadd)
+		std::vector<int> const& old_duplicate, std::vector<Vector2D> const& old_toadd,double Rproc)
 	{
 		if (duplicate.empty())
 			return;
@@ -85,7 +85,7 @@ namespace
 					if (old_duplicate[j] != duplicate[i])
 						break;
 					//Are they the same direction
-					double dxmax = std::max(std::max(dx[i], dx_old[j]), 1e-30);
+					double dxmax = std::max(std::max(dx[i], dx_old[j]), Rproc*0.1);
 					if (fastabs(old_toadd[j] - toadd[i]) < dxmax*0.1)
 					{
 						toremove.push_back(i);
@@ -751,7 +751,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	int n = static_cast<int>(points.size());
 	int N = static_cast<int>(cor.size());
 	stack<std::pair<size_t, size_t> > flip_stack;
-	/*vector<int> order=*/HilbertOrder(points,n);
+//	/*vector<int> order=*/HilbertOrder(points,n);
 	cor.insert(cor.end(), points.begin(), points.end());
 	for (int i = 0; i < n; ++i)
 	  add_point(static_cast<size_t>(N + i), flip_stack);
@@ -1411,6 +1411,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
 			vector<int> neighs = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[i]);
+			int checking = f[static_cast<size_t>(cur_facet)].vertices[i];
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
@@ -1750,12 +1751,14 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	if (periodic)
 		periodic_add_others2 = VectorValues(periodic_add_others2, indices);
 	// Get rid of duplicate points
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	for (size_t i = 0; i < to_duplicate.size(); ++i)
 	{
 		if (periodic)
 		{
 			if (i < to_duplicate_2.size())
-				PeriodicGetRidDuplicates(to_duplicate[i], periodic_add_others2[i], to_duplicate_2[i], periodic_add_others[i]);
+				PeriodicGetRidDuplicates(to_duplicate[i], periodic_add_others2[i], to_duplicate_2[i], periodic_add_others[i],t_proc.GetWidth(rank));
 			else
 				PeriodicGetRidDuplicatesSingle(to_duplicate[i], periodic_add_others2[i]);
 		}
@@ -1864,9 +1867,11 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	}
 
 	// ADD SELF SEND FROM SECOND RUN IN PERIODIC
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (periodic)
 	{
-		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self);
+		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self,t_proc.GetWidth(rank));
 		AddPeriodicMPI(self_send[0], periodic_add_self2);
 		for (size_t j = 0; j < self_send[0].size(); ++j)
 			OrgIndex.push_back(self_send[0][j]);
