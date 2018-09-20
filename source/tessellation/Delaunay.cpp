@@ -1867,8 +1867,6 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	}
 
 	// ADD SELF SEND FROM SECOND RUN IN PERIODIC
-	int rank = 0;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (periodic)
 	{
 		PeriodicGetRidDuplicates(self_send[0], periodic_add_self2, self_points[0], periodic_add_self,t_proc.GetWidth(rank));
