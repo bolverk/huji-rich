@@ -17,9 +17,10 @@ public:
 	\param speed The maximum change (in cell radii) of the processor movement
 	\param RoundSpeed By which factor is the rounding mechanisim larger than the movement speed of the mesh points
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
+	\param Rmin Optional, the minimum radius for a cpu point to be at. This is sometimes needed in order to prevent cpus with zero points.
 	*/
 	ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
-		double RoundSpeed=2,int mode=2);
+		double RoundSpeed=2,int mode=2,double Rmin = 0);
 
 	/*!
 	\brief Updates the load balance, does one iteration
@@ -36,5 +37,6 @@ private:
 	const double speed_;
 	const double RoundSpeed_;
 	const int mode_;
+	const double Rmin_;
 };
 #endif //CONSTPERPROC

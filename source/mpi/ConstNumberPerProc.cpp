@@ -7,9 +7,9 @@
 ConstNumberPerProc::~ConstNumberPerProc(void) {}
 
 
-ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,double speed, double RoundSpeed, int mode) :
+ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,double speed, double RoundSpeed, int mode,double Rmin) :
 	outer_(outer), speed_(speed), RoundSpeed_(RoundSpeed),
-	mode_(mode) {}
+	mode_(mode), Rmin_(Rmin) {}
 
 #ifdef RICH_MPI
 void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)const
@@ -133,6 +133,9 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 			dy = 0.5*(outer_.GetGridBoundary(Down) - point.y);
 	}
 	Vector2D cor = tproc.GetMeshPoint(rank) + Vector2D(dx, dy);
+	if (Rmin_ > 0)
+		if (abs(cor) < Rmin_)
+			cor = cor * Rmin_*1.01 / abs(cor);
 	// Have all processors have the same points
 	vector<double> tosend = list_serialize(vector<Vector2D>(1, cor));
 	vector<double> torecv(static_cast<size_t>(nproc) * 2);

@@ -18,9 +18,10 @@
 	\param Niter The number of correction iterations to use
 	\param speed How fast to make the correction each iteration in units of cpu cell size
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
+	\param Rmin Optional, the minimum radius for a cpu point to be at. This is sometimes needed in order to prevent cpus with zero points.
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Niter=100,double speed=0.04,int mode=2);
+	outer,int Niter=100,double speed=0.04,int mode=2,double Rmin=0);
 
 /*!
 	\brief Corrects the load between processors based on number of cells per processor, continues until target load is reached
@@ -30,8 +31,9 @@ void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 	\param TargetLoad The target load balance, must be higher than 1, recommened to be 1.5
 	\param speed How fast to make the correction each iteration in units of cpu cell size
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
+	\param Rmin Optional, the minimum radius for a cpu point to be at. This is sometimes needed in order to prevent cpus with zero points.
 */
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,double TargetLoad,double speed=0.04,int mode=2);
+	outer,double TargetLoad,double speed=0.04,int mode=2,double Rmin=0);
 
 #endif //SETLOAD

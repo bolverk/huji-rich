@@ -21,7 +21,7 @@ namespace
 	}
 
 	void RunLoadBalance(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-		outer,int Niter,double tload,double speed,int mode)
+		outer,int Niter,double tload,double speed,int mode,double Rmin)
 	{
 		double BestLoad=100;
 		vector<Vector2D> BestProc,BestMesh;
@@ -32,7 +32,7 @@ namespace
 			round=2;
 		else
 			round=1.6;
-		ConstNumberPerProc procmove(outer,speed,round,mode);
+		ConstNumberPerProc procmove(outer,speed,round,mode,Rmin);
 		VoronoiMesh local(tproc, points, outer);
 		vector<double> loads;
 		for(int i=0;i<Niter;++i)
@@ -111,15 +111,15 @@ namespace
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Niter,double speed,int mode)
+	outer,int Niter,double speed,int mode,double Rmin)
 {
-	RunLoadBalance(tproc,points,outer,Niter,0,speed,mode);
+	RunLoadBalance(tproc,points,outer,Niter,0,speed,mode,Rmin);
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,double TargetLoad,double speed,int mode)
+	outer,double TargetLoad,double speed,int mode,double Rmin)
 {
-	RunLoadBalance(tproc,points,outer,1000,TargetLoad,speed,mode);
+	RunLoadBalance(tproc,points,outer,1000,TargetLoad,speed,mode,Rmin);
 }
 
 #endif
