@@ -7,7 +7,7 @@
 ConstNumberPerProc::~ConstNumberPerProc(void) {}
 
 
-ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,double speed, double RoundSpeed, int mode,double Rmin) :
+ConstNumberPerProc::ConstNumberPerProc(OuterBoundary const& outer,double speed, double RoundSpeed, int mode,bool Rmin) :
 	outer_(outer), speed_(speed), RoundSpeed_(RoundSpeed),
 	mode_(mode), Rmin_(Rmin) {}
 
@@ -133,9 +133,17 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 			dy = 0.5*(outer_.GetGridBoundary(Down) - point.y);
 	}
 	Vector2D cor = tproc.GetMeshPoint(rank) + Vector2D(dx, dy);
-	if (Rmin_ > 0)
+
+	if (Rmin_)
+	{
+		double Rmin_1 = 0;
+		size_t Norglocal = tlocal.GetPointNo();
+		for (size_t i = 0; i < Norglocal; ++i)
+			Rmin_1 = std::max(Rmin_1, abs(tlocal.GetMeshPoint(i)));
+		MPI_Allreduce(MPI_IN_PLACE, &Rmin_1, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 		if (abs(cor) < Rmin_)
-			cor = cor * Rmin_*1.01 / abs(cor);
+			cor = cor * 1.01 / (Rmin_1 * abs(cor));
+	}
 	// Have all processors have the same points
 	vector<double> tosend = list_serialize(vector<Vector2D>(1, cor));
 	vector<double> torecv(static_cast<size_t>(nproc) * 2);

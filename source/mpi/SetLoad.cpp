@@ -21,7 +21,7 @@ namespace
 	}
 
 	void RunLoadBalance(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-		outer,int Niter,double tload,double speed,int mode,double Rmin)
+		outer,int Niter,double tload,double speed,int mode,bool Rmin)
 	{
 		double BestLoad=100;
 		vector<Vector2D> BestProc,BestMesh;
@@ -86,7 +86,7 @@ namespace
 			round=2.1;
 		else
 			round=1.75;
-		ConstNumberPerProc procmove2(outer,speed,round,mode);
+		ConstNumberPerProc procmove2(outer,speed,round,mode,Rmin);
 		tproc.Update(BestProc);
 		MPI_Barrier(MPI_COMM_WORLD);
 		local.Update(BestMesh,tproc);
@@ -111,13 +111,13 @@ namespace
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,int Niter,double speed,int mode,double Rmin)
+	outer,int Niter,double speed,int mode,bool Rmin)
 {
 	RunLoadBalance(tproc,points,outer,Niter,0,speed,mode,Rmin);
 }
 
 void SetLoad(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
-	outer,double TargetLoad,double speed,int mode,double Rmin)
+	outer,double TargetLoad,double speed,int mode,bool Rmin)
 {
 	RunLoadBalance(tproc,points,outer,1000,TargetLoad,speed,mode,Rmin);
 }
