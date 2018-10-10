@@ -139,7 +139,7 @@ void ConstNumberPerProc::Update(Tessellation& tproc, Tessellation const& tlocal)
 		double Rmin_1 = 0;
 		size_t Norglocal = tlocal.GetPointNo();
 		for (size_t i = 0; i < Norglocal; ++i)
-			Rmin_1 = std::max(Rmin_1, abs(tlocal.GetMeshPoint(i)));
+			Rmin_1 = std::max(Rmin_1, 1.0/abs(tlocal.GetMeshPoint(i)));
 		MPI_Allreduce(MPI_IN_PLACE, &Rmin_1, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 		if (abs(cor) < Rmin_)
 			cor = cor * 1.01 / (Rmin_1 * abs(cor));
