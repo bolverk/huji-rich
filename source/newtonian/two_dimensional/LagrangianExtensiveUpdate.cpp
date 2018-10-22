@@ -11,7 +11,7 @@ namespace
 LagrangianExtensiveUpdate::LagrangianExtensiveUpdate(LagrangianFlux const& lflux, EquationOfState const& eos, GhostPointGenerator
 	const& ghost, LinearGaussImproved const& interp) :lflux_(lflux), eos_(eos), ghost_(ghost), interp_(interp) {}
 
-void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, const PhysicalGeometry& pg,
+void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, const PhysicalGeometry& /*pg*/,
 	const Tessellation& tess, const double dt, const CacheData& cd, const vector<ComputationalCell>& cells,
 	vector<Extensive>& extensives, double time, TracerStickerNames const& tracerstickernames) const
 {
