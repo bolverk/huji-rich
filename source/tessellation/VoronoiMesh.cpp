@@ -13,6 +13,20 @@ using std::cout;
 
 namespace
 {
+	bool PointInCell(Tessellation const& tess,int cell_index, Vector2D const& vec)
+	{
+		std::vector<int> const& edges = tess.GetCellEdges(cell_index);
+		int N = static_cast<int>(edges.size());
+		for (int i = 0; i < N; ++i)
+		{
+			Edge const& edge = tess.GetEdge(edges[static_cast<size_t>(i)]);
+			if (orient2d(TripleConstRef<Vector2D>(edge.vertices.first, edge.vertices.second, vec))*
+				orient2d(TripleConstRef<Vector2D>(edge.vertices.first, edge.vertices.second, tess.GetMeshPoint(cell_index))) < 0)
+				return false;
+		}
+		return true;
+	}
+
 #ifdef RICH_MPI
 	template<class T> void tidy(vector<T>& v)
 	{
@@ -1450,7 +1464,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	{
 		bool good = false;
 		Vector2D temp = points[i];
-		if (PointInCell(cproc, temp)) // Check own cpu
+		if (PointInCell(vproc,rank,temp)) // Check own cpu
 		{
 			res.push_back(temp);
 			selfindex.push_back(i);
@@ -1458,9 +1472,9 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		}
 		if (!good)
 		{
-			for (size_t j = 0; j < neigh_chull.size(); ++j) // check cpu neighbors
+			for (size_t j = 0; j < realneigh.size(); ++j) // check cpu neighbors
 			{
-				if (PointInCell(neigh_chull[j], temp))
+				if((!periodic && PointInCell(vproc,realneigh[i], temp)) || (periodic && PointInCell(neigh_chull[i], temp)))
 				{
 					good = true;
 					if (periodic && static_cast<size_t>(neighbors[j]) >= nproc) // Do we need to move point?
@@ -1480,7 +1494,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				if (std::find(realneigh.begin(), realneigh.end(), j) != realneigh.end() || j == static_cast<size_t>(rank))
 					continue;
 				ConvexHull(cellpoints, vproc, static_cast<int>(j));
-				if (PointInCell(cellpoints, temp))
+				if ((!periodic && PointInCell(vproc, static_cast<int>(j), temp)) || (periodic && PointInCell(cellpoints, temp)))
 				{
 					good = true;
 					size_t index = std::find(sentproc.begin(), sentproc.end(), j) - sentproc.begin();
