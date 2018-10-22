@@ -198,7 +198,7 @@ void HDSim3D::timeAdvance2(void)
 	MPI_exchange_data(tess_, point_vel, true);
 #endif
 	CalcFaceVelocities(tess_, point_vel, face_vel);
-	//dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
+	dt = tsc_(tess_, cells_, eos_, face_vel, pt_.getTime(), tsn_);
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
