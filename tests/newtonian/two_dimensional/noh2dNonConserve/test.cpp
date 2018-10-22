@@ -14,7 +14,7 @@
 #include "source/newtonian/two_dimensional/modular_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cfl.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
-#include "source/newtonian/two_dimensional/ColdFlowsExtensiveCalculator.hpp"
+#include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
 #ifdef RICH_MPI
@@ -205,7 +205,7 @@ int main(void)
 	// Set up the external source term
 	ZeroForce force;
 
-	ColdFlowsExtensiveCalculator eu(eos,ghost,interpolation);
+	SimpleExtensiveUpdater eu(eos,ghost,interpolation);
 	SimpleCFL tsf(0.15);
 	ModularFluxCalculator fc(interpolation, rs);
 	SimpleCellUpdater cu;
