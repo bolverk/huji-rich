@@ -85,37 +85,4 @@ private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
 };
 
-
-//! \brief Updates the extensive with entropy if needed for pressure
-class ColdFlowsUpdate : public ConditionExtensiveUpdater::Action
-{
-public:
-
-	/*! \brief Class constructor
-	\param eos The equation of state
-	\param ghost The ghost point generator
-	\param interp The interpolation
-	*/
-	ColdFlowsUpdate(EquationOfState const& eos, GhostPointGenerator const& ghost,LinearGaussImproved const& interp);
-
-	void operator()
-		(const vector<Extensive>& fluxes,
-			const PhysicalGeometry& pg,
-			const Tessellation& tess,
-			const double dt,
-			const CacheData& cd,
-			const vector<ComputationalCell>& cells,
-			Extensive& extensive,
-			size_t index,
-			double time, 
-			TracerStickerNames const& tracerstickernames)const;
-private:
-	EquationOfState const& eos_;
-	GhostPointGenerator const& ghost_;
-	LinearGaussImproved const& interp_;
-	mutable double lasttime_,dt_;
-	mutable int entropy_index_;
-	mutable boost::container::flat_map<size_t, ComputationalCell> ghost_cells_;
-};
-
 #endif // CONDITION_EXTENSIVE_UPDATER_HPP
