@@ -36,7 +36,7 @@ namespace
 		Extensive const& cell)
 	{
 		std::vector<int> neigh;
-		tess.GetNeighbors(index, neigh);
+		tess.GetNeighbors(static_cast<int>(index), neigh);
 		size_t N = neigh.size();
 		double maxDV = 0;
 		size_t Norg = tess.GetPointNo();
