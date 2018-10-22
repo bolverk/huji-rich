@@ -84,14 +84,5 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 			extensives[static_cast<size_t>(edge.neighbors.second)].tracers[indexY] -= normal.y*deltaWs;
 		}
 	}
-	// check if cold flows is need
-	if (std::binary_search(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(), string("Entropy")))
-	{
-		ColdFlowsUpdate ceu(eos_, ghost_, interp_);
-		for (size_t i = 0; i < N; ++i)
-		{
-			ceu(fluxes, pg, tess, dt, cd, cells, extensives[i], i, time, tracerstickernames);
-		}
-	}
 }
 
