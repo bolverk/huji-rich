@@ -92,9 +92,9 @@ double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tra
 			CM += sign*Atemp*CMtemp;
 			A += sign*Atemp;
 		}
-		double ratio = fastabs(cd.CMs[i] - tess.GetMeshPoint(i)) / (tess.GetWidth(i));
+		double ratio = fastabs(cd.CMs[i] - tess.GetMeshPoint(static_cast<int>(i))) / (tess.GetWidth(static_cast<int>(i)));
 		double factor = std::min(0.2*ratio*ratio,0.1);
-		res[i] = (CM / A - (tess.GetMeshPoint(i)*factor+cd.CMs[i]*(1-factor)))/dt;
+		res[i] = (CM / A - (tess.GetMeshPoint(static_cast<int>(i))*factor+cd.CMs[i]*(1-factor)))/dt;
 		if (indexX < Ntracers && indexY < Ntracers)
 		{
 			double m = 2.5*cells[i].density*cd.volumes[i]/(dt*TotalArea[i]);
