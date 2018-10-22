@@ -205,7 +205,7 @@ int main(void)
 	// Set up the external source term
 	ZeroForce force;
 
-	SimpleExtensiveUpdater eu(eos,ghost,interpolation);
+	SimpleExtensiveUpdater eu;
 	SimpleCFL tsf(0.15);
 	ModularFluxCalculator fc(interpolation, rs);
 	SimpleCellUpdater cu;
