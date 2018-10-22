@@ -84,22 +84,25 @@ double dt, vector<Vector2D> const& /*velocities*/, TracerStickerNames const& tra
 		{
 		  double Atemp = edge_length[static_cast<size_t>(edges[j])] *
 		    dt*ws[static_cast<size_t>(edges[j])];
-			if (tess.GetEdge(edges[j]).neighbors.second == static_cast<int>(i))
-				Atemp *= -1;
-			Vector2D CMtemp = (tess.GetEdge(edges[j]).vertices.first + tess.GetEdge(edges[j]).vertices.second)*0.5 + ws[static_cast<size_t>(edges[j])] * 0.5
-			  *normals[static_cast<size_t>(edges[j])]*dt;
-			CM += Atemp*CMtemp;
-			A += Atemp;
+		  double sign = 1;
+		  if (tess.GetEdge(edges[j]).neighbors.second == static_cast<int>(i))
+			  sign = -1;
+			Vector2D CMtemp = (tess.GetEdge(edges[j]).vertices.first + tess.GetEdge(edges[j]).vertices.second)*0.5 + ws[static_cast<size_t>(edges[j])] *0.5*
+			  normals[static_cast<size_t>(edges[j])]*dt;
+			CM += sign*Atemp*CMtemp;
+			A += sign*Atemp;
 		}
-		res[i] = (CM / A - cd.CMs[i])/dt;
+		double ratio = fastabs(cd.CMs[i] - tess.GetMeshPoint(i)) / (tess.GetWidth(i));
+		double factor = std::min(0.2*ratio*ratio,0.1);
+		res[i] = (CM / A - (tess.GetMeshPoint(i)*factor+cd.CMs[i]*(1-factor)))/dt;
 		if (indexX < Ntracers && indexY < Ntracers)
 		{
 			double m = 2.5*cells[i].density*cd.volumes[i]/(dt*TotalArea[i]);
 			Vector2D toadd(m*cells[i].tracers[indexX], m*cells[i].tracers[indexY]);
 			double v = abs(res[i]);
 			double t = abs(toadd);
-			if (t > 0.15*v)
-				 toadd = toadd*(0.15*v / t);
+			if (t > 0.05*v)
+				 toadd = toadd*(0.05*v / t);
 			res[i] += toadd;
 		}
 	}
