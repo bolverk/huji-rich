@@ -70,7 +70,6 @@ namespace
 			res.tracers[i] = extensive.tracers[i] / extensive.mass;
 		try
 		{
-			EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
 			// Entropy fix if needed
 			if (entropy_index < res.tracers.size())
 			{
@@ -108,6 +107,8 @@ namespace
 					}
 				}
 			}
+			else
+				res.pressure = eos.de2p(res.density, energy, res.tracers, tracerstickernames.tracer_names);
 		}
 		catch (UniversalError &eo)
 		{
