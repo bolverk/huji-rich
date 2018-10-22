@@ -28,9 +28,9 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 	// Reduce the area tracer
 	for (size_t i = 0; i < N; ++i)
 	{
-		extensives[i].tracers[indexX] *= 0.85;
-		extensives[i].tracers[indexY] *= 0.85;
-		extensives[i].tracers[indexZ] *= 0.85;
+		extensives[i].tracers[indexX] *= 0.95;
+		extensives[i].tracers[indexY] *= 0.95;
+		extensives[i].tracers[indexZ] *= 0.95;
 	}
 
 	std::vector<double> oldEk(N, 0), oldEtherm(N, 0), oldE(N, 0);

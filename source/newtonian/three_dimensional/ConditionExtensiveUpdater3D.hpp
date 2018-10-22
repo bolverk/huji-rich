@@ -65,31 +65,6 @@ private:
 	const vector<pair<const Condition3D*, const Action3D*> > sequence_;
 };
 
-
-//! \brief Updates the extensive with entropy if needed for pressure
-class ColdFlowsUpdate3D : public ConditionExtensiveUpdater3D::Action3D
-{
-public:
-
-	/*! \brief Class constructor
-	\param eos The equation of state
-	\param ghost The ghost point generator
-	\param interp The interpolation
-	*/
-	ColdFlowsUpdate3D(EquationOfState const& eos, Ghost3D const& ghost, LinearGauss3D const& interp);
-
-	void operator()	(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
-		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives,size_t index,double time,
-		TracerStickerNames const& tracerstickernames)const;
-private:
-	EquationOfState const& eos_;
-	Ghost3D const& ghost_;
-	LinearGauss3D const& interp_;
-	mutable double lasttime_, dt_;
-	mutable size_t entropy_index_;
-	mutable boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells_;
-};
-
 class ChooseAll : public ConditionExtensiveUpdater3D::Condition3D
 {
 public:

@@ -88,7 +88,9 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 			CM += Vtemp*CMtemp;
 			V += Vtemp;
 		}
-		velocities[i] = (CM / V - tess.GetCellCM(i)) / dt;
+		double ratio = fastabs(tess.GetCellCM(i) - tess.GetMeshPoint(i)) / (tess.GetWidth(i));
+		double factor = std::min(0.2*ratio*ratio, 0.1);
+		velocities[i] = (CM / V - (tess.GetMeshPoint(i)*factor + tess.GetCellCM(i) * (1 - factor))) / dt;
 		if (indexX < Ntracers && indexY < Ntracers && indexZ < Ntracers)
 		{
 			double m = 5.5*cells[i].density*tess.GetVolume(i) / (dt*TotalArea[i]);
