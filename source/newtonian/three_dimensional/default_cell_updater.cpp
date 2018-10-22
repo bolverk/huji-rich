@@ -25,7 +25,7 @@ namespace
 		Vector3D Vcell = cell.momentum / cell.mass;
 		double Et = cell.energy / cell.mass - 0.5*ScalarProd(Vcell, Vcell);
 		for (size_t i = 0; i < N; ++i)
-			if (neigh[i] < Norg || !tess.IsPointOutsideBox(index))
+			if (neigh[i] < Norg || !tess.IsPointOutsideBox(neigh[i]))
 				maxDV = std::max(maxDV, abs(Vcell - cells.at(neigh[i]).momentum / cells[neigh[i]].mass));
 		return 0.005*maxDV*maxDV > Et;
 	}
