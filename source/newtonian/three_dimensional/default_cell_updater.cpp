@@ -1,5 +1,8 @@
 #include "default_cell_updater.hpp"
 #include "../../misc/utils.hpp"
+#ifdef RICH_MPI
+#include "../../mpi/mpi_commands.hpp"
+#endif
 
 namespace
 {
@@ -43,6 +46,10 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 		tracerstickernames.tracer_names.end(), string("Entropy"));
 	if (it != tracerstickernames.tracer_names.end())
 		entropy_index_ = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+#ifdef RICH_MPI
+	if (entropy_index_ < tracerstickernames.tracer_names.size())
+		MPI_exchange_data(tess, extensives, true);
+#endif
 	size_t Nloop = tess.GetPointNo();
 	size_t Ntracers = res.at(0).tracers.size();
 	res.resize(Nloop);
