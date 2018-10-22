@@ -1474,7 +1474,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		{
 			for (size_t j = 0; j < realneigh.size(); ++j) // check cpu neighbors
 			{
-				if((!periodic && PointInCell(vproc,realneigh[i], temp)) || (periodic && PointInCell(neigh_chull[i], temp)))
+				if((!periodic && PointInCell(vproc,realneigh[j], temp)) || (periodic && PointInCell(neigh_chull[j], temp)))
 				{
 					good = true;
 					if (periodic && static_cast<size_t>(neighbors[j]) >= nproc) // Do we need to move point?
