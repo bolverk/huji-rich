@@ -140,4 +140,9 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 			throw eo;
 		}
 	}
+#ifdef RICH_MPI
+	if (entropy_index_ < tracerstickernames.tracer_names.size())
+		extensives.resize(tess.GetPointNo());
+#endif
+
 }
