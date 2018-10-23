@@ -90,12 +90,10 @@ namespace
 					else
 					{
 						// Is the kinetic energy small?
-						if (energy*extensive.mass < 0.005*extensive.energy)
+						if ((energy*extensive.mass < 0.005*extensive.energy) && 
+							!HighRelativeKineticEnergy(tess, index, extensives, extensive))
 						{
-							if (!HighRelativeKineticEnergy(tess, index, extensives, extensive))
-							{
 								EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
-							}
 						}
 						else
 						{
