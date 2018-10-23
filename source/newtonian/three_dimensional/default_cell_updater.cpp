@@ -60,11 +60,6 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 		res[i].density = extensive.mass / vol;
 		res[i].velocity = extensive.momentum / extensive.mass;
 		double energy = extensive.internal_energy / extensive.mass;
-		if (energy < 0)
-		{
-			energy = extensive.energy / extensive.mass - 0.5*ScalarProd(res[i].velocity, res[i].velocity);
-			extensive.internal_energy = energy*extensive.mass;
-		}
 		extensive.energy = extensive.mass*(energy + 0.5*ScalarProd(res[i].velocity, res[i].velocity));
 		for (size_t j = 0; j < Ntracers; ++j)
 			res[i].tracers[j] = extensive.tracers[j] / extensive.mass;
@@ -90,12 +85,10 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 					else
 					{
 						// Is the kinetic energy small?
-						if (energy*extensive.mass < 0.005*extensive.energy)
+						if ((energy*extensive.mass < 0.005*extensive.energy) && 
+							!HighRelativeKineticEnergy(tess, i, extensives, extensive))
 						{
-							if (!HighRelativeKineticEnergy(tess, i, extensives, extensive))
-							{
 								EntropyFix(eos, res[i], entropy_index_, tracerstickernames, energy, extensive);
-							}
 						}
 						else
 						{
