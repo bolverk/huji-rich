@@ -93,6 +93,7 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 						else
 						{
 							// We don't need the entropy fix, update entropy
+							res[i].internal_energy = energy;
 							res[i].pressure = new_pressure;
 							res[i].tracers[entropy_index_] = new_entropy;
 							extensive.tracers[entropy_index_] = new_entropy * extensive.mass;
