@@ -168,6 +168,10 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 #endif
 	for (size_t i = 0; i < N; ++i)
 		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex,tracerstickernames);
+#ifdef RICH_MPI
+	if (tindex < old[0].tracers.size())
+		extensives.resize(static_cast<size_t>(tess.GetPointNo()));
+#endif
 	return res;
 }
 
