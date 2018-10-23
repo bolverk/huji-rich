@@ -22,8 +22,9 @@ namespace
 	}
 }
 
-LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos, double max_v_correction) 
-	:interp_(interp), eos_(eos),max_v_correction_(max_v_correction){}
+LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos,double round_speed,
+	double max_v_correction) 
+	:interp_(interp), eos_(eos),round_speed_(round_speed),max_v_correction_(max_v_correction){}
 
 void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double /*time*/,
 	TracerStickerNames const & /*tracerstickernames*/, vector<Vector3D>& res) const
@@ -89,7 +90,7 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 			V += Vtemp;
 		}
 		double ratio = fastabs(tess.GetCellCM(i) - tess.GetMeshPoint(i)) / (tess.GetWidth(i));
-		double factor = std::min(0.5*ratio*ratio, 0.05);
+		double factor = std::min(0.6*ratio*ratio, round_speed_);
 		velocities[i] = (CM / V -  tess.GetCellCM(i)) / dt;
 		double mag_v = fastabs(velocities[i]);
 		Vector3D round_speed = factor * (CM / V - tess.GetMeshPoint(i)) / dt;
