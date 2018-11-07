@@ -42,25 +42,49 @@ namespace
 		const PhysicalGeometry& pg,
 		const vector<ComputationalCell>& cells,
 		const EquationOfState& eos,
-		TracerStickerNames const& tracernames)
+		TracerStickerNames const& tracernames,
+		bool relativistic)
 	{
 	  size_t Nloop = static_cast<size_t>(tess.GetPointNo());
 		vector<Extensive> res(Nloop);
-		for (size_t i = 0; i < Nloop; ++i)
+		if (!relativistic)
 		{
-			const ComputationalCell& cell = cells[i];
-			const double volume =
-				pg.calcVolume
-				(serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
-			const double mass = volume*cell.density;
-			res[i].mass = mass;
-			res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers,tracernames.tracer_names)*mass +
-				0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-			res[i].momentum = mass*cell.velocity;
-			size_t N = cell.tracers.size();
-			res[i].tracers.resize(N);
-			for (size_t j = 0; j < N; ++j)
-				res[i].tracers[j] = cell.tracers[j] * mass;
+			for (size_t i = 0; i < Nloop; ++i)
+			{
+				const ComputationalCell& cell = cells[i];
+				const double volume =
+					pg.calcVolume
+					(serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
+				const double mass = volume * cell.density;
+				res[i].mass = mass;
+				res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names)*mass +
+					0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+				res[i].momentum = mass * cell.velocity;
+				size_t N = cell.tracers.size();
+				res[i].tracers.resize(N);
+				for (size_t j = 0; j < N; ++j)
+					res[i].tracers[j] = cell.tracers[j] * mass;
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < Nloop; ++i)
+			{
+				const ComputationalCell& cell = cells[i];
+				const double volume =
+					pg.calcVolume
+					(serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
+				double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
+				const double mass = volume * cell.density * gamma;
+				res[i].mass = mass;
+				const double enthalpy = 1 + eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names) + cell.pressure / cell.density;
+				res[i].energy = volume * (cell.density*gamma*gamma*enthalpy - cell.pressure) - mass;
+				res[i].momentum = mass * enthalpy*gamma*cell.velocity;
+				size_t N = cell.tracers.size();
+				res[i].tracers.resize(N);
+				for (size_t j = 0; j < N; ++j)
+					res[i].tracers[j] = cell.tracers[j] * mass;
+			}
 		}
 		return res;
 	}
@@ -83,7 +107,8 @@ hdsim::hdsim
 	const FluxCalculator& fc,
 	const ExtensiveUpdater& eu,
 	const CellUpdater& cu,
-	TracerStickerNames tracer_sticker_names
+	TracerStickerNames tracer_sticker_names,
+	bool relativistic
 #ifdef RICH_MPI
 	,const ProcessorUpdate* proc_update
 #endif
@@ -101,7 +126,7 @@ hdsim::hdsim
 			pg,
 			cells,
 			eos,
-			tracer_sticker_names)),
+			tracer_sticker_names,relativistic)),
 	point_motion_(point_motion),
 	edge_velocity_calculator_(evc),
 	source_(source),

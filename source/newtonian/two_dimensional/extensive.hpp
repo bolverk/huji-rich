@@ -21,13 +21,13 @@ class Extensive
 #endif // RICH_MPI
 {
 public:
-  //! \brief mass
+  //! \brief rest mass times gamma
   double mass;
 
-  //! \brief energy
+  //! \brief energy, in relativity it is = rho*h*gamma^2-P-rho
   double energy;
 
-  //! \brief momentum
+  //! \brief momentum, in relativity it is = rho*h*gamma*v
   Vector2D momentum;
 
   //! \brief tracers
