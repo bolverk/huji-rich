@@ -77,9 +77,9 @@ namespace
 				double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
 				const double mass = volume * cell.density * gamma;
 				res[i].mass = mass;
-				const double enthalpy = 1 + eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names) + cell.pressure / cell.density;
-				res[i].energy = volume * (cell.density*gamma*gamma*enthalpy - cell.pressure) - mass;
-				res[i].momentum = mass * enthalpy*gamma*cell.velocity;
+				const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names);
+				res[i].energy = volume * (cell.density*gamma*gamma*enthalpy - cell.pressure)+volume*cell.density*(gamma*gamma-gamma);
+				res[i].momentum = mass * (enthalpy+1)*gamma*cell.velocity;
 				size_t N = cell.tracers.size();
 				res[i].tracers.resize(N);
 				for (size_t j = 0; j < N; ++j)

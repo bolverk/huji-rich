@@ -51,7 +51,7 @@ namespace
 		const double mx_hll = (sr*mxr - sl * mxl + (mxl*left.Velocity.x + left.Pressure) - (mxr*right.Velocity.x + right.Pressure)) / (sr - sl);
 		const double F_E = (sr * mxl - sl * mxr + sr * sl*(Er - El)) / (sr - sl);
 		const double F_mx = (sr * (mxl*left.Velocity.x + left.Pressure) - sl * (mxr*right.Velocity.x + right.Pressure) + sr * sl*(mxr - mxl)) / (sr - sl);
-		const double ss= (((E_hll + F_mx) - std::sqrt((E_hll + F_mx)*(E_hll + F_mx) - 4 * mx_hll*F_E)) / (2 * F_E));
+		const double ss= (1e6*std::abs(F_E) < std::abs(E_hll+F_mx))	? mx_hll/(E_hll+F_mx) :	(((E_hll + F_mx) - std::sqrt((E_hll + F_mx)*(E_hll + F_mx) - 4 * mx_hll*F_E)) / (2 * F_E));
 		pstar = -F_E * ss + F_mx;
 		assert(sr > sl);
 		assert(sr > ss);
@@ -95,15 +95,15 @@ namespace
 	Conserved SR_Primitive2Flux(Primitive const& p,double edge_vel)
 	{
 		double gamma = 1.0 / std::sqrt(1 - ScalarProd(p.Velocity, p.Velocity));
-		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*p.Energy*gamma*gamma*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*p.Energy*gamma*gamma*p.Velocity.y*(p.Velocity.x-edge_vel)), 
-			p.Density*p.Energy*gamma*gamma*(p.Velocity.x-edge_vel));
+		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.y*(p.Velocity.x-edge_vel)), 
+			p.Density*(p.Energy+1)*gamma*gamma*(p.Velocity.x-edge_vel));
 	}	
 
 	Conserved starred_flux(Primitive const& state, double lambda_star, double lambda,double edge_vel,double pstar)
 	{
 		const double g_2 = 1.0/(1-ScalarProd(state.Velocity,state.Velocity));
 		const double dlambda_1 = 1.0 / (lambda - lambda_star);
-		const double d = state.Density*(lambda-state.Velocity.x)*dlambda_1;
+		const double d = state.Density*(lambda-state.Velocity.x)*dlambda_1*std::sqrt(g_2);
 		const double mx = (state.Density*(state.Energy+1)*state.Velocity.x*g_2*(lambda - state.Velocity.x) + pstar - state.Pressure)*dlambda_1;
 		const double my = (state.Density*(state.Energy+1)*state.Velocity.y*g_2*(lambda - state.Velocity.x))*dlambda_1;
 		const double E = ((state.Density*(state.Energy+1)*g_2 - state.Pressure)*(lambda - state.Velocity.x) + pstar * lambda_star - state.Pressure*state.Velocity.x)*dlambda_1;

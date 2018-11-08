@@ -110,6 +110,7 @@ vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<C
 		for (size_t i = 0; i < N; ++i)
 		{
 			res[i] += calc_dw(i, tess, cells,tracerstickernames);
+			res[i].y = 0;
 		}
 	}
 	return res;

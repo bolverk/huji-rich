@@ -76,10 +76,12 @@ public:
 
 	/*! \brief Class constructor
 	  \param sequence List of rules for cells that are calculated in a special way
+	  \param SR Flag for relativity
+	  \param G The adiabatic index for relativistic ideal gas law
 	 */
 	explicit SimpleCellUpdater
 		(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
-			vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >());
+			vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >(),bool SR = false,double G = 0);
 
 	vector<ComputationalCell> operator()
 		(const Tessellation& tess,
@@ -94,6 +96,8 @@ public:
 
 private:
 	const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence_;
+	const bool SR_;
+	const double G_;
 	const string entropy_;
 };
 

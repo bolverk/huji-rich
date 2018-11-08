@@ -23,6 +23,7 @@ void SimpleExtensiveUpdater::operator()
   for(size_t i=0;i<edge_list.size();++i)
   {
     const Edge& edge = edge_list[i];
+	int n0 = edge.neighbors.first, n1 = edge.neighbors.second;
 	ReplaceExtensive(delta,fluxes[i]);
 	delta *= dt*cd.areas[i];
     if(bracketed(0,edge.neighbors.first,tess.GetPointNo()))
