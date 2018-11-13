@@ -1,6 +1,5 @@
 #include "simple_cell_updater.hpp"
 #include "../../misc/lazy_list.hpp"
-#include <boost/math/tools/roots.hpp>
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
@@ -23,68 +22,6 @@ SimpleCellUpdater::Action::~Action(void) {}
 
 namespace
 {
-	class SolveVelocity
-	{
-	private:
-		double a0_, a1_, a2_, a3_, a4_;
-	public:
-		SolveVelocity(double a0, double a1, double a2, double a3, double a4) :a0_(a0), a1_(a1), a2_(a2), a3_(a3), a4_(a4) {}
-
-		double operator()(const double v) const
-		{
-			return a4_ * v*v*v*v + a3_ * v*v*v + a2_ * v*v + a1_ * v + a0_;
-		}
-
-		double Deriv(const double v) const
-		{
-			return 4 * a4_*v*v*v+3 * a3_*v*v + 2*a2_ * v + a1_;
-		}
-	};
-
-	double DoNewtonRapshon(SolveVelocity const& solve, double val)
-	{
-		size_t counter = 1;
-		double f0 = solve(val);
-		double new_val = val - f0 / solve.Deriv(val);
-		while (abs(new_val - val) > 1e-12 && std::abs(f0)>1e-16)
-		{
-			++counter;
-			val = new_val;
-			f0 = solve(val);
-			new_val = std::min(1.0,val - f0 / solve.Deriv(val));
-			if (counter > 99)
-			{
-				std::cout << "Bad convergence in simple cell updater, too mant iterations in finding velocity";
-				//std::cout << "E = " << E << " M = " << M << " D = " << cell.mass << std::endl;
-				throw;
-			}
-		}
-		return new_val;
-	}
-
-	double GetVelocity(Extensive const& cell,double G)
-	{
-		boost::uintmax_t max_iter = 100;
-		boost::math::tools::eps_tolerance<double> tol(25);
-		double M = std::sqrt(ScalarProd(cell.momentum, cell.momentum));
-		// Add rest mass energy
-		double E = cell.energy + cell.mass;
-		SolveVelocity tosolve(M*M, -2 * G*M*E, G*G*E*E + 2 * (G - 1)*M*M - (G - 1)*(G - 1)*cell.mass*cell.mass, -2 * G*(G - 1)*M*E, (G - 1)*(G - 1)*(cell.mass*cell.mass + M * M));
-		
-		double vmin = (1e6*M<cell.mass) ? 0 :(G*E - std::sqrt((G*E)*(G*E) - 4 * (G - 1)*M*M)) / (2 * M*(G - 1));
-		double vmax = std::min(1.0, M / E + 1e-6);
-	/*	std::pair<double, double>  r1 = boost::math::tools::toms748_solve(tosolve, vmin, vmax, tol, max_iter);
-		// check convergence
-		if (max_iter > 99)
-		{
-			std::cout << "Bad convergence in simple cell updater, too mant iterations in finding velocity";
-			std::cout << "E = " << E << " M = " << M << " D = " << cell.mass << std::endl;
-			throw;
-		}
-		return 0.5*(r1.first + r1.second);*/
-		return DoNewtonRapshon(tosolve, 0.5*(vmin + vmax));
-	}
-
 	void EntropyFix(EquationOfState const& eos,ComputationalCell &res,size_t entropy_index,TracerStickerNames const& tracerstickernames,double &energy,
 		Extensive &extensive)
 	{

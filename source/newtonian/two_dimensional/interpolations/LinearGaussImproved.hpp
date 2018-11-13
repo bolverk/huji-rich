@@ -27,6 +27,7 @@ public:
 	\param ghost The ghost point generator
 	\param calc_tracers Names of tracers for which to calc the slope for
 	\param skip_key The sticker name to skip cells for taking them into account for the slope limit
+	\param SR Flag for relativity
 	*/
 	LinearGaussImproved
 		(EquationOfState const& eos,
@@ -37,7 +38,8 @@ public:
 		double delta_P = 0.7,
 		const vector<string>& calc_tracers =
 		vector<string>(),
-		string skip_key=string());
+		string skip_key=string(),
+		bool SR=false);
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
 		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames,CacheData const& cd)const;
@@ -76,6 +78,7 @@ private:
 	const vector<string> calc_tracers_;
 	const string skip_key_;
 	mutable vector<size_t> to_skip_;
+	bool SR_;
 
 	LinearGaussImproved
 		(const LinearGaussImproved& origin);

@@ -96,7 +96,7 @@ namespace
 	{
 		double gamma = 1.0 / std::sqrt(1 - ScalarProd(p.Velocity, p.Velocity));
 		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.y*(p.Velocity.x-edge_vel)), 
-			p.Density*(p.Energy+1)*gamma*gamma*(p.Velocity.x-edge_vel));
+			p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.x-edge_vel*(p.Density*(p.Energy+1)*gamma*gamma-p.Pressure));
 	}	
 
 	Conserved starred_flux(Primitive const& state, double lambda_star, double lambda,double edge_vel,double pstar)
@@ -116,10 +116,9 @@ Conserved Hllc_SR::operator()(Primitive const& left,Primitive const& right,	doub
 {
 	if (is_nan(right.Velocity.x))
 		throw UniversalError("Hllc_SR::Solved entered with nan");
-
 	double pstar = 0;
 	WaveSpeeds ws = estimate_wave_speeds(left,right,pstar);
-
+	
 	Conserved f_gr;
 	if (ws.left > velocity)
 		f_gr = SR_Primitive2Flux(left,velocity);
