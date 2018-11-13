@@ -127,6 +127,29 @@ vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D
 	return res;
 }
 
+vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const & ll, Vector3D const & ur, double Rmin, double Rmax, double a,Vector3D const& center)
+{
+	typedef boost::mt19937_64 base_generator_type;
+	base_generator_type generator;
+	boost::random::uniform_real_distribution<> dist;
+	vector<Vector3D> res;
+	res.reserve(PointNum);
+	double Rmx = std::pow(Rmax, a);
+	double Rmn = std::pow(Rmin, a);
+	double a_1 = 1.0 / a;
+	while (res.size() < PointNum)
+	{
+		double r = std::pow(dist(generator)*(Rmx-Rmn) + Rmn, a_1);
+		double phi = 2 * M_PI*dist(generator);
+		double t = acos(2 * dist(generator) - 1);
+		Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
+		point += center;
+		if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
+			res.push_back(point);
+	}
+	return res;
+}
+
 
 #ifdef RICH_MPI
 vector<Vector3D> RandPointsMPI(Voronoi3D const& tproc, size_t np)

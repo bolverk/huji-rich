@@ -44,6 +44,8 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 
 vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax);
 
+vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,double a, Vector3D const& center);
+
 #ifdef RICH_MPI
 /*!
 \brief Generates a random grid with uniform point density and a constant seed
