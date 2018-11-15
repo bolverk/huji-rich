@@ -28,7 +28,7 @@ namespace
 		size_t counter = 1;
 		double f0 = solve(val);
 		double new_val = val - f0 / solve.Deriv(val);
-		while (abs(new_val - val) > 1e-12 && std::abs(f0) > 1e-16)
+		while (abs(new_val - val) > 1e-12 && std::abs(f0) > 1e-13)
 		{
 			++counter;
 			val = new_val;

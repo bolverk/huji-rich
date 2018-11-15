@@ -107,6 +107,29 @@ namespace {
 		double Vector2D::* component_;
 	};
 
+	class CMGeneratingPointCoordinate : public LazyList<double>
+	{
+	public:
+
+		CMGeneratingPointCoordinate(const Tessellation& tess,
+			double Vector2D::* component) :
+			tess_(tess), component_(component) {}
+
+		size_t size(void) const
+		{
+			return static_cast<size_t>(tess_.GetPointNo());
+		}
+
+		double operator[](size_t i) const
+		{
+			return tess_.GetCellCM(static_cast<int>(i)).*component_;
+		}
+
+	private:
+		const Tessellation& tess_;
+		double Vector2D::* component_;
+	};
+
 	class SingleCellPropertyExtractor
 	{
 	public:
@@ -287,6 +310,18 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 			(MeshGeneratingPointCoordinate
 				(sim.getTessellation(), &Vector2D::y)),
 			"y_coordinate");
+	write_std_vector_to_hdf5
+	(geometry,
+		serial_generate
+		(CMGeneratingPointCoordinate
+		(sim.getTessellation(), &Vector2D::x)),
+		"CM_x_coordinate");
+	write_std_vector_to_hdf5
+	(geometry,
+		serial_generate
+		(CMGeneratingPointCoordinate
+		(sim.getTessellation(), &Vector2D::y)),
+		"CM_y_coordinate");
 	write_std_vector_to_hdf5
 		(geometry,
 			chd.xvert,

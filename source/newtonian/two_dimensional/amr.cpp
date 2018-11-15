@@ -48,8 +48,8 @@ Extensive SimpleAMRExtensiveUpdaterSR::ConvertPrimitveToExtensive(const Computat
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * mass;
 	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
-	res.energy = enthalpy * mass*gamma - cell.pressure*volume;
-	res.momentum = mass * cell.velocity *gamma*enthalpy;
+	res.energy = (gamma*(enthalpy+1) -1)* mass - cell.pressure*volume;
+	res.momentum = mass * cell.velocity *gamma*(enthalpy+1);
 	return res;
 }
 

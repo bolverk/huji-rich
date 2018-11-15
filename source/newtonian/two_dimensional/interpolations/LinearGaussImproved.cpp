@@ -40,16 +40,16 @@ namespace
 		}
 	}
 
-	vector<ComputationalCell const*> GetNeighborCells(vector<const Edge *> const& edges, size_t cell_index,
-		vector<ComputationalCell> const& cells)
+	vector<ComputationalCell> GetNeighborCells(vector<const Edge *> const& edges, size_t cell_index,
+		vector<ComputationalCell> const& cells,bool SR)
 	{
-		vector<ComputationalCell const*> res(edges.size());
+		vector<ComputationalCell> res(edges.size());
 		const size_t nloop = edges.size();
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			size_t other_cell = (edges[i]->neighbors.first == static_cast<int>(cell_index)) ? static_cast<size_t>
 				(edges[i]->neighbors.second) : static_cast<size_t> (edges[i]->neighbors.first);
-			res[i] = &cells.at(other_cell);
+			res[i] = cells.at(other_cell);
 		}
 		return res;
 	}
@@ -65,7 +65,7 @@ namespace
 	}
 
 	void calc_naive_slope(ComputationalCell const& cell,
-		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell const*> const& neighbors,
+		Vector2D const& center, Vector2D const& cell_cm, double cell_volume, vector<ComputationalCell> const& neighbors,
 		vector<Vector2D> const& neighbor_centers, vector<Vector2D> const& neigh_cm, vector<const Edge*> const& edge_list,
 		Slope &res,Slope &vec_compare)
 	{
@@ -100,8 +100,8 @@ namespace
 				ComputationalCellAddMult(vec_compare.xderivative, cell, r_ij.x*0.5);
 				ComputationalCellAddMult(vec_compare.yderivative, cell, r_ij.y*0.5);
 			}
-			ComputationalCellAddMult(vec_compare.yderivative, *neighbors[i], r_ij.y*0.5);
-			ComputationalCellAddMult(vec_compare.xderivative, *neighbors[i], r_ij.x*0.5);
+			ComputationalCellAddMult(vec_compare.yderivative, neighbors[i], r_ij.y*0.5);
+			ComputationalCellAddMult(vec_compare.xderivative, neighbors[i], r_ij.x*0.5);
 		}
 		m[0] += cell_volume;
 		m[3] += cell_volume;
@@ -133,22 +133,22 @@ namespace
 		ComputationalCellAddMult(res.yderivative, vec_compare.xderivative, m_inv[2]);
 	}
 
-	double PressureRatio(ComputationalCell cell, vector<ComputationalCell const*> const& neigh)
+	double PressureRatio(ComputationalCell cell, vector<ComputationalCell> const& neigh)
 	{
 		double res = 1;
 		double p = cell.pressure;
 		for (size_t i = 0; i < neigh.size(); ++i)
 		{
-			if (p > neigh[i]->pressure)
-				res = std::min(res, neigh[i]->pressure / p);
+			if (p > neigh[i].pressure)
+				res = std::min(res, neigh[i].pressure / p);
 			else
-				res = std::min(res, p / neigh[i]->pressure);
+				res = std::min(res, p / neigh[i].pressure);
 		}
 		return res;
 	}
 
 	bool is_shock(Slope const& naive_slope, double cell_width, double shock_ratio,
-		ComputationalCell const& cell, vector<ComputationalCell const*> const& neighbor_list, double pressure_ratio, double cs)
+		ComputationalCell const& cell, vector<ComputationalCell> const& neighbor_list, double pressure_ratio, double cs)
 	{
 		const bool cond1 = (naive_slope.xderivative.velocity.x + naive_slope.yderivative.velocity.y)*
 			cell_width < (-shock_ratio)*cs;
@@ -172,7 +172,7 @@ namespace
 	}
 
 	void slope_limit(ComputationalCell const& cell, Vector2D const& cm,
-		vector<ComputationalCell const*> const& neighbors, vector<const Edge*> const& edge_list,
+		vector<ComputationalCell> const& neighbors, vector<const Edge*> const& edge_list,
 		Slope &slope,
 		ComputationalCell &cmax,
 		ComputationalCell &cmin,
@@ -193,7 +193,7 @@ namespace
 		size_t nloop = neighbors.size();
 		for (size_t i = 0; i < nloop; ++i)
 		{
-			ComputationalCell const& cell_temp = *neighbors[i];
+			ComputationalCell const& cell_temp = neighbors[i];
 			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
 			if (tess.GetOriginalIndex(edge_list[i]->neighbors.first) == tess.GetOriginalIndex(edge_list[i]->neighbors.second))
@@ -327,7 +327,7 @@ namespace
 	}
 
 	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
-		vector<ComputationalCell const*> const& neighbors, vector<const Edge*> const& edge_list,
+		vector<ComputationalCell> const& neighbors, vector<const Edge*> const& edge_list,
 		Slope  &slope, double diffusecoeff,TracerStickerNames const& tracerstickernames,
 		string const& skip_key,ComputationalCell &cmax,ComputationalCell &cmin,ComputationalCell &maxdiff,
 		ComputationalCell &mindiff,vector<double> &psi,bool SR)
@@ -340,7 +340,7 @@ namespace
 		// Find maximum values
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
-			ComputationalCell const& cell_temp = *neighbors[i];
+			ComputationalCell const& cell_temp = neighbors[i];
 			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
@@ -368,7 +368,7 @@ namespace
 		psi.assign(psi.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
-			if (!skip_key.empty() && safe_retrieve(neighbors[i]->stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && safe_retrieve(neighbors[i].stickers, tracerstickernames.sticker_names, skip_key))
 				continue;
 			interp(centroid_val,cell, slope, CalcCentroid(*edge_list[i]), cm);
 			if (SR)
@@ -378,25 +378,25 @@ namespace
 			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density > cmax.density || centroid_val.density < cmin.density)
 			{
 				if (std::abs(dphi.density) > 1e-9*cell.density)
-					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i]->density - cell.density) / dphi.density, 0.0));
+					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i].density - cell.density) / dphi.density, 0.0));
 			}
 			// pressure
 			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure < cmin.pressure || centroid_val.pressure>cmax.pressure)
 			{
 				if (std::abs(dphi.pressure) > 1e-9*cell.pressure)
-					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i]->pressure - cell.pressure) / dphi.pressure, 0.0));
+					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i].pressure - cell.pressure) / dphi.pressure, 0.0));
 			}
 			// xvelocity
 			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x<cmin.velocity.x || centroid_val.velocity.x>cmax.velocity.x)
 			{
 				if (std::abs(dphi.velocity.x) > 1e-9*cell.velocity.x)
-					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i]->velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
+					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i].velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
 			if (std::abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y<cmin.velocity.y || centroid_val.velocity.y>cmax.velocity.y)
 			{
 				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
-					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i]->velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
+					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i].velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
 			}
 			/*if (SR)
 			{
@@ -425,7 +425,7 @@ namespace
 				{
 					if (std::abs(dphi.tracers[j]) > std::abs(1e-9*cell_tracer))
 						psi[4 + counter] = std::min(psi[4 + counter],
-							std::max(diffusecoeff*(neighbors[i]->tracers[j] - cell_tracer) / dphi.tracers[j], 0.0));
+							std::max(diffusecoeff*(neighbors[i].tracers[j] - cell_tracer) / dphi.tracers[j], 0.0));
 				}
 				++counter;
 			}
@@ -464,7 +464,7 @@ namespace
 	}
 
 	void GetBoundarySlope(ComputationalCell const& cell, Vector2D const& cell_cm,
-		vector<ComputationalCell const*> const& neighbors, vector<Vector2D> const& neigh_cm,
+		vector<ComputationalCell> const& neighbors, vector<Vector2D> const& neigh_cm,
 		Slope &res)
 	{
 		size_t Nneigh = neigh_cm.size();
@@ -474,8 +474,8 @@ namespace
 		double SxSy(0), Sy2(0), Sx2(0);
 		for (size_t i = 0; i < Nneigh; ++i)
 		{
-			PhiSy += (*neighbors[i] - cell)*(neigh_cm[i].y - cell_cm.y);
-			PhiSx += (*neighbors[i] - cell)*(neigh_cm[i].x - cell_cm.x);
+			PhiSy += (neighbors[i] - cell)*(neigh_cm[i].y - cell_cm.y);
+			PhiSx += (neighbors[i] - cell)*(neigh_cm[i].x - cell_cm.x);
 			SxSy += (neigh_cm[i].y - cell_cm.y)*(neigh_cm[i].x - cell_cm.x);
 			Sx2 += (neigh_cm[i].x - cell_cm.x)*(neigh_cm[i].x - cell_cm.x);
 			Sy2 += (neigh_cm[i].y - cell_cm.y)*(neigh_cm[i].y - cell_cm.y);
@@ -513,9 +513,9 @@ namespace
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
 		GetNeighborCM(tess, edge_list, cell_index, neighbor_cm_list);
-		vector<ComputationalCell const* > neighbor_list = GetNeighborCells(edge_list, cell_index, cells);
+		vector<ComputationalCell> neighbor_list = GetNeighborCells(edge_list, cell_index, cells,SR);
 
-		ComputationalCell const& cell = cells[cell_index];
+		ComputationalCell cell = cells[cell_index];
 		bool boundary_slope = false;
 		size_t Nneigh = neighbor_list.size();
 		for (size_t i = 0; i < Nneigh; ++i)
@@ -614,6 +614,15 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 	for (boost::container::flat_map<size_t, ComputationalCell>::const_iterator it = ghost_cells.begin(); it !=
 		ghost_cells.end(); ++it)
 		new_cells[it->first] = it->second;
+	if (SR_)
+	{
+		size_t Nall = new_cells.size();
+		for (size_t j = 0; j < Nall; ++j)
+		{
+			double gamma = 1.0 / std::sqrt(1 - ScalarProd(new_cells[j].velocity, new_cells[j].velocity));
+			new_cells[j].velocity *= gamma;
+		}
+	}
 	// Prepare slopes
 	rslopes_.resize(CellNumber, Slope(cells[0], cells[0]));
 	naive_rslopes_.resize(CellNumber);
@@ -640,6 +649,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 			if (edge.neighbors.first == static_cast<int>(i))
 			{
 				ReplaceComputationalCell(res[static_cast<size_t>(edge_index[j])].first,new_cells[i]);
+				if(SR_)
 				interp2(res[static_cast<size_t>(edge_index[j])].first,
 					rslopes_[i], CalcCentroid(edge), tess.GetCellCM(static_cast<int>(i)));
 				if (edge.neighbors.second > static_cast<int>(CellNumber))
@@ -696,6 +706,18 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
 					edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #endif //RICH_MPI
+		}
+	}
+	//In SR convert back to velocities
+	if (SR_)
+	{
+		size_t N = res.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			double factor = 1.0 / std::sqrt(1 + ScalarProd(res[i].first.velocity, res[i].first.velocity));
+			res[i].first.velocity *= factor;
+			factor = 1.0 / std::sqrt(1 + ScalarProd(res[i].second.velocity, res[i].second.velocity));
+			res[i].second.velocity *= factor;
 		}
 	}
 }
