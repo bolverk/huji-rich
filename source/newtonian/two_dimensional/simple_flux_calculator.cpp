@@ -144,8 +144,8 @@ namespace {
 		const Vector2D& p)
 	{
 		return Conserved(c.Mass,
-			c.Momentum.x*n / abs(n) +
-			c.Momentum.y*p / abs(p),
+			c.Momentum.x*n +
+			c.Momentum.y*p ,
 			c.Energy);
 	}
 }

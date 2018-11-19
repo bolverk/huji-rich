@@ -7,19 +7,22 @@ namespace
 {
 	class SolveVelocity
 	{
-	private:
-		double a0_, a1_, a2_, a3_, a4_;
+	
 	public:
+		double a0_, a1_, a2_, a3_, a4_;
+
 		SolveVelocity(double a0, double a1, double a2, double a3, double a4) :a0_(a0), a1_(a1), a2_(a2), a3_(a3), a4_(a4) {}
 
 		double operator()(const double v) const
 		{
-			return a4_ * v*v*v*v + a3_ * v*v*v + a2_ * v*v + a1_ * v + a0_;
+			return v * v*(a4_*v*v + a3_ * v + a2_) +v*a1_ +a0_;
+			//return a4_ * v*v*v*v + a3_ * v*v*v + a2_ * v*v + a1_ * v + a0_;
 		}
 
 		double Deriv(const double v) const
 		{
-			return 4 * a4_*v*v*v + 3 * a3_*v*v + 2 * a2_ * v + a1_;
+			return v * v*(4 * a4_*v + a3_ * 3) + 2 * a2_*v + a1_;
+			//return 4 * a4_*v*v*v + 3 * a3_*v*v + 2 * a2_ * v + a1_;
 		}
 	};
 
@@ -28,7 +31,7 @@ namespace
 		size_t counter = 1;
 		double f0 = solve(val);
 		double new_val = val - f0 / solve.Deriv(val);
-		while (abs(new_val - val) > 1e-12 && std::abs(f0) > 1e-13)
+		while (abs(new_val - val) > 1e-12 && (std::abs(f0) > (1e-12*solve.a0_)))
 		{
 			++counter;
 			val = new_val;
@@ -53,6 +56,8 @@ double GetVelocity(Extensive const& cell, double G)
 	SolveVelocity tosolve(M*M, -2 * G*M*E, G*G*E*E + 2 * (G - 1)*M*M - (G - 1)*(G - 1)*cell.mass*cell.mass, -2 * G*(G - 1)*M*E, (G - 1)*(G - 1)*(cell.mass*cell.mass + M * M));
 
 	double vmin = (1e6*M < cell.mass) ? 0 : (G*E - std::sqrt((G*E)*(G*E) - 4 * (G - 1)*M*M)) / (2 * M*(G - 1));
+	if((G*E)*(G*E) - 4 * (G - 1)*M*M < 0)
+		vmin = 0;
 	double vmax = std::min(1.0, M / E + 1e-6);
 	return DoNewtonRapshon(tosolve, 0.5*(vmin + vmax));
 }

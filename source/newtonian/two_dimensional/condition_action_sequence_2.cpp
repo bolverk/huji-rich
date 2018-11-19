@@ -138,12 +138,10 @@ void RegularFlux2::operator()
 	Extensive &res,double /*time*/,
 	TracerStickerNames const& tracerstickernames) const
 {
-	const Vector2D p = normalize
-		(edge.vertices.second -
-			edge.vertices.first);
 	const Vector2D n = normalize
 		(tess.GetMeshPoint(edge.neighbors.second) -
 			tess.GetMeshPoint(edge.neighbors.first));
+	const Vector2D p(n.y, -n.x);
 	const double v =
 		ScalarProd(n, edge_velocity);
 	const Conserved c = rotate_solve_rotate_back

@@ -131,11 +131,11 @@ namespace
 		Extensive& extensive = extensives[index];
 		double v = GetVelocity(extensive, G);
 		const double volume = 1.0/cd.volumes[index];
-		double gamma_1 = std::sqrt(1 - v * v);
+		res.velocity = (fastabs(extensive.momentum)*1e8<extensive.mass) ? extensive.momentum/extensive.mass : v*extensive.momentum / abs(extensive.momentum);
+		double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity,res.velocity));
 		res.density = extensive.mass *gamma_1*volume;
 		if (res.density < 0)
 			throw UniversalError("Negative density");
-		res.velocity = (fastabs(extensive.momentum)*1e8<extensive.mass) ? extensive.momentum/extensive.mass : v*extensive.momentum / abs(extensive.momentum);
 		res.stickers = old.stickers;
 		for (size_t i = 0; i < extensive.tracers.size(); ++i)
 			res.tracers[i] = extensive.tracers[i] / extensive.mass;

@@ -51,7 +51,9 @@ namespace
 		const double mx_hll = (sr*mxr - sl * mxl + (mxl*left.Velocity.x + left.Pressure) - (mxr*right.Velocity.x + right.Pressure)) / (sr - sl);
 		const double F_E = (sr * mxl - sl * mxr + sr * sl*(Er - El)) / (sr - sl);
 		const double F_mx = (sr * (mxl*left.Velocity.x + left.Pressure) - sl * (mxr*right.Velocity.x + right.Pressure) + sr * sl*(mxr - mxl)) / (sr - sl);
-		const double ss= (1e6*std::abs(F_E) < std::abs(E_hll+F_mx))	? mx_hll/(E_hll+F_mx) :	(((E_hll + F_mx) - std::sqrt((E_hll + F_mx)*(E_hll + F_mx) - 4 * mx_hll*F_E)) / (2 * F_E));
+		const double b = -(E_hll + F_mx);
+		const double ss = (std::abs(F_E) < std::max(1e-14*E_hll, 1e-14)) ? -mx_hll / b : (-b - std::sqrt(b*b - 4 * mx_hll*F_E)) / (2 * F_E);
+		//const double ss= (1e6*std::abs(F_E) < std::abs(E_hll+F_mx))	? mx_hll/(E_hll+F_mx) :	(((E_hll + F_mx) - std::sqrt((E_hll + F_mx)*(E_hll + F_mx) - 4 * mx_hll*F_E)) / (2 * F_E));
 		pstar = -F_E * ss + F_mx;
 		assert(sr > sl);
 		assert(sr > ss);
@@ -94,9 +96,10 @@ namespace
 {
 	Conserved SR_Primitive2Flux(Primitive const& p,double edge_vel)
 	{
-		double gamma = 1.0 / std::sqrt(1 - ScalarProd(p.Velocity, p.Velocity));
-		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.y*(p.Velocity.x-edge_vel)), 
-			p.Density*(p.Energy+1)*gamma*gamma*p.Velocity.x-edge_vel*(p.Density*(p.Energy+1)*gamma*gamma-p.Pressure));
+		const double g_2 = 1.0 / (1 - ScalarProd(p.Velocity, p.Velocity));
+		double gamma =std::sqrt(g_2);
+		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*(p.Energy+1)*g_2*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*(p.Energy+1)*g_2*p.Velocity.y*(p.Velocity.x-edge_vel)), 
+			p.Density*(p.Energy+1)*g_2*p.Velocity.x-edge_vel*(p.Density*(p.Energy+1)*g_2-p.Pressure));
 	}	
 
 	Conserved starred_flux(Primitive const& state, double lambda_star, double lambda,double edge_vel,double pstar)
@@ -110,6 +113,16 @@ namespace
 		Conserved res(d*(lambda_star-edge_vel), Vector2D(mx*(lambda_star-edge_vel) + pstar, my*(lambda_star-edge_vel)), mx - E*edge_vel);
 		return res;
 	}
+	Conserved Hll_flux(Primitive const& left, Primitive const& right, double ll, double lr)
+	{
+		Conserved Fl = SR_Primitive2Flux(left,0);
+		Conserved Fr = SR_Primitive2Flux(right,0);
+		double g_2l = 1.0 / (1 - ScalarProd(left.Velocity, left.Velocity));
+		Conserved Ul(left.Density*std::sqrt(g_2l), g_2l*left.Density*(left.Energy + 1)*left.Velocity, g_2l*left.Density*(left.Energy + 1)-left.Pressure);
+		double g_2r = 1.0 / (1 - ScalarProd(right.Velocity, right.Velocity));
+		Conserved Ur(right.Density*std::sqrt(g_2r), g_2r*right.Density*(right.Energy + 1)*right.Velocity, g_2r*right.Density*(right.Energy + 1)-right.Pressure);
+		return (lr*Fl - ll * Fr + ll * lr*(Ur - Ul)) / (lr - ll);
+	}
 }
 
 Conserved Hllc_SR::operator()(Primitive const& left,Primitive const& right,	double velocity) const
@@ -121,11 +134,13 @@ Conserved Hllc_SR::operator()(Primitive const& left,Primitive const& right,	doub
 	
 	Conserved f_gr;
 	if (ws.left > velocity)
-		f_gr = SR_Primitive2Flux(left,velocity);
+		f_gr = SR_Primitive2Flux(left, velocity);
 	else if (ws.left <= velocity && ws.center >= velocity)
 		f_gr = starred_flux(left, ws.center, ws.left, velocity,pstar);
-	else if (ws.center < velocity && ws.right >= velocity)
+		//f_gr = Hll_flux(left, right, ws.left, ws.right);
+	else if (ws.center < velocity &&ws.right >= velocity)
 		f_gr = starred_flux(right, ws.center, ws.right, velocity,pstar);
+		//f_gr = Hll_flux(left, right, ws.left, ws.right);
 	else if (ws.right < velocity)
 		f_gr = SR_Primitive2Flux(right, velocity);
 	else
