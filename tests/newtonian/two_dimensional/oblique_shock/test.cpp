@@ -80,11 +80,11 @@ namespace
 				const double dx = tess.GetMeshPoint(static_cast<int>(index)).x + velocities[index].x*dt -
 					(tess.GetMeshPoint(static_cast<int>(index)).y + 0.428) * 10;
 				if (dx > (-1 * distanceToWall_))
-					res.x = -0.5*dx / dt;
+					res.x = 0.1*dx / dt;
 				const double dy = tess.GetMeshPoint(static_cast<int>(index)).y + velocities[index].y*dt -
 					(tess.GetMeshPoint(static_cast<int>(index)).x*0.1 - 0.428);
 				if (dy < distanceToWall_)
-					res.y = -0.5*dy / dt;
+					res.y = 0.1*dy / dt;
 				return res;
 			}
 			else
@@ -376,8 +376,8 @@ namespace
 	{
 		const int max_iter = 5e6;
 		const double tf = 0.5;
-		ObliqueRefine refine(0.05*0.05, "wedge");
-		ObliqueRemove remove("wedge", 0.02);
+		ObliqueRefine refine(0.025*0.025, "wedge");
+		ObliqueRemove remove("wedge", 0.01);
 		NonConservativeAMR amr(refine, remove);
 
 		while (tf > sim.getTime()) {

@@ -16,7 +16,7 @@ public:
   vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   const double time, TracerStickerNames const& tracerstickersnames) const;
+   double time, TracerStickerNames const& tracerstickersnames) const;
 };
 
 #endif // LAGRANGIAN_HPP

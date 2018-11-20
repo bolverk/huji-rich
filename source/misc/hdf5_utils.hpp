@@ -14,6 +14,7 @@ using std::string;
 using std::vector;
 using std::pair;
 using H5::Group;
+using H5::H5File;
 using H5::PredType;
 using H5::DataSpace;
 using H5::DSetCreatPropList;

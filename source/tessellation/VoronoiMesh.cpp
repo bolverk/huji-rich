@@ -13,7 +13,7 @@ using std::cout;
 
 namespace
 {
-	bool PointInCell(Tessellation const& tess,int cell_index, Vector2D const& vec)
+/*	bool PointInCell(Tessellation const& tess,int cell_index, Vector2D const& vec)
 	{
 		std::vector<int> const& edges = tess.GetCellEdges(cell_index);
 		int N = static_cast<int>(edges.size());
@@ -26,7 +26,7 @@ namespace
 		}
 		return true;
 	}
-
+	*/
 #ifdef RICH_MPI
 	template<class T> void tidy(vector<T>& v)
 	{
