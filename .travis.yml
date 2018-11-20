@@ -5,15 +5,15 @@ compiler:
 os:
 - linux
 before_install:
-- if [ "$CXX" = "g++" ]; then export CXX="g++-8.2" CC="gcc-8.2"; fi
+- if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
 addons:
   apt:	
     sources:
     - ubuntu-toolchain-r-test
     - boost-latest
     packages:
-    - gcc-8.2
-    - g++-8.2
+    - gcc-7
+    - g++-7
     - libhdf5-serial-dev
     - clang-3.8
 install:
