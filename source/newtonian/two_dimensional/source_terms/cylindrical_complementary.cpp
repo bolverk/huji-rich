@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include "cylindrical_complementary.hpp"
 #include "../../../misc/lazy_list.hpp"
 
@@ -52,7 +56,8 @@ vector<Extensive> CylindricalComplementary::operator()
 		const double r = distance_from_axis(cd.CMs[i], axis_);
 		const double volume = cd.volumes[i];
 		res[i].mass = 0;
-		res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
+	//	res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
+		res[i].momentum = 2*M_PI* tess.GetVolume(i)*p*r_hat / abs(r_hat);
 		res[i].energy = 0;
 		res[i].tracers.resize(cells[0].tracers.size(), 0);
 	}
