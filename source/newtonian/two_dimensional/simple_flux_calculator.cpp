@@ -89,8 +89,10 @@ namespace
 			(edge_index);
 		RiemannProblemInput res;
 		res.p = Parallel(edge);
+		res.p *= 1.0/abs(res.p);
 		res.n = tess.GetMeshPoint(edge.neighbors.second) -
 			tess.GetMeshPoint(edge.neighbors.first);
+		res.n *= 1.0 / abs(res.n);
 		const std::pair<bool, bool> flags = transform_pair
 			(edge.neighbors, CellIndexValidator(tess.GetPointNo()));
 		assert(flags.first || flags.second);
@@ -144,8 +146,8 @@ namespace {
 		const Vector2D& p)
 	{
 		return Conserved(c.Mass,
-			c.Momentum.x*n / abs(n) +
-			c.Momentum.y*p / abs(p),
+			c.Momentum.x*n +
+			c.Momentum.y*p ,
 			c.Energy);
 	}
 }

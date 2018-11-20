@@ -36,6 +36,23 @@ Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const Computatio
 	return res;
 }
 
+Extensive SimpleAMRExtensiveUpdaterSR::ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
+	double volume, TracerStickerNames const& tracerstickernames) const
+{
+	Extensive res;
+	double gamma = 1.0 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
+	const double mass = volume * cell.density*gamma;
+	res.mass = mass;
+	size_t N = cell.tracers.size();
+	res.tracers.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		res.tracers[i] = cell.tracers[i] * mass;
+	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
+	res.energy = (gamma*(enthalpy+1) -1)* mass - cell.pressure*volume;
+	res.momentum = mass * cell.velocity *gamma*(enthalpy+1);
+	return res;
+}
+
 SimpleAMRCellUpdater::SimpleAMRCellUpdater(vector<string> toskip) :toskip_(toskip) {}
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
@@ -56,6 +73,32 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 	res.pressure = eos.de2p(res.density, extensive.energy / extensive.mass - 0.5*ScalarProd(res.velocity, res.velocity),res.tracers,tracerstickernames.tracer_names);
 	return res;
 }
+
+SimpleAMRCellUpdaterSR::SimpleAMRCellUpdaterSR(double G,vector<string> toskip) : G_(G),toskip_(toskip) {}
+
+ComputationalCell SimpleAMRCellUpdaterSR::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& /*eos*/,
+	double volume, ComputationalCell const& old_cell, TracerStickerNames const& tracerstickernames) const
+{
+	for (size_t i = 0; i < toskip_.size(); ++i)
+		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+			return old_cell;
+
+	double v = GetVelocity(extensive, G_);
+	volume = 1.0 / volume;
+	ComputationalCell res;
+	if (res.density < 0)
+		throw UniversalError("Negative density in SimpleAMRCellUpdaterSR");
+	res.velocity = (fastabs(extensive.momentum)*1e8 < extensive.mass) ? extensive.momentum / extensive.mass : v * extensive.momentum / abs(extensive.momentum);
+	double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity,res.velocity));
+	res.density = extensive.mass *gamma_1*volume;
+	res.stickers = old_cell.stickers;
+	for (size_t i = 0; i < extensive.tracers.size(); ++i)
+		res.tracers[i] = extensive.tracers[i] / extensive.mass;
+	res.pressure = (G_ - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
+		+ (1.0 / gamma_1 - 1)*res.density);
+	return res;
+}
+
 
 namespace
 {

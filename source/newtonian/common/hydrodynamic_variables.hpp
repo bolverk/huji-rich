@@ -89,7 +89,7 @@ public:
   //! \brief Velocity
   Vector2D Velocity;
 
-  //! \brief Thermal energy per unit mass
+  //! \brief Thermal energy per unit mass, entahalpy in relativistic case
   double Energy;
 
   //! \brief Speed of sound

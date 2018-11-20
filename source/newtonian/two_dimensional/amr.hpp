@@ -81,6 +81,32 @@ public:
 		double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const;
 };
 
+//! \brief Simple class for extensive update scheme in amr for SR
+class SimpleAMRExtensiveUpdaterSR : public AMRExtensiveUpdater
+{
+public:
+	Extensive ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
+		double volume, TracerStickerNames const& tracerstickernames) const;
+};
+
+//! \brief Simple class for cell update scheme in amr for SR
+class SimpleAMRCellUpdaterSR : public AMRCellUpdater
+{
+private:
+	const double G_;
+	const vector<string>  toskip_;
+public:
+	/*!
+	\brief class constructor
+	\param G The adiabatic index
+	\param toskip A list of sticker names to skip their cell update
+	*/
+	explicit SimpleAMRCellUpdaterSR(double G,vector<string> toskip);
+
+	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
+		double volume, ComputationalCell const& old_cell, TracerStickerNames const& tracerstickernames) const;
+};
+
 //! \brief Chooses which cells should be remove
 class CellsToRemove
 {

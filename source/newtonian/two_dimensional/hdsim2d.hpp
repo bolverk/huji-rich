@@ -146,6 +146,7 @@ public:
     \param eu Extensive updater
     \param cu Cell updater
 	\param tracer_sticker_names The names of the tracers and stickers
+	\param relativistic If the run is relativistic or not
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes
@@ -168,7 +169,8 @@ public:
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
    const CellUpdater& cu,
-   TracerStickerNames tracer_sticker_names = TracerStickerNames()
+   TracerStickerNames tracer_sticker_names = TracerStickerNames(),
+	bool relativistic = false
 #ifdef RICH_MPI
 		  ,const ProcessorUpdate* proc_update=0
 #endif

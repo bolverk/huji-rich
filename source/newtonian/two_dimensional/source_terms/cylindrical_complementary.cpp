@@ -1,15 +1,19 @@
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include "cylindrical_complementary.hpp"
 #include "../../../misc/lazy_list.hpp"
 
 namespace {
-	double distance_from_axis(const Vector2D& point,
+	/*double distance_from_axis(const Vector2D& point,
 		const Axis& axis)
 	{
 		const double hypotenuse = abs(point - axis.origin);
 		const double side = std::abs(Projection(point - axis.origin,
 			axis.direction));
 		return sqrt(pow(hypotenuse, 2) - pow(side, 2));
-	}
+	}*/
 
 	/*
 	Vector2D cross_z(const Vector2D& v)
@@ -31,7 +35,7 @@ CylindricalComplementary::CylindricalComplementary(const Axis& axis) :
 vector<Extensive> CylindricalComplementary::operator()
 (const Tessellation& tess,
 	const PhysicalGeometry& /*pg*/,
-	const CacheData& cd,
+	const CacheData& /*cd*/,
 	const vector<ComputationalCell>& cells,
 	const vector<Extensive>& /*fluxes*/,
 	const vector<Vector2D>& /*point_velocities*/,
@@ -49,10 +53,11 @@ vector<Extensive> CylindricalComplementary::operator()
 		const double r = std::max(distance_from_axis
 		(tess.GetCellCM(static_cast<int>(i)), axis_), tess.GetWidth(static_cast<int>(i)));*/
 		//const double r = distance_from_axis(tess.GetCellCM(static_cast<int>(i)), axis_);
-		const double r = distance_from_axis(cd.CMs[i], axis_);
-		const double volume = cd.volumes[i];
+		//const double r = distance_from_axis(cd.CMs[i], axis_);
+		//const double volume = cd.volumes[i];
 		res[i].mass = 0;
-		res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
+	//	res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
+		res[i].momentum = 2*M_PI* tess.GetVolume(static_cast<int>(i))*p*r_hat / abs(r_hat);
 		res[i].energy = 0;
 		res[i].tracers.resize(cells[0].tracers.size(), 0);
 	}

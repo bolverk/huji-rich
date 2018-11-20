@@ -155,12 +155,7 @@ void RigidWallFlux::operator()
 	const Vector2D p = normalize
 		(edge.vertices.second - edge.vertices.first);
 	const Vector2D n =
-		normalize
-		(remove_parallel_component
-			(aux ?
-				edge.vertices.first - tess.GetMeshPoint(edge.neighbors.first) :
-				tess.GetMeshPoint(edge.neighbors.second) - edge.vertices.first,
-				p));
+		normalize(tess.GetMeshPoint(edge.neighbors.second) - tess.GetMeshPoint(edge.neighbors.first));
 	const double v = 0;
 	const pair<Primitive, Primitive> left_right =
 		rigid_wall_states
