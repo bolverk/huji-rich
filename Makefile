@@ -2,36 +2,37 @@ SOURCE_DIR := source
 RAW_SOURCES := $(shell find $(SOURCE_DIR) -name '*.cpp')
 SOURCES := $(RAW_SOURCES)
 LIB_FILE = librich.a
-CC := g++
+CC := gcc
+CXX := g++
 LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++0x
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
-	CC := mpiCC
+	CXX := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
-	CC := mpiCC
+	CXX := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++0x
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
-	CC := mpiCC
+	CXX := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -std=c++0x
 	LINT_FLAGS := 
 else ifeq ($(MODE),intel)
-	CC := icpc
+	CXX := icpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -std=c++0x
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel)
-	CC := mpiicpc
+	CXX := mpiicpc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -DRICH_MPI -std=c++0x
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
-	CC := clang++
+	CXX := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++03
 	LINT_FLAGS := 
 else
@@ -48,14 +49,14 @@ $(LIBRARY_FOLDER)/$(LIB_FILE): $(OBJECTS)
 
 $(OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
-	$(CC) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
-	$(CC) -MM $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CXX) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
+	$(CXX) -MM $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$@,g' -i $(LIBRARY_FOLDER)/$*.d
 
 $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
-	$(CC) -c $(OPTIMIZATION_FLAGS) $< -o $@
-	$(CC) -MM $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CXX) -c $(OPTIMIZATION_FLAGS) $< -o $@
+	$(CXX) -MM $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$(LIBRARY_FOLDER)/\1.o,g' -i $(LIBRARY_FOLDER)/$*.d
 
 -include $(OBJECTS:.o=.d)
