@@ -79,6 +79,7 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.4/c++
 	cd external_libraries/hdf5_dump/hdf5-1.10.4 && \
 	./configure --enable-cxx --prefix=`cd ../.. && pwd`
 	cd external_libraries/hdf5_dump/hdf5-1.10.4 && make
+	cd external_libraries/hdf5_dump/hdf5-1.10.4 && make check
 	cd external_libraries/hdf5_dump/hdf5-1.10.4 && make install
 
 external_libraries/include/clipper.hpp:
