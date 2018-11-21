@@ -1,4 +1,5 @@
 #include "Hllc_SR.hpp"
+#include <cmath>
 #include "../newtonian/common/hydrodynamic_variables.hpp"
 #include "../misc/universal_error.hpp"
 #include "../misc/utils.hpp"
