@@ -113,6 +113,8 @@ public:
    */
   int GetPointNo(void) const;
 
+  void SetPointNo(int N);
+
   /*! \brief Returns Position of mesh generating point
     \param index Mesh generating point index
     \return Position of mesh generating point
@@ -200,6 +202,12 @@ public:
   vector<Vector2D>& GetAllCM(void);
 
   void GetNeighborNeighbors(vector<int> &result, int point)const;
+
+#ifdef RICH_MPI
+  vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
+	  vector<Vector2D> &points, OuterBoundary const* obc, vector<size_t> &selfindex,
+	  vector<int> &sentproc, vector<vector<int> > &sentpoints);
+#endif
 private:
 	double eps;
 	OuterBoundary const* obc;
@@ -249,11 +257,7 @@ private:
 	void SendRecvRemove(vector<int> const& procorder,vector<int> const&
 		proclist,vector<vector<int> > &data);
 	void GetNeighborNeighborsMPI(vector<int> &result,int point);
-#ifdef RICH_MPI
-	vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
-		vector<Vector2D> &points, OuterBoundary const* obc, vector<size_t> &selfindex,
-		vector<int> &sentproc, vector<vector<int> > &sentpoints);
-#endif
+
 
 };
 /*! \brief Checks if a point is inside a Voronoi cell

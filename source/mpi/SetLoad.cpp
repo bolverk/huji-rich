@@ -23,90 +23,37 @@ namespace
 	void RunLoadBalance(Tessellation &tproc,vector<Vector2D> &points,OuterBoundary const&
 		outer,int Niter,double tload,double speed,int mode,bool Rmin)
 	{
-		double BestLoad=100;
-		vector<Vector2D> BestProc,BestMesh;
 		int ws;
 		MPI_Comm_size(MPI_COMM_WORLD, &ws);
+		int rank = 0;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		double round;
 		if(mode==1)
 			round=2;
 		else
 			round=1.6;
+		vector<size_t> selfindex;
+		vector<vector<int> > sentpoints;
+		vector<int> sentproc;
 		ConstNumberPerProc procmove(outer,speed,round,mode,Rmin);
-		VoronoiMesh local(tproc, points, outer);
-		vector<double> loads;
+		VoronoiMesh local;
+		local.GetMeshPoints() = points;
+		local.SetPointNo(static_cast<int>(points.size()));
 		for(int i=0;i<Niter;++i)
 		{
 			MPI_Barrier(MPI_COMM_WORLD);
-			//			if(rank==0)
-			//				cout<<"h1"<<endl;
 			procmove.Update(tproc,local);
-			//			voronoi_loggers::BinLogger log("vtemp.bin");
-			//			log.output(tproc);
-			vector<Vector2D> cp=local.GetMeshPoints();
-			cp.resize(static_cast<size_t>(local.GetPointNo()));
-
-			/*			if(rank==0)
-			{
-			BestProc=tproc.GetMeshPoints();
-			BestProc.resize(ws);
-			WriteVector2DToFile(BestProc,"procmesh.bin");
-			cout<<"h2"<<endl;
-			}
-			WriteVector2DToFile(cp,"localmesh"+int2str(rank)+".bin");
-			*/
-			try
-			{
-				MPI_Barrier(MPI_COMM_WORLD);
-				local.Update(cp,tproc);
-				//				if(rank==0)
-				//				cout<<"h3"<<endl;
-			}
-			catch(UniversalError const& eo)
-			{
-				DisplayError(eo);
-			}
+			points = local.UpdateMPIPoints(tproc, rank, points, &outer, selfindex, sentproc, sentpoints);
+			local.GetMeshPoints() = points;
+			local.SetPointNo(static_cast<int>(points.size()));
 			MPI_Barrier(MPI_COMM_WORLD);
 			double load=GetLoad(local);
 			MPI_Bcast(&load, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-			loads.push_back(load);
-			if(load<BestLoad)
-			{
-				BestLoad=load;
-				BestMesh=cp;
-				BestProc=tproc.GetMeshPoints();
-				BestProc.resize(static_cast<size_t>(ws));
-			}
 			if(load<tload)
 			{
 				break;
 			}
 		}
-		if(mode==1)
-			round=2.1;
-		else
-			round=1.75;
-		ConstNumberPerProc procmove2(outer,speed,round,mode,Rmin);
-		tproc.Update(BestProc);
-		MPI_Barrier(MPI_COMM_WORLD);
-		local.Update(BestMesh,tproc);
-		for(int i=0;i<3;++i)
-		{
-			MPI_Barrier(MPI_COMM_WORLD);
-			procmove2.Update(tproc,local);
-			vector<Vector2D> cp=local.GetMeshPoints();
-			cp.resize(static_cast<size_t>(local.GetPointNo()));
-			try
-			{
-				local.Update(cp,tproc);
-			}
-			catch(UniversalError const& eo)
-			{
-				DisplayError(eo);
-			}
-		}
-		points=local.GetMeshPoints();
-		points.resize(static_cast<size_t>(local.GetPointNo()));
 	}
 }
 

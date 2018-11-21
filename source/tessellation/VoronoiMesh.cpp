@@ -585,6 +585,12 @@ int VoronoiMesh::GetPointNo(void) const
 	return Tri.get_length();
 }
 
+void VoronoiMesh::SetPointNo(int N)
+{
+	Tri.Changelength(N);
+	return;
+}
+
 Vector2D VoronoiMesh::GetMeshPoint(int index) const
 {
 	return Tri.get_point(static_cast<size_t>(index));
