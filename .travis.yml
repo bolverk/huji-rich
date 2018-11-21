@@ -20,6 +20,7 @@ install:
 - mkdir -p external_libraries/include/
 - make external_libraries/lib/libclipper.a
 - export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_66_0:`pwd`/external_libraries/include
+- export CC=gcc
 - make external_libraries/include/H5Cpp.h
 - make
 - make MODE=clang
