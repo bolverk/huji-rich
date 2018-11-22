@@ -8,8 +8,8 @@ namespace
 	}
 }
 
-LagrangianExtensiveUpdate::LagrangianExtensiveUpdate(LagrangianFlux const& lflux, EquationOfState const& eos, GhostPointGenerator
-	const& ghost, LinearGaussImproved const& interp) :lflux_(lflux), eos_(eos), ghost_(ghost), interp_(interp) {}
+LagrangianExtensiveUpdate::LagrangianExtensiveUpdate(LagrangianFlux const& lflux, GhostPointGenerator
+	const& ghost) :lflux_(lflux), ghost_(ghost) {}
 
 void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, const PhysicalGeometry& /*pg*/,
 	const Tessellation& tess, const double dt, const CacheData& cd, const vector<ComputationalCell>& cells,
