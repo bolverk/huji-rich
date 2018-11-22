@@ -1,4 +1,6 @@
+#ifndef __clang__
 #define _USE_MATH_DEFINES
+#endif // __clang__
 #include <cmath>
 #include "physical_geometry_1d.hpp"
 

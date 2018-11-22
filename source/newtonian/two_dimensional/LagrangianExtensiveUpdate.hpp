@@ -12,12 +12,10 @@ class LagrangianExtensiveUpdate : public ExtensiveUpdater
 public:
   /*! \brief Class constructor
     \param lflux Flux calculator
-    \param eos Equation of state
     \param ghost Scheme to create ghost points
-    \param interp Interpolation scheme
    */
-	LagrangianExtensiveUpdate(LagrangianFlux const& lflux, EquationOfState const& eos, GhostPointGenerator
-		const& ghost, LinearGaussImproved const& interp);
+	LagrangianExtensiveUpdate(LagrangianFlux const& lflux, GhostPointGenerator
+		const& ghost);
 
 	void operator()
 		(const vector<Extensive>& fluxes,
@@ -30,8 +28,6 @@ public:
 			double time, TracerStickerNames const& tracerstickernames) const;
 private:
 	LagrangianFlux const& lflux_;
-	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;
-	LinearGaussImproved const& interp_;
 };
 #endif //LEUPDATE_HPP

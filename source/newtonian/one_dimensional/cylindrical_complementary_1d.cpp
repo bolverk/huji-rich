@@ -1,4 +1,6 @@
+#ifndef __clang__
 #define _USE_MATH_DEFINES
+#endif // __clang__
 #include <cmath>
 #include "cylindrical_complementary_1d.hpp"
 

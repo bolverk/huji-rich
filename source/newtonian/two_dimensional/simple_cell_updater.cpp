@@ -39,12 +39,12 @@ namespace
 		tess.GetNeighbors(static_cast<int>(index), neigh);
 		size_t N = neigh.size();
 		double maxDV = 0;
-		size_t Norg = tess.GetPointNo();
+		size_t Norg = static_cast<size_t>(tess.GetPointNo());
 		Vector2D Vcell = cell.momentum / cell.mass;
 		double Et = cell.energy / cell.mass - 0.5*ScalarProd(Vcell, Vcell);
 		for (size_t i = 0; i < N; ++i)
 			if (neigh[i] < static_cast<int>(Norg) || tess.GetOriginalIndex(static_cast<int>(neigh[i]))>static_cast<int>(Norg))
-				maxDV = std::max(maxDV, abs(Vcell - cells.at(neigh[i]).momentum / cells[neigh[i]].mass));
+				maxDV = std::max(maxDV, abs(Vcell - cells.at(static_cast<size_t>(neigh[i])).momentum / cells[static_cast<size_t>(neigh[i])].mass));
 		return 0.005*maxDV*maxDV > Et;
 	}
 
