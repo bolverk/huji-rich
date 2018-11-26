@@ -92,6 +92,8 @@ ComputationalCell SimpleAMRCellUpdaterSR::ConvertExtensiveToPrimitve(const Exten
 	double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity,res.velocity));
 	res.density = extensive.mass *gamma_1*volume;
 	res.stickers = old_cell.stickers;
+	size_t N = extensive.tracers.size();
+	res.tracers.resize(N);
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
 		res.tracers[i] = extensive.tracers[i] / extensive.mass;
 	res.pressure = (G_ - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
