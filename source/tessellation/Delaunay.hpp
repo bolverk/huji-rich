@@ -85,6 +85,7 @@ private:
 	size_t Walk(size_t point);
 	void CheckInput();
 	double CalculateRadius(int facet);
+	double CalcRadiusHiRes(int facet);
 	int FindPointInFacet(int facet, int point);
 	double FindMaxRadius(int point);
 	void FindContainingTetras(int StartTetra, int point, vector<int> &tetras);
@@ -269,9 +270,10 @@ public:
 	/*!
 	\brief Returns the center of the circumscribed circle of a facet
 	\param index The index of the facet
+	\param R The radius given as output
 	\returns The circumscribed circle's center
 	*/
-	Vector2D GetCircleCenter(int index)const;
+	Vector2D GetCircleCenter(int index, double &R)const;
 
 	//! \brief Diagnostics
 	delaunay_loggers::DelaunayLogger* logger;

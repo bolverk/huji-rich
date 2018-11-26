@@ -4,6 +4,7 @@
 #include <cmath>
 #include "../misc/triplet.hpp"
 #include <boost/foreach.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
@@ -444,7 +445,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	int n = int(f.size());
 	for (int i = 0; i < n; ++i)
 		radius[static_cast<size_t>(i)] = CalculateRadius(i);
-	CalcRadius = true;
+	//CalcRadius = true;
 
 	/*
 	int rank = -1;
@@ -616,35 +617,42 @@ bool Delaunay::IsOuterFacet(int facet)const
 
 double Delaunay::CalculateRadius(int facet)
 {
-	const double big = 1e10;
+	/*const double small = 1e-8;
 	const double a = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
 	const double b = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])]);
 	const double c = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
 	const double temp1 = b + c - a;
-	if (temp1 <= 0)
-	{
-		if (a > big*b || a > big*c) // Do we have a small edge?
-			return 0.5*a;
-		else
-			return 0.5*(b + c); // we have 3 points on a line
-	}
 	const double temp2 = c + a - b;
-	if (temp2 <= 0)
-	{
-		if (b > big*a || b > big*c) // Do we have a small edge?
-			return 0.5*b;
-		else
-			return 0.5*(a + c); // we have 3 points on a line
-	}
 	const double temp3 = b - c + a;
-	if (temp3 <= 0)
-	{
-		if (c > big*b || c > big*a) // Do we have a small edge?
-			return 0.5*c;
-		else
-			return 0.5*(b + a); // we have 3 points on a line
-	}
-	return a*b*c / sqrt((a + b + c)*temp1*temp2*temp3);
+	double maxv = std::max(std::max(std::abs(temp1), std::abs(temp2)), std::abs(temp3));
+	if (std::abs(temp1) < (maxv*small) || std::abs(temp2) < (maxv*small) || std::abs(temp3) < (maxv*small))
+		return CalcRadiusHiRes(facet);
+	return a*b*c / std::sqrt((a + b + c)*temp1*temp2*temp3);*/
+	double R = 0;
+	GetCircleCenter(facet, R);
+	return R;
+}
+
+double Delaunay::CalcRadiusHiRes(int facet)
+{
+	std::array<boost::multiprecision::cpp_dec_float_50, 2> V0,V1,V2;
+	V0[0] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].x;
+	V0[1] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].y;
+	V1[0] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])].x;
+	V1[1] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])].y;
+	V2[0] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])].x;
+	V2[1] = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])].y;
+
+	boost::multiprecision::cpp_dec_float_50 a = boost::multiprecision::sqrt((V0[0] - V1[0])*(V0[0] - V1[0]) + (V0[1] - V1[1])*(V0[1] - V1[1]));
+	boost::multiprecision::cpp_dec_float_50 b = boost::multiprecision::sqrt((V0[0] - V2[0])*(V0[0] - V2[0]) + (V0[1] - V2[1])*(V0[1] - V2[1]));
+	boost::multiprecision::cpp_dec_float_50 c = boost::multiprecision::sqrt((V2[0] - V1[0])*(V2[0] - V1[0]) + (V2[1] - V1[1])*(V2[1] - V1[1]));
+	
+	boost::multiprecision::cpp_dec_float_50 temp1 = b + c - a;
+	boost::multiprecision::cpp_dec_float_50 temp2 = -b + c + a;
+	boost::multiprecision::cpp_dec_float_50 temp3 = b - c - a;
+	boost::multiprecision::cpp_dec_float_50 temp4 = a + b + c;
+	temp4 = a * b*c / boost::multiprecision::sqrt(temp4*temp1*temp2*temp3);
+	return (temp4).convert_to<double>();
 }
 
 void Delaunay::CheckInput()
@@ -1186,59 +1194,60 @@ void Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges
 	for (size_t i = 0; i < toduplicate.size(); ++i)
 		for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			OrgIndex.push_back(toduplicate[i][j]);
+	radius.resize(f.size());
+	int n = int(f.size());
+	for (int i = 0; i < n; ++i)
+		radius[static_cast<size_t>(i)] = CalculateRadius(i);
 }
 
-Vector2D Delaunay::GetCircleCenter(int index)const
+Vector2D Delaunay::GetCircleCenter(int index, double &R)const
 {
 	Vector2D center;
 	facet const& F = f[static_cast<size_t>(index)];
 	double x1 = cor[static_cast<size_t>(F.vertices[0])].x;
-	double x2 = cor[static_cast<size_t>(F.vertices[1])].x;
-	double x3 = cor[static_cast<size_t>(F.vertices[2])].x;
 	double y1 = cor[static_cast<size_t>(F.vertices[0])].y;
+	double x2 = cor[static_cast<size_t>(F.vertices[1])].x;
 	double y2 = cor[static_cast<size_t>(F.vertices[1])].y;
+	double x3 = cor[static_cast<size_t>(F.vertices[2])].x;
 	double y3 = cor[static_cast<size_t>(F.vertices[2])].y;
+
 	// Do we have a case where two point are very close compared to the third?
 	double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
 	double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
 	double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
-	int scenario = 0;
-	if (d12 < 0.1*(d23 + d13))
-		scenario = 1;
+	double maxv = std::max(std::max(d12, d23), d13);
+	double small = 1e-10;
+	double d_inv = (2 * ((x2-x1)*(y3-y1) - (y2-y1) * (x3-x1)));
+	if (d12 < (small*maxv) || d23 < (small*maxv) || d13 < (small*maxv) || std::abs(d_inv) <small*maxv)
+	{
+		std::array<boost::multiprecision::cpp_dec_float_50, 2> V1,V2, V3;
+		V1[0] = x1;
+		V1[1] = y1;
+		V2[0] = x2;
+		V2[1] = y2;
+		V3[0] = x3;
+		V3[1] = y3;
+		V2[0] -= V1[0];
+		V3[0] -= V1[0];
+		V2[1] -= V1[1];
+		V3[1] -= V1[1];
+		boost::multiprecision::cpp_dec_float_50 d = 2 * (V2[0] * V3[1] - V2[1] * V3[0]);
+		boost::multiprecision::cpp_dec_float_50 r_x = (V3[1] * (V2[1] * V2[1] + V2[0] * V2[0]) - V2[1] * (V3[0] * V3[0] + V3[1] * V3[1])) / d;
+		boost::multiprecision::cpp_dec_float_50 r_y = (-V3[0] * (V2[1] * V2[1] + V2[0] * V2[0]) + V2[0] * (V3[0] * V3[0] + V3[1] * V3[1])) / d;
+		R = boost::multiprecision::sqrt(r_x*r_x + r_y * r_y).convert_to<double>();
+		center.Set(r_x.convert_to<double>() + x1, r_y.convert_to<double>() + y1);
+	}
 	else
-		if (d23 < 0.1*(d13 + d12))
-			scenario = 3;
-		else
-			if (d13 < 0.1*(d23 + d12))
-				scenario = 2;
-	switch (scenario)
 	{
-	case(0):
-	case(1):
-	case(2):
-	{
+		d_inv = 1.0 / d_inv;
 		x2 -= x1;
 		x3 -= x1;
 		y2 -= y1;
 		y3 -= y1;
-		double d_inv = 1 / (2 * (x2*y3 - y2*x3));
-		center.Set((y3*(x2*x2 + y2*y2) - y2*(x3*x3 + y3*y3))*d_inv + x1,
-			(-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
-		break;
-	}
-	case(3):
-	{
-		x1 -= x2;
-		x3 -= x2;
-		y1 -= y2;
-		y3 -= y2;
-		double d_inv = 1 / (2 * (x3*y1 - y3*x1));
-		center.Set((y1*(x3*x3 + y3*y3) - y3*(x1*x1 + y1*y1))*d_inv + x2,
-			(x3*(x1*x1 + y1*y1) - x1*(x3*x3 + y3*y3))*d_inv + y2);
-		break;
-	}
-	default:
-		throw UniversalError("Unhandled case in switch statement VoronoiMesh::get_center");
+		double x = (y3*(x2*x2 + y2 * y2) - y2 * (x3*x3 + y3 * y3))*d_inv;
+		double y = (-x3 * (x2*x2 + y2 * y2) + x2 * (x3*x3 + y3 * y3))*d_inv;
+		R = std::sqrt(x*x + y * y);
+		center.Set(x + x1,y + y1);
 	}
 	return center;
 }
@@ -1266,14 +1275,17 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 			bool added = false;
 			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= static_cast<int>(olength)))
 				continue;
+			int checking_now = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
 			vector<int> neigh = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
-				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
+				double R = 0;
+				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)],R);
 				for (size_t l = 0; l < edges.size(); ++l)
 				{
-					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, radius[static_cast<size_t>(neigh[static_cast<size_t>(k)])]))
+					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, R))
 					{
+						int adding = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
 						toduplicate[static_cast<size_t>(l)].push_back(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 						added = true;
 					}
@@ -1412,9 +1424,12 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				continue;
 			vector<int> neighs = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[i]);
 			int checking = f[static_cast<size_t>(cur_facet)].vertices[i];
+			double R = 0;
+			Vector2D center;
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
-				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
+				center=GetCircleCenter(neighs[k], R);
+				Circle circ(center,R);
 				vector<int> cputosendto;
 				if (recursive)
 					find_affected_cells_recursive(tproc, rank, circ, cputosendto, toadd, periodic,ll,ur);
@@ -1633,12 +1648,16 @@ vector<vector<int> > Delaunay::boundary_intersection_check(const vector<Edge>& e
 {
 	vector<vector<int> > res;
 	res.reserve(edges.size());
+	double R = 0;
+	Vector2D center;
 	BOOST_FOREACH(const Edge& edge, edges) {
 		res.push_back(vector<int>());
 		BOOST_FOREACH(const vector<int>& line, to_duplicate) {
-			BOOST_FOREACH(const int index, line) {
+			BOOST_FOREACH(const int index, line) 
+			{
+				center=GetCircleCenter(index,R);
 				const Circle circle
-				(GetCircleCenter(index), radius[index]);
+				(center, R);
 				if (edge_circle_intersect(edge, circle))
 					res.back().push_back(index);
 			}
@@ -1929,6 +1948,10 @@ std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	return FindOuterPoints2(tproc, edges, to_duplicate.first, to_duplicate.second, box_edges, Nghost, periodic, cpu_neigh,
 		periodic_add_self, periodic_add_others, Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down)),
 		Vector2D(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up)));
+	radius.resize(f.size());
+	int n = int(f.size());
+	for (int i = 0; i < n; ++i)
+		radius[static_cast<size_t>(i)] = CalculateRadius(i);
 }
 #endif // RICH_MPI
 

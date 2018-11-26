@@ -229,8 +229,9 @@ void VoronoiMesh::build_v()
 		mesh_vertices[static_cast<size_t>(i)].reserve(7);
 	int Nfacets = Tri.get_num_facet();
 	vector<Vector2D> centers(static_cast<size_t>(Nfacets));
+	double R = 0;
 	for (int i = 0; i < Nfacets; ++i)
-		centers[static_cast<size_t>(i)] = Tri.GetCircleCenter(i);
+		centers[static_cast<size_t>(i)] = Tri.GetCircleCenter(i,R);
 	for (int i = 0; i < Nfacets; ++i)
 	{
 		center = centers[static_cast<size_t>(i)];
@@ -247,7 +248,6 @@ void VoronoiMesh::build_v()
 				edge_temp.vertices.second = center_temp;
 				edge_temp.neighbors.first = to_check.vertices[static_cast<size_t>(j)];
 				edge_temp.neighbors.second = to_check.vertices[static_cast<size_t>(j + 1) % 3];
-
 				if (legal_edge(&edge_temp))
 				{
 					// I added a change here, if edge has zero length I don't add it.
@@ -310,7 +310,7 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	Tri.BuildBoundary(_bc, _bc->GetBoxEdges());
-
+	
 	eps = 1e-8;
 	edges.clear();
 	GhostPoints.clear();
@@ -382,9 +382,43 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 
 bool VoronoiMesh::legal_edge(Edge *e) //checks if both ends of the edge are outside the grid and that the edge doesn't cross the grid
 {
-	if ((e->neighbors.first < Tri.get_length()) ||
-		(e->neighbors.second < Tri.get_length()))
+	bool n0 = e->neighbors.first < Tri.get_length();
+	bool n1 = e->neighbors.second < Tri.get_length();
+	if ( n0 || n1)
+	{
+		if (obc->GetBoundaryType() == Rectengular)
+		{
+			if (!n1 || !n0)
+			{
+#ifdef RICH_MPI
+				if (!n0)
+				{
+					Vector2D p = Tri.get_point(n0);
+					if (p.x > obc->GetGridBoundary(Right) || p.x<obc->GetGridBoundary(Left) ||
+						p.y>obc->GetGridBoundary(Up) || p.y < obc->GetGridBoundary(Down))
+					{
+						if (GetOriginalIndex(n0) != GetOriginalIndex(n1))
+							return false;
+					}
+				}
+				else
+				{
+					Vector2D p = Tri.get_point(n1);
+					if (p.x > obc->GetGridBoundary(Right) || p.x<obc->GetGridBoundary(Left) ||
+						p.y>obc->GetGridBoundary(Up) || p.y < obc->GetGridBoundary(Down))
+					{
+						if (GetOriginalIndex(n0) != GetOriginalIndex(n1))
+							return false;
+					}
+				}
+#else
+				if (GetOriginalIndex(e->neighbors.first) != GetOriginalIndex(e->neighbors.second))
+					return false;
+#endif
+			}
+		}
 		return true;
+	}
 	else
 		return false;
 }

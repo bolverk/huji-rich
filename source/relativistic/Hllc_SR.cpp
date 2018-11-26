@@ -53,7 +53,7 @@ namespace
 		const double F_E = (sr * mxl - sl * mxr + sr * sl*(Er - El)) / (sr - sl);
 		const double F_mx = (sr * (mxl*left.Velocity.x + left.Pressure) - sl * (mxr*right.Velocity.x + right.Pressure) + sr * sl*(mxr - mxl)) / (sr - sl);
 		const double b = -(E_hll + F_mx);
-		const double ss = (std::abs(F_E) < std::max(1e-14*E_hll, 1e-14)) ? -mx_hll / b : (-b - std::sqrt(b*b - 4 * mx_hll*F_E)) / (2 * F_E);
+		const double ss = (std::abs(F_E) < std::max(1e-8*E_hll, 1e-10)) ? -mx_hll / b : (-b - std::sqrt(b*b - 4 * mx_hll*F_E)) / (2 * F_E);
 		//const double ss= (1e6*std::abs(F_E) < std::abs(E_hll+F_mx))	? mx_hll/(E_hll+F_mx) :	(((E_hll + F_mx) - std::sqrt((E_hll + F_mx)*(E_hll + F_mx) - 4 * mx_hll*F_E)) / (2 * F_E));
 		pstar = -F_E * ss + F_mx;
 		assert(sr > sl);
@@ -100,7 +100,8 @@ namespace
 		const double g_2 = 1.0 / (1 - ScalarProd(p.Velocity, p.Velocity));
 		double gamma =std::sqrt(g_2);
 		return Conserved(p.Density*gamma*(p.Velocity.x-edge_vel),Vector2D(p.Density*(p.Energy+1)*g_2*p.Velocity.x*(p.Velocity.x-edge_vel) + p.Pressure, p.Density*(p.Energy+1)*g_2*p.Velocity.y*(p.Velocity.x-edge_vel)), 
-			p.Density*(p.Energy+1)*g_2*p.Velocity.x-edge_vel*(p.Density*(p.Energy+1)*g_2-p.Pressure));
+			p.Density*p.Energy*g_2*p.Velocity.x +p.Density*p.Velocity.x*(g_2-gamma)
+			-edge_vel*(p.Density*p.Energy*g_2-p.Pressure+p.Density*(g_2-gamma)));
 	}	
 
 	Conserved starred_flux(Primitive const& state, double lambda_star, double lambda,double edge_vel,double pstar)
@@ -111,7 +112,8 @@ namespace
 		const double mx = (state.Density*(state.Energy+1)*state.Velocity.x*g_2*(lambda - state.Velocity.x) + pstar - state.Pressure)*dlambda_1;
 		const double my = (state.Density*(state.Energy+1)*state.Velocity.y*g_2*(lambda - state.Velocity.x))*dlambda_1;
 		const double E = ((state.Density*(state.Energy+1)*g_2 - state.Pressure)*(lambda - state.Velocity.x) + pstar * lambda_star - state.Pressure*state.Velocity.x)*dlambda_1;
-		Conserved res(d*(lambda_star-edge_vel), Vector2D(mx*(lambda_star-edge_vel) + pstar, my*(lambda_star-edge_vel)), mx - E*edge_vel);
+		Conserved res(d*(lambda_star-edge_vel), Vector2D(mx*(lambda_star-edge_vel) + pstar, 
+			my*(lambda_star-edge_vel)), mx - (E-d)*edge_vel-d*lambda_star);
 		return res;
 	}
 
@@ -153,6 +155,6 @@ Conserved Hllc_SR::operator()(Primitive const& left,Primitive const& right,	doub
 			ws.center,
 			ws.right);
 	// Remove rest mass Energy
-	f_gr.Energy -= f_gr.Mass;
+	//f_gr.Energy -= f_gr.Mass;
 	return f_gr;
 }
