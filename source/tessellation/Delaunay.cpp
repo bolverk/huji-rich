@@ -1285,7 +1285,6 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 				{
 					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, R))
 					{
-						int adding = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
 						toduplicate[static_cast<size_t>(l)].push_back(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 						added = true;
 					}
