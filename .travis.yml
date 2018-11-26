@@ -1,20 +1,18 @@
 sudo: false
+dist: xenial
 language: cpp
 compiler:
 - gcc
 os:
 - linux
-before_install:
-- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 addons:
   apt:	
     sources:
     - ubuntu-toolchain-r-test
     - boost-latest
     packages:
-    - gcc-4.8
-    - g++-4.8
-    - libhdf5-serial-dev
+    - gcc-7
+    - g++-7
     - clang-3.8
 install:
 - make external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp
@@ -22,6 +20,7 @@ install:
 - mkdir -p external_libraries/include/
 - make external_libraries/lib/libclipper.a
 - export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_66_0:`pwd`/external_libraries/include
+- make external_libraries/include/H5Cpp.h
 - make
 - make MODE=clang
 build: make
