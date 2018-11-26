@@ -48,7 +48,10 @@ Extensive SimpleAMRExtensiveUpdaterSR::ConvertPrimitveToExtensive(const Computat
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * mass;
 	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
-	res.energy = (gamma*(enthalpy+1) -1)* mass - cell.pressure*volume;
+	if (fastabs(cell.velocity) < 1e-5)
+		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
+	else
+		res.energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
 	res.momentum = mass * cell.velocity *gamma*(enthalpy+1);
 	return res;
 }
@@ -96,7 +99,11 @@ ComputationalCell SimpleAMRCellUpdaterSR::ConvertExtensiveToPrimitve(const Exten
 	res.tracers.resize(N);
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
 		res.tracers[i] = extensive.tracers[i] / extensive.mass;
-	res.pressure = (G_ - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
+	if (fastabs(res.velocity) < 1e-5)
+		res.pressure = (G_ - 1)*((extensive.energy - ScalarProd(extensive.momentum, res.velocity))*volume
+			+ (0.5*ScalarProd(res.velocity, res.velocity))*res.density);
+	else
+		res.pressure = (G_ - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
 		+ (1.0 / gamma_1 - 1)*res.density);
 	return res;
 }

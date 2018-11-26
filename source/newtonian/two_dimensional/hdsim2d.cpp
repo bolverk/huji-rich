@@ -78,7 +78,10 @@ namespace
 				const double mass = volume * cell.density * gamma;
 				res[i].mass = mass;
 				const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names);
-				res[i].energy = volume * (cell.density*gamma*gamma*enthalpy - cell.pressure)+volume*cell.density*(gamma*gamma-gamma);
+				if (fastabs(cell.velocity) < 1e-5)
+					res[i].energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
+				else
+					res[i].energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
 				res[i].momentum = mass * (enthalpy+1)*gamma*cell.velocity;
 				size_t N = cell.tracers.size();
 				res[i].tracers.resize(N);

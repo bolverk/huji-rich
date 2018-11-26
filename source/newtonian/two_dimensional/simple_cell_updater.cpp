@@ -139,7 +139,11 @@ namespace
 		res.stickers = old.stickers;
 		for (size_t i = 0; i < extensive.tracers.size(); ++i)
 			res.tracers[i] = extensive.tracers[i] / extensive.mass;
-		res.pressure = (G - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
+		if (fastabs(res.velocity) < 1e-5)
+			res.pressure = (G - 1)*((extensive.energy - ScalarProd(extensive.momentum, res.velocity))*volume
+				+ (0.5*ScalarProd(res.velocity, res.velocity))*res.density);
+		else
+			res.pressure = (G - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
 			+ (1.0 / gamma_1 - 1)*res.density);
 	}
 
