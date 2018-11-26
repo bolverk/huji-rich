@@ -1943,13 +1943,14 @@ std::pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 		findOuterPoints(tproc, edges, box_edges, Nghost, periodic, cpu_neigh, periodic_add_self, periodic_add_others,
 			Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down)),
 			Vector2D(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up)));
-	return FindOuterPoints2(tproc, edges, to_duplicate.first, to_duplicate.second, box_edges, Nghost, periodic, cpu_neigh,
+	std::pair<vector<vector<int> >, vector<int> > res = FindOuterPoints2(tproc, edges, to_duplicate.first, to_duplicate.second, box_edges, Nghost, periodic, cpu_neigh,
 		periodic_add_self, periodic_add_others, Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down)),
 		Vector2D(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up)));
 	radius.resize(f.size());
 	int n = int(f.size());
 	for (int i = 0; i < n; ++i)
 		radius[static_cast<size_t>(i)] = CalculateRadius(i);
+	return res;
 }
 #endif // RICH_MPI
 
