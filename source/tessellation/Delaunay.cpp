@@ -1275,7 +1275,6 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 			bool added = false;
 			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= static_cast<int>(olength)))
 				continue;
-			int checking_now = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)];
 			vector<int> neigh = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
