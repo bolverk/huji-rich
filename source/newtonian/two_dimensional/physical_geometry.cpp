@@ -67,7 +67,7 @@ double CylindricalSymmetry::calcArea(const Edge& edge) const
 {
   const Vector2D p1 = change_coordinate(edge.vertices.first, axis_);
   const Vector2D p2 = change_coordinate(edge.vertices.second, axis_);
-  return M_PI*(p1.y+p2.y)*sqrt(pow(p2.y-p1.y,2.)+pow(p2.x-p1.x,2.));
+  return M_PI*(p1.y+p2.y)*sqrt((p2.y - p1.y )*(p2.y - p1.y )+ (p2.x - p1.x)*(p2.x - p1.x));
 }
 
 namespace {
@@ -77,7 +77,7 @@ namespace {
   {
     const Vector2D q1 = change_coordinate(p1, axis);
     const Vector2D q2 = change_coordinate(p2, axis);
-    return (M_PI/3.)*(q2.x-q1.x)*(pow(q1.y,2.)+pow(q2.y,2.)+q1.y*q2.y);
+    return (M_PI/3.)*(q2.x-q1.x)*(q1.y*q1.y+ q2.y *q2.y +q1.y*q2.y);
   }
 
   double calc_triangular_ring_volume(const Vector2D& p1,
