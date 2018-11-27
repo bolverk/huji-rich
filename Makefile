@@ -34,7 +34,7 @@ else ifeq ($(MODE),parallel_intel)
 else ifeq ($(MODE),clang)
 	CXX := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++11
-	LINT_FLAGS := 
+	LINT_FLAGS := -std=c++11
 else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++11
