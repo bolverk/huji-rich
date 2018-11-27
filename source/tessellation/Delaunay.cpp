@@ -760,7 +760,7 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	cor.insert(cor.end(), points.begin(), points.end());
 	TripleConstRef<Vector2D> OuterTri(cor[olength], cor[olength + 1], cor[olength + 2]);
 	for (int i = 0; i < n; ++i)
-		if(InTriangle(OuterTri,cor[N+i]))
+		if(InTriangle(OuterTri,cor[static_cast<size_t>(N + i)]))
 			add_point(static_cast<size_t>(N + i), flip_stack);
 }
 
