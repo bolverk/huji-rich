@@ -246,10 +246,7 @@ namespace
 void Delaunay::add_point(size_t index, stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
-	assert(InTriangle(TripleConstRef<Vector2D>(cor[olength],
-		cor[olength + 1],
-		cor[olength + 2]),
-		cor[index]));
+	
 	const size_t triangle = Walk(index);
 	const Triplet<int> outer(f[triangle].vertices);
 	const Triplet<int> temp_friends(f[triangle].neighbors);
@@ -761,8 +758,10 @@ void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 	stack<std::pair<size_t, size_t> > flip_stack;
 //	/*vector<int> order=*/HilbertOrder(points,n);
 	cor.insert(cor.end(), points.begin(), points.end());
+	TripleConstRef<Vector2D> OuterTri(cor[olength], cor[olength + 1], cor[olength + 2]);
 	for (int i = 0; i < n; ++i)
-	  add_point(static_cast<size_t>(N + i), flip_stack);
+		if(InTriangle(OuterTri,cor[N+i]))
+			add_point(static_cast<size_t>(N + i), flip_stack);
 }
 
 void Delaunay::AddAditionalPoint(Vector2D const& vec)
