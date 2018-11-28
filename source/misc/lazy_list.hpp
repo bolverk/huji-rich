@@ -7,6 +7,7 @@
 #define LAZY_LIST_HPP 1
 
 #include <cassert>
+#include <algorithm>
 #include "universal_error.hpp"
 
 using std::vector;

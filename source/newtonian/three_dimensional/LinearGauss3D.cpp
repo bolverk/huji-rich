@@ -555,13 +555,13 @@ namespace
 			SzSy += (neigh_cm[i].z - cell_cm.z)*(neigh_cm[i].y - cell_cm.y);
 			Sz2 += (neigh_cm[i].z - cell_cm.z)*(neigh_cm[i].z - cell_cm.z);
 		}
-		double bottom = SxSz*SxSz*Sy2 + SxSy*SxSy*Sz2 - Sx2*Sy2*Sz2 - 2 * SxSy*SxSz*SzSy + Sx2*SzSy*Sz2;
+		double bottom = 1.0/SxSz*SxSz*Sy2 + SxSy*SxSy*Sz2 - Sx2*Sy2*Sz2 - 2 * SxSy*SxSz*SzSy + Sx2*SzSy*Sz2;
 		res.xderivative = (PhiSz*SxSz*Sy2 + PhiSy*SxSy*Sz2 - PhiSx*Sy2*Sz2 - PhiSz*SxSy*SzSy - PhiSy*SxSz*SzSy +
-			PhiSx*SzSy*SzSy) / bottom;
+			PhiSx*SzSy*SzSy)*bottom ;
 		res.yderivative = (PhiSz*SzSy*Sx2 + PhiSy*SxSz*SxSz - PhiSx*SxSz*SzSy - PhiSz*SxSy*SxSz - PhiSy*Sx2*Sz2 +
-			PhiSx*SxSy*Sz2) / bottom;
+			PhiSx*SxSy*Sz2)*bottom;
 		res.zderivative = (PhiSz*SxSy*SxSy - PhiSy*SxSy*SxSz - PhiSz*Sy2*Sx2 + PhiSx*SxSz*Sy2 + PhiSy*Sx2*SzSy -
-			PhiSx*SxSy*SzSy) / bottom;
+			PhiSx*SxSy*SzSy) *bottom;
 		res.xderivative.stickers = cell.stickers;
 		res.yderivative.stickers = cell.stickers;
 		res.zderivative.stickers = cell.stickers;

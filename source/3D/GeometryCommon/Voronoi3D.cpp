@@ -246,9 +246,8 @@ namespace
 #endif
 		for (size_t i = 1; i < N; ++i)
 		{
-			vtemp[i] = points[indeces[i-1]];
-			vtemp[i] *= -1;
-			vtemp[i] += points[indeces[i]];
+			vtemp[i] = points[indeces[i]];
+			vtemp[i] -= points[indeces[i - 1]];
 		}
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -1334,6 +1333,8 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	PointsInFace_.resize(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
 		FacesInCell_[i].reserve(20);
+	for (size_t i = 0; i < (10*Norg_); ++i)
+		PointsInFace_[i].reserve(8);
 	std::vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp, temp2;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
@@ -1365,7 +1366,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 				if (point_other != point && point_other > point)
 				{
 					// Did we already build this face?
-					if (neigh_set.count(point_other) == 0)
+					if (neigh_set.find(point_other) == neigh_set.end())
 					{
 						temp.clear();
 						// Find all tetras for face
@@ -1385,7 +1386,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 						if (temp.size() < 3)
 							continue;
 						temp_points_in_face = &PointsInFace_[FaceCounter];
-						temp_points_in_face->reserve(8);
+						//temp_points_in_face->reserve(8);
 						double Asize = CleanDuplicates(temp, tetra_centers_, *temp_points_in_face, ScalarProd(del_.points_[point]
 							- del_.points_[point_other], del_.points_[point] - del_.points_[point_other]), diffs,clean_vec);
 						if (temp_points_in_face->size() < 3)
@@ -1964,10 +1965,21 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
 	tetra_centers_[index] = center;
 	double Rres = 0.5*std::sqrt(DDx*DDx + DDy*DDy + DDz*DDz) / std::abs(a);
 	// Sanity check
-	double Rcheck0 = fastabs(del_.points_[del_.tetras_[index].points[0]] - center);
+	/*double Rcheck0 = fastabs(del_.points_[del_.tetras_[index].points[0]] - center);
 	double Rcheck1 = fastabs(del_.points_[del_.tetras_[index].points[1]] - center);
 	double Rcheck2 = fastabs(del_.points_[del_.tetras_[index].points[2]] - center);
-	double Rcheck3 = fastabs(del_.points_[del_.tetras_[index].points[3]] - center);
+	double Rcheck3 = fastabs(del_.points_[del_.tetras_[index].points[3]] - center);*/
+	Vector3D v1(del_.points_[del_.tetras_[index].points[0]]);
+	double Rcheck0 = fastabs(v1 - center);
+	v2 += v1;
+	v2 -= center;
+	double Rcheck1 = fastabs(v2);
+	v3 += v1;
+	v3 -= center;
+	double Rcheck2 = fastabs(v3);
+	v4 += v1;
+	v4 -= center;
+	double Rcheck3 = fastabs(v4);
 	double tol = 1 + 1e-6;
 	if (((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)*tol < (4 * Rcheck0)) || ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3) > (tol * 4 * Rcheck0)))
 		return CalcTetraRadiusCenterHiPrecision(index);
