@@ -32,6 +32,16 @@ namespace
 		extensive.energy += de * extensive.mass;
 	}
 
+	void EntropyFixSR(EquationOfState const& eos, ComputationalCell &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, double &energy,
+		Extensive &extensive,double vol)
+	{
+		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
+		res.pressure = new_pressure;
+		energy = eos.dp2e(res.density, res.pressure);
+		double gamma = std::sqrt(1.0 / (1 - ScalarProd(res.velocity, res.velocity)));
+		extensive.energy = extensive.mass*(energy*gamma+gamma-1)-res.pressure*vol;
+	}
+
 	bool HighRelativeKineticEnergy(Tessellation const& tess, size_t index, vector<Extensive> const& cells,
 		Extensive const& cell)
 	{
@@ -119,13 +129,13 @@ namespace
 		}
 	}
 
-	void regular_updateSR(const EquationOfState& /*eos*/, vector<Extensive>& extensives,
+	void regular_updateSR(const EquationOfState& eos, vector<Extensive>& extensives,
 		const ComputationalCell& old,
 		const CacheData& cd,
 		const size_t index,
 		ComputationalCell &res,
-		size_t /*entropy_index*/,
-		TracerStickerNames const& /*tracerstickernames*/,
+		size_t entropy_index,
+		TracerStickerNames const& tracerstickernames,
 		Tessellation const& /*tess*/,double G)
 	{
 		Extensive& extensive = extensives[index];
@@ -144,7 +154,32 @@ namespace
 				+ (0.5*ScalarProd(res.velocity, res.velocity))*res.density);
 		else
 			res.pressure = (G - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
-			+ (1.0 / gamma_1 - 1)*res.density);
+				+ (1.0 / gamma_1 - 1)*res.density);
+		// Entropy fix if needed
+		if (entropy_index < res.tracers.size())
+		{
+			double enthalpy = 0;
+			// Do we have a negative thermal energy?
+			if (res.pressure < 0)
+			{
+				EntropyFixSR(eos, res, entropy_index, tracerstickernames, enthalpy, extensive,cd.volumes[index]);
+			}
+			else
+			{
+				double new_entropy = eos.dp2s(res.density, res.pressure, res.tracers, tracerstickernames.tracer_names);
+				// Did we lose entropy? If yes then correct for it since it is unphysical
+				if (new_entropy < res.tracers[entropy_index])
+				{
+					EntropyFixSR(eos, res, entropy_index, tracerstickernames, enthalpy, extensive,cd.volumes[index]);
+				}
+				else
+				{
+					// We don't need the entropy fix, update entropy
+					res.tracers[entropy_index] = new_entropy;
+					extensive.tracers[entropy_index] = new_entropy * extensive.mass;
+				}
+			}
+		}
 	}
 
 	void update_single(const Tessellation& tess,
