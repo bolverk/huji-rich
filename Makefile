@@ -50,13 +50,13 @@ $(LIBRARY_FOLDER)/$(LIB_FILE): $(OBJECTS)
 $(OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
 	$(CXX) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
-	$(CXX) -MM $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CXX) -MM $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$@,g' -i $(LIBRARY_FOLDER)/$*.d
 
 $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p `dirname $@`
-	$(CXX) -c $(OPTIMIZATION_FLAGS) $< -o $@
-	$(CXX) -MM $< -o $(LIBRARY_FOLDER)/$*.d
+	$(CXX) -c $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $@
+	$(CXX) -MM $(OPTIMIZATION_FLAGS) $(LINT_FLAGS) $< -o $(LIBRARY_FOLDER)/$*.d
 	@sed 's,\(\w*\)\.o,$(LIBRARY_FOLDER)/\1.o,g' -i $(LIBRARY_FOLDER)/$*.d
 
 -include $(OBJECTS:.o=.d)
