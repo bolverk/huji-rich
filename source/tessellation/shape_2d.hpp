@@ -50,6 +50,10 @@ public:
   \param center The center of the circle
   */
   void setCenter(Vector2D const& center);
+  
+  ~Circle(void);
+  
+  Circle(const Circle& origin);
 
 private:
 
