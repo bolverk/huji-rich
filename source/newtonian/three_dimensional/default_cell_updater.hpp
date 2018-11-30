@@ -14,12 +14,14 @@ class DefaultCellUpdater : public CellUpdater3D
 public:
 
 	//! \brief Class constructor
-	DefaultCellUpdater(void);
+	DefaultCellUpdater(bool SR = false,double G=0);
 
 	void operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
 		const Tessellation3D& tess, vector<Conserved3D>& extensives, 
 		TracerStickerNames const& tracerstickernames) const;
 private:
+	const bool SR_;
+	const double G_;
 	mutable size_t entropy_index_;
 };
 

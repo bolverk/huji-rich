@@ -15,7 +15,7 @@ namespace
 			throw UniversalError("Bad cell after interpolation in LinearGauss3D");
 	}
 
-	void GetNeighborMesh(Tessellation3D const& tess, size_t cell_index, 
+	void GetNeighborMesh(Tessellation3D const& tess, size_t cell_index,
 		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &res, vector<size_t> const& faces)
 	{
 		res.resize(faces.size());
@@ -29,7 +29,7 @@ namespace
 		}
 	}
 
-	void GetNeighborCM(Tessellation3D const& tess, size_t cell_index, 
+	void GetNeighborCM(Tessellation3D const& tess, size_t cell_index,
 		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &res, vector<size_t> const& faces)
 	{
 		res.resize(faces.size());
@@ -58,10 +58,10 @@ namespace
 
 	void calc_naive_slope(ComputationalCell3D const& cell,
 		Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<ComputationalCell3D> const& neighbors,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neighbor_centers, 
+		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neighbor_centers,
 		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neigh_cm, Tessellation3D const& tess,
 		Slope3D &res, Slope3D &temp, size_t /*index*/, vector<size_t> const& faces,
-		std::vector<Vector3D,boost::alignment::aligned_allocator<Vector3D,32> > c_ij)
+		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > c_ij)
 	{
 		size_t n = neighbor_centers.size();
 		if (n > 60)
@@ -74,7 +74,7 @@ namespace
 
 		for (size_t i = 0; i < n; i++)
 		{
-			c_ij[i] = neigh_cm[i];		
+			c_ij[i] = neigh_cm[i];
 			c_ij[i] += cell_cm;
 			c_ij[i] *= -0.5;
 			c_ij[i] += tess.FaceCM(faces[i]);
@@ -214,16 +214,16 @@ namespace
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
 		if (pressure_calc)
 			try
-			{
+		{
 			//res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
-				res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
-			}
-			catch (UniversalError &eo)
-			{
-				eo.AddEntry("density", res.density);
-				eo.AddEntry("internal energy", res.internal_energy);
-				throw eo;
-			}
+			res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("density", res.density);
+			eo.AddEntry("internal energy", res.internal_energy);
+			throw eo;
+		}
 		return res;
 	}
 
@@ -485,13 +485,13 @@ namespace
 			}
 			// tracers
 			size_t counter = 0;
-			for (size_t j = 0; j <ntracer; ++j)
+			for (size_t j = 0; j < ntracer; ++j)
 			{
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
 				double centroid_tracer = centroid_val.tracers[j];
 				if (std::abs(dphi.tracers[j]) > 0.01*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) ||
-					centroid_tracer*cell_tracer < 0)
+					centroid_tracer * cell_tracer < 0)
 				{
 					if (std::abs(dphi.tracers[j]) > std::abs(1e-9*cell_tracer))
 						psi[6 + counter] = std::min(psi[6 + counter],
@@ -533,7 +533,7 @@ namespace
 	}
 
 	void GetBoundarySlope(ComputationalCell3D const& cell, Vector3D const& cell_cm,
-		vector<ComputationalCell3D> const& neighbors, 
+		vector<ComputationalCell3D> const& neighbors,
 		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neigh_cm,
 		Slope3D &res)
 	{
@@ -555,13 +555,13 @@ namespace
 			SzSy += (neigh_cm[i].z - cell_cm.z)*(neigh_cm[i].y - cell_cm.y);
 			Sz2 += (neigh_cm[i].z - cell_cm.z)*(neigh_cm[i].z - cell_cm.z);
 		}
-		double bottom = 1.0/SxSz*SxSz*Sy2 + SxSy*SxSy*Sz2 - Sx2*Sy2*Sz2 - 2 * SxSy*SxSz*SzSy + Sx2*SzSy*Sz2;
-		res.xderivative = (PhiSz*SxSz*Sy2 + PhiSy*SxSy*Sz2 - PhiSx*Sy2*Sz2 - PhiSz*SxSy*SzSy - PhiSy*SxSz*SzSy +
-			PhiSx*SzSy*SzSy)*bottom ;
-		res.yderivative = (PhiSz*SzSy*Sx2 + PhiSy*SxSz*SxSz - PhiSx*SxSz*SzSy - PhiSz*SxSy*SxSz - PhiSy*Sx2*Sz2 +
-			PhiSx*SxSy*Sz2)*bottom;
-		res.zderivative = (PhiSz*SxSy*SxSy - PhiSy*SxSy*SxSz - PhiSz*Sy2*Sx2 + PhiSx*SxSz*Sy2 + PhiSy*Sx2*SzSy -
-			PhiSx*SxSy*SzSy) *bottom;
+		double bottom = 1.0 / SxSz * SxSz*Sy2 + SxSy * SxSy*Sz2 - Sx2 * Sy2*Sz2 - 2 * SxSy*SxSz*SzSy + Sx2 * SzSy*Sz2;
+		res.xderivative = (PhiSz*SxSz*Sy2 + PhiSy * SxSy*Sz2 - PhiSx * Sy2*Sz2 - PhiSz * SxSy*SzSy - PhiSy * SxSz*SzSy +
+			PhiSx * SzSy*SzSy)*bottom;
+		res.yderivative = (PhiSz*SzSy*Sx2 + PhiSy * SxSz*SxSz - PhiSx * SxSz*SzSy - PhiSz * SxSy*SxSz - PhiSy * Sx2*Sz2 +
+			PhiSx * SxSy*Sz2)*bottom;
+		res.zderivative = (PhiSz*SxSy*SxSy - PhiSy * SxSy*SxSz - PhiSz * Sy2*Sx2 + PhiSx * SxSz*Sy2 + PhiSy * Sx2*SzSy -
+			PhiSx * SxSy*SzSy) *bottom;
 		res.xderivative.stickers = cell.stickers;
 		res.yderivative.stickers = cell.stickers;
 		res.zderivative.stickers = cell.stickers;
@@ -571,16 +571,16 @@ namespace
 	void calc_slope(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, size_t cell_index, bool slf,
 		double shockratio, double diffusecoeff, double pressure_ratio, EquationOfState const& eos,
 		const vector<string>& calc_tracers, Slope3D &naive_slope_, Slope3D & res, Slope3D &temp1, ComputationalCell3D &temp2,
-		ComputationalCell3D &temp3, ComputationalCell3D &temp4, ComputationalCell3D &temp5, 
+		ComputationalCell3D &temp3, ComputationalCell3D &temp4, ComputationalCell3D &temp5,
 		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &neighbor_mesh_list,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &neighbor_cm_list, 
+		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &neighbor_cm_list,
 		TracerStickerNames const& tracerstickernames, string const& skip_key,
 		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
 		vector<size_t> const& faces = tess.GetCellFaces(cell_index);
 		GetNeighborMesh(tess, cell_index, neighbor_mesh_list, faces);
 		GetNeighborCM(tess, cell_index, neighbor_cm_list, faces);
-		GetNeighborCells(tess, cell_index, cells, faces,neighbor_list);
+		GetNeighborCells(tess, cell_index, cells, faces, neighbor_list);
 		ComputationalCell3D const& cell = cells[cell_index];
 		bool boundary_slope = false;
 		size_t Nneigh = faces.size();
@@ -595,7 +595,7 @@ namespace
 		else
 			calc_naive_slope(cell, tess.GetMeshPoint(cell_index), tess.GetCellCM(cell_index),
 				tess.GetVolume(cell_index), neighbor_list, neighbor_mesh_list, neighbor_cm_list, tess, res, temp1,
-				cell_index, faces,c_ij);
+				cell_index, faces, c_ij);
 
 		naive_slope_ = res;
 
@@ -657,8 +657,8 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames const& tsn, Ghost3D const& ghost, bool slf, double delta_v, double theta,
-	double delta_P, const vector<string>& calc_tracers, string skip_key) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
-	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P),
+	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
+	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
 	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_() {}
 
 void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
@@ -676,6 +676,15 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	for (boost::container::flat_map<size_t, ComputationalCell3D>::const_iterator it = ghost_cells.begin(); it !=
 		ghost_cells.end(); ++it)
 		new_cells[it->first] = it->second;
+	if (SR_)
+	{
+		size_t Nall = new_cells.size();
+		for (size_t j = 0; j < Nall; ++j)
+		{
+			double gamma = 1.0 / std::sqrt(1 - ScalarProd(new_cells[j].velocity, new_cells[j].velocity));
+			new_cells[j].velocity *= gamma;
+		}
+	}
 	// Prepare slopes
 	rslopes_.resize(CellNumber, Slope3D(cells[0], cells[0], cells[0]));
 	naive_rslopes_.resize(CellNumber);
@@ -694,7 +703,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
-			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_,c_ij,neighbor_list);
+			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_, c_ij, neighbor_list);
 		vector<size_t> const& faces = tess.GetCellFaces(i);
 		const size_t nloop = faces.size();
 		for (size_t j = 0; j < nloop; ++j)
@@ -766,7 +775,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 #endif //RICH_MPI
 
 				CheckCell(*cell_ref);
-		}
+			}
 			catch (UniversalError &eo)
 			{
 				eo.AddEntry("old density", new_cells[N0].density);
@@ -784,10 +793,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
 							eo.AddEntry("Point recv index", static_cast<double>(k));
 							eo.AddEntry("Point proc index", static_cast<double>(j));
-			}
+						}
 #endif
 				throw eo;
-	}
+			}
 		}
 		else
 		{
@@ -808,7 +817,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 #endif //RICH_MPI
 
 				CheckCell(*cell_ref);
-		}
+			}
 			catch (UniversalError &eo)
 			{
 				eo.AddEntry("old density", new_cells[N0].density);
@@ -826,11 +835,23 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
 							eo.AddEntry("Point recv index", static_cast<double>(k));
 							eo.AddEntry("Point proc index", static_cast<double>(j));
-			}
+						}
 #endif
 				throw eo;
+			}
+		}
 	}
-}
+	//In SR convert back to velocities
+	if (SR_)
+	{
+		size_t N = res.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			double factor = 1.0 / std::sqrt(1 + ScalarProd(res[i].first.velocity, res[i].first.velocity));
+			res[i].first.velocity *= factor;
+			factor = 1.0 / std::sqrt(1 + ScalarProd(res[i].second.velocity, res[i].second.velocity));
+			res[i].second.velocity *= factor;
+		}
 	}
 }
 

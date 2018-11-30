@@ -65,7 +65,8 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	const CellUpdater3D& cu,
 	const ExtensiveUpdater3D& eu,
 	const SourceTerm3D &source,
-	TracerStickerNames &tsn
+	TracerStickerNames &tsn,
+	bool SR
 #ifdef RICH_MPI
 	,const ProcessorUpdate3D* proc_update
 #endif
@@ -135,8 +136,16 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	MPI_exchange_data(tess_, cells_, true);
 #endif
 	extensive_.resize(N);
-	for (size_t i = 0; i < N; ++i)
-		PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i]);
+	if (SR)
+	{
+		for (size_t i = 0; i < N; ++i)
+			PrimitiveToConservedSR(cells_[i], tess.GetVolume(i), extensive_[i],eos_,tsn_);
+	}
+	else
+	{
+		for (size_t i = 0; i < N; ++i)
+			PrimitiveToConserved(cells_[i], tess.GetVolume(i), extensive_[i]);
+	}
 }
 
 namespace

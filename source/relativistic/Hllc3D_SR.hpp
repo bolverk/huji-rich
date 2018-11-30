@@ -14,6 +14,9 @@ class Hllc3D_SR : public RiemannSolver3D
 private:
 	mutable ComputationalCell3D local_left_, local_right_;
 public:
+	Hllc3D_SR();
+
+	~Hllc3D_SR();
 
 	Conserved3D operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
 		EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const;

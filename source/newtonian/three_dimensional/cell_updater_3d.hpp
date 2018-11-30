@@ -32,4 +32,11 @@ public:
 		virtual ~CellUpdater3D(void);
 };
 
+/*!
+\brief Calculates velocity from extensive in SR
+\param cell The extensive variable
+\param G The adiabatic index
+\return The velocity
+*/
+double GetVelocity(Conserved3D const& cell, double G);
 #endif // CELL_UPDATER_HPP

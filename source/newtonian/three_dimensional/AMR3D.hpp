@@ -79,6 +79,32 @@ public:
 		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
 };
 
+//! \brief Simple class for extensive update scheme in amr for SR
+class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
+{
+public:
+	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+		double volume, TracerStickerNames const& tracerstickernames) const;
+};
+
+//! \brief Simple class for cell update scheme in amr for SR
+class SimpleAMRCellUpdaterSR3D : public AMRCellUpdater3D
+{
+private:
+	const double G_;
+	const vector<string>  toskip_;
+public:
+	/*!
+	\brief class constructor
+	\param G The adiabatic index
+	\param toskip A list of sticker names to skip their cell update
+	*/
+	explicit SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip);
+
+	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
+		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
+};
+
 //! \brief Chooses which cells should be remove
 class CellsToRemove3D
 {

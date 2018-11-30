@@ -71,7 +71,8 @@ public:
 	  const CellUpdater3D& cu,
 	  const ExtensiveUpdater3D & eu,
 	  const	SourceTerm3D &source,
-	  TracerStickerNames &tsn
+	  TracerStickerNames &tsn,
+	  bool SR=false
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif

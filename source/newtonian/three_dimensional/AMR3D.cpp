@@ -728,6 +728,26 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 	return res;
 }
 
+Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+	double volume, TracerStickerNames const& tracerstickernames) const
+{
+	Conserved3D res;
+	double gamma = 1.0 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
+	const double mass = volume * cell.density*gamma;
+	res.mass = mass;
+	size_t N = cell.tracers.size();
+	res.tracers.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		res.tracers[i] = cell.tracers[i] * mass;
+	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
+	if (fastabs(cell.velocity) < 1e-5)
+		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
+	else
+		res.energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
+	res.momentum = mass * cell.velocity *gamma*(enthalpy + 1);
+	return res;
+}
+
 SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(vector<string> toskip) :toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
@@ -756,6 +776,37 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = extensive.tracers[i] / extensive.mass;
 	res.stickers = old_cell.stickers;
+	return res;
+}
+
+SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip) : G_(G), toskip_(toskip) {}
+
+ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& /*eos*/,
+	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
+{
+	for (size_t i = 0; i < toskip_.size(); ++i)
+		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+			return old_cell;
+
+	double v = GetVelocity(extensive, G_);
+	volume = 1.0 / volume;
+	ComputationalCell3D res;
+	if (res.density < 0)
+		throw UniversalError("Negative density in SimpleAMRCellUpdaterSR");
+	res.velocity = (fastabs(extensive.momentum)*1e8 < extensive.mass) ? extensive.momentum / extensive.mass : v * extensive.momentum / abs(extensive.momentum);
+	double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity, res.velocity));
+	res.density = extensive.mass *gamma_1*volume;
+	res.stickers = old_cell.stickers;
+	size_t N = extensive.tracers.size();
+	res.tracers.resize(N);
+	for (size_t i = 0; i < extensive.tracers.size(); ++i)
+		res.tracers[i] = extensive.tracers[i] / extensive.mass;
+	if (fastabs(res.velocity) < 1e-5)
+		res.pressure = (G_ - 1)*((extensive.energy - ScalarProd(extensive.momentum, res.velocity))*volume
+			+ (0.5*ScalarProd(res.velocity, res.velocity))*res.density);
+	else
+		res.pressure = (G_ - 1)*(extensive.energy*volume - ScalarProd(extensive.momentum, res.velocity)*volume
+			+ (1.0 / gamma_1 - 1)*res.density);
 	return res;
 }
 

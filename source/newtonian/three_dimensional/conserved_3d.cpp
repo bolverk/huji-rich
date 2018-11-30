@@ -133,6 +133,23 @@ void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved
 		res.tracers[i] = cell.tracers[i]*res.mass;
 }
 
+void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserved3D &res, EquationOfState const& eos, TracerStickerNames const& tsn)
+{
+	double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
+	res.mass = cell.density*vol*gamma;
+	const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tsn.tracer_names);
+	res.internal_energy = enthalpy * res.mass;
+	if (fastabs(cell.velocity) < 1e-5)
+		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* res.mass - cell.pressure*vol;
+	else
+		res.energy = (gamma*enthalpy + (gamma - 1))* res.mass - cell.pressure*vol;
+	res.momentum = res.mass * (enthalpy + 1)*gamma*cell.velocity;
+	size_t N = cell.tracers.size();
+	res.tracers.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		res.tracers[i] = cell.tracers[i] * res.mass;
+}
+
 Conserved3D operator+(Conserved3D const& p1, Conserved3D const& p2)
 {
 	Conserved3D res(p1);
