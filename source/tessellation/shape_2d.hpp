@@ -53,6 +53,9 @@ public:
   
   ~Circle(void);
   
+  /*! \brief  Copy constructor
+  \param origin Original
+  */
   Circle(const Circle& origin);
 
 private:

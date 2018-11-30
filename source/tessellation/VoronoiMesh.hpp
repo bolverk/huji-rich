@@ -113,6 +113,9 @@ public:
    */
   int GetPointNo(void) const;
 
+  /*! \brief Set the number of points
+  \param N Number of points
+  */
   void SetPointNo(int N);
 
   /*! \brief Returns Position of mesh generating point
@@ -204,6 +207,16 @@ public:
   void GetNeighborNeighbors(vector<int> &result, int point)const;
 
 #ifdef RICH_MPI
+/*! \brief Communicate position of mesh generating points between processes
+	\param vproc Meta tessellation
+	\param rank Current process rank
+	\param points List of mesh generating points
+	\param obc Outer boundary conditions
+	\param selfindex Local indices
+	\param sentproc Processes to which points should be sentpoints
+	\param sentpoints Points to be sent
+	\return Received points
+*/
   vector<Vector2D> UpdateMPIPoints(Tessellation const& vproc, int rank,
 	  vector<Vector2D> &points, OuterBoundary const* obc, vector<size_t> &selfindex,
 	  vector<int> &sentproc, vector<vector<int> > &sentpoints);
