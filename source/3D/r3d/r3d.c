@@ -149,13 +149,8 @@ void r3d_reduce(r3d_poly* poly, r3d_real* moments, r3d_int polyorder) {
 	if(*nverts <= 0) return;
 	
 	// for keeping track of which edges have been visited
-	r3d_int **emarks = (r3d_int **)malloc(*nverts * sizeof(r3d_int*));
-	for (i = 0; i < *nverts; ++i)
-	{
-		emarks[i] = (r3d_int *)malloc(3 * sizeof(r3d_int));
-		for (j = 0; j < 3; ++j)
-			emarks[i][j] = 0;
-	}
+	r3d_int emarks[R3D_MAX_VERTS][3];
+	memset(&emarks, 0, sizeof(emarks));
 	
 
 	// Storage for coefficients
@@ -263,11 +258,6 @@ void r3d_reduce(r3d_poly* poly, r3d_real* moments, r3d_int polyorder) {
 		curlayer = 1 - curlayer;
 		prevlayer = 1 - prevlayer;
 	}
-
-	// free memory
-	for (i = 0; i < *nverts; ++i)
-		free(emarks[i]);
-	free(emarks);
 }
 
 
