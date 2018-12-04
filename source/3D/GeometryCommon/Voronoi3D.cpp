@@ -17,6 +17,8 @@
 #include "Intersections.hpp"
 #include "../../misc/int2str.hpp"
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/container/static_vector.hpp>
+
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index)
 {
@@ -231,9 +233,9 @@ namespace
 	}
 #endif
 
-	double CleanDuplicates(vector<size_t, boost::alignment::aligned_allocator<size_t,32> > &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
-		vector<double,boost::alignment::aligned_allocator<double,32> > &diffs,
-		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &vtemp)
+	double CleanDuplicates(boost::container::static_vector<size_t, 128> &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
+		boost::container::static_vector<double, 128> &diffs,
+		boost::container::static_vector<Vector3D, 128> &vtemp)
 	{
 		res.clear();
 		size_t N = indeces.size();
@@ -303,7 +305,7 @@ namespace
 	}
 
 	void MakeRightHandFace(vector<size_t> &indeces, Vector3D const& point, vector<Vector3D> const& face_points,
-		vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > &temp, double areascale)
+		boost::container::static_vector<size_t, 128> &temp, double areascale)
 	{
 		Vector3D V1, V2;
 		size_t counter = 0;
@@ -417,8 +419,8 @@ namespace
 #endif //RICH_MPI
 
 	void CalcFaceAreaCM(std::vector<size_t> const& indeces, std::vector<Vector3D> const& allpoints, 
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &points, double &Area, Vector3D &CM,
-		std::vector<double, boost::alignment::aligned_allocator<double, 32> > &Atemp)
+		boost::container::static_vector<Vector3D, 128> &points, double &Area, Vector3D &CM,
+		boost::container::static_vector<double, 128> &Atemp)
 	{
 		CM.Set(0.0, 0.0, 0.0);
 		std::size_t Nloop = indeces.size();
@@ -618,8 +620,8 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 Voronoi3D::Voronoi3D() :ll_(Vector3D()), ur_(Vector3D()), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
 del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
 FacesInCell_(vector<vector<std::size_t> >()), PointsInFace_(vector<vector<std::size_t> >()), FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
-CM_(vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >()), Face_CM_(vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >()), 
-volume_(vector<double, boost::alignment::aligned_allocator<double, 32> >()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
+CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D >()), 
+volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
 sentprocs_(vector<int>()), duplicatedprocs_(vector<int>()), sentpoints_(vector<vector<std::size_t> >()), Nghost_(vector<vector<std::size_t> >()),
 self_index_(vector<std::size_t>()), temp_points_(std::array<Vector3D, 4>()), temp_points2_(std::array<Vector3D, 5>())
 {}
@@ -627,8 +629,8 @@ self_index_(vector<std::size_t>()), temp_points_(std::array<Vector3D, 4>()), tem
 Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
 del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
 FacesInCell_(vector<vector<std::size_t> >()), PointsInFace_(vector<vector<std::size_t> >()), FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
-CM_(vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >()), Face_CM_(vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >()),
-volume_(vector<double, boost::alignment::aligned_allocator<double, 32> >()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
+CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D>()),
+volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
 sentprocs_(vector<int>()), duplicatedprocs_(vector<int>()), sentpoints_(vector<vector<std::size_t> >()), Nghost_(vector<vector<std::size_t> >()),
 self_index_(vector<std::size_t>()), temp_points_(std::array<Vector3D, 4>()), temp_points2_(std::array<Vector3D, 5>()) {}
 
@@ -1335,21 +1337,25 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 		FacesInCell_[i].reserve(20);
 	for (size_t i = 0; i < (10*Norg_); ++i)
 		PointsInFace_[i].reserve(8);
-	std::vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp, temp2;
+	boost::container::static_vector<size_t, 128> temp, temp2, temp3;
+	//std::vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp, temp2;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
 		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
 			CalcTetraRadiusCenter(i);
 	// Organize the faces and assign them to cells
-	vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp3;
-	vector<double, boost::alignment::aligned_allocator<double, 32> > diffs;
-	vector<double, boost::alignment::aligned_allocator<double, 32> > Atempvec;
+	//vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp3;
+	boost::container::static_vector<double, 128> diffs, Atempvec;
+	//vector<double, boost::alignment::aligned_allocator<double, 32> > diffs;
+	//vector<double, boost::alignment::aligned_allocator<double, 32> > Atempvec;
 
 	size_t FaceCounter = 0;
 	boost::container::flat_set<size_t> neigh_set;
 	std::vector<size_t> *temp_points_in_face;
-	std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;
+	boost::container::static_vector<Vector3D,128>  clean_vec;
+
+	//std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;
 	for (size_t i = 0; i < Norg_; ++i)
 	{
 		neigh_set.clear();
@@ -2324,12 +2330,12 @@ std::size_t Voronoi3D::GetTotalPointNumber(void)const
 	return del_.points_.size();
 }
 
-vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& Voronoi3D::GetAllCM(void)
+vector<Vector3D>& Voronoi3D::GetAllCM(void)
 {
 	return CM_;
 }
 
-vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > Voronoi3D::GetAllCM(void)const
+vector<Vector3D> Voronoi3D::GetAllCM(void)const
 {
 	return CM_;
 }
@@ -2373,12 +2379,12 @@ std::vector<std::pair<size_t, size_t> >& Voronoi3D::GetAllFaceNeighbors(void)
 	return FaceNeighbors_;
 }
 
-vector<double, boost::alignment::aligned_allocator<double, 32> >& Voronoi3D::GetAllVolumes(void)
+vector<double>& Voronoi3D::GetAllVolumes(void)
 {
 	return volume_;
 }
 
-vector<double, boost::alignment::aligned_allocator<double, 32> > Voronoi3D::GetAllVolumes(void) const
+vector<double> Voronoi3D::GetAllVolumes(void) const
 {
 	return volume_;
 }
@@ -2427,7 +2433,7 @@ vector<double>& Voronoi3D::GetAllArea(void)
 	return area_;
 }
 
-vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> >& Voronoi3D::GetAllFaceCM(void)
+vector<Vector3D>& Voronoi3D::GetAllFaceCM(void)
 {
 	return Face_CM_;
 }

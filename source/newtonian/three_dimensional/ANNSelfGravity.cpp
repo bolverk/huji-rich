@@ -200,7 +200,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		accpoints.resize(Ninner);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
-#pragma vector aligned
+//#pragma vector aligned
 #endif
 		for (size_t j = 0; j < Ninner; ++j)
 		{
