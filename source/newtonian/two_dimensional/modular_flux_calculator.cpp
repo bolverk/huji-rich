@@ -19,6 +19,7 @@ namespace
 			return pair<Vector2D, Vector2D>(p, remove_parallel_component(tess.GetMeshPoint(edge.neighbors.second) -
 				edge.vertices.first, p));
 		assert(false);
+		return std::pair<Vector2D, Vector2D>();
 	}
 
 	Extensive convert_conserved_to_extensive(const Conserved& conserved, const pair<ComputationalCell, ComputationalCell>& cells)
