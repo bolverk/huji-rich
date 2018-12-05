@@ -441,7 +441,7 @@ namespace
 			Atemp[i] = 0.3333333333333333*0.5*fastsqrt(ScalarProd(temp3, temp3));
 		}
 #ifdef __INTEL_COMPILER
-#pragma vector aligned
+//#pragma vector aligned
 #pragma ivdep
 #endif
 		for (size_t i = 0; i < Nloop; i++)
@@ -1119,7 +1119,7 @@ void Voronoi3D::CalcAllCM(void)
 		}
 	}
 #ifdef __INTEL_COMPILER
-#pragma vector aligned
+//#pragma vector aligned
 #pragma simd
 #endif
 	for (size_t i = 0; i < Norg_; ++i)

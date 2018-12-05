@@ -6,7 +6,6 @@
 #include "universal_error.hpp"
 #include "lazy_list.hpp"
 #include <boost/foreach.hpp>
-#include <boost/align.hpp>
 
 using std::vector;
 using std::size_t;
@@ -73,27 +72,6 @@ list_serialize
   }
   return res;
 }
-
-template <class S> vector<double> list_serialize(const vector<S,boost::alignment::aligned_allocator<S,32> > los);
-
-template <class S> vector<double> list_serialize(const vector<S, boost::alignment::aligned_allocator<S, 32> > los)
-	{
-		if (los.empty())
-			return vector<double>();
-		vector<double> res(los.size()*los.at(0).getChunkSize());
-		size_t counter = 0;
-		for (size_t i = 0; i<los.size(); ++i)
-		{
-			const vector<double> temp = los.at(i).serialize();
-			BOOST_FOREACH(double x, temp)
-			{
-				res.at(counter) = x;
-				++counter;
-			}
-		}
-		return res;
-	}
-
 
 template<class T> vector<T> list_unserialize(const vector<double>& data, const T& t);
 

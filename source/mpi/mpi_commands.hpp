@@ -11,7 +11,6 @@
 #include "../misc/utils.hpp"
 #include "../3D/GeometryCommon/Tessellation3D.hpp"
 #include "stdint.h"
-#include <boost/align.hpp>
 
 using std::vector;
 
@@ -205,59 +204,6 @@ vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vecto
 template <class T>
 vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith,vector<vector<int> > const& tosend,
 	vector<T>const& cells)
-{
-	assert(!cells.empty());
-	vector<MPI_Request> req(totalkwith.size());
-	vector<vector<double> > tempsend(totalkwith.size());
-	vector<double> temprecv;
-	double temp = 0;
-	for (size_t i = 0; i < totalkwith.size(); ++i)
-	{
-		bool isempty = tosend[i].empty();
-		if (!isempty)
-			tempsend[i] = list_serialize(VectorValues(cells, tosend[i]));
-		int size = static_cast<int>(tempsend[i].size());
-		if (size == 0)
-			MPI_Isend(&temp, 1, MPI_DOUBLE, totalkwith[i], 4, MPI_COMM_WORLD, &req[i]);
-		else
-			MPI_Isend(&tempsend[i][0], size, MPI_DOUBLE, totalkwith[i], 5, MPI_COMM_WORLD, &req[i]);
-	}
-	vector<vector<T> > torecv(totalkwith.size());
-	for (size_t i = 0; i < totalkwith.size(); ++i)
-	{
-		MPI_Status status;
-		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		int count;
-		MPI_Get_count(&status, MPI_DOUBLE, &count);
-		temprecv.resize(static_cast<size_t>(count));
-		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		if (status.MPI_TAG == 5)
-		{
-			size_t location = static_cast<size_t>(std::find(totalkwith.begin(), totalkwith.end(), status.MPI_SOURCE) -
-				totalkwith.begin());
-			if (location >= totalkwith.size())
-				throw UniversalError("Bad location in mpi exchange");
-			torecv[location] = list_unserialize(temprecv, cells[0]);
-		}
-		else
-		{
-			if (status.MPI_TAG != 4)
-				throw UniversalError("Recv bad mpi tag");
-		}
-	}
-	if (!req.empty())
-		MPI_Waitall(static_cast<int>(totalkwith.size()), &req[0], MPI_STATUSES_IGNORE);
-	MPI_Barrier(MPI_COMM_WORLD);
-	return torecv;
-}
-
-
-template <class T>
-vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > const& tosend,
-	vector<T, boost::alignment::aligned_allocator<T, 32> >const& cells);
-template <class T>
-vector<vector<T> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > const& tosend,
-	vector<T,boost::alignment::aligned_allocator<T,32> >const& cells)
 {
 	assert(!cells.empty());
 	vector<MPI_Request> req(totalkwith.size());

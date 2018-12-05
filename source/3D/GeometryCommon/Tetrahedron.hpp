@@ -8,8 +8,8 @@
 class Tetrahedron
 {
 public:
-	alignas(32) size_t points[4];
-	alignas(32) size_t neighbors[4];
+	size_t points[4];
+	size_t neighbors[4];
 
 	Tetrahedron();
 

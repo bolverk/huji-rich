@@ -2,7 +2,6 @@
 #include "../../misc/utils.hpp"
 #include <array>
 #include <iostream>
-#include <boost/align.hpp>
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
@@ -16,7 +15,7 @@ namespace
 	}
 
 	void GetNeighborMesh(Tessellation3D const& tess, size_t cell_index,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &res, vector<size_t> const& faces)
+		vector<Vector3D> &res, vector<size_t> const& faces)
 	{
 		res.resize(faces.size());
 		const size_t nloop = res.size();
@@ -30,7 +29,7 @@ namespace
 	}
 
 	void GetNeighborCM(Tessellation3D const& tess, size_t cell_index,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &res, vector<size_t> const& faces)
+		vector<Vector3D> &res, vector<size_t> const& faces)
 	{
 		res.resize(faces.size());
 		const size_t nloop = faces.size();
@@ -58,10 +57,10 @@ namespace
 
 	void calc_naive_slope(ComputationalCell3D const& cell,
 		Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<ComputationalCell3D> const& neighbors,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neighbor_centers,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neigh_cm, Tessellation3D const& tess,
+		vector<Vector3D> const& neighbor_centers,
+		vector<Vector3D> const& neigh_cm, Tessellation3D const& tess,
 		Slope3D &res, Slope3D &temp, size_t /*index*/, vector<size_t> const& faces,
-		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > c_ij)
+		std::vector<Vector3D> c_ij)
 	{
 		size_t n = neighbor_centers.size();
 		if (n > 60)
@@ -534,7 +533,7 @@ namespace
 
 	void GetBoundarySlope(ComputationalCell3D const& cell, Vector3D const& cell_cm,
 		vector<ComputationalCell3D> const& neighbors,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& neigh_cm,
+		vector<Vector3D> const& neigh_cm,
 		Slope3D &res)
 	{
 		size_t Nneigh = neigh_cm.size();
@@ -572,10 +571,10 @@ namespace
 		double shockratio, double diffusecoeff, double pressure_ratio, EquationOfState const& eos,
 		const vector<string>& calc_tracers, Slope3D &naive_slope_, Slope3D & res, Slope3D &temp1, ComputationalCell3D &temp2,
 		ComputationalCell3D &temp3, ComputationalCell3D &temp4, ComputationalCell3D &temp5,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &neighbor_mesh_list,
-		vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &neighbor_cm_list,
+		vector<Vector3D> &neighbor_mesh_list,
+		vector<Vector3D> &neighbor_cm_list,
 		TracerStickerNames const& tracerstickernames, string const& skip_key,
-		std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > &c_ij, vector<ComputationalCell3D> &neighbor_list)
+		std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
 		vector<size_t> const& faces = tess.GetCellFaces(cell_index);
 		GetNeighborMesh(tess, cell_index, neighbor_mesh_list, faces);
@@ -694,9 +693,9 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	ComputationalCell3D temp4(cells[0]);
 	ComputationalCell3D temp5(cells[0]);
 	vector<ComputationalCell3D> neighbor_list;
-	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > neighbor_mesh_list;
-	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > neighbor_cm_list;
-	std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > c_ij;
+	vector<Vector3D> neighbor_mesh_list;
+	vector<Vector3D> neighbor_cm_list;
+	std::vector<Vector3D> c_ij;
 	res.resize(tess.GetTotalFacesNumber(), pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
 	ComputationalCell3D* cell_ref = 0;
 	for (size_t i = 0; i < CellNumber; ++i)

@@ -355,7 +355,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray const& pa,				// point array
 	ANNidxArray			pidx,			// point indices to store in subtree
-	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
+	vector<double> const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dim,			// dimension of space
@@ -472,7 +472,7 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 
 ANNkd_tree::ANNkd_tree(					// construct from point array
 	ANNpointArray const& pa,				// point array (with at least n pts)
-	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
+	vector<double> const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					bs,				// bucket size
@@ -526,8 +526,8 @@ namespace
 	}
 }
 
-void  ANNkd_tree::GetAcc(std::vector<ANNpoint,boost::alignment::aligned_allocator<ANNpoint,32> > &qpoint, 
-	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2) const
+void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint, 
+	std::vector<ANNpoint> &res, double angle2) const
 {
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
 	std::array<double, 3> qMin,qMax;
@@ -562,8 +562,7 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint,boost::alignment::aligned_allocato
 	root->GetAcc(qpoint, res, angle2, bb,qCM);
 }
 
-void ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb,
+void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint,	std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
 	std::array<double, 4> const& qCM) const
 {
 	double lv = bb.lo[cut_dim];
@@ -644,8 +643,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocat
 	}
 }
 
-void  ANNkd_split::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const
+void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint,std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
@@ -811,8 +809,7 @@ void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double /*angle2*/
 	res[2] += Qfactor*dz;
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> >& qpoint, 
-	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> >& res, double /*angle2*/, ANNorthRect &bb) const
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint,	std::vector<ANNpoint>& res, double /*angle2*/, ANNorthRect &bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	size_t N = qpoint.size();
@@ -855,8 +852,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocato
 	}
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-	std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double /*angle2*/, ANNorthRect &bb,
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double /*angle2*/, ANNorthRect &bb,
 	std::array<double, 4> const& /*qCM*/) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);

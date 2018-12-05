@@ -57,12 +57,12 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 
 	size_t Norg = tess.GetPointNo();
 	acc.resize(Norg);
-	vector<double,boost::alignment::aligned_allocator<double,32> > masses(Norg);
+	vector<double> masses(Norg);
 	std::vector<std::array<double, 6> >  Q(Norg);
 
 	ANNpointArray dpoints = annAllocPts(static_cast<int>(Norg), 3);
-	vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > const& AllCM = tess.GetAllCM();
-	vector<double, boost::alignment::aligned_allocator<double, 32> > const& volumes = tess.GetAllVolumes();
+	vector<Vector3D> const& AllCM = tess.GetAllCM();
+	vector<double> const& volumes = tess.GetAllVolumes();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -183,7 +183,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	size_t Nbatch = 16;
 	ANNpointArray anqpoints = annAllocPts(static_cast<int>(Nbatch), 3);
 	ANNpointArray accress = annAllocPts(static_cast<int>(Nbatch), 3);
-	std::vector<ANNpoint,boost::alignment::aligned_allocator<ANNpoint,32> > qpoints(Nbatch), accpoints(Nbatch);
+	std::vector<ANNpoint > qpoints(Nbatch), accpoints(Nbatch);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif

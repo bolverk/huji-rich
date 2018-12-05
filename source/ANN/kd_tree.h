@@ -67,11 +67,9 @@ public:
 	std::array<double, 6> Q;
 	virtual void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const = 0;
 
-	virtual void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const = 0;
+	virtual void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const = 0;
 
-	virtual void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb,
+	virtual void GetAcc(std::vector<ANNpoint > &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
 		std::array<double,4> const& qCM) const = 0;
 
 	virtual void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
@@ -146,10 +144,8 @@ public:
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
 	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
-	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const;
-	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb,
+	void GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const;
+	void GetAcc(std::vector<ANNpoint > &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
 		std::array<double, 4> const& qCM) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
@@ -221,12 +217,10 @@ public:
 	virtual void ann_FR_search(ANNdist);		// fixed-radius search
 
 	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const;
-	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb) const;
+	void GetAcc(std::vector<ANNpoint> &qpoint, 	std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const;
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
-	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2, ANNorthRect &bb,
+	void GetAcc(std::vector<ANNpoint> &qpoint, 	std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
 		std::array<double, 4> const& qCM) const;
 };
 
@@ -246,7 +240,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	ANNpointArray const& pa,				// point array (unaltered)
 	ANNidxArray			pidx,			// point indices to store in subtree
-	vector<double, boost::alignment::aligned_allocator<double, 32> > const& masses,
+	vector<double> const& masses,
 	std::vector<std::array<double, 6> > const& Qs,
 	int					n,				// number of points
 	int					dim,			// dimension of space

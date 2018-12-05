@@ -88,7 +88,6 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-#include <boost/align.hpp>
 #include <vector>
 #include <array>
 #include <cstdlib>			// standard lib includes
@@ -671,7 +670,7 @@ public:
 
 	ANNkd_tree(							// build from point array
 		ANNpointArray const& pa,				// point array
-		std::vector<double,boost::alignment::aligned_allocator<double,32> > const& masses,
+		std::vector<double> const& masses,
 		std::vector<std::array<double,6> > const& Qs,
 		int				n,				// number of points
 		int				bs = 1,			// bucket size
@@ -723,8 +722,8 @@ public:
 
 	void GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2) const;
 
-	void GetAcc(std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &qpoint, 
-		std::vector<ANNpoint, boost::alignment::aligned_allocator<ANNpoint, 32> > &res, double angle2) const;
+	void GetAcc(std::vector<ANNpoint> &qpoint, 
+		std::vector<ANNpoint> &res, double angle2) const;
 
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, std::vector<ANNkd_ptr> & nodes, double angle2,
 		std::vector<ANNpoint> const& normals);
