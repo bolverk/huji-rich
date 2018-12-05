@@ -46,7 +46,7 @@ using namespace std;					// make std:: available
 class ANNkd_node{						// generic kd-tree node (empty shell)
 	
 public:
-	ANNkd_node() :mass(0), Q(std::array<double, 6>()) {}
+	ANNkd_node() :mass(0),CM(std::array<double,3>()), Q(std::array<double, 6>()) {}
 	virtual ~ANNkd_node() {}					// virtual distroyer
 
 	virtual void ann_search(ANNdist) = 0;		// tree search
