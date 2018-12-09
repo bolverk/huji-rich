@@ -17,7 +17,7 @@ namespace
 		extensive.internal_energy += de * extensive.mass;
 	}
 
-	void EntropyFixSR(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, TracerStickerNames const& tracerstickernames,	Conserved3D &extensive, double vol)
+	void EntropyFixSR(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, Conserved3D &extensive, double vol)
 	{
 		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
 		res.pressure = new_pressure;
@@ -70,29 +70,21 @@ namespace
 					}
 					else
 					{
-						double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
-						double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, tsn.tracer_names);
-						// Did we lose entropy? If yes then correct for it since it is unphysical
-						if (new_entropy < res[i].tracers[entropy_index])
+						// Is the kinetic energy small?
+						if ((energy*extensive.mass < 0.005*extensive.energy) &&
+							HighRelativeKineticEnergy(tess, i, extensives, extensive))
 						{
 							EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
 						}
 						else
 						{
-							// Is the kinetic energy small?
-							if ((energy*extensive.mass < 0.005*extensive.energy) &&
-								!HighRelativeKineticEnergy(tess, i, extensives, extensive))
-							{
-								EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
-							}
-							else
-							{
-								// We don't need the entropy fix, update entropy
-								res[i].internal_energy = energy;
-								res[i].pressure = new_pressure;
-								res[i].tracers[entropy_index] = new_entropy;
-								extensive.tracers[entropy_index] = new_entropy * extensive.mass;
-							}
+							double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
+							double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, tsn.tracer_names);
+							// We don't need the entropy fix, update entropy
+							res[i].internal_energy = energy;
+							res[i].pressure = new_pressure;
+							res[i].tracers[entropy_index] = new_entropy;
+							extensive.tracers[entropy_index] = new_entropy * extensive.mass;
 						}
 					}
 				}
@@ -133,7 +125,7 @@ namespace
 
 	void regular_updateSR(std::vector<ComputationalCell3D> &res, std::vector<Conserved3D> & extensives,
 		Tessellation3D const& tess, size_t entropy_index, TracerStickerNames const& tsn,
-		EquationOfState const& eos,double G)
+		EquationOfState const& eos, double G)
 	{
 		size_t Nloop = tess.GetPointNo();
 		size_t Ntracers = res[0].tracers.size();
@@ -143,7 +135,7 @@ namespace
 			{
 				double v = GetVelocity(extensives[i], G);
 				const double volume = 1.0 / tess.GetVolume(i);
-				res[i].velocity = (fastabs(extensives[i].momentum)*1e8 < extensives[i].mass) ? 
+				res[i].velocity = (fastabs(extensives[i].momentum)*1e8 < extensives[i].mass) ?
 					extensives[i].momentum / extensives[i].mass : v * extensives[i].momentum / abs(extensives[i].momentum);
 				double gamma_1 = std::sqrt(1 - ScalarProd(res[i].velocity, res[i].velocity));
 				res[i].density = extensives[i].mass *gamma_1*volume;
@@ -163,7 +155,7 @@ namespace
 					// Do we have a negative thermal energy?
 					if (res[i].pressure < 0)
 					{
-						EntropyFixSR(eos, res[i], entropy_index, tsn, extensives[i], 1.0/volume);
+						EntropyFixSR(eos, res[i], entropy_index, tsn, extensives[i], 1.0 / volume);
 					}
 					else
 					{
@@ -212,7 +204,7 @@ namespace
 
 }
 
-DefaultCellUpdater::DefaultCellUpdater(bool SR,double G) :SR_(SR),G_(G), entropy_index_(9999999) {}
+DefaultCellUpdater::DefaultCellUpdater(bool SR, double G) :SR_(SR), G_(G), entropy_index_(9999999) {}
 
 void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
 	const Tessellation3D& tess, vector<Conserved3D>& extensives,
