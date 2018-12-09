@@ -190,7 +190,8 @@ namespace
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
-			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
+				tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			if (tess.GetOriginalIndex(edge_list[i]->neighbors.first) == tess.GetOriginalIndex(edge_list[i]->neighbors.second))
 				continue;
@@ -308,7 +309,8 @@ namespace
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
-			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
+				tracerstickernames.sticker_names.end(),skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -329,7 +331,8 @@ namespace
 		vector<double> psi(4 + cell.tracers.size(), 1);
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
-			if (!skip_key.empty() && safe_retrieve(neighbors[i]->stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(neighbors[i]->stickers.begin(), 
+				tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
@@ -397,8 +400,8 @@ namespace
 	{
 		size_t Nneigh = neigh_cm.size();
 		ComputationalCell PhiSy, PhiSx;
-		PhiSy.tracers.resize(cell.tracers.size(), 0);
-		PhiSx.tracers.resize(cell.tracers.size(), 0);
+	//	PhiSy.tracers.resize(cell.tracers.size(), 0);
+	//	PhiSx.tracers.resize(cell.tracers.size(), 0);
 		double SxSy(0), Sy2(0), Sx2(0);
 		for (size_t i = 0; i < Nneigh; ++i)
 		{

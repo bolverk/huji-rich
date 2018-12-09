@@ -1,6 +1,7 @@
 #ifndef CONSERVED_3D_HPP
 #define CONSERVED_3D_HPP 1
 
+#include <array>
 #include "../../3D/GeometryCommon/Vector3D.hpp"
 #include "../common/equation_of_state.hpp"
 #include "computational_cell.hpp"
@@ -23,7 +24,7 @@ public:
 	double internal_energy;
 
 	//! \brief Tracers
-	vector<double> tracers;
+	std::array<double,MAX_TRACERS> tracers;
 
 	//! \brief Class constructor (sets everything to zero)
 	Conserved3D(void);
@@ -50,7 +51,7 @@ public:
 		const Vector3D& momentum_i,
 		double energy_i,
 		double internal_energy_i,
-		const vector<double>& tracers_i);
+		const std::array<double,MAX_TRACERS>& tracers_i);
 
 	/*! \brief Reduction operator
 	  \param diff Difference

@@ -12,8 +12,8 @@ ComputationalCell3D::ComputationalCell3D(double density_i,
 ComputationalCell3D::ComputationalCell3D(double density_i,
 				     double pressure_i, double internal_energy_i,size_t ID_i,
 				     const Vector3D& velocity_i,
-				     const vector<double>& tracers_i,
-					 const vector<bool>& stickers_i):
+				     const std::array<double,MAX_TRACERS>& tracers_i,
+					 const std::array<bool,MAX_STICKERS>& stickers_i):
   density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
   velocity(velocity_i), tracers(tracers_i),stickers(stickers_i) {}
 
@@ -36,12 +36,12 @@ ComputationalCell3D& ComputationalCell3D::operator+=(ComputationalCell3D const& 
 	this->pressure += other.pressure;
 	this->internal_energy += other.internal_energy;
 	this->velocity += other.velocity;
-	assert(this->tracers.size() == other.tracers.size());
-	size_t N = this->tracers.size();
+	//assert(this->tracers.size() == other.tracers.size());
+	//size_t N = this->tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		this->tracers[j] += other.tracers[j];
 	return *this;
 }
@@ -52,12 +52,12 @@ ComputationalCell3D& ComputationalCell3D::operator-=(ComputationalCell3D const& 
 	this->pressure -= other.pressure;
 	this->internal_energy -= other.internal_energy;
 	this->velocity -= other.velocity;
-	assert(this->tracers.size() == other.tracers.size());
-	size_t N = this->tracers.size();
+	//assert(this->tracers.size() == other.tracers.size());
+	//size_t N = this->tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		this->tracers[j] -= other.tracers[j];
 	return *this;
 }
@@ -68,8 +68,8 @@ ComputationalCell3D& ComputationalCell3D::operator*=(double s)
 	this->pressure *= s;
 	this->internal_energy *= s;
 	this->velocity *= s;
-	size_t N = this->tracers.size();
-	for (size_t j = 0; j < N; ++j)
+	//size_t N = this->tracers.size();
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		this->tracers[j] *= s;
 	return *this;
 }
@@ -91,18 +91,18 @@ vector<double> ComputationalCell3D::serialize(void) const
 	res.at(5) = internal_energy;
 	res.at(6) = static_cast<double>(ID);
 	size_t counter = 7;
-	size_t N = tracers.size();
+	//size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res[j + counter] = tracers[j];
-	size_t N2 = stickers.size();
+	//size_t N2 = stickers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N2; ++j)
-		res[j + counter + N] = stickers[j] ? 1 : 0;
+	for (size_t j = 0; j < MAX_STICKERS; ++j)
+		res[j + counter + MAX_TRACERS] = stickers[j] ? 1 : 0;
 	return res;
 }
 
@@ -118,18 +118,18 @@ void ComputationalCell3D::unserialize
 	internal_energy = data.at(5);
 	ID = static_cast<size_t>(std::llround(data.at(6)));
 	size_t counter = 7;
-	size_t N = tracers.size();
+	//size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		tracers[j] = data.at(counter + j);
-	size_t N2 = stickers.size();
+	//size_t N2 = stickers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t i = 0; i < N2; ++i)
-		stickers[i] = data.at(counter + N + i)>0.5;
+	for (size_t i = 0; i < MAX_STICKERS; ++i)
+		stickers[i] = data.at(counter + MAX_TRACERS + i)>0.5;
 }
 
 size_t Slope3D::getChunkSize(void) const
@@ -168,11 +168,11 @@ void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D cons
 	res.internal_energy += other.internal_energy*scalar;
 	res.velocity += other.velocity*scalar;
 	//assert(res.tracers.size() == other.tracers.size());
-	size_t N = res.tracers.size();
+	//size_t N = res.tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res.tracers[j] += other.tracers[j] * scalar;
 }
 
@@ -193,13 +193,14 @@ ComputationalCell3D operator-(ComputationalCell3D const& p1, ComputationalCell3D
 ComputationalCell3D operator/(ComputationalCell3D const& p, double s)
 {
 	ComputationalCell3D res(p);
-	res.density /= s;
-	res.pressure /= s;
-	res.internal_energy /= s;
-	size_t N = res.tracers.size();
-	for (size_t j = 0; j < N; ++j)
-		res.tracers[j] /= s;
-	res.velocity = res.velocity / s;
+	double s_1 = 1.0 / s;
+	res.density *= s_1;
+	res.pressure *= s_1;
+	res.internal_energy *= s_1;
+	//size_t N = res.tracers.size();
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
+		res.tracers[j] *= s_1;
+	res.velocity = res.velocity * s_1;
 	return res;
 }
 
@@ -209,8 +210,8 @@ ComputationalCell3D operator*(ComputationalCell3D const& p, double s)
 	res.density *= s;
 	res.pressure *= s;
 	res.internal_energy *= s;
-	size_t N = res.tracers.size();
-	for (size_t j = 0; j < N; ++j)
+	//size_t N = res.tracers.size();
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res.tracers[j] *= s;
 	res.velocity = res.velocity * s;
 	return res;
@@ -228,19 +229,19 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	cell.internal_energy = other.internal_energy;
 	cell.ID = other.ID;
 	cell.velocity = other.velocity;
-	size_t N = other.tracers.size();
-	cell.tracers.resize(N);
+	//size_t N = other.tracers.size();
+	//cell.tracers.resize(N);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t j = 0; j < N; ++j)
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		cell.tracers[j] = other.tracers[j];
-	N = other.stickers.size();
-	cell.stickers.resize(N);
+	//N = other.stickers.size();
+	//cell.stickers.resize(N);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < MAX_STICKERS; ++i)
 		cell.stickers[i] = other.stickers[i];
 }
 

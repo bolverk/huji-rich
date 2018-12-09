@@ -757,6 +757,18 @@ template<class S, class T> typename vector<T>::const_reference safe_retrieve
 	return data.at(index);
 }
 
+template<typename It, typename It2, class S>
+It safe_retrieve(const It data_begin, const It key_begin, const It key_end, S const& key);
+
+template<typename It,typename It2, class S>
+const It safe_retrieve(const It data_begin, const It2 key_begin, const It2 key_end, S const& key)
+{
+	const It2 index = binary_find(key_begin, key_end, key);
+	assert(index != key_end);
+	return data_begin + (index - key_begin);
+}
+
+
 /*! \brief Checks for existence and retrieves entry from flat map
 \param data Data vector
 \param key Key to look for

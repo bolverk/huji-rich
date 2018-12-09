@@ -6,6 +6,7 @@
 #ifndef COMPUTATIONAL_CELL3D_HPP
 #define COMPUTATIONAL_CELL3D_HPP 1
 
+#include <array>
 #include "../../3D/GeometryCommon/Vector3D.hpp"
 #include "../two_dimensional/computational_cell_2d.hpp"
 #ifdef RICH_MPI
@@ -33,10 +34,10 @@ public:
 	Vector3D velocity;
 
 	//! \brief Tracers
-	vector<double> tracers;
+	std::array<double,MAX_TRACERS> tracers;
 
 	//! \brief Stickers
-	vector<bool> stickers;
+	std::array<bool,MAX_STICKERS> stickers;
 
 	//! \brief Null constructor
 	ComputationalCell3D(void);
@@ -63,11 +64,11 @@ public:
 	  */
 	ComputationalCell3D(double density_i,
 		double pressure_i,
-		double internal_energy_i, 
+		double internal_energy_i,
 		size_t ID_i,
 		const Vector3D& velocity_i,
-		const vector<double>& tracers_i,
-		const vector<bool>& stickers_i);
+		const std::array<double, MAX_TRACERS>& tracers_i,
+		const std::array<bool, MAX_STICKERS>& stickers_i);
 
 	/*! \brief Self increment operator
 	\param other Addition

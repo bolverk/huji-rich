@@ -214,14 +214,14 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 	Group tracers = file.createGroup("/tracers");
 	Group stickers = file.createGroup("/stickers");
 
-	for (size_t j = 0; j < cells[0].tracers.size(); ++j)
+	for (size_t j = 0; j < tsn.tracer_names.size(); ++j)
 	{
 		for (size_t i = 0; i < Ncells; ++i)
 			temp[i] = cells[i].tracers[j];
 		write_std_vector_to_hdf5(tracers, temp, tsn.tracer_names[j]);
 	}
 
-	for (size_t j = 0; j < cells[0].stickers.size(); ++j)
+	for (size_t j = 0; j <tsn.sticker_names.size(); ++j)
 	{
 		for (size_t i = 0; i < Ncells; ++i)
 			temp[i] = cells[i].stickers[j];
@@ -325,10 +325,10 @@ Snapshot3D ReadSnapshot3D
 			res.cells.at(i).velocity.x = x_velocity.at(i);
 			res.cells.at(i).velocity.y = y_velocity.at(i);
 			res.cells.at(i).velocity.z = z_velocity.at(i);
-			res.cells.at(i).tracers.resize(tracernames.size());
+			//res.cells.at(i).tracers.resize(tracernames.size());
 			for (size_t j = 0; j < tracernames.size(); ++j)
 				res.cells.at(i).tracers.at(j) = tracers.at(j).at(i);
-			res.cells.at(i).stickers.resize(stickernames.size());
+			//res.cells.at(i).stickers.resize(stickernames.size());
 			for (size_t j = 0; j < stickernames.size(); ++j)
 				res.cells.at(i).stickers.at(j) = stickers.at(j).at(i) == 1;
 		}

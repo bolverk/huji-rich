@@ -7,14 +7,15 @@
 #define EQUATION_OF_STATE_HPP 1
 
 #include <string>
-#include <vector>
-#include <vector>
+#include <array>
+#include "../two_dimensional/computational_cell_2d.hpp"
+
 /** typedef for tracer vector */
-typedef std::vector<double> tvector;
+//typedef std::array<double,MAX_TRACERS> tvector;
 /** typedef for string vector */
-typedef std::vector<bool> svector;
+//typedef std::array<bool, MAX_STICKERS> svector;
 using std::string;
-using std::vector;
+//using std::vector;
 
 //! \brief Base class for equation of state
 class EquationOfState

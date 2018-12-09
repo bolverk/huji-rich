@@ -49,7 +49,7 @@ vector<Extensive> CylindricalComplementary::operator()
 		res[i].mass = 0;
 		res[i].momentum = volume*(p / r)*r_hat / abs(r_hat);
 		res[i].energy = 0;
-		res[i].tracers.resize(cells[0].tracers.size(), 0);
+//		res[i].tracers.resize(cells[0].tracers.size(), 0);
 	}
 	return res;
 }

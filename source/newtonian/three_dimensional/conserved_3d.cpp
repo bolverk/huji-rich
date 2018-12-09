@@ -2,59 +2,61 @@
 
 using std::size_t;
 
-Conserved3D::Conserved3D(void):
-  mass(0), momentum(), energy(0),internal_energy(0), tracers() {}
+Conserved3D::Conserved3D(void) :
+	mass(0), momentum(), energy(0), internal_energy(0), tracers() {}
 
 Conserved3D::Conserved3D(double mass_i,
-			 const Vector3D& momentum_i,
-			 double energy_i,double internal_energy_i):
-  mass(mass_i), momentum(momentum_i), energy(energy_i),internal_energy(internal_energy_i), tracers() {}
+	const Vector3D& momentum_i,
+	double energy_i, double internal_energy_i) :
+	mass(mass_i), momentum(momentum_i), energy(energy_i), internal_energy(internal_energy_i), tracers() {}
 
 Conserved3D::Conserved3D(double mass_i,
-			 const Vector3D& momentum_i,
-			 double energy_i, double internal_energy_i,
-			 const vector<double>& tracers_i):
-  mass(mass_i), momentum(momentum_i), 
-  energy(energy_i), internal_energy(internal_energy_i), tracers(tracers_i) {}
+	const Vector3D& momentum_i,
+	double energy_i, double internal_energy_i,
+	const std::array<double, MAX_TRACERS >& tracers_i) :
+	mass(mass_i), momentum(momentum_i),
+	energy(energy_i), internal_energy(internal_energy_i), tracers(tracers_i) {}
 
-namespace {
-  vector<double> operator*(double s, const vector<double>& v)
-  {
-    vector<double> res(v.size());
-    for(size_t i=0;i<v.size();++i)
-      res[i] = s*v[i];
-    return res;
-  }
+namespace
+{
+	std::array<double, MAX_TRACERS> operator*(double s, const std::array<double, MAX_TRACERS>& v)
+	{
+		std::array<double, MAX_TRACERS> res;
+		for (size_t i = 0; i < v.size(); ++i)
+			res[i] = s * v[i];
+		return res;
+	}
 
-  vector<double> operator/(const vector<double>& v,double s)
-  {
-    vector<double> res(v.size());
-    for(size_t i=0;i<v.size();++i)
-      res[i] = v[i]/s;
-    return res;
-  }
+	std::array<double, MAX_TRACERS> operator/(const std::array<double, MAX_TRACERS>& v, double s)
+	{
+		std::array<double, MAX_TRACERS> res;
+		double s_1 = 1.0 / s;
+		for (size_t i = 0; i < v.size(); ++i)
+			res[i] = v[i] * s_1;
+		return res;
+	}
 }
 
 Conserved3D& Conserved3D::operator-=(const Conserved3D& diff)
 {
-  mass -= diff.mass;
-  momentum -= diff.momentum;
-  energy -= diff.energy;
-  internal_energy -= diff.internal_energy;
-  for(size_t i=0;i<tracers.size();++i)
-    tracers[i] -= diff.tracers[i];
-  return *this;
+	mass -= diff.mass;
+	momentum -= diff.momentum;
+	energy -= diff.energy;
+	internal_energy -= diff.internal_energy;
+	for (size_t i = 0; i < MAX_TRACERS; ++i)
+		tracers[i] -= diff.tracers[i];
+	return *this;
 }
 
 Conserved3D& Conserved3D::operator+=(const Conserved3D& diff)
 {
-  mass += diff.mass;
-  momentum += diff.momentum;
-  energy += diff.energy;
-  internal_energy += diff.internal_energy;
-  for(size_t i=0;i<tracers.size();++i)
-    tracers[i] += diff.tracers[i];
-  return *this;
+	mass += diff.mass;
+	momentum += diff.momentum;
+	energy += diff.energy;
+	internal_energy += diff.internal_energy;
+	for (size_t i = 0; i < tracers.size(); ++i)
+		tracers[i] += diff.tracers[i];
+	return *this;
 }
 
 #ifdef RICH_MPI
@@ -73,8 +75,8 @@ vector<double> Conserved3D::serialize(void) const
 	res.at(4) = momentum.z;
 	res.at(5) = internal_energy;
 	size_t counter = 6;
-	size_t N = tracers.size();
-	for (size_t j = 0; j < N; ++j)
+	//size_t N = tracers.size();
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res[j + counter] = tracers[j];
 	return res;
 }
@@ -89,35 +91,36 @@ void Conserved3D::unserialize(const vector<double>& data)
 	momentum.z = data.at(4);
 	internal_energy = data.at(5);
 	size_t counter = 6;
-	size_t N = tracers.size();
-	for (size_t j = 0; j < N; ++j)
+	//size_t N = tracers.size();
+	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		tracers[j] = data.at(counter + j);
 }
 #endif
 
 Conserved3D operator*(double s, const Conserved3D& c)
 {
-  return Conserved3D(s*c.mass,
-		     s*c.momentum,
-		     s*c.energy,s*c.internal_energy,
-		     s*c.tracers);
+	return Conserved3D(s*c.mass,
+		s*c.momentum,
+		s*c.energy, s*c.internal_energy,
+		s*c.tracers);
 }
 
-Conserved3D operator*(const Conserved3D& c,double s)
+Conserved3D operator*(const Conserved3D& c, double s)
 {
 	return Conserved3D(s*c.mass,
 		s*c.momentum,
-		s*c.energy,s*c.internal_energy,
+		s*c.energy, s*c.internal_energy,
 		s*c.tracers);
 }
 
 
 Conserved3D operator/(const Conserved3D& c, double s)
 {
-  return Conserved3D(c.mass/s,
-		     c.momentum/s,
-		     c.energy/s,c.internal_energy/s,
-		     c.tracers/s);
+	double s_1 = 1.0 / s;
+	return Conserved3D(c.mass * s_1,
+		c.momentum * s_1,
+		c.energy * s_1, c.internal_energy * s_1,
+		s_1 * c.tracers);
 }
 
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res)
@@ -126,11 +129,11 @@ void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved
 	res.momentum = cell.velocity;
 	res.momentum *= res.mass;
 	res.internal_energy = res.mass*cell.internal_energy;
-	res.energy = res.mass*0.5*ScalarProd(cell.velocity,cell.velocity) + res.internal_energy;
-	size_t N = cell.tracers.size();
-	res.tracers.resize(N);
-	for (size_t i = 0; i < N;++i)
-		res.tracers[i] = cell.tracers[i]*res.mass;
+	res.energy = res.mass*0.5*ScalarProd(cell.velocity, cell.velocity) + res.internal_energy;
+	//size_t N = cell.tracers.size();
+	//res.tracers.resize(N);
+	for (size_t i = 0; i < MAX_TRACERS; ++i)
+		res.tracers[i] = cell.tracers[i] * res.mass;
 }
 
 void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserved3D &res, EquationOfState const& eos, TracerStickerNames const& tsn)
@@ -145,7 +148,7 @@ void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserv
 		res.energy = (gamma*enthalpy + (gamma - 1))* res.mass - cell.pressure*vol;
 	res.momentum = res.mass * (enthalpy + 1)*gamma*cell.velocity;
 	size_t N = cell.tracers.size();
-	res.tracers.resize(N);
+	//res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * res.mass;
 }

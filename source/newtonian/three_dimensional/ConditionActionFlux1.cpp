@@ -177,16 +177,16 @@ RegularSpecialEdge3D::RegularSpecialEdge3D(const string& sticker_name) :
 pair<bool, bool> RegularSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess,
 	const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const
 {
-	if (safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers, tracerstickernames.sticker_names,
-		sticker_name_))
+	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), tracerstickernames.sticker_names.begin(),
+		tracerstickernames.sticker_names.end(), sticker_name_))
 	{
-		if (safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers, tracerstickernames.sticker_names,
-			sticker_name_))
+		if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), tracerstickernames.sticker_names.begin(),
+			tracerstickernames.sticker_names.end(), sticker_name_))
 			return pair<bool, bool>(false, false);
 		return pair<bool, bool>(true, false);
 	}
-	if (safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers, tracerstickernames.sticker_names,
-		sticker_name_))
+	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), tracerstickernames.sticker_names.begin(),
+		tracerstickernames.sticker_names.end(), sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);
 }

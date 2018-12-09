@@ -74,7 +74,7 @@ namespace
 		res.mass = c.Mass;
 		res.momentum = c.Momentum;
 		res.energy = c.Energy;
-		res.tracers.resize(cell.tracers.size());
+//		res.tracers.resize(cell.tracers.size());
 		size_t N = cell.tracers.size();
 		for (size_t i = 0; i < N; ++i)
 			res.tracers[i] = cell.tracers[i] * c.Mass;
@@ -275,14 +275,17 @@ pair<bool, bool> RegularSpecialEdge::operator()
 	const Tessellation& /*tess*/,
 	const vector<ComputationalCell>& cells, TracerStickerNames const& tracerstickernames) const
 {
-	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers,tracerstickernames.sticker_names,
+	if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers.begin(),
+		tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
 		sticker_name_)) {
-		if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,tracerstickernames.sticker_names,
+		if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(),
+			tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
 			sticker_name_))
 			return pair<bool, bool>(false, false);
 		return pair<bool, bool>(true, false);
 	}
-	if (safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers,tracerstickernames.sticker_names,
+	if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(),
+		tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
 		sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);

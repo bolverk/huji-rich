@@ -28,7 +28,7 @@ namespace
 		res.mass = conserved.Mass;
 		res.momentum = conserved.Momentum;
 		res.energy = conserved.Energy;
-		res.tracers.resize(cells.first.tracers.size());
+//		res.tracers.resize(cells.first.tracers.size());
 		size_t N = res.tracers.size();
 		for (size_t i = 0; i < N; ++i)
 			res.tracers[i] = conserved.Mass*(conserved.Mass>0 ? cells.first.tracers[i] : cells.second.tracers[i]);

@@ -47,7 +47,10 @@ vector<Extensive> CylindericalGeometry::operator()
 		res[i].momentum = -volume*Vector2D(r_mom*direction_ / abs(direction_) + z_mom*z_hat / abs(z_hat));
 		res[i].energy = -volume*(vr*(p + d*(e + 0.5*pow(vr, 2) + 0.5*pow(vz, 2))) / r);
 		if (!cells[i].tracers.empty())
-			res[i].tracers = -d*volume*(vr / r)*cells[i].tracers;
+		{
+			for(size_t j=0;j<res[i].tracers.size();++j)
+				res[i].tracers[j] = -d * volume*(vr / r)*cells[i].tracers[j];
+		}
 	}
 	return res;
 }

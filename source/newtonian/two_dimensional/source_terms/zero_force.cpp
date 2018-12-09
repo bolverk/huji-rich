@@ -11,8 +11,8 @@ vector<Extensive> ZeroForce::operator()
 	TracerStickerNames const& /*tracerstickersnames*/) const
 {
 	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
-	size_t N = res.size();
-	for (size_t i = 0; i < N; ++i)
-		res[i].tracers.resize(cells[0].tracers.size(), 0);
+//	size_t N = res.size();
+	//for (size_t i = 0; i < N; ++i)
+		//res[i].tracers.resize(cells[0].tracers.size(), 0);
 	return res;
 }

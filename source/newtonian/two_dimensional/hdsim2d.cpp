@@ -58,7 +58,7 @@ namespace
 				0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 			res[i].momentum = mass*cell.velocity;
 			size_t N = cell.tracers.size();
-			res[i].tracers.resize(N);
+	//		res[i].tracers.resize(N);
 			for (size_t j = 0; j < N; ++j)
 				res[i].tracers[j] = cell.tracers[j] * mass;
 		}
@@ -664,7 +664,7 @@ void hdsim::recalculateExtensives(void)
 		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,tracer_sticker_names_.tracer_names)
 			*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 		extensives_[i].momentum = mass*cell.velocity;
-		extensives_[i].tracers.resize(cell.tracers.size());
+//		extensives_[i].tracers.resize(cell.tracers.size());
 		size_t N = cell.tracers.size();
 		for (size_t j = 0; j < N; ++j)
 			extensives_[i].tracers[j] = cell.tracers[j] * mass;

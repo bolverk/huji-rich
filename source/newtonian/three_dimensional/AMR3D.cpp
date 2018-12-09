@@ -581,7 +581,7 @@ namespace
 						// Remove extensive from neigh cell and add to new cell
 						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
 						extensives[cur_check] -= toadd;
-						extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
+						//extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
 						extensives[Norg2 + i] += toadd;
 						oldtess.GetNeighbors(cur_check, neigh);
 						Nneigh = neigh.size();
@@ -642,8 +642,8 @@ namespace
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			extensive_tosend[i].resize(neigh_index[i].size());
-			for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
-				extensive_tosend[i][j].tracers.resize(extensives[0].tracers.size(), 0);
+			//for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
+			//	extensive_tosend[i][j].tracers.resize(extensives[0].tracers.size(), 0);
 			size_t counter = 0;
 			for (size_t j = 0; j < neigh_index[i].size(); ++j)
 			{
@@ -722,7 +722,7 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 	res.energy = res.internal_energy + 0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 	res.momentum = mass*cell.velocity;
 	size_t N = cell.tracers.size();
-	res.tracers.resize(N);
+	//res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * mass;
 	return res;
@@ -736,7 +736,7 @@ Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const Co
 	const double mass = volume * cell.density*gamma;
 	res.mass = mass;
 	size_t N = cell.tracers.size();
-	res.tracers.resize(N);
+	//res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = cell.tracers[i] * mass;
 	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
@@ -754,8 +754,13 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
 {
 	for (size_t i = 0; i < toskip_.size(); ++i)
-		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+	{
+		if (*safe_retrieve(old_cell.stickers.begin(), tracerstickernames.sticker_names.begin(),
+			tracerstickernames.sticker_names.end(), toskip_[i]))
 			return old_cell;
+	}
+//		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+	//		return old_cell;
 	ComputationalCell3D res;
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
@@ -772,7 +777,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	}
 	res.internal_energy = extensive.internal_energy / extensive.mass;
 	size_t N = extensive.tracers.size();
-	res.tracers.resize(N);
+//	res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
 		res.tracers[i] = extensive.tracers[i] / extensive.mass;
 	res.stickers = old_cell.stickers;
@@ -785,8 +790,11 @@ ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
 {
 	for (size_t i = 0; i < toskip_.size(); ++i)
-		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+		if (*safe_retrieve(old_cell.stickers.begin(), tracerstickernames.sticker_names.begin(),
+			tracerstickernames.sticker_names.end(), toskip_[i]))
 			return old_cell;
+		//if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
+			//return old_cell;
 
 	double v = GetVelocity(extensive, G_);
 	volume = 1.0 / volume;
@@ -798,7 +806,7 @@ ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const
 	res.density = extensive.mass *gamma_1*volume;
 	res.stickers = old_cell.stickers;
 	size_t N = extensive.tracers.size();
-	res.tracers.resize(N);
+//	res.tracers.resize(N);
 	for (size_t i = 0; i < extensive.tracers.size(); ++i)
 		res.tracers[i] = extensive.tracers[i] / extensive.mass;
 	if (fastabs(res.velocity) < 1e-5)

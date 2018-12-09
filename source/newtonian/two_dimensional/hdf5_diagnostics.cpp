@@ -417,10 +417,10 @@ Snapshot read_hdf5_snapshot
 			res.cells.at(i).pressure = pressure.at(i);
 			res.cells.at(i).velocity.x = x_velocity.at(i);
 			res.cells.at(i).velocity.y = y_velocity.at(i);
-			res.cells.at(i).tracers.resize(tracernames.size());
+	//		res.cells.at(i).tracers.resize(tracernames.size());
 			for (size_t j = 0; j < tracernames.size(); ++j)
 				res.cells.at(i).tracers.at(j) = tracers.at(j).at(i);
-			res.cells.at(i).stickers.resize(stickernames.size());
+		//	res.cells.at(i).stickers.resize(stickernames.size());
 			for (size_t j = 0; j < stickernames.size(); ++j)
 				res.cells.at(i).stickers.at(j) = stickers.at(j).at(i)==1;
 		}

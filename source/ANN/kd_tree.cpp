@@ -746,18 +746,18 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, A
 #endif
 		for (int i = 0; i < 3; ++i)
 			res[i] -= mass * (qpoint[i] - CM[i]) * r3;
-		double Qfactor = r3 / dist_toq;
-		double dx = qpoint[0] - CM[0];
-		double dy = qpoint[1] - CM[1];
-		double dz = qpoint[2] - CM[2];
+		const double Qfactor = r3 / dist_toq;
+		const double dx = qpoint[0] - CM[0];
+		const double dy = qpoint[1] - CM[1];
+		const double dz = qpoint[2] - CM[2];
 		res[0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
 		res[1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
 		res[2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
 		double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
-		Qfactor *= -5 * mrr / (2 * dist_toq);
-		res[0] += Qfactor * dx;
-		res[1] += Qfactor * dy;
-		res[2] += Qfactor * dz;
+		const double Qfactor2 = -5 * mrr*Qfactor / (2 * dist_toq);
+		res[0] += Qfactor2 * dx;
+		res[1] += Qfactor2 * dy;
+		res[2] += Qfactor2 * dz;
 		return;
 	}
 

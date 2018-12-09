@@ -68,7 +68,7 @@ vector<Extensive> ConservativeForce::operator()
 			res[i].energy = volume*cells[i].density*ScalarProd(point_velocities[i], acc) + 
 				0.5*ScalarProd(mass_flux, acc);
 		}
-		res[i].tracers.resize(tracerstickernames.tracer_names.size(),0);
+//		res[i].tracers.resize(tracerstickernames.tracer_names.size(),0);
 	}
 	return res;
 }

@@ -261,7 +261,8 @@ namespace
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell3D const& cell_temp = neighbors[i];
-			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
+				tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -417,7 +418,8 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 		{
 			ComputationalCell3D const& cell_temp = neighbors[i];
-			if (!skip_key.empty() && safe_retrieve(cell_temp.stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
+				tracerstickernames.sticker_names.end(),skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -442,7 +444,8 @@ namespace
 		vector<double> psi(6 + cell.tracers.size(), 1);
 		for (size_t i = 0; i < N; ++i)
 		{
-			if (!skip_key.empty() && safe_retrieve(neighbors[i].stickers, tracerstickernames.sticker_names, skip_key))
+			if (!skip_key.empty() && *safe_retrieve(neighbors[i].stickers.begin(), 
+				tracerstickernames.sticker_names.begin(),tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[i]), cm, eos, tracerstickernames, false);
 			ComputationalCell3D dphi = centroid_val - cell;
@@ -538,9 +541,9 @@ namespace
 	{
 		size_t Nneigh = neigh_cm.size();
 		ComputationalCell3D PhiSy, PhiSx, PhiSz;
-		PhiSy.tracers.resize(cell.tracers.size(), 0);
-		PhiSx.tracers.resize(cell.tracers.size(), 0);
-		PhiSz.tracers.resize(cell.tracers.size(), 0);
+//		PhiSy.tracers.resize(cell.tracers.size(), 0);
+	//	PhiSx.tracers.resize(cell.tracers.size(), 0);
+		//PhiSz.tracers.resize(cell.tracers.size(), 0);
 		double SxSy(0), Sy2(0), Sx2(0), SxSz(0), Sz2(0), SzSy(0);
 		for (size_t i = 0; i < Nneigh; ++i)
 		{

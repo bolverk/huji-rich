@@ -87,6 +87,8 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
 	assert(tess.GetPointNo() == cells.size());
+	assert(tsn.sticker_names.size() <= MAX_STICKERS);
+	assert(tsn.tracer_names.size() <= MAX_TRACERS);
 	// sort tracers and stickers
 	size_t N = tess.GetPointNo();
 	vector<size_t> tindex = sort_index(tsn_.tracer_names);
@@ -211,8 +213,8 @@ void HDSim3D::timeAdvance2(void)
 	vector<Conserved3D> fluxes;
 	fc_(fluxes, tess_, face_vel, cells_, extensive_, eos_, pt_.getTime(), dt, tsn_);
 	vector<Conserved3D> mid_extensives(extensive_);
-	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt, tsn_, mid_extensives);
 	eu_(fluxes, tess_, dt, cells_, mid_extensives, pt_.getTime(), tsn_);
+	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt, tsn_, mid_extensives);
 
 	if (pt_.cycle % 10 == 0)
 	{

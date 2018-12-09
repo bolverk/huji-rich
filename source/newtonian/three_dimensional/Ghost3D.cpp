@@ -61,9 +61,9 @@ Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, c
 	TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Slope3D res;
-	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
 	return res;
 }
 
@@ -104,9 +104,9 @@ Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, co
 	TracerStickerNames const& /*tracerstickernames*/) const
 {
 	Slope3D res;
-	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
+	//res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
+	//res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
 	return res;
 }
 
@@ -151,9 +151,9 @@ Slope3D ConstantPrimitiveGenerator3D::GetGhostGradient(const Tessellation3D & /*
 	double /*time*/, size_t /*face_index*/, TracerStickerNames const & /*tracerstickernames*/) const
 {
 	Slope3D res;
-	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
-	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.yderivative.tracers.resize(cells[0].tracers.size(), 0);
+//	res.zderivative.tracers.resize(cells[0].tracers.size(), 0);
 	return res;
 }
 

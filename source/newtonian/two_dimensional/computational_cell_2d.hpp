@@ -9,9 +9,12 @@
 /*#include <boost/container/small_vector.hpp>
 typedef boost::container::small_vector<double,0> tvector;
 typedef boost::container::small_vector<bool,0> svector;*/
-#include <vector>
-typedef std::vector<double> tvector;
-typedef std::vector<bool> svector;
+#include <array>
+#define MAX_TRACERS 5
+#define MAX_STICKERS 4
+
+typedef std::array<double, MAX_TRACERS> tvector;
+typedef std::array<bool, MAX_STICKERS> svector;
 #include <string>
 #include "../../tessellation/geometry.hpp"
 #ifdef RICH_MPI

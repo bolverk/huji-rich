@@ -92,7 +92,7 @@ namespace
 		res.mass = c.Mass;
 		res.momentum = c.Momentum;
 		res.energy = c.Energy;
-		res.tracers.resize(cell.tracers.size());
+//		res.tracers.resize(cell.tracers.size());
 		size_t N = cell.tracers.size();
 		for (size_t i = 0; i < N; ++i)
 			res.tracers[i] = cell.tracers[i] * c.Mass;

@@ -235,7 +235,7 @@ vector<Extensive> SimpleFluxCalculator::operator()
 		size_t N = cells[0].tracers.size();
 		if (N > 0)
 		{
-			res[i].tracers.resize(N);
+//			res[i].tracers.resize(N);
 			for (size_t j = 0; j < N; ++j)
 				res[i].tracers[j] = calc_tracer_flux(i, tess, cells, j, hydro_flux);
 		}
