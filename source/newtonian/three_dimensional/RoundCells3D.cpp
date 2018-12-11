@@ -5,8 +5,8 @@
 #endif
 
 RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi,double eta, bool cold, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll),ur_(ur),chi_(chi), 
-	eta_(eta), cold_(cold),no_move_(no_move) {}
+	double chi,double eta, bool cold,double min_dw, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll),ur_(ur),chi_(chi), 
+	eta_(eta), cold_(cold),min_dw_(min_dw), no_move_(no_move) {}
 
 namespace
 {
@@ -127,8 +127,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity,size_t i, const Tessellation3D& te
 	const double R = tess.GetWidth(i);
 	if (d < 0.9*eta_*R)
 		return;
-	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
-		cells[i].tracers, tracerstickernames.tracer_names), fastabs(cells[i].velocity));
+	const double c = std::max(std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
+		cells[i].tracers, tracerstickernames.tracer_names), fastabs(cells[i].velocity)),min_dw_);
 	velocity += chi_*c*(s - r) / std::max(R,d);
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }
@@ -154,7 +154,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 			cells[static_cast<size_t>(neigh[j])].tracers,tracerstickernames.tracer_names));
 		cs = std::max(cs, fastabs(cells[neigh[j]].velocity));
 	}
-	const double c_dt = std::min(d / dt,cs);
+	const double c_dt = std::max(std::min(d / dt,cs),min_dw_);
 	velocity += chi_*c_dt*(s - r) / std::max(R, d);
 	SlowDown(velocity, tess, R, i,velocities,nomove);
 }

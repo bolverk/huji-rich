@@ -24,10 +24,12 @@ public:
 	\param chi chi parameter in equation 63
 	\param eta eta parameter in equation 63
 	\param cold Switch for cold flows
+	\param min_dw The minimum magnitude for the cell' velocity scale
 	\param no_move List of stickers not to move the cells for
 	*/
 	RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos,Vector3D const& ll,Vector3D const& ur,
-		double chi = 0.25, double eta = 0.02, bool cold = false,vector<std::string> no_move=vector<std::string>());
+		double chi = 0.25, double eta = 0.02, bool cold = false,double min_dw=0,
+		vector<std::string> no_move=vector<std::string>());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
@@ -50,6 +52,7 @@ private:
 	const double chi_;
 	const double eta_;
 	const bool cold_;
+	const double min_dw_;
 	const vector<std::string> no_move_;
 };
 
