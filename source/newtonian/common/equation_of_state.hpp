@@ -15,7 +15,7 @@
 /** typedef for string vector */
 //typedef std::array<bool, MAX_STICKERS> svector;
 using std::string;
-//using std::vector;
+using std::vector;
 
 //! \brief Base class for equation of state
 class EquationOfState
