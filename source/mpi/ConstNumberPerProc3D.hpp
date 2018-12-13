@@ -18,7 +18,7 @@ public:
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 	\param Hilbert Flag to use hilbert ordering for load balance
 	*/
-	ConstNumberPerProc3D(double speed = 0.01,double RoundSpeed = 0.15, int mode = 2,bool Hilbert=false);
+	ConstNumberPerProc3D(double speed = 0.01,double RoundSpeed = 0.025, int mode = 2,bool Hilbert=false);
 
 	/*!
 	\brief Updates the load balance, does one iteration

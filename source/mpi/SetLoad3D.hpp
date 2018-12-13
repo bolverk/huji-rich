@@ -21,8 +21,8 @@
 \param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 \param round The factor to enhance the cells rounding mechanisim
 */
-void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 100, double speed = 0.03, int mode = 1,
-	double round = 2.5);
+void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 300, double speed = 0.03, int mode = 2,
+	double round = 0.05);
 /*!
 \brief Corrects the load between processors based on number of cells per processor
 \param tproc The tessellation of the processors
@@ -34,8 +34,8 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 100, doub
 \param round The factor to enhance the cells rounding mechanisim
 */
 
-void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter = 100, double speed = 0.03, int mode = 1,
-	double round = 2.5);
+void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter = 300, double speed = 0.03, int mode = 21,
+	double round = 0.05);
 
 
 #endif // RICH_MPI

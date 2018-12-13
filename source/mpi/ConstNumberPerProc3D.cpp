@@ -11,6 +11,135 @@
 
 namespace
 {
+	/*Vector3D GetNeighborGrad(Tessellation3D const& tproc, std::vector<int> const& Nproc,size_t rank)
+	{
+		Vector3D grad_temp;
+		std::vector<size_t> neigh = tproc.GetNeighbors(rank);
+		std::vector<size_t> faces = tproc.GetCellFaces(rank);
+		size_t n = neigh.size();
+		Vector3D cell_cm = tproc.GetCellCM(rank);
+		Vector3D center = tproc.GetMeshPoint(rank);
+		std::vector<Vector3D> neighbor_centers(n), neigh_cm(n);
+		std::vector<size_t> neighbors(n);
+		size_t cell = Nproc[rank];
+		for (size_t i = 0; i < n;++i)
+		{
+			if (neigh[i] < tproc.GetPointNo())
+				neighbors[i] = static_cast<size_t>(Nproc[neigh[i]]);
+			else
+				neighbors[i] = static_cast<size_t>(Nproc[rank]);
+			neigh_cm[i] = tproc.GetCellCM(neigh[i]);
+			neighbor_centers[i] = tproc.GetMeshPoint(neigh[i]);
+		}
+		std::vector<Vector3D> c_ij;
+		// Create the matrix to invert and the vector to compare
+		std::array<double, 9>  m;
+		std::fill_n(m.begin(), 9, 0.0);
+		c_ij.resize(n);
+
+		for (size_t i = 0; i < n; i++)
+		{
+			c_ij[i] = neigh_cm[i];
+			c_ij[i] += cell_cm;
+			c_ij[i] *= -0.5;
+			c_ij[i] += tproc.FaceCM(faces[i]);
+			const Vector3D r_ij = normalize(neighbor_centers[i] - center);
+			const double A = tproc.GetArea(faces[i]);
+			m[0] -= c_ij[i].x*r_ij.x*A;
+			m[1] -= c_ij[i].y*r_ij.x*A;
+			m[2] -= c_ij[i].z*r_ij.x*A;
+			m[3] -= c_ij[i].x*r_ij.y*A;
+			m[4] -= c_ij[i].y*r_ij.y*A;
+			m[5] -= c_ij[i].z*r_ij.y*A;
+			m[6] -= c_ij[i].x*r_ij.z*A;
+			m[7] -= c_ij[i].y*r_ij.z*A;
+			m[8] -= c_ij[i].z*r_ij.z*A;
+			if (i == 0)
+			{
+				grad_temp.x = neighbors[i];
+				grad_temp.x *= r_ij.x*A;
+				grad_temp.y = neighbors[i];
+				grad_temp.y *= r_ij.y*A;
+				grad_temp.z = neighbors[i];
+				grad_temp.z *= r_ij.z*A;
+			}
+			else
+			{
+				grad_temp.x += neighbors[i] * r_ij.x*A;
+				grad_temp.y += neighbors[i] * r_ij.y*A;
+				grad_temp.z += neighbors[i] * r_ij.z*A;
+			}
+			grad_temp.x += cell * r_ij.x*A;
+			grad_temp.y += cell * r_ij.y*A;
+			grad_temp.z += cell * r_ij.z*A;
+		}
+		double v_inv = 1.0 / tproc.GetVolume(rank);
+		for (size_t i = 0; i < 9; ++i)
+			m[i] *= v_inv;
+		m[0] += 1;
+		m[4] += 1;
+		m[8] += 1;
+		// Find the det
+		const double det = -m[2] * m[4] * m[6] + m[1] * m[5] * m[6] + m[2] * m[3] * m[7] - m[0] * m[5] * m[7] -
+			m[1] * m[3] * m[8] + m[0] * m[4] * m[8];
+		// Check none singular
+		if (std::abs(det) < 1e-10)
+		{
+			UniversalError eo("Singular matrix");
+			eo.AddEntry("Cell x cor", center.x);
+			eo.AddEntry("Cell y cor", center.y);
+			eo.AddEntry("Cell z cor", center.z);
+			eo.AddEntry("Cell CMx cor", cell_cm.x);
+			eo.AddEntry("Cell CMy cor", cell_cm.y);
+			eo.AddEntry("Cell CMz cor", cell_cm.z);
+			eo.AddEntry("Cell volume", tproc.GetVolume(rank));
+			eo.AddEntry("Det was", det);
+			for (size_t i = 0; i < faces.size(); ++i)
+			{
+				c_ij[0] = tproc.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
+				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
+				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
+				eo.AddEntry("Neighbor z", neighbor_centers[i].z);
+				eo.AddEntry("Face", static_cast<double>(faces[i]));
+				eo.AddEntry("Neighbor Cx", c_ij[0].x);
+				eo.AddEntry("Neighbor Cy", c_ij[0].y);
+				eo.AddEntry("Neighbor Cz", c_ij[0].z);
+				eo.AddEntry("Face Cx", tproc.FaceCM(faces[i]).x);
+				eo.AddEntry("Face Cy", tproc.FaceCM(faces[i]).y);
+				eo.AddEntry("Face Cz", tproc.FaceCM(faces[i]).z);
+				eo.AddEntry("Face area", tproc.GetArea(faces[i]));
+			}
+			for (size_t i = 0; i < 9; ++i)
+				eo.AddEntry("M", m[i]);
+			throw eo;
+		}
+		// Invert the matrix
+		std::array<double, 9>  m_inv;
+		std::fill_n(m_inv.begin(), 9, 0);
+		m_inv[0] = m[4] * m[8] - m[5] * m[7];
+		m_inv[1] = m[2] * m[7] - m[1] * m[8];
+		m_inv[2] = m[1] * m[5] - m[2] * m[4];
+		m_inv[3] = m[5] * m[6] - m[3] * m[8];
+		m_inv[4] = m[0] * m[8] - m[2] * m[6];
+		m_inv[5] = m[2] * m[3] - m[5] * m[0];
+		m_inv[6] = m[3] * m[7] - m[6] * m[4];
+		m_inv[7] = m[6] * m[1] - m[0] * m[7];
+		m_inv[8] = m[4] * m[0] - m[1] * m[3];
+		for (size_t i = 0; i < 9; ++i)
+			m_inv[i] /= (2 * tproc.GetVolume(rank) * det);
+		Vector3D res = grad_temp;
+		res.x *= m_inv[0];
+		res.x += grad_temp.y*m_inv[1];
+		res.x += grad_temp.z*m_inv[2];
+		res.y *= m_inv[3];
+		res.y += grad_temp.y*m_inv[4];
+		res.y += grad_temp.z*m_inv[5];
+		res.z *= m_inv[6];
+		res.z += grad_temp.y*m_inv[7];
+		res.z += grad_temp.z*m_inv[8];
+		return res;
+	}
+	*/
 	Vector3D GetProcCM(Tessellation3D const& tess)
 	{
 		size_t Ncor = tess.GetPointNo();
@@ -20,52 +149,7 @@ namespace
 		res *= 1.0 / static_cast<double>(std::max(static_cast<size_t>(1), Ncor));
 		return res;
 	}
-
-	std::array<double, 4> DotQ(std::array<double, 4> const& q1, std::array<double, 4> const& q2)
-	{
-		std::array<double, 4> res{};
-		res[3] = (-q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] + q1[3] * q2[3]);
-		res[0] = (q1[3] * q2[0] + q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1]);
-		res[1] = (q1[3] * q2[1] - q1[0] * q2[2] + q1[1] * q2[3] + q1[2] * q2[0]);
-		res[2] = (q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0] + q1[2] * q2[3]);
-		return res;
-	}
-
-	std::array<double, 9> GetMatrix(std::array<double, 4> const& q)
-	{
-		std::array<double, 9> res = { 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2], 2 * q[0] * q[1] - 2 * q[2] * q[3], 2 * q[0] * q[2] + 2 * q[1] * q[3],
-			2 * q[0] * q[1] + 2 * q[2] * q[3], 1 - 2 * q[0] * q[0] - 2 * q[2] * q[2], 2 * q[1] * q[2] - 2 * q[0] * q[3],
-			2 * q[0] * q[2] - 2 * q[1] * q[3], 2 * q[1] * q[2] + 2 * q[0] * q[3], 1 - 2 * q[0] * q[0] - 2 * q[1] * q[1] };
-		return res;
-	}
-
-	std::array<double, 9> MatrixMult(std::array<double, 9> const&Q, std::array<double, 9> const& A)
-	{
-		std::array<double, 9> res{};
-		for (size_t i = 0; i < 3; ++i)
-		{
-			for (size_t j = 0; j < 3; ++j)
-			{
-				for (size_t k = 0; k < 3; ++k)
-					res[i * 3 + j] += Q[i * 3 + k] * A[j + k * 3];
-			}
-		}
-		return res;
-	}
-
-	std::array<double, 9> MatrixMultT(std::array<double, 9> const&Q, std::array<double, 9> const& A)
-	{
-		std::array<double, 9> res{};
-		for (size_t i = 0; i < 3; ++i)
-		{
-			for (size_t j = 0; j < 3; ++j)
-			{
-				res[i * 3 + j] = A[j * 3 + i];
-			}
-		}
-		return MatrixMult(Q, res);
-	}
-
+/*
 	void eigsrt(std::array<double, 3> &d, std::array<double, 9> &v)
 	{
 		int k;
@@ -188,59 +272,8 @@ namespace
 			a[k*3 + l] = h + s * (g - h * tau);
 		}
 	};
-
-	std::array<double, 4> Diagonalizer(std::array<double, 9> const &A, std::array<double, 3> &eigv)
-	{
-		// A must be a symmetric matrix.
-		// returns quaternion q such that its corresponding matrix Q 
-		// can be used to Diagonalize A
-		// Diagonal matrix D = Q * A * Transpose(Q);  and  A = QT*D*Q
-		// The rows of q are the eigenvectors D's diagonal is the eigenvalues
-		// As per 'row' convention if double3x3 Q = q.getmatrix(); then v*Q = q*v*conj(q)
-		int maxsteps = 240;  // certainly wont need that many.
-		int i;
-		std::array<double, 4> q{ 0, 0, 0, 1 };
-		for (i = 0; i < maxsteps; i++)
-		{
-			std::array<double, 9> Q = GetMatrix(q); // v*Q == q*v*conj(q)
-			std::array<double, 9> D = MatrixMult(Q, MatrixMultT(A, Q));
-			eigv[0] = D[0];
-			eigv[1] = D[4];
-			eigv[2] = D[8];
-			std::array<double, 3> offdiag = { D[5], D[2], D[1] }; // elements not on the diagonal
-			std::array<double, 3> om = { std::fabs(offdiag[0]), std::fabs(offdiag[1]), std::fabs(offdiag[2]) }; // mag of each offdiag elem
-			int k = (om[0] > om[1] && om[0] > om[2]) ? 0 : (om[1] > om[2]) ? 1 : 2; // index of largest element of offdiag
-			int k1 = (k + 1) % 3;
-			int k2 = (k + 2) % 3;
-			if (offdiag[k] == 0.0)
-				break;  // diagonal already
-			double thet = (D[k2 * 3 + k2] - D[k1 * 3 + k1]) / (2.0*offdiag[k]);
-			double sgn = (thet > 0.0) ? 1.0 : -1.0;
-			thet *= sgn; // make it positive
-			double t = sgn / (thet + ((thet < 1e6) ? std::sqrt(thet*thet + 1.0) : thet + 0.5 / thet)); // sign(T)/(|T|+sqrt(T^2+1))
-			double c = 1.0 / std::sqrt(t*t + 1.0); //  c= 1/(t^2+1) , t=s/c 
-			if (c > (1 - 1e-13))
-				break;  // no room for improvement - reached machine precision.
-			std::array<double, 4> jr = { 0, 0, 0, 0 }; // jacobi rotation for this iteration.
-			if (std::abs(t) < 1e-6)
-				jr[k] = sgn * std::abs(t*0.5);  // using 1/2 angle identity sin(a/2) = sqrt((1-cos(a))/2)  
-			else
-				jr[k] = sgn * std::sqrt((1.0 - c) / 2.0);  // using 1/2 angle identity sin(a/2) = sqrt((1-cos(a))/2)  
-			jr[3] = std::abs(jr[k]) < 1e-6 ? 1 - 0.5*jr[k] * jr[k] : std::sqrt(1.0 - jr[k] * jr[k]);
-			if (jr[3] > (1 - 1e-13))
-				break; // reached limits of doubleing point precision
-			q = DotQ(q, jr);
-			double sum = 0;
-			for (size_t j = 0; j < 4; ++j)
-				sum += q[j] * q[j];
-			sum = 1.0 / std::sqrt(sum);
-			for (size_t j = 0; j < 4; ++j)
-				q[j] *= sum;
-		}
-		assert(i < maxsteps);
-		return q;
-	}
-
+	
+	
 	std::array<double, 9> GetMomentOfInertia(Tessellation3D const& tess, Vector3D const& CM)
 	{
 		std::array<double, 9> res{};
@@ -348,7 +381,7 @@ namespace
 			return res;
 		}
 		return res;
-	}
+	}*/
 }
 #endif
 
@@ -449,10 +482,11 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	// Moving according to pressure
 	if (mode_ == 1 || mode_ == 2)
 	{
-		vector<size_t> neigh = tproc.GetNeighbors(rank);
+		std::vector<size_t> neigh = tproc.GetNeighbors(rank);
+		std::vector<size_t> faces = tproc.GetCellFaces(rank);
 		size_t Nneigh = neigh.size();
 
-		const double neigheps = 0.05;
+		const double neigheps = 0.025;
 		for (size_t i = 0; i < Nneigh; ++i)
 		{
 			if (static_cast<int>(neigh[i]) >= nproc)
@@ -469,25 +503,13 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			else
 			{
 				Vector3D otherpoint = RankCMs[neigh[i]];
-				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*std::pow(tproc.GetArea(faces[i])/(MyR*MyR),0.4) / IdealPerProc;
 				double dr = fastabs(otherpoint - point);
 				dx -= NewSpeed * merit*(otherpoint.x - point.x)*MyR / dr;
 				dy -= NewSpeed * merit*(otherpoint.y - point.y)*MyR / dr;
 				dz -= NewSpeed * merit*(otherpoint.z - point.z)*MyR / dr;
 			}
 		}
-	}
-
-	if (mode_ == 4)
-	{
-		dx = 0;
-		dy = 0;
-		dz = 0;
-		Vector3D grad = CalcGradient(tlocal, tproc, NPerProc);
-		double prefactor = (mypointnumber - IdealPerProc) / (ScalarProd(grad, grad)*MyR*MyR + 1e-8*IdealPerProc / MyR);
-		dx = prefactor * grad.x;
-		dy = prefactor * grad.y;
-		dz = prefactor * grad.z;
 	}
 	old_dx += dx;
 	old_dy += dy;
