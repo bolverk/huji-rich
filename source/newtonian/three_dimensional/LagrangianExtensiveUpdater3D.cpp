@@ -151,9 +151,13 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 					" Area*dt " << Area << " N0 "<<tess.GetMeshPoint(N0).x<<","<<tess.GetMeshPoint(N0).y<<","
 					<<tess.GetMeshPoint(N0).z<<" N1 "<<tess.GetMeshPoint(N1).x<<","<<tess.GetMeshPoint(N1).y<<","
 					<<tess.GetMeshPoint(N1).z<<" IDs "<<cells[N0].ID<<" "<<cells[N1].ID<< std::endl;
+				std::cout << "dl " << cells[N0].density << " pl " << cells[N0].pressure << " vxl " << cells[N0].velocity.x << " vyl " << cells[N0].velocity.y << " vzl " << cells[N0].velocity.z << std::endl;
+				std::cout << "dr " << cells[N1].density << " pr " << cells[N1].pressure << " vxr " << cells[N1].velocity.x << " vyr " << cells[N1].velocity.y << " vzr " << cells[N1].velocity.z << std::endl;
+				Vector3D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
+				std::cout << "dx " << normal.x << " dy " << normal.y << " dz " << normal.z << std::endl;
 				if (lflux_.Lag_calc_[temp[j]])
 				{
-					Vector3D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
+					
 					double p_star = ScalarProd(fluxes[temp[j]].momentum,normal);
 					double v_star = fluxes[temp[j]].energy / p_star;
 					double v_new = (v_star - lflux_.ws_[temp[j]]);
