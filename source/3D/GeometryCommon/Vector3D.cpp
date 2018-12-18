@@ -91,8 +91,6 @@ void Vector3D::Set(double ix, double iy, double iz)
 
 Vector3D& Vector3D::operator=(Vector3D const& v)
 {
-	if (this == &v)
-		return *this;
 	x = v.x;
 	y = v.y;
 	z = v.z;

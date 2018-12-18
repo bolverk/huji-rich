@@ -233,7 +233,8 @@ namespace
 	}
 #endif
 
-	double CleanDuplicates(boost::container::static_vector<size_t, 128> &indeces, vector<Vector3D> &points, vector<size_t> &res, double R,
+	double CleanDuplicates(boost::container::static_vector<size_t, 128> &indeces, vector<Vector3D> &points, 
+		vector<size_t> &res, double R,
 		boost::container::static_vector<double, 128> &diffs,
 		boost::container::static_vector<Vector3D, 128> &vtemp)
 	{
@@ -418,7 +419,7 @@ namespace
 	}
 #endif //RICH_MPI
 
-	void CalcFaceAreaCM(std::vector<size_t> const& indeces, std::vector<Vector3D> const& allpoints, 
+	void CalcFaceAreaCM(vector<size_t> const& indeces, std::vector<Vector3D> const& allpoints,
 		boost::container::static_vector<Vector3D, 128> &points, double &Area, Vector3D &CM,
 		boost::container::static_vector<double, 128> &Atemp)
 	{
@@ -619,7 +620,10 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 
 Voronoi3D::Voronoi3D() :ll_(Vector3D()), ur_(Vector3D()), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
 del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
-FacesInCell_(vector<vector<std::size_t> >()), PointsInFace_(vector<vector<std::size_t> >()), FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
+FacesInCell_(vector<vector<std::size_t> >()), 
+//PointsInFace_(vector<boost::container::small_vector<size_t, 8> >()), 
+PointsInFace_(vector<vector<size_t> >()),
+FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
 CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D >()), 
 volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
 sentprocs_(vector<int>()), duplicatedprocs_(vector<int>()), sentpoints_(vector<vector<std::size_t> >()), Nghost_(vector<vector<std::size_t> >()),
@@ -628,7 +632,10 @@ self_index_(vector<std::size_t>()), temp_points_(std::array<Vector3D, 4>()), tem
 
 Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
 del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
-FacesInCell_(vector<vector<std::size_t> >()), PointsInFace_(vector<vector<std::size_t> >()), FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
+FacesInCell_(vector<vector<std::size_t> >()), 
+PointsInFace_(vector<vector<size_t> >()), 
+//PointsInFace_(vector<boost::container::small_vector<size_t, 8> >()),
+FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
 CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D>()),
 volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
 sentprocs_(vector<int>()), duplicatedprocs_(vector<int>()), sentpoints_(vector<vector<std::size_t> >()), Nghost_(vector<vector<std::size_t> >()),
@@ -1335,8 +1342,8 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	PointsInFace_.resize(Norg_ * 10);
 	for (size_t i = 0; i < Norg_; ++i)
 		FacesInCell_[i].reserve(20);
-	for (size_t i = 0; i < (10*Norg_); ++i)
-		PointsInFace_[i].reserve(8);
+	//for (size_t i = 0; i < (10*Norg_); ++i)
+		//PointsInFace_[i].reserve(8);
 	boost::container::static_vector<size_t, 128> temp, temp2, temp3;
 	//std::vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp, temp2;
 	// Build all voronoi points
@@ -1345,14 +1352,12 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
 			CalcTetraRadiusCenter(i);
 	// Organize the faces and assign them to cells
-	//vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp3;
 	boost::container::static_vector<double, 128> diffs, Atempvec;
-	//vector<double, boost::alignment::aligned_allocator<double, 32> > diffs;
-	//vector<double, boost::alignment::aligned_allocator<double, 32> > Atempvec;
 
 	size_t FaceCounter = 0;
 	boost::container::flat_set<size_t> neigh_set;
 	std::vector<size_t> *temp_points_in_face;
+	//boost::container::small_vector<size_t,8> *temp_points_in_face;
 	boost::container::static_vector<Vector3D,128>  clean_vec;
 
 	//std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;

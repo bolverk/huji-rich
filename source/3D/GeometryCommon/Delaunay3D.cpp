@@ -773,8 +773,13 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
 
 void Delaunay3D::FindFlip(std::size_t tetra0,std::size_t tetra1,std::size_t p,size_t p_loc,size_t other_point_loc)
 {
+	size_t *tetcheck = tetras_[tetra0].points;
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (std::size_t i = 0; i < 3;++i)
-		b3_temp_[i] = points_[tetras_[tetra0].points[(p_loc + i + 1) % 4]];
+		//b3_temp_[i] = points_[tetras_[tetra0].points[(p_loc + i + 1) % 4]];
+		b3_temp_[i] = points_[tetcheck[(p_loc + i + 1) % 4]];
 	Vector3D intersection;
 	bool good_intersection = PlaneLineIntersection(b3_temp_, points_[p],
 		points_[tetras_[tetra1].points[other_point_loc]],intersection);

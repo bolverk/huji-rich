@@ -8,7 +8,7 @@ double const splitter = 134217729;
 
 namespace
 {
-#define Absolute(a)  ((a) >= 0.0 ? (a) : -(a))
+#define Absolute(a)  std::abs(a)//((a) >= 0.0 ? (a) : -(a))
 
 #define Fast_Two_Sum_Tail(a, b, x, y) \
   bvirt = x - a; \

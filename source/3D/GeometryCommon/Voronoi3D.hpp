@@ -16,6 +16,7 @@
 #include <array>
 #include "Tessellation3D.hpp"
 #include <boost/container/flat_set.hpp>
+#include <boost/container/small_vector.hpp>
 
 #ifdef RICH_MPI
 #include "../../newtonian/three_dimensional/computational_cell.hpp"
@@ -77,6 +78,7 @@ private:
 	vector<Vector3D> tetra_centers_;
 	// Voronoi Data
 	vector<vector<std::size_t> > FacesInCell_;
+	//std::vector<boost::container::small_vector<size_t, 8> > PointsInFace_;
 	vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
 	vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
 	vector<Vector3D> CM_,Face_CM_;
