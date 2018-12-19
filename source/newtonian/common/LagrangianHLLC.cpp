@@ -7,26 +7,48 @@ using namespace std;
 
 namespace 
 {
+	std::pair<double, double> HLLpu(Primitive const& left,Primitive const& right,EquationOfState const& eos)
+	{
+		double sl = std::min(left.Velocity.x - left.SoundSpeed, right.Velocity.x - right.SoundSpeed);
+		double sr = std::max(left.Velocity.x + left.SoundSpeed, right.Velocity.x + right.SoundSpeed);
+		Conserved Ul(left.Density, left.Density*left.Velocity, left.Density*(left.Energy + ScalarProd(left.Velocity, left.Velocity*0.5))),
+			Ur(right.Density, right.Density*right.Velocity, right.Density*(right.Energy + ScalarProd(right.Velocity, right.Velocity*0.5)));
+		Conserved Fl(left.Density*left.Velocity.x, Vector2D(left.Density*ScalarProd(left.Velocity, left.Velocity) + left.Pressure, 0), (Ul.Energy + left.Pressure)*left.Velocity.x),
+			Fr(right.Density*right.Velocity.x, Vector2D(right.Density*ScalarProd(right.Velocity, right.Velocity) + right.Pressure, 0), (Ur.Energy + right.Pressure)*right.Velocity.x);
+		Conserved Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
+		return std::pair<double, double> (eos.de2p(Ull.Mass, Ull.Energy - Ull.Momentum.x*Ull.Momentum.x*0.5 / Ull.Mass), Ull.Momentum.x / Ull.Mass);
+	}
+
 	class WaveSpeeds
 	{
 	public:
 
 		WaveSpeeds(double left_i,
 			double center_i,
-			double right_i) :
+			double right_i,double ps_i) :
 			left(left_i),
 			center(center_i),
-			right(right_i) {}
+			right(right_i),ps(ps_i) {}
 
-		const double left;
-		const double center;
-		const double right;
+		WaveSpeeds& operator=(WaveSpeeds const& ws)
+		{
+			left = ws.left;
+			center = ws.center;
+			right = ws.right;
+			ps = ws.ps;
+			return *this;
+		}
+
+		double left;
+		double center;
+		double right;
+		double ps;
 	};
 }
 
-namespace {
-	WaveSpeeds estimate_wave_speeds
-		(Primitive const& left, Primitive const& right)
+namespace 
+{
+	WaveSpeeds estimate_wave_speeds(Primitive const& left, Primitive const& right,double pstar)
 	{
 		const double dl = left.Density;
 		const double pl = left.Pressure;
@@ -36,15 +58,17 @@ namespace {
 		const double pr = right.Pressure;
 		const double vr = right.Velocity.x;
 		const double cr = right.SoundSpeed;
-		const double sl = min(vl - cl, vr - cr);
-		const double sr = max(vl + cl, vr + cr);
-		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr)) /
-			(dl*(sl - vl) - dr*(sr - vr));
-		return WaveSpeeds(sl, ss, sr);
+		const double sl = vl - cl * (pstar > pl ? std::sqrt(pstar / pl) : 1);
+		const double sr = vr + cr * (pstar > pr ? std::sqrt(pstar / pr) : 1);
+		const double denom = 1.0 /(dl*(sl - vl) - dr * (sr - vr));
+		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
+		return WaveSpeeds(sl, ss, sr,ps);
 	}
 }
 
-namespace {
+namespace 
+{
 	UniversalError invalid_wave_speeds(Primitive const& left,
 		Primitive const& right,
 		double velocity,
@@ -73,7 +97,8 @@ namespace {
 	}
 }
 
-namespace {
+namespace 
+{
 	Conserved starred_state
 		(Primitive const& state, double sk, double ss)
 	{
@@ -93,7 +118,7 @@ namespace {
 	}
 }
 
-LagrangianHLLC::LagrangianHLLC(bool massflux) : massflux_(massflux),energy(0)
+LagrangianHLLC::LagrangianHLLC(EquationOfState const& eos,bool massflux) :eos_(eos), massflux_(massflux),energy(0)
 {}
 
 Conserved LagrangianHLLC::operator()
@@ -112,14 +137,17 @@ Conserved LagrangianHLLC::operator()
 	local_right.Velocity -= velocity*normaldir;
 
 	Conserved f_gr;
+	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos_);
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, p_u_star.first);
+	ws = estimate_wave_speeds(local_left, local_right, ws.ps);
+
 	if (!massflux_)
 	{
-		WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right);
-
-		local_left.Velocity -= ws2.center*normaldir;
-		local_right.Velocity -= ws2.center*normaldir;
-		velocity += ws2.center;
-		energy = ws2.center;
+		local_left.Velocity -= ws.center*normaldir;
+		local_right.Velocity -= ws.center*normaldir;
+		velocity += ws.center;
+		energy = ws.center;
+		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
 	}
 
 
@@ -129,8 +157,6 @@ Conserved LagrangianHLLC::operator()
 	const Vector2D xdir(1, 0);
 	const Conserved fl = Primitive2Flux(local_left, xdir);
 	const Conserved fr = Primitive2Flux(local_right, xdir);
-
-	const WaveSpeeds ws = estimate_wave_speeds(local_left, local_right);
 
 	const Conserved usl = starred_state(local_left, ws.left, ws.center);
 	const Conserved usr = starred_state(local_right, ws.right, ws.center);

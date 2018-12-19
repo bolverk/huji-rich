@@ -16,13 +16,13 @@ namespace
 {
 	pair<Vector2D, Vector2D> calc_parallel_normal(const Tessellation& tess, const Edge& edge)
 	{
-		const Vector2D p = Parallel(edge);
+		const Vector2D p = normalize(Parallel(edge));
 		if (edge.neighbors.first >= 0 && edge.neighbors.first < tess.GetPointNo())
-			return pair<Vector2D, Vector2D>(p, remove_parallel_component(edge.vertices.first -
-				tess.GetMeshPoint(edge.neighbors.first), p));
+			return pair<Vector2D, Vector2D>(p,normalize(remove_parallel_component(edge.vertices.first -
+				tess.GetMeshPoint(edge.neighbors.first), p)));
 		if (edge.neighbors.second >= 0 && edge.neighbors.second < tess.GetPointNo())
-			return pair<Vector2D, Vector2D>(p, remove_parallel_component(tess.GetMeshPoint(edge.neighbors.second) -
-				edge.vertices.first, p));
+			return pair<Vector2D, Vector2D>(p, normalize(remove_parallel_component(tess.GetMeshPoint(edge.neighbors.second) -
+				edge.vertices.first, p)));
 		assert(false);
 		return pair<Vector2D, Vector2D>();
 	}
