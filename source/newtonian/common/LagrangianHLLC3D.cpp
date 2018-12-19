@@ -4,18 +4,50 @@ using namespace std;
 
 namespace
 {
+	std::pair<double, double> HLLpu(ComputationalCell3D const& left, ComputationalCell3D const& right, EquationOfState const& eos)
+	{
+		double cl = eos.dp2c(left.density, left.pressure);
+		double cr = eos.dp2c(right.density, right.pressure);
+		double sl = std::min(left.velocity.x - cl, right.velocity.x - cr);
+		double sr = std::max(left.velocity.x + cl, right.velocity.x + cr);
+		Conserved3D Ul(left.density, left.density*left.velocity, left.density*(left.internal_energy + ScalarProd(left.velocity, left.velocity)*0.5),left.internal_energy),
+			Ur(right.density, right.density*right.velocity, right.density*(right.internal_energy + ScalarProd(right.velocity, right.velocity)*0.5),right.internal_energy);
+		Conserved3D Fl(left.density*left.velocity.x, Vector3D(left.density*left.velocity.x*left.velocity.x + left.pressure, left.density*left.velocity.x*left.velocity.y,
+			left.density*left.velocity.x*left.velocity.z), (Ul.energy + left.pressure)*left.velocity.x,0),
+			Fr(right.density*right.velocity.x, Vector3D(right.density*right.velocity.x*right.velocity.x + right.pressure, right.density*right.velocity.x*right.velocity.y,
+				right.density*right.velocity.x*right.velocity.z), (Ur.energy + right.pressure)*right.velocity.x,0);
+		Conserved3D Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
+		return std::pair<double, double>(eos.de2p(Ull.mass, Ull.energy - ScalarProd(Ull.momentum,Ull.momentum)*0.5 / Ull.mass), Ull.momentum.x / Ull.mass);
+	}
+
 	class WaveSpeeds
 	{
 	public:
 
-		WaveSpeeds(double left_i, double center_i, double right_i) :left(left_i), center(center_i), right(right_i) {}
+		WaveSpeeds(double left_i,
+			double center_i,
+			double right_i, double ps_i) :
+			left(left_i),
+			center(center_i),
+			right(right_i), ps(ps_i) {}
+
+		WaveSpeeds& operator=(WaveSpeeds const& ws)
+		{
+			left = ws.left;
+			center = ws.center;
+			right = ws.right;
+			ps = ws.ps;
+			return *this;
+		}
+
 		double left;
 		double center;
 		double right;
+		double ps;
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn)
+		EquationOfState const &eos, TracerStickerNames const& tsn,double pstar)
 	{
 		const double dl = left.density;
 		const double pl = left.pressure;
@@ -25,11 +57,12 @@ namespace
 		const double pr = right.pressure;
 		const double vr = right.velocity.x;
 		const double cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
-		const double sl = std::min(vl - cl, vr - cr);
-		const double sr = std::max(vl + cl, vr + cr);
-		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr)) /
-			(dl*(sl - vl) - dr*(sr - vr));
-		return WaveSpeeds(sl, ss, sr);
+		const double sl = vl - cl * (pstar > pl ? std::sqrt(pstar / pl) : 1);
+		const double sr = vr + cr * (pstar > pr ? std::sqrt(pstar / pr) : 1);
+		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
+		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
+		return WaveSpeeds(sl, ss, sr, ps);
 	}
 
 	UniversalError invalid_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
@@ -109,30 +142,20 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	local_right.velocity.y = par_right;
 	local_right.velocity.z = 0;
 	Conserved3D f_gr;
+	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos);
+	assert(p_u_star.first > 0);
+	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right,eos,tsn,p_u_star.first);
+	ws2 = estimate_wave_speeds(local_left, local_right,eos,tsn, ws2.ps);
+
 	if (!massflux_)
 	{
-		const double dl = local_left.density;
-		const double pl = local_left.pressure;
-		const double vl = local_left.velocity.x;
-		const double cl = eos.dp2c(dl, pl, local_left.tracers, tsn.tracer_names);
-		const double dr = local_right.density;
-		const double pr = local_right.pressure;
-		const double vr = local_right.velocity.x;
-		const double cr = eos.dp2c(dr, pr, local_right.tracers, tsn.tracer_names);
-		const double sl = std::min(vl - cl, vr - cr);
-		const double sr = std::max(vl + cl, vr + cr);
-		const double denom = 1.0/ (dl*(sl - vl) - dr*(sr - vr));
-		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr))*denom;
-		const double ps = std::max(0.0,dl*(sl - vl)*(pr - dr*(vr - vl)*(sr - vr)) *denom - pl*dr*(sr - vr) *denom);
-		ws = ss;
-		f_gr.energy = ps*ss;
-		f_gr.momentum.Set(ps, 0, 0);
+		ws = ws2.center;
+		f_gr.energy = ws2.ps*ws;
+		f_gr.momentum.Set(ws2.ps, 0, 0);
 		f_gr.mass = 0;
 	}
 	else
 	{
-		WaveSpeeds ws_estimate = estimate_wave_speeds(local_left, local_right, eos, tsn);
-
 		Conserved3D ul, ur;
 		PrimitiveToConserved(local_left, 1, ul);
 		PrimitiveToConserved(local_right, 1, ur);
@@ -140,20 +163,20 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 
-		const Conserved3D usl = starred_state(local_left, ws_estimate.left, ws_estimate.center);
-		const Conserved3D usr = starred_state(local_right, ws_estimate.right, ws_estimate.center);
+		const Conserved3D usl = starred_state(local_left, ws2.left, ws2.center);
+		const Conserved3D usr = starred_state(local_right, ws2.right, ws2.center);
 
 
-		if (ws_estimate.left > 0)
+		if (ws2.left > 0)
 			f_gr = fl;
-		else if (ws_estimate.left <= 0 && ws_estimate.center >= 0)
-			f_gr = fl + ws_estimate.left*(usl - ul);
-		else if (ws_estimate.center < 0 && ws_estimate.right >= 0)
-			f_gr = fr + ws_estimate.right*(usr - ur);
-		else if (ws_estimate.right < 0)
+		else if (ws2.left <= 0 && ws2.center >= 0)
+			f_gr = fl + ws2.left*(usl - ul);
+		else if (ws2.center < 0 && ws2.right >= 0)
+			f_gr = fr + ws2.right*(usr - ur);
+		else if (ws2.right < 0)
 			f_gr = fr;
 		else
-			throw invalid_wave_speeds(local_left, local_right, velocity, ws_estimate.left, ws_estimate.center, ws_estimate.right);
+			throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
 	}
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
