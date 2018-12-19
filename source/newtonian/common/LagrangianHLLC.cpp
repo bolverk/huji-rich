@@ -13,10 +13,10 @@ namespace
 		double sr = std::max(left.Velocity.x + left.SoundSpeed, right.Velocity.x + right.SoundSpeed);
 		Conserved Ul(left.Density, left.Density*left.Velocity, left.Density*(left.Energy + ScalarProd(left.Velocity, left.Velocity*0.5))),
 			Ur(right.Density, right.Density*right.Velocity, right.Density*(right.Energy + ScalarProd(right.Velocity, right.Velocity*0.5)));
-		Conserved Fl(left.Density*left.Velocity.x, Vector2D(left.Density*ScalarProd(left.Velocity, left.Velocity) + left.Pressure, 0), (Ul.Energy + left.Pressure)*left.Velocity.x),
-			Fr(right.Density*right.Velocity.x, Vector2D(right.Density*ScalarProd(right.Velocity, right.Velocity) + right.Pressure, 0), (Ur.Energy + right.Pressure)*right.Velocity.x);
+		Conserved Fl(left.Density*left.Velocity.x, Vector2D(left.Density*left.Velocity.x*left.Velocity.x + left.Pressure, left.Density*left.Velocity.x*left.Velocity.y), (Ul.Energy + left.Pressure)*left.Velocity.x),
+			Fr(right.Density*right.Velocity.x, Vector2D(right.Density*right.Velocity.x*right.Velocity.x + right.Pressure, right.Density*right.Velocity.x*right.Velocity.y), (Ur.Energy + right.Pressure)*right.Velocity.x);
 		Conserved Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
-		return std::pair<double, double> (eos.de2p(Ull.Mass, Ull.Energy - Ull.Momentum.x*Ull.Momentum.x*0.5 / Ull.Mass), Ull.Momentum.x / Ull.Mass);
+		return std::pair<double, double> (eos.de2p(Ull.Mass, Ull.Energy - ScalarProd(Ull.Momentum,Ull.Momentum)*0.5 / Ull.Mass), Ull.Momentum.x / Ull.Mass);
 	}
 
 	class WaveSpeeds
