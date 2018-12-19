@@ -50,6 +50,13 @@ public:
   \param center The center of the circle
   */
   void setCenter(Vector2D const& center);
+  
+  ~Circle(void);
+  
+  /*! \brief  Copy constructor
+  \param origin Original
+  */
+  Circle(const Circle& origin);
 
 private:
 

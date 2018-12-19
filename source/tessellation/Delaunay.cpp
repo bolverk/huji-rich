@@ -1420,7 +1420,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
 			vector<int> neighs = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[i]);
-			int checking = f[static_cast<size_t>(cur_facet)].vertices[i];
+//			int checking = f[static_cast<size_t>(cur_facet)].vertices[i];
 			double R = 0;
 			Vector2D center;
 			for (size_t k = 0; k < neighs.size(); ++k)

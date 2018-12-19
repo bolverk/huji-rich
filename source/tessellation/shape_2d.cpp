@@ -30,6 +30,11 @@ bool Circle::operator()(Vector2D const& r) const
 
 Outside::Outside(Shape2D const& shape):
   shape_(shape) {}
+  
+Circle::~Circle(void) {}
+
+Circle::Circle(const Circle& origin):
+	center_(origin.getCenter()), radius_(origin.getRadius()) {}
 
 bool Outside::operator()(Vector2D const& r) const
 {
