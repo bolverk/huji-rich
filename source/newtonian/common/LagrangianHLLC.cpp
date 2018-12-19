@@ -147,7 +147,9 @@ Conserved LagrangianHLLC::operator()
 		local_right.Velocity -= ws.center*normaldir;
 		velocity += ws.center;
 		energy = ws.center;
-		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
+		ws.left -= ws.center;
+		ws.right -= ws.center;
+		ws.center = 0;
 	}
 
 
