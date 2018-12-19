@@ -8,7 +8,7 @@
 #ifdef RICH_MPI
 namespace
 {
-	void CallTreeGetSend(ANNkd_tree* tree, Tessellation3D const& tproc, std::vector<size_t>const& faces, vector<ANNkd_ptr>& nodes,
+	void CallTreeGetSend(ANNkd_tree* tree, Tessellation3D const& tproc, face_vec const& faces, vector<ANNkd_ptr>& nodes,
 		double opening)
 	{
 		vector<Vector3D> facepoints;
@@ -101,7 +101,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		if (i == static_cast<size_t>(rank))
 			continue;
 		nodes.clear();
-		vector<size_t> const& faces = tproc_->GetCellFaces(i);
+		face_vec const& faces = tproc_->GetCellFaces(i);
 		CallTreeGetSend(atree, *tproc_, faces, nodes, opening_);
 		for (size_t j = 0; j < nodes.size(); ++j)
 		{

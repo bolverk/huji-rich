@@ -435,7 +435,8 @@ namespace
 		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
 		Tessellation3D const& tess, std::vector<Conserved3D> &extensives)
 	{
-		std::vector<size_t> neigh, temp, temp2;
+		std::vector<size_t> neigh,temp2;
+		point_vec temp;
 		r3d_poly poly, poly2;
 		std::vector<std::vector<int> > i_temp;
 		size_t NRemove = ToRemove.size();
@@ -483,7 +484,8 @@ namespace
 		vector<vector < vector<double> > > planes_d;
 		vector<r3d_plane> planes;
 		r3d_poly poly, poly2;
-		std::vector<size_t> temp, temp2;
+		std::vector<size_t>  temp2;
+		point_vec temp;
 		std::vector<std::vector<int> > i_temp;
 		SendRecvMPIFullRemove(oldtess, ToRemove, nghost_index, duplicate_index, planes_v, planes_d);
 		size_t Nproc = nghost_index.size();
@@ -534,7 +536,8 @@ namespace
 		AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives)
 	{
 		size_t Nrefine = ToRefine.size();
-		std::vector<size_t> neigh, temp, temp2;
+		std::vector<size_t> neigh, temp2;
+		point_vec temp;
 		std::vector<std::vector<int> > i_temp;
 		r3d_poly poly, poly2;
 		boost::container::flat_set<size_t> checked;
@@ -605,6 +608,7 @@ namespace
 		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives)
 	{
 		std::vector<size_t> temp, temp2;
+		point_vec ptemp;
 		size_t Norg = oldtess.GetPointNo();
 		// Get outer refine points
 		size_t Nrefine = ToRefine.size();
@@ -672,7 +676,7 @@ namespace
 						checked.insert(cur_check);
 					if (cur_check >= Norg)
 						continue;
-					if (GetPoly(oldtess, cur_check, poly, temp, temp2, i_temp))
+					if (GetPoly(oldtess, cur_check, poly, ptemp, temp2, i_temp))
 					{
 						std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly, &r_planes);
 						if (dv.first)

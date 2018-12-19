@@ -33,7 +33,7 @@ namespace
 			const double c = eos_.dp2c(cells_[i].density,cells_[i].pressure,cells_[i].tracers,
 				tracerstickernames_.tracer_names);
 			const Vector3D v = cells_.at(i).velocity;
-			vector<size_t> const& faces = tess_.GetCellFaces(i);
+			face_vec const& faces = tess_.GetCellFaces(i);
 			size_t Nloop = faces.size();
 			for (size_t j = 0; j < Nloop; ++j)
 				res = fmax(res,(c + fastabs(v - face_velocities_[faces[j]])));

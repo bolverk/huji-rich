@@ -7,7 +7,11 @@
 #define TESSELLATION3D_HPP 1
 
 #include <vector>
+#include <boost/container/small_vector.hpp>
 #include "Face.hpp"
+typedef boost::container::small_vector<size_t, 24> face_vec;
+typedef boost::container::small_vector<size_t, 8> point_vec;
+typedef boost::container::small_vector<size_t, 40> tetra_vec;
 
 using std::vector;
 
@@ -80,9 +84,9 @@ public:
 	\param index Cell index
 	\return Cell edges
 	*/
-	virtual vector<size_t>const& GetCellFaces(size_t index) const = 0;
+	virtual face_vec const& GetCellFaces(size_t index) const = 0;
 
-	virtual vector<vector<size_t> >& GetAllCellFaces(void) = 0;
+	virtual vector<face_vec >& GetAllCellFaces(void) = 0;
 
 	/*!
 	\brief Returns a reference to the point vector
@@ -107,9 +111,9 @@ public:
 	\param index The index of the face
 	\returns The reference
 	*/
-	virtual vector<size_t>const& GetPointsInFace(size_t index) const = 0;
+	virtual point_vec const& GetPointsInFace(size_t index) const = 0;
 
-	virtual vector<vector<size_t> > & GetAllPointsInFace(void) = 0;
+	virtual vector<point_vec > & GetAllPointsInFace(void) = 0;
 
 	/*!
 	\brief Returns a list of the neighbors of a cell

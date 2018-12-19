@@ -15,7 +15,7 @@ namespace
 	}
 
 	void GetNeighborMesh(Tessellation3D const& tess, size_t cell_index,
-		vector<Vector3D> &res, vector<size_t> const& faces)
+		vector<Vector3D> &res, face_vec const& faces)
 	{
 		res.resize(faces.size());
 		const size_t nloop = res.size();
@@ -29,7 +29,7 @@ namespace
 	}
 
 	void GetNeighborCM(Tessellation3D const& tess, size_t cell_index,
-		vector<Vector3D> &res, vector<size_t> const& faces)
+		vector<Vector3D> &res, face_vec const& faces)
 	{
 		res.resize(faces.size());
 		const size_t nloop = faces.size();
@@ -43,7 +43,7 @@ namespace
 	}
 
 	void GetNeighborCells(Tessellation3D const& tess, size_t cell_index,
-		vector<ComputationalCell3D> const& cells, vector<size_t> const& faces, vector<ComputationalCell3D> &res)
+		vector<ComputationalCell3D> const& cells, face_vec const& faces, vector<ComputationalCell3D> &res)
 	{
 		const size_t nloop = faces.size();
 		res.resize(nloop);
@@ -59,7 +59,7 @@ namespace
 		Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<ComputationalCell3D> const& neighbors,
 		vector<Vector3D> const& neighbor_centers,
 		vector<Vector3D> const& neigh_cm, Tessellation3D const& tess,
-		Slope3D &res, Slope3D &temp, size_t /*index*/, vector<size_t> const& faces,
+		Slope3D &res, Slope3D &temp, size_t /*index*/,face_vec const& faces,
 		std::vector<Vector3D> c_ij)
 	{
 		size_t n = neighbor_centers.size();
@@ -251,7 +251,7 @@ namespace
 		vector<ComputationalCell3D> const& neighbors, Slope3D &slope, ComputationalCell3D &cmax,
 		ComputationalCell3D &cmin, ComputationalCell3D &maxdiff, ComputationalCell3D &mindiff,
 		TracerStickerNames const& tracerstickernames, string const& skip_key, Tessellation3D const& tess,
-		size_t /*cell_index*/, vector<size_t> const& faces, EquationOfState const& eos)
+		size_t /*cell_index*/, face_vec const& faces, EquationOfState const& eos)
 	{
 		ReplaceComputationalCell(cmax, cell);
 		ReplaceComputationalCell(cmin, cell);
@@ -408,7 +408,7 @@ namespace
 	void shocked_slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
 		vector<ComputationalCell3D> const& neighbors,
 		Slope3D  &slope, double diffusecoeff, TracerStickerNames const& tracerstickernames,
-		string const& skip_key, Tessellation3D const& tess, size_t /*cell_index*/, vector<size_t> const& faces,
+		string const& skip_key, Tessellation3D const& tess, size_t /*cell_index*/, face_vec const& faces,
 		EquationOfState const& eos)
 	{
 		ComputationalCell3D cmax(cell), cmin(cell);
@@ -579,7 +579,7 @@ namespace
 		TracerStickerNames const& tracerstickernames, string const& skip_key,
 		std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
-		vector<size_t> const& faces = tess.GetCellFaces(cell_index);
+		face_vec const& faces = tess.GetCellFaces(cell_index);
 		GetNeighborMesh(tess, cell_index, neighbor_mesh_list, faces);
 		GetNeighborCM(tess, cell_index, neighbor_cm_list, faces);
 		GetNeighborCells(tess, cell_index, cells, faces, neighbor_list);
@@ -706,7 +706,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
 			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_, c_ij, neighbor_list);
-		vector<size_t> const& faces = tess.GetCellFaces(i);
+		face_vec const& faces = tess.GetCellFaces(i);
 		const size_t nloop = faces.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{

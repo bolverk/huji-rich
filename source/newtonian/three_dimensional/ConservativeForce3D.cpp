@@ -6,7 +6,7 @@ namespace
 	{
 		Vector3D dm;
 		Vector3D center = tess.GetMeshPoint(point);
-		vector<size_t> const& faces = tess.GetCellFaces(point);
+		face_vec const& faces = tess.GetCellFaces(point);
 		size_t Nfaces = faces.size();
 
 		for (size_t i = 0; i < Nfaces; ++i)

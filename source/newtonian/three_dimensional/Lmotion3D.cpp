@@ -77,7 +77,7 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 	size_t Ntracers = tracerstickernames.tracer_names.size();
 	for (size_t i = 0; i < N; ++i)
 	{
-		std::vector<size_t> const& faces = tess.GetCellFaces(i);
+		face_vec const& faces = tess.GetCellFaces(i);
 		double V = tess.GetVolume(i);
 		Vector3D CM = V*tess.GetCellCM(i);
 		for (size_t j = 0; j < faces.size(); ++j)

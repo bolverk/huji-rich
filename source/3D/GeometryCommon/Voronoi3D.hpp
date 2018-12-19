@@ -45,9 +45,9 @@ private:
 		vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
 	void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
 		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
-		std::stack<std::size_t> &to_check,bool &skipped, vector<std::size_t> &faces, vector<size_t> const& past_duplicate);
+		std::stack<std::size_t> &to_check,bool &skipped,face_vec &faces, vector<size_t> const& past_duplicate);
 	void FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
-		Sphere &sphere, std::vector<Face> const& faces, bool &skipped, std::vector<size_t> const& face_index);
+		Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index);
 	std::size_t GetFirstPointToCheck(void)const;
 	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
 	void CalcRigidCM(std::size_t face_index);
@@ -73,13 +73,15 @@ private:
 	void BuildVoronoi(std::vector<size_t> const& order);
 
 	Delaunay3D del_;
-	vector<vector<std::size_t> > PointTetras_; // The tetras containing each point
+	//vector<vector<std::size_t> > PointTetras_; // The tetras containing each point
+	vector<tetra_vec > PointTetras_; // The tetras containing each point
 	vector<double> R_; // The radius of the sphere of each tetra
 	vector<Vector3D> tetra_centers_;
 	// Voronoi Data
-	vector<vector<std::size_t> > FacesInCell_;
-	//std::vector<boost::container::small_vector<size_t, 8> > PointsInFace_;
-	vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
+	//vector<vector<std::size_t> > FacesInCell_;
+	vector<face_vec > FacesInCell_;
+	std::vector<point_vec > PointsInFace_; // Right hand with regard to first neighbor
+	//vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
 	vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
 	vector<Vector3D> CM_,Face_CM_;
 	vector<double> volume_;
@@ -127,7 +129,7 @@ public:
 
 	double GetVolume(std::size_t index) const;
 
-	vector<std::size_t>const& GetCellFaces(std::size_t index) const;
+	face_vec const& GetCellFaces(std::size_t index) const;
 
 	vector<Vector3D>& GetMeshPoints(void);
 
@@ -163,9 +165,9 @@ public:
 
 	vector<Vector3D>const& GetFacePoints(void) const;
 
-	vector<vector<size_t> >& GetAllCellFaces(void);
+	vector<face_vec >& GetAllCellFaces(void);
 
-	vector<std::size_t>const& GetPointsInFace(std::size_t index) const;
+	point_vec const& GetPointsInFace(std::size_t index) const;
 
 	std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const;
 
@@ -193,7 +195,7 @@ public:
 
 	std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
 
-	vector<vector<size_t> > & GetAllPointsInFace(void);
+	vector<point_vec > & GetAllPointsInFace(void);
 
 	size_t& GetPointNo(void);
 

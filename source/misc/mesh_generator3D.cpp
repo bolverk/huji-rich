@@ -157,8 +157,8 @@ vector<Vector3D> RandPointsMPI(Voronoi3D const& tproc, size_t np)
 	int rank = 0;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	boost::mt19937_64 generator(rank);
-	vector<size_t> const& faces = tproc.GetCellFaces(rank);
-	vector<size_t> points = tproc.GetPointsInFace(faces[0]);
+	face_vec const& faces = tproc.GetCellFaces(rank);
+	point_vec points = tproc.GetPointsInFace(faces[0]);
 	Vector3D ll = tproc.GetFacePoints()[points[0]];
 	Vector3D ur(ll);
 	for (size_t i = 0; i < faces.size(); ++i)

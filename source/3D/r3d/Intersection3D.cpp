@@ -251,7 +251,7 @@ void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
 {
 	res.clear();
 	r3d_plane plane;
-	vector<size_t> const& newfaces = tess.GetCellFaces(index);
+	face_vec const& newfaces = tess.GetCellFaces(index);
 	size_t nfaces = newfaces.size();
 	res.resize(nfaces);
 	for (size_t i = 0; i < nfaces; ++i)
@@ -269,13 +269,13 @@ void GetPlanes(vector<r3d_plane> &res, Tessellation3D const& tess, size_t index)
 	}
 }
 
-bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, vector<size_t> &itemp, vector<size_t> &all_indeces,
+bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, point_vec &itemp, vector<size_t> &all_indeces,
 	vector<vector<int> > &faceinds)
 {
 	itemp.clear();
 	all_indeces.clear();
 	faceinds.clear();
-	vector<size_t> const& oldfaces = oldtess.GetCellFaces(oldcell);
+	face_vec const& oldfaces = oldtess.GetCellFaces(oldcell);
 	size_t nfaces = oldfaces.size();
 	faceinds.resize(nfaces);
 	for (size_t i = 0; i < nfaces; ++i)

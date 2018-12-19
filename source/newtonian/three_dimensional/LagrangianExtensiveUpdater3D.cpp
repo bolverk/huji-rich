@@ -140,7 +140,7 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 				<< std::endl;
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
 				abs(cells[i].velocity) << std::endl;
-			vector<size_t> temp = tess.GetCellFaces(i);
+			face_vec temp = tess.GetCellFaces(i);
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
 				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;

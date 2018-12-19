@@ -22,7 +22,7 @@
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index)
 {
-	vector<std::size_t> const& faces = tess.GetCellFaces(index);
+	face_vec const& faces = tess.GetCellFaces(index);
 	vector<Vector3D> const& points = tess.GetFacePoints();
 	std::size_t N = faces.size();
 	std::array<Vector3D, 4> vec;
@@ -33,7 +33,7 @@ bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t 
 		size_t N2 = 0;
 		Vector3D V1, V2;
 		size_t counter = 0;
-		vector<size_t> const& InFace = tess.GetPointsInFace(faces[i]);
+		point_vec const& InFace = tess.GetPointsInFace(faces[i]);
 		size_t NinFace = InFace.size();
 		N1 = 1;
 		V1 = points[InFace[(counter + 1) % NinFace]] - points[InFace[0]];
@@ -117,7 +117,7 @@ namespace
 	}
 
 	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<unsigned char> &future_check, size_t Norg,
-		Delaunay3D const& del, vector<vector<size_t> > const& PointsInTetra)
+		Delaunay3D const& del, vector<tetra_vec > const& PointsInTetra)
 	{
 		check_stack.empty();;
 		future_check.resize(Norg, 0);
@@ -234,7 +234,7 @@ namespace
 #endif
 
 	double CleanDuplicates(boost::container::static_vector<size_t, 128> &indeces, vector<Vector3D> &points, 
-		vector<size_t> &res, double R,
+		boost::container::small_vector<size_t, 8> &res, double R,
 		boost::container::static_vector<double, 128> &diffs,
 		boost::container::static_vector<Vector3D, 128> &vtemp)
 	{
@@ -263,7 +263,7 @@ namespace
 		return R;
 	}
 
-	size_t SetPointTetras(vector<vector<size_t> > &PointTetras, size_t Norg, vector<Tetrahedron> &tetras,
+	size_t SetPointTetras(vector<tetra_vec > &PointTetras, size_t Norg, vector<Tetrahedron> &tetras,
 		boost::container::flat_set<size_t> const& empty_tetras)
 	{
 		PointTetras.clear();
@@ -305,7 +305,7 @@ namespace
 		return bigtet;
 	}
 
-	void MakeRightHandFace(vector<size_t> &indeces, Vector3D const& point, vector<Vector3D> const& face_points,
+	void MakeRightHandFace(boost::container::small_vector<size_t, 8> &indeces, Vector3D const& point, vector<Vector3D> const& face_points,
 		boost::container::static_vector<size_t, 128> &temp, double areascale)
 	{
 		Vector3D V1, V2;
@@ -363,13 +363,13 @@ namespace
 	std::pair<Vector3D, Vector3D> GetBoundingBox(Tessellation3D const& tproc, int rank)
 	{
 		vector<Vector3D> const& face_points = tproc.GetFacePoints();
-		vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+		face_vec faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 		Vector3D ll = face_points[tproc.GetPointsInFace(faces[0])[0]];
 		Vector3D ur(ll);
 		size_t Nface = faces.size();
 		for (size_t i = 0; i < Nface; ++i)
 		{
-			vector<size_t> const& findex = tproc.GetPointsInFace(faces[i]);
+			point_vec const& findex = tproc.GetPointsInFace(faces[i]);
 			size_t Nindex = findex.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -419,7 +419,7 @@ namespace
 	}
 #endif //RICH_MPI
 
-	void CalcFaceAreaCM(vector<size_t> const& indeces, std::vector<Vector3D> const& allpoints,
+	void CalcFaceAreaCM(boost::container::small_vector<size_t,8> const& indeces, std::vector<Vector3D> const& allpoints,
 		boost::container::static_vector<Vector3D, 128> &points, double &Area, Vector3D &CM,
 		boost::container::static_vector<double, 128> &Atemp)
 	{
@@ -543,7 +543,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		eo.AddEntry("Point y cor", points[i].y);
 		eo.AddEntry("Point z cor", points[i].z);
 		vproc.output("vproc_" + int2str(rank) + ".bin");
-		vector<size_t> faces_error = vproc.GetCellFaces(static_cast<size_t>(rank));
+		face_vec faces_error = vproc.GetCellFaces(static_cast<size_t>(rank));
 		for (size_t j = 0; j < faces_error.size(); ++j)
 		{
 			vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
@@ -619,10 +619,9 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 
 
 Voronoi3D::Voronoi3D() :ll_(Vector3D()), ur_(Vector3D()), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
-del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
-FacesInCell_(vector<vector<std::size_t> >()), 
-//PointsInFace_(vector<boost::container::small_vector<size_t, 8> >()), 
-PointsInFace_(vector<vector<size_t> >()),
+del_(Delaunay3D()), PointTetras_(vector<tetra_vec >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
+FacesInCell_(vector<face_vec >()),
+PointsInFace_(vector<point_vec >()), 
 FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
 CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D >()), 
 volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
@@ -631,10 +630,9 @@ self_index_(vector<std::size_t>()), temp_points_(std::array<Vector3D, 4>()), tem
 {}
 
 Voronoi3D::Voronoi3D(Vector3D const& ll, Vector3D const& ur) :ll_(ll), ur_(ur), Norg_(0), bigtet_(0), set_temp_(std::set<int>()), stack_temp_(std::stack<int>()),
-del_(Delaunay3D()), PointTetras_(vector<vector<std::size_t> >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
-FacesInCell_(vector<vector<std::size_t> >()), 
-PointsInFace_(vector<vector<size_t> >()), 
-//PointsInFace_(vector<boost::container::small_vector<size_t, 8> >()),
+del_(Delaunay3D()), PointTetras_(vector<tetra_vec >()), R_(vector<double>()), tetra_centers_(vector<Vector3D>()),
+FacesInCell_(vector<face_vec >()),
+PointsInFace_(vector<point_vec >()),
 FaceNeighbors_(vector<std::pair<std::size_t, std::size_t> >()),
 CM_(vector<Vector3D>()), Face_CM_(vector<Vector3D>()),
 volume_(vector<double>()), area_(vector<double>()), duplicated_points_(vector<vector<std::size_t> >()),
@@ -1064,7 +1062,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	BuildVoronoi(order);
 
 	std::vector<double>().swap(R_);
-	std::vector<std::vector<size_t> >().swap(PointTetras_);
+	std::vector<tetra_vec >().swap(PointTetras_);
 
 	CalcAllCM();
 	for (std::size_t i = 0; i < FaceNeighbors_.size(); ++i)
@@ -1248,7 +1246,7 @@ void Voronoi3D::BuildDebug(int rank)
 	BuildVoronoi(order);
 
 	std::vector<double>().swap(R_);
-	std::vector<std::vector<size_t> >().swap(PointTetras_);
+	std::vector<tetra_vec >().swap(PointTetras_);
 	std::vector<Tetrahedron>().swap(del_.tetras_);
 
 	CalcAllCM();
@@ -1323,7 +1321,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points)
 	BuildVoronoi(order);
 
 	std::vector<double>().swap(R_);
-	std::vector<std::vector<size_t> >().swap(PointTetras_);
+	std::vector<tetra_vec >().swap(PointTetras_);
 	std::vector<Tetrahedron>().swap(del_.tetras_);
 
 	CalcAllCM();
@@ -1340,12 +1338,8 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	Face_CM_.resize(Norg_ * 10);
 	FaceNeighbors_.resize(Norg_ * 10);
 	PointsInFace_.resize(Norg_ * 10);
-	for (size_t i = 0; i < Norg_; ++i)
-		FacesInCell_[i].reserve(20);
-	//for (size_t i = 0; i < (10*Norg_); ++i)
-		//PointsInFace_[i].reserve(8);
+
 	boost::container::static_vector<size_t, 128> temp, temp2, temp3;
-	//std::vector<size_t, boost::alignment::aligned_allocator<size_t, 32> > temp, temp2;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
@@ -1356,8 +1350,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 
 	size_t FaceCounter = 0;
 	boost::container::flat_set<size_t> neigh_set;
-	std::vector<size_t> *temp_points_in_face;
-	//boost::container::small_vector<size_t,8> *temp_points_in_face;
+	point_vec *temp_points_in_face;
 	boost::container::static_vector<Vector3D,128>  clean_vec;
 
 	//std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;
@@ -1512,7 +1505,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
 }
 
 void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
-	Sphere &sphere, std::vector<Face> const& faces, bool &skipped, std::vector<size_t> const& face_index)
+	Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index)
 {
 	res.clear();
 	std::size_t Ntetra = PointTetras_[point].size();
@@ -1551,7 +1544,7 @@ void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t 
 
 void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	bool &skipped, vector<std::size_t> &faces, vector<size_t> const& past_duplicate)
+	bool &skipped,face_vec &faces, vector<size_t> const& past_duplicate)
 {
 	res.clear();
 	std::size_t N = tproc.GetPointNo();
@@ -1646,7 +1639,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (f.neighbors.first < N && f.neighbors.first != rank)
 					{
-						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
+						face_vec const& faces_temp = tproc.GetCellFaces(f.neighbors.first);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)
 						{
 							if (visited.find(faces_temp[i]) == visited.end())
@@ -1661,7 +1654,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 					}
 					if (f.neighbors.second < N && f.neighbors.second != rank)
 					{
-						vector<std::size_t> const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
+						face_vec const& faces_temp = tproc.GetCellFaces(f.neighbors.second);
 						for (std::size_t i = 0; i < faces_temp.size(); ++i)
 							if (visited.find(faces_temp[i]) == visited.end())
 							{
@@ -1727,7 +1720,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	if (mode == 1)
 	{
 		// Create faces to check for intersection
-		std::vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+		face_vec faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 		std::vector<Face> cell_faces(faces.size());
 		for (size_t i = 0; i < cell_faces.size(); ++i)
 			cell_faces[i] = Face(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(faces[i])),
@@ -1746,7 +1739,8 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::FindIntersections(Tessel
 	{
 		std::stack<size_t> intersection_check;
 		boost::container::flat_set<size_t> visited;
-		vector<size_t> past_duplicate, vtemp;
+		vector<size_t> past_duplicate;
+		face_vec vtemp;
 		vector<vector<size_t> > sorted_to_duplicate = duplicated_points_;
 		for (size_t i = 0; i < sorted_to_duplicate.size(); ++i)
 			std::sort(sorted_to_duplicate[i].begin(), sorted_to_duplicate[i].end());
@@ -1775,7 +1769,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const& tproc, vector<std::p
 	int rank = 0;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<size_t> neigh = tproc.GetNeighbors(static_cast<size_t>(rank));
-	vector<size_t> faces = tproc.GetCellFaces(static_cast<size_t>(rank));
+	face_vec faces = tproc.GetCellFaces(static_cast<size_t>(rank));
 	size_t Nneigh = neigh.size();
 	vector<size_t> to_add;
 	vector<Vector3D> neigh_points(Nneigh);
@@ -2236,7 +2230,7 @@ double Voronoi3D::GetVolume(std::size_t index) const
 	return volume_[index];
 }
 
-vector<std::size_t>const& Voronoi3D::GetCellFaces(std::size_t index) const
+face_vec const& Voronoi3D::GetCellFaces(std::size_t index) const
 {
 	return FacesInCell_[index];
 }
@@ -2369,7 +2363,7 @@ void Voronoi3D::GetNeighborNeighbors(vector<std::size_t> &result, std::size_t po
 	RemoveVal(result, point);
 }
 
-vector<vector<size_t> > & Voronoi3D::GetAllPointsInFace(void)
+vector<boost::container::small_vector<size_t, 8> > & Voronoi3D::GetAllPointsInFace(void)
 {
 	return PointsInFace_;
 }
@@ -2443,7 +2437,7 @@ vector<Vector3D>& Voronoi3D::GetAllFaceCM(void)
 	return Face_CM_;
 }
 
-vector<vector<size_t> >& Voronoi3D::GetAllCellFaces(void)
+vector<face_vec >& Voronoi3D::GetAllCellFaces(void)
 {
 	return FacesInCell_;
 }
@@ -2459,7 +2453,7 @@ vector<Vector3D>const& Voronoi3D::GetFacePoints(void)const
 }
 
 
-vector<std::size_t>const& Voronoi3D::GetPointsInFace(std::size_t index) const
+point_vec const& Voronoi3D::GetPointsInFace(std::size_t index) const
 {
 	return PointsInFace_[index];
 }

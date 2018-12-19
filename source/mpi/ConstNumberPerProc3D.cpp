@@ -483,7 +483,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	if (mode_ == 1 || mode_ == 2)
 	{
 		std::vector<size_t> neigh = tproc.GetNeighbors(rank);
-		std::vector<size_t> faces = tproc.GetCellFaces(rank);
+		face_vec faces = tproc.GetCellFaces(rank);
 		size_t Nneigh = neigh.size();
 
 		const double neigheps = 0.025;
