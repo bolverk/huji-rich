@@ -2,6 +2,7 @@
 #include "hydrodynamic_variables.hpp"
 #include "../../misc/universal_error.hpp"
 #include "../../misc/utils.hpp"
+#include <cmath>
 
 using namespace std;
 
