@@ -31,13 +31,8 @@ namespace
 			center(center_i),
 			right(right_i),ps(ps_i) {}
 
-		WaveSpeeds(WaveSpeeds const& other)
-		{
-			left=other.left;
-			center=other.center;
-			right=other.right;
-			ps=other.ps;
-		}
+		WaveSpeeds(WaveSpeeds const& other):left(other.left),center(other.center),
+			right(other.right),ps(other.ps){}
 		
 		WaveSpeeds& operator=(WaveSpeeds const& ws)
 		{
