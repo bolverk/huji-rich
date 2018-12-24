@@ -38,13 +38,16 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, boost::mt19937_64 &gen);
 
 vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
-	Vector3D center = Vector3D());
+	Vector3D center = Vector3D(),Voronoi3D const* tproc = 0);
 
-vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,double Rmin,double Rmax);
+vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,double Rmin,double Rmax
+	, Voronoi3D const* tproc = 0);
 
-vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax);
+vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
+	Voronoi3D const* tproc = 0);
 
-vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,double a, Vector3D const& center);
+vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,double a, Vector3D const& center,
+	Voronoi3D const* tproc = 0);
 
 #ifdef RICH_MPI
 /*!
