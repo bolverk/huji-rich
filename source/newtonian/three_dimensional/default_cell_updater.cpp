@@ -135,10 +135,16 @@ namespace
 			{
 				double v = GetVelocity(extensives[i], G);
 				const double volume = 1.0 / tess.GetVolume(i);
-				res[i].velocity = (fastabs(extensives[i].momentum)*1e8 < extensives[i].mass) ?
-					extensives[i].momentum / extensives[i].mass : v * extensives[i].momentum / abs(extensives[i].momentum);
+				if (fastabs(extensives[i].momentum)*1e8 < extensives[i].mass)
+				{
+					res[i].velocity = extensives[i].momentum / extensives[i].mass;
+					v = abs(res[i].velocity);
+				}
+				else
+					res[i].velocity = v * extensives[i].momentum / abs(extensives[i].momentum);
 				double gamma_1 = std::sqrt(1 - ScalarProd(res[i].velocity, res[i].velocity));
 				res[i].density = extensives[i].mass *gamma_1*volume;
+				double r = fastabs(tess.GetMeshPoint(i));
 				if (res[i].density < 0)
 					throw UniversalError("Negative density");
 				for (size_t j = 0; j < extensives[i].tracers.size(); ++j)

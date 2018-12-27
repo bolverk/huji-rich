@@ -39,9 +39,7 @@ namespace
 			new_val = std::min(1.0, val - f0 / solve.Deriv(val));
 			if (counter > 99)
 			{
-				std::cout << "Bad convergence in simple cell updater, too mant iterations in finding velocity";
-				//std::cout << "E = " << E << " M = " << M << " D = " << cell.mass << std::endl;
-				throw;
+				throw UniversalError("Bad convergence in simple cell updater, too mant iterations in finding velocity");
 			}
 		}
 		return new_val;
@@ -59,5 +57,21 @@ double GetVelocity(Conserved3D const& cell, double G)
 	if ((G*E)*(G*E) - 4 * (G - 1)*M*M < 0)
 		vmin = 0;
 	double vmax = std::min(1.0, M / E + 1e-6);
-	return DoNewtonRapshon(tosolve, 0.5*(vmin + vmax));
+	double res = 0;
+	try
+	{
+		res = DoNewtonRapshon(tosolve, 0.5*(vmin + vmax));
+	}
+	catch (UniversalError &eo)
+	{
+		eo.AddEntry("Mass", cell.mass);
+		eo.AddEntry("Mx", cell.momentum.x);
+		eo.AddEntry("My", cell.momentum.y);
+		eo.AddEntry("Mz", cell.momentum.z);
+		eo.AddEntry("Energy", cell.energy);
+		eo.AddEntry("Enthalpy", cell.internal_energy);
+		DisplayError(eo);
+		throw eo;
+	}
+	return res;
 }
