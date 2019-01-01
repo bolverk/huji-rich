@@ -166,17 +166,9 @@ namespace
 					else
 					{
 						double new_entropy = eos.dp2s(res[i].density, res[i].pressure, res[i].tracers, tsn.tracer_names);
-						// Did we lose entropy? If yes then correct for it since it is unphysical
-						if (new_entropy < res[i].tracers[entropy_index])
-						{
-							EntropyFixSR(eos, res[i], entropy_index, tsn, extensives[i], 1.0 / volume);
-						}
-						else
-						{
-							// We don't need the entropy fix, update entropy
-							res[i].tracers[entropy_index] = new_entropy;
-							extensives[i].tracers[entropy_index] = new_entropy * extensives[i].mass;
-						}
+						// We don't need the entropy fix, update entropy
+						res[i].tracers[entropy_index] = new_entropy;
+						extensives[i].tracers[entropy_index] = new_entropy * extensives[i].mass;
 					}
 				}
 				if (res[i].density < 0 || res[i].pressure < 0)
