@@ -5,8 +5,8 @@
 #endif
 
 SimpleCellUpdater::SimpleCellUpdater
-(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence,bool SR, double G) :
-	sequence_(sequence),SR_(SR),G_(G),entropy_("Entropy") {}
+(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence, bool SR, double G) :
+	sequence_(sequence), SR_(SR), G_(G), entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)
 {
@@ -22,7 +22,7 @@ SimpleCellUpdater::Action::~Action(void) {}
 
 namespace
 {
-	void EntropyFix(EquationOfState const& eos,ComputationalCell &res,size_t entropy_index,TracerStickerNames const& tracerstickernames,double &energy,
+	void EntropyFix(EquationOfState const& eos, ComputationalCell &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, double &energy,
 		Extensive &extensive)
 	{
 		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
@@ -33,13 +33,13 @@ namespace
 	}
 
 	void EntropyFixSR(EquationOfState const& eos, ComputationalCell &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, double &energy,
-		Extensive &extensive,double vol)
+		Extensive &extensive, double vol)
 	{
 		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
 		res.pressure = new_pressure;
 		energy = eos.dp2e(res.density, res.pressure);
 		double gamma = std::sqrt(1.0 / (1 - ScalarProd(res.velocity, res.velocity)));
-		extensive.energy = extensive.mass*(energy*gamma+gamma-1)-res.pressure*vol;
+		extensive.energy = extensive.mass*(energy*gamma + gamma - 1) - res.pressure*vol;
 	}
 
 	bool HighRelativeKineticEnergy(Tessellation const& tess, size_t index, vector<Extensive> const& cells,
@@ -89,29 +89,21 @@ namespace
 					EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
 				}
 				else
-				{		
-					double new_pressure = eos.de2p(res.density,energy, res.tracers, tracerstickernames.tracer_names);
-					double new_entropy = eos.dp2s(res.density, new_pressure, res.tracers, tracerstickernames.tracer_names);
-					// Did we lose entropy? If yes then correct for it since it is unphysical
-					if (new_entropy < res.tracers[entropy_index])
+				{
+					// Is the kinetic energy small?
+					if ((energy*extensive.mass < 0.005*extensive.energy) &&
+						!HighRelativeKineticEnergy(tess, index, extensives, extensive))
 					{
 						EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
 					}
 					else
 					{
-						// Is the kinetic energy small?
-						if ((energy*extensive.mass < 0.005*extensive.energy) && 
-							!HighRelativeKineticEnergy(tess, index, extensives, extensive))
-						{
-								EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
-						}
-						else
-						{
-							// We don't need the entropy fix, update entropy
-							res.pressure = new_pressure;
-							res.tracers[entropy_index] = new_entropy;
-							extensive.tracers[entropy_index] = new_entropy * extensive.mass;
-						}
+						double new_pressure = eos.de2p(res.density, energy, res.tracers, tracerstickernames.tracer_names);
+						double new_entropy = eos.dp2s(res.density, new_pressure, res.tracers, tracerstickernames.tracer_names);
+						// We don't need the entropy fix, update entropy
+						res.pressure = new_pressure;
+						res.tracers[entropy_index] = new_entropy;
+						extensive.tracers[entropy_index] = new_entropy * extensive.mass;
 					}
 				}
 			}
@@ -136,13 +128,13 @@ namespace
 		ComputationalCell &res,
 		size_t entropy_index,
 		TracerStickerNames const& tracerstickernames,
-		Tessellation const& /*tess*/,double G)
+		Tessellation const& /*tess*/, double G)
 	{
 		Extensive& extensive = extensives[index];
 		double v = GetVelocity(extensive, G);
-		const double volume = 1.0/cd.volumes[index];
-		res.velocity = (fastabs(extensive.momentum)*1e8<extensive.mass) ? extensive.momentum/extensive.mass : v*extensive.momentum / abs(extensive.momentum);
-		double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity,res.velocity));
+		const double volume = 1.0 / cd.volumes[index];
+		res.velocity = (fastabs(extensive.momentum)*1e8 < extensive.mass) ? extensive.momentum / extensive.mass : v * extensive.momentum / abs(extensive.momentum);
+		double gamma_1 = std::sqrt(1 - ScalarProd(res.velocity, res.velocity));
 		res.density = extensive.mass *gamma_1*volume;
 		if (res.density < 0)
 			throw UniversalError("Negative density");
@@ -158,26 +150,18 @@ namespace
 		// Entropy fix if needed
 		if (entropy_index < res.tracers.size())
 		{
-			double enthalpy = 0;
 			// Do we have a negative thermal energy?
 			if (res.pressure < 0)
 			{
-				EntropyFixSR(eos, res, entropy_index, tracerstickernames, enthalpy, extensive,cd.volumes[index]);
+				double enthalpy = 0;
+				EntropyFixSR(eos, res, entropy_index, tracerstickernames, enthalpy, extensive, cd.volumes[index]);
 			}
 			else
 			{
 				double new_entropy = eos.dp2s(res.density, res.pressure, res.tracers, tracerstickernames.tracer_names);
-				// Did we lose entropy? If yes then correct for it since it is unphysical
-				if (new_entropy < res.tracers[entropy_index])
-				{
-					EntropyFixSR(eos, res, entropy_index, tracerstickernames, enthalpy, extensive,cd.volumes[index]);
-				}
-				else
-				{
-					// We don't need the entropy fix, update entropy
-					res.tracers[entropy_index] = new_entropy;
-					extensive.tracers[entropy_index] = new_entropy * extensive.mass;
-				}
+				// We don't need the entropy fix, update entropy
+				res.tracers[entropy_index] = new_entropy;
+				extensive.tracers[entropy_index] = new_entropy * extensive.mass;
 			}
 		}
 	}
@@ -192,7 +176,7 @@ namespace
 		const size_t index,
 		ComputationalCell &res,
 		size_t entropyindex,
-		TracerStickerNames const & tracerstickernames,bool SR,double G)
+		TracerStickerNames const & tracerstickernames, bool SR, double G)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
@@ -202,10 +186,10 @@ namespace
 				return;
 			}
 		}
-		if(!SR)
-			regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex,tracerstickernames,tess);
+		if (!SR)
+			regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex, tracerstickernames, tess);
 		else
-			regular_updateSR(eos, extensives, old.at(index), cd, index, res, entropyindex, tracerstickernames, tess,G);
+			regular_updateSR(eos, extensives, old.at(index), cd, index, res, entropyindex, tracerstickernames, tess, G);
 	}
 }
 
@@ -231,7 +215,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 		MPI_exchange_data(tess, extensives, true);
 #endif
 	for (size_t i = 0; i < N; ++i)
-		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex,tracerstickernames,SR_,G_);
+		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex, tracerstickernames, SR_, G_);
 #ifdef RICH_MPI
 	if (tindex < old[0].tracers.size())
 		extensives.resize(static_cast<size_t>(tess.GetPointNo()));
