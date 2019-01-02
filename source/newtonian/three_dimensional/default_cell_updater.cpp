@@ -182,6 +182,7 @@ namespace
 					UniversalError eo("Negative quantity in cell update");
 					throw eo;
 				}
+				res[i].internal_energy = eos.dp2e(res[i].density, res[i].pressure,res[i].tracers,tsn.tracer_names);
 			}
 			catch (UniversalError &eo)
 			{

@@ -54,6 +54,7 @@ double GetVelocity(Conserved3D const& cell, double G)
 	SolveVelocity tosolve(M*M, -2 * G*M*E, G*G*E*E + 2 * (G - 1)*M*M - (G - 1)*(G - 1)*cell.mass*cell.mass, -2 * G*(G - 1)*M*E, (G - 1)*(G - 1)*(cell.mass*cell.mass + M * M));
 
 	double vmin = (1e6*M < cell.mass) ? 0 : (G*E - std::sqrt((G*E)*(G*E) - 4 * (G - 1)*M*M)) / (2 * M*(G - 1));
+	vmin = std::min(vmin, 0.999);
 	if ((G*E)*(G*E) - 4 * (G - 1)*M*M < 0)
 		vmin = 0;
 	double vmax = std::min(1.0, M / E + 1e-6);
