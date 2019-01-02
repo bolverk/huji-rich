@@ -158,6 +158,12 @@ namespace
 				// Entropy fix if needed
 				if (entropy_index < Ntracers)
 				{
+					if (!(extensives[i].tracers[entropy_index] > 0))
+					{
+						UniversalError eo("Negative entropy");
+						eo.AddEntry("Extensive Entropy", extensives[i].tracers[entropy_index]);
+						throw eo;
+					}
 					// Do we have a negative thermal energy?
 					if (res[i].pressure < 0)
 					{
@@ -174,26 +180,20 @@ namespace
 				if (!(res[i].density > 0) || !(res[i].pressure > 0))
 				{
 					UniversalError eo("Negative quantity in cell update");
-					eo.AddEntry("Cell index", static_cast<double>(i));
-					eo.AddEntry("Cell mass", extensives[i].mass);
-					eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
-					eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-					eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
-					eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
-					eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
-					eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
-					eo.AddEntry("Cell volume", volume);
-					eo.AddEntry("Cell energy", extensives[i].energy);
 					throw eo;
 				}
 			}
 			catch (UniversalError &eo)
 			{
+				eo.AddEntry("Cell volume", tess.GetVolume(i));
 				eo.AddEntry("Cell index", static_cast<double>(i));
 				eo.AddEntry("Cell mass", extensives[i].mass);
 				eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
 				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
 				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
+				eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
+				eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
+				eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
 				eo.AddEntry("Cell energy", extensives[i].energy);
 				eo.AddEntry("Number of tracers", Ntracers);
 				for (size_t j = 0; j < Ntracers; ++j)
