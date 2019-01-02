@@ -6,18 +6,43 @@ namespace
 {
 	std::pair<double, double> HLLpu(ComputationalCell3D const& left, ComputationalCell3D const& right, EquationOfState const& eos)
 	{
-		double cl = eos.dp2c(left.density, left.pressure);
-		double cr = eos.dp2c(right.density, right.pressure);
+		double cl = 0, cr = 0;
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cl = eos.dp2c(left.density, left.pressure);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in HLLpu left sound speed", 0);
+			throw eo;
+		}
+#endif
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cr = eos.dp2c(right.density, right.pressure);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in HLLpu right sound speed", 0);
+			throw eo;
+		}
+#endif
 		double sl = std::min(left.velocity.x - cl, right.velocity.x - cr);
 		double sr = std::max(left.velocity.x + cl, right.velocity.x + cr);
-		Conserved3D Ul(left.density, left.density*left.velocity, left.density*(left.internal_energy + ScalarProd(left.velocity, left.velocity)*0.5),left.internal_energy),
-			Ur(right.density, right.density*right.velocity, right.density*(right.internal_energy + ScalarProd(right.velocity, right.velocity)*0.5),right.internal_energy);
+		Conserved3D Ul(left.density, left.density*left.velocity, left.density*(left.internal_energy + ScalarProd(left.velocity, left.velocity)*0.5), left.internal_energy),
+			Ur(right.density, right.density*right.velocity, right.density*(right.internal_energy + ScalarProd(right.velocity, right.velocity)*0.5), right.internal_energy);
 		Conserved3D Fl(left.density*left.velocity.x, Vector3D(left.density*left.velocity.x*left.velocity.x + left.pressure, left.density*left.velocity.x*left.velocity.y,
-			left.density*left.velocity.x*left.velocity.z), (Ul.energy + left.pressure)*left.velocity.x,0),
+			left.density*left.velocity.x*left.velocity.z), (Ul.energy + left.pressure)*left.velocity.x, 0),
 			Fr(right.density*right.velocity.x, Vector3D(right.density*right.velocity.x*right.velocity.x + right.pressure, right.density*right.velocity.x*right.velocity.y,
-				right.density*right.velocity.x*right.velocity.z), (Ur.energy + right.pressure)*right.velocity.x,0);
+				right.density*right.velocity.x*right.velocity.z), (Ur.energy + right.pressure)*right.velocity.x, 0);
 		Conserved3D Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
-		return std::pair<double, double>(eos.de2p(Ull.mass, Ull.energy - ScalarProd(Ull.momentum,Ull.momentum)*0.5 / Ull.mass), Ull.momentum.x / Ull.mass);
+		return std::pair<double, double>(eos.de2p(Ull.mass, Ull.energy - ScalarProd(Ull.momentum, Ull.momentum)*0.5 / Ull.mass), Ull.momentum.x / Ull.mass);
 	}
 
 	class WaveSpeeds
@@ -47,16 +72,41 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn,double pstar)
+		EquationOfState const &eos, TracerStickerNames const& tsn, double pstar)
 	{
+		double cl = 0, cr = 0;
 		const double dl = left.density;
 		const double pl = left.pressure;
 		const double vl = left.velocity.x;
-		const double cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in LagHLLC3D left sound speed", 0);
+			throw eo;
+		}
+#endif
 		const double dr = right.density;
 		const double pr = right.pressure;
 		const double vr = right.velocity.x;
-		const double cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in LagHLLC3D right sound speed", 0);
+			throw eo;
+		}
+#endif
 		const double sl = vl - cl * (pstar > pl ? std::sqrt(pstar / pl) : 1);
 		const double sr = vr + cr * (pstar > pr ? std::sqrt(pstar / pr) : 1);
 		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
@@ -96,14 +146,14 @@ namespace
 		const double uk = state.velocity.x;
 		const double vk = state.velocity.y;
 		const double wk = state.velocity.z;
-		const double ds = dk*(sk - uk) / (sk - ss);
+		const double ds = dk * (sk - uk) / (sk - ss);
 		const double ek = TotalEnergyDensity3D(state);
 		Conserved3D res;
 		res.mass = ds;
-		res.momentum.x = ds*ss;
-		res.momentum.y = ds*vk;
-		res.momentum.z = ds*wk;
-		res.energy = ek*ds / dk + ds*(ss - uk)*(ss + pk / dk / (sk - uk));
+		res.momentum.x = ds * ss;
+		res.momentum.y = ds * vk;
+		res.momentum.z = ds * wk;
+		res.energy = ek * ds / dk + ds * (ss - uk)*(ss + pk / dk / (sk - uk));
 		res.internal_energy = 0;
 		return res;
 	}
@@ -126,12 +176,12 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	ComputationalCell3D local_left = left;
 	ComputationalCell3D local_right = right;
 
-	local_left.velocity.x -= velocity*normaldir.x;
-	local_left.velocity.y -= velocity*normaldir.y;
-	local_left.velocity.z -= velocity*normaldir.z;
-	local_right.velocity.x -= velocity*normaldir.x;
-	local_right.velocity.y -= velocity*normaldir.y;
-	local_right.velocity.z -= velocity*normaldir.z;
+	local_left.velocity.x -= velocity * normaldir.x;
+	local_left.velocity.y -= velocity * normaldir.y;
+	local_left.velocity.z -= velocity * normaldir.z;
+	local_right.velocity.x -= velocity * normaldir.x;
+	local_right.velocity.y -= velocity * normaldir.y;
+	local_right.velocity.z -= velocity * normaldir.z;
 
 	double par_left = fastabs(local_left.velocity - ScalarProd(local_left.velocity, normaldir)*normaldir);
 	double par_right = fastabs(local_right.velocity - ScalarProd(local_right.velocity, normaldir)*normaldir);
@@ -144,8 +194,8 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	Conserved3D f_gr;
 	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos);
 	assert(p_u_star.first > 0);
-	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right,eos,tsn,p_u_star.first);
-	ws2 = estimate_wave_speeds(local_left, local_right,eos,tsn, ws2.ps);
+	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, p_u_star.first);
+	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
 
 	if (!massflux_)
 	{
@@ -181,9 +231,9 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
 	if (f_gr.mass > 0)
-		f_gr.momentum += (left.velocity - normaldir*ScalarProd(left.velocity, normaldir))*f_gr.mass;
+		f_gr.momentum += (left.velocity - normaldir * ScalarProd(left.velocity, normaldir))*f_gr.mass;
 	else
-		f_gr.momentum += (right.velocity - normaldir*ScalarProd(right.velocity, normaldir))*f_gr.mass;
+		f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir))*f_gr.mass;
 	f_gr.internal_energy = 0;
 	return f_gr;
 }

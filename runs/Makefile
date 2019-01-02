@@ -75,6 +75,9 @@ else
 	OPTIMIZATION_FLAGS := -O3 -std=c++11
 	LFLAGS := -lclipper -lr3d
 endif
+ifeq ($(DEBUG),on)
+	OPTIMIZATION_FLAGS += -DRICH_DEBUG
+endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
 $(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe

@@ -1,6 +1,6 @@
 #include "Hllc3D_SR.hpp"
 
-Hllc3D_SR::Hllc3D_SR() : local_left_(ComputationalCell3D()),local_right_(ComputationalCell3D())
+Hllc3D_SR::Hllc3D_SR() : local_left_(ComputationalCell3D()), local_right_(ComputationalCell3D())
 {}
 
 
@@ -9,7 +9,7 @@ Hllc3D_SR::~Hllc3D_SR()
 
 using namespace std;
 
-namespace 
+namespace
 {
 	class WaveSpeeds
 	{
@@ -30,16 +30,41 @@ namespace
 
 namespace
 {
-	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right, 
-		EquationOfState const& eos,TracerStickerNames const& tsn, double &pstar)
+	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
+		EquationOfState const& eos, TracerStickerNames const& tsn, double &pstar)
 	{
-		double cl = eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names);
-		const double sig_left = cl*cl*(1 - ScalarProd(left.velocity, left.velocity)) / (1 - cl*cl);
+		double cl = 0, cr = 0;
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cl = eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in HLLC3D_SR left sound speed", 0);
+			throw eo;
+		}
+#endif
+		const double sig_left = cl * cl*(1 - ScalarProd(left.velocity, left.velocity)) / (1 - cl * cl);
 		double disct = std::sqrt(sig_left*(1 - left.velocity.x*left.velocity.x + sig_left));
 		const double lamda_minus_left = (left.velocity.x - disct) / (1 + sig_left);
 		const double lamda_plus_left = (left.velocity.x + disct) / (1 + sig_left);
-		double cr = eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names);
-		const double sig_right = cr*cr*(1 - ScalarProd(right.velocity, right.velocity)) / (1 - cr*cr);
+#ifdef RICH_DEBUG
+		try
+		{
+#endif
+			cr = eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names);
+#ifdef RICH_DEBUG
+		}
+		catch (UniversalError &eo)
+		{
+			eo.AddEntry("Error in HLLC3D_SR right sound speed", 0);
+			throw eo;
+		}
+#endif
+		const double sig_right = cr * cr*(1 - ScalarProd(right.velocity, right.velocity)) / (1 - cr * cr);
 		disct = std::sqrt(sig_right*(1 - right.velocity.x*right.velocity.x + sig_right));
 		const double lamda_minus_right = (right.velocity.x - disct) / (1 + sig_right);
 		const double lamda_plus_right = (right.velocity.x + disct) / (1 + sig_right);
@@ -113,7 +138,7 @@ namespace
 		//const double my = (state.density*(state.internal_energy + 1)*state.velocity.y*g_2*(lambda - state.velocity.x))*dlambda_1;
 		//const double mz = (state.density*(state.internal_energy + 1)*state.velocity.z*g_2*(lambda - state.velocity.x))*dlambda_1;
 		const double E = ((state.density*(state.internal_energy + 1)*g_2 - state.pressure)*(lambda - state.velocity.x) + pstar * lambda_star - state.pressure*state.velocity.x)*dlambda_1;
-		Conserved3D res(d*(lambda_star - edge_vel), Vector3D(mx*(lambda_star - edge_vel) + pstar,0,0), (lambda_star - edge_vel)*(E - d) + pstar * lambda_star,0);
+		Conserved3D res(d*(lambda_star - edge_vel), Vector3D(mx*(lambda_star - edge_vel) + pstar, 0, 0), (lambda_star - edge_vel)*(E - d) + pstar * lambda_star, 0);
 		return res;
 	}
 }
@@ -132,7 +157,7 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 	local_right_.velocity.y = par_right;
 	local_right_.velocity.z = 0;
 	double pstar = 0;
-	WaveSpeeds ws = estimate_wave_speeds(local_left_, local_right_,eos,tsn, pstar);
+	WaveSpeeds ws = estimate_wave_speeds(local_left_, local_right_, eos, tsn, pstar);
 
 	Conserved3D f_gr;
 	if (ws.left > velocity)
@@ -148,7 +173,7 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 
 	f_gr.momentum = f_gr.momentum.x * normaldir;
 	if (ws.center >= velocity)
-		f_gr.momentum += (left.velocity - normaldir * ScalarProd(left.velocity, normaldir))*f_gr.mass*(left.internal_energy+1)*std::sqrt(1.0/(1-ScalarProd(left.velocity,left.velocity)));
+		f_gr.momentum += (left.velocity - normaldir * ScalarProd(left.velocity, normaldir))*f_gr.mass*(left.internal_energy + 1)*std::sqrt(1.0 / (1 - ScalarProd(left.velocity, left.velocity)));
 	else
 		f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir))*f_gr.mass*(right.internal_energy + 1)*std::sqrt(1.0 / (1 - ScalarProd(right.velocity, right.velocity)));
 	return f_gr;

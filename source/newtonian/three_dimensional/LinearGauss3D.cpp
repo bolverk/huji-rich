@@ -59,7 +59,7 @@ namespace
 		Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<ComputationalCell3D> const& neighbors,
 		vector<Vector3D> const& neighbor_centers,
 		vector<Vector3D> const& neigh_cm, Tessellation3D const& tess,
-		Slope3D &res, Slope3D &temp, size_t /*index*/,face_vec const& faces,
+		Slope3D &res, Slope3D &temp, size_t /*index*/, face_vec const& faces,
 		std::vector<Vector3D> c_ij)
 	{
 		size_t n = neighbor_centers.size();
@@ -419,7 +419,7 @@ namespace
 		{
 			ComputationalCell3D const& cell_temp = neighbors[i];
 			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
-				tracerstickernames.sticker_names.end(),skip_key))
+				tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -444,8 +444,8 @@ namespace
 		vector<double> psi(6 + cell.tracers.size(), 1);
 		for (size_t i = 0; i < N; ++i)
 		{
-			if (!skip_key.empty() && *safe_retrieve(neighbors[i].stickers.begin(), 
-				tracerstickernames.sticker_names.begin(),tracerstickernames.sticker_names.end(), skip_key))
+			if (!skip_key.empty() && *safe_retrieve(neighbors[i].stickers.begin(),
+				tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), skip_key))
 				continue;
 			ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[i]), cm, eos, tracerstickernames, false);
 			ComputationalCell3D dphi = centroid_val - cell;
@@ -541,9 +541,9 @@ namespace
 	{
 		size_t Nneigh = neigh_cm.size();
 		ComputationalCell3D PhiSy, PhiSx, PhiSz;
-//		PhiSy.tracers.resize(cell.tracers.size(), 0);
-	//	PhiSx.tracers.resize(cell.tracers.size(), 0);
-		//PhiSz.tracers.resize(cell.tracers.size(), 0);
+		//		PhiSy.tracers.resize(cell.tracers.size(), 0);
+			//	PhiSx.tracers.resize(cell.tracers.size(), 0);
+				//PhiSz.tracers.resize(cell.tracers.size(), 0);
 		double SxSy(0), Sy2(0), Sx2(0), SxSz(0), Sz2(0), SzSy(0);
 		for (size_t i = 0; i < Nneigh; ++i)
 		{
@@ -613,17 +613,30 @@ namespace
 
 		if (slf)
 		{
-			if (!is_shock(res, tess.GetWidth(cell_index), shockratio, cell, neighbor_list, pressure_ratio,
-				eos.dp2c(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names)))
+#ifdef RICH_DEBUG
+			try
 			{
-				slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, temp2, temp3, temp4, temp5,
-					tracerstickernames, skip_key, tess, cell_index, faces, eos);
+#endif
+				if (!is_shock(res, tess.GetWidth(cell_index), shockratio, cell, neighbor_list, pressure_ratio,
+					eos.dp2c(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names)))
+				{
+					slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, temp2, temp3, temp4, temp5,
+						tracerstickernames, skip_key, tess, cell_index, faces, eos);
+				}
+				else
+				{
+					shocked_slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, diffusecoeff, tracerstickernames,
+						skip_key, tess, cell_index, faces, eos);
+				}
+#ifdef RICH_DEBUG
 			}
-			else
+			catch (UniversalError &eo)
 			{
-				shocked_slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, diffusecoeff, tracerstickernames,
-					skip_key, tess, cell_index, faces, eos);
+				eo.AddEntry("Error LinearGauss3D", 0);
+				eo.AddEntry("Cell number", cell_index);
+				throw eo;
 			}
+#endif
 		}
 	}
 

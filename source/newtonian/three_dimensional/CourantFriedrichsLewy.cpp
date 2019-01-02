@@ -30,8 +30,22 @@ namespace
 		double operator[](size_t i) const
 		{
 			double res = 0;
-			const double c = eos_.dp2c(cells_[i].density,cells_[i].pressure,cells_[i].tracers,
-				tracerstickernames_.tracer_names);
+			double c = 0;
+#ifdef RICH_DEBUG
+			try
+			{
+#endif
+				c = eos_.dp2c(cells_[i].density, cells_[i].pressure, cells_[i].tracers,
+					tracerstickernames_.tracer_names);
+#ifdef RICH_DEBUG
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Error in CFL", 0);
+				eo.AddEntry("Cell number", i);
+				throw eo;
+			}
+#endif
 			const Vector3D v = cells_.at(i).velocity;
 			face_vec const& faces = tess_.GetCellFaces(i);
 			size_t Nloop = faces.size();

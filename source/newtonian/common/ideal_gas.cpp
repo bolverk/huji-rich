@@ -2,66 +2,72 @@
 #include "ideal_gas.hpp"
 #include "../../misc/universal_error.hpp"
 
-IdealGas::IdealGas(double AdiabaticIndex):
-  g_(AdiabaticIndex) {}
+IdealGas::IdealGas(double AdiabaticIndex) :
+	g_(AdiabaticIndex) {}
 
 double IdealGas::getAdiabaticIndex(void) const
 {
-  return g_;
+	return g_;
 }
 
 double IdealGas::dp2e(double d, double p, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
-  return p/d/(g_-1);
+	return p / d / (g_ - 1);
 }
 
 double IdealGas::de2p(double d, double e, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
 	if (e < 0)
 		throw UniversalError("Negative thermal energy");
-  return (g_-1)*e*d;
+	return (g_ - 1)*e*d;
 }
 
 namespace {
-  /*
-  UniversalError imaginary_speed_of_sound(double g,
-					  double p,
-					  double d)
-  {
-    UniversalError res("Speed of sound came out imaginary");
-    res.AddEntry("adiabatic index",g);
-    res.AddEntry("density",d);
-    res.AddEntry("pressure",p);
-    return res;
-  }
-  */
+	/*
+	UniversalError imaginary_speed_of_sound(double g,
+						double p,
+						double d)
+	{
+	  UniversalError res("Speed of sound came out imaginary");
+	  res.AddEntry("adiabatic index",g);
+	  res.AddEntry("density",d);
+	  res.AddEntry("pressure",p);
+	  return res;
+	}
+	*/
 }
 
 double IdealGas::dp2c(double d, double p, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
-	if (g_ < 0 || p < 0 || d < 0)
+#ifdef RICH_DEBUG
+	if (!(g_ > 0) || !(p > 0) || !(d > 0))
 	{
 		UniversalError eo("Negative quantity in ideal gas");
 		eo.AddEntry("Density", d);
-		eo.AddEntry("Pressure",p);
+		eo.AddEntry("Pressure", p);
+		eo.AddEntry("Gamma index", g_);
 		throw eo;
 	}
-  return sqrt(g_*p/d);
+#endif RICH_DEBUG
+	assert(!(p < 0));
+	assert(!(d < 0));
+	assert(!(g_ < 0));
+	return sqrt(g_*p / d);
 }
 
 double IdealGas::de2c(double d, double e, tvector const& tracers, vector<string> const& tracernames) const
 {
-  double p = de2p(d, e, tracers,tracernames);
-  return sqrt(g_*p/d);
+	double p = de2p(d, e, tracers, tracernames);
+	return sqrt(g_*p / d);
 }
 
 double IdealGas::dp2s(double d, double p, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
-  return p*pow(d,-g_);
+	return p * pow(d, -g_);
 }
 
 double IdealGas::sd2p(double s, double d, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
-  assert(s>0 && d>0);
-  return s*pow(d,g_);
+	assert(s > 0 && d > 0);
+	return s * pow(d, g_);
 }

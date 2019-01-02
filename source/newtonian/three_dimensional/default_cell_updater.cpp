@@ -93,7 +93,7 @@ namespace
 					res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
 					res[i].internal_energy = energy;
 				}
-				if (res[i].density < 0 || res[i].pressure < 0)
+				if (!(res[i].density > 0) || !(res[i].pressure > 0))
 				{
 					UniversalError eo("Negative quantity in cell update");
 					eo.AddEntry("Cell index", static_cast<double>(i));
@@ -171,7 +171,7 @@ namespace
 						extensives[i].tracers[entropy_index] = new_entropy * extensives[i].mass;
 					}
 				}
-				if (res[i].density < 0 || res[i].pressure < 0)
+				if (!(res[i].density > 0) || !(res[i].pressure > 0))
 				{
 					UniversalError eo("Negative quantity in cell update");
 					eo.AddEntry("Cell index", static_cast<double>(i));
