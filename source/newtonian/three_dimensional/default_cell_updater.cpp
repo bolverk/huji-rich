@@ -193,8 +193,12 @@ namespace
 				eo.AddEntry("Cell mass", extensives[i].mass);
 				eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
 				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-				eo.AddEntry("Cell zy momentum", extensives[i].momentum.z);
+				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
 				eo.AddEntry("Cell energy", extensives[i].energy);
+				eo.AddEntry("Number of tracers", Ntracers);
+				for (size_t j = 0; j < Ntracers; ++j)
+					eo.AddEntry("Tracer extensive value", extensives[i].tracers[j]);
+				eo.AddEntry("Entropy index", entropy_index);
 				throw;
 			}
 		}
