@@ -19,9 +19,37 @@ namespace
 		{
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
 				(face, tess, cells, tracerstickernames);
-			if (flag_aux.first)
-				return (*sequence[i].second)
-				(face, tess, face_velocity, cells, eos, flag_aux.second, res, time, tracerstickernames,face_values);
+#ifdef RICH_DEBUG
+			try
+			{
+#endif
+				if (flag_aux.first)
+					return (*sequence[i].second)
+					(face, tess, face_velocity, cells, eos, flag_aux.second, res, time, tracerstickernames, face_values);
+#ifdef RICH_DEBUG
+			}
+			catch (UniversalError &eo)
+			{
+				eo.AddEntry("Face number", face);
+				size_t n0 = tess.GetFaceNeighbors(face).first;
+				size_t n1 = tess.GetFaceNeighbors(face).second;
+				eo.AddEntry("Left cell density", cells[n0].density);
+				eo.AddEntry("Left cell pressure", cells[n0].pressure);
+				eo.AddEntry("Left cell Vx", cells[n0].velocity.x);
+				eo.AddEntry("Left cell Vy", cells[n0].velocity.y);
+				eo.AddEntry("Left cell Vz", cells[n0].velocity.z);
+				eo.AddEntry("Left cell internal energy", cells[n0].internal_energy);
+				eo.AddEntry("Left cell ID", cells[n0].ID);
+				eo.AddEntry("Right cell density", cells[n1].density);
+				eo.AddEntry("Right cell pressure", cells[n1].pressure);
+				eo.AddEntry("Right cell Vx", cells[n1].velocity.x);
+				eo.AddEntry("Right cell Vy", cells[n1].velocity.y);
+				eo.AddEntry("Right cell Vz", cells[n1].velocity.z);
+				eo.AddEntry("Right cell internal energy", cells[n1].internal_energy);
+				eo.AddEntry("Right cell ID", cells[n1].ID);
+				throw eo;
+			}
+#endif
 		}
 		throw UniversalError("Error in ConditionActionFlux1");
 	}

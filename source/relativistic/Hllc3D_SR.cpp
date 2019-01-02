@@ -176,5 +176,46 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 		f_gr.momentum += (left.velocity - normaldir * ScalarProd(left.velocity, normaldir))*f_gr.mass*(left.internal_energy + 1)*std::sqrt(1.0 / (1 - ScalarProd(left.velocity, left.velocity)));
 	else
 		f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir))*f_gr.mass*(right.internal_energy + 1)*std::sqrt(1.0 / (1 - ScalarProd(right.velocity, right.velocity)));
+#ifdef RICH_DEBUG
+	bool good = true;
+	if (!std::isfinite(f_gr.energy))
+		good = false;
+	if (!std::isfinite(f_gr.internal_energy))
+		good = false;
+	if (!std::isfinite(f_gr.momentum.x))
+		good = false;
+	if (!std::isfinite(f_gr.momentum.y))
+		good = false;
+	if (!std::isfinite(f_gr.momentum.z))
+		good = false;
+	if (!std::isfinite(f_gr.mass))
+		good = false;
+	if (!good)
+	{
+		UniversalError eo("Bad flux");
+		eo.AddEntry("Energy flux", f_gr.energy);
+		eo.AddEntry("Internal Energy flux", f_gr.internal_energy);
+		eo.AddEntry("Mass flux", f_gr.mass);
+		eo.AddEntry("Momentum x flux", f_gr.momentum.x);
+		eo.AddEntry("Momentum y flux", f_gr.momentum.y);
+		eo.AddEntry("Momentum z flux", f_gr.momentum.z);
+		eo.AddEntry("Left cell density", left.density);
+		eo.AddEntry("Left cell pressure", left.pressure);
+		eo.AddEntry("Left cell Vx", left.velocity.x);
+		eo.AddEntry("Left cell Vy", left.velocity.y);
+		eo.AddEntry("Left cell Vz", left.velocity.z);
+		eo.AddEntry("Left cell internal energy", left.internal_energy);
+		eo.AddEntry("Left cell ID", left.ID);
+		eo.AddEntry("Right cell density", right.density);
+		eo.AddEntry("Right cell pressure", right.pressure);
+		eo.AddEntry("Right cell Vx", right.velocity.x);
+		eo.AddEntry("Right cell Vy", right.velocity.y);
+		eo.AddEntry("Right cell Vz", right.velocity.z);
+		eo.AddEntry("Right cell internal energy", right.internal_energy);
+		eo.AddEntry("Right cell ID", right.ID);
+		throw eo;
+	}
+#endif
+
 	return f_gr;
 }
