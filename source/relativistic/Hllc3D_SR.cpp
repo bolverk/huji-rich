@@ -213,6 +213,7 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 		eo.AddEntry("Right cell Vz", right.velocity.z);
 		eo.AddEntry("Right cell internal energy", right.internal_energy);
 		eo.AddEntry("Right cell ID", right.ID);
+		eo.AddEntry("Face velocity", velocity);
 		throw eo;
 	}
 #endif
