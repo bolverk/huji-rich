@@ -167,7 +167,7 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 	else if (ws.center < velocity &&ws.right >= velocity)
 		f_gr = starred_flux(local_right_, ws.center, ws.right, velocity, pstar);
 	else if (ws.right < velocity)
-		f_gr = SR_Primitive2Flux(right, velocity);
+		f_gr = SR_Primitive2Flux(local_right_, velocity);
 	else
 		throw invalid_wave_speeds(local_left_, local_right_, velocity, ws.left, ws.center, ws.right);
 
