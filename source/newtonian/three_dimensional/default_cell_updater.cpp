@@ -186,6 +186,7 @@ namespace
 			}
 			catch (UniversalError &eo)
 			{
+				eo.AddEntry("Cell ID", res[i].ID);
 				eo.AddEntry("Cell volume", tess.GetVolume(i));
 				eo.AddEntry("Cell index", static_cast<double>(i));
 				eo.AddEntry("Cell mass", extensives[i].mass);
