@@ -14,6 +14,7 @@ class PCM3D : public SpatialReconstruction3D
 {
 private:
 	Ghost3D const & ghost_;
+	std::vector<Slope3D> slopes_;
 public:
 	/*! \brief Class constructor
 	\param ghost The ghost point generator
@@ -22,6 +23,10 @@ public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const;
+
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames);
+
+	std::vector<Slope3D>& GetSlopes(void);
 };
 
 #endif // PCM3D_HPP

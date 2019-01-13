@@ -1,6 +1,6 @@
 #include "PCM3D.hpp"
 
-PCM3D::PCM3D(Ghost3D const& ghost) :ghost_(ghost) {}
+PCM3D::PCM3D(Ghost3D const& ghost) :ghost_(ghost),slopes_(std::vector<Slope3D>()) {}
 
 void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const
@@ -30,4 +30,15 @@ void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCel
 			else
 				res[i].second = ghosts.at(n1);
 	}
+}
+
+void PCM3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& /*cells*/, double /*time*/, TracerStickerNames const& /*tracerstickersnames*/) 
+{
+	slopes_.resize(tess.GetTotalPointNumber());
+	return;
+}
+
+std::vector<Slope3D>& PCM3D::GetSlopes(void)
+{
+	return slopes_;
 }

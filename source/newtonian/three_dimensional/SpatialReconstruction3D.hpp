@@ -29,6 +29,14 @@ public:
 		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res,TracerStickerNames const& tracerstickersnames) const = 0;
 
 	virtual ~SpatialReconstruction3D(void);
+
+	virtual void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,double time, TracerStickerNames const& tracerstickersnames) = 0;
+
+	/*!
+	\brief Returns the gradients
+	\return The gradients
+	*/
+	virtual std::vector<Slope3D>& GetSlopes(void)=0;
 };
 
 #endif // SPATIAL_RECONSTRUCTION3D_HPP

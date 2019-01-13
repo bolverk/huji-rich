@@ -433,7 +433,7 @@ namespace
 
 	void LocalRemove(Tessellation3D const& oldtess, std::vector<size_t> const& ToRemove, AMRExtensiveUpdater3D const& eu,
 		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
-		Tessellation3D const& tess, std::vector<Conserved3D> &extensives)
+		Tessellation3D const& tess, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		std::vector<size_t> neigh,temp2;
 		point_vec temp;
@@ -465,9 +465,9 @@ namespace
 
 					size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j])
 						- ToRemove.begin());
-					std::pair<bool, double> dv = PolyhedraIntersection(tess, neigh[j] - index_remove, poly2);
-					extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second,
-						tsn);
+					std::pair<bool, std::array<double,4> > dv = PolyhedraIntersection(tess, neigh[j] - index_remove, poly2);
+					extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
+						oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 				}
 			}
 		}
@@ -476,7 +476,7 @@ namespace
 #ifdef RICH_MPI
 	void MPIRemove(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRemove,
 		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, TracerStickerNames const& tsn,
-		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives)
+		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		vector<vector<size_t> > nghost_index;
 		vector<vector<vector<size_t> > > duplicate_index;
@@ -521,9 +521,10 @@ namespace
 								poly2.verts[kk].pnbrs[l] = poly.verts[kk].pnbrs[l];
 							}
 						}
-						std::pair<bool, double> dv = PolyhedraIntersection(oldtess, 0, poly2, &planes);
+						std::pair<bool, std::array<double,4> > dv = PolyhedraIntersection(oldtess, 0, poly2, &planes);
 						extensives[duplicate_index[i][j][k] - index_remove] += eu.ConvertPrimitveToExtensive3D(
-							cells[nghost_index[i][j]], eos, dv.second, tsn);
+							cells[nghost_index[i][j]], eos, dv.second[0], tsn,interp.GetSlopes()[nghost_index[i][j]],oldtess.GetCellCM(nghost_index[i][j]),
+							Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 					}
 				}
 			}
@@ -533,7 +534,7 @@ namespace
 
 	void LocalRefine(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRefine,
 		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
-		AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives)
+		AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		size_t Nrefine = ToRefine.size();
 		std::vector<size_t> neigh, temp2;
@@ -578,11 +579,12 @@ namespace
 						}
 					}
 					// Check intersectrion
-					std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly2);
+					std::pair<bool, std::array<double, 4> > dv = PolyhedraIntersection(oldtess, cur_check, poly2);
 					if (dv.first)
 					{
 						// Remove extensive from neigh cell and add to new cell
-						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
+						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
+							oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 						extensives[cur_check] -= toadd;
 						//extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
 						extensives[Norg2 + i] += toadd;
@@ -595,7 +597,8 @@ namespace
 			}
 			else
 			{
-				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg + i), tsn);
+				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg + i), tsn, interp.GetSlopes()[0], 
+					Vector3D(), Vector3D());
 				extensives[ToRefine[i]] -= extensives[Norg2 + i];
 				std::cout << "Warning no good poly localrefine" << std::endl;
 			}
@@ -605,7 +608,7 @@ namespace
 #ifdef RICH_MPI
 	void MPIRefine(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRefine,
 		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, TracerStickerNames const& tsn,
-		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives)
+		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		std::vector<size_t> temp, temp2;
 		point_vec ptemp;
@@ -646,8 +649,6 @@ namespace
 		for (size_t i = 0; i < Nprocs; ++i)
 		{
 			extensive_tosend[i].resize(neigh_index[i].size());
-			//for (size_t j = 0; j < extensive_tosend[i].size(); ++j)
-			//	extensive_tosend[i][j].tracers.resize(extensives[0].tracers.size(), 0);
 			size_t counter = 0;
 			for (size_t j = 0; j < neigh_index[i].size(); ++j)
 			{
@@ -678,11 +679,12 @@ namespace
 						continue;
 					if (GetPoly(oldtess, cur_check, poly, ptemp, temp2, i_temp))
 					{
-						std::pair<bool, double> dv = PolyhedraIntersection(oldtess, cur_check, poly, &r_planes);
+						std::pair<bool, std::array<double,4> > dv = PolyhedraIntersection(oldtess, cur_check, poly, &r_planes);
 						if (dv.first)
 						{
 							// add and remove the extensive
-							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second, tsn);
+							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
+								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 							extensives[cur_check] -= toadd;
 							extensive_tosend[i][j] += toadd;
 							oldtess.GetNeighbors(cur_check, temp);
@@ -716,39 +718,53 @@ AMRCellUpdater3D::~AMRCellUpdater3D(void) {}
 
 AMRExtensiveUpdater3D::~AMRExtensiveUpdater3D(void) {}
 
-Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& /*eos*/,
-	double volume, TracerStickerNames const& /*tracerstickernames*/) const
+Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
 {
 	Conserved3D res;
-	const double mass = volume*cell.density;
+	Vector3D diff(CMnew);
+	diff -= CMold;
+	ComputationalCell3D cell_temp(cell);
+	ComputationalCellAddMult(cell_temp, slope.xderivative, diff.x);
+	ComputationalCellAddMult(cell_temp, slope.yderivative, diff.y);
+	ComputationalCellAddMult(cell_temp, slope.zderivative, diff.z);
+	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, tracerstickernames.tracer_names);
+	const double mass = volume* cell_temp.density;
 	res.mass = mass;
-	res.internal_energy = cell.internal_energy*mass;
-	res.energy = res.internal_energy + 0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-	res.momentum = mass*cell.velocity;
-	size_t N = cell.tracers.size();
+	res.internal_energy = cell_temp.internal_energy*mass;
+	res.energy = res.internal_energy + 0.5*mass*ScalarProd(cell_temp.velocity, cell_temp.velocity);
+	res.momentum = mass* cell_temp.velocity;
+	size_t N = cell_temp.tracers.size();
 	//res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
-		res.tracers[i] = cell.tracers[i] * mass;
+		res.tracers[i] = cell_temp.tracers[i] * mass;
 	return res;
 }
 
 Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& tracerstickernames) const
+	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
 {
 	Conserved3D res;
-	double gamma = 1.0 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
-	const double mass = volume * cell.density*gamma;
+	Vector3D diff(CMnew);
+	diff -= CMold;
+	ComputationalCell3D cell_temp(cell);
+	ComputationalCellAddMult(cell_temp, slope.xderivative, diff.x);
+	ComputationalCellAddMult(cell_temp, slope.yderivative, diff.y);
+	ComputationalCellAddMult(cell_temp, slope.zderivative, diff.z);
+	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, tracerstickernames.tracer_names);
+	double gamma = 1.0 / std::sqrt(1 - ScalarProd(cell_temp.velocity, cell_temp.velocity));
+	const double mass = volume * cell_temp.density*gamma;
 	res.mass = mass;
-	size_t N = cell.tracers.size();
+	size_t N = cell_temp.tracers.size();
 	//res.tracers.resize(N);
 	for (size_t i = 0; i < N; ++i)
-		res.tracers[i] = cell.tracers[i] * mass;
-	double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names);
-	if (fastabs(cell.velocity) < 1e-5)
-		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
+		res.tracers[i] = cell_temp.tracers[i] * mass;
+	double enthalpy = cell_temp.internal_energy;
+	if (fastabs(cell_temp.velocity) < 1e-5)
+		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell_temp.velocity, cell_temp.velocity))* mass - cell_temp.pressure*volume;
 	else
-		res.energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
-	res.momentum = mass * cell.velocity *gamma*(enthalpy + 1);
+		res.energy = (gamma*enthalpy + (gamma - 1))* mass - cell_temp.pressure*volume;
+	res.momentum = mass * cell_temp.velocity *gamma*(enthalpy + 1);
 	return res;
 }
 
@@ -763,8 +779,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 			tracerstickernames.sticker_names.end(), toskip_[i]))
 			return old_cell;
 	}
-//		if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
-	//		return old_cell;
+
 	ComputationalCell3D res;
 	const double vol_inv = 1.0 / volume;
 	res.density = extensive.mass*vol_inv;
@@ -828,8 +843,8 @@ CellsToRemove3D::~CellsToRemove3D(void) {}
 
 CellsToRefine3D::~CellsToRefine3D(void) {}
 
-AMR3D::AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove, AMRCellUpdater3D* cu,
-	AMRExtensiveUpdater3D* eu) :eos_(eos), refine_(refine), remove_(remove), scu_(SimpleAMRCellUpdater3D()),
+AMR3D::AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu,
+	AMRExtensiveUpdater3D* eu) :eos_(eos), refine_(refine), remove_(remove),interp_(interp), scu_(SimpleAMRCellUpdater3D()),
 	seu_(SimpleAMRExtensiveUpdater3D()), cu_(cu), eu_(eu)
 {
 	if (!cu)
@@ -874,6 +889,7 @@ void AMR3D::operator() (HDSim3D &sim)
 #endif
 	if (ntotal == 0)
 		return;
+	interp_.BuildSlopes(tess, cells, time, tsn);
 	// Get new points from refine
 	std::vector<Vector3D> new_points = GetNewPoints(tess, ToRefine
 #ifdef RICH_MPI
@@ -895,17 +911,17 @@ void AMR3D::operator() (HDSim3D &sim)
 #endif
 	// Fix extensives for refine
 	extensives.resize(oldtess->GetPointNo() + ToRefine.first.size());
-	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, tsn, *eu_, extensives);
+	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, tsn, *eu_, extensives,interp_);
 #ifdef RICH_MPI
-	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, tsn, cells, extensives);
+	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, tsn, cells, extensives,interp_);
 #endif
 	// Remove from extensive the remove cells
 	RemoveVector(extensives, ToRemove.first);
 	// Add the removed extensive to the neighboring cells
-	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tsn, tess, extensives);
+	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tsn, tess, extensives,interp_);
 
 #ifdef RICH_MPI
-	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, tsn, cells, extensives);
+	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, tsn, cells, extensives,interp_);
 #endif
 	// Recalc cells
 	RemoveVector(cells, ToRemove.first);

@@ -1,6 +1,7 @@
 #include "Intersection3D.hpp"
 #include <algorithm>
 #include "../../misc/utils.hpp"
+#include <array>
 
 namespace
 {
@@ -386,7 +387,7 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, poi
 	return true;
 }
 
-std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & newtess, size_t newcell, r3d_poly &poly,
+std::pair<bool, std::array<double,4> > PolyhedraIntersection(Tessellation3D const & newtess, size_t newcell, r3d_poly &poly,
 	vector<r3d_plane> *planes)
 {
 	bool allocated = false;
@@ -397,17 +398,20 @@ std::pair<bool, double> PolyhedraIntersection(Tessellation3D const & newtess, si
 		GetPlanes(*planes, newtess, newcell);
 	}
 	r3d_clip(&poly, &(planes->at(0)), static_cast<int>(planes->size()));
-	std::pair<bool, double> res(false, 0);
+	std::pair<bool, std::array<double, 4> > res;
 	if (poly.nverts == 0)
 		res.first = false;
 	else
 	{
 		res.first = true;
-		// calc volume of intersection
-		double m[1];
+		// calc volume of intersection and it's CM
+		std::array<double, 4> m;
 		m[0] = 0;
-		r3d_reduce(&poly, m, 0);
-		res.second = std::abs(m[0]);
+		r3d_reduce(&poly, &m[0], 1);
+		m[0] = std::abs(m[0]);
+		for (size_t j = 1; j < 4; ++j)
+			m[j] /= m[0];
+		res.second = m;
 	}
 	if (allocated)
 		delete planes;

@@ -52,13 +52,15 @@ public:
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	vector<Slope3D>& GetSlopes(void)const;
+	vector<Slope3D>& GetSlopes(void);
 
 	/*!
 	\brief Returns the unsloped limtied gradients
 	\return The gradients
 	*/
 	vector<Slope3D>& GetSlopesUnlimited(void)const;
+
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames);
 
 private:
 	EquationOfState const& eos_;

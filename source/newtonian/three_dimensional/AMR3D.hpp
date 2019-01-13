@@ -47,7 +47,7 @@ public:
 	\return Extensive
 	*/
 	virtual Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames) const = 0;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope,Vector3D const& CMold,Vector3D const& CMnew) const = 0;
 
 	//! \brief Class destructor
 	virtual ~AMRExtensiveUpdater3D(void);
@@ -60,7 +60,7 @@ public:
 	SimpleAMRExtensiveUpdater3D(void);
 
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames) const;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -84,7 +84,7 @@ class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames) const;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
 };
 
 //! \brief Simple class for cell update scheme in amr for SR
@@ -153,6 +153,7 @@ private:
 	CellsToRemove3D  const& remove_;
 	SimpleAMRCellUpdater3D scu_;
 	SimpleAMRExtensiveUpdater3D seu_;
+	SpatialReconstruction3D &interp_;
 	AMRCellUpdater3D* cu_;
 	AMRExtensiveUpdater3D* eu_;
 	AMR3D(AMR3D const& amr);
@@ -172,7 +173,7 @@ public:
 	\param eu Extensive updater
 	\param eos Equation of state
 	*/
-	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove, AMRCellUpdater3D* cu = 0,
+	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = 0,
 		AMRExtensiveUpdater3D* eu = 0);
 	//! Class destructor
 	~AMR3D();

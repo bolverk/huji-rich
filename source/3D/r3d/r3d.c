@@ -158,9 +158,9 @@ void r3d_reduce(r3d_poly* poly, r3d_real* moments, r3d_int polyorder) {
 	// Note: Uses twice as much space as needed, but indexing is faster this way
 	r3d_int prevlayer = 0;
 	r3d_int curlayer = 1;
-	r3d_real S[1][1][2];
-	r3d_real D[1][1][2];
-	r3d_real C[1][1][2];
+	r3d_real S[1 + 1][1 + 1][2];
+	r3d_real D[1 + 1][1 + 1][2];
+	r3d_real C[1 + 1][1 + 1][2];
 
 	// loop over all vertices to find the starting point for each face
 	for(vstart = 0; vstart < *nverts; ++vstart)

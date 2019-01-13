@@ -601,7 +601,7 @@ namespace
 
 		naive_slope_ = res;
 
-		for (size_t i = 0; i < res.xderivative.tracers.size(); ++i)
+		for (size_t i = 0; i < tracerstickernames.tracer_names.size(); ++i)
 		{
 			if (std::find(calc_tracers.begin(), calc_tracers.end(), tracerstickernames.tracer_names[i]) == calc_tracers.end())
 			{
@@ -675,6 +675,51 @@ LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames cons
 	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
 	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
 	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_() {}
+
+void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) 
+{
+	const size_t CellNumber = tess.GetPointNo();
+	// Get ghost points
+	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
+	ghost_.operator()(tess, cells, time, tracerstickersnames, ghost_cells);
+	// Copy ghost data into new cells vector
+	vector<ComputationalCell3D> new_cells(cells);
+	new_cells.resize(tess.GetTotalPointNumber());
+	for (boost::container::flat_map<size_t, ComputationalCell3D>::const_iterator it = ghost_cells.begin(); it !=
+		ghost_cells.end(); ++it)
+		new_cells[it->first] = it->second;
+	if (SR_)
+	{
+		size_t Nall = new_cells.size();
+		for (size_t j = 0; j < Nall; ++j)
+		{
+			double gamma = 1.0 / std::sqrt(1 - ScalarProd(new_cells[j].velocity, new_cells[j].velocity));
+			new_cells[j].velocity *= gamma;
+		}
+	}
+	// Prepare slopes
+	rslopes_.resize(CellNumber, Slope3D(cells[0], cells[0], cells[0]));
+	naive_rslopes_.resize(CellNumber);
+	Slope3D temp1(cells[0], cells[0], cells[0]);
+	ComputationalCell3D temp2(cells[0]);
+	ComputationalCell3D temp3(cells[0]);
+	ComputationalCell3D temp4(cells[0]);
+	ComputationalCell3D temp5(cells[0]);
+	vector<ComputationalCell3D> neighbor_list;
+	vector<Vector3D> neighbor_mesh_list;
+	vector<Vector3D> neighbor_cm_list;
+	std::vector<Vector3D> c_ij;
+	for (size_t i = 0; i < CellNumber; ++i)
+	{
+		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
+			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
+			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_, c_ij, neighbor_list);
+	}
+#ifdef RICH_MPI
+	// communicate ghost slopes
+	exchange_ghost_slopes(tess, rslopes_);
+#endif //RICH_MPI
+}
 
 void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const
@@ -871,7 +916,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 }
 
 
-vector<Slope3D>& LinearGauss3D::GetSlopes(void)const
+vector<Slope3D>& LinearGauss3D::GetSlopes(void)
 {
 	return rslopes_;
 }
