@@ -1,6 +1,8 @@
 #ifndef INTERSECTION3D_HPP
 #define INTERSECTION3D_HPP 1
 
+#include <array>
+
 #include "../GeometryCommon/Tessellation3D.hpp"
 
 
