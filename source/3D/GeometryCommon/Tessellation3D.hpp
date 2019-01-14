@@ -251,6 +251,8 @@ public:
 	virtual bool IsPointOutsideBox(size_t index)const = 0;
 
 	virtual void output(std::string const& filename)const=0;
+
+	virtual void SetBox(Vector3D const& ll, Vector3D const& ur) = 0;
 };
 
 #endif // TESSELLATION3D_HPP

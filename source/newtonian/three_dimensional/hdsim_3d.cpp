@@ -16,6 +16,12 @@ const Tessellation3D& HDSim3D::getProcTesselation(void) const
 {
 	return tproc_;
 }
+
+Tessellation3D& HDSim3D::getProcTesselation(void)
+{
+	return tproc_;
+}
+
 #endif
 
 vector<ComputationalCell3D>& HDSim3D::getCells(void)

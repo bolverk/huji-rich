@@ -93,6 +93,8 @@ public:
   */
 #ifdef RICH_MPI
   const Tessellation3D& getProcTesselation(void) const;
+
+  Tessellation3D& getProcTesselation(void);
 #endif
 
   /*! \brief Access to computational cells
