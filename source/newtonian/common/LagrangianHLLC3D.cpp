@@ -1,4 +1,5 @@
 #include "LagrangianHLLC3D.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -197,10 +198,22 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, p_u_star.first);
 	double old_ps = ws2.ps;
 	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+	size_t counter = 0;
 	while (ws2.ps > 1.25 * old_ps || old_ps > 1.25 * ws2.ps)
 	{
 		old_ps = ws2.ps;
 		ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+		++counter;
+		if (counter > 14)
+		{
+			std::cout << "Too many iterations in HLLC" << std::endl;
+			std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z <<" velocity = "<<velocity<< std::endl;
+			std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
+				" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
+			std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.internal_energy << " vx = " << right.velocity.x <<
+				" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
+		}
+		assert(counter < 15);
 	}
 
 	if (!massflux_)
