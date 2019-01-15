@@ -54,10 +54,10 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 		if (lflux_.Lag_calc_[i])
 		{
 			double p_star = ScalarProd(fluxes[i].momentum, normal);
-			double v_star = fluxes[i].energy / p_star;
-			double v_new = (v_star - lflux_.ws_[i]);
 			if (p_star > 0)
 			{
+				double v_star = fluxes[i].energy / p_star;
+				double v_new = (v_star - lflux_.ws_[i]);
 				if (v_new*v_star > 0)
 				{
 					if (v_new > 0 && !tess.IsPointOutsideBox(n1) && p_star > 1.2*cells[n1].pressure)

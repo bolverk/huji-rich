@@ -223,29 +223,30 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 		f_gr.momentum.Set(ws2.ps, 0, 0);
 		f_gr.mass = 0;
 	}
-
-	Conserved3D ul, ur;
-	PrimitiveToConserved(local_left, 1, ul);
-	PrimitiveToConserved(local_right, 1, ur);
-
-	const Conserved3D fl = PrimitiveToFlux(local_left);
-	const Conserved3D fr = PrimitiveToFlux(local_right);
-
-	const Conserved3D usl = starred_state(local_left, ws2.left, ws2.center);
-	const Conserved3D usr = starred_state(local_right, ws2.right, ws2.center);
-
-
-	if (ws2.left > 0)
-		f_gr = fl;
-	else if (ws2.left <= 0 && ws2.center >= 0)
-		f_gr = fl + ws2.left*(usl - ul);
-	else if (ws2.center < 0 && ws2.right >= 0)
-		f_gr = fr + ws2.right*(usr - ur);
-	else if (ws2.right < 0)
-		f_gr = fr;
 	else
-		throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
+	{
+		Conserved3D ul, ur;
+		PrimitiveToConserved(local_left, 1, ul);
+		PrimitiveToConserved(local_right, 1, ur);
 
+		const Conserved3D fl = PrimitiveToFlux(local_left);
+		const Conserved3D fr = PrimitiveToFlux(local_right);
+
+		const Conserved3D usl = starred_state(local_left, ws2.left, ws2.center);
+		const Conserved3D usr = starred_state(local_right, ws2.right, ws2.center);
+
+
+		if (ws2.left > 0)
+			f_gr = fl;
+		else if (ws2.left <= 0 && ws2.center >= 0)
+			f_gr = fl + ws2.left*(usl - ul);
+		else if (ws2.center < 0 && ws2.right >= 0)
+			f_gr = fr + ws2.right*(usr - ur);
+		else if (ws2.right < 0)
+			f_gr = fr;
+		else
+			throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
+	}
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
 	if (f_gr.mass > 0)
