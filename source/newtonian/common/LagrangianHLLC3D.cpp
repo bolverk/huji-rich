@@ -109,10 +109,10 @@ namespace
 		}
 #endif
 		const double sl = vl - cl * (pstar > pl ? std::sqrt(0.8*(pstar / pl - 1) + 1) : 1);
-		const double sr = vr + cr * (pstar > pr ? std::sqrt(0.8*(pstar / pr - 1) + 1): 1);
+		const double sr = vr + cr * (pstar > pr ? std::sqrt(0.8*(pstar / pr - 1) + 1) : 1);
 		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
-		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
+		const double ps = std::max(0.0,dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		return WaveSpeeds(sl, ss, sr, ps);
 	}
 
@@ -199,21 +199,21 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	double old_ps = ws2.ps;
 	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
 	size_t counter = 0;
-	while (ws2.ps > 1.25 * old_ps || old_ps > 1.25 * ws2.ps)
+	while (ws2.ps > 1.1 * old_ps || old_ps > 1.1 * ws2.ps)
 	{
 		old_ps = ws2.ps;
 		ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
 		++counter;
-		if (counter > 14)
+		if (counter > 54)
 		{
 			std::cout << "Too many iterations in HLLC" << std::endl;
-			std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z <<" velocity = "<<velocity<< std::endl;
+			std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z << " velocity = " << velocity << std::endl;
 			std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
 				" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
 			std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.internal_energy << " vx = " << right.velocity.x <<
 				" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
 		}
-		assert(counter < 15);
+		assert(counter < 55);
 	}
 
 	if (!massflux_)
@@ -223,30 +223,29 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 		f_gr.momentum.Set(ws2.ps, 0, 0);
 		f_gr.mass = 0;
 	}
+
+	Conserved3D ul, ur;
+	PrimitiveToConserved(local_left, 1, ul);
+	PrimitiveToConserved(local_right, 1, ur);
+
+	const Conserved3D fl = PrimitiveToFlux(local_left);
+	const Conserved3D fr = PrimitiveToFlux(local_right);
+
+	const Conserved3D usl = starred_state(local_left, ws2.left, ws2.center);
+	const Conserved3D usr = starred_state(local_right, ws2.right, ws2.center);
+
+
+	if (ws2.left > 0)
+		f_gr = fl;
+	else if (ws2.left <= 0 && ws2.center >= 0)
+		f_gr = fl + ws2.left*(usl - ul);
+	else if (ws2.center < 0 && ws2.right >= 0)
+		f_gr = fr + ws2.right*(usr - ur);
+	else if (ws2.right < 0)
+		f_gr = fr;
 	else
-	{
-		Conserved3D ul, ur;
-		PrimitiveToConserved(local_left, 1, ul);
-		PrimitiveToConserved(local_right, 1, ur);
+		throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
 
-		const Conserved3D fl = PrimitiveToFlux(local_left);
-		const Conserved3D fr = PrimitiveToFlux(local_right);
-
-		const Conserved3D usl = starred_state(local_left, ws2.left, ws2.center);
-		const Conserved3D usr = starred_state(local_right, ws2.right, ws2.center);
-
-
-		if (ws2.left > 0)
-			f_gr = fl;
-		else if (ws2.left <= 0 && ws2.center >= 0)
-			f_gr = fl + ws2.left*(usl - ul);
-		else if (ws2.center < 0 && ws2.right >= 0)
-			f_gr = fr + ws2.right*(usr - ur);
-		else if (ws2.right < 0)
-			f_gr = fr;
-		else
-			throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
-	}
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
 	if (f_gr.mass > 0)
