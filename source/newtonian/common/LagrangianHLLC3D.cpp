@@ -107,8 +107,8 @@ namespace
 			throw eo;
 		}
 #endif
-		const double sl = vl - cl * (pstar > pl ? std::sqrt(pstar / pl) : 1);
-		const double sr = vr + cr * (pstar > pr ? std::sqrt(pstar / pr) : 1);
+		const double sl = vl - cl * (pstar > pl ? std::sqrt(0.8*(pstar / pl - 1) + 1) : 1);
+		const double sr = vr + cr * (pstar > pr ? std::sqrt(0.8*(pstar / pr - 1) + 1): 1);
 		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
@@ -195,7 +195,13 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos);
 	assert(p_u_star.first > 0);
 	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, p_u_star.first);
+	double old_ps = ws2.ps;
 	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+	while (ws2.ps > 1.25 * old_ps || old_ps > 1.25 * ws2.ps)
+	{
+		old_ps = ws2.ps;
+		ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+	}
 
 	if (!massflux_)
 	{
