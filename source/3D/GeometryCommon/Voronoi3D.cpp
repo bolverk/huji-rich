@@ -2423,6 +2423,40 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 	double w_abs = std::max(fastabs(v0),fastabs(v1));
 	if (dw_abs > w_abs)
 		delta_w *= (1 + (std::atan(dw_abs / w_abs) - 0.25 * M_PI)*2) * (w_abs / dw_abs);
+#ifdef RICH_DEBUG
+	if (!std::isfinite(dw_abs))
+	{
+		r0 = GetMeshPoint(p0);
+		r1 = GetMeshPoint(p1);
+		f = FaceCM(index);
+		UniversalError eo("Bad Face velocity");
+		eo.AddEntry("Face index", index);
+		eo.AddEntry("Neigh 0", p0);
+		eo.AddEntry("Neigh 1", p1);
+		eo.AddEntry("Neigh 0 x", r0.x);
+		eo.AddEntry("Neigh 0 y", r0.y);
+		eo.AddEntry("Neigh 0 z", r0.z);
+		eo.AddEntry("Neigh 0 CMx", CM_[p0].x);
+		eo.AddEntry("Neigh 0 CMy", CM_[p0].y);
+		eo.AddEntry("Neigh 0 CMz", CM_[p0].z);
+		eo.AddEntry("Neigh 1 x", r1.x);
+		eo.AddEntry("Neigh 1 y", r1.y);
+		eo.AddEntry("Neigh 1 z", r1.z);
+		eo.AddEntry("Neigh 1 CMx", CM_[p1].x);
+		eo.AddEntry("Neigh 1 CMy", CM_[p1].y);
+		eo.AddEntry("Neigh 1 CMz", CM_[p1].z);
+		eo.AddEntry("Face CMx", f.x);
+		eo.AddEntry("Face CMy", f.y);
+		eo.AddEntry("Face CMz", f.z);
+		eo.AddEntry("V0x", v0.x);
+		eo.AddEntry("V0y", v0.y);
+		eo.AddEntry("V0z", v0.z);
+		eo.AddEntry("V1x", v1.x);
+		eo.AddEntry("V1y", v1.y);
+		eo.AddEntry("V1z", v1.z);
+		throw eo;
+	}
+#endif
 	w += delta_w;
 	return w;
 }

@@ -166,7 +166,16 @@ namespace
 			if (tess.BoundaryFace(i))
 				res[i] = Vector3D();
 			else
-				res[i]=tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
+			{
+				try
+				{
+					res[i] = tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
+				}
+				catch (UniversalError &eo)
+				{
+					throw eo;
+				}
+			}
 	}
 
 	void UpdateTessellation(Tessellation3D &tess, vector<Vector3D> &point_vel,double dt
