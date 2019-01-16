@@ -63,6 +63,8 @@ public:
 
 	//! \brief THe names of the tracers and stickers
 	TracerStickerNames tracerstickernames;
+
+	Vector3D ll, ur;
 };
 
 /*! \brief Load snapshot data into memory

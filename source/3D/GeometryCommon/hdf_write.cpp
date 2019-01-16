@@ -63,7 +63,7 @@ Snapshot3D::Snapshot3D(void) :
 	cells(),
 	time(),
 	cycle(),
-	tracerstickernames() {}
+	tracerstickernames(),ll(Vector3D()),ur(Vector3D()){}
 
 Snapshot3D::Snapshot3D(const Snapshot3D& source) :
 	mesh_points(source.mesh_points),
@@ -74,7 +74,7 @@ Snapshot3D::Snapshot3D(const Snapshot3D& source) :
 	cells(source.cells),
 	time(source.time),
 	cycle(source.cycle),
-	tracerstickernames(source.tracerstickernames)
+	tracerstickernames(source.tracerstickernames),ll(source.ll),ur(source.ur)
 {}
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
@@ -134,6 +134,15 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 	TracerStickerNames tsn = sim.GetTracerStickerNames();
 
 	size_t Ncells = tess.GetPointNo();
+
+	std::vector<double> box(6);
+	box[0] = tess.GetBoxCoordinates().first.x;
+	box[1] = tess.GetBoxCoordinates().first.y;
+	box[2] = tess.GetBoxCoordinates().first.z;
+	box[3] = tess.GetBoxCoordinates().second.x;
+	box[4] = tess.GetBoxCoordinates().second.y;
+	box[5] = tess.GetBoxCoordinates().second.z;
+	write_std_vector_to_hdf5(file, box, "Box");
 
 	vector<double> temp(Ncells);
 
@@ -289,6 +298,12 @@ Snapshot3D ReadSnapshot3D
 			std::string name = file.getObjnameByIdx(i);
 			if (name.compare(std::string("ID"))==0)
 				IDs = read_sizet_vector_from_hdf5(file, "ID");
+			if (name.compare(std::string("Box")) == 0)
+			{
+				const vector<double> box = read_double_vector_from_hdf5(file, "Box");
+				res.ll.Set(box[0], box[1], box[2]);
+				res.ur.Set(box[3], box[4], box[5]);
+			}
 		}
 		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
 		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
