@@ -95,7 +95,7 @@ double Tillotson::dep2cI(double d, double e, double p) const
 	double w0 = e / (E0_*eta*eta) + 1;
 	double gamma = a_ + b_ / w0;
 	double res = (gamma + 1)*p / d + (A_ + B_*(eta*eta - 1)) / d + b_*(w0 - 1)*(2 * e - p / d)/(w0*w0);
-	res = std::max(res, 1e-10*E0_);
+	res = std::max(res, 1e-10*e);
 	return res;
 }
 
@@ -109,7 +109,7 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	double bfactor = (beta_*z > 100) ? 0 : std::exp(-beta_*z);
 	double res1 = A_*bfactor*afactor*(1 + (eta - 1)*(beta_ + 2 * alpha_*z - eta) / (eta*eta)) / rho0_;
 	res1 += b_*d*e*afactor*(2 * alpha_*z*w0 / rho0_ + (p / d - 2 * e) / (E0_*d)) / (w0*w0*eta*eta);
-	double res = std::max(res0 + res1, 1e-10*E0_);
+	double res = std::max(res0 + res1, 1e-10*e);
 	return res;
 }
 

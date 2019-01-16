@@ -186,7 +186,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 				cells[static_cast<size_t>(neigh[j])].tracers, tracerstickernames.tracer_names));
 			cs = std::max(cs, fastabs(cells[neigh[j]].velocity));
 #ifdef RICH_DEBUG
-			if (!isfinite(cs))
+			if (!std::isfinite(cs))
 				throw UniversalError("Bad cs in roundcells");
 		}
 		catch (UniversalError &eo)
