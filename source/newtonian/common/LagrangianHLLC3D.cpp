@@ -194,7 +194,7 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	local_right.velocity.z = 0;
 	Conserved3D f_gr;
 	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos);
-	assert(p_u_star.first > 0);
+	p_u_star.first = std::max(p_u_star.first, 0.0);
 	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, p_u_star.first);
 	double old_ps = ws2.ps;
 	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
