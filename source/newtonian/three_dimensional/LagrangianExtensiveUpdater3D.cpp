@@ -128,7 +128,8 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 			if (std::abs(dEtherm) > 0.999 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.001*std::abs(dE - dEk))
 				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
 		// check cell
-		if (extensives[i].mass < 0 || extensives[i].energy < 0)
+		if ((!(extensives[i].mass > 0)) || (!(extensives[i].energy < 0)) || (!std::isfinite(extensives[i].momentum.x)) || (!std::isfinite(extensives[i].momentum.y))
+			|| (!std::isfinite(extensives[i].momentum.z)))
 		{
 			int rank = 0;
 #ifdef RICH_MPI
