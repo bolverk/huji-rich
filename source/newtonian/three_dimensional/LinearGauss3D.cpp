@@ -10,7 +10,7 @@ namespace
 {
 	void CheckCell(ComputationalCell3D const& cell)
 	{
-		if (cell.density < 0 || cell.internal_energy < 0)
+		if (cell.density < 0 || cell.internal_energy < 0 || (!std::isfinite(cell.velocity.x)) || (!std::isfinite(cell.velocity.y)) || (!std::isfinite(cell.velocity.z)))
 			throw UniversalError("Bad cell after interpolation in LinearGauss3D");
 	}
 
@@ -783,6 +783,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.AddEntry("Face", static_cast<double>(faces[j]));
 					eo.AddEntry("Cell", static_cast<double>(i));
+					eo.AddEntry("Vx", new_cells[i].velocity.x);
+					eo.AddEntry("Vy", new_cells[i].velocity.y);
+					eo.AddEntry("Vz", new_cells[i].velocity.z);
+					eo.AddEntry("Cell id", new_cells[i].ID);
+					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).second > CellNumber)
 					boundaryedges.push_back(faces[j]);
@@ -802,6 +807,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.AddEntry("Face", static_cast<double>(faces[j]));
 					eo.AddEntry("Cell", static_cast<double>(i));
+					eo.AddEntry("Vx", new_cells[i].velocity.x);
+					eo.AddEntry("Vy", new_cells[i].velocity.y);
+					eo.AddEntry("Vz", new_cells[i].velocity.z);
+					eo.AddEntry("Cell id", new_cells[i].ID);
+					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).first > CellNumber)
 					boundaryedges.push_back(faces[j]);
@@ -842,6 +852,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
 				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
 				eo.AddEntry("Cell", static_cast<double>(N0));
+				eo.AddEntry("Vx", new_cells[N0].velocity.x);
+				eo.AddEntry("Vy", new_cells[N0].velocity.y);
+				eo.AddEntry("Vz", new_cells[N0].velocity.z);
+				eo.AddEntry("Cell id", new_cells[N0].ID);
+				throw eo;
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -884,6 +899,11 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
 				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
 				eo.AddEntry("Cell", static_cast<double>(N0));
+				eo.AddEntry("Vx", new_cells[N0].velocity.x);
+				eo.AddEntry("Vy", new_cells[N0].velocity.y);
+				eo.AddEntry("Vz", new_cells[N0].velocity.z);
+				eo.AddEntry("Cell id", new_cells[N0].ID);
+				throw eo;
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
