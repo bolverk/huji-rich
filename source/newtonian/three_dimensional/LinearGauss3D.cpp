@@ -450,37 +450,37 @@ namespace
 			ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[i]), cm, eos, tracerstickernames, false);
 			ComputationalCell3D dphi = centroid_val - cell;
 			// density
-			if (std::abs(dphi.density) > 0.01*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
+			if (std::abs(dphi.density) > 0.001*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
 				if (std::abs(dphi.density) > 1e-9*cell.density)
 					psi[0] = std::min(psi[0], std::max(diffusecoeff*(neighbors[i].density - cell.density) / dphi.density, 0.0));
 			}
 			// pressure
-			if (std::abs(dphi.pressure) > 0.01*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
+			if (std::abs(dphi.pressure) > 0.001*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (std::abs(dphi.pressure) > 1e-9*cell.pressure)
 					psi[1] = std::min(psi[1], std::max(diffusecoeff*(neighbors[i].pressure - cell.pressure) / dphi.pressure, 0.0));
 			}
 			// internal_energy
-			if (std::abs(dphi.internal_energy) > 0.01*std::max(std::abs(maxdiff.internal_energy), std::abs(mindiff.internal_energy)) || centroid_val.internal_energy*cell.internal_energy < 0)
+			if (std::abs(dphi.internal_energy) > 0.001*std::max(std::abs(maxdiff.internal_energy), std::abs(mindiff.internal_energy)) || centroid_val.internal_energy*cell.internal_energy < 0)
 			{
 				if (std::abs(dphi.internal_energy) > 1e-9*cell.internal_energy)
 					psi[5] = std::min(psi[5], std::max(diffusecoeff*(neighbors[i].internal_energy - cell.internal_energy) / dphi.internal_energy, 0.0));
 			}
 			// xvelocity
-			if (std::abs(dphi.velocity.x) > 0.01*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
+			if (std::abs(dphi.velocity.x) > 0.001*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
 				if (std::abs(dphi.velocity.x) > 1e-9*cell.velocity.x)
 					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i].velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
-			if (std::abs(dphi.velocity.y) > 0.01*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
+			if (std::abs(dphi.velocity.y) > 0.001*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
 				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
 					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i].velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
 			}
 			// zvelocity
-			if (std::abs(dphi.velocity.z) > 0.01*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
+			if (std::abs(dphi.velocity.z) > 0.001*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
 			{
 				if (std::abs(dphi.velocity.z) > 1e-9*cell.velocity.z)
 					psi[4] = std::min(psi[4], std::max(diffusecoeff*(neighbors[i].velocity.z - cell.velocity.z) / dphi.velocity.z, 0.0));
@@ -492,7 +492,7 @@ namespace
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
 				double centroid_tracer = centroid_val.tracers[j];
-				if (std::abs(dphi.tracers[j]) > 0.01*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) ||
+				if (std::abs(dphi.tracers[j]) > 0.001*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) ||
 					centroid_tracer * cell_tracer < 0)
 				{
 					if (std::abs(dphi.tracers[j]) > std::abs(1e-9*cell_tracer))
