@@ -792,6 +792,12 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	catch (UniversalError &eo)
 	{
 		eo.AddEntry("Density", res.density);
+		eo.AddEntry("Vx", res.velocity.x);
+		eo.AddEntry("Vy", res.velocity.y);
+		eo.AddEntry("Vz", res.velocity.z);
+		eo.AddEntry("ID", res.ID);
+		eo.AddEntry("internal energy", extensive.internal_energy / extensive.mass);
+		eo.AddEntry("Volume", 1.0 / vol_inv);
 		throw eo;
 	}
 	res.internal_energy = extensive.internal_energy / extensive.mass;
