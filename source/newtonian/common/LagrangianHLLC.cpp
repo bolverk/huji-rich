@@ -62,8 +62,8 @@ namespace
 		const double pr = right.Pressure;
 		const double vr = right.Velocity.x;
 		const double cr = right.SoundSpeed;
-		const double sl = vl - cl * (pstar > pl ? std::sqrt(pstar / pl) : 1);
-		const double sr = vr + cr * (pstar > pr ? std::sqrt(pstar / pr) : 1);
+		const double sl = vl - cl * (pstar > pl ? std::sqrt(0.8*(pstar / pl - 1) + 1) : 1);
+		const double sr = vr + cr * (pstar > pr ? std::sqrt(0.8*(pstar / pr - 1) + 1) : 1);
 		const double denom = 1.0 /(dl*(sl - vl) - dr * (sr - vr));
 		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
@@ -142,9 +142,29 @@ Conserved LagrangianHLLC::operator()
 
 	Conserved f_gr;
 	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos_);
-	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, p_u_star.first);
-	ws = estimate_wave_speeds(local_left, local_right, ws.ps);
+	double old_ps = p_u_star.first;
 
+	//old_ps = 0;
+
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, old_ps);
+	size_t counter = 0;
+	while (ws.ps > 1.01 * old_ps || old_ps > 1.01 * ws.ps)
+	{
+		old_ps = ws.ps;
+		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
+		++counter;
+	/*			if (counter > 54)
+				{
+					std::cout << "Too many iterations in HLLC" << std::endl;
+					std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z << " velocity = " << velocity << std::endl;
+					std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
+						" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
+					std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.internal_energy << " vx = " << right.velocity.x <<
+						" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
+				}*/
+		assert(counter < 55);
+	}
+	
 	if (!massflux_)
 	{
 		local_left.Velocity -= ws.center*normaldir;
