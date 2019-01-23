@@ -27,6 +27,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		oldEtherm[i] = extensives[i].internal_energy;
 		oldE[i] = extensives[i].energy;
 	}
+	bool entropy = !(std::lower_bound(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(), std::string("Entropy")) ==
+		tracerstickernames.tracer_names.end());
 	size_t Nfluxes = fluxes.size();
 	Conserved3D delta;
 	for (size_t i = 0; i < Nfluxes; ++i)
@@ -67,7 +69,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			}
 		}
 		// check cell
-		if (extensives[i].mass < 0 || extensives[i].energy < 0 || extensives[i].internal_energy < 0)
+		if ((!(extensives[i].mass)) > 0 || (!(extensives[i].energy)) > 0 || (!(extensives[i].internal_energy > 0) && (!entropy)) || 
+			(!std::isfinite(fastabs(extensives[i].momentum))))
 		{
 			int rank = 0;
 #ifdef RICH_MPI
@@ -108,6 +111,6 @@ void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/,
 	const vector<ComputationalCell3D>& /*cells*/, vector<Conserved3D> &extensives, size_t index, double /*time*/,
 	TracerStickerNames const& /*tracerstickernames*/)const
 {
-	assert(extensives[index].internal_energy > 0);
+	//assert(extensives[index].internal_energy > 0);
 	return;
 }

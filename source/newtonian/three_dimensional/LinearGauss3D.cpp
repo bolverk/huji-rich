@@ -10,7 +10,7 @@ namespace
 {
 	void CheckCell(ComputationalCell3D const& cell)
 	{
-		if (cell.density < 0 || cell.internal_energy < 0 || (!std::isfinite(cell.velocity.x)) || (!std::isfinite(cell.velocity.y)) || (!std::isfinite(cell.velocity.z)))
+		if ((!(cell.density > 0)) || (!(cell.internal_energy > 0)) || (!std::isfinite(cell.velocity.x)) || (!std::isfinite(cell.velocity.y)) || (!std::isfinite(cell.velocity.z)))
 			throw UniversalError("Bad cell after interpolation in LinearGauss3D");
 	}
 
@@ -788,6 +788,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Vy", new_cells[i].velocity.y);
 					eo.AddEntry("Vz", new_cells[i].velocity.z);
 					eo.AddEntry("Cell id", new_cells[i].ID);
+					eo.AddEntry("Interpolated density",cell_ref->density);
+					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
+					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
+					eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
+					eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
+					eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
 					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).second > CellNumber)
@@ -812,6 +818,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Vy", new_cells[i].velocity.y);
 					eo.AddEntry("Vz", new_cells[i].velocity.z);
 					eo.AddEntry("Cell id", new_cells[i].ID);
+					eo.AddEntry("Interpolated density",cell_ref->density);
+					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
+					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
+					eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
+					eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
+					eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
 					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).first > CellNumber)
@@ -857,7 +869,14 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Vy", new_cells[N0].velocity.y);
 				eo.AddEntry("Vz", new_cells[N0].velocity.z);
 				eo.AddEntry("Cell id", new_cells[N0].ID);
+				eo.AddEntry("Interpolated density",cell_ref->density);
+				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
+				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
+				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
+				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
+				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
 				throw eo;
+
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -904,6 +923,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Vy", new_cells[N0].velocity.y);
 				eo.AddEntry("Vz", new_cells[N0].velocity.z);
 				eo.AddEntry("Cell id", new_cells[N0].ID);
+				eo.AddEntry("Interpolated density",cell_ref->density);
+				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
+				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
+				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
+				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
+				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
 				throw eo;
 #ifdef RICH_MPI
 				int rank = 0;
