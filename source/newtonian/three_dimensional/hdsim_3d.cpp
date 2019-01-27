@@ -375,7 +375,7 @@ void HDSim3D::timeAdvance3(void)
 	MPI_exchange_data(tess_, extensive_, false);
 	MPI_exchange_data(tess_, cells_, false);
 	MPI_exchange_data(tess_, point_vel, false);
-	MPI_exchange_data(tess_, du1, false);
+	//MPI_exchange_data(tess_, du1, false);
 	MPI_exchange_data(tess_, oldpoints, false);
 	MPI_exchange_data(tess_, point_vel, true);
 #endif
