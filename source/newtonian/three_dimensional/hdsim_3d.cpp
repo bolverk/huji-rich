@@ -410,7 +410,9 @@ void HDSim3D::timeAdvance3(void)
 #endif
 
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
-
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
 	pt_.updateTime(0.5*dt);
 	pt_.updateCycle();
 	CalcFaceVelocities(tess_, point_vel, face_vel);
