@@ -345,7 +345,6 @@ void HDSim3D::timeAdvance3(void)
 	vector<Conserved3D> mid_extensives(extensive_);
 	eu_(fluxes, tess_, 0.5*dt, cells_, mid_extensives, pt_.getTime(), tsn_);
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), 0.5*dt, tsn_, mid_extensives);
-	std::vector<Conserved3D> du1 = 2*(mid_extensives - extensive_);
 
 	if (pt_.cycle % 10 == 0)
 	{
@@ -357,7 +356,7 @@ void HDSim3D::timeAdvance3(void)
 		extensive_ = VectorValues(extensive_, order);
 		cells_ = VectorValues(cells_, order);
 		point_vel = VectorValues(point_vel, order);
-		du1 = VectorValues(du1, order);
+		//du1 = VectorValues(du1, order);
 	}
 	std::vector<Vector3D> oldpoints = tess_.GetMeshPoints();
 	oldpoints.resize(tess_.GetPointNo());
@@ -382,6 +381,8 @@ void HDSim3D::timeAdvance3(void)
 #endif
 
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+	std::vector<Conserved3D> du1 = 2 * (mid_extensives - extensive_);
+
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
 #endif
@@ -392,7 +393,6 @@ void HDSim3D::timeAdvance3(void)
 	mid_extensives = extensive_;
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), 2*dt, tsn_, mid_extensives);
 	eu_(fluxes, tess_, 2*dt, cells_, mid_extensives, pt_.getTime(), tsn_);
-	std::vector<Conserved3D> du2 = 0.5*(mid_extensives - extensive_);
 	mid_extensives = mid_extensives - du1;
 	
 	UpdateTessellation(tess_, point_vel, dt
@@ -404,7 +404,7 @@ void HDSim3D::timeAdvance3(void)
 	// Keep relevant points
 	MPI_exchange_data(tess_, mid_extensives, false);
 	MPI_exchange_data(tess_, du1, false);
-	MPI_exchange_data(tess_, du2, false);
+	//MPI_exchange_data(tess_, du2, false);
 	MPI_exchange_data(tess_, extensive_, false);
 	MPI_exchange_data(tess_, cells_, false);
 	MPI_exchange_data(tess_, point_vel, false);
@@ -412,6 +412,8 @@ void HDSim3D::timeAdvance3(void)
 #endif
 
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+	std::vector<Conserved3D> du2 = 0.5*(mid_extensives - extensive_ + du1);
+
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
 #endif
