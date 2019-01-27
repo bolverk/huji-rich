@@ -724,6 +724,7 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 	Conserved3D res;
 	Vector3D diff(CMnew);
 	diff -= CMold;
+	
 	ComputationalCell3D cell_temp(cell);
 	ComputationalCellAddMult(cell_temp, slope.xderivative, diff.x);
 	ComputationalCellAddMult(cell_temp, slope.yderivative, diff.y);
@@ -980,6 +981,19 @@ void AMR3D::operator() (HDSim3D &sim)
 			throw eo;
 		}
 	}
+	// Recalc entropy if needed
+	size_t entropy_index = static_cast<size_t>(std::lower_bound(tsn.tracer_names.begin(), tsn.tracer_names.end(), std::string("Entropy")) -
+		tsn.tracer_names.begin());
+	if (entropy_index < tsn.tracer_names.size())
+	{
+		size_t Nentropy = cells.size();
+		for (size_t i = 0; i < Nentropy; ++i)
+		{
+			cells[i].tracers[entropy_index] = eos.dp2s(cells[i].density, cells[i].pressure, cells[i].tracers, tsn.tracer_names);
+			extensives[i].tracers[entropy_index] = cells[i].tracers[entropy_index] * extensives[i].mass;
+		}
+	}
+
 #ifdef RICH_MPI
 	// Update cells
 	MPI_exchange_data(tess, cells, true);

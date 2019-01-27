@@ -29,7 +29,9 @@ public:
     /*! \brief Update the progress tracker
       \param dt Time step
      */
-    void update(double dt);
+    void updateTime(double dt);
+
+	void updateCycle();
 
     /*! \brief Returns the current time of the simulation
       \return Time of the simulation
@@ -82,6 +84,8 @@ public:
   void timeAdvance();
   //! \brief Advances the simulation in time (second order)
   void timeAdvance2();
+
+  void timeAdvance3();
 
   /*! \brief Access to tessellation
     \return Tessellation
