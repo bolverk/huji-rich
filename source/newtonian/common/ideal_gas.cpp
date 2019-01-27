@@ -68,6 +68,13 @@ double IdealGas::dp2s(double d, double p, tvector const& /*tracers*/, vector<str
 
 double IdealGas::sd2p(double s, double d, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
+	if ((!(s > 0) || (!(d > 0))))
+	{
+		UniversalError eo("Negative quantaties in entropy calc");
+		eo.AddEntry("entropy", s);
+		eo.AddEntry("density", d);
+		throw eo;
+	}
 	assert(s > 0 && d > 0);
 	return s * pow(d, g_);
 }

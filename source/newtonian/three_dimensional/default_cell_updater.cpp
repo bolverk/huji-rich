@@ -63,29 +63,48 @@ namespace
 				// Entropy fix if needed
 				if (entropy_index < tsn.tracer_names.size())
 				{
-					// Do we have a negative thermal energy?
-					if (energy < 0)
+					try
 					{
-						EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
-					}
-					else
-					{
-						// Is the kinetic energy small?
-						if ((energy*extensive.mass < 0.005*extensive.energy) &&
-							HighRelativeKineticEnergy(tess, i, extensives, extensive))
+						// Do we have a negative thermal energy?
+						if (energy < 0)
 						{
 							EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
 						}
 						else
 						{
-							double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
-							double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, tsn.tracer_names);
-							// We don't need the entropy fix, update entropy
-							res[i].internal_energy = energy;
-							res[i].pressure = new_pressure;
-							res[i].tracers[entropy_index] = new_entropy;
-							extensive.tracers[entropy_index] = new_entropy * extensive.mass;
+							// Is the kinetic energy small?
+							if ((energy*extensive.mass < 0.005*extensive.energy) &&
+								HighRelativeKineticEnergy(tess, i, extensives, extensive))
+							{
+								EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
+							}
+							else
+							{
+								double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
+								double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, tsn.tracer_names);
+								// We don't need the entropy fix, update entropy
+								res[i].internal_energy = energy;
+								res[i].pressure = new_pressure;
+								res[i].tracers[entropy_index] = new_entropy;
+								extensive.tracers[entropy_index] = new_entropy * extensive.mass;
+							}
 						}
+					}
+					catch (UniversalError &eo)
+					{
+						eo.AddEntry("Cell index", static_cast<double>(i));
+						eo.AddEntry("Cell mass", extensives[i].mass);
+						eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
+						eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
+						eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
+						eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
+						eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
+						eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
+						eo.AddEntry("Cell volume", vol);
+						eo.AddEntry("Cell energy", extensives[i].energy);
+						eo.AddEntry("Cell thermal energy per unit mass", energy);
+						eo.AddEntry("Cell id", res[i].ID);
+						throw eo;
 					}
 				}
 				else
@@ -117,7 +136,7 @@ namespace
 				eo.AddEntry("Cell mass", extensives[i].mass);
 				eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
 				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-				eo.AddEntry("Cell zy momentum", extensives[i].momentum.z);
+				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
 				eo.AddEntry("Cell energy", extensives[i].energy);
 				throw;
 			}
