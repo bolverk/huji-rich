@@ -345,7 +345,7 @@ void HDSim3D::timeAdvance3(void)
 	vector<Conserved3D> mid_extensives(extensive_);
 	eu_(fluxes, tess_, 0.5*dt, cells_, mid_extensives, pt_.getTime(), tsn_);
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), 0.5*dt, tsn_, mid_extensives);
-	std::vector<Conserved3D> du1 = mid_extensives - extensive_;
+	std::vector<Conserved3D> du1 = 2*(mid_extensives - extensive_);
 
 	if (pt_.cycle % 10 == 0)
 	{
@@ -389,10 +389,12 @@ void HDSim3D::timeAdvance3(void)
 	pt_.updateTime(0.5*dt);
 	CalcFaceVelocities(tess_, point_vel, face_vel);
 	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), 2*dt, tsn_);
+	mid_extensives = extensive_;
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), 2*dt, tsn_, mid_extensives);
 	eu_(fluxes, tess_, 2*dt, cells_, mid_extensives, pt_.getTime(), tsn_);
-	mid_extensives = mid_extensives - 3 * du1;
-	std::vector<Conserved3D> du2 = mid_extensives - extensive_;
+	std::vector<Conserved3D> du2 = 0.5*(mid_extensives - extensive_);
+	mid_extensives = mid_extensives - du1;
+	
 	UpdateTessellation(tess_, point_vel, dt
 #ifdef RICH_MPI
 		, tproc_
@@ -417,9 +419,10 @@ void HDSim3D::timeAdvance3(void)
 	pt_.updateCycle();
 	CalcFaceVelocities(tess_, point_vel, face_vel);
 	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), dt/6, tsn_);
+	mid_extensives = extensive_;
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt/6, tsn_, mid_extensives);
 	eu_(fluxes, tess_, dt/6, cells_, mid_extensives, pt_.getTime(), tsn_);
-	extensive_ = mid_extensives - 0.6666666666666666*du2 + du1;
+	extensive_ = mid_extensives + 0.6666666666666666*du2 + (1./6.)*du1;
 	cu_(cells_, eos_, tess_, extensive_, tsn_);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
