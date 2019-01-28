@@ -379,9 +379,9 @@ void HDSim3D::timeAdvance3(void)
 	MPI_exchange_data(tess_, oldpoints, false);
 	MPI_exchange_data(tess_, point_vel, true);
 #endif
-
-	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
 	std::vector<Conserved3D> u1 = mid_extensives;
+	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+	
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
@@ -410,9 +410,9 @@ void HDSim3D::timeAdvance3(void)
 	MPI_exchange_data(tess_, point_vel, false);
 	MPI_exchange_data(tess_, point_vel, true);
 #endif
-
-	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
 	std::vector<Conserved3D> u2 = mid_extensives;
+	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+	
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
