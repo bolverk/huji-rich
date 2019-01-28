@@ -423,7 +423,7 @@ void HDSim3D::timeAdvance3(void)
 	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), dt/6, tsn_);
 	source_(tess_, cells_, fluxes, point_vel, pt_.getTime(), dt/6, tsn_, mid_extensives);
 	eu_(fluxes, tess_, dt/6, cells_, mid_extensives, pt_.getTime(), tsn_);
-	extensive_ = mid_extensives - (1.0/3.0)*(2*u2 - extensive_)+u1;
+	extensive_ = mid_extensives - (1.0/3.0)*(2*u2 + extensive_)+u1;
 	cu_(cells_, eos_, tess_, extensive_, tsn_);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
