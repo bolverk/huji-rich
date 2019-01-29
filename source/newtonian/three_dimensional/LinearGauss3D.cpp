@@ -875,8 +875,19 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
 				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
 				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
-				throw eo;
-
+				eo.AddEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
+				eo.AddEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
+				eo.AddEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
+				eo.AddEntry("Cell CMx", tess.GetCellCM(N0).x);
+				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
+				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
+				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).second;
+				eo.AddEntry("Other cell ID", new_cells[N1].ID);
+				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
+				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
+				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
+				eo.AddEntry("Other Cell density", new_cells[N1].density);
+				eo.AddEntry("Other Cell pressure", new_cells[N1].pressure);
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -929,7 +940,19 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
 				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
 				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
-				throw eo;
+				eo.AddEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
+				eo.AddEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
+				eo.AddEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
+				eo.AddEntry("Cell CMx", tess.GetCellCM(N0).x);
+				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
+				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
+				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).first;
+				eo.AddEntry("Other cell ID", new_cells[N1].ID);
+				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
+				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
+				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
+				eo.AddEntry("Other Cell density", new_cells[N1].density);
+				eo.AddEntry("Other Cell pressure", new_cells[N1].pressure);
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
