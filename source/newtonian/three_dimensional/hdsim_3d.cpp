@@ -500,6 +500,9 @@ void HDSim3D::timeAdvance4(void)
 	mid_extensives = mid_extensives - du1;
 	eu_(fluxes, tess_, 0.5 * dt, cells_, mid_extensives, pt_.getTime(), tsn_);
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
+#ifdef RICH_MPI
+	MPI_exchange_data(tess_, cells_, true);
+#endif
 	std::vector<Conserved3D> du2 = mid_extensives - extensive_;
 
 	fc_(fluxes, tess_, face_vel, cells_, mid_extensives, eos_, pt_.getTime(), dt, tsn_);
