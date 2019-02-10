@@ -888,6 +888,9 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
 				eo.AddEntry("Other Cell density", new_cells[N1].density);
 				eo.AddEntry("Other Cell pressure", new_cells[N1].pressure);
+				eo.AddEntry("Slopex", rslopes_[N0].xderivative.density);
+				eo.AddEntry("Slopey", rslopes_[N0].yderivative.density);
+				eo.AddEntry("Slopez", rslopes_[N0].zderivative.density);
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
