@@ -982,7 +982,7 @@ void AMR3D::operator() (HDSim3D &sim)
 		}
 	}
 	// Recalc entropy if needed
-	size_t entropy_index = static_cast<size_t>(std::lower_bound(tsn.tracer_names.begin(), tsn.tracer_names.end(), std::string("Entropy")) -
+	size_t entropy_index = static_cast<size_t>(std::find(tsn.tracer_names.begin(), tsn.tracer_names.end(), std::string("Entropy")) -
 		tsn.tracer_names.begin());
 	if (entropy_index < tsn.tracer_names.size())
 	{
