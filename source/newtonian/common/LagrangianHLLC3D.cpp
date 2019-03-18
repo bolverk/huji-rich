@@ -43,7 +43,7 @@ namespace
 			Fr(right.density*right.velocity.x, Vector3D(right.density*right.velocity.x*right.velocity.x + right.pressure, right.density*right.velocity.x*right.velocity.y,
 				right.density*right.velocity.x*right.velocity.z), (Ur.energy + right.pressure)*right.velocity.x, 0);
 		Conserved3D Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
-		return std::pair<double, double>(eos.de2p(Ull.mass, Ull.energy - ScalarProd(Ull.momentum, Ull.momentum)*0.5 / Ull.mass), Ull.momentum.x / Ull.mass);
+		return std::pair<double, double>(eos.de2p(Ull.mass, std::max(0.0,Ull.energy - ScalarProd(Ull.momentum, Ull.momentum)*0.5 / Ull.mass)), Ull.momentum.x / Ull.mass);
 	}
 
 	class WaveSpeeds

@@ -892,7 +892,9 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Do we need to rebuild tess ?
 	int ntotal = static_cast<int>(ToRemove.first.size() + ToRefine.first.size());
 #ifdef RICH_MPI
-	MPI_Allreduce(MPI_IN_PLACE, &ntotal, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	int ntemp = 0;
+	MPI_Allreduce(&ntotal, &ntemp, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+	ntotal = ntemp;
 #endif
 	if (ntotal == 0)
 		return;

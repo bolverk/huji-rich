@@ -87,6 +87,10 @@ public:
 
   void timeAdvance3();
 
+  void timeAdvance32();
+
+  void timeAdvance33();
+
   void timeAdvance4();
 
   /*! \brief Access to tessellation
