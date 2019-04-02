@@ -5,8 +5,8 @@
 #endif
 
 RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi, double eta, bool cold, double min_dw, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
-	eta_(eta), cold_(cold), min_dw_(min_dw), no_move_(no_move) {}
+	double chi, double eta, bool cold, double min_dw, double dt_speed, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
+	eta_(eta), cold_(cold), min_dw_(min_dw),dt_speed_(dt_speed),no_move_(no_move) {}
 
 namespace
 {
@@ -199,7 +199,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 #endif
 		
 }
-	const double c_dt = std::max(std::max(0.01*d / dt, cs), min_dw_);
+	const double c_dt = std::max(std::max(dt_speed_*d / dt, cs), min_dw_);
 	velocity += chi_ * c_dt*(s - r) / std::max(R, d);
 	SlowDown(velocity, tess, R, i, velocities, nomove);
 }

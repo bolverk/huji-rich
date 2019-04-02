@@ -26,9 +26,10 @@ public:
 	\param cold Switch for cold flows
 	\param min_dw The minimum magnitude for the cell' velocity scale
 	\param no_move List of stickers not to move the cells for
+	\param dt_speed The speed in units of radius/dt
 	*/
 	RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos,Vector3D const& ll,Vector3D const& ur,
-		double chi = 0.25, double eta = 0.02, bool cold = false,double min_dw=0,
+		double chi = 0.25, double eta = 0.02, bool cold = false,double min_dw=0,double dt_speed=0.01,
 		vector<std::string> no_move=vector<std::string>());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
@@ -53,6 +54,7 @@ private:
 	const double eta_;
 	const bool cold_;
 	const double min_dw_;
+	const double dt_speed_;
 	const vector<std::string> no_move_;
 };
 
