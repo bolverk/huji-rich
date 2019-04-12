@@ -753,28 +753,27 @@ namespace
 #endif
 							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
 								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
-#ifdef RICH_DEBUG
-						}
-						catch (UniversalError &eo)
-						{
-							eo.AddEntry("Error in MPIRefine", 0);
-							eo.AddEntry("Volume", dv.second[0]);
-							eo.AddEntry("Current check", cur_check);
-							eo.AddEntry("Current check ID", cells[cur_check].ID);
-							eo.AddEntry("Old mass", extensives[cur_check].mass);
-							eo.AddEntry("Old density", cells[cur_check].density);
-							eo.AddEntry("Refine index i", i);
-							eo.AddEntry("Refine index j", j);
-							throw eo;
-						}
-#endif
-
 							extensives[cur_check] -= toadd;
 							extensive_tosend[i][j] += toadd;
 							oldtess.GetNeighbors(cur_check, temp);
 							size_t Nneigh = temp.size();
 							for (size_t k = 0; k < Nneigh; ++k)
 								tocheck.push(temp[k]);
+#ifdef RICH_DEBUG
+						}
+							catch (UniversalError &eo)
+							{
+								eo.AddEntry("Error in MPIRefine", 0);
+								eo.AddEntry("Volume", dv.second[0]);
+								eo.AddEntry("Current check", cur_check);
+								eo.AddEntry("Current check ID", cells[cur_check].ID);
+								eo.AddEntry("Old mass", extensives[cur_check].mass);
+								eo.AddEntry("Old density", cells[cur_check].density);
+								eo.AddEntry("Refine index i", i);
+								eo.AddEntry("Refine index j", j);
+								throw eo;
+							}
+#endif
 						}
 					}
 					else
