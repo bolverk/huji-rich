@@ -12,11 +12,33 @@ double IdealGas::getAdiabaticIndex(void) const
 
 double IdealGas::dp2e(double d, double p, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
+#ifdef RICH_DEBUG
+	if (!(g_ > 0) || !(p > 0) || !(d > 0))
+	{
+		UniversalError eo("Negative quantity in ideal gas dp2e");
+		eo.AddEntry("Density", d);
+		eo.AddEntry("Pressure", p);
+		eo.AddEntry("Gamma index", g_);
+		throw eo;
+	}
+#endif RICH_DEBUG
+
 	return p / d / (g_ - 1);
 }
 
 double IdealGas::de2p(double d, double e, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
 {
+#ifdef RICH_DEBUG
+	if (!(g_ > 0) || !(e > 0) || !(d > 0))
+	{
+		UniversalError eo("Negative quantity in ideal gas de2p");
+		eo.AddEntry("Density", d);
+		eo.AddEntry("Energy", e);
+		eo.AddEntry("Gamma index", g_);
+		throw eo;
+	}
+#endif RICH_DEBUG
+
 	if (e < 0)
 		throw UniversalError("Negative thermal energy");
 	return (g_ - 1)*e*d;
