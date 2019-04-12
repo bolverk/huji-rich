@@ -466,8 +466,29 @@ namespace
 					size_t index_remove = static_cast<size_t>(std::lower_bound(ToRemove.begin(), ToRemove.end(), neigh[j])
 						- ToRemove.begin());
 					std::pair<bool, std::array<double,4> > dv = PolyhedraIntersection(tess, neigh[j] - index_remove, poly2);
-					extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
-						oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+#ifdef RICH_DEBUG
+					try
+					{
+#endif
+						extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
+							oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+#ifdef RICH_DEBUG
+				}
+				catch (UniversalError &eo)
+				{
+					eo.AddEntry("Error in LocalRemove", 0);
+					eo.AddEntry("Volume", dv.second[0]);
+					eo.AddEntry("Current remove", ToRemove[i]);
+					eo.AddEntry("Current remove ID", cells[ToRemove[i]].ID);
+					eo.AddEntry("New mass", extensives[neigh[j] - index_remove].mass);
+					eo.AddEntry("Remove index", i);
+					eo.AddEntry("neigh index",j);
+					eo.AddEntry("neigh", neigh[j]);
+					eo.AddEntry("index_remove", index_remove);
+					throw eo;
+				}
+#endif
+
 				}
 			}
 		}
@@ -522,9 +543,32 @@ namespace
 							}
 						}
 						std::pair<bool, std::array<double,4> > dv = PolyhedraIntersection(oldtess, 0, poly2, &planes);
+#ifdef RICH_DEBUG
+						try
+						{
+#endif
 						extensives[duplicate_index[i][j][k] - index_remove] += eu.ConvertPrimitveToExtensive3D(
 							cells[nghost_index[i][j]], eos, dv.second[0], tsn,interp.GetSlopes()[nghost_index[i][j]],oldtess.GetCellCM(nghost_index[i][j]),
 							Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+#ifdef RICH_DEBUG
+					}
+					catch (UniversalError &eo)
+					{
+						eo.AddEntry("Error in MPIRemove", 0);
+						eo.AddEntry("Volume", dv.second[0]);
+						eo.AddEntry("Current remove", nghost_index[i][j]);
+						eo.AddEntry("Current remove ID", cells[nghost_index[i][j]].ID);
+						eo.AddEntry("New mass", extensives[duplicate_index[i][j][k] - index_remove].mass);
+						eo.AddEntry("Remove index i", i);
+						eo.AddEntry("Remove index j", j);
+						eo.AddEntry("Remove index k", k);
+						eo.AddEntry("neigh index", j);
+						eo.AddEntry("duplicate_index[i][j][k] - index_remove", duplicate_index[i][j][k] - index_remove);
+						eo.AddEntry("index_remove", index_remove);
+						throw eo;
+					}
+#endif
+
 					}
 				}
 			}
@@ -583,15 +627,35 @@ namespace
 					if (dv.first)
 					{
 						// Remove extensive from neigh cell and add to new cell
-						Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
-							oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
-						extensives[cur_check] -= toadd;
-						//extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
-						extensives[Norg2 + i] += toadd;
-						oldtess.GetNeighbors(cur_check, neigh);
-						Nneigh = neigh.size();
-						for (size_t j = 0; j < Nneigh; ++j)
-							tocheck.push(neigh[j]);
+#ifdef RICH_DEBUG
+						try
+						{
+#endif
+							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
+								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+							extensives[cur_check] -= toadd;
+							//extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
+							extensives[Norg2 + i] += toadd;
+							oldtess.GetNeighbors(cur_check, neigh);
+							Nneigh = neigh.size();
+							for (size_t j = 0; j < Nneigh; ++j)
+								tocheck.push(neigh[j]);
+#ifdef RICH_DEBUG
+						}
+						catch (UniversalError &eo)
+						{
+							eo.AddEntry("Error in LocalRefine", 0);
+							eo.AddEntry("Volume", dv.second[0]);
+							eo.AddEntry("Current check", cur_check);
+							eo.AddEntry("Current check ID",cells[cur_check].ID);
+							eo.AddEntry("Old mass", extensives[cur_check].mass);
+							eo.AddEntry("Old density", cells[cur_check].density);
+							eo.AddEntry("New mass", extensives[Norg + i].mass);
+							eo.AddEntry("Refine index", i);
+							eo.AddEntry("Norg", Norg2);
+							throw eo;
+						}
+#endif
 					}
 				}
 			}
@@ -683,8 +747,28 @@ namespace
 						if (dv.first)
 						{
 							// add and remove the extensive
+#ifdef RICH_DEBUG
+							try
+							{
+#endif
 							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
 								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+#ifdef RICH_DEBUG
+						}
+						catch (UniversalError &eo)
+						{
+							eo.AddEntry("Error in MPIRefine", 0);
+							eo.AddEntry("Volume", dv.second[0]);
+							eo.AddEntry("Current check", cur_check);
+							eo.AddEntry("Current check ID", cells[cur_check].ID);
+							eo.AddEntry("Old mass", extensives[cur_check].mass);
+							eo.AddEntry("Old density", cells[cur_check].density);
+							eo.AddEntry("Refine index i", i);
+							eo.AddEntry("Refine index j", j);
+							throw eo;
+						}
+#endif
+
 							extensives[cur_check] -= toadd;
 							extensive_tosend[i][j] += toadd;
 							oldtess.GetNeighbors(cur_check, temp);
