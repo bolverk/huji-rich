@@ -291,6 +291,7 @@ namespace
 		ComputationalCell3D dphi = centroid_val - cell;
 		vector<double> psi(6 + cell.tracers.size(), 1);
 		const size_t nedges = faces.size();
+		const double skipfactor = 1e-3;
 		for (size_t i = 0; i < nedges; i++)
 		{
 			if (i > 0)
@@ -301,7 +302,7 @@ namespace
 				dphi -= cell;
 			}
 			// density
-			if (std::abs(dphi.density) > 0.1*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
+			if (std::abs(dphi.density) > skipfactor*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
 			{
 				if (dphi.density > 1e-9*cell.density)
 					psi[0] = std::min(psi[0], std::max(maxdiff.density / dphi.density, 0.0));
@@ -310,7 +311,7 @@ namespace
 						psi[0] = std::min(psi[0], std::max(mindiff.density / dphi.density, 0.0));
 			}
 			// pressure
-			if (std::abs(dphi.pressure) > 0.1*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
+			if (std::abs(dphi.pressure) > skipfactor*std::max(std::abs(maxdiff.pressure), std::abs(mindiff.pressure)) || centroid_val.pressure*cell.pressure < 0)
 			{
 				if (dphi.pressure > 1e-9*cell.pressure)
 					psi[1] = std::min(psi[1], std::max(maxdiff.pressure / dphi.pressure, 0.0));
@@ -319,7 +320,7 @@ namespace
 						psi[1] = std::min(psi[1], std::max(mindiff.pressure / dphi.pressure, 0.0));
 			}
 			// internal_energy
-			if (std::abs(dphi.internal_energy) > 0.1*std::max(std::abs(maxdiff.internal_energy), std::abs(mindiff.internal_energy)) || centroid_val.internal_energy*cell.internal_energy < 0)
+			if (std::abs(dphi.internal_energy) > skipfactor*std::max(std::abs(maxdiff.internal_energy), std::abs(mindiff.internal_energy)) || centroid_val.internal_energy*cell.internal_energy < 0)
 			{
 				if (dphi.internal_energy > 1e-9*cell.internal_energy)
 					psi[5] = std::min(psi[5], std::max(maxdiff.internal_energy / dphi.internal_energy, 0.0));
@@ -328,7 +329,7 @@ namespace
 						psi[5] = std::min(psi[5], std::max(mindiff.internal_energy / dphi.internal_energy, 0.0));
 			}
 			// xvelocity
-			if (std::abs(dphi.velocity.x) > 0.1*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
+			if (std::abs(dphi.velocity.x) > skipfactor*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
 				if (dphi.velocity.x > std::abs(1e-9*cell.velocity.x))
 					psi[2] = std::min(psi[2], std::max(maxdiff.velocity.x / dphi.velocity.x, 0.0));
@@ -337,7 +338,7 @@ namespace
 						psi[2] = std::min(psi[2], std::max(mindiff.velocity.x / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
-			if (std::abs(dphi.velocity.y) > 0.1*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
+			if (std::abs(dphi.velocity.y) > skipfactor*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
 				if (dphi.velocity.y > std::abs(1e-9*cell.velocity.y))
 					psi[3] = std::min(psi[3], std::max(maxdiff.velocity.y / dphi.velocity.y, 0.0));
@@ -346,7 +347,7 @@ namespace
 						psi[3] = std::min(psi[3], std::max(mindiff.velocity.y / dphi.velocity.y, 0.0));
 			}
 			// zvelocity
-			if (std::abs(dphi.velocity.z) > 0.1*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
+			if (std::abs(dphi.velocity.z) > skipfactor*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
 			{
 				if (dphi.velocity.z > std::abs(1e-9*cell.velocity.z))
 					psi[4] = std::min(psi[4], std::max(maxdiff.velocity.z / dphi.velocity.z, 0.0));
@@ -359,7 +360,7 @@ namespace
 			{
 				double cell_tracer = cell.tracers[j];
 				double diff_tracer = maxdiff.tracers[j];
-				if (std::abs(dphi.tracers[j]) > 0.1*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || (
+				if (std::abs(dphi.tracers[j]) > skipfactor*std::max(std::abs(diff_tracer), std::abs(mindiff.tracers[j])) || (
 					centroid_val.tracers[j] * cell_tracer < 0))
 				{
 					if (dphi.tracers[j] > std::abs(1e-9*cell_tracer))
