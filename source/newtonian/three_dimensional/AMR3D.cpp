@@ -470,8 +470,9 @@ namespace
 					try
 					{
 #endif
-						extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
-							oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
+						if(dv.first)
+							extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
+								oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 #ifdef RICH_DEBUG
 				}
 				catch (UniversalError &eo)
