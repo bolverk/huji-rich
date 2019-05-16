@@ -101,6 +101,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 			double phi = 2 * M_PI*dist(generator);
 			double t = acos(2 * dist(generator) - 1);
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
+			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
 				if (PointInPoly(*tproc, point, rank))
 					res.push_back(point);
