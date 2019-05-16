@@ -28,6 +28,13 @@ else ifeq ($(MODE),nasa_intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lr3d -lmpi -lmpi++
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),TACC)
+	CCC := icc
+	CC := mpicxx
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xSKYLAKE -fp-model precise  -std=c++11 -DMPI_NO_CPPBIND
+	LINT_FLAGS := 
+	LFLAGS := -lclipper -lr3d 
+	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),parallel_intel_check)
 	CCC := icc
 	CC := mpiicpc

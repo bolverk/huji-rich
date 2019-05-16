@@ -173,6 +173,68 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 		- y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
 }
 
+/*!
+\brief BiLinear Interpolation
+\param x The x vector, assumed sorted
+\param y The y vector, assumed sorted
+\param z z=f(x,y) matrix, first index is in x
+\param xi The x interpolation location
+\param yi The y interpolation location
+\return f(xi)
+*/
+template <typename T>
+T BiLinearInterpolation(const vector<T> &x, const vector<T> &y,const std::vector<std::vector<T> >& z, T xi, T yi);
+
+template <typename T>
+T BiLinearInterpolation(const vector<T> &x, const vector<T> &y, const std::vector<std::vector<T> >& z, T xi, T yi)
+{
+	typename vector<T>::const_iterator itx = upper_bound(x.begin(), x.end(), xi);
+	if (itx == x.end())
+	{
+		if (xi > x.back())
+		{
+			std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
+			throw;
+		}
+		else
+			itx--;
+	}
+	if (itx == x.begin())
+	{
+		if (*itx < x.at(0))
+		{
+			std::cout << "X too small in LinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
+			throw;
+		}
+	}
+	typename vector<T>::const_iterator ity = upper_bound(y.begin(), y.end(), yi);
+	if (ity == y.end())
+	{
+		if (yi > y.back())
+		{
+			std::cout << "Y too large in LinearInterpolation, y_i " << yi << " max Y " << y.back() << std::endl;
+			throw;
+		}
+		else
+			ity--;
+	}
+	if (ity == y.begin())
+	{
+		if (*ity < y.at(0))
+		{
+			std::cout << "Y too small in LinearInterpolation, y_i " << yi << " min Y " << y.at(0) << std::endl;
+			throw;
+		}
+	}
+
+	T delta = 1.0 / ((*itx - *(itx - 1))*(*ity - *(ity - 1)));
+	size_t idx = static_cast<std::size_t>(itx - x.begin());
+	size_t idy = static_cast<std::size_t>(ity - y.begin());
+	return (z[idx - 1][idy - 1] * (*itx - xi)*(*ity - yi) + z[idx][idy - 1] * (xi - *(itx - 1))*(*ity - yi)
+		+ z[idx - 1][idy] * (*itx - xi)*(yi - *(ity - 1)) + z[idx][idy] * (xi - *(itx - 1))
+		*(yi - *(ity - 1)))*delta;
+}
+
 /*! \brief Returns the minimal term in a vector
 \param v Vector
 \return The minimum of the vector

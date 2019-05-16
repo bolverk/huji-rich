@@ -68,7 +68,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 }
 
 
-vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
+vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, Vector3D center,
 	Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;
@@ -84,6 +84,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 			double phi = 2 * M_PI*dist(generator);
 			double t = acos(2 * dist(generator) - 1);
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
+			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
 				res.push_back(point);
 		}
@@ -150,7 +151,7 @@ vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D 
 	return res;
 }
 
-vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
+vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, Vector3D center,
 	Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;
@@ -182,6 +183,7 @@ vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D
 			double phi = 2 * M_PI*dist(generator);
 			double t = acos(2 * dist(generator) - 1);
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
+			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
 				if (PointInPoly(*tproc, point, rank))
 					res.push_back(point);
