@@ -143,9 +143,12 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 #ifdef RICH_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank << std::endl;
+			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank <<" time "<<time<< std::endl;
 			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " <<
 				extensives[i].internal_energy << " momentum" << abs(extensives[i].momentum) << " volume " << tess.GetVolume(i)
+				<< std::endl;
+			std::cout << "old mass " << old_extensive[i].mass << " energy " << old_extensive[i].energy << " internalE " <<
+				old_extensive[i].internal_energy << " momentum" << abs(old_extensive[i].momentum) << " volume " << tess.GetVolume(i)
 				<< std::endl;
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
 				abs(cells[i].velocity) << std::endl;
