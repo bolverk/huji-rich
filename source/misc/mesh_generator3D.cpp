@@ -25,7 +25,8 @@ vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, V
 	return res;
 }
 
-vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur)
+vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, 
+	Vector3D const& ur, Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;
 	double ran[3];
@@ -34,15 +35,37 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 	Vector3D point;
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
-	for (size_t i = 0; i < PointNum; ++i)
+	if (tproc == 0)
 	{
-		ran[0] = dist(generator);
-		ran[1] = dist(generator);
-		ran[2] = dist(generator);
-		point.x = ran[0] * diff.x + ll.x;
-		point.y = ran[1] * diff.y + ll.y;
-		point.z = ran[2] * diff.z + ll.z;
-		res.push_back(point);
+		for (size_t i = 0; i < PointNum; ++i)
+		{
+			ran[0] = dist(generator);
+			ran[1] = dist(generator);
+			ran[2] = dist(generator);
+			point.x = ran[0] * diff.x + ll.x;
+			point.y = ran[1] * diff.y + ll.y;
+			point.z = ran[2] * diff.z + ll.z;
+			res.push_back(point);
+		}
+	}
+	else
+	{
+		int rank = 0;
+#ifdef RICH_MPI
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+		for (size_t i = 0; i < PointNum; ++i)
+		{
+			ran[0] = dist(generator);
+			ran[1] = dist(generator);
+			ran[2] = dist(generator);
+			point.x = ran[0] * diff.x + ll.x;
+			point.y = ran[1] * diff.y + ll.y;
+			point.z = ran[2] * diff.z + ll.z;
+			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
+				if (PointInPoly(*tproc, point, rank))
+					res.push_back(point);
+		}
 	}
 	return res;
 }

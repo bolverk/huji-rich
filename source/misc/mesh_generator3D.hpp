@@ -33,7 +33,7 @@ vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, V
 \param ur The upper right point of the domain
 \return List of three dimensional points
 */
-vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur);
+vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,Voronoi3D const* tproc = 0);
 
 vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, boost::mt19937_64 &gen);
 
