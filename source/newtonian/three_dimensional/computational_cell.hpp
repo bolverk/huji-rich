@@ -70,6 +70,8 @@ public:
 		const std::array<double, MAX_TRACERS>& tracers_i,
 		const std::array<bool, MAX_STICKERS>& stickers_i);
 
+  ComputationalCell3D(const ComputationalCell3D& other);
+
 	/*! \brief Self increment operator
 	\param other Addition
 	\return Reference to self
