@@ -127,10 +127,15 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 }
 
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
-	const vector<DiagnosticAppendix3D*>& appendices,bool mpi_write)
-{
-	int rank = 0,ws=0;
+	const vector<DiagnosticAppendix3D*>& appendices
 #ifdef RICH_MPI
+,bool mpi_write
+#endif // RICH_MPI
+)
+{
+	int rank = 0;
+#ifdef RICH_MPI
+	int ws = 0;
 	if (mpi_write)
 	{
 		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
