@@ -6,6 +6,13 @@ Edge::Edge(void):
 vertices(Vector2D(), Vector2D()),
 	neighbors(0,0) {}
 
+Edge& Edge::operator=(const Edge& other)
+{
+  vertices = other.vertices;
+  neighbors = other.neighbors;
+  return *this;
+}
+
 Edge::~Edge(void){}
 
 Edge::Edge(Edge const& other):
