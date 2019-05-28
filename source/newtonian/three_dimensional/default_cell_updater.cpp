@@ -103,7 +103,7 @@ namespace
 						eo.AddEntry("Cell volume", vol);
 						eo.AddEntry("Cell energy", extensives[i].energy);
 						eo.AddEntry("Cell thermal energy per unit mass", energy);
-						eo.AddEntry("Cell id", res[i].ID);
+						eo.AddEntry("Cell id", static_cast<double>(res[i].ID));
 						throw eo;
 					}
 				}
@@ -126,7 +126,7 @@ namespace
 					eo.AddEntry("Cell volume", vol);
 					eo.AddEntry("Cell energy", extensives[i].energy);
 					eo.AddEntry("Cell thermal energy per unit mass", energy);
-					eo.AddEntry("Cell id", res[i].ID);
+					eo.AddEntry("Cell id", static_cast<double>(res[i].ID));
 					throw eo;
 				}
 			}
@@ -164,7 +164,7 @@ namespace
 					res[i].velocity = v * extensives[i].momentum / abs(extensives[i].momentum);
 				double gamma_1 = std::sqrt(1 - ScalarProd(res[i].velocity, res[i].velocity));
 				res[i].density = extensives[i].mass *gamma_1*volume;
-				double r = fastabs(tess.GetMeshPoint(i));
+				//				double r = fastabs(tess.GetMeshPoint(i));
 				if (res[i].density < 0)
 					throw UniversalError("Negative density");
 				for (size_t j = 0; j < extensives[i].tracers.size(); ++j)
@@ -206,7 +206,7 @@ namespace
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Cell ID", res[i].ID);
+			  eo.AddEntry("Cell ID", static_cast<double>(res[i].ID));
 				eo.AddEntry("Cell volume", tess.GetVolume(i));
 				eo.AddEntry("Cell index", static_cast<double>(i));
 				eo.AddEntry("Cell mass", extensives[i].mass);
@@ -217,10 +217,10 @@ namespace
 				eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
 				eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
 				eo.AddEntry("Cell energy", extensives[i].energy);
-				eo.AddEntry("Number of tracers", Ntracers);
+				eo.AddEntry("Number of tracers", static_cast<double>(Ntracers));
 				for (size_t j = 0; j < Ntracers; ++j)
 					eo.AddEntry("Tracer extensive value", extensives[i].tracers[j]);
-				eo.AddEntry("Entropy index", entropy_index);
+				eo.AddEntry("Entropy index", static_cast<double>(entropy_index));
 				throw;
 			}
 		}

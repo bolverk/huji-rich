@@ -944,7 +944,7 @@ void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 		vector<Vector2D> chull;
 		ConvexHull(chull, *oldtess, static_cast<int>(ToRemove[i]));
 		const double TotalV = oldtess->GetVolume(static_cast<int>(ToRemove[i]));
-		Extensive oldcell = extensives[ToRemove[i]];
+		//		Extensive oldcell = extensives[ToRemove[i]];
 		temp.clear();
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
