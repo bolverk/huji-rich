@@ -33,6 +33,8 @@ public:
   //! \brief tracers
   tvector tracers;
 
+  Extensive(const Extensive& other);
+
   /*! \brief Assignment operator
     \param origin Original extensives variables
     \return Copy

@@ -7,6 +7,12 @@ Extensive::Extensive(void):
   momentum(0,0),
   tracers() {}
 
+Extensive::Extensive(const Extensive& other):
+  mass(other.mass),
+  energy(other.energy),
+  momentum(other.momentum),
+  tracers(other.tracers) {}
+
 Extensive::Extensive(tvector const& Tracers):mass(0),
 energy(0),
 momentum(0, 0),
