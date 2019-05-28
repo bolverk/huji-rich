@@ -126,9 +126,44 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename)
 	write_std_vector_to_hdf5(file, VerticesInFace, "Vertices_in_face", datatype);
 }
 
-void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vector<DiagnosticAppendix3D*>& appendices)
+void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
+	const vector<DiagnosticAppendix3D*>& appendices,bool mpi_write)
 {
-	H5File file(H5std_string(filename), H5F_ACC_TRUNC);
+	int rank = 0,ws=0;
+#ifdef RICH_MPI
+	if (mpi_write)
+	{
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		MPI_Comm_size(MPI_COMM_WORLD, &ws);
+	}
+#endif
+	H5File file;
+	if (rank == 0)
+	{
+		H5File file2(H5std_string(filename), H5F_ACC_TRUNC);
+		file2.close();
+		file.openFile(H5std_string(filename), H5F_ACC_RDWR);
+	}
+	Group writegroup;
+#ifdef RICH_MPI
+	if (mpi_write)
+	{
+		MPI_Barrier(MPI_COMM_WORLD);
+		int dummy = 0;
+		if (rank > 0)
+		{
+			MPI_Recv(&dummy, 1, MPI_INT, rank - 1, 343, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			file.openFile(H5std_string(filename), H5F_ACC_RDWR);
+		}
+		file.createGroup("/rank" + int2str(rank));
+		writegroup = file.openGroup("/rank" + int2str(rank));
+	}
+	else
+		writegroup = file.openGroup("/");
+#else
+	writegroup = file.openGroup("/");
+#endif
+	
 	vector<ComputationalCell3D> const& cells = sim.getCells();
 	Tessellation3D const& tess = sim.getTesselation();
 	TracerStickerNames tsn = sim.GetTracerStickerNames();
@@ -142,87 +177,103 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 	box[3] = tess.GetBoxCoordinates().second.x;
 	box[4] = tess.GetBoxCoordinates().second.y;
 	box[5] = tess.GetBoxCoordinates().second.z;
-	write_std_vector_to_hdf5(file, box, "Box");
+	if(rank==0)
+		write_std_vector_to_hdf5(file, box, "Box");
 
 	vector<double> temp(Ncells);
-
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetMeshPoint(i).x;
-	write_std_vector_to_hdf5(file, temp, "X");
+	write_std_vector_to_hdf5(writegroup, temp, "X");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetMeshPoint(i).y;
-	write_std_vector_to_hdf5(file, temp, "Y");
+	write_std_vector_to_hdf5(writegroup, temp, "Y");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetMeshPoint(i).z;
-	write_std_vector_to_hdf5(file, temp, "Z");
+	write_std_vector_to_hdf5(writegroup, temp, "Z");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetCellCM(i).x;
-	write_std_vector_to_hdf5(file, temp, "CMx");
+	write_std_vector_to_hdf5(writegroup, temp, "CMx");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetCellCM(i).y;
-	write_std_vector_to_hdf5(file, temp, "CMy");
+	write_std_vector_to_hdf5(writegroup, temp, "CMy");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetCellCM(i).z;
-	write_std_vector_to_hdf5(file, temp, "CMz");
+	write_std_vector_to_hdf5(writegroup, temp, "CMz");
 
 #ifdef RICH_MPI
 	// MPI
-	Group mpi = file.createGroup("/mpi");
-	Tessellation3D const& tproc = sim.getProcTesselation();
-	Ncells = tproc.GetPointNo();
-	temp.resize(Ncells);
-	for (size_t i = 0; i < Ncells; ++i)
-		temp[i] = tproc.GetMeshPoint(i).x;
-	write_std_vector_to_hdf5(mpi, temp, "proc_X");
+	if (rank == 0)
+	{
+		Group mpi = writegroup.createGroup("/mpi");
+		Tessellation3D const& tproc = sim.getProcTesselation();
+		Ncells = tproc.GetPointNo();
+		temp.resize(Ncells);
+		for (size_t i = 0; i < Ncells; ++i)
+			temp[i] = tproc.GetMeshPoint(i).x;
+		write_std_vector_to_hdf5(mpi, temp, "proc_X");
 
-	for (size_t i = 0; i < Ncells; ++i)
-		temp[i] = tproc.GetMeshPoint(i).y;
-	write_std_vector_to_hdf5(mpi, temp, "proc_Y");
+		for (size_t i = 0; i < Ncells; ++i)
+			temp[i] = tproc.GetMeshPoint(i).y;
+		write_std_vector_to_hdf5(mpi, temp, "proc_Y");
 
-	for (size_t i = 0; i < Ncells; ++i)
-		temp[i] = tproc.GetMeshPoint(i).z;
-	write_std_vector_to_hdf5(mpi, temp, "proc_Z");
+		for (size_t i = 0; i < Ncells; ++i)
+			temp[i] = tproc.GetMeshPoint(i).z;
+		write_std_vector_to_hdf5(mpi, temp, "proc_Z");
+		mpi.close();
+	}
+#endif
 	Ncells = tess.GetPointNo();
 	temp.resize(Ncells);
-#endif
-
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].density;
-	write_std_vector_to_hdf5(file, temp, "Density");
+	write_std_vector_to_hdf5(writegroup, temp, "Density");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].pressure;
-	write_std_vector_to_hdf5(file, temp, "Pressure");
+	write_std_vector_to_hdf5(writegroup, temp, "Pressure");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].internal_energy;
-	write_std_vector_to_hdf5(file, temp, "InternalEnergy");
+	write_std_vector_to_hdf5(writegroup, temp, "InternalEnergy");
 
 	std::vector<size_t> ids(Ncells);
 	for (size_t i = 0; i < Ncells; ++i)
 		ids[i] = cells[i].ID;
-	write_std_vector_to_hdf5(file, ids, "ID");
+	write_std_vector_to_hdf5(writegroup, ids, "ID");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].velocity.x;
-	write_std_vector_to_hdf5(file, temp, "Vx");
+	write_std_vector_to_hdf5(writegroup, temp, "Vx");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].velocity.y;
-	write_std_vector_to_hdf5(file, temp, "Vy");
+	write_std_vector_to_hdf5(writegroup, temp, "Vy");
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = cells[i].velocity.z;
-	write_std_vector_to_hdf5(file, temp, "Vz");
+	write_std_vector_to_hdf5(writegroup, temp, "Vz");
 
-	Group tracers = file.createGroup("/tracers");
-	Group stickers = file.createGroup("/stickers");
-
+	Group tracers, stickers;
+#ifdef RICH_MPI
+	if (mpi_write)
+	{
+		tracers = writegroup.createGroup("/rank" + int2str(rank) + "/tracers");
+		stickers = writegroup.createGroup("/rank" + int2str(rank) + "/stickers");
+	}
+	else
+	{
+		tracers = writegroup.createGroup("/tracers");
+		stickers = writegroup.createGroup("/stickers");
+	}
+#else
+	tracers = writegroup.createGroup("/tracers");
+	stickers = writegroup.createGroup("/stickers");
+#endif
 	for (size_t j = 0; j < tsn.tracer_names.size(); ++j)
 	{
 		for (size_t i = 0; i < Ncells; ++i)
@@ -239,34 +290,61 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,const vecto
 
 	for (size_t i = 0; i < Ncells; ++i)
 		temp[i] = tess.GetVolume(i);
-	write_std_vector_to_hdf5(file, temp, "Volume");
+	write_std_vector_to_hdf5(writegroup, temp, "Volume");
+	if (rank == 0)
+	{
+		vector<double> time(1, sim.GetTime());
+		write_std_vector_to_hdf5(file, time, "Time");
 
-	vector<double> time(1, sim.GetTime());
-	write_std_vector_to_hdf5(file, time, "Time");
-
-	vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
-	write_std_vector_to_hdf5(file, cycle, "Cycle");
-
+		vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
+		write_std_vector_to_hdf5(file, cycle, "Cycle");
+	}
 	// Appendices
 	for (size_t i = 0; i < appendices.size(); ++i)
-		write_std_vector_to_hdf5(file,(*(appendices.at(i)))(sim),appendices.at(i)->getName());
+		write_std_vector_to_hdf5(writegroup,(*(appendices.at(i)))(sim),appendices.at(i)->getName());
+#ifdef RICH_MPI
+	if (mpi_write)
+	{
+		if (rank < (ws - 1))
+		{
+			int dummy = 0;
+			tracers.close();
+			stickers.close();
+			writegroup.close();
+			file.close();
+			MPI_Send(&dummy, 1, MPI_INT, rank + 1, 343, MPI_COMM_WORLD);
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
+	else
+		file.close();
+#else
+	file.close();
+#endif
 }
 
-Snapshot3D ReadSnapshot3D
-(const string& fname
+Snapshot3D ReadSnapshot3D(const string& fname
 #ifdef RICH_MPI
-	, bool mpioverride
+	, bool mpi_write
 #endif
 )
 {
 	Snapshot3D res;
 	H5File file(fname, H5F_ACC_RDONLY);
-
+	Group read_location = file.openGroup("/");
+#ifdef RICH_MPI
+	if (mpi_write)
+	{
+		int rank = 0;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		read_location = file.openGroup("/rank" + int2str(rank));
+	}
+#endif
 	// Mesh points
 	{
-		const vector<double> x = read_double_vector_from_hdf5(file, "X");
-		const vector<double> y = read_double_vector_from_hdf5(file, "Y");
-		const vector<double> z = read_double_vector_from_hdf5(file, "Z");
+		const vector<double> x = read_double_vector_from_hdf5(read_location, "X");
+		const vector<double> y = read_double_vector_from_hdf5(read_location, "Y");
+		const vector<double> z = read_double_vector_from_hdf5(read_location, "Z");
 		res.mesh_points.resize(x.size());
 		for (size_t i = 0; i < x.size(); ++i)
 			res.mesh_points.at(i) = Vector3D(x.at(i), y.at(i), z.at(i));
@@ -274,43 +352,36 @@ Snapshot3D ReadSnapshot3D
 
 #ifdef RICH_MPI
 	// MPI
-	if (!mpioverride)
-	{
-		Group mpi = file.openGroup("mpi");
-		const vector<double> px = read_double_vector_from_hdf5(mpi, "proc_X");
-		const vector<double> py = read_double_vector_from_hdf5(mpi, "proc_Y");
-		const vector<double> pz = read_double_vector_from_hdf5(mpi, "proc_Z");
-		res.proc_points.resize(px.size());
-		for (size_t i = 0; i < px.size(); ++i)
-			res.proc_points.at(i) = Vector3D(px.at(i), py.at(i), pz.at(i));
-	}
+	Group mpi = file.openGroup("mpi");
+	const vector<double> px = read_double_vector_from_hdf5(mpi, "proc_X");
+	const vector<double> py = read_double_vector_from_hdf5(mpi, "proc_Y");
+	const vector<double> pz = read_double_vector_from_hdf5(mpi, "proc_Z");
+	res.proc_points.resize(px.size());
+	for (size_t i = 0; i < px.size(); ++i)
+		res.proc_points.at(i) = Vector3D(px.at(i), py.at(i), pz.at(i));
 #endif
-
+	const vector<double> box = read_double_vector_from_hdf5(file, "Box");
+	res.ll.Set(box[0], box[1], box[2]);
+	res.ur.Set(box[3], box[4], box[5]);
 	// Hydrodynamic
 	{
-		const vector<double> density = read_double_vector_from_hdf5(file, "Density");
-		const vector<double> pressure = read_double_vector_from_hdf5(file, "Pressure");
-		const vector<double> energy = read_double_vector_from_hdf5(file, "InternalEnergy");
+		const vector<double> density = read_double_vector_from_hdf5(read_location, "Density");
+		const vector<double> pressure = read_double_vector_from_hdf5(read_location, "Pressure");
+		const vector<double> energy = read_double_vector_from_hdf5(read_location, "InternalEnergy");
 		vector<size_t> IDs(density.size(), 0);
-		ssize_t objcount =  file.getNumObjs();
+		ssize_t objcount = read_location.getNumObjs();
 		for (ssize_t i = 0; i < objcount; ++i)
 		{
-			std::string name = file.getObjnameByIdx(i);
+			std::string name = read_location.getObjnameByIdx(i);
 			if (name.compare(std::string("ID"))==0)
-				IDs = read_sizet_vector_from_hdf5(file, "ID");
-			if (name.compare(std::string("Box")) == 0)
-			{
-				const vector<double> box = read_double_vector_from_hdf5(file, "Box");
-				res.ll.Set(box[0], box[1], box[2]);
-				res.ur.Set(box[3], box[4], box[5]);
-			}
+				IDs = read_sizet_vector_from_hdf5(read_location, "ID");
 		}
-		const vector<double> x_velocity = read_double_vector_from_hdf5(file, "Vx");
-		const vector<double> y_velocity = read_double_vector_from_hdf5(file, "Vy");
-		const vector<double> z_velocity = read_double_vector_from_hdf5(file, "Vz");
+		const vector<double> x_velocity = read_double_vector_from_hdf5(read_location, "Vx");
+		const vector<double> y_velocity = read_double_vector_from_hdf5(read_location, "Vy");
+		const vector<double> z_velocity = read_double_vector_from_hdf5(read_location, "Vz");
 
-		Group g_tracers = file.openGroup("tracers");
-		Group g_stickers = file.openGroup("stickers");
+		Group g_tracers = read_location.openGroup("tracers");
+		Group g_stickers = read_location.openGroup("stickers");
 		vector<vector<double> > tracers(g_tracers.getNumObjs());
 		vector<string> tracernames(tracers.size());
 		for (hsize_t n = 0; n < g_tracers.getNumObjs(); ++n)
@@ -340,10 +411,8 @@ Snapshot3D ReadSnapshot3D
 			res.cells.at(i).velocity.x = x_velocity.at(i);
 			res.cells.at(i).velocity.y = y_velocity.at(i);
 			res.cells.at(i).velocity.z = z_velocity.at(i);
-			//res.cells.at(i).tracers.resize(tracernames.size());
 			for (size_t j = 0; j < tracernames.size(); ++j)
 				res.cells.at(i).tracers.at(j) = tracers.at(j).at(i);
-			//res.cells.at(i).stickers.resize(stickernames.size());
 			for (size_t j = 0; j < stickernames.size(); ++j)
 				res.cells.at(i).stickers.at(j) = stickers.at(j).at(i) == 1;
 		}
@@ -354,7 +423,7 @@ Snapshot3D ReadSnapshot3D
 		const vector<double> time = read_double_vector_from_hdf5(file, "Time");
 		res.time = time.at(0);
 
-		const vector<double> volume = read_double_vector_from_hdf5(file, "Volume");
+		const vector<double> volume = read_double_vector_from_hdf5(read_location, "Volume");
 		res.volumes = volume;
 		const vector<int> cycle = read_int_vector_from_hdf5(file, "Cycle");
 		res.cycle = cycle.at(0);

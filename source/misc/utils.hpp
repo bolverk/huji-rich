@@ -193,7 +193,7 @@ T BiLinearInterpolation(const vector<T> &x, const vector<T> &y, const std::vecto
 	{
 		if (xi > x.back())
 		{
-			std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
+			std::cout << "X too large in BiLinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
 			throw;
 		}
 		else
@@ -203,7 +203,7 @@ T BiLinearInterpolation(const vector<T> &x, const vector<T> &y, const std::vecto
 	{
 		if (*itx < x.at(0))
 		{
-			std::cout << "X too small in LinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
+			std::cout << "X too small in BiLinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
 			throw;
 		}
 	}
