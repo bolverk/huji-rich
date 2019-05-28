@@ -69,12 +69,11 @@ public:
 
 /*! \brief Load snapshot data into memory
 \param fname File name
-\param mpioverride Flag for not reading mpi data when MPI is on
 \return Snapshot data
 */
 Snapshot3D ReadSnapshot3D(const string& fname
 #ifdef RICH_MPI
-	,bool mpioverride = false
+	,bool mpi_write = false
 #endif
 );
 
@@ -85,5 +84,9 @@ Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proc
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
-	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>());
+	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>()
+#ifdef RICH_MPI
+	,bool mpi_write = false
+#endif
+);
 #endif // HDF_WRITE
