@@ -788,7 +788,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Vx", new_cells[i].velocity.x);
 					eo.AddEntry("Vy", new_cells[i].velocity.y);
 					eo.AddEntry("Vz", new_cells[i].velocity.z);
-					eo.AddEntry("Cell id", new_cells[i].ID);
+					eo.AddEntry("Cell id", static_cast<double>(new_cells[i].ID));
 					eo.AddEntry("Interpolated density",cell_ref->density);
 					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
 					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
@@ -818,7 +818,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 					eo.AddEntry("Vx", new_cells[i].velocity.x);
 					eo.AddEntry("Vy", new_cells[i].velocity.y);
 					eo.AddEntry("Vz", new_cells[i].velocity.z);
-					eo.AddEntry("Cell id", new_cells[i].ID);
+					eo.AddEntry("Cell id", static_cast<double>(new_cells[i].ID));
 					eo.AddEntry("Interpolated density",cell_ref->density);
 					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
 					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
@@ -869,7 +869,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Vx", new_cells[N0].velocity.x);
 				eo.AddEntry("Vy", new_cells[N0].velocity.y);
 				eo.AddEntry("Vz", new_cells[N0].velocity.z);
-				eo.AddEntry("Cell id", new_cells[N0].ID);
+				eo.AddEntry("Cell id", static_cast<double>(new_cells[N0].ID));
 				eo.AddEntry("Interpolated density",cell_ref->density);
 				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
 				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
@@ -883,7 +883,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
 				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
 				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).second;
-				eo.AddEntry("Other cell ID", new_cells[N1].ID);
+				eo.AddEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
 				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
 				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
 				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
@@ -937,7 +937,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Vx", new_cells[N0].velocity.x);
 				eo.AddEntry("Vy", new_cells[N0].velocity.y);
 				eo.AddEntry("Vz", new_cells[N0].velocity.z);
-				eo.AddEntry("Cell id", new_cells[N0].ID);
+				eo.AddEntry("Cell id", static_cast<double>(new_cells[N0].ID));
 				eo.AddEntry("Interpolated density",cell_ref->density);
 				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
 				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
@@ -951,7 +951,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
 				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
 				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).first;
-				eo.AddEntry("Other cell ID", new_cells[N1].ID);
+				eo.AddEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
 				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
 				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
 				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);

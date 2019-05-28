@@ -56,7 +56,7 @@ void RigidWallGenerator3D::operator()(const Tessellation3D& tess,
 		res.insert(res.begin()+i, temp[indeces2[i]]);
 }
 
-Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
+Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
 	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/,
 	TracerStickerNames const& /*tracerstickernames*/) const
 {
@@ -99,7 +99,7 @@ void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
 		res.insert(res.begin() + i, temp[indeces2[i]]);
 }
 
-Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
+Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
 	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/,
 	TracerStickerNames const& /*tracerstickernames*/) const
 {
@@ -147,7 +147,8 @@ void ConstantPrimitiveGenerator3D::operator()(const Tessellation3D & tess, const
 }
 
 Slope3D ConstantPrimitiveGenerator3D::GetGhostGradient(const Tessellation3D & /*tess*/, 
-	const vector<ComputationalCell3D>& cells, const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, 
+						       const vector<ComputationalCell3D>& /*cells*/, 
+						       const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, 
 	double /*time*/, size_t /*face_index*/, TracerStickerNames const & /*tracerstickernames*/) const
 {
 	Slope3D res;

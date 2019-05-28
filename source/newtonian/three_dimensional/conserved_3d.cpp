@@ -27,6 +27,7 @@ namespace
 		return res;
 	}
 
+  /*
 	std::array<double, MAX_TRACERS> operator/(const std::array<double, MAX_TRACERS>& v, double s)
 	{
 		std::array<double, MAX_TRACERS> res;
@@ -35,6 +36,7 @@ namespace
 			res[i] = v[i] * s_1;
 		return res;
 	}
+  */
 }
 
 Conserved3D& Conserved3D::operator-=(const Conserved3D& diff)
