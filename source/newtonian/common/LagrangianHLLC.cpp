@@ -157,10 +157,10 @@ Conserved LagrangianHLLC::operator()
 				{
 					std::cout << "Too many iterations in HLLC" << std::endl;
 					std::cout << "Normal " << normaldir.x << "," << normaldir.y <<  " velocity = " << velocity << std::endl;
-					std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.Energy << " vx = " << left.velocity.x <<
-						" vy = " << left.velocity.y << std::endl;
-					std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.Energy << " vx = " << right.velocity.x <<
-						" vy = " << right.velocity.y  << std::endl;
+					std::cout << " Left density = " << left.Density << " pressure = " << left.Pressure << " internal_energy = " << left.Energy << " vx = " << left.Velocity.x <<
+						" vy = " << left.Velocity.y << std::endl;
+					std::cout << " Right density = " << right.Density << " pressure = " << right.Pressure << " internal_energy = " << right.Energy << " vx = " << right.Velocity.x <<
+						" vy = " << right.Velocity.y  << std::endl;
 				}
 		throw UniversalError("LagrangianHllc::No convergence");
 	}
