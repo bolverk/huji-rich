@@ -161,8 +161,9 @@ Conserved LagrangianHLLC::operator()
 						" vy = " << left.Velocity.y << std::endl;
 					std::cout << " Right density = " << right.Density << " pressure = " << right.Pressure << " internal_energy = " << right.Energy << " vx = " << right.Velocity.x <<
 						" vy = " << right.Velocity.y  << std::endl;
+					throw UniversalError("LagrangianHllc::No convergence");
 				}
-		throw UniversalError("LagrangianHllc::No convergence");
+		
 	}
 	
 	if (!massflux_)
