@@ -153,16 +153,16 @@ Conserved LagrangianHLLC::operator()
 		old_ps = ws.ps;
 		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
 		++counter;
-	/*			if (counter > 54)
+				if (counter > 54)
 				{
 					std::cout << "Too many iterations in HLLC" << std::endl;
-					std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z << " velocity = " << velocity << std::endl;
-					std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
-						" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
-					std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.internal_energy << " vx = " << right.velocity.x <<
-						" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
-				}*/
-		assert(counter < 55);
+					std::cout << "Normal " << normaldir.x << "," << normaldir.y <<  " velocity = " << velocity << std::endl;
+					std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.Energy << " vx = " << left.velocity.x <<
+						" vy = " << left.velocity.y << std::endl;
+					std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.Energy << " vx = " << right.velocity.x <<
+						" vy = " << right.velocity.y  << std::endl;
+				}
+		throw UniversalError("LagrangianHllc::No convergence");
 	}
 	
 	if (!massflux_)
