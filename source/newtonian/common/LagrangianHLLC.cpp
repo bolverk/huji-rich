@@ -66,7 +66,7 @@ namespace
 		const double sr = vr + cr * (pstar > pr ? std::sqrt(0.8*(pstar / pr - 1) + 1) : 1);
 		const double denom = 1.0 /(dl*(sl - vl) - dr * (sr - vr));
 		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
-		const double ps = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
+		const double ps =  std::max(0.0,dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		return WaveSpeeds(sl, ss, sr,ps);
 	}
 }
