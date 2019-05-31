@@ -109,6 +109,8 @@ namespace
 			}
 			else
 				res.pressure = eos.de2p(res.density, energy, res.tracers, tracerstickernames.tracer_names);
+			if(!energy>0)
+				throw UniversalError("Negative thermal energy in cell update");
 		}
 		catch (UniversalError &eo)
 		{
