@@ -35,6 +35,12 @@ else ifeq ($(MODE),clang)
 	CXX := clang++
 	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++11 -Wno-zero-as-null-pointer-constant
 	LINT_FLAGS := -std=c++11
+else ifeq ($(MODE),TACC)
+	CC := icc
+	CXX := mpicxx
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xSKYLAKE -fp-model precise  -std=c++11 -DMPI_NO_CPPBIND
+	LINT_FLAGS := 
+	ARCHIVER_FUNC := xiar
 else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++11
