@@ -91,20 +91,20 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.4/c++
 
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
-	cd external_libraries/dump_clipper && wget https://sourceforge.net/projects/polyclipping/files/latest/download && mv download clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include
+	cd external_libraries/dump_clipper && wget https://sourceforge.net/projects/polyclipping/files/latest/download && mv download clipper_ver6.4.2.zip && unzip clipper_ver6.4.2.zip && cp cpp/clipper.hpp ../include
 #	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include
 
 external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hpp
-	cd external_libraries/dump_clipper && g++ -c -O3 cpp/clipper.cpp -o clipper.o
+	cd external_libraries/dump_clipper && $(CXX) -c -O3 cpp/clipper.cpp -o clipper.o
 
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
-	ar cr $@ $^ 
+	$(ARCHIVER_FUNC) cr $@ $^ 
 
 external_libraries/dump_clipper/dclipper.o: external_libraries/include/clipper.hpp
-	cd external_libraries/dump_clipper && g++ -c -O0 -g -pg -D_GLIBCXX_DEBUG cpp/clipper.cpp -o dclipper.o
+	cd external_libraries/dump_clipper && $(CXX) -c -O0 -g -pg -D_GLIBCXX_DEBUG cpp/clipper.cpp -o dclipper.o
 
 external_libraries/lib/libdclipper.a: external_libraries/dump_clipper/dclipper.o
-	ar cr $@ $^ 
+	$(ARCHIVER_FUNC) cr $@ $^ 
 
 external_libraries/hdf5_dump/hdf5-1.10.4/c++/src/H5Cpp.h: | external_libraries/hdf5_dump/hdf5-1.10.4.tar.gz
 	cd external_libraries/hdf5_dump/ && tar xf ./hdf5-1.10.4.tar.gz
