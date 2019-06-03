@@ -7,12 +7,18 @@ Extensive::Extensive(void):
   momentum(0,0),
   tracers() {}
 
+Extensive::Extensive(const Extensive& other):
+  mass(other.mass),
+  energy(other.energy),
+  momentum(other.momentum),
+  tracers(other.tracers) {}
+
 Extensive::Extensive(tvector const& Tracers):mass(0),
 energy(0),
 momentum(0, 0),
 tracers()
 {
-	size_t N = tracers.size();
+	size_t N = Tracers.size();
 	for (size_t i = 0; i < N; ++i)
 		tracers[i] = 0;
 }

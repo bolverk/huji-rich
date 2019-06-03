@@ -10,6 +10,13 @@ Primitive::Primitive(void):
   Energy(0),
   SoundSpeed(0) {}
 
+Primitive::Primitive(const Primitive& other):
+  Density(other.Density),
+  Pressure(other.Pressure),
+  Velocity(other.Velocity),
+  Energy(other.Energy),
+  SoundSpeed(other.SoundSpeed) {}
+
 Primitive::Primitive(double density_i,
 		     double pressure_i,
 		     Vector2D const& velocity_i,
@@ -53,6 +60,11 @@ Conserved::Conserved(double mass,
 		     double energy):
   Mass(mass), Momentum(momentum),
   Energy(energy) {}
+
+Conserved::Conserved(const Conserved& other):
+  Mass(other.Mass),
+  Momentum(other.Momentum),
+  Energy(other.Energy) {}
 
 Conserved& Conserved::operator=(Conserved const&other)
 {

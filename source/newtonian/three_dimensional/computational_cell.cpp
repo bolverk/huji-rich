@@ -17,6 +17,15 @@ ComputationalCell3D::ComputationalCell3D(double density_i,
   density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
   velocity(velocity_i), tracers(tracers_i),stickers(stickers_i) {}
 
+ComputationalCell3D::ComputationalCell3D(const ComputationalCell3D& other):
+density(other.density),
+pressure(other.pressure),
+internal_energy(other.internal_energy),
+ID(other.ID),
+velocity(other.velocity),
+tracers(other.tracers),
+stickers(other.stickers) {}
+
 
 ComputationalCell3D& ComputationalCell3D::operator=(ComputationalCell3D const& other)
 {

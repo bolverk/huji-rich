@@ -21,7 +21,7 @@ double IdealGas::dp2e(double d, double p, tvector const& /*tracers*/, vector<str
 		eo.AddEntry("Gamma index", g_);
 		throw eo;
 	}
-#endif RICH_DEBUG
+#endif //RICH_DEBUG
 
 	return p / d / (g_ - 1);
 }
@@ -37,7 +37,7 @@ double IdealGas::de2p(double d, double e, tvector const& /*tracers*/, vector<str
 		eo.AddEntry("Gamma index", g_);
 		throw eo;
 	}
-#endif RICH_DEBUG
+#endif // RICH_DEBUG
 
 	if (e < 0)
 		throw UniversalError("Negative thermal energy");
@@ -70,7 +70,7 @@ double IdealGas::dp2c(double d, double p, tvector const& /*tracers*/, vector<str
 		eo.AddEntry("Gamma index", g_);
 		throw eo;
 	}
-#endif RICH_DEBUG
+#endif //RICH_DEBUG
 	assert(!(p < 0));
 	assert(!(d < 0));
 	assert(!(g_ < 0));

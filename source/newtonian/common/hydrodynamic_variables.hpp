@@ -24,6 +24,8 @@ public:
 	    Vector2D const& momentum,
 	    double energy);
 
+  Conserved(const Conserved& other);
+
   //! \brief Mass
   double Mass;
 
@@ -73,6 +75,8 @@ public:
 	    Vector2D const& velocity_i,
 	    double energy_i,
 	    double sound_speed_i);
+
+  Primitive(const Primitive& other);
 
   //! \brief Density
   double Density;
