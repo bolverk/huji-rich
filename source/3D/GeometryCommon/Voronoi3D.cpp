@@ -1558,7 +1558,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 		{
 			size_t other = tproc.GetFaceNeighbors(faces[i]).first == rank ? tproc.GetFaceNeighbors(faces[i]).second :
 				tproc.GetFaceNeighbors(faces[i]).first;
-			if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+			if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>50 * tproc.GetWidth(other))
 				continue;
 			to_check.push(faces[i]);
 		}
@@ -1582,7 +1582,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (!std::binary_search(neigh.begin(), neigh.end(), fneigh.first))
 					{
-						if (fneigh.first < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>30
+						if (fneigh.first < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.first) - del_.points_[point])>50
 							* tproc.GetWidth(fneigh.first))
 							continue;
 						to_check.push(faces[j]);
@@ -1593,7 +1593,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 				{
 					if (!std::binary_search(neigh.begin(), neigh.end(), fneigh.second))
 					{
-						if (fneigh.second < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.second) - del_.points_[point])>30
+						if (fneigh.second < tproc.GetPointNo() && fastabs(tproc.GetCellCM(fneigh.second) - del_.points_[point])>50
 							* tproc.GetWidth(fneigh.second))
 							continue;
 						to_check.push(faces[j]);
@@ -1646,7 +1646,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 							{
 								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.first ?
 									tproc.GetFaceNeighbors(faces_temp[i]).second : tproc.GetFaceNeighbors(faces_temp[i]).first;
-								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>50 * tproc.GetWidth(other))
 									continue;
 								to_check.push(faces_temp[i]);
 							}
@@ -1660,7 +1660,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 							{
 								size_t other = tproc.GetFaceNeighbors(faces_temp[i]).first == f.neighbors.second ?
 									tproc.GetFaceNeighbors(faces_temp[i]).second : tproc.GetFaceNeighbors(faces_temp[i]).first;
-								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>30 * tproc.GetWidth(other))
+								if (other < tproc.GetPointNo() && fastabs(tproc.GetCellCM(other) - del_.points_[point])>50 * tproc.GetWidth(other))
 									continue;
 								to_check.push(faces_temp[i]);
 							}
