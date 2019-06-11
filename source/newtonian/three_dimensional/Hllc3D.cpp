@@ -158,6 +158,10 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		f_gr = fr;
 	else
 		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
+	// check if bad wavespeed
+	if(ws.center<ws.left || ws.center>ws.right)
+		f_gr = ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul)*(1.0 / (ws.right - ws.left)); // HLL flux
+
 
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
