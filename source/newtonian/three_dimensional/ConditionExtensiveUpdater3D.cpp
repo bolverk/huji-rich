@@ -27,7 +27,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		oldEtherm[i] = extensives[i].internal_energy;
 		oldE[i] = extensives[i].energy;
 	}
-	bool entropy = !(std::lower_bound(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(), std::string("Entropy")) ==
+	bool entropy = !(std::find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(), std::string("Entropy")) ==
 		tracerstickernames.tracer_names.end());
 	size_t Nfluxes = fluxes.size();
 	Conserved3D delta;
