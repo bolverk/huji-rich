@@ -80,8 +80,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " <<
 				extensives[i].internal_energy << " momentum" << abs(extensives[i].momentum) << " volume " << tess.GetVolume(i)
 				<< std::endl;
-			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
-				abs(cells[i].velocity) << std::endl;
+			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " vx " <<
+				cells[i].velocity.x << " vy " <<cells[i].velocity.y << " vz " <<cells[i].velocity.z << std::endl;
 			face_vec temp = tess.GetCellFaces(i);
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
@@ -90,7 +90,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 				double Area = tess.GetArea(temp[j]) * dt;
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass*Area <<
 					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
-					" Area*dt " << Area << std::endl;
+					" Area*dt " << Area <<" normal "<<tess.Normal(temp[j]).x<<"," << tess.Normal(temp[j]).y <<"," << tess.Normal(temp[j]).z << std::endl;
 			}
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
@@ -98,7 +98,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				size_t Nother = N1 == i ? N0 : N1;
 				std::cout << "Neigh cell " <<Nother<<", density " << cells[Nother].density << " pressure " << 
-					cells[Nother].pressure << " v " <<	abs(cells[Nother].velocity) << std::endl;
+					cells[Nother].pressure << " vx " <<	cells[Nother].velocity.x << " vy " << cells[Nother].velocity.y << " vz " 
+					<< cells[Nother].velocity.z<< std::endl;
 			}
 			assert(false);
 		}
