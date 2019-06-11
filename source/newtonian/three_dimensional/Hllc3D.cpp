@@ -159,7 +159,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	else
 		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
 	// check if bad wavespeed
-	if(ws.center<ws.left || ws.center>ws.right)
+	if((ws.center<ws.left || ws.center>ws.right) && ws.left<0 && ws.right>0)
 		f_gr = ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul)*(1.0 / (ws.right - ws.left)); // HLL flux
 
 
