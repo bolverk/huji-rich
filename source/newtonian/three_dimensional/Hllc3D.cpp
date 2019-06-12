@@ -11,9 +11,9 @@ namespace
 	public:
 
 		WaveSpeeds(double left_i, double center_i, double right_i) :left(left_i), center(center_i), right(right_i) {}
-		const double left;
-		const double center;
-		const double right;
+		double left;
+		double center;
+		double right;
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
@@ -142,12 +142,18 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	const Conserved3D fl = PrimitiveToFlux(local_left);
 	const Conserved3D fr = PrimitiveToFlux(local_right);
 
-	const WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn);
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn);
 
 	const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 	const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 
 	Conserved3D f_gr;
+	// check if bad wavespeed
+	if ((ws.center<ws.left || ws.center>ws.right))
+	{
+		ws.center = 0.5*(ws.left + ws.right);
+	}
+
 	if (ws.left > 0)
 		f_gr = fl;
 	else if (ws.left <= 0 && ws.center >= 0)
@@ -158,10 +164,10 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		f_gr = fr;
 	else
 		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
-	// check if bad wavespeed
-	if((ws.center<ws.left || ws.center>ws.right) && ws.left<0 && ws.right>0)
-		f_gr = ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul)*(1.0 / (ws.right - ws.left)); // HLL flux
 
+	// check if bad wavespeed
+	if ((ws.center<ws.left || ws.center>ws.right) && ws.left < 0 && ws.right>0)
+		f_gr = ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul)*(1.0 / (ws.right - ws.left)); // HLL flux
 
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;
