@@ -52,10 +52,17 @@ namespace
 			throw eo;
 		}
 #endif
-		const double sl = std::min(vl - cl, vr - cr);
-		const double sr = std::max(vl + cl, vr + cr);
-		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) /
-			(dl*(sl - vl) - dr * (sr - vr));
+		//const double sl2 = std::min(vl - cl, vr - cr);
+		//const double sr2 = std::max(vl + cl, vr + cr);
+		double dls = fastsqrt(dl), drs = fastsqrt(dr);
+		double ubar = (dls*vl + drs * vr) / (dls + drs);
+		double dbar = fastsqrt((dls*cl*cl + drs * cr*cr) / (dls + drs) + 0.5*
+			(vl - vr)*(vl - vr)*dls*drs / ((dls + drs)*(dls + drs)));
+		double sl = ubar - dbar;
+		double sr = ubar + dbar;
+		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
+		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		//const double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		return WaveSpeeds(sl, ss, sr);
 	}
 
