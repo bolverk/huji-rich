@@ -1,6 +1,7 @@
 #include "Tillotson.hpp"
 #include <assert.h>
 #include <boost/math/tools/roots.hpp>
+#include <boost/math/tools/minima.hpp>
 #include <iostream>
 #include "../../misc/universal_error.hpp"
 #include "../../misc/utils.hpp"
@@ -57,18 +58,18 @@ double Tillotson::de2pI(double d, double e)const
 	double c = E0_ * eta*eta;
 	double AB = (A_ - 2 * B_)*eta + (B_ - A_) + B_ * eta*eta;
 	double res = 0;
-	if (negative_pressure_)
+	//if (negative_pressure_)
 		res = (a_ + b_ / (e / c + 1))*d*e + AB;
-	else
-		res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, a_*d*e*1e-7);
+	//else
+	//	res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, a_*d*e*1e-7);
 	return res;
 }
 
 double Tillotson::de2pII(double d, double e)const
 {
-	double P2 = de2pI(d, e);
-	double P3 = de2pIV(d, e);
-	return ((e - EIV_)*P3 + (ECV_ - e)*P2) / (ECV_ - EIV_);
+	double P2 = de2pI(d, EIV_);
+	double P3 = de2pIV(d, ECV_);
+	return std::max(((e - EIV_)*P3 + (ECV_ - e)*P2) / (ECV_ - EIV_), a_*d*e*1e-7);
 }
 
 double Tillotson::de2pIV(double d, double e)const
@@ -83,10 +84,10 @@ double Tillotson::de2pIV(double d, double e)const
 	double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
 	double eta3 = beta_ * (rho0_ / d - 1);
 	double exp_beta = (eta3 > 100) ? 0 : A * std::exp(-eta3);
-	if (negative_pressure_)
+	//if (negative_pressure_)
 		return a_ * d*e + exp_alpha * (b_*d*e / (e / c + 1) + exp_beta);
-	else
-		return std::max(a_*d*e + exp_alpha * (b_*d*e / (e / c + 1) + exp_beta), a_ *d*e*1e-7);
+	//else
+	//	return std::max(a_*d*e + exp_alpha * (b_*d*e / (e / c + 1) + exp_beta), a_ *d*e*1e-7);
 }
 
 double Tillotson::dep2cI(double d, double e, double p) const
@@ -120,7 +121,7 @@ struct dp2eII
 
 	double operator()(double e)
 	{
-		double res = 1 - eos_.de2pII(eos_.temp_d_, e) / eos_.temp_p_;
+		double res = std::abs(1.0 - eos_.de2pII(eos_.temp_d_, e) / eos_.temp_p_);
 		return res;
 	}
 private:
@@ -140,55 +141,64 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 	}
 	else
 	{
-		double e1 = dp2EI(d, p);
-		if (e1<EIV_ && d >(rho0_*(1 - e1 * rho0_*a_ / A_)))
-			return e1;
 		double e4 = dp2EIV(d, p);
-		if (e4 > ECV_ || d < (rho0_*(1 - e4 * rho0_*a_ / A_)))
+		double p4 = de2pI(d, e4);
+		double e1 = dp2EI(d, p);
+		//double p1 = de2pI(d, e1);
+		if (p4<0 || e4>=ECV_)
 			return e4;
-		double PIV = de2pI(d, EIV_);
-		double eta2 = alpha_ * (rho0_ / d - 1) * (rho0_ / d - 1);
-		double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
-		double eta3 = beta_ * (rho0_ / d - 1);
-		double exp_beta = (eta3 > 100) ? 0 : A * std::exp(-eta3);
-		double PCV = 0;
-		if (negative_pressure_)
-			PCV = a_ * d*ECV_ + exp_alpha * (b_*d*ECV_ / (ECV_ / c + 1) + exp_beta);
-		else
-			PCV = std::max(a_*d*ECV_ + exp_alpha * (b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_ + b_)*d*ECV_*1e-7);
+		if (e4<EIV_ && p4>0)
+			return dp2EI(d, p);	
 		temp_d_ = d;
 		temp_p_ = p;
 		boost::uintmax_t it = 50;
-		std::pair<double, double> res;
+		std::pair<double, double> res,res2;
 		try
 		{
-			res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
+			//res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
+			res=boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, ECV_, 30, it);
+			//res2 = boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, 0.5*(EIV_+ECV_), 30, it);
 		}
 		catch (boost::exception const& eo)
 		{
+			double eta2 = alpha_ * (rho0_ / d - 1) * (rho0_ / d - 1);
+			double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
+			double eta3 = beta_ * (rho0_ / d - 1);
+			double exp_beta = (eta3 > 100) ? 0 : A * std::exp(-eta3);
+			double PIV = de2pI(d, EIV_);
+			double PCV = 0;
+			if (negative_pressure_)
+				PCV = a_ * d*ECV_ + exp_alpha * (b_*d*ECV_ / (ECV_ / c + 1) + exp_beta);
+			else
+				PCV = std::max(a_*d*ECV_ + exp_alpha * (b_*d*ECV_ / (ECV_ / c + 1) + exp_beta), (a_ + b_)*d*ECV_*1e-7);
 			std::cout << " EIV_ " << EIV_ << " ECV_ " << ECV_ << " density " << d << " pressure " << p << " PIV " << PIV << " PCV " << PCV << std::endl;
 		}
-		double result = 0.5*(res.first + res.second);
-		double newp = de2p(d, result);
-		if (newp > PIV * 2)
+		double result = res.first;
+		//double result = res.second > res2.second ? res2.first : res.first;
+		if (result > EIV_ && result < ECV_)
 		{
-			if (std::abs(p - newp) > 0.001*std::abs(p))
+			double newp = de2p(d, result);
+			if (newp > p*0.001)
 			{
-				UniversalError eo("No dp2e convergence");
-				eo.AddEntry("Density", d);
-				eo.AddEntry("Pressure", p);
-				eo.AddEntry("New Pressure", newp);
-				eo.AddEntry("EIV", EIV_);
-				eo.AddEntry("ECV", ECV_);
-				eo.AddEntry("First energy", res.first);
-				eo.AddEntry("Second energy", res.second);
-				eo.AddEntry("First pressure", de2p(d, res.first));
-				eo.AddEntry("Second pressure", de2p(d, res.second));
-				throw eo;
+				if (std::abs(p - newp) > 0.001*std::abs(p))
+				{
+					UniversalError eo("No dp2e convergence");
+					eo.AddEntry("Density", d);
+					eo.AddEntry("Pressure", p);
+					eo.AddEntry("New Pressure", newp);
+					eo.AddEntry("EIV", EIV_);
+					eo.AddEntry("ECV", ECV_);
+					eo.AddEntry("First energy", res.first);
+					eo.AddEntry("Second energy", res.second);
+					eo.AddEntry("First pressure", de2p(d, res.first));
+					eo.AddEntry("Second pressure", de2p(d, res.second));
+					throw eo;
+				}
 			}
+			assert(result > 0);
+			return result;
 		}
-		assert(result > 0);
-		return result;
+		return e4;
 	}
 }
 
@@ -200,9 +210,10 @@ double Tillotson::de2p(double d, double e, tvector const& /*tracers*/, vector<st
 	}
 	else
 	{
-		if (e <= EIV_ && d > (rho0_*(1-e*rho0_*a_/A_)))
-			return de2pI(d, e);
-		if (e >= ECV_ || d < (rho0_*(1 - e * rho0_*a_ / A_)))
+		double p1 = de2pI(d, e);
+		if (e <= EIV_ && p1 > 0)
+			return p1;
+		if (e >= ECV_  || p1<0)
 			return de2pIV(d, e);
 		return de2pII(d, e);
 	}
@@ -217,7 +228,7 @@ double Tillotson::de2c(double d, double e, tvector const & tracers, vector<strin
 double Tillotson::dp2c(double d, double p, tvector const & tracers, vector<string> const & tracernames) const
 {
 	double e = dp2e(d, p, tracers, tracernames);
-	if (d >= rho0_ || (e <= EIV_ && d > (rho0_*(1 - e * rho0_*a_ / A_))))
+	if (d >= rho0_)
 	{
 		double res = dep2cI(d, e, p);
 		assert(res > 0);
@@ -225,7 +236,15 @@ double Tillotson::dp2c(double d, double p, tvector const & tracers, vector<strin
 	}
 	else
 	{
-		if (e >= ECV_ || d < (rho0_*(1 - e * rho0_*a_ / A_)))
+		double p1 = de2pI(d, e);
+		if (e <= EIV_ && std::abs(p1-p) < p*1e-5)
+		{
+			double res = dep2cI(d, e, p);
+			assert(res > 0);
+			return std::sqrt(res);
+		}
+		//double e4 = dp2EIV(d, p);
+		if (e >= ECV_ || p1 < 0)
 		{
 			double res = dep2cIV(d, e, p);
 			assert(res > 0);
