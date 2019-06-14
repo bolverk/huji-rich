@@ -95,5 +95,68 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 			}
 		}
 	}
+
+	size_t N = extensives.size();
+	for (size_t i = 0; i < N; ++i)
+	{
+		if ((!(extensives[i].mass > 0)) || (!(extensives[i].energy > 0)) || (!std::isfinite(extensives[i].momentum.x)) || (!std::isfinite(extensives[i].momentum.y)))
+		{
+			int rank = 0;
+#ifdef RICH_MPI
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+			std::cout << "Bad cell in LagrangianExtensiveUpdate, cell " << i << " rank " << rank << " time " << time << std::endl;
+			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " Entropy " <<
+				extensives[i].tracers[0] << " momentum" << abs(extensives[i].momentum) << " volume " << cd.volumes[i]<< std::endl;
+			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " v " <<
+				abs(cells[i].velocity) << std::endl;
+			std::vector<int> temp = tess.GetCellEdges(static_cast<int>(i));
+			for (size_t j = 0; j < temp.size(); ++j)
+			{
+				Edge edge = tess.GetEdge(temp[j]);
+				int N0 = tess.GetEdge(temp[j]).neighbors.first;
+				int N1 = tess.GetEdge(temp[j]).neighbors.second;
+				double Area = tess.GetEdge(temp[j]).GetLength() * dt;
+				std::cout << "Edge " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass*Area <<
+					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
+					" L*dt " << Area << " N0 " << tess.GetMeshPoint(N0).x << "," << tess.GetMeshPoint(N0).y << " N1 " 
+					<< tess.GetMeshPoint(N1).x << "," << tess.GetMeshPoint(N1).y << std::endl;
+				std::cout << "dl " << newcells[N0].density << " pl " << newcells[N0].pressure << " vxl " << newcells[N0].velocity.x << " vyl " << newcells[N0].velocity.y  << std::endl;
+				std::cout << "dr " << newcells[N1].density << " pr " << newcells[N1].pressure << " vxr " << newcells[N1].velocity.x << " vyr " << newcells[N1].velocity.y  << std::endl;
+				Vector2D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
+				std::cout << "dx " << normal.x << " dy " << normal.y << std::endl;
+				if (lflux_.Lag_calc_[temp[j]])
+				{
+					double p_star = ScalarProd(fluxes[temp[j]].momentum, normal);
+					double v_star = fluxes[temp[j]].energy / p_star;
+					double v_new = (v_star - lflux_.ws_[temp[j]]);
+					std::cout << "Old pstar " << p_star << " vstar " << v_star << " vnew " << v_new << std::endl;
+					if (v_new*v_star > 0)
+					{
+						if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first)
+							&& p_star > 1.2*newcells[static_cast<size_t>(edge.neighbors.second)].pressure)
+							v_new = std::max(v_new, ScalarProd(newcells[static_cast<size_t>(edge.neighbors.second)].velocity,
+								normal));
+						if (v_new < 0 && tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first)
+							&& p_star > 1.2*newcells[static_cast<size_t>(edge.neighbors.first)].pressure)
+							v_new = std::min(v_new, ScalarProd(newcells[static_cast<size_t>(edge.neighbors.first)].velocity,
+								normal));
+					}
+					else
+					{
+						if (v_new > 0 && tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second))
+							p_star = newcells[static_cast<size_t>(edge.neighbors.first)].pressure;
+						else
+							if (tess.GetOriginalIndex(edge.neighbors.second) != tess.GetOriginalIndex(edge.neighbors.first))
+								p_star = newcells[static_cast<size_t>(edge.neighbors.second)].pressure;
+							else
+								p_star = 0;
+					}
+					std::cout << "Pstar " << p_star << " Ustar " << v_new << std::endl;
+				}
+			}
+			assert(false);
+		}
+	}
 }
 
