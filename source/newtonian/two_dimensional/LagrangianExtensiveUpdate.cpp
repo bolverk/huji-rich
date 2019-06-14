@@ -23,11 +23,16 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 		string("AreaX")) - tracerstickernames.tracer_names.begin());
 	size_t indexY = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
 		string("AreaY")) - tracerstickernames.tracer_names.begin());
-	assert(indexX < tracerstickernames.tracer_names.size() && indexY < tracerstickernames.tracer_names.size());
-	for (size_t i = 0; i < N; ++i)
+	//assert(indexX < tracerstickernames.tracer_names.size() && indexY < tracerstickernames.tracer_names.size());
+	bool area_calc = false;
+	if (indexX < tracerstickernames.tracer_names.size())
 	{
-		extensives[i].tracers[indexX] *= 0.85;
-		extensives[i].tracers[indexY] *= 0.85;
+		area_calc = true;
+		for (size_t i = 0; i < N; ++i)
+		{
+			extensives[i].tracers[indexX] *= 0.85;
+			extensives[i].tracers[indexY] *= 0.85;
+		}
 	}
 
 	boost::container::flat_map<size_t,ComputationalCell> ghosts = ghost_(tess, cells, time, tracerstickernames);
@@ -74,14 +79,20 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 		if (bracketed(0, edge.neighbors.first, tess.GetPointNo()))
 		{
 			extensives[static_cast<size_t>(edge.neighbors.first)] -= delta;
-			extensives[static_cast<size_t>(edge.neighbors.first)].tracers[indexX] -= normal.x*deltaWs;
-			extensives[static_cast<size_t>(edge.neighbors.first)].tracers[indexY] -= normal.y*deltaWs;
+			if (area_calc)
+			{
+				extensives[static_cast<size_t>(edge.neighbors.first)].tracers[indexX] -= normal.x*deltaWs;
+				extensives[static_cast<size_t>(edge.neighbors.first)].tracers[indexY] -= normal.y*deltaWs;
+			}
 		}
 		if (bracketed(0, edge.neighbors.second, tess.GetPointNo()))
 		{
 			extensives[static_cast<size_t>(edge.neighbors.second)] += delta;
-			extensives[static_cast<size_t>(edge.neighbors.second)].tracers[indexX] -= normal.x*deltaWs;
-			extensives[static_cast<size_t>(edge.neighbors.second)].tracers[indexY] -= normal.y*deltaWs;
+			if (area_calc)
+			{
+				extensives[static_cast<size_t>(edge.neighbors.second)].tracers[indexX] -= normal.x*deltaWs;
+				extensives[static_cast<size_t>(edge.neighbors.second)].tracers[indexY] -= normal.y*deltaWs;
+			}
 		}
 	}
 }
