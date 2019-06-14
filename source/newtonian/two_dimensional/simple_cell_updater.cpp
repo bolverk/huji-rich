@@ -100,10 +100,17 @@ namespace
 					{
 						double new_pressure = eos.de2p(res.density, energy, res.tracers, tracerstickernames.tracer_names);
 						double new_entropy = eos.dp2s(res.density, new_pressure, res.tracers, tracerstickernames.tracer_names);
-						// We don't need the entropy fix, update entropy
-						res.pressure = new_pressure;
-						res.tracers[entropy_index] = new_entropy;
-						extensive.tracers[entropy_index] = new_entropy * extensive.mass;
+						if (new_entropy < 0.5*res.tracers[entropy_index])
+						{
+							EntropyFix(eos, res, entropy_index, tracerstickernames, energy, extensive);
+						}
+						else
+						{
+							// We don't need the entropy fix, update entropy
+							res.pressure = new_pressure;
+							res.tracers[entropy_index] = new_entropy;
+							extensive.tracers[entropy_index] = new_entropy * extensive.mass;
+						}
 					}
 				}
 			}
