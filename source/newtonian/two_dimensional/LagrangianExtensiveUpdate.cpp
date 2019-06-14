@@ -1,5 +1,8 @@
 #include "LagrangianExtensiveUpdate.hpp"
 #include "../../misc/utils.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 namespace
 {
 	bool bracketed(int low, int arg, int high)
@@ -96,7 +99,6 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 		}
 	}
 
-	size_t N = extensives.size();
 	for (size_t i = 0; i < N; ++i)
 	{
 		if ((!(extensives[i].mass > 0)) || (!(extensives[i].energy > 0)) || (!std::isfinite(extensives[i].momentum.x)) || (!std::isfinite(extensives[i].momentum.y)))
