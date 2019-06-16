@@ -17,7 +17,7 @@ namespace
 		Conserved Fl(left.Density*left.Velocity.x, Vector2D(left.Density*left.Velocity.x*left.Velocity.x + left.Pressure, left.Density*left.Velocity.x*left.Velocity.y), (Ul.Energy + left.Pressure)*left.Velocity.x),
 			Fr(right.Density*right.Velocity.x, Vector2D(right.Density*right.Velocity.x*right.Velocity.x + right.Pressure, right.Density*right.Velocity.x*right.Velocity.y), (Ur.Energy + right.Pressure)*right.Velocity.x);
 		Conserved Ull = (sr*Ur - sl * Ul + Fl - Fr) / (sr - sl);
-		return std::pair<double, double> (eos.de2p(Ull.Mass, std::max(0.0,Ull.Energy - ScalarProd(Ull.Momentum,Ull.Momentum)*0.5 / Ull.Mass)), Ull.Momentum.x / Ull.Mass);
+		return std::pair<double, double> (eos.de2p(Ull.Mass, std::max(0.0,(Ull.Energy - ScalarProd(Ull.Momentum,Ull.Momentum)*0.5 / Ull.Mass))/Ull.Mass), Ull.Momentum.x / Ull.Mass);
 	}
 
 	class WaveSpeeds
