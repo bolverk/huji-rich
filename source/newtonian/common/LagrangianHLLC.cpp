@@ -122,7 +122,7 @@ namespace
 	}
 }
 
-LagrangianHLLC::LagrangianHLLC(EquationOfState const& eos,bool massflux) :eos_(eos), massflux_(massflux),energy(0)
+LagrangianHLLC::LagrangianHLLC(EquationOfState const& eos,bool massflux,bool iter) :eos_(eos), massflux_(massflux),iter_(iter),energy(0)
 {}
 
 Conserved LagrangianHLLC::operator()
@@ -147,35 +147,35 @@ Conserved LagrangianHLLC::operator()
 	//old_ps = 0;
 
 	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, old_ps);
-	size_t counter = 0;
-	while (ws.ps > 1.01 * old_ps || old_ps > 1.01 * ws.ps)
+	if (iter_)
 	{
-		old_ps = ws.ps;
-		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
-		++counter;
-				if (counter > 54)
-				{
-					std::cout << "Too many iterations in HLLC" << std::endl;
-					std::cout << "Normal " << normaldir.x << "," << normaldir.y <<  " velocity = " << velocity << std::endl;
-					std::cout << " Left density = " << left.Density << " pressure = " << left.Pressure << " internal_energy = " << left.Energy << " vx = " << left.Velocity.x <<
-						" vy = " << left.Velocity.y << std::endl;
-					std::cout << " Right density = " << right.Density << " pressure = " << right.Pressure << " internal_energy = " << right.Energy << " vx = " << right.Velocity.x <<
-						" vy = " << right.Velocity.y  << std::endl;
-					std::cout<<"Old Pstar = "<<old_ps<<" new Pstar = "<<ws.ps<<std::endl;
-					throw UniversalError("LagrangianHllc::No convergence");
-				}
-		
+		size_t counter = 0;
+		while (ws.ps > 1.01 * old_ps || old_ps > 1.01 * ws.ps)
+		{
+			old_ps = ws.ps;
+			ws = estimate_wave_speeds(local_left, local_right, ws.ps);
+			++counter;
+			if (counter > 54)
+			{
+				std::cout << "Too many iterations in HLLC" << std::endl;
+				std::cout << "Normal " << normaldir.x << "," << normaldir.y << " velocity = " << velocity << std::endl;
+				std::cout << " Left density = " << left.Density << " pressure = " << left.Pressure << " internal_energy = " << left.Energy << " vx = " << left.Velocity.x <<
+					" vy = " << left.Velocity.y << std::endl;
+				std::cout << " Right density = " << right.Density << " pressure = " << right.Pressure << " internal_energy = " << right.Energy << " vx = " << right.Velocity.x <<
+					" vy = " << right.Velocity.y << std::endl;
+				std::cout << "Old Pstar = " << old_ps << " new Pstar = " << ws.ps << std::endl;
+				throw UniversalError("LagrangianHllc::No convergence");
+			}
+
+		}
 	}
-	
 	if (!massflux_)
 	{
 		local_left.Velocity -= ws.center*normaldir;
 		local_right.Velocity -= ws.center*normaldir;
 		velocity += ws.center;
 		energy = ws.center;
-		ws.left -= ws.center;
-		ws.right -= ws.center;
-		ws.center = 0;
+		ws = estimate_wave_speeds(local_left, local_right, ws.ps);
 	}
 
 

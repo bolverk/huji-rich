@@ -15,12 +15,12 @@ class LagrangianHLLC : public RiemannSolver
 {
 private:
 	EquationOfState const& eos_;
-	const bool massflux_;
+	const bool massflux_,iter_;
 public:
   /*! \brief Class constructor
     \param massflux Whether to apply correction for mass flux
    */
-  explicit LagrangianHLLC(EquationOfState const& eos, bool massflux=true);
+  explicit LagrangianHLLC(EquationOfState const& eos, bool massflux=true,bool iter=false);
 
 	Conserved operator()
 		(Primitive const& left,
