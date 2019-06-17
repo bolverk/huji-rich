@@ -7,9 +7,9 @@
 #include "../../misc/utils.hpp"
 
 Tillotson::Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV, double
-	alpha, double beta, bool negative_pressure) :
+	alpha, double beta, bool negative_pressure,size_t e_index) :
 	a_(a), b_(b), A_(A), B_(B), rho0_(rho0), E0_(E0), EIV_(EIV), ECV_(ECV), alpha_(alpha), beta_(beta),
-	negative_pressure_(negative_pressure), temp_d_(0), temp_p_(0) {}
+	negative_pressure_(negative_pressure), temp_d_(0), temp_p_(0), e_index_(e_index){}
 
 double Tillotson::dp2EI(double d, double p) const
 {
@@ -129,8 +129,11 @@ private:
 };
 
 
-double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<string> const & /*tracernames*/) const
+double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<string> const &/* tracernames*/) const
 {
+	assert(tracers.size() > 0);
+	return tracers[e_index_];
+
 	double eta = d / rho0_;
 	double mu = eta - 1;
 	double c = E0_ * eta*eta;
@@ -146,10 +149,11 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 		double e1 = dp2EI(d, p);
 		double p1 = de2pI(d, e1);
 		//double p1 = de2pI(d, e1);
+		if (e1 < EIV_ && p1 > 0)
+			return dp2EI(d, p);
 		if (p4<0 || e4>=ECV_)
 			return e4;
-		if (e1<EIV_ && p4>0 && p1>0)
-			return dp2EI(d, p);	
+		
 		temp_d_ = d;
 		temp_p_ = p;
 		boost::uintmax_t it = 50;

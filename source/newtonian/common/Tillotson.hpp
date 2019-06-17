@@ -17,6 +17,7 @@ private:
 	double a_, b_, A_, B_, rho0_, E0_, EIV_, ECV_,alpha_,beta_;
 	const bool negative_pressure_;
 	mutable double temp_d_, temp_p_;
+	const size_t e_index_;
 
 	double dp2EI(double d, double p)const;
 	double dp2EIV(double d, double p)const;
@@ -27,7 +28,7 @@ private:
 	double dep2cIV(double d, double e, double p)const;
 public:
 	Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV,double alpha,
-		double beta,bool negative_pressure=false);
+		double beta,bool negative_pressure=false, size_t e_index = 0);
 
 	 double dp2e(double d, double p, tvector const& tracers = tvector(), 
 		 vector<string> const& tracernames = vector<string>())const;
