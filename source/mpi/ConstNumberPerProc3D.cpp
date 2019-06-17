@@ -502,9 +502,9 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			}
 			else
 			{
-				//Vector3D otherpoint = RankCMs[neigh[i]];
-				Vector3D otherpoint = tproc.GetMeshPoint(neigh[i]);
-				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]]) / IdealPerProc;
+				Vector3D otherpoint = RankCMs[neigh[i]];
+				//Vector3D otherpoint = tproc.GetMeshPoint(neigh[i]);
+				double merit = static_cast<double>(NPerProc[static_cast<size_t>(rank)] - NPerProc[neigh[i]])*std::pow(tproc.GetArea(faces[i]) / (MyR*MyR), 0.4) / IdealPerProc;
 				double dr = fastabs(otherpoint - point);
 				dx -= NewSpeed * merit*(otherpoint.x - point.x)*MyR / dr;
 				dy -= NewSpeed * merit*(otherpoint.y - point.y)*MyR / dr;
