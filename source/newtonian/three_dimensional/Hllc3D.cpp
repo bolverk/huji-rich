@@ -67,6 +67,26 @@ namespace
 		double sl = vl - cl * (pstar > pl ? fastsqrt(1 + 0.75*(pstar / pl - 1)) : 1);
 		double sr = vr + cr * (pstar > pr ? fastsqrt(1 + 0.75*(pstar / pr - 1)) : 1);
 		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
+		double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
+		size_t counter = 0;
+		while (ps > 1.1 * pstar || pstar > 1.1 * ps)
+		{
+			pstar = ps;
+			sl = vl - cl * (pstar > pl ? fastsqrt(1 + 0.75*(pstar / pl - 1)) : 1);
+			sr = vr + cr * (pstar > pr ? fastsqrt(1 + 0.75*(pstar / pr - 1)) : 1);
+			ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
+			++counter;
+			if (counter > 54)
+			{
+				std::cout << "Too many iterations in HLLC" << std::endl;
+				//std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z << " velocity = " << velocity << std::endl;
+				std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
+					" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
+				std::cout << " Right density = " << right.density << " pressure = " << right.pressure << " internal_energy = " << right.internal_energy << " vx = " << right.velocity.x <<
+					" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
+			}
+			assert(counter < 55);
+		}
 		double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		if (ss<sl || ss>sr)
 			ss = ustar;
