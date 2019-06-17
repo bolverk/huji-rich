@@ -129,10 +129,10 @@ private:
 };
 
 
-double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<string> const &/* tracernames*/) const
+double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<string> const & tracernames) const
 {
-	assert(tracers.size() > 0);
-	return tracers[e_index_];
+	if(tracernames.size() > 0)
+		return tracers[e_index_];
 
 	double eta = d / rho0_;
 	double mu = eta - 1;
