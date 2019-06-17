@@ -144,10 +144,11 @@ double Tillotson::dp2e(double d, double p, tvector const & /*tracers*/, vector<s
 		double e4 = dp2EIV(d, p);
 		double p4 = de2pI(d, e4);
 		double e1 = dp2EI(d, p);
+		double p1 = de2pI(d, e1);
 		//double p1 = de2pI(d, e1);
 		if (p4<0 || e4>=ECV_)
 			return e4;
-		if (e4<EIV_ && p4>0)
+		if (e1<EIV_ && p4>0 && p1>0)
 			return dp2EI(d, p);	
 		temp_d_ = d;
 		temp_p_ = p;

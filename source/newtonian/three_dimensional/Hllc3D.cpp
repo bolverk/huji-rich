@@ -54,14 +54,23 @@ namespace
 #endif
 		//const double sl2 = std::min(vl - cl, vr - cr);
 		//const double sr2 = std::max(vl + cl, vr + cr);
-		double dls = fastsqrt(dl), drs = fastsqrt(dr);
+		/*double dls = fastsqrt(dl), drs = fastsqrt(dr);
 		double ubar = (dls*vl + drs * vr) / (dls + drs);
 		double dbar = fastsqrt((dls*cl*cl + drs * cr*cr) / (dls + drs) + 0.5*
 			(vl - vr)*(vl - vr)*dls*drs / ((dls + drs)*(dls + drs)));
 		double sl = ubar - dbar;
-		double sr = ubar + dbar;
+		double sr = ubar + dbar;*/
+		double cbar = 0.5*(cr + cl);
+		double dbar = 0.5*(dl + dr);
+		double pstar = 0.5*(pl + pr) - 0.5*(vr - vl)*dbar*cbar;
+		double ustar = 0.5*(vr + vl) - 0.5*(pr - pl) / (dbar*cbar);
+		double sl = vl - cl * (pstar > pl ? fastsqrt(1 + 0.75*(pstar / pl - 1)) : 1);
+		double sr = vr + cr * (pstar > pr ? fastsqrt(1 + 0.75*(pstar / pr - 1)) : 1);
 		const double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
-		const double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		if (ss<sl || ss>sr)
+			ss = ustar;
+		//ss = ustar;
 		//const double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		return WaveSpeeds(sl, ss, sr);
 	}
