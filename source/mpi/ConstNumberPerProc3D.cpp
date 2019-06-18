@@ -495,7 +495,7 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 			const double mind = neigheps * std::min(MyR, R[neigh[i]]);
 			if (dist < mind)
 			{
-				double speed2 = NewSpeed * 10 * (mind - dist) / dist;
+				double speed2 = NewSpeed * 10 * (mind - dist)*MyR / (dist*dist);
 				dx += speed2 * (point.x - tproc.GetMeshPoint(neigh[i]).x);
 				dy += speed2 * (point.y - tproc.GetMeshPoint(neigh[i]).y);
 				dz += speed2 * (point.z - tproc.GetMeshPoint(neigh[i]).z);
