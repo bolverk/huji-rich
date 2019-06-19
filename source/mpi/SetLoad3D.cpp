@@ -23,6 +23,10 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double spe
 		local.Norg_ = points.size();
 		local.del_.points_ = points;
 	}
+	int total = 0;
+	double load = procmove.GetLoadImbalance(local, total);
+	if (rank == 0)
+		std::cout << "Done SetLoad, Load is " << load << std::endl;
 }
 
 void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, 
@@ -50,6 +54,10 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell
 		MPI_exchange_data(local, cells, false,&example);
 		local.del_.points_ = points;
 	}
+	int total = 0;
+	double load = procmove.GetLoadImbalance(local, total);
+	if (rank == 0)
+		std::cout << "Done SetLoad, Load is " << load << std::endl;
 }
 
 #endif
