@@ -109,14 +109,15 @@ void MPI_exchange_data(const Tessellation& tess, vector<T>& cells,bool ghost_or_
 \param ghost_or_sent True for ghost cells false for sent cells.
 */
 template<class T>
-void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent);
+void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent,T const * example_cell =0);
 
 template<class T>
-void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent)
+void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_or_sent, T const * example_cell)
 {
-	if (cells.empty())
+	if (example_cell == 0 && cells.empty())
 		throw UniversalError("Empty cell vector in MPI_exchange_data");
-	T example_cell = cells[0];
+	if (example_cell == 0)
+		example_cell = &cells[0];
 	vector<int> correspondents;
 	vector<vector<size_t> > duplicated_points;
 	if (ghost_or_sent)
@@ -164,7 +165,7 @@ void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_
 				correspondents.begin());
 			if (location >= correspondents.size())
 				throw UniversalError("Bad location in mpi exchange");
-			torecv[location] = list_unserialize(temprecv, example_cell);
+			torecv[location] = list_unserialize(temprecv, *example_cell);
 		}
 		else
 		{

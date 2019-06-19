@@ -37,6 +37,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell
 	vector<size_t> selfindex;
 	vector<vector<size_t> > sentpoints;
 	vector<int> sentproc;
+	ComputationalCell3D example;
 	for (size_t i = 0; i < Niter; ++i)
 	{
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -46,7 +47,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell
 		local.self_index_ = selfindex;
 		local.sentprocs_ = sentproc;
 		local.Norg_ = points.size();
-		MPI_exchange_data(local, cells, false);
+		MPI_exchange_data(local, cells, false,&example);
 		local.del_.points_ = points;
 	}
 }
