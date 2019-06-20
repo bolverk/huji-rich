@@ -842,7 +842,7 @@ vector<vector<std::size_t> > const& Voronoi3D::GetGhostIndeces(void) const
 #ifdef RICH_MPI
 void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tproc)
 {
-	assert(points.size() > 0);
+	//assert(points.size() > 0);
 	// Clear data
 	PointTetras_.clear();
 	R_.clear();

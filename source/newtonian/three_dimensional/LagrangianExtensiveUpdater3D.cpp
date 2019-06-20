@@ -13,7 +13,8 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 {
 	std::vector<Conserved3D> old_extensive(extensives);
 #ifdef RICH_MPI
-	MPI_exchange_data(tess, old_extensive, true);
+	Conserved3D edummy;
+	MPI_exchange_data(tess, old_extensive, true,&edummy);
 #endif
 	size_t indexX = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
 		string("AreaX")) - tracerstickernames.tracer_names.begin());

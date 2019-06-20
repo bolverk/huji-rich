@@ -241,7 +241,10 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 		entropy_index_ = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
 #ifdef RICH_MPI
 	if (entropy_index_ < tracerstickernames.tracer_names.size())
-		MPI_exchange_data(tess, extensives, true);
+	{
+		Conserved3D edummy;
+		MPI_exchange_data(tess, extensives, true,&edummy);
+	}
 #endif
 	if (!SR_)
 		regular_update(res, extensives, tess, entropy_index_, tracerstickernames, eos);

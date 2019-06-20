@@ -1093,7 +1093,8 @@ void AMR3D::operator() (HDSim3D &sim)
 
 #ifdef RICH_MPI
 	// Update cells
-	MPI_exchange_data(tess, cells, true);
+	ComputationalCell3D cdummy;
+	MPI_exchange_data(tess, cells, true,&cdummy);
 #endif
 	// Update Max ID
 	size_t & MaxID = sim.GetMaxID();

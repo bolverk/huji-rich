@@ -646,7 +646,8 @@ namespace
 
 	void exchange_ghost_slopes(Tessellation3D const& tess, vector<Slope3D> & slopes)
 	{
-		MPI_exchange_data(tess, slopes, true);
+		Slope3D sdummy;
+		MPI_exchange_data(tess, slopes, true,&sdummy);
 	}
 #endif//RICH_MPI
 }
