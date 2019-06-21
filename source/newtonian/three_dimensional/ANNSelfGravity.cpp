@@ -82,12 +82,15 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		for (size_t j = 0; j < 6; j++)
 			Q[i][j] = 0;
 	}
+#ifdef RICH_MPI
 	if (Nmass > Norg)
 	{
 		dpoints[0][0] = tproc_->GetMeshPoint(rank).x;
 		dpoints[0][1] = tproc_->GetMeshPoint(rank).y;
 		dpoints[0][2] = tproc_->GetMeshPoint(rank).z;
 	}
+
+#endif // RICH_MPI
 	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Nmass), 1, ANN_KD_SL_MIDPT);
 
 #ifdef RICH_MPI
