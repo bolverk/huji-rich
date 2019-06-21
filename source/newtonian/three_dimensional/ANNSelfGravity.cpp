@@ -57,10 +57,11 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 
 	size_t Norg = tess.GetPointNo();
 	acc.resize(Norg);
-	vector<double> masses(Norg);
-	std::vector<std::array<double, 6> >  Q(Norg);
+	size_t Nmass = std::max(Norg, static_cast<size_t>(1));
+	vector<double> masses(Nmass,0.0);
+	std::vector<std::array<double, 6> >  Q(Nmass, std::array<double, 6>{});
 
-	ANNpointArray dpoints = annAllocPts(static_cast<int>(Norg), 3);
+	ANNpointArray dpoints = annAllocPts(static_cast<int>(Nmass), 3);
 	vector<Vector3D> const& AllCM = tess.GetAllCM();
 	vector<double> const& volumes = tess.GetAllVolumes();
 #ifdef __INTEL_COMPILER
@@ -81,7 +82,13 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		for (size_t j = 0; j < 6; j++)
 			Q[i][j] = 0;
 	}
-	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg), 1, ANN_KD_SL_MIDPT);
+	if (Nmass > Norg)
+	{
+		dpoints[0][0] = tproc_->GetMeshPoint(rank).x;
+		dpoints[0][1] = tproc_->GetMeshPoint(rank).y;
+		dpoints[0][2] = tproc_->GetMeshPoint(rank).z;
+	}
+	ANNkd_tree *atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Nmass), 1, ANN_KD_SL_MIDPT);
 
 #ifdef RICH_MPI
 #ifdef timing

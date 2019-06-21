@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <H5Cpp.h>
 
 using std::string;
@@ -39,6 +40,8 @@ template<class T> void write_std_vector_to_hdf5
   DSetCreatPropList plist;
   if(dimsf[0]>100000)
     dimsf[0] = 100000;
+  if (dimsf[0] == 0)
+	  dimsf[0] = 1;
   plist.setChunk(1,dimsf);
   plist.setDeflate(6);
 
@@ -47,7 +50,10 @@ template<class T> void write_std_vector_to_hdf5
      dt,
      dataspace,
      plist);
-  dataset.write(&data[0],dt);
+  if(data.empty())
+	  dataset.write(NULL, dt);
+  else
+	dataset.write(&data[0],dt);
 }
 
 /*! \brief Writes floating point data to hdf5

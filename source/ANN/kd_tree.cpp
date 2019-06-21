@@ -998,7 +998,8 @@ void ANNkd_tree::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<
 	std::vector<ANNpoint> const& normals)
 {
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
-	root->GetToSend(faces, Nfaces, nodes, angle2, normals, bb);
+	if(n_pts>0)
+		root->GetToSend(faces, Nfaces, nodes, angle2, normals, bb);
 }
 
 void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,

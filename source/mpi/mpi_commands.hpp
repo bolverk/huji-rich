@@ -147,7 +147,7 @@ void MPI_exchange_data(const Tessellation3D& tess, vector<T>& cells, bool ghost_
 	}
 	const vector<vector<size_t> >& ghost_indices = tess.GetGhostIndeces();
 	if (ghost_or_sent)
-		cells.resize(tess.GetTotalPointNumber(), cells[0]);
+		cells.resize(tess.GetTotalPointNumber(), *example_cell);
 	else
 		cells = VectorValues(cells, tess.GetSelfIndex());
 	vector<vector<T> > torecv(correspondents.size());

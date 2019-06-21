@@ -249,8 +249,8 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 	MPI_exchange_data(tess, velocities, true,&vdummy);
 #endif
 	const size_t n = tess.GetPointNo();
-	if (n == 0)
-		return;
+	/*if (n == 0)
+		return;*/
 	vector<char> nomove(n, 0);
 	size_t Nstick = tracerstickernames.sticker_names.size();
 	vector<size_t> no_move_indeces;

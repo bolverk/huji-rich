@@ -47,7 +47,7 @@ namespace
 		EquationOfState const& eos)
 	{
 		size_t Nloop = tess.GetPointNo();
-		size_t Ntracers = res[0].tracers.size();
+		size_t Ntracers = tsn.tracer_names.size();
 		for (size_t i = 0; i < Nloop; ++i)
 		{
 			try
@@ -148,7 +148,7 @@ namespace
 		EquationOfState const& eos, double G)
 	{
 		size_t Nloop = tess.GetPointNo();
-		size_t Ntracers = res[0].tracers.size();
+		size_t Ntracers = tsn.tracer_names.size();
 		for (size_t i = 0; i < Nloop; ++i)
 		{
 			try

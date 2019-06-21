@@ -63,7 +63,7 @@ void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessell
 		sequence_[i].second->Reset();
 	vector<std::pair<ComputationalCell3D, ComputationalCell3D> > face_values;
 	interp_(tess, cells, time, face_values, tracerstickernames);
-	fluxes.resize(tess.GetTotalFacesNumber(), extensives[0]);
+	fluxes.resize(tess.GetTotalFacesNumber());
 	size_t Nloop = fluxes.size();
 	for (size_t i = 0; i < Nloop; ++i)
 	{

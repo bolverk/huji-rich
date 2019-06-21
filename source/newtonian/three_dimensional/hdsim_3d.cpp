@@ -113,8 +113,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
 	}
 	// Is this a new start?
-	assert(cells_.size() > 1);
-	if (cells_[0].ID == cells_[1].ID)
+	if (pt_.getCycle()==0)
 	{
 		size_t nstart = 0;
 #ifdef RICH_MPI
@@ -126,7 +125,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 		for (size_t i = 0; i < N; ++i)
 			cells_[i].ID = nstart + i;
-		Max_ID_ =cells_.back().ID;
+		Max_ID_ = nstart + N - 1;
 #ifdef RICH_MPI
 		for (size_t i = static_cast<size_t>(rank + 1); i < static_cast<size_t>(ws); ++i)
 			Max_ID_ += nrecv[i];

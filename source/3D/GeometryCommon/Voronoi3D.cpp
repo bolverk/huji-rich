@@ -866,7 +866,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	vector<Vector3D> new_points = UpdateMPIPoints(tproc, rank, points, self_index_, sentprocs_, sentpoints_);
 	Norg_ = new_points.size();
-	if (Norg_ == 0)
+/*	if (Norg_ == 0)
 	{
 		std::cout << "Zero Norg in rank " << rank << std::endl;
 		std::cout << "Rank CM " << tproc.GetCellCM(static_cast<size_t>(rank)).x << ","
@@ -875,7 +875,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
 			<< tproc.GetMeshPoint(static_cast<size_t>(rank)).y << "," << tproc.GetMeshPoint(static_cast<size_t>(rank)).z << std::endl;
 		std::cout << "Rank R " << tproc.GetWidth(static_cast<size_t>(rank)) << std::endl;
 	}
-	assert(Norg_ > 0);
+	assert(Norg_ > 0);*/
 	std::pair<Vector3D, Vector3D> bounding_box = GetBoundingBox(tproc, rank);
 
 #ifdef timing
@@ -1561,7 +1561,7 @@ void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t 
 
 void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 	Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
-	bool &skipped,face_vec &faces, vector<size_t> const& past_duplicate)
+	bool &skipped,face_vec &faces, vector<size_t> &past_duplicate)
 {
 	res.clear();
 	std::size_t N = tproc.GetPointNo();
@@ -1583,11 +1583,26 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 	else
 	{
 		if (mode == 2)
+		{
 			neigh.push_back(rank);
+			if (past_duplicate.empty())
+			{
+				tproc.GetNeighbors(rank, past_duplicate);
+				size_t Nn = past_duplicate.size();
+				for (size_t j = 0; j < Nn; ++j)
+					past_duplicate[j] = std::min(past_duplicate[j], tproc.GetPointNo()-1);
+			}
+		}
 		else
 		{
 			tproc.GetNeighbors(rank, neigh);
 			std::sort(neigh.begin(), neigh.end());
+			{
+				tproc.GetNeighbors(rank, past_duplicate);
+				size_t Nn = past_duplicate.size();
+				for (size_t j = 0; j < Nn; ++j)
+					past_duplicate[j] = std::min(past_duplicate[j], tproc.GetPointNo()-1);
+			}
 		}
 		for (size_t i = 0; i < past_duplicate.size(); ++i)
 		{
