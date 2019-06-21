@@ -218,7 +218,7 @@ double Tillotson::de2p(double d, double e, tvector const& /*tracers*/, vector<st
 		double p1 = de2pI(d, e);
 		if (e <= EIV_ && p1 > 0)
 			return p1;
-		if (e >= ECV_  || p1<0)// || de2pI(d,EIV_))
+		if (e >= ECV_  || p1<0 || de2pI(d,EIV_))
 			return de2pIV(d, e);
 		return de2pII(d, e);
 	}
