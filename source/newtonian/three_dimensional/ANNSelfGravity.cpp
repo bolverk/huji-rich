@@ -147,23 +147,23 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	assert(m_recv.size() % 10 == 0);
 	size_t toadd = m_recv.size()/10;
 	dpoints = annAllocPts(static_cast<int>(Norg + toadd), 3);
-	masses.resize(Norg + toadd);
-	Q.resize(Norg + toadd);
+	masses.resize(Nmass + toadd);
+	Q.resize(Nmass + toadd);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 	for (size_t i = 0; i < toadd; ++i)
 	{
-		masses[Norg + i] = m_recv[i * 10];
-		dpoints[Norg + i][0] = m_recv[i * 10+1];
-		dpoints[Norg + i][1] = m_recv[i * 10+2];
-		dpoints[Norg + i][2] = m_recv[i * 10 + 3];
-		Q[Norg + i][0] = m_recv[i * 10 + 4];
-		Q[Norg + i][1] = m_recv[i * 10 + 5];
-		Q[Norg + i][2] = m_recv[i * 10 + 6];
-		Q[Norg + i][3] = m_recv[i * 10 + 7];
-		Q[Norg + i][4] = m_recv[i * 10 + 8];
-		Q[Norg + i][5] = m_recv[i * 10 + 9];
+		masses[Nmass + i] = m_recv[i * 10];
+		dpoints[Nmass + i][0] = m_recv[i * 10+1];
+		dpoints[Nmass + i][1] = m_recv[i * 10+2];
+		dpoints[Nmass + i][2] = m_recv[i * 10 + 3];
+		Q[Nmass + i][0] = m_recv[i * 10 + 4];
+		Q[Nmass + i][1] = m_recv[i * 10 + 5];
+		Q[Nmass + i][2] = m_recv[i * 10 + 6];
+		Q[Nmass + i][3] = m_recv[i * 10 + 7];
+		Q[Nmass + i][4] = m_recv[i * 10 + 8];
+		Q[Nmass + i][5] = m_recv[i * 10 + 9];
 	}
 #ifdef timing
 	t1 = MPI_Wtime();
@@ -181,7 +181,15 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		dpoints[i][1] = AllCM[i].y;
 		dpoints[i][2] = AllCM[i].z;
 	}
-	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Norg + toadd), 1, ANN_KD_SL_MIDPT);
+#ifdef RICH_MPI
+	if (Nmass > Norg)
+	{
+		dpoints[0][0] = tproc_->GetMeshPoint(rank).x;
+		dpoints[0][1] = tproc_->GetMeshPoint(rank).y;
+		dpoints[0][2] = tproc_->GetMeshPoint(rank).z;
+	}
+#endif // RICH_MPI
+	atree = new ANNkd_tree(dpoints, masses, Q, static_cast<int>(Nmass + toadd), 1, ANN_KD_SL_MIDPT);
 #ifdef timing
 	t0 = MPI_Wtime();
 	if (rank == 0)
