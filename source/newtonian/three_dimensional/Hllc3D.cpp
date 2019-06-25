@@ -189,7 +189,7 @@ namespace
 			f_gr = fl;
 		else
 			if (sl < 0 & sr>0)
-				f_gr = sr * fl - sl * fr + sr * sl*(ur - ul)*(1.0 / (sr - sl)); // HLL flux
+				f_gr = (sr * fl - sl * fr + sr * sl*(ur - ul))*(1.0 / (sr - sl)); // HLL flux
 			else
 				if (sr < 0)
 					f_gr = fr;
@@ -258,7 +258,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 
 	// check if bad wavespeed
 	if (HLL && ws.left < 0 && ws.right>0)
-		f_gr = ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul)*(1.0 / (ws.right - ws.left)); // HLL flux
+		f_gr = (ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul))*(1.0 / (ws.right - ws.left)); // HLL flux
 	else
 		HLL = false;
 
