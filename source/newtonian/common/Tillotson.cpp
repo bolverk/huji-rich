@@ -59,9 +59,9 @@ double Tillotson::de2pI(double d, double e)const
 	double AB = (A_ - 2 * B_)*eta + (B_ - A_) + B_ * eta*eta;
 	double res = 0;
 	//if (negative_pressure_)
-		res = (a_ + b_ / (e / c + 1))*d*e + AB;
+		//res = (a_ + b_ / (e / c + 1))*d*e + AB;
 	//else
-	//	res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, a_*d*e*1e-7);
+	res = std::max((a_ + b_ / (e / c + 1))*d*e + AB, a_*d*e*1e-7);
 	return res;
 }
 
@@ -215,10 +215,9 @@ double Tillotson::de2p(double d, double e, tvector const& /*tracers*/, vector<st
 	}
 	else
 	{
-		double p1 = de2pI(d, e);
-		if (e <= EIV_ && p1 > 0)
-			return p1;
-		if (e >= ECV_  || p1<0 || de2pI(d,EIV_))
+		if (e <= EIV_)
+			return de2pI(d, e);
+		if (e >= ECV_)
 			return de2pIV(d, e);
 		return de2pII(d, e);
 	}
@@ -241,15 +240,14 @@ double Tillotson::dp2c(double d, double p, tvector const & tracers, vector<strin
 	}
 	else
 	{
-		double p1 = de2pI(d, e);
-		if (e <= EIV_ && std::abs(p1-p) < p*1e-5)
+		if (e <= EIV_)
 		{
 			double res = dep2cI(d, e, p);
 			assert(res > 0);
 			return std::sqrt(res);
 		}
 		//double e4 = dp2EIV(d, p);
-		if (e >= ECV_ || p1 < 0)
+		if (e >= ECV_)
 		{
 			double res = dep2cIV(d, e, p);
 			assert(res > 0);
