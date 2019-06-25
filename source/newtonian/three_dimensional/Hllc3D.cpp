@@ -17,7 +17,7 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn)
+		EquationOfState const &eos, TracerStickerNames const& tsn,double gamma)
 	{
 		double cl = 0, cr = 0;
 		const double dl = left.density;
@@ -64,16 +64,16 @@ namespace
 		double dbar = 0.5*(dl + dr);
 		double pstar = 0.5*(pl + pr) - 0.5*(vr - vl)*dbar*cbar;
 		double ustar = 0.5*(vr + vl) - 0.5*(pr - pl) / (dbar*cbar);
-		double sl = vl - cl * (pstar > pl ? fastsqrt(1 + 0.75*(pstar / pl - 1)) : 1);
-		double sr = vr + cr * (pstar > pr ? fastsqrt(1 + 0.75*(pstar / pr - 1)) : 1);
+		double sl = vl - cl * (pstar > pl ? fastsqrt(1 + gamma*(pstar / pl - 1)) : 1);
+		double sr = vr + cr * (pstar > pr ? fastsqrt(1 + gamma*(pstar / pr - 1)) : 1);
 		double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 		double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		size_t counter = 0;
 		while (ps > 1.1 * pstar || pstar > 1.1 * ps)
 		{
 			pstar = ps;
-			sl = vl - cl * (pstar > pl ? fastsqrt(1 + 0.75*(pstar / pl - 1)) : 1);
-			sr = vr + cr * (pstar > pr ? fastsqrt(1 + 0.75*(pstar / pr - 1)) : 1);
+			sl = vl - cl * (pstar > pl ? fastsqrt(1 + gamma*(pstar / pl - 1)) : 1);
+			sr = vr + cr * (pstar > pr ? fastsqrt(1 + gamma*(pstar / pr - 1)) : 1);
 			denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 			ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 			++counter;
@@ -149,6 +149,9 @@ namespace
 
 }
 
+Hllc3D::Hllc3D(double gamma):gamma_((gamma+1)/(2*gamma))
+{}
+
 Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
 	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
@@ -179,7 +182,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	const Conserved3D fl = PrimitiveToFlux(local_left);
 	const Conserved3D fr = PrimitiveToFlux(local_right);
 
-	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn);
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn,gamma_);
 
 	const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 	const Conserved3D usr = starred_state(local_right, ws.right, ws.center);

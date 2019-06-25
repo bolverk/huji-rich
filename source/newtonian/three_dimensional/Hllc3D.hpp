@@ -12,7 +12,10 @@
 //! \brief HLLC Riemann solver for an Eulerian grid
 class Hllc3D : public RiemannSolver3D
 {
+private:
+	const double gamma_;
 public:
+	Hllc3D(double gamma = -1);
 
 	Conserved3D operator()(ComputationalCell3D const& left,	ComputationalCell3D const& right,double velocity,
 		EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const;
