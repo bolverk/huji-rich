@@ -164,7 +164,7 @@ namespace
 	{
 		if (HLL)
 			return;
-		if (0.5*ScalarProd(f_gr.momentum, f_gr.momentum) / std::abs(f_gr.mass) < std::abs(f_gr.energy))
+		if (0.5*ScalarProd(f_gr.momentum, f_gr.momentum) < std::abs(f_gr.energy)*std::abs(f_gr.mass))
 			return;
 		const double dl = local_left.density;
 		const double pl = local_left.pressure;
