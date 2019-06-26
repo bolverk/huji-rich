@@ -83,13 +83,56 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " vx " <<
 				cells[i].velocity.x << " vy " <<cells[i].velocity.y << " vz " <<cells[i].velocity.z << std::endl;
 			face_vec temp = tess.GetCellFaces(i);
+			Conserved3D old_ext(extensives[i]);
+			// recover old_extensive
+			for (size_t j = 0; j < temp.size(); ++j)
+			{
+				double Area = tess.GetArea(temp[j]) * dt;
+				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
+				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
+				if (N1 == i)
+				{
+					double newEk = 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					old_ext.mass -= Area * fluxes[temp[j]].mass;
+					old_ext.momentum -= Area * fluxes[temp[j]].momentum;
+					old_ext.energy -= Area * fluxes[temp[j]].energy;
+					old_ext.internal_energy -= Area *fluxes[temp[j]].energy -
+						newEk + 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+				}
+				else
+				{
+					double newEk = 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					old_ext.mass += Area * fluxes[temp[j]].mass;
+					old_ext.momentum += Area * fluxes[temp[j]].momentum;
+					old_ext.energy += Area * fluxes[temp[j]].energy;
+					old_ext.internal_energy += Area * fluxes[temp[j]].energy +
+						newEk - 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+				}
+			}
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
 				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
 				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				double Area = tess.GetArea(temp[j]) * dt;
+				double Ek = 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+				delta = Area * fluxes[temp[j]];
+				double dEtherm = 0;
+				if (N1 == i)
+				{
+					old_ext += delta;
+					double Eknew = 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					dEtherm = delta.energy - (Eknew - Ek);
+					old_ext.internal_energy += delta.energy - (Eknew - Ek);
+				}
+				else
+				{
+					old_ext -= delta;
+					double Eknew = 0.5*ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					dEtherm = -delta.energy - (Eknew - Ek);
+					old_ext.internal_energy += dEtherm;
+				}
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass*Area <<
-					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
+					" energy= " << fluxes[temp[j]].energy*Area <<" Etherm= "<<dEtherm<< " momentum= " << abs(fluxes[temp[j]].momentum)*Area <<
 					" Area*dt " << Area <<" normal "<<tess.Normal(temp[j]).x<<"," << tess.Normal(temp[j]).y <<"," << tess.Normal(temp[j]).z << std::endl;
 			}
 			for (size_t j = 0; j < temp.size(); ++j)
