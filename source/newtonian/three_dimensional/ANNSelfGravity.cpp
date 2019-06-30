@@ -136,7 +136,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	// send/recv data
 	vector<int> m_rec_size(Nproc);
 	MPI_Alltoall(&m_size[0], 1, MPI_INT, &m_rec_size[0], 1, MPI_INT, MPI_COMM_WORLD);
-
+	MPI_Barrier(MPI_COMM_WORLD);
 	vector<int> s_disp(Nproc, 0), r_disp(Nproc, 0);
 	for (size_t i = 1; i < Nproc; ++i)
 		s_disp[i] = s_disp[i - 1] + m_size[i - 1];
