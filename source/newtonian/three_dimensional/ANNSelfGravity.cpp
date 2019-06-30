@@ -123,6 +123,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 				m_send.push_back(nodes[j]->Q[k]);
 		}
 		m_size[i] = static_cast<int>(nodes.size()*10);
+		assert(m_size[i] > 0);
 	}
 	delete atree;
 	annClose();
