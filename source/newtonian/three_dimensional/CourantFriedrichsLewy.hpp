@@ -20,7 +20,7 @@ public:
 	  \param SourceCFL CFL number for the source term
 	 */
 	explicit CourantFriedrichsLewy(double cfl,double SourceCFL, SourceTerm3D const& source,
-		bool debug);
+		bool debug=false);
 
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
 		const vector<Vector3D>& face_velocities,const double time, TracerStickerNames const& tracerstickernames) const;
