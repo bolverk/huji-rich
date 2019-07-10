@@ -39,9 +39,12 @@ namespace {
 	(int index,
 	 tess_.GetCellEdges(static_cast<int>(i))){
 	const Vector2D ve = edge_velocities_.at(static_cast<size_t>(index));
+	Edge const& edge = tess_.GetEdge(index);
+	const Vector2D n =
+		normalize(tess_.GetMeshPoint(edge.neighbors.second) - tess_.GetMeshPoint(edge.neighbors.first));
 	res = fmax
 	  (res,
-	   (c+abs(v-ve))/radius);
+	   (c+ScalarProd(n(v-ve)))/radius);
       }
       return 1.0/res;
     }
