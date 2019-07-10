@@ -44,7 +44,7 @@ namespace {
 		normalize(tess_.GetMeshPoint(edge.neighbors.second) - tess_.GetMeshPoint(edge.neighbors.first));
 	res = fmax
 	  (res,
-	   (c+ScalarProd(n(v-ve)))/radius);
+	   (c+ScalarProd(n,(v-ve)))/radius);
       }
       return 1.0/res;
     }
