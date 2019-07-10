@@ -44,7 +44,11 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 			face_vec const& faces = tess.GetCellFaces(i);
 			size_t Nloop = faces.size();
 			for (size_t j = 0; j < Nloop; ++j)
-				res_temp = fmax(res_temp, (c + fastabs(v - face_velocities[faces[j]])));
+			{
+				Vector3D n = tess.Normal(faces[j]);
+				n *= 1.0/fastabs(n);
+				res_temp = fmax(res_temp, (c + ScalarProd(n,v - face_velocities[faces[j]])));
+			}
 			res_temp = tess.GetWidth(i) / res_temp;
 			if (res_temp < res)
 			{
