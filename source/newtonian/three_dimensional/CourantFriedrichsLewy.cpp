@@ -47,7 +47,7 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 			{
 				Vector3D n = tess.Normal(faces[j]);
 				n *= 1.0/fastabs(n);
-				res_temp = fmax(res_temp, (c + ScalarProd(n,v - face_velocities[faces[j]])));
+				res_temp = fmax(res_temp, (c + std::abs(ScalarProd(n,v - face_velocities[faces[j]]))));
 			}
 			res_temp = tess.GetWidth(i) / res_temp;
 			if (res_temp < res)
