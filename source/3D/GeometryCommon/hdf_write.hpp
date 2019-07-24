@@ -73,12 +73,12 @@ public:
 */
 Snapshot3D ReadSnapshot3D(const string& fname
 #ifdef RICH_MPI
-	,bool mpi_write = false
+	,bool mpi_write = false,int fake_rank=-1
 #endif
 );
 
 #ifdef RICH_MPI
-Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number);
+Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number,bool mpi_write=false);
 #endif
 
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);

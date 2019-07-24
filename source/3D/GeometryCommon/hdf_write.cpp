@@ -330,7 +330,7 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 
 Snapshot3D ReadSnapshot3D(const string& fname
 #ifdef RICH_MPI
-	, bool mpi_write
+	, bool mpi_write,int fake_rank
 #endif
 )
 {
@@ -342,6 +342,8 @@ Snapshot3D ReadSnapshot3D(const string& fname
 	{
 		int rank = 0;
 		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if (fake_rank >= 0)
+			rank = fake_rank;
 		read_location = file.openGroup("/rank" + int2str(rank));
 	}
 #endif
@@ -438,15 +440,18 @@ Snapshot3D ReadSnapshot3D(const string& fname
 }
 
 #ifdef RICH_MPI
-Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number)
+Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number,bool mpi_write)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	// Read the data
-	Snapshot3D snap;
+	Snapshot3D snap,temp;
 	for (int i = 0; i < static_cast<int>(snapshot_number); ++i)
 	{
-		Snapshot3D temp = ReadSnapshot3D(filename + int2str(i) + ".h5", false);
+		if(mpi_write)
+			temp = ReadSnapshot3D(filename, true,i);
+		else
+			temp = ReadSnapshot3D(filename + int2str(i) + ".h5", false);
 		if (i == 0)
 		{
 			snap.time = temp.time;
