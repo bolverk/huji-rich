@@ -145,6 +145,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<double> m_recv(r_disp.back() + m_rec_size.back(), 0);
 
 	MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
 	assert(m_recv.size() % 10 == 0);
 	size_t toadd = m_recv.size()/10;
 	dpoints = annAllocPts(static_cast<int>(Norg + toadd), 3);
