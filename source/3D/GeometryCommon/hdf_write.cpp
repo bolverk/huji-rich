@@ -457,6 +457,9 @@ Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proc
 			snap.time = temp.time;
 			snap.cycle = temp.cycle;
 			snap.tracerstickernames = temp.tracerstickernames;
+			snap.ll = temp.ll;
+			snap.ur = temp.ur;
+			snap.proc_points = temp.proc_points;
 		}
 		size_t N = temp.cells.size();
 		for (size_t i = 0; i < N; ++i)
