@@ -50,6 +50,10 @@ public:
 	//! \brief Component in the z direction
 	double z;
 
+	double& operator[](size_t index);
+
+	double operator[](size_t index)const;
+
 	/*! \brief Addition
 	\param v Vector to be added
 	\return Reference to sum

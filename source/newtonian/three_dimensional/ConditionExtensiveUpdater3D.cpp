@@ -38,28 +38,29 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 		size_t n1 = tess.GetFaceNeighbors(i).second;
 		if (n0 < N)
 		{
-			double Ek = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
+//			double Ek = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
 			extensives[n0] -= delta;
-			double Eknew = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
-			extensives[n0].internal_energy -= delta.energy + (Eknew - Ek);
+	//		double Eknew = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
+	//		extensives[n0].internal_energy -= delta.energy + (Eknew - Ek);
 		}
 		if (n1 < N)
 		{
-			double Ek = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
+		//	double Ek = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
 			extensives[n1] += delta;
-			double Eknew = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
-			extensives[n1].internal_energy += delta.energy - (Eknew - Ek);
+	//		double Eknew = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
+		//	extensives[n1].internal_energy += delta.energy - (Eknew - Ek);
 		}
 	}
 
 	for (size_t i = 0; i < N; ++i)
 	{
-		double dEtherm = extensives[i].internal_energy - oldEtherm[i];
+		//double dEtherm = extensives[i].internal_energy - oldEtherm[i];
 		double dEk = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass - oldEk[i];
 		double dE = extensives[i].energy - oldE[i];
-		if(dEtherm*(dE-dEk)>0)
+		extensives[i].internal_energy += dE - dEk;
+		/*if(dEtherm*(dE-dEk)>0)
 			if (std::abs(dEtherm) > 0.999 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.001*std::abs(dE - dEk))
-				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
+				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);*/
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
 			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))

@@ -105,6 +105,28 @@ Vector3D& Vector3D::operator*=(double s)
 	return *this;
 }
 
+double& Vector3D::operator[](size_t index)
+{
+	if (index == 0)
+		return x;
+	if (index == 1)
+		return y;
+	if (index == 2)
+		return z;
+	assert(false);
+}
+
+double Vector3D::operator[](size_t index)const
+{
+	if (index == 0)
+		return x;
+	if (index == 1)
+		return y;
+	if (index == 2)
+		return z;
+	assert(false);
+}
+
 Vector3D& Vector3D::operator+=(Vector3D const& v)
 {
 	x += v.x;
