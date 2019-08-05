@@ -72,13 +72,14 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 	}
 	if (debug_)
 	{
-		if (1.01*res > old_res)
+		if (1.000001*res > old_res)
 		{
 			Vector3D const& v = cells[loc].velocity;
 			double c = eos.dp2c(cells[loc].density, cells[loc].pressure, cells[loc].tracers,
 				tracerstickernames.tracer_names);
 			std::cout << "Min dt, cell ID " << cells[loc].ID<<" width "<<tess.GetWidth(loc)<<" c "
-				<<c<<" cell_loc "<<tess.GetMeshPoint(loc).x<<"," << tess.GetMeshPoint(loc).y << "," << tess.GetMeshPoint(loc).z;
+				<<c<<" cell_loc "<<tess.GetMeshPoint(loc).x<<"," << tess.GetMeshPoint(loc).y << "," << tess.GetMeshPoint(loc).z
+				<<" cell v "<<cells[loc].velocity.x<<"," << cells[loc].velocity.y << "," << cells[loc].velocity.z << std::endl;
 			face_vec const& faces = tess.GetCellFaces(loc);
 			size_t Nloop = faces.size();
 			for (size_t j = 0; j < Nloop; ++j)
