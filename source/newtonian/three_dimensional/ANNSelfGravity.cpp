@@ -11,7 +11,7 @@ namespace
 	void CallTreeGetSend(ANNkd_tree* tree, Tessellation3D const& tproc, face_vec const& faces, vector<ANNkd_ptr>& nodes,
 		double opening)
 	{
-		vector<Vector3D> facepoints;
+		point_vec_v facepoints;
 		vector<ANNpointArray> annfaces(faces.size());
 		vector<size_t> Nfaces(faces.size());
 		vector<ANNpoint> normals(faces.size());

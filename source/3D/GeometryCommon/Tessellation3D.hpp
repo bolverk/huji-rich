@@ -255,4 +255,5 @@ public:
 	virtual void SetBox(Vector3D const& ll, Vector3D const& ur) = 0;
 };
 
+point_vec_v VectorValues(std::vector<Vector3D> const&v, point_vec const &index);
 #endif // TESSELLATION3D_HPP

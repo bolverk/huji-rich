@@ -7,7 +7,9 @@
 #define FACE_HPP 1
 
 #include <vector>
+#include <boost/container/small_vector.hpp>
 #include "Vector3D.hpp"
+typedef boost::container::small_vector<Vector3D, 10> point_vec_v;
 
 using std::vector;
 
@@ -17,7 +19,7 @@ class Face
 public:
 
   //! \brief Points at the ends of the edge
-  std::vector<Vector3D> vertices;
+	point_vec_v vertices;
 
   //! \brief Neighboring cells
   std::pair<std::size_t,std::size_t> neighbors;
@@ -27,7 +29,7 @@ public:
     \param neighbor1 Index of first neighbor cell
     \param neighbor2 Index of second neighbor cell
   */
-  Face(vector<Vector3D> const& vert,std::size_t neighbor1,std::size_t neighbor2);
+  Face(point_vec_v const& vert,std::size_t neighbor1,std::size_t neighbor2);
 
   Face(void);
 

@@ -547,7 +547,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		face_vec faces_error = vproc.GetCellFaces(static_cast<size_t>(rank));
 		for (size_t j = 0; j < faces_error.size(); ++j)
 		{
-			vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
+			point_vec_v f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
 			for (size_t k = 0; k < f_points.size(); ++k)
 			{
 				std::cout << "Rank " << rank << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x
@@ -567,7 +567,7 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 			faces_error = vproc.GetCellFaces(static_cast<size_t>(realneigh[l]));
 			for (size_t j = 0; j < faces_error.size(); ++j)
 			{
-				vector<Vector3D> f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
+				point_vec_v f_points = VectorValues(vproc.GetFacePoints(), vproc.GetPointsInFace(faces_error[j]));
 				for (size_t k = 0; k < f_points.size(); ++k)
 				{
 					std::cout << "Rank " << realneigh[l] << " face " << faces_error[j] << " point " << k << " cor " << f_points[k].x

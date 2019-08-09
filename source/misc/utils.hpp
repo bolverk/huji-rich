@@ -329,7 +329,7 @@ template <class T> vector<T> VectorValues(vector<T> const&v, vector<int> const &
 \param index The indeces to return
 \return The reduced vector
 */
-template <class T,class S> vector<T> VectorValues(vector<T> const&v,S const &index);
+/*template <class T,class S> vector<T> VectorValues(vector<T> const&v,S const &index);
 
 template <class T, class S> vector<T> VectorValues(vector<T> const&v, S const &index)
 {
@@ -337,10 +337,25 @@ template <class T, class S> vector<T> VectorValues(vector<T> const&v, S const &i
 		return vector<T>();
 
 	vector<T> result(index.size());
-	for (std::size_t i = 0; i < index.size(); ++i)
+	size_t N = index.size();
+	for (std::size_t i = 0; i < N; ++i)
 		result.at(i) = v.at(static_cast<std::size_t>(index[i]));
 	return result;
-}
+}*/
+
+/*template <class T, class S> S VectorValues(vector<T> const&v, S const &index);
+
+template <class T, class S> S VectorValues(vector<T> const&v, S const &index)
+{
+	if (index.empty() || v.empty())
+		return S();
+
+	S result;
+	size_t N = index.size();
+	for (std::size_t i = 0; i < N; ++i)
+		result.push_back(v[static_cast<std::size_t>(index[i])]);
+	return result;
+}*/
 
 /*!
 \brief Returns only the values with indeces in index
