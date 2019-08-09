@@ -12,6 +12,14 @@ void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, cons
 	size_t N = tess.GetPointNo();
 	size_t Nfluxes = fluxes.size();
 	Conserved3D delta;
+	std::vector<double> oldEk(N, 0), oldEtherm(N, 0), oldE(N, 0);
+	for (size_t i = 0; i < N; ++i)
+	{
+		oldEk[i] = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass;
+		oldEtherm[i] = extensives[i].internal_energy;
+		oldE[i] = extensives[i].energy;
+	}
+	std::vector<Conserved3D> toadd(extensives.size());
 	for (size_t i = 0; i < Nfluxes; ++i)
 	{
 		delta = fluxes[i] * dt*tess.GetArea(i);
@@ -72,14 +80,29 @@ void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, cons
 		if (n0 < N)
 		{
 			extensives[n0] -= delta;
-			extensives[n0].internal_energy -= delta.energy - ScalarProd(cells[n0].velocity, delta.momentum) +
-				0.5*ScalarProd(cells[n0].velocity, cells[n0].velocity)*delta.mass;
+			double Eknew = 0.5*ScalarProd(extensives[n0].momentum, extensives[n0].momentum) / extensives[n0].mass;
+			extensives[n0] += delta;
+			toadd[n0] -= delta;
+			toadd[n0].internal_energy -= delta.energy + (Eknew - oldEk[n0]);
 		}
 		if (n1 < N)
 		{
 			extensives[n1] += delta;
-			extensives[n1].internal_energy += delta.energy - ScalarProd(cells[n1].velocity, delta.momentum) +
-				0.5*ScalarProd(cells[n1].velocity, cells[n1].velocity)*delta.mass;
+			double Eknew = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
+			extensives[n1] -= delta;
+			toadd[n0] += delta;
+			toadd[n0].internal_energy += delta.energy - (Eknew - oldEk[n1]);
 		}
 	}
+	for (size_t i = 0; i < N; ++i)
+	{
+		extensives[i] += toadd[i];
+		double dEtherm = extensives[i].internal_energy - oldEtherm[i];
+		double dEk = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass - oldEk[i];
+		double dE = extensives[i].energy - oldE[i];
+		if (dEtherm*(dE - dEk) > 0)
+			if (std::abs(dEtherm) > 0.95 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.05*std::abs(dE - dEk))
+				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
+	}
+	extensives.resize(tess.GetPointNo());
 }
