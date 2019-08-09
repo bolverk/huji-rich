@@ -164,7 +164,7 @@ namespace
 	{
 		if (HLL)
 			return;
-		if (0.5*ScalarProd(f_gr.momentum, f_gr.momentum) < std::abs(f_gr.energy)*std::abs(f_gr.mass))
+		if (0.5*ScalarProd(f_gr.momentum, f_gr.momentum) < std::abs(f_gr.energy*f_gr.mass))
 			return;
 		const double dl = local_left.density;
 		const double pl = local_left.pressure;
@@ -193,7 +193,6 @@ namespace
 			else
 				if (sr < 0)
 					f_gr = fr;
-
 		BoostBack(f_gr, velocity, normaldir, left, right);
 	}
 }
@@ -228,13 +227,9 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	PrimitiveToConserved(local_left, 1, ul);
 	PrimitiveToConserved(local_right, 1, ur);
 
-	const Conserved3D fl = PrimitiveToFlux(local_left);
-	const Conserved3D fr = PrimitiveToFlux(local_right);
 
 	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn, gamma_);
 
-	const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
-	const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 
 	Conserved3D f_gr;
 	// check if bad wavespeed
@@ -246,23 +241,41 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	}
 
 	if (ws.left > 0)
+	{
+		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = fl;
+	}
 	else if (ws.left <= 0 && ws.center >= 0)
+	{
+		const Conserved3D fl = PrimitiveToFlux(local_left);
+		const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 		f_gr = fl + ws.left*(usl - ul);
+	}
 	else if (ws.center < 0 && ws.right >= 0)
+	{
+		const Conserved3D fr = PrimitiveToFlux(local_right);
+		const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 		f_gr = fr + ws.right*(usr - ur);
+	}
 	else if (ws.right < 0)
+	{
+		const Conserved3D fr = PrimitiveToFlux(local_right);
 		f_gr = fr;
+	}
 	else
 		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
 
 	// check if bad wavespeed
 	if (HLL && ws.left < 0 && ws.right>0)
+	{
+		const Conserved3D fr = PrimitiveToFlux(local_right);
+		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = (ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul))*(1.0 / (ws.right - ws.left)); // HLL flux
+	}
 	else
 		HLL = false;
 
 	BoostBack(f_gr, velocity, normaldir, left, right);
-	FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
+//	FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
 	return f_gr;
 }

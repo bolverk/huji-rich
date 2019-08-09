@@ -1644,17 +1644,17 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
 		if (visited.find(cur) != visited.end())
 			continue;
 		visited.insert(cur);
+		double maxR = GetRadius(PointTetras_[point].at(0));
+		for (std::size_t j = 1; j < Ntetra; ++j)
+			maxR = std::max(maxR, GetRadius(PointTetras_[point][j]));
+		sphere.radius = 2 * maxR;
+		sphere.center = GetMeshPoint(point);
 		Face f(VectorValues(tproc.GetFacePoints(), tproc.GetPointsInFace(cur)), tproc.GetFaceNeighbors(cur).first,
 			tproc.GetFaceNeighbors(cur).second);
 		Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
 		normal *= (1.0 / fastsqrt(ScalarProd(normal, normal)));
 
 		// Quick check if there is no intersection for sure
-		double maxR = GetRadius(PointTetras_[point].at(0));
-		for (std::size_t j = 1; j < Ntetra; ++j)
-			maxR = std::max(maxR, GetRadius(PointTetras_[point][j]));
-		sphere.radius = 2 * maxR;
-		sphere.center = GetMeshPoint(point);
 		if (!FaceSphereIntersections(f, sphere, normal))
 			continue;
 
