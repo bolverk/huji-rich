@@ -77,6 +77,7 @@ void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, cons
 			throw eo;
 		}
 #endif
+		delta.internal_energy = 0;
 		if (n0 < N)
 		{
 			extensives[n0] -= delta;
