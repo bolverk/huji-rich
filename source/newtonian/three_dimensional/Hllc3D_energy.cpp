@@ -1,4 +1,4 @@
-#include "Hllc3D.hpp"
+#include "Hllc3D_energy.hpp"
 #include "../../misc/universal_error.hpp"
 #include "../../misc/utils.hpp"
 
@@ -6,6 +6,30 @@ using namespace std;
 
 namespace
 {
+	double TotalEnergyDensity3D(ComputationalCell3D const& p)
+	{
+		return p.density*(0.5*ScalarProd(p.velocity, p.velocity) + p.internal_energy);
+	}
+
+	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss)
+	{
+		const double dk = state.density;
+		const double pk = state.pressure;
+		const double uk = state.velocity.x;
+		const double vk = state.velocity.y;
+		const double wk = state.velocity.z;
+		const double ds = dk * (sk - uk) / (sk - ss);
+		const double ek = TotalEnergyDensity3D(state);
+		Conserved3D res;
+		res.mass = ds;
+		res.momentum.x = ds * ss;
+		res.momentum.y = ds * vk;
+		res.momentum.z = ds * wk;
+		res.energy = ek * ds / dk + ds * (ss - uk)*(ss + pk / dk / (sk - uk));
+		res.internal_energy = (res.energy - 0.5*ScalarProd(res.momentum,res.momentum)/res.mass)/res.mass;
+		return res;
+	}
+
 	class WaveSpeeds
 	{
 	public:
@@ -22,7 +46,7 @@ namespace
 		double cl = 0, cr = 0;
 		const double dl = left.density;
 		const double pl = left.pressure;
-		const double vl = left.velocity.x;
+		double vl = left.velocity.x;
 #ifdef RICH_DEBUG
 		try
 		{
@@ -38,7 +62,7 @@ namespace
 #endif
 		const double dr = right.density;
 		const double pr = right.pressure;
-		const double vr = right.velocity.x;
+		double vr = right.velocity.x;
 #ifdef RICH_DEBUG
 		try
 		{
@@ -52,30 +76,44 @@ namespace
 			throw eo;
 		}
 #endif
+
 		double sl = std::min(vr - cr, vl - cl);
 		double sr = std::max(vr + cr, vl + cl);
-		double pstar = 0;
 		double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
-		double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
+		double ustar = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+		double pstar = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
+		double ps = pstar;
+		Conserved3D usl;
+		Conserved3D usr;
+		tvector newt;
 		size_t counter = 0;
-		while (ps > 1.1 * pstar || pstar > 1.1 * ps)
+		do
 		{
-			pstar = ps;
-			double al = (pstar > pl ? fastsqrt(1 + gamma * (pstar / pl - 1)) : 1);
-			double ar = (pstar > pr ? fastsqrt(1 + gamma * (pstar / pr - 1)) : 1);
-			sl = vl - cl * al;
-			sr = vr + cr *ar;
+			ps = pstar;
+			usl = starred_state(left, sl, ustar);
+			usr = starred_state(right, sr, ustar);
+			newt[0] = usl.internal_energy;
+			double cl2 = eos.de2c(usl.mass, newt[0], newt, tsn.tracer_names);
+			if (cl2 > cl)
+				cl2 *= 2;
+			newt[0] = usr.internal_energy;
+			double cr2 = eos.de2c(usr.mass, newt[0], newt, tsn.tracer_names);
+			if (cr2 > cr)
+				cr2 *= 2;
+			sl = vl - cl2;
+			sr = vr + cr2;
 			if (sl > sr)
 			{
-				sl = std::min(vr - cr*ar, vl - cl*al);
-				sr = std::max(vr + cr*ar, vl + cl*al);
+				sl = std::min(vr - cr2, vl - cl2);
+				sr = std::max(vr + cr2, vl + cl2);
 			}
 			denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
-			ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
+			ustar = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
+			pstar = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;	
 			++counter;
 			if (counter > 54)
 			{
-				std::cout << "Too many iterations in HLLC" << std::endl;
+				std::cout << "Too many iterations in HLLCEnergy" << std::endl;
 				//std::cout << "Normal " << normaldir.x << "," << normaldir.y << "," << normaldir.z << " velocity = " << velocity << std::endl;
 				std::cout << " Left density = " << left.density << " pressure = " << left.pressure << " internal_energy = " << left.internal_energy << " vx = " << left.velocity.x <<
 					" vy = " << left.velocity.y << " vz = " << left.velocity.z << std::endl;
@@ -83,7 +121,7 @@ namespace
 					" vy = " << right.velocity.y << " vz = " << right.velocity.z << std::endl;
 			}
 			assert(counter < 55);
-		}
+		} while (ps > 1.1 * pstar || pstar > 1.1 * ps);
 		double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		return WaveSpeeds(sl, ss, sr);
 	}
@@ -104,31 +142,6 @@ namespace
 		res.AddEntry("left wave speed", left_wave_speed);
 		res.AddEntry("center wave speed", center_wave_speed);
 		res.AddEntry("right wave speed", right_wave_speed);
-		return res;
-	}
-
-	double TotalEnergyDensity3D(ComputationalCell3D const& p)
-	{
-		return p.density*(0.5*ScalarProd(p.velocity, p.velocity) + p.internal_energy);
-	}
-
-
-	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss)
-	{
-		const double dk = state.density;
-		const double pk = state.pressure;
-		const double uk = state.velocity.x;
-		const double vk = state.velocity.y;
-		const double wk = state.velocity.z;
-		const double ds = dk * (sk - uk) / (sk - ss);
-		const double ek = TotalEnergyDensity3D(state);
-		Conserved3D res;
-		res.mass = ds;
-		res.momentum.x = ds * ss;
-		res.momentum.y = ds * vk;
-		res.momentum.z = ds * wk;
-		res.energy = ek * ds / dk + ds * (ss - uk)*(ss + pk / dk / (sk - uk));
-		res.internal_energy = 0;
 		return res;
 	}
 
@@ -189,10 +202,10 @@ namespace
 	}
 }
 
-Hllc3D::Hllc3D(double gamma) :gamma_((gamma + 1) / (2 * gamma))
+Hllc3DEnergy::Hllc3DEnergy(double gamma) :gamma_((gamma + 1) / (2 * gamma))
 {}
 
-Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
+Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
 	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
 
@@ -266,6 +279,6 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	}
 
 	BoostBack(f_gr, velocity, normaldir, left, right);
-	//FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
+	//	FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
 	return f_gr;
 }
