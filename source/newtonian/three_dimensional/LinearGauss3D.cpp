@@ -226,6 +226,14 @@ namespace
 		return res;
 	}
 
+	void interp23Dsimple(ComputationalCell3D &res, Slope3D const& slope,
+		Vector3D const& target, Vector3D const& cm)
+	{
+		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
+		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
+		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
+	}
+
 	void interp23D(ComputationalCell3D &res, Slope3D const& slope,
 		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos, TracerStickerNames const& tsn,
 		bool pressure_calc)
@@ -233,11 +241,12 @@ namespace
 		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
 		ComputationalCellAddMult(res, slope.yderivative, target.y - cm.y);
 		ComputationalCellAddMult(res, slope.zderivative, target.z - cm.z);
-		if (pressure_calc)
-			try
+		try
 		{
-			//res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
-			res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
+			if (!pressure_calc)
+				res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+			else
+				res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
 		}
 		catch (UniversalError &eo)
 		{
@@ -297,7 +306,7 @@ namespace
 			if (i > 0)
 			{
 				ReplaceComputationalCell(centroid_val, cell);
-				interp23D(centroid_val, slope, tess.FaceCM(faces[i]), cm, eos, tracerstickernames, false);
+				interp23Dsimple(centroid_val, slope, tess.FaceCM(faces[i]), cm);
 				ReplaceComputationalCell(dphi, centroid_val);
 				dphi -= cell;
 			}
@@ -675,9 +684,9 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames const& tsn, Ghost3D const& ghost, bool slf, double delta_v, double theta,
-	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
+	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
 	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
-	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_() {}
+	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_(),pressure_calc_(pressure_calc) {}
 
 void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) 
 {
@@ -762,6 +771,12 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	std::vector<Vector3D> c_ij;
 	res.resize(tess.GetTotalFacesNumber(), pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
 	ComputationalCell3D* cell_ref = 0;
+	size_t energy_index = tracerstickersnames.tracer_names.size();
+	vector<string>::const_iterator it = binary_find(tracerstickersnames.tracer_names.begin(),
+		tracerstickersnames.tracer_names.end(), string("Energy"));
+	if (it != tracerstickersnames.tracer_names.end())
+		energy_index = static_cast<size_t>(it - tracerstickersnames.tracer_names.begin());
+	bool energy_fix = energy_index < tracerstickersnames.tracer_names.size();
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
@@ -777,7 +792,14 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				ReplaceComputationalCell(*cell_ref, new_cells[i]);
 				try
 				{
-					interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+					if(pressure_calc_)
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
 					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
@@ -807,7 +829,14 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				ReplaceComputationalCell(*cell_ref, new_cells[i]);
 				try
 				{
-					interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+					if (pressure_calc_)
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
 					CheckCell(*cell_ref);
 				}
 				catch (UniversalError &eo)
@@ -850,13 +879,40 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 #ifdef RICH_MPI
 				if (tess.BoundaryFace(boundaryedges[i]))
+				{ 
+					if (pressure_calc_)
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
+				}
+				else
+				{
+					if (pressure_calc_)
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
+				}
+#else
+				if (pressure_calc_)
 					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
 				else
-					interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
-#else
-				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+				{
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+					if (energy_fix)
+						cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+				}
 #endif //RICH_MPI
 
 				CheckCell(*cell_ref);
@@ -918,13 +974,41 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			{
 #ifdef RICH_MPI
 				if (tess.BoundaryFace(boundaryedges[i]))
+				{
+					if (pressure_calc_)
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
+				}
+				else
+				{
+					if (pressure_calc_)
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					else
+					{
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						if (energy_fix)
+							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+					}
+				}
+					interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+#else
+				if (pressure_calc_)
 					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
 						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
 				else
-					interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
-#else
-				interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-					tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+				{
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
+						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+					if (energy_fix)
+						cell_ref->tracers[energy_index] = cell_ref->internal_energy;
+				}
 #endif //RICH_MPI
 
 				CheckCell(*cell_ref);

@@ -31,7 +31,7 @@ public:
 	*/
 	LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
 		double theta = 0.5,double delta_P = 0.7,bool SR=false,const vector<string>& calc_tracers = vector<string>(),
-		string skip_key = string());
+		string skip_key = string(),bool pressure_calc=true);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const;
@@ -76,6 +76,7 @@ private:
 	const vector<string> calc_tracers_;
 	const string skip_key_;
 	mutable vector<size_t> to_skip_;
+	const bool pressure_calc_;
 
 	LinearGauss3D(const LinearGauss3D& origin);
 
