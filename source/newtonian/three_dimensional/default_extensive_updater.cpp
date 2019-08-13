@@ -90,8 +90,8 @@ void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, cons
 			extensives[n1] += delta;
 			double Eknew = 0.5*ScalarProd(extensives[n1].momentum, extensives[n1].momentum) / extensives[n1].mass;
 			extensives[n1] -= delta;
-			toadd[n0] += delta;
-			toadd[n0].internal_energy += delta.energy - (Eknew - oldEk[n1]);
+			toadd[n1] += delta;
+			toadd[n1].internal_energy += delta.energy - (Eknew - oldEk[n1]);
 		}
 	}
 	for (size_t i = 0; i < N; ++i)
