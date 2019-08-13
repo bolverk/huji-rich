@@ -99,11 +99,18 @@ void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, cons
 	{
 		extensives[i] += toadd[i];
 		double dEtherm = extensives[i].internal_energy - oldEtherm[i];
-		double dEk = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass - oldEk[i];
+		double Eknew = 0.5*ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass;
+		double dEk = Eknew - oldEk[i];
 		double dE = extensives[i].energy - oldE[i];
 		if (dEtherm*(dE - dEk) > 0)
+		{
 			if (std::abs(dEtherm) > 0.95 *std::abs(dE - dEk) && std::abs(dEtherm) < 1.05*std::abs(dE - dEk))
-				extensives[i].internal_energy = oldEtherm[i] + (dE - dEk);
+				extensives[i].internal_energy = extensives[i].energy - Eknew;
+			else
+				extensives[i].energy = extensives[i].internal_energy + Eknew;
+		}
+		else
+			extensives[i].energy = extensives[i].internal_energy + Eknew;
 	}
 	extensives.resize(tess.GetPointNo());
 }
