@@ -997,7 +997,6 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
 				}
-					interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
 #else
 				if (pressure_calc_)
 					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
