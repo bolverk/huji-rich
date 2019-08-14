@@ -96,9 +96,9 @@ namespace
 			double cl2 = eos.de2c(usl.mass, newt[0], newt, tsn.tracer_names);
 			newt[0] = usr.internal_energy;
 			double cr2 = eos.de2c(usr.mass, newt[0], newt, tsn.tracer_names);
-			sl = vl - cl2;
+		/*	sl = vl - cl2;
 			sr = vr + cr2;
-			if (sl > sr)
+			if (sl > sr)*/
 			{
 				sl = std::min(vr - cr2, vl - cl2);
 				sr = std::max(vr + cr2, vl + cl2);
