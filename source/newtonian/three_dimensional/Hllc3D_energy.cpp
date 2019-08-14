@@ -109,7 +109,7 @@ namespace
 			}
 			denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 			ustar = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
-			pstar = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;	
+			pstar = std::abs(dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);	
 			++counter;
 			if (counter > 54)
 			{
