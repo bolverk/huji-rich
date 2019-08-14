@@ -94,12 +94,8 @@ namespace
 			usr = starred_state(right, sr, ustar);
 			newt[0] = usl.internal_energy;
 			double cl2 = eos.de2c(usl.mass, newt[0], newt, tsn.tracer_names);
-			if (cl2 > cl)
-				cl2 *= 2;
 			newt[0] = usr.internal_energy;
 			double cr2 = eos.de2c(usr.mass, newt[0], newt, tsn.tracer_names);
-			if (cr2 > cr)
-				cr2 *= 2;
 			sl = vl - cl2;
 			sr = vr + cr2;
 			if (sl > sr)
