@@ -400,7 +400,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 
 		ptr->mass = lo->mass + hi->mass;
 		for (size_t i = 0; i < 3; ++i)
-			ptr->CM[i] = (lo->CM[i] * lo->mass + hi->CM[i] * hi->mass) / ptr->mass;
+			ptr->CM[i] = (lo->CM[i] * lo->mass + hi->CM[i] * hi->mass) / std::max(DBL_MIN*1e10, ptr->mass);
 		double qx = lo->CM[0] - ptr->CM[0];
 		double qy = lo->CM[1] - ptr->CM[1];
 		double qz = lo->CM[2] - ptr->CM[2];
