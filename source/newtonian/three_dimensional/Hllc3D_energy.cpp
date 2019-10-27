@@ -189,7 +189,7 @@ namespace
 		if (sl > 0)
 			f_gr = fl;
 		else
-			if (sl < 0 & sr>0)
+			if (sl < 0 && sr>0)
 				f_gr = (sr * fl - sl * fr + sr * sl*(ur - ul))*(1.0 / (sr - sl)); // HLL flux
 			else
 				if (sr < 0)
