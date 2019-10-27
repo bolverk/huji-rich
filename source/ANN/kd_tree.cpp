@@ -49,7 +49,7 @@
 //	one tree).
 //----------------------------------------------------------------------
 static int				IDX_TRIVIAL[] = { 0 };	// trivial point index
-ANNkd_leaf				*KD_TRIVIAL = NULL;		// trivial leaf node
+ANNkd_leaf* KD_TRIVIAL = NULL;		// trivial leaf node
 
 //----------------------------------------------------------------------
 //	Printing the kd-tree 
@@ -68,7 +68,7 @@ ANNkd_leaf				*KD_TRIVIAL = NULL;		// trivial leaf node
 
 void ANNkd_split::print(				// print splitting node
 	int level,						// depth of node in tree
-	ostream &out)					// output stream
+	ostream& out)					// output stream
 {
 	child[ANN_HI]->print(level + 1, out);	// print high child
 	out << "    ";
@@ -83,7 +83,7 @@ void ANNkd_split::print(				// print splitting node
 
 void ANNkd_leaf::print(					// print leaf node
 	int level,						// depth of node in tree
-	ostream &out)					// output stream
+	ostream& out)					// output stream
 {
 
 	out << "    ";
@@ -105,7 +105,7 @@ void ANNkd_leaf::print(					// print leaf node
 
 void ANNkd_tree::Print(					// print entire tree
 	ANNbool with_pts,				// print points as well?
-	ostream &out)					// output stream
+	ostream& out)					// output stream
 {
 	out << "ANN Version " << ANNversion << "\n";
 	if (with_pts) {						// print point coordinates
@@ -132,7 +132,7 @@ void ANNkd_tree::Print(					// print entire tree
 
 #define MAX(a,b)		((a) > (b) ? (a) : (b))
 
-void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child 
+void ANNkdStats::merge(const ANNkdStats& st)	// merge stats from child 
 {
 	n_lf += st.n_lf;			n_tl += st.n_tl;
 	n_spl += st.n_spl;			n_shr += st.n_shr;
@@ -147,8 +147,8 @@ void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child
 const double ANN_AR_TOOBIG = 1000;				// too big an aspect ratio
 
 void ANNkd_leaf::getStats(						// get subtree statistics
-	ANNkdStats			&st,					// stats (modified)
-	ANNorthRect			&bnd_box)				// bounding box
+	ANNkdStats& st,					// stats (modified)
+	ANNorthRect& bnd_box)				// bounding box
 {
 	st.reset();
 	st.n_lf = 1;								// count this leaf
@@ -159,8 +159,8 @@ void ANNkd_leaf::getStats(						// get subtree statistics
 }
 
 void ANNkd_split::getStats(						// get subtree statistics
-	ANNkdStats			&st,					// stats (modified)
-	ANNorthRect			&bnd_box)				// bounding box
+	ANNkdStats& st,					// stats (modified)
+	ANNorthRect& bnd_box)				// bounding box
 {
 	ANNkdStats ch_stats;						// stats for children
 												// get stats for low child
@@ -189,7 +189,7 @@ void ANNkd_split::getStats(						// get subtree statistics
 //----------------------------------------------------------------------
 
 void ANNkd_tree::getStats(						// get tree statistics
-	ANNkdStats			&st)					// stats (modified)
+	ANNkdStats& st)					// stats (modified)
 {
 	st.reset(3, n_pts, bkt_size);				// reset stats
 												// create bounding box
@@ -314,7 +314,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	int					n,				// number of points
 	int					dim,			// dimension of space
 	int					bsp,			// bucket space
-	ANNorthRect			&bnd_box,		// bounding box for current node
+	ANNorthRect& bnd_box,		// bounding box for current node
 	ANNkd_splitter		splitter)		// splitting routine
 {
 	if (n <= bsp) {						// n small, make a leaf node
@@ -327,7 +327,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		int cd;							// cutting dimension
 		ANNcoord cv;					// cutting value
 		int n_lo;						// number on low side of cut
-		ANNkd_node *lo, *hi;			// low and high children
+		ANNkd_node* lo, * hi;			// low and high children
 
 										// invoke splitting procedure
 		(*splitter)(pa, pidx, bnd_box, n, dim, cd, cv, n_lo);
@@ -348,7 +348,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		bnd_box.lo[cd] = lv;			// restore bounds
 
 										// create the splitting node
-		ANNkd_split *ptr = new ANNkd_split(cd, cv, lv, hv, lo, hi);
+		ANNkd_split* ptr = new ANNkd_split(cd, cv, lv, hv, lo, hi);
 
 		return ptr;						// return pointer to this node
 	}
@@ -362,7 +362,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	int					n,				// number of points
 	int					dim,			// dimension of space
 	int					bsp,			// bucket space
-	ANNorthRect			&bnd_box,		// bounding box for current node
+	ANNorthRect& bnd_box,		// bounding box for current node
 	ANNkd_splitter		splitter)		// splitting routine
 {
 	if (n <= bsp) {						// n small, make a leaf node
@@ -375,7 +375,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		int cd;							// cutting dimension
 		ANNcoord cv;					// cutting value
 		int n_lo;						// number on low side of cut
-		ANNkd_node *lo, *hi;			// low and high children
+		ANNkd_node* lo, * hi;			// low and high children
 
 										// invoke splitting procedure
 		(*splitter)(pa, pidx, bnd_box, n, dim, cd, cv, n_lo);
@@ -396,29 +396,29 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		bnd_box.lo[cd] = lv;			// restore bounds
 
 										// create the splitting node
-		ANNkd_split *ptr = new ANNkd_split(cd, cv, lv, hv, lo, hi);
+		ANNkd_split* ptr = new ANNkd_split(cd, cv, lv, hv, lo, hi);
 
 		ptr->mass = lo->mass + hi->mass;
 		for (size_t i = 0; i < 3; ++i)
-			ptr->CM[i] = (lo->CM[i] * lo->mass + hi->CM[i] * hi->mass) / std::max(DBL_MIN*1e10, ptr->mass);
+			ptr->CM[i] = (lo->CM[i] * lo->mass + hi->CM[i] * hi->mass) / std::max(DBL_MIN * 1e10, ptr->mass);
 		double qx = lo->CM[0] - ptr->CM[0];
 		double qy = lo->CM[1] - ptr->CM[1];
 		double qz = lo->CM[2] - ptr->CM[2];
 		double qr2 = qx * qx + qy * qy + qz * qz;
-		ptr->Q[0] = lo->Q[0] + lo->mass*(3 * qx*qx - qr2);
-		ptr->Q[1] = lo->Q[1] + 3 * lo->mass*qx*qy;
-		ptr->Q[2] = lo->Q[2] + 3 * lo->mass*qx*qz;
-		ptr->Q[3] = lo->Q[3] + lo->mass*(3 * qy*qy - qr2);
-		ptr->Q[4] = lo->Q[4] + 3 * lo->mass*qz*qy;
+		ptr->Q[0] = lo->Q[0] + lo->mass * (3 * qx * qx - qr2);
+		ptr->Q[1] = lo->Q[1] + 3 * lo->mass * qx * qy;
+		ptr->Q[2] = lo->Q[2] + 3 * lo->mass * qx * qz;
+		ptr->Q[3] = lo->Q[3] + lo->mass * (3 * qy * qy - qr2);
+		ptr->Q[4] = lo->Q[4] + 3 * lo->mass * qz * qy;
 		qx = hi->CM[0] - ptr->CM[0];
 		qy = hi->CM[1] - ptr->CM[1];
 		qz = hi->CM[2] - ptr->CM[2];
 		qr2 = qx * qx + qy * qy + qz * qz;
-		ptr->Q[0] += hi->Q[0] + hi->mass*(3 * qx*qx - qr2);
-		ptr->Q[1] += hi->Q[1] + 3 * hi->mass*qx*qy;
-		ptr->Q[2] += hi->Q[2] + 3 * hi->mass*qx*qz;
-		ptr->Q[3] += hi->Q[3] + hi->mass*(3 * qy*qy - qr2);
-		ptr->Q[4] += hi->Q[4] + 3 * hi->mass*qz*qy;
+		ptr->Q[0] += hi->Q[0] + hi->mass * (3 * qx * qx - qr2);
+		ptr->Q[1] += hi->Q[1] + 3 * hi->mass * qx * qy;
+		ptr->Q[2] += hi->Q[2] + 3 * hi->mass * qx * qz;
+		ptr->Q[3] += hi->Q[3] + hi->mass * (3 * qy * qy - qr2);
+		ptr->Q[4] += hi->Q[4] + 3 * hi->mass * qz * qy;
 		ptr->Q[5] = -ptr->Q[0] - ptr->Q[3];
 		return ptr;						// return pointer to this node
 	}
@@ -432,7 +432,7 @@ ANNkd_ptr rkd_tree(ANNpointArray const& pa, ANNidxArray pidx, vector<double> con
 		else							// construct the node and return
 			return new ANNkd_leaf(n, pidx, masses[pidx[0]], pa[pidx[0]]);
 	}
-	else 
+	else
 	{								// n large, make a splitting node
 		int cd;							// cutting dimension
 		ANNcoord cv;					// cutting value
@@ -591,7 +591,7 @@ ANNkd_tree::ANNkd_tree(ANNpointArray const& pa, std::vector<double> const& masse
 	}
 }
 
-void ANNkd_tree::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2) const
+void ANNkd_tree::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double angle2) const
 {
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
 	root->GetAcc(qpoint, res, angle2, bb);
@@ -602,12 +602,12 @@ namespace
 	double fastsqrt(double x)
 	{
 		double res = static_cast<double>(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(static_cast<float>(x)))));
-		return x * res*(1.5 - 0.5*res*res*x);
+		return x * res * (1.5 - 0.5 * res * res * x);
 	}
 }
 
-void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint,
-	std::vector<ANNpoint> &res, double angle2) const
+void  ANNkd_tree::GetAcc(std::vector<ANNpoint>& qpoint,
+	std::vector<ANNpoint>& res, double angle2) const
 {
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
 	std::array<double, 3> qMin, qMax;
@@ -631,18 +631,18 @@ void  ANNkd_tree::GetAcc(std::vector<ANNpoint> &qpoint,
 		}
 	}
 	std::array<double, 4> qCM;
-	qCM[0] = 0.5*(qMax[0] + qMin[0]);
-	qCM[1] = 0.5*(qMax[1] + qMin[1]);
-	qCM[2] = 0.5*(qMax[2] + qMin[2]);
+	qCM[0] = 0.5 * (qMax[0] + qMin[0]);
+	qCM[1] = 0.5 * (qMax[1] + qMin[1]);
+	qCM[2] = 0.5 * (qMax[2] + qMin[2]);
 	if (N > 1)
-		qCM[3] = fastsqrt((qMax[0] - qMin[0])*(qMax[0] - qMin[0]) + (qMax[1] - qMin[1])*(qMax[1] - qMin[1]) +
-		(qMax[2] - qMin[2])*(qMax[2] - qMin[2]));
+		qCM[3] = fastsqrt((qMax[0] - qMin[0]) * (qMax[0] - qMin[0]) + (qMax[1] - qMin[1]) * (qMax[1] - qMin[1]) +
+		(qMax[2] - qMin[2]) * (qMax[2] - qMin[2]));
 	else
 		qCM[3] = 0;
 	root->GetAcc(qpoint, res, angle2, bb, qCM);
 }
 
-void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
+void ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double angle2, ANNorthRect& bb,
 	std::array<double, 4> const& qCM) const
 {
 	double lv = bb.lo[cut_dim];
@@ -655,10 +655,10 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 #pragma ivdep
 #endif
 	for (int i = 0; i < 3; ++i)
-		dist_toq += (qCM[i] - CM[i])*(qCM[i] - CM[i]);
+		dist_toq += (qCM[i] - CM[i]) * (qCM[i] - CM[i]);
 	if (N > 1)
 		dist_toq -= 2 * qCM[3] * fastsqrt(dist_toq) - qCM[3] * qCM[3];
-	if (dist_toq*angle2 > maxbox)
+	if (dist_toq * angle2 > maxbox)
 		counter = 1;
 	if (counter > 0)
 	{
@@ -669,10 +669,10 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 #pragma ivdep
 #endif
 			for (int i = 0; i < 3; ++i)
-				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
-			if (dist_toq*angle2 > maxbox)
+				dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
+			if (dist_toq * angle2 > maxbox)
 			{
-				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+				double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -682,10 +682,10 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 				double dx = qpoint[k][0] - CM[0];
 				double dy = qpoint[k][1] - CM[1];
 				double dz = qpoint[k][2] - CM[2];
-				res[k][0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-				res[k][1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-				res[k][2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-				double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+				res[k][0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+				res[k][1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+				res[k][2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+				double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
 				Qfactor *= -5 * mrr / (2 * dist_toq);
 				res[k][0] += Qfactor * dx;
 				res[k][1] += Qfactor * dy;
@@ -723,7 +723,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &r
 	}
 }
 
-void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb) const
+void  ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double angle2, ANNorthRect& bb) const
 {
 	double lv = bb.lo[cut_dim];
 	double hv = bb.hi[cut_dim];
@@ -737,8 +737,8 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 #pragma ivdep
 #endif
 		for (int i = 0; i < 3; ++i)
-			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
-		if (dist_toq*angle2 > maxbox)
+			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
+		if (dist_toq * angle2 > maxbox)
 		{
 			++counter;
 			break;
@@ -753,10 +753,10 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 #pragma ivdep
 #endif
 			for (int i = 0; i < 3; ++i)
-				dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
-			if (dist_toq*angle2 > maxbox)
+				dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
+			if (dist_toq * angle2 > maxbox)
 			{
-				double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+				double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -766,10 +766,10 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 				double dx = qpoint[k][0] - CM[0];
 				double dy = qpoint[k][1] - CM[1];
 				double dz = qpoint[k][2] - CM[2];
-				res[k][0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-				res[k][1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-				res[k][2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-				double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+				res[k][0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+				res[k][1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+				res[k][2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+				double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
 				Qfactor *= -5 * mrr / (2 * dist_toq);
 				res[k][0] += Qfactor * dx;
 				res[k][1] += Qfactor * dy;
@@ -815,10 +815,42 @@ void ANNkd_split::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces,
 
 void ANNkd_split::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const
 {
-
+	double lv = bb.lo[cut_dim];
+	double hv = bb.hi[cut_dim];
+	double maxbox = annDist2(3, bb.lo, bb.hi, CM);
+	double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+	for (int i = 0; i < 3; ++i)
+		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
+	if (dist_toq * angle2 > maxbox)
+	{
+		if (qpoint[2] > bb.lo[2] && qpoint[2] < bb.hi[2])
+		{
+			res.push_back(std::pair<double, double>(CM[2], mass / ((bb.hi[0] - bb.lo[0]) *
+				(bb.hi[1] - bb.lo[1]))));
+		}
+		return;
+	}
+	else
+	{
+		if (child[1] != KD_TRIVIAL)
+		{
+			bb.lo[cut_dim] = cut_val;
+			child[1]->GetOpticalDepth(qpoint, res, angle2, bb);
+			bb.lo[cut_dim] = lv;
+		}
+		if (child[0] != KD_TRIVIAL)
+		{
+			bb.hi[cut_dim] = cut_val;
+			child[0]->GetOpticalDepth(qpoint, res, angle2, bb);
+			bb.hi[cut_dim] = hv;
+		}
+	}
 }
 
-void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const
+void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double angle2, ANNorthRect& bb) const
 {
 	double maxbox = annDist2(3, bb.lo, bb.hi, CM);
 	double dist_toq = 0;
@@ -826,10 +858,10 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, A
 #pragma ivdep
 #endif
 	for (int i = 0; i < 3; ++i)
-		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
-	if (dist_toq*angle2 > maxbox)
+		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
+	if (dist_toq * angle2 > maxbox)
 	{
-		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -839,11 +871,11 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, A
 		const double dx = qpoint[0] - CM[0];
 		const double dy = qpoint[1] - CM[1];
 		const double dz = qpoint[2] - CM[2];
-		res[0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-		res[1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-		res[2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-		double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
-		const double Qfactor2 = -5 * mrr*Qfactor / (2 * dist_toq);
+		res[0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+		res[1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+		res[2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+		double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
+		const double Qfactor2 = -5 * mrr * Qfactor / (2 * dist_toq);
 		res[0] += Qfactor2 * dx;
 		res[1] += Qfactor2 * dy;
 		res[2] += Qfactor2 * dz;
@@ -875,43 +907,48 @@ void ANNkd_leaf::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, 
 
 void ANNkd_leaf::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const
 {
-
+	if (qpoint[2] > bb.lo[2] && qpoint[2] < bb.hi[2])
+	{
+		res.push_back(std::pair<double, double>(CM[2], mass / ((bb.hi[0] - bb.lo[0]) *
+			(bb.hi[1] - bb.lo[1]))));
+	}
+	return;
 }
 
-void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double /*angle2*/, ANNorthRect &bb) const
+void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double /*angle2*/, ANNorthRect& bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
 	for (int i = 0; i < 3; ++i)
-		dist_toq += (qpoint[i] - CM[i])*(qpoint[i] - CM[i]);
-	if (dist_toq < maxbox*1e-6) //prevent self force
+		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
+	if (dist_toq < maxbox * 1e-6) //prevent self force
 		return;
-	double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+	double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 	for (int i = 0; i < 3; ++i)
-		res[i] -= mass * (qpoint[i] - CM[i]) *r3;
+		res[i] -= mass * (qpoint[i] - CM[i]) * r3;
 	double sumQ = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 	for (size_t i = 0; i < 6; ++i)
 		sumQ += std::abs(Q[i]);
-	if (sumQ < mass*dist_toq*1e-6)
+	if (sumQ < mass * dist_toq * 1e-6)
 		return;
 	double Qfactor = r3 / dist_toq;
 	double dx = qpoint[0] - CM[0];
 	double dy = qpoint[1] - CM[1];
 	double dz = qpoint[2] - CM[2];
-	res[0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-	res[1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-	res[2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-	double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+	res[0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+	res[1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+	res[2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+	double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
 	Qfactor *= -5 * mrr / (2 * dist_toq);
 	res[0] += Qfactor * dx;
 	res[1] += Qfactor * dy;
 	res[2] += Qfactor * dz;
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double /*angle2*/, ANNorthRect &bb) const
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double /*angle2*/, ANNorthRect& bb) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	size_t N = qpoint.size();
@@ -922,31 +959,31 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 #pragma ivdep
 #endif
 		for (int i = 0; i < 3; ++i)
-			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
-		if (dist_toq < maxbox*1e-6) //prevent self force
+			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
+		if (dist_toq < maxbox * 1e-6) //prevent self force
 			continue;
-		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 		for (int i = 0; i < 3; ++i)
-			res[k][i] -= mass * (qpoint[k][i] - CM[i]) *r3;
+			res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
 		double sumQ = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 		for (size_t i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
-		if (sumQ < mass*dist_toq*1e-6)
+		if (sumQ < mass * dist_toq * 1e-6)
 			continue;
 		double Qfactor = r3 / dist_toq;
 		double dx = qpoint[k][0] - CM[0];
 		double dy = qpoint[k][1] - CM[1];
 		double dz = qpoint[k][2] - CM[2];
-		res[k][0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-		res[k][1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-		res[k][2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-		double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+		res[k][0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+		res[k][1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+		res[k][2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+		double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
 		Qfactor *= -5 * mrr / (2 * dist_toq);
 		res[k][0] += Qfactor * dx;
 		res[k][1] += Qfactor * dy;
@@ -954,7 +991,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 	}
 }
 
-void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &res, double /*angle2*/, ANNorthRect &bb,
+void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& res, double /*angle2*/, ANNorthRect& bb,
 	std::array<double, 4> const& /*qCM*/) const
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
@@ -966,31 +1003,31 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &re
 #pragma ivdep
 #endif
 		for (int i = 0; i < 3; ++i)
-			dist_toq += (qpoint[k][i] - CM[i])*(qpoint[k][i] - CM[i]);
-		if (dist_toq < maxbox*1e-6) //prevent self force
+			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
+		if (dist_toq < maxbox * 1e-6) //prevent self force
 			continue;
-		double r3 = 1.0 / (dist_toq*fastsqrt(dist_toq));
+		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 		for (int i = 0; i < 3; ++i)
-			res[k][i] -= mass * (qpoint[k][i] - CM[i]) *r3;
+			res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
 		double sumQ = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 		for (size_t i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
-		if (sumQ < mass*dist_toq*1e-6)
+		if (sumQ < mass * dist_toq * 1e-6)
 			continue;
 		double Qfactor = r3 / dist_toq;
 		double dx = qpoint[k][0] - CM[0];
 		double dy = qpoint[k][1] - CM[1];
 		double dz = qpoint[k][2] - CM[2];
-		res[k][0] += Qfactor * (dx*Q[0] + dy * Q[1] + dz * Q[2]);
-		res[k][1] += Qfactor * (dx*Q[1] + dy * Q[3] + dz * Q[4]);
-		res[k][2] += Qfactor * (dx*Q[2] + dy * Q[4] + dz * Q[5]);
-		double mrr = dx * dx*Q[0] + dy * dy*Q[3] + dz * dz*Q[5] + 2 * dx*dy*Q[1] + 2 * dx*dz*Q[2] + 2 * dy*dz*Q[4];
+		res[k][0] += Qfactor * (dx * Q[0] + dy * Q[1] + dz * Q[2]);
+		res[k][1] += Qfactor * (dx * Q[1] + dy * Q[3] + dz * Q[4]);
+		res[k][2] += Qfactor * (dx * Q[2] + dy * Q[4] + dz * Q[5]);
+		double mrr = dx * dx * Q[0] + dy * dy * Q[3] + dz * dz * Q[5] + 2 * dx * dy * Q[1] + 2 * dx * dz * Q[2] + 2 * dy * dz * Q[4];
 		Qfactor *= -5 * mrr / (2 * dist_toq);
 		res[k][0] += Qfactor * dx;
 		res[k][1] += Qfactor * dy;
@@ -1000,7 +1037,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &re
 
 namespace
 {
-	void CrossProduct(ANNpoint v1, ANNpoint v2, ANNpoint &res)
+	void CrossProduct(ANNpoint v1, ANNpoint v2, ANNpoint& res)
 	{
 		res[0] = v1[1] * v2[2] - v1[2] * v2[1];
 		res[1] = v1[2] * v2[1] - v1[1] * v2[2];
@@ -1044,10 +1081,10 @@ namespace
 
 namespace
 {
-	double DistanceToFace(ANNpointArray const& face, size_t Nface, std::array<double, 3> const&  qpoint, double maxdist,
+	double DistanceToFace(ANNpointArray const& face, size_t Nface, std::array<double, 3> const& qpoint, double maxdist,
 		ANNpoint normal)
 	{
-		double d = (qpoint[0] - face[0][0])*normal[0] + (qpoint[1] - face[0][1])*normal[1] + (qpoint[2] - face[0][2])*normal[2];
+		double d = (qpoint[0] - face[0][0]) * normal[0] + (qpoint[1] - face[0][1]) * normal[1] + (qpoint[2] - face[0][2]) * normal[2];
 		if (std::abs(d) > maxdist)
 			return std::abs(d);
 		ANNpoint ptemp;
@@ -1063,7 +1100,7 @@ namespace
 #pragma ivdep
 #endif
 		for (size_t i = 0; i < 3; ++i)
-			min_face_dist += (qpoint[i] - face[0][i])*(qpoint[i] - face[0][i]);
+			min_face_dist += (qpoint[i] - face[0][i]) * (qpoint[i] - face[0][i]);
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -1074,7 +1111,7 @@ namespace
 #pragma ivdep
 #endif
 			for (size_t i = 0; i < 3; ++i)
-				temp += (qpoint[i] - face[j][i])*(qpoint[i] - face[j][i]);
+				temp += (qpoint[i] - face[j][i]) * (qpoint[i] - face[j][i]);
 			min_face_dist = std::min(min_face_dist, temp);
 		}
 		return fastsqrt(min_face_dist);
@@ -1094,30 +1131,32 @@ namespace
 	}
 }
 
-void ANNkd_tree::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr> & nodes, double angle2,
+void ANNkd_tree::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 	std::vector<ANNpoint> const& normals)
 {
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
-	if(n_pts>0)
+	if (n_pts > 0)
 		root->GetToSend(faces, Nfaces, nodes, angle2, normals, bb);
 }
 
-void ANNkd_tree::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double>>& res, 
+void ANNkd_tree::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res,
 	double angle2) const
 {
+	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
+	root->GetOpticalDepth(qpoint, res, angle2, bb);
 }
 
-void ANNkd_tree::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t> 
+void ANNkd_tree::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>
 	const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2, std::vector<ANNpoint> const& normals)
 {
 }
 
 void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-	std::vector<ANNpoint> const& normals, ANNorthRect &bb)
+	std::vector<ANNpoint> const& normals, ANNorthRect& bb)
 {
 	double maxbox = annDist2(3, bb.lo, bb.hi, CM);
 	double dist = DistanceToFaces(faces, Nfaces, CM, fastsqrt(maxbox / angle2), normals);
-	if (dist*dist*angle2 > maxbox)
+	if (dist * dist * angle2 > maxbox)
 	{
 		nodes.push_back(this);
 		return;
@@ -1141,7 +1180,7 @@ void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector
 }
 
 void ANNkd_leaf::GetToSend(std::vector<ANNpointArray> const& /*faces*/, std::vector<size_t>const& /*Nfaces*/, vector<ANNkd_ptr>& nodes, double /*angle2*/,
-	std::vector<ANNpoint> const& /*normals*/, ANNorthRect &/*bb*/)
+	std::vector<ANNpoint> const& /*normals*/, ANNorthRect&/*bb*/)
 {
 	nodes.push_back(this);
 }
