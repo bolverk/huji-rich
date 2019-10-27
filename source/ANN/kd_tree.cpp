@@ -729,6 +729,17 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint> &qpoint, std::vector<ANNpoint> &
 	}
 }
 
+void ANNkd_split::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
+	std::vector<ANNpoint> const& normals, ANNorthRect& bb)
+{
+
+}
+
+void ANNkd_split::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const
+{
+
+}
+
 void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, ANNorthRect &bb) const
 {
 	double maxbox = annDist2(3, bb.lo, bb.hi, CM);
@@ -776,6 +787,17 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double angle2, A
 		child[0]->GetAcc(qpoint, res, angle2, bb);
 		bb.hi[cut_dim] = hv;
 	}
+}
+
+void ANNkd_leaf::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
+	std::vector<ANNpoint> const& normals, ANNorthRect& bb)
+{
+
+}
+
+void ANNkd_leaf::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const
+{
+
 }
 
 void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint &res, double /*angle2*/, ANNorthRect &bb) const
