@@ -676,6 +676,13 @@ public:
 		int				bs = 1,			// bucket size
 		ANNsplitRule	split = ANN_KD_SUGGEST);	// splitting method
 
+	ANNkd_tree(							// build from point array
+		ANNpointArray const& pa,				// point array
+		std::vector<double> const& masses,
+		int				n,				// number of points
+		int				bs = 1,			// bucket size
+		ANNsplitRule	split = ANN_KD_MIDPT);	// splitting method
+
 	ANNkd_tree(							// build from dump file
 		std::istream&	in);			// input stream for dump file
 
@@ -727,6 +734,11 @@ public:
 
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, std::vector<ANNkd_ptr> & nodes, double angle2,
 		std::vector<ANNpoint> const& normals);
+
+	void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2) const;
+
+	void GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces,
+		std::vector<ANNkd_ptr>& nodes, double angle2,	std::vector<ANNpoint> const& normals);
 };								
 
 //----------------------------------------------------------------------

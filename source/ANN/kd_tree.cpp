@@ -424,6 +424,49 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	}
 }
 
+ANNkd_ptr rkd_tree(ANNpointArray const& pa, ANNidxArray pidx, vector<double> const& masses, int n, int dim, int bsp, ANNorthRect& bnd_box, ANNkd_splitter splitter)
+{
+	if (n <= bsp) {						// n small, make a leaf node
+		if (n == 0)						// empty leaf node
+			return KD_TRIVIAL;			// return (canonical) empty leaf
+		else							// construct the node and return
+			return new ANNkd_leaf(n, pidx, masses[pidx[0]], pa[pidx[0]]);
+	}
+	else 
+	{								// n large, make a splitting node
+		int cd;							// cutting dimension
+		ANNcoord cv;					// cutting value
+		int n_lo;						// number on low side of cut
+		ANNkd_node* lo, * hi;			// low and high children
+
+										// invoke splitting procedure
+		(*splitter)(pa, pidx, bnd_box, n, dim, cd, cv, n_lo);
+
+		ANNcoord lv = bnd_box.lo[cd];	// save bounds for cutting dimension
+		ANNcoord hv = bnd_box.hi[cd];
+
+		bnd_box.hi[cd] = cv;			// modify bounds for left subtree
+		lo = rkd_tree(					// build left subtree
+			pa, pidx, masses, n_lo,			// ...from pidx[0..n_lo-1]
+			dim, bsp, bnd_box, splitter);
+		bnd_box.hi[cd] = hv;			// restore bounds
+
+		bnd_box.lo[cd] = cv;			// modify bounds for right subtree
+		hi = rkd_tree(					// build right subtree
+			pa, pidx + n_lo, masses, n - n_lo,// ...from pidx[n_lo..n-1]
+			dim, bsp, bnd_box, splitter);
+		bnd_box.lo[cd] = lv;			// restore bounds
+
+										// create the splitting node
+		ANNkd_split* ptr = new ANNkd_split(cd, cv, lv, hv, lo, hi);
+
+		ptr->mass = lo->mass + hi->mass;
+		for (size_t i = 0; i < 3; ++i)
+			ptr->CM[i] = (lo->CM[i] * lo->mass + hi->CM[i] * hi->mass) / std::max(DBL_MIN * 1e10, ptr->mass);
+		return ptr;						// return pointer to this node
+	}
+}
+
 
 //----------------------------------------------------------------------
 // kd-tree constructor
@@ -507,6 +550,41 @@ ANNkd_tree::ANNkd_tree(					// construct from point array
 		break;
 	case ANN_KD_SL_FAIR:				// sliding fair split
 		root = rkd_tree(pa, pidx, masses, Qs, n, 3, bs, bnd_box, sl_fair_split);
+		break;
+	default:
+		annError("Illegal splitting method", ANNabort);
+	}
+}
+
+ANNkd_tree::ANNkd_tree(ANNpointArray const& pa, std::vector<double> const& masses, int n, int bs, ANNsplitRule split)
+	:n_pts(0), bkt_size(0), pts(0), pidx(0), root(0), bnd_box_lo(ANNpoint()), bnd_box_hi(ANNpoint())
+{
+	SkeletonTree(n, bs);			// set up the basic stuff
+	pts = &pa;							// where the points are
+	if (n == 0) return;					// no points--no sweat
+
+	ANNorthRect bnd_box;			// bounding box for points
+	annEnclRect(pa, pidx, n, 3, bnd_box);// construct bounding rectangle
+										  // copy to tree structure
+	bnd_box_lo = bnd_box.lo;
+	bnd_box_hi = bnd_box.hi;
+
+	switch (split) {					// build by rule
+	case ANN_KD_STD:					// standard kd-splitting rule
+		root = rkd_tree(pa, pidx, masses, n, 3, bs, bnd_box, kd_split);
+		break;
+	case ANN_KD_MIDPT:					// midpoint split
+		root = rkd_tree(pa, pidx, masses, n, 3, bs, bnd_box, midpt_split);
+		break;
+	case ANN_KD_FAIR:					// fair split
+		root = rkd_tree(pa, pidx, masses, n, 3, bs, bnd_box, fair_split);
+		break;
+	case ANN_KD_SUGGEST:				// best (in our opinion)
+	case ANN_KD_SL_MIDPT:				// sliding midpoint split
+		root = rkd_tree(pa, pidx, masses, n, 3, bs, bnd_box, sl_midpt_split);
+		break;
+	case ANN_KD_SL_FAIR:				// sliding fair split
+		root = rkd_tree(pa, pidx, masses, n, 3, bs, bnd_box, sl_fair_split);
 		break;
 	default:
 		annError("Illegal splitting method", ANNabort);
@@ -1022,6 +1100,16 @@ void ANNkd_tree::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<
 	ANNorthRect bb(bnd_box_lo, bnd_box_hi);
 	if(n_pts>0)
 		root->GetToSend(faces, Nfaces, nodes, angle2, normals, bb);
+}
+
+void ANNkd_tree::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double>>& res, 
+	double angle2) const
+{
+}
+
+void ANNkd_tree::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t> 
+	const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2, std::vector<ANNpoint> const& normals)
+{
 }
 
 void ANNkd_split::GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,

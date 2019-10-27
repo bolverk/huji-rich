@@ -136,6 +136,20 @@ public:
 		Q = Qs;
 	}
 
+	ANNkd_leaf(							// constructor
+		int				n,				// number of points
+		ANNidxArray		b,
+		double m,
+		ANNpoint pt)				// bucket
+		:n_pts(n), bkt(b)
+	{
+		n_pts = n;			// number of points in bucket
+		bkt = b;			// the bucket
+		mass = m;
+		for (size_t i = 0; i < 3; ++i)
+			CM[i] = pt[i];
+	}
+
 	~ANNkd_leaf() { }					// destructor (none)
 
 	virtual void getStats(						// get tree statistics
@@ -257,6 +271,16 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 	int					dim,			// dimension of space
 	int					bsp,			// bucket space
 	ANNorthRect			&bnd_box,		// bounding box for current node
+	ANNkd_splitter		splitter);		// splitting routine
+
+ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
+	ANNpointArray const& pa,				// point array (unaltered)
+	ANNidxArray			pidx,			// point indices to store in subtree
+	vector<double> const& masses,
+	int					n,				// number of points
+	int					dim,			// dimension of space
+	int					bsp,			// bucket space
+	ANNorthRect& bnd_box,		// bounding box for current node
 	ANNkd_splitter		splitter);		// splitting routine
 
 double DistanceToFace(ANNpointArray const& face, size_t Nface, const double* qpoint,double maxdist,ANNpoint normal);
