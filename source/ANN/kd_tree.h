@@ -77,8 +77,7 @@ public:
 
 	virtual void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double,double> > & res, double angle2, ANNorthRect& bb) const = 0;
 
-	virtual void GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-		std::vector<ANNpoint> const& normals, ANNorthRect& bb) = 0;
+	virtual void GetToSendOpticalDepth(std::vector<ANNorthRect> const& faces, vector<ANNkd_ptr>& nodes, double angle2, ANNorthRect& bb) = 0;
 };
 
 //----------------------------------------------------------------------
@@ -169,8 +168,7 @@ public:
 	void GetToSend(std::vector<ANNpointArray> const& faces, std::vector<size_t> const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
 		std::vector<ANNpoint> const& normals, ANNorthRect &bb);
 	void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const;
-	void GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-		std::vector<ANNpoint> const& normals, ANNorthRect& bb);
+	void GetToSendOpticalDepth(std::vector<ANNorthRect> const& faces, vector<ANNkd_ptr>& nodes, double angle2, ANNorthRect& bb);
 };
 
 //----------------------------------------------------------------------
@@ -245,8 +243,7 @@ public:
 	void GetAcc(std::vector<ANNpoint> &qpoint, 	std::vector<ANNpoint> &res, double angle2, ANNorthRect &bb,
 		std::array<double, 4> const& qCM) const;
 	void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const;
-	void GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-		std::vector<ANNpoint> const& normals, ANNorthRect& bb);
+	void GetToSendOpticalDepth(std::vector<ANNorthRect> const& faces, vector<ANNkd_ptr>& nodes, double angle2, ANNorthRect& bb);
 };
 
 //----------------------------------------------------------------------

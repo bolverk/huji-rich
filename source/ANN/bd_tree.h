@@ -107,9 +107,10 @@ public:
 	void GetToSend(std::vector<ANNpointArray> const& /*faces*/, std::vector<size_t>const& /*Nfaces*/, vector<ANNkd_ptr>& /*nodes*/, double/* angle2*/,
 		std::vector<ANNpoint> const& /*normals*/, ANNorthRect &/*bb*/) {};
 
-	void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const {};
-	void GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, std::vector<size_t>const& Nfaces, vector<ANNkd_ptr>& nodes, double angle2,
-		std::vector<ANNpoint> const& normals, ANNorthRect& bb) {};
+	void GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res,
+		double angle2, ANNorthRect& bb) const {};
+	void GetToSendOpticalDepth(std::vector<ANNorthRect> const& faces, vector<ANNkd_ptr>& nodes,
+		double angle2, ANNorthRect& bb) {};
 };
 
 #endif
