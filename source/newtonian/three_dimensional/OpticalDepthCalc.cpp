@@ -1,8 +1,8 @@
 #include "OpticalDepthCalc.hpp"
-#include "source/ANN/ANN.h"
-#include "source/ANN/kd_tree.h"
+#include "../../ANN/ANN.h"
+#include "../..//ANN/kd_tree.h"
 #ifdef RICH_MPI
-#include <source/mpi/mpi_commands.hpp>
+#include "../..//mpi/mpi_commands.hpp"
 #endif
 
 namespace

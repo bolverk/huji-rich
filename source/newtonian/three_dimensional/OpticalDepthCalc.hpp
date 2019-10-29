@@ -1,8 +1,8 @@
 #ifndef OPTDEPTHCALC_HPP
 #define OPTDEPTHCALC_HPP 1
 
-#include <source/3D/GeometryCommon/Tessellation3D.hpp>
-#include <source/newtonian/three_dimensional/computational_cell.hpp>
+#include "../../3D/GeometryCommon/Tessellation3D.hpp"
+#include "computational_cell.hpp"
 
 class OpticalDepthCalc
 {
