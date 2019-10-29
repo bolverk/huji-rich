@@ -634,7 +634,7 @@ namespace
 		double min_1 = -1;
 		bool intersect = false;
 		size_t Nfaces = faces.size();
-		for (size_t i = 1; i < Nfaces; ++i)
+		for (size_t i = 0; i < Nfaces; ++i)
 		{
 			std::pair<bool, double> res = ZDistanceToFace(faces[i], bb);
 			if (res.first)
