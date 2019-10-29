@@ -52,7 +52,7 @@ namespace
 			{
 				if (surface_density[i].second < 0.5 * total_density || i == 0)
 				{
-					double result = -total_density * (surface_density[i].first + 0.5 * R);
+					double result = -total_density * (surface_density[i].first - 0.5 * R);
 					return result;
 				}
 			}
