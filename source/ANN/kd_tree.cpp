@@ -622,7 +622,7 @@ namespace
 {
 	std::pair<bool, double> ZDistanceToFace(ANNorthRect const& face, ANNorthRect const& bb)
 	{
-		if (!(face.lo[0] >= bb.hi[0] || face.hi[0] <= bb.lo[0] || face.hi[1] >= bb.lo[1] || face.lo[1] <= bb.hi[1]))
+		if (!(face.lo[0] >= bb.hi[0] || face.hi[0] <= bb.lo[0] || face.hi[1] <= bb.lo[1] || face.lo[1] >= bb.hi[1]))
 			return std::pair<bool, double>(true, std::min(std::abs(bb.lo[2] - face.hi[2]),
 				std::abs(bb.hi[2] - face.lo[2])));
 		else
