@@ -75,7 +75,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,	
 			}
 		}
 		// check cell
-		if ((!(extensives[i].mass)) > 0 || (!(extensives[i].energy)) > 0 || (!(extensives[i].internal_energy > 0) && (!entropy)) || 
+		if (!(extensives[i].mass > 0) || !(extensives[i].energy > 0) || (!(extensives[i].internal_energy > 0) && (!entropy)) || 
 			(!std::isfinite(fastabs(extensives[i].momentum))))
 		{
 			int rank = 0;
