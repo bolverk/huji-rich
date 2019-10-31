@@ -92,7 +92,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				cells[i].velocity.x << " vy " << cells[i].velocity.y << " vz " << cells[i].velocity.z << std::endl;
 			for (size_t j = 0; j < tracerstickernames.tracer_names.size(); ++j)
 			{
-				std::cout << tracerstickernames.tracer_names[j] << " " << cells[i].tracers[j] << std::endl;
+				std::cout << tracerstickernames.tracer_names[j] << " old cell " << cells[i].tracers[j] << 
+					" extensive "<<extensives[i].tracers[j]<<std::endl;
 			}
 			face_vec temp = tess.GetCellFaces(i);
 			Conserved3D old_ext(extensives[i]);
