@@ -119,19 +119,19 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 				int N0 = tess.GetEdge(temp[j]).neighbors.first;
 				int N1 = tess.GetEdge(temp[j]).neighbors.second;
 				double Area = tess.GetEdge(temp[j]).GetLength() * dt;
-				std::cout << "Edge " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass*Area <<
-					" energy " << fluxes[temp[j]].energy*Area << " momentum=" << abs(fluxes[temp[j]].momentum)*Area <<
+				std::cout << "Edge " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[static_cast<size_t>(temp[j])].mass*Area <<
+					" energy " << fluxes[static_cast<size_t>(temp[j])].energy*Area << " momentum=" << abs(fluxes[static_cast<size_t>(temp[j])].momentum)*Area <<
 					" L*dt " << Area << " N0 " << tess.GetMeshPoint(N0).x << "," << tess.GetMeshPoint(N0).y << " N1 " 
 					<< tess.GetMeshPoint(N1).x << "," << tess.GetMeshPoint(N1).y << std::endl;
-				std::cout << "dl " << newcells[N0].density << " pl " << newcells[N0].pressure << " vxl " << newcells[N0].velocity.x << " vyl " << newcells[N0].velocity.y  << std::endl;
-				std::cout << "dr " << newcells[N1].density << " pr " << newcells[N1].pressure << " vxr " << newcells[N1].velocity.x << " vyr " << newcells[N1].velocity.y  << std::endl;
+				std::cout << "dl " << newcells[static_cast<size_t>(N0)].density << " pl " << newcells[static_cast<size_t>(N0)].pressure << " vxl " << newcells[static_cast<size_t>(N0)].velocity.x << " vyl " << newcells[static_cast<size_t>(N0)].velocity.y  << std::endl;
+				std::cout << "dr " << newcells[static_cast<size_t>(N1)].density << " pr " << newcells[static_cast<size_t>(N1)].pressure << " vxr " << newcells[static_cast<size_t>(N1)].velocity.x << " vyr " << newcells[static_cast<size_t>(N1)].velocity.y  << std::endl;
 				Vector2D normal = normalize(tess.GetMeshPoint(N1) - tess.GetMeshPoint(N0));
 				std::cout << "dx " << normal.x << " dy " << normal.y << std::endl;
-				if (lflux_.Lag_calc_[temp[j]])
+				if (lflux_.Lag_calc_[static_cast<size_t>(temp[j])])
 				{
-					double p_star = ScalarProd(fluxes[temp[j]].momentum, normal);
-					double v_star = fluxes[temp[j]].energy / p_star;
-					double v_new = (v_star - lflux_.ws_[temp[j]]);
+					double p_star = ScalarProd(fluxes[static_cast<size_t>(temp[j])].momentum, normal);
+					double v_star = fluxes[static_cast<size_t>(temp[j])].energy / p_star;
+					double v_new = (v_star - lflux_.ws_[static_cast<size_t>(temp[j])]);
 					std::cout << "Old pstar " << p_star << " vstar " << v_star << " vnew " << v_new << std::endl;
 					if (v_new*v_star > 0)
 					{
