@@ -4,6 +4,10 @@
 #ifdef RICH_MPI
 #include "../..//mpi/mpi_commands.hpp"
 #endif
+#ifdef RICH_DEBUG
+#include "../../misc/simple_io.hpp"
+#include "../../misc/int2str.hpp"
+#endif
 
 namespace
 {
@@ -195,7 +199,15 @@ void OpticalDepthCalc::operator()(const Tessellation3D& tess, const vector<Compu
 	for (size_t i = 1; i < Nproc; ++i)
 		r_disp[i] = r_disp[i - 1] + m_rec_size[i - 1];
 	vector<double> m_recv(r_disp.back() + m_rec_size.back(), 0);
-
+#ifdef RICH_DEBUG
+	MPI_Barrier(MPI_COMM_WORLD);
+	write_vector(m_send, "m_send_" + int2str(rank) + ".txt");
+	write_vector(m_size, "m_size_" + int2str(rank) + ".txt");
+	write_vector(s_disp, "s_disp_" + int2str(rank) + ".txt");
+	write_vector(m_rec_size, "m_rec_size_" + int2str(rank) + ".txt");
+	write_vector(r_disp, "r_disp_" + int2str(rank) + ".txt");
+	write_number(m_recv.size(), "m_recv_" + int2str(rank) + ".txt");
+#endif
 	MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
 	MPI_Barrier(MPI_COMM_WORLD);
 	assert(m_recv.size() % 4 == 0);
