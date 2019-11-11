@@ -44,7 +44,8 @@ namespace
 	}
 }
 #endif
-ANNSelfGravity::ANNSelfGravity(double opening, Tessellation3D const* tproc) : opening_(opening), tproc_(tproc) {}
+ANNSelfGravity::ANNSelfGravity(double opening, Tessellation3D const* tproc, std::string debug_name) : 
+	opening_(opening), tproc_(tproc), d_name_(debug_name) {}
 
 void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells,
 	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const & /*tracerstickernames*/,
@@ -149,12 +150,12 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<double> m_recv(r_disp.back() + m_rec_size.back(), 0);
 #ifdef RICH_DEBUG
 	MPI_Barrier(MPI_COMM_WORLD);
-	write_vector(m_send, "m_send_" + int2str(rank) + ".txt");
-	write_vector(m_size, "m_size_" + int2str(rank) + ".txt");
-	write_vector(s_disp, "s_disp_" + int2str(rank) + ".txt");
-	write_vector(m_rec_size, "m_rec_size_" + int2str(rank) + ".txt");
-	write_vector(r_disp, "r_disp_" + int2str(rank) + ".txt");
-	write_number(m_recv.size(), "m_recv_" + int2str(rank) + ".txt");
+	write_vector(m_send, d_name_ + "m_send_" + int2str(rank) + ".txt");
+	write_vector(m_size, d_name_ + "m_size_" + int2str(rank) + ".txt");
+	write_vector(s_disp, d_name_ + "s_disp_" + int2str(rank) + ".txt");
+	write_vector(m_rec_size, d_name_ + "m_rec_size_" + int2str(rank) + ".txt");
+	write_vector(r_disp, d_name_ + "r_disp_" + int2str(rank) + ".txt");
+	write_number(m_recv.size(), d_name_ + "m_recv_" + int2str(rank) + ".txt");
 #endif
 	MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
 	MPI_Barrier(MPI_COMM_WORLD);
