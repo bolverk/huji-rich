@@ -4,10 +4,8 @@
 #ifdef RICH_MPI
 #include "../..//mpi/mpi_commands.hpp"
 #endif
-#ifdef RICH_DEBUG
 #include "../../misc/simple_io.hpp"
 #include "../../misc/int2str.hpp"
-#endif
 
 namespace
 {
@@ -209,7 +207,17 @@ void OpticalDepthCalc::operator()(const Tessellation3D& tess, const vector<Compu
 	write_vector(r_disp, d_name_ + "r_disp_" + int2str(rank) + ".txt");
 	write_number(m_recv.size(), d_name_ + "m_recv_" + int2str(rank) + ".txt");
 #endif
-	MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
+	int error = MPI_Alltoallv(&m_send[0], &m_size[0], &s_disp[0], MPI_DOUBLE, &m_recv[0], &m_rec_size[0], &r_disp[0], MPI_DOUBLE, MPI_COMM_WORLD);
+	if (error != 0)
+	{
+		write_vector(m_send, d_name_ + "m_send_" + int2str(rank) + ".txt");
+		write_vector(m_size, d_name_ + "m_size_" + int2str(rank) + ".txt");
+		write_vector(s_disp, d_name_ + "s_disp_" + int2str(rank) + ".txt");
+		write_vector(m_rec_size, d_name_ + "m_rec_size_" + int2str(rank) + ".txt");
+		write_vector(r_disp, d_name_ + "r_disp_" + int2str(rank) + ".txt");
+		write_number(m_recv.size(), d_name_ + "m_recv_" + int2str(rank) + ".txt");
+		throw;
+	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	assert(m_recv.size() % 4 == 0);
 	size_t toadd = m_recv.size() / 4;
