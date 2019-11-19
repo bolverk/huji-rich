@@ -139,6 +139,12 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	// send/recv data
 	vector<int> m_rec_size(Nproc);
 	MPI_Alltoall(&m_size[0], 1, MPI_INT, &m_rec_size[0], 1, MPI_INT, MPI_COMM_WORLD);
+
+	int Nmaxlocal = *std::max_element(m_size.begin(), m_size.end());
+	int Nmaxglobal = 0;
+	MPI_Reduce(&Nmaxlocal, &Nmaxglobal, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Maximum send length in gravity is " << Nmaxglobal << std::endl;
 	MPI_Barrier(MPI_COMM_WORLD);
 	vector<int> s_disp(Nproc, 0), r_disp(Nproc, 0);
 	for (size_t i = 1; i < Nproc; ++i)
