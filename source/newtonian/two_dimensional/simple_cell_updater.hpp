@@ -142,7 +142,8 @@ public:
 			const vector<ComputationalCell>& cells,
 			const CacheData& cd,
 			const size_t index,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames,
+			double time) const;
 };
 
 #endif // SIMPLE_CELL_UPDATER_HPP
