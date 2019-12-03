@@ -719,14 +719,14 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 		for (size_t j = 0; j < neigh.size(); ++j)
 		{
 			Vector2D const& otherpoint = tess.GetCellCM(neigh[j]);
-			if (otherpoint.distance(mypoint) < 1.75*R)
+			if (otherpoint.distance(mypoint) < 1.5*R)
 				continue;
-			if (tess.GetEdge(edges[j]).GetLength() < 0.5*R)
+			if (tess.GetEdge(edges[j]).GetLength() < 0.4*R)
 				continue;
 			Vector2D candidate = 0.75*mypoint + 0.25*otherpoint;
-			if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.5*R)
+			if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.4*R)
 				continue;
-			if (neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.5)
+			if (neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.4)
 				continue;
 			// Make sure not to split neighboring cells, this causes bad aspect ratio
 			if (std::binary_search(ToRefine.begin(), ToRefine.end(), static_cast<size_t>(neigh[j])))
@@ -734,12 +734,12 @@ void AMR::GetNewPoints(vector<size_t> const& ToRefine, Tessellation const& tess,
 				if (static_cast<size_t>(neigh[j]) > ToRefine[i])
 				{
 					candidate = 0.5*mypoint + 0.5*otherpoint;
-					if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.5*R ||
-						(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.5))
+					if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.4*R ||
+						(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.4))
 					{
 						candidate = 0.5*tess.GetMeshPoint(static_cast<int>(ToRefine[i])) + 0.5*tess.GetMeshPoint(neigh[j]);
 						if (candidate.distance(tess.GetMeshPoint(static_cast<int>(ToRefine[i]))) < 0.5*R ||
-							(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.5))
+							(neigh[j] < static_cast<int>(N) && candidate.distance(tess.GetMeshPoint(neigh[j])) < tess.GetWidth(neigh[j])*0.4))
 							continue;
 					}
 				}
