@@ -85,18 +85,17 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 		return Vector2D(0, 0);
 	vector<int> neigh = tess.GetNeighbors(static_cast<int>(i));
 	size_t N = neigh.size();
-	double cs =std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
-		cells[i].tracers,tracerstickernames.tracer_names));
+	double cs = eos_.dp2c(cells[i].density, cells[i].pressure, cells[i].tracers,tracerstickernames.tracer_names);
 	for (size_t j = 0; j < N; ++j)
 	{
 		if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(i) || neigh[j]>static_cast<int>(N))
 			continue;
 		cs = std::max(cs, eos_.dp2c(cells[static_cast<size_t>(neigh[j])].density, cells[static_cast<size_t>(neigh[j])].pressure,
 			cells[static_cast<size_t>(neigh[j])].tracers));
-		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity));
+		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity - cells[i].velocity));
 	}
-	const double c_dt = d / dt;
-	return chi_*std::min(c_dt,cs)*(s - r) / R;
+	const double c_dt = 0.025 * d / dt;
+	return chi_*std::max(c_dt, cs)*(s - r) / R;
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
