@@ -264,7 +264,7 @@ ComputationalCell SkipUpdate::operator()
 	const CacheData& /*cd*/,
 	const size_t index,
 	TracerStickerNames const& /*tracerstickernames*/,
-	double time) const
+	double/* time*/) const
 {
 	return cells[index];
 }
