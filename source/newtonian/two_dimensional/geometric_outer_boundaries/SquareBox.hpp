@@ -44,6 +44,8 @@ public:
    */
   pair<Vector2D,Vector2D> getBoundary(void) const;
 
+  void SetBoundary(Vector2D const& ll, Vector2D const& ur);
+
   ~SquareBox(void);
 private:
   double _left,_right,_up,_down;

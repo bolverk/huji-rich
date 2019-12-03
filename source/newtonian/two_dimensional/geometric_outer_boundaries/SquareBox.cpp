@@ -65,4 +65,12 @@ pair<Vector2D, Vector2D> SquareBox::getBoundary(void) const
 				 Vector2D(_right,_up));
 }
 
+void SquareBox::SetBoundary(Vector2D const& ll, Vector2D const& ur)
+{
+	_left = ll.x;
+	_right = ur.x;
+	_up = ur.y;
+	_down = ll.y;
+}
+
 SquareBox::~SquareBox(void) {}
