@@ -263,7 +263,8 @@ ComputationalCell SkipUpdate::operator()
 	const vector<ComputationalCell>& cells,
 	const CacheData& /*cd*/,
 	const size_t index,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	TracerStickerNames const& /*tracerstickernames*/,
+	double time) const
 {
 	return cells[index];
 }
