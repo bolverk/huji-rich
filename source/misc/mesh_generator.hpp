@@ -83,7 +83,7 @@ std::vector<Vector2D> CirclePointsRmax_1(int PointNum,double Rmin,double Rmax,
 */
 std::vector<Vector2D> circle_circumference(size_t point_number,
 					   double radius,
-					   Vector2D const& center);
+					   Vector2D const& center, double angle_start = 0, double angle_end = 2 * M_PI);
 
 /*!
   \brief Creates a line of evenly spaced points y=slope*x+b

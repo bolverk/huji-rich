@@ -215,12 +215,12 @@ vector<Vector2D> cartesian_mesh(int nx, int ny,
 vector<Vector2D> circle_circumference
 (size_t point_number,
 double radius,
-Vector2D const& center)
+Vector2D const& center, double angle_start, double angle_end)
 {
 	vector<Vector2D> res(point_number);
 	for (size_t i = 0; i < point_number; ++i)
 	{
-		const double angle = 2 * M_PI*double(i) / double(point_number);
+		const double angle = (angle_end  - angle_start) * double(i) / double(point_number) + angle_start;
 		res[i] = center + pol2cart(radius, angle);
 	}
 	return res;
