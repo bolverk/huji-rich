@@ -258,7 +258,7 @@ void hdsim::TimeAdvance(void)
 #endif
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_, time_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
@@ -327,7 +327,7 @@ void hdsim::TimeAdvanceClip(void)
 
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_, time_);
 
 	time_ += dt;
 	cycle_++;
@@ -429,7 +429,7 @@ void hdsim::TimeAdvance2Heun(void)
 	cache_data_.reset();
 
 	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,
-		tracer_sticker_names_);
+		tracer_sticker_names_, time_ + dt);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, mid_cells, true);
@@ -466,7 +466,7 @@ void hdsim::TimeAdvance2Heun(void)
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + dt);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
@@ -512,7 +512,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	time_ += 0.5*dt;
 	cache_data_.reset();
 
-	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,tracer_sticker_names_);
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,tracer_sticker_names_, time_);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
@@ -533,7 +533,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 		extensives_,tracer_sticker_names_);
 
 	cache_data_.reset();
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + 0.5 * dt);
 
 	if (cycle_ % 25 == 0)
 	{
@@ -590,7 +590,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 	cache_data_.reset();
 
 	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,
-		tracer_sticker_names_);
+		tracer_sticker_names_, time_);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
@@ -607,7 +607,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 	MoveMeshPoints(point_velocities, dt, tess_, false, old_points);
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + 0.5 * dt);
 
 	time_ += 0.5*dt;
 	++cycle_;
@@ -682,7 +682,7 @@ vector<ComputationalCell>& hdsim::getAllCells(void)
 void hdsim::recalculatePrimitives(void)
 {
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
-		cache_data_,tracer_sticker_names_);
+		cache_data_,tracer_sticker_names_, time_);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
 #endif

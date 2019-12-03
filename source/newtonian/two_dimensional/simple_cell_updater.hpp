@@ -71,7 +71,8 @@ public:
 				const vector<ComputationalCell>& cells,
 				const CacheData& cd,
 				const size_t index,
-				TracerStickerNames const& tracerstickernames)const = 0;
+				TracerStickerNames const& tracerstickernames,
+				double time)const = 0;
 	};
 
 	/*! \brief Class constructor
@@ -90,7 +91,8 @@ public:
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
 			const CacheData& cd,
-			const TracerStickerNames& tracerstickernames) const;
+			const TracerStickerNames& tracerstickernames,
+			double time) const;
 
 	~SimpleCellUpdater(void);
 

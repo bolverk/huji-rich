@@ -185,13 +185,13 @@ namespace
 		const size_t index,
 		ComputationalCell &res,
 		size_t entropyindex,
-		TracerStickerNames const & tracerstickernames, bool SR, double G)
+		TracerStickerNames const & tracerstickernames, double time, bool SR, double G)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
 			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index, tracerstickernames))
 			{
-				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index, tracerstickernames);
+				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index, tracerstickernames, time);
 				return;
 			}
 		}
@@ -209,7 +209,8 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 	vector<Extensive>& extensives,
 	const vector<ComputationalCell>& old,
 	const CacheData& cd,
-	TracerStickerNames const& tracerstickernames) const
+	TracerStickerNames const& tracerstickernames,
+	double time) const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<ComputationalCell> res(N, old[0]);
@@ -224,7 +225,7 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 		MPI_exchange_data(tess, extensives, true);
 #endif
 	for (size_t i = 0; i < N; ++i)
-		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex, tracerstickernames, SR_, G_);
+		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex, tracerstickernames, time, SR_, G_);
 #ifdef RICH_MPI
 	if (tindex < old[0].tracers.size())
 		extensives.resize(static_cast<size_t>(tess.GetPointNo()));
