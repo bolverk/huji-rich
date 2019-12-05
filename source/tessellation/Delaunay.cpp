@@ -204,7 +204,7 @@ namespace
 		int n = static_cast<int>(points.size());
 		for (int i = 0; i < n; ++i)
 		{
-			if (CrossProduct(points[static_cast<size_t>(i)] - p, points[static_cast<size_t>((i + 1) % n)] - p) < 0)
+			if(orient2d(TripleConstRef<Vector2D>(points[static_cast<size_t>(i)], points[static_cast<size_t>((i + 1) % n)], p)) < 0)
 				return false;
 		}
 		return true;
