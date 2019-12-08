@@ -75,7 +75,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 }
 
 Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells,
-	TracerStickerNames const& tracerstickernames, double cold_speed)const
+	TracerStickerNames const& tracerstickernames)const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -94,7 +94,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 			cells[static_cast<size_t>(neigh[j])].tracers));
 		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity - cells[i].velocity));
 	}
-	const double c_dt = cold_speed * d / dt;
+	const double c_dt = cold_speed_ * d / dt;
 	return chi_*std::max(c_dt, cs)*(s - r) / R;
 }
 
@@ -124,7 +124,7 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			res.at(i) += calc_dw(i, tess, dt,cells,tracerstickernames, cold_speed_);
+			res.at(i) += calc_dw(i, tess, dt,cells,tracerstickernames);
 		}
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
