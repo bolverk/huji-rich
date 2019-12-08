@@ -5,10 +5,10 @@
 #endif
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer, double chi,
-	double eta, bool cold) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(outer), chi_(chi), eta_(eta), cold_(cold) {}
+	double eta, bool cold, double cold_speed) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(outer), chi_(chi), eta_(eta), cold_(cold), cold_speed_(cold_speed) {}
 
 RoundCells::RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi,
-	double eta, bool cold) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(pouter_), chi_(chi), eta_(eta),cold_(cold) {}
+	double eta, bool cold, double cold_speed) : pm_(pm), eos_(eos), pouter_(-1, 1, 1, -1), outer_(pouter_), chi_(chi), eta_(eta),cold_(cold), cold_speed_(cold_speed) {}
 
 
 namespace
@@ -75,7 +75,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 }
 
 Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells,
-	TracerStickerNames const& tracerstickernames)const
+	TracerStickerNames const& tracerstickernames, double cold_speed)const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -94,7 +94,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 			cells[static_cast<size_t>(neigh[j])].tracers));
 		cs = std::max(cs, abs(cells[static_cast<size_t>(neigh[j])].velocity - cells[i].velocity));
 	}
-	const double c_dt = 0.025 * d / dt;
+	const double c_dt = cold_speed * d / dt;
 	return chi_*std::max(c_dt, cs)*(s - r) / R;
 }
 
@@ -124,7 +124,7 @@ vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<Computati
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			res.at(i) += calc_dw(i, tess, dt,cells,tracerstickernames);
+			res.at(i) += calc_dw(i, tess, dt,cells,tracerstickernames, cold_speed_);
 		}
 	}
 	if (outer_.GetBoundaryType()!=Periodic)

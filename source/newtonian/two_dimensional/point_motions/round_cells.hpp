@@ -26,7 +26,7 @@ public:
 	\param cold Switch for cold flows
    */
 	RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer,
-		double chi = 0.15, double eta = 0.02, bool cold = false);
+		double chi = 0.15, double eta = 0.02, bool cold = false, double cold_speed = 0.15);
 
 
 	/*! \brief Class constructor
@@ -36,7 +36,8 @@ public:
 	\param eta eta parameter in equation 63
 	\param cold Switch for cold flows
 	*/
-	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02,bool cold = false);
+	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02,bool cold = false
+		, double cold_speed = 0.15);
 
   vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
 	  TracerStickerNames const& tracerstickernames) const;
@@ -58,6 +59,7 @@ private:
   const double chi_;
   const double eta_;
   const bool cold_;
+  const double cold_speed_;
 };
 
 #endif // ROUND_CELLS_HPP
