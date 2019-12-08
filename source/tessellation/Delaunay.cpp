@@ -655,7 +655,19 @@ double Delaunay::CalcRadiusHiRes(int facet)
 void Delaunay::CheckInput()
 {
 	for (size_t i = 0; i < cor.size(); ++i)
-		assert(InCell(cell_points, cor[i]));
+	{
+		if (!InCell(cell_points, cor[i]))
+		{
+			std::cout << "Point not in cell in checkinput" << std::endl;
+			std::cout << "Bad point " << cor[i].x << ", " << cor[i].y << std::endl;
+			std::cout << "Bounding cell " << std::endl;
+			for (size_t j = 0; j < cell_points.size(); ++j)
+			{
+				std::cout << cell_points[j].x << ", " << cell_points[j].y << std::endl;
+			}
+			assert(false);
+		}
+	}
 }
 
 int Delaunay::GetOriginalIndex(int NewPoint) const
