@@ -400,8 +400,9 @@ namespace
 			MPI_COMM_WORLD);
 
 		vector<MPI_Request> req(to_talk_with.size());
+		std::vector<int> dummy_send(to_talk_with.size());
 		for (std::size_t i = 0; i < to_talk_with.size(); ++i)
-			MPI_Isend(&wsize, 1, MPI_INT, to_talk_with[i], 3, MPI_COMM_WORLD, &req[i]);
+			MPI_Isend(&dummy_send[i], 1, MPI_INT, to_talk_with[i], 3, MPI_COMM_WORLD, &req[i]);
 		vector<int> talkwithme;
 		for (int i = 0; i < nrecv; ++i)
 		{
@@ -598,8 +599,9 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
 		MPI_COMM_WORLD);
 
 	vector<MPI_Request> req(sentproc.size());
+	std::vector<int> dummy_send(req.size());
 	for (std::size_t i = 0; i < sentproc.size(); ++i)
-		MPI_Isend(&wsize, 1, MPI_INT, sentproc[i], 3, MPI_COMM_WORLD, &req[i]);
+		MPI_Isend(&dummy_send[i], 1, MPI_INT, sentproc[i], 3, MPI_COMM_WORLD, &req[i]);
 	vector<int> talkwithme;
 	for (int i = 0; i < nrecv; ++i)
 	{
