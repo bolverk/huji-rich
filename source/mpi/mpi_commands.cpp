@@ -85,6 +85,51 @@ vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vec
 	return torecv;
 }
 
+void MPI_exchange_data2(const Tessellation& tess, vector<double>& cells, bool ghost_or_sent)
+{
+	if (cells.empty())
+		throw UniversalError("Empty double cell vector in MPI_exchange_data");
+	vector<int> correspondents;
+	vector<vector<int> > duplicated_points;
+	if (ghost_or_sent)
+	{
+		correspondents = tess.GetDuplicatedProcs();
+		duplicated_points = tess.GetDuplicatedPoints();
+	}
+	else
+	{
+		correspondents = tess.GetSentProcs();
+		duplicated_points = tess.GetSentPoints();
+	}
+	vector<vector<double> > tempsend(correspondents.size());
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		bool isempty = duplicated_points[i].empty();
+		if (!isempty)
+			tempsend[i] = VectorValues(cells, duplicated_points[i]);
+	}
+	vector<vector<double> > torecv = MPI_exchange_data(correspondents, tempsend);
+
+	const vector<vector<int> >& ghost_indices = tess.GetGhostIndeces();
+	if (ghost_or_sent)
+		cells.resize(tess.GetTotalPointNumber(), cells[0]);
+	else
+		cells = VectorValues(cells, tess.GetSelfPoint());
+	for (size_t i = 0; i < correspondents.size(); ++i)
+	{
+		if (ghost_or_sent)
+		{
+			for (size_t j = 0; j < torecv[i].size(); ++j)
+				cells.at(ghost_indices.at(i).at(j)) = torecv[i][j];
+		}
+		else
+		{
+			for (size_t j = 0; j < torecv[i].size(); ++j)
+				cells.push_back(torecv[i][j]);
+		}
+	}
+}
+
 vector<vector<vector<int> > > MPI_exchange_data(const Tessellation& tess, vector<vector<vector<int> > > const& cells)
 {
 	vector<int> correspondents = tess.GetDuplicatedProcs();

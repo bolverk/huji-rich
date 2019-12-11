@@ -310,6 +310,8 @@ vector<vector<double> > MPI_exchange_data(const vector<int>& totalkwith, vector<
 
 vector<vector<int> > MPI_exchange_data(const vector<int>& totalkwith, vector<vector<int> > &tosend);
 
+void MPI_exchange_data2(const Tessellation& tess, vector<double>& cells, bool ghost_or_sent);
+
 #endif //RICH_MPI
 #endif // MPI_COMMANDS_HPP
 
