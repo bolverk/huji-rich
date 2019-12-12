@@ -1,6 +1,9 @@
 #include "condition_action_sequence_2.hpp"
 #include "simple_flux_calculator.hpp"
 #include "../../misc/utils.hpp"
+#ifdef RICH_MPI
+#include <mpi.h>
+#endif
 
 ConditionActionSequence2::ConditionActionSequence2
 (const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
@@ -121,6 +124,12 @@ vector<Extensive> ConditionActionSequence2::operator()
 			eo.AddEntry("original pressure right", cells[N1].pressure);
 			eo.AddEntry("Left neighbor", static_cast<double>(N0));
 			eo.AddEntry("Right neighbor", static_cast<double>(N1));
+			eo.AddEntry("Total number of cells", static_cast<double>(tess.GetPointNo()));
+#ifdef RICH_MPI
+			int rank = 0;
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+			eo.AddEntry("Rank", static_cast<double>(rank));
+#endif
 			throw eo;
 		}
 	}
