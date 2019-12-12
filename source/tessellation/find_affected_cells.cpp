@@ -63,13 +63,10 @@ bool edge_circle_intersect
 (const Edge& edge,
 	const Circle& circle)
 {
-	const double s =
-		ScalarProd(circle.getCenter() - edge.vertices.first,
-			edge.vertices.second - edge.vertices.first) /
-		ScalarProd(edge.vertices.second - edge.vertices.first,
-			edge.vertices.second - edge.vertices.first);
-	const double sb = bracket(0, s, 1);
-	return circle((1 - sb)*edge.vertices.first + sb*edge.vertices.second);
+	Vector2D norm = normalize(edge.vertices.second - edge.vertices.first);
+	Vector2D tocenter = circle.getCenter() - edge.vertices.first;
+	Vector2D perpindicular = tocenter - ScalarProd(norm, tocenter) * norm;
+	return ScalarProd(perpindicular, perpindicular) < circle.getRadius() * circle.getRadius();
 }
 
 namespace {
