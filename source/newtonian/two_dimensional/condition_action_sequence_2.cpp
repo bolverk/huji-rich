@@ -111,8 +111,8 @@ vector<Extensive> ConditionActionSequence2::operator()
 		}
 		catch (UniversalError & eo)
 		{
-			size_t N0 = static_cast<size_t>(tess.GetEdge(i).neighbors.first);
-			size_t N1 = static_cast<size_t>(tess.GetEdge(i).neighbors.second);
+			size_t N0 = static_cast<size_t>(tess.GetEdge(static_cast<int>(i)).neighbors.first);
+			size_t N1 = static_cast<size_t>(tess.GetEdge(static_cast<int>(i)).neighbors.second);
 			eo.AddEntry("Error in conditionactionseq2, edge", static_cast<double>(i));
 			eo.AddEntry("density left", edge_values_[i].first.density);
 			eo.AddEntry("pressure left", edge_values_[i].first.pressure);
