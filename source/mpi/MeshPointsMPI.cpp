@@ -238,7 +238,7 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 		const int Nphi=int(floor(N0*pow(r,1+alpha)+1.5));
 		const double dphi=2*M_PI/Nphi;
 		int phimin=static_cast<int>(minangle/dphi);
-		int phimax=static_cast<int>(maxangle/dphi+0.5);
+		int phimax=static_cast<int>(maxangle/dphi+1);
 		for(int j=phimin;j<phimax;++j)
 		{
 			pos.Set(r*cos(dphi*j)+xc,r*sin(dphi*j)+yc);
