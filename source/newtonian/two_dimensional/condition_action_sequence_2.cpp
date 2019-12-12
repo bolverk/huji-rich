@@ -93,16 +93,37 @@ vector<Extensive> ConditionActionSequence2::operator()
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
 	interp_.operator()(tess, cells, time,edge_values_,tracerstickernames,cd);
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
-	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
-		choose_action
-		(tess.getAllEdges()[i],
-			tess,
-			cells,
-			eos,
-			edge_velocities[i],
-			sequence_,
-			sequence2_,
-			edge_values_[i],res[i],time,tracerstickernames,i);
+	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
+	{
+		try {
+			choose_action
+			(tess.getAllEdges()[i],
+				tess,
+				cells,
+				eos,
+				edge_velocities[i],
+				sequence_,
+				sequence2_,
+				edge_values_[i], res[i], time, tracerstickernames, i);
+		}
+		catch (UniversalError & eo)
+		{
+			size_t N0 = static_cast<size_t>(tess.GetEdge(i).neighbors.first);
+			size_t N1 = static_cast<size_t>(tess.GetEdge(i).neighbors.second);
+			eo.AddEntry("Error in conditionactionseq2, edge", static_cast<double>(i));
+			eo.AddEntry("density left", edge_values_[i].first.density);
+			eo.AddEntry("pressure left", edge_values_[i].first.pressure);
+			eo.AddEntry("original density left", cells[N0].density);
+			eo.AddEntry("original pressure left", cells[N0].pressure);
+			eo.AddEntry("density right", edge_values_[i].second.density);
+			eo.AddEntry("pressure right", edge_values_[i].second.pressure);
+			eo.AddEntry("original density right", cells[N1].density);
+			eo.AddEntry("original pressure right", cells[N1].pressure);
+			eo.AddEntry("Left neighbor", static_cast<double>(N0));
+			eo.AddEntry("Right neighbor", static_cast<double>(N1));
+			throw eo;
+		}
+	}
 	return res;
 }
 
