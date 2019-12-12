@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include "universal_error.hpp"
+#include <algorithm>
 
 using std::vector;
 using std::size_t;
