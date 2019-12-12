@@ -53,10 +53,10 @@ namespace
 		return false;
 	}
 
-	double bracket(double low, double num, double high)
+	/*double bracket(double low, double num, double high)
 	{
 		return std::max(std::min(num, high), low);
-	}
+	}*/
 }
 
 bool edge_circle_intersect
