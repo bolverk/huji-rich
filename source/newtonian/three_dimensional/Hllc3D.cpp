@@ -112,7 +112,6 @@ namespace
 		return p.density*(0.5*ScalarProd(p.velocity, p.velocity) + p.internal_energy);
 	}
 
-
 	Conserved3D starred_state(ComputationalCell3D const& state, double sk, double ss)
 	{
 		const double dk = state.density;
@@ -150,43 +149,21 @@ namespace
 			f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir))*f_gr.mass;
 		f_gr.internal_energy = 0;
 	}
-	void FixNegativeThermalEnergy(Conserved3D &f_gr, double velocity, Vector3D const& normaldir, ComputationalCell3D const& left,
-		ComputationalCell3D const& right, ComputationalCell3D const& local_left, ComputationalCell3D const& local_right,
-		EquationOfState const& eos, TracerStickerNames const& tsn, bool HLL)
+
+	Conserved3D HLLstarred_state(ComputationalCell3D const& left, ComputationalCell3D const& right,
+		double sl, double sr)
 	{
-		if (HLL)
-			return;
-		if (0.5*ScalarProd(f_gr.momentum, f_gr.momentum) < std::abs(f_gr.energy*f_gr.mass))
-			return;
-		const double dl = local_left.density;
-		const double pl = local_left.pressure;
-		const double vl = local_left.velocity.x;
-		double cl = eos.dp2c(dl, pl, local_left.tracers, tsn.tracer_names);
-		const double dr = local_right.density;
-		const double pr = local_right.pressure;
-		const double vr = local_right.velocity.x;
-		double cr = eos.dp2c(dr, pr, local_right.tracers, tsn.tracer_names);
-		double dls = fastsqrt(dl), drs = fastsqrt(dr);
-		double ubar = (dls*vl + drs * vr) / (dls + drs);
-		double dbar = fastsqrt((dls*cl*cl + drs * cr*cr) / (dls + drs) + 0.5*
-			(vl - vr)*(vl - vr)*dls*drs / ((dls + drs)*(dls + drs)));
-		double sl = ubar - dbar;
-		double sr = ubar + dbar;
-		Conserved3D ul, ur;
-		PrimitiveToConserved(local_left, 1, ul);
-		PrimitiveToConserved(local_right, 1, ur);
-		const Conserved3D fl = PrimitiveToFlux(local_left);
-		const Conserved3D fr = PrimitiveToFlux(local_right);
-		if (sl > 0)
-			f_gr = fl;
-		else
-			if (sl < 0 & sr>0)
-				f_gr = (sr * fl - sl * fr + sr * sl*(ur - ul))*(1.0 / (sr - sl)); // HLL flux
-			else
-				if (sr < 0)
-					f_gr = fr;
-		BoostBack(f_gr, velocity, normaldir, left, right);
+		Conserved3D res;
+		Conserved3D Fl = PrimitiveToFlux(left), Fr = PrimitiveToFlux(right);
+		double denom = 1.0 / (sr - sl);
+		res.mass = (sr * right.density - sl * left.density + Fl.mass - Fr.mass) * denom;
+		res.momentum = (sr * right.density * right.velocity - sl * left.density * left.velocity
+			+ Fl.momentum - Fr.momentum) * denom;
+		res.energy = (sr * TotalEnergyDensity3D(right) - sl * TotalEnergyDensity3D(left)
+			+ Fl.energy - Fr.energy) * denom;
+		return res;
 	}
+	
 }
 
 Hllc3D::Hllc3D(double gamma) :gamma_((gamma + 1) / (2 * gamma))
@@ -195,6 +172,17 @@ Hllc3D::Hllc3D(double gamma) :gamma_((gamma + 1) / (2 * gamma))
 Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
 	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
+	double face_v = 0;	
+	double maxv = std::max(eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names),
+		std::max(eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names), 
+			std::max(fastabs(left.velocity), fastabs(right.velocity))));
+	bool fast_flow = maxv < std::abs(velocity) * 1e-3;
+	double old_v = velocity;
+	if (fast_flow)
+	{
+		face_v = velocity;
+		velocity = 0;
+	}
 
 	ComputationalCell3D local_left = left;
 	ComputationalCell3D local_right = right;
@@ -219,9 +207,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	PrimitiveToConserved(local_left, 1, ul);
 	PrimitiveToConserved(local_right, 1, ur);
 
-
 	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn, gamma_);
-
 
 	Conserved3D f_gr;
 	// check if bad wavespeed
@@ -232,40 +218,57 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		HLL = true;
 	}
 
-	if (ws.left > 0)
+	if (ws.left > face_v)
 	{
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = fl;
+		if (fast_flow)
+		{
+			f_gr.mass -= local_left.density * old_v;
+			f_gr.momentum -= local_left.density * local_left.velocity * old_v;
+			f_gr.energy -= TotalEnergyDensity3D(local_left) * old_v;
+		}
 	}
-	else if (ws.left <= 0 && ws.center >= 0)
+	else if (ws.left <= face_v && ws.center >= face_v)
 	{
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 		f_gr = fl + ws.left*(usl - ul);
+		if (fast_flow)
+			f_gr -= usl * old_v;
 	}
-	else if (ws.center < 0 && ws.right >= 0)
+	else if (ws.center < face_v && ws.right >= face_v)
 	{
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 		const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 		f_gr = fr + ws.right*(usr - ur);
+		if (fast_flow)
+			f_gr -= usr * old_v;
 	}
-	else if (ws.right < 0)
+	else if (ws.right < face_v)
 	{
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 		f_gr = fr;
+		if (fast_flow)
+		{
+			f_gr.mass -= local_right.density * old_v;
+			f_gr.momentum -= local_right.density * local_right.velocity * old_v;
+			f_gr.energy -= TotalEnergyDensity3D(local_right) * old_v;
+		}
 	}
 	else
 		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
 
 	// check if bad wavespeed
-	if (HLL && ws.left < 0 && ws.right>0)
+	if (HLL && ws.left < face_v && ws.right>face_v)
 	{
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = (ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul))*(1.0 / (ws.right - ws.left)); // HLL flux
+		if (fast_flow)
+			f_gr -= old_v * HLLstarred_state(left, right, ws.left, ws.right);
 	}
-
-	BoostBack(f_gr, velocity, normaldir, left, right);
-	//FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
+	if(!fast_flow)
+		BoostBack(f_gr, velocity, normaldir, left, right);
 	return f_gr;
 }
