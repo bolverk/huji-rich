@@ -421,7 +421,7 @@ namespace
 		string const& skip_key, Tessellation3D const& tess, size_t /*cell_index*/, face_vec const& faces,
 		EquationOfState const& eos)
 	{
-		const double small_factor = 1e-4;
+		const double small_factor = 1e-7;
 		ComputationalCell3D cmax(cell), cmin(cell);
 		size_t N = faces.size();
 		size_t ntracer = cell.tracers.size();
