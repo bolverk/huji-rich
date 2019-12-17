@@ -58,7 +58,7 @@ namespace
 		double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 		double ps = std::max(0.0, dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom);
 		size_t counter = 0;
-		while (ps > 1.1 * pstar || pstar > 1.1 * ps)
+		while ((ps > 1.1 * pstar || pstar > 1.1 * ps) && gamma > 0.001)
 		{
 			pstar = ps;
 			double al = (pstar > pl ? fastsqrt(1 + gamma * (pstar / pl - 1)) : 1);
@@ -177,6 +177,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		std::min(eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names), 
 			std::min(fastabs(left.velocity), fastabs(right.velocity))));
 	bool fast_flow = minv < std::abs(velocity) * 1e-3;
+	//fast_flow = false;
 	double old_v = velocity;
 	if (fast_flow)
 	{
