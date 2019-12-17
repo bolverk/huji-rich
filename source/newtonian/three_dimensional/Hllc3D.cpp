@@ -173,10 +173,10 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
 	double face_v = 0;	
-	double maxv = std::max(eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names),
-		std::max(eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names), 
-			std::max(fastabs(left.velocity), fastabs(right.velocity))));
-	bool fast_flow = maxv < std::abs(velocity) * 1e-3;
+	double minv = std::min(eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names),
+		std::min(eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names), 
+			std::min(fastabs(left.velocity), fastabs(right.velocity))));
+	bool fast_flow = minv < std::abs(velocity) * 1e-3;
 	double old_v = velocity;
 	if (fast_flow)
 	{
