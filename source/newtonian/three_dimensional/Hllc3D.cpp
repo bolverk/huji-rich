@@ -150,6 +150,17 @@ namespace
 		f_gr.internal_energy = 0;
 	}
 
+	void RotateBack(Conserved3D& f_gr, Vector3D const& normaldir, ComputationalCell3D const& left,
+		ComputationalCell3D const& right)
+	{
+		f_gr.momentum = f_gr.momentum.x * normaldir;
+		if (f_gr.mass > 0)
+			f_gr.momentum += (left.velocity - normaldir * ScalarProd(left.velocity, normaldir)) * f_gr.mass;
+		else
+			f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir)) * f_gr.mass;
+		f_gr.internal_energy = 0;
+	}
+
 	Conserved3D HLLstarred_state(ComputationalCell3D const& left, ComputationalCell3D const& right,
 		double sl, double sr)
 	{
@@ -173,12 +184,8 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
 {
 	double face_v = 0;	
-	double minv = std::min(eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names),
-		std::min(eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names), 
-			std::min(fastabs(left.velocity), fastabs(right.velocity))));
+	double minv = std::min(fastabs(left.velocity), fastabs(right.velocity));
 	bool fast_flow = minv < std::abs(velocity) * 1e-3;
-	//fast_flow = false;
-	double old_v = velocity;
 	if (fast_flow)
 	{
 		face_v = velocity;
@@ -225,9 +232,9 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		f_gr = fl;
 		if (fast_flow)
 		{
-			f_gr.mass -= local_left.density * old_v;
-			f_gr.momentum -= local_left.density * local_left.velocity * old_v;
-			f_gr.energy -= TotalEnergyDensity3D(local_left) * old_v;
+			Conserved3D ustate;
+			PrimitiveToConserved(local_left, 1, ustate);
+			f_gr -= ustate * face_v;			
 		}
 	}
 	else if (ws.left <= face_v && ws.center >= face_v)
@@ -236,7 +243,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 		f_gr = fl + ws.left*(usl - ul);
 		if (fast_flow)
-			f_gr -= usl * old_v;
+			f_gr -= usl * face_v;
 	}
 	else if (ws.center < face_v && ws.right >= face_v)
 	{
@@ -244,7 +251,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 		f_gr = fr + ws.right*(usr - ur);
 		if (fast_flow)
-			f_gr -= usr * old_v;
+			f_gr -= usr * face_v;
 	}
 	else if (ws.right < face_v)
 	{
@@ -252,9 +259,9 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		f_gr = fr;
 		if (fast_flow)
 		{
-			f_gr.mass -= local_right.density * old_v;
-			f_gr.momentum -= local_right.density * local_right.velocity * old_v;
-			f_gr.energy -= TotalEnergyDensity3D(local_right) * old_v;
+			Conserved3D ustate;
+			PrimitiveToConserved(local_right, 1, ustate);
+			f_gr -= ustate * face_v;
 		}
 	}
 	else
@@ -267,9 +274,11 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = (ws.right*fl - ws.left*fr + ws.left*ws.right*(ur - ul))*(1.0 / (ws.right - ws.left)); // HLL flux
 		if (fast_flow)
-			f_gr -= old_v * HLLstarred_state(left, right, ws.left, ws.right);
+			f_gr -= face_v * HLLstarred_state(local_left, local_right, ws.left, ws.right);
 	}
-	if(!fast_flow)
+	if (fast_flow)
+		RotateBack(f_gr, normaldir, left, right);
+	else
 		BoostBack(f_gr, velocity, normaldir, left, right);
 	return f_gr;
 }
