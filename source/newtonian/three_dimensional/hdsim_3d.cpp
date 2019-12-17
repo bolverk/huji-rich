@@ -80,6 +80,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	,const ProcessorUpdate3D* proc_update
 #endif
+	, bool new_start
 ) :
 	tess_(tess), 
 #ifdef RICH_MPI
@@ -113,7 +114,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
 	}
 	// Is this a new start?
-	if (std::abs(pt_.getTime()) < std::numeric_limits<double>::min() * 100)
+	if (new_start)
 	{
 		size_t nstart = 0;
 #ifdef RICH_MPI

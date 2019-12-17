@@ -78,6 +78,7 @@ public:
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif
+	  ,bool new_start = true
   );
 
   //! \brief Advances the simulation in time (first order)
