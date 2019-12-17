@@ -17,7 +17,7 @@ ConditionExtensiveUpdater3D::ConditionExtensiveUpdater3D(const vector<pair<const
 
 void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D& tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double time,
-	TracerStickerNames const& tracerstickernames) const
+	TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities) const
 {
 	size_t N = tess.GetPointNo();
 	std::vector<double> oldEk(N, 0), oldEtherm(N, 0), oldE(N, 0);
@@ -84,7 +84,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 #ifdef RICH_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-			std::cout << "Bad cell in ExtensiveUpdater3D, cell " << i << " rank " << rank << std::endl;
+			std::cout << "Bad cell in ExtensiveUpdater3D, cell " << i << " rank " << rank <<" dt "<<dt<< std::endl;
 			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " <<
 				extensives[i].internal_energy << " momentum" << abs(extensives[i].momentum) << " volume " << tess.GetVolume(i)
 				<< std::endl;
@@ -146,7 +146,8 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				}
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass * Area <<
 					" energy= " << fluxes[temp[j]].energy * Area << " Etherm= " << dEtherm << " momentum= " << abs(fluxes[temp[j]].momentum) * Area <<
-					" Area*dt " << Area << " normal " << tess.Normal(temp[j]).x << "," << tess.Normal(temp[j]).y << "," << tess.Normal(temp[j]).z << std::endl;
+					" Area*dt " << Area << " normal " << tess.Normal(temp[j]).x << "," << tess.Normal(temp[j]).y << "," << tess.Normal(temp[j]).z << 
+					" face velocity "<<edge_velocities[temp[j]].x<<","<< edge_velocities[temp[j]].y<<","<< edge_velocities[temp[j]].z<< std::endl;
 				for (size_t k = 0; k < tracerstickernames.tracer_names.size(); ++k)
 				{
 					std::cout << tracerstickernames.tracer_names[k] << " flux is " << fluxes[temp[j]].tracers[k] * Area << std::endl;

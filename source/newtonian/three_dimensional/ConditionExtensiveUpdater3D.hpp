@@ -59,7 +59,7 @@ public:
 
 	void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
 		const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,
-		TracerStickerNames const& tracerstickernames) const;
+		TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities) const;
 
 private:
 	const vector<pair<const Condition3D*, const Action3D*> > sequence_;
