@@ -84,7 +84,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 #ifdef RICH_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-			std::cout << "Bad cell in ExtensiveUpdater3D, cell " << i << " rank " << rank <<" dt "<<dt<< std::endl;
+			std::cout << "Bad cell in ExtensiveUpdater3D, cell " << i << " rank " << rank <<" dt "<<dt<<" ID "<<cells[i].ID<< std::endl;
 			std::cout << "mass " << extensives[i].mass << " energy " << extensives[i].energy << " internalE " <<
 				extensives[i].internal_energy << " momentum" << abs(extensives[i].momentum) << " volume " << tess.GetVolume(i)
 				<< std::endl;
