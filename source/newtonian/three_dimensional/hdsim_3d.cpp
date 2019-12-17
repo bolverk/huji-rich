@@ -113,7 +113,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 			cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
 	}
 	// Is this a new start?
-	if (pt_.getCycle()==0)
+	if (std::abs(pt_.getTime()) < std::numeric_limits<double>::min() * 100)
 	{
 		size_t nstart = 0;
 #ifdef RICH_MPI
