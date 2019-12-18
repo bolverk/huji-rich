@@ -1607,13 +1607,23 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		eo.AddEntry("Point number", static_cast<double>(i));
 		eo.AddEntry("Point x cor", points[i].x);
 		eo.AddEntry("Point y cor", points[i].y);
+		eo.AddEntry("cpu points", static_cast<double>(rank));
+		for (size_t jj = 0; jj < cproc.size(); ++jj)
+		{
+			eo.AddEntry("x", cproc[jj].x);
+			eo.AddEntry("y", cproc[jj].y);
+			eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(cproc[jj],
+				cproc[(jj + 1) % cproc.size()], points[i])));
+		}
 		for (size_t jj = 0; jj < neigh_chull.size(); ++jj)
 		{
 			eo.AddEntry("Cell number", static_cast<double>(realneigh[jj]));
 			for (size_t kk = 0; kk < neigh_chull[jj].size(); ++kk)
 			{
 				eo.AddEntry("x", neigh_chull[jj][kk].x);
-				eo.AddEntry("x", neigh_chull[jj][kk].y);
+				eo.AddEntry("y", neigh_chull[jj][kk].y);
+				eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(neigh_chull[jj][kk],
+					neigh_chull[jj][(kk + 1) % neigh_chull[jj].size()], points[i])));
 			}
 		}
 		throw eo;
