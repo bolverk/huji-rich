@@ -1607,6 +1607,15 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		eo.AddEntry("Point number", static_cast<double>(i));
 		eo.AddEntry("Point x cor", points[i].x);
 		eo.AddEntry("Point y cor", points[i].y);
+		for (size_t jj = 0; jj < neigh_chull.size(); ++jj)
+		{
+			eo.AddEntry("Cell number", static_cast<double>(realneigh[jj]));
+			for (size_t kk = 0; kk < neigh_chull[jj].size(); ++jj)
+			{
+				eo.AddEntry("x", neigh_chull[jj][kk].x);
+				eo.AddEntry("x", neigh_chull[jj][kk].y);
+			}
+		}
 		throw eo;
 	}
 	// Send/Recv the points
