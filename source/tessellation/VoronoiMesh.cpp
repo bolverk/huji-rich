@@ -1182,7 +1182,7 @@ bool PointInCell(vector<Vector2D> const& cpoints, Vector2D const& vec)
 	{
 		if (orient2d(TripleConstRef<Vector2D>(cpoints[i],
 			cpoints[(i + 1) % endp],
-			vec)) < 0)
+			vec)) < -0.0)
 			return false;
 	}
 	return true;
