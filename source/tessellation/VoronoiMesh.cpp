@@ -1178,8 +1178,15 @@ vector<vector<int> >const& VoronoiMesh::GetSentPoints(void)const
 // cpoints must be convex hull, checks if vec is inside cpoints
 bool PointInCell(vector<Vector2D> const& cpoints, Vector2D const& vec)
 {
-	for (size_t i = 0, endp = cpoints.size(); i < endp; ++i)
+	double Rmax = 0.0;
+	double eps = 1e-8;
+	size_t endp = cpoints.size();
+	for (size_t i = 0; i < endp; ++i)
+		Rmax = std::max(Rmax, fastabs(cpoints[i] - cpoints[(i + 1) % endp]));
+	for (size_t i = 0; i < endp; ++i)
 	{
+		if (fastabs(cpoints[i] - cpoints[(i + 1) % endp]) < eps * Rmax)
+			continue;
 		if (orient2d(TripleConstRef<Vector2D>(cpoints[i],
 			cpoints[(i + 1) % endp],
 			vec)) < -0.0)
