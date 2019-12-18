@@ -1255,7 +1255,27 @@ vector<int> VoronoiMesh::Update
 	newcor = UpdateMPIPoints(vproc, rank, newcor, obc, selfindex, SentProcs, SentPoints);
 
 	//Build the delaunay
-	Tri.build_delaunay(newcor, cpoints);
+	try
+	{
+		Tri.build_delaunay(newcor, cpoints);
+	}
+	catch (UniversalError & eo)
+	{
+		size_t bad_index = static_cast<size_t>(eo.GetValues()[0]);
+		eo.AddEntry("rank", rank);
+		eo.AddEntry("original point in cor x", points[bad_index].x);
+		eo.AddEntry("original point in cor y", points[bad_index].y);
+		vector<int> edge_index = vproc.GetCellEdges(rank);
+		for (size_t i = 0; i < edge_index.size(); ++i)
+		{
+			eo.AddEntry("edge number", static_cast<double>(edge_index[i]));
+			eo.AddEntry("Edge v0x", vproc.GetEdge(edge_index[i]).vertices.first.x);
+			eo.AddEntry("Edge v0y", vproc.GetEdge(edge_index[i]).vertices.first.y);
+			eo.AddEntry("Edge v1x", vproc.GetEdge(edge_index[i]).vertices.second.x);
+			eo.AddEntry("Edge v1y", vproc.GetEdge(edge_index[i]).vertices.second.y);
+		}
+		throw eo;
+	}
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	eps = 1e-8;
 	edges.clear();

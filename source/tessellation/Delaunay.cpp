@@ -665,7 +665,9 @@ void Delaunay::CheckInput()
 			{
 				std::cout << cell_points[j].x << ", " << cell_points[j].y << std::endl;
 			}
-			assert(false);
+			UniversalError eo("Bad check point");
+			eo.AddEntry("Point index", static_cast<double>(i));
+			throw eo;
 		}
 	}
 }
