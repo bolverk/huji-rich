@@ -254,23 +254,33 @@ void HDSim3D::timeAdvance2(void)
 	}
 
 #ifdef RICH_MPI
-	if (proc_update_ != 0)
-		proc_update_->Update(tproc_, tess_);
+	int ntotal = 0;
+	double load = 6.0;
+	ComputationalCell3D cdummy;
+	Conserved3D edummy;
+	while (load > 4.0)
+	{
+		if (proc_update_ != 0)
+		{
+			proc_update_->Update(tproc_, tess_);
+			load = proc_update_->GetLoadImbalance(tess_, ntotal);
+		}
+		else
+			load = 0.0;
 #endif
-	UpdateTessellation(tess_, point_vel, dt
+		UpdateTessellation(tess_, point_vel, dt
 #ifdef RICH_MPI
-		,tproc_
+			, tproc_
 #endif
 		);
 #ifdef RICH_MPI
-	// Keep relevant points
-	ComputationalCell3D cdummy;
-	Conserved3D edummy;
-	MPI_exchange_data(tess_, mid_extensives, false,&edummy);
-	MPI_exchange_data(tess_, extensive_, false,&edummy);
-	MPI_exchange_data(tess_, cells_, false,&cdummy);
-	MPI_exchange_data(tess_, point_vel, false,&vdummy);
-	MPI_exchange_data(tess_, point_vel, true,&vdummy);
+		// Keep relevant points
+		MPI_exchange_data(tess_, mid_extensives, false, &edummy);
+		MPI_exchange_data(tess_, extensive_, false, &edummy);
+		MPI_exchange_data(tess_, cells_, false, &cdummy);
+		MPI_exchange_data(tess_, point_vel, false, &vdummy);
+		MPI_exchange_data(tess_, point_vel, true, &vdummy);
+	}
 #endif
 
 	cu_(cells_, eos_, tess_, mid_extensives, tsn_);
