@@ -35,11 +35,6 @@ private:
 	std::set<int> set_temp_;
 	std::stack<int> stack_temp_;
 
-#ifdef RICH_MPI
-	vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
-		vector<Vector3D> const& points, vector<std::size_t> &selfindex, vector<int> &sentproc,
-		vector<vector<std::size_t> > &sentpoints);
-#endif
 	void output_buildextra(std::string const& filename)const;
 	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 		vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
@@ -95,6 +90,17 @@ private:
 	std::array<Vector3D, 4> temp_points_;
 	std::array<Vector3D, 5> temp_points2_;
 public:
+#ifdef RICH_MPI
+	vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
+		vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
+		vector<vector<std::size_t> >& sentpoints);
+#endif
+	vector<int>& GetSentProcs(void);
+
+	vector<vector<size_t> >& GetSentPoints(void);
+
+	vector<size_t>& GetSelfIndex(void);
+
 	vector<Vector3D>& GetAllFaceCM(void);
 
 	Vector3D FaceCM(std::size_t index)const;
