@@ -270,8 +270,17 @@ void HDSim3D::timeAdvance2(void)
 			vector<size_t> selfindex;
 			vector<vector<size_t> > sentpoints;
 			vector<int> sentproc;
+			if (rank == 0)
+				std::cout << "Starting update" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 			proc_update_->Update(tproc_, tess_);
+			if (rank == 0)
+				std::cout << "Done update" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 			std::vector<Vector3D> newpoints = tess_.UpdateMPIPoints(tproc_, rank, tess_.GetMeshPoints(), selfindex, sentproc, sentpoints);
+			if (rank == 0)
+				std::cout << "Done newpoints" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 			tess_.GetPointNo() = newpoints.size();
 			tess_.GetSentPoints() = sentpoints;
 			tess_.GetSentProcs() = sentproc;
@@ -283,7 +292,13 @@ void HDSim3D::timeAdvance2(void)
 			MPI_exchange_data(tess_, cells_, false, &cdummy);
 			MPI_exchange_data(tess_, point_vel, false, &vdummy);
 			MPI_exchange_data(tess_, point_vel, true, &vdummy);
+			if (rank == 0)
+				std::cout << "done send" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 			load = proc_update_->GetLoadImbalance(tess_, ntotal);
+			if (rank == 0)
+				std::cout << "new load" <<load<< std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 		}
 		else
 			load = 0.0;
