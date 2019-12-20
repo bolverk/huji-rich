@@ -274,6 +274,7 @@ void HDSim3D::timeAdvance2(void)
 			std::vector<Vector3D> newpoints = tess_.UpdateMPIPoints(tproc_, rank, tess_.GetMeshPoints(), selfindex, sentproc, sentpoints);
 			tess_.GetPointNo() = newpoints.size();
 			tess_.GetSentPoints() = sentpoints;
+			tess_.GetSentProcs() = sentproc;
 			tess_.GetSelfIndex() = selfindex;
 			tess_.GetMeshPoints() = newpoints;
 			// Keep relevant points
