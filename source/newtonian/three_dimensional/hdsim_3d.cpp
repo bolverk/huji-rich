@@ -291,7 +291,6 @@ void HDSim3D::timeAdvance2(void)
 			MPI_exchange_data(tess_, extensive_, false, &edummy);
 			MPI_exchange_data(tess_, cells_, false, &cdummy);
 			MPI_exchange_data(tess_, point_vel, false, &vdummy);
-			MPI_exchange_data(tess_, point_vel, true, &vdummy);
 			if (rank == 0)
 				std::cout << "done send" << std::endl;
 			MPI_Barrier(MPI_COMM_WORLD);
