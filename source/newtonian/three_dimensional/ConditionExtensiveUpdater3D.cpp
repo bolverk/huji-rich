@@ -17,7 +17,8 @@ ConditionExtensiveUpdater3D::ConditionExtensiveUpdater3D(const vector<pair<const
 
 void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D& tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double time,
-	TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities) const
+	TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities,
+	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const
 {
 	size_t N = tess.GetPointNo();
 	std::vector<double> oldEk(N, 0), oldEtherm(N, 0), oldE(N, 0);
@@ -80,6 +81,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 		if (!(extensives[i].mass > 0) || !(extensives[i].energy > 0) || (!(extensives[i].internal_energy > 0) && (!entropy)) ||
 			(!std::isfinite(fastabs(extensives[i].momentum))) || (entropy && extensives[i].tracers[entropy_index] < 0))
 		{
+			UniversalError eo("Bad extesnsive update");
 			int rank = 0;
 #ifdef RICH_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -144,10 +146,26 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 					dEtherm = -delta.energy - (Eknew - Ek);
 					old_ext.internal_energy += dEtherm;
 				}
+				Vector3D normalf = normalize(tess.Normal(temp[j]));
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass * Area <<
 					" energy= " << fluxes[temp[j]].energy * Area << " Etherm= " << dEtherm << " momentum= " << abs(fluxes[temp[j]].momentum) * Area <<
-					" Area*dt " << Area << " normal " << tess.Normal(temp[j]).x << "," << tess.Normal(temp[j]).y << "," << tess.Normal(temp[j]).z << 
+					" Area*dt " << Area << " normal " << normalf.x << "," << normalf.y << "," << normalf.z <<
 					" face velocity "<<edge_velocities[temp[j]].x<<","<< edge_velocities[temp[j]].y<<","<< edge_velocities[temp[j]].z<< std::endl;
+				eo.AddEntry("Face", static_cast<double>(temp[j]));
+				eo.AddEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(temp[j]).first));
+				eo.AddEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(temp[j]).second));
+				eo.AddEntry("First input Density", interp_values[temp[j]].first.density);
+				eo.AddEntry("First input pressure", interp_values[temp[j]].first.pressure);
+				eo.AddEntry("First input internal energy", interp_values[temp[j]].first.internal_energy);
+				eo.AddEntry("First input vx", interp_values[temp[j]].first.velocity.x);
+				eo.AddEntry("First input vy", interp_values[temp[j]].first.velocity.y);
+				eo.AddEntry("First input vz", interp_values[temp[j]].first.velocity.z);
+				eo.AddEntry("Second input Density", interp_values[temp[j]].second.density);
+				eo.AddEntry("Second input pressure", interp_values[temp[j]].second.pressure);
+				eo.AddEntry("Second input internal energy", interp_values[temp[j]].second.internal_energy);
+				eo.AddEntry("Second input vx", interp_values[temp[j]].second.velocity.x);
+				eo.AddEntry("Second input vy", interp_values[temp[j]].second.velocity.y);
+				eo.AddEntry("Second input vz", interp_values[temp[j]].second.velocity.z);
 				for (size_t k = 0; k < tracerstickernames.tracer_names.size(); ++k)
 				{
 					std::cout << tracerstickernames.tracer_names[k] << " flux is " << fluxes[temp[j]].tracers[k] * Area << std::endl;
@@ -166,6 +184,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 					std::cout << tracerstickernames.tracer_names[k] << " of other " << cells[Nother].tracers[k] << std::endl;
 				}
 			}
+			throw eo;
 			assert(false);
 		}
 	}

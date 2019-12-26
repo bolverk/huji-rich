@@ -55,7 +55,7 @@ namespace
 	}
 }
 
-void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& face_velocities,
+std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& face_velocities,
 	const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
 	const double time, const double /*dt*/, TracerStickerNames const& tracerstickernames) const
 {
@@ -105,6 +105,7 @@ void ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessell
 		}
 		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, tracerstickernames, face_values[i]);
 	}
+	return face_values;
 }
 
 ConditionActionFlux1::Condition3D::~Condition3D(void) {}

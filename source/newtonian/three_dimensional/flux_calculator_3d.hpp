@@ -28,7 +28,7 @@ public:
 	\param time The time
 	\param tracerstickernames The names of the stickers and tracers
    */
-  virtual void operator()(vector<Conserved3D> &fluxes,const Tessellation3D& tess,const vector<Vector3D>& edge_velocities,
+	virtual std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D>& fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 	  const vector<ComputationalCell3D>& cells,const vector<Conserved3D>& extensives,const EquationOfState& eos,
 	  const double time, const double dt,TracerStickerNames const& tracerstickernames) const = 0;
 
