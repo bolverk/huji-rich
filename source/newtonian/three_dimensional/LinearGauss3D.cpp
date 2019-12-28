@@ -421,7 +421,7 @@ namespace
 		string const& skip_key, Tessellation3D const& tess, size_t /*cell_index*/, face_vec const& faces,
 		EquationOfState const& eos)
 	{
-		const double small_factor = 1e-8;
+		const double small_factor = 1e-9;
 		ComputationalCell3D cmax(cell), cmin(cell);
 		size_t N = faces.size();
 		size_t ntracer = cell.tracers.size();
@@ -481,19 +481,19 @@ namespace
 			// xvelocity
 			if (std::abs(dphi.velocity.x) > small_factor*std::max(std::abs(maxdiff.velocity.x), std::abs(mindiff.velocity.x)) || centroid_val.velocity.x*cell.velocity.x < 0)
 			{
-				if (std::abs(dphi.velocity.x) > 1e-9*cell.velocity.x)
+				if (std::abs(dphi.velocity.x) > 1e-9*std::abs(cell.velocity.x))
 					psi[2] = std::min(psi[2], std::max(diffusecoeff*(neighbors[i].velocity.x - cell.velocity.x) / dphi.velocity.x, 0.0));
 			}
 			// yvelocity
 			if (std::abs(dphi.velocity.y) > small_factor*std::max(std::abs(maxdiff.velocity.y), std::abs(mindiff.velocity.y)) || centroid_val.velocity.y*cell.velocity.y < 0)
 			{
-				if (std::abs(dphi.velocity.y) > 1e-9*cell.velocity.y)
+				if (std::abs(dphi.velocity.y) > 1e-9*std::abs(cell.velocity.y))
 					psi[3] = std::min(psi[3], std::max(diffusecoeff*(neighbors[i].velocity.y - cell.velocity.y) / dphi.velocity.y, 0.0));
 			}
 			// zvelocity
 			if (std::abs(dphi.velocity.z) > small_factor*std::max(std::abs(maxdiff.velocity.z), std::abs(mindiff.velocity.z)) || centroid_val.velocity.z*cell.velocity.z < 0)
 			{
-				if (std::abs(dphi.velocity.z) > 1e-9*cell.velocity.z)
+				if (std::abs(dphi.velocity.z) > 1e-9*std::abs(cell.velocity.z))
 					psi[4] = std::min(psi[4], std::max(diffusecoeff*(neighbors[i].velocity.z - cell.velocity.z) / dphi.velocity.z, 0.0));
 			}
 			// tracers
