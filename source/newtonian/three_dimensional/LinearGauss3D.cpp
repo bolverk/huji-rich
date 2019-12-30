@@ -418,7 +418,7 @@ namespace
 	void shocked_slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
 		vector<ComputationalCell3D> const& neighbors,
 		Slope3D  &slope, double diffusecoeff, TracerStickerNames const& tracerstickernames,
-		string const& skip_key, Tessellation3D const& tess, size_t /*cell_index*/, face_vec const& faces,
+		string const& skip_key, Tessellation3D const& tess, size_t cell_index, face_vec const& faces,
 		EquationOfState const& eos)
 	{
 		const double small_factor = 1e-9;
@@ -542,6 +542,24 @@ namespace
 			slope.yderivative.tracers[k] *= psi[6 + counter];
 			slope.zderivative.tracers[k] *= psi[6 + counter];
 			++counter;
+		}
+		// make sure velocity slope is not too large in supersonic regions
+		double maxDv = ScalarProd(slope.xderivative.velocity, slope.xderivative.velocity)
+			+ ScalarProd(slope.yderivative.velocity, slope.yderivative.velocity) +
+			ScalarProd(slope.zderivative.velocity, slope.zderivative.velocity);
+		maxDv *= tess.GetWidth(cell_index) * tess.GetWidth(cell_index);
+		if (maxDv > 100 * ScalarProd(cell.velocity, cell.velocity))
+		{
+			double sfactor = fastsqrt(100 * ScalarProd(cell.velocity, cell.velocity) / maxDv);
+			slope.xderivative.velocity.x *= sfactor;
+			slope.yderivative.velocity.x *= sfactor;
+			slope.zderivative.velocity.x *= sfactor;
+			slope.xderivative.velocity.y *= sfactor;
+			slope.yderivative.velocity.y *= sfactor;
+			slope.zderivative.velocity.y *= sfactor;
+			slope.xderivative.velocity.z *= sfactor;
+			slope.yderivative.velocity.z *= sfactor;
+			slope.zderivative.velocity.z *= sfactor;
 		}
 	}
 
