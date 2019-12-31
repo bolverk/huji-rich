@@ -38,6 +38,7 @@ void ConservativeForce3D::operator()(const Tessellation3D& tess,const vector<Com
 	{
 		dt_ = std::max(dt_, std::sqrt(fastabs(acc[i])/ tess.GetWidth(i)));
 		double volume = tess.GetVolume(i);
+		double Ek = 0.5 * ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass;
 		extensives[i].momentum += volume*cells[i].density*acc[i]*dt;
 		if (mass_flux_ && (fastabs(acc[i])*tess.GetWidth(i)*cells[i].density)<(0.5*cells[i].pressure))
 		{
@@ -46,7 +47,11 @@ void ConservativeForce3D::operator()(const Tessellation3D& tess,const vector<Com
 			extensives[i].energy += (part0+part1)*dt;
 		}
 		else
-			extensives[i].energy += volume*cells[i].density*ScalarProd(acc[i], cells[i].velocity)*dt;
+		{
+			double Eknew = 0.5 * ScalarProd(extensives[i].momentum, extensives[i].momentum) / extensives[i].mass;
+			//extensives[i].energy += volume * cells[i].density * ScalarProd(acc[i], cells[i].velocity) * dt;
+			extensives[i].energy += Eknew - Ek;
+		}
 	}
 }
 
