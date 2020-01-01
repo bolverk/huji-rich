@@ -1321,6 +1321,12 @@ int Delaunay::findSomeOuterPoint(void)
 		if (candidate < static_cast<int>(olength))
 			return candidate;
 	}
+#ifdef RICH_MPI
+	int rank = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	std::cout << "Problem with rank " << rank <<" chcked facet "<<cur_facet<<" olength "
+		<<olength<< std::endl;
+#endif
 	assert(false && "something went wrong");
 }
 
