@@ -1326,6 +1326,7 @@ int Delaunay::findSomeOuterPoint(void)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	std::cout << "Problem with rank " << rank <<" chcked facet "<<cur_facet<<" olength "
 		<<olength<< std::endl;
+	throw UniversalError eo("Bad findsomeouterpoint");
 #endif
 	assert(false && "something went wrong");
 }
