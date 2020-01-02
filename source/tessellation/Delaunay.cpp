@@ -494,7 +494,7 @@ bool Delaunay::CheckCorrect(void)
 			{
 				bool found = false;
 				for (size_t k = 0; k < 3; ++k)
-					if (f[T.neighbors[j]].neighbors[k] == static_cast<int>(i))
+					if (f[static_cast<size_t>(T.neighbors[j])].neighbors[k] == static_cast<int>(i))
 						found = true;
 				if (!found)
 				{
@@ -521,7 +521,8 @@ bool Delaunay::CheckCorrect(void)
 					}
 					if (!found)
 					{
-						if (incircle(cor[T.vertices[0]], cor[T.vertices[1]], cor[T.vertices[2]], cor[f[T.neighbors[j]].vertices[k]]) > 0)
+						if (incircle(cor[static_cast<size_t>(T.vertices[0])], cor[static_cast<size_t>(T.vertices[1])], 
+							cor[static_cast<size_t>(T.vertices[2])], cor[static_cast<size_t>(f[T.neighbors[j]].vertices[k])]) > 0)
 						{
 							UniversalError eo("Failed checkcorrect in delaunay");
 							eo.AddEntry("Facet checked", static_cast<double>(i));
