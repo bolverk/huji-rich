@@ -1388,10 +1388,24 @@ void VoronoiMesh::Initialise
 	size_t npoints = points.size();
 	for (size_t i = 0; i < npoints; ++i)
 		selfindex[i] = i;
-	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(outer, vproc, NGhostReceived);
-	GhostPoints = ptemp.first;
-	GhostProcs = ptemp.second;
-
+	try
+	{
+		pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(obc, vproc, NGhostReceived);
+		GhostPoints = ptemp.first;
+		GhostProcs = ptemp.second;
+	}
+	catch (UniversalError & eo)
+	{
+		std::vector<double> xtemp;
+		for (size_t i = 0; i < points.size(); ++i)
+			xtemp.push_back(points[i].x);
+		write_vector(xtemp, "xcor_" + int2str(rank) + ".txt", 15);
+		xtemp.clear();
+		for (size_t i = 0; i < points.size(); ++i)
+			xtemp.push_back(points[i].y);
+		write_vector(xtemp, "ycor_" + int2str(rank) + ".txt", 15);
+		throw eo;
+	}
 	/*
 	if(get_rank()==0){
 	  {
