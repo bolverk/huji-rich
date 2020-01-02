@@ -298,5 +298,7 @@ public:
 	\param points The points to add
 	*/
 	void AddBoundaryPoints(vector<Vector2D> const& points);
+
+	bool CheckCorrect(void);
 };
 #endif //DELAUNAYMPI_HPP

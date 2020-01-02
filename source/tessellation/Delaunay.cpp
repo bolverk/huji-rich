@@ -481,6 +481,63 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	*/
 }
 
+bool Delaunay::CheckCorrect(void)
+{
+	std::size_t Ntri = f.size();
+	for (std::size_t i = 0; i < Ntri; ++i)
+	{
+		facet const& T = f[i];
+		for (std::size_t j = 0; j < 3; ++j)
+		{
+			// Check same neighbors
+			if (T.neighbors[j] != last_loc)
+			{
+				bool found = false;
+				for (size_t k = 0; k < 3; ++k)
+					if (f[T.neighbors[j]].neighbors[k] == static_cast<int>(i))
+						found = true;
+				if (!found)
+				{
+					UniversalError eo("Failed checkcorrect in delaunay");
+					eo.AddEntry("Facet checked", static_cast<double>(i));
+					eo.AddEntry("Neighbor that is not dual neighbor", static_cast<double>(T.neighbors[j]));
+					throw eo;
+				}
+			}
+			// Check incircle
+			if (T.neighbors[j] != last_loc)
+			{
+				// Find point to shared
+				for (size_t k = 0; k < 3; ++k)
+				{
+					bool found = false;
+					for (size_t l = 0; l < 3; ++l)
+					{
+						if (T.vertices[l] == f[T.neighbors[j]].vertices[k]);
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						if (incircle(cor[T.vertices[0]], cor[T.vertices[1]], cor[T.vertices[2]], cor[f[T.neighbors[j]].vertices[k]]) > 0)
+						{
+							UniversalError eo("Failed checkcorrect in delaunay");
+							eo.AddEntry("Facet checked", static_cast<double>(i));
+							eo.AddEntry("Point that is inside triangle", static_cast<double>(f[T.neighbors[j]].vertices[k]));
+							throw eo;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
 double Delaunay::triangle_area(int index)
 {
 	const TripleConstRef<Vector2D> p
