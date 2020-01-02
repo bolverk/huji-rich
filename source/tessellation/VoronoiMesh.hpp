@@ -280,4 +280,11 @@ private:
 */
 bool PointInCell(vector<Vector2D> const& cpoints,Vector2D const& vec);
 
+/*! \brief Checks if a point is inside a Voronoi cell
+\param cpoints The points of the cell in convex order, ordered by edges
+\param vec The point to check
+\return True if the point is inside the cell, false otherwise
+*/
+
+bool PointInCell(std::vector<std::pair<Vector2D, Vector2D> > const& cpoints, Vector2D const& vec);
 #endif // VORONOIMESH_HPP

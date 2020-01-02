@@ -1195,6 +1195,19 @@ bool PointInCell(vector<Vector2D> const& cpoints, Vector2D const& vec)
 	return true;
 }
 
+// cpoints must be convex hull, checks if vec is inside cpoints
+bool PointInCell(std::vector<std::pair<Vector2D, Vector2D> > const& cpoints, Vector2D const& vec)
+{
+	size_t endp = cpoints.size();
+	for (size_t i = 0; i < endp; ++i)
+	{
+		if (orient2d(TripleConstRef<Vector2D>(cpoints[i].first,
+			cpoints[i].second, vec)) < -0.0)
+			return false;
+	}
+	return true;
+}
+
 // result is : minx, maxx, miny, maxy
 boost::array<double, 4> VoronoiMesh::FindMaxCellEdges(void)
 {
@@ -1498,12 +1511,12 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	size_t nproc = static_cast<size_t>(vproc.GetPointNo());
 	const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
 	const double dy = obc->GetGridBoundary(Up) - obc->GetGridBoundary(Down);
-	vector<Vector2D> cproc;
+	vector<std::pair<Vector2D, Vector2D> > cproc;
 	ConvexHull(cproc, vproc, rank);
 	vector<int> neighbors = vproc.GetNeighbors(rank);
 	vector<int> realneigh;
 	std::vector<size_t> neigh_keep;
-	vector<vector<Vector2D> > neigh_chull;
+	vector<vector<std::pair<Vector2D, Vector2D> > > neigh_chull;
 	sentpoints.clear();
 	sentproc.clear();
 	bool periodic = obc->GetBoundaryType() == Periodic;
@@ -1517,11 +1530,14 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 				if (temp_neigh == rank)
 					continue;
 				realneigh.push_back(temp_neigh);
-				vector<Vector2D> temp;
+				vector< std::pair<Vector2D, Vector2D> > temp;
 				ConvexHull(temp, vproc, temp_neigh);
 				Vector2D to_add_neigh = vproc.GetMeshPoint(neighbors[i]) - vproc.GetMeshPoint(temp_neigh);
 				for (size_t j = 0; j < temp.size(); ++j)
-					temp[j] += to_add_neigh;
+				{
+					temp[j].first += to_add_neigh;
+					temp[j].second += to_add_neigh;
+				}
 				neigh_chull.push_back(temp);
 				sentproc.push_back(temp_neigh);
 				neigh_keep.push_back(i);
@@ -1529,7 +1545,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 			else
 			{
 				realneigh.push_back(neighbors[i]);
-				vector<Vector2D> temp;
+				vector< std::pair<Vector2D, Vector2D> > temp;
 				ConvexHull(temp, vproc, neighbors[i]);
 				neigh_chull.push_back(temp);
 				sentproc.push_back(neighbors[i]);
@@ -1570,7 +1586,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		}
 		if (!good)
 		{
-			vector<Vector2D> cellpoints;
+			vector<std::pair<Vector2D, Vector2D> > cellpoints;
 			for (size_t j = 0; j < nproc; ++j) // Search all cpus
 			{
 				if (std::find(realneigh.begin(), realneigh.end(), j) != realneigh.end() || j == static_cast<size_t>(rank))
@@ -1594,7 +1610,7 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		// If periodic check for all instances of duplication
 		if (!good && obc->GetBoundaryType() == Periodic)
 		{
-			vector<Vector2D> cellpoints;
+			vector<std::pair<Vector2D, Vector2D> > cellpoints;
 			for (size_t j = 0; j < nproc; ++j)
 			{
 				ConvexHull(cellpoints, vproc, static_cast<int>(j));
@@ -1646,20 +1662,24 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		eo.AddEntry("cpu points", static_cast<double>(rank));
 		for (size_t jj = 0; jj < cproc.size(); ++jj)
 		{
-			eo.AddEntry("x", cproc[jj].x);
-			eo.AddEntry("y", cproc[jj].y);
-			eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(cproc[jj],
-				cproc[(jj + 1) % cproc.size()], points[i])));
+			eo.AddEntry("x1", cproc[jj].first.x);
+			eo.AddEntry("y1", cproc[jj].first.y);
+			eo.AddEntry("x2", cproc[jj].second.x);
+			eo.AddEntry("y2", cproc[jj].second.y);
+			eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(cproc[jj].first,
+				cproc[jj].second, points[i])));
 		}
 		for (size_t jj = 0; jj < neigh_chull.size(); ++jj)
 		{
 			eo.AddEntry("Cell number", static_cast<double>(realneigh[jj]));
 			for (size_t kk = 0; kk < neigh_chull[jj].size(); ++kk)
 			{
-				eo.AddEntry("x", neigh_chull[jj][kk].x);
-				eo.AddEntry("y", neigh_chull[jj][kk].y);
-				eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(neigh_chull[jj][kk],
-					neigh_chull[jj][(kk + 1) % neigh_chull[jj].size()], points[i])));
+				eo.AddEntry("x1", neigh_chull[jj][kk].first.x);
+				eo.AddEntry("y1", neigh_chull[jj][kk].first.y);
+				eo.AddEntry("x2", neigh_chull[jj][kk].second.x);
+				eo.AddEntry("y2", neigh_chull[jj][kk].second.y);
+				eo.AddEntry("orient result", orient2d(TripleConstRef<Vector2D>(neigh_chull[jj][kk].first,
+					neigh_chull[jj][kk].second, points[i])));
 			}
 		}
 		throw eo;

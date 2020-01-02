@@ -126,7 +126,7 @@ vector<Vector2D> RandSquare(int npoints,Tessellation const& tess,
 	int mypoints=static_cast<int>(floor(npoints*myarea/Area+0.5));
 	vector<Vector2D> res;
 	res.reserve(static_cast<size_t>(mypoints));
-	vector<Vector2D> cpoints;
+	vector<std::pair<Vector2D, Vector2D> > cpoints;
 	ConvexHull(cpoints,tess,rank);
 	double ran[2];
 	gen_type gen(static_cast<size_t>(rank));
@@ -158,7 +158,7 @@ vector<Vector2D> SquareMeshM(int nx,int ny,Tessellation const& tess,
 	Vector2D point;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	vector<Vector2D> cpoints;
+	vector< std::pair<Vector2D, Vector2D> > cpoints;
 	ConvexHull(cpoints,tess,rank);
 	for(int i=0;i<nx;i++)
 	{
@@ -186,9 +186,11 @@ vector<Vector2D> CirclePointsRmaxM(int PointNum,double Rmin,double Rmax,
 	double dr=(Rmax-Rmin)/Nr;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	vector<Vector2D> cpoints;
+	vector< std::pair < Vector2D, Vector2D> >cpoints;
+	vector<Vector2D> cpoints2;
 	ConvexHull(cpoints,tess,rank);
-	boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
+	ConvexHull(cpoints2, tess, rank);
+	boost::array<double,4> arc=GetBindingArc(cpoints2,Vector2D(xc,yc),
 		tess.GetMeshPoint(rank));
 	double mincellR=max(min(arc[0],Rmax),Rmin);
 	double maxcellR=max(min(arc[1],Rmax),Rmin);
@@ -222,9 +224,11 @@ vector<Vector2D> CirclePointsRmax_aM(int PointNum,double Rmin,double Rmax,
 	vector<Vector2D> res;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	vector<Vector2D> cpoints;
-	ConvexHull(cpoints,tess,rank);
-	boost::array<double,4> arc=GetBindingArc(cpoints,Vector2D(xc,yc),
+	vector< std::pair < Vector2D, Vector2D> >cpoints;
+	vector<Vector2D> cpoints2;
+	ConvexHull(cpoints, tess, rank);
+	ConvexHull(cpoints2, tess, rank);
+	boost::array<double, 4> arc = GetBindingArc(cpoints2, Vector2D(xc, yc),
 		tess.GetMeshPoint(rank));
 	double mincellR=max(min(arc[0],Rmax),Rmin);
 	double maxcellR=max(min(arc[1],Rmax),Rmin);
@@ -255,7 +259,7 @@ vector<Vector2D> circle_circumferenceM(int point_number,double radius,
 	vector<Vector2D> res;
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	vector<Vector2D> cpoints;
+	vector<std::pair<Vector2D, Vector2D> > cpoints;
 	ConvexHull(cpoints,tproc,rank);
 	for(int i=0;i<point_number;++i)
 	{
