@@ -513,7 +513,7 @@ bool Delaunay::CheckCorrect(void)
 					bool found = false;
 					for (size_t l = 0; l < 3; ++l)
 					{
-						if (T.vertices[l] == f[T.neighbors[j]].vertices[k]);
+						if (T.vertices[l] == f[T.neighbors[j]].vertices[k])
 						{
 							found = true;
 							break;
