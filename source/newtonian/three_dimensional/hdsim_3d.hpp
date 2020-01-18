@@ -71,14 +71,15 @@ public:
 	  const TimeStepFunction3D& tsc,
 	  const FluxCalculator3D& fc,
 	  const CellUpdater3D& cu,
-	  const ExtensiveUpdater3D & eu,
-	  const	SourceTerm3D &source,
-	  TracerStickerNames &tsn,
+	  const ExtensiveUpdater3D& eu,
+	  const	SourceTerm3D& source,
+	  TracerStickerNames& tsn,
 	  bool SR=false
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif
 	  ,bool new_start = true
+	  ,const double maxload = 4.0
   );
 
   //! \brief Advances the simulation in time (first order)
@@ -175,6 +176,7 @@ private:
   const ProcessorUpdate3D* proc_update_;
 #endif
   size_t Max_ID_;
+  const double maxload_;
 };
 
 #endif // HDSIM_3D_HPP

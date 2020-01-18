@@ -80,7 +80,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	, const ProcessorUpdate3D* proc_update
 #endif
-	, bool new_start
+	, bool new_start, const double maxload
 ) :
 	tess_(tess),
 #ifdef RICH_MPI
@@ -90,7 +90,7 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	, proc_update_(proc_update)
 #endif
-	, Max_ID_(0)
+	, Max_ID_(0), maxload_(maxload)
 {
 #ifdef RICH_MPI
 	int ws = 0, rank = 0;
@@ -261,7 +261,7 @@ void HDSim3D::timeAdvance2(void)
 	double load = 6.0;
 	ComputationalCell3D cdummy;
 	Conserved3D edummy;
-	while (load > 4.0)
+	while (load > maxload_)
 	{
 		if (proc_update_ != 0)
 		{
