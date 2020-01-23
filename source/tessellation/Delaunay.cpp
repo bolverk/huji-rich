@@ -526,7 +526,7 @@ bool Delaunay::CheckCorrect(void)
 						{
 							UniversalError eo("Failed checkcorrect in delaunay");
 							eo.AddEntry("Facet checked", static_cast<double>(i));
-							eo.AddEntry("Point that is inside triangle", static_cast<double>(f[T.neighbors[j]].vertices[k]));
+							eo.AddEntry("Point that is inside triangle", static_cast<double>(f[static_cast<size_t>(T.neighbors[j])].vertices[k]));
 							throw eo;
 						}
 						break;
