@@ -253,7 +253,7 @@ vector<Vector2D> CirclePointsRmax_a(int PointNum,
 	double ymax,
 	double xmin,
 	double ymin,
-	double alpha)
+	double alpha, double angle_start, double angle_end)
 {
 	const double N0 = sqrt(PointNum * 4 * M_PI*(alpha + 1) /
 		(pow(Rmax, 2 * (alpha + 1)) -
@@ -267,11 +267,13 @@ vector<Vector2D> CirclePointsRmax_a(int PointNum,
 			pow(Rmin, alpha + 1), 1.0 / (alpha + 1));
 		const int Nphi = int(floor(N0*pow(r, 1 + alpha) + 1.5));
 		const double dphi = 2 * M_PI / Nphi;
-		for (int j = 0; j < Nphi; ++j)
+		double cur_phi = angle_start;
+		while(cur_phi < angle_end)
 		{
-			const Vector2D pos(r*cos(dphi*j) + xc, r*sin(dphi*j) + yc);
+			const Vector2D pos(r*cos(cur_phi) + xc, r*sin(cur_phi) + yc);
 			if (pos.x<xmax&&pos.x>xmin && pos.y<ymax&&pos.y>ymin)
 				res.push_back(pos);
+			cur_phi += dphi;
 		}
 	}
 	return res;

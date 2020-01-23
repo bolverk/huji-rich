@@ -112,7 +112,7 @@ std::vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,doub
 */
 std::vector<Vector2D> CirclePointsRmax_a(int PointNum,double Rmin,double Rmax,
 				    double xc,double yc,double xmax,double ymax,double xmin,double ymin,
-				    double alpha);
+				    double alpha, double angle_start = 0, double angle_end = 2 * M_PI);
 
 /*!
   \brief Generates a rectangular grid with random 1/r point density
