@@ -217,6 +217,42 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 		- y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
 }
 
+/*!
+  \brief Linear Interpolation
+  \param x The x vector, assumed sorted
+  \param y y=f(x) vector
+  \param xi The interpolation location
+  \return f(xi)
+*/
+template <typename T>
+T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vector<T>::const_iterator itx_end,
+	typename vector<T>::const_iterator ity_begin, typename vector<T>::const_iterator ity_end, T xi);
+
+template <typename T>
+T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vector<T>::const_iterator itx_end,
+	typename vector<T>::const_iterator ity_begin, typename vector<T>::const_iterator ity_end, T xi)
+{
+	typename vector<T>::const_iterator it = upper_bound(itx_begin, itx_end, xi);
+	if (it == itx_end)
+	{
+		std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << *itx_end << std::endl;
+		throw;
+	}
+	if (it == itx_begin)
+	{
+		if (*it < *itx_begin)
+		{
+			std::cout << "X too small in LinearInterpolation, x_i " << xi << " min X " << *itx_begin << std::endl;
+			throw;
+		}
+	}
+	const size_t toadd = static_cast<std::size_t>(it - itx_begin);
+	if (*it == xi)
+		return *(ity_begin + toadd);
+
+	return *(ity_begin + toadd) + (xi - *it) * (*(ity_begin + toadd + 1) - *(ity_begin + toadd)) / (*(it - 1) - *it);
+}
+
 /*! \brief Returns the minimal term in a vector
   \param v Vector
   \return The minimum of the vector
