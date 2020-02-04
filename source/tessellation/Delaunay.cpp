@@ -210,6 +210,19 @@ namespace
 		return true;
 	}
 
+	// Assume cell is orederd in convexhull counterclockwise
+	void InCellDebug(vector<Vector2D> const& points, Vector2D const& p)
+	{
+		int n = static_cast<int>(points.size());
+		for (int i = 0; i < n; ++i)
+		{
+			std::cout << "P1 " << points[static_cast<size_t>(i)].x << "," <<
+				points[static_cast<size_t>(i)].y << " P2 " << points[static_cast<size_t>((i + 1) % n)].x
+				<< "," << points[static_cast<size_t>((i + 1) % n)].y << " P3 " << p.x << "," << p.y <<
+				" result " << orient2d(TripleConstRef<Vector2D>(points[static_cast<size_t>(i)], points[static_cast<size_t>((i + 1) % n)], p)) << std::endl;
+		}
+	}
+
 	vector<double> CellSize(vector<Vector2D> const& points)
 	{
 		int n = static_cast<int>(points.size());
@@ -718,6 +731,7 @@ void Delaunay::CheckInput()
 		{
 			std::cout << "Point not in cell in checkinput" << std::endl;
 			std::cout << "Bad point " << cor[i].x << ", " << cor[i].y << std::endl;
+			InCellDebug(cell_points, cor[i]);
 			std::cout << "Bounding cell " << std::endl;
 			for (size_t j = 0; j < cell_points.size(); ++j)
 			{
