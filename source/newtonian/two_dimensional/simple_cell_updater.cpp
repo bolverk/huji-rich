@@ -117,14 +117,19 @@ namespace
 				res.pressure = eos.de2p(res.density, energy, res.tracers, tracerstickernames.tracer_names);
 			if(!(energy>0))
 				throw UniversalError("Negative thermal energy in cell update");
+			if (!(res.pressure > 0))
+				throw UniversalError("Negative pressure in cell update");
 		}
 		catch (UniversalError &eo)
 		{
 			eo.AddEntry("Cell index", static_cast<double>(index));
+			eo.AddEntry("Volume", volume);
 			eo.AddEntry("Cell mass", extensive.mass);
 			eo.AddEntry("Cell x momentum", extensive.momentum.x);
 			eo.AddEntry("Cell y momentum", extensive.momentum.y);
 			eo.AddEntry("Cell energy", extensive.energy);
+			for (size_t i = 0; i < tracerstickernames.tracer_names.size(); ++i)
+				eo.AddEntry(tracerstickernames.tracer_names[i], extensive.tracers[i]);
 			throw;
 		}
 	}
