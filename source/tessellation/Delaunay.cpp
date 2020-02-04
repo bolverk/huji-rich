@@ -147,7 +147,7 @@ Delaunay::DataOnlyForBuild& Delaunay::DataOnlyForBuild::operator=
 
 Delaunay::Delaunay(void) :
 	lastFacet(0), CalcRadius(false),
-	radius(vector<double>()), cell_points(vector<Vector2D>()),
+	radius(vector<double>()), 
 	PointWasAdded(false),
 	last_facet_added(0),
 	f(vector<facet>()),
@@ -161,7 +161,7 @@ Delaunay::Delaunay(void) :
 Delaunay::Delaunay(Delaunay const& other) :
 	lastFacet(other.lastFacet),
 	CalcRadius(other.CalcRadius),
-	radius(other.radius), cell_points(other.cell_points),
+	radius(other.radius), 
 	PointWasAdded(other.PointWasAdded),
 	last_facet_added(other.last_facet_added),
 	f(other.f),
@@ -178,7 +178,6 @@ Delaunay::~Delaunay(void)
 {
 	cor.clear();
 	f.clear();
-	cell_points.clear();
 }
 
 namespace
@@ -198,44 +197,19 @@ namespace
 					point)) > 0);
 	}
 
-	// Assume cell is orederd in convexhull counterclockwise
-	bool InCell(vector<Vector2D> const& points, Vector2D const& p)
+	vector<double> CellSize(std::vector<std::pair<Vector2D, Vector2D> > const& points)
 	{
 		int n = static_cast<int>(points.size());
-		for (int i = 0; i < n; ++i)
-		{
-			if(orient2d(TripleConstRef<Vector2D>(points[static_cast<size_t>(i)], points[static_cast<size_t>((i + 1) % n)], p)) < 0)
-				return false;
-		}
-		return true;
-	}
-
-	// Assume cell is orederd in convexhull counterclockwise
-	void InCellDebug(vector<Vector2D> const& points, Vector2D const& p)
-	{
-		int n = static_cast<int>(points.size());
-		for (int i = 0; i < n; ++i)
-		{
-			std::cout << "P1 " << points[static_cast<size_t>(i)].x << "," <<
-				points[static_cast<size_t>(i)].y << " P2 " << points[static_cast<size_t>((i + 1) % n)].x
-				<< "," << points[static_cast<size_t>((i + 1) % n)].y << " P3 " << p.x << "," << p.y <<
-				" result " << orient2d(TripleConstRef<Vector2D>(points[static_cast<size_t>(i)], points[static_cast<size_t>((i + 1) % n)], p)) << std::endl;
-		}
-	}
-
-	vector<double> CellSize(vector<Vector2D> const& points)
-	{
-		int n = static_cast<int>(points.size());
-		double minx = points[0].x;
-		double miny = points[0].y;
+		double minx = points[0].first.x;
+		double miny = points[0].first.y;
 		double maxx = minx;
 		double maxy = miny;
 		for (int i = 1; i < n; ++i)
 		{
-			minx = min(points[static_cast<size_t>(i)].x, minx);
-			miny = min(points[static_cast<size_t>(i)].y, miny);
-			maxx = max(points[static_cast<size_t>(i)].x, maxx);
-			maxy = max(points[static_cast<size_t>(i)].y, maxy);
+			minx = min(points[static_cast<size_t>(i)].first.x, minx);
+			miny = min(points[static_cast<size_t>(i)].first.y, miny);
+			maxx = max(points[static_cast<size_t>(i)].first.x, maxx);
+			maxy = max(points[static_cast<size_t>(i)].first.y, maxy);
 		}
 		vector<double> res(4);
 		res[0] = minx;
@@ -399,9 +373,8 @@ namespace{
   */
 }
 
-void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const& cpoints)
+void Delaunay::build_delaunay(vector<Vector2D>const& vp, std::vector<std::pair<Vector2D, Vector2D> > const& cpoints)
 {
-	cell_points = cpoints;
 	DataOnlyForBuild data;
 	lastFacet = 0;
 	CalcRadius = false;
@@ -417,12 +390,10 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	{
 		cor.push_back(vp[static_cast<size_t>(i)]);
 	}
-	// Check point input
-	CheckInput();
 
 	// add the 3 extreme points
 	Vector2D p_temp;
-	vector<double> cellsize = CellSize(cell_points);
+	vector<double> cellsize = CellSize(cpoints);
 	double width = cellsize[1] - cellsize[0];
 	double height = cellsize[3] - cellsize[2];
 	width = max(width, height);
@@ -457,41 +428,6 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 		radius[static_cast<size_t>(i)] = CalculateRadius(i);
 	//CalcRadius = true;
 
-	/*
-	int rank = -1;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if(rank==0){
-	  {
-	    ofstream dump("facet_vertices.txt");
-	    for(size_t i=0;i<f.size();++i){
-	      dump << f.at(i).vertices.first << " "
-		   << f.at(i).vertices.second << " "
-		   << f.at(i).vertices.third << std::endl;
-	    }
-	    dump.close();
-	  }
-
-	  {
-	    ofstream dump("facet_neighbors.txt");
-	    for(size_t i=0;i<f.size();++i){
-	      dump << f.at(i).neighbors.first << " "
-		   << f.at(i).neighbors.second << " "
-		   << f.at(i).neighbors.third << std::endl;
-	    }
-	    dump.close();
-	  }
-
-	  {
-	    ofstream dump("cor.txt");
-	    for(size_t i=0;i<cor.size();++i){
-	      dump << cor.at(i).x << " "
-		   << cor.at(i).y << std::endl;
-	    }
-	    dump.close();
-	  }
-	  assert(false);
-	}
-	*/
 }
 
 bool Delaunay::CheckCorrect(void)
@@ -565,8 +501,7 @@ double Delaunay::triangle_area(int index)
 	return -0.5*(x1*y2 - x2*y1);
 }
 
-void Delaunay::update(const vector<Vector2D>& points, vector<Vector2D>
-	const& cpoints)
+void Delaunay::update(const vector<Vector2D>& points, std::vector<std::pair<Vector2D, Vector2D> >const& cpoints)
 {
 	if (logger)
 		logger->output(cor, f);
@@ -721,27 +656,6 @@ double Delaunay::CalcRadiusHiRes(int facet)
 	boost::multiprecision::cpp_dec_float_50 temp4 = a + b + c;
 	temp4 = a * b*c / boost::multiprecision::sqrt(temp4*temp1*temp2*temp3);
 	return (temp4).convert_to<double>();
-}
-
-void Delaunay::CheckInput()
-{
-	for (size_t i = 0; i < cor.size(); ++i)
-	{
-		if (!InCell(cell_points, cor[i]))
-		{
-			std::cout << "Point not in cell in checkinput" << std::endl;
-			std::cout << "Bad point " << cor[i].x << ", " << cor[i].y << std::endl;
-			InCellDebug(cell_points, cor[i]);
-			std::cout << "Bounding cell " << std::endl;
-			for (size_t j = 0; j < cell_points.size(); ++j)
-			{
-				std::cout << cell_points[j].x << ", " << cell_points[j].y << std::endl;
-			}
-			UniversalError eo("Bad check point");
-			eo.AddEntry("Point index", static_cast<double>(i));
-			throw eo;
-		}
-	}
 }
 
 int Delaunay::GetOriginalIndex(int NewPoint) const

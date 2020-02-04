@@ -57,6 +57,28 @@ namespace
 		}
 		return res;
 	}
+
+	void CheckInput(std::vector<std::pair<Vector2D, Vector2D> > convexhull, std::vector<Vector2D> const& cor)
+	{
+		size_t N = cor.size();
+		for (size_t i = 0; i < N; ++i)
+		{
+			if (!PointInCell(convexhull, cor[i]))
+			{
+				std::cout << "Point not in cell in checkinput" << std::endl;
+				std::cout << "Bad point " << cor[i].x << ", " << cor[i].y << std::endl;
+				std::cout << "Bounding cell " << std::endl;
+				for (size_t j = 0; j < convexhull.size(); ++j)
+				{
+					std::cout << convexhull[j].first.x << ", " << convexhull[j].first.y <<" "<<convexhull[j].second.x << ", " << 
+						convexhull[j].second.y << std::endl;
+				}
+				UniversalError eo("Bad check point");
+				eo.AddEntry("Point index", static_cast<double>(i));
+				throw eo;
+			}
+		}
+	}
 }
 
 VoronoiMesh::VoronoiMesh
@@ -255,13 +277,17 @@ void VoronoiMesh::build_v()
 
 namespace
 {
-	vector<Vector2D> calc_procpoints(const OuterBoundary& bc)
+	std::vector<std::pair<Vector2D, Vector2D> > calc_procpoints(const OuterBoundary& bc)
 	{
-		vector<Vector2D> res(4);
-		res[0] = Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Down));
-		res[1] = Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Down));
-		res[2] = Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up));
-		res[3] = Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up));
+		std::vector<std::pair<Vector2D, Vector2D> > res(4);
+		res[0] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Down)),
+			Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Down)));
+		res[1] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Down)),
+			Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up)));
+		res[2] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up)),
+			Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up)));
+		res[2] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up)),
+			Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Down)));
 		return res;
 	}
 
@@ -291,7 +317,12 @@ void VoronoiMesh::Initialise(vector<Vector2D>const& pv, OuterBoundary const* _bc
 		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
 	else
 		points = pv;
-	Tri.build_delaunay(UpdatePoints(points, obc), calc_procpoints(*obc));
+	// Check that points are all isnide domain
+	std::vector<std::pair<Vector2D, Vector2D> > cpoints = calc_procpoints(*obc);
+	points = UpdatePoints(points, obc);
+	CheckInput(cpoints, points);
+
+	Tri.build_delaunay(points, cpoints);
 
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	Tri.BuildBoundary(_bc, _bc->GetBoxEdges());
@@ -469,6 +500,10 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Left), obc->GetGridBoundary(Up)));
 
 	vector<Vector2D> points = UpdatePoints(pv, obc);
+	// Check that points are all isnide domain
+	std::vector<std::pair<Vector2D, Vector2D> > chull = calc_procpoints(*obc);
+	CheckInput(chull, points);
+
 	vector<int> HilbertIndeces;
 	if (reorder)
 	{
@@ -476,7 +511,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv, bool reorder)
 		points = VectorValues(points, HilbertIndeces);
 	}
 
-	Tri.update(points, procpoints);
+	Tri.update(points, chull);
 
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges = obc->GetBoxEdges();
@@ -1242,7 +1277,7 @@ vector<int> VoronoiMesh::Update
 		cell_edges.push_back(vproc.GetEdge(cedges[i]));
 
 	// Get the convex hull of the cell
-	vector<Vector2D> cpoints;
+	std::vector<std::pair<Vector2D, Vector2D> > cpoints;
 	ConvexHull(cpoints, vproc, rank);
 
 	vector<int> HilbertIndeces;
@@ -1385,10 +1420,12 @@ void VoronoiMesh::Initialise
 		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
 	else
 		points = pv;
-
 	// Get the convex hull of the cell
-	vector<Vector2D> cpoints;
+	std::vector<std::pair<Vector2D, Vector2D> > cpoints;
 	ConvexHull(cpoints, vproc, rank);
+	// Check input
+	CheckInput(cpoints, points);
+
 	//Build the delaunay
 	Tri.build_delaunay(points, cpoints);
 	Nextra = static_cast<int>(Tri.ChangeCor().size());

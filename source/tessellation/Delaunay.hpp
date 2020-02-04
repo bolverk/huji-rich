@@ -68,7 +68,6 @@ private:
 	};
 
 	vector<double> radius;
-	vector<Vector2D> cell_points;
 	bool PointWasAdded;
 	int last_facet_added;
 	vector<facet> f;
@@ -83,7 +82,6 @@ private:
 	void add_point(size_t index, stack<std::pair<size_t, size_t> > &flip_stack);
 	void flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > & flip_stack);
 	size_t Walk(size_t point);
-	void CheckInput();
 	double CalculateRadius(int facet);
 	double CalcRadiusHiRes(int facet);
 	int FindPointInFacet(int facet, int point);
@@ -160,7 +158,7 @@ public:
 	  \param vp A refrence to a vector of points to be added.
 	  \param cpoints The edges of the processor cell.
 	*/
-	void build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const& cpoints);
+	void build_delaunay(vector<Vector2D>const& vp, std::vector<std::pair<Vector2D, Vector2D> >const & cpoints);
 
 	//! \brief Dumps the Delaunay tessellation into a binary file.
 	void output(void);
@@ -224,7 +222,7 @@ public:
 	  \param points The new set of points
 	  \param cpoints The points of the processor cell
 	*/
-	void update(const vector<Vector2D>& points, vector<Vector2D> const& cpoints);
+	void update(const vector<Vector2D>& points, std::vector<std::pair<Vector2D, Vector2D> >const& cpoints);
 
 	/*!
 	  \brief Returns the original index of the duplicated point in Periodic Boundary conditions
