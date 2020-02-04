@@ -74,6 +74,18 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 		res.tracers[i]=extensive.tracers[i] / extensive.mass;
 	res.stickers = old_cell.stickers;
 	res.pressure = eos.de2p(res.density, extensive.energy / extensive.mass - 0.5*ScalarProd(res.velocity, res.velocity),res.tracers,tracerstickernames.tracer_names);
+	if (!(res.pressure > 0))
+	{
+		UniversalError eo("Negative pressure in AMR cell update");
+		eo.AddEntry("Volume", volume);
+		eo.AddEntry("Cell mass", extensive.mass);
+		eo.AddEntry("Cell x momentum", extensive.momentum.x);
+		eo.AddEntry("Cell y momentum", extensive.momentum.y);
+		eo.AddEntry("Cell energy", extensive.energy);
+		for (size_t i = 0; i < tracerstickernames.tracer_names.size(); ++i)
+			eo.AddEntry(tracerstickernames.tracer_names[i], extensive.tracers[i]);
+		throw;
+	}
 	return res;
 }
 
@@ -640,7 +652,15 @@ namespace
 			double TotalVolume=0;
 			Extensive NewExtensive = GetNewExtensive(extensives, tess, N, location, moved, real_neigh, Chull,
 				cells, eos, eu,TotalVolume,oldtess,periodic,tracerstickernames,pg,cd);
-			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine],tracerstickernames));
+			try
+			{
+				cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine], tracerstickernames));
+			}
+			catch (UniversalError & eo)
+			{
+				eo.AddEntry("ToRefine", static_cast<double>(ToRefine));
+				throw eo;
+			}
 			if (interp != 0)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
 			++location;
