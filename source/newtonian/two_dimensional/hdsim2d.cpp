@@ -352,7 +352,7 @@ void hdsim::TimeAdvance2Heun(void)
 {
 #ifdef RICH_DEBUG_PRINT
 	int rank = 0;
-	MPI_Commm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (rank == 0)
 		std::cout << "Here 0" << std::endl;
