@@ -45,6 +45,9 @@ else
 	MODE = production
 	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++11
 endif
+ifeq ($(DEBUG_PRINT),on)
+	OPTIMIZATION_FLAGS += -DRICH_DEBUG_PRINT
+endif
 LIBRARY_FOLDER := library_$(MODE)
 OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(SOURCES))
 TREECODE_OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(LIBRARY_FOLDER)/%.o,$(TREECODE_SOURCES))

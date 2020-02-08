@@ -350,6 +350,13 @@ namespace
 
 void hdsim::TimeAdvance2Heun(void)
 {
+#ifdef RICH_DEBUG_PRINT
+	int rank = 0;
+	MPI_Commm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 0" << std::endl;
+#endif
 	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
 
 #ifdef RICH_MPI
@@ -358,8 +365,19 @@ void hdsim::TimeAdvance2Heun(void)
 
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 1" << std::endl;
+#endif
 
 	double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 2" << std::endl;
+#endif
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 
@@ -370,6 +388,11 @@ void hdsim::TimeAdvance2Heun(void)
 		edge_velocity_calculator_(tess_, point_velocities);
 	
 	dt = tsf_(tess_, cells_, eos_, edge_velocities, time_, tracer_sticker_names_);
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 3" << std::endl;
+#endif
 
 	const vector<Extensive> mid_fluxes =
 		fc_
@@ -381,6 +404,11 @@ void hdsim::TimeAdvance2Heun(void)
 			eos_,
 			time_,
 			dt,tracer_sticker_names_);
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 4" << std::endl;
+#endif
 
 	vector<Extensive> mid_extensives = extensives_;
 
@@ -395,9 +423,19 @@ void hdsim::TimeAdvance2Heun(void)
 			time_,
 			dt,
 			mid_extensives,tracer_sticker_names_);
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 5" << std::endl;
+#endif
 
 	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_,tracer_sticker_names_);
 
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 6" << std::endl;
+#endif
 
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -426,10 +464,21 @@ void hdsim::TimeAdvance2Heun(void)
 		point_velocities = VectorValues(point_velocities, HilbertIndeces);
 }
 #endif
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 7" << std::endl;
+#endif
+
 	cache_data_.reset();
 
 	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,
 		tracer_sticker_names_, time_ + dt);
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 8" << std::endl;
+#endif
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, mid_cells, true);
@@ -449,6 +498,12 @@ void hdsim::TimeAdvance2Heun(void)
 			time_,
 			dt,tracer_sticker_names_);
 
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 9" << std::endl;
+#endif
+
 	ExternalForceContribution
 		(tess_,
 			pg_,
@@ -463,10 +518,22 @@ void hdsim::TimeAdvance2Heun(void)
 
 	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt,tracer_sticker_names_);
 
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 10" << std::endl;
+#endif
+
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
 
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + dt);
+
+#ifdef RICH_DEBUG_PRINT
+	MPI_Barrier(MPI_COMM_WORLD);
+	if (rank == 0)
+		std::cout << "Here 11" << std::endl;
+#endif
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, cells_, true);
