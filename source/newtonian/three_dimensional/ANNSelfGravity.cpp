@@ -122,10 +122,21 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 			m_send.push_back(nodes[j]->CM[0]);
 			m_send.push_back(nodes[j]->CM[1]);
 			m_send.push_back(nodes[j]->CM[2]);
+			double Qsum = 0;
 			for (size_t k = 0; k < 6; ++k)
-				m_send.push_back(nodes[j]->Q[k]);
+				Qsum += std::fabs(nodes[j]->Q[k]);
+			if (Qsum > DBL_MIN)
+			{
+				for (size_t k = 0; k < 6; ++k)
+					m_send.push_back(nodes[j]->Q[k]);
+				m_size[i] += 10;
+			}
+			else
+			{
+				m_send.push_back(DBL_MAX);
+				m_size[i] += 5;
+			}
 		}
-		m_size[i] = static_cast<int>(nodes.size()*10);
 		assert(m_size[i] > 0);
 	}
 	delete atree;
@@ -177,26 +188,51 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		throw;
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
-	assert(m_recv.size() % 10 == 0);
-	size_t toadd = m_recv.size()/10;
+	assert(m_recv.size() % 5 == 0);
+	size_t m_recv_size = m_recv.size();
+	size_t toadd = 0;
+	for (size_t i = 4; i < m_recv_size; i+=5)
+	{
+		++toadd;
+		if (m_recv[i] > (0.1 * DBL_MAX))
+			continue;
+		else
+		{
+			i += 5;
+			continue;
+		}
+	}
 	dpoints = annAllocPts(static_cast<int>(Nmass + toadd), 3);
 	masses.resize(Nmass + toadd);
 	Q.resize(Nmass + toadd);
+	size_t counter = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
 	for (size_t i = 0; i < toadd; ++i)
 	{
-		masses[Nmass + i] = m_recv[i * 10];
-		dpoints[Nmass + i][0] = m_recv[i * 10+1];
-		dpoints[Nmass + i][1] = m_recv[i * 10+2];
-		dpoints[Nmass + i][2] = m_recv[i * 10 + 3];
-		Q[Nmass + i][0] = m_recv[i * 10 + 4];
-		Q[Nmass + i][1] = m_recv[i * 10 + 5];
-		Q[Nmass + i][2] = m_recv[i * 10 + 6];
-		Q[Nmass + i][3] = m_recv[i * 10 + 7];
-		Q[Nmass + i][4] = m_recv[i * 10 + 8];
-		Q[Nmass + i][5] = m_recv[i * 10 + 9];
+		masses[Nmass + i] = m_recv[counter];
+		dpoints[Nmass + i][0] = m_recv[counter+1];
+		dpoints[Nmass + i][1] = m_recv[counter +2];
+		dpoints[Nmass + i][2] = m_recv[counter + 3];
+		if (m_recv[counter + 4] > (0.1 * DBL_MAX))
+		{
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+			for (int j = 0; j < 6; j++)
+				Q[Nmass + i][j] = 0;
+			counter += 5;
+		}
+		else
+		{
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+			for (int j = 0; j < 6; j++)
+				Q[Nmass + i][j] = m_recv[counter + 4 + j];
+			counter += 10;
+		}
 	}
 #ifdef timing
 	t1 = MPI_Wtime();
