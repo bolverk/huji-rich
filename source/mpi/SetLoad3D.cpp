@@ -45,7 +45,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell
 	int total = 0;
 	for (size_t i = 0; i < Niter; ++i)
 	{
-		if (display)
+		if (display && rank == 0)
 			std::cout << "iteration " << i << " load " << procmove.GetLoadImbalance(local, total) << std::endl;;
 		MPI_Barrier(MPI_COMM_WORLD);
 		procmove.Update(tproc, local);
