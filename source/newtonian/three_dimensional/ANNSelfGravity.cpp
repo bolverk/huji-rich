@@ -66,7 +66,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 
 	ANNpointArray dpoints = annAllocPts(static_cast<int>(Nmass), 3);
 	vector<Vector3D> const& AllCM = tess.GetAllCM();
-	vector<double> const& volumes = tess.GetAllVolumes();
+	vector<double> const& volumes = tess.GetAllVolumes(); 
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif

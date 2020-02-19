@@ -1074,19 +1074,25 @@ void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double /*angle2*/
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
 	if (dist_toq < maxbox * 1e-6) //prevent self force
 		return;
 	double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
 	for (int i = 0; i < 3; ++i)
 		res[i] -= mass * (qpoint[i] - CM[i]) * r3;
 	double sumQ = 0;
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (size_t i = 0; i < 6; ++i)
-		sumQ += std::abs(Q[i]);
+	for (int i = 0; i < 6; ++i)
+		sumQ += std::fabs(Q[i]);
 	if (sumQ < mass * dist_toq * 1e-6)
 		return;
 	double Qfactor = r3 / dist_toq;
@@ -1151,7 +1157,10 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 {
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	size_t N = qpoint.size();
-	for (size_t k = 0; k < N; ++k)
+#ifdef __INTEL_COMPILER
+#pragma ivdep
+#endif
+	for (int k = 0; k < N; ++k)
 	{
 		double dist_toq = 0;
 #ifdef __INTEL_COMPILER
@@ -1171,7 +1180,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-		for (size_t i = 0; i < 6; ++i)
+		for (int i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
 		if (sumQ < mass * dist_toq * 1e-6)
 			continue;
