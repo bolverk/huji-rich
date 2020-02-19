@@ -35,7 +35,7 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 300, doub
 */
 
 void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter = 300, double speed = 0.03, int mode = 21,
-	double round = 0.05);
+	double round = 0.05, bool display = false);
 
 
 #endif // RICH_MPI
