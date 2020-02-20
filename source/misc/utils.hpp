@@ -222,13 +222,12 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
   \param itx_begin The iterator to the beginining of the X sequence, assumed sorted
   \param itx_end The iterator to the end of the X sequence
   \param ity_begin The iterator to the beginining of the Y sequence, assumed sorted
-  \param ity_end The iterator to the end of the Y sequence
   \param xi The interpolation location
   \return y(xi)
 */
 template <typename T>
 T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vector<T>::const_iterator itx_end,
-	typename vector<T>::const_iterator ity_begin, typename vector<T>::const_iterator ity_end, T xi);
+	typename vector<T>::const_iterator ity_begin, T xi);
 
 template <typename T>
 T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vector<T>::const_iterator itx_end,
