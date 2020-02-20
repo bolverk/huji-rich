@@ -231,7 +231,7 @@ T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vec
 
 template <typename T>
 T LinearInterpolation(typename vector<T>::const_iterator itx_begin, typename vector<T>::const_iterator itx_end,
-	typename vector<T>::const_iterator ity_begin, typename vector<T>::const_iterator ity_end, T xi)
+	typename vector<T>::const_iterator ity_begin, T xi)
 {
 	typename vector<T>::const_iterator it = upper_bound(itx_begin, itx_end, xi);
 	if (it == itx_end)
