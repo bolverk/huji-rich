@@ -443,6 +443,8 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	}
 	++run_counter_;
 	Vector3D RankCM = GetProcCM(tlocal);
+	if (tlocal.GetPointNo() == 0)
+		RankCM = tproc.GetCellCM(rank);
 	//Vector3D RankCM = tproc.GetCellCM(static_cast<size_t>(rank));
 	vector<double> tosend = list_serialize(vector<Vector3D>(1, RankCM));
 	vector<double> torecv(static_cast<size_t>(nproc) * 3);
