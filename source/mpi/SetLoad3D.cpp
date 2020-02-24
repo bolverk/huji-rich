@@ -2,7 +2,7 @@
 #include <iostream>
 
 #ifdef RICH_MPI
-void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double speed, int mode,double round)
+void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double speed, int mode, double round, bool display)
 {
 	int rank = 0;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -15,8 +15,13 @@ void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter, double spe
 	vector<int> sentproc;
 	int ntotal;
 	for (size_t i = 0; i < Niter; ++i)
-	{
-		procmove.GetLoadImbalance(local, ntotal);
+	{	
+		if (display)
+		{
+			double load = procmove.GetLoadImbalance(local, ntotal);
+			if (rank == 0)
+				std::cout << "iteration " << i << " load " << load << std::endl;;
+		}
 		MPI_Barrier(MPI_COMM_WORLD);
 		procmove.Update(tproc, local);
 		points = local.UpdateMPIPoints(tproc, rank, local.del_.points_, selfindex, sentproc, sentpoints);

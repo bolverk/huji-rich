@@ -22,7 +22,7 @@
 \param round The factor to enhance the cells rounding mechanisim
 */
 void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,size_t Niter = 300, double speed = 0.03, int mode = 2,
-	double round = 0.05);
+	double round = 0.05, bool display = false);
 /*!
 \brief Corrects the load between processors based on number of cells per processor
 \param tproc The tessellation of the processors

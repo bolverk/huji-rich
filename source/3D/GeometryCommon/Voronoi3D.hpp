@@ -114,7 +114,7 @@ public:
 #ifdef RICH_MPI
 	void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
 
-	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round);
+	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round, bool display);
 
 	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round, bool display);
 #endif
