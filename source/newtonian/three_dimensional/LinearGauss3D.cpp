@@ -18,13 +18,15 @@ namespace
 		vector<Vector3D> &res, face_vec const& faces)
 	{
 		res.resize(faces.size());
-		const size_t nloop = res.size();
-		for (size_t i = 0; i < nloop; ++i)
+		const int nloop = res.size();
+		std::pair<size_t, size_t> neigh;
+		for (int i = 0; i < nloop; ++i)
 		{
-			if (tess.GetFaceNeighbors(faces[i]).first == cell_index)
-				res[i] = tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).second);
+			neigh = tess.GetFaceNeighbors(faces[i]);
+			if (neigh.first == cell_index)
+				res[i] = tess.GetMeshPoint(neigh.second);
 			else
-				res[i] = tess.GetMeshPoint(tess.GetFaceNeighbors(faces[i]).first);
+				res[i] = tess.GetMeshPoint(neigh.first);
 		}
 	}
 
@@ -184,6 +186,9 @@ namespace
 		double res = 1.0;
 		double p = cell.pressure;
 		size_t N = neigh.size();
+#ifdef __INTEL_COMPILER
+#pragma omp simd reduction(min:res)
+#endif
 		for (size_t i = 0; i < N; i++)
 		{
 			if (p > neigh[i].pressure)
@@ -285,6 +290,9 @@ namespace
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
 			cmin.velocity.z = std::min(cmin.velocity.z, cell_temp.velocity.z);
 			cmin.internal_energy = std::min(cmin.internal_energy, cell_temp.internal_energy);
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 			for (size_t j = 0; j < ntracer; ++j)
 			{
 				cmax.tracers[j] = std::max(cmax.tracers[j], cell_temp.tracers[j]);
@@ -444,6 +452,9 @@ namespace
 			cmin.velocity.x = std::min(cmin.velocity.x, cell_temp.velocity.x);
 			cmin.velocity.y = std::min(cmin.velocity.y, cell_temp.velocity.y);
 			cmin.velocity.z = std::min(cmin.velocity.z, cell_temp.velocity.z);
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 			for (size_t j = 0; j < ntracer; ++j)
 			{
 				cmax.tracers[j] = std::max(cmax.tracers[j], cell_temp.tracers[j]);
@@ -536,6 +547,9 @@ namespace
 		slope.yderivative.internal_energy *= psi[5];
 		slope.zderivative.internal_energy *= psi[5];
 		size_t counter = 0;
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 		for (size_t k = 0; k < ntracer; ++k)
 		{
 			slope.xderivative.tracers[k] *= psi[6 + counter];

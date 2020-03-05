@@ -14,8 +14,8 @@ namespace
 	{
 		int sum = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
-#endif
+#pragma omp simd reduction(+:sum)
+#endif 
 		for (size_t i = 0; i < 4; ++i)
 		{
 			Vector3D normal = CrossProduct(cor[Norg + (1 + i) % 4] - cor[Norg + i], cor[Norg + (2 + i) % 4] - cor[Norg + i]);

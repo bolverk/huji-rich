@@ -785,7 +785,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& r
 	size_t N = qpoint.size();
 	double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qCM[i] - CM[i]) * (qCM[i] - CM[i]);
@@ -799,7 +799,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& r
 		{
 			dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 			for (int i = 0; i < 3; ++i)
 				dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
@@ -807,7 +807,7 @@ void ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& r
 			{
 				double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
@@ -867,7 +867,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& 
 	{
 		double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
@@ -883,7 +883,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& 
 		{
 			double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 			for (int i = 0; i < 3; ++i)
 				dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
@@ -891,7 +891,7 @@ void  ANNkd_split::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& 
 			{
 				double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 				for (int i = 0; i < 3; ++i)
 					res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
@@ -974,7 +974,7 @@ void ANNkd_split::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
@@ -1010,7 +1010,7 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double angle2, A
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
@@ -1018,7 +1018,7 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double angle2, A
 	{
 		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 		for (int i = 0; i < 3; ++i)
 			res[i] -= mass * (qpoint[i] - CM[i]) * r3;
@@ -1075,7 +1075,7 @@ void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double /*angle2*/
 	double maxbox = annDist(3, bb.lo, bb.hi);
 	double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 	for (int i = 0; i < 3; ++i)
 		dist_toq += (qpoint[i] - CM[i]) * (qpoint[i] - CM[i]);
@@ -1089,7 +1089,7 @@ void ANNkd_leaf::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double /*angle2*/
 		res[i] -= mass * (qpoint[i] - CM[i]) * r3;
 	double sumQ = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:sumQ)
 #endif
 	for (int i = 0; i < 6; ++i)
 		sumQ += std::fabs(Q[i]);
@@ -1117,7 +1117,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 	{
 		double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
@@ -1125,13 +1125,13 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 			continue;
 		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
 		double sumQ = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:sumQ)
 #endif
 		for (size_t i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
@@ -1164,7 +1164,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 	{
 		double dist_toq = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:dist_toq)
 #endif
 		for (int i = 0; i < 3; ++i)
 			dist_toq += (qpoint[k][i] - CM[i]) * (qpoint[k][i] - CM[i]);
@@ -1172,13 +1172,13 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 			continue;
 		double r3 = 1.0 / (dist_toq * fastsqrt(dist_toq));
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 		for (int i = 0; i < 3; ++i)
 			res[k][i] -= mass * (qpoint[k][i] - CM[i]) * r3;
 		double sumQ = 0;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd reduction(+:sumQ)
 #endif
 		for (int i = 0; i < 6; ++i)
 			sumQ += std::abs(Q[i]);
@@ -1226,6 +1226,9 @@ void ANNkd_tree::GetToSendOpticalDepth(std::vector<ANNpointArray> const& faces, 
 		bb_faces[i].lo = faces[i][0];
 		for (size_t j = 1; j < N; ++j)
 		{
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 			for (size_t k = 0; k < 3; ++k)
 			{
 				bb_faces[i].hi[k] = std::max(bb_faces[i].hi[k], faces[i][j][k]);

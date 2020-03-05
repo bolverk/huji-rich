@@ -18,6 +18,7 @@
 #include "../../misc/int2str.hpp"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/container/static_vector.hpp>
+#include <omp.h>
 
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index)
@@ -119,7 +120,7 @@ namespace
 	void FirstCheckList(std::stack<std::size_t > &check_stack, vector<unsigned char> &future_check, size_t Norg,
 		Delaunay3D const& del, vector<tetra_vec > const& PointsInTetra)
 	{
-		check_stack.empty();;
+		check_stack.empty();
 		future_check.resize(Norg, 0);
 		size_t Ntetra = del.tetras_.size();
 		vector<unsigned char> tetra_check(Ntetra, 0);
@@ -233,25 +234,25 @@ namespace
 	}
 #endif
 
-	double CleanDuplicates(boost::container::static_vector<size_t, 128> &indeces, vector<Vector3D> &points, 
+	double CleanDuplicates(std::array<size_t, 128> const &indeces, vector<Vector3D> &points, 
 		boost::container::small_vector<size_t, 8> &res, double R,
-		boost::container::static_vector<double, 128> &diffs,
-		boost::container::static_vector<Vector3D, 128> &vtemp)
+		std::array<double, 128> &diffs,
+		std::array<Vector3D, 128> &vtemp, const size_t N)
 	{
 		res.clear();
-		size_t N = indeces.size();
-		diffs.resize(N);
-		vtemp.resize(N);
 		vtemp[0] = points[indeces[0]];
-		vtemp[0] -= points[indeces.back()];
+		vtemp[0] -= points[N - 1];
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd 
 #endif
 		for (size_t i = 1; i < N; ++i)
 		{
 			vtemp[i] = points[indeces[i]];
-			vtemp[i] -= points[indeces[i - 1]];
+			vtemp[i] -= points[indeces[i - 1]];			
 		}
+#ifdef __INTEL_COMPILER
+#pragma omp simd reduction(max:R)
+#endif
 		for (size_t i = 0; i < N; ++i)
 		{
 			diffs[i] = ScalarProd(vtemp[i], vtemp[i]);
@@ -306,11 +307,11 @@ namespace
 	}
 
 	void MakeRightHandFace(boost::container::small_vector<size_t, 8> &indeces, Vector3D const& point, vector<Vector3D> const& face_points,
-		boost::container::static_vector<size_t, 128> &temp, double areascale)
+		std::array<size_t, 128> &temp, double areascale)
 	{
 		Vector3D V1, V2;
 		size_t counter = 0;
-		size_t N = indeces.size();
+		const size_t N = indeces.size();
 		V1 = face_points[indeces[counter + 1]];
 		V1 -= face_points[indeces[counter]];
 		double AScale = 1e-14*areascale;
@@ -333,8 +334,12 @@ namespace
 		// Do we need to flip handness?
 		if (ScalarProd(CrossProduct(V1, V2), point - face_points[indeces[0]]) > 0)
 		{
-			temp.resize(indeces.size());
-			temp.assign(indeces.begin(), indeces.end());
+			const size_t Ninner = indeces.size();
+#ifdef __INTEL_COMPILER
+#pragma omp simd early_exit
+#endif
+			for (size_t j = 0; j < Ninner; ++j)
+				temp[j] = indeces[j];
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -421,12 +426,11 @@ namespace
 #endif //RICH_MPI
 
 	void CalcFaceAreaCM(boost::container::small_vector<size_t,8> const& indeces, std::vector<Vector3D> const& allpoints,
-		boost::container::static_vector<Vector3D, 128> &points, double &Area, Vector3D &CM,
-		boost::container::static_vector<double, 128> &Atemp)
+		std::array<Vector3D, 128> &points, double &Area, Vector3D &CM,
+		std::array<double, 128> &Atemp)
 	{
 		CM.Set(0.0, 0.0, 0.0);
-		std::size_t Nloop = indeces.size();
-		points.resize(Nloop);
+		size_t Nloop = indeces.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
@@ -434,12 +438,12 @@ namespace
 			points[i] = allpoints[indeces[i]];
 		Nloop -= 2;
 		Area = 0;
-		Atemp.resize(Nloop);
+		Vector3D temp3, temp4, temp5;
 		for (size_t i = 0; i < Nloop; i++)
 		{
-			Vector3D temp3(CrossProduct(Vector3D(points[i + 1].x - points[0].x,
-				points[i + 1].y - points[0].y, points[i + 1].z - points[0].z),
-				Vector3D(points[i + 2].x - points[0].x,	points[i + 2].y - points[0].y, points[i + 2].z - points[0].z)));
+			temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
+			temp5.Set(points[i + 2].x - points[0].x, points[i + 2].y - points[0].y, points[i + 2].z - points[0].z);
+			CrossProduct(temp4, temp5, temp3);
 			Atemp[i] = 0.3333333333333333*0.5*fastsqrt(ScalarProd(temp3, temp3));
 		}
 #ifdef __INTEL_COMPILER
@@ -1144,7 +1148,7 @@ void Voronoi3D::CalcAllCM(void)
 	}
 #ifdef __INTEL_COMPILER
 //#pragma vector aligned
-#pragma simd
+#pragma ivdep
 #endif
 	for (size_t i = 0; i < Norg_; ++i)
 		CM_[i] *= (1.0 / volume_[i]);
@@ -1213,6 +1217,9 @@ void Voronoi3D::BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3
 	vector<std::pair<size_t, size_t> > duplicate(6);
 	for (size_t j = 0; j < toduplicate.size(); ++j)
 	{
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 		for (size_t i = 0; i < 6; ++i)
 			duplicate[i] = std::pair<size_t, size_t>(i, toduplicate[j]);
 		vector<vector<size_t> > past_duplicates;
@@ -1358,19 +1365,19 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	FaceNeighbors_.resize(Norg_ * 10);
 	PointsInFace_.resize(Norg_ * 10);
 
-	boost::container::static_vector<size_t, 128> temp, temp2, temp3;
+	std::array<size_t, 128> temp, temp2, temp3;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)
 		if (ShouldCalcTetraRadius(del_.tetras_[i], Norg_))
 			CalcTetraRadiusCenter(i);
 	// Organize the faces and assign them to cells
-	boost::container::static_vector<double, 128> diffs, Atempvec;
+	std::array<double, 128> diffs, Atempvec;
 
 	size_t FaceCounter = 0;
 	boost::container::flat_set<size_t> neigh_set;
 	point_vec *temp_points_in_face;
-	boost::container::static_vector<Vector3D,128>  clean_vec;
+	std::array<Vector3D,128>  clean_vec;
 
 	//std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;
 	for (size_t i = 0; i < Norg_; ++i)
@@ -1391,27 +1398,29 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 					// Did we already build this face?
 					if (neigh_set.find(point_other) == neigh_set.end())
 					{
-						temp.clear();
+						size_t temp_size = 0;
 						// Find all tetras for face
-						temp.push_back(tetcheck);
+						temp[0] = tetcheck;
+						++temp_size;
 						size_t next_check = NextLoopTetra(del_.tetras_[tetcheck], tetcheck, point, point_other);
 						size_t cur_check = next_check;
 						size_t last_check = tetcheck;
 						while (next_check != tetcheck)
 						{
 							Tetrahedron const& tet_check = del_.tetras_[cur_check];
-							temp.push_back(cur_check);
+							temp[temp_size] = cur_check;
+							++temp_size;
 							next_check = NextLoopTetra(tet_check, last_check, point, point_other);
 							last_check = cur_check;
 							cur_check = next_check;
 						}
 						// Is face too small?
-						if (temp.size() < 3)
+						if (temp_size < 3)
 							continue;
 						temp_points_in_face = &PointsInFace_[FaceCounter];
 						//temp_points_in_face->reserve(8);
 						double Asize = CleanDuplicates(temp, tetra_centers_, *temp_points_in_face, ScalarProd(del_.points_[point]
-							- del_.points_[point_other], del_.points_[point] - del_.points_[point_other]), diffs,clean_vec);
+							- del_.points_[point_other], del_.points_[point] - del_.points_[point_other]), diffs,clean_vec, temp_size);
 						if (temp_points_in_face->size() < 3)
 							continue;
 						CalcFaceAreaCM(*temp_points_in_face, tetra_centers_,clean_vec, area_[FaceCounter], 
@@ -1452,6 +1461,9 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	// Fix Face CM (this prevents large face velocities for close by points)
 	size_t Nfaces = FaceCounter;
 	Vector3D mid, norm;
+#ifdef __INTEL_COMPILER
+#pragma omp simd private(mid, norm) early_exit
+#endif 
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		mid = del_.points_[FaceNeighbors_[i].first];
@@ -2108,6 +2120,9 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 void Voronoi3D::GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const
 {
 	CM.Set(0, 0, 0);
+#ifdef __INTEL_COMPILER
+#pragma omp simd
+#endif
 	for (std::size_t i = 0; i < 4; i++)
 	{
 		CM.x += points[i].x;
@@ -2276,14 +2291,14 @@ vector<Vector3D>& Voronoi3D::GetMeshPoints(void)
 
 vector<std::size_t> Voronoi3D::GetNeighbors(std::size_t index)const
 {
-	std::size_t N = FacesInCell_[index].size();
-	vector<std::size_t> res(N);
+	const size_t N = FacesInCell_[index].size();
+	vector<size_t> res(N);
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
-	for (std::size_t i = 0; i < N; ++i)
+	for (size_t i = 0; i < N; ++i)
 	{
-		std::size_t face = FacesInCell_[index][i];
+		size_t face = FacesInCell_[index][i];
 		res[i] = FaceNeighbors_[face].first == index ? FaceNeighbors_[face].second :
 			FaceNeighbors_[face].first;
 	}

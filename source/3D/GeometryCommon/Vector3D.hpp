@@ -27,11 +27,17 @@ public:
 	\param iy y Component
 	\param iz z Component
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D(double ix, double iy, double iz);
 
 	/*! \brief Class copy constructor
 	\param v Other vector
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D(const Vector3D& v);
 
 	/*! \brief Set vector components
@@ -39,7 +45,12 @@ public:
 	\param iy y Component
 	\param iz z Component
 	*/
-	void Set(double ix, double iy, double iz);
+	inline void Set(double ix, double iy, double iz) 
+	{
+		x = ix;
+		y = iy;
+		z = iz;
+	}
 
 	//! \brief Component in the x direction
 	double x;
@@ -58,24 +69,36 @@ public:
 	\param v Vector to be added
 	\return Reference to sum
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D& operator+=(Vector3D const& v);
 
 	/*! \brief Subtraction
 	\param v Vector to be subtracted
 	\return Difference
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D& operator-=(Vector3D const& v);
 
 	/*! \brief Assignment operator
 	\param v Vector to be copied
 	\return The assigned value
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D& operator=(Vector3D const& v);
 	
 	/*! \brief Scalar product
 	\param s Scalar
 	\return Reference to the vector multiplied by scalar
 	*/
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 	Vector3D& operator*=(double s);
 
 	/*! \brief Compare 3D-Vectors (up to an arbitrary precision)
@@ -108,18 +131,29 @@ public:
 	vector<double> serialize(void) const;
 
 	void unserialize(const vector<double>& data);
+
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
+	~Vector3D(void){}
 };
 
 /*! \brief Norm of a vector
 \param v Three dimensional vector
 \return Norm of v
 */
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 double abs(Vector3D const& v);
 
 /*! \brief Norm of a vector, less accurate
 \param v Three dimensional vector
 \return Norm of v
 */
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 double fastabs(Vector3D const& v);
 
 /*! \brief Term by term addition
@@ -162,6 +196,9 @@ Vector3D operator/(Vector3D const& v, double d);
 \param v2 3D vector
 \return Scalar product of v1 and v2
 */
+#ifdef __INTEL_COMPILER
+#pragma omp declare simd
+#endif
 inline double ScalarProd(Vector3D const& v1, Vector3D const& v2)
 {
 	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;

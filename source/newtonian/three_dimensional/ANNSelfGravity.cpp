@@ -24,7 +24,7 @@ namespace
 			Nfaces[j] = NFace;
 			annfaces[j] = annAllocPts(static_cast<int>(NFace), 3);
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd early_exit
 #endif
 			for (size_t i = 0; i < NFace; ++i)
 			{
@@ -68,7 +68,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	vector<Vector3D> const& AllCM = tess.GetAllCM();
 	vector<double> const& volumes = tess.GetAllVolumes(); 
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 	for (size_t i = 0; i < Norg; ++i)
 	{
@@ -123,6 +123,9 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 			m_send.push_back(nodes[j]->CM[1]);
 			m_send.push_back(nodes[j]->CM[2]);
 			double Qsum = 0;
+#ifdef __INTEL_COMPILER
+#pragma omp simd reduction(+:Qsum)
+#endif
 			for (size_t k = 0; k < 6; ++k)
 				Qsum += std::fabs(nodes[j]->Q[k]);
 			if (Qsum > DBL_MIN)
@@ -286,8 +289,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		qpoints.resize(Ninner);
 		accpoints.resize(Ninner);
 #ifdef __INTEL_COMPILER
-#pragma ivdep
-//#pragma vector aligned
+#pragma omp simd
 #endif
 		for (size_t j = 0; j < Ninner; ++j)
 		{
