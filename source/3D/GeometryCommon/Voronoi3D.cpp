@@ -1148,7 +1148,7 @@ void Voronoi3D::CalcAllCM(void)
 	}
 #ifdef __INTEL_COMPILER
 //#pragma vector aligned
-#pragma ivdep
+#pragma omp simd
 #endif
 	for (size_t i = 0; i < Norg_; ++i)
 		CM_[i] *= (1.0 / volume_[i]);
