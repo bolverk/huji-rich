@@ -243,9 +243,6 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 			vtemp[i] = points[indeces[i]];
 		vtemp[0] -= vtemp[N - 1];
-#ifdef __INTEL_COMPILER
-#pragma omp simd 
-#endif
 		for (size_t i = 1; i < N; ++i)
 		{
 			vtemp[i].x -= vtemp[i - 1].x;
