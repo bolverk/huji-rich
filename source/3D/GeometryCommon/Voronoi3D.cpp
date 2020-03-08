@@ -241,7 +241,7 @@ namespace
 	{
 		res.clear();
 		vtemp[0] = points[indeces[0]];
-		vtemp[0] -= points[N - 1];
+		vtemp[0] -= points[indeces[N - 1]];
 #ifdef __INTEL_COMPILER
 #pragma omp simd 
 #endif
@@ -269,8 +269,6 @@ namespace
 	{
 		PointTetras.clear();
 		PointTetras.resize(Norg);
-		for (size_t i = 0; i < Norg; ++i)
-			PointTetras[i].reserve(32);
 		size_t Ntetra = tetras.size();
 		size_t bigtet(0);
 		bool has_good, has_big;
