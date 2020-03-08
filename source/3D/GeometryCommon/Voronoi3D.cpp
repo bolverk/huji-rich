@@ -2119,16 +2119,18 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
 
 void Voronoi3D::GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const
 {
-	CM.Set(0, 0, 0);
+	double x = 0, y = 0, z = 0;
+	//CM.Set(0, 0, 0);
 #ifdef __INTEL_COMPILER
-#pragma omp simd reduction(sum:CM.x, sum:CM.y, sum:CM.z)
+#pragma omp simd reduction(+:x,y,z)
 #endif
 	for (std::size_t i = 0; i < 4; i++)
 	{
-		CM.x += points[i].x;
-		CM.y += points[i].y;
-		CM.z += points[i].z;
+		x += points[i].x;
+		y += points[i].y;
+		z += points[i].z;
 	}
+	CM.Set(x, y, z);
 	CM *= 0.25;
 }
 
