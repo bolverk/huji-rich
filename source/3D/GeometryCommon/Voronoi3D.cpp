@@ -465,15 +465,15 @@ namespace
 		for (size_t i = 0; i < Nloop; i++)
 		{
 			double A = Atemp[i];
-			CM.x += A*points[0].x;
-			CM.y += A * points[0].y;
-			CM.z += A * points[0].z;
-			CM.x += A*points[i + 1].x;
-			CM.y += A * points[i + 1].y;
-			CM.z += A * points[i + 1].z;
-			CM.x += A*points[i + 2].x;
-			CM.y += A * points[i + 2].y;
-			CM.z += A * points[i + 2].z;
+			x += A*points[0].x;
+			y += A * points[0].y;
+			z += A * points[0].z;
+			x += A*points[i + 1].x;
+			y += A * points[i + 1].y;
+			z += A * points[i + 1].z;
+			x += A*points[i + 2].x;
+			y += A * points[i + 2].y;
+			z += A * points[i + 2].z;
 			Area += 3.0*A;
 		}
 		CM.Set(x, y, x);
