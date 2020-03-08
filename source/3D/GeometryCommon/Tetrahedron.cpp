@@ -5,7 +5,7 @@ Tetrahedron::Tetrahedron()  {}
 Tetrahedron::Tetrahedron(Tetrahedron const & other)
 {
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 	for (int i = 0; i < 4; i++)
 	{
@@ -22,7 +22,7 @@ Tetrahedron & Tetrahedron::operator=(Tetrahedron const & other)
 	if (&other == this)
 		return *this;
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd
 #endif
 	for (int i = 0; i < 4; ++i)
 	{

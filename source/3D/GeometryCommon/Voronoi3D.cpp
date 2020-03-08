@@ -240,15 +240,17 @@ namespace
 		std::array<Vector3D, 128> &vtemp, const size_t N)
 	{
 		res.clear();
-		vtemp[0] = points[indeces[0]];
-		vtemp[0] -= points[indeces[N - 1]];
+		for (size_t i = 0; i < N; ++i)
+			vtemp[i] = points[indeces[i]];
+		vtemp[0] -= vtemp[N - 1];
 #ifdef __INTEL_COMPILER
 #pragma omp simd 
 #endif
 		for (size_t i = 1; i < N; ++i)
 		{
-			vtemp[i] = points[indeces[i]];
-			vtemp[i] -= points[indeces[i - 1]];			
+			vtemp[i].x -= vtemp[i - 1].x;
+			vtemp[i].y -= vtemp[i - 1].y;
+			vtemp[i].z -= vtemp[i - 1].z;
 		}
 #ifdef __INTEL_COMPILER
 #pragma omp simd reduction(max:R)
@@ -276,6 +278,9 @@ namespace
 		for (boost::container::flat_set<size_t>::const_iterator it = empty_tetras.begin(); it !=
 			empty_tetras.end(); it++)
 		{
+#ifdef __INTEL_COMPILER
+#pragma omp simd early_exit
+#endif
 			for (size_t i = 0; i < 4; ++i)
 			{
 				tetras[*it].points[i]= std::numeric_limits<std::size_t>::max();
@@ -339,7 +344,7 @@ namespace
 			for (size_t j = 0; j < Ninner; ++j)
 				temp[j] = indeces[j];
 #ifdef __INTEL_COMPILER
-#pragma ivdep
+#pragma omp simd early_exit
 #endif
 			for (size_t i = 0; i < N; ++i)
 				indeces[i] = temp[(N - i - 1)];
@@ -427,7 +432,7 @@ namespace
 		std::array<Vector3D, 128> &points, double &Area, Vector3D &CM,
 		std::array<double, 128> &Atemp)
 	{
-		CM.Set(0.0, 0.0, 0.0);
+		//CM.Set(0.0, 0.0, 0.0);
 		size_t Nloop = indeces.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -436,26 +441,42 @@ namespace
 			points[i] = allpoints[indeces[i]];
 		Nloop -= 2;
 		Area = 0;
-		Vector3D temp3, temp4, temp5;
-		for (size_t i = 0; i < Nloop; i++)
+		//Vector3D temp3, temp4, temp5;
+#ifdef __INTEL_COMPILER
+		//#pragma vector aligned
+#pragma omp simd
+#endif
+
+		for (int i = 0; i < Nloop; i++)
 		{
-			temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
-			temp5.Set(points[i + 2].x - points[0].x, points[i + 2].y - points[0].y, points[i + 2].z - points[0].z);
+			//temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
+			Vector3D temp4(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
+			//temp5.Set(points[i + 2].x - points[0].x, points[i + 2].y - points[0].y, points[i + 2].z - points[0].z);
+			Vector3D temp5(points[i + 2].x - points[0].x, points[i + 2].y - points[0].y, points[i + 2].z - points[0].z);
+			Vector3D temp3;
 			CrossProduct(temp4, temp5, temp3);
 			Atemp[i] = 0.3333333333333333*0.5*fastsqrt(ScalarProd(temp3, temp3));
 		}
+		double x = 0, y = 0, z = 0;
 #ifdef __INTEL_COMPILER
-//#pragma vector aligned
-#pragma ivdep
+		//#pragma vector aligned
+#pragma omp simd reduction(+:x, y, z, Area)
 #endif
 		for (size_t i = 0; i < Nloop; i++)
 		{
 			double A = Atemp[i];
-			CM += A*points[0];
-			CM += A*points[i + 1];
-			CM += A*points[i + 2];
+			CM.x += A*points[0].x;
+			CM.y += A * points[0].y;
+			CM.z += A * points[0].z;
+			CM.x += A*points[i + 1].x;
+			CM.y += A * points[i + 1].y;
+			CM.z += A * points[i + 1].z;
+			CM.x += A*points[i + 2].x;
+			CM.y += A * points[i + 2].y;
+			CM.z += A * points[i + 2].z;
 			Area += 3.0*A;
 		}
+		CM.Set(x, y, x);
 		CM *= (1.0 / (Area + DBL_MIN * 100)); //prevent overflow
 	}
 
@@ -1459,9 +1480,6 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	// Fix Face CM (this prevents large face velocities for close by points)
 	size_t Nfaces = FaceCounter;
 	Vector3D mid, norm;
-#ifdef __INTEL_COMPILER
-#pragma omp simd private(mid, norm) early_exit
-#endif 
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		mid = del_.points_[FaceNeighbors_[i].first];
