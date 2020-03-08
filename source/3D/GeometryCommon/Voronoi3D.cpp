@@ -2121,7 +2121,7 @@ void Voronoi3D::GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)c
 {
 	CM.Set(0, 0, 0);
 #ifdef __INTEL_COMPILER
-#pragma omp simd
+#pragma omp simd reduction(sum:CM.x, sum:CM.y, sum:CM.z)
 #endif
 	for (std::size_t i = 0; i < 4; i++)
 	{
