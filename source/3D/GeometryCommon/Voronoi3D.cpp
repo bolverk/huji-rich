@@ -242,13 +242,13 @@ namespace
 		res.clear();
 		for (size_t i = 0; i < N; ++i)
 			vtemp[i] = points[indeces[i]];
-		vtemp[0] -= vtemp[N - 1];
 		for (size_t i = 1; i < N; ++i)
 		{
 			vtemp[i].x -= vtemp[i - 1].x;
 			vtemp[i].y -= vtemp[i - 1].y;
 			vtemp[i].z -= vtemp[i - 1].z;
 		}
+		vtemp[0] -= points[indeces[N - 1]];
 #ifdef __INTEL_COMPILER
 #pragma omp simd reduction(max:R)
 #endif

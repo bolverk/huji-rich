@@ -6,11 +6,7 @@ namespace
 	bool PointInPolygon(Face const& face, Vector3D const& point)
 	{
 		Vector3D normal = CrossProduct(face.vertices[0] - point, face.vertices[1] - point);
-		int Nloop = face.vertices.size() - 1;
-#ifdef __INTEL_COMPILER
-#pragma omp simd early_exit
-#endif
-
+		const size_t Nloop = face.vertices.size() - 1;
 		for (int i = 0; i < Nloop; ++i)
 			if (ScalarProd(CrossProduct(face.vertices[i + 1] - point, face.vertices[(i + 2) % (Nloop + 1)] - point),
 				normal) < 0)
