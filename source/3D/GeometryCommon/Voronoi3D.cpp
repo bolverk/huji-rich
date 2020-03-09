@@ -439,11 +439,6 @@ namespace
 		Nloop -= 2;
 		Area = 0;
 		//Vector3D temp3, temp4, temp5;
-#ifdef __INTEL_COMPILER
-		//#pragma vector aligned
-#pragma omp simd
-#endif
-
 		for (int i = 0; i < Nloop; i++)
 		{
 			//temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
@@ -473,7 +468,7 @@ namespace
 			z += A * points[i + 2].z;
 			Area += 3.0*A;
 		}
-		CM.Set(x, y, x);
+		CM.Set(x, y, z);
 		CM *= (1.0 / (Area + DBL_MIN * 100)); //prevent overflow
 	}
 
