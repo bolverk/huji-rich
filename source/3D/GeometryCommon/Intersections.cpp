@@ -7,7 +7,7 @@ namespace
 	{
 		Vector3D normal = CrossProduct(face.vertices[0] - point, face.vertices[1] - point);
 		const size_t Nloop = face.vertices.size() - 1;
-		for (int i = 0; i < Nloop; ++i)
+		for (size_t i = 0; i < Nloop; ++i)
 			if (ScalarProd(CrossProduct(face.vertices[i + 1] - point, face.vertices[(i + 2) % (Nloop + 1)] - point),
 				normal) < 0)
 				return false;

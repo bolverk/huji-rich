@@ -242,7 +242,7 @@ namespace
 		res.clear();
 		for (size_t i = 0; i < N; ++i)
 			vtemp[i] = points[indeces[i]];
-		for (size_t i = 1; i < N; ++i)
+		for (size_t i = N - 1; i > 0; --i)
 		{
 			vtemp[i].x -= vtemp[i - 1].x;
 			vtemp[i].y -= vtemp[i - 1].y;
