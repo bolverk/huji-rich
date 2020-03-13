@@ -451,8 +451,8 @@ namespace
 		}
 		double x = 0, y = 0, z = 0;
 #ifdef __INTEL_COMPILER
-		//#pragma vector aligned
-#pragma omp simd reduction(+:x, y, z, Area)
+		#pragma vector aligned
+//#pragma omp simd reduction(+:x, y, z, Area)
 #endif
 		for (size_t i = 0; i < Nloop; i++)
 		{
