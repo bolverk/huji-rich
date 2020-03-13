@@ -14,6 +14,7 @@
 #include "boundary_conditions_1d.hpp"
 #include "source_term_1d.hpp"
 #include "physical_geometry_1d.hpp"
+#include "cell_updater_1d.hpp"
 
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
@@ -121,6 +122,8 @@ private:
   BoundaryConditions1D const& _bc;
 
   SourceTerm1D const& force_;
+  
+  const CellUpdater1D& cu_;
 
   double _cfl;
 
@@ -162,7 +165,8 @@ public:
    const RiemannSolver& rs,
    const VertexMotion& vm,
    const BoundaryConditions1D& bc,
-   const SourceTerm1D& force);
+   const SourceTerm1D& force,
+   const CellUpdater1D& cu);
 
   /*! \brief Changes the value of the Courant Friedrichs Levy coefficient
     \param cfl New value of cfl number

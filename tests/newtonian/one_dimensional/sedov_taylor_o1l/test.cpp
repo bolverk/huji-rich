@@ -38,6 +38,7 @@ namespace {
       vm_(false),
       bc_(),
       force_(),
+      cu_(),
       sim_
       (pg_,
        logspace(10,-2,0.5,200),
@@ -50,7 +51,8 @@ namespace {
        rs_,
        vm_,
        bc_,
-       force_) 
+       force_,
+       cu_) 
     {}
 
     hdsim1D& getSim(void)
@@ -67,6 +69,7 @@ namespace {
     const Lagrangian1D vm_;
     const RigidWall1D bc_;
     const CylindricalComplementary1D force_;
+    const SimpleCellUpdater1D cu_;
     hdsim1D sim_;
   };
 

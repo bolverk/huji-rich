@@ -60,6 +60,7 @@ public:
     vm_(),
     bc_(),
     force_(),
+    cu_(),
     sim_(pg_,
 	 edges_,
 	 interpm_,
@@ -74,7 +75,8 @@ public:
 	 rs_, 
 	 vm_, 
 	 bc_,
-	 force_) {}
+	 force_,
+     cu_) {}
 
   hdsim1D& getSim(void)
   {
@@ -91,6 +93,7 @@ private:
   Eulerian1D vm_;
   RigidWall1D bc_;
   const ZeroForce1D force_;
+  const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };
 

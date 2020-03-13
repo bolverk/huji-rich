@@ -71,6 +71,7 @@ public:
     right_bc_(),
     bc_(left_bc_,right_bc_),
     force_(),
+    cu_(),
     sim_
     (pg_,
      edges_,
@@ -83,7 +84,8 @@ public:
      rs_,
      vm_,
      bc_,
-     force_) {}
+     force_,
+     cu_) {}
 
   hdsim1D& getSim(void)
   {
@@ -107,6 +109,7 @@ private:
   const Outflow right_bc_;
   const DifferentBC bc_;
   const ZeroForce1D force_;
+  const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };
 

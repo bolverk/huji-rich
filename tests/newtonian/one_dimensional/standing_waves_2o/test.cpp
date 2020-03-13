@@ -68,6 +68,7 @@ public:
     force_(read_number("wavelength.txt"),
 	   read_number("amplitude.txt"),
 	   read_number("phase_velocity.txt")),
+    cu_(),
     sim_(pg_,
 	 linspace(0,width,30),
 	 interpm_,
@@ -79,7 +80,8 @@ public:
 	 rs_,
 	 vm_,
 	 bc_,
-	 force_) {}
+	 force_,
+     cu_) {}
 
   hdsim1D& getSim(void)
   {
@@ -95,6 +97,7 @@ private:
   const Eulerian1D vm_;
   const RigidWall1D bc_;
   const PeriodicDriver force_;
+  const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };
 }

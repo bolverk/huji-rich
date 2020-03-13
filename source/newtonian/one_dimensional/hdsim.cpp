@@ -129,7 +129,8 @@ hdsim1D::hdsim1D
  const RiemannSolver& rs,
  const VertexMotion& vm,
  const BoundaryConditions1D& bc,
- const SourceTerm1D& force):
+ const SourceTerm1D& force,
+ const CellUpdater1D& cu):
   pg_(pg),
   _Vertices(vertices), 
   _eos(eos), 
@@ -145,7 +146,9 @@ hdsim1D::hdsim1D
     _Vertices)),
   _Interpolation(Interpolation),
   _rs(rs), _vm(vm), _bc(bc), 
-  force_(force), _cfl(1./3.), time_(0), cycle_(0),
+  force_(force), 
+  cu_(cu),
+  _cfl(1./3.), time_(0), cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
   tracers_extensive_(vector<vector<double> >()),
   cold_flows_() {}
