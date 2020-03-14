@@ -22,7 +22,7 @@ if compiler=='g++':
     else:
         cflags +=' -O3'
 elif compiler=='clang++':
-    cflags = '-Weverything -Werror -ferror-limit=1 -Wno-error=padded'
+    cflags = '-Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++11'
     if int(debug):
         cflags += ' -O0 -g -pg'
         linkflags = ' -g -pg'

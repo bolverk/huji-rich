@@ -347,9 +347,15 @@ void hdsim1D::TimeAdvance(void)
     (_ConservedExtensive, _Vertices, pg_);
 
   //  _Cells = UpdatePrimitives(_ConservedIntensive, _eos);
-  _Cells = cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
-					    _ConservedExtensive,
-					    _eos);
+  if(cold_flows_.is_active())
+      _Cells = cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
+                                                _ConservedExtensive,
+                                                _eos);
+  else
+      _Cells = cu_(_ConservedIntensive,
+                   _ConservedExtensive,
+                   _Cells,
+                   _eos);
 
   time_ += dt;
   cycle_++;
@@ -712,6 +718,10 @@ vector<Primitive> ColdFlows::retrieveAllPrimitive
 					    active_));
 }
 
+bool ColdFlows::is_active(void) const
+{
+    return active_;
+}
 
 void hdsim1D::enableColdFlows(double thres)
 {

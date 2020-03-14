@@ -13,9 +13,17 @@
 
 using std::vector;
 
+//! \brief Abstract class for the cell update scheme
 class CellUpdater1D
 {
     public:
+        /*! \brief Updates cells
+            \param intensive Intensive conserved variables
+            \param extensive Extensive conserved variables
+            \param old Old cells
+            \param eos Equation of state
+            \return New computational cells
+        */
         virtual vector<Primitive> operator()
         (const vector<Conserved>& intensive,
          const vector<Conserved>& extensive,

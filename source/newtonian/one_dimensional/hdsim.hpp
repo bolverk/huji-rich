@@ -85,6 +85,8 @@ public:
   (const vector<Conserved>& intensive,
    const vector<Conserved>& extensive,
    const EquationOfState& eos) const;
+   
+   bool is_active(void) const;
 
 private:
   bool active_;
