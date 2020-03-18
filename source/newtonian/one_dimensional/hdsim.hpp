@@ -143,8 +143,6 @@ private:
 
   EquationOfState const& _eos;
 
-  vector<Primitive> _Cells;
-
   vector<Conserved> _Fluxes;
 
   vector<double> _VertexVelocity;

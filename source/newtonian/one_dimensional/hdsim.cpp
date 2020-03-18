@@ -18,28 +18,6 @@ HydroSnapshot1D::HydroSnapshot1D
   intensive(rintensive),
   extensive(rextensive) {}
 
-namespace {
-  vector<Primitive> InitialiseCells
-  (vector<double> const& vertices,
-   SpatialDistribution1D const& density,
-   SpatialDistribution1D const& pressure,
-   SpatialDistribution1D const& paravelocity,
-   SpatialDistribution1D const& perpvelocity,
-   EquationOfState const& eos)
-  {
-    vector<Primitive> res(vertices.size()-1);
-    for(size_t i = 0; i<vertices.size() - 1; i++){
-      const double r = 0.5*(vertices[i] + vertices[i+1]);
-      const double d = density(r);
-      const double p = pressure(r);
-      const Vector2D v(paravelocity(r),
-		       perpvelocity(r));
-      res[i] = CalcPrimitive(d, p, v, eos);
-    }
-    return res;
-  }
-}
-
 // Diagnostics
 
 double hdsim1D::GetCellCenter(size_t index) const
@@ -227,8 +205,6 @@ hdsim1D::hdsim1D
       vector<pair<string, const BoolSpatialDistribution* > >()),
   //  _Vertices(vertices), 
   _eos(eos), 
-  _Cells(InitialiseCells(vertices, density, pressure,
-			 paravelocity, perpvelocity, eos)),
   _Fluxes(vector<Conserved>(vertices.size())),
   _VertexVelocity(vector<double>()),
   _ConservedIntensive
