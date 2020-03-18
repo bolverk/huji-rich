@@ -16,6 +16,8 @@
 #include "physical_geometry_1d.hpp"
 #include "cell_updater_1d.hpp"
 
+using std::pair;
+
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
 {
@@ -92,6 +94,34 @@ private:
   bool active_;
   double threshold_;
   vector<double> entropies_;
+};
+
+class BoolSpatialDistribution
+{
+    public:
+    
+        virtual bool operator()(double x) const = 0;
+        
+        virtual ~BoolSpatialDistribution(void);
+};
+
+class SimulationState1D
+{
+    public:
+    
+        SimulationState1D
+	(const vector<double>& vertices,
+	 const SpatialDistribution1D& density,
+	 const SpatialDistribution1D& pressure,
+	 const SpatialDistribution1D& para_velocity,
+	 const SpatialDistribution1D& perp_velocity,
+	 const vector<pair<string, const SpatialDistribution1D*> >& tracers,
+	 const vector<pair<string, const BoolSpatialDistribution*> >& stickers);
+    
+    private:
+        vector<double> vertices_;
+        vector<ComputationalCell> cells_;
+        TracerStickerNames tsn_;
 };
 
 //! \brief Newtonian hydrodynamic simulation
