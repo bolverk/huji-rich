@@ -92,7 +92,7 @@ double hdsim1D::GetVertexPosition(size_t i) const
 // External functions
 
 namespace {
-  vector<Conserved> CalcConservedIntensive(vector<Primitive> p)
+  vector<Conserved> CalcConservedIntensive(const vector<Primitive>& p)
   {
     vector<Conserved> res(p.size());
     for(size_t i=0;i<p.size();i++){
@@ -154,9 +154,33 @@ const vector<double>& SimulationState1D::getVertices(void) const
   return vertices_;
 }
 
+const vector<ComputationalCell>& SimulationState1D::getCells(void) const
+{
+  return cells_;
+}
+
 void SimulationState1D::updateVertices(const vector<double>& vertices)
 {
   vertices_ = vertices;
+}
+
+namespace{
+  vector<Primitive> cc2primitives
+    (const vector<ComputationalCell>& ccs,
+     const EquationOfState& eos)
+  {
+    vector<Primitive> res(ccs.size());
+    for(size_t i=0;i<res.size();++i){
+      res.at(i).Density = ccs.at(i).density;
+      res.at(i).Pressure = ccs.at(i).pressure;
+      res.at(i).Velocity = ccs.at(i).velocity;
+      res.at(i).Energy = eos.dp2e
+	(ccs.at(i).density, ccs.at(i).pressure);
+      res.at(i).SoundSpeed = eos.dp2c
+	(ccs.at(i).density, ccs.at(i).pressure);
+    }
+    return res;
+  }
 }
 
 hdsim1D::hdsim1D
@@ -187,7 +211,8 @@ hdsim1D::hdsim1D
 			 paravelocity, perpvelocity, eos)),
   _Fluxes(vector<Conserved>(vertices.size())),
   _VertexVelocity(vector<double>()),
-  _ConservedIntensive(CalcConservedIntensive(_Cells)),
+  _ConservedIntensive
+  (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
   _ConservedExtensive
   (CalcConservedExtensive
    (pg_,

@@ -120,6 +120,8 @@ public:
 
   const vector<double>& getVertices(void) const;
 
+  const vector<ComputationalCell>& getCells(void) const;
+
   void updateVertices(const vector<double>& vertices);
     
 private:
@@ -136,8 +138,6 @@ private:
   const PhysicalGeometry1D& pg_;
 
   SimulationState1D ss_;
-
-  //  vector<double> _Vertices;
 
   EquationOfState const& _eos;
 
