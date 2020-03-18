@@ -131,6 +131,8 @@ private:
 
   const PhysicalGeometry1D& pg_;
 
+  SimulationState1D ss_;
+
   vector<double> _Vertices;
 
   EquationOfState const& _eos;

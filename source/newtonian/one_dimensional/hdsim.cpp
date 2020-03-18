@@ -158,6 +158,13 @@ hdsim1D::hdsim1D
  const SourceTerm1D& force,
  const CellUpdater1D& cu):
   pg_(pg),
+  ss_(vertices,
+      density,
+      pressure,
+      paravelocity,
+      perpvelocity,
+      vector<pair<string, const SpatialDistribution1D*> >(),
+      vector<pair<string, const BoolSpatialDistribution* > >()),
   _Vertices(vertices), 
   _eos(eos), 
   _Cells(InitialiseCells(vertices, density, pressure,
