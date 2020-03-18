@@ -22,12 +22,12 @@ using namespace diagnostics1d;
 
 namespace {
 
-double GetXVelocityAt(const hdsim1D* sim, double x)
+double GetXVelocityAt(const hdsim1D& sim, double x)
 {
-  for(size_t i=1;i<static_cast<size_t>(sim->GetCellNo());i++){
-    if(sim->GetCellCenter(i-1)<x&&sim->GetCellCenter(i)>x)
-      return 0.5*(sim->GetCell(i-1).Velocity.x+
-		  sim->GetCell(i).Velocity.x);
+  for(size_t i=1;i<sim.getCells().size();i++){
+    if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
+      return 0.5*(sim.GetCell(i-1).Velocity.x+
+		  sim.GetCell(i).Velocity.x);
   }
   throw "x out of range in GetXVelocityAt";
 }
@@ -36,7 +36,7 @@ class StopCond
 {
 public:
 
-  StopCond(const hdsim1D* sim, double xl, double xr):
+  StopCond(const hdsim1D& sim, double xl, double xr):
     sim_(sim), xl_(xl), xr_(xr), iter_(0), max_iter_(50000) {}
 
   bool TimeToStop(void)
@@ -55,7 +55,7 @@ public:
     
 private:
 
-  const hdsim1D* sim_;
+  const hdsim1D& sim_;
   const double xl_;
   const double xr_;
   int iter_;
@@ -117,7 +117,7 @@ private:
 
 void main_loop(hdsim1D& sim)
 {
-  StopCond sc(&sim,0.1,0.9);
+  StopCond sc(sim,0.1,0.9);
   while(!sc.TimeToStop()){
     sim.TimeAdvance();
   }

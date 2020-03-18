@@ -76,8 +76,8 @@ private:
 void write_output(hdsim1D const& sim, string const& fname)
 {
   ofstream f(fname.c_str());
-  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Pressure << endl;
-  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Velocity.x << endl;
+  f << sim.GetCell(sim.getCells().size()/2).Pressure << endl;
+  f << sim.GetCell(sim.getCells().size()/2).Velocity.x << endl;
   f.close();
 }
 }

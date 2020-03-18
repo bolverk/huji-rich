@@ -250,7 +250,7 @@ public:
   /*! \brief Returns the number of cells
     \return Number of cells
    */
-  int GetCellNo(void) const;
+  //  int GetCellNo(void) const;
 
   /*! \brief Returns the hydrodynamic variables in a cell
     \param i Cell index

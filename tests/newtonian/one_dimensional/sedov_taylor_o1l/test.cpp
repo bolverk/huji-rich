@@ -76,8 +76,9 @@ namespace {
   bool termination_condition
   (const hdsim1D& sim)
   {
-    assert(sim.GetCellNo()>10);
-    return sim.GetCell(static_cast<size_t>(sim.GetCellNo())-10).Density>1.2;
+    const size_t n = sim.getCells().size();
+    assert(n>10);
+    return sim.GetCell(n-10).Density>1.2;
     //return sim.GetCycle()>1e5;
   }
 

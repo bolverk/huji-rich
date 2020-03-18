@@ -51,19 +51,20 @@ void diagnostics1d::write_snapshot_to_hdf5
 
   // Write grid
   {
-    vector<double> grid_vector(size_t(sim.GetCellNo()));
-    for(size_t i=0;i<static_cast<size_t>(sim.GetCellNo());++i)
+    vector<double> grid_vector(sim.getCells().size());
+    for(size_t i=0;i<sim.getCells().size();++i)
       grid_vector[size_t(i)] = sim.GetCellCenter(i);
     write_std_vector_to_hdf5(file, grid_vector, "grid");
   }
 
   // Write Hydrodynamic variables
   {
-    vector<double> density_vector(size_t(sim.GetCellNo()));
-    vector<double> pressure_vector(size_t(sim.GetCellNo()));
-    vector<double> x_velocity_vector(size_t(sim.GetCellNo()));
-    vector<double> y_velocity_vector(size_t(sim.GetCellNo()));
-    for(size_t i=0;i<static_cast<size_t>(sim.GetCellNo());++i){
+    const size_t n = sim.getCells().size();
+    vector<double> density_vector(n);
+    vector<double> pressure_vector(n);
+    vector<double> x_velocity_vector(n);
+    vector<double> y_velocity_vector(n);
+    for(size_t i=0;i<n;++i){
       density_vector[size_t(i)] = sim.GetCell(i).Density;
       pressure_vector[size_t(i)] = sim.GetCell(i).Pressure;
       x_velocity_vector[size_t(i)] = sim.GetCell(i).Velocity.x;
