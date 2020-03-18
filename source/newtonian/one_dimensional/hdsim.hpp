@@ -107,21 +107,25 @@ class BoolSpatialDistribution
 
 class SimulationState1D
 {
-    public:
+public:
     
-        SimulationState1D
-	(const vector<double>& vertices,
-	 const SpatialDistribution1D& density,
-	 const SpatialDistribution1D& pressure,
-	 const SpatialDistribution1D& para_velocity,
-	 const SpatialDistribution1D& perp_velocity,
-	 const vector<pair<string, const SpatialDistribution1D*> >& tracers,
-	 const vector<pair<string, const BoolSpatialDistribution*> >& stickers);
+  SimulationState1D
+  (const vector<double>& vertices,
+   const SpatialDistribution1D& density,
+   const SpatialDistribution1D& pressure,
+   const SpatialDistribution1D& para_velocity,
+   const SpatialDistribution1D& perp_velocity,
+   const vector<pair<string, const SpatialDistribution1D*> >& tracers,
+   const vector<pair<string, const BoolSpatialDistribution*> >& stickers);
+
+  const vector<double>& getVertices(void) const;
+
+  void updateVertices(const vector<double>& vertices);
     
-    private:
-        vector<double> vertices_;
-        vector<ComputationalCell> cells_;
-        TracerStickerNames tsn_;
+private:
+  vector<double> vertices_;
+  vector<ComputationalCell> cells_;
+  TracerStickerNames tsn_;
 };
 
 //! \brief Newtonian hydrodynamic simulation
@@ -133,7 +137,7 @@ private:
 
   SimulationState1D ss_;
 
-  vector<double> _Vertices;
+  //  vector<double> _Vertices;
 
   EquationOfState const& _eos;
 
