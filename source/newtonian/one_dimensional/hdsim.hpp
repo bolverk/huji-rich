@@ -229,6 +229,11 @@ public:
 
   //  void AddTracer(SpatialDistribution1D const& tracer);
 
+  // Scaffolding
+  const vector<Primitive>& getCells(void) const;
+
+  void setCells(const vector<Primitive>& primitives);
+
   // Diagnostics
 
   /*! \brief Returns the number of vertices

@@ -67,6 +67,16 @@ vector<Conserved> const& hdsim1D::getFluxes(void) const
   return _Fluxes;
 }
 
+const vector<Primitive>& hdsim1D::getCells(void) const
+{
+  return _Cells;
+}
+
+void hdsim1D::setCells(const vector<Primitive>& primitives)
+{
+  _Cells = primitives;
+}
+
 int hdsim1D::GetVertexNo(void) const
 {
   //  return static_cast<int>(_Vertices.size());
