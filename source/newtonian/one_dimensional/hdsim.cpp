@@ -208,12 +208,12 @@ hdsim1D::hdsim1D
   _eos(eos), 
   //  _Fluxes(vector<Conserved>(vertices.size())),
   //  _VertexVelocity(vector<double>()),
-  _ConservedIntensive
-  (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
+  //  _ConservedIntensive
+  //  (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
   _ConservedExtensive
   (CalcConservedExtensive
    (pg_,
-    _ConservedIntensive, 
+    CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
     ss_.getVertices())),
   _Interpolation(Interpolation),
   _rs(rs), _vm(vm), _bc(bc), 
@@ -428,7 +428,7 @@ void hdsim1D::TimeAdvance(void)
 				       dt,
 				       ss_.getVertices()));
 
-  _ConservedIntensive = UpdateConservedIntensive
+  const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
     (_ConservedExtensive, ss_.getVertices(), pg_);
 
   if(cold_flows_.is_active())
@@ -499,7 +499,10 @@ void hdsim1D::TimeAdvance2(void)
     (mid_vertices, mid_cells, _Interpolation, _VertexVelocity,
      _rs, _bc, dt);
 
-  cold_flows_.advanceEntropies(_Fluxes,_ConservedIntensive,dt);
+  cold_flows_.advanceEntropies
+    (_Fluxes,
+     CalcConservedIntensive(getCells()),
+     dt);
 
   UpdateConservedExtensive
     (_Fluxes, 
@@ -517,7 +520,7 @@ void hdsim1D::TimeAdvance2(void)
 				       dt,
 				       ss_.getVertices()));
 
-  _ConservedIntensive = UpdateConservedIntensive
+  const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
     (_ConservedExtensive, ss_.getVertices(), pg_);
 
   setCells(cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
@@ -629,13 +632,13 @@ void hdsim1D::TimeAdvanceRK(int order)
       (pg_,
        HydroSnapshot1D(ss_.getVertices(),
 		       getCells(),
-		       _ConservedIntensive,
+		       CalcConservedIntensive(getCells()),
 		       _ConservedExtensive),
        _vm, _Interpolation, _rs, _bc, _eos, 
        force_, time_, dt);
     ss_.updateVertices(res.edges);
     setCells(res.cells);
-    _ConservedIntensive = res.intensive;
+    const vector<Conserved> _ConservedIntensive = res.intensive;
     _ConservedExtensive = res.extensive;
   }
   else if(2==order){
@@ -643,13 +646,13 @@ void hdsim1D::TimeAdvanceRK(int order)
       (pg_,
        HydroSnapshot1D(ss_.getVertices(),
 		       getCells(),
-		       _ConservedIntensive,
+		       CalcConservedIntensive(getCells()),
 		       _ConservedExtensive),
        _vm, _Interpolation, _rs, _bc, _eos, 
        force_, time_, dt);
     ss_.updateVertices(res.edges);
     setCells(res.cells);
-    _ConservedIntensive = res.intensive;
+    const vector<Conserved> _ConservedIntensive = res.intensive;
     _ConservedExtensive = res.extensive;
   }
   else

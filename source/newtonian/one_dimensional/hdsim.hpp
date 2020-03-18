@@ -147,7 +147,7 @@ private:
 
   //  vector<double> _VertexVelocity;
 
-  vector<Conserved> _ConservedIntensive;
+  //  vector<Conserved> _ConservedIntensive;
 
   vector<Conserved> _ConservedExtensive;
 
