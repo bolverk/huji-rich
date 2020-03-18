@@ -207,7 +207,7 @@ hdsim1D::hdsim1D
   //  _Vertices(vertices), 
   _eos(eos), 
   //  _Fluxes(vector<Conserved>(vertices.size())),
-  _VertexVelocity(vector<double>()),
+  //  _VertexVelocity(vector<double>()),
   _ConservedIntensive
   (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
   _ConservedExtensive
@@ -401,7 +401,7 @@ void hdsim1D::TimeAdvance(void)
 				  getCells(),
 				  _eos);
 
-  _VertexVelocity = CalcVertexVelocities
+  const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_.getVertices(), getCells(), _vm);
 
   const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
@@ -492,7 +492,7 @@ void hdsim1D::TimeAdvance2(void)
 				  getCells(),
 				  _eos);
 
-  _VertexVelocity = CalcVertexVelocities
+  const vector<double> _VertexVelocity = CalcVertexVelocities
     (mid_vertices, mid_cells, _vm);
 
   const vector<Conserved> _Fluxes = SolveRiemannProblems

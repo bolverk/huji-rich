@@ -145,7 +145,7 @@ private:
 
   //  vector<Conserved> _Fluxes;
 
-  vector<double> _VertexVelocity;
+  //  vector<double> _VertexVelocity;
 
   vector<Conserved> _ConservedIntensive;
 
