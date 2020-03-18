@@ -143,7 +143,7 @@ private:
 
   EquationOfState const& _eos;
 
-  vector<Conserved> _Fluxes;
+  //  vector<Conserved> _Fluxes;
 
   vector<double> _VertexVelocity;
 
@@ -266,7 +266,7 @@ public:
   /*! \brief Returns the hydrodynamic fluxes
     \return Hydrodynamic fluxes
   */
-  vector<Conserved> const& getFluxes(void) const;
+  //  vector<Conserved> const& getFluxes(void) const;
 };
 
 #endif // HDSIM_1D_HPP

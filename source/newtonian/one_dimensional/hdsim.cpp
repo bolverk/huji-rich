@@ -40,10 +40,11 @@ int hdsim1D::GetCycle(void) const
   return cycle_;
 }
 
-vector<Conserved> const& hdsim1D::getFluxes(void) const
+/*vector<Conserved> const& hdsim1D::getFluxes(void) const
 {
   return _Fluxes;
 }
+*/
 
 namespace{
   vector<Primitive> cc2primitives
@@ -205,7 +206,7 @@ hdsim1D::hdsim1D
       vector<pair<string, const BoolSpatialDistribution* > >()),
   //  _Vertices(vertices), 
   _eos(eos), 
-  _Fluxes(vector<Conserved>(vertices.size())),
+  //  _Fluxes(vector<Conserved>(vertices.size())),
   _VertexVelocity(vector<double>()),
   _ConservedIntensive
   (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
@@ -405,7 +406,7 @@ void hdsim1D::TimeAdvance(void)
 
   const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
 
-  _Fluxes = SolveRiemannProblems
+  const vector<Conserved> _Fluxes = SolveRiemannProblems
     (ss_.getVertices(), getCells(), _Interpolation, _VertexVelocity,
      _rs, _bc, dt);
 
@@ -494,7 +495,7 @@ void hdsim1D::TimeAdvance2(void)
   _VertexVelocity = CalcVertexVelocities
     (mid_vertices, mid_cells, _vm);
 
-  _Fluxes = SolveRiemannProblems
+  const vector<Conserved> _Fluxes = SolveRiemannProblems
     (mid_vertices, mid_cells, _Interpolation, _VertexVelocity,
      _rs, _bc, dt);
 
