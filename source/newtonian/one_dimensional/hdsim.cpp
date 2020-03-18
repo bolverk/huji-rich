@@ -67,14 +67,47 @@ vector<Conserved> const& hdsim1D::getFluxes(void) const
   return _Fluxes;
 }
 
-const vector<Primitive>& hdsim1D::getCells(void) const
+namespace{
+  vector<Primitive> cc2primitives
+    (const vector<ComputationalCell>& ccs,
+     const EquationOfState& eos)
+  {
+    vector<Primitive> res(ccs.size());
+    for(size_t i=0;i<res.size();++i){
+      res.at(i).Density = ccs.at(i).density;
+      res.at(i).Pressure = ccs.at(i).pressure;
+      res.at(i).Velocity = ccs.at(i).velocity;
+      res.at(i).Energy = eos.dp2e
+	(ccs.at(i).density, ccs.at(i).pressure);
+      res.at(i).SoundSpeed = eos.dp2c
+	(ccs.at(i).density, ccs.at(i).pressure);
+    }
+    return res;
+  }
+
+  vector<ComputationalCell> primitives2cc
+    (const vector<Primitive>& primitives)
+  {
+    vector<ComputationalCell> res(primitives.size());
+    for(size_t i=0;i<res.size();++i){
+      res.at(i).density = primitives.at(i).Density;
+      res.at(i).pressure = primitives.at(i).Pressure;
+      res.at(i).velocity = primitives.at(i).Velocity;
+    }
+    return res;
+  }
+}
+
+const vector<Primitive> hdsim1D::getCells(void) const
 {
-  return _Cells;
+  //  return _Cells;
+  return cc2primitives(ss_.getCells(),_eos);
 }
 
 void hdsim1D::setCells(const vector<Primitive>& primitives)
 {
-  _Cells = primitives;
+  //  _Cells = primitives;
+  ss_.updateCells(primitives2cc(primitives));
 }
 
 int hdsim1D::GetVertexNo(void) const
@@ -164,23 +197,10 @@ void SimulationState1D::updateVertices(const vector<double>& vertices)
   vertices_ = vertices;
 }
 
-namespace{
-  vector<Primitive> cc2primitives
-    (const vector<ComputationalCell>& ccs,
-     const EquationOfState& eos)
-  {
-    vector<Primitive> res(ccs.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).Density = ccs.at(i).density;
-      res.at(i).Pressure = ccs.at(i).pressure;
-      res.at(i).Velocity = ccs.at(i).velocity;
-      res.at(i).Energy = eos.dp2e
-	(ccs.at(i).density, ccs.at(i).pressure);
-      res.at(i).SoundSpeed = eos.dp2c
-	(ccs.at(i).density, ccs.at(i).pressure);
-    }
-    return res;
-  }
+void SimulationState1D::updateCells
+(const vector<ComputationalCell>& cells)
+{
+  cells_ = cells;
 }
 
 hdsim1D::hdsim1D

@@ -123,6 +123,8 @@ public:
   const vector<ComputationalCell>& getCells(void) const;
 
   void updateVertices(const vector<double>& vertices);
+
+  void updateCells(const vector<ComputationalCell>& cells);
     
 private:
   vector<double> vertices_;
@@ -230,7 +232,7 @@ public:
   //  void AddTracer(SpatialDistribution1D const& tracer);
 
   // Scaffolding
-  const vector<Primitive>& getCells(void) const;
+  const vector<Primitive> getCells(void) const;
 
   void setCells(const vector<Primitive>& primitives);
 
