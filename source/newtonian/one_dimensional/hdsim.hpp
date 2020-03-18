@@ -15,8 +15,7 @@
 #include "source_term_1d.hpp"
 #include "physical_geometry_1d.hpp"
 #include "cell_updater_1d.hpp"
-
-using std::pair;
+#include "simulation_state_1d.hpp"
 
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
@@ -96,42 +95,6 @@ private:
   vector<double> entropies_;
 };
 
-class BoolSpatialDistribution
-{
-    public:
-    
-        virtual bool operator()(double x) const = 0;
-        
-        virtual ~BoolSpatialDistribution(void);
-};
-
-class SimulationState1D
-{
-public:
-    
-  SimulationState1D
-  (const vector<double>& vertices,
-   const SpatialDistribution1D& density,
-   const SpatialDistribution1D& pressure,
-   const SpatialDistribution1D& para_velocity,
-   const SpatialDistribution1D& perp_velocity,
-   const vector<pair<string, const SpatialDistribution1D*> >& tracers,
-   const vector<pair<string, const BoolSpatialDistribution*> >& stickers);
-
-  const vector<double>& getVertices(void) const;
-
-  const vector<ComputationalCell>& getCells(void) const;
-
-  void updateVertices(const vector<double>& vertices);
-
-  void updateCells(const vector<ComputationalCell>& cells);
-    
-private:
-  vector<double> vertices_;
-  vector<ComputationalCell> cells_;
-  TracerStickerNames tsn_;
-};
-
 //! \brief Newtonian hydrodynamic simulation
 class hdsim1D
 {
@@ -142,12 +105,6 @@ private:
   SimulationState1D ss_;
 
   EquationOfState const& _eos;
-
-  //  vector<Conserved> _Fluxes;
-
-  //  vector<double> _VertexVelocity;
-
-  //  vector<Conserved> _ConservedIntensive;
 
   vector<Conserved> _ConservedExtensive;
 
