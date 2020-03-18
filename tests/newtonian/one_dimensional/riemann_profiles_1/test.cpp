@@ -22,10 +22,11 @@ namespace {
 
   double GetXVelocityAt(const hdsim1D& sim, double x)
   {
-    for(size_t i=1;i<sim.getCells().size();i++){
+    const vector<Primitive>& cells = sim.getCells();
+    for(size_t i=1;i<cells.size();i++){
       if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
-	return 0.5*(sim.GetCell(i-1).Velocity.x+
-		    sim.GetCell(i).Velocity.x);
+	return 0.5*(cells.at(i-1).Velocity.x+
+		    cells.at(i).Velocity.x);
     }
     throw "x out of range in GetXVelocityAt";
   }

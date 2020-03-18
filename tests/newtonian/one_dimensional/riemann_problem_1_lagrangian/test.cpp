@@ -77,8 +77,9 @@ void write_output(hdsim1D const& sim)
 {
   ofstream f;
   f.open("res.txt");
-  f << sim.GetCell(sim.getCells().size()/2).Pressure << endl;
-  f << sim.GetCell(sim.getCells().size()/2).Velocity.x << endl;
+  const vector<Primitive>& cells = sim.getCells();
+  f << cells.at(cells.size()/2).Pressure << endl;
+  f << cells.at(cells.size()/2).Velocity.x << endl;
   f.close();
 }
 }

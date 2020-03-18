@@ -89,15 +89,10 @@ double hdsim1D::GetVertexPosition(size_t i) const
   return ss_.getVertices().at(i);
 }
 
-/*int hdsim1D::GetCellNo(void) const
-{
-  return static_cast<int>(_Cells.size());
-  }*/
-
-Primitive hdsim1D::GetCell(size_t i) const
+/*Primitive hdsim1D::GetCell(size_t i) const
 {
   return _Cells[i];
-}
+  }*/
 
 // External functions
 

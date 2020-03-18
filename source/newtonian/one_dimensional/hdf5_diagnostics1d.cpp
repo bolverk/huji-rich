@@ -64,11 +64,12 @@ void diagnostics1d::write_snapshot_to_hdf5
     vector<double> pressure_vector(n);
     vector<double> x_velocity_vector(n);
     vector<double> y_velocity_vector(n);
+    const vector<Primitive>& cells = sim.getCells();
     for(size_t i=0;i<n;++i){
-      density_vector[size_t(i)] = sim.GetCell(i).Density;
-      pressure_vector[size_t(i)] = sim.GetCell(i).Pressure;
-      x_velocity_vector[size_t(i)] = sim.GetCell(i).Velocity.x;
-      y_velocity_vector[size_t(i)] = sim.GetCell(i).Velocity.y;
+      density_vector[size_t(i)] = cells.at(i).Density;
+      pressure_vector[size_t(i)] = cells.at(i).Pressure;
+      x_velocity_vector[size_t(i)] = cells.at(i).Velocity.x;
+      y_velocity_vector[size_t(i)] = cells.at(i).Velocity.y;
     }
     write_std_vector_to_hdf5(file, density_vector, "density");
     write_std_vector_to_hdf5(file, pressure_vector, "pressure");

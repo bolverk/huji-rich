@@ -247,16 +247,11 @@ public:
   */
   double GetVertexPosition(size_t i) const;
 
-  /*! \brief Returns the number of cells
-    \return Number of cells
-   */
-  //  int GetCellNo(void) const;
-
   /*! \brief Returns the hydrodynamic variables in a cell
     \param i Cell index
     \return Primitive variables in a hydrodynamic cells
   */
-  Primitive GetCell(size_t i) const;
+  //  Primitive GetCell(size_t i) const;
   
   /*! \brief Returns the position of the center of the cell
     \param index Cell index

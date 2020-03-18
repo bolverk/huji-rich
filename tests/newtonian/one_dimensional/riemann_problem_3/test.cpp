@@ -76,8 +76,9 @@ namespace {
 void write_output(hdsim1D const& sim, string const& fname)
 {
   ofstream f(fname.c_str());
-  f << sim.GetCell(sim.getCells().size()/2).Pressure << endl;
-  f << sim.GetCell(sim.getCells().size()/2).Velocity.x << endl;
+  const vector<Primitive>& cells = sim.getCells();
+  f << cells.at(cells.size()/2).Pressure << endl;
+  f << cells.at(cells.size()/2).Velocity.x << endl;
   f.close();
 }
 }
