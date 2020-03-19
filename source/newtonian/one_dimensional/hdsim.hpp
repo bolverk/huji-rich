@@ -17,6 +17,7 @@
 #include "cell_updater_1d.hpp"
 #include "simulation_state_1d.hpp"
 #include "time_step_function_1d.hpp"
+#include "../two_dimensional/extensive.hpp"
 
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
@@ -107,7 +108,7 @@ private:
 
   EquationOfState const& _eos;
 
-  vector<Conserved> _ConservedExtensive;
+  vector<Extensive> _ConservedExtensive;
 
   SpatialReconstruction1D const& _Interpolation;
 

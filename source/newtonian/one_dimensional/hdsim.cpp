@@ -22,10 +22,6 @@ HydroSnapshot1D::HydroSnapshot1D
 
 double hdsim1D::GetCellCenter(size_t index) const
 {
-  /*
-  return 0.5*(_Vertices[index]+
-	      _Vertices[index+1]);
-  */
   return 0.5*(ss_.getVertices().at(index)+
 	      ss_.getVertices().at(index+1));
 }
@@ -40,13 +36,32 @@ int hdsim1D::GetCycle(void) const
   return cycle_;
 }
 
-/*vector<Conserved> const& hdsim1D::getFluxes(void) const
-{
-  return _Fluxes;
-}
-*/
-
 namespace{
+
+  vector<Conserved> extensive2conserved
+    (const vector<Extensive>& extensives)
+  {
+    vector<Conserved> res(extensives.size());
+    for(size_t i=0;i<res.size();++i){
+      res.at(i).Mass = extensives.at(i).mass;
+      res.at(i).Momentum = extensives.at(i).momentum;
+      res.at(i).Energy = extensives.at(i).energy;
+    }
+    return res;
+  }
+
+  vector<Extensive> conserved2extensive
+    (const vector<Conserved>& conserved)
+  {
+    vector<Extensive> res(conserved.size());
+    for(size_t i=0;i<res.size();++i){
+      res.at(i).mass = conserved.at(i).Mass;
+      res.at(i).momentum = conserved.at(i).Momentum;
+      res.at(i).energy = conserved.at(i).Energy;
+    }
+    return res;
+  }
+  
   vector<Primitive> cc2primitives
     (const vector<ComputationalCell>& ccs,
      const EquationOfState& eos)
@@ -160,10 +175,11 @@ hdsim1D::hdsim1D
       vector<pair<string, const BoolSpatialDistribution* > >()),
   _eos(eos), 
   _ConservedExtensive
-  (CalcConservedExtensive
-   (pg_,
-    CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
-    ss_.getVertices())),
+  (conserved2extensive
+   (CalcConservedExtensive
+    (pg_,
+     CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
+     ss_.getVertices()))),
   _Interpolation(Interpolation),
   _rs(rs), _vm(vm), _bc(bc), 
   force_(force),
@@ -270,11 +286,11 @@ namespace {
   */
 
   void UpdateConservedExtensive
-  (const vector<Conserved>& Fluxes, 
+  (const vector<Extensive>& Fluxes, 
    double dt,
    const vector<double>& vertices,
    const PhysicalGeometry1D& pg,
-   vector<Conserved>& ConservedExtensive)
+   vector<Extensive>& ConservedExtensive)
   {
     for(size_t i = 0; i<ConservedExtensive.size(); i++){
       ConservedExtensive[i] += dt*pg.calcArea(vertices.at(i))*Fluxes.at(i);
@@ -331,19 +347,30 @@ void hdsim1D::overrideCFL(double cfl)
 }
 
 namespace {
+
+  Extensive conserved2extensive
+  (const Conserved& c)
+  {
+    Extensive res;
+    res.mass = c.Mass;
+    res.momentum = c.Momentum;
+    res.energy = c.Energy;
+    return res;
+  }
+  
   void force_contribution
   (vector<double> const& vertices,
    vector<Primitive> const& cells,
    const SourceTerm1D& force,
    double t,
    double dt,
-   vector<Conserved>& extensive)
+   vector<Extensive>& extensive)
   {
     for(size_t i=0;i<extensive.size();++i)
       extensive[i] +=
-	dt*force(vertices,
-		 cells,
-		 i, t, dt); 
+	dt*conserved2extensive(force(vertices,
+				     cells,
+				     i, t, dt)); 
   }
 }
 
@@ -363,10 +390,13 @@ void hdsim1D::TimeAdvance(void)
     (ss_.getVertices(), getCells(), _Interpolation, _VertexVelocity,
      _rs, _bc, dt);
 
-  cold_flows_.advanceEntropies(_Fluxes,_ConservedExtensive,dt);
+  cold_flows_.advanceEntropies
+    (_Fluxes,
+     extensive2conserved(_ConservedExtensive),
+     dt);
 
   UpdateConservedExtensive
-    (_Fluxes, 
+    (conserved2extensive(_Fluxes), 
      dt, 
      ss_.getVertices(),
      pg_,
@@ -382,15 +412,17 @@ void hdsim1D::TimeAdvance(void)
 				       ss_.getVertices()));
 
   const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
-    (_ConservedExtensive, ss_.getVertices(), pg_);
+    (extensive2conserved(_ConservedExtensive),
+     ss_.getVertices(), pg_);
 
   if(cold_flows_.is_active())
-    setCells(cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
-					      _ConservedExtensive,
-					      _eos));
+    setCells(cold_flows_.retrieveAllPrimitive
+	     (_ConservedIntensive,
+	      extensive2conserved(_ConservedExtensive),
+	      _eos));
   else
     setCells(cu_(_ConservedIntensive,
-		 _ConservedExtensive,
+		 extensive2conserved(_ConservedExtensive),
 		 getCells(),
 		 _eos));
 
@@ -415,11 +447,13 @@ void hdsim1D::TimeAdvance2(void)
 			 mid_vertex_velocities,
 			 _rs, _bc, dt);
 
-  cold_flows_.advanceEntropies(mid_fluxes, _ConservedExtensive, dt/2);
+  cold_flows_.advanceEntropies
+    (mid_fluxes, extensive2conserved(_ConservedExtensive), dt/2);
 
-  vector<Conserved> mid_extensive = _ConservedExtensive;
+  vector<Extensive> mid_extensive = _ConservedExtensive;
+  
   UpdateConservedExtensive
-    (mid_fluxes,
+    (conserved2extensive(mid_fluxes),
      dt/2,
      ss_.getVertices(),
      pg_,
@@ -433,13 +467,13 @@ void hdsim1D::TimeAdvance2(void)
 
   const vector<Conserved> mid_intesive = 
     UpdateConservedIntensive
-    (mid_extensive,
+    (extensive2conserved(mid_extensive),
      mid_vertices,
      pg_);
 
   const vector<Primitive> mid_cells = 
     cold_flows_.retrieveAllPrimitive(mid_intesive,
-				     mid_extensive,
+				     extensive2conserved(mid_extensive),
 				     _eos);
 
   cold_flows_.initializeEntropies(ss_.getVertices(),
@@ -459,7 +493,7 @@ void hdsim1D::TimeAdvance2(void)
      dt);
 
   UpdateConservedExtensive
-    (_Fluxes, 
+    (conserved2extensive(_Fluxes), 
      dt, 
      ss_.getVertices(),
      pg_,
@@ -475,11 +509,13 @@ void hdsim1D::TimeAdvance2(void)
 				       ss_.getVertices()));
 
   const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
-    (_ConservedExtensive, ss_.getVertices(), pg_);
+    (extensive2conserved(_ConservedExtensive),
+     ss_.getVertices(), pg_);
 
-  setCells(cold_flows_.retrieveAllPrimitive(_ConservedIntensive,
-					    _ConservedExtensive,
-					    _eos));
+  setCells(cold_flows_.retrieveAllPrimitive
+	   (_ConservedIntensive,
+	    extensive2conserved(_ConservedExtensive),
+	    _eos));
 
   time_ += dt;
   ++cycle_;
@@ -503,9 +539,9 @@ namespace{
     const vector<Conserved> fluxes = SolveRiemannProblems
       (old.edges,old.cells,sr,edge_velocity,rs,bc,dt);
 
-    vector<Conserved> extensive = old.extensive;
+    vector<Extensive> extensive = conserved2extensive(old.extensive);
     UpdateConservedExtensive
-      (fluxes,
+      (conserved2extensive(fluxes),
        dt,
        old.edges,
        pg,
@@ -520,11 +556,13 @@ namespace{
     MoveVertices(edge_velocity,dt,edges);
 
     const vector<Conserved> intensive = 
-      UpdateConservedIntensive(extensive,edges,pg);
+      UpdateConservedIntensive
+      (extensive2conserved(extensive),edges,pg);
 
     const vector<Primitive> cells = UpdatePrimitives(intensive,eos);
 
-    return HydroSnapshot1D(edges,cells,intensive,extensive);
+    return HydroSnapshot1D(edges,cells,intensive,
+			   extensive2conserved(extensive));
   }
 
   HydroSnapshot1D time_advance_2nd_order
@@ -548,9 +586,9 @@ namespace{
     const vector<Conserved> fluxes = SolveRiemannProblems
       (mid.edges,mid.cells,sr,edge_velocity,rs,bc,dt);
 
-    vector<Conserved> new_extensive = old.extensive;
+    vector<Extensive> new_extensive = conserved2extensive(old.extensive);
     UpdateConservedExtensive
-      (fluxes,
+      (conserved2extensive(fluxes),
        dt,
        old.edges,
        pg,
@@ -566,7 +604,7 @@ namespace{
 
     vector<Conserved> new_intensive = 
       UpdateConservedIntensive
-      (new_extensive,new_edges, pg);
+      (extensive2conserved(new_extensive),new_edges, pg);
 
     vector<Primitive> new_cells = 
       UpdatePrimitives(new_intensive,eos);
@@ -574,7 +612,7 @@ namespace{
     return HydroSnapshot1D(new_edges,
 			   new_cells,
 			   new_intensive,
-			   new_extensive);
+			   extensive2conserved(new_extensive));
   }
 }
 
@@ -588,13 +626,13 @@ void hdsim1D::TimeAdvanceRK(int order)
        HydroSnapshot1D(ss_.getVertices(),
 		       getCells(),
 		       CalcConservedIntensive(getCells()),
-		       _ConservedExtensive),
+		       extensive2conserved(_ConservedExtensive)),
        _vm, _Interpolation, _rs, _bc, _eos, 
        force_, time_, dt);
     ss_.updateVertices(res.edges);
     setCells(res.cells);
     const vector<Conserved> _ConservedIntensive = res.intensive;
-    _ConservedExtensive = res.extensive;
+    _ConservedExtensive = conserved2extensive(res.extensive);
   }
   else if(2==order){
     HydroSnapshot1D res = time_advance_2nd_order
@@ -602,13 +640,13 @@ void hdsim1D::TimeAdvanceRK(int order)
        HydroSnapshot1D(ss_.getVertices(),
 		       getCells(),
 		       CalcConservedIntensive(getCells()),
-		       _ConservedExtensive),
+		       extensive2conserved(_ConservedExtensive)),
        _vm, _Interpolation, _rs, _bc, _eos, 
        force_, time_, dt);
     ss_.updateVertices(res.edges);
     setCells(res.cells);
     const vector<Conserved> _ConservedIntensive = res.intensive;
-    _ConservedExtensive = res.extensive;
+    _ConservedExtensive = conserved2extensive(res.extensive);
   }
   else
     throw UniversalError("Unsupported Runge Kutta order");
