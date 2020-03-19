@@ -11,7 +11,7 @@ def consolidate_single(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname,'r+')
+    f = h5py.File(fname,'r')
     #res = {key:numpy.array(f[key]) for key in f}
     res = {}
     res['x_coordinate'] = numpy.array(f['geometry']['x_coordinate'])
@@ -32,7 +32,7 @@ def consolidate_multiple(f_list):
     parts_list = [consolidate_single(fname) for fname in f_list]
     return {key:numpy.concatenate([part[key] for part in parts_list]) for key in parts_list[0]}
 
-def find_max_pos_par(x_list, y_list, window=2):
+def find_max_pos_par(x_list, y_list, window=10):
 
     import numpy
 
@@ -62,11 +62,11 @@ class SedovTaylorProfiles:
     def __init__(self, upstream, shock_front, g, w, n ,nip=1000):
 
         import numpy
-        import imp
+        from importlib.machinery import SourceFileLoader
         import os
 
-        sedov_taylor = imp.load_source('sedov_taylor',
-                                       os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
+        sedov_taylor = SourceFileLoader('sedov_taylor',
+                                        os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py').load_module()
 
         self.upstream = upstream
         ssv_list = numpy.linspace(1e-6+1./g,

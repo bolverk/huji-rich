@@ -156,15 +156,19 @@ int main(void)
   SimData sim_data;
   hdsim& sim = sim_data.getSim();
 
+  const double tf = 0.01;
+
   //my_main_loop(sim);
-  for (size_t i = 0; i < 100; ++i)
+  while(sim.getTime()<tf)
   {
 	  sim.TimeAdvance();
+	  /*
 #ifdef RICH_MPI
 	  write_snapshot_to_hdf5(sim, "snap_"+int2str(sim.getCycle())+"_"+int2str(rank)+".h5");
 #else
 	  write_snapshot_to_hdf5(sim, "snap_" + int2str(sim.getCycle()) + ".h5");
 #endif
+	  */
   }
 
 #ifdef RICH_MPI

@@ -38,7 +38,7 @@ def consolidate_data_single(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname)
+    f = h5py.File(fname,'r')
 
     res = {}
     for field in f['geometry']:
@@ -92,7 +92,7 @@ def main():
     f.close()
 
     return l1_density<2.25 and \
-        l1_pressure<0.8 and \
+        l1_pressure<0.9 and \
         l1_velocity<0.18
 
 if __name__ == '__main__':
