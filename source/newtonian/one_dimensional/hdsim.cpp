@@ -148,6 +148,7 @@ hdsim1D::hdsim1D
  const VertexMotion& vm,
  const BoundaryConditions1D& bc,
  const SourceTerm1D& force,
+ const TimeStepFunction1D& tsf,
  const CellUpdater1D& cu):
   pg_(pg),
   ss_(vertices,
@@ -157,12 +158,7 @@ hdsim1D::hdsim1D
       perpvelocity,
       vector<pair<string, const SpatialDistribution1D*> >(),
       vector<pair<string, const BoolSpatialDistribution* > >()),
-  //  _Vertices(vertices), 
   _eos(eos), 
-  //  _Fluxes(vector<Conserved>(vertices.size())),
-  //  _VertexVelocity(vector<double>()),
-  //  _ConservedIntensive
-  //  (CalcConservedIntensive(cc2primitives(ss_.getCells(),eos))),
   _ConservedExtensive
   (CalcConservedExtensive
    (pg_,
@@ -170,7 +166,8 @@ hdsim1D::hdsim1D
     ss_.getVertices())),
   _Interpolation(Interpolation),
   _rs(rs), _vm(vm), _bc(bc), 
-  force_(force), 
+  force_(force),
+  tsf_(tsf),
   cu_(cu),
   _cfl(1./3.), time_(0), cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
@@ -254,6 +251,7 @@ namespace {
     return res;
   }
 
+  /*
   double MaxTimeStepForCell(double width, Primitive const& p)
   {
     return width/(p.SoundSpeed+abs(p.Velocity.x));
@@ -269,6 +267,7 @@ namespace {
     }
     return res;
   }
+  */
 
   void UpdateConservedExtensive
   (const vector<Conserved>& Fluxes, 
@@ -357,7 +356,8 @@ void hdsim1D::TimeAdvance(void)
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_.getVertices(), getCells(), _vm);
 
-  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  const double dt = tsf_(ss_,_eos);
 
   const vector<Conserved> _Fluxes = SolveRiemannProblems
     (ss_.getVertices(), getCells(), _Interpolation, _VertexVelocity,
@@ -407,7 +407,8 @@ void hdsim1D::TimeAdvance2(void)
   const vector<double> mid_vertex_velocities = 
     CalcVertexVelocities(ss_.getVertices(), getCells(), _vm);
 
-  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  const double dt = tsf_(ss_, _eos);
 
   const vector<Conserved> mid_fluxes = 
     SolveRiemannProblems(ss_.getVertices(), getCells(), _Interpolation, 
@@ -579,7 +580,8 @@ namespace{
 
 void hdsim1D::TimeAdvanceRK(int order)
 {
-  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  const double dt = tsf_(ss_,_eos);
   if(1==order){
     HydroSnapshot1D res = time_advance_1st_order
       (pg_,

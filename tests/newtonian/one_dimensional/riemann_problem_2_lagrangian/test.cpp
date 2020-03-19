@@ -4,6 +4,7 @@
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/one_dimensional/hdsim.hpp"
 #include "source/newtonian/one_dimensional/pcm1d.hpp"
+
 #include "source/newtonian/one_dimensional/spatial_distribution1d.hpp"
 #include "source/newtonian/one_dimensional/eulerian1d.hpp"
 #include "source/newtonian/one_dimensional/lagrangian1d.hpp"
@@ -12,6 +13,7 @@
 #include "source/misc/int2str.hpp"
 #include "source/misc/utils.hpp"
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
+#include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 
 // Riemann problem
 
@@ -36,6 +38,7 @@ public:
     vm_(false),
     bc_(),
     force_(),
+    tsf_(0.3),
     cu_(),
     sim_
     (pg_,
@@ -50,6 +53,7 @@ public:
      vm_,
      bc_,
      force_,
+     tsf_,
      cu_) {}
 
   hdsim1D& getSim(void)
@@ -70,6 +74,7 @@ private:
   const Lagrangian1D vm_;
   const Outflow bc_;
   const ZeroForce1D force_;
+  const SimpleCFL1D tsf_;
   const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };

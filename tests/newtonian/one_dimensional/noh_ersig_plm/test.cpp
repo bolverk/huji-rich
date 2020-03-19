@@ -13,6 +13,7 @@
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
+#include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 
 using namespace std;
 using namespace interpolations1d;
@@ -71,6 +72,7 @@ public:
     right_bc_(),
     bc_(left_bc_,right_bc_),
     force_(),
+    tsf_(0.3),
     cu_(),
     sim_
     (pg_,
@@ -85,6 +87,7 @@ public:
      vm_,
      bc_,
      force_,
+     tsf_,
      cu_) {}
 
   hdsim1D& getSim(void)
@@ -109,6 +112,7 @@ private:
   const Outflow right_bc_;
   const DifferentBC bc_;
   const ZeroForce1D force_;
+  const SimpleCFL1D tsf_;
   const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };

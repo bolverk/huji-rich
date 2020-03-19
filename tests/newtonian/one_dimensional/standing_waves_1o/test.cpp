@@ -11,6 +11,7 @@
 #include "source/newtonian/one_dimensional/source_term_1d.hpp"
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"
+#include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 
 using namespace std;
 using namespace simulation1d;
@@ -66,6 +67,7 @@ public:
     force_(read_number("wavelength.txt"),
 	   read_number("amplitude.txt"),
 	   read_number("phase_velocity.txt")),
+    tsf_(0.33333333333),
     cu_(),
     sim_(pg_,
 	 linspace(0,width,30),
@@ -79,7 +81,8 @@ public:
 	 vm_,
 	 bc_,
 	 force_,
-     cu_) {}
+	 tsf_,
+	 cu_) {}
 
   hdsim1D& getSim(void)
   {
@@ -94,6 +97,7 @@ private:
   const Eulerian1D vm_;
   const RigidWall1D bc_;
   const PeriodicDriver force_;
+  const SimpleCFL1D tsf_;
   const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };

@@ -16,6 +16,7 @@
 #include "physical_geometry_1d.hpp"
 #include "cell_updater_1d.hpp"
 #include "simulation_state_1d.hpp"
+#include "time_step_function_1d.hpp"
 
 //! \brief Container for all hydrodynamic data
 class HydroSnapshot1D
@@ -117,6 +118,8 @@ private:
   BoundaryConditions1D const& _bc;
 
   SourceTerm1D const& force_;
+
+  const TimeStepFunction1D& tsf_;
   
   const CellUpdater1D& cu_;
 
@@ -161,6 +164,7 @@ public:
    const VertexMotion& vm,
    const BoundaryConditions1D& bc,
    const SourceTerm1D& force,
+   const TimeStepFunction1D& tsf,
    const CellUpdater1D& cu);
 
   /*! \brief Changes the value of the Courant Friedrichs Levy coefficient
