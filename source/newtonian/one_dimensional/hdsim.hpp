@@ -20,35 +20,6 @@
 #include "../two_dimensional/extensive.hpp"
 #include "extensive_updater_1d.hpp"
 
-//! \brief Container for all hydrodynamic data
-class HydroSnapshot1D
-{
-public:
-
-  /*! \brief Class constructor
-    \param redges Location of grid edges
-    \param rcells Values of the primitive variables in hydrodynamic cells
-    \param rintensive Values of the intensive conserved variables
-    \param rextensive Values of the extensive conserved variables
-  */
-  HydroSnapshot1D(vector<double> const& redges,
-		  vector<Primitive> const& rcells,
-		  vector<Conserved> const& rintensive,
-		  vector<Conserved> const& rextensive);
-
-  //! \brief Position of interfaces between hydrodynamic cells
-  vector<double> edges;
-
-  //! \brief Primitive variables inside each hydrodynamic cell
-  vector<Primitive> cells;
-
-  //! \brief Intensive conserved variables of each cell
-  vector<Conserved> intensive;
-
-  //! \brief Extensive conserved variables of each cell
-  vector<Conserved> extensive;
-};
-
 //! \brief Container for cold flows data
 class ColdFlows
 {
@@ -175,11 +146,6 @@ public:
 
   //! \brief Second order time advance
   void TimeAdvance2(void);
-
-  /*! \brief Advances the simulation in time
-    \param order Order of accuracy of the scheme
-  */
-  //  void TimeAdvanceRK(int order);
   
   /*! \brief Enables cold flows correction
     \param thres Threshold for the ratio between thermal and total energy below which the correction is applied

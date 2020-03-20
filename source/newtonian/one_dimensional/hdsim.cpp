@@ -9,15 +9,6 @@
 
 using namespace std;
 
-HydroSnapshot1D::HydroSnapshot1D
-(vector<double> const& redges,
- vector<Primitive> const& rcells,
- vector<Conserved> const& rintensive,
- vector<Conserved> const& rextensive):
-  edges(redges), cells(rcells), 
-  intensive(rintensive),
-  extensive(rextensive) {}
-
 // Diagnostics
 
 double hdsim1D::GetCellCenter(size_t index) const
