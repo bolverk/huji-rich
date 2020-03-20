@@ -455,15 +455,6 @@ void hdsim1D::TimeAdvance2(void)
       ss_,
       dt/2,
       mid_extensive);
-  /*
-      
-  UpdateConservedExtensive
-    (conserved2extensive(mid_fluxes),
-     dt/2,
-     ss_.getVertices(),
-     pg_,
-     mid_extensive);
-  */
   
   force_contribution(ss_.getVertices(), getCells(),
 		     force_, time_, dt/2,
@@ -499,12 +490,11 @@ void hdsim1D::TimeAdvance2(void)
      CalcConservedIntensive(getCells()),
      dt);
 
-  UpdateConservedExtensive
-    (conserved2extensive(_Fluxes), 
-     dt, 
-     ss_.getVertices(),
-     pg_,
-     _ConservedExtensive);
+  eu_(conserved2extensive(_Fluxes),
+      pg_,
+      ss_,
+      dt,
+      _ConservedExtensive);
 
   force_contribution(mid_vertices, mid_cells,
 		     force_, time_, dt,
