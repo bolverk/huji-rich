@@ -57,7 +57,8 @@ void simulation1d::main_loop(hdsim1D& sim,
     if(1==time_order)
       sim.TimeAdvance();
     else if(2==time_order)
-      sim.TimeAdvanceRK(2);
+      sim.TimeAdvance2();
+    //      sim.TimeAdvanceRK(2);
     else
       throw UniversalError("Error in 1d main_loop: unsupported time integration order");
     

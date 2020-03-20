@@ -288,6 +288,7 @@ namespace {
   }
   */
 
+  /*
   void UpdateConservedExtensive
   (const vector<Extensive>& Fluxes, 
    double dt,
@@ -300,6 +301,7 @@ namespace {
       ConservedExtensive[i] -= dt*pg.calcArea(vertices.at(i+1))*Fluxes.at(i+1);
     }
   }
+  */
 
   void MoveVertices(vector<double> const& VertexVelocity,
 		    double dt, vector<double>& Vertices)
@@ -333,6 +335,7 @@ namespace {
     return res;
   }
 
+  /*
   vector<Primitive> UpdatePrimitives
   (vector<Conserved> const& ConservedIntensive,
    EquationOfState const& eos)
@@ -342,6 +345,7 @@ namespace {
       res[i] = Conserved2Primitive(ConservedIntensive[i], eos);
     return res;
   }
+  */
 }
 
 namespace {
@@ -519,6 +523,7 @@ void hdsim1D::TimeAdvance2(void)
 }
 
 namespace{
+  /*
   HydroSnapshot1D time_advance_1st_order
     (const PhysicalGeometry1D& pg,
      const HydroSnapshot1D& old,
@@ -561,7 +566,9 @@ namespace{
     return HydroSnapshot1D(edges,cells,intensive,
 			   extensive2conserved(extensive));
   }
+  */
 
+  /*
   HydroSnapshot1D time_advance_2nd_order
     (const PhysicalGeometry1D& pg,
      const HydroSnapshot1D& old,
@@ -611,8 +618,10 @@ namespace{
 			   new_intensive,
 			   extensive2conserved(new_extensive));
   }
+  */
 }
 
+/*
 void hdsim1D::TimeAdvanceRK(int order)
 {
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
@@ -651,6 +660,7 @@ void hdsim1D::TimeAdvanceRK(int order)
   time_ += dt;
   cycle_++;
 }
+*/
 
 ColdFlows::ColdFlows(void):
   active_(false),

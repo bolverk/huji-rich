@@ -179,7 +179,7 @@ public:
   /*! \brief Advances the simulation in time
     \param order Order of accuracy of the scheme
   */
-  void TimeAdvanceRK(int order);
+  //  void TimeAdvanceRK(int order);
   
   /*! \brief Enables cold flows correction
     \param thres Threshold for the ratio between thermal and total energy below which the correction is applied
