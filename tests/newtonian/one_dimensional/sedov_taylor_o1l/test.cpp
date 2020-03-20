@@ -9,6 +9,7 @@
 #include "source/newtonian/one_dimensional/cylindrical_complementary_1d.hpp"
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"
 #include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
+#include "source/newtonian/one_dimensional/simple_extensive_updater_1d.hpp"
 
 namespace {
 
@@ -40,6 +41,7 @@ namespace {
       bc_(),
       force_(),
       tsf_(0.3),
+      eu_(),
       cu_(),
       sim_
       (pg_,
@@ -55,6 +57,7 @@ namespace {
        bc_,
        force_,
        tsf_,
+       eu_,
        cu_) 
     {}
 
@@ -73,6 +76,7 @@ namespace {
     const RigidWall1D bc_;
     const CylindricalComplementary1D force_;
     const SimpleCFL1D tsf_;
+    const SimpleExtensiveUpdater1D eu_;
     const SimpleCellUpdater1D cu_;
     hdsim1D sim_;
   };

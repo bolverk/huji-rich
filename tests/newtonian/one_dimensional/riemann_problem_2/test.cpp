@@ -13,6 +13,7 @@
 #include "source/newtonian/one_dimensional/hdf5_diagnostics1d.hpp"
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
+#include "source/newtonian/one_dimensional/simple_extensive_updater_1d.hpp"
 
 // Riemann problem
 
@@ -37,6 +38,7 @@ public:
     bc_(),
     force_(),
     tsf_(0.3),
+    eu_(),
     cu_(),
     sim_(pg_,
 	 vertices_,
@@ -51,6 +53,7 @@ public:
 	 bc_,
 	 force_,
 	 tsf_,
+	 eu_,
 	 cu_) {}
 
   hdsim1D& getSim(void)
@@ -72,6 +75,7 @@ private:
   const Outflow bc_;
   const ZeroForce1D force_;
   const SimpleCFL1D tsf_;
+  const SimpleExtensiveUpdater1D eu_;
   const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
 };

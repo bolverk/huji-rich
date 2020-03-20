@@ -164,6 +164,7 @@ hdsim1D::hdsim1D
  const BoundaryConditions1D& bc,
  const SourceTerm1D& force,
  const TimeStepFunction1D& tsf,
+ const ExtensiveUpdater1D& eu,
  const CellUpdater1D& cu):
   pg_(pg),
   ss_(vertices,
@@ -184,6 +185,7 @@ hdsim1D::hdsim1D
   _rs(rs), _vm(vm), _bc(bc), 
   force_(force),
   tsf_(tsf),
+  eu_(eu),
   cu_(cu),
   _cfl(1./3.), time_(0), cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
