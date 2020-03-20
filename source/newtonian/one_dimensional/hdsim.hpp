@@ -127,8 +127,6 @@ private:
   
   const CellUpdater1D& cu_;
 
-  double _cfl;
-
   double time_;
 
   int cycle_;
@@ -171,11 +169,6 @@ public:
    const TimeStepFunction1D& tsf,
    const ExtensiveUpdater1D& eu,
    const CellUpdater1D& cu);
-
-  /*! \brief Changes the value of the Courant Friedrichs Levy coefficient
-    \param cfl New value of cfl number
-  */
-  void overrideCFL(double cfl);
 
   //! \brief Advances the simulation in time
   void TimeAdvance(void);

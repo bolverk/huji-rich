@@ -187,7 +187,8 @@ hdsim1D::hdsim1D
   tsf_(tsf),
   eu_(eu),
   cu_(cu),
-  _cfl(1./3.), time_(0), cycle_(0),
+  time_(0),
+  cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
   tracers_extensive_(vector<vector<double> >()),
   cold_flows_() {}
@@ -341,11 +342,6 @@ namespace {
       res[i] = Conserved2Primitive(ConservedIntensive[i], eos);
     return res;
   }
-}
-
-void hdsim1D::overrideCFL(double cfl)
-{
-  _cfl = cfl;
 }
 
 namespace {
