@@ -336,11 +336,6 @@ void hdsim1D::TimeAdvance(void)
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_,_eos);
 
-  /*
-  const vector<Conserved> _Fluxes = SolveRiemannProblems
-    (ss_.getVertices(), getCells(), _Interpolation, _VertexVelocity,
-     _rs, _bc, dt);
-  */
   const vector<Extensive> fluxes =
     fc_(ss_, _VertexVelocity, _eos, dt);
 
@@ -396,17 +391,21 @@ void hdsim1D::TimeAdvance2(void)
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_, _eos);
 
+  /*
   const vector<Conserved> mid_fluxes = 
     SolveRiemannProblems(ss_.getVertices(), getCells(), _Interpolation, 
 			 mid_vertex_velocities,
 			 _rs, _bc, dt);
+  */
+  const vector<Extensive> mid_fluxes =
+    fc_(ss_, mid_vertex_velocities, _eos, dt);
 
   cold_flows_.advanceEntropies
-    (mid_fluxes, extensive2conserved(_ConservedExtensive), dt/2);
+    (extensive2conserved(mid_fluxes), extensive2conserved(_ConservedExtensive), dt/2);
 
   vector<Extensive> mid_extensive = _ConservedExtensive;
 
-  eu_(conserved2extensive(mid_fluxes),
+  eu_(mid_fluxes,
       pg_,
       ss_,
       dt/2,
