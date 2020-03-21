@@ -228,6 +228,7 @@ namespace {
     throw eo;
   }
 
+  /*
   vector<Conserved> SolveRiemannProblems
   (vector<double> const& Vertices, 
    vector<Primitive> const& Cells,
@@ -262,7 +263,9 @@ namespace {
 		  VertexVelocity, static_cast<int>(Vertices.size())-1);
     return res;
   }
+  */
 
+  /*
   void MoveVertices(vector<double> const& VertexVelocity,
 		    double dt, vector<double>& Vertices)
   {
@@ -270,6 +273,7 @@ namespace {
       Vertices[i] += dt*VertexVelocity[i];
     }
   }
+  */
 
   vector<double> calc_new_vertices
   (const vector<double> vv_,
@@ -391,12 +395,6 @@ void hdsim1D::TimeAdvance2(void)
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_, _eos);
 
-  /*
-  const vector<Conserved> mid_fluxes = 
-    SolveRiemannProblems(ss_.getVertices(), getCells(), _Interpolation, 
-			 mid_vertex_velocities,
-			 _rs, _bc, dt);
-  */
   const vector<Extensive> mid_fluxes =
     fc_(ss_, mid_vertex_velocities, _eos, dt);
 
@@ -414,46 +412,71 @@ void hdsim1D::TimeAdvance2(void)
   force_contribution(ss_.getVertices(), getCells(),
 		     force_, time_, dt/2,
 		     mid_extensive);
+
+  SimulationState1D mid_state = ss_;
+  mid_state.updateVertices
+    (calc_new_vertices(mid_vertex_velocities,
+		       dt,
+		       ss_.getVertices()));
+
+  /*
   vector<double> mid_vertices = ss_.getVertices();
   MoveVertices(mid_vertex_velocities, 
 	       dt/2, mid_vertices);
+  */
 
   const vector<Conserved> mid_intesive = 
     UpdateConservedIntensive
     (extensive2conserved(mid_extensive),
-     mid_vertices,
+     mid_state.getVertices(),
      pg_);
+  mid_state.updateCells
+    (primitives2cc
+     (cold_flows_.retrieveAllPrimitive
+      (mid_intesive,
+       extensive2conserved(mid_extensive),
+       _eos)));
 
+  /*
   const vector<Primitive> mid_cells = 
     cold_flows_.retrieveAllPrimitive(mid_intesive,
 				     extensive2conserved(mid_extensive),
 				     _eos);
+  */
 
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
 				  _eos);
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
-    (mid_vertices, mid_cells, _vm);
+    (mid_state.getVertices(),
+     cc2primitives(mid_state.getCells(),_eos),
+     _vm);
 
+  /*
   const vector<Conserved> _Fluxes = SolveRiemannProblems
     (mid_vertices, mid_cells, _Interpolation, _VertexVelocity,
      _rs, _bc, dt);
+  */
+  const vector<Extensive> fluxes =
+    fc_(mid_state, _VertexVelocity, _eos, dt);
 
   cold_flows_.advanceEntropies
-    (_Fluxes,
+    (extensive2conserved(fluxes),
      CalcConservedIntensive(getCells()),
      dt);
 
-  eu_(conserved2extensive(_Fluxes),
+  eu_(fluxes,
       pg_,
       ss_,
       dt,
       _ConservedExtensive);
 
-  force_contribution(mid_vertices, mid_cells,
-		     force_, time_, dt,
-		     _ConservedExtensive);
+  force_contribution
+    (mid_state.getVertices(),
+     cc2primitives(mid_state.getCells(),_eos),
+     force_, time_, dt,
+     _ConservedExtensive);
 
   //  MoveVertices(_VertexVelocity, dt, _Vertices);
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
