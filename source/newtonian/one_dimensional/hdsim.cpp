@@ -155,6 +155,7 @@ hdsim1D::hdsim1D
  const BoundaryConditions1D& bc,
  const SourceTerm1D& force,
  const TimeStepFunction1D& tsf,
+ const FluxCalculator1D& fc,
  const ExtensiveUpdater1D& eu,
  const CellUpdater1D& cu):
   pg_(pg),
@@ -176,6 +177,7 @@ hdsim1D::hdsim1D
   _rs(rs), _vm(vm), _bc(bc), 
   force_(force),
   tsf_(tsf),
+  fc_(fc),
   eu_(eu),
   cu_(cu),
   time_(0),
@@ -261,39 +263,6 @@ namespace {
     return res;
   }
 
-  /*
-  double MaxTimeStepForCell(double width, Primitive const& p)
-  {
-    return width/(p.SoundSpeed+abs(p.Velocity.x));
-  }
-
-  double MaxTimeStep(vector<double> const& Vertices,
-		     vector<Primitive> const& Cells)
-  {
-    double res = MaxTimeStepForCell(Vertices[1]-Vertices[0], Cells[0]);
-    for(size_t i=1;i<Vertices.size()-1;i++){
-      res = min(res,MaxTimeStepForCell
-		(Vertices[i+1]-Vertices[i],Cells[i]));
-    }
-    return res;
-  }
-  */
-
-  /*
-  void UpdateConservedExtensive
-  (const vector<Extensive>& Fluxes, 
-   double dt,
-   const vector<double>& vertices,
-   const PhysicalGeometry1D& pg,
-   vector<Extensive>& ConservedExtensive)
-  {
-    for(size_t i = 0; i<ConservedExtensive.size(); i++){
-      ConservedExtensive[i] += dt*pg.calcArea(vertices.at(i))*Fluxes.at(i);
-      ConservedExtensive[i] -= dt*pg.calcArea(vertices.at(i+1))*Fluxes.at(i+1);
-    }
-  }
-  */
-
   void MoveVertices(vector<double> const& VertexVelocity,
 		    double dt, vector<double>& Vertices)
   {
@@ -325,18 +294,6 @@ namespace {
     }
     return res;
   }
-
-  /*
-  vector<Primitive> UpdatePrimitives
-  (vector<Conserved> const& ConservedIntensive,
-   EquationOfState const& eos)
-  {
-    vector<Primitive> res(ConservedIntensive.size());
-    for(size_t i=0;i<ConservedIntensive.size();i++)
-      res[i] = Conserved2Primitive(ConservedIntensive[i], eos);
-    return res;
-  }
-  */
 }
 
 namespace {
@@ -512,146 +469,6 @@ void hdsim1D::TimeAdvance2(void)
   time_ += dt;
   ++cycle_;
 }
-
-namespace{
-  /*
-  HydroSnapshot1D time_advance_1st_order
-    (const PhysicalGeometry1D& pg,
-     const HydroSnapshot1D& old,
-     const VertexMotion& vm,
-     const SpatialReconstruction1D& sr,
-     const RiemannSolver& rs,
-     const BoundaryConditions1D& bc,
-     const EquationOfState& eos,
-     const SourceTerm1D& force,
-     double t, double dt)
-  {
-    const vector<double> edge_velocity = CalcVertexVelocities
-      (old.edges,old.cells,vm);
-
-    const vector<Conserved> fluxes = SolveRiemannProblems
-      (old.edges,old.cells,sr,edge_velocity,rs,bc,dt);
-
-    vector<Extensive> extensive = conserved2extensive(old.extensive);
-    UpdateConservedExtensive
-      (conserved2extensive(fluxes),
-       dt,
-       old.edges,
-       pg,
-       extensive);
-    force_contribution(old.edges,
-		       old.cells,
-		       force,
-		       t, dt,
-		       extensive);
-  
-    vector<double> edges = old.edges;
-    MoveVertices(edge_velocity,dt,edges);
-
-    const vector<Conserved> intensive = 
-      UpdateConservedIntensive
-      (extensive2conserved(extensive),edges,pg);
-
-    const vector<Primitive> cells = UpdatePrimitives(intensive,eos);
-
-    return HydroSnapshot1D(edges,cells,intensive,
-			   extensive2conserved(extensive));
-  }
-  */
-
-  /*
-  HydroSnapshot1D time_advance_2nd_order
-    (const PhysicalGeometry1D& pg,
-     const HydroSnapshot1D& old,
-     const VertexMotion& vm,
-     const SpatialReconstruction1D& sr,
-     const RiemannSolver& rs,
-     const BoundaryConditions1D& bc,
-     const EquationOfState& eos,
-     const SourceTerm1D& force,
-     double t, 
-     double dt)
-  {
-    const HydroSnapshot1D mid = time_advance_1st_order
-      (pg, old,vm,sr,rs,bc,eos,force,t,dt/2);
-
-    const vector<double> edge_velocity = CalcVertexVelocities
-      (mid.edges,mid.cells,vm);
-
-    const vector<Conserved> fluxes = SolveRiemannProblems
-      (mid.edges,mid.cells,sr,edge_velocity,rs,bc,dt);
-
-    vector<Extensive> new_extensive = conserved2extensive(old.extensive);
-    UpdateConservedExtensive
-      (conserved2extensive(fluxes),
-       dt,
-       old.edges,
-       pg,
-       new_extensive);
-    force_contribution(mid.edges,
-		       mid.cells,
-		       force,
-		       t+dt/2, dt,
-		       new_extensive);
-
-    vector<double> new_edges = old.edges;
-    MoveVertices(edge_velocity,dt,new_edges);
-
-    vector<Conserved> new_intensive = 
-      UpdateConservedIntensive
-      (extensive2conserved(new_extensive),new_edges, pg);
-
-    vector<Primitive> new_cells = 
-      UpdatePrimitives(new_intensive,eos);
-
-    return HydroSnapshot1D(new_edges,
-			   new_cells,
-			   new_intensive,
-			   extensive2conserved(new_extensive));
-  }
-  */
-}
-
-/*
-void hdsim1D::TimeAdvanceRK(int order)
-{
-  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
-  const double dt = tsf_(ss_,_eos);
-  if(1==order){
-    HydroSnapshot1D res = time_advance_1st_order
-      (pg_,
-       HydroSnapshot1D(ss_.getVertices(),
-		       getCells(),
-		       CalcConservedIntensive(getCells()),
-		       extensive2conserved(_ConservedExtensive)),
-       _vm, _Interpolation, _rs, _bc, _eos, 
-       force_, time_, dt);
-    ss_.updateVertices(res.edges);
-    setCells(res.cells);
-    const vector<Conserved> _ConservedIntensive = res.intensive;
-    _ConservedExtensive = conserved2extensive(res.extensive);
-  }
-  else if(2==order){
-    HydroSnapshot1D res = time_advance_2nd_order
-      (pg_,
-       HydroSnapshot1D(ss_.getVertices(),
-		       getCells(),
-		       CalcConservedIntensive(getCells()),
-		       extensive2conserved(_ConservedExtensive)),
-       _vm, _Interpolation, _rs, _bc, _eos, 
-       force_, time_, dt);
-    ss_.updateVertices(res.edges);
-    setCells(res.cells);
-    const vector<Conserved> _ConservedIntensive = res.intensive;
-    _ConservedExtensive = conserved2extensive(res.extensive);
-  }
-  else
-    throw UniversalError("Unsupported Runge Kutta order");
-
-  time_ += dt;
-  cycle_++;
-}
-*/
 
 ColdFlows::ColdFlows(void):
   active_(false),

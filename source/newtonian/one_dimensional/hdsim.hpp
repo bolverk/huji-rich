@@ -19,6 +19,7 @@
 #include "time_step_function_1d.hpp"
 #include "../two_dimensional/extensive.hpp"
 #include "extensive_updater_1d.hpp"
+#include "flux_calculator_1d.hpp"
 
 //! \brief Container for cold flows data
 class ColdFlows
@@ -94,6 +95,8 @@ private:
 
   const TimeStepFunction1D& tsf_;
 
+  const FluxCalculator1D& fc_;
+
   const ExtensiveUpdater1D& eu_;
   
   const CellUpdater1D& cu_;
@@ -138,6 +141,7 @@ public:
    const BoundaryConditions1D& bc,
    const SourceTerm1D& force,
    const TimeStepFunction1D& tsf,
+   const FluxCalculator1D& fc,
    const ExtensiveUpdater1D& eu,
    const CellUpdater1D& cu);
 

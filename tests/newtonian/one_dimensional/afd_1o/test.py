@@ -11,8 +11,8 @@ def main(graphic_flag=False):
     afd = imp.load_source('afd',os.environ['RICH_ROOT']+'/analytic/afd.py')
     import argparse
 
-    initial = h5py.File('initial.h5')
-    final_numeric = h5py.File('final.h5')
+    initial = h5py.File('initial.h5','r')
+    final_numeric = h5py.File('final.h5','r')
 
     init_parsed = {}
     init_parsed['grid'] = initial['grid']

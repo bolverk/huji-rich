@@ -15,6 +15,7 @@
 #include "source/newtonian/test_1d/main_loop_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_extensive_updater_1d.hpp"
+#include "source/newtonian/one_dimensional/simple_flux_calculator_1d.hpp"
 
 // Riemann problem
 
@@ -38,6 +39,7 @@ public:
     bc_(),
     force_(),
     tsf_(0.3),
+    fc_(rs_,interpm_,bc_),
     eu_(),
     cu_(),
     sim_(pg_,
@@ -53,6 +55,7 @@ public:
 	 bc_,
 	 force_,
 	 tsf_,
+	 fc_,
 	 eu_,
 	 cu_) {}
 
@@ -75,6 +78,7 @@ private:
   const Outflow bc_;
   const ZeroForce1D force_;
   const SimpleCFL1D tsf_;
+  const SimpleFluxCalculator1D fc_;
   const SimpleExtensiveUpdater1D eu_;
   const SimpleCellUpdater1D cu_;
   hdsim1D sim_;
