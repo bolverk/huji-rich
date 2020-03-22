@@ -51,14 +51,14 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
   // Bulk
   vector<Extensive> res(ss.getVertices().size());
   for(size_t i=1;i<ss.getVertices().size()-1;++i){
-    const Primitive left = interp_.InterpState
+    const Primitive left = interp_
       (ss.getVertices(),
        cc2primitives(ss.getCells(), eos),
        vertex_velocity.at(i),
        i,
        0,
        dt);
-    const Primitive right = interp_.InterpState
+    const Primitive right = interp_
       (ss.getVertices(),
        cc2primitives(ss.getCells(), eos),
        vertex_velocity.at(i),

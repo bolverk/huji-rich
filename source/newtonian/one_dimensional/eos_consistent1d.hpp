@@ -26,10 +26,11 @@ namespace interpolations1d{
     EOSConsistent(SpatialReconstruction1D const& naive,
 		  EquationOfState const& eos);
 
-    Primitive InterpState(vector<double> const& vp,
-			  vector<Primitive> const& hv,
-			  double interface_speed,
-			  size_t i, int dir, double dt) const;
+    Primitive operator()
+    (vector<double> const& vp,
+     vector<Primitive> const& hv,
+     double interface_speed,
+     size_t i, int dir, double dt) const;
 
   private:
     SpatialReconstruction1D const& naive_;

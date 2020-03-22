@@ -139,7 +139,7 @@ namespace {
     for(size_t i=margin;i<test_data.getEdges().size()-margin;++i){
       double v_a = test_data.getDistribution("xvelocity")(test_data.getEdges()[i]);
       if(i>0){
-	double v_l = sr.InterpState
+	double v_l = sr
 	  (test_data.getEdges(),
 	   test_data.getCells(),
 	   0,
@@ -148,7 +148,7 @@ namespace {
 	++counter;
       }
       if(i<test_data.getEdges().size()-1){
-	double v_r = sr.InterpState
+	double v_r = sr
 	  (test_data.getEdges(),
 	   test_data.getCells(),
 	   0,
@@ -172,12 +172,12 @@ namespace{
       if(i>0)
 	f << test_data.getEdges()[i] << " "
 	  << test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
-	  << sr.InterpState
+	  << sr
 	  (test_data.getEdges(), test_data.getCells(),0,i,0,0).Velocity.x << endl;
       if(i<test_data.getEdges().size()-1)
 	f << test_data.getEdges()[i] << " "
 	  << test_data.getDistribution("xvelocity")(test_data.getEdges()[i]) << " "
-	  << sr.InterpState
+	  << sr
 	  (test_data.getEdges(), test_data.getCells(),0,i,1,0).Velocity.x << endl;
     }
     f.close();

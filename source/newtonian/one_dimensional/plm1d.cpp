@@ -71,11 +71,12 @@ PLM1D::PLM1D(bool second_order_time,
   second_order_time_(second_order_time),
   slope_limiter_flag_(slope_limiter_flag) {}
 
-Primitive PLM1D::InterpState(vector<double> const& vp,
-			     vector<Primitive> const& hv,
-			     double /*interface_speed*/,
-			     size_t idx, 
-			     int dir, double dt) const
+Primitive PLM1D::operator()
+  (vector<double> const& vp,
+   vector<Primitive> const& hv,
+   double /*interface_speed*/,
+   size_t idx, 
+   int dir, double dt) const
 {
   if(dir==0){
     if(idx==1)

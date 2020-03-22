@@ -12,10 +12,11 @@
 class PCM1D: public SpatialReconstruction1D
 {
 public:
-  Primitive InterpState(vector<double> const& vp,
-			vector<Primitive> const& hv,
-			double interface_speed,
-			size_t i, int dir, double dt) const;
+  Primitive operator()
+  (vector<double> const& vp,
+   vector<Primitive> const& hv,
+   double interface_speed,
+   size_t i, int dir, double dt) const;
 };
 
 #endif // PCM1D_HPP 

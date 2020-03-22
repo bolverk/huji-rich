@@ -1,10 +1,11 @@
 #include "pcm1d.hpp"
 #include "../../misc/universal_error.hpp"
 
-Primitive PCM1D::InterpState(vector<double> const& /*vp*/,
-			     vector<Primitive> const& hv,
-			     double /*interface_speed*/,
-			     size_t i, int dir, double /*dt*/) const
+Primitive PCM1D::operator()
+  (vector<double> const& /*vp*/,
+   vector<Primitive> const& hv,
+   double /*interface_speed*/,
+   size_t i, int dir, double /*dt*/) const
 {
   if(dir==0)//left boundary 
     return hv[i-1];

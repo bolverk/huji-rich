@@ -8,13 +8,13 @@ EOSConsistent::EOSConsistent
  EquationOfState const& eos):
   naive_(naive), eos_(eos) {}
 
-Primitive EOSConsistent::InterpState
+Primitive EOSConsistent::operator()
 (vector<double> const& vp,
  vector<Primitive> const& hv,
  double interface_speed,
  size_t i, int dir, double dt) const
 {
-  Primitive res = naive_.InterpState
+  Primitive res = naive_
     (vp,hv,interface_speed,i,dir,dt);
   res.Energy = eos_.dp2e(res.Density,res.Pressure);
   res.SoundSpeed = eos_.dp2c(res.Density,res.Pressure);

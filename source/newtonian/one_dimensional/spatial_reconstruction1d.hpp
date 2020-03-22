@@ -27,10 +27,11 @@ public:
     \param dt Time step
     \return Hydrodynamic variables on the left or right side of the interface
    */
-  virtual Primitive InterpState(vector<double> const& vp, 
-				vector<Primitive> const& hv, 
-				double interface_speed,
-				size_t i, int dir,double dt) const = 0;
+  virtual Primitive operator()
+  (vector<double> const& vp, 
+   vector<Primitive> const& hv, 
+   double interface_speed,
+   size_t i, int dir,double dt) const = 0;
 
   virtual ~SpatialReconstruction1D(void);
 };

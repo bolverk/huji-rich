@@ -20,10 +20,11 @@ public:
    */
   PLM1D(bool second_order_time=false, bool slope_limiter_flag=true);
 
-  Primitive InterpState(vector<double> const& vp,
-			vector<Primitive> const& hv,
-			double interface_speed,
-			size_t i, int dir, double dt) const;
+  Primitive operator()
+  (vector<double> const& vp,
+   vector<Primitive> const& hv,
+   double interface_speed,
+   size_t i, int dir, double dt) const;
 
 private:
 
