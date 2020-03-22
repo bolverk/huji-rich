@@ -200,6 +200,7 @@ namespace {
     return res;
   }
 
+  /*
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
     __attribute__((noreturn))
 #endif
@@ -228,6 +229,7 @@ namespace {
     eo.AddEntry("interface velocity",vertex_velocity);
     throw eo;
   }
+  */
 
   vector<double> calc_new_vertices
   (const vector<double> vv_,
