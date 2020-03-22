@@ -83,13 +83,13 @@ private:
 
   vector<Extensive> _ConservedExtensive;
 
-  SpatialReconstruction1D const& _Interpolation;
+  //  SpatialReconstruction1D const& _Interpolation;
 
   //  RiemannSolver const& _rs;
 
   VertexMotion const& _vm;
 
-  BoundaryConditions1D const& _bc;
+  //  BoundaryConditions1D const& _bc;
 
   SourceTerm1D const& force_;
 
