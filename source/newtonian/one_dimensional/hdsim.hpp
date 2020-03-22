@@ -81,9 +81,9 @@ private:
 
   EquationOfState const& eos_;
 
-  vector<Extensive> _ConservedExtensive;
+  vector<Extensive> extensives_;
 
-  VertexMotion const& _vm;
+  VertexMotion const& vm_;
 
   SourceTerm1D const& force_;
 
