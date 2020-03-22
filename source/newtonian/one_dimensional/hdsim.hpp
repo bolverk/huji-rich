@@ -110,15 +110,12 @@ public:
   /*! \brief Class constructor
     \param pg Physical geometry
     \param vertices Vertices
-    \param Interpolation Interpolation method
     \param density Initial spatial density distribution
     \param pressure Initial spatial pressure distribution
     \param paravelocity Initial spatial parallel velocity distribution
     \param perpvelocity Initial spatial perpendicular velocity distribution
     \param eos Equation of state
-    \param rs Riemann solver
     \param vm Vertex motion. Calculates the vertex velocities
-    \param bc Boundary conditions
     \param force External force
   */
   hdsim1D

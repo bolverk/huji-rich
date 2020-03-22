@@ -19,7 +19,7 @@ public:
    */
   explicit ArepoInterp(IdealGas const& eos);
 
-  Primitive InterpState
+  Primitive operator()
   (vector<double> const& vp,
    vector<Primitive> const& hv,
    double interface_speed,

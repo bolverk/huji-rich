@@ -68,10 +68,11 @@ namespace {
   }
 }
 
-Primitive ArepoInterp::InterpState(vector<double> const& vp,
-				   vector<Primitive> const& hv,
-				   double v_i,
-				   size_t idx, int dir, double dt) const
+Primitive ArepoInterp::operator()
+  (vector<double> const& vp,
+   vector<Primitive> const& hv,
+   double v_i,
+   size_t idx, int dir, double dt) const
 {
   if(dir==0){
     if(idx==1)
