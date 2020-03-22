@@ -1,7 +1,7 @@
 #include "rigid_wall_1d.hpp"
 #include "../../misc/universal_error.hpp"
 
-Conserved RigidWall1D::CalcFlux
+Conserved RigidWall1D::operator()
 (vector<double> const& Vertices, vector<Primitive> const& Cells,
  RiemannSolver const& rs, 
  vector<double> const& vertex_velocity,

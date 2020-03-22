@@ -11,11 +11,12 @@ namespace {
   */
 }
 
-Conserved Periodic1D::CalcFlux(vector<double> const& Vertices, 
-			       vector<Primitive> const& Cells,
-			       RiemannSolver const& rs, 
-			       vector<double> const& vertex_velocity,
-			       int i) const
+Conserved Periodic1D::operator()
+  (vector<double> const& Vertices, 
+   vector<Primitive> const& Cells,
+   RiemannSolver const& rs, 
+   vector<double> const& vertex_velocity,
+   int i) const
 {
   if(i==0||i==static_cast<int>(Vertices.size())-1){
     /*

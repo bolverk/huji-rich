@@ -78,18 +78,18 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
   }
 
   // Boundary conditions
-  const Conserved front = bc_.CalcFlux(ss.getVertices(),
-				       cc2primitives(ss.getCells(),eos),
-				       rs_,
-				       vertex_velocity,
-				       0);
+  const Conserved front = bc_(ss.getVertices(),
+			      cc2primitives(ss.getCells(),eos),
+			      rs_,
+			      vertex_velocity,
+			      0);
   copy_hydro_flux(front, res.front());
   nullify_tracers(res.front());
-  const Conserved back = bc_.CalcFlux(ss.getVertices(),
-				      cc2primitives(ss.getCells(),eos),
-				      rs_,
-				      vertex_velocity,
-				      static_cast<int>(res.size()-1));
+  const Conserved back = bc_(ss.getVertices(),
+			     cc2primitives(ss.getCells(),eos),
+			     rs_,
+			     vertex_velocity,
+			     static_cast<int>(res.size()-1));
   copy_hydro_flux(back, res.back());
   nullify_tracers(res.back());		  
   return res;			   

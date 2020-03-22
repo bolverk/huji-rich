@@ -1,11 +1,12 @@
 #include "outflow1d.hpp"
 #include "../../misc/universal_error.hpp"
 
-Conserved Outflow::CalcFlux(vector<double> const& Vertices,
-			    vector<Primitive> const& Cells,
-			    RiemannSolver const& rs, 
-			    vector<double> const& vertex_velocity,
-			    int i) const
+Conserved Outflow::operator()
+  (vector<double> const& Vertices,
+   vector<Primitive> const& Cells,
+   RiemannSolver const& rs, 
+   vector<double> const& vertex_velocity,
+   int i) const
 {
   if(i==0){
     Primitive ghost = Cells[0];

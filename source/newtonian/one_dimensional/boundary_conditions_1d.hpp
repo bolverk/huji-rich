@@ -24,7 +24,7 @@ public:
     \param i Vertex index
     \return Flux at the boundary
    */
-  virtual Conserved CalcFlux
+  virtual Conserved operator()
   (vector<double> const& Vertices,
    vector<Primitive> const& Cells,
    RiemannSolver const& rs, 
