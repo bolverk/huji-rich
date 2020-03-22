@@ -85,7 +85,7 @@ private:
 
   SpatialReconstruction1D const& _Interpolation;
 
-  RiemannSolver const& _rs;
+  //  RiemannSolver const& _rs;
 
   VertexMotion const& _vm;
 

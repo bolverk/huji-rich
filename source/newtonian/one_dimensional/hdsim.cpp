@@ -150,7 +150,7 @@ hdsim1D::hdsim1D
  const SpatialDistribution1D& paravelocity,
  const SpatialDistribution1D& perpvelocity,
  const EquationOfState& eos,
- const RiemannSolver& rs,
+ const RiemannSolver& /*rs*/,
  const VertexMotion& vm,
  const BoundaryConditions1D& bc,
  const SourceTerm1D& force,
@@ -174,7 +174,8 @@ hdsim1D::hdsim1D
      CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
      ss_.getVertices()))),
   _Interpolation(Interpolation),
-  _rs(rs), _vm(vm), _bc(bc), 
+  //_rs(rs),
+  _vm(vm), _bc(bc), 
   force_(force),
   tsf_(tsf),
   fc_(fc),
@@ -227,53 +228,6 @@ namespace {
     eo.AddEntry("interface velocity",vertex_velocity);
     throw eo;
   }
-
-  /*
-  vector<Conserved> SolveRiemannProblems
-  (vector<double> const& Vertices, 
-   vector<Primitive> const& Cells,
-   SpatialReconstruction1D const& Interpolation,
-   vector<double> const& VertexVelocity,
-   RiemannSolver const& rs,
-   BoundaryConditions1D const& bc,
-   double dt)
-  {
-    vector<Conserved> res(Vertices.size());
-    for(size_t i = 1;i<Vertices.size()-1; i++){
-      const Primitive left = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], i, 0,dt);
-      const Primitive right = Interpolation.InterpState
-	(Vertices, Cells, VertexVelocity[i], i, 1,dt);
-      try{
-	res[i] = rs(left, right, VertexVelocity[i]);
-      }
-      catch(UniversalError& eo){
-	riemann_solver_rethrow(left,
-			       right,
-			       i, 
-			       Vertices[i],
-			       VertexVelocity[i],
-			       eo);
-      }
-    }
-    res[0] = bc.CalcFlux(Vertices, Cells, rs, 
-			 VertexVelocity,0);
-    res[Vertices.size()-1] = 
-      bc.CalcFlux(Vertices, Cells, rs, 
-		  VertexVelocity, static_cast<int>(Vertices.size())-1);
-    return res;
-  }
-  */
-
-  /*
-  void MoveVertices(vector<double> const& VertexVelocity,
-		    double dt, vector<double>& Vertices)
-  {
-    for(size_t i=0;i<Vertices.size();i++){
-      Vertices[i] += dt*VertexVelocity[i];
-    }
-  }
-  */
 
   vector<double> calc_new_vertices
   (const vector<double> vv_,
