@@ -79,17 +79,11 @@ private:
 
   SimulationState1D ss_;
 
-  EquationOfState const& _eos;
+  EquationOfState const& eos_;
 
   vector<Extensive> _ConservedExtensive;
 
-  //  SpatialReconstruction1D const& _Interpolation;
-
-  //  RiemannSolver const& _rs;
-
   VertexMotion const& _vm;
-
-  //  BoundaryConditions1D const& _bc;
 
   SourceTerm1D const& force_;
 

@@ -86,7 +86,7 @@ namespace{
 const vector<Primitive> hdsim1D::getCells(void) const
 {
   //  return _Cells;
-  return cc2primitives(ss_.getCells(),_eos);
+  return cc2primitives(ss_.getCells(),eos_);
 }
 
 void hdsim1D::setCells(const vector<Primitive>& primitives)
@@ -166,17 +166,14 @@ hdsim1D::hdsim1D
       perpvelocity,
       vector<pair<string, const SpatialDistribution1D*> >(),
       vector<pair<string, const BoolSpatialDistribution* > >()),
-  _eos(eos), 
+  eos_(eos), 
   _ConservedExtensive
   (conserved2extensive
    (CalcConservedExtensive
     (pg_,
      CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
      ss_.getVertices()))),
-  //_Interpolation(Interpolation),
-  //_rs(rs),
   _vm(vm),
-  //_bc(bc), 
   force_(force),
   tsf_(tsf),
   fc_(fc),
@@ -289,16 +286,16 @@ void hdsim1D::TimeAdvance(void)
 {
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
-				  _eos);
+				  eos_);
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_.getVertices(), getCells(), _vm);
 
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
-  const double dt = tsf_(ss_,_eos);
+  const double dt = tsf_(ss_,eos_);
 
   const vector<Extensive> fluxes =
-    fc_(ss_, _VertexVelocity, _eos, dt);
+    fc_(ss_, _VertexVelocity, eos_, dt);
 
   cold_flows_.advanceEntropies
     (extensive2conserved(fluxes),
@@ -329,12 +326,12 @@ void hdsim1D::TimeAdvance(void)
     setCells(cold_flows_.retrieveAllPrimitive
 	     (_ConservedIntensive,
 	      extensive2conserved(_ConservedExtensive),
-	      _eos));
+	      eos_));
   else
     setCells(cu_(_ConservedIntensive,
 		 extensive2conserved(_ConservedExtensive),
 		 getCells(),
-		 _eos));
+		 eos_));
 
   time_ += dt;
   cycle_++;
@@ -344,16 +341,16 @@ void hdsim1D::TimeAdvance2(void)
 {
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
-				  _eos);
+				  eos_);
 
   const vector<double> mid_vertex_velocities = 
     CalcVertexVelocities(ss_.getVertices(), getCells(), _vm);
 
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
-  const double dt = tsf_(ss_, _eos);
+  const double dt = tsf_(ss_, eos_);
 
   const vector<Extensive> mid_fluxes =
-    fc_(ss_, mid_vertex_velocities, _eos, dt);
+    fc_(ss_, mid_vertex_velocities, eos_, dt);
 
   cold_flows_.advanceEntropies
     (extensive2conserved(mid_fluxes), extensive2conserved(_ConservedExtensive), dt/2);
@@ -376,12 +373,6 @@ void hdsim1D::TimeAdvance2(void)
 		       dt,
 		       ss_.getVertices()));
 
-  /*
-  vector<double> mid_vertices = ss_.getVertices();
-  MoveVertices(mid_vertex_velocities, 
-	       dt/2, mid_vertices);
-  */
-
   const vector<Conserved> mid_intesive = 
     UpdateConservedIntensive
     (extensive2conserved(mid_extensive),
@@ -392,31 +383,19 @@ void hdsim1D::TimeAdvance2(void)
      (cold_flows_.retrieveAllPrimitive
       (mid_intesive,
        extensive2conserved(mid_extensive),
-       _eos)));
-
-  /*
-  const vector<Primitive> mid_cells = 
-    cold_flows_.retrieveAllPrimitive(mid_intesive,
-				     extensive2conserved(mid_extensive),
-				     _eos);
-  */
+       eos_)));
 
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
-				  _eos);
+				  eos_);
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (mid_state.getVertices(),
-     cc2primitives(mid_state.getCells(),_eos),
+     cc2primitives(mid_state.getCells(),eos_),
      _vm);
 
-  /*
-  const vector<Conserved> _Fluxes = SolveRiemannProblems
-    (mid_vertices, mid_cells, _Interpolation, _VertexVelocity,
-     _rs, _bc, dt);
-  */
   const vector<Extensive> fluxes =
-    fc_(mid_state, _VertexVelocity, _eos, dt);
+    fc_(mid_state, _VertexVelocity, eos_, dt);
 
   cold_flows_.advanceEntropies
     (extensive2conserved(fluxes),
@@ -431,11 +410,10 @@ void hdsim1D::TimeAdvance2(void)
 
   force_contribution
     (mid_state.getVertices(),
-     cc2primitives(mid_state.getCells(),_eos),
+     cc2primitives(mid_state.getCells(),eos_),
      force_, time_, dt,
      _ConservedExtensive);
 
-  //  MoveVertices(_VertexVelocity, dt, _Vertices);
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
@@ -447,7 +425,7 @@ void hdsim1D::TimeAdvance2(void)
   setCells(cold_flows_.retrieveAllPrimitive
 	   (_ConservedIntensive,
 	    extensive2conserved(_ConservedExtensive),
-	    _eos));
+	    eos_));
 
   time_ += dt;
   ++cycle_;
