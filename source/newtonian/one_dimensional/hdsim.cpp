@@ -240,12 +240,6 @@ namespace {
 
 void hdsim1D::TimeAdvance(void)
 {
-  /*
-  cold_flows_.initializeEntropies(ss_.getVertices(),
-				  getCells(),
-				  eos_);
-  */
-
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_.getVertices(), getCells(), vm_);
 
@@ -254,13 +248,6 @@ void hdsim1D::TimeAdvance(void)
 
   const vector<Extensive> fluxes =
     fc_(ss_, _VertexVelocity, eos_, dt);
-
-  /*
-  cold_flows_.advanceEntropies
-    (extensive2conserved(fluxes),
-     extensive2conserved(extensives_),
-     dt);
-  */
 
   eu_
     (fluxes,
@@ -282,18 +269,10 @@ void hdsim1D::TimeAdvance(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  /*
-  if(cold_flows_.is_active())
-    setCells(cold_flows_.retrieveAllPrimitive
-	     (_ConservedIntensive,
-	      extensive2conserved(extensives_),
-	      eos_));
-  else
-  */
-    setCells(cu_(_ConservedIntensive,
-		 extensive2conserved(extensives_),
-		 getCells(),
-		 eos_));
+  setCells(cu_(_ConservedIntensive,
+	       extensive2conserved(extensives_),
+	       getCells(),
+	       eos_));
 
   time_ += dt;
   cycle_++;
@@ -301,12 +280,6 @@ void hdsim1D::TimeAdvance(void)
 
 void hdsim1D::TimeAdvance2(void)
 {
-  /*
-  cold_flows_.initializeEntropies(ss_.getVertices(),
-				  getCells(),
-				  eos_);
-  */
-
   const vector<double> mid_vertex_velocities = 
     CalcVertexVelocities(ss_.getVertices(), getCells(), vm_);
 
@@ -315,11 +288,6 @@ void hdsim1D::TimeAdvance2(void)
 
   const vector<Extensive> mid_fluxes =
     fc_(ss_, mid_vertex_velocities, eos_, dt);
-
-  /*
-  cold_flows_.advanceEntropies
-    (extensive2conserved(mid_fluxes), extensive2conserved(extensives_), dt/2);
-  */
 
   vector<Extensive> mid_extensive = extensives_;
 
@@ -346,16 +314,10 @@ void hdsim1D::TimeAdvance2(void)
      pg_);
   mid_state.updateCells
     (primitives2cc
-     (cold_flows_.retrieveAllPrimitive
-      (mid_intesive,
-       extensive2conserved(mid_extensive),
-       eos_)));
-
-  /*
-  cold_flows_.initializeEntropies(ss_.getVertices(),
-				  getCells(),
-				  eos_);
-  */
+     (cu_(mid_intesive,
+	  extensive2conserved(mid_extensive),
+	  cc2primitives(mid_state.getCells(),eos_),
+	  eos_)));
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (mid_state.getVertices(),
