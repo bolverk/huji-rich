@@ -141,6 +141,7 @@ namespace {
   }
 }
 
+/*
 hdsim1D::hdsim1D
 (const PhysicalGeometry1D& pg,
  const vector<double>& vertices,
@@ -163,6 +164,38 @@ hdsim1D::hdsim1D
       perpvelocity,
       vector<pair<string, const SpatialDistribution1D*> >(),
       vector<pair<string, const BoolSpatialDistribution* > >()),
+  eos_(eos), 
+  extensives_
+  (conserved2extensive
+   (CalcConservedExtensive
+    (pg_,
+     CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
+     ss_.getVertices()))),
+  vm_(vm),
+  force_(force),
+  tsf_(tsf),
+  fc_(fc),
+  eu_(eu),
+  cu_(cu),
+  time_(0),
+  cycle_(0),
+  tracers_intensive_(vector<vector<double> >()),
+  tracers_extensive_(vector<vector<double> >()),
+  cold_flows_() {}
+*/
+
+hdsim1D::hdsim1D
+(const PhysicalGeometry1D& pg,
+ const SimulationState1D& ss,
+ const EquationOfState& eos,
+ const VertexMotion& vm,
+ const SourceTerm1D& force,
+ const TimeStepFunction1D& tsf,
+ const FluxCalculator1D& fc,
+ const ExtensiveUpdater1D& eu,
+ const CellUpdater1D& cu):
+  pg_(pg),
+  ss_(ss),
   eos_(eos), 
   extensives_
   (conserved2extensive

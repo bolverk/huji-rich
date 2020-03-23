@@ -118,6 +118,7 @@ public:
     \param vm Vertex motion. Calculates the vertex velocities
     \param force External force
   */
+  /*
   hdsim1D
   (const PhysicalGeometry1D& pg,
    const vector<double>& vertices,
@@ -125,6 +126,18 @@ public:
    const SpatialDistribution1D& pressure,
    const SpatialDistribution1D& paravelocity,
    const SpatialDistribution1D& perpvelocity,
+   const EquationOfState& eos,
+   const VertexMotion& vm,
+   const SourceTerm1D& force,
+   const TimeStepFunction1D& tsf,
+   const FluxCalculator1D& fc,
+   const ExtensiveUpdater1D& eu,
+   const CellUpdater1D& cu);
+  */
+
+  hdsim1D
+  (const PhysicalGeometry1D& pg,
+   const SimulationState1D& ss,
    const EquationOfState& eos,
    const VertexMotion& vm,
    const SourceTerm1D& force,
