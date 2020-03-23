@@ -240,9 +240,11 @@ namespace {
 
 void hdsim1D::TimeAdvance(void)
 {
+  /*
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
 				  eos_);
+  */
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_.getVertices(), getCells(), vm_);
@@ -253,10 +255,12 @@ void hdsim1D::TimeAdvance(void)
   const vector<Extensive> fluxes =
     fc_(ss_, _VertexVelocity, eos_, dt);
 
+  /*
   cold_flows_.advanceEntropies
     (extensive2conserved(fluxes),
      extensive2conserved(extensives_),
      dt);
+  */
 
   eu_
     (fluxes,
@@ -297,9 +301,11 @@ void hdsim1D::TimeAdvance(void)
 
 void hdsim1D::TimeAdvance2(void)
 {
+  /*
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
 				  eos_);
+  */
 
   const vector<double> mid_vertex_velocities = 
     CalcVertexVelocities(ss_.getVertices(), getCells(), vm_);
@@ -310,8 +316,10 @@ void hdsim1D::TimeAdvance2(void)
   const vector<Extensive> mid_fluxes =
     fc_(ss_, mid_vertex_velocities, eos_, dt);
 
+  /*
   cold_flows_.advanceEntropies
     (extensive2conserved(mid_fluxes), extensive2conserved(extensives_), dt/2);
+  */
 
   vector<Extensive> mid_extensive = extensives_;
 
@@ -343,9 +351,11 @@ void hdsim1D::TimeAdvance2(void)
        extensive2conserved(mid_extensive),
        eos_)));
 
+  /*
   cold_flows_.initializeEntropies(ss_.getVertices(),
 				  getCells(),
 				  eos_);
+  */
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (mid_state.getVertices(),
@@ -355,10 +365,12 @@ void hdsim1D::TimeAdvance2(void)
   const vector<Extensive> fluxes =
     fc_(mid_state, _VertexVelocity, eos_, dt);
 
+  /*
   cold_flows_.advanceEntropies
     (extensive2conserved(fluxes),
      CalcConservedIntensive(getCells()),
      dt);
+  */
 
   eu_(fluxes,
       pg_,
@@ -380,10 +392,16 @@ void hdsim1D::TimeAdvance2(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
+  /*
   setCells(cold_flows_.retrieveAllPrimitive
 	   (_ConservedIntensive,
 	    extensive2conserved(extensives_),
 	    eos_));
+  */
+  setCells(cu_(_ConservedIntensive,
+	       extensive2conserved(extensives_),
+	       getCells(),
+	       eos_));
 
   time_ += dt;
   ++cycle_;
