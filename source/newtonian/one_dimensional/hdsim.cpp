@@ -141,49 +141,6 @@ namespace {
   }
 }
 
-/*
-hdsim1D::hdsim1D
-(const PhysicalGeometry1D& pg,
- const vector<double>& vertices,
- const SpatialDistribution1D& density,
- const SpatialDistribution1D& pressure,
- const SpatialDistribution1D& paravelocity,
- const SpatialDistribution1D& perpvelocity,
- const EquationOfState& eos,
- const VertexMotion& vm,
- const SourceTerm1D& force,
- const TimeStepFunction1D& tsf,
- const FluxCalculator1D& fc,
- const ExtensiveUpdater1D& eu,
- const CellUpdater1D& cu):
-  pg_(pg),
-  ss_(vertices,
-      density,
-      pressure,
-      paravelocity,
-      perpvelocity,
-      vector<pair<string, const SpatialDistribution1D*> >(),
-      vector<pair<string, const BoolSpatialDistribution* > >()),
-  eos_(eos), 
-  extensives_
-  (conserved2extensive
-   (CalcConservedExtensive
-    (pg_,
-     CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
-     ss_.getVertices()))),
-  vm_(vm),
-  force_(force),
-  tsf_(tsf),
-  fc_(fc),
-  eu_(eu),
-  cu_(cu),
-  time_(0),
-  cycle_(0),
-  tracers_intensive_(vector<vector<double> >()),
-  tracers_extensive_(vector<vector<double> >()),
-  cold_flows_() {}
-*/
-
 hdsim1D::hdsim1D
 (const PhysicalGeometry1D& pg,
  const SimulationState1D& ss,
@@ -227,37 +184,6 @@ namespace {
 
     return res;
   }
-
-  /*
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-    __attribute__((noreturn))
-#endif
-  void riemann_solver_rethrow
-  (Primitive const& left,
-   Primitive const& right,
-   size_t idx, 
-   double pos,
-   double vertex_velocity,
-   UniversalError& eo)
-  {
-    eo.AddEntry("riemann solver stage data starts here",0);
-    eo.AddEntry("left density",left.Density);
-    eo.AddEntry("left pressure",left.Pressure);
-    eo.AddEntry("left x velocity",left.Velocity.x);
-    eo.AddEntry("left y velocity",left.Velocity.y);
-    eo.AddEntry("left sound speed",left.SoundSpeed);
-    eo.AddEntry("right density",right.Density);
-    eo.AddEntry("right pressure",right.Pressure);
-    eo.AddEntry("right x velocity",right.Velocity.x);
-    eo.AddEntry("right y velocity",right.Velocity.y);
-    eo.AddEntry("right sound speed",right.SoundSpeed);
-    eo.AddEntry("right energy",right.Energy);
-    eo.AddEntry("interface index",static_cast<double>(idx));
-    eo.AddEntry("interface position",pos);
-    eo.AddEntry("interface velocity",vertex_velocity);
-    throw eo;
-  }
-  */
 
   vector<double> calc_new_vertices
   (const vector<double> vv_,
@@ -352,12 +278,14 @@ void hdsim1D::TimeAdvance(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
+  /*
   if(cold_flows_.is_active())
     setCells(cold_flows_.retrieveAllPrimitive
 	     (_ConservedIntensive,
 	      extensive2conserved(extensives_),
 	      eos_));
   else
+  */
     setCells(cu_(_ConservedIntensive,
 		 extensive2conserved(extensives_),
 		 getCells(),
@@ -612,9 +540,4 @@ vector<Primitive> ColdFlows::retrieveAllPrimitive
 bool ColdFlows::is_active(void) const
 {
     return active_;
-}
-
-void hdsim1D::enableColdFlows(double thres)
-{
-  cold_flows_.activate(thres);
 }
