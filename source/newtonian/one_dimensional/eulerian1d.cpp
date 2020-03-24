@@ -1,6 +1,6 @@
 #include "eulerian1d.hpp"
 
-double Eulerian1D::CalcVelocity
+double Eulerian1D::operator()
 (int /*i*/, vector<double> const& /*vp*/,
  vector<Primitive> const& /*hv*/) const
 {

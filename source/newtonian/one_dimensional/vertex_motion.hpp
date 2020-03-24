@@ -22,8 +22,9 @@ public:
     \param hv Pointer to hydrodynamics variables container
     \return Velocity of the vertex
   */
-  virtual double CalcVelocity(int i, vector<double> const& vp,
-			      vector<Primitive> const& hv) const = 0;
+  virtual double operator()
+  (int i, vector<double> const& vp,
+   vector<Primitive> const& hv) const = 0;
 
   virtual ~VertexMotion(void);
 };

@@ -3,7 +3,7 @@
 Lagrangian1D::Lagrangian1D(bool rigid_walls):
   rigid_walls_(rigid_walls) {}
 
-double Lagrangian1D::CalcVelocity
+double Lagrangian1D::operator()
 (int i, vector<double> const& /*vp*/,
  vector<Primitive> const& hv) const
 {
