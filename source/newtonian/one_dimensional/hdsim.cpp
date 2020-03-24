@@ -169,8 +169,7 @@ hdsim1D::hdsim1D
   time_(0),
   cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
-  tracers_extensive_(vector<vector<double> >()),
-  cold_flows_() {}
+  tracers_extensive_(vector<vector<double> >()) {}
 
 namespace {
   vector<double> CalcVertexVelocities
@@ -327,13 +326,6 @@ void hdsim1D::TimeAdvance2(void)
   const vector<Extensive> fluxes =
     fc_(mid_state, _VertexVelocity, eos_, dt);
 
-  /*
-  cold_flows_.advanceEntropies
-    (extensive2conserved(fluxes),
-     CalcConservedIntensive(getCells()),
-     dt);
-  */
-
   eu_(fluxes,
       pg_,
       ss_,
@@ -354,12 +346,6 @@ void hdsim1D::TimeAdvance2(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  /*
-  setCells(cold_flows_.retrieveAllPrimitive
-	   (_ConservedIntensive,
-	    extensive2conserved(extensives_),
-	    eos_));
-  */
   setCells(cu_(_ConservedIntensive,
 	       extensive2conserved(extensives_),
 	       getCells(),
@@ -367,18 +353,6 @@ void hdsim1D::TimeAdvance2(void)
 
   time_ += dt;
   ++cycle_;
-}
-
-ColdFlows::ColdFlows(void):
-  active_(false),
-  threshold_(0),
-  entropies_() {}
-
-void ColdFlows::activate(double threshold)
-{
-  active_ = true;
-  assert(threshold>0);
-  threshold_ = threshold;
 }
 
 namespace {
@@ -409,39 +383,6 @@ namespace {
     const vector<Primitive>& cells_;
     const EquationOfState& eos_;
   };
-}
-
-void ColdFlows::initializeEntropies(const vector<double>& grid,
-					     const vector<Primitive>& cells,
-					     const EquationOfState& eos)
-{
-  if(active_)
-    entropies_ = serial_generate(EntropyCalculator(grid,cells,eos));
-}
-
-void ColdFlows::advanceEntropies(const vector<Conserved>& fluxes,
-					  const vector<Conserved>& extensive,
-					  double dt)
-{
-  if(active_){
-    vector<double> specific_entropies(extensive.size());
-    for(size_t i=0;i<extensive.size();++i)
-      specific_entropies[i] = entropies_[i]/extensive[i].Mass;
-    vector<double> entropy_fluxes(fluxes.size());
-    entropy_fluxes[0] = specific_entropies[0]*fluxes[0].Mass;
-    for(size_t i=1;i<extensive.size();++i)
-      entropy_fluxes[i] = fluxes[i].Mass*specific_entropies[fluxes[i].Mass>0 ? i-1 : i];
-    entropy_fluxes[entropy_fluxes.size()-1] = specific_entropies.back()*fluxes.back().Mass;
-    vector<double> entropy_difference(extensive.size());
-    for(size_t i=0;i<extensive.size();++i)
-      entropy_difference[i] = dt*(entropy_fluxes[i] - entropy_fluxes[i+1]);
-    vector<double> old_entropies = entropies_;
-    for(size_t i=0;i<entropies_.size();++i)
-      entropies_[i] = old_entropies[i] + entropy_difference[i];
-
-    for(size_t i=0;i<entropies_.size();++i)
-      assert(entropies_[i]>0 && "Entropy is negative");
-  }
 }
 
 namespace {
@@ -502,22 +443,4 @@ namespace {
     const double threshold_;
     const bool active_;
   };
-}
-
-vector<Primitive> ColdFlows::retrieveAllPrimitive
-(const vector<Conserved>& intensive,
- const vector<Conserved>& extensive,
- const EquationOfState& eos) const
-{
-  return serial_generate(PrimitiveRetriever(intensive,
-					    extensive,
-					    eos,
-					    entropies_,
-					    threshold_,
-					    active_));
-}
-
-bool ColdFlows::is_active(void) const
-{
-    return active_;
 }

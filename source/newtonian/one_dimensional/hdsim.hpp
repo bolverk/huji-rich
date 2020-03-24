@@ -21,55 +21,6 @@
 #include "extensive_updater_1d.hpp"
 #include "flux_calculator_1d.hpp"
 
-//! \brief Container for cold flows data
-class ColdFlows
-{
-public:
-
-  ColdFlows(void);
-
-  /*! \brief Activates the cold flows correction
-    \param threshold Ratio between thermal and total energy below which the correction will be applied
-   */
-  void activate(double threshold);
-
-  /*! \brief Initializes the list of entropies for each cell
-    \param grid Computational grid
-    \param cells Hydrodynamic cells
-    \param eos Equation of state
-   */
-  void initializeEntropies(const vector<double>& grid,
-			   const vector<Primitive>& cells,
-			   const EquationOfState& eos);
-
-  /*! \brief Advances the entropies in time
-    \param fluxes Fluxes
-    \param extensive Extensive conserved variables
-    \param dt Time step
-   */
-  void advanceEntropies(const vector<Conserved>& fluxes,
-			const vector<Conserved>& extensive,
-			double dt);
-
-  /*! \brief Calculates the primitive variables
-    \param intensive Intensive conserved variables
-    \param extensive Extensive conserved variables
-    \param eos Equation of state
-    \return List of primitive variables
-   */
-  vector<Primitive> retrieveAllPrimitive
-  (const vector<Conserved>& intensive,
-   const vector<Conserved>& extensive,
-   const EquationOfState& eos) const;
-   
-   bool is_active(void) const;
-
-private:
-  bool active_;
-  double threshold_;
-  vector<double> entropies_;
-};
-
 //! \brief Newtonian hydrodynamic simulation
 class hdsim1D
 {
@@ -102,8 +53,6 @@ private:
   vector<vector<double> > tracers_intensive_;
   
   vector<vector<double> > tracers_extensive_;
-
-  ColdFlows cold_flows_;
 
 public:
 
