@@ -11,10 +11,9 @@ def main():
 
     import numpy
     import os
-    import imp
     import h5py
 
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
     x_list = h5f['geometry']['x_coordinate']
     d_list = h5f['hydrodynamic']['density']
     p_list = h5f['hydrodynamic']['pressure']

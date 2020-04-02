@@ -5,8 +5,8 @@ matplotlib.use('Qt4Agg')
 import pylab
 import numpy
 import sys
-import imp
-sedov_taylor = imp.load_source('sedov_taylor','../analytic/sedov_taylor.py')
+from importlib.machinery import SourceFileLoader
+sedov_taylor = SourceFileLoader('sedov_taylor','../analytic/sedov_taylor.py').load_module()
 
 # Simulation results
 

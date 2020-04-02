@@ -5,7 +5,6 @@ matplotlib.use('Qt4Agg')
 import pylab
 import numpy
 import sys
-import imp
 
 # Simulation results
 

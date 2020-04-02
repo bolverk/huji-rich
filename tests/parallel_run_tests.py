@@ -2,10 +2,10 @@ def run_single_test(fpath):
 
     import os
     import run_tests as nrt
-    import imp
-    homebrew_makefile = imp.load_source(\
+    from importlib.machinery import SourceFileLoader
+    homebrew_makefile = SourceFileLoader(\
         'homebrew_makefile',
-        '../homebrew_makefile.py')
+        '../homebrew_makefile.py').load_module()
 
     tfname = nrt.temp_folder_name(fpath)
     nrt.new_empty_directory(tfname)
@@ -33,8 +33,8 @@ def run_single_test(fpath):
     # Run
     os.chdir(tfname)
     os.system('./test.exe')
-    import imp
-    mod = imp.load_source('mod',os.getcwd()+'/test.py')
+    from importlib.machinery import SourceFileLoader
+    mod = SourceFileLoader('mod',os.getcwd()+'/test.py').load_module()
     res = mod.main()
     os.chdir('..')
     return res

@@ -5,8 +5,8 @@ matplotlib.use('Qt4Agg')
 import pylab
 import numpy
 import sys
-import imp
-enrs = imp.load_source('enrs','../analytic/enrs.py')
+from importlib.machinery import SourceFileLoader
+enrs = SourceFileLoader('enrs','../analytic/enrs.py').load_module()
 
 pref = sys.argv[0].replace('draw_profiles.py','')
 

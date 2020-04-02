@@ -30,10 +30,10 @@ def main():
 
     import argparse
     import os
-    import imp
-    homebrew_makefile = imp.load_source(\
+    from importlib.machinery import SourceFileLoader
+    homebrew_makefile = SourceFileLoader(\
         'homebrew_makefile',
-        '../homebrew_makefile.py')
+        '../homebrew_makefile.py').load_module()
 
     build_library()
     os.system('rm -rf ./temp_*')
@@ -72,8 +72,8 @@ def main():
     if not args.just_build:
         os.chdir(tfname)
         os.system('./test.exe')
-        import imp
-        mod = imp.load_source('mod',os.getcwd()+'/test.py')
+        from importlib.machinery import SourceFileLoader
+        mod = SourceFileLoader('mod',os.getcwd()+'/test.py').load_module()
         try:
             if mod.main():
                 print args.test_folder+' ... passed'

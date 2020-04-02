@@ -8,7 +8,7 @@ def consolidate_data(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname)
+    f = h5py.File(fname,'r')
     data = {'geometry':{},
             'hydrodynamic':{}}
     for field in data:
@@ -28,12 +28,12 @@ def main():
     
     import numpy
     import math
-    import imp
+    from importlib.machinery import SourceFileLoader
     import h5py
     import os
-    sedov_taylor = imp.load_source(
+    sedov_taylor = SourceFileLoader(
         'sedov_taylor',\
-            os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
+            os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py').load_module()
 
     numeric = consolidate_data('final.h5')
 

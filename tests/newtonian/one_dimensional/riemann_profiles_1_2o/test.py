@@ -10,8 +10,8 @@ def goodness_of_fit(a1, a2):
 def main():
 
     import os
-    import imp
-    enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
+    from importlib.machinery import SourceFileLoader
+    enrs = SourceFileLoader('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py').load_module()
 
     import numpy
     import h5py
@@ -19,7 +19,7 @@ def main():
     left = enrs.Primitive(1,10,0);
     right = enrs.Primitive(1,1,0);
     prof = enrs.RiemannProfile(left,right,5./3.)
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
     t = h5f['time']
     offset = 0.5
 

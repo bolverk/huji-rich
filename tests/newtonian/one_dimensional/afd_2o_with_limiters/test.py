@@ -6,13 +6,13 @@ def main(graphic_flag=False):
 
     import h5py
     import numpy
-    import imp
+    from importlib.machinery import SourceFileLoader
     import os
-    afd = imp.load_source('afd',os.environ['RICH_ROOT']+'/analytic/afd.py')
+    afd = SourceFileLoader('afd',os.environ['RICH_ROOT']+'/analytic/afd.py').load_module()
     import argparse
 
-    initial = h5py.File('initial.h5')
-    final_numeric = h5py.File('final.h5')
+    initial = h5py.File('initial.h5','r')
+    final_numeric = h5py.File('final.h5','r')
 
     init_parsed = {}
     init_parsed['grid'] = initial['grid']

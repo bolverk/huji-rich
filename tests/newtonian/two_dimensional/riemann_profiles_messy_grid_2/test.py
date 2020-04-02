@@ -11,10 +11,10 @@ def main():
 
     import numpy
     import os
-    import imp
+    from importlib.machinery import SourceFileLoader
     import h5py
     import glob
-    enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
+    enrs = SourceFileLoader('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py').load_module()
 
     ns = len(glob.glob('process_*_final.h5'))
     if ns>0:
@@ -29,7 +29,7 @@ def main():
             p.extend(f['pressure'])
             v.extend(f['x_velocity'])
     else:
-        h5f = h5py.File('final.h5')
+        h5f = h5py.File('final.h5','r')
         x = h5f['geometry']['x_coordinate']
         d = h5f['hydrodynamic']['density']
         p = h5f['hydrodynamic']['pressure']
