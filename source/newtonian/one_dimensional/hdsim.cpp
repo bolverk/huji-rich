@@ -83,6 +83,11 @@ namespace{
   }
 }
 
+const SimulationState1D& hdsim1D::getState(void) const
+{
+  return ss_;
+}
+
 const vector<Primitive> hdsim1D::getCells(void) const
 {
   //  return _Cells;
@@ -95,11 +100,11 @@ void hdsim1D::setCells(const vector<Primitive>& primitives)
   ss_.updateCells(primitives2cc(primitives));
 }
 
-int hdsim1D::GetVertexNo(void) const
-{
+//int hdsim1D::GetVertexNo(void) const
+//{
   //  return static_cast<int>(_Vertices.size());
-  return static_cast<int>(ss_.getVertices().size());
-}
+  //return static_cast<int>(ss_.getVertices().size());
+//}
 
 double hdsim1D::GetVertexPosition(size_t i) const
 {

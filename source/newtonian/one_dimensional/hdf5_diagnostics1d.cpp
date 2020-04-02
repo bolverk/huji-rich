@@ -76,4 +76,12 @@ void diagnostics1d::write_snapshot_to_hdf5
     write_std_vector_to_hdf5(file, x_velocity_vector, "x_velocity");
     write_std_vector_to_hdf5(file, y_velocity_vector, "y_velocity");
   }
+
+  // Write tracers
+  /*
+  {
+    const size_t n = sim.getCells().size();
+    const size_t m = sim.getS
+  }
+  */
 }

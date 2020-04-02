@@ -56,34 +56,6 @@ private:
 
 public:
 
-  /*! \brief Class constructor
-    \param pg Physical geometry
-    \param vertices Vertices
-    \param density Initial spatial density distribution
-    \param pressure Initial spatial pressure distribution
-    \param paravelocity Initial spatial parallel velocity distribution
-    \param perpvelocity Initial spatial perpendicular velocity distribution
-    \param eos Equation of state
-    \param vm Vertex motion. Calculates the vertex velocities
-    \param force External force
-  */
-  /*
-  hdsim1D
-  (const PhysicalGeometry1D& pg,
-   const vector<double>& vertices,
-   const SpatialDistribution1D& density,
-   const SpatialDistribution1D& pressure,
-   const SpatialDistribution1D& paravelocity,
-   const SpatialDistribution1D& perpvelocity,
-   const EquationOfState& eos,
-   const VertexMotion& vm,
-   const SourceTerm1D& force,
-   const TimeStepFunction1D& tsf,
-   const FluxCalculator1D& fc,
-   const ExtensiveUpdater1D& eu,
-   const CellUpdater1D& cu);
-  */
-
   hdsim1D
   (const PhysicalGeometry1D& pg,
    const SimulationState1D& ss,
@@ -101,7 +73,7 @@ public:
   //! \brief Second order time advance
   void TimeAdvance2(void);
 
-  //  void AddTracer(SpatialDistribution1D const& tracer);
+  const SimulationState1D& getState(void) const;
 
   // Scaffolding
   const vector<Primitive> getCells(void) const;
@@ -113,7 +85,7 @@ public:
   /*! \brief Returns the number of vertices
     \return Number of vertices
    */
-  int GetVertexNo(void) const;
+  //  int GetVertexNo(void) const;
 
   /*! \brief Returns the position of a vertex
     \param i Vertex index
