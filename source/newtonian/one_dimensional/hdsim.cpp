@@ -100,17 +100,11 @@ void hdsim1D::setCells(const vector<Primitive>& primitives)
   ss_.updateCells(primitives2cc(primitives));
 }
 
-//int hdsim1D::GetVertexNo(void) const
+//double hdsim1D::GetVertexPosition(size_t i) const
 //{
-  //  return static_cast<int>(_Vertices.size());
-  //return static_cast<int>(ss_.getVertices().size());
-//}
-
-double hdsim1D::GetVertexPosition(size_t i) const
-{
   //  return _Vertices[i];
-  return ss_.getVertices().at(i);
-}
+//  return ss_.getVertices().at(i);
+//}
 
 // External functions
 

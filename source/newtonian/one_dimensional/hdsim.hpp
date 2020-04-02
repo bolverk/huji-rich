@@ -82,16 +82,11 @@ public:
 
   // Diagnostics
 
-  /*! \brief Returns the number of vertices
-    \return Number of vertices
-   */
-  //  int GetVertexNo(void) const;
-
   /*! \brief Returns the position of a vertex
     \param i Vertex index
     \return Position of cell vertex
   */
-  double GetVertexPosition(size_t i) const;
+  //  double GetVertexPosition(size_t i) const;
   
   /*! \brief Returns the position of the center of the cell
     \param index Cell index
