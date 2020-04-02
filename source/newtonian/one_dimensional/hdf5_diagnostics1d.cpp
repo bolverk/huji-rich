@@ -52,25 +52,26 @@ void diagnostics1d::write_snapshot_to_hdf5
   // Write grid
   {
     const vector<double>& grid = sim.getState().getVertices();
-    vector<double> grid_vector(sim.getCells().size());
-    for(size_t i=0;i<sim.getCells().size();++i)
+    vector<double> grid_vector(grid.size()-1);
+    for(size_t i=0;i<grid_vector.size();++i)
       grid_vector[i] = 0.5*(grid.at(i)+grid.at(i+1));
     write_std_vector_to_hdf5(file, grid_vector, "grid");
   }
 
   // Write Hydrodynamic variables
   {
-    const size_t n = sim.getCells().size();
+    const vector<ComputationalCell>& cells = sim.getState().getCells();
+    const size_t n = cells.size();
     vector<double> density_vector(n);
     vector<double> pressure_vector(n);
     vector<double> x_velocity_vector(n);
     vector<double> y_velocity_vector(n);
-    const vector<Primitive>& cells = sim.getCells();
+    //    const vector<Primitive>& cells = sim.getCells();
     for(size_t i=0;i<n;++i){
-      density_vector[size_t(i)] = cells.at(i).Density;
-      pressure_vector[size_t(i)] = cells.at(i).Pressure;
-      x_velocity_vector[size_t(i)] = cells.at(i).Velocity.x;
-      y_velocity_vector[size_t(i)] = cells.at(i).Velocity.y;
+      density_vector[size_t(i)] = cells.at(i).density;
+      pressure_vector[size_t(i)] = cells.at(i).pressure;
+      x_velocity_vector[size_t(i)] = cells.at(i).velocity.x;
+      y_velocity_vector[size_t(i)] = cells.at(i).velocity.y;
     }
     write_std_vector_to_hdf5(file, density_vector, "density");
     write_std_vector_to_hdf5(file, pressure_vector, "pressure");

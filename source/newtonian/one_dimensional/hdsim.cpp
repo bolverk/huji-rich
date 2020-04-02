@@ -91,7 +91,6 @@ const SimulationState1D& hdsim1D::getState(void) const
 
 const vector<Primitive> hdsim1D::getCells(void) const
 {
-  //  return _Cells;
   return cc2primitives(ss_.getCells(),eos_);
 }
 
