@@ -14,7 +14,7 @@ def main():
 
     # Simulation results
 
-    initial_data = h5py.File('initial.h5')
+    initial_data = h5py.File('initial.h5','r')
     xr0 = initial_data['geometry']['x_coordinate']
     dr0 = initial_data['hydrodynamic']['density']
     pr0 = initial_data['hydrodynamic']['pressure']
@@ -22,7 +22,7 @@ def main():
     g = numpy.loadtxt('adiabatic_index.txt')
     cr0 = [numpy.sqrt(g*p/d) for d,p in zip(dr0,pr0)]
 
-    final_data = h5py.File('final.h5')
+    final_data = h5py.File('final.h5','r')
     time = numpy.array(final_data['time'])[0]
 
     xs0 = numpy.sort(xr0)

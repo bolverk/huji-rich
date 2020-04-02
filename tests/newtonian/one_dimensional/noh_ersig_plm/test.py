@@ -16,7 +16,7 @@ def main(aux_flag=''):
         graphic_flag = True
 
     # Numeric profiles
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
     center_list = h5f['grid']
     density_list = h5f['density']
     pressure_list = h5f['pressure']
