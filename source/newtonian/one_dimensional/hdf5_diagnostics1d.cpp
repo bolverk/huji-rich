@@ -51,9 +51,10 @@ void diagnostics1d::write_snapshot_to_hdf5
 
   // Write grid
   {
+    const vector<double>& grid = sim.getState().getVertices();
     vector<double> grid_vector(sim.getCells().size());
     for(size_t i=0;i<sim.getCells().size();++i)
-      grid_vector[size_t(i)] = sim.GetCellCenter(i);
+      grid_vector[i] = 0.5*(grid.at(i)+grid.at(i+1));
     write_std_vector_to_hdf5(file, grid_vector, "grid");
   }
 

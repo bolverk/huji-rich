@@ -82,18 +82,6 @@ public:
 
   // Diagnostics
 
-  /*! \brief Returns the position of a vertex
-    \param i Vertex index
-    \return Position of cell vertex
-  */
-  //  double GetVertexPosition(size_t i) const;
-  
-  /*! \brief Returns the position of the center of the cell
-    \param index Cell index
-    \return Position of cell center
-  */
-  double GetCellCenter(size_t index) const;
-
   /*! \brief Returns the time of the simulation
     \return Time
   */

@@ -30,8 +30,9 @@ namespace {
     double GetXVelocityAt(const hdsim1D& sim, double x)
   {
     const vector<Primitive>& cells = sim.getCells();
+    const vector<double>& vertices = sim.getState().getVertices();
     for(size_t i=1;i<cells.size();i++){
-      if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
+      if(vertices.at(i-1)<x&&vertices.at(i)>x)
 	return 0.5*(cells.at(i-1).Velocity.x+
 		    cells.at(i).Velocity.x);
     }

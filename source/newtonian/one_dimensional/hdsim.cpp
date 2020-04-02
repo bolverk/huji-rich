@@ -10,12 +10,13 @@
 using namespace std;
 
 // Diagnostics
-
+/*
 double hdsim1D::GetCellCenter(size_t index) const
 {
   return 0.5*(ss_.getVertices().at(index)+
 	      ss_.getVertices().at(index+1));
 }
+*/
 
 double hdsim1D::GetTime(void) const
 {
