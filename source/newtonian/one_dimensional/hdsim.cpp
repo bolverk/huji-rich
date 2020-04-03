@@ -21,6 +21,7 @@ int hdsim1D::GetCycle(void) const
   return cycle_;
 }
 
+/*
 namespace{
 
   vector<Conserved> extensive2conserved
@@ -35,6 +36,7 @@ namespace{
     return res;
   }
 }
+*/
 
 const SimulationState1D& hdsim1D::getState(void) const
 {
@@ -127,7 +129,7 @@ namespace {
     return res;
   }
 
-  vector<Conserved> UpdateConservedIntensive
+  /*  vector<Conserved> UpdateConservedIntensive
   (const vector<Conserved>& ConservedExtensive, 
    const vector<double>& Vertices,
    const PhysicalGeometry1D& pg)
@@ -139,6 +141,7 @@ namespace {
     }
     return res;
   }
+  */
 }
 
 namespace {
@@ -193,9 +196,11 @@ void hdsim1D::TimeAdvance(void)
 				       dt,
 				       ss_.getVertices()));
 
+  /*
   const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
+  */
 
   ss_.updateCells(cu_(pg_,
 		      extensives_,
@@ -234,11 +239,13 @@ void hdsim1D::TimeAdvance2(void)
 		       dt,
 		       ss_.getVertices()));
 
+  /*
   const vector<Conserved> mid_intesive = 
     UpdateConservedIntensive
     (extensive2conserved(mid_extensive),
      mid_state.getVertices(),
      pg_);
+  */
   mid_state.updateCells
     (cu_(pg_,
 	 mid_extensive,
@@ -266,9 +273,11 @@ void hdsim1D::TimeAdvance2(void)
 				       dt,
 				       ss_.getVertices()));
 
+  /*
   const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
+  */
 
   ss_.updateCells(cu_(pg_,
 		      extensives_,
