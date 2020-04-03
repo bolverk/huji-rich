@@ -76,7 +76,7 @@ public:
   const SimulationState1D& getState(void) const;
 
   // Scaffolding
-  const vector<Primitive> getCells(void) const;
+  //const vector<Primitive> getCells(void) const;
 
   void setCells(const vector<Primitive>& primitives);
 

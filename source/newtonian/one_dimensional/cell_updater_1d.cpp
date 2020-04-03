@@ -28,7 +28,7 @@ namespace{
 vector<Primitive> SimpleCellUpdater1D::operator()
 (const vector<Conserved>& intensives,
 const vector<Conserved>& /*extensives*/,
-const vector<Primitive>& /*old*/,
+const vector<ComputationalCell>& /*old*/,
 const EquationOfState& eos) const
 {
     vector<Primitive> res(intensives.size());

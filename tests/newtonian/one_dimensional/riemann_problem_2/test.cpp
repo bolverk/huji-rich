@@ -84,15 +84,15 @@ private:
   hdsim1D sim_;
 };
 
-void write_output(hdsim1D const& sim, string const& fname)
-{
-  ofstream f;
-  f.open(fname.c_str());
-  const vector<Primitive>& cells = sim.getCells();
-  f << cells.at(cells.size()/2).Pressure << endl;
-  f << cells.at(cells.size()/2).Velocity.x << endl;
-  f.close();
-}
+  void write_output(hdsim1D const& sim, string const& fname)
+  {
+    ofstream f;
+    f.open(fname.c_str());
+    const vector<ComputationalCell>& cells = sim.getState().getCells();
+    f << cells.at(cells.size()/2).pressure << endl;
+    f << cells.at(cells.size()/2).velocity.x << endl;
+    f.close();
+  }
 }
 
 int main(void)

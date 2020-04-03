@@ -88,10 +88,10 @@ namespace {
   bool termination_condition
   (const hdsim1D& sim)
   {
-    const vector<Primitive>& cells = sim.getCells();
+    const vector<ComputationalCell>& cells = sim.getState().getCells();
     const size_t n = cells.size();
     assert(n>10);
-    return cells.at(n-10).Density>1.2;
+    return cells.at(n-10).density>1.2;
     //return sim.GetCycle()>1e5;
   }
 

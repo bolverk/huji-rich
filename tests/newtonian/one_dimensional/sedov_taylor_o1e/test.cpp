@@ -88,7 +88,7 @@ namespace {
   bool termination_condition
   (const hdsim1D& sim)
   {
-    assert(sim.getCells().size()>10);
+    assert(sim.getState().getCells().size()>10);
     //    return sim.GetCell(sim.GetCellNo()-10).Density>1.2;
     return sim.GetCycle()>1e5;
   }

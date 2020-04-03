@@ -27,7 +27,7 @@ class CellUpdater1D
         virtual vector<Primitive> operator()
         (const vector<Conserved>& intensive,
          const vector<Conserved>& extensive,
-         const vector<Primitive>& old,
+         const vector<ComputationalCell>& old,
          const EquationOfState& eos) const = 0;
     
     virtual ~CellUpdater1D(void);
@@ -42,7 +42,7 @@ class SimpleCellUpdater1D: public CellUpdater1D
         vector<Primitive> operator()
         (const vector<Conserved>& intensive,
          const vector<Conserved>& extensive,
-         const vector<Primitive>& old,
+         const vector<ComputationalCell>& old,
          const EquationOfState& eos) const;
          
          ~SimpleCellUpdater1D(void);

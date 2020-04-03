@@ -82,10 +82,11 @@ const SimulationState1D& hdsim1D::getState(void) const
   return ss_;
 }
 
+/*
 const vector<Primitive> hdsim1D::getCells(void) const
 {
   return cc2primitives(ss_.getCells(),eos_);
-}
+  }*/
 
 void hdsim1D::setCells(const vector<Primitive>& primitives)
 {
@@ -259,7 +260,7 @@ void hdsim1D::TimeAdvance(void)
 
   setCells(cu_(_ConservedIntensive,
 	       extensive2conserved(extensives_),
-	       getCells(),
+	       ss_.getCells(),
 	       eos_));
 
   time_ += dt;
@@ -304,7 +305,7 @@ void hdsim1D::TimeAdvance2(void)
     (primitives2cc
      (cu_(mid_intesive,
 	  extensive2conserved(mid_extensive),
-	  cc2primitives(mid_state.getCells(),eos_),
+	  mid_state.getCells(),
 	  eos_)));
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
@@ -334,7 +335,7 @@ void hdsim1D::TimeAdvance2(void)
 
   setCells(cu_(_ConservedIntensive,
 	       extensive2conserved(extensives_),
-	       getCells(),
+	       ss_.getCells(),
 	       eos_));
 
   time_ += dt;
