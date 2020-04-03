@@ -9,8 +9,7 @@ public:
   CylindricalComplementary1D(void);
 
   Conserved operator()
-  (const vector<double>& vertices,
-   const vector<Primitive>& cells,
+  (const SimulationState1D& state,
    size_t point,
    double t,
    double dt) const;

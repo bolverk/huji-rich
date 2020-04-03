@@ -7,14 +7,15 @@
 CylindricalComplementary1D::CylindricalComplementary1D(void) {}
 
 Conserved CylindricalComplementary1D::operator()
-(const vector<double>& vertices,
- const vector<Primitive>& cells,
- size_t point,
- double /*t*/,
- double /*dt*/) const
+  (const SimulationState1D& state,
+   size_t point,
+   double /*t*/,
+   double /*dt*/) const
 {
+  const vector<ComputationalCell>& cells = state.getCells();
+  const vector<double>& vertices = state.getVertices();
   const size_t i = static_cast<size_t>(point);
-  const double p = cells.at(i).Pressure;
+  const double p = cells.at(i).pressure;
   const double r = 0.5*(vertices.at(i)+vertices.at(i+1));
   const double volume = 
     (4./3.)*M_PI*(pow(vertices.at(i+1),3)-

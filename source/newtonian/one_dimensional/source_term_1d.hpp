@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
+#include "simulation_state_1d.hpp"
 
 using std::vector;
 
@@ -25,8 +26,7 @@ public:
     \return Value of the external force
    */
   virtual Conserved operator()
-  (vector<double> const& vertices,
-   vector<Primitive> const& cells,
+  (const SimulationState1D& state,
    size_t point,
    double t,
    double dt) const = 0;

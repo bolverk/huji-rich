@@ -34,17 +34,18 @@ public:
     v_(phase_velocity) {}
 
   Conserved operator()
-  (vector<double> const& vertices,
-   vector<Primitive> const& cells,
+  (const SimulationState1D& state,
    size_t point,
    double t,
    double /*dt*/) const
   {
+    const vector<ComputationalCell>& cells = state.getCells();
+    const vector<double>& vertices = state.getVertices();
     const size_t index = static_cast<size_t>(point);
     const double volume = vertices[index+1]-vertices[index];
     const double x = 0.5*(vertices[index+1]+vertices[index]);
-    const double density = cells[index].Density;
-    const double xvelocity =cells[index].Velocity.x;
+    const double density = cells[index].density;
+    const double xvelocity =cells[index].velocity.x;
     const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
     const double xmom = density*acceleration;
     const double enr = density*acceleration*xvelocity;

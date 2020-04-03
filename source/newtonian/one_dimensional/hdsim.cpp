@@ -213,8 +213,7 @@ namespace {
   }
   
   void force_contribution
-  (vector<double> const& vertices,
-   vector<Primitive> const& cells,
+  (const SimulationState1D& state,
    const SourceTerm1D& force,
    double t,
    double dt,
@@ -222,8 +221,7 @@ namespace {
   {
     for(size_t i=0;i<extensive.size();++i)
       extensive[i] +=
-	dt*conserved2extensive(force(vertices,
-				     cells,
+	dt*conserved2extensive(force(state,
 				     i, t, dt)); 
   }
 }
@@ -246,7 +244,7 @@ void hdsim1D::TimeAdvance(void)
      dt,
      extensives_);
 
-  force_contribution(ss_.getVertices(), getCells(),
+  force_contribution(ss_,
 		     force_, time_, dt, 
 		     extensives_);
 
@@ -287,7 +285,7 @@ void hdsim1D::TimeAdvance2(void)
       dt/2,
       mid_extensive);
   
-  force_contribution(ss_.getVertices(), getCells(),
+  force_contribution(ss_,
 		     force_, time_, dt/2,
 		     mid_extensive);
 
@@ -322,8 +320,7 @@ void hdsim1D::TimeAdvance2(void)
       extensives_);
 
   force_contribution
-    (mid_state.getVertices(),
-     cc2primitives(mid_state.getCells(),eos_),
+    (mid_state,
      force_, time_, dt,
      extensives_);
 

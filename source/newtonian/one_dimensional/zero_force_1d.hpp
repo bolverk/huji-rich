@@ -13,8 +13,7 @@ class ZeroForce1D: public SourceTerm1D
 {
 public:
   Conserved operator()
-  (vector<double> const& vertices,
-   vector<Primitive> const& cells,
+  (const SimulationState1D& state,
    size_t point,
    double t,
    double dt) const;
