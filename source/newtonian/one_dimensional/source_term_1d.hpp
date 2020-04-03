@@ -18,8 +18,6 @@ class SourceTerm1D
 public:
 
   /*! \brief Calculates the change in the extensive conserved variables due to external forces
-    \param vertices Position of the vertices
-    \param cells Hydrodynamic cells
     \param point Point in which the forces will be evaluated
     \param t Simulation time
     \param dt Time step
