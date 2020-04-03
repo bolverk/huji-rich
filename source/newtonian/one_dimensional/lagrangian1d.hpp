@@ -18,7 +18,7 @@ public:
    */
   explicit Lagrangian1D(bool rigid_walls);
 
-  double operator()(int i, vector<double> const& vp,
+  double operator()(size_t i, vector<double> const& vp,
 		    vector<ComputationalCell> const& hv) const;
 
 private:

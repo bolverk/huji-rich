@@ -4,7 +4,7 @@ Lagrangian1D::Lagrangian1D(bool rigid_walls):
   rigid_walls_(rigid_walls) {}
 
 double Lagrangian1D::operator()
-(int i, vector<double> const& /*vp*/,
+(size_t i, vector<double> const& /*vp*/,
  vector<ComputationalCell> const& hv) const
 {
   if(i==0){
@@ -13,7 +13,7 @@ double Lagrangian1D::operator()
     else
       return hv[0].velocity.x;
   }
-  else if(i==static_cast<int>(hv.size())){
+  else if(i==hv.size()){
     if(rigid_walls_)
       return 0;
     else

@@ -24,7 +24,7 @@ public:
     \return Velocity of the vertex
   */
   virtual double operator()
-  (int i, vector<double> const& vp,
+  (size_t i, vector<double> const& vp,
    vector<ComputationalCell> const& hv) const = 0;
 
   virtual ~VertexMotion(void);

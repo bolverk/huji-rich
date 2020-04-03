@@ -10,13 +10,6 @@
 using namespace std;
 
 // Diagnostics
-/*
-double hdsim1D::GetCellCenter(size_t index) const
-{
-  return 0.5*(ss_.getVertices().at(index)+
-	      ss_.getVertices().at(index+1));
-}
-*/
 
 double hdsim1D::GetTime(void) const
 {
@@ -172,13 +165,12 @@ hdsim1D::hdsim1D
 
 namespace {
   vector<double> CalcVertexVelocities
-  (vector<double> const& Vertices, 
-   vector<Primitive> const& Cells,
+  (const SimulationState1D& state, 
    VertexMotion const& vm)
   {
-    vector<double> res(Vertices.size());
-    for(size_t i = 0; i<Vertices.size();i++)
-      res[i] = vm(int(i), Vertices, primitives2cc(Cells));
+    vector<double> res(state.getVertices().size());
+    for(size_t i = 0; i<state.getVertices().size();i++)
+      res[i] = vm(i, state.getVertices(), state.getCells());
 
     return res;
   }
@@ -239,7 +231,7 @@ namespace {
 void hdsim1D::TimeAdvance(void)
 {
   const vector<double> _VertexVelocity = CalcVertexVelocities
-    (ss_.getVertices(), getCells(), vm_);
+    (ss_, vm_);
 
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_,eos_);
@@ -279,7 +271,7 @@ void hdsim1D::TimeAdvance(void)
 void hdsim1D::TimeAdvance2(void)
 {
   const vector<double> mid_vertex_velocities = 
-    CalcVertexVelocities(ss_.getVertices(), getCells(), vm_);
+    CalcVertexVelocities(ss_, vm_);
 
   //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_, eos_);
@@ -318,9 +310,7 @@ void hdsim1D::TimeAdvance2(void)
 	  eos_)));
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
-    (mid_state.getVertices(),
-     cc2primitives(mid_state.getCells(),eos_),
-     vm_);
+    (mid_state, vm_);
 
   const vector<Extensive> fluxes =
     fc_(mid_state, _VertexVelocity, eos_, dt);
