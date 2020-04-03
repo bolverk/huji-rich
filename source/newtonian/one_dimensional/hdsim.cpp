@@ -86,13 +86,14 @@ const SimulationState1D& hdsim1D::getState(void) const
 const vector<Primitive> hdsim1D::getCells(void) const
 {
   return cc2primitives(ss_.getCells(),eos_);
-  }*/
+  }
 
 void hdsim1D::setCells(const vector<Primitive>& primitives)
 {
   //  _Cells = primitives;
   ss_.updateCells(primitives2cc(primitives));
 }
+*/
 
 //double hdsim1D::GetVertexPosition(size_t i) const
 //{
@@ -258,10 +259,10 @@ void hdsim1D::TimeAdvance(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  setCells(cu_(_ConservedIntensive,
-	       extensive2conserved(extensives_),
-	       ss_.getCells(),
-	       eos_));
+  ss_.updateCells(primitives2cc(cu_(_ConservedIntensive,
+				    extensive2conserved(extensives_),
+				    ss_.getCells(),
+				    eos_)));
 
   time_ += dt;
   cycle_++;
@@ -333,10 +334,10 @@ void hdsim1D::TimeAdvance2(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  setCells(cu_(_ConservedIntensive,
-	       extensive2conserved(extensives_),
-	       ss_.getCells(),
-	       eos_));
+  ss_.updateCells(primitives2cc(cu_(_ConservedIntensive,
+				    extensive2conserved(extensives_),
+				    ss_.getCells(),
+				    eos_)));
 
   time_ += dt;
   ++cycle_;
