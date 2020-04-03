@@ -24,7 +24,7 @@ class CellUpdater1D
             \param eos Equation of state
             \return New computational cells
         */
-        virtual vector<Primitive> operator()
+        virtual vector<ComputationalCell> operator()
         (const vector<Conserved>& intensive,
          const vector<Conserved>& extensive,
          const vector<ComputationalCell>& old,
@@ -39,7 +39,7 @@ class SimpleCellUpdater1D: public CellUpdater1D
     
         SimpleCellUpdater1D(void);
         
-        vector<Primitive> operator()
+        vector<ComputationalCell> operator()
         (const vector<Conserved>& intensive,
          const vector<Conserved>& extensive,
          const vector<ComputationalCell>& old,

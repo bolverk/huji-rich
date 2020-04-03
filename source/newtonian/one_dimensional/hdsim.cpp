@@ -64,6 +64,7 @@ namespace{
     return res;
   }
 
+  /*
   vector<ComputationalCell> primitives2cc
     (const vector<Primitive>& primitives)
   {
@@ -75,6 +76,7 @@ namespace{
     }
     return res;
   }
+  */
 }
 
 const SimulationState1D& hdsim1D::getState(void) const
@@ -259,10 +261,10 @@ void hdsim1D::TimeAdvance(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  ss_.updateCells(primitives2cc(cu_(_ConservedIntensive,
-				    extensive2conserved(extensives_),
-				    ss_.getCells(),
-				    eos_)));
+  ss_.updateCells(cu_(_ConservedIntensive,
+		      extensive2conserved(extensives_),
+		      ss_.getCells(),
+		      eos_));
 
   time_ += dt;
   cycle_++;
@@ -303,11 +305,10 @@ void hdsim1D::TimeAdvance2(void)
      mid_state.getVertices(),
      pg_);
   mid_state.updateCells
-    (primitives2cc
-     (cu_(mid_intesive,
-	  extensive2conserved(mid_extensive),
-	  mid_state.getCells(),
-	  eos_)));
+    (cu_(mid_intesive,
+	 extensive2conserved(mid_extensive),
+	 mid_state.getCells(),
+	 eos_));
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (mid_state, vm_);
@@ -334,10 +335,10 @@ void hdsim1D::TimeAdvance2(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  ss_.updateCells(primitives2cc(cu_(_ConservedIntensive,
+  ss_.updateCells(cu_(_ConservedIntensive,
 				    extensive2conserved(extensives_),
 				    ss_.getCells(),
-				    eos_)));
+				    eos_));
 
   time_ += dt;
   ++cycle_;
