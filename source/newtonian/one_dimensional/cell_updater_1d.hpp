@@ -10,6 +10,9 @@
 #include "source/newtonian/two_dimensional/computational_cell_2d.hpp"
 #include "source/newtonian/common/hydrodynamic_variables.hpp"
 #include "source/newtonian/common/equation_of_state.hpp"
+#include "physical_geometry_1d.hpp"
+#include "../two_dimensional/extensive.hpp"
+#include "simulation_state_1d.hpp"
 
 using std::vector;
 
@@ -25,9 +28,9 @@ class CellUpdater1D
             \return New computational cells
         */
         virtual vector<ComputationalCell> operator()
-        (const vector<Conserved>& intensive,
-         const vector<Conserved>& extensive,
-         const vector<ComputationalCell>& old,
+        (const PhysicalGeometry1D& pg,
+         const vector<Extensive>& extensives,
+         const SimulationState1D& old,
          const EquationOfState& eos) const = 0;
     
     virtual ~CellUpdater1D(void);
@@ -40,9 +43,9 @@ class SimpleCellUpdater1D: public CellUpdater1D
         SimpleCellUpdater1D(void);
         
         vector<ComputationalCell> operator()
-        (const vector<Conserved>& intensive,
-         const vector<Conserved>& extensive,
-         const vector<ComputationalCell>& old,
+        (const PhysicalGeometry1D& pg,
+         const vector<Extensive>& extensives,
+	 const SimulationState1D& old,
          const EquationOfState& eos) const;
          
          ~SimpleCellUpdater1D(void);

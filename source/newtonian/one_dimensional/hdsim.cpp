@@ -34,37 +34,6 @@ namespace{
     }
     return res;
   }
-
-  /*
-  vector<Extensive> conserved2extensive
-    (const vector<Conserved>& conserved)
-  {
-    vector<Extensive> res(conserved.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).mass = conserved.at(i).Mass;
-      res.at(i).momentum = conserved.at(i).Momentum;
-      res.at(i).energy = conserved.at(i).Energy;
-    }
-    return res;
-  }
-  
-  vector<Primitive> cc2primitives
-    (const vector<ComputationalCell>& ccs,
-     const EquationOfState& eos)
-  {
-    vector<Primitive> res(ccs.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).Density = ccs.at(i).density;
-      res.at(i).Pressure = ccs.at(i).pressure;
-      res.at(i).Velocity = ccs.at(i).velocity;
-      res.at(i).Energy = eos.dp2e
-	(ccs.at(i).density, ccs.at(i).pressure);
-      res.at(i).SoundSpeed = eos.dp2c
-	(ccs.at(i).density, ccs.at(i).pressure);
-    }
-    return res;
-  }
-  */
 }
 
 const SimulationState1D& hdsim1D::getState(void) const
@@ -75,16 +44,6 @@ const SimulationState1D& hdsim1D::getState(void) const
 // External functions
 
 namespace {
-  /*
-  vector<Conserved> CalcConservedIntensive(const vector<Primitive>& p)
-  {
-    vector<Conserved> res(p.size());
-    for(size_t i=0;i<p.size();i++){
-      res[i] = Primitive2Conserved(p[i]);
-    }
-    return res;
-  }
-  */
 
   double GetVolume
   (const vector<double>& v, 
@@ -118,20 +77,6 @@ namespace {
     }
     return res;
   }
-
-  /*
-  vector<Conserved> CalcConservedExtensive
-  (const PhysicalGeometry1D& pg,
-   const vector<Conserved>& ci, 
-   const vector<double>& v)
-  {
-    vector<Conserved> res(ci.size());
-    for(size_t i=0;i<ci.size();i++){
-      res[i] = GetVolume(v, pg, i)*ci[i];
-    }
-    return res;
-  }
-  */
 }
 
 hdsim1D::hdsim1D
@@ -148,14 +93,6 @@ hdsim1D::hdsim1D
   ss_(ss),
   eos_(eos),
   extensives_(calc_extensives(pg,ss,eos)),
-  /*
-  extensives_
-  (conserved2extensive
-   (CalcConservedExtensive
-    (pg_,
-     CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
-     ss_.getVertices()))),
-  */
   vm_(vm),
   force_(force),
   tsf_(tsf),
@@ -252,7 +189,6 @@ void hdsim1D::TimeAdvance(void)
 		     force_, time_, dt, 
 		     extensives_);
 
-  //  MoveVertices(_VertexVelocity, dt, ss_.getVertices());
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
@@ -261,9 +197,9 @@ void hdsim1D::TimeAdvance(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  ss_.updateCells(cu_(_ConservedIntensive,
-		      extensive2conserved(extensives_),
-		      ss_.getCells(),
+  ss_.updateCells(cu_(pg_,
+		      extensives_,
+		      ss_,
 		      eos_));
 
   time_ += dt;
@@ -275,7 +211,6 @@ void hdsim1D::TimeAdvance2(void)
   const vector<double> mid_vertex_velocities = 
     CalcVertexVelocities(ss_, vm_);
 
-  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
   const double dt = tsf_(ss_, eos_);
 
   const vector<Extensive> mid_fluxes =
@@ -305,9 +240,9 @@ void hdsim1D::TimeAdvance2(void)
      mid_state.getVertices(),
      pg_);
   mid_state.updateCells
-    (cu_(mid_intesive,
-	 extensive2conserved(mid_extensive),
-	 mid_state.getCells(),
+    (cu_(pg_,
+	 mid_extensive,
+	 mid_state,
 	 eos_));
 
   const vector<double> _VertexVelocity = CalcVertexVelocities
@@ -335,10 +270,10 @@ void hdsim1D::TimeAdvance2(void)
     (extensive2conserved(extensives_),
      ss_.getVertices(), pg_);
 
-  ss_.updateCells(cu_(_ConservedIntensive,
-				    extensive2conserved(extensives_),
-				    ss_.getCells(),
-				    eos_));
+  ss_.updateCells(cu_(pg_,
+		      extensives_,
+		      ss_,
+		      eos_));
 
   time_ += dt;
   ++cycle_;
