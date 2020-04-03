@@ -38,26 +38,6 @@ namespace{
       res.tracers.at(i) /= extensive.mass;
     return res;
   }
-
-  /*
-  ComputationalCell retrieve_single_cell
-    (const Conserved& intensive,
-     const EquationOfState& eos)
-     {
-         const double density = intensive.Mass;
-         const Vector2D velocity = intensive.Momentum/intensive.Mass;
-         const double kinetic_energy = 0.5*pow(abs(velocity),2);
-         const double total_energy = intensive.Energy/intensive.Mass;
-         const double thermal_energy = total_energy - kinetic_energy;
-         const double pressure = eos.de2p(density, thermal_energy);
-	 //         const double sound_speed = eos.dp2c(density, pressure);
-	 ComputationalCell res;
-	 res.density = density;
-	 res.pressure = pressure;
-	 res.velocity = velocity;
-	 return res;
-     }
-  */
 }
 
 vector<ComputationalCell> SimpleCellUpdater1D::operator()

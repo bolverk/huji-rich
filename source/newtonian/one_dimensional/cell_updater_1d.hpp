@@ -21,8 +21,6 @@ class CellUpdater1D
 {
     public:
         /*! \brief Updates cells
-            \param intensive Intensive conserved variables
-            \param extensive Extensive conserved variables
             \param old Old cells
             \param eos Equation of state
             \return New computational cells
