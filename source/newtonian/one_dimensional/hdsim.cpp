@@ -35,6 +35,7 @@ namespace{
     return res;
   }
 
+  /*
   vector<Extensive> conserved2extensive
     (const vector<Conserved>& conserved)
   {
@@ -63,19 +64,6 @@ namespace{
     }
     return res;
   }
-
-  /*
-  vector<ComputationalCell> primitives2cc
-    (const vector<Primitive>& primitives)
-  {
-    vector<ComputationalCell> res(primitives.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).density = primitives.at(i).Density;
-      res.at(i).pressure = primitives.at(i).Pressure;
-      res.at(i).velocity = primitives.at(i).Velocity;
-    }
-    return res;
-  }
   */
 }
 
@@ -84,28 +72,10 @@ const SimulationState1D& hdsim1D::getState(void) const
   return ss_;
 }
 
-/*
-const vector<Primitive> hdsim1D::getCells(void) const
-{
-  return cc2primitives(ss_.getCells(),eos_);
-  }
-
-void hdsim1D::setCells(const vector<Primitive>& primitives)
-{
-  //  _Cells = primitives;
-  ss_.updateCells(primitives2cc(primitives));
-}
-*/
-
-//double hdsim1D::GetVertexPosition(size_t i) const
-//{
-  //  return _Vertices[i];
-//  return ss_.getVertices().at(i);
-//}
-
 // External functions
 
 namespace {
+  /*
   vector<Conserved> CalcConservedIntensive(const vector<Primitive>& p)
   {
     vector<Conserved> res(p.size());
@@ -114,6 +84,7 @@ namespace {
     }
     return res;
   }
+  */
 
   double GetVolume
   (const vector<double>& v, 
@@ -124,6 +95,31 @@ namespace {
       - pg.calcVolume(v.at(i));
   }
 
+  vector<Extensive> calc_extensives
+  (const PhysicalGeometry1D& pg,
+   const SimulationState1D& ss,
+   const EquationOfState& eos)
+  {
+    const vector<double>& vertices = ss.getVertices();
+    const vector<ComputationalCell>& cells = ss.getCells();
+    vector<Extensive> res(ss.getCells().size());
+    for(size_t i=0;i<res.size();++i){
+      const double volume = GetVolume(vertices,
+				      pg,
+				      i);
+      res.at(i).mass = cells.at(i).density*volume;
+      res.at(i).momentum = res.at(i).mass*cells.at(i).velocity;
+      const double kinetic_specific_energy =
+	0.5*pow(abs(cells.at(i).velocity),2);
+      const double thermal_specific_energy =
+	eos.dp2e(cells.at(i).density, cells.at(i).pressure);
+      res.at(i).energy = res.at(i).mass*
+	(kinetic_specific_energy+thermal_specific_energy);
+    }
+    return res;
+  }
+
+  /*
   vector<Conserved> CalcConservedExtensive
   (const PhysicalGeometry1D& pg,
    const vector<Conserved>& ci, 
@@ -135,6 +131,7 @@ namespace {
     }
     return res;
   }
+  */
 }
 
 hdsim1D::hdsim1D
@@ -149,13 +146,16 @@ hdsim1D::hdsim1D
  const CellUpdater1D& cu):
   pg_(pg),
   ss_(ss),
-  eos_(eos), 
+  eos_(eos),
+  extensives_(calc_extensives(pg,ss,eos)),
+  /*
   extensives_
   (conserved2extensive
    (CalcConservedExtensive
     (pg_,
      CalcConservedIntensive(cc2primitives(ss_.getCells(),eos)),
      ss_.getVertices()))),
+  */
   vm_(vm),
   force_(force),
   tsf_(tsf),
