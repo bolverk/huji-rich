@@ -19,7 +19,7 @@ public:
   explicit Lagrangian1D(bool rigid_walls);
 
   double operator()(int i, vector<double> const& vp,
-		      vector<Primitive> const& hv) const;
+		    vector<ComputationalCell> const& hv) const;
 
 private:
 

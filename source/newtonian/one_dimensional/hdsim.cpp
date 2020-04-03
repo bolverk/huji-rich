@@ -178,7 +178,7 @@ namespace {
   {
     vector<double> res(Vertices.size());
     for(size_t i = 0; i<Vertices.size();i++)
-      res[i] = vm(int(i), Vertices, Cells);
+      res[i] = vm(int(i), Vertices, primitives2cc(Cells));
 
     return res;
   }

@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
+#include "../two_dimensional/computational_cell_2d.hpp"
 
 using std::vector;
 
@@ -24,7 +25,7 @@ public:
   */
   virtual double operator()
   (int i, vector<double> const& vp,
-   vector<Primitive> const& hv) const = 0;
+   vector<ComputationalCell> const& hv) const = 0;
 
   virtual ~VertexMotion(void);
 };

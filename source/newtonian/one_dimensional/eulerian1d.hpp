@@ -16,7 +16,7 @@ class Eulerian1D: public VertexMotion
 public:
   
   double operator()(int i, vector<double> const& vp,
-		    vector<Primitive> const& hv) const;
+		    vector<ComputationalCell> const& hv) const;
 };
 
 #endif // EULERIAN1D_HPP

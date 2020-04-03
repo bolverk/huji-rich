@@ -2,7 +2,7 @@
 
 double Eulerian1D::operator()
 (int /*i*/, vector<double> const& /*vp*/,
- vector<Primitive> const& /*hv*/) const
+ vector<ComputationalCell> const& /*hv*/) const
 {
   return 0;
 }
