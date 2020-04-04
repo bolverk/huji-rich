@@ -38,6 +38,14 @@ namespace{
       res.tracers.at(i) /= extensive.mass;
     return res;
   }
+
+  void validate_input
+    (const vector<Extensive>& extensives,
+     const SimulationState1D& old)
+  {
+    assert(extensives.at(0).tracers.size()==
+	   old.getCells().at(0).tracers.size());
+  }
 }
 
 vector<ComputationalCell> SimpleCellUpdater1D::operator()
@@ -46,13 +54,14 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
    const SimulationState1D& old,
    const EquationOfState& eos) const
 {
-    vector<ComputationalCell> res(extensives.size());
-    for(size_t i=0;i<res.size();++i)
-        res.at(i) = retrieve_single_cell
-	  (calc_cell_volume(pg,old.getVertices(),i),
-	   extensives.at(i),
-	   eos);
-    return res;
+  validate_input(extensives, old);
+  vector<ComputationalCell> res(extensives.size());
+  for(size_t i=0;i<res.size();++i)
+    res.at(i) = retrieve_single_cell
+      (calc_cell_volume(pg,old.getVertices(),i),
+       extensives.at(i),
+       eos);
+  return res;
 }
 
 SimpleCellUpdater1D::~SimpleCellUpdater1D(void) {}

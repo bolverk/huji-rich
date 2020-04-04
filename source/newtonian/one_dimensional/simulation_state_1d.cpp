@@ -19,10 +19,14 @@ SimulationState1D::SimulationState1D
     cell.pressure = pressure(x);
     cell.velocity = Vector2D(para_velocity(x),
 			      perp_velocity(x));
-    for(size_t j=0;j<tracers.size();++j)
+    for(size_t j=0;j<tracers.size();++j){
       cell.tracers.push_back((*tracers.at(j).second)(x));
-    for(size_t j=0;j<stickers.size();++j)
+      tsn_.tracer_names.push_back(tracers.at(j).first);
+    }
+    for(size_t j=0;j<stickers.size();++j){
       cell.stickers.push_back((*stickers.at(j).second)(x));
+      tsn_.sticker_names.push_back(stickers.at(j).first);
+    }
   }
 }
 
@@ -34,6 +38,11 @@ const vector<double>& SimulationState1D::getVertices(void) const
 const vector<ComputationalCell>& SimulationState1D::getCells(void) const
 {
   return cells_;
+}
+
+const TracerStickerNames& SimulationState1D::getTracerStickerNames(void) const
+{
+  return tsn_;
 }
 
 void SimulationState1D::updateVertices(const vector<double>& vertices)

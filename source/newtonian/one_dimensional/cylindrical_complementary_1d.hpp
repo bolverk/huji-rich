@@ -8,7 +8,7 @@ public:
 
   CylindricalComplementary1D(void);
 
-  Conserved operator()
+  Extensive operator()
   (const SimulationState1D& state,
    size_t point,
    double t,

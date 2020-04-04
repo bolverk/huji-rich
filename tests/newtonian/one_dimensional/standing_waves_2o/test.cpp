@@ -33,7 +33,7 @@ public:
     amp_(amplitude),
     v_(phase_velocity) {}
 
-  Conserved operator()
+  Extensive operator()
   (const SimulationState1D& state,
    size_t point,
    double t,
@@ -49,7 +49,13 @@ public:
     const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);
     const double xmom = density*acceleration;
     const double enr = density*acceleration*xvelocity;
-    return -volume*Conserved(0,Vector2D(xmom,0),enr);
+
+    Extensive res;
+    res.mass = 0;
+    res.momentum = -volume*xmom*Vector2D(1,0);
+    res.energy = -volume*enr;
+    res.tracers = vector<double>(cells.at(0).tracers.size(),0);
+    return res;
   }
 
 private:

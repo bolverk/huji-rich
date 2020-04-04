@@ -76,7 +76,12 @@ namespace {
 	eos.dp2e(cells.at(i).density, cells.at(i).pressure);
       res.at(i).energy = res.at(i).mass*
 	(kinetic_specific_energy+thermal_specific_energy);
+      for(size_t j=0;j<cells.at(0).tracers.size();++j){
+	res.at(i).tracers.push_back
+	  (cells.at(i).tracers.at(j)*res.at(i).mass);
+      }
     }
+    
     return res;
   }
 }
@@ -146,6 +151,7 @@ namespace {
 
 namespace {
 
+  /*
   Extensive conserved2extensive
   (const Conserved& c)
   {
@@ -155,6 +161,7 @@ namespace {
     res.energy = c.Energy;
     return res;
   }
+  */
   
   void force_contribution
   (const SimulationState1D& state,
@@ -165,8 +172,7 @@ namespace {
   {
     for(size_t i=0;i<extensive.size();++i)
       extensive[i] +=
-	dt*conserved2extensive(force(state,
-				     i, t, dt)); 
+	dt*force(state, i, t, dt); 
   }
 }
 

@@ -37,6 +37,8 @@ public:
 
   const vector<ComputationalCell>& getCells(void) const;
 
+  const TracerStickerNames& getTracerStickerNames(void) const;
+
   void updateVertices(const vector<double>& vertices);
 
   void updateCells(const vector<ComputationalCell>& cells);

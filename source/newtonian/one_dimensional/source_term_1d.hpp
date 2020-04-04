@@ -9,6 +9,7 @@
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
 #include "simulation_state_1d.hpp"
+#include "../two_dimensional/extensive.hpp"
 
 using std::vector;
 
@@ -23,7 +24,7 @@ public:
     \param dt Time step
     \return Value of the external force
    */
-  virtual Conserved operator()
+  virtual Extensive operator()
   (const SimulationState1D& state,
    size_t point,
    double t,

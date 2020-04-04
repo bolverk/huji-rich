@@ -12,7 +12,7 @@
 class ZeroForce1D: public SourceTerm1D
 {
 public:
-  Conserved operator()
+  Extensive operator()
   (const SimulationState1D& state,
    size_t point,
    double t,

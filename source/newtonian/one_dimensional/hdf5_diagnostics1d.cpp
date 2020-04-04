@@ -80,10 +80,18 @@ void diagnostics1d::write_snapshot_to_hdf5
   }
 
   // Write tracers
-  /*
   {
-    const size_t n = sim.getCells().size();
-    const size_t m = sim.getS
+    const vector<string>& tracer_names =
+      sim.getState().getTracerStickerNames().tracer_names;
+    const vector<ComputationalCell>& cells = sim.getState().getCells();
+    const size_t n = cells.size();
+    const size_t m = cells.at(0).tracers.size();
+    vector<double> tracers(n);
+    for(size_t i=0;i<m;++i){
+      for(size_t j=0;j<n;++j){
+	tracers.at(j) = cells.at(j).tracers.at(i);
+      }
+      write_std_vector_to_hdf5(file, tracers, tracer_names.at(i));
+    }
   }
-  */
 }

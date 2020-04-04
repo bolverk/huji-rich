@@ -72,9 +72,10 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
     flux.energy = hydro_flux.Energy;
 
     const size_t source_index = hydro_flux.Mass>0 ? i-1 : i;
-    for(size_t j=0;j<res.at(i).tracers.size();++j)
-      flux.tracers.at(j) = res.at(i).mass*
-		     ss.getCells().at(source_index).tracers.at(j);;
+    for(size_t j=0;j<ss.getCells().at(i).tracers.size();++j)
+      flux.tracers.push_back
+	(res.at(i).mass*
+	 ss.getCells().at(source_index).tracers.at(j));
   }
 
   // Boundary conditions
@@ -84,6 +85,7 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
 			      vertex_velocity,
 			      0);
   copy_hydro_flux(front, res.front());
+  res.front().tracers = ss.getCells().front().tracers;
   nullify_tracers(res.front());
   const Conserved back = bc_(ss.getVertices(),
 			     cc2primitives(ss.getCells(),eos),
@@ -91,6 +93,8 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
 			     vertex_velocity,
 			     static_cast<int>(res.size()-1));
   copy_hydro_flux(back, res.back());
-  nullify_tracers(res.back());		  
+  res.back().tracers = ss.getCells().back().tracers;
+  nullify_tracers(res.back());
+
   return res;			   
 }

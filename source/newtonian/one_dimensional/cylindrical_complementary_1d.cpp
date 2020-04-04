@@ -6,7 +6,7 @@
 
 CylindricalComplementary1D::CylindricalComplementary1D(void) {}
 
-Conserved CylindricalComplementary1D::operator()
+Extensive CylindricalComplementary1D::operator()
   (const SimulationState1D& state,
    size_t point,
    double /*t*/,
@@ -20,5 +20,11 @@ Conserved CylindricalComplementary1D::operator()
   const double volume = 
     (4./3.)*M_PI*(pow(vertices.at(i+1),3)-
 		  pow(vertices.at(i),3));
-  return Conserved(0,2*Vector2D(volume*(p/r),0),0);
+
+  Extensive res;
+  res.mass = 0;
+  res.momentum = 2*volume*(p/r)*Vector2D(1,0);
+  res.energy = 0;
+  res.tracers = vector<double>(cells.at(point).tracers.size(),0);
+  return res;
 }
