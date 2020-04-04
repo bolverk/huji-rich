@@ -20,11 +20,8 @@ class BoundaryConditions1D
 {
 public:
   /*! \brief Calculates the flux at the boundaries
-    \param Vertices Position of the vertices
-    \param Cells Hydrodynamic variables
     \param rs Riemann solver
     \param vertex_velocity Velocity of the vertex
-    \param i Vertex index
     \return Flux at the boundary
    */
   virtual Extensive operator()
