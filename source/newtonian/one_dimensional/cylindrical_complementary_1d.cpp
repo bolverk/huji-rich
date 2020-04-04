@@ -14,7 +14,7 @@ Extensive CylindricalComplementary1D::operator()
 {
   const vector<ComputationalCell>& cells = state.getCells();
   const vector<double>& vertices = state.getVertices();
-  const size_t i = static_cast<size_t>(point);
+  const size_t i = point;
   const double p = cells.at(i).pressure;
   const double r = 0.5*(vertices.at(i)+vertices.at(i+1));
   const double volume = 
