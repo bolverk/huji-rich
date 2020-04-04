@@ -68,11 +68,11 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
 		    eos,
 		    rs_,
 		    vertex_velocity,
-		    0);
+		    false);
   res.back() = bc_(ss,
 		   eos,
 		   rs_,
 		   vertex_velocity,
-		   res.size()-1);
+		   true);
   return res;			   
 }

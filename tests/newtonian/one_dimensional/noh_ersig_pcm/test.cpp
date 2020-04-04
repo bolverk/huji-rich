@@ -14,12 +14,14 @@
 #include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_extensive_updater_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_flux_calculator_1d.hpp"
+#include "source/newtonian/one_dimensional/different_bc.hpp"
 
 using namespace std;
 using namespace simulation1d;
 using namespace diagnostics1d;
 
 namespace {
+  /*
   class DifferentBC: public BoundaryConditions1D
   {
   public:
@@ -46,6 +48,7 @@ namespace {
     BoundaryConditions1D const& left_;
     BoundaryConditions1D const& right_;
   };
+  */
   
   class SimData
   {
