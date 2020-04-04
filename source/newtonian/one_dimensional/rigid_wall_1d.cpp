@@ -1,23 +1,66 @@
 #include "rigid_wall_1d.hpp"
 #include "../../misc/universal_error.hpp"
 
-Conserved RigidWall1D::operator()
-(vector<double> const& Vertices, vector<Primitive> const& Cells,
- RiemannSolver const& rs, 
- vector<double> const& vertex_velocity,
- int i) const
-{
-  if(i==0){
-    Primitive ghost = Cells[0];
-    double vv = vertex_velocity[0];
-    ghost.Velocity.x = -ghost.Velocity.x;
-    return rs(ghost, Cells[0], vv);
+namespace {
+  Primitive reverse_velocity(const Primitive& p)
+  {
+    Primitive res = p;
+    res.Velocity.x *= -1;
+    return res;
   }
-  else if(i==static_cast<int>(Vertices.size())-1){
-    Primitive ghost = Cells[Vertices.size()-2];
-    double vv = vertex_velocity[Vertices.size()-1];
-    ghost.Velocity.x = -ghost.Velocity.x;
-    return rs(Cells[Vertices.size()-2], ghost,vv);
+
+  Primitive cc2primitive(const ComputationalCell& cc,
+			 const EquationOfState& eos)
+  {
+    Primitive res;
+    res.Density = cc.density;
+    res.Pressure = cc.pressure;
+    res.Velocity = cc.velocity;
+    res.Energy = eos.dp2e(cc.density,
+			  cc.pressure);
+    res.SoundSpeed = eos.dp2c(cc.density,
+			      cc.pressure);
+    return res;
+  }
+
+  Extensive conserved2extensive
+  (const Conserved& conserved,
+   const ComputationalCell& cell)
+  {
+    Extensive res;
+    res.mass = conserved.Mass;
+    res.momentum = conserved.Momentum;
+    res.energy = conserved.Energy;
+    res.tracers = vector<double>(cell.tracers.size(),0);
+    return res;
+  }
+}
+
+Extensive RigidWall1D::operator()
+  (const SimulationState1D& ss,
+   const EquationOfState& eos,
+   const RiemannSolver& rs, 
+   const vector<double>& vertex_velocity,
+   const size_t i) const
+{
+  const vector<double>& vertices = ss.getVertices();
+  if(i==0){
+    const ComputationalCell& cell = ss.getCells().front();
+    const Primitive right = cc2primitive(cell, eos);
+    const Primitive left = reverse_velocity(right);
+    const double vv = vertex_velocity[0];
+    return conserved2extensive
+      (rs(left, right, vv),
+       cell);
+  }
+  else if(i==vertices.size()-1){
+    const ComputationalCell& cell = ss.getCells().back();
+    const Primitive left = cc2primitive(cell, eos);
+    const Primitive right = reverse_velocity(left);
+    const double vv = vertex_velocity.at(vertices.size()-1);
+    return conserved2extensive
+      (rs(left, right, vv),
+       cell);
   }
   else{
     throw UniversalError("Index inside bulk of grid");

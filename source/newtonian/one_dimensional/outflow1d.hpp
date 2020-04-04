@@ -13,12 +13,12 @@ class Outflow: public BoundaryConditions1D
 {
 public:
   
-  Conserved operator()
-  (vector<double> const& Vertices,
-   vector<Primitive> const& Cells,
-   RiemannSolver const& rs,
-   vector<double> const& vertex_veclocity,
-   int i) const;
+  Extensive operator()
+  (const SimulationState1D& ss,
+   const EquationOfState& eos,
+   const RiemannSolver& rs,
+   const vector<double>& vertex_veclocity,
+   const size_t i) const;
 };
 
 #endif // OUTFLOW_1D_HPP

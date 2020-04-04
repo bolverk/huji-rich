@@ -9,6 +9,9 @@
 #include <vector>
 #include "../common/hydrodynamic_variables.hpp"
 #include "../common/riemann_solver.hpp"
+#include "../common/equation_of_state.hpp"
+#include "../two_dimensional/extensive.hpp"
+#include "simulation_state_1d.hpp"
 
 using std::vector;
 
@@ -24,12 +27,12 @@ public:
     \param i Vertex index
     \return Flux at the boundary
    */
-  virtual Conserved operator()
-  (vector<double> const& Vertices,
-   vector<Primitive> const& Cells,
-   RiemannSolver const& rs, 
-   vector<double> const& vertex_velocity,
-   int i) const= 0;
+  virtual Extensive operator()
+  (const SimulationState1D& ss,
+   const EquationOfState& eos,
+   const RiemannSolver& rs, 
+   const vector<double>& vertex_velocity,
+   const size_t i) const= 0;
 
   virtual ~BoundaryConditions1D(void);
 };

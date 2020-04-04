@@ -28,17 +28,18 @@ namespace {
 		BoundaryConditions1D const& right):
       left_(left), right_(right) {}
 
-    Conserved operator()
-    (vector<double> const& edges,
-     vector<Primitive> const& cells,
-     RiemannSolver const& rs,
-     vector<double> const& vertex_velocity,
-     int i) const
+    Extensive operator()
+    (const SimulationState1D& ss,
+     const EquationOfState& eos,
+     const RiemannSolver& rs,
+     const vector<double>& vertex_velocity,
+     const size_t i) const
     {
+      const vector<double>& vertices = ss.getVertices();
       if(0==i)
-	return left_(edges,cells,rs,vertex_velocity,i);
-      else if(static_cast<int>(edges.size())-1==i)
-	return right_(edges,cells,rs,vertex_velocity,i);
+	return left_(ss,eos,rs,vertex_velocity,i);
+      else if(vertices.size()-1==i)
+	return right_(ss,eos,rs,vertex_velocity,i);
       else
 	throw "Inside bulk of grid";
     }

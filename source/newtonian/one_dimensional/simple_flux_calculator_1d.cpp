@@ -25,21 +25,6 @@ namespace{
     }
     return res;
   }
-
-  void copy_hydro_flux
-    (const Conserved& hydro_flux,
-     Extensive& flux)
-  {
-    flux.mass = hydro_flux.Mass;
-    flux.momentum = hydro_flux.Momentum;
-    flux.energy = hydro_flux.Energy;
-  }
-
-  void nullify_tracers(Extensive& flux)
-  {
-    for(size_t i=0;i<flux.tracers.size();++i)
-      flux.tracers.at(i) = 0;
-  }
 }
 
 vector<Extensive> SimpleFluxCalculator1D::operator()
@@ -79,22 +64,15 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
   }
 
   // Boundary conditions
-  const Conserved front = bc_(ss.getVertices(),
-			      cc2primitives(ss.getCells(),eos),
-			      rs_,
-			      vertex_velocity,
-			      0);
-  copy_hydro_flux(front, res.front());
-  res.front().tracers = ss.getCells().front().tracers;
-  nullify_tracers(res.front());
-  const Conserved back = bc_(ss.getVertices(),
-			     cc2primitives(ss.getCells(),eos),
-			     rs_,
-			     vertex_velocity,
-			     static_cast<int>(res.size()-1));
-  copy_hydro_flux(back, res.back());
-  res.back().tracers = ss.getCells().back().tracers;
-  nullify_tracers(res.back());
-
+  res.front() = bc_(ss,
+		    eos,
+		    rs_,
+		    vertex_velocity,
+		    0);
+  res.back() = bc_(ss,
+		   eos,
+		   rs_,
+		   vertex_velocity,
+		   res.size()-1);
   return res;			   
 }
