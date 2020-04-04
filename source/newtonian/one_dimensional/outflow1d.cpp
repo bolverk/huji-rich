@@ -22,23 +22,10 @@ Extensive Outflow::operator()
    const EquationOfState& eos,
    const RiemannSolver& rs, 
    const vector<double>& vertex_velocity,
-   const size_t i) const
+   const bool side) const
 {
   const vector<double> vertices = ss.getVertices();
-  if(i==0){
-    const ComputationalCell& cell = ss.getCells().front();
-    const Primitive ghost = cc2primitive(cell, eos);
-    const double vv = vertex_velocity[0];
-    const Conserved flux = rs(ghost,ghost,vv);
-    Extensive res;
-    res.mass = flux.Mass;
-    res.momentum = flux.Momentum;
-    res.energy = flux.Energy;
-    for(size_t j=0;j<cell.tracers.size();++j)
-      res.tracers.push_back(res.mass*cell.tracers.at(j));
-    return res;	 
-  }
-  else if(i==vertices.size()-1){
+  if(side){
     const ComputationalCell& cell = ss.getCells().back();
     const Primitive ghost = cc2primitive(cell, eos);
     const double vv = vertex_velocity[vertices.size()-1];
@@ -51,6 +38,17 @@ Extensive Outflow::operator()
       res.tracers.push_back(res.mass*cell.tracers.at(j));
     return res;
   }
-  else
-    throw UniversalError("Index inside bulk of grid");
+  else{
+    const ComputationalCell& cell = ss.getCells().front();
+    const Primitive ghost = cc2primitive(cell, eos);
+    const double vv = vertex_velocity[0];
+    const Conserved flux = rs(ghost,ghost,vv);
+    Extensive res;
+    res.mass = flux.Mass;
+    res.momentum = flux.Momentum;
+    res.energy = flux.Energy;
+    for(size_t j=0;j<cell.tracers.size();++j)
+      res.tracers.push_back(res.mass*cell.tracers.at(j));
+    return res;	 
+  }
 }

@@ -33,15 +33,12 @@ namespace {
      const EquationOfState& eos,
      const RiemannSolver& rs,
      const vector<double>& vertex_velocity,
-     const size_t i) const
+     const bool side) const
     {
-      const vector<double>& vertices = ss.getVertices();
-      if(0==i)
-	return left_(ss,eos,rs,vertex_velocity,i);
-      else if(vertices.size()-1==i)
-	return right_(ss,eos,rs,vertex_velocity,i);
+      if(side)
+	return right_(ss,eos,rs,vertex_velocity,side);
       else
-	throw "Inside bulk of grid";
+	return left_(ss,eos,rs,vertex_velocity,side);
     }
     
   private:

@@ -18,7 +18,7 @@ public:
    const EquationOfState& eos,
    const RiemannSolver& rs,
    const vector<double>& vertex_veclocity,
-   const size_t i) const;
+   const bool side) const;
 };
 
 #endif // OUTFLOW_1D_HPP

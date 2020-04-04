@@ -32,7 +32,7 @@ public:
    const EquationOfState& eos,
    const RiemannSolver& rs, 
    const vector<double>& vertex_velocity,
-   const size_t i) const= 0;
+   const bool side) const= 0;
 
   virtual ~BoundaryConditions1D(void);
 };

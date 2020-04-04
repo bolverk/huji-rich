@@ -41,19 +41,10 @@ Extensive RigidWall1D::operator()
    const EquationOfState& eos,
    const RiemannSolver& rs, 
    const vector<double>& vertex_velocity,
-   const size_t i) const
+   const bool side) const
 {
   const vector<double>& vertices = ss.getVertices();
-  if(i==0){
-    const ComputationalCell& cell = ss.getCells().front();
-    const Primitive right = cc2primitive(cell, eos);
-    const Primitive left = reverse_velocity(right);
-    const double vv = vertex_velocity[0];
-    return conserved2extensive
-      (rs(left, right, vv),
-       cell);
-  }
-  else if(i==vertices.size()-1){
+  if(side){
     const ComputationalCell& cell = ss.getCells().back();
     const Primitive left = cc2primitive(cell, eos);
     const Primitive right = reverse_velocity(left);
@@ -63,6 +54,12 @@ Extensive RigidWall1D::operator()
        cell);
   }
   else{
-    throw UniversalError("Index inside bulk of grid");
+    const ComputationalCell& cell = ss.getCells().front();
+    const Primitive right = cc2primitive(cell, eos);
+    const Primitive left = reverse_velocity(right);
+    const double vv = vertex_velocity[0];
+    return conserved2extensive
+      (rs(left, right, vv),
+       cell);
   }
 }

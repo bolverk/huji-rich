@@ -19,7 +19,7 @@ public:
    const EquationOfState& eos,
    const RiemannSolver& rs, 
    const vector<double>& vertex_velocity,
-   const size_t i) const;
+   const bool side) const;
 };
 
 #endif // PERIODIC_1D_HPP

@@ -40,18 +40,14 @@ Extensive Periodic1D::operator()
    const EquationOfState& eos,
    const RiemannSolver& rs, 
    const vector<double>& vertex_velocity,
-   const size_t i) const
+   const bool /*side*/) const
 {
-  if(i==0||i==vertex_velocity.size()-1){
-    const Primitive left = cc2primitive(ss.getCells().back(), eos);
-    const Primitive right = cc2primitive(ss.getCells().front(), eos);
-    const double vv =
-      0.5*(vertex_velocity.front() + vertex_velocity.back());
-    return conserved2extensive
-      (rs(left, right, vv),
-       ss.getCells().back(),
-       ss.getCells().front());
-  }
-  else
-    throw UniversalError("Error in Periodic1D::CalcFlux \n Applied to bulk of grid");
+  const Primitive left = cc2primitive(ss.getCells().back(), eos);
+  const Primitive right = cc2primitive(ss.getCells().front(), eos);
+  const double vv =
+    0.5*(vertex_velocity.front() + vertex_velocity.back());
+  return conserved2extensive
+    (rs(left, right, vv),
+     ss.getCells().back(),
+     ss.getCells().front());
 }
