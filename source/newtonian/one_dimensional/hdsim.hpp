@@ -56,6 +56,17 @@ private:
 
 public:
 
+  /*! \brief Class constructor
+    \param pg Physical parameter
+    \param ss Computational domain and hydro cells
+    \param eos Equation of state
+    \param vm Vertex motion
+    \param force Source term
+    \param tsf Time step function
+    \param fc Flux calculator
+    \param eu Extensive updater
+    \param cu Cell updater
+   */
   hdsim1D
   (const PhysicalGeometry1D& pg,
    const SimulationState1D& ss,
@@ -73,12 +84,10 @@ public:
   //! \brief Second order time advance
   void TimeAdvance2(void);
 
+  /*! \brief Access to computational domain and hydro cells
+    \return Computational domain and hydro cells
+   */
   const SimulationState1D& getState(void) const;
-
-  // Scaffolding
-  //const vector<Primitive> getCells(void) const;
-
-  //  void setCells(const vector<Primitive>& primitives);
 
   // Diagnostics
 

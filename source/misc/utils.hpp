@@ -145,7 +145,7 @@ T BiLinearInterpolation(const vector<T>& x, const vector<T>& y, const std::vecto
 			throw;
 		}
 		else
-			itx--;
+			--itx;
 	}
 	if (itx == x.begin())
 	{
@@ -164,7 +164,7 @@ T BiLinearInterpolation(const vector<T>& x, const vector<T>& y, const std::vecto
 			throw;
 		}
 		else
-			ity--;
+			--ity;
 	}
 	if (ity == y.begin())
 	{

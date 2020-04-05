@@ -20,8 +20,11 @@ class BoundaryConditions1D
 {
 public:
   /*! \brief Calculates the flux at the boundaries
+    \param ss Computational domain and hydro cells
+    \param eos Equation of state
     \param rs Riemann solver
     \param vertex_velocity Velocity of the vertex
+    \param side False for left boundary, true for right boundary
     \return Flux at the boundary
    */
   virtual Extensive operator()

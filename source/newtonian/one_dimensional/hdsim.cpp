@@ -21,23 +21,6 @@ int hdsim1D::GetCycle(void) const
   return cycle_;
 }
 
-/*
-namespace{
-
-  vector<Conserved> extensive2conserved
-    (const vector<Extensive>& extensives)
-  {
-    vector<Conserved> res(extensives.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).Mass = extensives.at(i).mass;
-      res.at(i).Momentum = extensives.at(i).momentum;
-      res.at(i).Energy = extensives.at(i).energy;
-    }
-    return res;
-  }
-}
-*/
-
 const SimulationState1D& hdsim1D::getState(void) const
 {
   return ss_;
@@ -124,7 +107,7 @@ namespace {
   }
 
   vector<double> calc_new_vertices
-  (const vector<double> vv_,
+  (const vector<double>& vv_,
    double dt,
    const vector<double>& vertices)
   {
@@ -133,20 +116,6 @@ namespace {
       res.at(i) += dt*vv_.at(i);
     return res;
   }
-
-  /*  vector<Conserved> UpdateConservedIntensive
-  (const vector<Conserved>& ConservedExtensive, 
-   const vector<double>& Vertices,
-   const PhysicalGeometry1D& pg)
-  {
-    vector<Conserved> res(ConservedExtensive.size());
-    for(size_t i=0;i<ConservedExtensive.size();i++){
-      res[i] = ConservedExtensive[i] / 
-	GetVolume(Vertices, pg, i);
-    }
-    return res;
-  }
-  */
 }
 
 namespace {

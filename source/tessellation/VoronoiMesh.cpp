@@ -1314,7 +1314,7 @@ vector<int> VoronoiMesh::Update
 			eo.AddEntry("Edge v1x", vproc.GetEdge(edge_index[i]).vertices.second.x);
 			eo.AddEntry("Edge v1y", vproc.GetEdge(edge_index[i]).vertices.second.y);
 		}
-		throw eo;
+		throw;
 	}
 	Nextra = static_cast<int>(Tri.ChangeCor().size());
 	eps = 1e-8;
@@ -1338,7 +1338,7 @@ vector<int> VoronoiMesh::Update
 		for (size_t i = 0; i < newcor.size(); ++i)
 			xtemp.push_back(newcor[i].y);
 		write_vector(xtemp, "ycor_" + int2str(rank) + ".txt", 15);
-		throw eo;
+		throw;
 	}
 	build_v();
 
@@ -1454,7 +1454,7 @@ void VoronoiMesh::Initialise
 		for (size_t i = 0; i < points.size(); ++i)
 			xtemp.push_back(points[i].y);
 		write_vector(xtemp, "ycor_" + int2str(rank) + ".txt", 15);
-		throw eo;
+		throw;
 	}
 	/*
 	if(get_rank()==0){

@@ -130,7 +130,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 			eo.AddEntry("Rank", static_cast<double>(rank));
 #endif
-			throw eo;
+			throw;
 		}
 	}
 	return res;

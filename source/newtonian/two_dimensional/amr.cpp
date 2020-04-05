@@ -659,7 +659,7 @@ namespace
 			catch (UniversalError & eo)
 			{
 				eo.AddEntry("ToRefine", static_cast<double>(ToRefine));
-				throw eo;
+				throw;
 			}
 			if (interp != 0)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
