@@ -1,4 +1,5 @@
 #include "simple_flux_calculator_1d.hpp"
+#include "flux_conversion.hpp"
 
 SimpleFluxCalculator1D::SimpleFluxCalculator1D
 (const RiemannSolver& rs,
@@ -8,25 +9,6 @@ SimpleFluxCalculator1D::SimpleFluxCalculator1D
   interp_(interp),
   bc_(bc) {}
 
-namespace{
-  vector<Primitive> cc2primitives
-    (const vector<ComputationalCell>& ccs,
-     const EquationOfState& eos)
-  {
-    vector<Primitive> res(ccs.size());
-    for(size_t i=0;i<res.size();++i){
-      res.at(i).Density = ccs.at(i).density;
-      res.at(i).Pressure = ccs.at(i).pressure;
-      res.at(i).Velocity = ccs.at(i).velocity;
-      res.at(i).Energy = eos.dp2e
-	(ccs.at(i).density, ccs.at(i).pressure);
-      res.at(i).SoundSpeed = eos.dp2c
-	(ccs.at(i).density, ccs.at(i).pressure);
-    }
-    return res;
-  }
-}
-
 vector<Extensive> SimpleFluxCalculator1D::operator()
 (const SimulationState1D& ss,
  const vector<double>& vertex_velocity,
@@ -35,17 +17,19 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
 {
   // Bulk
   vector<Extensive> res(ss.getVertices().size());
+  const vector<Primitive> primitives = ccs2primitives
+    (ss.getCells(), eos);
   for(size_t i=1;i<ss.getVertices().size()-1;++i){
     const Primitive left = interp_
       (ss.getVertices(),
-       cc2primitives(ss.getCells(), eos),
+       primitives,
        vertex_velocity.at(i),
        i,
        0,
        dt);
     const Primitive right = interp_
       (ss.getVertices(),
-       cc2primitives(ss.getCells(), eos),
+       primitives,
        vertex_velocity.at(i),
        i,
        1,
