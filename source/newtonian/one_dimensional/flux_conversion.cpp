@@ -24,3 +24,26 @@ vector<Primitive> ccs2primitives
     res.at(i) = cc2primitive(cells.at(i), eos);
   return res;
 }
+
+Extensive flux2extensive
+(const Conserved& flux,
+ const ComputationalCell& donor)
+{
+  Extensive res;
+  res.mass = flux.Mass;
+  res.momentum = flux.Momentum;
+  res.energy = flux.Energy;
+  for(size_t i=0;i<donor.tracers.size();++i)
+    res.tracers.push_back(res.mass*donor.tracers.at(i));
+  return res;
+}
+
+Extensive flux2extensive
+(const Conserved& flux,
+ const ComputationalCell& left,
+ const ComputationalCell& right)
+{
+  return flux2extensive
+    (flux,
+     flux.Mass > 0 ? left : right);
+}

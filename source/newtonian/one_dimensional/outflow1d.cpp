@@ -14,26 +14,16 @@ Extensive Outflow::operator()
     const ComputationalCell& cell = ss.getCells().back();
     const Primitive ghost = cc2primitive(cell, eos);
     const double vv = vertex_velocity[vertices.size()-1];
-    const Conserved flux = rs(ghost,ghost,vv);
-    Extensive res;
-    res.mass = flux.Mass;
-    res.momentum = flux.Momentum;
-    res.energy = flux.Energy;
-    for(size_t j=0;j<cell.tracers.size();++j)
-      res.tracers.push_back(res.mass*cell.tracers.at(j));
-    return res;
+    return flux2extensive
+      (rs(ghost,ghost,vv),
+       cell);
   }
   else{
     const ComputationalCell& cell = ss.getCells().front();
     const Primitive ghost = cc2primitive(cell, eos);
     const double vv = vertex_velocity[0];
-    const Conserved flux = rs(ghost,ghost,vv);
-    Extensive res;
-    res.mass = flux.Mass;
-    res.momentum = flux.Momentum;
-    res.energy = flux.Energy;
-    for(size_t j=0;j<cell.tracers.size();++j)
-      res.tracers.push_back(res.mass*cell.tracers.at(j));
-    return res;	 
+    return flux2extensive
+      (rs(ghost, ghost, vv),
+       cell);
   }
 }

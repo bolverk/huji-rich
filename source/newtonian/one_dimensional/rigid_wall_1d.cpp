@@ -9,18 +9,6 @@ namespace {
     res.Velocity.x *= -1;
     return res;
   }
-
-  Extensive conserved2extensive
-  (const Conserved& conserved,
-   const ComputationalCell& cell)
-  {
-    Extensive res;
-    res.mass = conserved.Mass;
-    res.momentum = conserved.Momentum;
-    res.energy = conserved.Energy;
-    res.tracers = vector<double>(cell.tracers.size(),0);
-    return res;
-  }
 }
 
 Extensive RigidWall1D::operator()
@@ -36,7 +24,7 @@ Extensive RigidWall1D::operator()
     const Primitive left = cc2primitive(cell, eos);
     const Primitive right = reverse_velocity(left);
     const double vv = vertex_velocity.at(vertices.size()-1);
-    return conserved2extensive
+    return flux2extensive
       (rs(left, right, vv),
        cell);
   }
@@ -45,7 +33,7 @@ Extensive RigidWall1D::operator()
     const Primitive right = cc2primitive(cell, eos);
     const Primitive left = reverse_velocity(right);
     const double vv = vertex_velocity[0];
-    return conserved2extensive
+    return flux2extensive
       (rs(left, right, vv),
        cell);
   }
