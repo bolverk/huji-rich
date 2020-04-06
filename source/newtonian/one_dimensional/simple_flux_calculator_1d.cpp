@@ -35,16 +35,9 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
        1,
        dt);
     const Conserved hydro_flux = rs_(left, right, vertex_velocity.at(i));
-    Extensive& flux = res.at(i);
-    flux.mass = hydro_flux.Mass;
-    flux.momentum = hydro_flux.Momentum;
-    flux.energy = hydro_flux.Energy;
-
-    const size_t source_index = hydro_flux.Mass>0 ? i-1 : i;
-    for(size_t j=0;j<ss.getCells().at(i).tracers.size();++j)
-      flux.tracers.push_back
-	(res.at(i).mass*
-	 ss.getCells().at(source_index).tracers.at(j));
+    res.at(i) = flux2extensive(hydro_flux,
+			       ss.getCells().at(i-1),
+			       ss.getCells().at(i));
   }
 
   // Boundary conditions
