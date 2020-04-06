@@ -19,6 +19,8 @@
 #include "source/newtonian/one_dimensional/simple_cfl_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_extensive_updater_1d.hpp"
 #include "source/newtonian/one_dimensional/simple_flux_calculator_1d.hpp"
+#include "spdlog/spdlog.h"
+#include "spdlog/cfg/env.h"
 
 using namespace std;
 using namespace simulation1d;
@@ -108,6 +110,7 @@ namespace {
 
 int main(void)
 {
+  spdlog::cfg::load_env_levels();
   SimData sim_data;
   hdsim1D& sim = sim_data.getSim();
 

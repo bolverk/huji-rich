@@ -75,15 +75,20 @@ $(TREECODE_OBJECTS): $(LIBRARY_FOLDER)/%.o: $(SOURCE_DIR)/%.cpp
 clean:
 	rm -rf ./$(LIBRARY_FOLDER)
 
-set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libdclipper.a
+set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a external_libraries/lib/libclipper.a external_libraries/lib/libdclipper.a external_libraries/spdlog/include
 	$(eval MY_BOOST_PATH=`pwd`/external_libraries/boost_dump/boost_1_66_0)
 	$(eval MY_HDF5_PATH=`pwd`/external_libraries/include)
 	$(eval MY_ANN_PATH=`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/include)
-	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH):$(MY_ANN_PATH) > set_environ_vars.sh
+	$(eval MY_SPDLOG_PATH=`pwd`/external_libraries/spdlog/include)
+	echo export\ CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):$(MY_BOOST_PATH):$(MY_HDF5_PATH):$(MY_ANN_PATH):$(MY_SPDLOG_PATH) > set_environ_vars.sh
 	echo export\ HDF5_LIB_PATH=`pwd`/external_libraries/lib >> set_environ_vars.sh
 	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
+
+external_libraries/spdlog/include:
+	cd external_libraries/ && \
+	git clone https://github.com/gabime/spdlog.git
 
 external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.4/c++/src/H5Cpp.h
 	cd external_libraries/hdf5_dump/hdf5-1.10.4 && \
@@ -95,7 +100,6 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.4/c++
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
 	cd external_libraries/dump_clipper && wget https://sourceforge.net/projects/polyclipping/files/latest/download && mv download clipper_ver6.4.2.zip && unzip clipper_ver6.4.2.zip && cp cpp/clipper.hpp ../include
-#	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include
 
 external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hpp
 	cd external_libraries/dump_clipper && $(CXX) -c -O3 cpp/clipper.cpp -o clipper.o

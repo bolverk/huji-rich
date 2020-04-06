@@ -6,6 +6,7 @@
 #include "../common/hydrodynamics.hpp"
 #include "../../misc/utils.hpp"
 #include "../../misc/lazy_list.hpp"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -92,7 +93,10 @@ hdsim1D::hdsim1D
   time_(0),
   cycle_(0),
   tracers_intensive_(vector<vector<double> >()),
-  tracers_extensive_(vector<vector<double> >()) {}
+  tracers_extensive_(vector<vector<double> >())
+{
+  spdlog::debug("hdsim1D initialisation completed");
+}
 
 namespace {
   vector<double> CalcVertexVelocities
