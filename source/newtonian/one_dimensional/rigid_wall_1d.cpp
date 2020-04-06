@@ -1,25 +1,12 @@
 #include "rigid_wall_1d.hpp"
 #include "../../misc/universal_error.hpp"
+#include "flux_conversion.hpp"
 
 namespace {
   Primitive reverse_velocity(const Primitive& p)
   {
     Primitive res = p;
     res.Velocity.x *= -1;
-    return res;
-  }
-
-  Primitive cc2primitive(const ComputationalCell& cc,
-			 const EquationOfState& eos)
-  {
-    Primitive res;
-    res.Density = cc.density;
-    res.Pressure = cc.pressure;
-    res.Velocity = cc.velocity;
-    res.Energy = eos.dp2e(cc.density,
-			  cc.pressure);
-    res.SoundSpeed = eos.dp2c(cc.density,
-			      cc.pressure);
     return res;
   }
 
