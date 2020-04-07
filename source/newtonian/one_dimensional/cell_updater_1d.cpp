@@ -1,5 +1,6 @@
 #include <cmath>
 #include "cell_updater_1d.hpp"
+#include "spdlog/spdlog.h"
 
 CellUpdater1D::~CellUpdater1D(void) {}
 
@@ -56,11 +57,23 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
 {
   validate_input(extensives, old);
   vector<ComputationalCell> res(extensives.size());
-  for(size_t i=0;i<res.size();++i)
-    res.at(i) = retrieve_single_cell
-      (calc_cell_volume(pg,old.getVertices(),i),
-       extensives.at(i),
-       eos);
+  for(size_t i=0;i<res.size();++i){
+    try{
+      res.at(i) = retrieve_single_cell
+	(calc_cell_volume(pg,old.getVertices(),i),
+	 extensives.at(i),
+	 eos);
+    }
+    catch(...){
+      spdlog::critical("error found in cell {0}, position {1}, mass {2}, momentum {3} and energy {4}",
+		       i,
+		       old.getVertices().at(i),
+		       extensives.at(i).mass,
+		       extensives.at(i).momentum.x,
+		       extensives.at(i).energy);
+      throw;
+    }
+  }
   return res;
 }
 

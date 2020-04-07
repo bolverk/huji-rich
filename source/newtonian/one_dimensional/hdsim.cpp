@@ -151,14 +151,22 @@ namespace {
 
 void hdsim1D::TimeAdvance(void)
 {
+  spdlog::debug("begin time advance 1o iteration {0}, virtual time {1}",
+		cycle_, time_);
+  
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_, vm_);
 
-  //  const double dt = _cfl*MaxTimeStep(ss_.getVertices(), getCells());
+  spdlog::debug("Vertex velocity calculated");
+
   const double dt = tsf_(ss_,eos_);
+
+  spdlog::debug("Time step calculated");
 
   const vector<Extensive> fluxes =
     fc_(ss_, _VertexVelocity, eos_, dt);
+
+  spdlog::debug("Fluxes calculated");
 
   eu_
     (fluxes,
@@ -167,27 +175,31 @@ void hdsim1D::TimeAdvance(void)
      dt,
      extensives_);
 
+  spdlog::debug("Extensives updated");
+
   force_contribution(ss_,
 		     force_, time_, dt, 
 		     extensives_);
+
+  spdlog::debug("source term calculated");
 
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
 
-  /*
-  const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
-    (extensive2conserved(extensives_),
-     ss_.getVertices(), pg_);
-  */
+  spdlog::debug("Vertices updated");
 
   ss_.updateCells(cu_(pg_,
 		      extensives_,
 		      ss_,
 		      eos_));
 
+  spdlog::debug("cells updated");
+
   time_ += dt;
   cycle_++;
+
+  spdlog::debug("time advance interation finished");
 }
 
 void hdsim1D::TimeAdvance2(void)
@@ -251,12 +263,6 @@ void hdsim1D::TimeAdvance2(void)
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
-
-  /*
-  const vector<Conserved> _ConservedIntensive = UpdateConservedIntensive
-    (extensive2conserved(extensives_),
-     ss_.getVertices(), pg_);
-  */
 
   ss_.updateCells(cu_(pg_,
 		      extensives_,

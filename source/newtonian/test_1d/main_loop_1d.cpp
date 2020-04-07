@@ -43,7 +43,7 @@ void simulation1d::main_loop(hdsim1D& sim,
       throw UniversalError("Error in 1d main_loop: unsupported time integration order");
 
     if(diag)
-      diag->diagnose(sim);
+      (*diag)(sim);
   }
 }
 

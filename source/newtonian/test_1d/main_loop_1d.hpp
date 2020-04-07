@@ -58,7 +58,7 @@ namespace simulation1d{
     /*! \brief Perform diagnostics
       \param sim Hydrodynamic simulation
      */
-    virtual void diagnose(hdsim1D const& sim) = 0;
+    virtual void operator()(hdsim1D const& sim) = 0;
     
     virtual ~DiagnosticsFunction(void);
   };
