@@ -138,7 +138,7 @@ namespace
 				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
 				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
 				eo.AddEntry("Cell energy", extensives[i].energy);
-				throw;
+				throw eo;
 			}
 		}
 	}
