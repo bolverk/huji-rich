@@ -76,7 +76,7 @@ namespace simulation1d{
     /*! \brief Performs diagnostics
       \param sim Hydrodynamic simulation
      */
-    void diagnose(hdsim1D const& sim);
+    void operator()(hdsim1D const& sim);
 
   private:
     const string fname_;

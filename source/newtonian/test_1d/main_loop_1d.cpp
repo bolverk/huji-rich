@@ -24,7 +24,7 @@ simulation1d::WriteTime::WriteTime
 (string const& fname):
 fname_(fname) {}
 
-void simulation1d::WriteTime::diagnose(hdsim1D const& sim)
+void simulation1d::WriteTime::operator()(hdsim1D const& sim)
 {
   write_number(sim.GetTime(),fname_);
 }
