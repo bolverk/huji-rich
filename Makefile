@@ -102,7 +102,7 @@ external_libraries/include/clipper.hpp:
 	cd external_libraries/dump_clipper && wget https://sourceforge.net/projects/polyclipping/files/latest/download && mv download clipper_ver6.4.2.zip && unzip clipper_ver6.4.2.zip && cp cpp/clipper.hpp ../include
 
 external_libraries/dump_clipper/clipper.o: external_libraries/include/clipper.hpp
-	cd external_libraries/dump_clipper && $(CXX) -c -O3 cpp/clipper.cpp -o clipper.o
+	cd external_libraries/dump_clipper && $(CXX) -c -O3 -march=native -fPIE cpp/clipper.cpp -o clipper.o
 
 external_libraries/lib/libclipper.a: external_libraries/dump_clipper/clipper.o
 	$(ARCHIVER_FUNC) cr $@ $^ 
