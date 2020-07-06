@@ -19,7 +19,6 @@ void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlo
 		std::vector<double> allx, xlocal(nlocal);
 		if (rank == 0)
 		{
-			std::cout << "Entering load" << std::endl;
 			allx.resize(ntotal);
 		}
 		for (int i = 0; i < nlocal; ++i)
@@ -31,7 +30,6 @@ void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlo
 			disp.resize(nproc, 0);
 			for (size_t i = 1; i < nproc; ++i)
 				disp[i] = disp[i - 1] + NPerProc[i - 1];
-			std::cout << "start gather" << std::endl;
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
 		MPI_Gatherv(&xlocal[0], nlocal, MPI_DOUBLE, &allx[0], &NPerProc[0], &disp[0],
