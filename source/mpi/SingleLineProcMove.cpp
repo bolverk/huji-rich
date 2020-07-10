@@ -1,8 +1,10 @@
 #include "SingleLineProcMove.hpp"
 #ifdef RICH_MPI
 #include "../misc/serializable.hpp"
+#include "../misc/simple_io.hpp"
 #include "mpi_commands.hpp"
 #include <mpi.h>
+#include <random>
 #endif
 
 void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlocal) const
@@ -14,8 +16,10 @@ void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlo
 	int ntotal = 0;
 	int nlocal = tlocal.GetPointNo();
 	double load = GetLoadImbalance(tlocal, ntotal);
-	if (load > 1.55)
+	if (load > 1.45)
 	{
+		std::mt19937_64 randgen;
+		std::uniform_real_distribution<double> dist;
 		std::vector<double> allx, xlocal(nlocal);
 		if (rank == 0)
 		{
@@ -40,12 +44,18 @@ void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlo
 			std::sort(allx.begin(), allx.end());
 			int NperProc2 = ntotal / nproc + 1;
 			newx[0] = allx[NperProc2] - 0.5 * (allx[2 * NperProc2] - allx[NperProc2]);
-			for (int i = 1; i < nproc; ++i)
+			newx[1] = 2 * allx[NperProc2] - newx[0];
+			for (int i = 2; i < nproc; ++i)
 			{
-				int index = std::min(NperProc2 * i, ntotal - 1);
-				newx[i] = 2 * allx.at(index) - 0.001 * (allx.at(index) - allx.at(index - 1))
-					- newx[i - 1];
+				double x_edge = 0.5 * (newx[i - 1] + newx[i - 2]);
+				int points_done = static_cast<int>(std::upper_bound(allx.begin(), allx.end(), x_edge) - allx.begin());
+				NperProc2 = (ntotal - points_done) / (nproc - i);
+				double new_edge = allx[std::min(points_done + NperProc2, ntotal - 1)];
+				double new_loc = std::min(std::min(2 * new_edge - newx[i - 1], allx.back()), allx[points_done +
+					static_cast<int>(1.5 * NperProc2)]);
+				newx[i] = std::min(new_loc, allx.back() * 0.99999);
 			}
+			write_vector(newx, "procx.txt", 8);
 		}
 		MPI_Bcast(&newx[0], nproc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 		std::vector<Vector3D> cortemp = tproc.GetMeshPoints();
