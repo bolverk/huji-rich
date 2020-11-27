@@ -139,13 +139,15 @@ namespace {
   void force_contribution
   (const SimulationState1D& state,
    const SourceTerm1D& force,
+   const vector<Extensive>& fluxes,
+   const PhysicalGeometry1D& pg,
    double t,
    double dt,
    vector<Extensive>& extensive)
   {
     for(size_t i=0;i<extensive.size();++i)
       extensive[i] +=
-	dt*force(state, i, t, dt); 
+	dt*force(state, i, fluxes, pg, t, dt); 
   }
 }
 
@@ -178,7 +180,11 @@ void hdsim1D::TimeAdvance(void)
   spdlog::debug("Extensives updated");
 
   force_contribution(ss_,
-		     force_, time_, dt, 
+		     force_, 
+		     fluxes,
+		     pg_,
+		     time_, 
+		     dt, 
 		     extensives_);
 
   spdlog::debug("source term calculated");
@@ -221,7 +227,11 @@ void hdsim1D::TimeAdvance2(void)
       mid_extensive);
   
   force_contribution(ss_,
-		     force_, time_, dt/2,
+		     force_, 
+		     mid_fluxes,
+		     pg_,
+		     time_, 
+		     dt/2,
 		     mid_extensive);
 
   SimulationState1D mid_state = ss_;
@@ -257,7 +267,11 @@ void hdsim1D::TimeAdvance2(void)
 
   force_contribution
     (mid_state,
-     force_, time_, dt,
+     force_, 
+     fluxes,
+     pg_,
+     time_, 
+     dt,
      extensives_);
 
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,

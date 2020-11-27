@@ -9,6 +9,8 @@ CylindricalComplementary1D::CylindricalComplementary1D(void) {}
 Extensive CylindricalComplementary1D::operator()
   (const SimulationState1D& state,
    size_t point,
+   const vector<Extensive>& /*fluxes*/,
+   const PhysicalGeometry1D& /*pg*/,
    double /*t*/,
    double /*dt*/) const
 {

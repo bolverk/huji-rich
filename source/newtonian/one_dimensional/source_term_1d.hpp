@@ -10,6 +10,7 @@
 #include "../common/hydrodynamic_variables.hpp"
 #include "simulation_state_1d.hpp"
 #include "../two_dimensional/extensive.hpp"
+#include "physical_geometry_1d.hpp"
 
 using std::vector;
 
@@ -28,6 +29,8 @@ public:
   virtual Extensive operator()
   (const SimulationState1D& state,
    size_t point,
+   const vector<Extensive>& fluxes,
+   const PhysicalGeometry1D& pg,
    double t,
    double dt) const = 0;
 

@@ -34,6 +34,8 @@ namespace {
     Extensive operator()
     (const SimulationState1D& state,
      size_t point,
+     const vector<Extensive>& /*fluxes*/,
+     const PhysicalGeometry1D& /*pg*/,
      double t,
      double /*dt*/) const
     {
