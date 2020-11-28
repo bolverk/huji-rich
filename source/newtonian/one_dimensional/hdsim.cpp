@@ -27,6 +27,11 @@ const SimulationState1D& hdsim1D::getState(void) const
   return ss_;
 }
 
+const vector<Extensive>& hdsim1D::getExtensives(void) const
+{
+  return extensives_;
+}
+
 // External functions
 
 namespace {

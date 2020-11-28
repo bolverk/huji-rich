@@ -30,13 +30,13 @@ private:
 
   SimulationState1D ss_;
 
-  EquationOfState const& eos_;
+  const EquationOfState& eos_;
 
   vector<Extensive> extensives_;
 
-  VertexMotion const& vm_;
+  const VertexMotion& vm_;
 
-  SourceTerm1D const& force_;
+  const SourceTerm1D& force_;
 
   const TimeStepFunction1D& tsf_;
 
@@ -88,6 +88,11 @@ public:
     \return Computational domain and hydro cells
    */
   const SimulationState1D& getState(void) const;
+
+  /*! \brief Access extensive variables
+    \return Extensive variables
+   */
+  const vector<Extensive>& getExtensives(void) const;
 
   // Diagnostics
 

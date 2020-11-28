@@ -1,4 +1,5 @@
 #include "hdf5_diagnostics1d.hpp"
+#include "../../misc/lazy_list.hpp"
 
 using H5::PredType;
 using H5::DataSet;
@@ -61,22 +62,34 @@ void diagnostics1d::write_snapshot_to_hdf5
   // Write Hydrodynamic variables
   {
     const vector<ComputationalCell>& cells = sim.getState().getCells();
+    const vector<Extensive>& extensives = sim.getExtensives();
     const size_t n = cells.size();
     vector<double> density_vector(n);
     vector<double> pressure_vector(n);
     vector<double> x_velocity_vector(n);
     vector<double> y_velocity_vector(n);
-    //    const vector<Primitive>& cells = sim.getCells();
+    vector<double> mass_vector(n);
+    vector<double> x_momentum_vector(n);
+    vector<double> y_momentum_vector(n);
+    vector<double> energy_vector(n);
     for(size_t i=0;i<n;++i){
-      density_vector[size_t(i)] = cells.at(i).density;
-      pressure_vector[size_t(i)] = cells.at(i).pressure;
-      x_velocity_vector[size_t(i)] = cells.at(i).velocity.x;
-      y_velocity_vector[size_t(i)] = cells.at(i).velocity.y;
+      density_vector[i] = cells.at(i).density;
+      pressure_vector[i] = cells.at(i).pressure;
+      x_velocity_vector[i] = cells.at(i).velocity.x;
+      y_velocity_vector[i] = cells.at(i).velocity.y;
+      mass_vector[i] = extensives.at(i).mass;
+      x_momentum_vector[i] = extensives.at(i).momentum.x;
+      y_momentum_vector[i] = extensives.at(i).momentum.y;
+      energy_vector[i] = extensives.at(i).energy;
     }
     write_std_vector_to_hdf5(file, density_vector, "density");
     write_std_vector_to_hdf5(file, pressure_vector, "pressure");
     write_std_vector_to_hdf5(file, x_velocity_vector, "x_velocity");
     write_std_vector_to_hdf5(file, y_velocity_vector, "y_velocity");
+    write_std_vector_to_hdf5(file, mass_vector, "mass");
+    write_std_vector_to_hdf5(file, x_momentum_vector, "x_momentum");
+    write_std_vector_to_hdf5(file, y_momentum_vector, "y_momentum");
+    write_std_vector_to_hdf5(file, energy_vector, "energy");
   }
 
   // Write tracers
