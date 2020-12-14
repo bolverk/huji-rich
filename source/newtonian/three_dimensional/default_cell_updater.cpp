@@ -13,6 +13,7 @@ namespace
 		res.pressure = new_pressure;
 		double de = eos.dp2e(res.density, res.pressure) - energy;
 		energy += de;
+		res.internal_energy = energy;
 		extensive.energy += de * extensive.mass;
 		extensive.internal_energy += de * extensive.mass;
 	}
