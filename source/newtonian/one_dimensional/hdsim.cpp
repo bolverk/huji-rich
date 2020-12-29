@@ -32,6 +32,11 @@ const vector<Extensive>& hdsim1D::getExtensives(void) const
   return extensives_;
 }
 
+void hdsim1D::setExtensives(const vector<Extensive>& new_ext)
+{
+  extensives_ = new_ext;
+}
+
 // External functions
 
 namespace {

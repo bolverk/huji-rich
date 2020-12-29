@@ -94,6 +94,10 @@ public:
    */
   const vector<Extensive>& getExtensives(void) const;
 
+  /*! \brief Override extensive variables
+   */
+  void setExtensives(const vector<Extensive>& new_ext);
+
   // Diagnostics
 
   /*! \brief Returns the time of the simulation
