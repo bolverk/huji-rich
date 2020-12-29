@@ -60,6 +60,8 @@ public:
 
 private:
 
+  Circle& operator=(const Circle& origin);
+
   Vector2D center_;
   const double radius_;
 };

@@ -284,8 +284,8 @@ namespace
 			Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Down)));
 		res[1] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Down)),
 			Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up)));
-		res[2] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up)),
-			Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up)));
+		/*res[2] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Right), bc.GetGridBoundary(Up)),
+		  Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up)));*/
 		res[2] = std::pair<Vector2D, Vector2D>(Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Up)),
 			Vector2D(bc.GetGridBoundary(Left), bc.GetGridBoundary(Down)));
 		return res;

@@ -34,7 +34,8 @@ Outside::Outside(Shape2D const& shape):
 Circle::~Circle(void) {}
 
 Circle::Circle(const Circle& origin):
-	center_(origin.getCenter()), radius_(origin.getRadius()) {}
+  center_(origin.getCenter()), 
+  radius_(origin.getRadius()) {}
 
 bool Outside::operator()(Vector2D const& r) const
 {
