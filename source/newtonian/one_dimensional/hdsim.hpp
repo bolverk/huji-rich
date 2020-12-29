@@ -95,6 +95,7 @@ public:
   const vector<Extensive>& getExtensives(void) const;
 
   /*! \brief Override extensive variables
+    \param new_ext New external variables
    */
   void setExtensives(const vector<Extensive>& new_ext);
 

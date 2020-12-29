@@ -23,7 +23,8 @@ public:
 	\param outer The outer boudnary conditions, used for preventing points from getting outside the box. If periodic then no fix is applied
     \param chi chi parameter in equation 63
     \param eta eta parameter in equation 63
-	\param cold Switch for cold flows
+    \param cold Switch for cold flows
+    \param cold_speed Reference velocity for cold flows
    */
 	RoundCells(const PointMotion& pm, const EquationOfState& eos, OuterBoundary const& outer,
 		double chi = 0.15, double eta = 0.02, bool cold = false, double cold_speed = 0.15);
@@ -35,6 +36,7 @@ public:
 	\param chi chi parameter in equation 63
 	\param eta eta parameter in equation 63
 	\param cold Switch for cold flows
+	\param cold_speed Reference speed for cold flows
 	*/
 	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02,bool cold = false
 		, double cold_speed = 0.15);

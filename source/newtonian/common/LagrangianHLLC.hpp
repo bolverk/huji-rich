@@ -19,6 +19,8 @@ private:
 public:
   /*! \brief Class constructor
     \param massflux Whether to apply correction for mass flux
+    \param eos Equation of state
+    \param iter Perform multiple iterations
    */
   explicit LagrangianHLLC(EquationOfState const& eos, bool massflux=true,bool iter=false);
 

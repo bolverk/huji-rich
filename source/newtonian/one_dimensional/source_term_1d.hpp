@@ -22,6 +22,8 @@ public:
   /*! \brief Calculates the change in the extensive conserved variables due to external forces
     \param state Computational domain and hydro cells
     \param point Point in which the forces will be evaluated
+    \param fluxes Hydrodynamic fluxes
+    \param pg Physical geometry
     \param t Simulation time
     \param dt Time step
     \return Value of the external force

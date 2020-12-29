@@ -44,6 +44,10 @@ public:
    */
   pair<Vector2D,Vector2D> getBoundary(void) const;
 
+  /*! \brief Sets the position of the boundary
+    \param ll Lower left point
+    \param ur Upper right point
+   */
   void SetBoundary(Vector2D const& ll, Vector2D const& ur);
 
   ~SquareBox(void);

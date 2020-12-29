@@ -79,6 +79,8 @@ std::vector<Vector2D> CirclePointsRmax_1(int PointNum,double Rmin,double Rmax,
   \param point_number Number of points along the circumference
   \param radius Radius of the circle
   \param center Position of the center of the circle
+  \param angle_start Starting angle
+  \param angle_end End angle
   \return List of two dimensional points
 */
 std::vector<Vector2D> circle_circumference(size_t point_number,
@@ -108,6 +110,8 @@ std::vector<Vector2D> Line(int PointNum,double xmin,double xmax,double ymin,doub
   \param ymax Upper edge of confining rectangle
   \param ymin Lower edge of confining rectangle
   \param alpha The point density, should not be -1 or -2
+  \param angle_start Start angle
+  \param angle_end End angle
   \return List of two dimensional points
 */
 std::vector<Vector2D> CirclePointsRmax_a(int PointNum,double Rmin,double Rmax,

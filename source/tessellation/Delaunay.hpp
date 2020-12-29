@@ -297,6 +297,9 @@ public:
 	*/
 	void AddBoundaryPoints(vector<Vector2D> const& points);
 
+  /*! \brief Verify triangulation
+    \return True if triangulation is valid
+   */
 	bool CheckCorrect(void);
 };
 #endif //DELAUNAYMPI_HPP
