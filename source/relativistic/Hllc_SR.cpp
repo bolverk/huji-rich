@@ -47,7 +47,7 @@ namespace
 		const double El = (left.Energy+1)*left.Density / (1 - ScalarProd(left.Velocity, left.Velocity)) - left.Pressure;
 		const double Er = (right.Energy+1)*right.Density / (1 - ScalarProd(right.Velocity, right.Velocity)) - right.Pressure;
 		const double mxl = (El + left.Pressure)*left.Velocity.x;
-		const double mxr = (Er + right.Pressure)*right.Velocity.x;;
+		const double mxr = (Er + right.Pressure)*right.Velocity.x;
 		const double E_hll = (sr*Er - sl * El + mxl - mxr) / (sr - sl);
 		const double mx_hll = (sr*mxr - sl * mxl + (mxl*left.Velocity.x + left.Pressure) - (mxr*right.Velocity.x + right.Pressure)) / (sr - sl);
 		const double F_E = (sr * mxl - sl * mxr + sr * sl*(Er - El)) / (sr - sl);

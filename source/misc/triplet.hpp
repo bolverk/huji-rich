@@ -80,7 +80,7 @@ template<class T> class Triplet
   {
     first = first_i;
     second = second_i;
-    third = third_i;;
+    third = third_i;
   }
 
   /*! \brief Random access operator
