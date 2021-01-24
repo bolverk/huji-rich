@@ -204,10 +204,10 @@ namespace {
    ExtensiveField f)
   {
     switch(f){
-    case Mass:return e.mass; break;
-    case MomentumX:return e.momentum.x; break;
-    case MomentumY:return e.momentum.y; break;
-    case Energy:return e.energy; break;
+    case Mass:return e.mass;
+    case MomentumX:return e.momentum.x;
+    case MomentumY:return e.momentum.y;
+    case Energy:return e.energy;
     }
     throw("something went wrong");
   }
