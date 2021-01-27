@@ -1,43 +1,49 @@
-import h5py
-import pylab
-import numpy
-import matplotlib
-import sys
-import argparse
+def main():
 
-parser = argparse.ArgumentParser(description='Displays snapshot of the hydrodynamic simualation')
-parser.add_argument("file_name",
-                    help="path to snapshot file")
-parser.add_argument("field",
-                    help="Name of hydrodynamic variable")
-args = parser.parse_args()
+    import h5py
+    import pylab
+    import numpy
+    import matplotlib
+    import sys
+    import argparse
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
 
-h5f = h5py.File(args.file_name)
-x_list = numpy.array(h5f['x_coordinate'])
-print len(x_list)
-y_list = h5f['y_coordinate']
-z_list = h5f[args.field]
-vert_x_raw = numpy.array(h5f['x position of vertices'])
-vert_y_raw = numpy.array(h5f['y position of vertices'])
-vert_n_raw = h5f['Number of vertices in cell']
-vert_idx_list = numpy.cumsum(vert_n_raw)
+    parser = argparse.ArgumentParser(description='Displays snapshot of the hydrodynamic simualation')
+    parser.add_argument("file_name",
+                        help="path to snapshot file")
+    parser.add_argument("field",
+                        help="Name of hydrodynamic variable")
+    args = parser.parse_args()
 
-z_range = max(z_list) - min(z_list) + 1e-15
-z_min = min(z_list)
-z_scaled = [(z-z_min)/z_range for z in z_list]
+    with h5py.File(args.file_name, 'r') as f:
+        x_list = numpy.array(f['geometry']['x_coordinate'])
+        y_list = numpy.array(f['geometry']['y_coordinate'])
+        z_list = numpy.array(f['hydrodynamic'][args.field])
+        vert_x_raw = numpy.array(f['geometry']['x_vertices'])
+        vert_y_raw = numpy.array(f['geometry']['y_vertices'])
+        vert_n_raw = numpy.array(f['geometry']['n_vertices'])
+        vert_idx_list = numpy.concatenate(([0], numpy.cumsum(vert_n_raw))).astype(int)
+        time = numpy.array(f['time'])[0]
 
-for i in range(len(vert_n_raw)):
-    upbound = vert_idx_list[i]
-    if i==0:
-        lowbound = 0
-    else:
-        lowbound = vert_idx_list[i-1]
-    pylab.fill(vert_x_raw[lowbound:upbound],
-               vert_y_raw[lowbound:upbound],
-               fc=matplotlib.cm.jet(z_scaled[i]),
-               ec='None')
+    polygon_list = [Polygon(
+        numpy.vstack((vert_x_raw[low:high],
+                      vert_y_raw[low:high])).T)
+                    for low, high
+                    in zip(vert_idx_list[:-1],
+                           vert_idx_list[1:])]
+    patch_collection = PatchCollection(polygon_list)
+    patch_collection.set_array(z_list)
 
-pylab.title(args.field)
-ax, _ = matplotlib.colorbar.make_axes(pylab.gca())
-matplotlib.colorbar.ColorbarBase(ax,norm=matplotlib.colors.Normalize(vmin=min(z_list),vmax=max(z_list)))
-pylab.show()
+    fig, ax = pylab.subplots()
+    ax.add_collection(patch_collection)
+    pylab.suptitle('t = %.4f' % time)
+    pylab.axis('scaled')
+    pylab.xlim((numpy.min(x_list), numpy.max(x_list)))
+    pylab.ylim((numpy.min(y_list), numpy.max(y_list)))
+
+    pylab.show()
+
+if __name__ == '__main__':
+
+    main()
