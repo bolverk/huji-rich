@@ -11,27 +11,25 @@ def unstructured_contour(x_list, y_list, z_list):
     res = plt.tricontourf(mtri, z_list)
     return res
 
-def consolidate_data(fname, g = 5./3.):
+def load_file(fname):
 
-    import h5py
     import numpy
+    import h5py
 
-    f = h5py.File(fname)
     res = {}
-    for field in f:
-        res[field] = numpy.array(f[field])
-    res['log_density'] = numpy.log(res['density'])
-    res['log_pressure'] = numpy.log(res['pressure'])
-    res['sound_speed'] = numpy.sqrt(res['pressure']/res['density'])
-    res['speed'] = numpy.sqrt(res['x_velocity']**2+res['y_velocity']**2)
-    res['mach_number'] = res['speed']/res['sound_speed']
+    with h5py.File(fname, 'r') as f:
+        for spr in ['geometry', 'hydrodynamic']:
+            for field in f[spr]:
+                res[field] = numpy.array(f[spr][field])
+        for field in ['time', 'cycle']:
+            res[field] = numpy.array(f[field])
     return res
 
 def collect_snapshot_data(file_list):
 
     import numpy
 
-    part_list = [consolidate_data(fname) for fname
+    part_list = [load_file(fname) for fname
                  in file_list]
     res = {}
     for field in part_list[0]:
@@ -41,7 +39,7 @@ def collect_snapshot_data(file_list):
 def main():
 
     import argparse
-    import glob
+    from glob import glob
     import pylab
 
     parser = argparse.ArgumentParser(description='Plots RICH snapshots')
@@ -49,7 +47,7 @@ def main():
     parser.add_argument('varname',help='name of variable to be plotted (z axis)')
     args = parser.parse_args()
 
-    data = collect_snapshot_data(glob.glob(args.pattern))
+    data = collect_snapshot_data(glob(args.pattern))
     unstructured_contour(data['x_coordinate'],
                          data['y_coordinate'],
                          data[args.varname])
