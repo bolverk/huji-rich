@@ -14,31 +14,6 @@ using namespace std;
 
 namespace
 {
-  class CellEdgesGetter : public LazyList<Edge>
-  {
-  public:
-
-    CellEdgesGetter(const Tessellation& tess, int n) :
-      tess_(tess), edge_indices_(tess.GetCellEdges(n)) {}
-
-    size_t size(void) const
-    {
-      return edge_indices_.size();
-    }
-
-    Edge operator[](size_t i) const
-    {
-      return tess_.GetEdge(edge_indices_[i]);
-    }
-
-  private:
-    const Tessellation& tess_;
-    const vector<int> edge_indices_;
-  };
-}
-
-namespace
-{
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
 				    const vector<ComputationalCell>& cells,
@@ -53,11 +28,6 @@ namespace
 	for (size_t i = 0; i < Nloop; ++i)
 	  {
 	    const ComputationalCell& cell = cells[i];
-	    /*
-	    const double volume =
-	      pg.calcVolume
-	      (serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
-	    */
 	    const double volume =
 	      pg.calcVolume
 	      (serial_generate<int, Edge>
@@ -81,7 +51,9 @@ namespace
 	    const ComputationalCell& cell = cells[i];
 	    const double volume =
 	      pg.calcVolume
-	      (serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
+	      (serial_generate<int, Edge>
+	       (tess.GetCellEdges(static_cast<int>(i)),
+		[&tess](int j){return tess.GetEdge(j);}));
 	    double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
 	    const double mass = volume * cell.density * gamma;
 	    res[i].mass = mass;
@@ -815,7 +787,9 @@ vector<Extensive>& hdsim::getAllExtensives(void)
 double hdsim::getCellVolume(size_t index) const
 {
   return pg_.calcVolume
-    (serial_generate(CellEdgesGetter(tess_, static_cast<int>(index))));
+    (serial_generate<int, Edge>
+     (tess_.GetCellEdges(static_cast<int>(index)),
+      [&](int j){return tess_.GetEdge(j);}));
 }
 
 const CacheData& hdsim::getCacheData(void) const
