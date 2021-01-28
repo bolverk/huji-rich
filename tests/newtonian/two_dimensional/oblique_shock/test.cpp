@@ -27,7 +27,6 @@
 #include "source/newtonian/two_dimensional/condition_action_sequence.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
-#include "source/misc/vector_initialiser.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/misc/mesh_generator.hpp"
 #include "source/newtonian/two_dimensional/amr.hpp"
@@ -244,6 +243,11 @@ namespace
 			point_motion_(pm_, criteria_),
 			force_(),
 			tsf_(0.3),
+			fc_({{new LeftBoundaryEdge, new ConstantGhost(calc_ghost(), rs_)},
+			      {new IsBoundaryEdge, new FreeFlowFlux(rs_)},
+				{new RegularSpecialEdge("wedge"), new RigidWallFlux(rs_)},
+			     {new IsBulkEdge, new RegularFlux(rs_)}}),
+			/*
 			fc_(VectorInitialiser<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >
 				(pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*>
 					(new LeftBoundaryEdge, new ConstantGhost(calc_ghost(), rs_)))
@@ -253,10 +257,9 @@ namespace
 					(new RegularSpecialEdge("wedge"), new RigidWallFlux(rs_)))
 				(pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*>
 					(new IsBulkEdge, new RegularFlux(rs_)))()),
+			*/
 			eu_(),
-			cu_(VectorInitialiser<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >
-				(pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*>
-					(new HasSticker("wedge"), new SkipUpdate))()),
+			cu_({{new HasSticker("wedge"), new SkipUpdate}}),
 			sim_
 			(
 #ifdef RICH_MPI
