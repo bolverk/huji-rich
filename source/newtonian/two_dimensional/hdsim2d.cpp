@@ -14,6 +14,30 @@ using namespace std;
 
 namespace
 {
+
+  Extensive cell2extensive
+  (const ComputationalCell& cell,
+   const double volume,
+   const EquationOfState& eos,
+   const TracerStickerNames& tnames)
+  {
+    const double mass = volume*cell.density;
+    Extensive res;
+    res.mass = mass;
+    res.energy = eos.dp2e
+      (cell.density,
+       cell.pressure,
+       cell.tracers,
+       tnames.tracer_names)*mass+
+      0.5*mass*ScalarProd(cell.velocity,
+			  cell.velocity);
+    res.momentum = mass*cell.velocity;
+    res.tracers = serial_generate<double, double>
+      (cell.tracers,
+       [&mass](double t){return mass*t;});
+    return res;
+  }
+
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
 				    const vector<ComputationalCell>& cells,
@@ -33,15 +57,22 @@ namespace
 	      (serial_generate<int, Edge>
 	       (tess.GetCellEdges(static_cast<int>(i)),
 		[&tess](int j){return tess.GetEdge(j);}));
-	    const double mass = volume * cell.density;
-	    res[i].mass = mass;
+	    res.at(i) = cell2extensive(cell,
+				       volume,
+				       eos,
+				       tracernames);
+	    //    const double mass = volume * cell.density;
+	    //	    res[i].mass = mass;
+	    /*
 	    res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names)*mass +
 	      0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 	    res[i].momentum = mass * cell.velocity;
 	    size_t N = cell.tracers.size();
 	    res[i].tracers.resize(N);
-	    for (size_t j = 0; j < N; ++j)
-	      res[i].tracers[j] = cell.tracers[j] * mass;
+	    res[i].tracers = serial_generate<double, double>
+	      (cell.tracers,
+	       [&mass](double t){return mass*t;});
+	    */
 	  }
       }
     else
