@@ -4,6 +4,7 @@
 #include "../../misc/simple_io.hpp"
 #include "../../misc/hdf5_utils.hpp"
 #include "../../misc/lazy_list.hpp"
+#include "../../misc/serial_generate.hpp"
 
 LocalContourCriterion::~LocalContourCriterion(void) {}
 
@@ -35,29 +36,6 @@ SequentialContour::SequentialContour
 
 namespace {
 
-  class ComponentExtractor: public LazyList<double>
-  {
-  public:
-
-    ComponentExtractor(const vector<Vector2D>& source,
-		       double Vector2D::* component):
-      source_(source), component_(component) {}
-
-    size_t size(void) const
-    {
-      return source_.size();
-    }
-
-    double operator[](size_t i) const
-    {
-      return source_[i].*component_;
-    }
-
-  private:
-    const vector<Vector2D>& source_;
-    double Vector2D::* component_;
-  };
-
   void hdf5_write(const string& output_file,
 		  const vector<Vector2D>& data,
 		  const double time)
@@ -65,8 +43,14 @@ namespace {
     if(!data.empty())
       (HDF5Shortcut(output_file))
 	("time",vector<double>(1,time))
-	("x",serial_generate(ComponentExtractor(data, &Vector2D::x)))
-	("y",serial_generate(ComponentExtractor(data, &Vector2D::y)));
+	("x",serial_generate<Vector2D, double>
+	 (data,
+	  [](const Vector2D& v){return v.x;}))
+	("y",serial_generate<Vector2D, double>
+	 (data,
+	  [](const Vector2D& v){return v.y;}));
+	 //("x",serial_generate(ComponentExtractor(data, &Vector2D::x)))
+    //	("y",serial_generate(ComponentExtractor(data, &Vector2D::y)));
   }
 }
 

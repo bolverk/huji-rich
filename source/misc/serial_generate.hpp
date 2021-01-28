@@ -9,7 +9,7 @@ using std::function;
 
 template<class S, class T> vector<T> serial_generate
 (const vector<S>& source,
- function<T(S)> func)
+ function<T(const S&)> func)
 {
   vector<T> res(source.size());
   for(size_t i=0;i<source.size();++i)
