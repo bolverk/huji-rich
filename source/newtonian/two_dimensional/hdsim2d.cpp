@@ -9,6 +9,8 @@
 #include <iostream>
 #include "hdf5_diagnostics.hpp"
 #include "../../misc/serial_generate.hpp"
+#include <numeric>
+
 
 using namespace std;
 
@@ -38,7 +40,7 @@ namespace
     return res;
   }
 
-    Extensive relativistic_cell2extensive
+  Extensive relativistic_cell2extensive
   (const ComputationalCell& cell,
    const double volume,
    const EquationOfState& eos,
@@ -62,6 +64,17 @@ namespace
        [&mass](double t){return mass*t;});
     return res;
   }
+
+  namespace {
+    vector<size_t> create_range(size_t n)
+    {
+      vector<size_t> res(n);
+      std::iota(res.begin(),
+		res.end(),
+		0);
+      return res;
+    }
+  }
   
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
@@ -70,57 +83,24 @@ namespace
 				    TracerStickerNames const& tracernames,
 				    bool relativistic)
   {
-    size_t Nloop = static_cast<size_t>(tess.GetPointNo());
-    vector<Extensive> res(Nloop);
-    if (!relativistic)
-      {
-	for (size_t i = 0; i < Nloop; ++i)
-	  {
-	    const ComputationalCell& cell = cells[i];
-	    const double volume =
-	      pg.calcVolume
-	      (serial_generate<int, Edge>
-	       (tess.GetCellEdges(static_cast<int>(i)),
-		[&tess](int j){return tess.GetEdge(j);}));
-	    res.at(i) = cell2extensive(cell,
-				       volume,
-				       eos,
-				       tracernames);
-	  }
-      }
-    else
-      {
-	for (size_t i = 0; i < Nloop; ++i)
-	  {
-	    const ComputationalCell& cell = cells[i];
-	    const double volume =
-	      pg.calcVolume
-	      (serial_generate<int, Edge>
-	       (tess.GetCellEdges(static_cast<int>(i)),
-		[&tess](int j){return tess.GetEdge(j);}));
-	    res.at(i) = relativistic_cell2extensive
-	      (cell,
-	       volume,
-	       eos,
-	       tracernames);
-	    /*
-	    double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
-	    const double mass = volume * cell.density * gamma;
-	    res[i].mass = mass;
-	    const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names);
-	    if (fastabs(cell.velocity) < 1e-5)
-	      res[i].energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
-	    else
-	      res[i].energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
-	    res[i].momentum = mass * (enthalpy+1)*gamma*cell.velocity;
-	    size_t N = cell.tracers.size();
-	    res[i].tracers.resize(N);
-	    for (size_t j = 0; j < N; ++j)
-	      res[i].tracers[j] = cell.tracers[j] * mass;
-	    */
-	  }
-      }
-    return res;
+    return serial_generate<size_t, Extensive>
+      (create_range(static_cast<size_t>(tess.GetPointNo())),
+       [&](size_t i){
+	 const ComputationalCell& cell = cells[i];
+	 const double volume =
+	   pg.calcVolume
+	   (serial_generate<int, Edge>
+	    (tess.GetCellEdges(static_cast<int>(i)),
+	     [&tess](int j){return tess.GetEdge(j);}));
+	 auto func = (relativistic ?
+		      &relativistic_cell2extensive :
+		      &cell2extensive);
+	 return (*func)
+	   (cell,
+	    volume,
+	    eos,
+	    tracernames);
+       });
   }
 }
 
