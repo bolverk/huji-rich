@@ -498,13 +498,6 @@ void hdsim::TimeAdvance2Heun(void)
 
   eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt,tracer_sticker_names_);
 
-#ifdef RICH_DEBUG_PRINT
-  MPI_Barrier(MPI_COMM_WORLD);
-  if (rank == 0)
-    std::cout << "Here 10" << std::endl;
-#endif
-
-
   extensives_ = average_extensive(mid_extensives, extensives_);
 
   cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + dt);
