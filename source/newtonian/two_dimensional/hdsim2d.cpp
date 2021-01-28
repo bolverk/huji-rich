@@ -38,6 +38,31 @@ namespace
     return res;
   }
 
+    Extensive relativistic_cell2extensive
+  (const ComputationalCell& cell,
+   const double volume,
+   const EquationOfState& eos,
+   const TracerStickerNames& tnames)
+  {
+    const double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
+    const double mass = volume*cell.density*gamma;
+    const double enthalpy = eos.dp2e(cell.density,
+				     cell.pressure,
+				     cell.tracers,
+				     tnames.tracer_names);
+    Extensive res;
+    res.mass = mass;
+    if (fastabs(cell.velocity) < 1e-5)
+      res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* mass - cell.pressure*volume;
+    else
+      res.energy = (gamma*enthalpy + (gamma - 1))* mass - cell.pressure*volume;
+    res.momentum = mass * (enthalpy+1)*gamma*cell.velocity;
+    res.tracers = serial_generate<double, double>
+      (cell.tracers,
+       [&mass](double t){return mass*t;});
+    return res;
+  }
+  
   vector<Extensive> init_extensives(const Tessellation& tess,
 				    const PhysicalGeometry& pg,
 				    const vector<ComputationalCell>& cells,
@@ -61,18 +86,6 @@ namespace
 				       volume,
 				       eos,
 				       tracernames);
-	    //    const double mass = volume * cell.density;
-	    //	    res[i].mass = mass;
-	    /*
-	    res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, tracernames.tracer_names)*mass +
-	      0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-	    res[i].momentum = mass * cell.velocity;
-	    size_t N = cell.tracers.size();
-	    res[i].tracers.resize(N);
-	    res[i].tracers = serial_generate<double, double>
-	      (cell.tracers,
-	       [&mass](double t){return mass*t;});
-	    */
 	  }
       }
     else
@@ -85,6 +98,12 @@ namespace
 	      (serial_generate<int, Edge>
 	       (tess.GetCellEdges(static_cast<int>(i)),
 		[&tess](int j){return tess.GetEdge(j);}));
+	    res.at(i) = relativistic_cell2extensive
+	      (cell,
+	       volume,
+	       eos,
+	       tracernames);
+	    /*
 	    double gamma = 1 / std::sqrt(1 - ScalarProd(cell.velocity, cell.velocity));
 	    const double mass = volume * cell.density * gamma;
 	    res[i].mass = mass;
@@ -98,6 +117,7 @@ namespace
 	    res[i].tracers.resize(N);
 	    for (size_t j = 0; j < N; ++j)
 	      res[i].tracers[j] = cell.tracers[j] * mass;
+	    */
 	  }
       }
     return res;
