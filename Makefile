@@ -33,7 +33,7 @@ else ifeq ($(MODE),parallel_intel)
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CXX := clang++
-	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++11 -Wno-zero-as-null-pointer-constant
+	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -std=c++11 -Wno-zero-as-null-pointer-constant -Wno-c++98-compat
 	LINT_FLAGS := -std=c++11
 else ifeq ($(MODE),TACC)
 	CC := icc
