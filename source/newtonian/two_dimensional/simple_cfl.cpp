@@ -105,7 +105,18 @@ double SimpleCFL::operator()(const Tessellation& tess,
 			     const vector<Vector2D>& point_velocities,
 			     const double /*time*/,TracerStickerNames const& tracerstickernames) const
 {
-  double res =  cfl_*lazy_min(TimeStepCalculator(tess,cells,eos,point_velocities,tracerstickernames));
+  const vector<double> candidates =
+    serial_generate<size_t, double>
+    (create_range<size_t>(0, cells.size()),
+     [&](size_t i)
+     {return calc_local_time_step(tess,
+				  cells,
+				  point_velocities,
+				  eos,
+				  tracerstickernames,
+				  i);});
+  const double res =  cfl_*(*min_element(candidates.begin(),
+					 candidates.end()));
 #ifdef RICH_MPI
   double global_res=res;
   MPI_Allreduce(&res, &global_res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
