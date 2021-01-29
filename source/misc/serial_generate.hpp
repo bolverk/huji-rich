@@ -12,7 +12,23 @@ template<class S, class T> vector<T> serial_generate
  function<T(const S&)> func)
 {
   vector<T> res(source.size());
-  transform(source.begin(), source.end(),
+  transform(source.begin(),
+	    source.end(),
+	    res.begin(),
+	    func);
+  return res;
+}
+
+template<class S1, class S2, class T> vector<T> serial_generate
+(const vector<S1>& s1,
+ const vector<S2>& s2,
+ function<T(const S1&, const S2&)> func)
+{
+  assert(s1.size()==s2.size());
+  vector<T> res(s1.size());
+  transform(s1.begin(),
+	    s1.end(),
+	    s2.begin(),
 	    res.begin(),
 	    func);
   return res;

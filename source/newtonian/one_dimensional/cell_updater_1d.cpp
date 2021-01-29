@@ -61,6 +61,13 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
     diff(serial_generate<double,double>
 	 (old.getVertices(),
 	  [&](double r){return pg.calcVolume(r);}));
+  return serial_generate<Extensive, double, ComputationalCell>
+    (extensives,
+     volumes,
+     [&](const Extensive& e,
+	 const double& v){
+       return retrieve_single_cell(v,e,eos);});
+  /*
   vector<ComputationalCell> res(extensives.size());
   transform(extensives.begin(),
 	    extensives.end(),
@@ -70,6 +77,7 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
 		const double& v){
 	      return retrieve_single_cell(v,e,eos);});
   return res;
+  */
 }
 
 SimpleCellUpdater1D::~SimpleCellUpdater1D(void) {}
