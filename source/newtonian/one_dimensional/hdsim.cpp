@@ -110,6 +110,7 @@ hdsim1D::hdsim1D
 }
 
 namespace {
+  /*
   vector<double> CalcVertexVelocities
   (const SimulationState1D& state, 
    VertexMotion const& vm)
@@ -120,6 +121,7 @@ namespace {
 
     return res;
   }
+  */
 
   vector<double> calc_new_vertices
   (const vector<double>& vv_,
@@ -167,10 +169,6 @@ void hdsim1D::TimeAdvance(void)
   spdlog::debug("begin time advance 1o iteration {0}, virtual time {1}",
 		cycle_, time_);
 
-  /*
-  const vector<double> _VertexVelocity = CalcVertexVelocities
-    (ss_, vm_);
-  */
   const vector<double> _VertexVelocity =
     serial_generate<size_t, double>
     (create_range<size_t>(0, ss_.getVertices().size()),
@@ -227,8 +225,10 @@ void hdsim1D::TimeAdvance(void)
 
 void hdsim1D::TimeAdvance2(void)
 {
-  const vector<double> mid_vertex_velocities = 
-    CalcVertexVelocities(ss_, vm_);
+  const vector<double> mid_vertex_velocities =
+    serial_generate<size_t, double>
+    (create_range<size_t>(0, ss_.getVertices().size()),
+     [&](size_t i){return vm_(i, ss_.getVertices(), ss_.getCells());});
 
   const double dt = tsf_(ss_, eos_);
 
@@ -257,21 +257,15 @@ void hdsim1D::TimeAdvance2(void)
 		       dt,
 		       ss_.getVertices()));
 
-  /*
-  const vector<Conserved> mid_intesive = 
-    UpdateConservedIntensive
-    (extensive2conserved(mid_extensive),
-     mid_state.getVertices(),
-     pg_);
-  */
   mid_state.updateCells
     (cu_(pg_,
 	 mid_extensive,
 	 mid_state,
 	 eos_));
 
-  const vector<double> _VertexVelocity = CalcVertexVelocities
-    (mid_state, vm_);
+  const vector<double> _VertexVelocity = serial_generate<size_t, double>
+    (create_range<size_t>(0, ss_.getVertices().size()),
+     [&](size_t i){return vm_(i, ss_.getVertices(), ss_.getCells());});
 
   const vector<Extensive> fluxes =
     fc_(mid_state, _VertexVelocity, eos_, dt);
