@@ -15,16 +15,6 @@ Primitive cc2primitive
   return res;
 }
 
-vector<Primitive> ccs2primitives
-(const vector<ComputationalCell>& cells,
- const EquationOfState& eos)
-{
-  vector<Primitive> res(cells.size());
-  for(size_t i=0;i<res.size();++i)
-    res.at(i) = cc2primitive(cells.at(i), eos);
-  return res;
-}
-
 Extensive flux2extensive
 (const Conserved& flux,
  const ComputationalCell& donor)
