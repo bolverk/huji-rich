@@ -78,7 +78,6 @@ public:
    */
   void updateCells(const vector<ComputationalCell>& cells);
     
-private:
   vector<double> vertices_;
   vector<ComputationalCell> cells_;
   TracerStickerNames tsn_;

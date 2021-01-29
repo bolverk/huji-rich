@@ -110,18 +110,6 @@ hdsim1D::hdsim1D
 }
 
 namespace {
-  /*
-  vector<double> CalcVertexVelocities
-  (const SimulationState1D& state, 
-   VertexMotion const& vm)
-  {
-    vector<double> res(state.getVertices().size());
-    for(size_t i = 0; i<state.getVertices().size();i++)
-      res[i] = vm(i, state.getVertices(), state.getCells());
-
-    return res;
-  }
-  */
 
   vector<double> calc_new_vertices
   (const vector<double>& vv_,
@@ -136,18 +124,6 @@ namespace {
 }
 
 namespace {
-
-  /*
-  Extensive conserved2extensive
-  (const Conserved& c)
-  {
-    Extensive res;
-    res.mass = c.Mass;
-    res.momentum = c.Momentum;
-    res.energy = c.Energy;
-    return res;
-  }
-  */
   
   void force_contribution
   (const SimulationState1D& state,
@@ -204,9 +180,18 @@ void hdsim1D::TimeAdvance(void)
 
   spdlog::debug("source term calculated");
 
+  transform(ss_.vertices_.begin(),
+	    ss_.vertices_.end(),
+	    _VertexVelocity.begin(),
+	    ss_.vertices_.begin(),
+	    [&](double x, double v)
+	    {return x+v*dt;});
+  /*
+
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
+  */
 
   spdlog::debug("Vertices updated");
 
