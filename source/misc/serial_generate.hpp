@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <numeric>
 
 using std::vector;
 using std::function;
@@ -42,6 +43,13 @@ template<class T> vector<T> diff(const vector<T> source){
 	    res.begin(),
 	    [&](const T& t1, const T& t2)
 	    {return t1-t2;});
+  return res;
+}
+
+template<class S> vector<S> create_range(const S& start, const S& length)
+{
+  vector<S> res(length);
+  iota(res.begin(), res.end(), start);
   return res;
 }
 

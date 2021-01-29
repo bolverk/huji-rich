@@ -78,29 +78,6 @@ namespace {
        [&](const ComputationalCell& c,
 	   const double& v){
 	 return calc_single_extensive(c,v,eos);});
-    /*
-    vector<Extensive> res(ss.getCells().size());
-    for(size_t i=0;i<res.size();++i){
-      const double volume = GetVolume(vertices,
-				      pg,
-				      i);
-      res.at(i).mass = cells.at(i).density*volume;
-      res.at(i).momentum = res.at(i).mass*cells.at(i).velocity;
-      const double kinetic_specific_energy =
-	0.5*pow(abs(cells.at(i).velocity),2);
-      const double thermal_specific_energy =
-	eos.dp2e(cells.at(i).density, cells.at(i).pressure);
-      res.at(i).energy = res.at(i).mass*
-	(kinetic_specific_energy+thermal_specific_energy);
-      for(size_t j=0;j<cells.at(0).tracers.size();++j){
-	res.at(i).tracers.push_back
-	  (cells.at(i).tracers.at(j)*res.at(i).mass);
-      }
-
-    }
-    
-    return res;
-    */
   }
 }
 
@@ -189,9 +166,15 @@ void hdsim1D::TimeAdvance(void)
 {
   spdlog::debug("begin time advance 1o iteration {0}, virtual time {1}",
 		cycle_, time_);
-  
+
+  /*
   const vector<double> _VertexVelocity = CalcVertexVelocities
     (ss_, vm_);
+  */
+  const vector<double> _VertexVelocity =
+    serial_generate<size_t, double>
+    (create_range<size_t>(0, ss_.getVertices().size()),
+     [&](size_t i){return vm_(i,ss_.getVertices(), ss_.getCells());});
 
   spdlog::debug("Vertex velocity calculated");
 
