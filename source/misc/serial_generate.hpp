@@ -34,4 +34,15 @@ template<class S1, class S2, class T> vector<T> serial_generate
   return res;
 }
 
+template<class T> vector<T> diff(const vector<T> source){
+  vector<T> res(source.size()-1);
+  transform(next(source.begin(),1),
+	    source.end(),
+	    source.begin(),
+	    res.begin(),
+	    [&](const T& t1, const T& t2)
+	    {return t1-t2;});
+  return res;
+}
+
 #endif // SERIAL_GENERATE_HPP

@@ -41,19 +41,6 @@ namespace{
     assert(extensives.at(0).tracers.size()==
 	   old.getCells().at(0).tracers.size());
   }
-
-  template<class T> vector<T> diff(const vector<T> source){
-    vector<T> res(source.size()-1);
-    transform(next(source.begin(),1),
-	      source.end(),
-	      source.begin(),
-	      res.begin(),
-	      [&](const T& t1, const T& t2)
-	      {return t1-t2;});
-    //    for(size_t i=0;i<res.size();++i)
-    //      res.at(i) = source.at(i+1) - source.at(i);
-    return res;
-  }
 }
 
 vector<ComputationalCell> SimpleCellUpdater1D::operator()
@@ -73,17 +60,6 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
      [&](const Extensive& e,
 	 const double& v){
        return retrieve_single_cell(v,e,eos);});
-  /*
-  vector<ComputationalCell> res(extensives.size());
-  transform(extensives.begin(),
-	    extensives.end(),
-	    volumes.begin(),
-	    res.begin(),
-	    [&](const Extensive& e,
-		const double& v){
-	      return retrieve_single_cell(v,e,eos);});
-  return res;
-  */
 }
 
 SimpleCellUpdater1D::~SimpleCellUpdater1D(void) {}

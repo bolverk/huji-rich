@@ -7,6 +7,7 @@
 #include "../../misc/utils.hpp"
 #include "../../misc/lazy_list.hpp"
 #include "spdlog/spdlog.h"
+#include "../../misc/serial_generate.hpp"
 
 using namespace std;
 
@@ -41,13 +42,24 @@ void hdsim1D::setExtensives(const vector<Extensive>& new_ext)
 
 namespace {
 
-  double GetVolume
-  (const vector<double>& v, 
-   const PhysicalGeometry1D& pg,
-   size_t i)
+  Extensive calc_single_extensive
+  (const ComputationalCell& cell,
+   const double& volume,
+   const EquationOfState& eos)
   {
-    return pg.calcVolume(v.at(i+1)) 
-      - pg.calcVolume(v.at(i));
+    Extensive res;
+    res.mass = cell.density*volume;
+    res.momentum = res.mass*cell.velocity;
+    const double kinetic_specific_energy =
+      0.5*pow(abs(cell.velocity),2);
+    const double thermal_specific_energy =
+      eos.dp2e(cell.density, cell.pressure);
+    res.energy = res.mass*
+      (kinetic_specific_energy+thermal_specific_energy);
+    res.tracers = serial_generate<double, double>
+      (cell.tracers,
+       [&](const double& t){return t*res.mass;});
+    return res;
   }
 
   vector<Extensive> calc_extensives
@@ -57,6 +69,16 @@ namespace {
   {
     const vector<double>& vertices = ss.getVertices();
     const vector<ComputationalCell>& cells = ss.getCells();
+    const vector<double> volumes = diff
+      (serial_generate<double, double>
+       (vertices, [&](const double& r){return pg.calcVolume(r);}));
+    return serial_generate<ComputationalCell, double, Extensive>
+      (cells,
+       volumes,
+       [&](const ComputationalCell& c,
+	   const double& v){
+	 return calc_single_extensive(c,v,eos);});
+    /*
     vector<Extensive> res(ss.getCells().size());
     for(size_t i=0;i<res.size();++i){
       const double volume = GetVolume(vertices,
@@ -74,9 +96,11 @@ namespace {
 	res.at(i).tracers.push_back
 	  (cells.at(i).tracers.at(j)*res.at(i).mass);
       }
+
     }
     
     return res;
+    */
   }
 }
 
