@@ -39,12 +39,6 @@ void BinOutput(string location,
 	       Tessellation const& V,
 	       bool floatprecision=true);
 
-/*! \brief Calculates the total extensive conserved variables of the entire computational domain
-  \param sim Hydrodynamic simulation
-  \return The total conserved of the simulation
-*/
-Extensive total_conserved(hdsim const& sim);
-
 /*! \brief Calculates the total amount of tracer in computational domain
   \param sim Hydrodynamic simulation
   \param index Index of tracer

@@ -20,6 +20,7 @@
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
 #include "source/newtonian/two_dimensional/simple_extensive_updater.hpp"
 #include "source/newtonian/two_dimensional/stationary_box.hpp"
+#include <numeric>
 
 using namespace std;
 using namespace simulation2d;
@@ -179,7 +180,9 @@ namespace {
 
     void operator()(hdsim const& sim)
     {
-      cons_.push_back(total_conserved(sim));
+      cons_.push_back(accumulate(next(sim.getAllExtensives().begin()),
+				 sim.getAllExtensives().end(),
+				 sim.getAllExtensives().front()));
     }
 
     ~WriteConserved(void)

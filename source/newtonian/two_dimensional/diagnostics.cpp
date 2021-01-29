@@ -24,37 +24,6 @@ void write_error(const string& fname,
   f.close();
 }
 
-namespace {
-
-  class ExtensiveConservedCalculator: public LazyList<Extensive>
-  {
-  public:
-
-    explicit ExtensiveConservedCalculator(const hdsim& sim):
-      sim_(sim), pg_(sim.getPhysicalGeometry()) {}
-
-    size_t size(void) const
-    {
-      return sim_.getAllExtensives().size();
-    }
-
-    Extensive operator[](size_t i) const
-    {
-      return sim_.getAllExtensives()[i];
-    }
-
-  private:
-    const hdsim& sim_;
-    const PhysicalGeometry& pg_;
-  };
-}
-
-Extensive total_conserved(const hdsim& sim)
-{
-  Extensive res = lazy_sum(ExtensiveConservedCalculator(sim));
-  return res;
-}
-
 vector<Vector2D> ReadVector2DFromFile(string filename)
 {
   fstream myFile (filename.c_str(),ios::in | ios::binary);
