@@ -187,34 +187,6 @@ hdsim::hdsim
 	     c.stickers = serial_generate<size_t, bool>
 	       (sindex,
 		[&](size_t j){return c.stickers.at(j);});});
-  /*
-  for (size_t i = 0; i < N; ++i)
-    {
-      cells_.at(i).tracers =
-	serial_generate<size_t, double>
-	(tindex,
-	 [&](size_t j){return cells.at(i).tracers.at(j);});
-      extensives_.at(i).tracers =
-	serial_generate<size_t, double>
-	(tindex,
-	 [&](size_t j){return cells.at(i).tracers[j]*extensives_.at(i).mass;});
-  */
-      /*
-      for (size_t j = 0; j < tindex.size(); ++j)
-	{
-	  cells_[i].tracers[j] = cells[i].tracers[tindex[j]];
-	  extensives_[i].tracers[j] = cells_[i].tracers[j] * extensives_[i].mass;
-	  }*/
-  /*
-      cells_.at(i).stickers =
-	serial_generate<size_t, bool>
-	(sindex,
-	 [&](size_t j){return cells.at(i).stickers.at(j);});
-  */
-      /*
-      for (size_t j = 0; j < sindex.size(); ++j)
-	cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
-      */
 #ifdef RICH_MPI
   MPI_exchange_data(tess_, cells_, true);
 #endif
@@ -386,7 +358,7 @@ void hdsim::TimeAdvanceClip(void)
   cycle_++;
 }
 
-
+/*
 namespace
 {
   vector<Extensive> average_extensive
@@ -400,6 +372,7 @@ namespace
     return res;
   }
 }
+*/
 
 void hdsim::TimeAdvance2Heun(void)
 {
@@ -571,7 +544,13 @@ void hdsim::TimeAdvance2Heun(void)
 
   eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt,tracer_sticker_names_);
 
-  extensives_ = average_extensive(mid_extensives, extensives_);
+  //  extensives_ = average_extensive(mid_extensives, extensives_);
+  transform(extensives_.begin(), extensives_.end(),
+	    mid_extensives.begin(), extensives_.begin(),
+	    [](const Extensive& arg1, const Extensive& arg2){
+	      return 0.5*(arg1+arg2);
+	    });
+	    
 
   cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_, time_ + dt);
 
