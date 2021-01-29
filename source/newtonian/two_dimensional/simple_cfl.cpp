@@ -1,6 +1,7 @@
 #include "simple_cfl.hpp"
 #include "hydrodynamics_2d.hpp"
 #include <boost/foreach.hpp>
+#include "../../misc/serial_generate.hpp"
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif
@@ -8,6 +9,38 @@
 SimpleCFL::SimpleCFL(const double cfl): cfl_(cfl) {}
 
 namespace {
+
+  double calc_local_time_step
+  (const Tessellation& tess,
+   const vector<ComputationalCell>&  cells,
+   const vector<Vector2D>& edge_velocities,
+   const EquationOfState& eos,
+   const TracerStickerNames& tsn,
+   size_t i)
+  {
+    const double radius = tess.GetWidth(static_cast<int>(i));
+    const ComputationalCell& cell = cells.at(i);
+    const double c = eos.dp2c(cell.density,
+			      cell.pressure,
+			      cell.tracers,
+			      tsn.tracer_names);
+    const Vector2D v = cell.velocity;
+    const vector<double> candidates =
+      serial_generate<int, double>
+      (tess.GetCellEdges(static_cast<int>(i)),
+       [&](int j)
+       {
+	 const Vector2D ve = edge_velocities.at(static_cast<size_t>(j));
+	 const Edge& edge = tess.GetEdge(j);
+	 const Vector2D n =
+	   normalize(tess.GetMeshPoint(edge.neighbors.second)-
+		     tess.GetMeshPoint(edge.neighbors.first));
+	 return radius/(c+abs(ScalarProd(n,v-ve)));
+       });
+    return *min_element(candidates.begin(),
+			candidates.end());
+  }
+
   class TimeStepCalculator: public LazyList<double>
   {
   public:
@@ -27,6 +60,7 @@ namespace {
 
     double operator[](size_t i) const
     {
+      /*
       double res = 0;
       const double radius = tess_.GetWidth(static_cast<int>(i));
       const double c = eos_.dp2c
@@ -47,6 +81,13 @@ namespace {
 	   (c+std::abs(ScalarProd(n,(v-ve))))/radius);
       }
       return 1.0/res;
+      */
+      return calc_local_time_step(tess_,
+				  cells_,
+				  edge_velocities_,
+				  eos_,
+				  tracerstickernames_,
+				  i);
     }
 
   private:
