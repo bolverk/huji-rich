@@ -109,6 +109,7 @@ hdsim1D::hdsim1D
   spdlog::debug("hdsim1D initialisation completed");
 }
 
+/*
 namespace {
   
   void force_contribution
@@ -125,6 +126,7 @@ namespace {
 	dt*force(state, i, fluxes, pg, t, dt); 
   }
 }
+*/
 
 void hdsim1D::TimeAdvance(void)
 {
@@ -162,16 +164,6 @@ void hdsim1D::TimeAdvance(void)
 	    extensives_.begin(),
 	    [&](const Extensive& e, size_t i)
 	    {return e+dt*force_(ss_,i,fluxes,pg_,time_,dt);});
-
-  /*
-  force_contribution(ss_,
-		     force_, 
-		     fluxes,
-		     pg_,
-		     time_, 
-		     dt, 
-		     extensives_);
-  */
 
   spdlog::debug("source term calculated");
 
@@ -216,7 +208,15 @@ void hdsim1D::TimeAdvance2(void)
       ss_,
       dt/2,
       mid_extensive);
-  
+
+  transform(extensives_.begin(),
+	    extensives_.end(),
+	    create_range<size_t>(0, extensives_.size()).begin(),
+	    extensives_.begin(),
+	    [&](const Extensive& e, size_t i)
+	    {return e+0.5*dt*force_(ss_,i,mid_extensive,pg_,time_,dt/2);});
+
+  /*
   force_contribution(ss_,
 		     force_, 
 		     mid_fluxes,
@@ -224,6 +224,7 @@ void hdsim1D::TimeAdvance2(void)
 		     time_, 
 		     dt/2,
 		     mid_extensive);
+  */
 
   SimulationState1D mid_state = ss_;
   transform(ss_.vertices_.begin(),
@@ -258,6 +259,13 @@ void hdsim1D::TimeAdvance2(void)
       dt,
       extensives_);
 
+  transform(extensives_.begin(),
+	    extensives_.end(),
+	    create_range<size_t>(0, extensives_.size()).begin(),
+	    extensives_.begin(),
+	    [&](const Extensive& e, size_t i)
+	    {return e+dt*force_(mid_state, i, fluxes, pg_, time_, dt);});
+  /*
   force_contribution
     (mid_state,
      force_, 
@@ -266,6 +274,7 @@ void hdsim1D::TimeAdvance2(void)
      time_, 
      dt,
      extensives_);
+  */
 
   transform(ss_.vertices_.begin(),
 	    ss_.vertices_.end(),
