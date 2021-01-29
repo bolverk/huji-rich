@@ -109,6 +109,7 @@ hdsim1D::hdsim1D
   spdlog::debug("hdsim1D initialisation completed");
 }
 
+/*
 namespace {
 
   vector<double> calc_new_vertices
@@ -122,6 +123,7 @@ namespace {
     return res;
   }
 }
+*/
 
 namespace {
   
@@ -186,12 +188,6 @@ void hdsim1D::TimeAdvance(void)
 	    ss_.vertices_.begin(),
 	    [&](double x, double v)
 	    {return x+v*dt;});
-  /*
-
-  ss_.updateVertices(calc_new_vertices(_VertexVelocity,
-				       dt,
-				       ss_.getVertices()));
-  */
 
   spdlog::debug("Vertices updated");
 
@@ -237,10 +233,18 @@ void hdsim1D::TimeAdvance2(void)
 		     mid_extensive);
 
   SimulationState1D mid_state = ss_;
+  transform(ss_.vertices_.begin(),
+	    ss_.vertices_.end(),
+	    mid_vertex_velocities.begin(),
+	    ss_.vertices_.begin(),
+	    [&](double x, double v)
+	    {return x+dt*v;});
+  /*
   mid_state.updateVertices
     (calc_new_vertices(mid_vertex_velocities,
 		       dt,
 		       ss_.getVertices()));
+  */
 
   mid_state.updateCells
     (cu_(pg_,
@@ -270,9 +274,17 @@ void hdsim1D::TimeAdvance2(void)
      dt,
      extensives_);
 
+  /*
   ss_.updateVertices(calc_new_vertices(_VertexVelocity,
 				       dt,
 				       ss_.getVertices()));
+  */
+  transform(ss_.vertices_.begin(),
+	    ss_.vertices_.end(),
+	    _VertexVelocity.begin(),
+	    ss_.vertices_.begin(),
+	    [&](double x, double v)
+	    {return x+v*dt;});
 
   ss_.updateCells(cu_(pg_,
 		      extensives_,
