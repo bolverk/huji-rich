@@ -1,6 +1,7 @@
 #include "hdf5_diagnostics.hpp"
 #include "../../misc/hdf5_utils.hpp"
 #include "../../misc/lazy_list.hpp"
+#include "../../misc/serial_generate.hpp"
 #ifdef RICH_MPI
 #include "../../tessellation/VoronoiMesh.hpp"
 #endif
@@ -286,6 +287,7 @@ namespace {
     const size_t index_;
   };
 
+  /*
   class TracerSlice : public LazyList<double>
   {
   public:
@@ -308,6 +310,7 @@ namespace {
     const hdsim& sim_;
     const size_t index_;
   };
+  */
 }
 
 void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
@@ -449,7 +452,13 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
   TracerStickerNames const& tracerstickernames = sim.GetTracerStickerNames();
   size_t Ntracers = sim.getAllCells().front().tracers.size();
   for (size_t i = 0; i < Ntracers; ++i)
-    write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), tracerstickernames.tracer_names[i]);
+    write_std_vector_to_hdf5(tracers,
+			     serial_generate<ComputationalCell, double>
+			     (sim.getAllCells(),
+			      [&](const ComputationalCell& c)
+			      {return c.tracers.at(i);}),
+			     tracerstickernames.tracer_names.at(i));
+    //    write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), tracerstickernames.tracer_names[i]);
 
   // Stickers
   size_t Nstickers = sim.getAllCells().front().stickers.size();
