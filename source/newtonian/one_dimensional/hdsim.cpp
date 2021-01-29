@@ -109,25 +109,6 @@ hdsim1D::hdsim1D
   spdlog::debug("hdsim1D initialisation completed");
 }
 
-/*
-namespace {
-  
-  void force_contribution
-  (const SimulationState1D& state,
-   const SourceTerm1D& force,
-   const vector<Extensive>& fluxes,
-   const PhysicalGeometry1D& pg,
-   double t,
-   double dt,
-   vector<Extensive>& extensive)
-  {
-    for(size_t i=0;i<extensive.size();++i)
-      extensive[i] +=
-	dt*force(state, i, fluxes, pg, t, dt); 
-  }
-}
-*/
-
 void hdsim1D::TimeAdvance(void)
 {
   spdlog::debug("begin time advance 1o iteration {0}, virtual time {1}",
@@ -265,16 +246,6 @@ void hdsim1D::TimeAdvance2(void)
 	    extensives_.begin(),
 	    [&](const Extensive& e, size_t i)
 	    {return e+dt*force_(mid_state, i, fluxes, pg_, time_, dt);});
-  /*
-  force_contribution
-    (mid_state,
-     force_, 
-     fluxes,
-     pg_,
-     time_, 
-     dt,
-     extensives_);
-  */
 
   transform(ss_.vertices_.begin(),
 	    ss_.vertices_.end(),

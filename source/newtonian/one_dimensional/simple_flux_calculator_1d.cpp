@@ -1,5 +1,6 @@
 #include "simple_flux_calculator_1d.hpp"
 #include "flux_conversion.hpp"
+#include "../../misc/serial_generate.hpp"
 
 SimpleFluxCalculator1D::SimpleFluxCalculator1D
 (const RiemannSolver& rs,
@@ -17,8 +18,15 @@ vector<Extensive> SimpleFluxCalculator1D::operator()
 {
   // Bulk
   vector<Extensive> res(ss.getVertices().size());
+  /*
   const vector<Primitive> primitives = ccs2primitives
     (ss.getCells(), eos);
+  */
+  const vector<Primitive> primitives =
+    serial_generate<ComputationalCell, Primitive>
+    (ss.cells_,
+     [&](const ComputationalCell& c)
+     {return cc2primitive(c, eos);});
   for(size_t i=1;i<ss.getVertices().size()-1;++i){
     const Primitive left = interp_
       (ss.getVertices(),
