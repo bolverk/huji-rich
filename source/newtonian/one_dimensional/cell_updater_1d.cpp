@@ -1,20 +1,13 @@
 #include <cmath>
 #include "cell_updater_1d.hpp"
 #include "spdlog/spdlog.h"
+#include "../../misc/serial_generate.hpp"
 
 CellUpdater1D::~CellUpdater1D(void) {}
 
 SimpleCellUpdater1D::SimpleCellUpdater1D(void) {}
 
 namespace{
-
-  double calc_cell_volume
-    (const PhysicalGeometry1D& pg,
-     const vector<double>& vertices,
-     const size_t i)
-  {
-    return pg.calcVolume(vertices.at(i+1)) - pg.calcVolume(vertices.at(i));
-  }
 
   ComputationalCell retrieve_single_cell
     (const double volume,
@@ -35,8 +28,9 @@ namespace{
     res.pressure = pressure;
     res.velocity = velocity;
     res.tracers = extensive.tracers;
-    for(size_t i=0;i<res.tracers.size();++i)
-      res.tracers.at(i) /= extensive.mass;
+    res.tracers = serial_generate<double, double>
+      (res.tracers,
+       [&](double t){return t/extensive.mass;});
     return res;
   }
 
@@ -47,6 +41,13 @@ namespace{
     assert(extensives.at(0).tracers.size()==
 	   old.getCells().at(0).tracers.size());
   }
+
+  template<class T> vector<T> diff(const vector<T> source){
+    vector<T> res(source.size()-1);
+    for(size_t i=0;i<res.size();++i)
+      res.at(i) = source.at(i+1) - source.at(i);
+    return res;
+  }
 }
 
 vector<ComputationalCell> SimpleCellUpdater1D::operator()
@@ -56,24 +57,18 @@ vector<ComputationalCell> SimpleCellUpdater1D::operator()
    const EquationOfState& eos) const
 {
   validate_input(extensives, old);
+  const vector<double> volumes =
+    diff(serial_generate<double,double>
+	 (old.getVertices(),
+	  [&](double r){return pg.calcVolume(r);}));
   vector<ComputationalCell> res(extensives.size());
-  for(size_t i=0;i<res.size();++i){
-    try{
-      res.at(i) = retrieve_single_cell
-	(calc_cell_volume(pg,old.getVertices(),i),
-	 extensives.at(i),
-	 eos);
-    }
-    catch(...){
-      spdlog::critical("error found in cell {0}, position {1}, mass {2}, momentum {3} and energy {4}",
-		       i,
-		       old.getVertices().at(i),
-		       extensives.at(i).mass,
-		       extensives.at(i).momentum.x,
-		       extensives.at(i).energy);
-      throw;
-    }
-  }
+  transform(extensives.begin(),
+	    extensives.end(),
+	    volumes.begin(),
+	    res.begin(),
+	    [&](const Extensive& e,
+		const double& v){
+	      return retrieve_single_cell(v,e,eos);});
   return res;
 }
 

@@ -766,8 +766,6 @@ void hdsim::recalculatePrimitives(void)
 
 void hdsim::recalculateExtensives(void)
 {
-  //  const EquationOfState& eos = eos_;
-  //  const auto tracer_sticker_names = tracer_sticker_names_;
   const vector<double> volumes =
     serial_generate<size_t, double>
     (create_range(static_cast<size_t>(tess_.GetPointNo())),
@@ -783,28 +781,6 @@ void hdsim::recalculateExtensives(void)
 				    eos_,
 				    tracer_sticker_names_);
 	    });
-  /*
-  for (size_t i = 0; i < extensives_.size(); ++i) 
-    {
-      const ComputationalCell& cell = cells_[i];
-      const double volume = cache_data_.volumes[i];
-      extensives_.at(i) = cell2extensive(cell,
-					 volume,
-					 eos_,
-					 tracer_sticker_names_);
-  */
-      /*
-      const double mass = volume*cell.density;
-      extensives_[i].mass = mass;
-      extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,tracer_sticker_names_.tracer_names)
-	*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
-      extensives_[i].momentum = mass*cell.velocity;
-      extensives_[i].tracers.resize(cell.tracers.size());
-      size_t N = cell.tracers.size();
-      for (size_t j = 0; j < N; ++j)
-	extensives_[i].tracers[j] = cell.tracers[j] * mass;
-    }
-      */
 }
 
 void hdsim::setCycle(int cycle)
