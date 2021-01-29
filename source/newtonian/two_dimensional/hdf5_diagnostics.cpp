@@ -263,29 +263,6 @@ namespace {
       }
     }
   };
-
-  /*  class StickerSlice : public LazyList<double>
-  {
-  public:
-
-    StickerSlice(const hdsim& sim,
-		 size_t index) :
-      sim_(sim), index_(index) {}
-
-    size_t size(void) const
-    {
-      return static_cast<size_t>(sim_.getTessellation().GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      return static_cast<double>(sim_.getAllCells()[i].stickers[index_]);
-    }
-
-  private:
-    const hdsim& sim_;
-    const size_t index_;
-    };*/
 }
 
 void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
@@ -397,31 +374,31 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
      "y_velocity");
 
   // Extensive variables
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (ExtensivePropertyExtractor
-      (sim, Mass)),
-     "mass");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (ExtensivePropertyExtractor
-      (sim, MomentumX)),
-     "x_momentum");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (ExtensivePropertyExtractor
-      (sim, MomentumY)),
-     "y_momentum");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (ExtensivePropertyExtractor
-      (sim, Energy)),
-     "energy");
-	
+  {
+    const vector<pair<string, function<double(const Extensive& e)> > > meta =
+      {{"mass",
+	[&](const Extensive& e)
+	{return e.mass;}},
+       {"x_momentum",
+	[&](const Extensive& e)
+	{return e.momentum.x;}},
+       {"y_momentum",
+	[&](const Extensive& e)
+	{return e.momentum.y;}},
+       {"energy",
+	[&](const Extensive& e)
+	{return e.energy;}}
+      };
+    for(auto itr=meta.begin();
+	itr!=meta.end();
+	++itr)
+      write_std_vector_to_hdf5
+	(hydrodynamic,
+	 serial_generate<Extensive, double>
+	 (sim.getAllExtensives(),
+	  itr->second),
+	 itr->first);
+  }
 
   // Tracers
   TracerStickerNames const& tracerstickernames = sim.GetTracerStickerNames();
@@ -433,7 +410,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 			      [&](const ComputationalCell& c)
 			      {return c.tracers.at(i);}),
 			     tracerstickernames.tracer_names.at(i));
-    //    write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), tracerstickernames.tracer_names[i]);
+  //    write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), tracerstickernames.tracer_names[i]);
 
   // Stickers
   size_t Nstickers = sim.getAllCells().front().stickers.size();
@@ -444,7 +421,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 			      [&](const ComputationalCell& c)
 			      {return static_cast<double>(c.stickers.at(i));}),
 			     tracerstickernames.sticker_names.at(i));
-    //write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), tracerstickernames.sticker_names[i]);
+  //write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), tracerstickernames.sticker_names[i]);
 
   // Appendices
   for (size_t i = 0; i < appendices.size(); ++i)
