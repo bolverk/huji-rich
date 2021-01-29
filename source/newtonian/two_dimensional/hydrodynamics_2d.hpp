@@ -52,42 +52,6 @@ Conserved RotateFluxBack(const Conserved& c,
 int get_other_index(const Edge& edge,
 	const int index);
 
-/*! \brief Initialize computational cells
-  \param density Density distribution
-  \param pressure Pressure distribution
-  \param xvelocity Distribution of the x component of the velocity
-  \param yvelocity Distribution of the y component of the velocity
-  \param eos Equation of state
-  \param tess Tessellation
-  \param CMvalue Determines whether to evaluate the spatial distributions in the mesh generating points or the center of mass
-  \return List of primitive variables
-*/
-vector<Primitive> InitialiseCells
-(SpatialDistribution const& density,
-	SpatialDistribution const& pressure,
-	SpatialDistribution const& xvelocity,
-	SpatialDistribution const& yvelocity,
-	EquationOfState const& eos,
-	Tessellation const& tess, bool CMvalue = true);
-
-/*! \brief Calculates the intensive conserved variables
-  \param cells Hydrodynamical cells
-  \return List of conserved variables
-*/
-vector<Conserved> CalcConservedIntensive
-(vector<Primitive> const& cells);
-
-/*! \brief Calculates the extensive conserved variables
-  \param cons_int Conserved intensive variables
-  \param tess Tessellation
-  \param pg Physical geometry
-  \return List of conserved variables
-*/
-vector<Conserved> CalcConservedExtensive
-(const vector<Conserved>& cons_int,
-	const Tessellation& tess,
-	const PhysicalGeometry& pg);
-
 /*! \brief Calculates the time step for a cell
   \param cell Computational cell
   \param width Cell width
