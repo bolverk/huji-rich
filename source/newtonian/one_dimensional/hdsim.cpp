@@ -109,22 +109,6 @@ hdsim1D::hdsim1D
   spdlog::debug("hdsim1D initialisation completed");
 }
 
-/*
-namespace {
-
-  vector<double> calc_new_vertices
-  (const vector<double>& vv_,
-   double dt,
-   const vector<double>& vertices)
-  {
-    vector<double> res = vertices;
-    for(size_t i=0;i<res.size();++i)
-      res.at(i) += dt*vv_.at(i);
-    return res;
-  }
-}
-*/
-
 namespace {
   
   void force_contribution
@@ -172,6 +156,14 @@ void hdsim1D::TimeAdvance(void)
 
   spdlog::debug("Extensives updated");
 
+  transform(extensives_.begin(),
+	    extensives_.end(),
+	    create_range<size_t>(0, extensives_.size()).begin(),
+	    extensives_.begin(),
+	    [&](const Extensive& e, size_t i)
+	    {return e+dt*force_(ss_,i,fluxes,pg_,time_,dt);});
+
+  /*
   force_contribution(ss_,
 		     force_, 
 		     fluxes,
@@ -179,6 +171,7 @@ void hdsim1D::TimeAdvance(void)
 		     time_, 
 		     dt, 
 		     extensives_);
+  */
 
   spdlog::debug("source term calculated");
 
@@ -274,11 +267,6 @@ void hdsim1D::TimeAdvance2(void)
      dt,
      extensives_);
 
-  /*
-  ss_.updateVertices(calc_new_vertices(_VertexVelocity,
-				       dt,
-				       ss_.getVertices()));
-  */
   transform(ss_.vertices_.begin(),
 	    ss_.vertices_.end(),
 	    _VertexVelocity.begin(),
