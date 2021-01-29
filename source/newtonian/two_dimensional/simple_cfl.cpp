@@ -40,63 +40,6 @@ namespace {
     return *min_element(candidates.begin(),
 			candidates.end());
   }
-
-  class TimeStepCalculator: public LazyList<double>
-  {
-  public:
-
-    TimeStepCalculator(const Tessellation& tess,
-		       const vector<ComputationalCell>& cells,
-		       const EquationOfState& eos,
-		       const vector<Vector2D>& edge_velocities,
-		       TracerStickerNames const& tracerstickernames):
-      tess_(tess), cells_(cells), 
-      edge_velocities_(edge_velocities), eos_(eos), tracerstickernames_(tracerstickernames){}
-
-    size_t size(void) const 
-    {
-      return static_cast<size_t>(tess_.GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      /*
-      double res = 0;
-      const double radius = tess_.GetWidth(static_cast<int>(i));
-      const double c = eos_.dp2c
-	(cells_[i].density,
-	 cells_[i].pressure,
-	 cells_[i].tracers,
-	 tracerstickernames_.tracer_names);
-      const Vector2D v = cells_.at(i).velocity;
-      BOOST_FOREACH
-	(int index,
-	 tess_.GetCellEdges(static_cast<int>(i))){
-	const Vector2D ve = edge_velocities_.at(static_cast<size_t>(index));
-	Edge const& edge = tess_.GetEdge(index);
-	const Vector2D n =
-	  normalize(tess_.GetMeshPoint(edge.neighbors.second) - tess_.GetMeshPoint(edge.neighbors.first));
-	res = fmax
-	  (res,
-	   (c+std::abs(ScalarProd(n,(v-ve))))/radius);
-      }
-      return 1.0/res;
-      */
-      return calc_local_time_step(tess_,
-				  cells_,
-				  edge_velocities_,
-				  eos_,
-				  tracerstickernames_,
-				  i);
-    }
-
-  private:
-    const Tessellation& tess_;
-    const vector<ComputationalCell>& cells_;
-    const vector<Vector2D>& edge_velocities_;
-    const EquationOfState& eos_;
-    TracerStickerNames const& tracerstickernames_;
-  };
 }
 
 double SimpleCFL::operator()(const Tessellation& tess,

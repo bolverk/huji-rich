@@ -688,35 +688,6 @@ void hdsim::TimeAdvance2MidPoint(void)
   ++cycle_;
 }
 
-namespace {
-
-  template<class T> class AverageCalculator : public LazyList<T>
-  {
-  public:
-
-    AverageCalculator(const vector<T>& ll1,
-		      const vector<T>& ll2) :
-      ll1_(ll1), ll2_(ll2)
-    {
-      assert(ll1.size() == ll2.size());
-    }
-
-    size_t getLength(void) const
-    {
-      return ll1_.size();
-    }
-
-    T operator()(size_t i) const
-    {
-      return 0.5*(ll1_[i] + ll2_[i]);
-    }
-
-  private:
-    const vector<T>& ll1_;
-    const vector<T>& ll2_;
-  };
-}
-
 const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const
 {
   return pg_;

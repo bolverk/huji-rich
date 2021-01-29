@@ -449,18 +449,6 @@ namespace {
 	};
 }
 
-vector<vector<double> > calc_extensive_tracer
-(const vector<vector<double> >& intensive_tracer,
-	const Tessellation& tess,
-	const vector<Primitive>& cells,
-	const PhysicalGeometry& pg)
-{
-	return serial_generate(ExtensiveTracerCalculator(intensive_tracer,
-		tess,
-		cells,
-		pg));
-}
-
 void MakeTracerExtensive(vector<vector<double> > const &tracer,
 	Tessellation const& tess,
 	vector<Primitive> const& cells,

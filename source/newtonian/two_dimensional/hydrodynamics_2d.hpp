@@ -208,19 +208,6 @@ vector<Primitive> make_eos_consistent
 vector<double> GetForceEnergy(Tessellation const& tess,
 	vector<double> const& g);
 
-/*! \brief Calculates extensive tracers
-  \param intensive_tracer Intensive tracers
-  \param tess Tessellation
-  \param cells List of primitive variables
-  \param pg Physical geometry
-  \return List of extensive tracers
- */
-vector<vector<double> > calc_extensive_tracer
-(const vector<vector<double> > & intensive_tracer,
-	const Tessellation& tess,
-	const vector<Primitive>& cells,
-	const PhysicalGeometry& pg);
-
 /*! \brief Calculates the extensive tracer
   \param tracer Intensive tracer
   \param tess Tessellation
