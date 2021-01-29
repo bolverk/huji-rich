@@ -121,17 +121,6 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
 	double dt, Tessellation& tessellation, Tessellation const& vproc, bool reorder,
 	vector<Vector2D> oldpoints = vector<Vector2D>());
 
-/*! \brief Calculates the intensive conserved variables
-  \param tess Tessellation
-  \param extensive Extensive conserved variables
-  \param pg Physical geometry
-  \return List of intensive conserved variables
- */
-vector<Conserved> calc_conserved_intensive
-(const Tessellation& tess,
-	const vector<Conserved>& extensive,
-	const PhysicalGeometry& pg);
-
 /*! \brief Updates the intensive conserved variables
   \param tessellation Tessellation
   \param conservedextensive Extensive conserved variables
