@@ -158,7 +158,6 @@ hdsim::hdsim
 #endif
 {
   // sort tracers and stickers
-  const size_t N = cells_.size();
   const vector<size_t> tindex =
     sort_index(tracer_sticker_names_.tracer_names);
   const vector<size_t> sindex =
@@ -169,6 +168,26 @@ hdsim::hdsim
   tracer_sticker_names_.sticker_names =
     VectorValues(tracer_sticker_names_.sticker_names,
 		 sindex);
+  for_each(cells_.begin(),
+	   cells_.end(),
+	   [&](ComputationalCell& c){
+	     c.tracers = serial_generate<size_t, double>
+	       (tindex,
+		[&](size_t j){return c.tracers.at(j);});
+	   });
+  for(pair<vector<Extensive>::iterator, vector<ComputationalCell>::iterator > multitr{extensives_.begin(), cells_.begin()};
+      multitr.first!=extensives_.end();
+      ++multitr.first,++multitr.second)
+    (*multitr.first).tracers = serial_generate<double, double>
+      ((*multitr.second).tracers,
+       [&](double t){return t*(*multitr.first).mass;});
+  for_each(cells_.begin(),
+	   cells_.end(),
+	   [&](ComputationalCell& c){
+	     c.stickers = serial_generate<size_t, bool>
+	       (sindex,
+		[&](size_t j){return c.stickers.at(j);});});
+  /*
   for (size_t i = 0; i < N; ++i)
     {
       cells_.at(i).tracers =
@@ -179,21 +198,23 @@ hdsim::hdsim
 	serial_generate<size_t, double>
 	(tindex,
 	 [&](size_t j){return cells.at(i).tracers[j]*extensives_.at(i).mass;});
+  */
       /*
       for (size_t j = 0; j < tindex.size(); ++j)
 	{
 	  cells_[i].tracers[j] = cells[i].tracers[tindex[j]];
 	  extensives_[i].tracers[j] = cells_[i].tracers[j] * extensives_[i].mass;
 	  }*/
+  /*
       cells_.at(i).stickers =
 	serial_generate<size_t, bool>
 	(sindex,
 	 [&](size_t j){return cells.at(i).stickers.at(j);});
+  */
       /*
       for (size_t j = 0; j < sindex.size(); ++j)
 	cells_[i].stickers[j] = cells[i].stickers[sindex[j]];
       */
-    }
 #ifdef RICH_MPI
   MPI_exchange_data(tess_, cells_, true);
 #endif
