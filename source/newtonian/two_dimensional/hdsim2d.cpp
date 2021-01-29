@@ -528,7 +528,6 @@ void hdsim::TimeAdvance2Heun(void)
 
   eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt,tracer_sticker_names_);
 
-  //  extensives_ = average_extensive(mid_extensives, extensives_);
   transform(extensives_.begin(), extensives_.end(),
 	    mid_extensives.begin(), extensives_.begin(),
 	    [](const Extensive& arg1, const Extensive& arg2){
@@ -767,10 +766,34 @@ void hdsim::recalculatePrimitives(void)
 
 void hdsim::recalculateExtensives(void)
 {
+  //  const EquationOfState& eos = eos_;
+  //  const auto tracer_sticker_names = tracer_sticker_names_;
+  const vector<double> volumes =
+    serial_generate<size_t, double>
+    (create_range(static_cast<size_t>(tess_.GetPointNo())),
+     [&](size_t i){return cache_data_.volumes[i];});
+  transform(cells_.begin(),
+	    cells_.end(),
+	    volumes.begin(),
+	    extensives_.begin(),
+	    [&](const ComputationalCell& c,
+		const double& v){
+	      return cell2extensive(c,
+				    v,
+				    eos_,
+				    tracer_sticker_names_);
+	    });
+  /*
   for (size_t i = 0; i < extensives_.size(); ++i) 
     {
       const ComputationalCell& cell = cells_[i];
       const double volume = cache_data_.volumes[i];
+      extensives_.at(i) = cell2extensive(cell,
+					 volume,
+					 eos_,
+					 tracer_sticker_names_);
+  */
+      /*
       const double mass = volume*cell.density;
       extensives_[i].mass = mass;
       extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,tracer_sticker_names_.tracer_names)
@@ -781,6 +804,7 @@ void hdsim::recalculateExtensives(void)
       for (size_t j = 0; j < N; ++j)
 	extensives_[i].tracers[j] = cell.tracers[j] * mass;
     }
+      */
 }
 
 void hdsim::setCycle(int cycle)

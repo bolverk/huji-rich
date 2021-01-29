@@ -15,10 +15,6 @@ template<class S, class T> vector<T> serial_generate
   transform(source.begin(), source.end(),
 	    res.begin(),
 	    func);
-  /*
-  for(size_t i=0;i<source.size();++i)
-    res.at(i) = func(source.at(i));
-  */
   return res;
 }
 
