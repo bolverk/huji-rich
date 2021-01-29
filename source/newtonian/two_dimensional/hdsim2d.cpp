@@ -358,22 +358,6 @@ void hdsim::TimeAdvanceClip(void)
   cycle_++;
 }
 
-/*
-namespace
-{
-  vector<Extensive> average_extensive
-  (const vector<Extensive>& extensives_1,
-   const vector<Extensive>& extensives_2)
-  {
-    assert(extensives_1.size() == extensives_2.size());
-    vector<Extensive> res(extensives_1.size());
-    for (size_t i = 0; i < extensives_1.size(); ++i)
-      res[i] = 0.5*(extensives_1[i] + extensives_2[i]);
-    return res;
-  }
-}
-*/
-
 void hdsim::TimeAdvance2Heun(void)
 {
 #ifdef RICH_DEBUG_PRINT
