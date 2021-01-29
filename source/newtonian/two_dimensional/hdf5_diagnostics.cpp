@@ -264,7 +264,7 @@ namespace {
     }
   };
 
-  class StickerSlice : public LazyList<double>
+  /*  class StickerSlice : public LazyList<double>
   {
   public:
 
@@ -285,32 +285,7 @@ namespace {
   private:
     const hdsim& sim_;
     const size_t index_;
-  };
-
-  /*
-  class TracerSlice : public LazyList<double>
-  {
-  public:
-
-    TracerSlice(const hdsim& sim,
-		size_t index) :
-      sim_(sim), index_(index) {}
-
-    size_t size(void) const
-    {
-      return static_cast<size_t>(sim_.getTessellation().GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      return sim_.getAllCells()[i].tracers[index_];
-    }
-
-  private:
-    const hdsim& sim_;
-    const size_t index_;
-  };
-  */
+    };*/
 }
 
 void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
@@ -463,7 +438,13 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
   // Stickers
   size_t Nstickers = sim.getAllCells().front().stickers.size();
   for (size_t i = 0; i < Nstickers; ++i)
-    write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), tracerstickernames.sticker_names[i]);
+    write_std_vector_to_hdf5(stickers,
+			     serial_generate<ComputationalCell, double>
+			     (sim.getAllCells(),
+			      [&](const ComputationalCell& c)
+			      {return static_cast<double>(c.stickers.at(i));}),
+			     tracerstickernames.sticker_names.at(i));
+    //write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), tracerstickernames.sticker_names[i]);
 
   // Appendices
   for (size_t i = 0; i < appendices.size(); ++i)
