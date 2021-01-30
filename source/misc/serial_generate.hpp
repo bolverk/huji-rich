@@ -48,7 +48,7 @@ template<class T> vector<T> diff(const vector<T> source){
 
 template<class S> vector<S> create_range(const S& start, const S& length)
 {
-  vector<S> res(length);
+  vector<S> res(static_cast<size_t>(length));
   iota(res.begin(), res.end(), start);
   return res;
 }
