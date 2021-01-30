@@ -85,31 +85,8 @@ namespace
 }
 
 namespace {
+
   /*
-  class MeshGeneratingPointCoordinate : public LazyList<double>
-  {
-  public:
-
-    MeshGeneratingPointCoordinate(const Tessellation& tess,
-				  double Vector2D::* component) :
-      tess_(tess), component_(component) {}
-
-    size_t size(void) const
-    {
-      return static_cast<size_t>(tess_.GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      return tess_.GetMeshPoint(static_cast<int>(i)).*component_;
-    }
-
-  private:
-    const Tessellation& tess_;
-    double Vector2D::* component_;
-  };
-  */
-
   class CMGeneratingPointCoordinate : public LazyList<double>
   {
   public:
@@ -132,6 +109,7 @@ namespace {
     const Tessellation& tess_;
     double Vector2D::* component_;
   };
+  */
 
   class ConvexHullData
   {
@@ -195,34 +173,42 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
     const Tessellation& tess = sim.getTessellation();
     const vector<Vector2D> coordinates =
       run_along_index<Vector2D>(static_cast<size_t>(tess.GetPointNo()),
-		      [&](size_t i)
-		      {const int idx = static_cast<int>(i);
-			return tess.GetMeshPoint(idx);});
-  write_std_vector_to_hdf5
-    (geometry,
-     serial_generate<Vector2D, double>
-     (coordinates,
-      [](const Vector2D& v){return v.x;}),
-     "x_coordinate");
-  write_std_vector_to_hdf5
-    (geometry,
-     serial_generate<Vector2D, double>
-     (coordinates,
-      [](const Vector2D& v){return v.y;}),
-     "y_coordinate");
+				[&](size_t i)
+				{const int idx = static_cast<int>(i);
+				  return tess.GetMeshPoint(idx);});
+    write_std_vector_to_hdf5
+      (geometry,
+       serial_generate<Vector2D, double>
+       (coordinates,
+	[](const Vector2D& v){return v.x;}),
+       "x_coordinate");
+    write_std_vector_to_hdf5
+      (geometry,
+       serial_generate<Vector2D, double>
+       (coordinates,
+	[](const Vector2D& v){return v.y;}),
+       "y_coordinate");
   }
-  write_std_vector_to_hdf5
-    (geometry,
-     serial_generate
-     (CMGeneratingPointCoordinate
-      (sim.getTessellation(), &Vector2D::x)),
-     "CM_x_coordinate");
-  write_std_vector_to_hdf5
-    (geometry,
-     serial_generate
-     (CMGeneratingPointCoordinate
-      (sim.getTessellation(), &Vector2D::y)),
-     "CM_y_coordinate");
+  {
+    const Tessellation& tess = sim.getTessellation();
+    const vector<Vector2D> cms =
+      run_along_index<Vector2D>(static_cast<size_t>(tess.GetPointNo()),
+				[&](size_t i)
+				{const int idx = static_cast<int>(i);
+				  return tess.GetCellCM(idx);});
+    write_std_vector_to_hdf5
+      (geometry,
+       serial_generate<Vector2D, double>
+       (cms,
+	[](const Vector2D& v){return v.x;}),
+       "CM_x_coordinate");
+    write_std_vector_to_hdf5
+      (geometry,
+       serial_generate<Vector2D, double>
+       (cms,
+	[](const Vector2D& v){return v.y;}),
+       "CM_y_coordinate");
+  }
   write_std_vector_to_hdf5
     (geometry,
      chd.xvert,
@@ -235,6 +221,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
     (geometry,
      chd.nvert,
      "n_vertices");
+
   //MPI
 #ifdef RICH_MPI
   write_std_vector_to_hdf5
@@ -252,7 +239,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 #endif
 
   // Hydrodynamic
-    {
+  {
     const vector<pair<string, function<double(const ComputationalCell&)> > > meta =
       {{"density",
 	[&](const ComputationalCell& c)
