@@ -384,9 +384,6 @@ namespace
 		NonConservativeAMR amr(refine, remove);
 
 		while (tf > sim.getTime()) {
-#ifdef RICH_MPI
-			cout << sim.getTime() << endl;
-#endif // RICH_MPI
 			try {
 				sim.TimeAdvance();
 				amr(sim);

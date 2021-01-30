@@ -26,11 +26,6 @@ namespace voronoi_loggers
     //! \brief Class constructor
     VoronoiLogger(void);
 
-    /*! \brief Outputs information from the Voronoi tessellation
-      \param v Refernce to Voronoi tessellation
-     */
-    virtual void output(const VoronoiMesh& v);
-
 	 /*! \brief Outputs information from a tessellation
       \param v Refernce to the tessellation
      */

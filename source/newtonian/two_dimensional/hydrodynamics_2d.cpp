@@ -52,9 +52,10 @@ vector<int> MoveMeshPoints(vector<Vector2D> const& pointvelocity,
   if (oldpoints.empty())
     //    oldpoints = serial_generate(NewPointPosition(tessellation, pointvelocity, dt));
     oldpoints = serial_generate<int, Vector2D>
-      (create_range<int>(0, tess.GetPointNo()),
+      (create_range<int>(0, tessellation.GetPointNo()),
        [&](int i)
-       {return tess.GetMeshPoint(i)+dt*pointvelocity.at(static_cast<size_t>(i));});
+       {return tessellation.GetMeshPoint(i)+
+	dt*pointvelocity.at(static_cast<size_t>(i));});
   else
     {
       for (size_t i = 0; i < oldpoints.size(); ++i)

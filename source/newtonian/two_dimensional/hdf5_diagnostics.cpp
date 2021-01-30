@@ -199,20 +199,31 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 
   //MPI
 #ifdef RICH_MPI
+  {
+    const Tessellation& tess = sim.GetProcTessellation();
+    const vector<Vector2D> coordinates = 
+      run_along_index<Vector2D>(static_cast<size_t>(tess.GetPointNo()),
+				[&](size_t i)
+				{const int idx = static_cast<int>(i);
+				 return tess.GetMeshPoint(idx);});
   write_std_vector_to_hdf5
     (mpi,
-     serial_generate
-     (MeshGeneratingPointCoordinate
-      (sim.GetProcTessellation(), &Vector2D::x)),
+     serial_generate<Vector2D, double>
+     (coordinates,
+      [](const Vector2D& v){return v.x;}),
      "proc_x_coordinate");
   write_std_vector_to_hdf5
     (mpi,
-     serial_generate
-     (MeshGeneratingPointCoordinate
-      (sim.GetProcTessellation(), &Vector2D::y)),
+     serial_generate<Vector2D, double>
+     (coordinates,
+      [](const Vector2D& v){return v.y;}),
      "proc_y_coordinate");
+  }
 #endif
-
+  const vector<ComputationalCell> interior_cells = 
+    vector<ComputationalCell>(sim.getAllCells().begin(),
+			      sim.getAllCells().begin()+
+			      sim.getTessellation().GetPointNo());
   // Hydrodynamic
   {
     const vector<pair<string, function<double(const ComputationalCell&)> > > meta =
@@ -235,7 +246,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
       write_std_vector_to_hdf5
 	(hydrodynamic,
 	 serial_generate<ComputationalCell, double>
-	 (sim.getAllCells(),
+	 (interior_cells, //sim.getAllCells(),
 	  itr->second),
 	 itr->first);
   }
@@ -273,7 +284,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
   for (size_t i = 0; i < Ntracers; ++i)
     write_std_vector_to_hdf5(tracers,
 			     serial_generate<ComputationalCell, double>
-			     (sim.getAllCells(),
+			     (interior_cells,
 			      [&](const ComputationalCell& c)
 			      {return c.tracers.at(i);}),
 			     tracerstickernames.tracer_names.at(i));
@@ -284,7 +295,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
   for (size_t i = 0; i < Nstickers; ++i)
     write_std_vector_to_hdf5(stickers,
 			     serial_generate<ComputationalCell, double>
-			     (sim.getAllCells(),
+			     (interior_cells,
 			      [&](const ComputationalCell& c)
 			      {return static_cast<double>(c.stickers.at(i));}),
 			     tracerstickernames.sticker_names.at(i));

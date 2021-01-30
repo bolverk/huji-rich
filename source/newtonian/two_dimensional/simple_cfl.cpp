@@ -12,7 +12,7 @@ namespace {
 
   double calc_local_time_step
   (const Tessellation& tess,
-   const vector<ComputationalCell>&  cells,
+   const vector<ComputationalCell>& cells,
    const vector<Vector2D>& edge_velocities,
    const EquationOfState& eos,
    const TracerStickerNames& tsn,
@@ -50,7 +50,8 @@ double SimpleCFL::operator()(const Tessellation& tess,
 {
   const vector<double> candidates =
     serial_generate<size_t, double>
-    (create_range<size_t>(0, cells.size()),
+    (create_range<size_t>
+     (0, static_cast<size_t>(tess.GetPointNo())),
      [&](size_t i)
      {return calc_local_time_step(tess,
 				  cells,
