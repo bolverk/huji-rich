@@ -131,6 +131,7 @@ namespace {
     double Vector2D::* component_;
   };
 
+  /*
   class SingleCellPropertyExtractor
   {
   public:
@@ -194,6 +195,7 @@ namespace {
     const hdsim& sim_;
     const SingleCellPropertyExtractor& scpe_;
   };
+  */
 
   enum ExtensiveField {Mass, 
 		       MomentumX,
@@ -348,6 +350,32 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 #endif
 
   // Hydrodynamic
+    {
+    const vector<pair<string, function<double(const ComputationalCell&)> > > meta =
+      {{"density",
+	[&](const ComputationalCell& c)
+	{return c.density;}},
+       {"x_velocity",
+	[&](const ComputationalCell& c)
+	{return c.velocity.x;}},
+       {"y_velocity",
+	[&](const ComputationalCell& c)
+	{return c.velocity.y;}},
+       {"pressure",
+	[&](const ComputationalCell& c)
+	{return c.pressure;}}
+      };
+    for(auto itr=meta.begin();
+	itr!=meta.end();
+	++itr)
+      write_std_vector_to_hdf5
+	(hydrodynamic,
+	 serial_generate<ComputationalCell, double>
+	 (sim.getAllCells(),
+	  itr->second),
+	 itr->first);
+  }
+    /*
   write_std_vector_to_hdf5
     (hydrodynamic,
      serial_generate
@@ -372,6 +400,7 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
      (CellsPropertyExtractor
       (sim, CellVelocityComponentExtractor(&Vector2D::y))),
      "y_velocity");
+    */
 
   // Extensive variables
   {
