@@ -85,6 +85,7 @@ namespace
 }
 
 namespace {
+  /*
   class MeshGeneratingPointCoordinate : public LazyList<double>
   {
   public:
@@ -107,6 +108,7 @@ namespace {
     const Tessellation& tess_;
     double Vector2D::* component_;
   };
+  */
 
   class CMGeneratingPointCoordinate : public LazyList<double>
   {
@@ -129,114 +131,6 @@ namespace {
   private:
     const Tessellation& tess_;
     double Vector2D::* component_;
-  };
-
-  /*
-  class SingleCellPropertyExtractor
-  {
-  public:
-
-    virtual double operator()(const ComputationalCell& p) const = 0;
-
-    virtual ~SingleCellPropertyExtractor(void) {}
-  };
-
-  class ThermalPropertyExtractor : public SingleCellPropertyExtractor
-  {
-  public:
-
-    explicit ThermalPropertyExtractor(double ComputationalCell::* var) :
-      var_(var) {}
-
-    double operator()(const ComputationalCell& p) const
-    {
-      return p.*var_;
-    }
-
-  private:
-    double ComputationalCell::* var_;
-  };
-
-  class CellVelocityComponentExtractor : public SingleCellPropertyExtractor
-  {
-  public:
-
-    explicit CellVelocityComponentExtractor(double Vector2D::* component) :
-      component_(component) {}
-
-    double operator()(const ComputationalCell& p) const
-    {
-      return p.velocity.*component_;
-    }
-
-  private:
-    double Vector2D::* component_;
-  };
-
-  class CellsPropertyExtractor : public LazyList<double>
-  {
-  public:
-
-    CellsPropertyExtractor(const hdsim& sim,
-			   const SingleCellPropertyExtractor& scpe) :
-      sim_(sim), scpe_(scpe) {}
-
-    size_t size(void) const
-    {
-      return static_cast<size_t>(sim_.getTessellation().GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      return scpe_(sim_.getAllCells()[i]);
-    }
-
-  private:
-    const hdsim& sim_;
-    const SingleCellPropertyExtractor& scpe_;
-  };
-  */
-
-  enum ExtensiveField {Mass, 
-		       MomentumX,
-		       MomentumY,
-		       Energy};
-
-  double serial_access
-  (const Extensive& e,
-   ExtensiveField f)
-  {
-    switch(f){
-    case Mass:return e.mass;
-    case MomentumX:return e.momentum.x;
-    case MomentumY:return e.momentum.y;
-    case Energy:return e.energy;
-    }
-    throw("something went wrong");
-  }
-
-  class ExtensivePropertyExtractor: public LazyList<double>
-  {
-  public:
-    
-    ExtensivePropertyExtractor(const hdsim& sim,
-			       ExtensiveField f):
-      sim_(sim), f_(f) {}
-
-    size_t size(void) const
-    {
-      return sim_.getAllCells().size();
-    }
-
-    double operator[](size_t i) const
-    {
-      return serial_access(sim_.getAllExtensives()[i],
-			   f_);
-    }
-
-  private:
-    const hdsim& sim_;
-    const ExtensiveField f_;
   };
 
   class ConvexHullData
@@ -296,19 +190,27 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
     area[i]=sim.getCacheData().volumes[i];
   write_std_vector_to_hdf5(file,area,"Volumes");
 
-  // Geometry  
+  // Geometry
+  {
+    const Tessellation& tess = sim.getTessellation();
+    const vector<Vector2D> coordinates =
+      run_along_index<Vector2D>(static_cast<size_t>(tess.GetPointNo()),
+		      [&](size_t i)
+		      {const int idx = static_cast<int>(i);
+			return tess.GetMeshPoint(idx);});
   write_std_vector_to_hdf5
     (geometry,
-     serial_generate
-     (MeshGeneratingPointCoordinate
-      (sim.getTessellation(), &Vector2D::x)),
+     serial_generate<Vector2D, double>
+     (coordinates,
+      [](const Vector2D& v){return v.x;}),
      "x_coordinate");
   write_std_vector_to_hdf5
     (geometry,
-     serial_generate
-     (MeshGeneratingPointCoordinate
-      (sim.getTessellation(), &Vector2D::y)),
+     serial_generate<Vector2D, double>
+     (coordinates,
+      [](const Vector2D& v){return v.y;}),
      "y_coordinate");
+  }
   write_std_vector_to_hdf5
     (geometry,
      serial_generate
@@ -375,32 +277,6 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 	  itr->second),
 	 itr->first);
   }
-    /*
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (CellsPropertyExtractor
-      (sim, ThermalPropertyExtractor(&ComputationalCell::density))),
-     "density");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (CellsPropertyExtractor
-      (sim, ThermalPropertyExtractor(&ComputationalCell::pressure))),
-     "pressure");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (CellsPropertyExtractor
-      (sim, CellVelocityComponentExtractor(&Vector2D::x))),
-     "x_velocity");
-  write_std_vector_to_hdf5
-    (hydrodynamic,
-     serial_generate
-     (CellsPropertyExtractor
-      (sim, CellVelocityComponentExtractor(&Vector2D::y))),
-     "y_velocity");
-    */
 
   // Extensive variables
   {
@@ -742,9 +618,20 @@ void WriteTess(Tessellation const& tess, string const& fname)
   ConvexHullData chd(tess);
   H5File file(H5std_string(fname), H5F_ACC_TRUNC);
   Group geometry = file.createGroup("/geometry");
-  write_std_vector_to_hdf5(geometry, serial_generate(MeshGeneratingPointCoordinate(tess, &Vector2D::x)),
+  const vector<Vector2D> coordinates = run_along_index<Vector2D>
+    (static_cast<size_t>(tess.GetPointNo()),
+     [&](size_t i)
+     {const int idx = static_cast<int>(i);
+       return tess.GetMeshPoint(idx);});
+  write_std_vector_to_hdf5(geometry,
+			   serial_generate<Vector2D, double>
+			   (coordinates,
+			    [](const Vector2D& v){return v.x;}),
 			   "x_coordinate");
-  write_std_vector_to_hdf5(geometry, serial_generate(MeshGeneratingPointCoordinate(tess, &Vector2D::y)),
+  write_std_vector_to_hdf5(geometry,
+			   serial_generate<Vector2D, double>
+			   (coordinates,
+			    [](const Vector2D& v){return v.y;}),
 			   "y_coordinate");
   write_std_vector_to_hdf5(geometry, chd.xvert, "x_vertices");
   write_std_vector_to_hdf5(geometry, chd.yvert, "y_vertices");

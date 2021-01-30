@@ -53,4 +53,13 @@ template<class S> vector<S> create_range(const S& start, const S& length)
   return res;
 }
 
+template<class T> vector<T> run_along_index(size_t num,
+					    function<T(size_t i)> func)
+{
+  vector<T> res(num);
+  for(size_t i=0;i<num;++i)
+    res.at(i) = func(i);
+  return res;
+}
+
 #endif // SERIAL_GENERATE_HPP
