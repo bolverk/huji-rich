@@ -18,7 +18,7 @@ public:
 	//! \brief Comparison
   //! \param shape of hilbert curve
   //! \return True if two shapes are the same
-	bool operator==(HilbertCurve3D_shape & shape);
+	bool operator==(const HilbertCurve3D_shape & shape) const;
 	//! \brief An array of the 7 unit vector steps defining the shape
 	vector<Vector3D> m_vShapePoints;
 
@@ -38,7 +38,7 @@ HilbertCurve3D_shape::HilbertCurve3D_shape():
 }
 
 // Compare to a given Hilbert curve shape by comparing pairs of shape points:
-bool HilbertCurve3D_shape::operator==(HilbertCurve3D_shape & shape)
+bool HilbertCurve3D_shape::operator==(const HilbertCurve3D_shape & shape) const
 {
 	bool b = true;
 	for (size_t ii = 0; ii < m_vShapePoints.size(); ++ii)
@@ -75,7 +75,7 @@ private:
 	*/
 	int GetRotation(int * piRotation, int iRotationIndex);
 	// Find the index of a given shape object:
-	int FindShapeIndex(HilbertCurve3D_shape & roShape);
+	int FindShapeIndex(const HilbertCurve3D_shape & roShape);
 	// Create the recursion rule:
 	void BuildRecursionRule();
 	// Create the shape order, for all shapes (the order of octants):
@@ -122,7 +122,7 @@ HilbertCurve3D::HilbertCurve3D():
 }
 
 // FindShapeIndex - returns the index of a shape:
-int HilbertCurve3D::FindShapeIndex(HilbertCurve3D_shape & roShape)
+int HilbertCurve3D::FindShapeIndex(const HilbertCurve3D_shape & roShape)
 {
 	for (int ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
 	{
@@ -291,14 +291,14 @@ int HilbertCurve3D::GetRotation(int * piRotation, int iRotationIndex)
 // Rotate a shape:
 void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 {
-	int iSign = 0;
+  //	int iSign = 0;
 
 	for (size_t ii = 0; ii < 7; ++ii)
 	{
 		for (size_t iAx = 0; iAx < vAxes.size(); ++iAx)
 		{
 			// A trick to find the sign of vAxes[iAx]:
-			iSign = (vAxes[iAx] > 0) - (vAxes[iAx] < 0);
+			int iSign = (vAxes[iAx] > 0) - (vAxes[iAx] < 0);
 
 			switch (abs(vAxes[iAx]))
 			{
@@ -322,7 +322,7 @@ void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 
 void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCurve3D_shape & roShapeOut , int iRotationIndex)
 {
-	int iSign = 0;
+  //	int iSign = 0;
 
 	vector<int> vAxes = m_vRotations[static_cast<size_t>(iRotationIndex)];
 	roShapeOut = roShape;
@@ -332,7 +332,7 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 		for (size_t iAx = 0; iAx < vAxes.size(); ++iAx)
 		{
 			// A trick to find the sign of vAxes[iAx]:
-			iSign = (vAxes[iAx] > 0) - (vAxes[iAx] < 0);
+		  int iSign = (vAxes[iAx] > 0) - (vAxes[iAx] < 0);
 
 			switch (abs(vAxes[iAx]))
 			{

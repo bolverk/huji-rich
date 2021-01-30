@@ -3,45 +3,53 @@
 #include "../../misc/lazy_list.hpp"
 
 CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl):
-cfl_(cfl)
+  cfl_(cfl)
 {
-	assert(cfl_<1 && "cfl number must be smaller than 1");
+  assert(cfl_<1 && "cfl number must be smaller than 1");
 }
 
 namespace 
 {
-	class TimeStepBoundCalculator: public LazyList<double>
-	{
-	public:
+  class TimeStepBoundCalculator: public LazyList<double>
+  {
+  public:
 
-		TimeStepBoundCalculator(const Tessellation3D& tess,
-			const vector<ComputationalCell>& cells,
-			const EquationOfState& eos):
-		tess_(tess), cells_(cells), eos_(eos) {}
+    TimeStepBoundCalculator(const Tessellation3D& tess,
+			    const vector<ComputationalCell>& cells,
+			    const EquationOfState& eos):
+      tess_(tess), cells_(cells), eos_(eos) {}
 
-	  size_t size(void) const
-		{
-			return cells_.size();
-		}
+    size_t size(void) const
+    {
+      return cells_.size();
+    }
 
-		double operator[](size_t i) const
-		{
-			return tess_.GetWidth(i)/
-				(abs(cells_[i].velocity)+
-				eos_.dp2c(cells_[i].density,cells_[i].pressure));
-		}
+    double operator[](size_t i) const
+    {
+      return tess_.GetWidth(i)/
+	(abs(cells_[i].velocity)+
+	 eos_.dp2c(cells_[i].density,cells_[i].pressure));
+    }
 
-	private:
-		const Tessellation3D& tess_;
-		const vector<ComputationalCell>& cells_;
-		const EquationOfState& eos_;
-	};
+  private:
+    const Tessellation3D& tess_;
+    const vector<ComputationalCell>& cells_;
+    const EquationOfState& eos_;
+  };
+
+  template<class T> T lazy_min(const LazyList<T>& i2m)
+  {
+    T res = i2m[0];
+    for(size_t i=1;i<i2m.size();++i)
+      res = std::min(res,i2m[i]);
+    return res;
+  }
 }
 
 double CourantFriedrichsLewy::operator()
-	(const Tessellation3D& tess,
-	const vector<ComputationalCell>& cells,
-	const EquationOfState& eos) const
+  (const Tessellation3D& tess,
+   const vector<ComputationalCell>& cells,
+   const EquationOfState& eos) const
 {
-	return cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos));
+  return cfl_*lazy_min(TimeStepBoundCalculator(tess,cells,eos));
 }
