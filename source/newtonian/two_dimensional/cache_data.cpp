@@ -1,7 +1,9 @@
 #include "cache_data.hpp"
 #include "../../tessellation/ConvexHull.hpp"
 #include "../../misc/lazy_list.hpp"
+#include "../../misc/serial_generate.hpp"
 
+/*
 namespace {
   class CellEdgesGetter: public LazyList<Edge>
   {
@@ -25,6 +27,7 @@ namespace {
     const vector<int> edge_indices_;
   };
 }
+*/
 
 CacheData::VolumeCalculator::VolumeCalculator
 (const Tessellation& tess,
@@ -39,7 +42,12 @@ size_t CacheData::VolumeCalculator::size(void) const
 double CacheData::VolumeCalculator::operator[](const size_t i) const
 {
   return pg_.calcVolume
-    (serial_generate(CellEdgesGetter(tess_,static_cast<int>(i))));
+    (serial_generate<int, Edge>
+     (tess_.GetCellEdges(static_cast<int>(i)),
+      [&](int n)
+      {return tess_.GetEdge(n);}));
+      
+    //    (serial_generate(CellEdgesGetter(tess_,static_cast<int>(i))));
 }
 
 CacheData::AreaCalculator::AreaCalculator

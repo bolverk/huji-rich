@@ -86,31 +86,6 @@ namespace
 
 namespace {
 
-  /*
-  class CMGeneratingPointCoordinate : public LazyList<double>
-  {
-  public:
-
-    CMGeneratingPointCoordinate(const Tessellation& tess,
-				double Vector2D::* component) :
-      tess_(tess), component_(component) {}
-
-    size_t size(void) const
-    {
-      return static_cast<size_t>(tess_.GetPointNo());
-    }
-
-    double operator[](size_t i) const
-    {
-      return tess_.GetCellCM(static_cast<int>(i)).*component_;
-    }
-
-  private:
-    const Tessellation& tess_;
-    double Vector2D::* component_;
-  };
-  */
-
   class ConvexHullData
   {
   public:
