@@ -21,7 +21,7 @@ void LagrangianExtensiveUpdate::operator()(const vector<Extensive>& fluxes, cons
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	Extensive delta = dt*cd.areas[0] * fluxes[0];
 	size_t N = static_cast<size_t>(tess.GetPointNo());
-	std::vector<double> dA(N, 0), dWs(N, 0);
+	//	std::vector<double> dA(N, 0), dWs(N, 0);
 	size_t indexX = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
 		string("AreaX")) - tracerstickernames.tracer_names.begin());
 	size_t indexY = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),

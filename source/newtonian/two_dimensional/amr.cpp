@@ -56,7 +56,7 @@ Extensive SimpleAMRExtensiveUpdaterSR::ConvertPrimitveToExtensive(const Computat
 	return res;
 }
 
-SimpleAMRCellUpdater::SimpleAMRCellUpdater(vector<string> toskip) :toskip_(toskip) {}
+SimpleAMRCellUpdater::SimpleAMRCellUpdater(const vector<string>& toskip) :toskip_(toskip) {}
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 	double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const
@@ -89,7 +89,7 @@ ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensi
 	return res;
 }
 
-SimpleAMRCellUpdaterSR::SimpleAMRCellUpdaterSR(double G,vector<string> toskip) : G_(G),toskip_(toskip) {}
+SimpleAMRCellUpdaterSR::SimpleAMRCellUpdaterSR(double G,const vector<string>& toskip) : G_(G),toskip_(toskip) {}
 
 ComputationalCell SimpleAMRCellUpdaterSR::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& /*eos*/,
 	double volume, ComputationalCell const& old_cell, TracerStickerNames const& tracerstickernames) const
@@ -307,7 +307,7 @@ namespace
 		chulls_res = CombineVectors(chulls);
 	}
 
-	void DealWithMPINeighbors(Tessellation const& tess, vector<size_t> &ToRemove, vector<double> &merits,
+	void DealWithMPINeighbors(Tessellation const& tess, vector<size_t> &ToRemove, const vector<double> &merits,
 		vector<vector<int> > &to_check, vector<vector<Vector2D> > &chulls_res,
 		vector<Extensive> const& extensives, vector<Extensive> & mpi_extensives,CacheData const& cd)
 	{

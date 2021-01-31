@@ -375,7 +375,7 @@ namespace{
 
 void Delaunay::build_delaunay(vector<Vector2D>const& vp, std::vector<std::pair<Vector2D, Vector2D> > const& cpoints)
 {
-	DataOnlyForBuild data;
+  //	DataOnlyForBuild data;
 	lastFacet = 0;
 	CalcRadius = false;
 	length = int(vp.size() + 3);

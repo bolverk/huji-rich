@@ -82,7 +82,7 @@ public:
     \param G The adiabatic index for relativistic ideal gas law
   */
   explicit SimpleCellUpdater
-  (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
+  (const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence =
    vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >(),bool SR = false,double G = 0);
 
   vector<ComputationalCell> operator()

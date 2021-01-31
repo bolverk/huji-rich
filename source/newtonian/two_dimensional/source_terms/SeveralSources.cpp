@@ -1,6 +1,6 @@
 #include "SeveralSources.hpp"
 
-SeveralSources::SeveralSources(vector<SourceTerm*> sources) :
+SeveralSources::SeveralSources(const vector<SourceTerm*>& sources) :
 	sources_(sources) {}
 
 SeveralSources::~SeveralSources(void) {}

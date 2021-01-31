@@ -124,16 +124,16 @@ void ExternalForceContribution
  vector<Extensive>& extensives,
  TracerStickerNames const& tracerstickernames)
 {
-  const vector<Extensive> diff = force(tess, pg, cd, cells, fluxes, point_velocities, t,tracerstickernames);
+  const vector<Extensive> difr = force(tess, pg, cd, cells, fluxes, point_velocities, t,tracerstickernames);
   for (size_t i = 0; i < static_cast<size_t>(tess.GetPointNo()); ++i) 
     {
-      extensives[i].mass += dt*diff[i].mass;
-      extensives[i].momentum += dt*diff[i].momentum;
-      extensives[i].energy += dt*diff[i].energy;
-      assert(extensives[i].tracers.size()==diff[i].tracers.size());
-      size_t N = diff[i].tracers.size();
+      extensives[i].mass += dt*difr[i].mass;
+      extensives[i].momentum += dt*difr[i].momentum;
+      extensives[i].energy += dt*difr[i].energy;
+      assert(extensives[i].tracers.size()==difr[i].tracers.size());
+      size_t N = difr[i].tracers.size();
       for (size_t j = 0; j < N; ++j)
-	extensives[i].tracers[j] += dt*diff[i].tracers[j];
+	extensives[i].tracers[j] += dt*difr[i].tracers[j];
     }
 }
 

@@ -105,7 +105,7 @@ double CylindricalSymmetry::calcVolume(const vector<Edge>& edge_list) const
 
 Vector2D CylindricalSymmetry::calcCentroid(const vector<Vector2D>& chull) const
 {
-	double V = 0;
+  //	double V = 0;
 	Vector2D res;
 	Vector2D anchor = change_coordinate(chull[0], axis_);
 	for (size_t i = 1; i < chull.size() - 1; ++i)
@@ -113,7 +113,7 @@ Vector2D CylindricalSymmetry::calcCentroid(const vector<Vector2D>& chull) const
 		Vector2D q1 = change_coordinate(chull[i], axis_);
 		Vector2D q2 = change_coordinate(chull[i+1], axis_);
 		double dv = 0.5*std::abs(CrossProduct(q2 - anchor, q1 - anchor));
-		V += dv;
+		//		V += dv;
 		res += dv*Vector2D((2 * anchor.x*anchor.y + q1.x*anchor.y + q2.x*anchor.y + q1.y*anchor.x + q1.y*q1.x * 2 + q1.y*q2.x
 			+ q2.y*anchor.x + q2.y*q1.x + 2 * q2.x*q2.y) / 12.0, (anchor.y*anchor.y + anchor.y*q1.y + anchor.y*q2.y
 				+ q1.y*q2.y + q1.y*q1.y + q2.y*q2.y) / 6.0);

@@ -121,7 +121,7 @@ hdsim::hdsim
  const FluxCalculator& fc,
  const ExtensiveUpdater& eu,
  const CellUpdater& cu,
- TracerStickerNames tracer_sticker_names,
+ const TracerStickerNames& tracer_sticker_names,
  bool relativistic
 #ifdef RICH_MPI
  ,const ProcessorUpdate* proc_update

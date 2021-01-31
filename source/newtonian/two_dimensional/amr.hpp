@@ -75,7 +75,7 @@ public:
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-  explicit SimpleAMRCellUpdater(vector<string> toskip);
+  explicit SimpleAMRCellUpdater(const vector<string>& toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const;
@@ -101,7 +101,7 @@ public:
 	\param G The adiabatic index
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	explicit SimpleAMRCellUpdaterSR(double G,vector<string> toskip);
+	explicit SimpleAMRCellUpdaterSR(double G, const vector<string>& toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell const& old_cell, TracerStickerNames const& tracerstickernames) const;

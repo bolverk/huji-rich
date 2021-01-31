@@ -4,7 +4,7 @@ GhostCriteria::~GhostCriteria(void) {}
 
 typedef boost::container::flat_map<size_t, ComputationalCell> GhostCells;
 
-SeveralGhostGenerators::SeveralGhostGenerators(vector<GhostPointGenerator*> ghosts, GhostCriteria const& ghostchooser) :
+SeveralGhostGenerators::SeveralGhostGenerators(const vector<GhostPointGenerator*>& ghosts, GhostCriteria const& ghostchooser) :
 	ghosts_(ghosts), ghost_chooser_(ghostchooser)
 {}
 

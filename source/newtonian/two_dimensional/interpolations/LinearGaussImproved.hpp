@@ -38,7 +38,7 @@ public:
 		double delta_P = 0.7,
 		const vector<string>& calc_tracers =
 		vector<string>(),
-		string skip_key=string(),
+		 const string& skip_key=string(),
 		bool SR=false);
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,

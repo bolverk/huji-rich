@@ -27,7 +27,7 @@ public:
 	\param toignore List of sticker names not to apply correction for
 	*/
 	CentroidMotion(PointMotion const& bpm, double reduction_factor,EquationOfState const& eos, size_t niter = 2,
-		vector<string> toignore = vector<string>());
+		const vector<string>& toignore = vector<string>());
 
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time,
 		TracerStickerNames const& tracerstickernames) const;

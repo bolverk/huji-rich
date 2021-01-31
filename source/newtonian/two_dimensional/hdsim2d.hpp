@@ -44,7 +44,7 @@ class hdsim
 {
 private:
 #ifdef RICH_MPI
-	Tessellation& proctess_;
+  Tessellation& proctess_;
 #endif
 
   Tessellation& tess_;
@@ -94,12 +94,12 @@ public:
 
   /*! \brief Returns a list of all computational cells
     \return List of all computational cells
-   */
+  */
   const vector<ComputationalCell>& getAllCells(void) const;
 
   /*! \brief Access method to manually change data
     \return Reference to computational cells
-   */
+  */
   vector<ComputationalCell>& getAllCells(void);
 
   //! \brief Recalculates the primitives from the extensive variables
@@ -111,7 +111,7 @@ public:
 
   /*! \brief Access to physical geometry
     \return Physical geometry
-   */
+  */
   const PhysicalGeometry& getPhysicalGeometry(void) const;
 
   /*! \brief Returns the tessellation
@@ -120,18 +120,18 @@ public:
   const Tessellation& getTessellation(void) const;
 
   /*! \brief Returns the tessellation
-  \return The tessellation
+    \return The tessellation
   */
   Tessellation& getTessellation(void);
 
 #ifdef RICH_MPI
-   /*! \brief Returns the processor tessellation
+  /*! \brief Returns the processor tessellation
     \return The tessellation
   */
   const Tessellation & GetProcTessellation(void)const;
 #endif
 
-   /*! \brief Class constructor
+  /*! \brief Class constructor
     \param tess Voronoi tessellation method
     \param proc_update Scheme for updating the locations of the processes
     \param obc Outer boundary conditions
@@ -145,19 +145,19 @@ public:
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
-	\param tracer_sticker_names The names of the tracers and stickers
-	\param relativistic If the run is relativistic or not
+    \param tracer_sticker_names The names of the tracers and stickers
+    \param relativistic If the run is relativistic or not
   */
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes
   //! \param proc_update Scheme for updating the position of the processes
 #endif // RICH_MPI
   hdsim
-	  (
+  (
 #ifdef RICH_MPI
-	  Tessellation& proctess,
+   Tessellation& proctess,
 #endif
-	  Tessellation& tess,
+   Tessellation& tess,
    const OuterBoundary& obc,
    const PhysicalGeometry& pg,
    const vector<ComputationalCell>& init_cond,
@@ -169,21 +169,21 @@ public:
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
    const CellUpdater& cu,
-   TracerStickerNames tracer_sticker_names = TracerStickerNames(),
-	bool relativistic = false
+   const TracerStickerNames& tracer_sticker_names = TracerStickerNames(),
+   bool relativistic = false
 #ifdef RICH_MPI
-		  ,const ProcessorUpdate* proc_update=0
+   ,const ProcessorUpdate* proc_update=0
 #endif
-		  );
+   );
 
   /*! \brief Loads reset data into simulation
     \param checkpoint Reset dump
-   */
+  */
   void load(const ResetDump& checkpoint);
 
   /*! \brief Dumps simulation data
     \param checkpoint Reset dump where data is to be written
-   */
+  */
   void makeCheckpoint(ResetDump& checkpoint) const;
 
   /*!
@@ -207,16 +207,16 @@ public:
 
   /*! \brief Change the physical geometry
     \param pg New physical geometry
-   */
+  */
   void changePhysicalGeometry(const PhysicalGeometry* pg);
 
-    /*! \brief Sets the start time
+  /*! \brief Sets the start time
     \param t_start Start time
-   */
+  */
   void setStartTime(double t_start);
 
   /*! \brief Sets the cycle
-  \param cycle The cycle number
+    \param cycle The cycle number
   */
   void setCycle(int cycle);
 
@@ -240,22 +240,22 @@ public:
 
   /*! \brief Change the time step function
     \param tsf New time step function
-   */
+  */
   void setTimeStepFunction(TimeStepFunction& tsf);
 
   /*! \brief Access to the equation of state
     \return Equation of state
-   */
+  */
   const EquationOfState& getEos(void) const;
 
   /*! \brief Access to the geometric outer boundary 
     \return Geometry outer boundary
-   */
+  */
   const OuterBoundary& getOuterBoundary(void) const;
 
   /*! \brief Returns a list of extensive variables
     \return List of extensive variables
-   */
+  */
   const vector<Extensive>& getAllExtensives(void) const;
 
   /*! \brief Returns a list of extensive variables
@@ -265,12 +265,12 @@ public:
 
   /*! \brief Returns reference to the cached data
     \return Cached data
-   */
+  */
   const CacheData& getCacheData(void) const;
 
   /*!
-  \brief Returns the TracerStickerNames
-  \return The TracerStickerNames of the simulation
+    \brief Returns the TracerStickerNames
+    \return The TracerStickerNames of the simulation
   */
   TracerStickerNames const& GetTracerStickerNames(void)const;
 };

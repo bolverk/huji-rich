@@ -39,7 +39,7 @@ public:
     \param ghosts List of ghost generators
     \param ghostchooser Criteria for when to use each ghost generator
    */
-	SeveralGhostGenerators(vector<GhostPointGenerator*> ghosts,GhostCriteria const& ghostchooser);
+	SeveralGhostGenerators(const vector<GhostPointGenerator*>& ghosts,GhostCriteria const& ghostchooser);
 
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells,double time,TracerStickerNames const&

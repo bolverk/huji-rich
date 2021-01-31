@@ -5,7 +5,7 @@
 #endif
 
 SimpleCellUpdater::SimpleCellUpdater
-(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence, bool SR, double G) :
+(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence, bool SR, double G) :
 	sequence_(sequence), SR_(SR), G_(G), entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)
