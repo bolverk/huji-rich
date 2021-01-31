@@ -72,7 +72,7 @@ public:
     assert(high_>low_);
   }
 
-  size_t size(void) const
+  size_t size(void) const override
   {
     return high_-low_;
   }

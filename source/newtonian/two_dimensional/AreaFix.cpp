@@ -591,9 +591,11 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 					dA_flux2, eos);
 			std::pair<int, int> mid_neigh(tessmid.GetOriginalIndex(edge2.neighbors.first), tessmid.GetOriginalIndex(edge2.neighbors.second));
 			std::pair<int, int> mid_neigh2(mid_neigh.second, mid_neigh.first);
-			if (only_mid.count(mid_neigh) == 0)
+			auto ibp = only_mid.insert(mid_neigh);
+			//			if (only_mid.count(mid_neigh) == 0)
+			if(ibp.second)
 			{
-				only_mid.insert(mid_neigh);
+			  //only_mid.insert(mid_neigh);
 				only_mid.insert(mid_neigh2);
 				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.second))] += toadd2;
 				res[static_cast<size_t>(tessmid.GetOriginalIndex(edge2.neighbors.first))] -= toadd2;
