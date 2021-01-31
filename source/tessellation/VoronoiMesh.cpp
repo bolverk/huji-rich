@@ -1034,7 +1034,7 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied, vector<vector<int> > &
 	for (int i = 0; i < nsides; ++i)
 		sort(copied[static_cast<size_t>(i)].begin(), copied[static_cast<size_t>(i)].end());
 	totest.resize(static_cast<size_t>(nsides));
-	int test = 0;
+	//	int test = 0;
 	for (int i = 0; i < nsides; ++i)
 	{
 		vector<int> totest2;
@@ -1044,6 +1044,7 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied, vector<vector<int> > &
 			int n = static_cast<int>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])].size());
 			for (int k = 0; k < n; ++k)
 			{
+			  int test;
 				if (edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.first ==
 					copied[static_cast<size_t>(i)][static_cast<size_t>(j)])
 					test = edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(copied[static_cast<size_t>(i)][static_cast<size_t>(j)])][static_cast<size_t>(k)])].neighbors.second;

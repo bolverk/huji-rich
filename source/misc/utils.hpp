@@ -154,6 +154,7 @@ T BiLinearInterpolation(const vector<T>& x, const vector<T>& y, const std::vecto
 			std::cout << "X too small in BiLinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
 			throw;
 		}
+		throw;
 	}
 	typename vector<T>::const_iterator ity = upper_bound(y.begin(), y.end(), yi);
 	if (ity == y.end())
@@ -173,6 +174,7 @@ T BiLinearInterpolation(const vector<T>& x, const vector<T>& y, const std::vecto
 			std::cout << "Y too small in LinearInterpolation, y_i " << yi << " min Y " << y.at(0) << std::endl;
 			throw;
 		}
+		throw;
 	}
 
 	T delta = 1.0 / ((*itx - *(itx - 1)) * (*ity - *(ity - 1)));

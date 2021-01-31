@@ -35,7 +35,7 @@ template<class S1, class S2, class T> vector<T> serial_generate
   return res;
 }
 
-template<class T> vector<T> diff(const vector<T> source){
+template<class T> vector<T> diff(const vector<T>& source){
   vector<T> res(source.size()-1);
   transform(next(source.begin(),1),
 	    source.end(),
