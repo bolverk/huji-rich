@@ -35,7 +35,7 @@ namespace {
 	 const Vector2D n =
 	   normalize(tess.GetMeshPoint(edge.neighbors.second)-
 		     tess.GetMeshPoint(edge.neighbors.first));
-	 return radius/(c+abs(ScalarProd(n,v-ve)));
+	 return radius/(c+std::abs(ScalarProd(n,v-ve)));
        });
     return *min_element(candidates.begin(),
 			candidates.end());
