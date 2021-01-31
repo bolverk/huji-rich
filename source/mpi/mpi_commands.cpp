@@ -140,7 +140,7 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation& tess, vector
 
 	vector<vector<int> > send_sizes(correspondents.size());
 	vector<int> temprecv;
-	vector<int> tempsrecv;
+	//	vector<int> tempsrecv;
 	int temp = 0;
 	for (size_t i = 0; i < correspondents.size(); ++i)
 	{

@@ -19,7 +19,7 @@ public:
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 	\param Rmin Optional, sets a minimum radius for a cpu point to be at. This is sometimes needed in order to prevent cpus with zero points.
 	*/
-	ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
+	explicit ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
 		double RoundSpeed=2,int mode=2,bool Rmin = false);
 
 	/*!

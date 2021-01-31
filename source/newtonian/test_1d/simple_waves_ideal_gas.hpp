@@ -132,7 +132,7 @@ public:
     \param pname Name of the Hydrodynamic variables
     \return Spatial profile
    */
-  SpatialDistribution1D const& getProfile(string pname) const;
+  SpatialDistribution1D const& getProfile(const string& pname) const;
 
 private:
 
