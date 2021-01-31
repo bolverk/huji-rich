@@ -44,8 +44,6 @@ namespace voronoi_loggers
      */
     explicit BinLogger(const std::string& file_name);
 
-    void output(const VoronoiMesh& v);
-
 	void output(const Tessellation& v);
 
 	/*! \brief Reads the output information from the Voronoi tessellation

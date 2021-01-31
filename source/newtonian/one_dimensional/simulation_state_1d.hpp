@@ -77,9 +77,12 @@ public:
     \param cells New cells
    */
   void updateCells(const vector<ComputationalCell>& cells);
-    
+  
+  //! \brief Positions of the vertices
   vector<double> vertices_;
+  //! \brief Computational cells
   vector<ComputationalCell> cells_;
+  //! \brief Names of stickers and tracers
   TracerStickerNames tsn_;
 };
 
