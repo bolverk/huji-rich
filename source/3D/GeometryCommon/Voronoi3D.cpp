@@ -439,7 +439,7 @@ namespace
 		Nloop -= 2;
 		Area = 0;
 		//Vector3D temp3, temp4, temp5;
-		for (int i = 0; i < Nloop; i++)
+		for (int i = 0; i < static_cast<int>(Nloop); i++)
 		{
 			//temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
 			Vector3D temp4(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
@@ -1376,7 +1376,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const& order)
 	FaceNeighbors_.resize(Norg_ * 10);
 	PointsInFace_.resize(Norg_ * 10);
 
-	std::array<size_t, 128> temp, temp2, temp3;
+	std::array<size_t, 128> temp, temp3;
 	// Build all voronoi points
 	std::size_t Ntetra = del_.tetras_.size();
 	for (size_t i = 0; i < Ntetra; ++i)

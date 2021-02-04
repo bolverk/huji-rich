@@ -103,7 +103,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
 				double Area = tess.GetArea(temp[j]) * dt;
-				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
+				//				size_t N0 = tess.GetFaceNeighbors(temp[j]).first;
 				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				if (N1 == i)
 				{
