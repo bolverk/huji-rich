@@ -131,24 +131,24 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				double Area = tess.GetArea(temp[j]) * dt;
 				double Ek = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
 				delta = Area * fluxes[temp[j]];
-				double dEtherm = 0;
+				double dEtherm1 = 0;
 				if (N1 == i)
 				{
 					old_ext += delta;
-					double Eknew = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
-					dEtherm = delta.energy - (Eknew - Ek);
-					old_ext.internal_energy += delta.energy - (Eknew - Ek);
+					double Eknew1 = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					dEtherm1 = delta.energy - (Eknew1 - Ek);
+					old_ext.internal_energy += delta.energy - (Eknew1 - Ek);
 				}
 				else
 				{
 					old_ext -= delta;
-					double Eknew = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
-					dEtherm = -delta.energy - (Eknew - Ek);
-					old_ext.internal_energy += dEtherm;
+					double Eknew1 = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					dEtherm1 = -delta.energy - (Eknew1 - Ek);
+					old_ext.internal_energy += dEtherm1;
 				}
 				Vector3D normalf = normalize(tess.Normal(temp[j]));
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass * Area <<
-					" energy= " << fluxes[temp[j]].energy * Area << " Etherm= " << dEtherm << " momentum= " << abs(fluxes[temp[j]].momentum) * Area <<
+					" energy= " << fluxes[temp[j]].energy * Area << " Etherm= " << dEtherm1 << " momentum= " << abs(fluxes[temp[j]].momentum) * Area <<
 					" Area*dt " << Area << " normal " << normalf.x << "," << normalf.y << "," << normalf.z <<
 					" face velocity "<<edge_velocities[temp[j]].x<<","<< edge_velocities[temp[j]].y<<","<< edge_velocities[temp[j]].z<< std::endl;
 				eo.AddEntry("Face", static_cast<double>(temp[j]));

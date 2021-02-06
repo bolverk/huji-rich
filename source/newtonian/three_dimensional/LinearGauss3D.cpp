@@ -18,7 +18,7 @@ namespace
 		vector<Vector3D> &res, face_vec const& faces)
 	{
 		res.resize(faces.size());
-		const int nloop = res.size();
+		const int nloop = static_cast<int>(res.size());
 		std::pair<size_t, size_t> neigh;
 		for (int i = 0; i < nloop; ++i)
 		{
