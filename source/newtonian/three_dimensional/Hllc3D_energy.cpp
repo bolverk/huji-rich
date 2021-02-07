@@ -41,7 +41,7 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn, double gamma)
+					EquationOfState const &eos, TracerStickerNames const& tsn, double /*gamma*/)
 	{
 		double cl = 0, cr = 0;
 		const double dl = left.density;
@@ -159,6 +159,8 @@ namespace
 			f_gr.momentum += (right.velocity - normaldir * ScalarProd(right.velocity, normaldir))*f_gr.mass;
 		f_gr.internal_energy = 0;
 	}
+
+  /*
 	void FixNegativeThermalEnergy(Conserved3D &f_gr, double velocity, Vector3D const& normaldir, ComputationalCell3D const& left,
 		ComputationalCell3D const& right, ComputationalCell3D const& local_left, ComputationalCell3D const& local_right,
 		EquationOfState const& eos, TracerStickerNames const& tsn, bool HLL)
@@ -196,6 +198,7 @@ namespace
 					f_gr = fr;
 		BoostBack(f_gr, velocity, normaldir, left, right);
 	}
+  */
 }
 
 Hllc3DEnergy::Hllc3DEnergy(double gamma) :gamma_((gamma + 1) / (2 * gamma))

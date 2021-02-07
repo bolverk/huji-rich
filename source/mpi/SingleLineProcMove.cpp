@@ -7,7 +7,17 @@
 #include <random>
 #endif
 
-void SingleLineProcMove::Update(Tessellation3D& tproc, Tessellation3D const& tlocal) const
+void SingleLineProcMove::Update
+(
+#ifdef RICH_MPI
+ Tessellation3D& tproc,
+ Tessellation3D const& tlocal
+ #else
+ Tessellation3D& /*tproc*/,
+ Tessellation3D const& /*tlocal*/
+ #endif
+ 
+ ) const
 {
 #ifdef RICH_MPI
 	int nproc = static_cast<int>(tproc.GetPointNo());

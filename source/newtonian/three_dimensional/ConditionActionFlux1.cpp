@@ -56,7 +56,7 @@ namespace
 }
 
 std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& face_velocities,
-	const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
+												   const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& /*extensives*/, const EquationOfState& eos,
 	const double time, const double /*dt*/, TracerStickerNames const& tracerstickernames) const
 {
 	for (size_t i = 0; i < sequence_.size(); ++i)

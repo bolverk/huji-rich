@@ -11,7 +11,7 @@ private:
 	const double opening_;
 	Tessellation3D const* tproc_;
 	std::string const d_name_;
-	OpticalDepthCalc(const OpticalDepthCalc&/*other*/) :opening_(0), tproc_(0) {};
+  OpticalDepthCalc(const OpticalDepthCalc&/*other*/) :opening_(0), tproc_(0), d_name_("") {};
 	OpticalDepthCalc& operator=(const OpticalDepthCalc /*other*/) { return *this; }
 public:
 	OpticalDepthCalc(double opening = 0.25, Tessellation3D const* tproc = 0, std::string debug_name = "");

@@ -7,8 +7,8 @@ DefaultExtensiveUpdater::DefaultExtensiveUpdater(void){}
 
 void DefaultExtensiveUpdater::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D& tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double /*time*/,
-	TracerStickerNames const& /*tracerstickernames*/, std::vector<Vector3D> const& face_vel,
-	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const
+					 TracerStickerNames const& /*tracerstickernames*/, std::vector<Vector3D> const& /*face_vel*/,
+					 std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& /*interp_values*/) const
 {
 	size_t N = tess.GetPointNo();
 	size_t Nfluxes = fluxes.size();

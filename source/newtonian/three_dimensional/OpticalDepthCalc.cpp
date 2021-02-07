@@ -50,7 +50,7 @@ namespace
 		if (surface_density.at(index - 1).second > surface_density.at(index + 1).second)
 		{
 			double total_density = surface_density[index - 1].second + density_self;
-			for (size_t i = index - 1; i >= 0; --i)
+			for (int i = static_cast<int>(index) - 1; i >= 0; --i)
 			{
 				if (surface_density[i].second < 0.5 * total_density || i == 0)
 				{

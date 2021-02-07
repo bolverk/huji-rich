@@ -1054,12 +1054,12 @@ void ANNkd_split::GetAcc(ANNpoint const& qpoint, ANNpoint& res, double angle2, A
 	}
 }
 
-void ANNkd_leaf::GetToSendOpticalDepth(std::vector<ANNorthRect> const& faces, vector<ANNkd_ptr>& nodes, double angle2, ANNorthRect& bb)
+void ANNkd_leaf::GetToSendOpticalDepth(std::vector<ANNorthRect> const& /*faces*/, vector<ANNkd_ptr>& nodes, double /*angle2*/, ANNorthRect& /*bb*/)
 {
 	nodes.push_back(this);
 }
 
-void ANNkd_leaf::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double angle2, ANNorthRect& bb) const
+void ANNkd_leaf::GetOpticalDepth(ANNpoint const& qpoint, std::vector<std::pair<double, double> >& res, double /*angle2*/, ANNorthRect& bb) const
 {
 	if (qpoint[0] >= bb.lo[0] && qpoint[0] <= bb.hi[0] &&
 		qpoint[1] >= bb.lo[1] && qpoint[1] <= bb.hi[1])
@@ -1160,7 +1160,7 @@ void ANNkd_leaf::GetAcc(std::vector<ANNpoint>& qpoint, std::vector<ANNpoint>& re
 #ifdef __INTEL_COMPILER
 #pragma ivdep
 #endif
-	for (int k = 0; k < N; ++k)
+	for (int k = 0; k < static_cast<int>(N); ++k)
 	{
 		double dist_toq = 0;
 #ifdef __INTEL_COMPILER
