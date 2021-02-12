@@ -155,12 +155,12 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 	MPI_Alltoall(&m_size[0], 1, MPI_INT, &m_rec_size[0], 1, MPI_INT, MPI_COMM_WORLD);
 
 	int Nmaxlocal = *std::max_element(m_size.begin(), m_size.end());
-	int max_loc = std::max_element(m_size.begin(), m_size.end()) - m_size.begin();
+	//int max_loc = static_cast<int>(std::max_element(m_size.begin(), m_size.end()) - m_size.begin());
 	vector<int> maxes(Nproc);
 	MPI_Gather(&Nmaxlocal, 1, MPI_INT, &maxes[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
 	int Nmaxglobal = 0;
 	MPI_Reduce(&Nmaxlocal, &Nmaxglobal, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
-	int max_logc = std::max_element(maxes.begin(), maxes.end()) - maxes.begin();
+	//	int max_logc = static_cast<int>(std::max_element(maxes.begin(), maxes.end()) - maxes.begin());
 	if (rank == 0)
 		std::cout << "Maximum send length in gravity is " << Nmaxglobal << std::endl;
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -187,7 +187,7 @@ void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<Comput
 		write_vector(s_disp, d_name_ + "s_disp_" + int2str(rank) + ".txt");
 		write_vector(m_rec_size, d_name_ + "m_rec_size_" + int2str(rank) + ".txt");
 		write_vector(r_disp, d_name_ + "r_disp_" + int2str(rank) + ".txt");
-		write_number(m_recv.size(), d_name_ + "m_recv_" + int2str(rank) + ".txt");
+		write_number(static_cast<int>(m_recv.size()), d_name_ + "m_recv_" + int2str(rank) + ".txt");
 		throw;
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
