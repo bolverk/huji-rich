@@ -19,7 +19,7 @@ class Face
 public:
 
   //! \brief Points at the ends of the edge
-	point_vec_v vertices;
+  point_vec_v vertices;
 
   //! \brief Neighboring cells
   std::pair<std::size_t,std::size_t> neighbors;
@@ -30,6 +30,8 @@ public:
     \param neighbor2 Index of second neighbor cell
   */
   Face(point_vec_v const& vert,std::size_t neighbor1,std::size_t neighbor2);
+
+  Face& operator=(const Face& other);
 
   Face(void);
 
@@ -49,7 +51,7 @@ public:
 /*! \brief Calculates the centroid of aa face
   \param face The face
   \return Centroid
- */
+*/
 Vector3D calc_centroid(const Face& face);
 
 #endif	// FACE_HPP
