@@ -29,7 +29,7 @@ ComputationalCell& ComputationalCell::operator+=(ComputationalCell const& other)
   assert(this->tracers.size() == other.tracers.size());
   size_t N = this->tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  this->tracers[j] += other.tracers[j];
+    this->tracers[j] += other.tracers[j];
   return *this;
 }
 
@@ -41,7 +41,7 @@ ComputationalCell& ComputationalCell::operator-=(ComputationalCell const& other)
   assert(this->tracers.size() == other.tracers.size());
   size_t N = this->tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  this->tracers[j] -= other.tracers[j];
+    this->tracers[j] -= other.tracers[j];
   return *this;
 }
 
@@ -52,7 +52,7 @@ ComputationalCell& ComputationalCell::operator*=(double s)
   this->velocity *= s;
   size_t N = this->tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  this->tracers[j] *= s;
+    this->tracers[j] *= s;
   return *this;
 }
 
@@ -64,7 +64,7 @@ void ComputationalCellAddMult(ComputationalCell &res, ComputationalCell const& o
   assert(res.tracers.size() == other.tracers.size());
   size_t N = res.tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  res.tracers[j] += other.tracers[j]*scalar;
+    res.tracers[j] += other.tracers[j]*scalar;
 }
 
 ComputationalCell operator+(ComputationalCell const& p1, ComputationalCell const& p2)
@@ -88,7 +88,7 @@ ComputationalCell operator/(ComputationalCell const& p, double s)
   res.pressure /= s;
   size_t N = res.tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  res.tracers[j] /= s;
+    res.tracers[j] /= s;
   res.velocity = res.velocity / s;
   return res;
 }
@@ -100,7 +100,7 @@ ComputationalCell operator*(ComputationalCell const& p, double s)
   res.pressure *= s;
   size_t N = res.tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  res.tracers[j] *= s;
+    res.tracers[j] *= s;
   res.velocity = res.velocity * s;
   return res;
 }
@@ -119,10 +119,10 @@ void ReplaceComputationalCell(ComputationalCell & cell, ComputationalCell const&
   assert(cell.stickers.size() == other.stickers.size());
   size_t N = cell.tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  cell.tracers[j] = other.tracers[j];
+    cell.tracers[j] = other.tracers[j];
   N = cell.stickers.size();
   for (size_t i = 0; i < N; ++i)
-	  cell.stickers[i] = other.stickers[i];
+    cell.stickers[i] = other.stickers[i];
 }
 
 
@@ -132,14 +132,22 @@ Slope::Slope(ComputationalCell const & x, ComputationalCell const & y) : xderiva
 {}
 
 TracerStickerNames::TracerStickerNames(void)
-	: tracer_names(vector<string>()), sticker_names(vector<string>()) {}
+  : tracer_names(vector<string>()), sticker_names(vector<string>()) {}
+
+TracerStickerNames& TracerStickerNames::operator=
+(const TracerStickerNames& other)
+{
+  tracer_names = other.tracer_names;
+  sticker_names = other.sticker_names;
+  return *this;
+}
 
 TracerStickerNames::~TracerStickerNames(void) {}
 
 TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
 
 TracerStickerNames::TracerStickerNames(std::vector<std::string> tracers, std::vector<std::string> stickers):
-	tracer_names(tracers),sticker_names(stickers){}
+  tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI
 size_t ComputationalCell::getChunkSize(void) const
@@ -157,10 +165,10 @@ vector<double> ComputationalCell::serialize(void) const
   size_t counter = 4;
   size_t N = tracers.size();
   for (size_t j = 0; j < N ; ++j)
-	 res[j+counter] = tracers[j];
+    res[j+counter] = tracers[j];
   size_t N2 = stickers.size();
   for (size_t j = 0; j < N2; ++j)
-	  res[j + counter + N] = stickers[j] ? 1 : 0;
+    res[j + counter + N] = stickers[j] ? 1 : 0;
   return res;
 }
 
@@ -175,32 +183,32 @@ void ComputationalCell::unserialize
   size_t counter = 4;
   size_t N = tracers.size();
   for (size_t j = 0; j < N; ++j)
-	  tracers[j] = data.at(counter + j);
+    tracers[j] = data.at(counter + j);
   size_t N2 = stickers.size();
   for (size_t i = 0; i < N2; ++i)
-	  stickers[i] = data.at(counter + N + i)>0.5;
+    stickers[i] = data.at(counter + N + i)>0.5;
 }
 
 size_t Slope::getChunkSize(void) const
 {
-	return xderivative.getChunkSize() * 2;
+  return xderivative.getChunkSize() * 2;
 }
 
 vector<double> Slope::serialize(void) const
 {
-	vector<double> res(getChunkSize());
-	vector<double> temp(xderivative.serialize());
-	std::copy(temp.begin(), temp.end(), res.begin());
-	temp = yderivative.serialize();
-	std::copy(temp.begin(), temp.end(), res.begin() + xderivative.getChunkSize());
-	return res;
+  vector<double> res(getChunkSize());
+  vector<double> temp(xderivative.serialize());
+  std::copy(temp.begin(), temp.end(), res.begin());
+  temp = yderivative.serialize();
+  std::copy(temp.begin(), temp.end(), res.begin() + xderivative.getChunkSize());
+  return res;
 }
 
 void Slope::unserialize(const vector<double>& data)
 {
-	size_t size = xderivative.getChunkSize();
-	xderivative.unserialize(vector<double>(data.begin(), data.begin() + size));
-	yderivative.unserialize(vector<double>(data.begin() + size, data.end()));
+  size_t size = xderivative.getChunkSize();
+  xderivative.unserialize(vector<double>(data.begin(), data.begin() + size));
+  yderivative.unserialize(vector<double>(data.begin() + size, data.end()));
 }
 
 #endif // RICH_MPI

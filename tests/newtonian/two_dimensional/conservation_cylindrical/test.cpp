@@ -70,7 +70,8 @@ namespace {
       res[i].density = 1;
       res[i].pressure = triangle(r) ? 2 : 1;
       res[i].velocity = triangle(r) ? Vector2D(1,-1) : Vector2D(0,0);
-      res[i].tracers.push_back(triangle(r) ? 1 : 0);
+      //res[i].tracers.push_back(triangle(r) ? 1 : 0);
+      res[i].tracers[0] = triangle(r) ? 1 : 0;
     }
     return res;
   }
