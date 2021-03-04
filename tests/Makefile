@@ -5,7 +5,7 @@ MY_PYTHON_PATH = python
 EXECUTION_PREFIX =
 ifeq ($(MODE),debug)
 	OPTIMIZATION_FLAGS := -O0 -g -pg
-	LFLAGS := -pg
+	LFLAGS := -pg -lclipper
 else ifeq ($(MODE),parallel)
 	CC := mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3
