@@ -1,4 +1,7 @@
 #include "Face.hpp"
+#include <numeric>
+
+using std::inner_product;
 
 using namespace std;
  
@@ -23,22 +26,30 @@ Face::Face(Face const& other):
 
 double Face::GetArea(void) const
 {
-  double res=0;
-  for(std::size_t i=0;i<vertices.size()-2;++i)
-    res+=0.5*fastabs(CrossProduct(vertices[i+1]-vertices[0],vertices[i+2]-vertices[0]));
-  return res;
+  const Vector3D& ref = vertices[0];
+  return inner_product(vertices.begin()+1,
+		       vertices.end()-1,
+		       vertices.begin()+2,
+		       0,
+		       [](const double x, const double y)
+		       {return x+y;},
+		       [&ref](const Vector3D& u, const Vector3D& v)
+		       {return 0.5*fastabs(CrossProduct(u-ref,v-ref));});
 }
 
 Vector3D calc_centroid(const Face& face)
 {
-  Vector3D res;
-  for(std::size_t i=0;i<face.vertices.size()-2;++i)
-    {
-      double area=0.5*fastabs(CrossProduct(face.vertices[i+1]-face.vertices[0],
-					   face.vertices[i+2]-face.vertices[0]));
-      res.x+=area*(face.vertices[0].x+face.vertices[i+2].x+face.vertices[i+1].x)/3.;
-      res.y+=area*(face.vertices[0].y+face.vertices[i+2].y+face.vertices[i+1].y)/3.;
-      res.z+=area*(face.vertices[0].z+face.vertices[i+2].z+face.vertices[i+1].z)/3.;
-    }
-  return res;
+  const Vector3D& ref = face.vertices[0];
+  return inner_product(face.vertices.begin()+1,
+		       face.vertices.end()-1,
+		       face.vertices.begin()+2,
+		       Vector3D(0,0,0),
+		       [](const Vector3D& x, const Vector3D& y)
+		       {return x+y;},
+		       [&ref](const Vector3D& u, const Vector3D& v)
+		       {
+			 const double area = 0.5*fastabs
+			   (CrossProduct(u-ref, v-ref));
+			 return area*(u+v+ref)/3;
+		       });
 }
