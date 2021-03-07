@@ -193,7 +193,7 @@ namespace
 	{
 		vector<Vector3D> points;
 		if (orgpoints == 0)
-			points = tess.GetMeshPoints();
+			points = tess.getMeshPoints();
 		else
 			points = *orgpoints;
 		points.resize(tess.GetPointNo());
@@ -246,7 +246,7 @@ void HDSim3D::timeAdvance2(void)
 
 	if (pt_.cycle % 10 == 0)
 	{
-		vector<Vector3D>& mesh = tess_.GetMeshPoints();
+		vector<Vector3D>& mesh = tess_.accessMeshPoints();
 		mesh.resize(tess_.GetPointNo());
 		vector<size_t> order = HilbertOrder3D(mesh);
 		mesh = VectorValues(mesh, order);
@@ -391,7 +391,7 @@ void HDSim3D::timeAdvance3(void)
 
 	if (pt_.cycle % 10 == 0)
 	{
-		vector<Vector3D>& mesh = tess_.GetMeshPoints();
+		vector<Vector3D>& mesh = tess_.accessMeshPoints();
 		mesh.resize(tess_.GetPointNo());
 		vector<size_t> order = HilbertOrder3D(mesh);
 		mesh = VectorValues(mesh, order);
@@ -401,7 +401,7 @@ void HDSim3D::timeAdvance3(void)
 		point_vel = VectorValues(point_vel, order);
 		//du1 = VectorValues(du1, order);
 	}
-	std::vector<Vector3D> oldpoints = tess_.GetMeshPoints();
+	std::vector<Vector3D> oldpoints = tess_.accessMeshPoints();
 	oldpoints.resize(tess_.GetPointNo());
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -498,7 +498,7 @@ void HDSim3D::timeAdvance33(void)
 
 	if (pt_.cycle % 10 == 0)
 	{
-		vector<Vector3D>& mesh = tess_.GetMeshPoints();
+		vector<Vector3D>& mesh = tess_.accessMeshPoints();
 		mesh.resize(tess_.GetPointNo());
 		vector<size_t> order = HilbertOrder3D(mesh);
 		mesh = VectorValues(mesh, order);
@@ -507,7 +507,7 @@ void HDSim3D::timeAdvance33(void)
 		cells_ = VectorValues(cells_, order);
 		point_vel = VectorValues(point_vel, order);
 	}
-	std::vector<Vector3D> oldpoints = tess_.GetMeshPoints();
+	std::vector<Vector3D> oldpoints = tess_.accessMeshPoints();
 	oldpoints.resize(tess_.GetPointNo());
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -612,7 +612,7 @@ void HDSim3D::timeAdvance32(void)
 
 	if (pt_.cycle % 10 == 0)
 	{
-		vector<Vector3D>& mesh = tess_.GetMeshPoints();
+		vector<Vector3D>& mesh = tess_.accessMeshPoints();
 		mesh.resize(tess_.GetPointNo());
 		vector<size_t> order = HilbertOrder3D(mesh);
 		mesh = VectorValues(mesh, order);
@@ -694,7 +694,7 @@ void HDSim3D::timeAdvance4(void)
 
 	if (pt_.cycle % 10 == 0)
 	{
-		vector<Vector3D>& mesh = tess_.GetMeshPoints();
+		vector<Vector3D>& mesh = tess_.accessMeshPoints();
 		mesh.resize(tess_.GetPointNo());
 		vector<size_t> order = HilbertOrder3D(mesh);
 		mesh = VectorValues(mesh, order);
@@ -704,7 +704,7 @@ void HDSim3D::timeAdvance4(void)
 		point_vel = VectorValues(point_vel, order);
 		//du1 = VectorValues(du1, order);
 	}
-	std::vector<Vector3D> oldpoints = tess_.GetMeshPoints();
+	std::vector<Vector3D> oldpoints = tess_.accessMeshPoints();
 	oldpoints.resize(tess_.GetPointNo());
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -796,7 +796,7 @@ const vector<ComputationalCell3D>& HDSim3D::getCells(void) const
 	return cells_;
 }
 
-double HDSim3D::GetTime(void)const
+double HDSim3D::getTime(void)const
 {
 	return pt_.getTime();
 }
@@ -806,7 +806,7 @@ TracerStickerNames HDSim3D::GetTracerStickerNames(void)const
 	return tsn_;
 }
 
-size_t HDSim3D::GetCycle(void)const
+size_t HDSim3D::getCycle(void)const
 {
 	return static_cast<size_t>(pt_.getCycle());
 }

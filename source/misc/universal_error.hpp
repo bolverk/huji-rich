@@ -9,6 +9,10 @@
 #include <string>
 #include <vector>
 
+using std::string;
+using std::vector;
+using std::pair;
+
 /*! \brief Container for error reports
  */
 class UniversalError
@@ -36,26 +40,20 @@ public:
 
   /*! \brief Returns entry fields
    */
-  std::vector<std::string> const& GetFields(void) const;
-
-  /*! \brief Returns entry values
-   */
-  std::vector<double> const& GetValues(void) const;
+  std::vector<pair<string, double> > const& getFields(void) const;
 
   ~UniversalError(void);
 
 private:
 
-  std::string err_msg_;
+  string err_msg_;
 
-  std::vector<std::string> fields_;
-
-  std::vector<double> values_;
+  vector<pair<string, double> > fields_;
 };
 
 /*! \brief Prints the contents of the error
 \param eo The error object
 */
-void DisplayError(UniversalError const& eo);
+void reportError(const UniversalError& eo);
 
 #endif // UNIVERSAL_ERROR_HPP

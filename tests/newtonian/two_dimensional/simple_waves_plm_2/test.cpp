@@ -143,17 +143,6 @@ namespace {
   }
 }
 
-namespace {
-void report_error(UniversalError const& eo)
-{
-cout << eo.GetErrorMessage() << endl;
-cout.precision(14);
-for(size_t i=0;i<eo.GetFields().size();++i)
-  cout << eo.GetFields()[i] << " = "
-       << eo.GetValues()[i] << endl;
-}
-}
-
 int main(void)
 {
   SimData sim_data;
@@ -167,7 +156,7 @@ my_main_loop(sim);
 }
  catch(UniversalError const& eo)
    {
-report_error(eo);
+reportError(eo);
 throw;
 }
 

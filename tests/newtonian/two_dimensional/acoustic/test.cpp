@@ -26,16 +26,6 @@ using namespace simulation2d;
 
 namespace {
 
-  void report_error(UniversalError const& eo)
-  {
-    cout << "Caught universal error" << endl;
-    cout << eo.GetErrorMessage() << endl;
-    for(size_t i = 0;i<eo.GetFields().size();++i){
-      cout << eo.GetFields()[i] << " = "
-	   << eo.GetValues()[i] << endl;
-    }
-  }
-
   vector<ComputationalCell> calc_init_cond(const Tessellation& tess,
 					   const EquationOfState& eos,
 					   double width)
@@ -172,7 +162,7 @@ int main(void)
       write_snapshot_to_hdf5(sim, "final.h5");
     }
   catch(const UniversalError& eo){
-    report_error(eo);
+    reportError(eo);
     throw;
   }
 

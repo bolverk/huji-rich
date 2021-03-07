@@ -133,7 +133,7 @@ public:
   /*! \brief Get the time of the simulation
   \return The current time of the simulation
   */
-  double GetTime(void)const;
+  double getTime(void)const;
   /*! \brief Access to the names of the stickers and tracers
   \return The names of the stickers and tracers
   */
@@ -141,7 +141,7 @@ public:
   /*! \brief Get the cycle number of the simulation
   \return The current cycle of the simulation
   */
-  size_t GetCycle(void)const;
+  size_t getCycle(void)const;
   /*! \brief Change the cycle of the simulation
   \param cycle The new cycle of the simulation
   */

@@ -159,7 +159,7 @@ namespace {
       sim.getCells();
     Tessellation3D& tess = sim.getTesselation();
     const vector<Vector3D>& points = 
-      tess.GetMeshPoints();
+      tess.getMeshPoints();
     for(size_t i=0;i<cells.size();++i)
       f << points.at(i).x << " "
 	<< points.at(i).y << " "
@@ -274,7 +274,7 @@ class SimData
 
     void operator()(HDSim3D& sim)
     {
-      const double time = sim.GetTime();
+      const double time = sim.getTime();
       const double radius =
 	estimate_shock_radius(sim,
 			      p_thres_);
@@ -302,7 +302,7 @@ class SimData
     write_txt_snapshot(sim, "initial.txt");
     TrackShockRadius diag("shock_trajectory.txt",
 			  1e-3);
-    while(sim.GetTime()<tf){
+    while(sim.getTime()<tf){
       sim.timeAdvance();
       diag(sim);
     }
@@ -316,9 +316,7 @@ int main(void)
     main_loop(SimData().getSim());
   }
   catch(const UniversalError& eo){
-    cout << eo.GetErrorMessage() << endl;
-    for(size_t i=0; i<eo.GetFields().size(); ++i)
-      cout << eo.GetFields().at(i) << " " << eo.GetValues().at(i) << endl;
+    reportError(eo);
   }
   return 0;
 }

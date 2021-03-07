@@ -23,15 +23,15 @@ using namespace interpolations1d;
 using namespace diagnostics1d;
 
 namespace {
-double GetXVelocityAt(const hdsim1D& sim, double x)
-{
-  for(size_t i=1;i<static_cast<size_t>(sim.GetCellNo());i++){
-    if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
-      return 0.5*(sim.GetCell(i-1).Velocity.x+
-		  sim.GetCell(i).Velocity.x);
+  double GetXVelocityAt(const hdsim1D& sim, double x)
+  {
+    for(size_t i=1;i<static_cast<size_t>(sim.GetCellNo());i++){
+      if(sim.GetCellCenter(i-1)<x&&sim.GetCellCenter(i)>x)
+	return 0.5*(sim.GetCell(i-1).Velocity.x+
+		    sim.GetCell(i).Velocity.x);
+    }
+    throw "x out of range in GetXVelocityAt";
   }
-  throw "x out of range in GetXVelocityAt";
-}
 }
 
 class StopCond
@@ -63,17 +63,6 @@ private:
   int iter_;
   const int max_iter_;
 };
-
-namespace {
-void ReportError(UniversalError& eo)
-{
-  cout << eo.GetErrorMessage() << endl;
-  for(size_t i=0;i<eo.GetFields().size();i++){
-    cout << eo.GetFields()[i] << " = "
-	 << eo.GetValues()[i] << endl;
-  }
-}
-}
 
 class SimData
 {
@@ -118,21 +107,21 @@ private:
 };
 
 namespace {
-void main_loop(hdsim1D& sim)
-{
-  StopCond sc(sim,0.1,0.9);
-  while(!sc.TimeToStop()){
-    try{
-      sim.TimeAdvance2();
-    }
-    catch(UniversalError& eo){
-      eo.AddEntry("time",sim.GetTime());
-      eo.AddEntry("cycle",sim.GetCycle());
-      ReportError(eo);
-      throw;
+  void main_loop(hdsim1D& sim)
+  {
+    StopCond sc(sim,0.1,0.9);
+    while(!sc.TimeToStop()){
+      try{
+	sim.TimeAdvance2();
+      }
+      catch(UniversalError& eo){
+	eo.AddEntry("time",sim.GetTime());
+	eo.AddEntry("cycle",sim.GetCycle());
+	reportError(eo);
+	throw;
+      }
     }
   }
-}
 }
 
 int main(void)

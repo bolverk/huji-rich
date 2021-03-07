@@ -54,7 +54,7 @@ void simulation2d::main_loop(hdsim& sim,
 	}
       catch(UniversalError const& eo)
 	{
-	  DisplayError(eo);
+	  reportError(eo);
 	  throw;
 	}
       if(manipulate)

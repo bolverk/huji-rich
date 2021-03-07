@@ -963,7 +963,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	std::vector<Conserved3D> &extensives = sim.getExtensives();
 	EquationOfState const& eos = eos_;
 	TracerStickerNames tsn = sim.GetTracerStickerNames();
-	double time = sim.GetTime();
+	double time = sim.getTime();
 	// Get remove list
 	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tsn);
 	// sort
@@ -1003,7 +1003,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Create copy of old tess
 	boost::scoped_ptr<Tessellation3D> oldtess(tess.clone());
 	// Build new tess
-	vector<Vector3D> new_mesh = tess.GetMeshPoints();
+	vector<Vector3D> new_mesh = tess.getMeshPoints();
 	size_t Norg = tess.GetPointNo();
 	new_mesh.resize(Norg);
 	RemoveVector(new_mesh, ToRemove.first);

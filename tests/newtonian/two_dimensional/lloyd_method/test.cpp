@@ -151,7 +151,7 @@ int main(void)
     my_main_loop(sim);
   }
   catch(UniversalError const& eo){
-    DisplayError(eo);
+    reportError(eo);
   }
 
   return 0;

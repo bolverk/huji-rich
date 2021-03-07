@@ -1,6 +1,6 @@
 /* \file Voronoi3D.hpp
-\brief A 3D Voronoi
-\Author Elad Steinberg
+   \brief A 3D Voronoi
+   \Author Elad Steinberg
 */
 #ifndef VORONOI3D_HPP
 #define VORONOI3D_HPP 1
@@ -29,185 +29,187 @@ typedef std::array<std::size_t, 3> b_array_3;
 class Voronoi3D : public Tessellation3D
 {
 private:
-	Vector3D ll_, ur_;
-	std::size_t Norg_, bigtet_;
+  Vector3D ll_, ur_;
+  std::size_t Norg_, bigtet_;
 
-	std::set<int> set_temp_;
-	std::stack<int> stack_temp_;
+  std::set<int> set_temp_;
+  std::stack<int> stack_temp_;
 
-	void output_buildextra(std::string const& filename)const;
-	void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
-		vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
-	void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
-		std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
-		std::stack<std::size_t> &to_check,bool &skipped,face_vec &faces, vector<size_t> &past_duplicate);
-	void FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
-		Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index);
-	std::size_t GetFirstPointToCheck(void)const;
-	void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
-	void CalcRigidCM(std::size_t face_index);
-	void GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const;
-	double GetTetraVolume(std::array<Vector3D, 4> const& points)const;
-	void CalcCellCMVolume(std::size_t index);
-	double GetRadius(std::size_t index);
-	double GetMaxRadius(std::size_t index);
-	void CalcAllCM(void);
-	vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
-	vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
-	double CalcTetraRadiusCenterHiPrecision(std::size_t index);
+  void output_buildextra(std::string const& filename)const;
+  void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
+			       vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
+  void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
+				  std::size_t point, Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited,
+				  std::stack<std::size_t> &to_check,bool &skipped,face_vec &faces, vector<size_t> &past_duplicate);
+  void FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
+				 Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index);
+  std::size_t GetFirstPointToCheck(void)const;
+  void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
+  void CalcRigidCM(std::size_t face_index);
+  void GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const;
+  double GetTetraVolume(std::array<Vector3D, 4> const& points)const;
+  void CalcCellCMVolume(std::size_t index);
+  double GetRadius(std::size_t index);
+  double GetMaxRadius(std::size_t index);
+  void CalcAllCM(void);
+  vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
+  vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);
+  double CalcTetraRadiusCenterHiPrecision(std::size_t index);
 #ifdef RICH_MPI
-	vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode,
-		vector<unsigned char> &checked_clear);
-	vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
-		Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
-	void MPIFirstIntersections(Tessellation3D const& tproc, vector<std::pair<std::size_t, std::size_t> > &ghost_index);
+  vector<std::pair<std::size_t, std::size_t> > FindIntersections(Tessellation3D const& tproc, size_t mode,
+								 vector<unsigned char> &checked_clear);
+  vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
+					   Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
+  void MPIFirstIntersections(Tessellation3D const& tproc, vector<std::pair<std::size_t, std::size_t> > &ghost_index);
 #endif
-	double CalcTetraRadiusCenter(std::size_t index);
-	vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
-		vector<vector<size_t> > &past_duplicate);
-	void BuildVoronoi(std::vector<size_t> const& order);
+  double CalcTetraRadiusCenter(std::size_t index);
+  vector<Vector3D> CreateBoundaryPoints(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
+					vector<vector<size_t> > &past_duplicate);
+  void BuildVoronoi(std::vector<size_t> const& order);
 
-	Delaunay3D del_;
-	//vector<vector<std::size_t> > PointTetras_; // The tetras containing each point
-	vector<tetra_vec > PointTetras_; // The tetras containing each point
-	vector<double> R_; // The radius of the sphere of each tetra
-	vector<Vector3D> tetra_centers_;
-	// Voronoi Data
-	//vector<vector<std::size_t> > FacesInCell_;
-	vector<face_vec > FacesInCell_;
-	std::vector<point_vec > PointsInFace_; // Right hand with regard to first neighbor
-	//vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
-	vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
-	vector<Vector3D> CM_,Face_CM_;
-	vector<double> volume_;
-	vector<double> area_;
-	vector<vector<std::size_t> > duplicated_points_;
-	vector<int> sentprocs_, duplicatedprocs_;
-	vector<vector<std::size_t> > sentpoints_, Nghost_;
-	vector<std::size_t> self_index_;
-	Voronoi3D();
-	Voronoi3D(Voronoi3D const &other);
-	std::array<Vector3D, 4> temp_points_;
-	std::array<Vector3D, 5> temp_points2_;
+  Delaunay3D del_;
+  //vector<vector<std::size_t> > PointTetras_; // The tetras containing each point
+  vector<tetra_vec > PointTetras_; // The tetras containing each point
+  vector<double> R_; // The radius of the sphere of each tetra
+  vector<Vector3D> tetra_centers_;
+  // Voronoi Data
+  //vector<vector<std::size_t> > FacesInCell_;
+  vector<face_vec > FacesInCell_;
+  std::vector<point_vec > PointsInFace_; // Right hand with regard to first neighbor
+  //vector<vector<std::size_t> > PointsInFace_; // Right hand with regard to first neighbor
+  vector<std::pair<std::size_t, std::size_t> > FaceNeighbors_;
+  vector<Vector3D> CM_,Face_CM_;
+  vector<double> volume_;
+  vector<double> area_;
+  vector<vector<std::size_t> > duplicated_points_;
+  vector<int> sentprocs_, duplicatedprocs_;
+  vector<vector<std::size_t> > sentpoints_, Nghost_;
+  vector<std::size_t> self_index_;
+  Voronoi3D();
+  Voronoi3D(Voronoi3D const &other);
+  std::array<Vector3D, 4> temp_points_;
+  std::array<Vector3D, 5> temp_points2_;
 public:
 #ifdef RICH_MPI
-	vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
-		vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
-		vector<vector<std::size_t> >& sentpoints);
+  vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
+				   vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
+				   vector<vector<std::size_t> >& sentpoints);
 #endif
-	vector<int>& GetSentProcs(void);
+  vector<int>& GetSentProcs(void);
 
-	vector<vector<size_t> >& GetSentPoints(void);
+  vector<vector<size_t> >& GetSentPoints(void);
 
-	vector<size_t>& GetSelfIndex(void);
+  vector<size_t>& GetSelfIndex(void);
 
-	vector<Vector3D>& GetAllFaceCM(void);
+  vector<Vector3D>& GetAllFaceCM(void);
 
-	Vector3D FaceCM(std::size_t index)const;
+  Vector3D FaceCM(std::size_t index)const;
 
-	Voronoi3D(Vector3D const& ll, Vector3D const& ur);
+  Voronoi3D(Vector3D const& ll, Vector3D const& ur);
 
-	void output(std::string const& filename)const;
+  void output(std::string const& filename)const;
 
-	void Build(vector<Vector3D> const& points);
+  void Build(vector<Vector3D> const& points);
 
 #ifdef RICH_MPI
-	void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
+  void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
 
-	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round, bool display);
+  friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round, bool display);
 
-	friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round, bool display);
+  friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round, bool display);
 #endif
 
-	void BuildDebug(int rank);
+  void BuildDebug(int rank);
 
-	std::size_t GetPointNo(void) const;
+  std::size_t GetPointNo(void) const;
 
-	Vector3D GetMeshPoint(std::size_t index) const;
+  Vector3D GetMeshPoint(std::size_t index) const;
 
-	double GetArea(std::size_t index) const;
+  double GetArea(std::size_t index) const;
 
-	Vector3D const& GetCellCM(std::size_t index) const;
+  Vector3D const& GetCellCM(std::size_t index) const;
 
-	std::size_t GetTotalFacesNumber(void) const;
+  std::size_t GetTotalFacesNumber(void) const;
 
-	double GetWidth(std::size_t index) const;
+  double GetWidth(std::size_t index) const;
 
-	double GetVolume(std::size_t index) const;
+  double GetVolume(std::size_t index) const;
 
-	face_vec const& GetCellFaces(std::size_t index) const;
+  face_vec const& GetCellFaces(std::size_t index) const;
 
-	vector<Vector3D>& GetMeshPoints(void);
+  vector<Vector3D>& accessMeshPoints(void);
 
-	vector<std::size_t> GetNeighbors(std::size_t index)const;
+  const vector<Vector3D>& getMeshPoints(void) const;
 
-	Tessellation3D* clone(void) const;
+  vector<std::size_t> GetNeighbors(std::size_t index)const;
 
-	bool NearBoundary(std::size_t index) const;
+  Tessellation3D* clone(void) const;
 
-	bool BoundaryFace(std::size_t index) const;
+  bool NearBoundary(std::size_t index) const;
 
-	vector<vector<std::size_t> >& GetDuplicatedPoints(void);
+  bool BoundaryFace(std::size_t index) const;
 
-	vector<vector<std::size_t> >const& GetDuplicatedPoints(void)const;
+  vector<vector<std::size_t> >& GetDuplicatedPoints(void);
 
-	std::size_t GetTotalPointNumber(void)const;
+  vector<vector<std::size_t> >const& GetDuplicatedPoints(void)const;
 
-	vector<Vector3D> & GetAllCM(void);
+  std::size_t GetTotalPointNumber(void)const;
 
-	vector<Vector3D > GetAllCM(void)const;
+  vector<Vector3D> & GetAllCM(void);
 
-	void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const;
+  vector<Vector3D > GetAllCM(void)const;
 
-	Vector3D Normal(std::size_t faceindex)const;
+  void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const;
 
-	bool IsGhostPoint(std::size_t index)const;
+  Vector3D Normal(std::size_t faceindex)const;
 
-	Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const;
+  bool IsGhostPoint(std::size_t index)const;
 
-	vector<Vector3D>& GetFacePoints(void);
+  Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const;
 
-	vector<double>& GetAllArea(void);
+  vector<Vector3D>& GetFacePoints(void);
 
-	vector<Vector3D>const& GetFacePoints(void) const;
+  vector<double>& GetAllArea(void);
 
-	vector<face_vec >& GetAllCellFaces(void);
+  vector<Vector3D>const& GetFacePoints(void) const;
 
-	point_vec const& GetPointsInFace(std::size_t index) const;
+  vector<face_vec >& GetAllCellFaces(void);
 
-	std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const;
+  point_vec const& GetPointsInFace(std::size_t index) const;
 
-	vector<int> GetDuplicatedProcs(void)const;
+  std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const;
 
-	vector<int> GetSentProcs(void)const;
+  vector<int> GetDuplicatedProcs(void)const;
 
-	vector<vector<std::size_t> > const& GetSentPoints(void)const;
+  vector<int> GetSentProcs(void)const;
 
-	vector<std::size_t> const& GetSelfIndex(void) const;
+  vector<vector<std::size_t> > const& GetSentPoints(void)const;
 
-	vector<vector<std::size_t> > const& GetGhostIndeces(void) const;
+  vector<std::size_t> const& GetSelfIndex(void) const;
 
-	vector<vector<std::size_t> >& GetGhostIndeces(void);
+  vector<vector<std::size_t> > const& GetGhostIndeces(void) const;
 
-	void GetNeighbors(size_t index, vector<size_t> &res)const;
+  vector<vector<std::size_t> >& GetGhostIndeces(void);
 
-	std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
+  void GetNeighbors(size_t index, vector<size_t> &res)const;
 
-	void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate);
+  std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
 
-	vector<double>& GetAllVolumes(void);
+  void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate);
 
-	vector<double> GetAllVolumes(void)const;
+  vector<double>& GetAllVolumes(void);
 
-	std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
+  vector<double> GetAllVolumes(void)const;
 
-	vector<point_vec > & GetAllPointsInFace(void);
+  std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
 
-	size_t& GetPointNo(void);
+  vector<point_vec > & GetAllPointsInFace(void);
 
-	bool IsPointOutsideBox(size_t index)const;
+  size_t& GetPointNo(void);
 
-	void SetBox(Vector3D const& ll, Vector3D const& ur);
+  bool IsPointOutsideBox(size_t index)const;
+
+  void SetBox(Vector3D const& ll, Vector3D const& ur);
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);

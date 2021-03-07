@@ -63,15 +63,6 @@ private:
   const int max_iter_;
 };
 
-void ReportError(UniversalError& eo)
-{
-  cout << eo.GetErrorMessage() << endl;
-  for(size_t i=0;i<eo.GetFields().size();i++){
-    cout << eo.GetFields()[i] << " = "
-	 << eo.GetValues()[i] << endl;
-  }
-}
-
 class SimData
 {
 public:
@@ -134,7 +125,7 @@ void main_loop(hdsim1D& sim)
     catch(UniversalError& eo){
       eo.AddEntry("time",sim.GetTime());
       eo.AddEntry("cycle",sim.GetCycle());
-      ReportError(eo);
+      reportError(eo);
       throw;
     }
   }

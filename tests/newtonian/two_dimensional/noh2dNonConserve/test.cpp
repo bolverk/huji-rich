@@ -252,7 +252,7 @@ int main(void)
 	}
       catch (UniversalError const& eo)
 	{
-	  DisplayError(eo);
+	  reportError(eo);
 	}
     }
 

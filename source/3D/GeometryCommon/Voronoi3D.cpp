@@ -2297,7 +2297,12 @@ face_vec const& Voronoi3D::GetCellFaces(std::size_t index) const
   return FacesInCell_[index];
 }
 
-vector<Vector3D>& Voronoi3D::GetMeshPoints(void)
+vector<Vector3D>& Voronoi3D::accessMeshPoints(void)
+{
+  return del_.points_;
+}
+
+const vector<Vector3D>& Voronoi3D::getMeshPoints(void) const
 {
   return del_.points_;
 }

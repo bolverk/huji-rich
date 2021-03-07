@@ -71,7 +71,6 @@ double GetVelocity(Conserved3D const& cell, double G)
 		eo.AddEntry("Mz", cell.momentum.z);
 		eo.AddEntry("Energy", cell.energy);
 		eo.AddEntry("Enthalpy", cell.internal_energy);
-		DisplayError(eo);
 		throw eo;
 	}
 	return res;
