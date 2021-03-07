@@ -63,7 +63,7 @@ def main():
     left = enrs.Primitive(1,2,0)
     right = enrs.Primitive(1,1,0)
     prof = enrs.RiemannProfile(left,right,5./3.)
-    offset = 0.5;
+    offset = 0;
     da = [prof.CalcPrim((i-offset)/t).Density for i in xs]
     pa = [prof.CalcPrim((i-offset)/t).Pressure for i in xs]
     va = [prof.CalcPrim((i-offset)/t).Velocity for i in xs]
@@ -90,7 +90,7 @@ def main():
         f.write(str(gof2)+'\n')
         f.write(str(gof3)+'\n')
     
-    return gof1<0.3 and gof2<0.31 and gof3<0.33
+    return gof1<0.12 and gof2<0.11 and gof3<0.13
 
 if __name__=='__main__':
 
