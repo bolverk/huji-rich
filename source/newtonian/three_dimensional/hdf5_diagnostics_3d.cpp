@@ -81,4 +81,35 @@ void write_snapshot_to_hdf5
 	    f.first);
        });
   }
+  {
+    typedef function<double(const Conserved3D&)> my_func;
+    vector<pair<string, my_func> >
+      fields
+      ({{"mass", 
+	 [](const Conserved3D& c){return c.mass;}},
+	{"energy", 
+	 [](const Conserved3D& c){return c.energy;}},
+	{"x_momentum", 
+	 [](const Conserved3D& c){return c.momentum.x;}},
+	{"y_momentum", 
+	 [](const Conserved3D& c){return c.momentum.y;}},
+	{"z_momentum",
+	 [](const Conserved3D& c){return c.momentum.z;}}});
+    for_each
+      (fields.begin(),
+       fields.end(),
+       [&sim, &hydrodynamic](const pair<string, my_func>& f)
+       {
+	 vector<double> buffer(sim.getExtensives().size());
+	 transform
+	   (sim.getExtensives().begin(),
+	    sim.getExtensives().end(),
+	    buffer.begin(),
+	    f.second);
+	 write_std_vector_to_hdf5
+	   (hydrodynamic,
+	    buffer,
+	    f.first);
+       });
+  }
 }
