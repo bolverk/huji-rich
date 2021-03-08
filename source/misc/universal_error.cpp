@@ -13,14 +13,14 @@ void UniversalError::Append2ErrorMessage(string const& msg)
   err_msg_ += msg;
 }
 
-void UniversalError::AddEntry
+void UniversalError::addEntry
 (const string& field,
  double value)
 {
   fields_.push_back({field, value});
 }
 
-const string& UniversalError::GetErrorMessage(void) const
+const string& UniversalError::getErrorMessage(void) const
 {
   return err_msg_;
 }
@@ -32,10 +32,14 @@ const vector<pair<string, double> >& UniversalError::getFields(void) const
 
 UniversalError::~UniversalError(void) {}
 
+UniversalError::UniversalError(const UniversalError& eo):
+  err_msg_(eo.getErrorMessage()),
+  fields_(eo.getFields()) {}
+
 void reportError(UniversalError const& eo)
 {
   std::cout.precision(14);
-  std::cout << eo.GetErrorMessage() << std::endl;
+  std::cout << eo.getErrorMessage() << std::endl;
   for_each
     (eo.getFields().begin(),
      eo.getFields().end(),

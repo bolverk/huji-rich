@@ -115,8 +115,8 @@ namespace {
 	sim.TimeAdvance2();
       }
       catch(UniversalError& eo){
-	eo.AddEntry("time",sim.GetTime());
-	eo.AddEntry("cycle",sim.GetCycle());
+	eo.addEntry("time",sim.GetTime());
+	eo.addEntry("cycle",sim.GetCycle());
 	reportError(eo);
 	throw;
       }

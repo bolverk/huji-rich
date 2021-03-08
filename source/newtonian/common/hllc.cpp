@@ -52,22 +52,22 @@ namespace {
 				     double right_wave_speed)
   {
     UniversalError res("Invalid wave speeds in hllc solver");
-    res.AddEntry("left density",left.Density);
-    res.AddEntry("left pressure",left.Pressure);
-    res.AddEntry("left x velocity",left.Velocity.x);
-    res.AddEntry("left y velocity",left.Velocity.y);
-    res.AddEntry("left sound speed",left.SoundSpeed);
-    res.AddEntry("left energy",left.Energy);
-    res.AddEntry("right density",right.Density);
-    res.AddEntry("right pressure",right.Pressure);
-    res.AddEntry("right x velocity",right.Velocity.x);
-    res.AddEntry("right y velocity",right.Velocity.y);
-    res.AddEntry("right sound speed",right.SoundSpeed);
-    res.AddEntry("right energy",right.Energy);
-    res.AddEntry("interface velocity",velocity);
-    res.AddEntry("left wave speed",left_wave_speed);
-    res.AddEntry("center wave speed",center_wave_speed);
-    res.AddEntry("right wave speed",right_wave_speed);
+    res.addEntry("left density",left.Density);
+    res.addEntry("left pressure",left.Pressure);
+    res.addEntry("left x velocity",left.Velocity.x);
+    res.addEntry("left y velocity",left.Velocity.y);
+    res.addEntry("left sound speed",left.SoundSpeed);
+    res.addEntry("left energy",left.Energy);
+    res.addEntry("right density",right.Density);
+    res.addEntry("right pressure",right.Pressure);
+    res.addEntry("right x velocity",right.Velocity.x);
+    res.addEntry("right y velocity",right.Velocity.y);
+    res.addEntry("right sound speed",right.SoundSpeed);
+    res.addEntry("right energy",right.Energy);
+    res.addEntry("interface velocity",velocity);
+    res.addEntry("left wave speed",left_wave_speed);
+    res.addEntry("center wave speed",center_wave_speed);
+    res.addEntry("right wave speed",right_wave_speed);
     return res;
   }
 }

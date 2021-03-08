@@ -168,15 +168,15 @@ double TillotsonOrg::dp2e(double d, double p, tvector const & /*tracers*/, vecto
 			if (std::abs(p - newp) > 0.001*std::abs(p))
 			{
 				UniversalError eo("No dp2e convergence");
-				eo.AddEntry("Density", d);
-				eo.AddEntry("Pressure", p);
-				eo.AddEntry("New Pressure", newp);
-				eo.AddEntry("EIV", EIV_);
-				eo.AddEntry("ECV", ECV_);
-				eo.AddEntry("First energy", res.first);
-				eo.AddEntry("Second energy", res.second);
-				eo.AddEntry("First pressure", de2p(d, res.first));
-				eo.AddEntry("Second pressure", de2p(d, res.second));
+				eo.addEntry("Density", d);
+				eo.addEntry("Pressure", p);
+				eo.addEntry("New Pressure", newp);
+				eo.addEntry("EIV", EIV_);
+				eo.addEntry("ECV", ECV_);
+				eo.addEntry("First energy", res.first);
+				eo.addEntry("Second energy", res.second);
+				eo.addEntry("First pressure", de2p(d, res.first));
+				eo.addEntry("Second pressure", de2p(d, res.second));
 				throw eo;
 			}
 		}

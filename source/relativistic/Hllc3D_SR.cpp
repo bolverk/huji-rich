@@ -43,7 +43,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D_SR left sound speed", 0);
+			eo.addEntry("Error in HLLC3D_SR left sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -60,7 +60,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D_SR right sound speed", 0);
+			eo.addEntry("Error in HLLC3D_SR right sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -99,22 +99,22 @@ namespace
 		double right_wave_speed)
 	{
 		UniversalError res("Invalid wave speeds in hllc solver");
-		res.AddEntry("left density", left.density);
-		res.AddEntry("left pressure", left.pressure);
-		res.AddEntry("left x velocity", left.velocity.x);
-		res.AddEntry("left y velocity", left.velocity.y);
-		res.AddEntry("left z velocity", left.velocity.z);
-		res.AddEntry("left Energy", (left.internal_energy + 1));
-		res.AddEntry("right density", right.density);
-		res.AddEntry("right pressure", right.pressure);
-		res.AddEntry("right x velocity", right.velocity.x);
-		res.AddEntry("right y velocity", right.velocity.y);
-		res.AddEntry("right z velocity", right.velocity.z);
-		res.AddEntry("right Energy", (right.internal_energy + 1));
-		res.AddEntry("interface velocity", velocity);
-		res.AddEntry("left wave speed", left_wave_speed);
-		res.AddEntry("center wave speed", center_wave_speed);
-		res.AddEntry("right wave speed", right_wave_speed);
+		res.addEntry("left density", left.density);
+		res.addEntry("left pressure", left.pressure);
+		res.addEntry("left x velocity", left.velocity.x);
+		res.addEntry("left y velocity", left.velocity.y);
+		res.addEntry("left z velocity", left.velocity.z);
+		res.addEntry("left Energy", (left.internal_energy + 1));
+		res.addEntry("right density", right.density);
+		res.addEntry("right pressure", right.pressure);
+		res.addEntry("right x velocity", right.velocity.x);
+		res.addEntry("right y velocity", right.velocity.y);
+		res.addEntry("right z velocity", right.velocity.z);
+		res.addEntry("right Energy", (right.internal_energy + 1));
+		res.addEntry("interface velocity", velocity);
+		res.addEntry("left wave speed", left_wave_speed);
+		res.addEntry("center wave speed", center_wave_speed);
+		res.addEntry("right wave speed", right_wave_speed);
 		return res;
 	}
 }
@@ -193,27 +193,27 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 	if (!good)
 	{
 		UniversalError eo("Bad flux");
-		eo.AddEntry("Energy flux", f_gr.energy);
-		eo.AddEntry("Internal Energy flux", f_gr.internal_energy);
-		eo.AddEntry("Mass flux", f_gr.mass);
-		eo.AddEntry("Momentum x flux", f_gr.momentum.x);
-		eo.AddEntry("Momentum y flux", f_gr.momentum.y);
-		eo.AddEntry("Momentum z flux", f_gr.momentum.z);
-		eo.AddEntry("Left cell density", left.density);
-		eo.AddEntry("Left cell pressure", left.pressure);
-		eo.AddEntry("Left cell Vx", left.velocity.x);
-		eo.AddEntry("Left cell Vy", left.velocity.y);
-		eo.AddEntry("Left cell Vz", left.velocity.z);
-		eo.AddEntry("Left cell internal energy", left.internal_energy);
-		eo.AddEntry("Left cell ID", left.ID);
-		eo.AddEntry("Right cell density", right.density);
-		eo.AddEntry("Right cell pressure", right.pressure);
-		eo.AddEntry("Right cell Vx", right.velocity.x);
-		eo.AddEntry("Right cell Vy", right.velocity.y);
-		eo.AddEntry("Right cell Vz", right.velocity.z);
-		eo.AddEntry("Right cell internal energy", right.internal_energy);
-		eo.AddEntry("Right cell ID", right.ID);
-		eo.AddEntry("Face velocity", velocity);
+		eo.addEntry("Energy flux", f_gr.energy);
+		eo.addEntry("Internal Energy flux", f_gr.internal_energy);
+		eo.addEntry("Mass flux", f_gr.mass);
+		eo.addEntry("Momentum x flux", f_gr.momentum.x);
+		eo.addEntry("Momentum y flux", f_gr.momentum.y);
+		eo.addEntry("Momentum z flux", f_gr.momentum.z);
+		eo.addEntry("Left cell density", left.density);
+		eo.addEntry("Left cell pressure", left.pressure);
+		eo.addEntry("Left cell Vx", left.velocity.x);
+		eo.addEntry("Left cell Vy", left.velocity.y);
+		eo.addEntry("Left cell Vz", left.velocity.z);
+		eo.addEntry("Left cell internal energy", left.internal_energy);
+		eo.addEntry("Left cell ID", left.ID);
+		eo.addEntry("Right cell density", right.density);
+		eo.addEntry("Right cell pressure", right.pressure);
+		eo.addEntry("Right cell Vx", right.velocity.x);
+		eo.addEntry("Right cell Vy", right.velocity.y);
+		eo.addEntry("Right cell Vz", right.velocity.z);
+		eo.addEntry("Right cell internal energy", right.internal_energy);
+		eo.addEntry("Right cell ID", right.ID);
+		eo.addEntry("Face velocity", velocity);
 		throw eo;
 	}
 #endif

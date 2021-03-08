@@ -373,7 +373,7 @@ int StaticVoronoiMesh::GetOriginalIndex(int point) const
 		if(point<Nextra)
 		{
 			UniversalError eo("Tried to get original index of non exsistent cell");
-			eo.AddEntry("Tried accessing cell",point);
+			eo.addEntry("Tried accessing cell",point);
 			throw eo;
 		}
 		int maxcor=static_cast<int>(Tri.getCor().size());
@@ -392,7 +392,7 @@ int StaticVoronoiMesh::GetOriginalIndex(int point) const
 			}
 		}
 		UniversalError eo("Tried to get original index of non exsistent cell");
-		eo.AddEntry("Tried accessing cell",point);
+		eo.addEntry("Tried accessing cell",point);
 		throw eo;
 		#endif
 	}

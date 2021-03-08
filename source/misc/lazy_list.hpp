@@ -155,8 +155,8 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
   if(indeces.size()!=data.size())
     {
       UniversalError eo("Matching vectors are not the same length");
-      eo.AddEntry("indeces length",static_cast<double>(indeces.size()));
-      eo.AddEntry("data length",static_cast<double>(data.size()));
+      eo.addEntry("indeces length",static_cast<double>(indeces.size()));
+      eo.addEntry("data length",static_cast<double>(data.size()));
       throw eo;
     }
   for(size_t i=0;i<indeces.size();++i)

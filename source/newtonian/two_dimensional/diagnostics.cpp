@@ -11,7 +11,7 @@ void write_error(const string& fname,
 		 const UniversalError& eo)
 {
   ofstream f(fname.c_str());
-  f << eo.GetErrorMessage() << endl;
+  f << eo.getErrorMessage() << endl;
   for_each(eo.getFields().begin(),
 	   eo.getFields().end(),
 	   [&f](const pair<string, double>& x)

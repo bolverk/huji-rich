@@ -151,21 +151,21 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 					" energy= " << fluxes[temp[j]].energy * Area << " Etherm= " << dEtherm1 << " momentum= " << abs(fluxes[temp[j]].momentum) * Area <<
 					" Area*dt " << Area << " normal " << normalf.x << "," << normalf.y << "," << normalf.z <<
 					" face velocity "<<edge_velocities[temp[j]].x<<","<< edge_velocities[temp[j]].y<<","<< edge_velocities[temp[j]].z<< std::endl;
-				eo.AddEntry("Face", static_cast<double>(temp[j]));
-				eo.AddEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(temp[j]).first));
-				eo.AddEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(temp[j]).second));
-				eo.AddEntry("First input Density", interp_values[temp[j]].first.density);
-				eo.AddEntry("First input pressure", interp_values[temp[j]].first.pressure);
-				eo.AddEntry("First input internal energy", interp_values[temp[j]].first.internal_energy);
-				eo.AddEntry("First input vx", interp_values[temp[j]].first.velocity.x);
-				eo.AddEntry("First input vy", interp_values[temp[j]].first.velocity.y);
-				eo.AddEntry("First input vz", interp_values[temp[j]].first.velocity.z);
-				eo.AddEntry("Second input Density", interp_values[temp[j]].second.density);
-				eo.AddEntry("Second input pressure", interp_values[temp[j]].second.pressure);
-				eo.AddEntry("Second input internal energy", interp_values[temp[j]].second.internal_energy);
-				eo.AddEntry("Second input vx", interp_values[temp[j]].second.velocity.x);
-				eo.AddEntry("Second input vy", interp_values[temp[j]].second.velocity.y);
-				eo.AddEntry("Second input vz", interp_values[temp[j]].second.velocity.z);
+				eo.addEntry("Face", static_cast<double>(temp[j]));
+				eo.addEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(temp[j]).first));
+				eo.addEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(temp[j]).second));
+				eo.addEntry("First input Density", interp_values[temp[j]].first.density);
+				eo.addEntry("First input pressure", interp_values[temp[j]].first.pressure);
+				eo.addEntry("First input internal energy", interp_values[temp[j]].first.internal_energy);
+				eo.addEntry("First input vx", interp_values[temp[j]].first.velocity.x);
+				eo.addEntry("First input vy", interp_values[temp[j]].first.velocity.y);
+				eo.addEntry("First input vz", interp_values[temp[j]].first.velocity.z);
+				eo.addEntry("Second input Density", interp_values[temp[j]].second.density);
+				eo.addEntry("Second input pressure", interp_values[temp[j]].second.pressure);
+				eo.addEntry("Second input internal energy", interp_values[temp[j]].second.internal_energy);
+				eo.addEntry("Second input vx", interp_values[temp[j]].second.velocity.x);
+				eo.addEntry("Second input vy", interp_values[temp[j]].second.velocity.y);
+				eo.addEntry("Second input vz", interp_values[temp[j]].second.velocity.z);
 				for (size_t k = 0; k < tracerstickernames.tracer_names.size(); ++k)
 				{
 					std::cout << tracerstickernames.tracer_names[k] << " flux is " << fluxes[temp[j]].tracers[k] * Area << std::endl;

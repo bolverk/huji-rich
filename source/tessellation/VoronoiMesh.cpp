@@ -198,7 +198,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 		if(point<Nextra)
 		{
 			UniversalError eo("Tried to get original index of non exsistent cell");
-			eo.AddEntry("Tried accessing cell",point);
+			eo.addEntry("Tried accessing cell",point);
 			throw eo;
 		}
 		int maxcor=static_cast<int>(Tri.getCor().size());
@@ -217,7 +217,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 			}
 		}
 		UniversalError eo("Tried to get original index of non exsistent cell");
-		eo.AddEntry("Tried accessing cell",point);
+		eo.addEntry("Tried accessing cell",point);
 		throw eo;
 		#endif
 	}
@@ -1440,10 +1440,10 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		HDF5Logger log("verror" + int2str(rank) + ".h5");
 		log.output(vproc);
 		UniversalError eo("Point is not inside any processor");
-		eo.AddEntry("CPU rank", rank);
-		eo.AddEntry("Point number", static_cast<double>(i));
-		eo.AddEntry("Point x cor", points[i].x);
-		eo.AddEntry("Point y cor", points[i].y);
+		eo.addEntry("CPU rank", rank);
+		eo.addEntry("Point number", static_cast<double>(i));
+		eo.addEntry("Point x cor", points[i].x);
+		eo.addEntry("Point y cor", points[i].y);
 		throw eo;
 	}
 	// Send/Recv the points

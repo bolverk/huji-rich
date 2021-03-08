@@ -176,14 +176,14 @@ namespace{
 		       2*max(plvr,prvl),tol);
       }
       catch(UniversalError& eo){
-	eo.AddEntry("caught in two shock section of ersig",0);
-	eo.AddEntry("left density",left.Density);
-	eo.AddEntry("right density",right.Density);
-	eo.AddEntry("left pressure",left.Pressure);
-	eo.AddEntry("right pressure",right.Pressure);
-	eo.AddEntry("left x velocity",left.Velocity.x);
-	eo.AddEntry("right x velocity",right.Velocity.y);
-	eo.AddEntry("rethrown",0);
+	eo.addEntry("caught in two shock section of ersig",0);
+	eo.addEntry("left density",left.Density);
+	eo.addEntry("right density",right.Density);
+	eo.addEntry("left pressure",left.Pressure);
+	eo.addEntry("right pressure",right.Pressure);
+	eo.addEntry("left x velocity",left.Velocity.x);
+	eo.addEntry("right x velocity",right.Velocity.y);
+	eo.addEntry("rethrown",0);
 	throw;
       }
     }
@@ -575,20 +575,20 @@ Conserved ERSIG::operator()
     return res;
   }
   catch(UniversalError& eo){
-    if(eo.GetErrorMessage()=="Vacuum formed"){
+    if(eo.getErrorMessage()=="Vacuum formed"){
       if(vacuum_behaviour_=="zero flux")
 	return Conserved();
     }
 
-    eo.AddEntry("ERSIG::Solve data starts here",0);
-    eo.AddEntry("left density",left.Density);
-    eo.AddEntry("left pressure",left.Pressure);
-    eo.AddEntry("left x velocity",left.Velocity.x);
-    eo.AddEntry("left y velocity",left.Velocity.y);
-    eo.AddEntry("right density",right.Density);
-    eo.AddEntry("right pressure",right.Pressure);
-    eo.AddEntry("right x velocity",right.Velocity.x);
-    eo.AddEntry("right y velocity",right.Velocity.y);
+    eo.addEntry("ERSIG::Solve data starts here",0);
+    eo.addEntry("left density",left.Density);
+    eo.addEntry("left pressure",left.Pressure);
+    eo.addEntry("left x velocity",left.Velocity.x);
+    eo.addEntry("left y velocity",left.Velocity.y);
+    eo.addEntry("right density",right.Density);
+    eo.addEntry("right pressure",right.Pressure);
+    eo.addEntry("right x velocity",right.Velocity.x);
+    eo.addEntry("right y velocity",right.Velocity.y);
     throw;
   }
 }

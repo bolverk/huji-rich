@@ -35,6 +35,7 @@ public:
 };
 
 namespace {
+  /*
   template<class T> vector<T> chunk
   (const vector<T>& source,
    size_t i_start,
@@ -46,6 +47,7 @@ namespace {
       res.at(i-i_start) = source.at(i);
     return res;
   }
+  */
 }
 
 vector<double> list_serialize
@@ -84,8 +86,8 @@ template<class T> vector<T> list_unserialize
 	if (data.size() % t.getChunkSize() != 0)
 	{
 		UniversalError eo("Count of serializable objects not integer");
-		eo.AddEntry("chunksize", static_cast<double>(t.getChunkSize()));
-		eo.AddEntry("Data size", static_cast<double>(data.size()));
+		eo.addEntry("chunksize", static_cast<double>(t.getChunkSize()));
+		eo.addEntry("Data size", static_cast<double>(data.size()));
 		throw eo;
 	}
   const size_t n = data.size()/t.getChunkSize();

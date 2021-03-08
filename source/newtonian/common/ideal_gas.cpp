@@ -16,9 +16,9 @@ double IdealGas::dp2e(double d, double p, tvector const& /*tracers*/, vector<str
 	if (!(g_ > 0) || !(p > 0) || !(d > 0))
 	{
 		UniversalError eo("Negative quantity in ideal gas dp2e");
-		eo.AddEntry("Density", d);
-		eo.AddEntry("Pressure", p);
-		eo.AddEntry("Gamma index", g_);
+		eo.addEntry("Density", d);
+		eo.addEntry("Pressure", p);
+		eo.addEntry("Gamma index", g_);
 		throw eo;
 	}
 #endif //RICH_DEBUG
@@ -32,9 +32,9 @@ double IdealGas::de2p(double d, double e, tvector const& /*tracers*/, vector<str
 	if (!(g_ > 0) || !(e > 0) || !(d > 0))
 	{
 		UniversalError eo("Negative quantity in ideal gas de2p");
-		eo.AddEntry("Density", d);
-		eo.AddEntry("Energy", e);
-		eo.AddEntry("Gamma index", g_);
+		eo.addEntry("Density", d);
+		eo.addEntry("Energy", e);
+		eo.addEntry("Gamma index", g_);
 		throw eo;
 	}
 #endif // RICH_DEBUG
@@ -51,9 +51,9 @@ namespace {
 						double d)
 	{
 	  UniversalError res("Speed of sound came out imaginary");
-	  res.AddEntry("adiabatic index",g);
-	  res.AddEntry("density",d);
-	  res.AddEntry("pressure",p);
+	  res.addEntry("adiabatic index",g);
+	  res.addEntry("density",d);
+	  res.addEntry("pressure",p);
 	  return res;
 	}
 	*/
@@ -65,9 +65,9 @@ double IdealGas::dp2c(double d, double p, tvector const& /*tracers*/, vector<str
 	if (!(g_ > 0) || !(p > 0) || !(d > 0))
 	{
 		UniversalError eo("Negative quantity in ideal gas");
-		eo.AddEntry("Density", d);
-		eo.AddEntry("Pressure", p);
-		eo.AddEntry("Gamma index", g_);
+		eo.addEntry("Density", d);
+		eo.addEntry("Pressure", p);
+		eo.addEntry("Gamma index", g_);
 		throw eo;
 	}
 #endif //RICH_DEBUG
@@ -93,8 +93,8 @@ double IdealGas::sd2p(double s, double d, tvector const& /*tracers*/, vector<str
 	if ((!(s > 0) || (!(d > 0))))
 	{
 		UniversalError eo("Negative quantaties in entropy calc");
-		eo.AddEntry("entropy", s);
-		eo.AddEntry("density", d);
+		eo.addEntry("entropy", s);
+		eo.addEntry("density", d);
 		throw eo;
 	}
 	assert(s > 0 && d > 0);

@@ -31,18 +31,20 @@ public:
 
   /*! \brief Adds an entry to the list
    */
-  void AddEntry(std::string const& field,
+  void addEntry(std::string const& field,
 		double value);
 
   /*! \brief Returns the error message
    */
-  std::string const& GetErrorMessage(void) const;
+  std::string const& getErrorMessage(void) const;
 
   /*! \brief Returns entry fields
    */
   std::vector<pair<string, double> > const& getFields(void) const;
 
   ~UniversalError(void);
+
+  UniversalError(const UniversalError& eo);
 
 private:
 

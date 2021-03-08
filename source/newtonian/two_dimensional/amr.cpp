@@ -262,7 +262,7 @@ namespace
 			std::cout << "In refine Real volume: " << vv << " AMR volume: " << TotalVolume << std::endl;
 #ifndef RICH_MPI
 			UniversalError eo("Not same volume in amr refine");
-			eo.AddEntry("location",static_cast<double>(location));
+			eo.addEntry("location",static_cast<double>(location));
 			throw eo;
 #endif
 		}

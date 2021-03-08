@@ -257,10 +257,10 @@ namespace
 		if (std::abs(sum) > 1e-5*area_scale)
 		{
 			UniversalError eo("Bad total area in TrianglesArea");
-			eo.AddEntry("area_scale", area_scale);
-			eo.AddEntry("sum", sum);
-			eo.AddEntry("old neigh 0", eold.neighbors.first);
-			eo.AddEntry("old neigh 1", eold.neighbors.second);
+			eo.addEntry("area_scale", area_scale);
+			eo.addEntry("sum", sum);
+			eo.addEntry("old neigh 0", eold.neighbors.first);
+			eo.addEntry("old neigh 1", eold.neighbors.second);
 			throw eo;
 		}
 		return res;

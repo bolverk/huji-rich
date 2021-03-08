@@ -73,8 +73,8 @@ namespace
 		if (n > 20)
 		{
 			UniversalError eo("Cell has too many neighbors");
-			eo.AddEntry("Cell x cor", center.x);
-			eo.AddEntry("Cell y cor", center.y);
+			eo.addEntry("Cell x cor", center.x);
+			eo.addEntry("Cell y cor", center.y);
 			throw eo;
 		}
 		// Create the matrix to invert and the vector to compare
@@ -111,10 +111,10 @@ namespace
 		if (std::abs(det) < 1e-10*cell_volume*cell_volume)
 		{
 			UniversalError eo("Singular matrix");
-			eo.AddEntry("Cell x cor", center.x);
-			eo.AddEntry("Cell y cor", center.y);
-			eo.AddEntry("Cell volume", cell_volume);
-			eo.AddEntry("Det was", det);
+			eo.addEntry("Cell x cor", center.x);
+			eo.addEntry("Cell y cor", center.y);
+			eo.addEntry("Cell volume", cell_volume);
+			eo.addEntry("Det was", det);
 			throw eo;
 		}
 		// Invert the matrix

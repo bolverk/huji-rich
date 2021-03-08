@@ -137,8 +137,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-		eo.AddEntry("Cell number", i);
+		eo.addEntry("Error RoundCells3D::calc_dw", 0);
+		eo.addEntry("Cell number", i);
 		throw eo;
 	}
 #endif
@@ -167,8 +167,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-		eo.AddEntry("Cell number", i);
+		eo.addEntry("Error RoundCells3D::calc_dw", 0);
+		eo.addEntry("Cell number", i);
 		throw eo;
 	}
 #endif
@@ -189,9 +189,9 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-			eo.AddEntry("Neigh Cell number", neigh[j]);
-			eo.AddEntry("Neigh index", j);
+			eo.addEntry("Error RoundCells3D::calc_dw", 0);
+			eo.addEntry("Neigh Cell number", neigh[j]);
+			eo.addEntry("Neigh index", j);
 			throw eo;
 	}
 #endif

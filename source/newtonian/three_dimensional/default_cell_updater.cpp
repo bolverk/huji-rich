@@ -93,18 +93,18 @@ namespace
 					}
 					catch (UniversalError &eo)
 					{
-						eo.AddEntry("Cell index", static_cast<double>(i));
-						eo.AddEntry("Cell mass", extensives[i].mass);
-						eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
-						eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-						eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
-						eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
-						eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
-						eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
-						eo.AddEntry("Cell volume", vol);
-						eo.AddEntry("Cell energy", extensives[i].energy);
-						eo.AddEntry("Cell thermal energy per unit mass", energy);
-						eo.AddEntry("Cell id", static_cast<double>(res[i].ID));
+						eo.addEntry("Cell index", static_cast<double>(i));
+						eo.addEntry("Cell mass", extensives[i].mass);
+						eo.addEntry("Cell x momentum", extensives[i].momentum.x);
+						eo.addEntry("Cell y momentum", extensives[i].momentum.y);
+						eo.addEntry("Cell z momentum", extensives[i].momentum.z);
+						eo.addEntry("Cell x location", tess.GetMeshPoint(i).x);
+						eo.addEntry("Cell y location", tess.GetMeshPoint(i).y);
+						eo.addEntry("Cell z location", tess.GetMeshPoint(i).z);
+						eo.addEntry("Cell volume", vol);
+						eo.addEntry("Cell energy", extensives[i].energy);
+						eo.addEntry("Cell thermal energy per unit mass", energy);
+						eo.addEntry("Cell id", static_cast<double>(res[i].ID));
 						throw eo;
 					}
 				}
@@ -116,29 +116,29 @@ namespace
 				if (!(res[i].density > 0) || !(res[i].pressure > 0) || (!std::isfinite(fastabs(extensives[i].momentum))))
 				{
 					UniversalError eo("Negative quantity in cell update");
-					eo.AddEntry("Cell index", static_cast<double>(i));
-					eo.AddEntry("Cell mass", extensives[i].mass);
-					eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
-					eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-					eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
-					eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
-					eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
-					eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
-					eo.AddEntry("Cell volume", vol);
-					eo.AddEntry("Cell energy", extensives[i].energy);
-					eo.AddEntry("Cell thermal energy per unit mass", energy);
-					eo.AddEntry("Cell id", static_cast<double>(res[i].ID));
+					eo.addEntry("Cell index", static_cast<double>(i));
+					eo.addEntry("Cell mass", extensives[i].mass);
+					eo.addEntry("Cell x momentum", extensives[i].momentum.x);
+					eo.addEntry("Cell y momentum", extensives[i].momentum.y);
+					eo.addEntry("Cell z momentum", extensives[i].momentum.z);
+					eo.addEntry("Cell x location", tess.GetMeshPoint(i).x);
+					eo.addEntry("Cell y location", tess.GetMeshPoint(i).y);
+					eo.addEntry("Cell z location", tess.GetMeshPoint(i).z);
+					eo.addEntry("Cell volume", vol);
+					eo.addEntry("Cell energy", extensives[i].energy);
+					eo.addEntry("Cell thermal energy per unit mass", energy);
+					eo.addEntry("Cell id", static_cast<double>(res[i].ID));
 					throw eo;
 				}
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Cell index", static_cast<double>(i));
-				eo.AddEntry("Cell mass", extensives[i].mass);
-				eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
-				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
-				eo.AddEntry("Cell energy", extensives[i].energy);
+				eo.addEntry("Cell index", static_cast<double>(i));
+				eo.addEntry("Cell mass", extensives[i].mass);
+				eo.addEntry("Cell x momentum", extensives[i].momentum.x);
+				eo.addEntry("Cell y momentum", extensives[i].momentum.y);
+				eo.addEntry("Cell z momentum", extensives[i].momentum.z);
+				eo.addEntry("Cell energy", extensives[i].energy);
 				throw eo;
 			}
 		}
@@ -182,7 +182,7 @@ namespace
 					if (!(extensives[i].tracers[entropy_index] > 0))
 					{
 						UniversalError eo("Negative entropy");
-						eo.AddEntry("Extensive Entropy", extensives[i].tracers[entropy_index]);
+						eo.addEntry("Extensive Entropy", extensives[i].tracers[entropy_index]);
 						throw eo;
 					}
 					// Do we have a negative thermal energy?
@@ -207,21 +207,21 @@ namespace
 			}
 			catch (UniversalError &eo)
 			{
-			  eo.AddEntry("Cell ID", static_cast<double>(res[i].ID));
-				eo.AddEntry("Cell volume", tess.GetVolume(i));
-				eo.AddEntry("Cell index", static_cast<double>(i));
-				eo.AddEntry("Cell mass", extensives[i].mass);
-				eo.AddEntry("Cell x momentum", extensives[i].momentum.x);
-				eo.AddEntry("Cell y momentum", extensives[i].momentum.y);
-				eo.AddEntry("Cell z momentum", extensives[i].momentum.z);
-				eo.AddEntry("Cell x location", tess.GetMeshPoint(i).x);
-				eo.AddEntry("Cell y location", tess.GetMeshPoint(i).y);
-				eo.AddEntry("Cell z location", tess.GetMeshPoint(i).z);
-				eo.AddEntry("Cell energy", extensives[i].energy);
-				eo.AddEntry("Number of tracers", static_cast<double>(Ntracers));
+			  eo.addEntry("Cell ID", static_cast<double>(res[i].ID));
+				eo.addEntry("Cell volume", tess.GetVolume(i));
+				eo.addEntry("Cell index", static_cast<double>(i));
+				eo.addEntry("Cell mass", extensives[i].mass);
+				eo.addEntry("Cell x momentum", extensives[i].momentum.x);
+				eo.addEntry("Cell y momentum", extensives[i].momentum.y);
+				eo.addEntry("Cell z momentum", extensives[i].momentum.z);
+				eo.addEntry("Cell x location", tess.GetMeshPoint(i).x);
+				eo.addEntry("Cell y location", tess.GetMeshPoint(i).y);
+				eo.addEntry("Cell z location", tess.GetMeshPoint(i).z);
+				eo.addEntry("Cell energy", extensives[i].energy);
+				eo.addEntry("Number of tracers", static_cast<double>(Ntracers));
 				for (size_t j = 0; j < Ntracers; ++j)
-					eo.AddEntry("Tracer extensive value", extensives[i].tracers[j]);
-				eo.AddEntry("Entropy index", static_cast<double>(entropy_index));
+					eo.addEntry("Tracer extensive value", extensives[i].tracers[j]);
+				eo.addEntry("Entropy index", static_cast<double>(entropy_index));
 				throw;
 			}
 		}

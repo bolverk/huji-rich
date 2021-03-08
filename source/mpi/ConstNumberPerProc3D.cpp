@@ -86,31 +86,31 @@ namespace
 		if (std::abs(det) < 1e-10)
 		{
 			UniversalError eo("Singular matrix");
-			eo.AddEntry("Cell x cor", center.x);
-			eo.AddEntry("Cell y cor", center.y);
-			eo.AddEntry("Cell z cor", center.z);
-			eo.AddEntry("Cell CMx cor", cell_cm.x);
-			eo.AddEntry("Cell CMy cor", cell_cm.y);
-			eo.AddEntry("Cell CMz cor", cell_cm.z);
-			eo.AddEntry("Cell volume", tproc.GetVolume(rank));
-			eo.AddEntry("Det was", det);
+			eo.addEntry("Cell x cor", center.x);
+			eo.addEntry("Cell y cor", center.y);
+			eo.addEntry("Cell z cor", center.z);
+			eo.addEntry("Cell CMx cor", cell_cm.x);
+			eo.addEntry("Cell CMy cor", cell_cm.y);
+			eo.addEntry("Cell CMz cor", cell_cm.z);
+			eo.addEntry("Cell volume", tproc.GetVolume(rank));
+			eo.addEntry("Det was", det);
 			for (size_t i = 0; i < faces.size(); ++i)
 			{
 				c_ij[0] = tproc.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
-				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
-				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
-				eo.AddEntry("Neighbor z", neighbor_centers[i].z);
-				eo.AddEntry("Face", static_cast<double>(faces[i]));
-				eo.AddEntry("Neighbor Cx", c_ij[0].x);
-				eo.AddEntry("Neighbor Cy", c_ij[0].y);
-				eo.AddEntry("Neighbor Cz", c_ij[0].z);
-				eo.AddEntry("Face Cx", tproc.FaceCM(faces[i]).x);
-				eo.AddEntry("Face Cy", tproc.FaceCM(faces[i]).y);
-				eo.AddEntry("Face Cz", tproc.FaceCM(faces[i]).z);
-				eo.AddEntry("Face area", tproc.GetArea(faces[i]));
+				eo.addEntry("Neighbor x", neighbor_centers[i].x);
+				eo.addEntry("Neighbor y", neighbor_centers[i].y);
+				eo.addEntry("Neighbor z", neighbor_centers[i].z);
+				eo.addEntry("Face", static_cast<double>(faces[i]));
+				eo.addEntry("Neighbor Cx", c_ij[0].x);
+				eo.addEntry("Neighbor Cy", c_ij[0].y);
+				eo.addEntry("Neighbor Cz", c_ij[0].z);
+				eo.addEntry("Face Cx", tproc.FaceCM(faces[i]).x);
+				eo.addEntry("Face Cy", tproc.FaceCM(faces[i]).y);
+				eo.addEntry("Face Cz", tproc.FaceCM(faces[i]).z);
+				eo.addEntry("Face area", tproc.GetArea(faces[i]));
 			}
 			for (size_t i = 0; i < 9; ++i)
-				eo.AddEntry("M", m[i]);
+				eo.addEntry("M", m[i]);
 			throw eo;
 		}
 		// Invert the matrix

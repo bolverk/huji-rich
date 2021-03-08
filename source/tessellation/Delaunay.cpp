@@ -454,8 +454,8 @@ int Delaunay::FindPointInFacet(int facet, int point)
 		if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == point)
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
-	eo.AddEntry("Facet number", facet);
-	eo.AddEntry("Point number", point);
+	eo.addEntry("Facet number", facet);
+	eo.addEntry("Point number", point);
 	throw eo;
 }
 
@@ -801,7 +801,7 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in AddRigid", 0);
+			eo.addEntry("Error in AddRigid", 0);
 			throw;
 		}
 		ReArrangeVector(toduplicate[i], order);
@@ -1338,7 +1338,7 @@ Delaunay::findOuterPoints
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error in first send in triangulation", 0.0);
+				eo.addEntry("Error in first send in triangulation", 0.0);
 				throw;
 			}
 		}
@@ -1563,10 +1563,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error in second send in triangulation", 0.0);
-				eo.AddEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
-				eo.AddEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
-				eo.AddEntry("Mpi count", static_cast<double>(count));
+				eo.addEntry("Error in second send in triangulation", 0.0);
+				eo.addEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
+				eo.addEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
+				eo.addEntry("Mpi count", static_cast<double>(count));
 				throw;
 			}
 		}
