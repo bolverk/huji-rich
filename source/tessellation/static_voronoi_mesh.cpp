@@ -292,6 +292,7 @@ namespace {
 			  */
 #endif // RICH_MPI
 
+  /*
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -318,6 +319,7 @@ namespace {
 		}
 		return res;
 	}
+  */
 }
 
 vector<int> StaticVoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,

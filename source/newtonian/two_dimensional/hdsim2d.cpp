@@ -603,11 +603,13 @@ namespace {
 		const vector<T>& ll2_;
 	};
 
+  /*
 	template<class T> vector<T> average(const vector<T>& v1,
 		const vector<T>& v2)
 	{
 		return serial_generate(AverageCalculator<T>(v1, v2));
 	}
+  */
 }
 
 const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const

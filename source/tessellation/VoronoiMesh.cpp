@@ -67,6 +67,7 @@ namespace
 		return res;
 	}
 
+  /*
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -78,7 +79,9 @@ namespace
 		}
 		return true;
 	}
+  */
 
+  /*
 	template <typename T>
 	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
 		vector<vector<T> > const& v2)
@@ -93,14 +96,15 @@ namespace
 		}
 		return res;
 	}
+  */
 }
 
 VoronoiMesh::VoronoiMesh
 (vector<Vector2D> const& points,
  OuterBoundary const& bc, bool HOrder):
-	logger(0),
+	logger(nullptr),
 	eps(1e-8),
-	obc(0),
+	obc(nullptr),
 	cell_edges(vector<Edge> ()),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
@@ -229,9 +233,9 @@ vector<size_t> VoronoiMesh::GetSelfPoint(void)const
 }
 
 VoronoiMesh::VoronoiMesh(void):
-	logger(0),
+	logger(nullptr),
 	eps(1e-8),
-	obc(0),
+	obc(nullptr),
 	cell_edges(vector<Edge> ()),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),

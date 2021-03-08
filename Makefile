@@ -61,7 +61,7 @@ else ifeq ($(MODE),parallel_intel_check)
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
-	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded -Wno-c++98-compat-pedantic
+	OPTIMIZATION_FLAGS := -Weverything -ferror-limit=1 -Wno-error=padded -Wno-c++98-compat-pedantic
 	LINT_FLAGS := 
 else
 	MODE = production
