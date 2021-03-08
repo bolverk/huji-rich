@@ -23,7 +23,6 @@ public:
 	  \param eos Equation of state
 	  \param tess The tessellation
 	  \param tracerstickernames The names of the tracers and stickers
-	  \return Computational cell
 	 */
 	virtual void operator() (vector<ComputationalCell3D> &res, EquationOfState const& eos,
 		const Tessellation3D& tess,vector<Conserved3D>& extensives,TracerStickerNames const& tracerstickernames)const = 0;

@@ -142,8 +142,8 @@ Delaunay3D& Delaunay3D::operator=(Delaunay3D const& other)
 
 Delaunay3D::Delaunay3D(Delaunay3D const& other) :  tetras_(other.tetras_),points_(other.points_),empty_tetras_(other.empty_tetras_),Norg_(other.Norg_),
 						   outside_neighbor_(other.outside_neighbor_),b3_temp_(std::array<Vector3D, 3> ()),b3_temp2_(std::array<Vector3D, 3> ()),
-						   b4_temp_(std::array<Vector3D, 4>()), b5_temp_(std::array<Vector3D, 5>()),b4s_temp_(std::array<std::size_t, 4> ()),
-						   b4s_temp2_(std::array<std::size_t, 4> ()),b8s_temp_(std::array<std::size_t, 8> ()),to_check_(vector<std::size_t>()),
+						   b4_temp_(std::array<Vector3D, 4>()), b5_temp_(std::array<Vector3D, 5>()),/*b4s_temp_(std::array<std::size_t, 4> ()),*/
+						   /*b4s_temp2_(std::array<std::size_t, 4> ()),*/ b8s_temp_(std::array<std::size_t, 8> ()),to_check_(vector<std::size_t>()),
 						   last_checked_(0), tet_temp0_(Tetrahedron()), tet_temp1_(Tetrahedron()), newtet_(Tetrahedron()) {}
 
 void Delaunay3D::flip23(std::size_t tetra0, std::size_t tetra1, std::size_t location0,bool flat_check)
@@ -539,7 +539,7 @@ void Delaunay3D::flip44(std::size_t tetra0, std::size_t tetra1, std::size_t loca
 
 Delaunay3D::Delaunay3D() :tetras_(vector<Tetrahedron> ()),points_(vector<Vector3D> ()),empty_tetras_(boost::container::flat_set<size_t> ()),Norg_(0),outside_neighbor_(0),
 			  b3_temp_(std::array<Vector3D, 3> ()),b3_temp2_(std::array<Vector3D, 3> ()),b4_temp_(std::array<Vector3D, 4> ()),b5_temp_(std::array<Vector3D, 5> ()),
-			  b4s_temp_(std::array<std::size_t, 4>()),b4s_temp2_(std::array<std::size_t, 4>()),b8s_temp_(std::array<std::size_t, 8>()),
+			  /*b4s_temp_(std::array<std::size_t, 4>()),*/ /*b4s_temp2_(std::array<std::size_t, 4>()), */ b8s_temp_(std::array<std::size_t, 8>()),
 			  to_check_(vector<std::size_t>()),last_checked_(0), tet_temp0_(Tetrahedron()),tet_temp1_(Tetrahedron()), newtet_(Tetrahedron())
 {
   empty_tetras_.reserve(15);

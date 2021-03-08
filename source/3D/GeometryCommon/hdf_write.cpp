@@ -15,7 +15,7 @@ namespace
     DataSet dataset = file.openDataSet(caption);
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
-    filespace.getSimpleExtentDims(dims_out, NULL);
+    filespace.getSimpleExtentDims(dims_out, nullptr);
     const size_t NX = static_cast<size_t>(dims_out[0]);
     vector<T> result(NX);
     dataset.read(&result[0], datatype);
@@ -376,8 +376,8 @@ Snapshot3D ReadSnapshot3D(const string& fname
     const vector<double> pressure = read_double_vector_from_hdf5(read_location, "Pressure");
     const vector<double> energy = read_double_vector_from_hdf5(read_location, "InternalEnergy");
     vector<size_t> IDs(density.size(), 0);
-    ssize_t objcount = read_location.getNumObjs();
-    for (ssize_t i = 0; i < objcount; ++i)
+    hsize_t objcount = read_location.getNumObjs();
+    for (hsize_t i = 0; i < objcount; ++i)
       {
 	std::string name = read_location.getObjnameByIdx(i);
 	if (name.compare(std::string("ID"))==0)

@@ -59,8 +59,12 @@ public:
 	\param source Source term
 	\param tsn The names of the stickers and tracers
 	\param proc_update How to load balance
+  */
+#ifdef RICH_MPI
+  /*
 	\param tproc The tessellation of the domian decomposition
    */
+#endif //RICH_MPI
   HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	  Tessellation3D& tproc,

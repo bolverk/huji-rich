@@ -98,15 +98,15 @@ m_vShapeRecursion(boost::array< boost::array<int, 8> , NUMBER_OF_SHAPES>())
 {
 	int rot[MAX_ROTATION_LENGTH];
 	int iRotLength;
-	for (int iRotIndex = 1; iRotIndex < NUMBER_OF_SHAPES; ++iRotIndex)
+	for (size_t iRotIndex = 1; iRotIndex < NUMBER_OF_SHAPES; ++iRotIndex)
 	{
-		iRotLength = GetRotation(rot, iRotIndex);
+	  iRotLength = GetRotation(rot, static_cast<int>(iRotIndex));
 		m_vRotations[iRotIndex].assign(rot, rot + iRotLength);
 	}
 
-	for (int ii = 1; ii < NUMBER_OF_SHAPES; ++ii)
+	for (size_t ii = 1; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-		RotateShape(ii, m_vRotations[ii]);
+	  RotateShape(static_cast<int>(ii), m_vRotations[ii]);
 	}
 
 	BuildRecursionRule();
@@ -116,11 +116,11 @@ m_vShapeRecursion(boost::array< boost::array<int, 8> , NUMBER_OF_SHAPES>())
 // FindShapeIndex - returns the index of a shape:
 int HilbertCurve3D::FindShapeIndex(HilbertCurve3D_shape & roShape)
 {
-	for (int ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
+  for (size_t ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
 	{
 		if (roShape == m_vRotatedShapes[ii])
 		{
-			return ii;
+		  return static_cast<int>(ii);
 		}
 	}
 	// TODO - manage this kind of return value (error)
@@ -141,12 +141,12 @@ void HilbertCurve3D::BuildRecursionRule()
 
 	HilbertCurve3D_shape oTempShape;
 	// What about ii=0? not necessary 
-	for (int ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
+	for (size_t ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
 	{
-		for (int jj = 0; jj < 8; ++jj)
+		for (size_t jj = 0; jj < 8; ++jj)
 		{
 			// Rotate the appropriate block of the reference recursion rule, according to the ii rotation scheme:
-			RotateShape(m_vRotatedShapes[m_vShapeRecursion[0][jj]], oTempShape, ii);
+		  RotateShape(m_vRotatedShapes[static_cast<size_t>(m_vShapeRecursion[0][jj])], oTempShape, static_cast<int>(ii));
 			// Find the shape index of the rotated shape:
 			m_vShapeRecursion[ii][jj] = FindShapeIndex(oTempShape);
 		}
@@ -276,7 +276,7 @@ int HilbertCurve3D::GetRotation(int * piRotation, int iRotationIndex)
 
 	default:
 		return 0;
-		break;
+		//		break;
 	}
 }
 
@@ -295,20 +295,20 @@ void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 			switch (abs(vAxes[iAx]))
 			{
 			case 1:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateX( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateX( iSign * PI / 2 );
 				break;
 			case 2:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateY( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateY( iSign * PI / 2 );
 				break;
 			case 3:
-				m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].RotateZ( iSign * PI / 2 );
+			  m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].RotateZ( iSign * PI / 2 );
 				break;
 			default:
 				break;
 			}
 		}
 		// Round off the results:
-		m_vRotatedShapes[iShapeIndex].m_vShapePoints[ii].Round();
+		m_vRotatedShapes[static_cast<size_t>(iShapeIndex)].m_vShapePoints[ii].Round();
 	}
 }
 
@@ -316,7 +316,7 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 {
 	int iSign = 0;
 
-	vector<int> vAxes = m_vRotations[iRotationIndex];
+	vector<int> vAxes = m_vRotations[static_cast<size_t>(iRotationIndex)];
 	roShapeOut = roShape;
 
 	for (int ii = 0; ii < 7; ++ii)
@@ -329,20 +329,20 @@ void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCu
 			switch (abs(vAxes[iAx]))
 			{
 			case 1:
-				roShapeOut.m_vShapePoints[ii].RotateX(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateX(iSign * PI / 2);
 				break;
 			case 2:
-				roShapeOut.m_vShapePoints[ii].RotateY(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateY(iSign * PI / 2);
 				break;
 			case 3:
-				roShapeOut.m_vShapePoints[ii].RotateZ(iSign * PI / 2);
+			  roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].RotateZ(iSign * PI / 2);
 				break;
 			default:
 				break;
 			}
 		}
 		// Round off the results:
-		roShapeOut.m_vShapePoints[ii].Round();
+		roShapeOut.m_vShapePoints[static_cast<size_t>(ii)].Round();
 	}
 
 	return;
@@ -362,9 +362,9 @@ void HilbertCurve3D::BuildShapeOrder()
 	{
 		for (std::size_t ii = 0; ii < m_vRotatedShapes[iShapeInd].m_vShapePoints.size(); ++ii)
 		{
-			vShapeVerticesX[ii + 1] = (int)(vShapeVerticesX[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].x);
-			vShapeVerticesY[ii + 1] = (int)(vShapeVerticesY[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].y);
-			vShapeVerticesZ[ii + 1] = (int)(vShapeVerticesZ[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].z);
+		  vShapeVerticesX[ii + 1] = static_cast<int>(vShapeVerticesX[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].x);
+			vShapeVerticesY[ii + 1] = static_cast<int>(vShapeVerticesY[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].y);
+			vShapeVerticesZ[ii + 1] = static_cast<int>(vShapeVerticesZ[ii] + m_vRotatedShapes[iShapeInd].m_vShapePoints[ii].z);
 		}
 
 		int iMinX = *min_element(vShapeVerticesX.begin(), vShapeVerticesX.end());
@@ -408,7 +408,7 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 	for (int iN = 1; iN <= numOfIterations; ++iN)
 	{
 		// Calculate the current power of 0.5:
-		dbPow2 = ((double)1) / (1 << iN);
+		dbPow2 = 1.0 / (1 << iN);
 		bX = x > dbPow2;
 		bY = y > dbPow2;
 		bZ = z > dbPow2;

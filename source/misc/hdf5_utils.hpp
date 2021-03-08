@@ -51,7 +51,7 @@ template<class T> void write_std_vector_to_hdf5
      dataspace,
      plist);
   if(data.empty())
-	  dataset.write(NULL, dt);
+    dataset.write(nullptr, dt);
   else
 	dataset.write(&data[0],dt);
 }
