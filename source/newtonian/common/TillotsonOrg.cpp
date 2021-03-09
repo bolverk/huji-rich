@@ -157,7 +157,7 @@ double TillotsonOrg::dp2e(double d, double p, tvector const & /*tracers*/, vecto
 		{
 			res = boost::math::tools::toms748_solve(dp2eIIOrg(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
 		}
-		catch (boost::exception const& eo)
+		catch (boost::exception const& /*eo*/)
 		{
 			std::cout << " EIV_ " << EIV_ << " ECV_ " << ECV_ << " density " << d << " pressure " << p << " PIV " << PIV << " PCV " << PCV << std::endl;
 		}
