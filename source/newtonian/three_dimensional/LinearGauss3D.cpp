@@ -22,11 +22,11 @@ namespace
 		std::pair<size_t, size_t> neigh;
 		for (int i = 0; i < nloop; ++i)
 		{
-			neigh = tess.GetFaceNeighbors(faces[i]);
+		  neigh = tess.GetFaceNeighbors(faces[static_cast<size_t>(i)]);
 			if (neigh.first == cell_index)
-				res[i] = tess.GetMeshPoint(neigh.second);
+			  res[static_cast<size_t>(i)] = tess.GetMeshPoint(neigh.second);
 			else
-				res[i] = tess.GetMeshPoint(neigh.first);
+			  res[static_cast<size_t>(i)] = tess.GetMeshPoint(neigh.first);
 		}
 	}
 

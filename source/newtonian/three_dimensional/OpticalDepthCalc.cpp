@@ -52,9 +52,9 @@ namespace
 			double total_density = surface_density[index - 1].second + density_self;
 			for (int i = static_cast<int>(index) - 1; i >= 0; --i)
 			{
-				if (surface_density[i].second < 0.5 * total_density || i == 0)
+			  if (surface_density[static_cast<size_t>(i)].second < 0.5 * total_density || i == 0)
 				{
-					double result = -total_density * (surface_density[i].first - 0.5 * R);
+				  double result = -total_density * (surface_density[static_cast<size_t>(i)].first - 0.5 * R);
 					return result;
 				}
 			}

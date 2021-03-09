@@ -17,7 +17,7 @@ private:
 #ifdef RICH_MPI
 						     , tproc_(0)
 #endif // RICH_MPI
-						     , d_name_("") {};
+						     , d_name_("") {}
 	OpticalDepthCalc& operator=(const OpticalDepthCalc /*other*/) { return *this; }
 public:
 	OpticalDepthCalc(double opening = 0.25
