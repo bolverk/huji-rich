@@ -42,14 +42,14 @@ namespace
   Two_Sum_Tail(a, b, x, y)
 
 #define Two_Diff_Tail(a, b, x, y) \
-  bvirt = (double) (a - x); \
+  bvirt = static_cast<double>(a - x); \
   avirt = x + bvirt; \
   bround = bvirt - b; \
   around = a - avirt; \
   y = around + bround
 
 #define Two_Diff(a, b, x, y) \
-  x = (double) (a - b); \
+  x = static_cast<double> (a - b); \
   Two_Diff_Tail(a, b, x, y)
 
 #define Split(a, ahi, alo) \
@@ -67,11 +67,11 @@ namespace
   y = (alo * blo) - err3
 
 #define Two_Product(a, b, x, y) \
-  x = (double) (a * b); \
+  x = static_cast<double> (a * b); \
   Two_Product_Tail(a, b, x, y)
 
 #define Two_Product_Presplit(a, b, bhi, blo, x, y) \
-  x = (double) (a * b); \
+  x = static_cast<double> (a * b); \
   Split(a, ahi, alo); \
   err1 = x - (ahi * bhi); \
   err2 = err1 - (alo * bhi); \
@@ -524,15 +524,15 @@ namespace
 		double _i, _j, _k;
 		double _0;
 
-		adx = (double)(pa[0] - pd[0]);
-		bdx = (double)(pb[0] - pd[0]);
-		cdx = (double)(pc[0] - pd[0]);
-		ady = (double)(pa[1] - pd[1]);
-		bdy = (double)(pb[1] - pd[1]);
-		cdy = (double)(pc[1] - pd[1]);
-		adz = (double)(pa[2] - pd[2]);
-		bdz = (double)(pb[2] - pd[2]);
-		cdz = (double)(pc[2] - pd[2]);
+		adx = static_cast<double>(pa[0] - pd[0]);
+		bdx = static_cast<double>(pb[0] - pd[0]);
+		cdx = static_cast<double>(pc[0] - pd[0]);
+		ady = static_cast<double>(pa[1] - pd[1]);
+		bdy = static_cast<double>(pb[1] - pd[1]);
+		cdy = static_cast<double>(pc[1] - pd[1]);
+		adz = static_cast<double>(pa[2] - pd[2]);
+		bdz = static_cast<double>(pb[2] - pd[2]);
+		cdz = static_cast<double>(pc[2] - pd[2]);
 
 		Two_Product(bdx, cdy, bdxcdy1, bdxcdy0);
 		Two_Product(cdx, bdy, cdxbdy1, cdxbdy0);
@@ -1173,18 +1173,18 @@ namespace
 		double _i, _j;
 		double _0;
 
-		aex = (double)(pa[0] - pe[0]);
-		bex = (double)(pb[0] - pe[0]);
-		cex = (double)(pc[0] - pe[0]);
-		dex = (double)(pd[0] - pe[0]);
-		aey = (double)(pa[1] - pe[1]);
-		bey = (double)(pb[1] - pe[1]);
-		cey = (double)(pc[1] - pe[1]);
-		dey = (double)(pd[1] - pe[1]);
-		aez = (double)(pa[2] - pe[2]);
-		bez = (double)(pb[2] - pe[2]);
-		cez = (double)(pc[2] - pe[2]);
-		dez = (double)(pd[2] - pe[2]);
+		aex = static_cast<double>(pa[0] - pe[0]);
+		bex = static_cast<double>(pb[0] - pe[0]);
+		cex = static_cast<double>(pc[0] - pe[0]);
+		dex = static_cast<double>(pd[0] - pe[0]);
+		aey = static_cast<double>(pa[1] - pe[1]);
+		bey = static_cast<double>(pb[1] - pe[1]);
+		cey = static_cast<double>(pc[1] - pe[1]);
+		dey = static_cast<double>(pd[1] - pe[1]);
+		aez = static_cast<double>(pa[2] - pe[2]);
+		bez = static_cast<double>(pb[2] - pe[2]);
+		cez = static_cast<double>(pc[2] - pe[2]);
+		dez = static_cast<double>(pd[2] - pe[2]);
 
 		Two_Product(aex, bey, aexbey1, aexbey0);
 		Two_Product(bex, aey, bexaey1, bexaey0);
