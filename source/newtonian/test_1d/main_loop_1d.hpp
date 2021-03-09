@@ -91,7 +91,7 @@ namespace simulation1d{
   void main_loop(hdsim1D& sim,
 		 TerminationCondition& term_cond,
 		 int time_order,
-		 DiagnosticsFunction* diag = 0);
+		 DiagnosticsFunction* diag = nullptr);
 
   /*! \brief Main simulation time advance loop
     \param sim Hydrodynamic simulation

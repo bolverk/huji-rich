@@ -38,3 +38,4 @@ private:
 	const int mode_;
 };
 #endif //CONSTPERPROC
+

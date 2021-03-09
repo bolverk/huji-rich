@@ -35,7 +35,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll,
 	Vector3D point;
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
-	if (tproc == 0)
+	if (tproc == nullptr)
 	{
 		for (size_t i = 0; i < PointNum; ++i)
 		{
@@ -98,7 +98,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
 	vector<Vector3D> res;
-	if (tproc == 0)
+	if (tproc == nullptr)
 	{
 		res.reserve(PointNum);
 		while (res.size() < PointNum)
@@ -140,7 +140,7 @@ vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D 
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
 	vector<Vector3D> res;
-	if (tproc == 0)
+	if (tproc == nullptr)
 	{
 		res.reserve(PointNum);
 		while (res.size() < PointNum)
@@ -182,7 +182,7 @@ vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D
 	base_generator_type generator;
 	boost::random::uniform_real_distribution<> dist;
 	vector<Vector3D> res;
-	if (tproc == 0)
+	if (tproc == nullptr)
 	{
 		res.reserve(PointNum);
 		while (res.size() < PointNum)
@@ -226,7 +226,7 @@ vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const & ll, Vector3
 	double Rmx = std::pow(Rmax, a);
 	double Rmn = std::pow(Rmin, a);
 	double a_1 = 1.0 / a;
-	if (tproc == 0)
+	if (tproc == nullptr)
 	{
 		res.reserve(PointNum);
 		while (res.size() < PointNum)

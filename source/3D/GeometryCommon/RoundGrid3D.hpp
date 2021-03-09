@@ -27,7 +27,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points,Vector3D const& ll,V
 	#ifdef RICH_MPI
 		   Tessellation3D const* tproc=0,
 	#endif
-	Tessellation3D *tess=0);
+	Tessellation3D *tess=nullptr);
 
 #ifdef RICH_MPI
 /*!

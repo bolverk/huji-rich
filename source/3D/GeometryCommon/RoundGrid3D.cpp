@@ -12,7 +12,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 	Tessellation3D *tess)
 {
 	Voronoi3D default_tess(ll, ur);
-	if (tess == 0)
+	if (tess == nullptr)
 		tess = &default_tess;
 #ifdef RICH_MPI
 	tess->Build(points, *tproc);
