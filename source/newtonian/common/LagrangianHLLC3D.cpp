@@ -67,6 +67,12 @@ namespace
 			return *this;
 		}
 
+	  WaveSpeeds(const WaveSpeeds& ws):
+	    left(ws.left),
+	    center(ws.center),
+	    right(ws.right),
+	    ps(ws.ps) {}
+
 		double left;
 		double center;
 		double right;
