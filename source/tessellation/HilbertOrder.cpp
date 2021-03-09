@@ -109,7 +109,7 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
   stack<vector<int>*> IndexTableStack;
   const int temp_n=max(static_cast<int>(sqrt(static_cast<double>(N))),2);
   const int temp_pow2=max(static_cast<int>(pow(2.0,static_cast<int>(log(1.0*temp_n)/log(2.0)))),2);
-  AllLocalData d_local_data(0,N,temp_n,temp_pow2);
+  AllLocalData d_local_data(nullptr,N,temp_n,temp_pow2);
   vector<int> p = range(N);
   vector<int>* param = &p;
   Context *context=new Context(param,d_local_data,0);
@@ -149,7 +149,7 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 					  point_compare_y)).y;
 	  const double dx=static_cast<double>(xmax-xmin)/(local_data.pow2-1);
 	  const double dy=static_cast<double>(ymax-ymin)/(local_data.pow2-1);
-	  local_data.IndexTable=new vector<int>[local_data.pow2*local_data.pow2];
+	  local_data.IndexTable=new vector<int>[static_cast<size_t>(local_data.pow2*local_data.pow2)];
 	  for(int j=0;j<local_data.N;j++){
 	    const int d = calc_d
 	      (pair<double,double>(dx,dy),
@@ -176,7 +176,7 @@ vector<int> HilbertOrder(vector<Vector2D> const& cor,int num,int innernum)
 	  context=new Context
 	    (&local_data.IndexTable[i],
 	     AllLocalData
-	     (0,
+	     (nullptr,
 	      static_cast<int>(local_data.IndexTable[i].size()),
 	      temp_n2,
 	      max(static_cast<int>(pow(2.0,static_cast<int>(log(1.0*temp_n2)/log(2.0)))),2)), 0);

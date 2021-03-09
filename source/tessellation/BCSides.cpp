@@ -60,9 +60,7 @@ WrongBCSidesOrderException::WrongBCSidesOrderException (double down, double up, 
 :	_up(up), _down(down), _left(left), _right(right)
 {}
 
-WrongBCSidesOrderException::~WrongBCSidesOrderException(void)
-{
-}
+WrongBCSidesOrderException::~WrongBCSidesOrderException(void) = default;
 
 double WrongBCSidesOrderException::GetUp(void) const
 {
