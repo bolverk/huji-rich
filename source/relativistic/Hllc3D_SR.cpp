@@ -74,7 +74,7 @@ namespace
 		const double El = (left.internal_energy + 1)*left.density / (1 - ScalarProd(left.velocity, left.velocity)) - left.pressure;
 		const double Er = (right.internal_energy + 1)*right.density / (1 - ScalarProd(right.velocity, right.velocity)) - right.pressure;
 		const double mxl = (El + left.pressure)*left.velocity.x;
-		const double mxr = (Er + right.pressure)*right.velocity.x;;
+		const double mxr = (Er + right.pressure)*right.velocity.x;
 		const double E_hll = (sr*Er - sl * El + mxl - mxr) / (sr - sl);
 		const double mx_hll = (sr*mxr - sl * mxl + (mxl*left.velocity.x + left.pressure) - (mxr*right.velocity.x + right.pressure)) / (sr - sl);
 		const double F_E = (sr * mxl - sl * mxr + sr * sl*(Er - El)) / (sr - sl);

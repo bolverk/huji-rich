@@ -90,6 +90,8 @@ public:
 
   ~WrongBCSidesOrderException(void);
 
+  WrongBCSidesOrderException(const WrongBCSidesOrderException& eo);
+
   /*! \brief Returns the y coordinate of the upper boundary
     \return y coordinate of the upper boundary
    */

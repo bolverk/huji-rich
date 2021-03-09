@@ -420,8 +420,8 @@ unsigned long long int HilbertCurve3D::Hilbert3D_xyz2d(Vector3D const & rvPoint,
 		// Multiply the distance by 8 (for every recursion iteration):
 		d = d << 3;
 		iOctantNum = m_mShapeOrder[iCurrentShape][bX][bY][bZ];
-		d = d + iOctantNum;
-		iCurrentShape = m_vShapeRecursion[iCurrentShape][iOctantNum];
+		d = d + static_cast<size_t>(iOctantNum);
+		iCurrentShape = m_vShapeRecursion[static_cast<size_t>(iCurrentShape)][static_cast<size_t>(iOctantNum)];
 	}
 
 	return d;
