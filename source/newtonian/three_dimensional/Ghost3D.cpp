@@ -52,8 +52,11 @@ void RigidWallGenerator3D::operator()(const Tessellation3D& tess,
 	sort_index(indeces, indeces2);
 	res.clear();
 	res.reserve(N);
-	for (size_t i = 0; i < N; ++i)
-		res.insert(res.begin()+i, temp[indeces2[i]]);
+	auto itr = res.begin();
+	for (size_t i = 0; i < N; ++i){
+	  res.insert(itr, temp[indeces2[i]]);
+		++itr;
+	}
 }
 
 Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
@@ -95,8 +98,11 @@ void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
 	sort_index(indeces, indeces2);
 	res.clear();
 	res.reserve(N);
-	for (size_t i = 0; i < N; ++i)
-		res.insert(res.begin() + i, temp[indeces2[i]]);
+	auto itr = res.begin();
+	for (size_t i = 0; i < N; ++i){
+		res.insert(itr, temp[indeces2[i]]);
+		++itr;
+	}
 }
 
 Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
