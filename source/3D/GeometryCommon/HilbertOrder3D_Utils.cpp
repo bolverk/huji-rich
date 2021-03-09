@@ -2,7 +2,7 @@
 
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
 {
-	return (int)ceil(log(pow((double)cor.size(), (1.0 / 3.0))) / log(2.0));
+  return static_cast<int>(ceil(log(pow(static_cast<double>(cor.size()), (1.0 / 3.0))) / log(2.0)));
 }
 
 

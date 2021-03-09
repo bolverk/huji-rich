@@ -157,14 +157,14 @@ double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<strin
 		temp_d_ = d;
 		temp_p_ = p;
 		boost::uintmax_t it = 50;
-		std::pair<double, double> res,res2;
+		std::pair<double, double> res /*,res2*/;
 		try
 		{
 			//res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
 			res=boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, ECV_, 30, it);
 			//res2 = boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, 0.5*(EIV_+ECV_), 30, it);
 		}
-		catch (boost::exception const& eo)
+		catch (boost::exception const& /*eo*/)
 		{
 			double eta2 = alpha_ * (rho0_ / d - 1) * (rho0_ / d - 1);
 			double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
