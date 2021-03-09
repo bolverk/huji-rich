@@ -20,6 +20,7 @@
 using std::cout;
 using std::endl;
 using std::pair;
+using std::for_each;
 
 namespace {
 

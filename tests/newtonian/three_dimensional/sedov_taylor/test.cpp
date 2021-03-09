@@ -14,11 +14,13 @@
 #include "source/newtonian/three_dimensional/default_cell_updater.hpp"
 #include "source/newtonian/three_dimensional/default_extensive_updater.hpp"
 #include "source/newtonian/three_dimensional/hdsim_3d.hpp"
+#include "source/newtonian/three_dimensional/hdf5_diagnostics_3d.hpp"
 #include <fstream>
 
 using std::cout;
 using std::endl;
 using std::pair;
+using std::ofstream;
 
 namespace {
 
@@ -151,27 +153,6 @@ namespace {
     ConditionActionFlux1 fc_;
   };
 
-  void write_txt_snapshot(HDSim3D& sim,
-			  const string& fname)
-  {
-    ofstream f(fname.c_str());
-    const vector<ComputationalCell3D>& cells = 
-      sim.getCells();
-    Tessellation3D& tess = sim.getTesselation();
-    const vector<Vector3D>& points = 
-      tess.getMeshPoints();
-    for(size_t i=0;i<cells.size();++i)
-      f << points.at(i).x << " "
-	<< points.at(i).y << " "
-	<< points.at(i).z << " "
-	<< cells.at(i).density << " "
-	<< cells.at(i).pressure << " "
-	<< cells.at(i).velocity.x << " "
-	<< cells.at(i).velocity.y << " "
-	<< cells.at(i).velocity.z << endl;
-    f.close();
-  }
-
   class TessellationData
   {
   public:
@@ -299,14 +280,16 @@ class SimData
   void main_loop(HDSim3D& sim)
   {
     const double tf = 5e-1;
-    write_txt_snapshot(sim, "initial.txt");
+    //    write_txt_snapshot(sim, "initial.txt");
+    write_snapshot_to_hdf5(sim, "initial.h5");
     TrackShockRadius diag("shock_trajectory.txt",
 			  1e-3);
     while(sim.getTime()<tf){
       sim.timeAdvance();
       diag(sim);
     }
-    write_txt_snapshot(sim, "final.txt");
+    //    write_txt_snapshot(sim, "final.txt");
+    write_snapshot_to_hdf5(sim, "final.h5");
   }
 }
 

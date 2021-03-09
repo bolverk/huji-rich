@@ -13,7 +13,7 @@
 #include "SpatialReconstruction3D.hpp"
 #include "../common/LagrangianHLLC3D.hpp"
 
-using namespace std;
+//using namespace std;
 
 //! \brief First order flux calculator based on a series of conditions and actions
 class ConditionActionFlux1 : public FluxCalculator3D
