@@ -14,6 +14,8 @@ class RiemannSolver3D
 {
 public:
 
+  RiemannSolver3D(void);
+
 	/*! \brief Solve Riemann porblme
 	\param left Primitive variables on the left side
 	\param right Primitive variables on the right side
@@ -40,6 +42,8 @@ public:
   */
 
   virtual ~RiemannSolver3D(void);
+protected:
+  RiemannSolver3D(const RiemannSolver3D&);
 };
 
 #endif // RIEMANN_SOVLER3D_HPP

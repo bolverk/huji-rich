@@ -32,6 +32,12 @@ public:
 
 	//! \brief Class destructor
 	virtual ~AMRCellUpdater3D(void);
+
+protected:
+
+  AMRCellUpdater3D(void);
+
+  AMRCellUpdater3D(const AMRCellUpdater3D&); 
 };
 
 //! \brief Abstract class for extensive update scheme in amr
