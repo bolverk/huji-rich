@@ -63,7 +63,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll,
 			point.y = ran[1] * diff.y + ll.y;
 			point.z = ran[2] * diff.z + ll.z;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
-				if (PointInPoly(*tproc, point, rank))
+			  if (PointInPoly(*tproc, point, static_cast<size_t>(rank)))
 					res.push_back(point);
 		}
 	}
@@ -126,7 +126,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
 			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
-				if (PointInPoly(*tproc, point, rank))
+			  if (PointInPoly(*tproc, point, static_cast<size_t>(rank)))
 					res.push_back(point);
 		}
 	}
@@ -168,7 +168,7 @@ vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D 
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
 			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
-				if (PointInPoly(*tproc, point, rank))
+			  if (PointInPoly(*tproc, point, static_cast<size_t>(rank)))
 					res.push_back(point);
 		}
 	}
@@ -209,7 +209,7 @@ vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
 			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
-				if (PointInPoly(*tproc, point, rank))
+			  if (PointInPoly(*tproc, point, static_cast<size_t>(rank)))
 					res.push_back(point);
 		}
 	}
@@ -254,7 +254,7 @@ vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const & ll, Vector3
 			Vector3D point(r*sin(t)*cos(phi), r*sin(t)*sin(phi), r*cos(t));
 			point += center;
 			if (point.x<ur.x&&point.x>ll.x&&point.y > ll.y&&point.y<ur.y&&point.z>ll.z&&point.z < ur.z)
-				if (PointInPoly(*tproc, point, rank))
+			  if (PointInPoly(*tproc, point, static_cast<size_t>(rank)))
 					res.push_back(point);
 		}
 	}

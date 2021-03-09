@@ -62,7 +62,7 @@ std::vector<Vector2D> RandPointsCylinder(int PointNum, Vector2D const& ll, Vecto
 	{
 		ran[0] = dist(generator);
 		ran[1] = dist(generator);
-		res[i] = Vector2D(ran[0] * dx - ll.x, exp(ran[1]/A)*ll.y);
+		res[static_cast<size_t>(i)] = Vector2D(ran[0] * dx - ll.x, exp(ran[1]/A)*ll.y);
 	}
 	return res;
 }

@@ -15,7 +15,7 @@ namespace
   y = b - bvirt
 
 #define Fast_Two_Sum(a, b, x, y) \
-  x = (double) (a + b); \
+  x = static_cast<double>(a + b); \
   Fast_Two_Sum_Tail(a, b, x, y)
 
   /*
@@ -31,14 +31,14 @@ namespace
   */
 
 #define Two_Sum_Tail(a, b, x, y) \
-  bvirt = (double) (x - a); \
+  bvirt = static_cast<double>(x - a); \
   avirt = x - bvirt; \
   bround = b - bvirt; \
   around = a - avirt; \
   y = around + bround
 
 #define Two_Sum(a, b, x, y) \
-  x = (double) (a + b); \
+  x = static_cast<double>(a + b); \
   Two_Sum_Tail(a, b, x, y)
 
 #define Two_Diff_Tail(a, b, x, y) \
@@ -53,8 +53,8 @@ namespace
   Two_Diff_Tail(a, b, x, y)
 
 #define Split(a, ahi, alo) \
-  c = (double) (splitter * a); \
-  abig = (double) (c - a); \
+  c = static_cast<double>(splitter * a); \
+  abig = static_cast<double>(c - a); \
   ahi = c - abig; \
   alo = a - ahi
 
