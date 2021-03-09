@@ -17,7 +17,7 @@ bool is_nan(double x)
 
 vector<double> linspace(double xl, double xh, int n)
 {
-  vector<double> res(n,0);
+  vector<double> res(static_cast<size_t>(n),0);
   for(size_t i=0;i<size_t(n);++i)
     res[i] = xl + (xh-xl)*static_cast<double>(i)/
       static_cast<double>(n-1);

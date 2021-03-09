@@ -96,7 +96,7 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 	vector<unsigned long long int>::iterator it1, itPrev, itCur;
 	it1 = unique(vD_sorted_unq.begin(), vD_sorted_unq.end());
 
-	vD_sorted_unq.resize(distance(vD_sorted_unq.begin(), it1));
+	vD_sorted_unq.resize(static_cast<size_t>(distance(vD_sorted_unq.begin(), it1)));
 	
 	if (vD_sorted.size() == vD_sorted_unq.size())
 	{
@@ -123,12 +123,12 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 		if (1 < iCurPrevDist)
 		{
 			int iBase = static_cast<int>(distance(vD_sorted_cpy.begin(), itPrev));
-			vector<std::size_t> vInd( iCurPrevDist );
+			vector<std::size_t> vInd( static_cast<size_t>(iCurPrevDist) );
 			// C++11
 			// iota(vInd.begin(), vInd.end(), iBase);
 			for (int ii = 0; ii < iCurPrevDist; ++ii)
 			{
-				vInd[ii] = iBase + ii;
+			  vInd[static_cast<size_t>(ii)] = static_cast<size_t>(iBase + ii);
 			}
 			vOut.push_back(vInd);
 		}
@@ -141,10 +141,10 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 	{
 		int iBase = static_cast<int>(distance(vD_sorted_cpy.begin(), itPrev));
 
-		vector<std::size_t> vInd(iCurPrevDist);
+		vector<std::size_t> vInd(static_cast<size_t>(iCurPrevDist));
 		for (int ii = 0; ii < iCurPrevDist; ++ii)
 		{
-			vInd[ii] = iBase + ii;
+		  vInd[static_cast<size_t>(ii)] = static_cast<size_t>(iBase + ii);
 		}
 		vOut.push_back(vInd);
 	}
