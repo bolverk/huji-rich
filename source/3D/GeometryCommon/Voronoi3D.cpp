@@ -439,7 +439,7 @@ namespace
     Nloop -= 2;
     Area = 0;
     //Vector3D temp3, temp4, temp5;
-    for (int i = 0; i < static_cast<int>(Nloop); i++)
+    for (size_t i = 0; i < Nloop; i++)
       {
 	//temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
 	Vector3D temp4(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
@@ -2125,7 +2125,7 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
   temp = (bDz / (2 * ba) + V0[2]);
   tetra_centers_[index].z = temp.convert_to<double>();
   temp = (boost::multiprecision::sqrt(bDx*bDx + bDy*bDy + bDz*bDz) / ba);
-  return 0.5 * temp.convert_to<double>();;
+  return 0.5 * temp.convert_to<double>();
 }
 
 void Voronoi3D::GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const
