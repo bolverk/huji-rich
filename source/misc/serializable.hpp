@@ -35,7 +35,7 @@ public:
 };
 
 namespace {
-  /*
+  #if RICH_MPI
   template<class T> vector<T> chunk
   (const vector<T>& source,
    size_t i_start,
@@ -47,7 +47,7 @@ namespace {
       res.at(i-i_start) = source.at(i);
     return res;
   }
-  */
+#endif // RICH_MPI
 }
 
 vector<double> list_serialize

@@ -9,9 +9,9 @@ class OpticalDepthCalc
 {
 private:
 	const double opening_;
-#ifdef MPI
+#ifdef RICH_MPI
 	Tessellation3D const* tproc_;
-#endif // MPI
+#endif // RICH_MPI
 	std::string const d_name_;
   OpticalDepthCalc(const OpticalDepthCalc&/*other*/) :opening_(0)
 #ifdef RICH_MPI

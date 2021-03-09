@@ -68,7 +68,7 @@ void SingleLineProcMove::Update
 	  write_vector(newx, "procx.txt", 8);
 	}
       MPI_Bcast(&newx[0], nproc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-      std::vector<Vector3D> cortemp = tproc.GetMeshPoints();
+      std::vector<Vector3D> cortemp = tproc.getMeshPoints();
       cortemp.resize(nproc);
       for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 	cortemp[i] = Vector3D(newx[i], 0, 0);

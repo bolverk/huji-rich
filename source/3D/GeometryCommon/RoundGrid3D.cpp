@@ -26,7 +26,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 	{
 #ifdef RICH_MPI
 		N = tess->GetPointNo();
-		res = tess->GetMeshPoints();
+		res = tess->getMeshPoints();
 		res.resize(static_cast<size_t>(N));
 #endif
 		for (size_t i = 0; i < N; ++i)
@@ -50,7 +50,7 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 	}
 #ifdef RICH_MPI
 	N = tess->GetPointNo();
-	res = tess->GetMeshPoints();
+	res = tess->getMeshPoints();
 	res.resize(static_cast<size_t>(N));
 #endif
 	return res;
