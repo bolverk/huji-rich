@@ -44,7 +44,7 @@ namespace
 		const EquationOfState& eos,
 		TracerStickerNames const& tracernames)
 	{
-		size_t Nloop = tess.GetPointNo();
+	  size_t Nloop = static_cast<size_t>(tess.GetPointNo());
 		vector<Extensive> res(Nloop);
 		for (size_t i = 0; i < Nloop; ++i)
 		{

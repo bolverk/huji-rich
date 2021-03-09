@@ -61,7 +61,7 @@ vector<Extensive> ConditionActionSequence::operator()
 
 ConditionActionSequence::Condition::~Condition(void) {}
 
-ConditionActionSequence::Action::~Action(void) {}
+ConditionActionSequence::Action::~Action(void) = default;
 
 RegularFlux::RegularFlux(const RiemannSolver& rs) :
 	rs_(rs) {}

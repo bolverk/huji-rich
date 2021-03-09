@@ -35,7 +35,7 @@ namespace
 		DataSet dataset = file.openDataSet(caption);
 		DataSpace filespace = dataset.getSpace();
 		hsize_t dims_out[2];
-		filespace.getSimpleExtentDims(dims_out, NULL);
+		filespace.getSimpleExtentDims(dims_out, nullptr);
 		const size_t NX = static_cast<size_t>(dims_out[0]);
 		vector<T> result(NX);
 		dataset.read(&result[0], datatype);
