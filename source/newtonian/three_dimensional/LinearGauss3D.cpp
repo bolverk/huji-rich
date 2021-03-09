@@ -802,7 +802,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	vector<Vector3D> neighbor_cm_list;
 	std::vector<Vector3D> c_ij;
 	res.resize(tess.GetTotalFacesNumber(), pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
-	ComputationalCell3D* cell_ref = 0;
+	ComputationalCell3D* cell_ref = nullptr;
 	size_t energy_index = tracerstickersnames.tracer_names.size();
 	vector<string>::const_iterator it = binary_find(tracerstickersnames.tracer_names.begin(),
 		tracerstickersnames.tracer_names.end(), string("Energy"));

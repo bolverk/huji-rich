@@ -133,8 +133,8 @@ namespace simulation2d{
   void main_loop(hdsim& sim,
 		 TerminationCondition& term_cond,
 		 void (hdsim::*time_advance_method)(void),
-		 DiagnosticFunction* diagfunc = 0,
-		 Manipulate* manipulate = 0);
+		 DiagnosticFunction* diagfunc = nullptr,
+		 Manipulate* manipulate = nullptr);
 }
 
 #endif // MAIN_LOOP_2D_HPP

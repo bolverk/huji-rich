@@ -83,7 +83,9 @@ public:
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif
 	  ,bool new_start = true
+#ifdef RICH_MPI
 	  ,const double maxload = 4.0
+#endif // RICH_MPI
   );
 
   //! \brief Advances the simulation in time (first order)
@@ -180,7 +182,9 @@ private:
   const ProcessorUpdate3D* proc_update_;
 #endif
   size_t Max_ID_;
+#ifdef RICH_MPI
   const double maxload_;
+#endif // RICH_MPI
 };
 
 #endif // HDSIM_3D_HPP

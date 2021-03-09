@@ -80,7 +80,10 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	, const ProcessorUpdate3D* proc_update
 #endif
-	, bool new_start, const double maxload
+	, bool new_start
+#ifdef RICH_MPI
+		 , const double maxload
+#endif // RICH_MPI
 ) :
 	tess_(tess),
 #ifdef RICH_MPI
@@ -90,7 +93,10 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	, proc_update_(proc_update)
 #endif
-	, Max_ID_(0), maxload_(maxload)
+	, Max_ID_(0)
+#ifdef RICH_MPI
+	, maxload_(maxload)
+#endif // RICH_MPI
 {
 #ifdef RICH_MPI
 	int ws = 0, rank = 0;
@@ -189,10 +195,10 @@ namespace
 #ifdef RICH_MPI
 		, Tessellation3D const& tproc
 #endif
-		, std::vector<Vector3D> const* orgpoints = 0)
+		, std::vector<Vector3D> const* orgpoints = nullptr)
 	{
 		vector<Vector3D> points;
-		if (orgpoints == 0)
+		if (orgpoints == nullptr)
 			points = tess.getMeshPoints();
 		else
 			points = *orgpoints;

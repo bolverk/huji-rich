@@ -6,8 +6,7 @@
 class LagrangianExtensiveUpdater3D : public ExtensiveUpdater3D
 {
 public:
-	LagrangianExtensiveUpdater3D(LagrangianFlux3D const& lflux, Ghost3D
-		const& ghost, const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*, 
+	LagrangianExtensiveUpdater3D(LagrangianFlux3D const& lflux, const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*, 
 		const ConditionExtensiveUpdater3D::Action3D*> >& sequence);
 
 	void operator()(const vector<Conserved3D>& fluxes, const Tessellation3D& tess,
@@ -17,7 +16,7 @@ public:
 private:
 	LagrangianFlux3D const& lflux_;
   //EquationOfState const& eos_;
-	Ghost3D const& ghost_;
+  //	Ghost3D const& ghost_;
 	vector<pair<const ConditionExtensiveUpdater3D::Condition3D*, const ConditionExtensiveUpdater3D::Action3D*> >
 		const& sequence_;
 };

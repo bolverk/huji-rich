@@ -173,8 +173,8 @@ public:
 	\param eu Extensive updater
 	\param eos Equation of state
 	*/
-	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = 0,
-		AMRExtensiveUpdater3D* eu = 0);
+	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = nullptr,
+		AMRExtensiveUpdater3D* eu = nullptr);
 	//! Class destructor
 	~AMR3D();
 };

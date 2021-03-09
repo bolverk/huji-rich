@@ -254,9 +254,9 @@ public:
 	(CellsToRefine const& refine,
 	 CellsToRemove const& remove,
 		bool periodic = false,
-	 LinearGaussImproved *slopes = 0,
-	 AMRCellUpdater* cu=0,
-	 AMRExtensiveUpdater* eu=0);
+	 LinearGaussImproved *slopes = nullptr,
+	 AMRCellUpdater* cu=nullptr,
+	 AMRExtensiveUpdater* eu=nullptr);
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
@@ -302,8 +302,8 @@ public:
   NonConservativeAMR
   (CellsToRefine const& refine,
    CellsToRemove const& remove,
-	  LinearGaussImproved *slopes = 0,
-   AMRExtensiveUpdater* eu = 0);
+	  LinearGaussImproved *slopes = nullptr,
+   AMRExtensiveUpdater* eu = nullptr);
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
@@ -352,9 +352,9 @@ public:
 	ConservativeAMROld
 		(CellsToRefine const& refine,
 			CellsToRemove const& remove,
-			LinearGaussImproved *slopes = 0,
-			AMRCellUpdater* cu = 0,
-			AMRExtensiveUpdater* eu = 0);
+			LinearGaussImproved *slopes = nullptr,
+			AMRCellUpdater* cu = nullptr,
+			AMRExtensiveUpdater* eu = nullptr);
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,

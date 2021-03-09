@@ -18,13 +18,17 @@ namespace
   x = (double) (a + b); \
   Fast_Two_Sum_Tail(a, b, x, y)
 
+  /*
 #define Fast_Two_Diff_Tail(a, b, x, y) \
   bvirt = a - x; \
   y = bvirt - b
+  */
 
+  /*
 #define Fast_Two_Diff(a, b, x, y) \
   x = (double) (a - b); \
   Fast_Two_Diff_Tail(a, b, x, y)
+  */
 
 #define Two_Sum_Tail(a, b, x, y) \
   bvirt = (double) (x - a); \
@@ -81,63 +85,81 @@ namespace
   err3 = err2 - (ahi * blo); \
   y = (alo * blo) - err3
 
+  /*
 #define Square_Tail(a, x, y) \
   Split(a, ahi, alo); \
   err1 = x - (ahi * ahi); \
   err3 = err1 - ((ahi + ahi) * alo); \
   y = (alo * alo) - err3
+  */
 
 #define Square(a, x, y) \
   x = (double) (a * a); \
   Square_Tail(a, x, y)
 
+  /*
 #define Two_One_Sum(a1, a0, b, x2, x1, x0) \
   Two_Sum(a0, b , _i, x0); \
   Two_Sum(a1, _i, x2, x1)
+  */
 
 #define Two_One_Diff(a1, a0, b, x2, x1, x0) \
   Two_Diff(a0, b , _i, x0); \
   Two_Sum( a1, _i, x2, x1)
 
+  /*
 #define Two_Two_Sum(a1, a0, b1, b0, x3, x2, x1, x0) \
   Two_One_Sum(a1, a0, b0, _j, _0, x0); \
   Two_One_Sum(_j, _0, b1, x3, x2, x1)
+  */
 
 #define Two_Two_Diff(a1, a0, b1, b0, x3, x2, x1, x0) \
   Two_One_Diff(a1, a0, b0, _j, _0, x0); \
   Two_One_Diff(_j, _0, b1, x3, x2, x1)
 
+  /*
 #define Four_One_Sum(a3, a2, a1, a0, b, x4, x3, x2, x1, x0) \
   Two_One_Sum(a1, a0, b , _j, x1, x0); \
   Two_One_Sum(a3, a2, _j, x4, x3, x2)
+  */
 
+  /*
 #define Four_Two_Sum(a3, a2, a1, a0, b1, b0, x5, x4, x3, x2, x1, x0) \
   Four_One_Sum(a3, a2, a1, a0, b0, _k, _2, _1, _0, x0); \
   Four_One_Sum(_k, _2, _1, _0, b1, x5, x4, x3, x2, x1)
+  */
 
+  /*
 #define Four_Four_Sum(a3, a2, a1, a0, b4, b3, b1, b0, x7, x6, x5, x4, x3, x2, \
                       x1, x0) \
   Four_Two_Sum(a3, a2, a1, a0, b1, b0, _l, _2, _1, _0, x1, x0); \
   Four_Two_Sum(_l, _2, _1, _0, b4, b3, x7, x6, x5, x4, x3, x2)
+  */
 
+  /*
 #define Eight_One_Sum(a7, a6, a5, a4, a3, a2, a1, a0, b, x8, x7, x6, x5, x4, \
                       x3, x2, x1, x0) \
   Four_One_Sum(a3, a2, a1, a0, b , _j, x3, x2, x1, x0); \
   Four_One_Sum(a7, a6, a5, a4, _j, x8, x7, x6, x5, x4)
+  */
 
+  /*
 #define Eight_Two_Sum(a7, a6, a5, a4, a3, a2, a1, a0, b1, b0, x9, x8, x7, \
                       x6, x5, x4, x3, x2, x1, x0) \
   Eight_One_Sum(a7, a6, a5, a4, a3, a2, a1, a0, b0, _k, _6, _5, _4, _3, _2, \
                 _1, _0, x0); \
   Eight_One_Sum(_k, _6, _5, _4, _3, _2, _1, _0, b1, x9, x8, x7, x6, x5, x4, \
                 x3, x2, x1)
+  */
 
+  /*
 #define Eight_Four_Sum(a7, a6, a5, a4, a3, a2, a1, a0, b4, b3, b1, b0, x11, \
                        x10, x9, x8, x7, x6, x5, x4, x3, x2, x1, x0) \
   Eight_Two_Sum(a7, a6, a5, a4, a3, a2, a1, a0, b1, b0, _l, _6, _5, _4, _3, \
                 _2, _1, _0, x1, x0); \
   Eight_Two_Sum(_l, _6, _5, _4, _3, _2, _1, _0, b4, b3, x11, x10, x9, x8, \
                 x7, x6, x5, x4, x3, x2)
+  */
 
 #define Two_One_Product(a1, a0, b, x3, x2, x1, x0) \
   Split(b, bhi, blo); \
@@ -185,6 +207,7 @@ namespace
   Two_Sum(_2, _i, _k, x5); \
   Two_Sum(_m, _k, x7, x6)
 
+  /*
 #define Two_Square(a1, a0, x5, x4, x3, x2, x1, x0) \
   Square(a0, _j, x0); \
   _0 = a0 + a0; \
@@ -192,6 +215,7 @@ namespace
   Two_One_Sum(_k, _1, _j, _l, _2, x1); \
   Square(a1, _j, _1); \
   Two_Two_Sum(_j, _1, _l, _2, x5, x4, x3, x2)
+  */
 
 	//double splitter;     /* = 2^ceiling(p / 2) + 1.  Used to split floats in half. */
 	//double epsilon;                /* = 2^(-p).  Used to estimate roundoff errors. */

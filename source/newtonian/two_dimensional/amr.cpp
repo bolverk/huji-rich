@@ -387,7 +387,7 @@ namespace
 			Extensive NewExtensive = GetNewExtensive(extensives, tess, N, location, moved, real_neigh, Chull,
 				cells, eos, eu,TotalVolume,oldtess,periodic,tracerstickernames);
 			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine],tracerstickernames));
-			if (interp != 0)
+			if (interp != nullptr)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
 			++location;
 		}
@@ -765,7 +765,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	{
 		cor.push_back(NewPoints[i].second);
 		cells.push_back(cells[NewPoints[i].first]);
-		if (interp_ != 0)
+		if (interp_ != nullptr)
 			interp_->GetSlopesUnlimited().push_back(interp_->GetSlopesUnlimited()[NewPoints[i].first]);
 	}
 	// Rebuild tessellation
@@ -884,7 +884,7 @@ void ConservativeAMROld::UpdateCellsRefine
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
 	cells.resize(N);
-	if (interp_ != 0)
+	if (interp_ != nullptr)
 		interp_->GetSlopesUnlimited().resize(N);
 
 	for (size_t i = 0; i < NewPoints.size(); ++i)

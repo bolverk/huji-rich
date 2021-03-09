@@ -42,8 +42,16 @@ namespace
 	}
 }
 #endif
-ANNSelfGravity::ANNSelfGravity(double opening, Tessellation3D const* tproc, std::string debug_name) : 
-	opening_(opening), tproc_(tproc), d_name_(debug_name) {}
+ANNSelfGravity::ANNSelfGravity(double opening,
+			       #ifdef RICH_MPI
+			       Tessellation3D const* tproc,
+#endif // RICH_MPI
+			       std::string debug_name) : 
+	opening_(opening),
+#ifdef RICH_MPI
+	tproc_(tproc),
+#endif // RICH_MPI
+	d_name_(debug_name) {}
 
 void ANNSelfGravity::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells,
 	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const & /*tracerstickernames*/,

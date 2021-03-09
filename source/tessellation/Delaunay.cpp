@@ -51,7 +51,7 @@ Delaunay::Delaunay(void) :
 	cor(vector<Vector2D>()),
 	length(0),
 	olength(0), location_pointer(0), last_loc(0),
-	logger(0)
+	logger(nullptr)
 #ifdef RICH_MPI
 	,OrgIndex(vector<int>())
 #endif
@@ -381,7 +381,7 @@ namespace {
 				cor[point])) < 0)
 			return &Triplet<int>::third;
 		else
-			return 0;
+			return nullptr;
 	}
 
 	class WalkBookkeeper
