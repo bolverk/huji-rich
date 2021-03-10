@@ -141,12 +141,12 @@ public:
   explicit Echo(const vector<T>& v):
     v_(v) {}
 
-  size_t size(void) const
+  size_t size(void) const override
   {
     return v_.size();
   }
 
-  T operator[](size_t i) const
+  T operator[](size_t i) const override
   {
     return v_[i];
   }
@@ -173,12 +173,12 @@ public:
     assert(high_>low_);
   }
 
-  size_t size(void) const
+  size_t size(void) const override
   {
     return high_-low_;
   }
 
-  T operator[](size_t i) const
+  T operator[](size_t i) const override
   {
     return i2m_(i+low_);
   }

@@ -53,11 +53,11 @@ namespace {
 vector<double> list_serialize
 (const vector<Serializable*>& los);
 
-template <class S> vector<double> list_serialize(const vector<S> los);
+template <class S> vector<double> list_serialize(const vector<S>& los);
 
 template <class S> vector<double>
 list_serialize
-(const vector<S> los)
+(const vector<S>& los)
 {
 	if (los.empty())
 		return vector<double> ();
