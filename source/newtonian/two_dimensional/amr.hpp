@@ -176,7 +176,7 @@ public:
 	\brief Runs the AMR
 	\param sim The sim object
 	*/
-	virtual void operator() (hdsim &sim) = 0;
+  //	virtual void operator() (hdsim &sim) = 0;
 	/*!
 	\brief Runs the refine
 	\param tess The tessellation
