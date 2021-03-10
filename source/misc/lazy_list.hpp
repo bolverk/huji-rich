@@ -55,42 +55,6 @@ template<class T> vector<T> serial_generate(const LazyList<T>& ll)
   return res;
 }
 
-/*! \brief Multiplies all terms of std::vector with a scalar
-  \param v std::vector
-  \param s Scalar
-  \return Each term of v multiplied by s
-*/
-template<class T> vector<T> termwise_product(const vector<T>& v,
-					     const T& s);
-template<class T> vector<T> termwise_product(const vector<T>& v,
-					     const T& s)
-{
-  class Multiplier: public LazyList<T>
-  {
-  public:
-
-    Multiplier(const vector<T>& v_i,
-	       const T& s_i):
-      v_(v_i), s_(s_i) {}
-
-    size_t size(void) const
-    {
-      return v_.size();
-    }
-
-    T operator[](size_t i) const
-    {
-      return s_*v_[i];
-    }
-
-  private:
-    const vector<T>& v_;
-    const T& s_;
-  } multiplier(v,s);
-
-  return serial_generate(multiplier);
-}
-
 /*! \brief Trims a list and retains only a specific number of the first terms
   \param v std::vector
   \param max_index Number of terms to retain

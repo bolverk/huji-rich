@@ -137,6 +137,7 @@ Delaunay3D& Delaunay3D::operator=(Delaunay3D const& other)
   empty_tetras_ = other.empty_tetras_;
   Norg_ = other.Norg_;
   outside_neighbor_ = other.outside_neighbor_;
+  last_checked_ = 0;
   return *this;
 }
 
@@ -1008,10 +1009,10 @@ bool Delaunay3D::CheckCorrect(void)
       b5_temp_[3] = points_[T.points[3]];
       for (std::size_t j = 0; j < 4; ++j)
 	{
-	  size_t loctemp=4;
 	  // Check same neighbors
 	  if (T.neighbors[j] != outside_neighbor_)
 	    {
+	      size_t loctemp=4;
 	      GetOppositePoint(tetras_[T.neighbors[j]], i, loctemp);
 	      assert(loctemp < 4);
 	    }

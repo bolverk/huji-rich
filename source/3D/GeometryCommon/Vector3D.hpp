@@ -126,11 +126,11 @@ public:
 	*/
 	void Round();
 
-	size_t getChunkSize(void) const;
+  size_t getChunkSize(void) const override;
 	
-	vector<double> serialize(void) const;
+	vector<double> serialize(void) const override;
 
-	void unserialize(const vector<double>& data);
+	void unserialize(const vector<double>& data) override;
 
 #ifdef __INTEL_COMPILER
 #pragma omp declare simd
