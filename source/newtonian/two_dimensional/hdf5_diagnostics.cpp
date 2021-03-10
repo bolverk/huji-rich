@@ -337,7 +337,11 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 }
 
 Snapshot read_hdf5_snapshot
-(const string& fname, bool mpioverride)
+(const string& fname
+#ifdef RICH_MPI
+, bool mpioverride
+#endif // RICH_MPI
+)
 {
 	Snapshot res;
 	H5File file(fname, H5F_ACC_RDONLY);
@@ -350,8 +354,8 @@ Snapshot read_hdf5_snapshot
 	if (!mpioverride)
 		mpi = file.openGroup("/mpi");
 #else
-	if (mpioverride)
-		mpioverride = true;
+	//	if (mpioverride)
+	//		mpioverride = true;
 #endif
 
 

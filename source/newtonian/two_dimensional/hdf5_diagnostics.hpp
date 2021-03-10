@@ -52,7 +52,11 @@ public:
   \return Snapshot data
  */
 Snapshot read_hdf5_snapshot
-(const string& fname,bool mpioverride=false);
+(const string& fname
+#ifdef RICH_MPI
+,bool mpioverride=false
+#endif // RICH_MPI
+);
 
 //! \brief Addition data to be written in a snapshot
 class DiagnosticAppendix
