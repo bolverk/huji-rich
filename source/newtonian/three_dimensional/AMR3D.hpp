@@ -79,7 +79,7 @@ public:
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	SimpleAMRCellUpdater3D(vector<string> toskip = vector<string>());
+	SimpleAMRCellUpdater3D(const vector<string>& toskip = vector<string>());
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
@@ -90,7 +90,7 @@ class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const overide;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr for SR
@@ -105,7 +105,7 @@ public:
 	\param G The adiabatic index
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	explicit SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip);
+  SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip);
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
 		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;

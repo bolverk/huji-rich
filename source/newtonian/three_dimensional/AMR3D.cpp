@@ -855,7 +855,7 @@ Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const Co
 	return res;
 }
 
-SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(vector<string> toskip) :toskip_(toskip) {}
+SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(const vector<string>& toskip) :toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
@@ -896,7 +896,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	return res;
 }
 
-SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip) : G_(G), toskip_(toskip) {}
+SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip) : G_(G), toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& /*eos*/,
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
@@ -1048,7 +1048,9 @@ void AMR3D::operator() (HDSim3D &sim)
 	}
 
 	// Get index for ID
+#ifdef RICH_MPI
 	size_t Nrefine = ToRefine.first.size();
+#endif // RICH_MPI
 	size_t Nstart = sim.GetMaxID() + 1;
 #ifdef RICH_MPI
 	int ws = 0, rank = 0;
@@ -1097,14 +1099,14 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Update cells
 	ComputationalCell3D cdummy;
 	MPI_exchange_data(tess, cells, true,&cdummy);
-#endif
+	//#endif
 	// Update Max ID
 	size_t & MaxID = sim.GetMaxID();
-#ifdef RICH_MPI
+	//#ifdef RICH_MPI
 	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
 		MaxID += nrecv[i];
 #else
-	MaxID += Nrefine;
+	//MaxID += Nrefine;
 #endif
 }
 

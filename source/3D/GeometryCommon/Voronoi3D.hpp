@@ -151,7 +151,7 @@ public:
 
   vector<vector<std::size_t> >& GetDuplicatedPoints(void) override;
 
-  vector<vector<std::size_t> >const& GetDuplicatedPoints(void)const;
+  vector<vector<std::size_t> >const& GetDuplicatedPoints(void)const override;
 
   std::size_t GetTotalPointNumber(void)const override;
 
