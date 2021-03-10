@@ -60,7 +60,7 @@ public:
 	void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
 		const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,
 		TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities,
-		std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const;
+		std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const override;
 
 private:
 	const vector<pair<const Condition3D*, const Action3D*> > sequence_;
@@ -71,7 +71,7 @@ class ChooseAll : public ConditionExtensiveUpdater3D::Condition3D
 public:
 
 	bool operator()(size_t /*index*/, const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
-		double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
+		double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const override
 	{
 		return true;
 	}
@@ -84,7 +84,7 @@ public:
 
 	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
 		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time,
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER3D_HPP

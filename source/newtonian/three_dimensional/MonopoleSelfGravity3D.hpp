@@ -13,7 +13,7 @@ public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
-		vector<Vector3D> &acc) const;
+		vector<Vector3D> &acc) const override;
 };
 
 #endif //MONOPOLE3D_HPP

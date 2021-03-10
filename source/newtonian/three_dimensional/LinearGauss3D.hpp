@@ -34,7 +34,7 @@ public:
 		string skip_key = string(),bool pressure_calc=true);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const;
+		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const override;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell
@@ -52,7 +52,7 @@ public:
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	vector<Slope3D>& GetSlopes(void);
+	vector<Slope3D>& GetSlopes(void) override;
 
 	/*!
 	\brief Returns the unsloped limtied gradients
@@ -60,7 +60,7 @@ public:
 	*/
 	vector<Slope3D>& GetSlopesUnlimited(void)const;
 
-	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames);
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) override;
 
 private:
 	EquationOfState const& eos_;

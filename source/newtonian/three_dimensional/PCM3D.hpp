@@ -22,11 +22,11 @@ public:
 	explicit PCM3D(Ghost3D const& ghost);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const;
+		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const override;
 
-	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames);
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) override;
 
-	std::vector<Slope3D>& GetSlopes(void);
+	std::vector<Slope3D>& GetSlopes(void) override;
 };
 
 #endif // PCM3D_HPP

@@ -36,7 +36,7 @@ public:
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	virtual std::vector<Slope3D>& GetSlopes(void)=0;
+  virtual std::vector<Slope3D>& GetSlopes(void)=0;
 };
 
 #endif // SPATIAL_RECONSTRUCTION3D_HPP

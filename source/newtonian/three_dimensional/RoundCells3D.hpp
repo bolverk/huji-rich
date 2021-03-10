@@ -33,10 +33,10 @@ public:
 		vector<std::string> no_move=vector<std::string>());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
+		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const override;
 
 	void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
-		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const;
+		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const override;
 
 	void ChangeBox(Vector3D const& ll, Vector3D const& ur);
 private:

@@ -66,7 +66,7 @@ public:
 	SimpleAMRExtensiveUpdater3D(void);
 
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -82,7 +82,7 @@ public:
 	SimpleAMRCellUpdater3D(vector<string> toskip = vector<string>());
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
+		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Simple class for extensive update scheme in amr for SR
@@ -90,7 +90,7 @@ class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const overide;
 };
 
 //! \brief Simple class for cell update scheme in amr for SR
@@ -108,7 +108,7 @@ public:
 	explicit SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip);
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
+		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Chooses which cells should be remove

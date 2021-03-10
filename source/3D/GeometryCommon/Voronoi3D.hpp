@@ -95,21 +95,21 @@ public:
 				   vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
 				   vector<vector<std::size_t> >& sentpoints);
 #endif
-  vector<int>& GetSentProcs(void);
+  vector<int>& GetSentProcs(void) override;
 
-  vector<vector<size_t> >& GetSentPoints(void);
+  vector<vector<size_t> >& GetSentPoints(void) override;
 
-  vector<size_t>& GetSelfIndex(void);
+  vector<size_t>& GetSelfIndex(void) override;
 
-  vector<Vector3D>& GetAllFaceCM(void);
+  vector<Vector3D>& GetAllFaceCM(void) override;
 
-  Vector3D FaceCM(std::size_t index)const;
+  Vector3D FaceCM(std::size_t index)const override;
 
   Voronoi3D(Vector3D const& ll, Vector3D const& ur);
 
-  void output(std::string const& filename)const;
+  void output(std::string const& filename)const override;
 
-  void Build(vector<Vector3D> const& points);
+  void Build(vector<Vector3D> const& points) override;
 
 #ifdef RICH_MPI
   void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
@@ -121,95 +121,95 @@ public:
 
   void BuildDebug(int rank);
 
-  std::size_t GetPointNo(void) const;
+  std::size_t GetPointNo(void) const override;
 
-  Vector3D GetMeshPoint(std::size_t index) const;
+  Vector3D GetMeshPoint(std::size_t index) const override;
 
-  double GetArea(std::size_t index) const;
+  double GetArea(std::size_t index) const override;
 
-  Vector3D const& GetCellCM(std::size_t index) const;
+  Vector3D const& GetCellCM(std::size_t index) const override;
 
-  std::size_t GetTotalFacesNumber(void) const;
+  std::size_t GetTotalFacesNumber(void) const override;
 
-  double GetWidth(std::size_t index) const;
+  double GetWidth(std::size_t index) const override;
 
-  double GetVolume(std::size_t index) const;
+  double GetVolume(std::size_t index) const override;
 
-  face_vec const& GetCellFaces(std::size_t index) const;
+  face_vec const& GetCellFaces(std::size_t index) const override;
 
-  vector<Vector3D>& accessMeshPoints(void);
+  vector<Vector3D>& accessMeshPoints(void) override;
 
-  const vector<Vector3D>& getMeshPoints(void) const;
+  const vector<Vector3D>& getMeshPoints(void) const override;
 
-  vector<std::size_t> GetNeighbors(std::size_t index)const;
+  vector<std::size_t> GetNeighbors(std::size_t index)const override;
 
-  Tessellation3D* clone(void) const;
+  Tessellation3D* clone(void) const override;
 
-  bool NearBoundary(std::size_t index) const;
+  bool NearBoundary(std::size_t index) const override;
 
-  bool BoundaryFace(std::size_t index) const;
+  bool BoundaryFace(std::size_t index) const override;
 
-  vector<vector<std::size_t> >& GetDuplicatedPoints(void);
+  vector<vector<std::size_t> >& GetDuplicatedPoints(void) override;
 
   vector<vector<std::size_t> >const& GetDuplicatedPoints(void)const;
 
-  std::size_t GetTotalPointNumber(void)const;
+  std::size_t GetTotalPointNumber(void)const override;
 
-  vector<Vector3D> & GetAllCM(void);
+  vector<Vector3D> & GetAllCM(void) override;
 
-  vector<Vector3D > GetAllCM(void)const;
+  vector<Vector3D > GetAllCM(void)const override;
 
-  void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const;
+  void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const override;
 
-  Vector3D Normal(std::size_t faceindex)const;
+  Vector3D Normal(std::size_t faceindex)const override;
 
-  bool IsGhostPoint(std::size_t index)const;
+  bool IsGhostPoint(std::size_t index)const override;
 
-  Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const;
+  Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const override;
 
-  vector<Vector3D>& GetFacePoints(void);
+  vector<Vector3D>& GetFacePoints(void) override;
 
-  vector<double>& GetAllArea(void);
+  vector<double>& GetAllArea(void) override;
 
-  vector<Vector3D>const& GetFacePoints(void) const;
+  vector<Vector3D>const& GetFacePoints(void) const override;
 
-  vector<face_vec >& GetAllCellFaces(void);
+  vector<face_vec >& GetAllCellFaces(void) override;
 
-  point_vec const& GetPointsInFace(std::size_t index) const;
+  point_vec const& GetPointsInFace(std::size_t index) const override;
 
-  std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const;
+  std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const override;
 
-  vector<int> GetDuplicatedProcs(void)const;
+  vector<int> GetDuplicatedProcs(void)const override;
 
-  vector<int> GetSentProcs(void)const;
+  vector<int> GetSentProcs(void)const override;
 
-  vector<vector<std::size_t> > const& GetSentPoints(void)const;
+  vector<vector<std::size_t> > const& GetSentPoints(void)const override;
 
-  vector<std::size_t> const& GetSelfIndex(void) const;
+  vector<std::size_t> const& GetSelfIndex(void) const override;
 
-  vector<vector<std::size_t> > const& GetGhostIndeces(void) const;
+  vector<vector<std::size_t> > const& GetGhostIndeces(void) const override;
 
-  vector<vector<std::size_t> >& GetGhostIndeces(void);
+  vector<vector<std::size_t> >& GetGhostIndeces(void) override;
 
-  void GetNeighbors(size_t index, vector<size_t> &res)const;
+  void GetNeighbors(size_t index, vector<size_t> &res)const override;
 
-  std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const;
+  std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const override;
 
-  void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate);
+  void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate) override;
 
-  vector<double>& GetAllVolumes(void);
+  vector<double>& GetAllVolumes(void) override;
 
-  vector<double> GetAllVolumes(void)const;
+  vector<double> GetAllVolumes(void)const override;
 
-  std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void);
+  std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void) override;
 
-  vector<point_vec > & GetAllPointsInFace(void);
+  vector<point_vec > & GetAllPointsInFace(void) override;
 
-  size_t& GetPointNo(void);
+  size_t& GetPointNo(void) override;
 
-  bool IsPointOutsideBox(size_t index)const;
+  bool IsPointOutsideBox(size_t index)const override;
 
-  void SetBox(Vector3D const& ll, Vector3D const& ur);
+  void SetBox(Vector3D const& ll, Vector3D const& ur) override;
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);
