@@ -78,7 +78,7 @@ public:
 	  \param sequence List of rules for cells that are calculated in a special way
 	 */
 	explicit SimpleCellUpdater
-		(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence =
+		(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence =
 			vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >());
 
 	vector<ComputationalCell> operator()

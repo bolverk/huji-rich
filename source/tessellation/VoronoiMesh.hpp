@@ -37,7 +37,7 @@ public:
 
 	vector<int> GetNeighbors(int index)const override;
 
-	void GetNeighbors(int index, vector<int> &neigh)const;
+	void GetNeighbors(int index, vector<int> &neigh)const override;
 	/*!
 	\brief Returns the list of neighbors including ghost points
 	\return The neighbors
@@ -165,17 +165,17 @@ public:
   void FindBoundaryRemoveSend(vector<int> const& ToRemove,vector<vector<int> > &BoundaryRemove,
 		vector<vector<vector<int> > > &BoundaryNeigh);
 
-  vector<vector<int> >& GetDuplicatedPoints(void);
+  vector<vector<int> >& GetDuplicatedPoints(void) override;
 
-  vector<vector<int> >const& GetDuplicatedPoints(void)const;
+  vector<vector<int> >const& GetDuplicatedPoints(void)const override;
 
   vector<int> GetDuplicatedProcs(void)const override;
 
-  vector<vector<int> >const& GetSentPoints(void)const;
+  vector<vector<int> >const& GetSentPoints(void)const override;
 
   vector<int> GetSentProcs(void)const override;
 
-  vector<vector<int> >& GetGhostIndeces(void);
+  vector<vector<int> >& GetGhostIndeces(void) override;
 
   vector<vector<int> >const& GetGhostIndeces(void)const override;
 
@@ -187,7 +187,7 @@ public:
 
   vector<Vector2D>& GetAllCM(void) override;
 
-  void GetNeighborNeighbors(vector<int> &result, int point)const;
+  void GetNeighborNeighbors(vector<int> &result, int point)const override;
 private:
 	double eps;
 	OuterBoundary const* obc;

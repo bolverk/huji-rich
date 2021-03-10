@@ -503,7 +503,7 @@ LinearGaussImproved::LinearGaussImproved
 	double theta,
 	double delta_P,
 	const vector<string>& flat_tracers,
-	string skip_key) :
+ const string& skip_key) :
 	eos_(eos),
 	ghost_(ghost),
 	rslopes_(),

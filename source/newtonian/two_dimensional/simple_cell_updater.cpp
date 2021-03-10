@@ -2,7 +2,7 @@
 #include "../../misc/lazy_list.hpp"
 
 SimpleCellUpdater::SimpleCellUpdater
-(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence) :
+(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence) :
 	sequence_(sequence), entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)

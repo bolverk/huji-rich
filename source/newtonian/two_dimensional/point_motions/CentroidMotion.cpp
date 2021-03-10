@@ -190,7 +190,7 @@ namespace
 }
 
 CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& eos, bool cold, size_t niter,
-	vector<string> toignore) :
+	const vector<string>& toignore) :
 	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter),toignore_(toignore){}
 
 vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells,
