@@ -591,7 +591,8 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 					dA_flux2, eos);
 			std::pair<int, int> mid_neigh(tessmid.GetOriginalIndex(edge2.neighbors.first), tessmid.GetOriginalIndex(edge2.neighbors.second));
 			std::pair<int, int> mid_neigh2(mid_neigh.second, mid_neigh.first);
-			if (only_mid.count(mid_neigh) == 0)
+			//			if (only_mid.count(mid_neigh) == 0)
+			if(only_mid.insert(mid_neigh).second)
 			{
 				only_mid.insert(mid_neigh);
 				only_mid.insert(mid_neigh2);
