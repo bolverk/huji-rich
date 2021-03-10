@@ -171,7 +171,7 @@ Slope3D ConstantPrimitiveGenerator3D::GetGhostGradient(const Tessellation3D & /*
 SeveralGhostGenerator3D::GhostCriteria3D::~GhostCriteria3D(void){}
 
 
-SeveralGhostGenerator3D::SeveralGhostGenerator3D(vector<Ghost3D*> ghosts, GhostCriteria3D const& ghostchooser) :
+SeveralGhostGenerator3D::SeveralGhostGenerator3D(const vector<Ghost3D*>& ghosts, GhostCriteria3D const& ghostchooser) :
 	ghosts_(ghosts), ghost_chooser_(ghostchooser){}
 
 void SeveralGhostGenerator3D::operator() (const Tessellation3D& tess,

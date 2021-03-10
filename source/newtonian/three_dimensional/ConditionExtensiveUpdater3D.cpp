@@ -107,21 +107,21 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				size_t N1 = tess.GetFaceNeighbors(temp[j]).second;
 				if (N1 == i)
 				{
-					double newEk = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+				  //					double newEk = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
 					old_ext.mass -= Area * fluxes[temp[j]].mass;
 					old_ext.momentum -= Area * fluxes[temp[j]].momentum;
-					old_ext.energy -= Area * fluxes[temp[j]].energy;
-					old_ext.internal_energy -= Area * fluxes[temp[j]].energy -
-						newEk + 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					//old_ext.energy -= Area * fluxes[temp[j]].energy;
+					/*					old_ext.internal_energy -= Area * fluxes[temp[j]].energy -
+						newEk + 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;*/
 				}
 				else
 				{
-					double newEk = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+				  //					double newEk = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
 					old_ext.mass += Area * fluxes[temp[j]].mass;
 					old_ext.momentum += Area * fluxes[temp[j]].momentum;
-					old_ext.energy += Area * fluxes[temp[j]].energy;
-					old_ext.internal_energy += Area * fluxes[temp[j]].energy +
-						newEk - 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
+					//					old_ext.energy += Area * fluxes[temp[j]].energy;
+					/*old_ext.internal_energy += Area * fluxes[temp[j]].energy +
+					  newEk - 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;*/
 				}
 			}
 			for (size_t j = 0; j < temp.size(); ++j)
@@ -137,14 +137,14 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 					old_ext += delta;
 					double Eknew1 = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
 					dEtherm1 = delta.energy - (Eknew1 - Ek);
-					old_ext.internal_energy += delta.energy - (Eknew1 - Ek);
+					//					old_ext.internal_energy += delta.energy - (Eknew1 - Ek);
 				}
 				else
 				{
 					old_ext -= delta;
 					double Eknew1 = 0.5 * ScalarProd(old_ext.momentum, old_ext.momentum) / old_ext.mass;
 					dEtherm1 = -delta.energy - (Eknew1 - Ek);
-					old_ext.internal_energy += dEtherm1;
+					//					old_ext.internal_energy += dEtherm1;
 				}
 				Vector3D normalf = normalize(tess.Normal(temp[j]));
 				std::cout << "Face " << temp[j] << " neigh " << N0 << "," << N1 << " mass=" << fluxes[temp[j]].mass * Area <<
@@ -185,7 +185,6 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				}
 			}
 			throw eo;
-			assert(false);
 		}
 	}
 	extensives.resize(tess.GetPointNo());

@@ -408,12 +408,12 @@ namespace
 
 	int scale_expansion_zeroelim(int elen, double *e, double b, double *h)   /* e and h cannot be the same. */
 	{
-		double Q, sum;
+		double Q;
 		double hh;
-		double product1;
-		double product0;
+		//		double product1;
+		//		double product0;
 		int eindex, hindex;
-		double enow;
+		//		double enow;
 		double bvirt;
 		double avirt, bround, around;
 		double c;
@@ -428,8 +428,11 @@ namespace
 			h[hindex++] = hh;
 		}
 		for (eindex = 1; eindex < elen; eindex++) {
-			enow = e[eindex];
+		  const double enow = e[eindex];
+			double product1;
+			double product0;
 			Two_Product_Presplit(enow, b, bhi, blo, product1, product0);
+			double sum;
 			Two_Sum(Q, product0, sum, hh);
 			if (hh != 0) {
 				h[hindex++] = hh;

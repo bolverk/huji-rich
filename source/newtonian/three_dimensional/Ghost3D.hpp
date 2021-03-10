@@ -114,7 +114,7 @@ public:
 	\param ghosts List of ghost generators
 	\param ghostchooser Criteria for when to use each ghost generator
 	*/
-	SeveralGhostGenerator3D(vector<Ghost3D*> ghosts, GhostCriteria3D const& ghostchooser);
+	SeveralGhostGenerator3D(const vector<Ghost3D*>& ghosts, GhostCriteria3D const& ghostchooser);
 
 	void operator() (const Tessellation3D& tess,
 		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&

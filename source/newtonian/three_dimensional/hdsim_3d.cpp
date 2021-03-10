@@ -103,7 +103,8 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 	MPI_Comm_size(MPI_COMM_WORLD, &ws);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-	assert(tess.GetPointNo() == cells.size());
+	const bool validity_check = tess.GetPointNo() == cells.size();
+	assert(validity_check);
 	assert(tsn.sticker_names.size() <= MAX_STICKERS);
 	assert(tsn.tracer_names.size() <= MAX_TRACERS);
 	// sort tracers and stickers

@@ -17,13 +17,19 @@ private:
 						  tproc_(0),
 #endif // RICH_MPI
 						  d_name_("") {};
-	ANNSelfGravity& operator=(const ANNSelfGravity /*other*/) { return *this; }
+  ANNSelfGravity& operator=(const ANNSelfGravity /*other*/) 
+  {
+#if RICH_MPI
+    this->tproc_ = 0;
+#endif // RICH_MPI
+    return *this; 
+  }
 public:
 	ANNSelfGravity(double opening = 0.25,
 #ifdef RICH_MPI
 		       Tessellation3D const* tproc=0,
 #endif // RICH_MPI
-		       std::string debug_name = "");
+		       const std::string& debug_name = "");
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,

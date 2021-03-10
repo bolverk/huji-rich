@@ -310,7 +310,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	MPI_Barrier(MPI_COMM_WORLD);
 	QIn22_real = temp;
 #else
-	vector<double> temp;
+	//	vector<double> temp;
 #endif
 	for (size_t i = 1; i < resolution; ++i)
 		m_radius[i] += m_radius[i - 1];

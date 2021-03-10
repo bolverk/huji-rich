@@ -5,12 +5,12 @@
 #endif
 
 RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi, double eta, bool cold, double min_dw, double dt_speed, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
+	double chi, double eta, bool cold, double min_dw, double dt_speed, const vector<std::string>& no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
 	eta_(eta), cold_(cold), min_dw_(min_dw),dt_speed_(dt_speed),no_move_(no_move) {}
 
 namespace
 {
-	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R, size_t index, vector<Vector3D> & velocities,
+	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R, size_t index, const vector<Vector3D> & velocities,
 		vector<char> const& nomove)
 	{
 		if (nomove[index] == 1)
