@@ -1101,10 +1101,10 @@ void AMR3D::operator() (HDSim3D &sim)
 	MPI_exchange_data(tess, cells, true,&cdummy);
 	//#endif
 	// Update Max ID
-	size_t & MaxID = sim.GetMaxID();
+	//	size_t & MaxID = sim.GetMaxID();
 	//#ifdef RICH_MPI
-	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
-		MaxID += nrecv[i];
+	//	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
+	//	MaxID += nrecv[i];
 #else
 	//MaxID += Nrefine;
 #endif

@@ -185,7 +185,7 @@ namespace
 				}
 				catch (UniversalError & eo)
 				{
-					throw eo;
+					throw;
 				}
 			}
 		}
