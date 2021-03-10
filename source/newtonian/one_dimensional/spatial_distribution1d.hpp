@@ -37,7 +37,7 @@ public:
     \param x Position
     \return Value at x
    */
-  double operator()(double x) const;
+  double operator()(double x) const override;
 };
 
 //! \brief Step distribution
@@ -67,7 +67,7 @@ public:
     \param x Position
     \return Value of the distribution at x
    */
-  double operator()(double x) const;
+  double operator()(double x) const override;
 };
 
 //! \brief Two steps
@@ -99,7 +99,7 @@ public:
     \param x Position
     \return Value of the distribution at x
    */
-  double operator()(double x) const;
+  double operator()(double x) const override;
 };
 
 #endif // SPATIAL_DISTRIBUTION_1D_HPP

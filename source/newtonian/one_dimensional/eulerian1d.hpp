@@ -16,7 +16,7 @@ class Eulerian1D: public VertexMotion
 public:
   
   double CalcVelocity(int i, vector<double> const& vp,
-		      vector<Primitive> const& hv) const;
+		      vector<Primitive> const& hv) const override;
 };
 
 #endif // EULERIAN1D_HPP

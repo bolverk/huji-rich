@@ -34,9 +34,9 @@ public:
   //! \brief Class constructor
   SlabSymmetry1D(void);
 
-  double calcArea(double radius) const;
+  double calcArea(double radius) const override;
 
-  double calcVolume(double radius) const;
+  double calcVolume(double radius) const override;
 };
 
 //! \brief Cylindrical geometry
@@ -47,9 +47,9 @@ public:
   //! \brief Class constructor
   CylindricalSymmetry1D(void);
 
-  double calcArea(double radius) const;
+  double calcArea(double radius) const override;
 
-  double calcVolume(double radius) const;
+  double calcVolume(double radius) const override;
 };
 
 //! \brief Spherical geometry
@@ -59,9 +59,9 @@ public:
   //! \brief Class constructor
   SphericalSymmetry1D(void);
 
-  double calcArea(double radius) const;
+  double calcArea(double radius) const override;
 
-  double calcVolume(double radius) const;
+  double calcVolume(double radius) const override;
 };
 
 #endif // PHYSICAL_GEOMETRY_1D

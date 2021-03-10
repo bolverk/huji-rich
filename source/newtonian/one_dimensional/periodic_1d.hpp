@@ -18,7 +18,7 @@ public:
 		     vector<Primitive> const& Cells,
 		     RiemannSolver const& rs, 
 		     vector<double> const& vertex_velocity,
-		     int i) const;
+		     int i) const override;
 };
 
 #endif // PERIODIC_1D_HPP

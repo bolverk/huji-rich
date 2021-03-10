@@ -17,7 +17,7 @@ public:
 		     vector<Primitive> const& Cells,
 		     RiemannSolver const& rs, 
 		     vector<double> const& vertex_velocity,
-		     int i) const;
+		     int i) const override;
 };
 
 #endif // RIGID_WALL_1D_HPP

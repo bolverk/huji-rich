@@ -17,7 +17,7 @@ public:
    vector<Primitive> const& cells,
    size_t point,
    double t,
-   double dt) const;
+   double dt) const override;
 };
 
 #endif // ZERO_FORCE_1D_HPP

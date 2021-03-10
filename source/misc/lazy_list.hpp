@@ -55,42 +55,6 @@ template<class T> vector<T> serial_generate(const LazyList<T>& ll)
   return res;
 }
 
-/*! \brief Trims a list and retains only a specific number of the first terms
-  \param v std::vector
-  \param max_index Number of terms to retain
-  \return The first max_index number of terms from v
-*/
-template<class T> vector<T> trim_top(const vector<T>& v,
-				     const size_t max_index);
-template<class T> vector<T> trim_top(const vector<T>& v,
-				     const size_t max_index)
-{
-  class Trimmer: public LazyList<T>
-  {
-  public:
-
-    Trimmer(const vector<T>& v_i,
-	    const size_t max_index_i):
-      v_(v_i), max_index_(max_index_i) {}
-
-    size_t getLength(void) const
-    {
-      return max_index_;
-    }
-
-    T operator()(size_t i) const
-    {
-      return v_[i];
-    }
-
-  private:
-    const vector<T>& v_;
-    const size_t max_index_;
-  } trimmer(v,max_index);
-
-  return serial_generate(trimmer);
-}
-
 /*!
   \brief Calculates the total number of elements in the 2d vector
   \param vec The vector to count

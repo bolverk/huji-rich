@@ -50,7 +50,7 @@ public:
 
 #ifdef RICH_MPI
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
-		OuterBoundary const* outer,bool HilbertOrder=true);
+		OuterBoundary const* outer,bool HilbertOrder=true) override;
 #endif
 
 	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool HilbertOrder = true);
