@@ -191,7 +191,7 @@ namespace
 		}
 	}
 
-	void UpdateTessellation(Tessellation3D& tess, vector<Vector3D>& point_vel, double dt
+	void UpdateTessellation(Tessellation3D& tess, const vector<Vector3D>& point_vel, double dt
 #ifdef RICH_MPI
 		, Tessellation3D const& tproc
 #endif

@@ -47,9 +47,9 @@ public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const vector<Vector3D>& point_velocities, const double t, double dt,
-		TracerStickerNames const& tracerstickernames, vector<Conserved3D> &extensives) const;
+		TracerStickerNames const& tracerstickernames, vector<Conserved3D> &extensives) const override;
 
-	double SuggestInverseTimeStep(void)const;
+	double SuggestInverseTimeStep(void)const override;
 
 private:
 	const Acceleration3D& acc_;

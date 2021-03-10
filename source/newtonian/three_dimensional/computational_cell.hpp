@@ -170,11 +170,11 @@ public:
 	//! \brief Default constructor
 	Slope3D(void);
 #ifdef RICH_MPI
-	size_t getChunkSize(void) const;
+	size_t getChunkSize(void) const override;
 
-	vector<double> serialize(void) const;
+	vector<double> serialize(void) const override;
 
-	void unserialize(const vector<double>& data);
+	void unserialize(const vector<double>& data) override;
 #endif//RICH_MPI
 };
 

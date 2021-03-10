@@ -16,7 +16,7 @@ public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
-		vector<Vector3D> &acc) const operator;
+		vector<Vector3D> &acc) const override;
 };
 
 #endif //QPOLE3D_HPP

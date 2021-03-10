@@ -93,7 +93,7 @@ public:
 #ifdef RICH_MPI
   vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
 				   vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
-				   vector<vector<std::size_t> >& sentpoints);
+				   vector<vector<std::size_t> >& sentpoints) override;
 #endif
   vector<int>& GetSentProcs(void) override;
 
@@ -112,7 +112,7 @@ public:
   void Build(vector<Vector3D> const& points) override;
 
 #ifdef RICH_MPI
-  void Build(vector<Vector3D> const& points, Tessellation3D const& tproc);
+  void Build(vector<Vector3D> const& points, Tessellation3D const& tproc) override;
 
   friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round, bool display);
 
