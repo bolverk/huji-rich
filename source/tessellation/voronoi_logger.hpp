@@ -49,9 +49,9 @@ namespace voronoi_loggers
      */
     explicit BinLogger(const std::string& file_name);
 
-    void output(const VoronoiMesh& v);
+    void output(const VoronoiMesh& v) override;
 
-	void output(const Tessellation& v);
+	void output(const Tessellation& v) override;
 
 	/*! \brief Reads the output information from the Voronoi tessellation
       \param location Name of output file

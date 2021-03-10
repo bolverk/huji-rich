@@ -62,7 +62,7 @@ public:
 			const EquationOfState& eos,
 			const double time,
 			const double dt,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
@@ -90,7 +90,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 
@@ -117,7 +117,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -143,7 +143,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const bool in_;

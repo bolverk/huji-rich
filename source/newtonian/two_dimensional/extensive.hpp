@@ -69,12 +69,12 @@ public:
   explicit Extensive(tvector const& Tracers);
 
 #ifdef RICH_MPI
-  size_t getChunkSize(void) const;
+  size_t getChunkSize(void) const override;
 
-  vector<double> serialize(void) const;
+  vector<double> serialize(void) const override;
 
   void unserialize
-  (const vector<double>& data);
+  (const vector<double>& data) override;
 
 #endif
 

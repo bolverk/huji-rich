@@ -25,7 +25,7 @@ public:
    */
   Line2D(double a,double b,double above,double under);
   ~Line2D();
-  double operator()(const Vector2D& r) const;
+  double operator()(const Vector2D& r) const override;
 };
 
 #endif // LINE2D_HPP

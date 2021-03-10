@@ -35,7 +35,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			vector<Extensive>& extensives,
 			double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 };
 
 #endif // COLD_EXTENSIVE_UPDATER_HPP

@@ -146,7 +146,9 @@ TracerStickerNames::~TracerStickerNames(void) {}
 
 TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
 
-TracerStickerNames::TracerStickerNames(std::vector<std::string> tracers, std::vector<std::string> stickers):
+TracerStickerNames::TracerStickerNames
+(const std::vector<std::string>& tracers,
+ const std::vector<std::string>& stickers):
   tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI

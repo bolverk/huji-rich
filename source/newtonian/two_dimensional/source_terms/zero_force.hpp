@@ -21,7 +21,7 @@ public:
    const vector<Extensive>& fluxes,
    const vector<Vector2D>& point_velocities,
    const double t,
-	 TracerStickerNames const& tracerstickersnames) const;
+	 TracerStickerNames const& tracerstickersnames) const override;
 };
 
 #endif // ZEROFORCE_HPP

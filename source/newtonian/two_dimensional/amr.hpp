@@ -62,7 +62,7 @@ class SimpleAMRExtensiveUpdater : public AMRExtensiveUpdater
 {
 public:
 	Extensive ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames) const;
+		double volume, TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -78,7 +78,7 @@ public:
   explicit SimpleAMRCellUpdater(vector<string> toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const;
+		double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Chooses which cells should be remove
@@ -240,7 +240,7 @@ private:
 	ConservativeAMR& operator=(ConservativeAMR const& other);
 
 public:
-	void operator() (hdsim &sim);
+	void operator() (hdsim &sim) override;
 
   /*! \brief Class constructor
     \param refine Refinement scheme
@@ -264,7 +264,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -272,7 +272,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 };
 
 //! \brief Non conservative amr
@@ -291,7 +291,7 @@ private:
 	NonConservativeAMR& operator=(NonConservativeAMR const& other);
 
 public:
-	void operator() (hdsim &sim);
+	void operator() (hdsim &sim) override;
 
   /*! \brief Class constructor
     \param refine Refinement scheme
@@ -311,7 +311,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -319,7 +319,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 };
 
 //! \brief Conservative amr using old method to split cells
@@ -340,7 +340,7 @@ private:
 	ConservativeAMROld& operator=(ConservativeAMROld const& other);
 
 public:
-	void operator() (hdsim &sim);
+	void operator() (hdsim &sim) override;
 
 	/*! \brief Class constructor
 	\param refine Refinement scheme
@@ -362,7 +362,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
@@ -370,7 +370,7 @@ public:
 #ifdef RICH_MPI
 		Tessellation const& proctess,
 #endif
-		TracerStickerNames const& tracerstickernames)const;
+		TracerStickerNames const& tracerstickernames)const override;
 };
 
 

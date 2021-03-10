@@ -88,7 +88,7 @@ public:
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
 			const CacheData& cd,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 	~SimpleCellUpdater(void);
 
@@ -115,7 +115,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const CacheData& cd,
 			const size_t index, 
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const string sticker_name_;
@@ -136,7 +136,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const CacheData& cd,
 			const size_t index,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 };
 
 #endif // SIMPLE_CELL_UPDATER_HPP

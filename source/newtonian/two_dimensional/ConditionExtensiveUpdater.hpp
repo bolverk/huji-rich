@@ -71,15 +71,16 @@ public:
 
 	~ConditionExtensiveUpdater(void);
 
-	void operator()(const vector<Extensive>& fluxes,
-		const PhysicalGeometry& pg,
-		const Tessellation& tess,
-		const double dt,
-		const CacheData& cd,
-		const vector<ComputationalCell>& cells,
-		vector<Extensive>& extensives,
-		double time,
-		TracerStickerNames const& tracerstickernames) const;
+	void operator()
+	(const vector<Extensive>& fluxes,
+	 const PhysicalGeometry& pg,
+	 const Tessellation& tess,
+	 const double dt,
+	 const CacheData& cd,
+	 const vector<ComputationalCell>& cells,
+	 vector<Extensive>& extensives,
+	 double time,
+	 TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -108,7 +109,7 @@ public:
 			Extensive& extensive,
 			size_t index,
 			double time, 
-			TracerStickerNames const& tracerstickernames)const;
+			TracerStickerNames const& tracerstickernames)const override;
 private:
 	EquationOfState const& eos_;
 	GhostPointGenerator const& ghost_;

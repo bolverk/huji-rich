@@ -31,11 +31,11 @@ class VoronoiMesh : public Tessellation
 public:
 
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
-		Vector2D rR,Vector2D f)const;
+		Vector2D rR,Vector2D f)const override;
 
-	Tessellation* clone(void)const;
+	Tessellation* clone(void)const override;
 
-	vector<int> GetNeighbors(int index)const;
+	vector<int> GetNeighbors(int index)const override;
 
 	void GetNeighbors(int index, vector<int> &neigh)const;
 	/*!
@@ -45,7 +45,7 @@ public:
 	*/
 	vector<int> GetLiteralNeighbors(int index)const;
 
-	int GetOriginalIndex(int point) const;
+	int GetOriginalIndex(int point) const override;
 
 #ifdef RICH_MPI
 	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
@@ -99,54 +99,54 @@ public:
 	/*! \brief Get Total number of mesh generating points
     \return Number of mesh generating points
    */
-  int GetPointNo(void) const;
+  int GetPointNo(void) const override;
 
   /*! \brief Returns Position of mesh generating point
     \param index Mesh generating point index
     \return Position of mesh generating point
    */
-  Vector2D GetMeshPoint(int index) const;
+  Vector2D GetMeshPoint(int index) const override;
 
   /*! \brief Returns the total number of faces
     \return Total number of faces
    */
-  int GetTotalSidesNumber(void) const;
+  int GetTotalSidesNumber(void) const override;
 
   /*! \brief Returns edge (interface between cells)
     \param index Face index
     \return Interface between cells
    */
-  Edge const& GetEdge(int index) const;
+  Edge const& GetEdge(int index) const override;
 
   /*! \brief Returns the effective width of a cell
     \param index Cell index
     \return Effective cell width
    */
-  double GetWidth(int index) const;
+  double GetWidth(int index) const override;
 
   /*! \brief Returns the volume of a cell
     \param index Cell index
     \return Cell volume
    */
-  double GetVolume(int index) const;
+  double GetVolume(int index) const override;
 
 //! \brief Returns a reference to a vector<int> containing the indexes of the edges related to a cell. \param index The index of the cell. \returns The reference to vector<int>
-  vector<int>const& GetCellEdges(int index) const;
+  vector<int>const& GetCellEdges(int index) const override;
 
 /*! \brief Returns Position of Cell's CM
     \param index Mesh generating point index (the cell's index)
     \return Position of CM
    */
-  Vector2D const& GetCellCM(int index) const;
+  Vector2D const& GetCellCM(int index) const override;
 
-  vector<Vector2D>& GetMeshPoints(void);
+  vector<Vector2D>& GetMeshPoints(void) override;
 
   /*! \brief Outputs the grid data
   \param filename The path to the output file
   */
   void output(string filename);
 
-  bool NearBoundary(int index) const;
+  bool NearBoundary(int index) const override;
 
   //! \brief Diagnostics method
   voronoi_loggers::VoronoiLogger* logger;
@@ -169,23 +169,23 @@ public:
 
   vector<vector<int> >const& GetDuplicatedPoints(void)const;
 
-  vector<int> GetDuplicatedProcs(void)const;
+  vector<int> GetDuplicatedProcs(void)const override;
 
   vector<vector<int> >const& GetSentPoints(void)const;
 
-  vector<int> GetSentProcs(void)const;
+  vector<int> GetSentProcs(void)const override;
 
   vector<vector<int> >& GetGhostIndeces(void);
 
-  vector<vector<int> >const& GetGhostIndeces(void)const;
+  vector<vector<int> >const& GetGhostIndeces(void)const override;
 
-  vector<size_t> GetSelfPoint(void)const;
+  vector<size_t> GetSelfPoint(void)const override;
 
-  int GetTotalPointNumber(void)const;
+  int GetTotalPointNumber(void)const override;
   
-  const vector<Edge>& getAllEdges(void) const;
+  const vector<Edge>& getAllEdges(void) const override;
 
-  vector<Vector2D>& GetAllCM(void);
+  vector<Vector2D>& GetAllCM(void) override;
 
   void GetNeighborNeighbors(vector<int> &result, int point)const;
 private:

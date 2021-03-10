@@ -180,7 +180,9 @@ public:
     \param tracers The names of the tracers
     \param stickers The names of the stickers
   */
-  TracerStickerNames(std::vector<std::string> tracers,std::vector<std::string> stickers);
+  TracerStickerNames
+  (const std::vector<std::string>& tracers,
+   const std::vector<std::string>& stickers);
   //! \brief Class destructor
   ~TracerStickerNames(void);
 };

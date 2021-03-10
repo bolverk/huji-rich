@@ -102,7 +102,7 @@ namespace {
 		explicit ThermalPropertyExtractor(double ComputationalCell::* var) :
 			var_(var) {}
 
-		double operator()(const ComputationalCell& p) const
+		double operator()(const ComputationalCell& p) const override
 		{
 			return p.*var_;
 		}
@@ -118,7 +118,7 @@ namespace {
 		explicit CellVelocityComponentExtractor(double Vector2D::* component) :
 			component_(component) {}
 
-		double operator()(const ComputationalCell& p) const
+		double operator()(const ComputationalCell& p) const override
 		{
 			return p.velocity.*component_;
 		}

@@ -10,7 +10,7 @@ public:
 
 	HalfPeriodicEdgeVelocities(void);
 
-	vector<Vector2D> operator()(const Tessellation& tess,const vector<Vector2D>& point_velocities) const;
+	vector<Vector2D> operator()(const Tessellation& tess,const vector<Vector2D>& point_velocities) const override;
 };
 
 #endif // HALF_PERIODIC_EDGE_VELOCITIES_HPP

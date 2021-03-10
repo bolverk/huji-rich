@@ -34,7 +34,7 @@ public:
    */
   explicit WriteTime(const string& fname);
 
-  void operator()(const hdsim& sim);
+  void operator()(const hdsim& sim) override;
 
 private:
   string fname_;
@@ -50,7 +50,7 @@ public:
 	*/
 	explicit WriteData(const string& fname);
 
-	void operator()(const hdsim& sim);
+	void operator()(const hdsim& sim) override;
 
 private:
 	string fname_;
@@ -84,7 +84,7 @@ public:
   SafeTimeTermination(double termination_time,
 		      int max_cycles);
 
-  bool operator()(const hdsim& sim);
+  bool operator()(const hdsim& sim) override;
 
 private:
   const double termination_time_;
@@ -101,7 +101,7 @@ public:
    */
   explicit CycleTermination(int max_cycles);
 
-  bool operator()(const hdsim& sim);
+  bool operator()(const hdsim& sim) override;
 
 private:
 

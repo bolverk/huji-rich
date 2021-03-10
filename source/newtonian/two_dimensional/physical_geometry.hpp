@@ -43,9 +43,9 @@ public:
   //! \brief Class constructor
   SlabSymmetry(void);
 
-  double calcArea(const Edge& edge) const;
+  double calcArea(const Edge& edge) const override;
 
-  double calcVolume(const vector<Edge>& edge_list) const;
+  double calcVolume(const vector<Edge>& edge_list) const override;
 };
 
 //! \brief Axis of revolution
@@ -79,9 +79,9 @@ public:
   CylindricalSymmetry(const Vector2D& origin,
 		      const Vector2D& direction);
 
-  double calcArea(const Edge& edge) const;
+  double calcArea(const Edge& edge) const override;
 
-  double calcVolume(const vector<Edge>& edge_list) const;
+  double calcVolume(const vector<Edge>& edge_list) const override;
 
   /*! \brief Returns the axis of revolution
     \return Axis of revolution

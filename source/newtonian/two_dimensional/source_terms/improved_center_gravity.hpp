@@ -26,7 +26,7 @@ public:
    const vector<Extensive>& fluxes,
    const double time,
    const int point,
-   TracerStickerNames const& tracerstickernames) const;
+   TracerStickerNames const& tracerstickernames) const override;
 
   /*! \brief Returns the position of the center
     \return Position of the center

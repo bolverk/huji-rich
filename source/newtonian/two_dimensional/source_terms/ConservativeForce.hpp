@@ -57,7 +57,7 @@ public:
 			const vector<Extensive>& fluxes,
 			const vector<Vector2D>& point_velocities,
 			const double t,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const Acceleration& acc_;

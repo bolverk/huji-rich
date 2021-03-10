@@ -12,7 +12,7 @@ public:
 
   vector<Vector2D> operator()
   (const Tessellation& tess,
-   const vector<Vector2D>& point_velocities) const;
+   const vector<Vector2D>& point_velocities) const override;
 };
 
 #endif // STATIONARY_BOX_HPP

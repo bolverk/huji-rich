@@ -26,7 +26,7 @@ public:
    const vector<Extensive>& fluxes,
    const double time,
    const int point,
-   TracerStickerNames const& tracerstickernames) const;
+   TracerStickerNames const& tracerstickernames) const override;
 
 private:
   const double M_;
