@@ -20,9 +20,9 @@ public:
    */
   explicit HDF5Logger(const string& fname);
 
-  void output(const VoronoiMesh& v);
+  void output(const VoronoiMesh& v) override;
 
-  void output(const Tessellation& v);
+  void output(const Tessellation& v) override;
 
 private:
   const string fname_;

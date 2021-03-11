@@ -1037,7 +1037,7 @@ void StaticVoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int
 	for(int i=0;i<nsides;++i)
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());
 	totest.resize(static_cast<size_t>(nsides));
-	int test=0;
+	int test;
 	for(int i=0;i<nsides;++i)
 	{
 		vector<int> totest2;

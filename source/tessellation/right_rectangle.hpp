@@ -27,7 +27,7 @@ public:
    */
   explicit RightRectangle(const pair<Vector2D,Vector2D>& ll_ur);
 
-  bool operator()(const Vector2D& point) const;
+  bool operator()(const Vector2D& point) const override;
 
 private:
   const Vector2D lower_left_;
