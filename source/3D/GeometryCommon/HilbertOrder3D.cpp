@@ -283,7 +283,7 @@ int HilbertCurve3D::GetRotation(int * piRotation, int iRotationIndex)
 // Rotate a shape:
 void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 {
-  int iSign = 0;
+  int iSign;
 
 	for (std::size_t ii = 0; ii < 7; ++ii)
 	{
@@ -314,7 +314,7 @@ void HilbertCurve3D::RotateShape(int iShapeIndex, vector<int> vAxes)
 
 void HilbertCurve3D::RotateShape(HilbertCurve3D_shape const & roShape, HilbertCurve3D_shape & roShapeOut , int iRotationIndex)
 {
-  int iSign = 0;
+  int iSign;
 
 	vector<int> vAxes = m_vRotations[static_cast<size_t>(iRotationIndex)];
 	roShapeOut = roShape;
