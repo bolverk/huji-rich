@@ -12,8 +12,11 @@
 #include <cassert>
 #include <iostream>
 #include "boost/container/flat_map.hpp"
+#include <limits>
 
 using std::vector;
+
+bool close2zero(const double x);
 
 /*! \brief Checks whether a number is a nan
 \param x A number

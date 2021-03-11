@@ -13,7 +13,7 @@ namespace
 		assert(it != x.end() && it != x.begin() &&
 			"X out of range in Linear Interp");
 		index = std::max(static_cast<size_t>(it - x.begin()),static_cast<size_t>(1));
-		if (*it == xi)
+		if (close2zero(*it-xi))
 			return y[static_cast<std::size_t>(it - x.begin())];
 
 		return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*

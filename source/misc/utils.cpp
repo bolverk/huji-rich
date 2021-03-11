@@ -8,6 +8,12 @@
 #include <cfloat>
 #include <cmath>
 
+bool close2zero(const double x)
+{
+  constexpr double lowest_double = std::numeric_limits<double>::lowest();
+  return std::abs(x)<lowest_double;
+}
+
 bool is_nan(double x)
 {
   int b1 = (x>=0);
