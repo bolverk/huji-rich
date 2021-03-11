@@ -1,4 +1,13 @@
 #include "HilbertOrder3D_Utils.hpp"
+#include <limits>
+
+namespace {
+  bool close2zero(double x)
+  {
+    constexpr double lowest_double = std::numeric_limits<double>::lowest();
+    return std::abs(x)<lowest_double;
+  }
+}
 
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
 {
@@ -30,9 +39,9 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 	double dbScaleY = dbMaxY - dbMinY;
 	double dbScaleZ = dbMaxZ - dbMinZ;
 	// To prevent division by zero (very unlikely - double precision!)
-	bool bFlagX = dbScaleX == 0;
-	bool bFlagY = dbScaleY == 0;
-	bool bFlagZ = dbScaleZ == 0;
+	bool bFlagX = close2zero(dbScaleX);
+	bool bFlagY = close2zero(dbScaleY);
+	bool bFlagZ = close2zero(dbScaleZ);
 
 	// X coordinate:
 	if (!bFlagX)

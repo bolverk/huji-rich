@@ -43,7 +43,7 @@ public:
 	/*!
 	\brief Class destructor
 	*/
-	~ConservativeForce3D(void);
+  ~ConservativeForce3D(void) override;
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const vector<Vector3D>& point_velocities, const double t, double dt,
