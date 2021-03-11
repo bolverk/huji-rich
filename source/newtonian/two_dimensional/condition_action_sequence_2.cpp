@@ -78,6 +78,12 @@ vector<Extensive> ConditionActionSequence2::operator()
 	return res;
 }
 
+ConditionActionSequence2::Action2::Action2(void) = default;
+
+ConditionActionSequence2::Action2::Action2(const Action2&) = default;
+
+ConditionActionSequence2::Action2& ConditionActionSequence2::Action2::operator=
+(const Action2&) = default;
 
 ConditionActionSequence2::Action2::~Action2(void) {}
 

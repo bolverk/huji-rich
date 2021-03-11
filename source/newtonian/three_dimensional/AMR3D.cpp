@@ -802,7 +802,16 @@ AMRCellUpdater3D::AMRCellUpdater3D(void) = default;
 
 AMRCellUpdater3D::~AMRCellUpdater3D(void) = default;
 
-AMRExtensiveUpdater3D::~AMRExtensiveUpdater3D(void) {}
+AMRCellUpdater3D::AMRCellUpdater3D(const AMRCellUpdater3D&) = default;
+
+AMRCellUpdater3D& AMRCellUpdater3D::operator=(const AMRCellUpdater3D&) = default;
+
+AMRExtensiveUpdater3D::AMRExtensiveUpdater3D(const AMRExtensiveUpdater3D&) = default;
+
+AMRExtensiveUpdater3D& AMRExtensiveUpdater3D::operator=
+(const AMRExtensiveUpdater3D&) = default;
+
+AMRExtensiveUpdater3D::AMRExtensiveUpdater3D(void) = default;
 
 Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
 	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const

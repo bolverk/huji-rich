@@ -14,6 +14,8 @@ public:
 	{
 	public:
 
+	  Action2(void);
+
 		/*! \brief Calculates flux
 		\param edge Interface between cells
 		\param tess Tessellation
@@ -38,7 +40,11 @@ public:
 				double time,
 				TracerStickerNames const& tracerstickernames) const = 0;
 
-		virtual ~Action2(void);
+	  virtual ~Action2(void);
+
+	  Action2& operator=(const Action2&);
+
+	  Action2(const Action2&);
 	};
 
 	/*! \brief Class constructor
