@@ -45,35 +45,6 @@ namespace {
 }
 
 namespace {
-	UniversalError invalid_wave_speeds(Primitive const& left,
-		Primitive const& right,
-		double velocity,
-		double left_wave_speed,
-		double center_wave_speed,
-		double right_wave_speed)
-	{
-		UniversalError res("Invalid wave speeds in hllc solver");
-		res.addEntry("left density", left.Density);
-		res.addEntry("left pressure", left.Pressure);
-		res.addEntry("left x velocity", left.Velocity.x);
-		res.addEntry("left y velocity", left.Velocity.y);
-		res.addEntry("left sound speed", left.SoundSpeed);
-		res.addEntry("left energy", left.Energy);
-		res.addEntry("right density", right.Density);
-		res.addEntry("right pressure", right.Pressure);
-		res.addEntry("right x velocity", right.Velocity.x);
-		res.addEntry("right y velocity", right.Velocity.y);
-		res.addEntry("right sound speed", right.SoundSpeed);
-		res.addEntry("right energy", right.Energy);
-		res.addEntry("interface velocity", velocity);
-		res.addEntry("left wave speed", left_wave_speed);
-		res.addEntry("center wave speed", center_wave_speed);
-		res.addEntry("right wave speed", right_wave_speed);
-		return res;
-	}
-}
-
-namespace {
 	Conserved starred_state
 		(Primitive const& state, double sk, double ss)
 	{
@@ -129,30 +100,23 @@ Conserved LagrangianHLLC::operator()
 		f_gr = fl;
 		energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density;
 	}
-	else if (ws.left <= 0 && ws.center >= 0)
+	else if (ws.center >= 0)
 	{
 		f_gr = fl + ws.left*(usl - ul);
 		energy = ScalarProd(local_left.Velocity, xdir)*local_left.Energy*local_left.Density +
 			ws.left*local_left.Energy*((ws.left-local_left.Velocity.x)/(ws.left-ws.center)-1)*local_left.Density;
 	}
-	else if (ws.center < 0 && ws.right >= 0)
+	else if (ws.right >= 0)
 	{
 		f_gr = fr + ws.right*(usr - ur);
 		energy = (ScalarProd(local_right.Velocity, xdir)*local_right.Energy + ws.right*local_right.Energy*
 			((ws.right - local_right.Velocity.x) / (ws.right - ws.center) - 1))*local_right.Density;
 	}
-	else if (ws.right<0)
+	else
 	{
 		f_gr = fr;
 		energy = ScalarProd(local_right.Velocity, xdir)*local_right.Energy*local_right.Density;
 	}
-	else
-		throw invalid_wave_speeds(local_left,
-			local_right,
-			velocity,
-			ws.left,
-			ws.center,
-			ws.right);
 
 	f_gr.Energy += ScalarProd(f_gr.Momentum, velocity*normaldir) +
 		0.5*f_gr.Mass*velocity*velocity;

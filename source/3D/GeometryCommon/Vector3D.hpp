@@ -135,7 +135,7 @@ public:
 #ifdef __INTEL_COMPILER
 #pragma omp declare simd
 #endif
-	~Vector3D(void){}
+	~Vector3D(void) override {}
 };
 
 /*! \brief Norm of a vector
