@@ -48,9 +48,9 @@ private:
   void CalcRigidCM(std::size_t face_index);
   void GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const;
   double GetTetraVolume(std::array<Vector3D, 4> const& points)const;
-  void CalcCellCMVolume(std::size_t index);
+  //  void CalcCellCMVolume(std::size_t index);
   double GetRadius(std::size_t index);
-  double GetMaxRadius(std::size_t index);
+  //  double GetMaxRadius(std::size_t index);
   void CalcAllCM(void);
   vector<std::pair<std::size_t, std::size_t> > SerialFindIntersections(bool first_run);
   vector<std::pair<std::size_t, std::size_t> > SerialFirstIntersections(void);

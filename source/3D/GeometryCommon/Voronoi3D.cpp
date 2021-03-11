@@ -216,7 +216,7 @@ namespace
     return res;
   }
 
-  size_t BoxIndex(vector<Vector3D> const& fnormals, Vector3D normal)
+  size_t BoxIndex(vector<Vector3D> const& fnormals, const Vector3D& normal)
   {
     double max_angle = ScalarProd(fnormals[0], normal);
     size_t loc = 0;
@@ -273,7 +273,7 @@ namespace
     bool has_good, has_big;
     // change empty tetras to be not relevant
     for (boost::container::flat_set<size_t>::const_iterator it = empty_tetras.begin(); it !=
-	   empty_tetras.end(); it++)
+	   empty_tetras.end(); ++it)
       {
 #ifdef __INTEL_COMPILER
 #pragma omp simd early_exit
@@ -726,7 +726,7 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
   vector<Face> box_faces = BuildBox(ll_, ur_);
   vector<Vector3D> box_normals = GetBoxNormals(ll_, ur_);
   vector<vector<size_t> > box_candidates(box_normals.size());
-  vector<vector<size_t> > new_self_duplicate(box_normals.size());
+  vector<vector<size_t> > new_self_duplicate; //(box_normals.size());
   self_duplicate.resize(box_faces.size());
 
   int rank = 0;
@@ -951,7 +951,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -991,7 +991,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1031,7 +1031,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1071,7 +1071,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1122,7 +1122,7 @@ void Voronoi3D::CalcAllCM(void)
   size_t Nfaces = FaceNeighbors_.size();
   Vector3D vtemp;
   std::vector<Vector3D> vectemp;
-  double vol = 0;
+  double vol;
   for (size_t i = 0; i < Nfaces; ++i)
     {
       size_t N0 = FaceNeighbors_[i].first;
@@ -1501,6 +1501,7 @@ double Voronoi3D::GetRadius(std::size_t index)
   return R_[index];
 }
 
+/*
 double Voronoi3D::GetMaxRadius(std::size_t index)
 {
   std::size_t N = PointTetras_[index].size();
@@ -1511,7 +1512,7 @@ double Voronoi3D::GetMaxRadius(std::size_t index)
   for (std::size_t i = 0; i < N; ++i)
     res = std::max(res, GetRadius(PointTetras_[index][i]));
   return 2 * res;
-}
+  }*/
 
 void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 					 vector<size_t> &intersecting_faces, std::vector<double> &Rtemp, std::vector<Vector3D> &vtemp)
@@ -1896,7 +1897,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFirstIntersections
       normals[i] *= (1.0 / fastsqrt(ScalarProd(normals[i], normals[i])));
     }
 
-  vector<std::size_t> point_neigh;
+  //  vector<std::size_t> point_neigh;
   vector<std::pair<std::size_t, std::size_t> > res;
   Sphere sphere;
   vector<unsigned char>  will_check(Norg_, 0);
@@ -1957,7 +1958,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
   if (first_run)
     {
       FirstCheckList(check_stack, will_check, Norg_, del_, PointTetras_);
-      cur_loc = check_stack.top();
+      //cur_loc = check_stack.top();
       check_stack.pop();
     }
   else
@@ -2154,6 +2155,7 @@ double Voronoi3D::GetTetraVolume(std::array<Vector3D, 4> const& points)const
   return std::abs(orient3d(points)) / 6.0;
 }
 
+/*
 void Voronoi3D::CalcCellCMVolume(std::size_t index)
 {
   volume_[index] = 0;
@@ -2181,7 +2183,7 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
     }
   CM_[index] = CM_[index] / volume_[index];
 }
-
+*/
 
 void Voronoi3D::output(std::string const& filename)const
 {
@@ -2495,7 +2497,7 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 #endif // RICH_DEBUG
   Vector3D w = (v0 + v1) *0.5;
 #ifdef RICH_DEBUG
-  double w_abs = std::max(fastabs(v0),fastabs(v1));
+  //  double w_abs = std::max(fastabs(v0),fastabs(v1));
 #endif // RICH_DEBUG
   //if (dw_abs > w_abs)
   //	delta_w *= (1 + (std::atan(dw_abs / w_abs) - 0.25 * M_PI)*2) * (w_abs / dw_abs);
