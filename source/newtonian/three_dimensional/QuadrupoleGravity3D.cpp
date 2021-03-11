@@ -35,12 +35,12 @@ namespace
 		Vector3D acc;
 		size_t index = 0;
 		double r = abs(point);
-		double Phi = LinearInterp(r_list, Q20In, r, index);
+		LinearInterp(r_list, Q20In, r, index);
 		double small = 1e-5;
 		double dx = small*(r_list[index] - r_list.at(index-1));
 		point.x += 0.5*dx;
-		r = abs(point);
-		Phi = -LinearInterp(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x*point.x - point.y*point.y) / (r*r*r*r*r);
+		//		double r = abs(point);
+		double Phi = -LinearInterp(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x*point.x - point.y*point.y) / (r*r*r*r*r);
 		point.x -= dx;
 		r = abs(point);
 		Phi += LinearInterp2(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x *point.x - point.y * point.y) / (r*r*r*r*r);
