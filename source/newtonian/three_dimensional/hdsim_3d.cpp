@@ -184,7 +184,7 @@ namespace
 				{
 					res[i] = tess.CalcFaceVelocity(i, point_vel[tess.GetFaceNeighbors(i).first], point_vel[tess.GetFaceNeighbors(i).second]);
 				}
-				catch (UniversalError & eo)
+				catch (UniversalError & /*eo*/)
 				{
 					throw;
 				}

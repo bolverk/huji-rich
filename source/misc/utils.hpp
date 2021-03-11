@@ -158,7 +158,8 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 	typename vector<T>::const_iterator it = upper_bound(x.begin(), x.end(), xi);
 	if (it == x.end())
 	{
-		if (x.back() == xi)
+	  //		if (x.back() == xi)
+	  if(close2zero(x.back()-xi))
 			return y.back();
 		std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
 		throw;
@@ -171,7 +172,7 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 			throw;
 		}
 	}
-	if (*it == xi)
+	if (close2zero(*it - xi))
 		return y[static_cast<std::size_t>(it - x.begin())];
 
 	return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*	(y[static_cast<std::size_t>(it - 1 - x.begin())] 
