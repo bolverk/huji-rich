@@ -282,7 +282,7 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const& cpoints)
 {
 	cell_points = cpoints;
-	DataOnlyForBuild data;
+	//	DataOnlyForBuild data;
 	lastFacet = 0;
 	CalcRadius = false;
 	length = int(vp.size() + 3);

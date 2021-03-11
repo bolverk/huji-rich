@@ -20,7 +20,7 @@ IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 	points[1]=p1;
 	points[2]=q0;
 	double temp=orient2d(TripleConstRef<Vector2D>(p0,p1,q0));
-	points[2]=q1;
+	//	points[2]=q1;
 	if(temp*orient2d(TripleConstRef<Vector2D>(p0,p1,q1))>0)
 		return False;
 	points[0]=q0;
