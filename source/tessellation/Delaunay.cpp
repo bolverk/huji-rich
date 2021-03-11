@@ -749,7 +749,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 		}
 		return res;
 	}
-	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
+	vector<int> res_temp, outer_points, f_temp /*, f_add(f.size(), 0)*/;
 	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
