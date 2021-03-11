@@ -42,7 +42,7 @@ namespace simulation1d{
     SafeTimeTermination(double termination_time,
 			int max_cycles);
 
-    bool operator()(hdsim1D const&  sim);
+    bool operator()(hdsim1D const&  sim) override;
 
   private:
     
@@ -76,7 +76,7 @@ namespace simulation1d{
     /*! \brief Performs diagnostics
       \param sim Hydrodynamic simulation
      */
-    void diagnose(hdsim1D const& sim);
+    void diagnose(hdsim1D const& sim) override;
 
   private:
     const string fname_;

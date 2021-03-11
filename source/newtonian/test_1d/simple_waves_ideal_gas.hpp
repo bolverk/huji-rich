@@ -36,7 +36,7 @@ public:
   ConstEntropy(SpatialDistribution1D const& density,
 	       double s, double g);
 
-  double operator()(double x) const;
+  double operator()(double x) const override;
 
 private:
 
@@ -60,7 +60,7 @@ public:
 		 SpatialDistribution1D const& density,
 		 EquationOfState const& eos);
 
-  double operator()(double x) const;
+  double operator()(double x) const override;
 
 private:
 
@@ -94,7 +94,7 @@ public:
 		  SpatialDistribution1D const& sound_speed,
 		  double g);
 
-  double operator()(double x) const;
+  double operator()(double x) const override;
 
 private:
 
@@ -131,7 +131,7 @@ public:
     \param pname Name of the Hydrodynamic variables
     \return Spatial profile
    */
-  SpatialDistribution1D const& getProfile(string pname) const;
+  SpatialDistribution1D const& getProfile(const string& pname) const;
 
 private:
 
@@ -159,7 +159,7 @@ public:
 	      SpatialDistribution1D const& pressure,
 	      double adiabatic_index);
 
-  double operator()(double x) const;
+  double operator()(double x) const override;
 
 private:
 

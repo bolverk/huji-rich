@@ -27,7 +27,7 @@ public:
 	   double phase,
 	   double offset);
 
-  double operator()(double x) const;
+  double operator()(double x) const override;
 
 private:
 

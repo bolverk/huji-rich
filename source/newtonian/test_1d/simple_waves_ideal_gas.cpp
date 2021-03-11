@@ -67,7 +67,7 @@ IdealGas const& SimpleWaveIdealGasInitCond::getEOS(void) const
   return eos_;
 }
 
-SpatialDistribution1D const& SimpleWaveIdealGasInitCond::getProfile(string pname) const
+SpatialDistribution1D const& SimpleWaveIdealGasInitCond::getProfile(const string& pname) const
 {
   if("density"==pname)
     return density_;
