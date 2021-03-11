@@ -26,7 +26,7 @@ public:
     \param under Value under the sine
    */
   SineSepar(double Amp,double f,double off,double above,double under);
-  ~SineSepar();
+  ~SineSepar() override;
   double operator()(const Vector2D& r) const override;
 };
 

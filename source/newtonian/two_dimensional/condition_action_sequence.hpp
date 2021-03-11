@@ -64,7 +64,7 @@ public:
 	explicit ConditionActionSequence
 		(const vector<pair<const Condition*, const Action*> >& sequence);
 
-	~ConditionActionSequence(void);
+	~ConditionActionSequence(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,

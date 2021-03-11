@@ -24,7 +24,7 @@ public:
     \param under Value under the line
    */
   Line2D(double a,double b,double above,double under);
-  ~Line2D();
+  ~Line2D() override;
   double operator()(const Vector2D& r) const override;
 };
 

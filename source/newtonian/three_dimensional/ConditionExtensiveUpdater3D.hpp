@@ -55,7 +55,7 @@ public:
 	*/
 	explicit ConditionExtensiveUpdater3D(const vector<pair<const Condition3D*, const Action3D*> >& sequence);
 
-	~ConditionExtensiveUpdater3D(void);
+	~ConditionExtensiveUpdater3D(void) override;
 
 	void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
 		const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,

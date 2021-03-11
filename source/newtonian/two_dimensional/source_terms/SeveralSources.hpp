@@ -16,7 +16,7 @@ public:
 	//! \brief Class constructor
 	explicit SeveralSources(const vector<SourceTerm*>& forces);
 	//! \brief Class destructor
-	~SeveralSources(void);
+	~SeveralSources(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,

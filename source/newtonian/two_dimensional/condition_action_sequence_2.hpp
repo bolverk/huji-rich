@@ -51,7 +51,7 @@ public:
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
 			SpatialReconstruction const& interp);
 
-	~ConditionActionSequence2(void);
+	~ConditionActionSequence2(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,

@@ -69,7 +69,7 @@ public:
 	explicit ConditionExtensiveUpdater
 		(const vector<pair<const Condition*, const Action*> >& sequence);
 
-	~ConditionExtensiveUpdater(void);
+	~ConditionExtensiveUpdater(void) override;
 
 	void operator()
 	(const vector<Extensive>& fluxes,

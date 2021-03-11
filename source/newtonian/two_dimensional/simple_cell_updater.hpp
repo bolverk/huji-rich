@@ -90,7 +90,7 @@ public:
 			const CacheData& cd,
 			TracerStickerNames const& tracerstickernames) const override;
 
-	~SimpleCellUpdater(void);
+	~SimpleCellUpdater(void) override;
 
 private:
 	const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence_;

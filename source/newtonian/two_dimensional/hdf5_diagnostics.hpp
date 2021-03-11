@@ -48,7 +48,13 @@ public:
 
 /*! \brief Load snapshot data into memory
   \param fname File name
+*/
+#ifdef RICH_MPI
+/*
   \param mpioverride Flag for not reading mpi data when MPI is on
+*/
+#endif // RICH_MPI
+/*
   \return Snapshot data
  */
 Snapshot read_hdf5_snapshot
