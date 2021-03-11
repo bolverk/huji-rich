@@ -52,7 +52,7 @@ public:
 		OuterBoundary const* outer,bool reorder=true);
 #endif
 
-	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true);
+	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true) override;
 
 	//! \brief Class default constructor.
   VoronoiMesh(void);
@@ -93,9 +93,9 @@ public:
 	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool reorder=false);
 #endif // RICH_MPI
 
-	vector<int> Update(const vector<Vector2D>& points, bool reorder=false);
+	vector<int> Update(const vector<Vector2D>& points, bool reorder=false) override;
 
-	~VoronoiMesh(void);
+	~VoronoiMesh(void) override;
 	/*! \brief Get Total number of mesh generating points
     \return Number of mesh generating points
    */

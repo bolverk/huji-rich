@@ -47,7 +47,7 @@ public:
 	/*!
 	  \brief Class destructor
 	*/
-	~ConservativeForce(void);
+	~ConservativeForce(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,
