@@ -74,7 +74,7 @@ public:
 
 	vector<int> Update(const vector<Vector2D>& points, bool HilbertOrder = false) override;
 
-  ~StaticVoronoiMesh(void);
+  ~StaticVoronoiMesh(void) override;
 	/*! \brief Get Total number of mesh generating points
     \return Number of mesh generating points
    */
