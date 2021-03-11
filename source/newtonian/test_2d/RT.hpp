@@ -17,7 +17,7 @@ class RT_velocityY: public SpatialDistribution
 public:
 
   RT_velocityY();
-  ~RT_velocityY();
+  ~RT_velocityY() override;
   double operator()(const Vector2D& r) const override;
 };
 
@@ -36,7 +36,7 @@ public:
    */
   RT_Pressure(double g,double rhoup,double rhodown);
 
-  ~RT_Pressure();
+  ~RT_Pressure() override;
 
   double operator()(const Vector2D& r) const override;
 };

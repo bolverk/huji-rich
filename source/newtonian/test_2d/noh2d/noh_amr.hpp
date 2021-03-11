@@ -20,7 +20,7 @@ public:
 	*/
   explicit NohRefine(double Vmax);
 	//! \brief Class destructor
-	~NohRefine();
+	~NohRefine() override;
 
 	vector<int> CellsToRefine
 	(Tessellation const& tess,
@@ -42,7 +42,7 @@ public:
 	*/
   explicit NohRemove(double Vmin);
 	//! \brief Class destructor
-	~NohRemove();
+	~NohRemove() override;
 
 	vector<int> CellsToRemove
 	(Tessellation const& tess,

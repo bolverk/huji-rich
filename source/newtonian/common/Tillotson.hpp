@@ -48,7 +48,7 @@ public:
 	double sd2p(double s, double d,tvector const& tracers = tvector(), 
 		vector<string> const& tracernames = vector<string>()) const override;
 
-	~Tillotson(void);
+	~Tillotson(void) override;
 };
 
 #endif //TILLOTSON_HPP

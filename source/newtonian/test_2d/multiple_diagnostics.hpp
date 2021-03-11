@@ -23,7 +23,7 @@ public:
 
   void operator()(const hdsim& sim) override;
 
-  ~MultipleDiagnostics(void);
+  ~MultipleDiagnostics(void) override;
 };
 
 #endif // MULTIPLE_DIAGNOSTICS_HPP
