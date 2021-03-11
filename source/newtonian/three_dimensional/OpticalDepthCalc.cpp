@@ -112,7 +112,7 @@ OpticalDepthCalc::OpticalDepthCalc(double opening
 				   #ifdef RICH_MPI
 				   , Tessellation3D const* tproc
 #endif // RICH_MPI
-				   , std::string debug_name) : 
+				   , const std::string& debug_name) : 
 	opening_(opening)
 	#ifdef RICH_MPI
 	, tproc_(tproc)

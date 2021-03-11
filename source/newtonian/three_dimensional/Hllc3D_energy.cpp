@@ -249,7 +249,7 @@ Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, Computatio
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = fl;
 	}
-	else if (ws.left <= 0 && ws.center >= 0)
+	else if (ws.center >= 0)
 	{
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		const Conserved3D usl = starred_state(local_left, ws.left, ws.center);

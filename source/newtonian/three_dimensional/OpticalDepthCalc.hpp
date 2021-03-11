@@ -18,13 +18,19 @@ private:
 						     , tproc_(0)
 #endif // RICH_MPI
 						     , d_name_("") {}
-	OpticalDepthCalc& operator=(const OpticalDepthCalc /*other*/) { return *this; }
+	OpticalDepthCalc& operator=(const OpticalDepthCalc /*other*/) 
+  { 
+#ifdef RICH_MPI
+    this->tproc_=0;
+#endif // RICH_MPI
+    return *this; 
+  }
 public:
 	OpticalDepthCalc(double opening = 0.25
 			 #ifdef RICH_MPI
 			 , Tessellation3D const* tproc = 0
 #endif // RICH_MPI
-			 , std::string debug_name = "");
+			 , const std::string& debug_name = "");
 
 	// returns dz * Sigma, so for time need to multiply by kappa and divide by c
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,

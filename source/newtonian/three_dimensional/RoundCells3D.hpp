@@ -42,7 +42,7 @@ public:
 private:
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		TracerStickerNames const& tracerstickernames,vector<Vector3D> & velocities, vector<char> const& nomove) const;
+		TracerStickerNames const& tracerstickernames,const vector<Vector3D> & velocities, vector<char> const& nomove) const;
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
 		TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove)const;

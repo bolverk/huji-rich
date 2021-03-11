@@ -119,7 +119,7 @@ namespace
 }
 
 void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove) const
+	TracerStickerNames const& tracerstickernames, const vector<Vector3D> & velocities, vector<char> const& nomove) const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);

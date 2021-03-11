@@ -620,7 +620,7 @@ namespace
 		vector<Vector3D> &neighbor_mesh_list,
 		vector<Vector3D> &neighbor_cm_list,
 		TracerStickerNames const& tracerstickernames, string const& skip_key,
-		std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
+		const std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
 		face_vec const& faces = tess.GetCellFaces(cell_index);
 		GetNeighborMesh(tess, cell_index, neighbor_mesh_list, faces);
@@ -716,7 +716,7 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames const& tsn, Ghost3D const& ghost, bool slf, double delta_v, double theta,
-	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
+	double delta_P, bool SR, const vector<string>& calc_tracers, const string& skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
 	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
 	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_(),pressure_calc_(pressure_calc) {}
 
