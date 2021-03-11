@@ -20,11 +20,11 @@ public:
     \param g Adiabatic index
     \param vacuum_behaviour Toggles optional behaviour in case of vacuum
    */
-  ERSIG(double g, string const& vacuum_behaviour = "throw exception");
+  explicit ERSIG(double g, string const& vacuum_behaviour = "throw exception");
 
   Conserved operator()(Primitive const& left,
 		       Primitive const& right,
-		       double velocity) const;
+		       double velocity) const override;
 
 private:
 

@@ -110,7 +110,7 @@ double TillotsonOrg::dep2cIV(double d, double e, double p) const
 
 	struct dp2eIIOrg
 	{
-		dp2eIIOrg(TillotsonOrg const& eos) : eos_(eos)
+	  explicit dp2eIIOrg(TillotsonOrg const& eos) : eos_(eos)
 		{}
 
 		double operator()(double e)

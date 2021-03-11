@@ -17,7 +17,7 @@ public:
   Conserved operator()
   (Primitive const& left,
    Primitive const& right,
-   double velocity) const;
+   double velocity) const override;
 };
 
 #endif //HLLC_EULERIAN_HPP

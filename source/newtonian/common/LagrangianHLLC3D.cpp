@@ -123,25 +123,6 @@ namespace
 		return WaveSpeeds(sl, ss, sr, ps);
 	}
 
-	UniversalError invalid_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		double velocity, double left_wave_speed, double center_wave_speed, double right_wave_speed)
-	{
-		UniversalError res("Invalid wave speeds in hllc solver");
-		res.addEntry("left density", left.density);
-		res.addEntry("left pressure", left.pressure);
-		res.addEntry("left x velocity", left.velocity.x);
-		res.addEntry("left y velocity", left.velocity.y);
-		res.addEntry("right density", right.density);
-		res.addEntry("right pressure", right.pressure);
-		res.addEntry("right x velocity", right.velocity.x);
-		res.addEntry("right y velocity", right.velocity.y);
-		res.addEntry("interface velocity", velocity);
-		res.addEntry("left wave speed", left_wave_speed);
-		res.addEntry("center wave speed", center_wave_speed);
-		res.addEntry("right wave speed", right_wave_speed);
-		return res;
-	}
-
 	double TotalEnergyDensity3D(ComputationalCell3D const& p)
 	{
 		return p.density*(0.5*ScalarProd(p.velocity, p.velocity) + p.internal_energy);
@@ -245,14 +226,12 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 
 		if (ws2.left > 0)
 			f_gr = fl;
-		else if (ws2.left <= 0 && ws2.center >= 0)
+		else if (ws2.center >= 0)
 			f_gr = fl + ws2.left*(usl - ul);
-		else if (ws2.center < 0 && ws2.right >= 0)
+		else if (ws2.right >= 0)
 			f_gr = fr + ws2.right*(usr - ur);
-		else if (ws2.right < 0)
-			f_gr = fr;
 		else
-			throw invalid_wave_speeds(local_left, local_right, velocity, ws2.left, ws2.center, ws2.right);
+			f_gr = fr;
 	}
 	f_gr.energy += f_gr.momentum.x * velocity + 0.5*f_gr.mass*velocity*velocity;
 	f_gr.momentum = (f_gr.momentum.x + f_gr.mass*velocity)*normaldir;

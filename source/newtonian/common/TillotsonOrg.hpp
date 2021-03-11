@@ -29,22 +29,22 @@ public:
 		double beta);
 
 	double dp2e(double d, double p, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>())const;
+		vector<string> const& tracernames = vector<string>())const override;
 
 	double de2p(double d, double e, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>()) const;
+		vector<string> const& tracernames = vector<string>()) const override;
 
 	double de2c(double d, double e, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>()) const;
+		vector<string> const& tracernames = vector<string>()) const override;
 
 	double dp2c(double d, double p, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>()) const;
+		vector<string> const& tracernames = vector<string>()) const override;
 
 	double dp2s(double d, double p, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>()) const;
+		vector<string> const& tracernames = vector<string>()) const override;
 
 	double sd2p(double s, double d, tvector const& tracers = tvector(),
-		vector<string> const& tracernames = vector<string>()) const;
+		vector<string> const& tracernames = vector<string>()) const override;
 
 	~TillotsonOrg(void);
 };
