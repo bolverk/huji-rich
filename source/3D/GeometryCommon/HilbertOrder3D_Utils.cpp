@@ -1,14 +1,6 @@
 #include "HilbertOrder3D_Utils.hpp"
 #include <limits>
 
-namespace {
-  bool close2zero(double x)
-  {
-    constexpr double lowest_double = std::numeric_limits<double>::lowest();
-    return std::abs(x)<lowest_double;
-  }
-}
-
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
 {
   return static_cast<int>(ceil(log(pow(static_cast<double>(cor.size()), (1.0 / 3.0))) / log(2.0)));
