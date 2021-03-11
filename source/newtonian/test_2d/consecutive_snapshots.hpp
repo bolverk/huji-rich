@@ -33,7 +33,7 @@ public:
 		       Index2FileName* i2fn,
 		       const vector<DiagnosticAppendix*>& appendices);
 
-  void operator()(const hdsim& sim);
+  void operator()(const hdsim& sim) override;
 
   ~ConsecutiveSnapshots(void);
 

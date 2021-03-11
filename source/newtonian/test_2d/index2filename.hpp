@@ -41,7 +41,7 @@ public:
     \param index File index
     \return File name
    */
-  string operator()(int index);
+  string operator()(int index) override;
 
 private:
   const string prefix_;

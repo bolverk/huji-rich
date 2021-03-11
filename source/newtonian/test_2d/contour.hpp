@@ -42,7 +42,7 @@ public:
 		    Index2FileName* p_i2f,
 		    LocalContourCriterion* p_lcc);
 
-  void operator()(const hdsim& sim);
+  void operator()(const hdsim& sim) override;
 
 private:
   std::unique_ptr<Trigger> p_trigger_;

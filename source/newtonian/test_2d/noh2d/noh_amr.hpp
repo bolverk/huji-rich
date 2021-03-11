@@ -27,7 +27,7 @@ public:
 	 vector<ComputationalCell> const& cells,
 	 double time,
 	 vector<Vector2D> &directions,
-	 vector<int> const& Removed);
+	 vector<int> const& Removed) override;
 };
 
 //! \brief Noh problem Removal strategy class
@@ -47,7 +47,7 @@ public:
 	vector<int> CellsToRemove
 	(Tessellation const& tess,
 	 vector<ComputationalCell> const& cells, 
-	 double time)const;
+	 double time)const override;
 };
 
 #endif //NOH_AMR_HPP

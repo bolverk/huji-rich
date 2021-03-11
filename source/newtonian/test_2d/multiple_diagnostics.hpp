@@ -21,7 +21,7 @@ public:
    */
   explicit MultipleDiagnostics(const vector<DiagnosticFunction*>& diag_list);
 
-  void operator()(const hdsim& sim);
+  void operator()(const hdsim& sim) override;
 
   ~MultipleDiagnostics(void);
 };
