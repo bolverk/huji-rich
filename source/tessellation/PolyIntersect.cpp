@@ -16,9 +16,11 @@ IntersectFlags SegmentIntersection(Vector2D const& p0,Vector2D const& p1,
 		min(p0.y,p1.y)>max(q1.y,q0.y)||min(q1.y,q0.y)>max(p0.y,p1.y))
 		return False;
 	boost::array<Vector2D,3> points;
+	/*
 	points[0]=p0;
 	points[1]=p1;
 	points[2]=q0;
+	*/
 	double temp=orient2d(TripleConstRef<Vector2D>(p0,p1,q0));
 	//	points[2]=q1;
 	if(temp*orient2d(TripleConstRef<Vector2D>(p0,p1,q1))>0)
