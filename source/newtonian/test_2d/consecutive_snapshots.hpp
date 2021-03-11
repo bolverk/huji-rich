@@ -35,7 +35,7 @@ public:
 
   void operator()(const hdsim& sim) override;
 
-  ~ConsecutiveSnapshots(void);
+  ~ConsecutiveSnapshots(void) override;
 
 private:
   std::unique_ptr<Trigger> trigger_;

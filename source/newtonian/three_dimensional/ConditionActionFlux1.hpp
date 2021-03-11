@@ -74,7 +74,7 @@ public:
 		SpatialReconstruction3D const& interp);
 
 	//! \brief Class destructor
-	~ConditionActionFlux1(void);
+	~ConditionActionFlux1(void) override;
 
 	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 		const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
