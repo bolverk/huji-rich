@@ -31,7 +31,9 @@ public:
      */
     void updateTime(double dt);
 
-	void updateCycle();
+    /*! \brief Updates the cycle number
+     */
+    void updateCycle();
 
     /*! \brief Returns the current time of the simulation
       \return Time of the simulation
@@ -43,7 +45,9 @@ public:
      */
     size_t getCycle(void) const;
 
+    //! \brief Simulation time
     double time;
+    //! \brief Tracks the number of times time advance was called
     size_t cycle;
   };
 
@@ -55,15 +59,16 @@ public:
     \param tsc Time step calculator
     \param fc Flux calculator
     \param cu Cell updater
-	\param eu Extensive updater
-	\param source Source term
-	\param tsn The names of the stickers and tracers
-	\param proc_update How to load balance
+    \param eu Extensive updater
+    \param source Source term
+    \param tsn The names of the stickers and tracers
+    \param proc_update How to load balance
+    \param SR Special relativity flag
+    \param new_start Rerun indication
+    \param maxload parallel directive
   */
 #ifdef RICH_MPI
-  /*
-	\param tproc The tessellation of the domian decomposition
-   */
+  //! \param tproc The tessellation of the domian decomposition
 #endif //RICH_MPI
   HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
@@ -120,6 +125,9 @@ public:
 #ifdef RICH_MPI
   const Tessellation3D& getProcTesselation(void) const;
 
+  /*! \brief Get meta tessellation
+    \return Reference to meta tessellation
+   */
   Tessellation3D& getProcTesselation(void);
 #endif
 

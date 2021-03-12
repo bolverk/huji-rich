@@ -19,11 +19,13 @@ using namespace std;
 class HilbertCurve3D_shape
 {
 public:
-	// Constructor
+	//! \brief Constructor
 	HilbertCurve3D_shape();
-	// Comparison:
+	//! \brief Comparison:
+  //! \param shape Other shape
+  //! \return Result of comparison
 	bool operator==(const HilbertCurve3D_shape & shape);
-	// An array of the 7 unit vector steps defining the shape:
+	//! \brief An array of the 7 unit vector steps defining the shape:
 	boost::array<Vector3D, 7> m_vShapePoints;
 
 };
@@ -55,9 +57,12 @@ bool HilbertCurve3D_shape::operator==(const HilbertCurve3D_shape & shape)
 class HilbertCurve3D
 {
 public:
-	// Constructor
+	//! \brief Constructor
 	HilbertCurve3D(void);
-	// Calculate the Hilbert curve distance of a given point, given a required number of iterations:
+  //! \brief Calculate the Hilbert curve distance of a given point, given a required number of iterations:
+  //! \param rvPoint Point
+  //! \param numOfIterations Number of iterations
+  //! \return Position on curve
 	unsigned long long int Hilbert3D_xyz2d(Vector3D const & rvPoint, int numOfIterations);
 
 private:

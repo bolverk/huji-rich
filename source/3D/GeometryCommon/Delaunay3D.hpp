@@ -31,20 +31,43 @@ public:
 
   Delaunay3D();
 
+  /*! \brief Copy constructor
+    \param other Source
+   */
   Delaunay3D(Delaunay3D const& other);
 
+  /*! \brief Copy assingment
+    \param other Source
+    \return Reference to new object
+   */
   Delaunay3D& operator=(Delaunay3D const& other);
 
   ~Delaunay3D();
 
+  /*! \brief Build triangulation
+    \param points Mesh generating points
+    \param maxv Bounding point
+    \param minv Bounding point
+    \param order Sorted list of indices
+   */ 
   void Build(vector<Vector3D> const& points,Vector3D const& maxv,Vector3D const& minv,std::vector<size_t> &order);
 
+  /*! \brief Add new points and rebuild
+    \param points New points
+   */
   void BuildExtra(vector<Vector3D> const& points);
 
+  /*! \brief Dump data to file
+    \param filename Name of output file
+   */
   void output(string const& filename)const;
 
+  /*! \brief Validate input
+    \return True if input is valid
+   */
   bool CheckCorrect(void);
 
+  //! \brief Clear data
   void Clean(void);
 private:
   void InsertPoint(std::size_t index);

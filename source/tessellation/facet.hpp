@@ -42,6 +42,10 @@ public:
 	//! \brief Class destructor
 	~facet();
 
+  /*! \brief Assignment operator
+    \param other Source
+    \return Reference to new object
+   */
   facet& operator=(const facet& other);
 };
 

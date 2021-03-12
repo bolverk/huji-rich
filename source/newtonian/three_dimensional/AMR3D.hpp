@@ -33,8 +33,12 @@ public:
 	//! \brief Class destructor
 	virtual ~AMRCellUpdater3D(void);
 
+  /*! \brief Null constructor
+   */
   AMRCellUpdater3D(void);
 
+  /*! \brief Copy constructor
+   */
   AMRCellUpdater3D(const AMRCellUpdater3D&);
 
   /*! \brief Copy constructor
@@ -53,6 +57,9 @@ public:
 	\param eos Equation of state
 	\param volume Cell volume
 	\param tracerstickernames The names of the tracers and stickers
+	\param slope Gradients
+	\param CMold Old centre of mass
+	\param CMnew New centre of mass
 	\return Extensive
 	*/
 	virtual Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
@@ -61,10 +68,17 @@ public:
 	//! \brief Class destructor
 	virtual ~AMRExtensiveUpdater3D(void);
 
+  /*! \brief Null constructor
+   */
   AMRExtensiveUpdater3D(void);
 
+  /*! \brief Copy constructor
+   */
   AMRExtensiveUpdater3D(const AMRExtensiveUpdater3D&);
 
+  /*! \brief Copy assignment
+    \return Reference to new object
+   */
   AMRExtensiveUpdater3D& operator=(const AMRExtensiveUpdater3D&);
 };
 
@@ -98,11 +112,17 @@ public:
 class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
-  /*! \param slope Gradients
+  /*! 
+    \param cell Computational cell
+    \param eos Equation of state
+    \param volume Volume
+    \param tracerstickernames Tracers and stickers names
+    \param slope Gradients
     \param CMold Old centre of mass
     \param CMnew New centre of mass
+    \return Conserved variables
    */
-	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+  Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
 		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
@@ -191,6 +211,7 @@ public:
 	\param cu Cell updater
 	\param eu Extensive updater
 	\param eos Equation of state
+	\param interp Interpolation scheme
 	*/
 	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = nullptr,
 		AMRExtensiveUpdater3D* eu = nullptr);

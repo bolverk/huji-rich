@@ -42,6 +42,9 @@ public:
 
 	  virtual ~Action2(void);
 
+	  /*! \brief Copy assignment
+	    \return Reference to new object
+	   */
 	  Action2& operator=(const Action2&);
 
 	  /*! \brief Copy constructor

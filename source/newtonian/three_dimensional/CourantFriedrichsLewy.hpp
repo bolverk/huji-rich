@@ -26,6 +26,9 @@ public:
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
 		const vector<Vector3D>& face_velocities,const double time, TracerStickerNames const& tracerstickernames) const override;
 
+  /*! \brief Override the time step
+    \param dt New time step
+   */
 	void SetTimeStep(double dt);
 
 private:

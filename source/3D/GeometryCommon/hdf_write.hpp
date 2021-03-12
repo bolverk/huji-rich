@@ -25,6 +25,10 @@ public:
 
 	/*! \brief Returns the name of the new field
 	*/
+
+	/*! \brief Get appendix title
+	  \return Title
+	 */
 	virtual string getName(void) const = 0;
 
 	//! \brief Class destructor

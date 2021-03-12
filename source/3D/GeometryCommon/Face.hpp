@@ -32,6 +32,10 @@ public:
   */
   Face(point_vec_v const& vert,std::size_t neighbor1,std::size_t neighbor2);
 
+  /*! \brief Assignment operator
+    \param other Source
+    \return Reference to new object
+   */
   Face& operator=(const Face& other);
 
   Face(void);

@@ -14,6 +14,8 @@ class DefaultCellUpdater : public CellUpdater3D
 public:
 
 	//! \brief Class constructor
+  //! \param SR Special relativity flag
+  //! \param G Correction to adiabatic index
 	DefaultCellUpdater(bool SR = false,double G=0);
 
 	void operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,

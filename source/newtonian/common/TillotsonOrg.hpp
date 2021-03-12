@@ -33,6 +33,19 @@ private:
    */
 	double dep2cIV(double d, double e, double p)const;
 public:
+
+  /*! \brief Class constructor
+    \param a a parameter
+    \param b b parameter
+    \param A A parameter
+    \param B B parameter
+    \param rho0 Refernce density
+    \param E0 Refernce energy
+    \param EIV EIV parameter
+    \param ECV ECV parameter
+    \param alpha alpha Parameter
+    \param beta beta Parameter
+   */
 	TillotsonOrg(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV, double alpha,
 		double beta);
 

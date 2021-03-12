@@ -38,6 +38,10 @@ public:
 	void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
 		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const override;
 
+  /*! \brief Adjust the size of the box
+    \param ll Lower left corner
+    \param ur Upper right corner
+   */
 	void ChangeBox(Vector3D const& ll, Vector3D const& ur);
 private:
 

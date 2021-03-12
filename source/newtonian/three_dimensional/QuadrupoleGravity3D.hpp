@@ -11,6 +11,8 @@ private:
 	const double smoothlength_;
 	bool output_;
 public:
+  /*! \brief List of values of the potential
+   */
 	mutable vector<double> potential;
 
   /*! \brief Class constructor

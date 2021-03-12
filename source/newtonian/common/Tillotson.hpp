@@ -13,6 +13,7 @@ struct dp2eII;
 //! \brief Tillotson equation of state
 class Tillotson : public EquationOfState
 {
+  //! \brief Auxiliary struct
 	friend  struct dp2eII;
 private:
 	double a_, b_, A_, B_, rho0_, E0_, EIV_, ECV_,alpha_,beta_;

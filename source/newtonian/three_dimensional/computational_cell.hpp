@@ -70,6 +70,9 @@ public:
 		const std::array<double, MAX_TRACERS>& tracers_i,
 		const std::array<bool, MAX_STICKERS>& stickers_i);
 
+  /*! \brief Copy constructor
+    \param other Source
+   */
   ComputationalCell3D(const ComputationalCell3D& other);
 
 	/*! \brief Self increment operator
@@ -96,10 +99,19 @@ public:
 	ComputationalCell3D& operator=(ComputationalCell3D const& other);
 
 #ifdef RICH_MPI
+  /*! \brief Get size of chunks
+    \return Chunk size in bytes
+   */
 	size_t getChunkSize(void) const;
 
+  /*! \brief Decompose cell into list of numbers
+    \return List of numbers
+   */
 	vector<double> serialize(void) const;
 
+  /*! \brief Reconstruct cell from series of numbers
+    \param data List of numbers
+   */
 	void unserialize
 		(const vector<double>& data);
 #endif // RICH_MPI

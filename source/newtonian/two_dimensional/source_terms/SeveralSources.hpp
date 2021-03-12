@@ -14,6 +14,7 @@ class SeveralSources :public SourceTerm
 {
 public:
 	//! \brief Class constructor
+  //! \param forces List of list of sources
 	explicit SeveralSources(const vector<SourceTerm*>& forces);
 	//! \brief Class destructor
 	~SeveralSources(void) override;

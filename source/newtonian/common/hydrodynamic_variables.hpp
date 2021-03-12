@@ -23,7 +23,9 @@ public:
   Conserved(double mass,
 	    Vector2D const& momentum,
 	    double energy);
-
+  /*! \brief Copy constructor
+    \param other Source
+   */
   Conserved(const Conserved& other);
 
   //! \brief Mass

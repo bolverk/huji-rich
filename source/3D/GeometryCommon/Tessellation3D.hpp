@@ -25,6 +25,15 @@ class Tessellation3D
 {
 public:
 #ifdef RICH_MPI
+  /*! \brief Update meta tessellation points
+    \param vproc Meta tessellation
+    \param rank Parallel process rank
+    \param points New points
+    \param selfindex Self indices
+    \param sentproc List of processes to which points were sent
+    \param sentpoints List of sent points
+    \return Received points
+   */
   virtual vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
 					   vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
 					   vector<vector<std::size_t> >& sentpoints) = 0;

@@ -7,6 +7,10 @@
 class LagrangianExtensiveUpdater3D : public ExtensiveUpdater3D
 {
 public:
+  /*! \brief Class constructor
+    \param lflux Lagrangian flux calculator
+    \param sequence Condition - action sequence
+   */
 	LagrangianExtensiveUpdater3D(LagrangianFlux3D const& lflux, const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*, 
 		const ConditionExtensiveUpdater3D::Action3D*> >& sequence);
 

@@ -118,9 +118,16 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 //! \brief Auxiliary class
 struct dp2eII
 {
+  /*! \brief Class constructor
+    \param eos Equation of state
+   */
   explicit dp2eII(Tillotson const& eos) : eos_(eos)
 	{}
 
+  /*! \brief Calculates pressure 
+    \param e Energy
+    \return Pressure
+   */
 	double operator()(double e)
 	{
 		double res = std::abs(1.0 - eos_.de2pII(eos_.temp_d_, e) / eos_.temp_p_);

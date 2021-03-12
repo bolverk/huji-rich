@@ -71,6 +71,7 @@ public:
   virtual vector<double> operator()(const hdsim& sim) const = 0;
 
   /*! \brief Returns the name of the new field
+    \return Name of new field
    */
   virtual string getName(void) const = 0;
 

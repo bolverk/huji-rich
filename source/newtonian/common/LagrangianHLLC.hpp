@@ -20,6 +20,7 @@ public:
 			Primitive const& right,
 			double velocity) const override;
 
+  //! \brief Energy
 	mutable double energy;
 };
 

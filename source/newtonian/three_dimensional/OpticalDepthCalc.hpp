@@ -27,6 +27,11 @@ private:
     return *this; 
   }
 public:
+  /*! \brief Class constructor
+    \param opening Opening angle
+    \param tproc Meta tessellation
+    \param debug_name Logging file name
+   */
 	OpticalDepthCalc(double opening = 0.25
 			 #ifdef RICH_MPI
 			 , Tessellation3D const* tproc = 0
@@ -37,7 +42,7 @@ public:
 
   /*! \brief Calculates the optical depth
     \param tess Tessellation
-    \param cell Computational cells
+    \param cells Computational cells
     \param res Results
    */
   void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
