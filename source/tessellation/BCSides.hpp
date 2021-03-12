@@ -90,6 +90,9 @@ public:
 
   ~WrongBCSidesOrderException(void);
 
+  /*! \brief Copy constructor
+    \param eo Source
+   */
   WrongBCSidesOrderException(const WrongBCSidesOrderException& eo);
 
   /*! \brief Returns the y coordinate of the upper boundary

@@ -22,7 +22,10 @@ namespace delaunay_loggers {
     //! \brief Class constructor
     DelaunayLogger(void);
 
-    //! \brief Dumps output
+    /*! \brief Dumps output
+       \param cor List of points
+       \param f List of facets
+     */
     virtual void output(vector<Vector2D> const& cor,
 			vector<facet> const& f);
 

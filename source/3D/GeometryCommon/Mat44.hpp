@@ -6,6 +6,7 @@
 #ifndef MAT44_HPP
 #define MAT44_HPP 1
 
+//! \brief A 4x4 matrix
 template <typename T>
 class Mat44
 {

@@ -9,8 +9,11 @@
 #include <vector>
 #include <boost/container/small_vector.hpp>
 #include "Face.hpp"
+//! \brief Container for points defining a face
 typedef boost::container::small_vector<size_t, 24> face_vec;
+//! \brief Container for neighbouring points
 typedef boost::container::small_vector<size_t, 8> point_vec;
+//! \brief Container for neighbouring tetrahedra
 typedef boost::container::small_vector<size_t, 40> tetra_vec;
 
 using std::vector;
@@ -45,6 +48,9 @@ public:
   */
   virtual size_t GetPointNo(void) const = 0;
 
+  /*! \brief Get number of points
+    \return Number of all points
+   */
   virtual size_t& GetPointNo(void) = 0;
 
   /*! \brief Returns Position of mesh generating point
@@ -59,6 +65,9 @@ public:
   */
   virtual double GetArea(size_t index) const = 0;
 
+  /*! \brief Get areas of all faces
+    \return List of areas of all faces
+   */
   virtual vector<double>& GetAllArea(void) = 0;
 
 
@@ -91,6 +100,9 @@ public:
   */
   virtual face_vec const& GetCellFaces(size_t index) const = 0;
 
+  /*! \brief Get all cell faces
+    \return List of all cell faces
+   */
   virtual vector<face_vec >& GetAllCellFaces(void) = 0;
 
   /*!
@@ -99,6 +111,9 @@ public:
   */
   virtual vector<Vector3D>& accessMeshPoints(void) = 0;
 
+  /*! \brief Get all mesh points
+    \return List of all mesh points
+   */
   virtual const vector<Vector3D>& getMeshPoints(void) const = 0;
   
 
@@ -121,6 +136,9 @@ public:
   */
   virtual point_vec const& GetPointsInFace(size_t index) const = 0;
 
+  /*! \brief Get a list of all points in face
+    \return List to all points in face
+   */
   virtual vector<point_vec > & GetAllPointsInFace(void) = 0;
 
   /*!
@@ -128,18 +146,18 @@ public:
     \param index The cell to check
     \return The neighbors
   */
-
   virtual vector<size_t> GetNeighbors(size_t index)const = 0;
+
   /*!
     \brief Returns a list of the neighbors of a cell
     \param index The cell to check
     \param res The neighbors, returned
   */
-
   virtual void GetNeighbors(size_t index,vector<size_t> &res)const = 0;
 
   /*!
     \brief Cloning function
+    \return Pointer to new tessellation
   */
   virtual Tessellation3D* clone(void) const = 0;
 
@@ -171,18 +189,40 @@ public:
   */
   virtual vector<vector<size_t> >const& GetDuplicatedPoints(void)const = 0;
 
+  /*!
+    \brief Returns the indeces of the points that were sent to other processors as ghost points
+    \return The sent points, outer vector is the index of the cpu and inner vector are the points sent through the face
+  */
   virtual vector<int> GetDuplicatedProcs(void)const = 0;
 
+  /*! \brief Gets the list of parallel process to which points have been sent
+    \return List of process indices
+   */
   virtual vector<int> GetSentProcs(void)const = 0;
 
+  /*! \brief Get Indices of points sent to other parallel processes
+    \return List of indices of cells sent to other processes, partitioned by process
+   */
   virtual vector<vector<size_t> > const& GetSentPoints(void)const = 0;
 
+  /*! \brief Get real index of points
+    \return List of real indices
+   */
   virtual vector<size_t> const& GetSelfIndex(void) const = 0;
 
+  /*! \brief Gets the list of parallel process to which points have been sent
+    \return List of process indices
+   */
   virtual vector<int>& GetSentProcs(void) = 0;
 
+  /*! \brief Get Indices of points sent to other parallel processes
+    \return List of indices of cells sent to other processes, partitioned by process
+   */
   virtual vector<vector<size_t> > & GetSentPoints(void) = 0;
 
+  /*! \brief Get self inidices of points
+    \return List of all indices
+   */
   virtual vector<size_t> & GetSelfIndex(void) = 0;
 
   /*!
@@ -222,9 +262,15 @@ public:
   */
   virtual void GetNeighborNeighbors(vector<size_t> &result,size_t point)const = 0;
 
-
+  /*! \brief Get the indices of neighbours of a face
+    \param face_index Index of the face
+    \return Pair of indices of cells on the two sides of the face
+   */
   virtual std::pair<size_t,size_t> GetFaceNeighbors(size_t face_index)const = 0;
 
+  /*! \brief Retrieve all neighbouring points who share a face
+    \return List of pairs of indices of all neighbouring points
+   */
   virtual std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void) = 0;
 
   /*!
@@ -250,24 +296,61 @@ public:
   */
   virtual Vector3D CalcFaceVelocity(size_t index,Vector3D const& v0,Vector3D const& v1)const=0;
 
+  /*! \brief Calculates the centres of mass of all faces
+    \return List of all centres of mass
+   */
   virtual vector<Vector3D>& GetAllFaceCM(void) = 0;
 
+  /*! \brief Return the centre of mass of a face
+    \param index Face index
+    \return Position of the face centre of mass
+   */
   virtual Vector3D FaceCM(size_t index)const=0;
 
+  /*! \brief Get indices of ghost points
+    \return List of list of ghost point indices
+   */
   virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;
 
+  /*! \brief \brief Get indices of ghost points
+    \return List of indices of ghost points
+   */
   virtual vector<vector<size_t> > & GetGhostIndeces(void) = 0;
 
+  /*! \brief Get the coordinate of opposite corners of the boundary
+    \return Pair of coordiantes of opposite corners
+   */
   virtual std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const = 0;
 
+  /*! \brief Build tessellatoin without a box
+    \param points Mesh generating points
+    \param ghosts Ghost points
+    \param toduplicate List of duplicate points
+   */
   virtual void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts, vector<size_t> toduplicate) = 0;
 
+  /*! \brief Checks if a point is inside the box
+    \param index Point index
+    \return True if point is inside the box
+   */
   virtual bool IsPointOutsideBox(size_t index)const = 0;
 
+  /*! \brief Write tessellation to file
+    \param filename Name of output file
+   */
   virtual void output(std::string const& filename)const=0;
 
+  /*! \brief Adjust the boundary
+    \param ll Lower left
+    \param ur Upper right
+   */
   virtual void SetBox(Vector3D const& ll, Vector3D const& ur) = 0;
 };
 
+/*! \brief Create a subset of a vector of points
+  \param v Source list of points
+  \param index List of indices
+  \return Points selected according to list of indices
+ */
 point_vec_v VectorValues(std::vector<Vector3D> const&v, point_vec const &index);
 #endif // TESSELLATION3D_HPP

@@ -1,4 +1,4 @@
-/*! \file cylinderical_geometry.hpp
+/*! \file cylindrical_geometry.hpp
 \brief Cylinderical geometry by means of source terms
 \author Almog Yalinewich
 */

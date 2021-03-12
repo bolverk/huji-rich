@@ -3,6 +3,7 @@
 #include "ConditionExtensiveUpdater3D.hpp"
 #include "ConditionActionFlux1.hpp"
 
+//! \brief Lagrangian cell updater
 class LagrangianExtensiveUpdater3D : public ExtensiveUpdater3D
 {
 public:

@@ -66,6 +66,7 @@ private:
 	const vector<pair<const Condition3D*, const Action3D*> > sequence_;
 };
 
+//! \brief Class that returns true for all cells
 class ChooseAll : public ConditionExtensiveUpdater3D::Condition3D
 {
 public:
@@ -77,6 +78,7 @@ public:
 	}
 };
 
+//! \brief Default extensive updater
 class RegularExtensiveUpdate3D : public ConditionExtensiveUpdater3D::Action3D
 {
 public:

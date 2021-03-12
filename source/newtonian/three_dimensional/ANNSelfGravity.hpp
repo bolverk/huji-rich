@@ -4,6 +4,7 @@
 #include "ConservativeForce3D.hpp"
 #include <string>
 
+//! \brief ANN based self gravity
 class ANNSelfGravity : public Acceleration3D
 {
 private:

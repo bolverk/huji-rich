@@ -3,6 +3,7 @@
 #include "point_motion_3d.hpp"
 #include "LinearGauss3D.hpp"
 
+//! \brief Point motion according to Lloyd's algorithm
 class LMotion3D : public PointMotion3D
 {
 private:

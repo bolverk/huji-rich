@@ -53,6 +53,7 @@ public:
 	vector<std::pair<size_t, size_t> > GetOuterFacesIndeces(Tessellation3D const& tess)const;
 };
 
+//! \brief Rigid wall ghost
 class RigidWallGenerator3D : public Ghost3D
 {
 public:
@@ -65,6 +66,7 @@ public:
 		TracerStickerNames const& tracerstickernames) const override;
 };
 
+//! \brief Generator for free - flow ghosts
 class FreeFlowGenerator3D : public Ghost3D
 {
 public:
@@ -77,11 +79,16 @@ public:
 		TracerStickerNames const& tracerstickernames) const override;
 };
 
+//! \brief Ghost cell with time independent properties
 class ConstantPrimitiveGenerator3D : public Ghost3D
 {
 private:
 	const ComputationalCell3D cell_;
 public:
+
+  /*! \brief Class constructor
+    \param cell Source cell
+   */
   explicit ConstantPrimitiveGenerator3D(ComputationalCell3D const& cell);
 
 	void operator() (const Tessellation3D& tess,
@@ -93,9 +100,13 @@ public:
 		TracerStickerNames const& tracerstickernames) const override;
 };
 
+//! \brief Class to describe several different ghost cells
 class SeveralGhostGenerator3D : public Ghost3D
 {
 public:
+
+
+  //! \brief Decides between different ghosts
 	class GhostCriteria3D
 	{
 	public:

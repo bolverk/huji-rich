@@ -59,8 +59,11 @@ public:
 
 		virtual ~Action(void);
 
+	  /*! \brief Default constructor
+	   */
 	  Action(const Action&);
 
+	  // \brief Default copy operator
 	  Action& operator=(const Action&);
 	};
 

@@ -33,6 +33,9 @@ public:
 	Vector2D CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D rL,
 		Vector2D rR,Vector2D f)const override;
 
+  /*! \brief Clone tessellation
+    \return Pointer to new tessellation
+   */
 	Tessellation* clone(void)const override;
 
 	vector<int> GetNeighbors(int index)const override;

@@ -9,6 +9,7 @@
 #include <vector>
 #include <boost/container/small_vector.hpp>
 #include "Vector3D.hpp"
+//! \brief Container for small collection of points
 typedef boost::container::small_vector<Vector3D, 10> point_vec_v;
 
 using std::vector;

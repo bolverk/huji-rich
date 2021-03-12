@@ -7,6 +7,7 @@
 #define TILLOTSON_HPP 1
 #include "equation_of_state.hpp"
 
+//! \brief Helper class
 struct dp2eII;
 
 //! \brief Tillotson equation of state
@@ -27,6 +28,20 @@ private:
 	double dep2cI(double d, double e, double p)const;
 	double dep2cIV(double d, double e, double p)const;
 public:
+  /*! \brief Class constructor
+    \param a a parameter
+    \param b b parameter
+    \param A A parameter
+    \param B B parameter
+    \param rho0 Refernce density
+    \param E0 Refernce energy
+    \param EIV EIV parameter
+    \param ECV ECV parameter
+    \param alpha alpha Parameter
+    \param beta beta Parameter
+    \param negative_pressure Flag for handling negative pressure
+    \param e_index TBD
+   */
 	Tillotson(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV,double alpha,
 		double beta,bool negative_pressure=false, size_t e_index = 0);
 

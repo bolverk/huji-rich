@@ -18,6 +18,7 @@ public:
 	  \param cfl CFL number
 	  \param source The source term for the simulation
 	  \param SourceCFL CFL number for the source term
+	  \param debug Logging flag
 	 */
 	explicit CourantFriedrichsLewy(double cfl,double SourceCFL, SourceTerm3D const& source,
 		bool debug=false);

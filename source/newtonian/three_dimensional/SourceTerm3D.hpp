@@ -29,11 +29,15 @@ public:
 		const vector<Conserved3D>& fluxes,const vector<Vector3D>& point_velocities,const double t,double dt,
 		TracerStickerNames const& tracerstickernames,vector<Conserved3D> &extensives) const = 0;
 
+  /*! \brief Informs simulation about the time step
+    \return Inverse of the time step (to allow for an infinite time step)
+   */
 	virtual double SuggestInverseTimeStep(void)const;
 
 	virtual ~SourceTerm3D(void);
 };
 
+//! \brief No force
 class ZeroForce3D : public SourceTerm3D
 {
 public:
