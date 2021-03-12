@@ -5,6 +5,7 @@
 #include "computational_cell.hpp"
 #include <string>
 
+//! \brief Optical depth calculator
 class OpticalDepthCalc
 {
 private:

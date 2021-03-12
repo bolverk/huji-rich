@@ -26,6 +26,7 @@
 typedef std::array<std::size_t, 4> b_array_4;
 typedef std::array<std::size_t, 3> b_array_3;
 
+//! \brief A three dimensional voronoi tessellation
 class Voronoi3D : public Tessellation3D
 {
 private:
@@ -175,40 +176,92 @@ public:
 
   vector<face_vec >& GetAllCellFaces(void) override;
 
+  /*! \brief Get the points in face
+    \param index Face index
+    \return Indices of points in face
+   */
   point_vec const& GetPointsInFace(std::size_t index) const override;
 
+  /*! \brief Get the neighbours across a face
+    \param face_index Index of face
+    \return Indices of neighbour across face
+   */
   std::pair<std::size_t, std::size_t> GetFaceNeighbors(std::size_t face_index)const override;
 
+  /*! \brief Get Duplicated processe
+    \return List of duplicated points
+   */
   vector<int> GetDuplicatedProcs(void)const override;
 
+  /*! \brief Get a list of parallel processes to which points have been sent
+    \return List of process numbers
+   */
   vector<int> GetSentProcs(void)const override;
 
+  /*! \brief List of point sent to parallel processes, partitioned by processor number
+    \return List of list of indices
+   */
   vector<vector<std::size_t> > const& GetSentPoints(void)const override;
 
+  /*! \brief Get indices of all real cells
+    \return List of indices of all real cells
+   */
   vector<std::size_t> const& GetSelfIndex(void) const override;
 
+  /*! \brief Get the indices of ghost points
+    \return List of list of ghost points
+   */
   vector<vector<std::size_t> > const& GetGhostIndeces(void) const override;
 
+  /*! \brief Get the indices of ghost points
+    \return List of list of ghost points
+   */
   vector<vector<std::size_t> >& GetGhostIndeces(void) override;
 
   void GetNeighbors(size_t index, vector<size_t> &res)const override;
 
+  /*! \brief Get the positions of opposite corners on the bounding box
+    \return Pair of points on opposite corners
+   */
   std::pair<Vector3D, Vector3D> GetBoxCoordinates(void)const override;
 
+  /*! \brief Build tessellation without a box
+    \param points Mesh generating points
+    \param ghost Ghost points
+    \param toduplicate Indices of points to be duplicated
+   */
   void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate) override;
 
   vector<double>& GetAllVolumes(void) override;
 
   vector<double> GetAllVolumes(void)const override;
 
-  std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void) override;
+  /*! \brief Get all face neighbours
+    \return List of pairs of indices to neighbours
+   */
+  std::vector<std::pair<size_t, size_t> >& GetAllFaceNeighbors(void) override
+;
 
+  /*! \brief List all points in face
+    \return List of all points in face
+   */
   vector<point_vec > & GetAllPointsInFace(void) override;
 
+  /*! \brief Get the number of points
+    \return The number of points
+   */
   size_t& GetPointNo(void) override;
 
+  /*! \brief Check whether a point is inside the computational domain
+    \param index Index of point
+    \return bool True if point is inside
+   */
   bool IsPointOutsideBox(size_t index)const override;
 
+  /*! \brief Adjust position of the boundary
+    \param ll Lower left corner
+    \param ur Upper right corner
+  */
   void SetBox(Vector3D const& ll, Vector3D const& ur) override;
 };
 

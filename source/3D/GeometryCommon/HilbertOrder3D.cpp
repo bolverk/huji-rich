@@ -15,7 +15,7 @@
 
 using namespace std;
 
-// The elementary Hilbert Curve shape:
+//! \brief The elementary Hilbert Curve shape
 class HilbertCurve3D_shape
 {
 public:
@@ -51,7 +51,7 @@ bool HilbertCurve3D_shape::operator==(const HilbertCurve3D_shape & shape)
 	return b;
 }
 
-// The Hilbert Curve class:
+//! \brief The Hilbert Curve class:
 class HilbertCurve3D
 {
 public:

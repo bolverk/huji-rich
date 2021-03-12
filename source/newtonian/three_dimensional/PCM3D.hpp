@@ -24,6 +24,12 @@ public:
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
 		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const override;
 
+  /*! \brief Calculate the slopes
+    \param tess Tessellation
+    \param cells Computational cells
+    \param time Simulation time
+    \param tracerstickersnames Tracers and stickers names
+   */
 	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) override;
 
 	std::vector<Slope3D>& GetSlopes(void) override;

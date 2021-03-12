@@ -33,6 +33,9 @@ public:
   //! \brief tracers
   tvector tracers;
 
+  /*! \brief Copy constructor
+    \param other Source
+   */ 
   Extensive(const Extensive& other);
 
   /*! \brief Assignment operator

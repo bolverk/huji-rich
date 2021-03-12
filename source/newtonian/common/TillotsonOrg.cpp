@@ -108,6 +108,7 @@ double TillotsonOrg::dep2cIV(double d, double e, double p) const
 	return res;
 }
 
+//! \brief Auxiliary struct
 	struct dp2eIIOrg
 	{
 	  explicit dp2eIIOrg(TillotsonOrg const& eos) : eos_(eos)

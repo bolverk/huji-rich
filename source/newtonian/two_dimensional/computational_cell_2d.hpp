@@ -173,6 +173,10 @@ public:
   */
   TracerStickerNames(TracerStickerNames const& other);
 
+  /*! \brief Assignment operator
+    \param other Source
+    \return Reference to self
+   */
   TracerStickerNames& operator=(const TracerStickerNames& other);
 
   /*!

@@ -6,6 +6,7 @@
 #ifndef MAT3_HPP
 #define MAT3_HPP 1
 
+//! \brief A 3x3 matrix
 template <typename T>
 class Mat33
 {

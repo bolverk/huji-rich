@@ -114,6 +114,8 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	return res;
 }
 
+
+//! \brief Auxiliary class
 struct dp2eII
 {
   explicit dp2eII(Tillotson const& eos) : eos_(eos)

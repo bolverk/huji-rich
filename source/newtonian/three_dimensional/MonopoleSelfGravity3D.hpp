@@ -3,6 +3,7 @@
 
 #include "ConservativeForce3D.hpp"
 
+//! \brief Point gravity
 class MonopoleSelfGravity3D : public Acceleration3D
 {
 private:

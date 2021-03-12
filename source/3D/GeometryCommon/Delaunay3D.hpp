@@ -13,13 +13,19 @@ using std::vector;
 using std::string;
 //using std::stack;
 
+//! \brief A three dimensional delauny triangulation
 class Delaunay3D
 {
 public:
+  //! \brief List of tetrahedra
   vector<Tetrahedron> tetras_;
+  //! \brief List of mesh generating points
   vector<Vector3D> points_;
+  //! \brief List of empty tetrahedra
   boost::container::flat_set<size_t> empty_tetras_;
+  //! \brief Length of list of real points
   std::size_t Norg_;
+  //! \brief List of outside neighbours
   std::size_t outside_neighbor_;
 
 

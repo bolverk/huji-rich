@@ -9,6 +9,10 @@
 #ifndef HILBERTPROC_HPP
 #define HILBERTPROC_HPP 1
 
+/*! \brief Perform Hilbert ordering on the positions of the processes
+  \param tess Meta tessellation
+  \return Hilbert ordered list of process positions
+ */
 vector<Vector3D> HilbertProcPositions(Tessellation3D const& tess);
 
 #endif //HILBERTPROC_HPP

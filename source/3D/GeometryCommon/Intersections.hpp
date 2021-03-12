@@ -3,10 +3,15 @@
 
 #include "Face.hpp"
 
+//! \brief Sphere data
 struct Sphere
 {
+  //! \brief Centre of the sphere
 	Vector3D center;
+  //! \brief Sphere radius 
 	double radius;
+
+  //! \brief Default constructor
 	Sphere():center(Vector3D()),radius(0){}
 };
 

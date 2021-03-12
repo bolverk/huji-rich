@@ -22,7 +22,7 @@ public:
   /*! \brief Class constructor
     \param err_msg Error message
    */
-  explicit UniversalError(std::string const& err_msg);
+  explicit UniversalError(const string& err_msg);
 
   /*! \brief Appends std::string to the error message
     \param msg Message to append
