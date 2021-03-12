@@ -93,12 +93,20 @@ public:
   //! \brief Advances the simulation in time (second order)
   void timeAdvance2();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance3();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance32();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance33();
 
+  /*! \brief Fourth order time advance
+   */
   void timeAdvance4();
 
   /*! \brief Access to tessellation

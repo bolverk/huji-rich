@@ -62,6 +62,8 @@ public:
 
 		virtual ~Action3D(void);
 
+	  /*! \brief Resets data
+	   */
 		virtual void Reset(void) const {}
 	};
 

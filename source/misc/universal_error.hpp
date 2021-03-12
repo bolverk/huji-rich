@@ -30,20 +30,27 @@ public:
   void Append2ErrorMessage(std::string const& msg);
 
   /*! \brief Adds an entry to the list
+    \param field Field name
+    \param value value
    */
   void addEntry(std::string const& field,
 		double value);
 
   /*! \brief Returns the error message
+    \return Error message
    */
   std::string const& getErrorMessage(void) const;
 
-  /*! \brief Returns entry fields
+  /*! \brief Returns entry fields and values
+    \return List of fields and values
    */
   std::vector<pair<string, double> > const& getFields(void) const;
 
   ~UniversalError(void);
 
+  /*! \brief Copy constructor
+    \param eo Source
+   */
   UniversalError(const UniversalError& eo);
 
 private:

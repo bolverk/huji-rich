@@ -18,7 +18,13 @@ using std::vector;
 */
 vector<std::size_t> HilbertOrder3D(vector<Vector3D> const& cor);
 
-
+/*! \brief Get the reorderd list of indices
+  \param cor List of points
+  \param ll Low left corner
+  \param ur Upper right corner
+  \param Hmax Upper index of real indices
+  \return List of indices
+ */
 vector<std::size_t> GetGlobalHibertIndeces(vector<Vector3D> const& cor,Vector3D const& ll, Vector3D const& ur,size_t &Hmax);
 
 #endif // HILBERTORDER_HPP

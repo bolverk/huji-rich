@@ -16,6 +16,10 @@
 
 using std::vector;
 
+/*! \brief Checks if a number is numerically close to zero
+  \param x Number
+  \return True is the number is close enough to zero
+ */
 bool close2zero(const double x);
 
 /*! \brief Checks whether a number is a nan
@@ -324,8 +328,9 @@ template <class T> vector<T> VectorValues
 	return result;
 }
 
-template <class T> void FlipVector(vector<T> &v);
-
+/*! \brief Reverses the vector
+  \param v Vector
+ */
 template <class T> void FlipVector(vector<T> &v)
 {
 	vector<T> temp(v);
@@ -797,9 +802,13 @@ template<class S, class T> typename vector<T>::const_reference safe_retrieve
 	return data.at(index);
 }
 
-template<typename It, typename It2, class S>
-It safe_retrieve(const It data_begin, const It key_begin, const It key_end, S const& key);
-
+/*! \brief Retrieve a value from the container
+  \param data_begin First iterator
+  \param key_begin First key
+  \param key_end Last key
+  \param key Desired key
+  \return Iterator to value
+ */
 template<typename It,typename It2, class S>
 const It safe_retrieve(const It data_begin, const It2 key_begin, const It2 key_end, S const& key)
 {

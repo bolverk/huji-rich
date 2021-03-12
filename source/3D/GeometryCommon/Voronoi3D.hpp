@@ -36,7 +36,14 @@ private:
   std::set<int> set_temp_;
   std::stack<int> stack_temp_;
 
-  //void output_buildextra(std::string const& filename)const;
+  /*! \brief Finds intersections for a single cell
+    \param box Bounding faces
+    \param point Point index
+    \param sphere Bounding sphere
+    \param intersecting_faces Result
+    \param Rtemp TBA
+    \param vtemp TBA
+   */
   void FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 			       vector<size_t> &intersecting_faces,std::vector<double> &Rtemp,std::vector<Vector3D> &vtemp);
   /*  void FindIntersectionsRecursive(vector<std::size_t> &res,Tessellation3D const& tproc, std::size_t rank,
@@ -45,6 +52,12 @@ private:
   /*  void FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
       Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index);*/
   std::size_t GetFirstPointToCheck(void)const;
+
+  /*! \brief Get point to check
+    \param point Point index
+    \param check Mast of checked points
+    \param res Result
+   */
   void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);
   void CalcRigidCM(std::size_t face_index);
   void GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const;
@@ -61,6 +74,11 @@ private:
 								 vector<unsigned char> &checked_clear);
   vector<Vector3D> CreateBoundaryPointsMPI(vector<std::pair<std::size_t, std::size_t> > const& to_duplicate,
 					   Tessellation3D const& tproc, vector<vector<size_t> > &self_duplicate);
+
+  /*! \brief Calculate intersections
+    \param tproc Meta tessellation
+    \param ghost_index Indices of ghost points
+   */
   void MPIFirstIntersections(Tessellation3D const& tproc, vector<std::pair<std::size_t, std::size_t> > &ghost_index);
 #endif
   double CalcTetraRadiusCenter(std::size_t index);
@@ -92,6 +110,15 @@ private:
   std::array<Vector3D, 5> temp_points2_;
 public:
 #ifdef RICH_MPI
+  /*! \brief Update meta tessellation
+    \param vproc Meta tessellation
+    \param rank Parallel process rank
+    \param points New point positions
+    \param selfindex Self indices of points
+    \param sentproc List of processes to which points were sent
+    \param sentpoints List of indices of points sent
+    \return Received points
+   */
   vector<Vector3D> UpdateMPIPoints(Tessellation3D const& vproc, int rank,
 				   vector<Vector3D> const& points, vector<std::size_t>& selfindex, vector<int>& sentproc,
 				   vector<vector<std::size_t> >& sentpoints) override;
@@ -104,8 +131,16 @@ public:
 
   vector<Vector3D>& GetAllFaceCM(void) override;
 
+  /*! \brief Calculates the centre of mass of a face
+    \param index Face index
+    \return Face centre of mass
+   */
   Vector3D FaceCM(std::size_t index)const override;
 
+  /*! \brief class constructor
+    \param ll Lower left
+    \param ur Upper right
+   */
   Voronoi3D(Vector3D const& ll, Vector3D const& ur);
 
   void output(std::string const& filename)const override;
@@ -115,39 +150,80 @@ public:
 #ifdef RICH_MPI
   void Build(vector<Vector3D> const& points, Tessellation3D const& tproc) override;
 
+  //! \param display Logging flag
   friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points, size_t Niter, double speed, int mode,double round, bool display);
 
+  //! \param display Logging flag
   friend void SetLoad(Voronoi3D &tproc, vector<Vector3D> &points,vector<ComputationalCell3D> &cells, size_t Niter, double speed, int mode, double round, bool display);
 #endif
 
+  /*! \brief Dump debug information
+    \param rank Rank of parallel process
+   */
   void BuildDebug(int rank);
 
   std::size_t GetPointNo(void) const override;
 
+  /*! \brief Get mehs point position
+    \param index Index
+    \return Position of point
+   */
   Vector3D GetMeshPoint(std::size_t index) const override;
 
+  /*! \brief Calculate face area
+    \param index Face index
+    \return Face area
+   */
   double GetArea(std::size_t index) const override;
 
+  /*! \brief Get cell centre of mass
+    \param index Point index
+    \return Centre of mass
+   */
   Vector3D const& GetCellCM(std::size_t index) const override;
 
   std::size_t GetTotalFacesNumber(void) const override;
 
+  /*! \brief Get cell size
+    \param index Point index
+    \return Cell width
+   */
   double GetWidth(std::size_t index) const override;
 
+  /*! \brief Get cell volume
+    \param index Point index
+    \return Cell volume
+   */
   double GetVolume(std::size_t index) const override;
 
+  /*! \brief Get cell faces
+    \param index Point index
+    \return List of bounding faces
+   */ 
   face_vec const& GetCellFaces(std::size_t index) const override;
 
   vector<Vector3D>& accessMeshPoints(void) override;
 
   const vector<Vector3D>& getMeshPoints(void) const override;
 
+  /*! \brief Get neighbours
+    \param index Point index
+    \return List of indices of neighbouring points
+   */
   vector<std::size_t> GetNeighbors(std::size_t index)const override;
 
   Tessellation3D* clone(void) const override;
 
+  /*! \brief Checs if a point is near a boundary
+    \param index Point index
+    \return True if point is near a boundary
+   */
   bool NearBoundary(std::size_t index) const override;
 
+  /*! \brief Checks if a face is on the boundary
+    \param index Face index
+    \return True if the face is on the boundary
+   */
   bool BoundaryFace(std::size_t index) const override;
 
   vector<vector<std::size_t> >& GetDuplicatedPoints(void) override;
@@ -160,12 +236,30 @@ public:
 
   vector<Vector3D > GetAllCM(void)const override;
 
+  /*! \brief Get neighbours of neighbours
+    \param result Result
+    \param point Point index
+   */
   void GetNeighborNeighbors(vector<std::size_t> &result, std::size_t point)const override;
 
+  /*! \brief Calculate normal vector to face
+    \param faceindex Index of face
+    \return Vector normal to face
+   */
   Vector3D Normal(std::size_t faceindex)const override;
 
+  /*! \brief Checks if a point is a ghost
+    \param index Index
+    \return bool if the point is a ghost
+   */
   bool IsGhostPoint(std::size_t index)const override;
 
+  /*! \brief Calculate the face velocity
+    \param index Face index
+    \param v0 Velocity of one neighbour
+    \param v1 Velocity of second neighbour
+    \return Face velocity
+   */
   Vector3D CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vector3D const& v1)const override;
 
   vector<Vector3D>& GetFacePoints(void) override;
@@ -227,7 +321,7 @@ public:
 
   /*! \brief Build tessellation without a box
     \param points Mesh generating points
-    \param ghost Ghost points
+    \param ghosts Ghost points
     \param toduplicate Indices of points to be duplicated
    */
   void BuildNoBox(vector<Vector3D> const& points, vector<vector<Vector3D> > const& ghosts,vector<size_t> toduplicate) override;

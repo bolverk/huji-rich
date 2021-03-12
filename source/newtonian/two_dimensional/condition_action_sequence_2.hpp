@@ -44,6 +44,8 @@ public:
 
 	  Action2& operator=(const Action2&);
 
+	  /*! \brief Copy constructor
+	   */
 	  Action2(const Action2&);
 	};
 

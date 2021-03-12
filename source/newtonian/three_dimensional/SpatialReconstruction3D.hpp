@@ -30,6 +30,12 @@ public:
 
 	virtual ~SpatialReconstruction3D(void);
 
+  /*! \brief Calculate gradients
+    \param tess Tessellation
+    \param cells Computational cells
+    \param time Time
+    \param tracerstickersnames Tracer and sticker names
+   */
 	virtual void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,double time, TracerStickerNames const& tracerstickersnames) = 0;
 
 	/*!

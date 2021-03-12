@@ -26,6 +26,8 @@ public:
 	\param extensives Extensive variables
 	\param tracerstickernames The names of the tracers and stickers
 	\param time The time
+	\param edge_velocities Edge velocities
+	\param interp_values Interpolated values
 	*/
 	virtual void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,
 		const double dt,const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,

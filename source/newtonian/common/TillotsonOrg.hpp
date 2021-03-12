@@ -12,6 +12,8 @@ struct dp2eII;
 //! \brief Tillotson equation of state
 class TillotsonOrg : public EquationOfState
 {
+  /*! \brief Auxiliary struct
+   */
 	friend  struct dp2eIIOrg;
 private:
 	double a_, b_, A_, B_, rho0_, E0_, EIV_, ECV_, alpha_, beta_;
@@ -23,6 +25,12 @@ private:
 	double de2pII(double d, double e)const;
 	double de2pIV(double d, double e)const;
 	double dep2cI(double d, double e, double p)const;
+  /*! \brief Calculate speed of sound
+    \param d Density
+    \param e Energy
+    \param p PRessure 
+    \return Speed of sound
+   */
 	double dep2cIV(double d, double e, double p)const;
 public:
 	TillotsonOrg(double a, double b, double A, double B, double rho0, double E0, double EIV, double ECV, double alpha,

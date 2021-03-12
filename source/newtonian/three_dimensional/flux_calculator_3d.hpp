@@ -24,9 +24,10 @@ public:
     \param eos Equation of state
     \param edge_velocities Velocities of the edges
     \param fluxes THe fluxes given as output
-	\param dt The timestep
-	\param time The time
-	\param tracerstickernames The names of the stickers and tracers
+    \param dt The timestep
+    \param time The time
+    \param tracerstickernames The names of the stickers and tracers
+    \return List of riemann problem conditions
    */
 	virtual std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D>& fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 	  const vector<ComputationalCell3D>& cells,const vector<Conserved3D>& extensives,const EquationOfState& eos,
@@ -36,6 +37,16 @@ public:
   virtual ~FluxCalculator3D(void);
 };
 
+/*! \brief Rotate, solve riemann problem and rotate back
+  \param normal Normal direction
+  \param left Cell on one side
+  \param right Cell on the other side
+  \param face_velocity Face velocity
+  \param rs Riemann solver
+  \param res Result
+  \param eos Equation of state
+  \param tsn Tracers and stickers names
+ */
 void RotateSolveBack3D(Vector3D const& normal, ComputationalCell3D const& left, ComputationalCell3D const& right,
 	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn);
 

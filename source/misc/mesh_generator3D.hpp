@@ -31,21 +31,70 @@ vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, V
 \param PointNum The number of points.
 \param ll The lower left point of the domain
 \param ur The upper right point of the domain
+\param tproc Meta tessellation
 \return List of three dimensional points
 */
 vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,Voronoi3D const* tproc = nullptr);
 
+/*! \brief Generates a random grid with uniform point density and a constant seed
+  \param PointNum Number of points
+  \param ll Lower left
+  \param ur Upper right
+  \param gen Seed
+  \return List of points
+ */
 vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, boost::mt19937_64 &gen);
 
+/*! \brief Generate random point inside a sphere
+  \param PointNum Number of points
+  \param ll Lower left
+  \param ur Upper right
+  \param Rmin Inner radius
+  \param Rmax Outer radius
+  \param center Sphere centre
+  \param tproc Meta tessellation
+  \return List of points
+ */
 vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
 	Vector3D center = Vector3D(),Voronoi3D const* tproc = nullptr);
 
+/*! \brief Generate random point inside a sphere
+  \param PointNum Number of points
+  \param ll Lower left
+  \param ur Upper right
+  \param Rmin Inner radius
+  \param Rmax Outer radius
+  \param center Sphere centre
+  \param tproc Meta tessellation
+  \return List of points
+ */
 vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,double Rmin,double Rmax
 	, Vector3D center = Vector3D(), Voronoi3D const* tproc = nullptr);
 
+/*! \brief Generate random point inside a sphere
+  \param PointNum Number of points
+  \param ll Lower left
+  \param ur Upper right
+  \param Rmin Inner radius
+  \param Rmax Outer radius
+  \param center Sphere centre
+  \param tproc Meta tessellation
+  \return List of points
+ */
 vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
 	Vector3D center = Vector3D(),Voronoi3D const* tproc = nullptr);
 
+/*! \brief Generate random point inside a sphere
+  \param PointNum Number of points
+  \param ll Lower left
+  \param ur Upper right
+  \param Rmin Inner radius
+  \param Rmax Outer radius
+  \param a Point density slope
+  \param center Sphere centre
+  \param tproc Meta tessellation
+  \return List of points
+ */
 vector<Vector3D> RandSphereRa(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,double a, Vector3D const& center,
 	Voronoi3D const* tproc = nullptr);
 

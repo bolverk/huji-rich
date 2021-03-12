@@ -34,7 +34,13 @@ public:
 			 , const std::string& debug_name = "");
 
 	// returns dz * Sigma, so for time need to multiply by kappa and divide by c
-	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+
+  /*! \brief Calculates the optical depth
+    \param tess Tessellation
+    \param cell Computational cells
+    \param res Results
+   */
+  void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		std::vector<double>& res) const;
 	~OpticalDepthCalc() {}
 };

@@ -75,6 +75,8 @@ public:
 
 /*! \brief Load snapshot data into memory
 \param fname File name
+\param mpi_write Flag for providing parallelisation data
+\param fake_rank Process id
 \return Snapshot data
 */
 Snapshot3D ReadSnapshot3D(const string& fname
@@ -105,6 +107,7 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
   \param sim Simulation
   \param filename name of output file
   \param appendices Custom fields
+  \param mpi_write Determines whether to write parallisation data
  */
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>()

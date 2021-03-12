@@ -43,6 +43,9 @@ public:
 
   virtual ~RiemannSolver3D(void);
 protected:
+
+  /*! \brief Copy constructor
+   */
   RiemannSolver3D(const RiemannSolver3D&);
 };
 

@@ -37,6 +37,9 @@ public:
 
   AMRCellUpdater3D(const AMRCellUpdater3D&);
 
+  /*! \brief Copy constructor
+    \return Reference to new object
+   */
   AMRCellUpdater3D& operator=(const AMRCellUpdater3D&);
 };
 
@@ -95,6 +98,10 @@ public:
 class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
+  /*! \param slope Gradients
+    \param CMold Old centre of mass
+    \param CMnew New centre of mass
+   */
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
 		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };

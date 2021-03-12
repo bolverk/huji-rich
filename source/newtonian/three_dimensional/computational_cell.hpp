@@ -141,8 +141,17 @@ ComputationalCell3D operator*(ComputationalCell3D const& p, double s);
 */
 ComputationalCell3D operator*(double s, ComputationalCell3D const& p);
 
+/*! \brief Perform addition and scalar multiplication
+  \param res Result
+  \param other Addition
+  \param scalar Scalar
+ */
 void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D const& other, double scalar);
 
+/*! \brief Swap computation cell
+  \param cell Result
+  \param other Other cell
+ */
 void ReplaceComputationalCell(ComputationalCell3D &cell, ComputationalCell3D const& other);
 
 //! \brief Class for 3D spatial interpolations

@@ -63,7 +63,8 @@ public:
 	   */
 	  Action(const Action&);
 
-	  // \brief Default copy operator
+	  //! \brief Default copy operator
+	  //! \return Reference to new object
 	  Action& operator=(const Action&);
 	};
 
