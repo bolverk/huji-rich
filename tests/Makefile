@@ -29,7 +29,7 @@ else ifeq ($(MODE),clang)
 	LINT_FLAGS :=
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O3
+	OPTIMIZATION_FLAGS := -O3 -march=native
 	LFLAGS = -lclipper
 endif
 CFLAGS = $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
