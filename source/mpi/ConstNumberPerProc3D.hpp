@@ -25,7 +25,7 @@ public:
 	\param tproc The processors tessellation.
 	\param tlocal The local tessellation
 	*/
-	void Update(Tessellation3D &tproc, Tessellation3D const& tlocal)const;
+	void Update(Tessellation3D &tproc, Tessellation3D const& tlocal)const override;
 
 	//! \brief Class destructor
 	~ConstNumberPerProc3D(void);

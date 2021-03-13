@@ -68,8 +68,8 @@ namespace
 			const Vector2D tocenter=procpoint-center;
 			const double Rcenter=abs(tocenter);
 			boost::array<Vector2D,3> tocheck;
-			tocheck[0]=center;
-			tocheck[1]=procpoint;
+			//			tocheck[0]=center;
+			//			tocheck[1]=procpoint;
 			double minusval=0,plusval=0;
 			int minusloc=0,plusloc=0;
 			for(size_t i=0;i<static_cast<size_t>(npoints);++i)

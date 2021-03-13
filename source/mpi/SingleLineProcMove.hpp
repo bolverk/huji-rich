@@ -7,10 +7,15 @@
 #define SINGLELINEPROC_HPP 1
 #include "ProcessorUpdate3D.hpp"
 
+#ifdef RICH_MPI
+
 //! \brief A load balancing scheme aiming for the same number of points in each process
 class SingleLineProcMove : public ProcessorUpdate3D
 {
 public:
-	void Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const;
+  void Update(Tessellation3D& tproc, Tessellation3D const& tlocal)const override;
 };
+
+#endif // RICH_MPI
+
 #endif //SINGLELINEPROC_HPP

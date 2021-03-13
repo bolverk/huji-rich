@@ -43,7 +43,7 @@ namespace
 	}
 
 	vector<double> read_double_vector_from_hdf5
-		(Group& file, string const& caption)
+	(const Group& file, const string& caption)
 	{
 		return read_vector_from_hdf5<double>
 			(file,
