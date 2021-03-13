@@ -1544,7 +1544,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
     }
 }
 
-/*
+#ifdef RICH_MPI
 void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
 					  Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index)
 {
@@ -1582,9 +1582,7 @@ void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t 
   std::sort(res.begin(), res.end());
   res = unique(res);
 }
-*/
 
-/*
 void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellation3D const& tproc, std::size_t rank, std::size_t point,
 					   Sphere &sphere, size_t mode, boost::container::flat_set<size_t> &visited, std::stack<std::size_t> &to_check,
 					   bool &skipped,face_vec &faces, vector<size_t> &past_duplicate)
@@ -1731,7 +1729,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
   std::sort(res.begin(), res.end());
   res = unique(res);
 }
-*/
+#endif // RICH_MPI
 
 
 void Voronoi3D::GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res)
@@ -2229,7 +2227,8 @@ void Voronoi3D::output(std::string const& filename)const
   file_handle.close();
 }
 
-/*void Voronoi3D::output_buildextra(std::string const& filename)const
+#ifdef RICH_MPI
+void Voronoi3D::output_buildextra(std::string const& filename)const
 {
   std::ofstream file_handle(filename.c_str(), std::ios::out | std::ios::binary);
   assert(file_handle.is_open());
@@ -2237,10 +2236,8 @@ void Voronoi3D::output(std::string const& filename)const
   binary_write_single_int(static_cast<int>(stemp), file_handle);
   stemp = del_.points_.size();
   binary_write_single_int(static_cast<int>(stemp), file_handle);
-#ifdef RICH_MPI
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
   // Points
   for (std::size_t i = 0; i < stemp; ++i)
     {
@@ -2261,7 +2258,7 @@ void Voronoi3D::output(std::string const& filename)const
     }
   file_handle.close();
 }
-*/
+#endif
 
 
 std::size_t Voronoi3D::GetPointNo(void) const
