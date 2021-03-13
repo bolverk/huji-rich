@@ -156,6 +156,9 @@ public:
 
 #ifdef RICH_MPI
 
+  /*! \brief Output extra build
+    \param filename Output file name
+   */
   void output_buildextra(std::string const& filename)const;
 
   void Build(vector<Vector3D> const& points, Tessellation3D const& tproc) override;
