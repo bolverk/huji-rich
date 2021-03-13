@@ -91,7 +91,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
 }
 
 
-vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, Vector3D center,
+vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, const Vector3D& center,
 	Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;
@@ -134,7 +134,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
 }
 
 vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
-	Vector3D center, Voronoi3D const* tproc)
+	const Vector3D& center, Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;
 	base_generator_type generator;
@@ -175,7 +175,7 @@ vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D 
 	return res;
 }
 
-vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, Vector3D center,
+vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax, const Vector3D& center,
 	Voronoi3D const* tproc)
 {
 	typedef boost::mt19937_64 base_generator_type;

@@ -74,7 +74,7 @@ namespace
 			int minusloc=0,plusloc=0;
 			for(size_t i=0;i<static_cast<size_t>(npoints);++i)
 			{
-				tocheck[2]=cpoints[i];
+			  //				tocheck[2]=cpoints[i];
 				const Vector2D tocpoint=cpoints[i]-center;
 				const double angle=acos(ScalarProd(tocenter,tocpoint)/(abs(tocpoint)*Rcenter));
 				if(orient2d(TripleConstRef<Vector2D>(center,

@@ -56,7 +56,7 @@ vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vecto
   \return List of points
  */
 vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
-	Vector3D center = Vector3D(),Voronoi3D const* tproc = nullptr);
+	const Vector3D& center = Vector3D(),Voronoi3D const* tproc = nullptr);
 
 /*! \brief Generate random point inside a sphere
   \param PointNum Number of points
@@ -69,7 +69,7 @@ vector<Vector3D> RandSphereR(std::size_t PointNum, Vector3D const& ll, Vector3D 
   \return List of points
  */
 vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,double Rmin,double Rmax
-	, Vector3D center = Vector3D(), Voronoi3D const* tproc = nullptr);
+	, const Vector3D& center = Vector3D(), Voronoi3D const* tproc = nullptr);
 
 /*! \brief Generate random point inside a sphere
   \param PointNum Number of points
@@ -82,7 +82,7 @@ vector<Vector3D> RandSphereR2(std::size_t PointNum, Vector3D const& ll, Vector3D
   \return List of points
  */
 vector<Vector3D> RandSphereR1(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, double Rmin, double Rmax,
-	Vector3D center = Vector3D(),Voronoi3D const* tproc = nullptr);
+	const Vector3D& center = Vector3D(),Voronoi3D const* tproc = nullptr);
 
 /*! \brief Generate random point inside a sphere
   \param PointNum Number of points
