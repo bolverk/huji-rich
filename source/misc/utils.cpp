@@ -10,7 +10,7 @@
 
 bool close2zero(const double x)
 {
-  constexpr double lowest_double = std::numeric_limits<double>::lowest();
+  constexpr double lowest_double = std::numeric_limits<double>::min();
   return std::abs(x)<lowest_double;
 }
 
