@@ -5,7 +5,9 @@
 #ifndef VORONOI3D_HPP
 #define VORONOI3D_HPP 1
 
-//#define _USE_MATH_DEFINES
+#if  _MSC_VER
+#define _USE_MATH_DEFINES
+#endif // _MSC_VER
 #include <cmath>
 #include <vector>
 #include <string>
