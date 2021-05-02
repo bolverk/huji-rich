@@ -714,7 +714,8 @@ void Delaunay3D::ExactFlip(std::size_t tetra0, std::size_t tetra1, std::size_t p
   b4_temp_[2] = points_[p];
   b4_temp_[3] = b3_temp_[2];
   test0 = orient3d(b4_temp_);
-  if (std::abs(test0) <1e-12)
+  // if (std::abs(test0) <1e-12)
+  if(close2zero(std::abs(test0)))
     in_counter++;
   b4_temp_[3] = points_[other_point];
   test1 = orient3d(b4_temp_);
