@@ -84,10 +84,14 @@ public:
   //! \brief Second order time advance
   void TimeAdvance2(void);
 
+  void recalculateExtensives(void);
+
   /*! \brief Access to computational domain and hydro cells
     \return Computational domain and hydro cells
    */
   const SimulationState1D& getState(void) const;
+
+  SimulationState1D& getState(void);
 
   /*! \brief Access extensive variables
     \return Extensive variables

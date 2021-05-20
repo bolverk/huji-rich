@@ -28,6 +28,11 @@ const SimulationState1D& hdsim1D::getState(void) const
   return ss_;
 }
 
+SimulationState1D& hdsim1D::getState(void)
+{
+  return ss_;
+}
+
 const vector<Extensive>& hdsim1D::getExtensives(void) const
 {
   return extensives_;
@@ -261,4 +266,12 @@ void hdsim1D::TimeAdvance2(void)
 
   time_ += dt;
   ++cycle_;
+}
+
+void hdsim1D::recalculateExtensives(void)
+{
+  extensives_ = calc_extensives
+    (pg_,
+     ss_,
+     eos_);
 }
