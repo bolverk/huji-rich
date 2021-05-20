@@ -105,6 +105,29 @@ namespace simulation1d{
 		 int max_iter=1e6,
 		 int time_order=1,
 		 string const& time_log="");
+
+  class Manipulate
+  {
+  public:
+
+    virtual void operator()(hdsim1D& sim) = 0;
+
+    virtual ~Manipulate(void);
+  };
+
+  class DoNothing: public Manipulate
+  {
+  public:
+
+    void operator()(hdsim1D& sim);
+  };
+
+  void main_loop
+  (hdsim1D& sim,
+   TerminationCondition& term_cond,
+   void (hdsim1D::*time_advance_method)(void),
+   DiagnosticsFunction& diag,
+   Manipulate& manip);
 }
 
 #endif // MAIN_LOOP_HPP

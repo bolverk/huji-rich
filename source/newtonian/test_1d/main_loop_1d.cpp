@@ -70,3 +70,22 @@ void simulation1d::main_loop(hdsim1D& sim,
       throw UniversalError("Too many time advance iterations");
   }
 }
+
+void simulation1d::DoNothing::operator()(hdsim1D& /*sim*/)
+{}
+
+void simulation1d::main_loop
+(hdsim1D& sim,
+ TerminationCondition& term_cond,
+ void (hdsim1D::*time_advance_method)(void),
+ DiagnosticsFunction& diag,
+ Manipulate& manip)
+{
+  while(term_cond(sim)){
+    (sim.*time_advance_method)();
+    manip(sim);
+    diag(sim);
+  }
+}
+
+simulation1d::Manipulate::~Manipulate(void) {}
