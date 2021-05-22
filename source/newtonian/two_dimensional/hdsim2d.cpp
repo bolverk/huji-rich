@@ -44,7 +44,7 @@ namespace
 		const EquationOfState& eos,
 		TracerStickerNames const& tracernames)
 	{
-		size_t Nloop = tess.GetPointNo();
+	  size_t Nloop = static_cast<size_t>(tess.GetPointNo());
 		vector<Extensive> res(Nloop);
 		for (size_t i = 0; i < Nloop; ++i)
 		{
@@ -83,7 +83,7 @@ hdsim::hdsim
 	const FluxCalculator& fc,
 	const ExtensiveUpdater& eu,
 	const CellUpdater& cu,
-	TracerStickerNames tracer_sticker_names
+	const TracerStickerNames& tracer_sticker_names
 #ifdef RICH_MPI
 	,const ProcessorUpdate* proc_update
 #endif
@@ -603,11 +603,13 @@ namespace {
 		const vector<T>& ll2_;
 	};
 
+  /*
 	template<class T> vector<T> average(const vector<T>& v1,
 		const vector<T>& v2)
 	{
 		return serial_generate(AverageCalculator<T>(v1, v2));
 	}
+  */
 }
 
 const PhysicalGeometry& hdsim::getPhysicalGeometry(void) const

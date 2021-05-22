@@ -1,46 +1,48 @@
 #include "universal_error.hpp"
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-UniversalError::UniversalError(string const& err_msg):
+UniversalError::UniversalError(const string& err_msg):
   err_msg_(err_msg),
-  fields_(vector<string>()),
-  values_(vector<double>()) {}
+  fields_() {}
 
 void UniversalError::Append2ErrorMessage(string const& msg)
 {
   err_msg_ += msg;
 }
 
-void UniversalError::AddEntry(string const& field,
-	      double value)
+void UniversalError::addEntry
+(const string& field,
+ double value)
 {
-  fields_.push_back(field);
-  values_.push_back(value);
+  fields_.push_back({field, value});
 }
 
-string const& UniversalError::GetErrorMessage(void) const
+const string& UniversalError::getErrorMessage(void) const
 {
   return err_msg_;
 }
 
-vector<string> const& UniversalError::GetFields(void) const
+const vector<pair<string, double> >& UniversalError::getFields(void) const
 {
   return fields_;
 }
 
-vector<double> const& UniversalError::GetValues(void) const
-{
-  return values_;
-}
-
 UniversalError::~UniversalError(void) {}
 
-void DisplayError(UniversalError const& eo)
+UniversalError::UniversalError(const UniversalError& eo):
+  err_msg_(eo.getErrorMessage()),
+  fields_(eo.getFields()) {}
+
+void reportError(UniversalError const& eo)
 {
-	std::cout.precision(14);
-	std::cout << eo.GetErrorMessage() << std::endl;
-	for (size_t i = 0; i<eo.GetFields().size(); ++i)
-		std::cout << eo.GetFields()[i] << " = " << eo.GetValues()[i] << std::endl;
+  std::cout.precision(14);
+  std::cout << eo.getErrorMessage() << std::endl;
+  for_each
+    (eo.getFields().begin(),
+     eo.getFields().end(),
+     [](const pair<string, double>& f)
+     {cout << f.first << " " << f.second << endl;});
 }

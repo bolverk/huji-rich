@@ -30,23 +30,23 @@ namespace
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Face number", face);
+				eo.addEntry("Face number", face);
 				size_t n0 = tess.GetFaceNeighbors(face).first;
 				size_t n1 = tess.GetFaceNeighbors(face).second;
-				eo.AddEntry("Left cell density", cells[n0].density);
-				eo.AddEntry("Left cell pressure", cells[n0].pressure);
-				eo.AddEntry("Left cell Vx", cells[n0].velocity.x);
-				eo.AddEntry("Left cell Vy", cells[n0].velocity.y);
-				eo.AddEntry("Left cell Vz", cells[n0].velocity.z);
-				eo.AddEntry("Left cell internal energy", cells[n0].internal_energy);
-				eo.AddEntry("Left cell ID", cells[n0].ID);
-				eo.AddEntry("Right cell density", cells[n1].density);
-				eo.AddEntry("Right cell pressure", cells[n1].pressure);
-				eo.AddEntry("Right cell Vx", cells[n1].velocity.x);
-				eo.AddEntry("Right cell Vy", cells[n1].velocity.y);
-				eo.AddEntry("Right cell Vz", cells[n1].velocity.z);
-				eo.AddEntry("Right cell internal energy", cells[n1].internal_energy);
-				eo.AddEntry("Right cell ID", cells[n1].ID);
+				eo.addEntry("Left cell density", cells[n0].density);
+				eo.addEntry("Left cell pressure", cells[n0].pressure);
+				eo.addEntry("Left cell Vx", cells[n0].velocity.x);
+				eo.addEntry("Left cell Vy", cells[n0].velocity.y);
+				eo.addEntry("Left cell Vz", cells[n0].velocity.z);
+				eo.addEntry("Left cell internal energy", cells[n0].internal_energy);
+				eo.addEntry("Left cell ID", cells[n0].ID);
+				eo.addEntry("Right cell density", cells[n1].density);
+				eo.addEntry("Right cell pressure", cells[n1].pressure);
+				eo.addEntry("Right cell Vx", cells[n1].velocity.x);
+				eo.addEntry("Right cell Vy", cells[n1].velocity.y);
+				eo.addEntry("Right cell Vz", cells[n1].velocity.z);
+				eo.addEntry("Right cell internal energy", cells[n1].internal_energy);
+				eo.addEntry("Right cell ID", cells[n1].ID);
 				throw eo;
 			}
 #endif
@@ -71,36 +71,36 @@ std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > ConditionActio
 			|| face_values[i].second.density < 0  || face_values[i].second.internal_energy < 0)
 		{
 			UniversalError eo("Bad input to flux calculator");
-			eo.AddEntry("Face", static_cast<double>(i));
-			eo.AddEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(i).first));
-			eo.AddEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(i).second));
-			eo.AddEntry("First input Density", face_values[i].first.density);
-			eo.AddEntry("First input pressure", face_values[i].first.pressure);
-			eo.AddEntry("First input internal energy", face_values[i].first.internal_energy);
-			eo.AddEntry("First input vx", face_values[i].first.velocity.x);
-			eo.AddEntry("First input vy", face_values[i].first.velocity.y);
-			eo.AddEntry("First input vz", face_values[i].first.velocity.z);
-			eo.AddEntry("Second input Density", face_values[i].second.density);
-			eo.AddEntry("Second input pressure", face_values[i].second.pressure);
-			eo.AddEntry("Second input internal energy", face_values[i].second.internal_energy);
-			eo.AddEntry("Second input vx", face_values[i].second.velocity.x);
-			eo.AddEntry("Second input vy", face_values[i].second.velocity.y);
-			eo.AddEntry("Second input vz", face_values[i].second.velocity.z);
-			eo.AddEntry("First cell Density", cells[tess.GetFaceNeighbors(i).first].density);
-			eo.AddEntry("First cell pressure", cells[tess.GetFaceNeighbors(i).first].pressure);
-			eo.AddEntry("First cell internal energy", cells[tess.GetFaceNeighbors(i).first].internal_energy);
-			eo.AddEntry("First cell vx", cells[tess.GetFaceNeighbors(i).first].velocity.x);
-			eo.AddEntry("First cell vy", cells[tess.GetFaceNeighbors(i).first].velocity.y);
-			eo.AddEntry("First cell vz", cells[tess.GetFaceNeighbors(i).first].velocity.z);
-			eo.AddEntry("Second cell Density", cells[tess.GetFaceNeighbors(i).second].density);
-			eo.AddEntry("Second cell pressure", cells[tess.GetFaceNeighbors(i).second].pressure);
-			eo.AddEntry("Second cell internal energy", cells[tess.GetFaceNeighbors(i).second].internal_energy);
-			eo.AddEntry("Second cell vx", cells[tess.GetFaceNeighbors(i).second].velocity.x);
-			eo.AddEntry("Second cell vy", cells[tess.GetFaceNeighbors(i).second].velocity.y);
-			eo.AddEntry("Second cell vz", cells[tess.GetFaceNeighbors(i).second].velocity.z);
-			eo.AddEntry("Face vx", face_velocities[i].x);
-			eo.AddEntry("Face vy", face_velocities[i].y);
-			eo.AddEntry("Face vz", face_velocities[i].z);
+			eo.addEntry("Face", static_cast<double>(i));
+			eo.addEntry("Face neigh 0", static_cast<double>(tess.GetFaceNeighbors(i).first));
+			eo.addEntry("Face neigh 1", static_cast<double>(tess.GetFaceNeighbors(i).second));
+			eo.addEntry("First input Density", face_values[i].first.density);
+			eo.addEntry("First input pressure", face_values[i].first.pressure);
+			eo.addEntry("First input internal energy", face_values[i].first.internal_energy);
+			eo.addEntry("First input vx", face_values[i].first.velocity.x);
+			eo.addEntry("First input vy", face_values[i].first.velocity.y);
+			eo.addEntry("First input vz", face_values[i].first.velocity.z);
+			eo.addEntry("Second input Density", face_values[i].second.density);
+			eo.addEntry("Second input pressure", face_values[i].second.pressure);
+			eo.addEntry("Second input internal energy", face_values[i].second.internal_energy);
+			eo.addEntry("Second input vx", face_values[i].second.velocity.x);
+			eo.addEntry("Second input vy", face_values[i].second.velocity.y);
+			eo.addEntry("Second input vz", face_values[i].second.velocity.z);
+			eo.addEntry("First cell Density", cells[tess.GetFaceNeighbors(i).first].density);
+			eo.addEntry("First cell pressure", cells[tess.GetFaceNeighbors(i).first].pressure);
+			eo.addEntry("First cell internal energy", cells[tess.GetFaceNeighbors(i).first].internal_energy);
+			eo.addEntry("First cell vx", cells[tess.GetFaceNeighbors(i).first].velocity.x);
+			eo.addEntry("First cell vy", cells[tess.GetFaceNeighbors(i).first].velocity.y);
+			eo.addEntry("First cell vz", cells[tess.GetFaceNeighbors(i).first].velocity.z);
+			eo.addEntry("Second cell Density", cells[tess.GetFaceNeighbors(i).second].density);
+			eo.addEntry("Second cell pressure", cells[tess.GetFaceNeighbors(i).second].pressure);
+			eo.addEntry("Second cell internal energy", cells[tess.GetFaceNeighbors(i).second].internal_energy);
+			eo.addEntry("Second cell vx", cells[tess.GetFaceNeighbors(i).second].velocity.x);
+			eo.addEntry("Second cell vy", cells[tess.GetFaceNeighbors(i).second].velocity.y);
+			eo.addEntry("Second cell vz", cells[tess.GetFaceNeighbors(i).second].velocity.z);
+			eo.addEntry("Face vx", face_velocities[i].x);
+			eo.addEntry("Face vy", face_velocities[i].y);
+			eo.addEntry("Face vz", face_velocities[i].z);
 			throw eo;
 		}
 		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, tracerstickernames, face_values[i]);

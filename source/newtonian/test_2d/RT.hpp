@@ -17,8 +17,8 @@ class RT_velocityY: public SpatialDistribution
 public:
 
   RT_velocityY();
-  ~RT_velocityY();
-  double operator()(const Vector2D& r) const;
+  ~RT_velocityY() override;
+  double operator()(const Vector2D& r) const override;
 };
 
 //! \brief Spatial profile of the initial pressure for Rayleigh Taylor instability
@@ -36,9 +36,9 @@ public:
    */
   RT_Pressure(double g,double rhoup,double rhodown);
 
-  ~RT_Pressure();
+  ~RT_Pressure() override;
 
-  double operator()(const Vector2D& r) const;
+  double operator()(const Vector2D& r) const override;
 };
 
 

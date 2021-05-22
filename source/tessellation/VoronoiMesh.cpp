@@ -67,6 +67,7 @@ namespace
 		return res;
 	}
 
+  /*
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -78,7 +79,9 @@ namespace
 		}
 		return true;
 	}
+  */
 
+  /*
 	template <typename T>
 	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
 		vector<vector<T> > const& v2)
@@ -93,14 +96,15 @@ namespace
 		}
 		return res;
 	}
+  */
 }
 
 VoronoiMesh::VoronoiMesh
 (vector<Vector2D> const& points,
  OuterBoundary const& bc, bool HOrder):
-	logger(0),
+	logger(nullptr),
 	eps(1e-8),
-	obc(0),
+	obc(nullptr),
 	cell_edges(vector<Edge> ()),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
@@ -198,7 +202,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 		if(point<Nextra)
 		{
 			UniversalError eo("Tried to get original index of non exsistent cell");
-			eo.AddEntry("Tried accessing cell",point);
+			eo.addEntry("Tried accessing cell",point);
 			throw eo;
 		}
 		int maxcor=static_cast<int>(Tri.getCor().size());
@@ -217,7 +221,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 			}
 		}
 		UniversalError eo("Tried to get original index of non exsistent cell");
-		eo.AddEntry("Tried accessing cell",point);
+		eo.addEntry("Tried accessing cell",point);
 		throw eo;
 		#endif
 	}
@@ -229,9 +233,9 @@ vector<size_t> VoronoiMesh::GetSelfPoint(void)const
 }
 
 VoronoiMesh::VoronoiMesh(void):
-	logger(0),
+	logger(nullptr),
 	eps(1e-8),
-	obc(0),
+	obc(nullptr),
 	cell_edges(vector<Edge> ()),
 	edges(vector<Edge>()),
 	CM(vector<Vector2D> ()),
@@ -998,7 +1002,7 @@ void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &t
 	for(int i=0;i<nsides;++i)
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());
 	totest.resize(static_cast<size_t>(nsides));
-	int test=0;
+	int test;
 	for(int i=0;i<nsides;++i)
 	{
 		vector<int> totest2;
@@ -1440,10 +1444,10 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 		HDF5Logger log("verror" + int2str(rank) + ".h5");
 		log.output(vproc);
 		UniversalError eo("Point is not inside any processor");
-		eo.AddEntry("CPU rank", rank);
-		eo.AddEntry("Point number", static_cast<double>(i));
-		eo.AddEntry("Point x cor", points[i].x);
-		eo.AddEntry("Point y cor", points[i].y);
+		eo.addEntry("CPU rank", rank);
+		eo.addEntry("Point number", static_cast<double>(i));
+		eo.addEntry("Point x cor", points[i].x);
+		eo.addEntry("Point y cor", points[i].y);
 		throw eo;
 	}
 	// Send/Recv the points

@@ -97,7 +97,7 @@ vector<vector<vector<int> > > MPI_exchange_data(const Tessellation3D& tess, vect
 
 	vector<vector<int> > send_sizes(correspondents.size());
 	vector<int> temprecv;
-	vector<int> tempsrecv;
+	//	vector<int> tempsrecv;
 	int temp = 0;
 	for (size_t i = 0; i < correspondents.size(); ++i)
 	{
@@ -226,7 +226,7 @@ vector<vector<vector<size_t> > > MPI_exchange_data(const Tessellation3D& tess, v
 
 	vector<vector<int> > send_sizes(correspondents.size());
 	vector<size_t> temprecv;
-	vector<int> tempsrecv;
+	//	vector<int> tempsrecv;
 	size_t temp = 0;
 	for (size_t i = 0; i < correspondents.size(); ++i)
 	{
@@ -311,7 +311,7 @@ vector<vector<vector<double> > > MPI_exchange_data(const Tessellation3D& tess, v
 
 	vector<vector<int> > send_sizes(correspondents.size());
 	vector<double> temprecv;
-	vector<int> tempsrecv;
+	//	vector<int> tempsrecv;
 	double temp = 0;
 	for (size_t i = 0; i < correspondents.size(); ++i)
 	{

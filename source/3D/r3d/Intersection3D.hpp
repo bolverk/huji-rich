@@ -17,6 +17,6 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, poi
 	vector<vector<int> > &faceinds);
 
 std::pair<bool, std::array<double,4> > PolyhedraIntersection(Tessellation3D const& newtess, size_t newcell,r3d_poly &poly,
-	vector<r3d_plane> *planes = 0);
+	vector<r3d_plane> *planes = nullptr);
 
 #endif //INTERSECTION3D_HPP

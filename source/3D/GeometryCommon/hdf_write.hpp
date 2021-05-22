@@ -11,6 +11,8 @@
 #include "Voronoi3D.hpp"
 #include "../../newtonian/three_dimensional/hdsim_3d.hpp"
 
+
+//! \brief Appendix to data dump
 class DiagnosticAppendix3D
 {
 public:
@@ -23,6 +25,10 @@ public:
 
 	/*! \brief Returns the name of the new field
 	*/
+
+	/*! \brief Get appendix title
+	  \return Title
+	 */
 	virtual string getName(void) const = 0;
 
 	//! \brief Class destructor
@@ -64,11 +70,17 @@ public:
 	//! \brief THe names of the tracers and stickers
 	TracerStickerNames tracerstickernames;
 
-	Vector3D ll, ur;
+	//! \brief Lower left corner
+	Vector3D ll;
+
+  //! \brief Upper right corner
+	Vector3D ur;
 };
 
 /*! \brief Load snapshot data into memory
 \param fname File name
+\param mpi_write Flag for providing parallelisation data
+\param fake_rank Process id
 \return Snapshot data
 */
 Snapshot3D ReadSnapshot3D(const string& fname
@@ -78,11 +90,29 @@ Snapshot3D ReadSnapshot3D(const string& fname
 );
 
 #ifdef RICH_MPI
+/*! \brief Redistribute data between the different processes
+  \param filename Name of output file
+  \param proctess Meta tessellation
+  \param snapshot_number Number of snapshot
+  \param mpi_write Parallel output flag
+  \return Hydrodynamic snapshot
+ */
 Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proctess, size_t snapshot_number,bool mpi_write=false);
 #endif
 
+
+/*! \brief Write voronoi data to a file
+  \param tri Voronoit tessellation
+  \param filename Name of output file
+ */
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
+/*! \brief Write snapshot to file
+  \param sim Simulation
+  \param filename name of output file
+  \param appendices Custom fields
+  \param mpi_write Determines whether to write parallisation data
+ */
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>()
 #ifdef RICH_MPI

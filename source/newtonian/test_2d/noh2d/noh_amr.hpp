@@ -20,14 +20,14 @@ public:
 	*/
   explicit NohRefine(double Vmax);
 	//! \brief Class destructor
-	~NohRefine();
+	~NohRefine() override;
 
 	vector<int> CellsToRefine
 	(Tessellation const& tess,
 	 vector<ComputationalCell> const& cells,
 	 double time,
 	 vector<Vector2D> &directions,
-	 vector<int> const& Removed);
+	 vector<int> const& Removed) override;
 };
 
 //! \brief Noh problem Removal strategy class
@@ -42,12 +42,12 @@ public:
 	*/
   explicit NohRemove(double Vmin);
 	//! \brief Class destructor
-	~NohRemove();
+	~NohRemove() override;
 
 	vector<int> CellsToRemove
 	(Tessellation const& tess,
 	 vector<ComputationalCell> const& cells, 
-	 double time)const;
+	 double time)const override;
 };
 
 #endif //NOH_AMR_HPP

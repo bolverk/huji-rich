@@ -46,13 +46,18 @@ public:
   TracerStickerNames tracerstickernames;
 };
 
-/*! \brief Load snapshot data into memory
-  \param fname File name
-  \param mpioverride Flag for not reading mpi data when MPI is on
-  \return Snapshot data
- */
+//! \brief Load snapshot data into memory
+//!  \param fname File name
+#ifdef RICH_MPI
+//! \param mpioverride Flag for not reading mpi data when MPI is on
+#endif // RICH_MPI
+//! \return Snapshot data
 Snapshot read_hdf5_snapshot
-(const string& fname,bool mpioverride=false);
+(const string& fname
+#ifdef RICH_MPI
+,bool mpioverride=false
+#endif // RICH_MPI
+);
 
 //! \brief Addition data to be written in a snapshot
 class DiagnosticAppendix
@@ -66,6 +71,7 @@ public:
   virtual vector<double> operator()(const hdsim& sim) const = 0;
 
   /*! \brief Returns the name of the new field
+    \return Name of new field
    */
   virtual string getName(void) const = 0;
 

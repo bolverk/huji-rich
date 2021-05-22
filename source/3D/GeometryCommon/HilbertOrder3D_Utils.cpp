@@ -1,8 +1,9 @@
 #include "HilbertOrder3D_Utils.hpp"
+#include <limits>
 
 int EstimateHilbertIterationNum(vector<Vector3D> const& cor)
 {
-	return (int)ceil(log(pow((double)cor.size(), (1.0 / 3.0))) / log(2.0));
+  return static_cast<int>(ceil(log(pow(static_cast<double>(cor.size()), (1.0 / 3.0))) / log(2.0)));
 }
 
 
@@ -30,9 +31,9 @@ void AdjustPoints(vector<Vector3D> const & vPointsIn, vector<Vector3D> & vPoints
 	double dbScaleY = dbMaxY - dbMinY;
 	double dbScaleZ = dbMaxZ - dbMinZ;
 	// To prevent division by zero (very unlikely - double precision!)
-	bool bFlagX = dbScaleX == 0;
-	bool bFlagY = dbScaleY == 0;
-	bool bFlagZ = dbScaleZ == 0;
+	bool bFlagX = close2zero(dbScaleX);
+	bool bFlagY = close2zero(dbScaleY);
+	bool bFlagZ = close2zero(dbScaleZ);
 
 	// X coordinate:
 	if (!bFlagX)
@@ -96,7 +97,7 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 	vector<unsigned long long int>::iterator it1, itPrev, itCur;
 	it1 = unique(vD_sorted_unq.begin(), vD_sorted_unq.end());
 
-	vD_sorted_unq.resize(distance(vD_sorted_unq.begin(), it1));
+	vD_sorted_unq.resize(static_cast<size_t>(distance(vD_sorted_unq.begin(), it1)));
 	
 	if (vD_sorted.size() == vD_sorted_unq.size())
 	{
@@ -123,12 +124,12 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 		if (1 < iCurPrevDist)
 		{
 			int iBase = static_cast<int>(distance(vD_sorted_cpy.begin(), itPrev));
-			vector<std::size_t> vInd( iCurPrevDist );
+			vector<std::size_t> vInd( static_cast<size_t>(iCurPrevDist) );
 			// C++11
 			// iota(vInd.begin(), vInd.end(), iBase);
 			for (int ii = 0; ii < iCurPrevDist; ++ii)
 			{
-				vInd[ii] = iBase + ii;
+			  vInd[static_cast<size_t>(ii)] = static_cast<size_t>(iBase + ii);
 			}
 			vOut.push_back(vInd);
 		}
@@ -141,10 +142,10 @@ void FindEqualIndices(vector<unsigned long long int> const & vD_sorted, vector<v
 	{
 		int iBase = static_cast<int>(distance(vD_sorted_cpy.begin(), itPrev));
 
-		vector<std::size_t> vInd(iCurPrevDist);
+		vector<std::size_t> vInd(static_cast<size_t>(iCurPrevDist));
 		for (int ii = 0; ii < iCurPrevDist; ++ii)
 		{
-			vInd[ii] = iBase + ii;
+		  vInd[static_cast<size_t>(ii)] = static_cast<size_t>(iBase + ii);
 		}
 		vOut.push_back(vInd);
 	}

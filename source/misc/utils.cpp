@@ -8,6 +8,12 @@
 #include <cfloat>
 #include <cmath>
 
+bool close2zero(const double x)
+{
+  constexpr double lowest_double = std::numeric_limits<double>::min();
+  return std::abs(x)<lowest_double;
+}
+
 bool is_nan(double x)
 {
   int b1 = (x>=0);
@@ -17,7 +23,7 @@ bool is_nan(double x)
 
 vector<double> linspace(double xl, double xh, int n)
 {
-  vector<double> res(n,0);
+  vector<double> res(static_cast<size_t>(n),0);
   for(size_t i=0;i<size_t(n);++i)
     res[i] = xl + (xh-xl)*static_cast<double>(i)/
       static_cast<double>(n-1);
@@ -51,7 +57,7 @@ double max(vector<double> const& v)
 
 double fastsqrt(double x)
 {
-	if (x<FLT_MIN || x > FLT_MAX)
+  if (x<static_cast<double>(FLT_MIN) || x > static_cast<double>(FLT_MAX))
 		return std::sqrt(x);
 	double res = static_cast<double>(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(static_cast<float>(x)))));
 	return x*res*(1.5 - 0.5*res*res*x);

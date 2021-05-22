@@ -44,35 +44,6 @@ WaveSpeeds estimate_wave_speeds
 }
 
 namespace {
-  UniversalError invalid_wave_speeds(Primitive const& left,
-				     Primitive const& right,
-				     double velocity,
-				     double left_wave_speed,
-				     double center_wave_speed,
-				     double right_wave_speed)
-  {
-    UniversalError res("Invalid wave speeds in hllc solver");
-    res.AddEntry("left density",left.Density);
-    res.AddEntry("left pressure",left.Pressure);
-    res.AddEntry("left x velocity",left.Velocity.x);
-    res.AddEntry("left y velocity",left.Velocity.y);
-    res.AddEntry("left sound speed",left.SoundSpeed);
-    res.AddEntry("left energy",left.Energy);
-    res.AddEntry("right density",right.Density);
-    res.AddEntry("right pressure",right.Pressure);
-    res.AddEntry("right x velocity",right.Velocity.x);
-    res.AddEntry("right y velocity",right.Velocity.y);
-    res.AddEntry("right sound speed",right.SoundSpeed);
-    res.AddEntry("right energy",right.Energy);
-    res.AddEntry("interface velocity",velocity);
-    res.AddEntry("left wave speed",left_wave_speed);
-    res.AddEntry("center wave speed",center_wave_speed);
-    res.AddEntry("right wave speed",right_wave_speed);
-    return res;
-  }
-}
-
-namespace {
 Conserved starred_state
 (Primitive const& state, double sk, double ss)
 {
@@ -122,19 +93,12 @@ Conserved Hllc::operator()
   Conserved f_gr;
   if(ws.left>0)
     f_gr = fl;
-  else if(ws.left<=0&&ws.center>=0)
+  else if(ws.center>=0)
    f_gr = fl+ws.left*(usl-ul);
-  else if(ws.center<0&&ws.right>=0)
+  else if(ws.right>=0)
     f_gr  = fr + ws.right*(usr-ur);
-  else if(ws.right<0)
-    f_gr = fr;
   else
-    throw invalid_wave_speeds(local_left,
-			      local_right,
-			      velocity,
-			      ws.left,
-			      ws.center,
-			      ws.right);
+    f_gr = fr;
 
   f_gr.Energy += ScalarProd(f_gr.Momentum,velocity*normaldir) +
                 0.5*f_gr.Mass*velocity*velocity;

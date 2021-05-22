@@ -1,6 +1,7 @@
 #include "Tetrahedron.hpp"
 
-Tetrahedron::Tetrahedron()  {}
+Tetrahedron::Tetrahedron():
+  points(), neighbors()  {}
 
 Tetrahedron::Tetrahedron(Tetrahedron const & other)
 {

@@ -6,6 +6,7 @@
 #ifndef MAT3_HPP
 #define MAT3_HPP 1
 
+//! \brief A 3x3 matrix
 template <typename T>
 class Mat33
 {
@@ -14,38 +15,63 @@ private:
 
 public:
 	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline T& at(int row, int col)
 	{
 		return _data[row][col];
 	}
 
 	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline const T& at(int row, int col) const
 	{
 		return _data[row][col];
 	}
 
 	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline T& operator()(int row, int col) { return at(row, col); }
 
 	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline const T& operator()(int row, int col) const { return at(row, col); }
 
 	//! \brief Constructs a zeroed out matrix
 	Mat33();
 
 	//! \brief Constructs a matrix and fills all its values. An intializer_list is better, but C++ 11 isn't always supported
+  /*! \param d00 Term in position 0,0
+    \param d01 Term in position 0,1
+    \param d02 Term in position 0,2
+    \param d10 Term in position 1,0
+    \param d11 Term in position 1,1
+    \param d12 Term in position 1,2
+    \param d20 Term in position 2,0
+    \param d21 Term in position 2,1
+    \param d22 Term in position 2,2
+   */
 	Mat33(T d00, T d01, T d02,
 		T d10, T d11, T d12,
 		T d20, T d21, T d22);
 
 	//! \brief Returns the matrix's determinant
+  //! \return Determinant of the matrix
 	T determinant() const;
 
-	//! \brief Return the inverse matrix
+  //! \brief Return the inverse matrix
+  //! \return Inverse matrix
 	Mat33<T> inverse()const;
 
-	//! \brief Returns the transpose matrix
+  //! \brief Returns the transpose matrix
+  //! \return Transposed matrix
 	Mat33<T> transpose()const;
 };
 

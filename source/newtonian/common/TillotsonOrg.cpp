@@ -108,11 +108,19 @@ double TillotsonOrg::dep2cIV(double d, double e, double p) const
 	return res;
 }
 
+//! \brief Auxiliary struct
 	struct dp2eIIOrg
 	{
-		dp2eIIOrg(TillotsonOrg const& eos) : eos_(eos)
+	  /*! \brief Class constructor
+	    \param eos Equation of state
+	   */
+	  explicit dp2eIIOrg(TillotsonOrg const& eos) : eos_(eos)
 		{}
 
+	  /*! \brief Calculate pressure
+	    \param e Energy
+	    \return Pressure
+	   */
 		double operator()(double e)
 		{
 			double res = 1 - eos_.de2pII(eos_.temp_d_, e) / eos_.temp_p_;
@@ -157,7 +165,7 @@ double TillotsonOrg::dp2e(double d, double p, tvector const & /*tracers*/, vecto
 		{
 			res = boost::math::tools::toms748_solve(dp2eIIOrg(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
 		}
-		catch (boost::exception const& eo)
+		catch (boost::exception const& /*eo*/)
 		{
 			std::cout << " EIV_ " << EIV_ << " ECV_ " << ECV_ << " density " << d << " pressure " << p << " PIV " << PIV << " PCV " << PCV << std::endl;
 		}
@@ -168,15 +176,15 @@ double TillotsonOrg::dp2e(double d, double p, tvector const & /*tracers*/, vecto
 			if (std::abs(p - newp) > 0.001*std::abs(p))
 			{
 				UniversalError eo("No dp2e convergence");
-				eo.AddEntry("Density", d);
-				eo.AddEntry("Pressure", p);
-				eo.AddEntry("New Pressure", newp);
-				eo.AddEntry("EIV", EIV_);
-				eo.AddEntry("ECV", ECV_);
-				eo.AddEntry("First energy", res.first);
-				eo.AddEntry("Second energy", res.second);
-				eo.AddEntry("First pressure", de2p(d, res.first));
-				eo.AddEntry("Second pressure", de2p(d, res.second));
+				eo.addEntry("Density", d);
+				eo.addEntry("Pressure", p);
+				eo.addEntry("New Pressure", newp);
+				eo.addEntry("EIV", EIV_);
+				eo.addEntry("ECV", ECV_);
+				eo.addEntry("First energy", res.first);
+				eo.addEntry("Second energy", res.second);
+				eo.addEntry("First pressure", de2p(d, res.first));
+				eo.addEntry("Second pressure", de2p(d, res.second));
 				throw eo;
 			}
 		}

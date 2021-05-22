@@ -31,7 +31,9 @@ public:
      */
     void updateTime(double dt);
 
-	void updateCycle();
+    /*! \brief Updates the cycle number
+     */
+    void updateCycle();
 
     /*! \brief Returns the current time of the simulation
       \return Time of the simulation
@@ -43,7 +45,9 @@ public:
      */
     size_t getCycle(void) const;
 
+    //! \brief Simulation time
     double time;
+    //! \brief Tracks the number of times time advance was called
     size_t cycle;
   };
 
@@ -55,12 +59,17 @@ public:
     \param tsc Time step calculator
     \param fc Flux calculator
     \param cu Cell updater
-	\param eu Extensive updater
-	\param source Source term
-	\param tsn The names of the stickers and tracers
-	\param proc_update How to load balance
-	\param tproc The tessellation of the domian decomposition
-   */
+    \param eu Extensive updater
+    \param source Source term
+    \param tsn The names of the stickers and tracers
+    \param proc_update How to load balance
+    \param SR Special relativity flag
+    \param new_start Rerun indication
+    \param maxload parallel directive
+  */
+#ifdef RICH_MPI
+  //! \param tproc The tessellation of the domian decomposition
+#endif //RICH_MPI
   HDSim3D(Tessellation3D& tess,
 #ifdef RICH_MPI
 	  Tessellation3D& tproc,
@@ -79,7 +88,9 @@ public:
 	  ,const ProcessorUpdate3D* proc_update = 0
 #endif
 	  ,bool new_start = true
+#ifdef RICH_MPI
 	  ,const double maxload = 4.0
+#endif // RICH_MPI
   );
 
   //! \brief Advances the simulation in time (first order)
@@ -87,12 +98,20 @@ public:
   //! \brief Advances the simulation in time (second order)
   void timeAdvance2();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance3();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance32();
 
+  /*! \brief Third order time advance
+   */
   void timeAdvance33();
 
+  /*! \brief Fourth order time advance
+   */
   void timeAdvance4();
 
   /*! \brief Access to tessellation
@@ -106,6 +125,9 @@ public:
 #ifdef RICH_MPI
   const Tessellation3D& getProcTesselation(void) const;
 
+  /*! \brief Get meta tessellation
+    \return Reference to meta tessellation
+   */
   Tessellation3D& getProcTesselation(void);
 #endif
 
@@ -133,7 +155,7 @@ public:
   /*! \brief Get the time of the simulation
   \return The current time of the simulation
   */
-  double GetTime(void)const;
+  double getTime(void)const;
   /*! \brief Access to the names of the stickers and tracers
   \return The names of the stickers and tracers
   */
@@ -141,7 +163,7 @@ public:
   /*! \brief Get the cycle number of the simulation
   \return The current cycle of the simulation
   */
-  size_t GetCycle(void)const;
+  size_t getCycle(void)const;
   /*! \brief Change the cycle of the simulation
   \param cycle The new cycle of the simulation
   */
@@ -176,7 +198,9 @@ private:
   const ProcessorUpdate3D* proc_update_;
 #endif
   size_t Max_ID_;
+#ifdef RICH_MPI
   const double maxload_;
+#endif // RICH_MPI
 };
 
 #endif // HDSIM_3D_HPP

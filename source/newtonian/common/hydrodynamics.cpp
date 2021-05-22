@@ -25,10 +25,10 @@ Primitive Conserved2Primitive
   if(energy<0)
   {
 	  UniversalError eo("Negative thermal energy");
-	  eo.AddEntry("x velocity",velocity.x);
-	  eo.AddEntry("y velocity",velocity.y);
-	  eo.AddEntry("density",density);
-	  eo.AddEntry("Energy per volume",c.Energy);
+	  eo.addEntry("x velocity",velocity.x);
+	  eo.addEntry("y velocity",velocity.y);
+	  eo.addEntry("density",density);
+	  eo.addEntry("Energy per volume",c.Energy);
 	  throw eo;
   }
   */

@@ -28,7 +28,10 @@ public:
   */
   Edge(Vector2D const& p1, Vector2D const& p2,
        int neighbor1, int neighbor2);
-
+  /*! \brief Copy assignment
+    \param other Source
+    \return Refernce to new object
+   */
   Edge& operator=(const Edge& other);
 
   Edge(void);

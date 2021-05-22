@@ -27,13 +27,13 @@ public:
 	\param toignore List of sticker names not to apply correction for
 	*/
 	CentroidMotion(double reduction_factor,EquationOfState const& eos, bool coldflow = false, size_t niter = 2,
-		vector<string> toignore = vector<string>());
+		const vector<string>& toignore = vector<string>());
 
 	vector<Vector2D> operator()(const Tessellation& tess, const vector<ComputationalCell>& cells, double time,
-		TracerStickerNames const& tracerstickernames) const;
+		TracerStickerNames const& tracerstickernames) const override;
 
 	vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-		double dt, vector<Vector2D> const& velocities, TracerStickerNames const& tracerstickernames)const;
+		double dt, vector<Vector2D> const& velocities, TracerStickerNames const& tracerstickernames)const override;
 private:
 
 	const double reduce_factor_;

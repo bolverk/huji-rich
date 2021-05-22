@@ -42,6 +42,10 @@ void write_vector(vector<double> const& v,
 void write_vector(vector<int> const& v,
 		  string const& fname);
 
+/*! \brief Write vector to file
+  \param v Vector
+  \param fname Name of file
+ */
 void write_vector(vector<size_t> const& v,
 	string const& fname);
 

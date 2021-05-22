@@ -34,6 +34,8 @@ public:
 	{
 	public:
 
+	  Action(void);
+
 		/*! \brief Calculates flux
 		  \param edge Interface between cells
 		  \param tess Tessellation
@@ -56,6 +58,14 @@ public:
 				TracerStickerNames const& tracerstickernames) const = 0;
 
 		virtual ~Action(void);
+
+	  /*! \brief Default constructor
+	   */
+	  Action(const Action&);
+
+	  //! \brief Default copy operator
+	  //! \return Reference to new object
+	  Action& operator=(const Action&);
 	};
 
 	/*! \brief Class constructor
@@ -64,7 +74,7 @@ public:
 	explicit ConditionActionSequence
 		(const vector<pair<const Condition*, const Action*> >& sequence);
 
-	~ConditionActionSequence(void);
+	~ConditionActionSequence(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,
@@ -75,7 +85,7 @@ public:
 			const EquationOfState& eos,
 			const double time,
 			const double dt,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -99,7 +109,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 
@@ -124,7 +134,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -148,7 +158,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -165,7 +175,7 @@ public:
 		(const Edge& edge,
 			const Tessellation& tess,
 			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Check if an interface is inside the domain
@@ -179,7 +189,7 @@ public:
 		(const Edge& edge,
 			const Tessellation& tess,
 			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Determines if the interface is between a regular and a special cell
@@ -196,7 +206,7 @@ public:
 		(const Edge& edge,
 			const Tessellation& tess,
 			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const string sticker_name_;

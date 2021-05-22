@@ -61,8 +61,16 @@ public:
 	//! \brief Component in the z direction
 	double z;
 
+  /*! \brief Indexed access to member
+    \param index Member index
+    \return Reference to member
+   */
 	double& operator[](size_t index);
 
+  /*! \brief Indexed access to member
+    \param index Member index
+    \return Value of member
+   */
 	double operator[](size_t index)const;
 
 	/*! \brief Addition
@@ -126,16 +134,16 @@ public:
 	*/
 	void Round();
 
-	size_t getChunkSize(void) const;
+  size_t getChunkSize(void) const override;
 	
-	vector<double> serialize(void) const;
+	vector<double> serialize(void) const override;
 
-	void unserialize(const vector<double>& data);
+	void unserialize(const vector<double>& data) override;
 
 #ifdef __INTEL_COMPILER
 #pragma omp declare simd
 #endif
-	~Vector3D(void){}
+	~Vector3D(void) override {}
 };
 
 /*! \brief Norm of a vector
@@ -264,6 +272,11 @@ inline Vector3D CrossProduct(Vector3D const& v1, Vector3D const& v2)
 	return Vector3D(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
 }
 
+/*! \brief Cross product
+  \param v1 First vector
+  \param v2 Second vector
+  \param res result
+ */
 inline void CrossProduct(Vector3D const& v1, Vector3D const& v2,Vector3D &res)
 {
 	res.x = v1.y*v2.z - v1.z*v2.y;
@@ -280,6 +293,10 @@ inline void CrossProduct(Vector3D const& v1, Vector3D const& v2,Vector3D &res)
 */
 void Split(vector<Vector3D> const & vIn, vector<double> & vX, vector<double> & vY, vector<double> & vZ);
 
+/*! \brief Normalise vector
+  \param vec Vector
+  \return Normalised vector
+ */
 Vector3D normalize(Vector3D const& vec);
 
 #endif // Vector3D_HPP

@@ -29,9 +29,9 @@ namespace {
 						double d)
 	{
 	  UniversalError res("Speed of sound came out imaginary");
-	  res.AddEntry("adiabatic index",g);
-	  res.AddEntry("density",d);
-	  res.AddEntry("pressure",p);
+	  res.addEntry("adiabatic index",g);
+	  res.addEntry("density",d);
+	  res.addEntry("pressure",p);
 	  return res;
 	}
 	*/
@@ -43,9 +43,9 @@ double IdealGas_SR::dp2c(double d, double p, tvector const& /*tracers*/, vector<
 	if (!(g_ > 0) || !(p > 0) || !(d > 0))
 	{
 		UniversalError eo("Negative quantity in ideal gas SR");
-		eo.AddEntry("Density", d);
-		eo.AddEntry("Pressure", p);
-		eo.AddEntry("Gamma index", g_);
+		eo.addEntry("Density", d);
+		eo.addEntry("Pressure", p);
+		eo.addEntry("Gamma index", g_);
 		throw eo;
 	}
 #endif

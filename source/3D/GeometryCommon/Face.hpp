@@ -9,6 +9,7 @@
 #include <vector>
 #include <boost/container/small_vector.hpp>
 #include "Vector3D.hpp"
+//! \brief Container for small collection of points
 typedef boost::container::small_vector<Vector3D, 10> point_vec_v;
 
 using std::vector;
@@ -31,6 +32,10 @@ public:
   */
   Face(point_vec_v const& vert,std::size_t neighbor1,std::size_t neighbor2);
 
+  /*! \brief Assignment operator
+    \param other Source
+    \return Reference to new object
+   */
   Face& operator=(const Face& other);
 
   Face(void);

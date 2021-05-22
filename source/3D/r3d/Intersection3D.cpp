@@ -391,7 +391,7 @@ std::pair<bool, std::array<double,4> > PolyhedraIntersection(Tessellation3D cons
 	vector<r3d_plane> *planes)
 {
 	bool allocated = false;
-	if (planes == 0)
+	if (planes == nullptr)
 	{
 		allocated = true;
 		planes = new vector<r3d_plane>;

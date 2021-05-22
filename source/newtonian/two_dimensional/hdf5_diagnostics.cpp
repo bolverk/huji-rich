@@ -35,7 +35,7 @@ namespace
 		DataSet dataset = file.openDataSet(caption);
 		DataSpace filespace = dataset.getSpace();
 		hsize_t dims_out[2];
-		filespace.getSimpleExtentDims(dims_out, NULL);
+		filespace.getSimpleExtentDims(dims_out, nullptr);
 		const size_t NX = static_cast<size_t>(dims_out[0]);
 		vector<T> result(NX);
 		dataset.read(&result[0], datatype);
@@ -43,7 +43,7 @@ namespace
 	}
 
 	vector<double> read_double_vector_from_hdf5
-		(Group& file, string const& caption)
+	(const Group& file, const string& caption)
 	{
 		return read_vector_from_hdf5<double>
 			(file,
@@ -102,7 +102,7 @@ namespace {
 		explicit ThermalPropertyExtractor(double ComputationalCell::* var) :
 			var_(var) {}
 
-		double operator()(const ComputationalCell& p) const
+		double operator()(const ComputationalCell& p) const override
 		{
 			return p.*var_;
 		}
@@ -118,7 +118,7 @@ namespace {
 		explicit CellVelocityComponentExtractor(double Vector2D::* component) :
 			component_(component) {}
 
-		double operator()(const ComputationalCell& p) const
+		double operator()(const ComputationalCell& p) const override
 		{
 			return p.velocity.*component_;
 		}
@@ -337,7 +337,11 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 }
 
 Snapshot read_hdf5_snapshot
-(const string& fname, bool mpioverride)
+(const string& fname
+#ifdef RICH_MPI
+, bool mpioverride
+#endif // RICH_MPI
+)
 {
 	Snapshot res;
 	H5File file(fname, H5F_ACC_RDONLY);
@@ -350,8 +354,8 @@ Snapshot read_hdf5_snapshot
 	if (!mpioverride)
 		mpi = file.openGroup("/mpi");
 #else
-	if (mpioverride)
-		mpioverride = true;
+	//	if (mpioverride)
+	//		mpioverride = true;
 #endif
 
 

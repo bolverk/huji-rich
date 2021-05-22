@@ -20,7 +20,7 @@ public:
   KillSwitch(const string& fname,
 	     TerminationCondition& tc);
 
-  bool operator()(const hdsim& sim);
+  bool operator()(const hdsim& sim) override;
 
 private:
 

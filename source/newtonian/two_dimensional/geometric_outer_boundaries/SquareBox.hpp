@@ -16,13 +16,13 @@ class SquareBox: public OuterBoundary
 {
 public:
 
-  bool AreWeReflective(Edge const& edge)const;
+  bool AreWeReflective(Edge const& edge)const override;
 
-  BoundaryType GetBoundaryType(void) const;
+  BoundaryType GetBoundaryType(void) const override;
 
-  bool PointIsReflective(Vector2D const& point)const;
+  bool PointIsReflective(Vector2D const& point)const override;
 
-  double GetGridBoundary(Directions dir) const;
+  double GetGridBoundary(Directions dir) const override;
   /*!
     \brief Class constructor
     \param left The left coordinate
@@ -44,7 +44,7 @@ public:
    */
   pair<Vector2D,Vector2D> getBoundary(void) const;
 
-  ~SquareBox(void);
+  ~SquareBox(void) override;
 private:
   double _left,_right,_up,_down;
 };

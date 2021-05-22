@@ -92,12 +92,12 @@ public:
     ar & y;
   }
 
-  vector<double> serialize(void) const;
+  vector<double> serialize(void) const override;
 
-  size_t getChunkSize(void) const;
+  size_t getChunkSize(void) const override;
 
   void unserialize
-  (const vector<double>& data);
+  (const vector<double>& data) override;
 #endif // RICH_MPI
 };
 

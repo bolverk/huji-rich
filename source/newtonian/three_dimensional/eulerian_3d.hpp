@@ -17,7 +17,7 @@ public:
   Eulerian3D(void);
 
   void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	  double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const;
+	  double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const override;
 };
 
 #endif // EULERIAN_3D_HPP

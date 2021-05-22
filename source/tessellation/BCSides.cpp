@@ -60,9 +60,14 @@ WrongBCSidesOrderException::WrongBCSidesOrderException (double down, double up, 
 :	_up(up), _down(down), _left(left), _right(right)
 {}
 
-WrongBCSidesOrderException::~WrongBCSidesOrderException(void)
-{
-}
+WrongBCSidesOrderException::WrongBCSidesOrderException
+(const WrongBCSidesOrderException& eo):
+  _up(eo._up),
+  _down(eo._down),
+  _left(eo._left),
+  _right(eo._right) {}
+
+WrongBCSidesOrderException::~WrongBCSidesOrderException(void) = default;
 
 double WrongBCSidesOrderException::GetUp(void) const
 {

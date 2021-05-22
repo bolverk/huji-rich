@@ -70,6 +70,9 @@ public:
 		const std::array<double, MAX_TRACERS>& tracers_i,
 		const std::array<bool, MAX_STICKERS>& stickers_i);
 
+  /*! \brief Copy constructor
+    \param other Source
+   */
   ComputationalCell3D(const ComputationalCell3D& other);
 
 	/*! \brief Self increment operator
@@ -96,10 +99,19 @@ public:
 	ComputationalCell3D& operator=(ComputationalCell3D const& other);
 
 #ifdef RICH_MPI
+  /*! \brief Get size of chunks
+    \return Chunk size in bytes
+   */
 	size_t getChunkSize(void) const;
 
+  /*! \brief Decompose cell into list of numbers
+    \return List of numbers
+   */
 	vector<double> serialize(void) const;
 
+  /*! \brief Reconstruct cell from series of numbers
+    \param data List of numbers
+   */
 	void unserialize
 		(const vector<double>& data);
 #endif // RICH_MPI
@@ -141,8 +153,17 @@ ComputationalCell3D operator*(ComputationalCell3D const& p, double s);
 */
 ComputationalCell3D operator*(double s, ComputationalCell3D const& p);
 
+/*! \brief Perform addition and scalar multiplication
+  \param res Result
+  \param other Addition
+  \param scalar Scalar
+ */
 void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D const& other, double scalar);
 
+/*! \brief Swap computation cell
+  \param cell Result
+  \param other Other cell
+ */
 void ReplaceComputationalCell(ComputationalCell3D &cell, ComputationalCell3D const& other);
 
 //! \brief Class for 3D spatial interpolations
@@ -170,11 +191,11 @@ public:
 	//! \brief Default constructor
 	Slope3D(void);
 #ifdef RICH_MPI
-	size_t getChunkSize(void) const;
+	size_t getChunkSize(void) const override;
 
-	vector<double> serialize(void) const;
+	vector<double> serialize(void) const override;
 
-	void unserialize(const vector<double>& data);
+	void unserialize(const vector<double>& data) override;
 #endif//RICH_MPI
 };
 

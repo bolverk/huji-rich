@@ -9,6 +9,8 @@
 #include <string>
 
 /*! \brief Converts an integer to a string
+  \param n Number
+  \return Number converted to string
  */
 std::string int2str(int n);
 

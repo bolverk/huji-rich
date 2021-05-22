@@ -11,9 +11,11 @@ void write_error(const string& fname,
 		 const UniversalError& eo)
 {
   ofstream f(fname.c_str());
-  f << eo.GetErrorMessage() << endl;
-  for(size_t i=0;eo.GetFields().size();++i)
-    f << eo.GetFields()[i] << " = " << eo.GetValues()[i] << endl;
+  f << eo.getErrorMessage() << endl;
+  for_each(eo.getFields().begin(),
+	   eo.getFields().end(),
+	   [&f](const pair<string, double>& x)
+	   {f << x.first << " " << x.second << endl;});
   f.close();
 }
 

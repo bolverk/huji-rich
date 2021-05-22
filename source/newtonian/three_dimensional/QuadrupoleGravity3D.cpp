@@ -13,7 +13,7 @@ namespace
 		assert(it != x.end() && it != x.begin() &&
 			"X out of range in Linear Interp");
 		index = std::max(static_cast<size_t>(it - x.begin()),static_cast<size_t>(1));
-		if (*it == xi)
+		if (close2zero(*it-xi))
 			return y[static_cast<std::size_t>(it - x.begin())];
 
 		return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*
@@ -35,12 +35,12 @@ namespace
 		Vector3D acc;
 		size_t index = 0;
 		double r = abs(point);
-		double Phi = LinearInterp(r_list, Q20In, r, index);
+		LinearInterp(r_list, Q20In, r, index);
 		double small = 1e-5;
 		double dx = small*(r_list[index] - r_list.at(index-1));
 		point.x += 0.5*dx;
-		r = abs(point);
-		Phi = -LinearInterp(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x*point.x - point.y*point.y) / (r*r*r*r*r);
+		//		double r = abs(point);
+		double Phi = -LinearInterp(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x*point.x - point.y*point.y) / (r*r*r*r*r);
 		point.x -= dx;
 		r = abs(point);
 		Phi += LinearInterp2(r_list, Q20In, r, index)*(2 * point.z*point.z - point.x *point.x - point.y * point.y) / (r*r*r*r*r);
@@ -310,7 +310,7 @@ void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<Co
 	MPI_Barrier(MPI_COMM_WORLD);
 	QIn22_real = temp;
 #else
-	vector<double> temp;
+	//	vector<double> temp;
 #endif
 	for (size_t i = 1; i < resolution; ++i)
 		m_radius[i] += m_radius[i - 1];

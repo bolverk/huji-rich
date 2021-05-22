@@ -12,13 +12,13 @@
 class PeriodicBox: public OuterBoundary
 {
 public:
-	bool AreWeReflective(Edge const& edge)const;
+	bool AreWeReflective(Edge const& edge)const override;
 
-	BoundaryType GetBoundaryType(void) const;
+	BoundaryType GetBoundaryType(void) const override;
 
-	bool PointIsReflective(Vector2D const& point)const;
+	bool PointIsReflective(Vector2D const& point)const override;
 
-	double GetGridBoundary(Directions dir) const;
+	double GetGridBoundary(Directions dir) const override;
 	/*!
 	\brief Class constructor
 	\param left The left coordinate

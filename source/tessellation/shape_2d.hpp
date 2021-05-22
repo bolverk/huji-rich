@@ -35,7 +35,7 @@ public:
   Circle(Vector2D const& center,
 	 double radius);
 
-  bool operator()(const Vector2D& r) const;
+  bool operator()(const Vector2D& r) const override;
 
   /*! \brief Returns the center of the circle
     \return Center of the circle
@@ -63,7 +63,7 @@ public:
    */
   explicit Outside(Shape2D const& shape);
 
-  bool operator()(const Vector2D& r) const;
+  bool operator()(const Vector2D& r) const override;
 
 private:
 

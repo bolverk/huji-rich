@@ -14,9 +14,10 @@ class SeveralSources :public SourceTerm
 {
 public:
 	//! \brief Class constructor
-	explicit SeveralSources(vector<SourceTerm*> forces);
+  //! \param forces List of list of sources
+	explicit SeveralSources(const vector<SourceTerm*>& forces);
 	//! \brief Class destructor
-	~SeveralSources(void);
+	~SeveralSources(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,
@@ -26,7 +27,7 @@ public:
 			const vector<Extensive>& fluxes,
 			const vector<Vector2D>& point_velocities,
 			const double t,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	vector<SourceTerm*> sources_;

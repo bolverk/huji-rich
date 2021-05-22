@@ -56,7 +56,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D left sound speed", 0);
+			eo.addEntry("Error in HLLC3D left sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -72,7 +72,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D right sound speed", 0);
+			eo.addEntry("Error in HLLC3D right sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -120,25 +120,6 @@ namespace
 		} while (ps > 1.1 * pstar || pstar > 1.1 * ps);
 		double ss = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		return WaveSpeeds(sl, ss, sr);
-	}
-
-	UniversalError invalid_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		double velocity, double left_wave_speed, double center_wave_speed, double right_wave_speed)
-	{
-		UniversalError res("Invalid wave speeds in hllc solver");
-		res.AddEntry("left density", left.density);
-		res.AddEntry("left pressure", left.pressure);
-		res.AddEntry("left x velocity", left.velocity.x);
-		res.AddEntry("left y velocity", left.velocity.y);
-		res.AddEntry("right density", right.density);
-		res.AddEntry("right pressure", right.pressure);
-		res.AddEntry("right x velocity", right.velocity.x);
-		res.AddEntry("right y velocity", right.velocity.y);
-		res.AddEntry("interface velocity", velocity);
-		res.AddEntry("left wave speed", left_wave_speed);
-		res.AddEntry("center wave speed", center_wave_speed);
-		res.AddEntry("right wave speed", right_wave_speed);
-		return res;
 	}
 
 	Conserved3D PrimitiveToFlux(ComputationalCell3D const& p)
@@ -249,25 +230,23 @@ Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, Computatio
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		f_gr = fl;
 	}
-	else if (ws.left <= 0 && ws.center >= 0)
+	else if (ws.center >= 0)
 	{
 		const Conserved3D fl = PrimitiveToFlux(local_left);
 		const Conserved3D usl = starred_state(local_left, ws.left, ws.center);
 		f_gr = fl + ws.left*(usl - ul);
 	}
-	else if (ws.center < 0 && ws.right >= 0)
+	else if (ws.right >= 0)
 	{
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 		const Conserved3D usr = starred_state(local_right, ws.right, ws.center);
 		f_gr = fr + ws.right*(usr - ur);
 	}
-	else if (ws.right < 0)
+	else
 	{
 		const Conserved3D fr = PrimitiveToFlux(local_right);
 		f_gr = fr;
 	}
-	else
-		throw invalid_wave_speeds(local_left, local_right, velocity, ws.left, ws.center, ws.right);
 
 	// check if bad wavespeed
 	if (HLL && ws.left < 0 && ws.right>0)

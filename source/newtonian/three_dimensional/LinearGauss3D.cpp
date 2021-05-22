@@ -22,11 +22,11 @@ namespace
 		std::pair<size_t, size_t> neigh;
 		for (int i = 0; i < nloop; ++i)
 		{
-			neigh = tess.GetFaceNeighbors(faces[i]);
+		  neigh = tess.GetFaceNeighbors(faces[static_cast<size_t>(i)]);
 			if (neigh.first == cell_index)
-				res[i] = tess.GetMeshPoint(neigh.second);
+			  res[static_cast<size_t>(i)] = tess.GetMeshPoint(neigh.second);
 			else
-				res[i] = tess.GetMeshPoint(neigh.first);
+			  res[static_cast<size_t>(i)] = tess.GetMeshPoint(neigh.first);
 		}
 	}
 
@@ -122,31 +122,31 @@ namespace
 		if (std::abs(det) < 1e-10)
 		{
 			UniversalError eo("Singular matrix");
-			eo.AddEntry("Cell x cor", center.x);
-			eo.AddEntry("Cell y cor", center.y);
-			eo.AddEntry("Cell z cor", center.z);
-			eo.AddEntry("Cell CMx cor", cell_cm.x);
-			eo.AddEntry("Cell CMy cor", cell_cm.y);
-			eo.AddEntry("Cell CMz cor", cell_cm.z);
-			eo.AddEntry("Cell volume", cell_volume);
-			eo.AddEntry("Det was", det);
+			eo.addEntry("Cell x cor", center.x);
+			eo.addEntry("Cell y cor", center.y);
+			eo.addEntry("Cell z cor", center.z);
+			eo.addEntry("Cell CMx cor", cell_cm.x);
+			eo.addEntry("Cell CMy cor", cell_cm.y);
+			eo.addEntry("Cell CMz cor", cell_cm.z);
+			eo.addEntry("Cell volume", cell_volume);
+			eo.addEntry("Det was", det);
 			for (size_t i = 0; i < faces.size(); ++i)
 			{
 				c_ij[0] = tess.FaceCM(faces[i]) - 0.5 * (neigh_cm[i] + cell_cm);
-				eo.AddEntry("Neighbor x", neighbor_centers[i].x);
-				eo.AddEntry("Neighbor y", neighbor_centers[i].y);
-				eo.AddEntry("Neighbor z", neighbor_centers[i].z);
-				eo.AddEntry("Face", static_cast<double>(faces[i]));
-				eo.AddEntry("Neighbor Cx", c_ij[0].x);
-				eo.AddEntry("Neighbor Cy", c_ij[0].y);
-				eo.AddEntry("Neighbor Cz", c_ij[0].z);
-				eo.AddEntry("Face Cx", tess.FaceCM(faces[i]).x);
-				eo.AddEntry("Face Cy", tess.FaceCM(faces[i]).y);
-				eo.AddEntry("Face Cz", tess.FaceCM(faces[i]).z);
-				eo.AddEntry("Face area", tess.GetArea(faces[i]));
+				eo.addEntry("Neighbor x", neighbor_centers[i].x);
+				eo.addEntry("Neighbor y", neighbor_centers[i].y);
+				eo.addEntry("Neighbor z", neighbor_centers[i].z);
+				eo.addEntry("Face", static_cast<double>(faces[i]));
+				eo.addEntry("Neighbor Cx", c_ij[0].x);
+				eo.addEntry("Neighbor Cy", c_ij[0].y);
+				eo.addEntry("Neighbor Cz", c_ij[0].z);
+				eo.addEntry("Face Cx", tess.FaceCM(faces[i]).x);
+				eo.addEntry("Face Cy", tess.FaceCM(faces[i]).y);
+				eo.addEntry("Face Cz", tess.FaceCM(faces[i]).z);
+				eo.addEntry("Face area", tess.GetArea(faces[i]));
 			}
 			for (size_t i = 0; i < 9; ++i)
-				eo.AddEntry("M", m[i]);
+				eo.addEntry("M", m[i]);
 			throw eo;
 		}
 		// Invert the matrix
@@ -224,8 +224,8 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("density", res.density);
-			eo.AddEntry("internal energy", res.internal_energy);
+			eo.addEntry("density", res.density);
+			eo.addEntry("internal energy", res.internal_energy);
 			throw eo;
 		}
 		return res;
@@ -255,8 +255,8 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("density", res.density);
-			eo.AddEntry("internal energy", res.internal_energy);
+			eo.addEntry("density", res.density);
+			eo.addEntry("internal energy", res.internal_energy);
 			throw eo;
 		}
 	}
@@ -620,7 +620,7 @@ namespace
 		vector<Vector3D> &neighbor_mesh_list,
 		vector<Vector3D> &neighbor_cm_list,
 		TracerStickerNames const& tracerstickernames, string const& skip_key,
-		std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
+		const std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
 		face_vec const& faces = tess.GetCellFaces(cell_index);
 		GetNeighborMesh(tess, cell_index, neighbor_mesh_list, faces);
@@ -675,8 +675,8 @@ namespace
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error LinearGauss3D", 0);
-				eo.AddEntry("Cell number", cell_index);
+				eo.addEntry("Error LinearGauss3D", 0);
+				eo.addEntry("Cell number", cell_index);
 				throw eo;
 			}
 #endif
@@ -702,21 +702,21 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Cell density", cell.density);
-		eo.AddEntry("Cell internal energy", cell.internal_energy);
-		eo.AddEntry("cell index", static_cast<double>(cell_index));
-		eo.AddEntry("CMx", cm.x);
-		eo.AddEntry("CMy", cm.y);
-		eo.AddEntry("CMz", cm.z);
-		eo.AddEntry("Targetx", target.x);
-		eo.AddEntry("Targety", target.y);
-		eo.AddEntry("Targetz", target.z);
+		eo.addEntry("Cell density", cell.density);
+		eo.addEntry("Cell internal energy", cell.internal_energy);
+		eo.addEntry("cell index", static_cast<double>(cell_index));
+		eo.addEntry("CMx", cm.x);
+		eo.addEntry("CMy", cm.y);
+		eo.addEntry("CMz", cm.z);
+		eo.addEntry("Targetx", target.x);
+		eo.addEntry("Targety", target.y);
+		eo.addEntry("Targetz", target.z);
 		throw eo;
 	}
 }
 
 LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames const& tsn, Ghost3D const& ghost, bool slf, double delta_v, double theta,
-	double delta_P, bool SR, const vector<string>& calc_tracers, string skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
+	double delta_P, bool SR, const vector<string>& calc_tracers, const string& skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
 	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
 	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_(),pressure_calc_(pressure_calc) {}
 
@@ -802,7 +802,7 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	vector<Vector3D> neighbor_cm_list;
 	std::vector<Vector3D> c_ij;
 	res.resize(tess.GetTotalFacesNumber(), pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
-	ComputationalCell3D* cell_ref = 0;
+	ComputationalCell3D* cell_ref = nullptr;
 	size_t energy_index = tracerstickersnames.tracer_names.size();
 	vector<string>::const_iterator it = binary_find(tracerstickersnames.tracer_names.begin(),
 		tracerstickersnames.tracer_names.end(), string("Energy"));
@@ -836,20 +836,20 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				}
 				catch (UniversalError &eo)
 				{
-					eo.AddEntry("Old density", new_cells[i].density);
-					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
-					eo.AddEntry("Face", static_cast<double>(faces[j]));
-					eo.AddEntry("Cell", static_cast<double>(i));
-					eo.AddEntry("Vx", new_cells[i].velocity.x);
-					eo.AddEntry("Vy", new_cells[i].velocity.y);
-					eo.AddEntry("Vz", new_cells[i].velocity.z);
-					eo.AddEntry("Cell id", static_cast<double>(new_cells[i].ID));
-					eo.AddEntry("Interpolated density",cell_ref->density);
-					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
-					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
-					eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
-					eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
-					eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
+					eo.addEntry("Old density", new_cells[i].density);
+					eo.addEntry("Old internal energy", new_cells[i].internal_energy);
+					eo.addEntry("Face", static_cast<double>(faces[j]));
+					eo.addEntry("Cell", static_cast<double>(i));
+					eo.addEntry("Vx", new_cells[i].velocity.x);
+					eo.addEntry("Vy", new_cells[i].velocity.y);
+					eo.addEntry("Vz", new_cells[i].velocity.z);
+					eo.addEntry("Cell id", static_cast<double>(new_cells[i].ID));
+					eo.addEntry("Interpolated density",cell_ref->density);
+					eo.addEntry("Interpolated pressure",cell_ref->pressure);
+					eo.addEntry("Interpolated internal energy",cell_ref->internal_energy);
+					eo.addEntry("Interpolated Vx",cell_ref->velocity.x);
+					eo.addEntry("Interpolated Vy",cell_ref->velocity.y);
+					eo.addEntry("Interpolated Vz",cell_ref->velocity.z);
 					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).second > CellNumber)
@@ -873,20 +873,20 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				}
 				catch (UniversalError &eo)
 				{
-					eo.AddEntry("Old density", new_cells[i].density);
-					eo.AddEntry("Old internal energy", new_cells[i].internal_energy);
-					eo.AddEntry("Face", static_cast<double>(faces[j]));
-					eo.AddEntry("Cell", static_cast<double>(i));
-					eo.AddEntry("Vx", new_cells[i].velocity.x);
-					eo.AddEntry("Vy", new_cells[i].velocity.y);
-					eo.AddEntry("Vz", new_cells[i].velocity.z);
-					eo.AddEntry("Cell id", static_cast<double>(new_cells[i].ID));
-					eo.AddEntry("Interpolated density",cell_ref->density);
-					eo.AddEntry("Interpolated pressure",cell_ref->pressure);
-					eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
-					eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
-					eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
-					eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
+					eo.addEntry("Old density", new_cells[i].density);
+					eo.addEntry("Old internal energy", new_cells[i].internal_energy);
+					eo.addEntry("Face", static_cast<double>(faces[j]));
+					eo.addEntry("Cell", static_cast<double>(i));
+					eo.addEntry("Vx", new_cells[i].velocity.x);
+					eo.addEntry("Vy", new_cells[i].velocity.y);
+					eo.addEntry("Vz", new_cells[i].velocity.z);
+					eo.addEntry("Cell id", static_cast<double>(new_cells[i].ID));
+					eo.addEntry("Interpolated density",cell_ref->density);
+					eo.addEntry("Interpolated pressure",cell_ref->pressure);
+					eo.addEntry("Interpolated internal energy",cell_ref->internal_energy);
+					eo.addEntry("Interpolated Vx",cell_ref->velocity.x);
+					eo.addEntry("Interpolated Vy",cell_ref->velocity.y);
+					eo.addEntry("Interpolated Vz",cell_ref->velocity.z);
 					throw eo;
 				}
 				if (tess.GetFaceNeighbors(faces[j]).first > CellNumber)
@@ -951,47 +951,47 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("old density", new_cells[N0].density);
-				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
-				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
-				eo.AddEntry("Cell", static_cast<double>(N0));
-				eo.AddEntry("Vx", new_cells[N0].velocity.x);
-				eo.AddEntry("Vy", new_cells[N0].velocity.y);
-				eo.AddEntry("Vz", new_cells[N0].velocity.z);
-				eo.AddEntry("Cell id", static_cast<double>(new_cells[N0].ID));
-				eo.AddEntry("Interpolated density",cell_ref->density);
-				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
-				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
-				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
-				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
-				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
-				eo.AddEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
-				eo.AddEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
-				eo.AddEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
-				eo.AddEntry("Cell CMx", tess.GetCellCM(N0).x);
-				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
-				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
+				eo.addEntry("old density", new_cells[N0].density);
+				eo.addEntry("old internal energy", new_cells[N0].internal_energy);
+				eo.addEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
+				eo.addEntry("Cell", static_cast<double>(N0));
+				eo.addEntry("Vx", new_cells[N0].velocity.x);
+				eo.addEntry("Vy", new_cells[N0].velocity.y);
+				eo.addEntry("Vz", new_cells[N0].velocity.z);
+				eo.addEntry("Cell id", static_cast<double>(new_cells[N0].ID));
+				eo.addEntry("Interpolated density",cell_ref->density);
+				eo.addEntry("Interpolated pressure",cell_ref->pressure);
+				eo.addEntry("Interpolated internal energy",cell_ref->internal_energy);
+				eo.addEntry("Interpolated Vx",cell_ref->velocity.x);
+				eo.addEntry("Interpolated Vy",cell_ref->velocity.y);
+				eo.addEntry("Interpolated Vz",cell_ref->velocity.z);
+				eo.addEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
+				eo.addEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
+				eo.addEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
+				eo.addEntry("Cell CMx", tess.GetCellCM(N0).x);
+				eo.addEntry("Cell CMy", tess.GetCellCM(N0).y);
+				eo.addEntry("Cell CMz", tess.GetCellCM(N0).z);
 				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).second;
-				eo.AddEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
-				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
-				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
-				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
-				eo.AddEntry("Other Cell density", new_cells[N1].density);
-				eo.AddEntry("Other Cell pressure", new_cells[N1].pressure);
-				eo.AddEntry("Slopex", rslopes_[N0].xderivative.density);
-				eo.AddEntry("Slopey", rslopes_[N0].yderivative.density);
-				eo.AddEntry("Slopez", rslopes_[N0].zderivative.density);
+				eo.addEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
+				eo.addEntry("Other Cell CMx", tess.GetCellCM(N1).x);
+				eo.addEntry("Other Cell CMy", tess.GetCellCM(N1).y);
+				eo.addEntry("Other Cell CMz", tess.GetCellCM(N1).z);
+				eo.addEntry("Other Cell density", new_cells[N1].density);
+				eo.addEntry("Other Cell pressure", new_cells[N1].pressure);
+				eo.addEntry("Slopex", rslopes_[N0].xderivative.density);
+				eo.addEntry("Slopey", rslopes_[N0].yderivative.density);
+				eo.addEntry("Slopez", rslopes_[N0].zderivative.density);
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-				eo.AddEntry("Rank", static_cast<double>(rank));
+				eo.addEntry("Rank", static_cast<double>(rank));
 				for (size_t j = 0; j < tess.GetGhostIndeces().size(); ++j)
 					for (size_t k = 0; k < tess.GetGhostIndeces()[j].size(); ++k)
 						if (tess.GetGhostIndeces()[j][k] == N0)
 						{
-							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
-							eo.AddEntry("Point recv index", static_cast<double>(k));
-							eo.AddEntry("Point proc index", static_cast<double>(j));
+							eo.addEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
+							eo.addEntry("Point recv index", static_cast<double>(k));
+							eo.addEntry("Point proc index", static_cast<double>(j));
 						}
 #endif
 				throw eo;
@@ -1046,44 +1046,44 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("old density", new_cells[N0].density);
-				eo.AddEntry("old internal energy", new_cells[N0].internal_energy);
-				eo.AddEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
-				eo.AddEntry("Cell", static_cast<double>(N0));
-				eo.AddEntry("Vx", new_cells[N0].velocity.x);
-				eo.AddEntry("Vy", new_cells[N0].velocity.y);
-				eo.AddEntry("Vz", new_cells[N0].velocity.z);
-				eo.AddEntry("Cell id", static_cast<double>(new_cells[N0].ID));
-				eo.AddEntry("Interpolated density",cell_ref->density);
-				eo.AddEntry("Interpolated pressure",cell_ref->pressure);
-				eo.AddEntry("Interpolated internal energy",cell_ref->internal_energy);
-				eo.AddEntry("Interpolated Vx",cell_ref->velocity.x);
-				eo.AddEntry("Interpolated Vy",cell_ref->velocity.y);
-				eo.AddEntry("Interpolated Vz",cell_ref->velocity.z);
-				eo.AddEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
-				eo.AddEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
-				eo.AddEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
-				eo.AddEntry("Cell CMx", tess.GetCellCM(N0).x);
-				eo.AddEntry("Cell CMy", tess.GetCellCM(N0).y);
-				eo.AddEntry("Cell CMz", tess.GetCellCM(N0).z);
+				eo.addEntry("old density", new_cells[N0].density);
+				eo.addEntry("old internal energy", new_cells[N0].internal_energy);
+				eo.addEntry("Boundary Face", static_cast<double>(boundaryedges[i]));
+				eo.addEntry("Cell", static_cast<double>(N0));
+				eo.addEntry("Vx", new_cells[N0].velocity.x);
+				eo.addEntry("Vy", new_cells[N0].velocity.y);
+				eo.addEntry("Vz", new_cells[N0].velocity.z);
+				eo.addEntry("Cell id", static_cast<double>(new_cells[N0].ID));
+				eo.addEntry("Interpolated density",cell_ref->density);
+				eo.addEntry("Interpolated pressure",cell_ref->pressure);
+				eo.addEntry("Interpolated internal energy",cell_ref->internal_energy);
+				eo.addEntry("Interpolated Vx",cell_ref->velocity.x);
+				eo.addEntry("Interpolated Vy",cell_ref->velocity.y);
+				eo.addEntry("Interpolated Vz",cell_ref->velocity.z);
+				eo.addEntry("Face CMx", tess.FaceCM(boundaryedges[i]).x);
+				eo.addEntry("Face CMy", tess.FaceCM(boundaryedges[i]).y);
+				eo.addEntry("Face CMz", tess.FaceCM(boundaryedges[i]).z);
+				eo.addEntry("Cell CMx", tess.GetCellCM(N0).x);
+				eo.addEntry("Cell CMy", tess.GetCellCM(N0).y);
+				eo.addEntry("Cell CMz", tess.GetCellCM(N0).z);
 				size_t N1 = tess.GetFaceNeighbors(boundaryedges[i]).first;
-				eo.AddEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
-				eo.AddEntry("Other Cell CMx", tess.GetCellCM(N1).x);
-				eo.AddEntry("Other Cell CMy", tess.GetCellCM(N1).y);
-				eo.AddEntry("Other Cell CMz", tess.GetCellCM(N1).z);
-				eo.AddEntry("Other Cell density", new_cells[N1].density);
-				eo.AddEntry("Other Cell pressure", new_cells[N1].pressure);
+				eo.addEntry("Other cell ID", static_cast<double>(new_cells[N1].ID));
+				eo.addEntry("Other Cell CMx", tess.GetCellCM(N1).x);
+				eo.addEntry("Other Cell CMy", tess.GetCellCM(N1).y);
+				eo.addEntry("Other Cell CMz", tess.GetCellCM(N1).z);
+				eo.addEntry("Other Cell density", new_cells[N1].density);
+				eo.addEntry("Other Cell pressure", new_cells[N1].pressure);
 #ifdef RICH_MPI
 				int rank = 0;
 				MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-				eo.AddEntry("Rank", static_cast<double>(rank));
+				eo.addEntry("Rank", static_cast<double>(rank));
 				for (size_t j = 0; j < tess.GetGhostIndeces().size(); ++j)
 					for (size_t k = 0; k < tess.GetGhostIndeces()[j].size(); ++k)
 						if (tess.GetGhostIndeces()[j][k] == N0)
 						{
-							eo.AddEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
-							eo.AddEntry("Point recv index", static_cast<double>(k));
-							eo.AddEntry("Point proc index", static_cast<double>(j));
+							eo.addEntry("Point recv from proc", static_cast<double>(tess.GetDuplicatedProcs()[j]));
+							eo.addEntry("Point recv index", static_cast<double>(k));
+							eo.addEntry("Point proc index", static_cast<double>(j));
 						}
 #endif
 				throw eo;

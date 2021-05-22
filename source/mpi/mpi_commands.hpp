@@ -374,7 +374,7 @@ vector<vector<vector<T> > > MPI_exchange_data(const vector<int>& totalkwith, vec
 	vector<MPI_Request> req(2*totalkwith.size());
 	vector<vector<double> > tempsend(2*totalkwith.size());
 	vector<vector<int> > send_sizes(totalkwith.size());
-	vector<T> temprecv;
+	//	vector<T> temprecv;
 	double temp = 0;
 	for (size_t i = 0; i < totalkwith.size(); ++i)
 	{

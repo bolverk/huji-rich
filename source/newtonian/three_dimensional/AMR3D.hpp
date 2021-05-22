@@ -32,6 +32,19 @@ public:
 
 	//! \brief Class destructor
 	virtual ~AMRCellUpdater3D(void);
+
+  /*! \brief Null constructor
+   */
+  AMRCellUpdater3D(void);
+
+  /*! \brief Copy constructor
+   */
+  AMRCellUpdater3D(const AMRCellUpdater3D&);
+
+  /*! \brief Copy constructor
+    \return Reference to new object
+   */
+  AMRCellUpdater3D& operator=(const AMRCellUpdater3D&);
 };
 
 //! \brief Abstract class for extensive update scheme in amr
@@ -44,6 +57,9 @@ public:
 	\param eos Equation of state
 	\param volume Cell volume
 	\param tracerstickernames The names of the tracers and stickers
+	\param slope Gradients
+	\param CMold Old centre of mass
+	\param CMnew New centre of mass
 	\return Extensive
 	*/
 	virtual Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
@@ -51,6 +67,19 @@ public:
 
 	//! \brief Class destructor
 	virtual ~AMRExtensiveUpdater3D(void);
+
+  /*! \brief Null constructor
+   */
+  AMRExtensiveUpdater3D(void);
+
+  /*! \brief Copy constructor
+   */
+  AMRExtensiveUpdater3D(const AMRExtensiveUpdater3D&);
+
+  /*! \brief Copy assignment
+    \return Reference to new object
+   */
+  AMRExtensiveUpdater3D& operator=(const AMRExtensiveUpdater3D&);
 };
 
 //! \brief Simple class for extensive update scheme in amr
@@ -60,7 +89,7 @@ public:
 	SimpleAMRExtensiveUpdater3D(void);
 
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -73,18 +102,28 @@ public:
 	\brief class constructor
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	SimpleAMRCellUpdater3D(vector<string> toskip = vector<string>());
+	SimpleAMRCellUpdater3D(const vector<string>& toskip = vector<string>());
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
+		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Simple class for extensive update scheme in amr for SR
 class SimpleAMRExtensiveUpdaterSR3D : public AMRExtensiveUpdater3D
 {
 public:
-	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const;
+  /*! 
+    \param cell Computational cell
+    \param eos Equation of state
+    \param volume Volume
+    \param tracerstickernames Tracers and stickers names
+    \param slope Gradients
+    \param CMold Old centre of mass
+    \param CMnew New centre of mass
+    \return Conserved variables
+   */
+  Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
+		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr for SR
@@ -99,10 +138,10 @@ public:
 	\param G The adiabatic index
 	\param toskip A list of sticker names to skip their cell update
 	*/
-	explicit SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip);
+  SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip);
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const;
+		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
 };
 
 //! \brief Chooses which cells should be remove
@@ -172,9 +211,10 @@ public:
 	\param cu Cell updater
 	\param eu Extensive updater
 	\param eos Equation of state
+	\param interp Interpolation scheme
 	*/
-	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = 0,
-		AMRExtensiveUpdater3D* eu = 0);
+	AMR3D(EquationOfState const& eos, CellsToRefine3D const& refine, CellsToRemove3D const& remove,SpatialReconstruction3D &interp, AMRCellUpdater3D* cu = nullptr,
+		AMRExtensiveUpdater3D* eu = nullptr);
 	//! Class destructor
 	~AMR3D();
 };

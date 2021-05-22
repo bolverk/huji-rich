@@ -32,7 +32,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D left sound speed", 0);
+			eo.addEntry("Error in HLLC3D left sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -48,7 +48,7 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in HLLC3D right sound speed", 0);
+			eo.addEntry("Error in HLLC3D right sound speed", 0);
 			throw eo;
 		}
 #endif
@@ -92,18 +92,18 @@ namespace
 		double velocity, double left_wave_speed, double center_wave_speed, double right_wave_speed)
 	{
 		UniversalError res("Invalid wave speeds in hllc solver");
-		res.AddEntry("left density", left.density);
-		res.AddEntry("left pressure", left.pressure);
-		res.AddEntry("left x velocity", left.velocity.x);
-		res.AddEntry("left y velocity", left.velocity.y);
-		res.AddEntry("right density", right.density);
-		res.AddEntry("right pressure", right.pressure);
-		res.AddEntry("right x velocity", right.velocity.x);
-		res.AddEntry("right y velocity", right.velocity.y);
-		res.AddEntry("interface velocity", velocity);
-		res.AddEntry("left wave speed", left_wave_speed);
-		res.AddEntry("center wave speed", center_wave_speed);
-		res.AddEntry("right wave speed", right_wave_speed);
+		res.addEntry("left density", left.density);
+		res.addEntry("left pressure", left.pressure);
+		res.addEntry("left x velocity", left.velocity.x);
+		res.addEntry("left y velocity", left.velocity.y);
+		res.addEntry("right density", right.density);
+		res.addEntry("right pressure", right.pressure);
+		res.addEntry("right x velocity", right.velocity.x);
+		res.addEntry("right y velocity", right.velocity.y);
+		res.addEntry("interface velocity", velocity);
+		res.addEntry("left wave speed", left_wave_speed);
+		res.addEntry("center wave speed", center_wave_speed);
+		res.addEntry("right wave speed", right_wave_speed);
 		return res;
 	}
 

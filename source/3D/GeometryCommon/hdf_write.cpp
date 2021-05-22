@@ -15,7 +15,7 @@ namespace
     DataSet dataset = file.openDataSet(caption);
     DataSpace filespace = dataset.getSpace();
     hsize_t dims_out[2];
-    filespace.getSimpleExtentDims(dims_out, NULL);
+    filespace.getSimpleExtentDims(dims_out, nullptr);
     const size_t NX = static_cast<size_t>(dims_out[0]);
     vector<T> result(NX);
     dataset.read(&result[0], datatype);
@@ -23,7 +23,7 @@ namespace
   }
 
   vector<double> read_double_vector_from_hdf5
-  (Group& file, string const& caption)
+  (const Group& file, string const& caption)
   {
     return read_vector_from_hdf5<double>
       (file,
@@ -133,8 +133,8 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 #endif // RICH_MPI
 		     )
 {
-  int rank = 0;
 #ifdef RICH_MPI
+  int rank = 0;
   int ws = 0;
   if (mpi_write)
     {
@@ -143,12 +143,16 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
     }
 #endif
   H5File file;
+#ifdef RICH_MPI
   if (rank == 0)
     {
+#endif // RICH_MPI
       H5File file2(H5std_string(filename), H5F_ACC_TRUNC);
       file2.close();
       file.openFile(H5std_string(filename), H5F_ACC_RDWR);
+#ifdef RICH_MPI
     }
+#endif // RICH_MPI
   Group writegroup;
 #ifdef RICH_MPI
   if (mpi_write)
@@ -182,7 +186,9 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
   box[3] = tess.GetBoxCoordinates().second.x;
   box[4] = tess.GetBoxCoordinates().second.y;
   box[5] = tess.GetBoxCoordinates().second.z;
+#ifdef RICH_MPI
   if(rank==0)
+#endif // RICH_MPI
     write_std_vector_to_hdf5(file, box, "Box");
 
   vector<double> temp(Ncells);
@@ -296,14 +302,18 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
   for (size_t i = 0; i < Ncells; ++i)
     temp[i] = tess.GetVolume(i);
   write_std_vector_to_hdf5(writegroup, temp, "Volume");
+#ifdef RICH_MPI
   if (rank == 0)
     {
-      vector<double> time(1, sim.GetTime());
+#endif // RICH_MPI
+      vector<double> time(1, sim.getTime());
       write_std_vector_to_hdf5(file, time, "Time");
 
-      vector<int> cycle(1, static_cast<int>(sim.GetCycle()));
+      vector<int> cycle(1, static_cast<int>(sim.getCycle()));
       write_std_vector_to_hdf5(file, cycle, "Cycle");
+#ifdef RICH_MPI
     }
+#endif // RICH_MPI
   // Appendices
   for (size_t i = 0; i < appendices.size(); ++i)
     write_std_vector_to_hdf5(writegroup,(*(appendices.at(i)))(sim),appendices.at(i)->getName());
@@ -376,8 +386,8 @@ Snapshot3D ReadSnapshot3D(const string& fname
     const vector<double> pressure = read_double_vector_from_hdf5(read_location, "Pressure");
     const vector<double> energy = read_double_vector_from_hdf5(read_location, "InternalEnergy");
     vector<size_t> IDs(density.size(), 0);
-    ssize_t objcount = read_location.getNumObjs();
-    for (ssize_t i = 0; i < objcount; ++i)
+    hsize_t objcount = read_location.getNumObjs();
+    for (hsize_t i = 0; i < objcount; ++i)
       {
 	std::string name = read_location.getObjnameByIdx(i);
 	if (name.compare(std::string("ID"))==0)
@@ -467,12 +477,12 @@ Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proc
 	  snap.proc_points = temp.proc_points;
 	}
       size_t N = temp.cells.size();
-      for (size_t i = 0; i < N; ++i)
+      for (size_t j = 0; j < N; ++j)
 	{
-	  if (PointInPoly(proctess, temp.mesh_points[i], static_cast<size_t>(rank)))
+	  if (PointInPoly(proctess, temp.mesh_points[j], static_cast<size_t>(rank)))
 	    {
-	      snap.cells.push_back(temp.cells[i]);
-	      snap.mesh_points.push_back(temp.mesh_points[i]);
+	      snap.cells.push_back(temp.cells[j]);
+	      snap.mesh_points.push_back(temp.mesh_points[j]);
 	    }
 	}
     }

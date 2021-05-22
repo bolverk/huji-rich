@@ -114,11 +114,20 @@ double Tillotson::dep2cIV(double d, double e, double p) const
 	return res;
 }
 
+
+//! \brief Auxiliary class
 struct dp2eII
 {
-	dp2eII(Tillotson const& eos) : eos_(eos)
+  /*! \brief Class constructor
+    \param eos Equation of state
+   */
+  explicit dp2eII(Tillotson const& eos) : eos_(eos)
 	{}
 
+  /*! \brief Calculates pressure 
+    \param e Energy
+    \return Pressure
+   */
 	double operator()(double e)
 	{
 		double res = std::abs(1.0 - eos_.de2pII(eos_.temp_d_, e) / eos_.temp_p_);
@@ -157,14 +166,14 @@ double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<strin
 		temp_d_ = d;
 		temp_p_ = p;
 		boost::uintmax_t it = 50;
-		std::pair<double, double> res,res2;
+		std::pair<double, double> res /*,res2*/;
 		try
 		{
 			//res = boost::math::tools::toms748_solve(dp2eII(*this), EIV_, ECV_, boost::math::tools::eps_tolerance<double>(30), it);
 			res=boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, ECV_, 30, it);
 			//res2 = boost::math::tools::brent_find_minima(dp2eII(*this), EIV_, 0.5*(EIV_+ECV_), 30, it);
 		}
-		catch (boost::exception const& eo)
+		catch (boost::exception const& /*eo*/)
 		{
 			double eta2 = alpha_ * (rho0_ / d - 1) * (rho0_ / d - 1);
 			double exp_alpha = (eta2 > 100) ? 0 : std::exp(-eta2);
@@ -188,15 +197,15 @@ double Tillotson::dp2e(double d, double p, tvector const & tracers, vector<strin
 				if (std::abs(p - newp) > 0.001*std::abs(p))
 				{
 					UniversalError eo("No dp2e convergence");
-					eo.AddEntry("Density", d);
-					eo.AddEntry("Pressure", p);
-					eo.AddEntry("New Pressure", newp);
-					eo.AddEntry("EIV", EIV_);
-					eo.AddEntry("ECV", ECV_);
-					eo.AddEntry("First energy", res.first);
-					eo.AddEntry("Second energy", res.second);
-					eo.AddEntry("First pressure", de2p(d, res.first));
-					eo.AddEntry("Second pressure", de2p(d, res.second));
+					eo.addEntry("Density", d);
+					eo.addEntry("Pressure", p);
+					eo.addEntry("New Pressure", newp);
+					eo.addEntry("EIV", EIV_);
+					eo.addEntry("ECV", ECV_);
+					eo.addEntry("First energy", res.first);
+					eo.addEntry("Second energy", res.second);
+					eo.addEntry("First pressure", de2p(d, res.first));
+					eo.addEntry("Second pressure", de2p(d, res.second));
 					throw eo;
 				}
 			}

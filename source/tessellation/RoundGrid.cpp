@@ -12,7 +12,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	vector<Vector2D> res(points);
 	res = VectorValues(res, indeces);
 	VoronoiMesh default_tess;
-	if(tess==0)
+	if(tess==nullptr)
 		tess=&default_tess;
 #ifdef RICH_MPI
 	if(tproc==0)

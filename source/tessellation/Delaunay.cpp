@@ -51,7 +51,7 @@ Delaunay::Delaunay(void) :
 	cor(vector<Vector2D>()),
 	length(0),
 	olength(0), location_pointer(0), last_loc(0),
-	logger(0)
+	logger(nullptr)
 #ifdef RICH_MPI
 	,OrgIndex(vector<int>())
 #endif
@@ -282,7 +282,7 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const& cpoints)
 {
 	cell_points = cpoints;
-	DataOnlyForBuild data;
+	//	DataOnlyForBuild data;
 	lastFacet = 0;
 	CalcRadius = false;
 	length = int(vp.size() + 3);
@@ -381,7 +381,7 @@ namespace {
 				cor[point])) < 0)
 			return &Triplet<int>::third;
 		else
-			return 0;
+			return nullptr;
 	}
 
 	class WalkBookkeeper
@@ -454,8 +454,8 @@ int Delaunay::FindPointInFacet(int facet, int point)
 		if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == point)
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
-	eo.AddEntry("Facet number", facet);
-	eo.AddEntry("Point number", point);
+	eo.addEntry("Facet number", facet);
+	eo.addEntry("Point number", point);
 	throw eo;
 }
 
@@ -749,7 +749,7 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 		}
 		return res;
 	}
-	vector<int> res_temp, outer_points, f_temp, f_add(f.size(), 0);
+	vector<int> res_temp, outer_points, f_temp /*, f_add(f.size(), 0)*/;
 	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
@@ -801,7 +801,7 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error in AddRigid", 0);
+			eo.addEntry("Error in AddRigid", 0);
 			throw;
 		}
 		ReArrangeVector(toduplicate[i], order);
@@ -1338,7 +1338,7 @@ Delaunay::findOuterPoints
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error in first send in triangulation", 0.0);
+				eo.addEntry("Error in first send in triangulation", 0.0);
 				throw;
 			}
 		}
@@ -1563,10 +1563,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error in second send in triangulation", 0.0);
-				eo.AddEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
-				eo.AddEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
-				eo.AddEntry("Mpi count", static_cast<double>(count));
+				eo.addEntry("Error in second send in triangulation", 0.0);
+				eo.addEntry("Mpi status", static_cast<double>(status.MPI_SOURCE));
+				eo.addEntry("Mpi tag", static_cast<double>(status.MPI_TAG));
+				eo.addEntry("Mpi count", static_cast<double>(count));
 				throw;
 			}
 		}

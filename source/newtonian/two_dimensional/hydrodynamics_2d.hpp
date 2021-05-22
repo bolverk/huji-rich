@@ -25,14 +25,14 @@
 #include "../common/riemann_solver.hpp"
 
 /*! \brief Rotates primitive variables to align with edge
-  \param n Normal directions
-  \param p Parallel direction
-  \param cell Primitive variables
+  \param normaldir Normal directions
+  \param paraldir Parallel direction
+  \param p Primitive variables
   \return Rotated cell
  */
-Primitive RotatePrimitive(const Vector2D& n,
-	const Vector2D& p,
-	const Primitive& cell);
+Primitive RotatePrimitive(const Vector2D& normaldir,
+	const Vector2D& paraldir,
+	const Primitive& p);
 
 /*! \brief Rotates flux from the edge frame back to the lab frame
   \param c Flux

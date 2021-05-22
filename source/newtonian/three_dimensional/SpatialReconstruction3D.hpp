@@ -30,13 +30,19 @@ public:
 
 	virtual ~SpatialReconstruction3D(void);
 
+  /*! \brief Calculate gradients
+    \param tess Tessellation
+    \param cells Computational cells
+    \param time Time
+    \param tracerstickersnames Tracer and sticker names
+   */
 	virtual void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,double time, TracerStickerNames const& tracerstickersnames) = 0;
 
 	/*!
 	\brief Returns the gradients
 	\return The gradients
 	*/
-	virtual std::vector<Slope3D>& GetSlopes(void)=0;
+  virtual std::vector<Slope3D>& GetSlopes(void)=0;
 };
 
 #endif // SPATIAL_RECONSTRUCTION3D_HPP

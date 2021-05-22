@@ -3,9 +3,9 @@
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
-LagrangianExtensiveUpdater3D::LagrangianExtensiveUpdater3D(LagrangianFlux3D const & lflux, EquationOfState const & eos,
-	Ghost3D const & ghost, const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*,
-	const ConditionExtensiveUpdater3D::Action3D*>>&sequence) :lflux_(lflux), eos_(eos), ghost_(ghost), sequence_(sequence) {}
+LagrangianExtensiveUpdater3D::LagrangianExtensiveUpdater3D(LagrangianFlux3D const & lflux, 
+	const vector<pair<const ConditionExtensiveUpdater3D::Condition3D*,
+	const ConditionExtensiveUpdater3D::Action3D*>>&sequence) :lflux_(lflux), sequence_(sequence) {}
 
 void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D & tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double time,

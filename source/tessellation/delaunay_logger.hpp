@@ -22,7 +22,10 @@ namespace delaunay_loggers {
     //! \brief Class constructor
     DelaunayLogger(void);
 
-    //! \brief Dumps output
+    /*! \brief Dumps output
+       \param cor List of points
+       \param f List of facets
+     */
     virtual void output(vector<Vector2D> const& cor,
 			vector<facet> const& f);
 
@@ -40,7 +43,7 @@ namespace delaunay_loggers {
     explicit BinaryLogger(string const& file_name);
 
     void output(vector<Vector2D> const& cor,
-		vector<facet> const& f);
+		vector<facet> const& f) override;
 
   private:
     const string file_name_;

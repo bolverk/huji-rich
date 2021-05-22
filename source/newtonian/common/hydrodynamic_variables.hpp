@@ -23,7 +23,9 @@ public:
   Conserved(double mass,
 	    Vector2D const& momentum,
 	    double energy);
-
+  /*! \brief Copy constructor
+    \param other Source
+   */
   Conserved(const Conserved& other);
 
   //! \brief Mass
@@ -59,6 +61,8 @@ class Primitive
 {
 public:
 
+  /*! \brief Number of members
+   */
   enum {NUMBER_PRIMITIVE_VARIABLES=6};
 
   Primitive(void);
@@ -76,6 +80,9 @@ public:
 	    double energy_i,
 	    double sound_speed_i);
 
+  /*! \brief Copy constructor
+    \param other Source
+   */
   Primitive(const Primitive& other);
 
   //! \brief Density
@@ -93,7 +100,9 @@ public:
   //! \brief Speed of sound
   double SoundSpeed;
 
-  //! \brief Returns the numbers of members
+  /*! \brief Returns the numbers of members
+    \return Number of members
+   */
   int GetVarNo(void) const;
 
   /*! \brief Operator for adding members of two primitives

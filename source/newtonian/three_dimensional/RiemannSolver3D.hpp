@@ -14,6 +14,8 @@ class RiemannSolver3D
 {
 public:
 
+  RiemannSolver3D(void);
+
 	/*! \brief Solve Riemann porblme
 	\param left Primitive variables on the left side
 	\param right Primitive variables on the right side
@@ -23,10 +25,28 @@ public:
 	\param normaldir Normal to the face
 	\return Corrected fluxes
 	*/
-	virtual Conserved3D operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
-		EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const = 0;
+	virtual Conserved3D operator()
+	(ComputationalCell3D const& left,
+	 ComputationalCell3D const& right,
+	 double velocity,
+	 EquationOfState const& eos,
+	 TracerStickerNames const& tsn,
+	 Vector3D const& normaldir) const = 0;
 
-	virtual ~RiemannSolver3D(void);
+  /*
+  RiemannSolver3D(void);
+  RiemannSolver3D(const RiemannSolver3D&) = default;
+  RiemannSolver3D(RiemannSolver3D&&) = default;
+  RiemannSolver3D& operator=(const RiemannSolver3D&) = default;
+  RiemannSolver3D& operator=(RiemannSolver3D&&) = default;
+  */
+
+  virtual ~RiemannSolver3D(void);
+protected:
+
+  /*! \brief Copy constructor
+   */
+  RiemannSolver3D(const RiemannSolver3D&);
 };
 
 #endif // RIEMANN_SOVLER3D_HPP

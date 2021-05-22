@@ -35,6 +35,7 @@ public:
 };
 
 namespace {
+  #if RICH_MPI
   template<class T> vector<T> chunk
   (const vector<T>& source,
    size_t i_start,
@@ -46,16 +47,17 @@ namespace {
       res.at(i-i_start) = source.at(i);
     return res;
   }
+#endif // RICH_MPI
 }
 
 vector<double> list_serialize
 (const vector<Serializable*>& los);
 
-template <class S> vector<double> list_serialize(const vector<S> los);
+template <class S> vector<double> list_serialize(const vector<S>& los);
 
 template <class S> vector<double>
 list_serialize
-(const vector<S> los)
+(const vector<S>& los)
 {
 	if (los.empty())
 		return vector<double> ();
@@ -84,8 +86,8 @@ template<class T> vector<T> list_unserialize
 	if (data.size() % t.getChunkSize() != 0)
 	{
 		UniversalError eo("Count of serializable objects not integer");
-		eo.AddEntry("chunksize", static_cast<double>(t.getChunkSize()));
-		eo.AddEntry("Data size", static_cast<double>(data.size()));
+		eo.addEntry("chunksize", static_cast<double>(t.getChunkSize()));
+		eo.addEntry("Data size", static_cast<double>(data.size()));
 		throw eo;
 	}
   const size_t n = data.size()/t.getChunkSize();

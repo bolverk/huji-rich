@@ -120,7 +120,7 @@ namespace
   void FirstCheckList(std::stack<std::size_t > &check_stack, vector<unsigned char> &future_check, size_t Norg,
 		      Delaunay3D const& del, vector<tetra_vec > const& PointsInTetra)
   {
-    check_stack.empty();
+    //    check_stack.empty();
     future_check.resize(Norg, 0);
     size_t Ntetra = del.tetras_.size();
     vector<unsigned char> tetra_check(Ntetra, 0);
@@ -216,7 +216,7 @@ namespace
     return res;
   }
 
-  size_t BoxIndex(vector<Vector3D> const& fnormals, Vector3D normal)
+  size_t BoxIndex(vector<Vector3D> const& fnormals, const Vector3D& normal)
   {
     double max_angle = ScalarProd(fnormals[0], normal);
     size_t loc = 0;
@@ -234,7 +234,7 @@ namespace
   }
 #endif
 
-  double CleanDuplicates(std::array<size_t, 128> const &indeces, vector<Vector3D> &points, 
+  double CleanDuplicates(std::array<size_t, 128> const &indeces, const vector<Vector3D> &points, 
 			 boost::container::small_vector<size_t, 8> &res, double R,
 			 std::array<double, 128> &diffs,
 			 std::array<Vector3D, 128> &vtemp, const size_t N)
@@ -273,7 +273,7 @@ namespace
     bool has_good, has_big;
     // change empty tetras to be not relevant
     for (boost::container::flat_set<size_t>::const_iterator it = empty_tetras.begin(); it !=
-	   empty_tetras.end(); it++)
+	   empty_tetras.end(); ++it)
       {
 #ifdef __INTEL_COMPILER
 #pragma omp simd early_exit
@@ -439,7 +439,7 @@ namespace
     Nloop -= 2;
     Area = 0;
     //Vector3D temp3, temp4, temp5;
-    for (int i = 0; i < static_cast<int>(Nloop); i++)
+    for (size_t i = 0; i < Nloop; i++)
       {
 	//temp4.Set(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
 	Vector3D temp4(points[i + 1].x - points[0].x, points[i + 1].y - points[0].y, points[i + 1].z - points[0].z);
@@ -553,11 +553,11 @@ vector<Vector3D> Voronoi3D::UpdateMPIPoints(Tessellation3D const& vproc, int ran
       if (good)
 	continue;
       UniversalError eo("Point is not inside any processor");
-      eo.AddEntry("CPU rank", rank);
-      eo.AddEntry("Point number", static_cast<double>(i));
-      eo.AddEntry("Point x cor", points[i].x);
-      eo.AddEntry("Point y cor", points[i].y);
-      eo.AddEntry("Point z cor", points[i].z);
+      eo.addEntry("CPU rank", rank);
+      eo.addEntry("Point number", static_cast<double>(i));
+      eo.addEntry("Point x cor", points[i].x);
+      eo.addEntry("Point y cor", points[i].y);
+      eo.addEntry("Point z cor", points[i].z);
       vproc.output("vproc_" + int2str(rank) + ".bin");
       std::array<Vector3D, 4> vec;
       face_vec faces_error = vproc.GetCellFaces(static_cast<size_t>(rank));
@@ -726,7 +726,7 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
   vector<Face> box_faces = BuildBox(ll_, ur_);
   vector<Vector3D> box_normals = GetBoxNormals(ll_, ur_);
   vector<vector<size_t> > box_candidates(box_normals.size());
-  vector<vector<size_t> > new_self_duplicate(box_normals.size());
+  vector<vector<size_t> > new_self_duplicate; //(box_normals.size());
   self_duplicate.resize(box_faces.size());
 
   int rank = 0;
@@ -951,7 +951,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -991,7 +991,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1031,7 +1031,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1071,7 +1071,7 @@ void Voronoi3D::Build(vector<Vector3D> const & points, Tessellation3D const& tpr
       string fname("extra_" + int2str(rank) + ".bin");
       output_buildextra(fname);
       tproc.output("vproc_" + int2str(rank) + ".bin");
-      throw eo;
+      throw;
     }
 
 #ifdef timing
@@ -1122,7 +1122,7 @@ void Voronoi3D::CalcAllCM(void)
   size_t Nfaces = FaceNeighbors_.size();
   Vector3D vtemp;
   std::vector<Vector3D> vectemp;
-  double vol = 0;
+  double vol;
   for (size_t i = 0; i < Nfaces; ++i)
     {
       size_t N0 = FaceNeighbors_[i].first;
@@ -1501,6 +1501,7 @@ double Voronoi3D::GetRadius(std::size_t index)
   return R_[index];
 }
 
+/*
 double Voronoi3D::GetMaxRadius(std::size_t index)
 {
   std::size_t N = PointTetras_[index].size();
@@ -1511,7 +1512,7 @@ double Voronoi3D::GetMaxRadius(std::size_t index)
   for (std::size_t i = 0; i < N; ++i)
     res = std::max(res, GetRadius(PointTetras_[index][i]));
   return 2 * res;
-}
+  }*/
 
 void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t point, Sphere &sphere,
 					 vector<size_t> &intersecting_faces, std::vector<double> &Rtemp, std::vector<Vector3D> &vtemp)
@@ -1543,6 +1544,7 @@ void  Voronoi3D::FindIntersectionsSingle(vector<Face> const& box, std::size_t po
     }
 }
 
+#ifdef RICH_MPI
 void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t point,
 					  Sphere &sphere, std::vector<Face> const& faces, bool &skipped, face_vec const& face_index)
 {
@@ -1727,6 +1729,7 @@ void Voronoi3D::FindIntersectionsRecursive(vector<std::size_t> &res, Tessellatio
   std::sort(res.begin(), res.end());
   res = unique(res);
 }
+#endif // RICH_MPI
 
 
 void Voronoi3D::GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res)
@@ -1892,7 +1895,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFirstIntersections
       normals[i] *= (1.0 / fastsqrt(ScalarProd(normals[i], normals[i])));
     }
 
-  vector<std::size_t> point_neigh;
+  //  vector<std::size_t> point_neigh;
   vector<std::pair<std::size_t, std::size_t> > res;
   Sphere sphere;
   vector<unsigned char>  will_check(Norg_, 0);
@@ -1953,7 +1956,7 @@ vector<std::pair<std::size_t, std::size_t> > Voronoi3D::SerialFindIntersections(
   if (first_run)
     {
       FirstCheckList(check_stack, will_check, Norg_, del_, PointTetras_);
-      cur_loc = check_stack.top();
+      //cur_loc = check_stack.top();
       check_stack.pop();
     }
   else
@@ -2125,7 +2128,7 @@ double Voronoi3D::CalcTetraRadiusCenterHiPrecision(std::size_t index)
   temp = (bDz / (2 * ba) + V0[2]);
   tetra_centers_[index].z = temp.convert_to<double>();
   temp = (boost::multiprecision::sqrt(bDx*bDx + bDy*bDy + bDz*bDz) / ba);
-  return 0.5 * temp.convert_to<double>();;
+  return 0.5 * temp.convert_to<double>();
 }
 
 void Voronoi3D::GetTetraCM(std::array<Vector3D, 4> const& points, Vector3D &CM)const
@@ -2150,6 +2153,7 @@ double Voronoi3D::GetTetraVolume(std::array<Vector3D, 4> const& points)const
   return std::abs(orient3d(points)) / 6.0;
 }
 
+/*
 void Voronoi3D::CalcCellCMVolume(std::size_t index)
 {
   volume_[index] = 0;
@@ -2177,7 +2181,7 @@ void Voronoi3D::CalcCellCMVolume(std::size_t index)
     }
   CM_[index] = CM_[index] / volume_[index];
 }
-
+*/
 
 void Voronoi3D::output(std::string const& filename)const
 {
@@ -2223,6 +2227,7 @@ void Voronoi3D::output(std::string const& filename)const
   file_handle.close();
 }
 
+#ifdef RICH_MPI
 void Voronoi3D::output_buildextra(std::string const& filename)const
 {
   std::ofstream file_handle(filename.c_str(), std::ios::out | std::ios::binary);
@@ -2231,10 +2236,8 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
   binary_write_single_int(static_cast<int>(stemp), file_handle);
   stemp = del_.points_.size();
   binary_write_single_int(static_cast<int>(stemp), file_handle);
-#ifdef RICH_MPI
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
   // Points
   for (std::size_t i = 0; i < stemp; ++i)
     {
@@ -2255,6 +2258,7 @@ void Voronoi3D::output_buildextra(std::string const& filename)const
     }
   file_handle.close();
 }
+#endif
 
 
 std::size_t Voronoi3D::GetPointNo(void) const
@@ -2297,7 +2301,12 @@ face_vec const& Voronoi3D::GetCellFaces(std::size_t index) const
   return FacesInCell_[index];
 }
 
-vector<Vector3D>& Voronoi3D::GetMeshPoints(void)
+vector<Vector3D>& Voronoi3D::accessMeshPoints(void)
+{
+  return del_.points_;
+}
+
+const vector<Vector3D>& Voronoi3D::getMeshPoints(void) const
 {
   return del_.points_;
 }
@@ -2485,7 +2494,7 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
 #endif // RICH_DEBUG
   Vector3D w = (v0 + v1) *0.5;
 #ifdef RICH_DEBUG
-  double w_abs = std::max(fastabs(v0),fastabs(v1));
+  //  double w_abs = std::max(fastabs(v0),fastabs(v1));
 #endif // RICH_DEBUG
   //if (dw_abs > w_abs)
   //	delta_w *= (1 + (std::atan(dw_abs / w_abs) - 0.25 * M_PI)*2) * (w_abs / dw_abs);
@@ -2496,30 +2505,30 @@ Vector3D Voronoi3D::CalcFaceVelocity(std::size_t index, Vector3D const& v0, Vect
       r1 = GetMeshPoint(p1);
       f = FaceCM(index);
       UniversalError eo("Bad Face velocity");
-      eo.AddEntry("Face index", index);
-      eo.AddEntry("Neigh 0", p0);
-      eo.AddEntry("Neigh 1", p1);
-      eo.AddEntry("Neigh 0 x", r0.x);
-      eo.AddEntry("Neigh 0 y", r0.y);
-      eo.AddEntry("Neigh 0 z", r0.z);
-      eo.AddEntry("Neigh 0 CMx", CM_[p0].x);
-      eo.AddEntry("Neigh 0 CMy", CM_[p0].y);
-      eo.AddEntry("Neigh 0 CMz", CM_[p0].z);
-      eo.AddEntry("Neigh 1 x", r1.x);
-      eo.AddEntry("Neigh 1 y", r1.y);
-      eo.AddEntry("Neigh 1 z", r1.z);
-      eo.AddEntry("Neigh 1 CMx", CM_[p1].x);
-      eo.AddEntry("Neigh 1 CMy", CM_[p1].y);
-      eo.AddEntry("Neigh 1 CMz", CM_[p1].z);
-      eo.AddEntry("Face CMx", f.x);
-      eo.AddEntry("Face CMy", f.y);
-      eo.AddEntry("Face CMz", f.z);
-      eo.AddEntry("V0x", v0.x);
-      eo.AddEntry("V0y", v0.y);
-      eo.AddEntry("V0z", v0.z);
-      eo.AddEntry("V1x", v1.x);
-      eo.AddEntry("V1y", v1.y);
-      eo.AddEntry("V1z", v1.z);
+      eo.addEntry("Face index", index);
+      eo.addEntry("Neigh 0", p0);
+      eo.addEntry("Neigh 1", p1);
+      eo.addEntry("Neigh 0 x", r0.x);
+      eo.addEntry("Neigh 0 y", r0.y);
+      eo.addEntry("Neigh 0 z", r0.z);
+      eo.addEntry("Neigh 0 CMx", CM_[p0].x);
+      eo.addEntry("Neigh 0 CMy", CM_[p0].y);
+      eo.addEntry("Neigh 0 CMz", CM_[p0].z);
+      eo.addEntry("Neigh 1 x", r1.x);
+      eo.addEntry("Neigh 1 y", r1.y);
+      eo.addEntry("Neigh 1 z", r1.z);
+      eo.addEntry("Neigh 1 CMx", CM_[p1].x);
+      eo.addEntry("Neigh 1 CMy", CM_[p1].y);
+      eo.addEntry("Neigh 1 CMz", CM_[p1].z);
+      eo.addEntry("Face CMx", f.x);
+      eo.addEntry("Face CMy", f.y);
+      eo.addEntry("Face CMz", f.z);
+      eo.addEntry("V0x", v0.x);
+      eo.addEntry("V0y", v0.y);
+      eo.addEntry("V0z", v0.z);
+      eo.addEntry("V1x", v1.x);
+      eo.addEntry("V1y", v1.y);
+      eo.addEntry("V1z", v1.z);
       throw eo;
     }
 #endif

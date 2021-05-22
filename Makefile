@@ -61,7 +61,7 @@ else ifeq ($(MODE),parallel_intel_check)
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
-	OPTIMIZATION_FLAGS := -Weverything -Werror -ferror-limit=1 -Wno-error=padded
+	OPTIMIZATION_FLAGS := -Weverything -ferror-limit=1 -Wno-error=padded -Wno-c++98-compat-pedantic
 	LINT_FLAGS := 
 else
 	MODE = production
@@ -112,7 +112,7 @@ external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.3/c++
 	./configure --enable-cxx --prefix=`cd ../.. && pwd`
 	cd external_libraries/hdf5_dump/hdf5-1.10.3 && make
 	cd external_libraries/hdf5_dump/hdf5-1.10.3 && make install
-	
+
 external_libraries/include/clipper.hpp:
 	mkdir -p external_libraries/dump_clipper
 	cd external_libraries/dump_clipper && wget http://sourceforge.net/projects/polyclipping/files/latest/download?source=files && mv download?source=files clipper.zip && unzip clipper.zip && cp cpp/clipper.hpp ../include

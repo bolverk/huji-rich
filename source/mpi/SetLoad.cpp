@@ -64,7 +64,7 @@ namespace
 			}
 			catch(UniversalError const& eo)
 			{
-				DisplayError(eo);
+				reportError(eo);
 			}
 			MPI_Barrier(MPI_COMM_WORLD);
 			double load=GetLoad(local);
@@ -102,7 +102,7 @@ namespace
 			}
 			catch(UniversalError const& eo)
 			{
-				DisplayError(eo);
+			  reportError(eo);
 			}
 		}
 		points=local.GetMeshPoints();

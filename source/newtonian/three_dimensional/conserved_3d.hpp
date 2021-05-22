@@ -72,10 +72,19 @@ public:
 	Conserved3D& operator*=(double s);
 
 #ifdef RICH_MPI
+  /*! \brief Estimate chunk sizes
+    \return Size of chunk (in bits)
+   */
 	size_t getChunkSize(void) const;
 
+  /*! \brief Convert to series of numbers
+    \return series of numbers
+   */
 	vector<double> serialize(void) const;
 
+  /*! \brief Reconstruct from serial form
+    \param data Serialised form
+   */
 	void unserialize
 	(const vector<double>& data);
 #endif // RICH_MPI

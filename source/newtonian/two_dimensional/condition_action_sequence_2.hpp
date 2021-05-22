@@ -14,6 +14,8 @@ public:
 	{
 	public:
 
+	  Action2(void);
+
 		/*! \brief Calculates flux
 		\param edge Interface between cells
 		\param tess Tessellation
@@ -38,7 +40,16 @@ public:
 				double time,
 				TracerStickerNames const& tracerstickernames) const = 0;
 
-		virtual ~Action2(void);
+	  virtual ~Action2(void);
+
+	  /*! \brief Copy assignment
+	    \return Reference to new object
+	   */
+	  Action2& operator=(const Action2&);
+
+	  /*! \brief Copy constructor
+	   */
+	  Action2(const Action2&);
 	};
 
 	/*! \brief Class constructor
@@ -51,7 +62,7 @@ public:
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence2::Action2*> >& sequence2,
 			SpatialReconstruction const& interp);
 
-	~ConditionActionSequence2(void);
+	~ConditionActionSequence2(void) override;
 
 	vector<Extensive> operator()
 		(const Tessellation& tess,
@@ -62,7 +73,7 @@ public:
 			const EquationOfState& eos,
 			const double time,
 			const double dt,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
@@ -90,7 +101,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 
@@ -117,7 +128,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -143,7 +154,7 @@ public:
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
 			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const;
+			TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const bool in_;

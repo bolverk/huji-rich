@@ -24,10 +24,10 @@ public:
 
 	boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
 		const vector<ComputationalCell>& cells, double time,TracerStickerNames const&
-		tracerstickernames) const;
+		tracerstickernames) const override;
 
 	Slope GetGhostGradient(const Tessellation& tess,const vector<ComputationalCell>& cells,const vector<Slope>& gradients,
-		size_t ghost_index, double time, const Edge& edge,TracerStickerNames const& tracerstickernames)const;
+		size_t ghost_index, double time, const Edge& edge,TracerStickerNames const& tracerstickernames)const override;
 };
 
 #endif // CONSTANT_PRIMITIVE__GENERATOR_HPP

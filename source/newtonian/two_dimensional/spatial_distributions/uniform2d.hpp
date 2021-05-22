@@ -22,7 +22,7 @@ public:
    */
   explicit Uniform2D(double val);
 
-  double operator()(const Vector2D& /*r*/) const;
+  double operator()(const Vector2D& /*r*/) const override;
 };
 
 #endif // UNIFORM2D_HPP

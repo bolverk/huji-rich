@@ -32,9 +32,9 @@ public:
     \param dt Time step
     \param t_next First trigger time
    */
-  ConstantTimeInterval(double dt, double t_next=0);
+  explicit ConstantTimeInterval(double dt, double t_next=0);
 
-  bool operator()(const hdsim& sim);
+  bool operator()(const hdsim& sim) override;
 
 private:
 

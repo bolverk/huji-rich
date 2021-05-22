@@ -72,28 +72,14 @@ private:
 
 namespace {
 
-void write_output(hdsim1D const& sim)
-{
-  ofstream f;
-  f.open("res.txt");
-  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Pressure << endl;
-  f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Velocity.x << endl;
-  f.close();
-}
-
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-  __attribute__((noreturn))
-#endif
-void report_error(UniversalError const& eo)
-{
-  cout << "Caught universal error" << endl;
-  cout << eo.GetErrorMessage() << endl;
-  for(size_t i = 0;i<eo.GetFields().size();++i){
-    cout << eo.GetFields()[i] << " = "
-	 << eo.GetValues()[i] << endl;
+  void write_output(hdsim1D const& sim)
+  {
+    ofstream f;
+    f.open("res.txt");
+    f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Pressure << endl;
+    f << sim.GetCell(static_cast<size_t>(sim.GetCellNo()/2)).Velocity.x << endl;
+    f.close();
   }
-  throw;
-}
 }
 
 int main(void)
@@ -102,11 +88,11 @@ int main(void)
   hdsim1D& sim = sim_data.getSim();
 
   try{
-  main_loop(sim, 0.067, 1e6, 1,
-	    "time.txt");
+    main_loop(sim, 0.067, 1e6, 1,
+	      "time.txt");
   }
   catch(UniversalError const& eo){
-    report_error(eo);
+    reportError(eo);
   }
 	
   write_output(sim);

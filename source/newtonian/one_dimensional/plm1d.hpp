@@ -23,7 +23,7 @@ public:
   Primitive InterpState(vector<double> const& vp,
 			vector<Primitive> const& hv,
 			double interface_speed,
-			size_t i, int dir, double dt) const;
+			size_t i, int dir, double dt) const override;
 
 private:
 

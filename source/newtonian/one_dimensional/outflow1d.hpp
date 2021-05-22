@@ -17,7 +17,7 @@ public:
 		     vector<Primitive> const& Cells,
 		     RiemannSolver const& rs,
 		     vector<double> const& vertex_veclocity,
-		     int i) const;
+		     int i) const override;
 };
 
 #endif // OUTFLOW_1D_HPP

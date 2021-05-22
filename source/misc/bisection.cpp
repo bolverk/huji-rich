@@ -50,10 +50,10 @@ double bisection(Func1Var const& f,
 
   if(fl*fr>0){
     UniversalError eo("Error in bisection: root is not bracketed");
-    eo.AddEntry("xl",xl);
-    eo.AddEntry("xr",xr);
-    eo.AddEntry("fl",fl);
-    eo.AddEntry("fr",fr);
+    eo.addEntry("xl",xl);
+    eo.addEntry("xr",xr);
+    eo.addEntry("fl",fl);
+    eo.addEntry("fr",fr);
     throw eo;
   }
 

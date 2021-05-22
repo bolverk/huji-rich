@@ -19,7 +19,7 @@ public:
   explicit Lagrangian1D(bool rigid_walls);
 
   double CalcVelocity(int i, vector<double> const& vp,
-		      vector<Primitive> const& hv) const;
+		      vector<Primitive> const& hv) const override;
 
 private:
 

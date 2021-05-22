@@ -257,10 +257,10 @@ namespace
 		if (std::abs(sum) > 1e-5*area_scale)
 		{
 			UniversalError eo("Bad total area in TrianglesArea");
-			eo.AddEntry("area_scale", area_scale);
-			eo.AddEntry("sum", sum);
-			eo.AddEntry("old neigh 0", eold.neighbors.first);
-			eo.AddEntry("old neigh 1", eold.neighbors.second);
+			eo.addEntry("area_scale", area_scale);
+			eo.addEntry("sum", sum);
+			eo.addEntry("old neigh 0", eold.neighbors.first);
+			eo.addEntry("old neigh 1", eold.neighbors.second);
 			throw eo;
 		}
 		return res;
@@ -591,7 +591,8 @@ vector<Extensive> FluxFix2(Tessellation const& tessold, Tessellation const& tess
 					dA_flux2, eos);
 			std::pair<int, int> mid_neigh(tessmid.GetOriginalIndex(edge2.neighbors.first), tessmid.GetOriginalIndex(edge2.neighbors.second));
 			std::pair<int, int> mid_neigh2(mid_neigh.second, mid_neigh.first);
-			if (only_mid.count(mid_neigh) == 0)
+			//			if (only_mid.count(mid_neigh) == 0)
+			if(only_mid.insert(mid_neigh).second)
 			{
 				only_mid.insert(mid_neigh);
 				only_mid.insert(mid_neigh2);

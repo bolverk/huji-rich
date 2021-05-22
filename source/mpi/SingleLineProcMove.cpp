@@ -5,21 +5,15 @@
 #include "mpi_commands.hpp"
 #include <mpi.h>
 #include <random>
-#endif
+
 
 void SingleLineProcMove::Update
 (
-#ifdef RICH_MPI
+
  Tessellation3D& tproc,
- Tessellation3D const& tlocal
-#else
- Tessellation3D& /*tproc*/,
- Tessellation3D const& /*tlocal*/
-#endif
- 
+ Tessellation3D const& tlocal 
  ) const
 {
-#ifdef RICH_MPI
   int nproc = static_cast<int>(tproc.GetPointNo());
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -28,20 +22,20 @@ void SingleLineProcMove::Update
   double load = GetLoadImbalance(tlocal, ntotal);
   if (load > 1.45)
     {
-      std::mt19937_64 randgen;
-      std::uniform_real_distribution<double> dist;
+      //      std::mt19937_64 randgen;
+      //      std::uniform_real_distribution<double> dist;
       std::vector<double> allx, xlocal(nlocal);
-      if (rank == 0)
-	{
+      //      if (rank == 0)
+      //	{
 	  allx.resize(ntotal);
-	}
+	  //	}
       for (int i = 0; i < nlocal; ++i)
 	xlocal[i] = tlocal.GetMeshPoint(i).x;
       vector<int> NPerProc(static_cast<size_t>(nproc)), disp;
       MPI_Gather(&nlocal, 1, MPI_INT, &NPerProc[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+      disp.resize(nproc, 0);
       if (rank == 0)
 	{
-	  disp.resize(nproc, 0);
 	  for (size_t i = 1; i < static_cast<size_t>(nproc); ++i)
 	    disp[i] = disp[i - 1] + NPerProc[i - 1];
 	}
@@ -68,7 +62,7 @@ void SingleLineProcMove::Update
 	  write_vector(newx, "procx.txt", 8);
 	}
       MPI_Bcast(&newx[0], nproc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-      std::vector<Vector3D> cortemp = tproc.GetMeshPoints();
+      std::vector<Vector3D> cortemp = tproc.getMeshPoints();
       cortemp.resize(nproc);
       for (size_t i = 0; i < static_cast<size_t>(nproc); ++i)
 	cortemp[i] = Vector3D(newx[i], 0, 0);
@@ -77,5 +71,6 @@ void SingleLineProcMove::Update
   else
     if (rank == 0)
       std::cout << "Load is " << load << " skipping proc move" << std::endl;
-#endif
 }
+
+#endif // RICH_MPI

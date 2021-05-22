@@ -18,7 +18,7 @@ public:
 	\param RoundSpeed By which factor is the rounding mechanisim larger than the movement speed of the mesh points
 	\param mode The operating mode, 1=Hybrid, 2=Pressure based, 3= Density based
 	*/
-	ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
+  explicit ConstNumberPerProc(OuterBoundary const& outer,double speed=0.03,
 		double RoundSpeed=2,int mode=2);
 
 	/*!
@@ -38,3 +38,4 @@ private:
 	const int mode_;
 };
 #endif //CONSTPERPROC
+

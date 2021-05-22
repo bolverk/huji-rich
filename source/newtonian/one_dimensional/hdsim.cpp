@@ -174,21 +174,21 @@ namespace {
    double vertex_velocity,
    UniversalError& eo)
   {
-    eo.AddEntry("riemann solver stage data starts here",0);
-    eo.AddEntry("left density",left.Density);
-    eo.AddEntry("left pressure",left.Pressure);
-    eo.AddEntry("left x velocity",left.Velocity.x);
-    eo.AddEntry("left y velocity",left.Velocity.y);
-    eo.AddEntry("left sound speed",left.SoundSpeed);
-    eo.AddEntry("right density",right.Density);
-    eo.AddEntry("right pressure",right.Pressure);
-    eo.AddEntry("right x velocity",right.Velocity.x);
-    eo.AddEntry("right y velocity",right.Velocity.y);
-    eo.AddEntry("right sound speed",right.SoundSpeed);
-    eo.AddEntry("right energy",right.Energy);
-    eo.AddEntry("interface index",static_cast<double>(idx));
-    eo.AddEntry("interface position",pos);
-    eo.AddEntry("interface velocity",vertex_velocity);
+    eo.addEntry("riemann solver stage data starts here",0);
+    eo.addEntry("left density",left.Density);
+    eo.addEntry("left pressure",left.Pressure);
+    eo.addEntry("left x velocity",left.Velocity.x);
+    eo.addEntry("left y velocity",left.Velocity.y);
+    eo.addEntry("left sound speed",left.SoundSpeed);
+    eo.addEntry("right density",right.Density);
+    eo.addEntry("right pressure",right.Pressure);
+    eo.addEntry("right x velocity",right.Velocity.x);
+    eo.addEntry("right y velocity",right.Velocity.y);
+    eo.addEntry("right sound speed",right.SoundSpeed);
+    eo.addEntry("right energy",right.Energy);
+    eo.addEntry("interface index",static_cast<double>(idx));
+    eo.addEntry("interface position",pos);
+    eo.addEntry("interface velocity",vertex_velocity);
     throw eo;
   }
 

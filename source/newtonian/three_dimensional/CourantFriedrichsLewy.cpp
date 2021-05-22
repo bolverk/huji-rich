@@ -35,8 +35,8 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 			}
 			catch (UniversalError &eo)
 			{
-				eo.AddEntry("Error in CFL", 0);
-				eo.AddEntry("Cell number", i);
+				eo.addEntry("Error in CFL", 0);
+				eo.addEntry("Cell number", i);
 				throw eo;
 			}
 #endif

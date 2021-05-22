@@ -13,7 +13,7 @@
 #include "SpatialReconstruction3D.hpp"
 #include "../common/LagrangianHLLC3D.hpp"
 
-using namespace std;
+//using namespace std;
 
 //! \brief First order flux calculator based on a series of conditions and actions
 class ConditionActionFlux1 : public FluxCalculator3D
@@ -62,6 +62,8 @@ public:
 
 		virtual ~Action3D(void);
 
+	  /*! \brief Resets data
+	   */
 		virtual void Reset(void) const {}
 	};
 
@@ -74,11 +76,12 @@ public:
 		SpatialReconstruction3D const& interp);
 
 	//! \brief Class destructor
-	~ConditionActionFlux1(void);
+	~ConditionActionFlux1(void) override;
 
 	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 		const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
-		const double time, const double dt, TracerStickerNames const& tracerstickernames) const;
+		const double time, const double dt, TracerStickerNames const& tracerstickernames) const override
+;
 
 private:
 	const vector<pair<const Condition3D*, const Action3D*> > sequence_;
@@ -98,7 +101,7 @@ public:
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
 		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
-		const& face_values)const;
+		const& face_values)const override;
 
 private:
 
@@ -118,7 +121,7 @@ public:
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
 		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
-		const& face_values) const;
+		const& face_values) const override;
 
 private:
 	const RiemannSolver3D& rs_;
@@ -137,7 +140,7 @@ public:
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
 		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
-		const& face_values) const;
+		const& face_values) const override;
 
 private:
 	const RiemannSolver3D& rs_;
@@ -182,11 +185,11 @@ public:
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
 		double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
-		const& face_values) const;
+		const& face_values) const override;
 
 	/*! \brief Resets the internal variables
 	*/
-	void Reset(void) const;
+	void Reset(void) const override;
 
 	//! \brief Velocity of the interfaces
 	mutable vector<double> ws_;
@@ -207,7 +210,7 @@ public:
 	IsBoundaryFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const;
+		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const override;
 };
 
 //! \brief Check if an interface is inside the domain
@@ -218,7 +221,7 @@ public:
 	IsBulkFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const;
+		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const override;
 };
 
 //! \brief Determines if the interface is between a regular and a special cell
@@ -232,7 +235,7 @@ public:
 	explicit RegularSpecialEdge3D(const string& sticker_name);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const;
+		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const override;
 
 private:
 	const string sticker_name_;

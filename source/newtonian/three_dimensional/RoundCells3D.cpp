@@ -5,12 +5,12 @@
 #endif
 
 RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi, double eta, bool cold, double min_dw, double dt_speed, vector<std::string> no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
+	double chi, double eta, bool cold, double min_dw, double dt_speed, const vector<std::string>& no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
 	eta_(eta), cold_(cold), min_dw_(min_dw),dt_speed_(dt_speed),no_move_(no_move) {}
 
 namespace
 {
-	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R, size_t index, vector<Vector3D> & velocities,
+	void SlowDown(Vector3D &velocity, Tessellation3D const& tess, double R, size_t index, const vector<Vector3D> & velocities,
 		vector<char> const& nomove)
 	{
 		if (nomove[index] == 1)
@@ -119,7 +119,7 @@ namespace
 }
 
 void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove) const
+	TracerStickerNames const& tracerstickernames, const vector<Vector3D> & velocities, vector<char> const& nomove) const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
@@ -137,8 +137,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-		eo.AddEntry("Cell number", i);
+		eo.addEntry("Error RoundCells3D::calc_dw", 0);
+		eo.addEntry("Cell number", i);
 		throw eo;
 	}
 #endif
@@ -167,8 +167,8 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-		eo.AddEntry("Cell number", i);
+		eo.addEntry("Error RoundCells3D::calc_dw", 0);
+		eo.addEntry("Cell number", i);
 		throw eo;
 	}
 #endif
@@ -189,9 +189,9 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Error RoundCells3D::calc_dw", 0);
-			eo.AddEntry("Neigh Cell number", neigh[j]);
-			eo.AddEntry("Neigh index", j);
+			eo.addEntry("Error RoundCells3D::calc_dw", 0);
+			eo.addEntry("Neigh Cell number", neigh[j]);
+			eo.addEntry("Neigh index", j);
 			throw eo;
 	}
 #endif

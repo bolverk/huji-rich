@@ -55,78 +55,6 @@ template<class T> vector<T> serial_generate(const LazyList<T>& ll)
   return res;
 }
 
-/*! \brief Multiplies all terms of std::vector with a scalar
-  \param v std::vector
-  \param s Scalar
-  \return Each term of v multiplied by s
-*/
-template<class T> vector<T> termwise_product(const vector<T>& v,
-					     const T& s);
-template<class T> vector<T> termwise_product(const vector<T>& v,
-					     const T& s)
-{
-  class Multiplier: public LazyList<T>
-  {
-  public:
-
-    Multiplier(const vector<T>& v_i,
-	       const T& s_i):
-      v_(v_i), s_(s_i) {}
-
-    size_t size(void) const
-    {
-      return v_.size();
-    }
-
-    T operator[](size_t i) const
-    {
-      return s_*v_[i];
-    }
-
-  private:
-    const vector<T>& v_;
-    const T& s_;
-  } multiplier(v,s);
-
-  return serial_generate(multiplier);
-}
-
-/*! \brief Trims a list and retains only a specific number of the first terms
-  \param v std::vector
-  \param max_index Number of terms to retain
-  \return The first max_index number of terms from v
-*/
-template<class T> vector<T> trim_top(const vector<T>& v,
-				     const size_t max_index);
-template<class T> vector<T> trim_top(const vector<T>& v,
-				     const size_t max_index)
-{
-  class Trimmer: public LazyList<T>
-  {
-  public:
-
-    Trimmer(const vector<T>& v_i,
-	    const size_t max_index_i):
-      v_(v_i), max_index_(max_index_i) {}
-
-    size_t getLength(void) const
-    {
-      return max_index_;
-    }
-
-    T operator()(size_t i) const
-    {
-      return v_[i];
-    }
-
-  private:
-    const vector<T>& v_;
-    const size_t max_index_;
-  } trimmer(v,max_index);
-
-  return serial_generate(trimmer);
-}
-
 /*!
   \brief Calculates the total number of elements in the 2d vector
   \param vec The vector to count
@@ -155,8 +83,8 @@ template<class T> void ListExchange(vector<T> &vec,vector<int> const& indeces,
   if(indeces.size()!=data.size())
     {
       UniversalError eo("Matching vectors are not the same length");
-      eo.AddEntry("indeces length",static_cast<double>(indeces.size()));
-      eo.AddEntry("data length",static_cast<double>(data.size()));
+      eo.addEntry("indeces length",static_cast<double>(indeces.size()));
+      eo.addEntry("data length",static_cast<double>(data.size()));
       throw eo;
     }
   for(size_t i=0;i<indeces.size();++i)
@@ -213,12 +141,12 @@ public:
   explicit Echo(const vector<T>& v):
     v_(v) {}
 
-  size_t size(void) const
+  size_t size(void) const override
   {
     return v_.size();
   }
 
-  T operator[](size_t i) const
+  T operator[](size_t i) const override
   {
     return v_[i];
   }
@@ -245,12 +173,12 @@ public:
     assert(high_>low_);
   }
 
-  size_t size(void) const
+  size_t size(void) const override
   {
     return high_-low_;
   }
 
-  T operator[](size_t i) const
+  T operator[](size_t i) const override
   {
     return i2m_(i+low_);
   }

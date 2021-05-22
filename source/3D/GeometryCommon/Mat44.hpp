@@ -6,6 +6,7 @@
 #ifndef MAT44_HPP
 #define MAT44_HPP 1
 
+//! \brief A 4x4 matrix
 template <typename T>
 class Mat44
 {
@@ -13,34 +14,64 @@ private:
 	T _data[4][4];
 
 public:
-	// \brief Return the element at (row, col)
+	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline T& at(int row, int col)
 	{
 		return _data[row][col];
 	}
 
-	// \brief Return the element at (row, col)
+	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //!  \return Entry
 	inline const T& at(int row, int col) const
 	{
 		return _data[row][col];
 	}
 
-	// \brief Return the element at (row, col)
+	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry value
 	inline T& operator()(int row, int col) { return at(row, col); }
 
-	// \brief Return the element at (row, col)
+	//! \brief Return the element at (row, col)
+  //! \param row Row
+  //! \param col Column
+  //! \return Entry
 	inline const T& operator()(int row, int col) const { return at(row, col); }
 
 	// \brief Constructs a zeroed out matrix
 	Mat44();
 
-	// \brief Constructs a matrix and fills all its values. An intializer_list is better, but C++ 11 isn't always supported
+  /*! \brief Constructs a matrix and fills all its values. An intializer_list is better, but C++ 11 isn't always supported
+    \param d00 Term in in position 0,0
+    \param d01 Term in in position 0,1
+    \param d02 Term in in position 0,2
+    \param d03 Term in in position 0,3
+    \param d10 Term in in position 1,0
+    \param d11 Term in in position 1,1
+    \param d12 Term in in position 1,2
+    \param d13 Term in in position 1,3
+    \param d20 Term in in position 2,0
+    \param d21 Term in in position 2,1
+    \param d22 Term in in position 2,2
+    \param d23 Term in in position 2,3
+    \param d30 Term in in position 3,0
+    \param d31 Term in in position 3,1
+    \param d32 Term in in position 3,2
+    \param d33 Term in in position 3,3
+   */
 	Mat44(T d00, T d01, T d02, T d03,
 		T d10, T d11, T d12, T d13,
 		T d20, T d21, T d22, T d23,
 		T d30, T d31, T d32, T d33);
 
-	// \brief Returns the matrix's determinant
+	//! \brief Returns the matrix's determinant
+  //! \return Value of the determinant 
 	T determinant() const;
 };
 

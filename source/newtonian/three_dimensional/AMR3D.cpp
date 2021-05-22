@@ -477,15 +477,15 @@ namespace
 				}
 				catch (UniversalError &eo)
 				{
-					eo.AddEntry("Error in LocalRemove", 0);
-					eo.AddEntry("Volume", dv.second[0]);
-					eo.AddEntry("Current remove", ToRemove[i]);
-					eo.AddEntry("Current remove ID", cells[ToRemove[i]].ID);
-					eo.AddEntry("New mass", extensives[neigh[j] - index_remove].mass);
-					eo.AddEntry("Remove index", i);
-					eo.AddEntry("neigh index",j);
-					eo.AddEntry("neigh", neigh[j]);
-					eo.AddEntry("index_remove", index_remove);
+					eo.addEntry("Error in LocalRemove", 0);
+					eo.addEntry("Volume", dv.second[0]);
+					eo.addEntry("Current remove", ToRemove[i]);
+					eo.addEntry("Current remove ID", cells[ToRemove[i]].ID);
+					eo.addEntry("New mass", extensives[neigh[j] - index_remove].mass);
+					eo.addEntry("Remove index", i);
+					eo.addEntry("neigh index",j);
+					eo.addEntry("neigh", neigh[j]);
+					eo.addEntry("index_remove", index_remove);
 					throw eo;
 				}
 #endif
@@ -555,17 +555,17 @@ namespace
 					}
 					catch (UniversalError &eo)
 					{
-						eo.AddEntry("Error in MPIRemove", 0);
-						eo.AddEntry("Volume", dv.second[0]);
-						eo.AddEntry("Current remove", nghost_index[i][j]);
-						eo.AddEntry("Current remove ID", cells[nghost_index[i][j]].ID);
-						eo.AddEntry("New mass", extensives[duplicate_index[i][j][k] - index_remove].mass);
-						eo.AddEntry("Remove index i", i);
-						eo.AddEntry("Remove index j", j);
-						eo.AddEntry("Remove index k", k);
-						eo.AddEntry("neigh index", j);
-						eo.AddEntry("duplicate_index[i][j][k] - index_remove", duplicate_index[i][j][k] - index_remove);
-						eo.AddEntry("index_remove", index_remove);
+						eo.addEntry("Error in MPIRemove", 0);
+						eo.addEntry("Volume", dv.second[0]);
+						eo.addEntry("Current remove", nghost_index[i][j]);
+						eo.addEntry("Current remove ID", cells[nghost_index[i][j]].ID);
+						eo.addEntry("New mass", extensives[duplicate_index[i][j][k] - index_remove].mass);
+						eo.addEntry("Remove index i", i);
+						eo.addEntry("Remove index j", j);
+						eo.addEntry("Remove index k", k);
+						eo.addEntry("neigh index", j);
+						eo.addEntry("duplicate_index[i][j][k] - index_remove", duplicate_index[i][j][k] - index_remove);
+						eo.addEntry("index_remove", index_remove);
 						throw eo;
 					}
 #endif
@@ -645,15 +645,15 @@ namespace
 						}
 						catch (UniversalError &eo)
 						{
-							eo.AddEntry("Error in LocalRefine", 0);
-							eo.AddEntry("Volume", dv.second[0]);
-							eo.AddEntry("Current check", cur_check);
-							eo.AddEntry("Current check ID",cells[cur_check].ID);
-							eo.AddEntry("Old mass", extensives[cur_check].mass);
-							eo.AddEntry("Old density", cells[cur_check].density);
-							eo.AddEntry("New mass", extensives[Norg + i].mass);
-							eo.AddEntry("Refine index", i);
-							eo.AddEntry("Norg", Norg2);
+							eo.addEntry("Error in LocalRefine", 0);
+							eo.addEntry("Volume", dv.second[0]);
+							eo.addEntry("Current check", cur_check);
+							eo.addEntry("Current check ID",cells[cur_check].ID);
+							eo.addEntry("Old mass", extensives[cur_check].mass);
+							eo.addEntry("Old density", cells[cur_check].density);
+							eo.addEntry("New mass", extensives[Norg + i].mass);
+							eo.addEntry("Refine index", i);
+							eo.addEntry("Norg", Norg2);
 							throw eo;
 						}
 #endif
@@ -764,14 +764,14 @@ namespace
 						}
 							catch (UniversalError &eo)
 							{
-								eo.AddEntry("Error in MPIRefine", 0);
-								eo.AddEntry("Volume", dv.second[0]);
-								eo.AddEntry("Current check", cur_check);
-								eo.AddEntry("Current check ID", cells[cur_check].ID);
-								eo.AddEntry("Old mass", extensives[cur_check].mass);
-								eo.AddEntry("Old density", cells[cur_check].density);
-								eo.AddEntry("Refine index i", i);
-								eo.AddEntry("Refine index j", j);
+								eo.addEntry("Error in MPIRefine", 0);
+								eo.addEntry("Volume", dv.second[0]);
+								eo.addEntry("Current check", cur_check);
+								eo.addEntry("Current check ID", cells[cur_check].ID);
+								eo.addEntry("Old mass", extensives[cur_check].mass);
+								eo.addEntry("Old density", cells[cur_check].density);
+								eo.addEntry("Refine index i", i);
+								eo.addEntry("Refine index j", j);
 								throw eo;
 							}
 #endif
@@ -798,9 +798,20 @@ namespace
 
 }
 
-AMRCellUpdater3D::~AMRCellUpdater3D(void) {}
+AMRCellUpdater3D::AMRCellUpdater3D(void) = default;
 
-AMRExtensiveUpdater3D::~AMRExtensiveUpdater3D(void) {}
+AMRCellUpdater3D::~AMRCellUpdater3D(void) = default;
+
+AMRCellUpdater3D::AMRCellUpdater3D(const AMRCellUpdater3D&) = default;
+
+AMRCellUpdater3D& AMRCellUpdater3D::operator=(const AMRCellUpdater3D&) = default;
+
+AMRExtensiveUpdater3D::AMRExtensiveUpdater3D(const AMRExtensiveUpdater3D&) = default;
+
+AMRExtensiveUpdater3D& AMRExtensiveUpdater3D::operator=
+(const AMRExtensiveUpdater3D&) = default;
+
+AMRExtensiveUpdater3D::AMRExtensiveUpdater3D(void) = default;
 
 Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
 	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
@@ -853,7 +864,7 @@ Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const Co
 	return res;
 }
 
-SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(vector<string> toskip) :toskip_(toskip) {}
+SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(const vector<string>& toskip) :toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
@@ -876,13 +887,13 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Density", res.density);
-		eo.AddEntry("Vx", res.velocity.x);
-		eo.AddEntry("Vy", res.velocity.y);
-		eo.AddEntry("Vz", res.velocity.z);
-		eo.AddEntry("ID", static_cast<double>(res.ID));
-		eo.AddEntry("internal energy", extensive.internal_energy / extensive.mass);
-		eo.AddEntry("Volume", 1.0 / vol_inv);
+		eo.addEntry("Density", res.density);
+		eo.addEntry("Vx", res.velocity.x);
+		eo.addEntry("Vy", res.velocity.y);
+		eo.addEntry("Vz", res.velocity.z);
+		eo.addEntry("ID", static_cast<double>(res.ID));
+		eo.addEntry("internal energy", extensive.internal_energy / extensive.mass);
+		eo.addEntry("Volume", 1.0 / vol_inv);
 		throw eo;
 	}
 	res.internal_energy = extensive.internal_energy / extensive.mass;
@@ -894,7 +905,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 	return res;
 }
 
-SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, vector<string> toskip) : G_(G), toskip_(toskip) {}
+SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip) : G_(G), toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& /*eos*/,
 	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
@@ -963,7 +974,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	std::vector<Conserved3D> &extensives = sim.getExtensives();
 	EquationOfState const& eos = eos_;
 	TracerStickerNames tsn = sim.GetTracerStickerNames();
-	double time = sim.GetTime();
+	double time = sim.getTime();
 	// Get remove list
 	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tsn);
 	// sort
@@ -1003,7 +1014,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Create copy of old tess
 	boost::scoped_ptr<Tessellation3D> oldtess(tess.clone());
 	// Build new tess
-	vector<Vector3D> new_mesh = tess.GetMeshPoints();
+	vector<Vector3D> new_mesh = tess.getMeshPoints();
 	size_t Norg = tess.GetPointNo();
 	new_mesh.resize(Norg);
 	RemoveVector(new_mesh, ToRemove.first);
@@ -1039,14 +1050,16 @@ void AMR3D::operator() (HDSim3D &sim)
 		}
 		catch (UniversalError & eo)
 		{
-			eo.AddEntry("First loop", static_cast<double>(i));
-			eo.AddEntry("Norg", static_cast<double>(Norg));
+			eo.addEntry("First loop", static_cast<double>(i));
+			eo.addEntry("Norg", static_cast<double>(Norg));
 			throw eo;
 		}
 	}
 
 	// Get index for ID
+#ifdef RICH_MPI
 	size_t Nrefine = ToRefine.first.size();
+#endif // RICH_MPI
 	size_t Nstart = sim.GetMaxID() + 1;
 #ifdef RICH_MPI
 	int ws = 0, rank = 0;
@@ -1072,9 +1085,9 @@ void AMR3D::operator() (HDSim3D &sim)
 		}
 		catch (UniversalError & eo)
 		{
-			eo.AddEntry("Second loop", static_cast<double>(i));
-			eo.AddEntry("Norg", static_cast<double>(Norg));
-			eo.AddEntry("Nrefine", static_cast<double>(ToRefine.first.size()));
+			eo.addEntry("Second loop", static_cast<double>(i));
+			eo.addEntry("Norg", static_cast<double>(Norg));
+			eo.addEntry("Nrefine", static_cast<double>(ToRefine.first.size()));
 			throw eo;
 		}
 	}
@@ -1095,14 +1108,14 @@ void AMR3D::operator() (HDSim3D &sim)
 	// Update cells
 	ComputationalCell3D cdummy;
 	MPI_exchange_data(tess, cells, true,&cdummy);
-#endif
+	//#endif
 	// Update Max ID
-	size_t & MaxID = sim.GetMaxID();
-#ifdef RICH_MPI
-	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
-		MaxID += nrecv[i];
+	//	size_t & MaxID = sim.GetMaxID();
+	//#ifdef RICH_MPI
+	//	for (size_t i = 0; i < static_cast<size_t>(ws); ++i)
+	//	MaxID += nrecv[i];
 #else
-	MaxID += Nrefine;
+	//MaxID += Nrefine;
 #endif
 }
 

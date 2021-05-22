@@ -25,7 +25,7 @@ public:
 	    const SpatialDistribution& inside,
 	    const SpatialDistribution& outside);
 
-  double operator()(const Vector2D& point) const;
+  double operator()(const Vector2D& point) const override;
 
 private:
   const Shape2D& shape_;

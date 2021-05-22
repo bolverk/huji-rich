@@ -16,7 +16,7 @@ public:
   vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   double time, TracerStickerNames const& tracerstickersnames) const;
+   double time, TracerStickerNames const& tracerstickersnames) const override;
 };
 
 #endif // EULERIAN_HPP

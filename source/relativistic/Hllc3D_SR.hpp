@@ -19,7 +19,7 @@ public:
 	~Hllc3D_SR();
 
 	Conserved3D operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
-		EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const;
+		EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const override;
 };
 
 #endif //HLLC3D_HPP

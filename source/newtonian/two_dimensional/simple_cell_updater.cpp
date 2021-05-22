@@ -2,7 +2,7 @@
 #include "../../misc/lazy_list.hpp"
 
 SimpleCellUpdater::SimpleCellUpdater
-(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> > sequence) :
+(const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence) :
 	sequence_(sequence), entropy_("Entropy") {}
 
 SimpleCellUpdater::~SimpleCellUpdater(void)
@@ -47,11 +47,11 @@ namespace
 		}
 		catch (UniversalError &eo)
 		{
-			eo.AddEntry("Cell index", static_cast<double>(index));
-			eo.AddEntry("Cell mass", extensive.mass);
-			eo.AddEntry("Cell x momentum", extensive.momentum.x);
-			eo.AddEntry("Cell y momentum", extensive.momentum.y);
-			eo.AddEntry("Cell energy", extensive.energy);
+			eo.addEntry("Cell index", static_cast<double>(index));
+			eo.addEntry("Cell mass", extensive.mass);
+			eo.addEntry("Cell x momentum", extensive.momentum.x);
+			eo.addEntry("Cell y momentum", extensive.momentum.y);
+			eo.addEntry("Cell energy", extensive.energy);
 			throw;
 		}
 	}

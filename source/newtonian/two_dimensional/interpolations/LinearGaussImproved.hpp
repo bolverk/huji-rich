@@ -37,10 +37,10 @@ public:
 		double delta_P = 0.7,
 		const vector<string>& flat_tracers =
 		vector<string>(),
-		string skip_key=string());
+		const string& skip_key=string());
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
-		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames,CacheData const& cd)const;
+		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames,CacheData const& cd)const override;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell

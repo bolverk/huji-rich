@@ -65,13 +65,12 @@ double GetVelocity(Conserved3D const& cell, double G)
 	}
 	catch (UniversalError &eo)
 	{
-		eo.AddEntry("Mass", cell.mass);
-		eo.AddEntry("Mx", cell.momentum.x);
-		eo.AddEntry("My", cell.momentum.y);
-		eo.AddEntry("Mz", cell.momentum.z);
-		eo.AddEntry("Energy", cell.energy);
-		eo.AddEntry("Enthalpy", cell.internal_energy);
-		DisplayError(eo);
+		eo.addEntry("Mass", cell.mass);
+		eo.addEntry("Mx", cell.momentum.x);
+		eo.addEntry("My", cell.momentum.y);
+		eo.addEntry("Mz", cell.momentum.z);
+		eo.addEntry("Energy", cell.energy);
+		eo.addEntry("Enthalpy", cell.internal_energy);
 		throw eo;
 	}
 	return res;

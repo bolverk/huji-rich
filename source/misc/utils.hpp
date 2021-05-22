@@ -12,8 +12,15 @@
 #include <cassert>
 #include <iostream>
 #include "boost/container/flat_map.hpp"
+#include <limits>
 
 using std::vector;
+
+/*! \brief Checks if a number is numerically close to zero
+  \param x Number
+  \return True is the number is close enough to zero
+ */
+bool close2zero(const double x);
 
 /*! \brief Checks whether a number is a nan
 \param x A number
@@ -155,7 +162,8 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 	typename vector<T>::const_iterator it = upper_bound(x.begin(), x.end(), xi);
 	if (it == x.end())
 	{
-		if (x.back() == xi)
+	  //		if (x.back() == xi)
+	  if(close2zero(x.back()-xi))
 			return y.back();
 		std::cout << "X too large in LinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
 		throw;
@@ -168,73 +176,11 @@ T LinearInterpolation(const vector<T> &x, const vector<T> &y, T xi)
 			throw;
 		}
 	}
-	if (*it == xi)
+	if (close2zero(*it - xi))
 		return y[static_cast<std::size_t>(it - x.begin())];
 
 	return y[static_cast<std::size_t>(it - x.begin())] + (xi - *it)*	(y[static_cast<std::size_t>(it - 1 - x.begin())] 
 		- y[static_cast<std::size_t>(it - x.begin())]) / (*(it - 1) - *it);
-}
-
-/*!
-\brief BiLinear Interpolation
-\param x The x vector, assumed sorted
-\param y The y vector, assumed sorted
-\param z z=f(x,y) matrix, first index is in x
-\param xi The x interpolation location
-\param yi The y interpolation location
-\return f(xi)
-*/
-template <typename T>
-T BiLinearInterpolation(const vector<T> &x, const vector<T> &y,const std::vector<std::vector<T> >& z, T xi, T yi);
-
-template <typename T>
-T BiLinearInterpolation(const vector<T> &x, const vector<T> &y, const std::vector<std::vector<T> >& z, T xi, T yi)
-{
-	typename vector<T>::const_iterator itx = upper_bound(x.begin(), x.end(), xi);
-	if (itx == x.end())
-	{
-		if (xi > x.back())
-		{
-			std::cout << "X too large in BiLinearInterpolation, x_i " << xi << " max X " << x.back() << std::endl;
-			throw;
-		}
-		else
-			itx--;
-	}
-	if (itx == x.begin())
-	{
-		if (*itx < x.at(0))
-		{
-			std::cout << "X too small in BiLinearInterpolation, x_i " << xi << " min X " << x.at(0) << std::endl;
-			throw;
-		}
-	}
-	typename vector<T>::const_iterator ity = upper_bound(y.begin(), y.end(), yi);
-	if (ity == y.end())
-	{
-		if (yi > y.back())
-		{
-			std::cout << "Y too large in LinearInterpolation, y_i " << yi << " max Y " << y.back() << std::endl;
-			throw;
-		}
-		else
-			ity--;
-	}
-	if (ity == y.begin())
-	{
-		if (*ity < y.at(0))
-		{
-			std::cout << "Y too small in LinearInterpolation, y_i " << yi << " min Y " << y.at(0) << std::endl;
-			throw;
-		}
-	}
-
-	T delta = 1.0 / ((*itx - *(itx - 1))*(*ity - *(ity - 1)));
-	size_t idx = static_cast<std::size_t>(itx - x.begin());
-	size_t idy = static_cast<std::size_t>(ity - y.begin());
-	return (z[idx - 1][idy - 1] * (*itx - xi)*(*ity - yi) + z[idx][idy - 1] * (xi - *(itx - 1))*(*ity - yi)
-		+ z[idx - 1][idy] * (*itx - xi)*(yi - *(ity - 1)) + z[idx][idy] * (xi - *(itx - 1))
-		*(yi - *(ity - 1)))*delta;
 }
 
 /*! \brief Returns the minimal term in a vector
@@ -382,8 +328,9 @@ template <class T> vector<T> VectorValues
 	return result;
 }
 
-template <class T> void FlipVector(vector<T> &v);
-
+/*! \brief Reverses the vector
+  \param v Vector
+ */
 template <class T> void FlipVector(vector<T> &v)
 {
 	vector<T> temp(v);
@@ -566,7 +513,7 @@ namespace
 	template<class T> struct Wrapper
 	{
 		index_cmp<vector<T> > *cmp;
-		Wrapper(index_cmp<vector<T> > *cmp2) : cmp(cmp2) {}
+		explicit Wrapper(index_cmp<vector<T> > *cmp2) : cmp(cmp2) {}
 		bool operator() (const size_t lhs, const size_t rhs) const
 		{
 			return (*cmp)(lhs, rhs);
@@ -630,7 +577,7 @@ namespace
 	{
 	public:
 		Compare comp;
-		PairComp(Compare comp_) : comp(comp_) {}
+	  explicit PairComp(Compare comp_) : comp(comp_) {}
 		bool operator() (const std::pair<std::size_t, RAIter>& a,
 			const std::pair<std::size_t, RAIter>& b) const {
 			return comp(*a.second, *b.second);
@@ -855,9 +802,13 @@ template<class S, class T> typename vector<T>::const_reference safe_retrieve
 	return data.at(index);
 }
 
-template<typename It, typename It2, class S>
-It safe_retrieve(const It data_begin, const It key_begin, const It key_end, S const& key);
-
+/*! \brief Retrieve a value from the container
+  \param data_begin First iterator
+  \param key_begin First key
+  \param key_end Last key
+  \param key Desired key
+  \return Iterator to value
+ */
 template<typename It,typename It2, class S>
 const It safe_retrieve(const It data_begin, const It2 key_begin, const It2 key_end, S const& key)
 {

@@ -292,6 +292,7 @@ namespace {
 			  */
 #endif // RICH_MPI
 
+  /*
 	template <typename T>
 	bool EmptyVectorVector(vector<vector<T> > const& v)
 	{
@@ -318,6 +319,7 @@ namespace {
 		}
 		return res;
 	}
+  */
 }
 
 vector<int> StaticVoronoiMesh::AddPointsAlongEdge(size_t point,vector<vector<int> > const&copied,
@@ -373,7 +375,7 @@ int StaticVoronoiMesh::GetOriginalIndex(int point) const
 		if(point<Nextra)
 		{
 			UniversalError eo("Tried to get original index of non exsistent cell");
-			eo.AddEntry("Tried accessing cell",point);
+			eo.addEntry("Tried accessing cell",point);
 			throw eo;
 		}
 		int maxcor=static_cast<int>(Tri.getCor().size());
@@ -392,7 +394,7 @@ int StaticVoronoiMesh::GetOriginalIndex(int point) const
 			}
 		}
 		UniversalError eo("Tried to get original index of non exsistent cell");
-		eo.AddEntry("Tried accessing cell",point);
+		eo.addEntry("Tried accessing cell",point);
 		throw eo;
 		#endif
 	}
@@ -1035,7 +1037,7 @@ void StaticVoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int
 	for(int i=0;i<nsides;++i)
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());
 	totest.resize(static_cast<size_t>(nsides));
-	int test=0;
+	int test;
 	for(int i=0;i<nsides;++i)
 	{
 		vector<int> totest2;

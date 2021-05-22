@@ -48,7 +48,7 @@ namespace
 		explicit CellIndexValidator(const int point_no) :
 			point_no_(point_no) {}
 
-		bool operator()(const int& index) const
+		bool operator()(const int& index) const override
 		{
 			return index >= 0 && index < point_no_;
 		}

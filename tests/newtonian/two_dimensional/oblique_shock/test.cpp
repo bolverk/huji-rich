@@ -412,7 +412,7 @@ namespace
 	amr(sim);
       }
       catch (UniversalError const& eo) {
-	DisplayError(eo);
+	reportError(eo);
       }
 
       if (sim.getCycle() > max_iter)
