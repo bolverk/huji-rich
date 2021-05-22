@@ -50,6 +50,13 @@ void diagnostics1d::write_snapshot_to_hdf5
     write_std_vector_to_hdf5(file, time_vector, "time");
   }
 
+  // Write cycle
+  {
+    vector<double> time_vector(1,0);
+    time_vector[0] = static_cast<double>(sim.GetCycle());
+    write_std_vector_to_hdf5(file, time_vector, "cycle");
+  }
+
   // Write grid
   {
     const vector<double>& grid = sim.getState().getVertices();
