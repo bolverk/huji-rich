@@ -189,7 +189,7 @@ namespace {
 		     int v_stop,
 		     int v_step)
   {
-    vector<int> res((v_stop-v_init)/v_step,0);
+    vector<int> res(static_cast<size_t>((v_stop-v_init)/v_step),0);
     for(size_t i=0;i<res.size();++i){
       res[i] = v_init+v_step*static_cast<int>(i);
     }
