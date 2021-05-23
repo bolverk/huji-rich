@@ -43,7 +43,7 @@ class ZeroForce3D : public SourceTerm3D
 public:
 	void operator()(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
 		const vector<Conserved3D>& /*fluxes*/, const vector<Vector3D>& /*point_velocities*/, const double /*t*/, 
-		double /*dt*/,TracerStickerNames const& /*tracerstickernames*/, vector<Conserved3D> &/*extensives*/) const override{} 
+			double /*dt*/,TracerStickerNames const& /*tracerstickernames*/, vector<Conserved3D> &/*extensives*/) const override;
 };
 
 #endif //SOURCETERM3D_HPP

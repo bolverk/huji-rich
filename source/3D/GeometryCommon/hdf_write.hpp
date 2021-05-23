@@ -77,12 +77,20 @@ public:
 	Vector3D ur;
 };
 
+#if RICH_MPI
 /*! \brief Load snapshot data into memory
 \param fname File name
 \param mpi_write Flag for providing parallelisation data
 \param fake_rank Process id
 \return Snapshot data
 */
+#else
+/*! \brief Load snapshot data into memory
+\param fname File name
+\param fake_rank Process id
+\return Snapshot data
+*/
+#endif // RICH_MPI
 Snapshot3D ReadSnapshot3D(const string& fname
 #ifdef RICH_MPI
 	,bool mpi_write = false,int fake_rank=-1
@@ -107,12 +115,21 @@ Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proc
  */
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
+
+#if RICH_MPI
 /*! \brief Write snapshot to file
   \param sim Simulation
   \param filename name of output file
   \param appendices Custom fields
   \param mpi_write Determines whether to write parallisation data
  */
+#else
+/*! \brief Write snapshot to file
+  \param sim Simulation
+  \param filename name of output file
+  \param appendices Custom fields
+ */
+#endif // RICH_MPI
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>()
 #ifdef RICH_MPI

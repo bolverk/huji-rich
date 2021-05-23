@@ -64,7 +64,7 @@ private:
 
   /*! \brief Get point to check
     \param point Point index
-    \param check Mast of checked points
+    \param checked Mast of checked points
     \param res Result
    */
   void GetPointToCheck(std::size_t point, vector<unsigned char> const& checked, vector<std::size_t> &res);

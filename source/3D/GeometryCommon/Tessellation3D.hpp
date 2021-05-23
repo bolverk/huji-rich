@@ -321,7 +321,7 @@ public:
    */
   virtual vector<vector<size_t> > const& GetGhostIndeces(void) const = 0;
 
-  /*! \brief \brief Get indices of ghost points
+  /*! \brief Get indices of ghost points
     \return List of indices of ghost points
    */
   virtual vector<vector<size_t> > & GetGhostIndeces(void) = 0;

@@ -117,7 +117,7 @@ class SimData
 {
 public:
   
-  SimData(const Snapshot* const ss = 0):
+  SimData(const Snapshot* const ss = nullptr):
     pg_(),
     outer_(-0.5,0.5,0.5,-0.5),
     rs_(),

@@ -46,7 +46,7 @@ namespace {
       xvelocity_(swigic_.getProfile("xvelocity")),
       yvelocity_(0) {}
 
-    double getWidth(void)
+    double getWidth(void) const
     {
       return width_;
     }
@@ -106,7 +106,7 @@ namespace {
   {
   public:
 
-    SimData(InitProfiles init_prof = InitProfiles()):
+    SimData(const InitProfiles& init_prof = InitProfiles()):
       pg_(),
       outer_(0,init_prof.getWidth(),
 	     init_prof.getWidth(),0),
