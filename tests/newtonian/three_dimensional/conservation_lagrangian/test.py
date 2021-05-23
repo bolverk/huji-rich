@@ -1,5 +1,9 @@
 #! /usr/bin/python
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 def goodness_of_fit(a1, a2):
 
     import math
@@ -14,9 +18,9 @@ def load_file(fname):
 
     res = {}
     with h5py.File(fname, 'r') as f :
-        for field in f['hydrodynamic']:
-            res[field] = numpy.array(f['hydrodynamic'][field])
-    return res
+        logging.debug([field for field in f])
+        return {field:numpy.array(f[field])
+                for field in f}
 
 def main():
 
@@ -25,6 +29,16 @@ def main():
 
     initial = load_file('initial.h5')
     final = load_file('final.h5')
+
+    for state in [initial, final]:
+        state['mass'] = state['Volume']*state['Density']
+        state['energy'] = (state['InternalEnergy']+
+                           0.5*state['Vx']**2+
+                           0.5*state['Vy']**2+
+                           0.5*state['Vz']**2)*state['mass']
+        state['x_momentum'] = state['mass']*state['Vx']
+        state['y_momentum'] = state['mass']*state['Vy']
+        state['z_momentum'] = state['mass']*state['Vz']
 
     for field in ['mass', 'energy', 'x_momentum', 'y_momentum', 'z_momentum']:
         if abs(sum(initial[field]) - sum(final[field]))>1e-5:

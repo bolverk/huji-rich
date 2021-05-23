@@ -14,7 +14,8 @@
 #include "source/newtonian/three_dimensional/default_cell_updater.hpp"
 #include "source/newtonian/three_dimensional/default_extensive_updater.hpp"
 #include "source/newtonian/three_dimensional/hdsim_3d.hpp"
-#include "source/newtonian/three_dimensional/hdf5_diagnostics_3d.hpp"
+//#include "source/newtonian/three_dimensional/hdf5_diagnostics_3d.hpp"
+#include "source/3D/GeometryCommon/hdf_write.hpp"
 #include <fstream>
 
 using std::cout;
@@ -281,7 +282,8 @@ class SimData
   {
     const double tf = 5e-1;
     //    write_txt_snapshot(sim, "initial.txt");
-    write_snapshot_to_hdf5(sim, "initial.h5");
+    //    write_snapshot_to_hdf5(sim, "initial.h5");
+    WriteSnapshot3D(sim, "initial.h5");
     TrackShockRadius diag("shock_trajectory.txt",
 			  1e-3);
     while(sim.getTime()<tf){
@@ -289,7 +291,8 @@ class SimData
       diag(sim);
     }
     //    write_txt_snapshot(sim, "final.txt");
-    write_snapshot_to_hdf5(sim, "final.h5");
+    //    write_snapshot_to_hdf5(sim, "final.h5");
+    WriteSnapshot3D(sim, "final.h5");
   }
 }
 

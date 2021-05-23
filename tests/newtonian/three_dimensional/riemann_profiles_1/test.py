@@ -47,11 +47,11 @@ def main():
             t = f['time']
     else:
         h5f = h5py.File('final.h5')
-        x_list = h5f['geometry']['x_coordinate']
-        d_list = h5f['hydrodynamic']['density']
-        p_list = h5f['hydrodynamic']['pressure']
-        v_list = h5f['hydrodynamic']['x_velocity']
-        t = h5f['time']
+        x_list = h5f['X']
+        d_list = h5f['Density']                     
+        p_list = h5f['Pressure']
+        v_list = h5f['Vx']
+        t = h5f['Time']
 
     combined = sorted([(x,d,p,v) for x,d,p,v in zip(x_list, d_list, p_list, v_list)], key=lambda tup:tup[0])
 
