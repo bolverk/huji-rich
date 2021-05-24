@@ -98,7 +98,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 					" extensive "<<extensives[i].tracers[j]<<std::endl;
 			}
 			face_vec temp = tess.GetCellFaces(i);
-			Conserved3D old_ext(extensives[i]);
+			Conserved3D old_ext;//(extensives[i]);
 			// recover old_extensive
 			for (size_t j = 0; j < temp.size(); ++j)
 			{
