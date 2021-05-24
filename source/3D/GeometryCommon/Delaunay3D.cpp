@@ -1016,10 +1016,6 @@ bool Delaunay3D::CheckCorrect(void)
 	      size_t loctemp=4;
 	      GetOppositePoint(tetras_[T.neighbors[j]], i, loctemp);
 	      assert(loctemp < 4);
-	    }
-	  // Check insphere
-	  if (T.neighbors[j] != outside_neighbor_)
-	    {
 	      std::size_t other=4;
 	      GetOppositePoint(tetras_[T.neighbors[j]], i,other);
 	      assert(other < 4);
