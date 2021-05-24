@@ -24,7 +24,7 @@ public:
 	//! \brief Comparison:
   //! \param shape Other shape
   //! \return Result of comparison
-	bool operator==(const HilbertCurve3D_shape & shape);
+	bool operator==(const HilbertCurve3D_shape & shape) const;
 	//! \brief An array of the 7 unit vector steps defining the shape:
 	boost::array<Vector3D, 7> m_vShapePoints;
 
@@ -42,7 +42,7 @@ HilbertCurve3D_shape::HilbertCurve3D_shape() : m_vShapePoints(boost::array<Vecto
 }
 
 // Compare to a given Hilbert curve shape by comparing pairs of shape points:
-bool HilbertCurve3D_shape::operator==(const HilbertCurve3D_shape & shape)
+bool HilbertCurve3D_shape::operator==(const HilbertCurve3D_shape & shape) const
 {
 	bool b = true;
 	for (std::size_t ii = 0; ii < m_vShapePoints.size(); ++ii)
@@ -78,7 +78,7 @@ private:
 	*/
 	int GetRotation(int * piRotation, int iRotationIndex);
 	// Find the index of a given shape object:
-	int FindShapeIndex(HilbertCurve3D_shape & roShape);
+	int FindShapeIndex(const HilbertCurve3D_shape & roShape);
 	// Create the recursion rule:
 	void BuildRecursionRule();
 	// Create the shape order, for all shapes (the order of octants):
@@ -119,7 +119,7 @@ m_vShapeRecursion(boost::array< boost::array<int, 8> , NUMBER_OF_SHAPES>())
 }
 
 // FindShapeIndex - returns the index of a shape:
-int HilbertCurve3D::FindShapeIndex(HilbertCurve3D_shape & roShape)
+int HilbertCurve3D::FindShapeIndex(const HilbertCurve3D_shape & roShape)
 {
   for (size_t ii = 0; ii < NUMBER_OF_SHAPES; ++ii)
 	{

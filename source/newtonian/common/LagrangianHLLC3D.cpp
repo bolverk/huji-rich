@@ -18,7 +18,7 @@ namespace
 		catch (UniversalError &eo)
 		{
 			eo.addEntry("Error in HLLpu left sound speed", 0);
-			throw eo;
+			throw;
 		}
 #endif
 #ifdef RICH_DEBUG
@@ -31,7 +31,7 @@ namespace
 		catch (UniversalError &eo)
 		{
 			eo.addEntry("Error in HLLpu right sound speed", 0);
-			throw eo;
+			throw;
 		}
 #endif
 		double sl = std::min(left.velocity.x - cl, right.velocity.x - cr);
@@ -112,7 +112,7 @@ namespace
 		catch (UniversalError &eo)
 		{
 			eo.addEntry("Error in LagHLLC3D right sound speed", 0);
-			throw eo;
+			throw;
 		}
 #endif
 		const double sl = vl - cl * (pstar > pl ? std::sqrt(0.8*(pstar / pl - 1) + 1) : 1);
