@@ -156,7 +156,7 @@ Vector3D& Vector3D::operator-=(Vector3D const& v)
 
 // Note - since working with double precision, two vectors are assumed to be "equal",
 // if their coordinates agree up to precision EPSILON
-bool Vector3D::operator==(Vector3D const& v)
+bool Vector3D::operator==(Vector3D const& v) const
 {
 	return (std::abs(x - v.x) < EPSILON) && (std::abs(y - v.y) < EPSILON) && (std::abs(z - v.z) < EPSILON);
 }
