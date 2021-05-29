@@ -57,6 +57,13 @@ public:
 
 	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true) override;
 
+  #ifdef RICH_MPI
+	void Initialise_loc(vector<Vector2D> const& points,Tessellation const& vproc,
+		OuterBoundary const* outer,bool reorder=true);
+#endif
+
+	void Initialise_loc(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true);
+
 	//! \brief Class default constructor.
   VoronoiMesh(void);
 

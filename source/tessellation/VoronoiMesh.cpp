@@ -119,7 +119,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,&bc,HOrder);
+	Initialise_loc(points,&bc,HOrder);
 }
 
 #ifdef RICH_MPI
@@ -353,6 +353,11 @@ namespace
 }
 
 void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
+{
+  Initialise_loc(pv, _bc, reorder);
+}
+
+void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
 {
 	obc=_bc;
 	vector<Vector2D> points;
@@ -1284,6 +1289,14 @@ vector<int> VoronoiMesh::Update
 }
 
 void VoronoiMesh::Initialise
+(vector<Vector2D> const& pv,
+ Tessellation const& vproc,
+ OuterBoundary const* outer,bool reorder)
+{
+  Initialise_loc(pv, vproc, outer, reorder);
+}
+
+void VoronoiMesh::Initialise_loc
 (vector<Vector2D> const& pv,
  Tessellation const& vproc,
  OuterBoundary const* outer,bool reorder)
