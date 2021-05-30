@@ -313,10 +313,6 @@ template <class T, class S> S VectorValues(vector<T> const&v, S const &index)
 */
 template <class T> vector<T> VectorValues
 (vector<T> const&v,
-	vector<std::size_t> const &index);
-
-template <class T> vector<T> VectorValues
-(vector<T> const&v,
 	vector<std::size_t> const &index)
 {
 	if (index.empty() || v.empty())
