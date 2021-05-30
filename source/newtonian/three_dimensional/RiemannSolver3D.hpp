@@ -45,8 +45,9 @@ public:
 protected:
 
   /*! \brief Copy constructor
+    \param rs Riemann solver
    */
-  RiemannSolver3D(const RiemannSolver3D&);
+  RiemannSolver3D(const RiemannSolver3D& rs);
 };
 
 #endif // RIEMANN_SOVLER3D_HPP

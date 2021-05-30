@@ -20,7 +20,6 @@ public:
 	\param time The simulation time
 	\param tracerstickernames The names of the tracers and stickers
 	\param acc The calculated acceleration, given as output
-	\return none
 	*/
 	virtual void operator()(const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
 			const vector<Conserved3D>& fluxes,const double time,TracerStickerNames const& tracerstickernames,

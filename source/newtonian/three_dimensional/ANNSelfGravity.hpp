@@ -26,15 +26,12 @@ private:
     return *this; 
   }
 public:
-  /*! \brief Class constructor
-    \param opening Opening angle
-  */
 #ifdef RICH_MPI
   //! \param tproc Process tessellation
 #endif // RICH_MPI
   /*! \brief Class constructor
+    \param opening Opening angle
     \param debug_name Logger file name
-    \return none
    */
 	ANNSelfGravity(double opening = 0.25,
 #ifdef RICH_MPI
