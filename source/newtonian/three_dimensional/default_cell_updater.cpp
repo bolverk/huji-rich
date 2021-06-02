@@ -159,7 +159,7 @@ namespace
 				if (fastabs(extensives[i].momentum)*1e8 < extensives[i].mass)
 				{
 					res[i].velocity = extensives[i].momentum / extensives[i].mass;
-					v = abs(res[i].velocity);
+					//v = abs(res[i].velocity);
 				}
 				else
 					res[i].velocity = v * extensives[i].momentum / abs(extensives[i].momentum);

@@ -47,7 +47,7 @@ namespace
 				eo.addEntry("Right cell Vz", cells[n1].velocity.z);
 				eo.addEntry("Right cell internal energy", cells[n1].internal_energy);
 				eo.addEntry("Right cell ID", cells[n1].ID);
-				throw eo;
+				throw;
 			}
 #endif
 		}

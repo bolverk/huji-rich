@@ -22,9 +22,11 @@
   \param upper_right Upper right point
   \return Set of two dimensional points
 */
-std::vector<Vector2D> cartesian_mesh(int nx, int ny,
-				Vector2D const& lower_left,
-				Vector2D const& upper_right);
+std::vector<Vector2D> cartesian_mesh
+(size_t nx,
+ size_t ny,
+ Vector2D const& lower_left,
+ Vector2D const& upper_right);
 
 /*!
   \brief Generates a round grid with constant point density

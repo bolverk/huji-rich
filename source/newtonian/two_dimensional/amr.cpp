@@ -882,6 +882,7 @@ void ConservativeAMROld::UpdateCellsRefine
 	GetNewPoints2(ToRefine, tess, NewPoints, Moved, obc);
 
 	// Rebuild tessellation
+	assert(interp_);
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
 	cells.resize(N);

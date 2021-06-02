@@ -208,12 +208,46 @@ vector<Vector2D> CirclePointsRmax(int PointNum, double Rmin, double Rmax,
 	return res;
 }
 
-vector<Vector2D> cartesian_mesh(int nx, int ny,
-	Vector2D const& lower_left,
-	Vector2D const& upper_right)
+namespace {
+  class BiIndex
+  {
+  public:
+
+    BiIndex(size_t nx, size_t ny):
+      indices_(0,0),
+      ranges_({nx,ny}) {}
+
+    BiIndex& operator++(void)
+    {
+      ++indices_.first;
+      if(indices_.first>=ranges_.first){
+	++indices_.second;
+	indices_.first -= ranges_.first;
+      }
+      return *this;
+    }
+
+    bool shouldContinue(void) const
+    {
+      return indices_.second < ranges_.second;
+    }
+
+    const pair<size_t, size_t>& get(void) const
+    {
+      return indices_;
+    }
+
+  private:
+    pair<size_t, size_t> indices_;
+    const pair<size_t, size_t> ranges_;
+  };
+}
+
+vector<Vector2D> cartesian_mesh
+(size_t nx, size_t ny,
+ Vector2D const& lower_left,
+ Vector2D const& upper_right)
 {
-	assert(nx > 0);
-	assert(ny > 0);
 	assert(upper_right.x > lower_left.x);
 	assert(upper_right.y > lower_left.y);
 
@@ -222,10 +256,19 @@ vector<Vector2D> cartesian_mesh(int nx, int ny,
 		static_cast<double>(nx);
 	const double dy = (upper_right.y - lower_left.y) /
 		static_cast<double>(ny);
+	for(BiIndex bi(nx, ny);
+	    bi.shouldContinue();
+	    ++bi)
+	  res.push_back
+	    (Vector2D
+	     (lower_left.x+(0.5+static_cast<double>(bi.get().first))*dx,
+	      lower_left.y+(0.5+static_cast<double>(bi.get().second))*dy));
+	/*	    	      
 	for (double x = lower_left.x + 0.5*dx; x < upper_right.x; x += dx){
 		for (double y = lower_left.y + 0.5*dy; y < upper_right.y; y += dy)
 			res.push_back(Vector2D(x, y));
 	}
+	*/
 	return res;
 }
 

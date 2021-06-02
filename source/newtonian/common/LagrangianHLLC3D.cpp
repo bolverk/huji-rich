@@ -96,7 +96,7 @@ namespace
 		catch (UniversalError &eo)
 		{
 			eo.addEntry("Error in LagHLLC3D left sound speed", 0);
-			throw eo;
+			throw;
 		}
 #endif
 		const double dr = right.density;

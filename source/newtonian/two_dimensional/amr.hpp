@@ -182,6 +182,7 @@ public:
 	\param time The sim time
 	\param obc Outer boundary conditions
 	\param tracerstickernames The names of the tracers and stickers
+	\return none
 	*/
 #ifdef RICH_MPI
   //! \param proctess Tessellation of the processes (for parallel runs)
@@ -202,6 +203,7 @@ public:
 	\param time The sim time
 	\param obc The outer boundary conditions
 	\param tracerstickernames The names of the tracers and stickers
+	\return none
 	*/
 #ifdef RICH_MPI
   //!	\param proctess Tessellation of the processes (for parallel runs)

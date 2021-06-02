@@ -486,7 +486,7 @@ namespace
 					eo.addEntry("neigh index",j);
 					eo.addEntry("neigh", neigh[j]);
 					eo.addEntry("index_remove", index_remove);
-					throw eo;
+					throw;
 				}
 #endif
 
@@ -566,7 +566,7 @@ namespace
 						eo.addEntry("neigh index", j);
 						eo.addEntry("duplicate_index[i][j][k] - index_remove", duplicate_index[i][j][k] - index_remove);
 						eo.addEntry("index_remove", index_remove);
-						throw eo;
+						throw;
 					}
 #endif
 
@@ -654,7 +654,7 @@ namespace
 							eo.addEntry("New mass", extensives[Norg + i].mass);
 							eo.addEntry("Refine index", i);
 							eo.addEntry("Norg", Norg2);
-							throw eo;
+							throw;
 						}
 #endif
 					}
@@ -772,7 +772,7 @@ namespace
 								eo.addEntry("Old density", cells[cur_check].density);
 								eo.addEntry("Refine index i", i);
 								eo.addEntry("Refine index j", j);
-								throw eo;
+								throw;
 							}
 #endif
 						}
@@ -894,7 +894,7 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 		eo.addEntry("ID", static_cast<double>(res.ID));
 		eo.addEntry("internal energy", extensive.internal_energy / extensive.mass);
 		eo.addEntry("Volume", 1.0 / vol_inv);
-		throw eo;
+		throw;
 	}
 	res.internal_energy = extensive.internal_energy / extensive.mass;
 	size_t N = extensive.tracers.size();
@@ -1052,7 +1052,7 @@ void AMR3D::operator() (HDSim3D &sim)
 		{
 			eo.addEntry("First loop", static_cast<double>(i));
 			eo.addEntry("Norg", static_cast<double>(Norg));
-			throw eo;
+			throw;
 		}
 	}
 
@@ -1088,7 +1088,7 @@ void AMR3D::operator() (HDSim3D &sim)
 			eo.addEntry("Second loop", static_cast<double>(i));
 			eo.addEntry("Norg", static_cast<double>(Norg));
 			eo.addEntry("Nrefine", static_cast<double>(ToRefine.first.size()));
-			throw eo;
+			throw;
 		}
 	}
 	// Recalc entropy if needed

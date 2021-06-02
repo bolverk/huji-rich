@@ -82,7 +82,7 @@ namespace
 		double denom = 1.0 / (dl*(sl - vl) - dr * (sr - vr));
 		double ustar = (pr - pl + dl * vl*(sl - vl) - dr * vr*(sr - vr)) *denom;
 		double pstar = dl * (sl - vl)*(pr - dr * (vr - vl)*(sr - vr)) *denom - pl * dr*(sr - vr) *denom;
-		double ps = pstar;
+		double ps;// = pstar;
 		Conserved3D usl;
 		Conserved3D usr;
 		tvector newt;
