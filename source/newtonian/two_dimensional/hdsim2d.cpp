@@ -162,7 +162,7 @@ void hdsim::TimeAdvance(void)
 		cells_,
 		eos_,
 		edge_velocities,
-		time_,tracer_sticker_names_);
+		time_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 #ifdef RICH_MPI
@@ -248,7 +248,7 @@ void hdsim::TimeAdvanceClip(void)
 		cells_,
 		eos_,
 		edge_velocities,
-		time_,tracer_sticker_names_);
+		time_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 
@@ -329,7 +329,7 @@ void hdsim::TimeAdvance2Heun(void)
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 
@@ -446,7 +446,7 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 	vector<Vector2D> edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 
@@ -517,7 +517,7 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	vector<Vector2D> edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
 	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
 

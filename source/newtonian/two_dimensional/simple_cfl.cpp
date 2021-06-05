@@ -15,10 +15,9 @@ namespace {
     TimeStepCalculator(const Tessellation& tess,
 		       const vector<ComputationalCell>& cells,
 		       const EquationOfState& eos,
-		       const vector<Vector2D>& edge_velocities,
-		TracerStickerNames const& tracerstickernames):
+		       const vector<Vector2D>& edge_velocities):
       tess_(tess), cells_(cells), 
-      edge_velocities_(edge_velocities), eos_(eos), tracerstickernames_(tracerstickernames){}
+      edge_velocities_(edge_velocities), eos_(eos){}
 
     size_t size(void) const 
     {
@@ -33,7 +32,7 @@ namespace {
 	(cells_[i].density,
 	 cells_[i].pressure,
 	 cells_[i].tracers,
-		tracerstickernames_.tracer_names);
+	 ComputationalCell::tracerNames);
       const Vector2D v = cells_.at(i).velocity;
       BOOST_FOREACH
 	(int index,
@@ -51,7 +50,6 @@ namespace {
     const vector<ComputationalCell>& cells_;
     const vector<Vector2D>& edge_velocities_;
     const EquationOfState& eos_;
-	TracerStickerNames const& tracerstickernames_;
   };
 }
 
@@ -59,9 +57,9 @@ double SimpleCFL::operator()(const Tessellation& tess,
 			     const vector<ComputationalCell>& cells,
 			     const EquationOfState& eos,
 			     const vector<Vector2D>& point_velocities,
-			     const double /*time*/,TracerStickerNames const& tracerstickernames) const
+			     const double /*time*/) const
 {
-  double res =  cfl_*lazy_min(TimeStepCalculator(tess,cells,eos,point_velocities,tracerstickernames));
+  double res =  cfl_*lazy_min(TimeStepCalculator(tess,cells,eos,point_velocities));
 #ifdef RICH_MPI
   MPI_Allreduce(&res, &res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 #endif

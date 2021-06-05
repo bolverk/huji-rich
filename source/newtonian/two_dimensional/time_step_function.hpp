@@ -31,8 +31,7 @@ public:
    const vector<ComputationalCell>& cells,
    const EquationOfState& eos,
    const vector<Vector2D>& point_velocities,
-   const double time,
-	  TracerStickerNames const& tracerstickernames) const = 0;
+   const double time) const = 0;
 
   //! \brief Destructor
   virtual ~TimeStepFunction(void);
