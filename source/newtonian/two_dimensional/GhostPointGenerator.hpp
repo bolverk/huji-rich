@@ -21,12 +21,10 @@ public:
 	\param tess The tessellation
 	\param cells The computational cells
 	\param time The time
-	\param tracerstickernames The names of the tracers and stickers
 	\return A map where the key is the index of the ghost cell and the value is its' comuptational cell
 	*/
 	virtual boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-		const vector<ComputationalCell>& cells, double time,TracerStickerNames const&
-		tracerstickernames) const = 0;
+		const vector<ComputationalCell>& cells, double time) const = 0;
 
 	/*!
 	\brief Calculates the gradients for the ghost cells
@@ -40,8 +38,7 @@ public:
 	\return The gradient of the ghost cell
 	*/
 	virtual Slope GetGhostGradient(const Tessellation& tess,const vector<ComputationalCell>& cells,
-		const vector<Slope>& gradients,size_t ghost_index,double time,const Edge& edge,
-		TracerStickerNames const& tracerstickernames) const = 0;
+		const vector<Slope>& gradients,size_t ghost_index,double time,const Edge& edge) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~GhostPointGenerator(void);

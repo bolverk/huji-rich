@@ -45,7 +45,7 @@ namespace
     NOHGhostGenerator(EquationOfState const& eos) :eos_(eos){}
 
     boost::container::flat_map<size_t, ComputationalCell> operator() (const Tessellation& tess,
-								      const vector<ComputationalCell>& /*cells*/, double time,TracerStickerNames const& /*ts*/) const
+								      const vector<ComputationalCell>& /*cells*/, double time) const override
     {
       vector<std::pair<size_t, size_t> > outer_edges = GetOuterEdgesIndeces(tess);
       boost::container::flat_map<size_t, ComputationalCell> res;
@@ -69,7 +69,7 @@ namespace
 
     Slope GetGhostGradient(Tessellation const& /*tess*/,
 			   vector<ComputationalCell> const& /*cells*/, vector<Slope> const& /*gradients*/,
-			   size_t /*ghost_index*/, double /*time*/,Edge const& /*edge*/,TracerStickerNames const& /*ts*/)const
+			   size_t /*ghost_index*/, double /*time*/,Edge const& /*edge*/) const override
     {
       ComputationalCell temp;
       //temp.tracers.push_back(0);

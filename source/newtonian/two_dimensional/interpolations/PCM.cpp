@@ -3,12 +3,11 @@
 PCM::PCM(GhostPointGenerator const & ghost) :ghost_(ghost){}
 
 void PCM::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells, double time,
-	vector<pair<ComputationalCell, ComputationalCell> >& res, TracerStickerNames const & tracerstickersnames,
-	CacheData const& /*cd*/) const
+	vector<pair<ComputationalCell, ComputationalCell> >& res, CacheData const& /*cd*/) const
 {
 	res.resize(static_cast<size_t>(tess.GetTotalSidesNumber()));
 	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess,
-		cells, time, tracerstickersnames);
+		cells, time);
 	int Npoints = tess.GetPointNo();
 	size_t Nedges = res.size();
 	for (size_t i = 0; i < Nedges; ++i)

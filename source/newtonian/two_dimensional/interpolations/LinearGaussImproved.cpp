@@ -179,7 +179,6 @@ namespace
 		ComputationalCell &cmin,
 		ComputationalCell &maxdiff,
 		ComputationalCell &mindiff,
-		TracerStickerNames const& tracerstickernames,
 		string const& skip_key,
 		Tessellation const& tess)
 	{
@@ -190,8 +189,8 @@ namespace
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
-			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
-				tracerstickernames.sticker_names.end(), skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), ComputationalCell::stickerNames.begin(),
+								ComputationalCell::stickerNames.end(), skip_key))
 				continue;
 			if (tess.GetOriginalIndex(edge_list[i]->neighbors.first) == tess.GetOriginalIndex(edge_list[i]->neighbors.second))
 				continue;
@@ -301,7 +300,7 @@ namespace
 
 	void shocked_slope_limit(ComputationalCell const& cell, Vector2D const& cm,
 		vector<ComputationalCell const*> const& neighbors, vector<const Edge*> const& edge_list,
-		Slope  &slope, double diffusecoeff,TracerStickerNames const& tracerstickernames,
+		Slope  &slope, double diffusecoeff,
 		string const& skip_key)
 	{
 		ComputationalCell cmax(cell), cmin(cell);
@@ -309,8 +308,8 @@ namespace
 		for (size_t i = 0; i < neighbors.size(); ++i)
 		{
 			ComputationalCell const& cell_temp = *neighbors[i];
-			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
-				tracerstickernames.sticker_names.end(),skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), ComputationalCell::stickerNames.begin(),
+								ComputationalCell::stickerNames.end(),skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -332,7 +331,7 @@ namespace
 		for (size_t i = 0; i<edge_list.size(); ++i)
 		{
 			if (!skip_key.empty() && *safe_retrieve(neighbors[i]->stickers.begin(), 
-				tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), skip_key))
+								ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(), skip_key))
 				continue;
 			ComputationalCell centroid_val = interp(cell, slope, CalcCentroid(*edge_list[i]), cm);
 			ComputationalCell dphi = centroid_val - cell;
@@ -438,7 +437,6 @@ namespace
 			vector<const Edge *> const& edge_list,
 			vector<Vector2D> &neighbor_mesh_list,
 			vector<Vector2D> &neighbor_cm_list,
-			TracerStickerNames const& tracerstickernames,
 			string const& skip_key)
 	{
 		GetNeighborMesh(tess, edge_list, cell_index, neighbor_mesh_list);
@@ -466,9 +464,9 @@ namespace
 
 		for (size_t i = 0; i < flat_tracers.size(); ++i)
 		{
-			size_t tindex = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-				flat_tracers[i]) - tracerstickernames.tracer_names.begin());
-			assert(tindex < tracerstickernames.tracer_names.size());
+		  size_t tindex = static_cast<size_t>(binary_find(ComputationalCell::tracerNames.begin(), ComputationalCell::tracerNames.end(),
+								  flat_tracers[i]) - ComputationalCell::tracerNames.begin());
+		  assert(tindex < ComputationalCell::tracerNames.size());
 			res.xderivative.tracers[tindex] = 0;
 			res.yderivative.tracers[tindex] = 0;
 		}
@@ -476,14 +474,14 @@ namespace
 		if (slf)
 		{
 			if (!is_shock(res, tess.GetWidth(static_cast<int>(cell_index)), shockratio, cell, neighbor_list, pressure_ratio,
-				eos.dp2c(cell.density, cell.pressure, cell.tracers,tracerstickernames.tracer_names)))
+				      eos.dp2c(cell.density, cell.pressure, cell.tracers,ComputationalCell::tracerNames)))
 			{
 				slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, temp2, temp3,
-					temp4, temp5,tracerstickernames,skip_key,tess);
+					temp4, temp5,skip_key,tess);
 			}
 			else
 			{
-				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff,tracerstickernames,skip_key);
+				shocked_slope_limit(cell, tess.GetCellCM(static_cast<int>(cell_index)), neighbor_list, edge_list, res, diffusecoeff,skip_key);
 			}
 		}
 	}
@@ -528,12 +526,12 @@ namespace
 
 void LinearGaussImproved::operator() (const Tessellation& tess,
 	const vector<ComputationalCell>& cells, double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-	TracerStickerNames const& tracerstikersnames,CacheData const& /*cd*/) const
+	CacheData const& /*cd*/) const
 {
 	const size_t CellNumber = static_cast<size_t>(tess.GetPointNo());
 	vector<int> boundaryedges;
 	// Get ghost points
-	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time, tracerstikersnames);
+	boost::container::flat_map<size_t, ComputationalCell> ghost_cells = ghost_.operator()(tess, cells, time);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell> new_cells(cells);
 	new_cells.resize
@@ -558,7 +556,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 		GetEdgeList(tess, edge_index, edge_list);
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			flat_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5, edge_list,
-			neighbor_mesh_list, neighbor_cm_list, tracerstikersnames,skip_key_);
+			neighbor_mesh_list, neighbor_cm_list,skip_key_);
 		const size_t nloop = edge_index.size();
 		for (size_t j = 0; j < nloop; ++j)
 		{
@@ -605,7 +603,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 #else
 			res[static_cast<size_t>(boundaryedges[i])].first = interp(res[static_cast<size_t>(boundaryedges[i])].first,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-					edge.neighbors.first), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
+					edge.neighbors.first), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.first));
 #endif //RICH_MPI
 		}
 		else
@@ -622,7 +620,7 @@ void LinearGaussImproved::operator() (const Tessellation& tess,
 #else
 			res[static_cast<size_t>(boundaryedges[i])].second = interp(res[static_cast<size_t>(boundaryedges[i])].second,
 				ghost_.GetGhostGradient(tess, cells, rslopes_, static_cast<size_t>(
-					edge.neighbors.second), time, edge, tracerstikersnames), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
+					edge.neighbors.second), time, edge), CalcCentroid(edge), tess.GetCellCM(edge.neighbors.second));
 #endif //RICH_MPI
 		}
 	}

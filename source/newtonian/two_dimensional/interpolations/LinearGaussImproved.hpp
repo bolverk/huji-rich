@@ -40,7 +40,7 @@ public:
 		const string& skip_key=string());
 
 	void operator() (const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
-		vector<pair<ComputationalCell, ComputationalCell> > &res,TracerStickerNames const& tracerstickersnames,CacheData const& cd)const override;
+		vector<pair<ComputationalCell, ComputationalCell> > &res ,CacheData const& cd)const override;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell

@@ -209,13 +209,13 @@ void ColdFlowsUpdate::operator()
 	{
 		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(), ts.tracer_names.end(), string("Entropy")) - ts.tracer_names.begin());
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_cells_ = ghost_(tess, cells, time);
 		dt_ = dt;
 	}
 	if (lasttime_ < time || dt < dt_ || dt > dt_)
 	{
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_cells_ = ghost_.operator()(tess, cells, time);
 		dt_ = dt;
 	}
 

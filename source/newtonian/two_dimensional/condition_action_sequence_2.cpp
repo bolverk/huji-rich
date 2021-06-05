@@ -63,7 +63,7 @@ vector<Extensive> ConditionActionSequence2::operator()
 {
 	edge_values_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
-	interp_.operator()(tess, cells, time,edge_values_,tracerstickernames,cd);
+	interp_.operator()(tess, cells, time,edge_values_,cd);
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
 	for (size_t i = 0; i<tess.getAllEdges().size(); ++i)
 		choose_action
