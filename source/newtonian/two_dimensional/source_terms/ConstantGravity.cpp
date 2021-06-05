@@ -8,8 +8,7 @@ Vector2D ConstantGravity::operator()
  const vector<ComputationalCell>& /*cells*/,
  const vector<Extensive>& /*fluxes*/,
  const double /*time*/,
- const int /*point*/,
- TracerStickerNames const& /*tracerstickernames*/) const
+ const int /*point*/) const
 {
   return force_;
 }

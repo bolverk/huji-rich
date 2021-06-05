@@ -7,8 +7,7 @@ vector<Extensive> ZeroForce::operator()
  const vector<ComputationalCell>& /*cells*/,
 	const vector<Extensive>& /*fluxes*/,
 	const vector<Vector2D>& /*point_velocities*/,
-	const double /*t*/,
-	TracerStickerNames const& /*tracerstickersnames*/) const
+	const double /*t*/) const
 {
 	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
 //	size_t N = res.size();

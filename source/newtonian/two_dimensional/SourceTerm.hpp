@@ -26,7 +26,6 @@ public:
 	  \param fluxes Fluxes
 	  \param point_velocities Velocities of the mesh generating points
 	  \param t Time
-	  \param tracerstickernames The names of the tracers and stickers
 	  \return The flux of conserved variables
 	*/
 	virtual vector<Extensive> operator()
@@ -36,8 +35,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const vector<Extensive>& fluxes,
 			const vector<Vector2D>& point_velocities,
-			const double t,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const double t) const = 0;
 
 	virtual ~SourceTerm(void);
 };

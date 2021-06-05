@@ -26,8 +26,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const vector<Extensive>& fluxes,
 			const vector<Vector2D>& point_velocities,
-			const double t,
-			TracerStickerNames const& tracerstickernames) const override;
+			const double t) const override;
 
 private:
 	vector<SourceTerm*> sources_;

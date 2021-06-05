@@ -12,8 +12,7 @@ vector<Extensive> SeveralSources::operator()
 	const vector<ComputationalCell>& cells,
 	const vector<Extensive>& fluxes,
 	const vector<Vector2D>& point_velocities,
-	const double t,
-	TracerStickerNames const& tracerstickernames) const
+	const double t) const
 {
 	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
 	size_t ntracer = cells[0].tracers.size();
@@ -29,7 +28,7 @@ vector<Extensive> SeveralSources::operator()
 	for (size_t i = 0; i < sources_.size(); ++i) 
 	{
 		const vector<Extensive> diff = (*sources_[i])
-			(tess, pg, cd, cells, fluxes, point_velocities, t,tracerstickernames);
+			(tess, pg, cd, cells, fluxes, point_velocities, t);
 		for (size_t j = 0; j < res.size(); ++j) 
 		{
 			res[j].mass += diff[j].mass;

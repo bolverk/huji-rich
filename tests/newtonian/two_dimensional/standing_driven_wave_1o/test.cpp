@@ -44,7 +44,7 @@ namespace {
      const vector<ComputationalCell>& /*cells*/,
      const vector<Extensive>& /*fluxes*/,
      double t,
-     int point,TracerStickerNames const& /*tracerstickersnames*/) const
+     int point) const override
     {
       const double x = tess.GetMeshPoint(point).x;
       const double acceleration = amp_*sin(k_*x)*sin(k_*v_*t);

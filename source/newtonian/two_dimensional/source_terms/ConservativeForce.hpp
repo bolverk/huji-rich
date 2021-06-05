@@ -19,7 +19,6 @@ public:
 	  \param point The index of the cell to calculate
 	  \param fluxes The vector of the fluxes
 	  \param time The simulation time
-	  \param tracerstickernames The names of the tracers and stickers
 	  \return The calculated acceleration
 	*/
 	virtual Vector2D operator()
@@ -27,8 +26,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const vector<Extensive>& fluxes,
 			const double time,
-			const int point,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const int point) const = 0;
 
 	virtual ~Acceleration(void);
 };
@@ -56,8 +54,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const vector<Extensive>& fluxes,
 			const vector<Vector2D>& point_velocities,
-			const double t,
-			TracerStickerNames const& tracerstickernames) const override;
+			const double t) const override;
 
 private:
 	const Acceleration& acc_;

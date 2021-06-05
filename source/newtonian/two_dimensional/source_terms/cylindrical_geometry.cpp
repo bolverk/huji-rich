@@ -25,8 +25,7 @@ vector<Extensive> CylindericalGeometry::operator()
 	const vector<ComputationalCell>& cells,
 	const vector<Extensive>& fluxes,
 	const vector<Vector2D>& /*point_velocities*/,
-	const double /*t*/,
-	TracerStickerNames const& tracerstickernames) const
+	const double /*t*/) const
 
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -38,7 +37,7 @@ vector<Extensive> CylindericalGeometry::operator()
 		const double vz = Projection(cells[i].velocity,z_hat);
 		const double vr = Projection(cells[i].velocity,direction_);
 		const double p = cells[i].pressure;
-		const double e = eos_.dp2e(d, p, cells[i].tracers, tracerstickernames.tracer_names);
+		const double e = eos_.dp2e(d, p, cells[i].tracers, ComputationalCell::tracerNames);
 		const double r = distance_from_line(tess.GetCellCM(static_cast<int>(i)),origin_,direction_);
 		const double r_mom = d*pow(vr, 2) / r;
 		const double z_mom = d*vr*vz / r;
