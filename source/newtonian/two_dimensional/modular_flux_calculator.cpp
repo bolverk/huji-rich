@@ -39,8 +39,7 @@ namespace
 
 vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess, const vector<Vector2D>& edge_velocities,
 	const vector<ComputationalCell>& cells, const vector<Extensive>& /*extensives*/, const CacheData& cd,
-	const EquationOfState& eos, const double time, const double /*dt*/,
-	TracerStickerNames const& tracerstickernames) const
+	const EquationOfState& eos, const double time, const double /*dt*/) const
 {
 	interpolated_.resize(static_cast<size_t>(tess.GetTotalSidesNumber()),
 		pair<ComputationalCell, ComputationalCell>(cells[0], cells[0]));
@@ -57,10 +56,10 @@ vector<Extensive> ModularFluxCalculator::operator() (const Tessellation& tess, c
 			const double speed = ScalarProd(p_n.second, edge_velocities.at(i)) / abs(p_n.second);
 			const Primitive p_left =
 				convert_to_primitive
-				(interpolated_.at(i).first, eos,tracerstickernames);
+				(interpolated_.at(i).first, eos);
 			const Primitive p_right =
 				convert_to_primitive
-				(interpolated_.at(i).second, eos,tracerstickernames);
+				(interpolated_.at(i).second, eos);
 			res.at(i) =
 				convert_conserved_to_extensive
 				(rotate_solve_rotate_back

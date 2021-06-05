@@ -12,11 +12,10 @@
  /*! \brief Converts computational cell to primitive variables
    \param cell Computational cell
    \param eos Equation of state
-   \param tracerstickernames The names of the tracers and stickers
    \return Primitive variable
   */
 Primitive convert_to_primitive(const ComputationalCell& cell,
-	const EquationOfState& eos, TracerStickerNames const& tracerstickernames);
+	const EquationOfState& eos);
 
 /*! \brief Reflects velocity about axis
   \param p Primitive variables
@@ -52,8 +51,7 @@ public:
 			const CacheData& cd,
 			const EquationOfState& eos,
 			const double time,
-			const double dt,
-			TracerStickerNames const& tracerstickernames) const override;
+			const double dt) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -62,8 +60,7 @@ private:
 		const vector<Vector2D>& edge_velocities,
 		const vector<ComputationalCell>& cells,
 		const EquationOfState& eos,
-		const size_t i,
-		TracerStickerNames const& tracerstickernames) const;
+		const size_t i) const;
 };
 
 /*! \brief Rotates, solve riemann problem and rotates results back

@@ -23,14 +23,14 @@ namespace
 			const EquationOfState& eos,
 			const Vector2D& edge_velocity,
 			const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> >& sequence,
-			Extensive &res, double time, TracerStickerNames const& tracerstickernames)
+			Extensive &res, double time)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i) {
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
-				(edge, tess, cells, tracerstickernames);
+				(edge, tess, cells);
 			if (flag_aux.first)
 				return (*sequence[i].second)
-				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res, time, tracerstickernames);
+				(edge, tess, edge_velocity, cells, eos, flag_aux.second, res, time);
 		}
 		throw UniversalError("Error in ConditionActionSequence");
 	}
@@ -44,8 +44,7 @@ vector<Extensive> ConditionActionSequence::operator()
 	const CacheData& /*cd*/,
 	const EquationOfState& eos,
 	const double time,
-	const double /*dt*/,
-	TracerStickerNames const& tracerstickernames) const
+	const double /*dt*/) const
 {
 	vector<Extensive> res(tess.getAllEdges().size(), extensives[0]);
 	for (size_t i = 0; i < tess.getAllEdges().size(); ++i)
@@ -55,7 +54,7 @@ vector<Extensive> ConditionActionSequence::operator()
 			cells,
 			eos,
 			edge_velocities[i],
-			sequence_, res[i], time, tracerstickernames);
+			sequence_, res[i], time);
 	return res;
 }
 
@@ -95,7 +94,7 @@ void RegularFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool /*aux*/,
-	Extensive &res, double /*time*/, TracerStickerNames const& tracerstickernames) const
+	Extensive &res, double /*time*/) const
 {
 	assert(edge.neighbors.first >= 0 && tess.GetOriginalIndex(edge.neighbors.first) !=
 		tess.GetOriginalIndex(edge.neighbors.second) && edge.neighbors.second >= 0);
@@ -110,9 +109,9 @@ void RegularFlux::operator()
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
 			convert_to_primitive
-			(cells.at(static_cast<size_t>(edge.neighbors.first)), eos,tracerstickernames),
+			(cells.at(static_cast<size_t>(edge.neighbors.first)), eos),
 			convert_to_primitive
-			(cells.at(static_cast<size_t>(edge.neighbors.second)), eos,tracerstickernames),
+			(cells.at(static_cast<size_t>(edge.neighbors.second)), eos),
 			v, n, p);
 	conserved_to_extensive
 		(c,
@@ -151,7 +150,7 @@ void RigidWallFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res, double /*time*/,TracerStickerNames const& tracerstickernames) const
+	Extensive &res, double /*time*/) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -175,7 +174,7 @@ void RigidWallFlux::operator()
 			(cells.at
 				(static_cast<size_t>
 					(aux ? edge.neighbors.first : edge.neighbors.second)),
-				eos,tracerstickernames),
+				eos),
 			p, aux);
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
@@ -197,7 +196,7 @@ void FreeFlowFlux::operator()
 	const vector<ComputationalCell>& cells,
 	const EquationOfState& eos,
 	const bool aux,
-	Extensive &res, double /*time*/, TracerStickerNames const& tracerstickernames) const
+	Extensive &res, double /*time*/) const
 {
 #ifndef RICH_MPI
 	if (aux)
@@ -220,7 +219,7 @@ void FreeFlowFlux::operator()
 		(cells.at
 			(static_cast<size_t>
 				(aux ? edge.neighbors.first : edge.neighbors.second)),
-			eos,tracerstickernames);
+			eos);
 	const Conserved c = rotate_solve_rotate_back
 		(rs_,
 			state, state,
@@ -235,7 +234,7 @@ IsBoundaryEdge::IsBoundaryEdge(void) {}
 pair<bool, bool> IsBoundaryEdge::operator()
 (const Edge& edge,
 	const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<ComputationalCell>& /*cells*/) const
 {
 #ifdef RICH_MPI
 	if (tess.GetOriginalIndex(edge.neighbors.first) != tess.GetOriginalIndex(edge.neighbors.second))
@@ -262,7 +261,7 @@ IsBulkEdge::IsBulkEdge(void) {}
 pair<bool, bool> IsBulkEdge::operator()
 (const Edge& edge,
 	const Tessellation& tess,
-	const vector<ComputationalCell>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<ComputationalCell>& /*cells*/) const
 {
 	return pair<bool, bool>
 		(edge.neighbors.first >= 0 &&
@@ -280,19 +279,16 @@ RegularSpecialEdge::RegularSpecialEdge(const string& sticker_name) :
 pair<bool, bool> RegularSpecialEdge::operator()
 (const Edge& edge,
 	const Tessellation& /*tess*/,
-	const vector<ComputationalCell>& cells, TracerStickerNames const& tracerstickernames) const
+	const vector<ComputationalCell>& cells) const
 {
-	if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers.begin(),
-		tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
+  if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.first)).stickers.begin(), ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(),
 		sticker_name_)) {
-		if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(),
-			tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
+    if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(), ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(),
 			sticker_name_))
 			return pair<bool, bool>(false, false);
 		return pair<bool, bool>(true, false);
 	}
-	if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(),
-		tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
+  if (*safe_retrieve(cells.at(static_cast<size_t>(edge.neighbors.second)).stickers.begin(), ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(),
 		sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);

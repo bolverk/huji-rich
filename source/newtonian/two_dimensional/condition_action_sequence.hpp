@@ -18,13 +18,11 @@ public:
 		  \param edge Interface
 		  \param tess Tessellation
 		  \param cells Computational cells
-		  \param tracerstickernames The names of the tracers and stickers
 		  \return A pair of booleans. The first is whether the edge satisfies a condition, and the second is an auxiliary variable.
 		 */
 		virtual pair<bool, bool> operator()(const Edge& edge,
 				const Tessellation& tess,
-				const vector<ComputationalCell>& cells,
-				TracerStickerNames const& tracerstickernames) const = 0;
+				const vector<ComputationalCell>& cells) const = 0;
 
 		virtual ~Condition(void);
 	};
@@ -45,7 +43,6 @@ public:
 		  \param edge_velocity Velocity of the egdes
 		  \param res The flux
 		  \param time The time
-		  \param tracerstickernames The names of the tracers and stickers
 		 */
 		virtual void operator()
 			(const Edge& edge,
@@ -54,8 +51,7 @@ public:
 				const vector<ComputationalCell>& cells,
 				const EquationOfState& eos,
 				const bool aux,
-				Extensive &res, double time,
-				TracerStickerNames const& tracerstickernames) const = 0;
+				Extensive &res, double time) const = 0;
 
 		virtual ~Action(void);
 
@@ -84,8 +80,7 @@ public:
 			const CacheData& cd,
 			const EquationOfState& eos,
 			const double time,
-			const double dt,
-			TracerStickerNames const& tracerstickernames) const override;
+			const double dt) const override;
 
 private:
 	const vector<pair<const Condition*, const Action*> > sequence_;
@@ -108,8 +103,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 
@@ -133,8 +127,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -157,8 +150,7 @@ public:
 			const vector<ComputationalCell>& cells,
 			const EquationOfState& eos,
 			const bool aux,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -174,8 +166,7 @@ public:
 	pair<bool, bool> operator()
 		(const Edge& edge,
 			const Tessellation& tess,
-			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const override;
+			const vector<ComputationalCell>& cells) const override;
 };
 
 //! \brief Check if an interface is inside the domain
@@ -188,8 +179,7 @@ public:
 	pair<bool, bool> operator()
 		(const Edge& edge,
 			const Tessellation& tess,
-			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const override;
+			const vector<ComputationalCell>& cells) const override;
 };
 
 //! \brief Determines if the interface is between a regular and a special cell
@@ -205,8 +195,7 @@ public:
 	pair<bool, bool> operator()
 		(const Edge& edge,
 			const Tessellation& tess,
-			const vector<ComputationalCell>& cells,
-			TracerStickerNames const& tracerstickernames) const override;
+			const vector<ComputationalCell>& cells) const override;
 
 private:
 	const string sticker_name_;
