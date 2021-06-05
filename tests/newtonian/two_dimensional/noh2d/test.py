@@ -93,7 +93,7 @@ def main():
 
     return l1_density<1.24 and \
         l1_pressure<0.37 and \
-        l1_velocity<0.077
+        l1_velocity<0.078
 
 if __name__ == '__main__':
 
