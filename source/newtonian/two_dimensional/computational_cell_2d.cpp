@@ -3,6 +3,9 @@
 
 using namespace std;
 
+vector<string> ComputationalCell::tracerNames;
+vector<string> ComputationalCell::stickerNames;
+
 ComputationalCell::ComputationalCell(void) :
   density(0), pressure(0), velocity(Vector2D()), tracers(),
   stickers(){}

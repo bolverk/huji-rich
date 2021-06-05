@@ -124,6 +124,8 @@ hdsim::hdsim
 	vector<size_t> sindex = sort_index(tracer_sticker_names_.sticker_names);
 	tracer_sticker_names_.tracer_names = VectorValues(tracer_sticker_names_.tracer_names, tindex);
 	tracer_sticker_names_.sticker_names = VectorValues(tracer_sticker_names_.sticker_names, sindex);
+	ComputationalCell::tracerNames = tracer_sticker_names_.tracer_names;
+	ComputationalCell::stickerNames = tracer_sticker_names_.sticker_names;
 	for (size_t i = 0; i < N; ++i)
 	{
 		for (size_t j = 0; j < tindex.size(); ++j)
