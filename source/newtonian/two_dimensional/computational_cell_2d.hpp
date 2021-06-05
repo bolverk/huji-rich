@@ -9,9 +9,13 @@
 /*#include <boost/container/small_vector.hpp>
   typedef boost::container::small_vector<double,0> tvector;
   typedef boost::container::small_vector<bool,0> svector;*/
+#include <vector>
 #include <array>
 #define MAX_TRACERS 5
 #define MAX_STICKERS 4
+
+using std::vector;
+using std::string;
 
 typedef std::array<double, MAX_TRACERS> tvector;
 typedef std::array<bool, MAX_STICKERS> svector;
@@ -38,6 +42,9 @@ public:
 
   //! \brief Velocity
   Vector2D velocity;
+
+  static vector<string> tracerNames;
+  static vector<string> stickerNames;
 
   //! \brief Tracers (can transfer from one cell to another)
   tvector tracers;
