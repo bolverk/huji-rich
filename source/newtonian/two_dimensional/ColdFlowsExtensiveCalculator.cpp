@@ -21,8 +21,7 @@ void ColdFlowsExtensiveCalculator::operator()
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
 	vector<Extensive>& extensives,
-	double time,
-	TracerStickerNames const& tracerstickernames) const
+	double time) const
 {
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	for (size_t i = 0; i < edge_list.size(); ++i)
@@ -36,5 +35,5 @@ void ColdFlowsExtensiveCalculator::operator()
 	}
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		coldupdate_.operator()(fluxes, pg, tess, dt, cd, cells, extensives[i], i, time, tracerstickernames);
+		coldupdate_.operator()(fluxes, pg, tess, dt, cd, cells, extensives[i], i, time);
 }

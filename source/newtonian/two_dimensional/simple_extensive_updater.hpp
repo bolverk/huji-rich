@@ -21,7 +21,7 @@ public:
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
    vector<Extensive>& extensives,
-	  double time, TracerStickerNames const& tracerstickersnames) const override;
+	  double time) const override;
 };
 
 #endif // SIMPLE_EXTENSIVE_UPDATER_HPP
