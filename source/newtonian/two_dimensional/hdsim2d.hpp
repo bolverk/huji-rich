@@ -145,7 +145,6 @@ public:
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
-    \param tracer_sticker_names The names of the tracers and stickers
     \param proctess Tessellation of the processes
   */
   hdsim
@@ -267,7 +266,7 @@ public:
   \brief Returns the TracerStickerNames
   \return The TracerStickerNames of the simulation
   */
-  TracerStickerNames const& GetTracerStickerNames(void)const;
+  //  TracerStickerNames const& GetTracerStickerNames(void)const;
 };
 
 #endif

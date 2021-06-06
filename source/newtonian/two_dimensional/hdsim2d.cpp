@@ -138,10 +138,12 @@ hdsim::hdsim
 
 hdsim::~hdsim(void) {}
 
+/*
 TracerStickerNames const& hdsim::GetTracerStickerNames(void)const
 {
 	return tracer_sticker_names_;
 }
+*/
 
 void hdsim::TimeAdvance(void)
 {
