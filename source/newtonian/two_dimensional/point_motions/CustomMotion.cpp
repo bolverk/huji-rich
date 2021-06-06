@@ -6,9 +6,9 @@ CustomMotion::CustomMotion(PointMotion const& otherpm, CustomMotionCriteria cons
 criteria_(criteria){}
 
 vector<Vector2D> CustomMotion::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
-	double time, TracerStickerNames const& tracerstickernames) const
+	double time) const
 {
-	return pm_.operator()(tess, cells, time,tracerstickernames);
+	return pm_.operator()(tess, cells, time);
 }
 
 vector<Vector2D> CustomMotion::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,

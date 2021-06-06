@@ -194,7 +194,7 @@ CentroidMotion::CentroidMotion(double reduction_factor, EquationOfState const& e
 	reduce_factor_(reduction_factor),eos_(eos),cold_(cold),niter_(niter),toignore_(toignore){}
 
 vector<Vector2D> CentroidMotion::operator()(const Tessellation & tess, const vector<ComputationalCell>& cells,
-	double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
+	double /*time*/) const
 {
 	vector<Vector2D> res(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < res.size(); ++i)
