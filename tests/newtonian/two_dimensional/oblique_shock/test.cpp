@@ -339,8 +339,7 @@ namespace
   public:
     ObliqueRefine(double maxV, string key) :maxV_(maxV), key_(key) {}
 
-    vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/,
-			    TracerStickerNames const& /*ts*/)const
+    vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/)const
     {
       vector<size_t> res;
       size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -362,7 +361,7 @@ namespace
     ObliqueRemove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
 
     std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
-							vector<ComputationalCell> const& cells, double /*time*/,TracerStickerNames const& /*ts*/)const
+							vector<ComputationalCell> const& cells, double /*time*/) const
     {
       std::pair<vector<size_t>, vector<double> > res;
       vector<double> merits;

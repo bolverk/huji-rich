@@ -18,7 +18,7 @@ CellsToRefine::~CellsToRefine() {}
 AMR::~AMR(void) {}
 
 Extensive SimpleAMRExtensiveUpdater::ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& /*tracerstickernames*/) const
+	double volume) const
 {
 	Extensive res;
 	const double mass = volume*cell.density;
@@ -37,11 +37,11 @@ SimpleAMRCellUpdater::SimpleAMRCellUpdater
 (const vector<string>& toskip) :toskip_(toskip) {}
 
 ComputationalCell SimpleAMRCellUpdater::ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
-	double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const
+	double volume, ComputationalCell const& old_cell) const
 {
 	for (size_t i = 0; i < toskip_.size(); ++i)
-		if(*safe_retrieve(old_cell.stickers.begin(), tracerstickernames.sticker_names.begin(),
-			tracerstickernames.sticker_names.end(),toskip_[i]))
+	  if(*safe_retrieve(old_cell.stickers.begin(), ComputationalCell::stickerNames.begin(),
+			    ComputationalCell::stickerNames.end(),toskip_[i]))
 			return old_cell;
 	ComputationalCell res;
 	const double vol_inv = 1.0 / volume;
@@ -188,7 +188,7 @@ namespace
 	Extensive GetNewExtensive(vector<Extensive> const& extensives,Tessellation const& tess,size_t N,size_t location,
 		vector<Vector2D> const& moved,vector<int> const& real_neigh,vector<vector<Vector2D> >  const& Chull,
 		vector<ComputationalCell> const& cells,EquationOfState const& eos, AMRExtensiveUpdater const& eu,
-		double &TotalVolume,Tessellation const& oldtess,bool periodic,TracerStickerNames const& tracerstickernames)
+		double &TotalVolume,Tessellation const& oldtess,bool periodic)
 	{
 		Extensive NewExtensive(extensives[0].tracers);
 		vector<Vector2D> temp;
@@ -204,7 +204,7 @@ namespace
 			double v = AreaOverlap(temp, Chull[j]);
 			if (v > vv*1e-8)
 			{
-				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v,tracerstickernames);
+				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(real_neigh[j])], eos, v);
 				TotalVolume += v;
 #ifdef RICH_MPI
 				if (oldtess.GetOriginalIndex(real_neigh[j]) > tess.GetPointNo() || oldtess.GetOriginalIndex(real_neigh[j])==real_neigh[j])
@@ -237,7 +237,7 @@ namespace
 			double v = AreaOverlap(temp, chull);
 			if (v > vv*1e-8)
 			{
-				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(cur_check)], eos, v,tracerstickernames);
+				NewExtensive += eu.ConvertPrimitveToExtensive(cells[static_cast<size_t>(cur_check)], eos, v);
 				TotalVolume += v;
 				oldtess.GetNeighbors(cur_check,neightemp);
 				for (size_t k = 0; k < neightemp.size(); ++k)
@@ -374,8 +374,7 @@ namespace
 	void ConservedSingleCell(Tessellation const& oldtess, Tessellation const& tess, size_t ToRefine, size_t &location,
 		LinearGaussImproved *interp, EquationOfState const& eos, vector<ComputationalCell> &cells,
 		vector<pair<size_t, Vector2D> > const& NewPoints, vector<Extensive> const& extensives,
-		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved,bool periodic,
-		TracerStickerNames const& tracerstickernames)
+		AMRExtensiveUpdater const& eu, AMRCellUpdater const& cu,vector<Vector2D> const& moved,bool periodic)
 	{
 		vector<int> real_neigh;
 		vector<vector<Vector2D> > Chull;
@@ -386,8 +385,8 @@ namespace
 			AddCurrentNeigh(tess,location, Chull, real_neigh, moved, oldtess);
 			double TotalVolume=0;
 			Extensive NewExtensive = GetNewExtensive(extensives, tess, N, location, moved, real_neigh, Chull,
-				cells, eos, eu,TotalVolume,oldtess,periodic,tracerstickernames);
-			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine],tracerstickernames));
+				cells, eos, eu,TotalVolume,oldtess,periodic);
+			cells.push_back(cu.ConvertExtensiveToPrimitve(NewExtensive, eos, TotalVolume, cells[ToRefine]));
 			if (interp != nullptr)
 				interp->GetSlopesUnlimited().push_back(interp->GetSlopesUnlimited()[ToRefine]);
 			++location;
@@ -531,17 +530,17 @@ void ConservativeAMR::UpdateCellsRefine
 	vector<ComputationalCell> &cells,
 	EquationOfState const& eos,
 	vector<Extensive> &extensives,
-	double time,
+	double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+	)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Find the primitive of each point and the new location
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
-	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time,tracerstickernames);
+	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
 #ifndef RICH_MPI
 	if (ToRefine.empty())
 		return;
@@ -589,26 +588,26 @@ void ConservativeAMR::UpdateCellsRefine
 	size_t location = 0;
 	for (size_t i = 0; i < ToRefine.size(); ++i)
 		ConservedSingleCell(*oldtess, tess, ToRefine[i], location, interp_, eos, cells, NewPoints, extensives, *eu_,
-			*cu_,Moved,periodic_,tracerstickernames);
+			*cu_,Moved,periodic_);
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)),tracerstickernames);
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-	EquationOfState const& eos, double time,
+	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+					)const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
 	cells.resize(N);
-	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time,tracerstickernames);
+	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 #ifndef RICH_MPI
 	if (ToRemovepair.first.empty())
 		return;
@@ -693,23 +692,23 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i],tracerstickernames);
+		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
 }
 
 void ConservativeAMR::operator()(hdsim &sim)
 {
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(), sim.getTime(),
+		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+		);
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(), sim.getTime(),
+		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+			  );
 	// redo cache data
 	sim.getCacheData().reset();
 }
@@ -731,13 +730,13 @@ NonConservativeAMR::NonConservativeAMR
 
 void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-	vector<Extensive> &extensives, double time,
+	vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+					   )const
 {
-	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time,tracerstickernames);
+	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
 #ifndef RICH_MPI
 	if (ToRefine.empty())
 		return;
@@ -778,18 +777,18 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 
 	// Recalcualte extensives
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)),tracerstickernames);
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-	EquationOfState const& eos, double time,
+	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+	)const
 {
-	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time,tracerstickernames);
+	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 	vector<size_t> ToRemove = ToRemovepair.first;
 #ifndef RICH_MPI
 	if (ToRemove.empty())
@@ -812,23 +811,23 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	// Recalcualte extensives
 	extensives.resize(cells.size());
 	for (size_t i = 0; i < extensives.size(); ++i)
-		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)),tracerstickernames);
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void NonConservativeAMR::operator()(hdsim &sim)
 {
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(), sim.getTime(),
+		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+			  );
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(), sim.getTime(),
+		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+			  );
 	// redo cache data
 	sim.getCacheData().reset();
 }
@@ -859,17 +858,17 @@ void ConservativeAMROld::UpdateCellsRefine
 	vector<ComputationalCell> &cells,
 	EquationOfState const& eos,
 	vector<Extensive> &extensives,
-	double time,
+	double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+ )const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Find the primitive of each point and the new location
 	vector<std::pair<size_t, Vector2D> > NewPoints;
 	vector<Vector2D> Moved;
-	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time,tracerstickernames);
+	vector<size_t> ToRefine = refine_.ToRefine(tess, cells, time);
 #ifndef RICH_MPI
 	if (ToRefine.empty())
 		return;
@@ -903,23 +902,23 @@ void ConservativeAMROld::UpdateCellsRefine
 
 	extensives.resize(N + NewPoints.size());
 	for (size_t i = 0; i < N + NewPoints.size(); ++i)
-		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)),tracerstickernames);
+		extensives[i] = eu_->ConvertPrimitveToExtensive(cells[i], eos, tess.GetVolume(static_cast<int>(i)));
 }
 
 void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-	EquationOfState const& eos, double time,
+	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess,
+	Tessellation const& proctess
 #endif
-	TracerStickerNames const& tracerstickernames)const
+					   )const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	// Rebuild tessellation
 	vector<Vector2D> cor = tess.GetMeshPoints();
 	cor.resize(N);
 	cells.resize(N);
-	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time,tracerstickernames);
+	std::pair<vector<size_t>, vector<double> > ToRemovepair = remove_.ToRemove(tess, cells, time);
 #ifndef RICH_MPI
 	if (ToRemovepair.first.empty())
 		return;
@@ -975,23 +974,23 @@ void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 	RemoveVector(cells, ToRemove);
 	N = static_cast<size_t>(tess.GetPointNo());
 	for (size_t i = 0; i < N; ++i)
-		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i],tracerstickernames);
+		cells[i] = cu_->ConvertExtensiveToPrimitve(extensives[i], eos, tess.GetVolume(static_cast<int>(i)), cells[i]);
 }
 
 void ConservativeAMROld::operator()(hdsim &sim)
 {
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
-		sim.getAllExtensives(), sim.getTime(),
+		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+			  );
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
-		sim.getEos(), sim.getTime(),
+		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation(),
+		sim.GetProcTessellation()
 #endif
-		sim.GetTracerStickerNames());
+			  );
 	// redo cache data
 	sim.getCacheData().reset();
 }

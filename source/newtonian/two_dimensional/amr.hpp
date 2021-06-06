@@ -28,11 +28,10 @@ public:
 	\param eos Equation of state
 	\param volume Cell volume
 	\param old_cell Old computational cell
-	\param tracerstickernames The names of the tracers and stickers
 	\return Computational cell
 	*/
 	virtual ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive,const EquationOfState& eos,
-		double volume,ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const = 0;
+		double volume,ComputationalCell const& old_cell) const = 0;
 
 	//! \brief Class destructor
 	virtual ~AMRCellUpdater(void);
@@ -47,11 +46,10 @@ public:
 	\param cell Computational cell
 	\param eos Equation of state
 	\param volume Cell volume
-	\param tracerstickernames The names of the tracers and stickers
 	\return Extensive
 	*/
 	virtual Extensive ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-		double volume,TracerStickerNames const& tracerstickernames) const = 0;
+		double volume) const = 0;
 
 	//! \brief Class destructor
 	virtual ~AMRExtensiveUpdater(void);
@@ -62,7 +60,7 @@ class SimpleAMRExtensiveUpdater : public AMRExtensiveUpdater
 {
 public:
 	Extensive ConvertPrimitveToExtensive(const ComputationalCell& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames) const override;
+		double volume) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -78,7 +76,7 @@ public:
   explicit SimpleAMRCellUpdater(const vector<string>& toskip);
 
 	ComputationalCell ConvertExtensiveToPrimitve(const Extensive& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell const& old_cell,TracerStickerNames const& tracerstickernames) const override;
+		double volume, ComputationalCell const& old_cell) const override;
 };
 
 //! \brief Chooses which cells should be remove
@@ -90,12 +88,10 @@ public:
 	\param tess The tesselation
 	\param cells The computational cells
 	\param time The sim time
-	\param tracerstickernames The names of the tracers and stickers
 	\return The indeces of cells to remove with a corresponding merit which decides if there are neighboring cells which one to choose to remove
 	*/
 	virtual std::pair<vector<size_t>,vector<double> > ToRemove(Tessellation const& tess,
-		vector<ComputationalCell> const& cells,double time,
-		TracerStickerNames const& tracerstickernames)const=0;
+		vector<ComputationalCell> const& cells,double time) const=0;
 
 	//! \brief Virtual destructor
 	virtual ~CellsToRemove(void);
@@ -110,11 +106,9 @@ public:
 		\param tess The tesselation
 		\param cells The computational cells
 		\param time The sim time
-		\param tracerstickernames The names of the tracers and stickers
 		\return The indeces of cells to remove
      */
-	virtual vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-		TracerStickerNames const& tracerstickernames)const = 0;
+	virtual vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double time)const = 0;
 	
 	//! \brief Virtual destructor
 	virtual ~CellsToRefine(void);
@@ -181,7 +175,6 @@ public:
 	\param extensives The extensive variables
 	\param time The sim time
 	\param obc Outer boundary conditions
-	\param tracerstickernames The names of the tracers and stickers
 	\return none
 	*/
 #ifdef RICH_MPI
@@ -189,11 +182,11 @@ public:
 #endif // RICH_MPI
 	virtual void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time,
+		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const = 0;
+				       )const = 0;
 	/*!
 	\brief Runs the removal
 	\param tess The tessellation
@@ -202,7 +195,6 @@ public:
 	\param extensives The extensive variables
 	\param time The sim time
 	\param obc The outer boundary conditions
-	\param tracerstickernames The names of the tracers and stickers
 	\return none
 	*/
 #ifdef RICH_MPI
@@ -210,11 +202,11 @@ public:
 #endif // RICH_MPI
 	virtual void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time,
+		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const = 0;
+				       )const = 0;
 	//! \brief Virtual destructor
 	virtual ~AMR(void);
 };
@@ -258,19 +250,19 @@ public:
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
-		vector<Extensive> &extensives,double time,
+		vector<Extensive> &extensives,double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos,double time,
+		EquationOfState const& eos,double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 };
 
 //! \brief Non conservative amr
@@ -305,19 +297,19 @@ public:
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time,
+		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time,
+		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 };
 
 //! \brief Conservative amr using old method to split cells
@@ -356,19 +348,19 @@ public:
 
 	void UpdateCellsRefine(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
-		vector<Extensive> &extensives, double time,
+		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 
 	void UpdateCellsRemove(Tessellation &tess,
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
-		EquationOfState const& eos, double time,
+		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess,
+		Tessellation const& proctess
 #endif
-		TracerStickerNames const& tracerstickernames)const override;
+			       )const override;
 };
 
 
