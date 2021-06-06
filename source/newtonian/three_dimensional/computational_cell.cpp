@@ -83,6 +83,9 @@ ComputationalCell3D& ComputationalCell3D::operator*=(double s)
 	return *this;
 }
 
+vector<string> ComputationalCell3D::tracerNames;
+vector<string> ComputationalCell3D::stickerNames;
+
 #ifdef RICH_MPI
 size_t ComputationalCell3D::getChunkSize(void) const
 {

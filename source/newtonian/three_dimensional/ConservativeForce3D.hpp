@@ -22,7 +22,7 @@ public:
 	\param acc The calculated acceleration, given as output
 	*/
 	virtual void operator()(const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
-			const vector<Conserved3D>& fluxes,const double time,TracerStickerNames const& tracerstickernames,
+				const vector<Conserved3D>& fluxes,const double time,
 		vector<Vector3D> &acc) const = 0;
 
 	virtual ~Acceleration3D(void);
@@ -47,7 +47,7 @@ public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes, const vector<Vector3D>& point_velocities, const double t, double dt,
-		TracerStickerNames const& tracerstickernames, vector<Conserved3D> &extensives) const override;
+			vector<Conserved3D> &extensives) const override;
 
 	double SuggestInverseTimeStep(void)const override;
 

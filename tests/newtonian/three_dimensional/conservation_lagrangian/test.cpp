@@ -197,7 +197,6 @@ class SimData
       fcd_(),
       cu_(),
       eu_(),
-      tsn_({}, {}),
       sim_
       (td_.tess,
        calc_init_cond(init_points_, eos_),
@@ -208,7 +207,7 @@ class SimData
        cu_,
        eu_,
        source_term_,
-       tsn_) 
+      {vector<string>(), vector<string>()}) 
     {}
 
     HDSim3D& getSim(void)
@@ -229,7 +228,6 @@ class SimData
     FluxCalculatorData fcd_;
     DefaultCellUpdater cu_;
     DefaultExtensiveUpdater eu_;
-    TracerStickerNames tsn_;
     HDSim3D sim_;
   };
 

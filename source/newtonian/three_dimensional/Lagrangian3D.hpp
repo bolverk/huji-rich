@@ -14,7 +14,7 @@ class Lagrangian3D : public PointMotion3D
 public:
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const override;
+		double time, vector<Vector3D> &res) const override;
 };
 
 #endif // LAGRANGIAN_HPP

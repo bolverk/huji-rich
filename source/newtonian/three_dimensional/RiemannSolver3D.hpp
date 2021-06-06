@@ -30,7 +30,6 @@ public:
 	 ComputationalCell3D const& right,
 	 double velocity,
 	 EquationOfState const& eos,
-	 TracerStickerNames const& tsn,
 	 Vector3D const& normaldir) const = 0;
 
   /*

@@ -17,7 +17,7 @@ ConditionExtensiveUpdater3D::ConditionExtensiveUpdater3D(const vector<pair<const
 
 void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D& tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double time,
-	TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities,
+	 const vector<Vector3D>& edge_velocities,
 	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const
 {
 	size_t N = tess.GetPointNo();
@@ -28,10 +28,10 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 		oldEtherm[i] = extensives[i].internal_energy;
 		oldE[i] = extensives[i].energy;
 	}
-	bool entropy = !(std::find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(), std::string("Entropy")) ==
-		tracerstickernames.tracer_names.end());
-	size_t entropy_index = static_cast<size_t>(std::find(tracerstickernames.tracer_names.begin(),
-		tracerstickernames.tracer_names.end(), std::string("Entropy")) - tracerstickernames.tracer_names.begin());
+	bool entropy = !(std::find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(), std::string("Entropy")) ==
+			 ComputationalCell3D::tracerNames.end());
+	size_t entropy_index = static_cast<size_t>(std::find(ComputationalCell3D::tracerNames.begin(),
+							     ComputationalCell3D::tracerNames.end(), std::string("Entropy")) - ComputationalCell3D::tracerNames.begin());
 	size_t Nfluxes = fluxes.size();
 	Conserved3D delta;
 	for (size_t i = 0; i < Nfluxes; ++i)
@@ -71,9 +71,9 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 			extensives[i].energy = extensives[i].internal_energy + Eknew;
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
+			if (sequence_[j].first->operator()(i, tess, cells, time))
 			{
-				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives, i, time, tracerstickernames);
+				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives, i, time);
 				break;
 			}
 		}
@@ -92,9 +92,9 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				<< std::endl;
 			std::cout << "Old cell, density " << cells[i].density << " pressure " << cells[i].pressure << " vx " <<
 				cells[i].velocity.x << " vy " << cells[i].velocity.y << " vz " << cells[i].velocity.z << std::endl;
-			for (size_t j = 0; j < tracerstickernames.tracer_names.size(); ++j)
+			for (size_t j = 0; j < ComputationalCell3D::tracerNames.size(); ++j)
 			{
-				std::cout << tracerstickernames.tracer_names[j] << " old cell " << cells[i].tracers[j] << 
+			  std::cout << ComputationalCell3D::tracerNames[j] << " old cell " << cells[i].tracers[j] << 
 					" extensive "<<extensives[i].tracers[j]<<std::endl;
 			}
 			face_vec temp = tess.GetCellFaces(i);
@@ -166,9 +166,9 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				eo.addEntry("Second input vx", interp_values[temp[j]].second.velocity.x);
 				eo.addEntry("Second input vy", interp_values[temp[j]].second.velocity.y);
 				eo.addEntry("Second input vz", interp_values[temp[j]].second.velocity.z);
-				for (size_t k = 0; k < tracerstickernames.tracer_names.size(); ++k)
+				for (size_t k = 0; k < ComputationalCell3D::tracerNames.size(); ++k)
 				{
-					std::cout << tracerstickernames.tracer_names[k] << " flux is " << fluxes[temp[j]].tracers[k] * Area << std::endl;
+				  std::cout << ComputationalCell3D::tracerNames[k] << " flux is " << fluxes[temp[j]].tracers[k] * Area << std::endl;
 				}
 			}
 			for (size_t j = 0; j < temp.size(); ++j)
@@ -179,9 +179,9 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 				std::cout << "Neigh cell " << Nother << ", density " << cells[Nother].density << " pressure " <<
 					cells[Nother].pressure << " vx " << cells[Nother].velocity.x << " vy " << cells[Nother].velocity.y << " vz "
 					<< cells[Nother].velocity.z << std::endl;
-				for (size_t k = 0; k < tracerstickernames.tracer_names.size(); ++k)
+				for (size_t k = 0; k < ComputationalCell3D::tracerNames.size(); ++k)
 				{
-					std::cout << tracerstickernames.tracer_names[k] << " of other " << cells[Nother].tracers[k] << std::endl;
+				  std::cout << ComputationalCell3D::tracerNames[k] << " of other " << cells[Nother].tracers[k] << std::endl;
 				}
 			}
 			throw eo;
@@ -193,8 +193,7 @@ void ConditionExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, 
 
 void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/, const Tessellation3D& /*tess*/, const double /*dt*/,
 	const vector<ComputationalCell3D>& /*cells*/, vector<Conserved3D>& /*extensives*/,
-	size_t /*index*/, double /*time*/,
-	TracerStickerNames const& /*tracerstickernames*/)const
+	size_t /*index*/, double /*time*/)const
 {
 	//assert(extensives[index].internal_energy > 0);
 	return;

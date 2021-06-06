@@ -22,7 +22,7 @@ public:
 	explicit PCM3D(Ghost3D const& ghost);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const override;
+		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res)const override;
 
   /*! \brief Calculate the slopes
     \param tess Tessellation
@@ -30,7 +30,7 @@ public:
     \param time Simulation time
     \param tracerstickersnames Tracers and stickers names
    */
-	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) override;
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time) override;
 
 	std::vector<Slope3D>& GetSlopes(void) override;
 };

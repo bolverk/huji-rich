@@ -33,10 +33,10 @@ public:
 		const vector<std::string>& no_move=vector<std::string>());
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const override;
+		double time, vector<Vector3D> &res) const override;
 
 	void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
-		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const override;
+		double dt, vector<Vector3D> &velocities)const override;
 
   /*! \brief Adjust the size of the box
     \param ll Lower left corner
@@ -46,10 +46,10 @@ public:
 private:
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		TracerStickerNames const& tracerstickernames,const vector<Vector3D> & velocities, vector<char> const& nomove) const;
+		const vector<Vector3D> & velocities, vector<char> const& nomove) const;
 
 	void calc_dw(Vector3D &velocty, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-		TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove)const;
+		vector<Vector3D> & velocities, vector<char> const& nomove)const;
 
 	const PointMotion3D& pm_;
 	const EquationOfState& eos_;

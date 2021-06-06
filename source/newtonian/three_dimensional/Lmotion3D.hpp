@@ -21,9 +21,9 @@ public:
 		double max_v_correction=0.05);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const override;
+		double time, vector<Vector3D> &res) const override;
 
 	void ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
-		double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const override;
+		double dt, vector<Vector3D> &velocities)const override;
 };
 #endif //LMOTION3D_HPP

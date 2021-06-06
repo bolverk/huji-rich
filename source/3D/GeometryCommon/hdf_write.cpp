@@ -175,7 +175,6 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 	
   vector<ComputationalCell3D> const& cells = sim.getCells();
   Tessellation3D const& tess = sim.getTesselation();
-  TracerStickerNames tsn = sim.GetTracerStickerNames();
 
   size_t Ncells = tess.GetPointNo();
 
@@ -285,18 +284,18 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
   tracers = writegroup.createGroup("/tracers");
   stickers = writegroup.createGroup("/stickers");
 #endif
-  for (size_t j = 0; j < tsn.tracer_names.size(); ++j)
+  for (size_t j = 0; j < ComputationalCell3D::tracerNames.size(); ++j)
     {
       for (size_t i = 0; i < Ncells; ++i)
 	temp[i] = cells[i].tracers[j];
-      write_std_vector_to_hdf5(tracers, temp, tsn.tracer_names[j]);
+      write_std_vector_to_hdf5(tracers, temp, ComputationalCell3D::tracerNames[j]);
     }
 
-  for (size_t j = 0; j <tsn.sticker_names.size(); ++j)
+  for (size_t j = 0; j <ComputationalCell3D::stickerNames.size(); ++j)
     {
       for (size_t i = 0; i < Ncells; ++i)
 	temp[i] = cells[i].stickers[j];
-      write_std_vector_to_hdf5(stickers, temp, tsn.sticker_names[j]);
+      write_std_vector_to_hdf5(stickers, temp, ComputationalCell3D::stickerNames[j]);
     }
 
   for (size_t i = 0; i < Ncells; ++i)
@@ -416,8 +415,8 @@ Snapshot3D ReadSnapshot3D(const string& fname
 	stickernames[n] = name;
 	stickers[n] = read_int_vector_from_hdf5(g_stickers, name);
       }
-    res.tracerstickernames.sticker_names = stickernames;
-    res.tracerstickernames.tracer_names = tracernames;
+    res.tracerstickernames.first = tracernames;
+    res.tracerstickernames.second = stickernames;
     res.cells.resize(density.size());
     for (size_t i = 0; i < res.cells.size(); ++i)
       {

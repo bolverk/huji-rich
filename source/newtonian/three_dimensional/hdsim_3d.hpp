@@ -82,7 +82,7 @@ public:
 	  const CellUpdater3D& cu,
 	  const ExtensiveUpdater3D& eu,
 	  const	SourceTerm3D& source,
-	  TracerStickerNames& tsn,
+	  const pair<vector<string>, vector<string> >& tsn,
 	  bool SR=false
 #ifdef RICH_MPI
 	  ,const ProcessorUpdate3D* proc_update = 0
@@ -156,10 +156,7 @@ public:
   \return The current time of the simulation
   */
   double getTime(void)const;
-  /*! \brief Access to the names of the stickers and tracers
-  \return The names of the stickers and tracers
-  */
-  TracerStickerNames GetTracerStickerNames(void)const;
+
   /*! \brief Get the cycle number of the simulation
   \return The current cycle of the simulation
   */
@@ -192,7 +189,6 @@ private:
   const CellUpdater3D& cu_;
   const ExtensiveUpdater3D& eu_;
   const	SourceTerm3D &source_;
-  TracerStickerNames &tsn_;
   ProgressTracker pt_;
 #ifdef RICH_MPI
   const ProcessorUpdate3D* proc_update_;

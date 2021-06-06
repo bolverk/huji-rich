@@ -28,7 +28,7 @@ public:
 	\return Computational cell
 	*/
 	virtual ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const = 0;
+		double volume, ComputationalCell3D const& old_cell) const = 0;
 
 	//! \brief Class destructor
 	virtual ~AMRCellUpdater3D(void);
@@ -63,7 +63,7 @@ public:
 	\return Extensive
 	*/
 	virtual Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope,Vector3D const& CMold,Vector3D const& CMnew) const = 0;
+		double volume, Slope3D const& slope,Vector3D const& CMold,Vector3D const& CMnew) const = 0;
 
 	//! \brief Class destructor
 	virtual ~AMRExtensiveUpdater3D(void);
@@ -89,7 +89,7 @@ public:
 	SimpleAMRExtensiveUpdater3D(void);
 
 	Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
+		double volume, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr
@@ -105,7 +105,7 @@ public:
 	SimpleAMRCellUpdater3D(const vector<string>& toskip = vector<string>());
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
+		double volume, ComputationalCell3D const& old_cell) const override;
 };
 
 //! \brief Simple class for extensive update scheme in amr for SR
@@ -123,7 +123,7 @@ public:
     \return Conserved variables
    */
   Conserved3D ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-		double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
+		double volume, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const override;
 };
 
 //! \brief Simple class for cell update scheme in amr for SR
@@ -141,7 +141,7 @@ public:
   SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip);
 
 	ComputationalCell3D ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-		double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const override;
+							 double volume, const ComputationalCell3D& old_cell) const override;
 };
 
 //! \brief Chooses which cells should be remove
@@ -157,8 +157,7 @@ public:
 	\return The indeces of cells to remove with a corresponding merit which decides if there are neighboring cells which one to choose to remove
 	*/
 	virtual std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation3D const& tess,
-		vector<ComputationalCell3D> const& cells, double time,
-		TracerStickerNames const& tracerstickernames)const = 0;
+		vector<ComputationalCell3D> const& cells, double time)const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~CellsToRemove3D(void);
@@ -177,7 +176,7 @@ public:
 	\return The indeces of cells to remove and the direction to split (can be given empty)
 	*/
 	virtual std::pair<vector<size_t>,vector<Vector3D> > ToRefine(Tessellation3D const& tess,
-		vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickernames)const = 0;
+		vector<ComputationalCell3D> const& cells, double time)const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~CellsToRefine3D(void);

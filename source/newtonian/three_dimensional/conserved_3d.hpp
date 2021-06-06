@@ -119,6 +119,6 @@ Conserved3D operator-(Conserved3D const& p1, Conserved3D const& p2);
 
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res);
 
-void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn);
+void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserved3D &res,EquationOfState const& eos);
 
 #endif // CONSERVED_3D_HPP

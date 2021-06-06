@@ -6,10 +6,10 @@
 
 namespace
 {
-	void EntropyFix(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, double &energy,
+	void EntropyFix(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, double &energy,
 		Conserved3D &extensive)
 	{
-		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
+	  double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, ComputationalCell3D::tracerNames);
 		res.pressure = new_pressure;
 		double de = eos.dp2e(res.density, res.pressure) - energy;
 		energy += de;
@@ -18,9 +18,9 @@ namespace
 		extensive.internal_energy += de * extensive.mass;
 	}
 
-	void EntropyFixSR(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, TracerStickerNames const& tracerstickernames, Conserved3D &extensive, double vol)
+	void EntropyFixSR(EquationOfState const& eos, ComputationalCell3D &res, size_t entropy_index, Conserved3D &extensive, double vol)
 	{
-		double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, tracerstickernames.tracer_names);
+	  double new_pressure = eos.sd2p(res.tracers[entropy_index], res.density, res.tracers, ComputationalCell3D::tracerNames);
 		res.pressure = new_pressure;
 		double energy = eos.dp2e(res.density, res.pressure);
 		double gamma = std::sqrt(1.0 / (1 - ScalarProd(res.velocity, res.velocity)));
@@ -44,11 +44,11 @@ namespace
 	}
 
 	void regular_update(std::vector<ComputationalCell3D> &res, std::vector<Conserved3D> & extensives,
-		Tessellation3D const& tess, size_t entropy_index, TracerStickerNames const& tsn,
+		Tessellation3D const& tess, size_t entropy_index,
 		EquationOfState const& eos)
 	{
 		size_t Nloop = tess.GetPointNo();
-		size_t Ntracers = tsn.tracer_names.size();
+		size_t Ntracers = ComputationalCell3D::tracerNames.size();
 		for (size_t i = 0; i < Nloop; ++i)
 		{
 			try
@@ -62,14 +62,14 @@ namespace
 				for (size_t j = 0; j < Ntracers; ++j)
 					res[i].tracers[j] = extensive.tracers[j] / extensive.mass;
 				// Entropy fix if needed
-				if (entropy_index < tsn.tracer_names.size())
+				if (entropy_index < ComputationalCell3D::tracerNames.size())
 				{
 					try
 					{
 						// Do we have a negative thermal energy?
 						if (energy < 0)
 						{
-							EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
+							EntropyFix(eos, res[i], entropy_index, energy, extensive);
 						}
 						else
 						{
@@ -77,12 +77,12 @@ namespace
 							if ((energy*extensive.mass < 0.005*extensive.energy) &&
 								HighRelativeKineticEnergy(tess, i, extensives, extensive))
 							{
-								EntropyFix(eos, res[i], entropy_index, tsn, energy, extensive);
+								EntropyFix(eos, res[i], entropy_index, energy, extensive);
 							}
 							else
 							{
-								double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
-								double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, tsn.tracer_names);
+							  double new_pressure = eos.de2p(res[i].density, energy, res[i].tracers, ComputationalCell3D::tracerNames);
+							  double new_entropy = eos.dp2s(res[i].density, new_pressure, res[i].tracers, ComputationalCell3D::tracerNames);
 								// We don't need the entropy fix, update entropy
 								res[i].internal_energy = energy;
 								res[i].pressure = new_pressure;
@@ -110,7 +110,7 @@ namespace
 				}
 				else
 				{
-					res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers, tsn.tracer_names);
+				  res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers, ComputationalCell3D::tracerNames);
 					res[i].internal_energy = energy;
 				}
 				if (!(res[i].density > 0) || !(res[i].pressure > 0) || (!std::isfinite(fastabs(extensives[i].momentum))))
@@ -145,11 +145,11 @@ namespace
 	}
 
 	void regular_updateSR(std::vector<ComputationalCell3D> &res, std::vector<Conserved3D> & extensives,
-		Tessellation3D const& tess, size_t entropy_index, TracerStickerNames const& tsn,
+		Tessellation3D const& tess, size_t entropy_index,
 		EquationOfState const& eos, double G)
 	{
 		size_t Nloop = tess.GetPointNo();
-		size_t Ntracers = tsn.tracer_names.size();
+		size_t Ntracers = ComputationalCell3D::tracerNames.size();
 		for (size_t i = 0; i < Nloop; ++i)
 		{
 			try
@@ -188,11 +188,11 @@ namespace
 					// Do we have a negative thermal energy?
 					if (res[i].pressure < 0)
 					{
-						EntropyFixSR(eos, res[i], entropy_index, tsn, extensives[i], 1.0 / volume);
+						EntropyFixSR(eos, res[i], entropy_index, extensives[i], 1.0 / volume);
 					}
 					else
 					{
-						double new_entropy = eos.dp2s(res[i].density, res[i].pressure, res[i].tracers, tsn.tracer_names);
+					  double new_entropy = eos.dp2s(res[i].density, res[i].pressure, res[i].tracers, ComputationalCell3D::tracerNames);
 						// We don't need the entropy fix, update entropy
 						res[i].tracers[entropy_index] = new_entropy;
 						extensives[i].tracers[entropy_index] = new_entropy * extensives[i].mass;
@@ -203,7 +203,7 @@ namespace
 					UniversalError eo("Negative quantity in cell update");
 					throw eo;
 				}
-				res[i].internal_energy = eos.dp2e(res[i].density, res[i].pressure,res[i].tracers,tsn.tracer_names);
+				res[i].internal_energy = eos.dp2e(res[i].density, res[i].pressure,res[i].tracers,ComputationalCell3D::tracerNames);
 			}
 			catch (UniversalError &eo)
 			{
@@ -232,14 +232,13 @@ namespace
 DefaultCellUpdater::DefaultCellUpdater(bool SR, double G) :SR_(SR), G_(G), entropy_index_(9999999) {}
 
 void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
-	const Tessellation3D& tess, vector<Conserved3D>& extensives,
-	TracerStickerNames const& tracerstickernames) const
+	const Tessellation3D& tess, vector<Conserved3D>& extensives) const
 {
-	entropy_index_ = tracerstickernames.tracer_names.size();
-	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(),
-		tracerstickernames.tracer_names.end(), string("Entropy"));
-	if (it != tracerstickernames.tracer_names.end())
-		entropy_index_ = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+  entropy_index_ = ComputationalCell3D::tracerNames.size();
+  vector<string>::const_iterator it = binary_find(ComputationalCell3D::tracerNames.begin(),
+						  ComputationalCell3D::tracerNames.end(), string("Entropy"));
+  if (it != ComputationalCell3D::tracerNames.end())
+    entropy_index_ = static_cast<size_t>(it - ComputationalCell3D::tracerNames.begin());
 #ifdef RICH_MPI
 	if (entropy_index_ < tracerstickernames.tracer_names.size())
 	{
@@ -248,9 +247,9 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 	}
 #endif
 	if (!SR_)
-		regular_update(res, extensives, tess, entropy_index_, tracerstickernames, eos);
+		regular_update(res, extensives, tess, entropy_index_, eos);
 	else
-		regular_updateSR(res, extensives, tess, entropy_index_, tracerstickernames, eos, G_);
+		regular_updateSR(res, extensives, tess, entropy_index_, eos, G_);
 #ifdef RICH_MPI
 	if (entropy_index_ < tracerstickernames.tracer_names.size())
 		extensives.resize(tess.GetPointNo());

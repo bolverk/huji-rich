@@ -19,8 +19,7 @@ public:
 	DefaultCellUpdater(bool SR = false,double G=0);
 
 	void operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
-		const Tessellation3D& tess, vector<Conserved3D>& extensives, 
-		TracerStickerNames const& tracerstickernames) const override;
+		const Tessellation3D& tess, vector<Conserved3D>& extensives) const override;
 private:
 	const bool SR_;
 	const double G_;

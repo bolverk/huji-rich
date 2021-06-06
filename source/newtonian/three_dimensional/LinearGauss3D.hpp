@@ -30,12 +30,12 @@ public:
 	\param tsn The names of the stickers and tracers
 	\param pressure_calc Determine whether the pressure should be recalculated
 	*/
-	LinearGauss3D(EquationOfState const& eos,TracerStickerNames const& tsn, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
+	LinearGauss3D(EquationOfState const& eos, Ghost3D const& ghost,bool slf = true,double delta_v = 0.2,
 		double theta = 0.5,double delta_P = 0.7,bool SR=false,const vector<string>& calc_tracers = vector<string>(),
 		const string& skip_key = string(),bool pressure_calc=true);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const override;
+		vector<pair<ComputationalCell3D, ComputationalCell3D> > &res) const override;
 
 	/*! \brief Interpolates a cell
 	\param cell The primitives of the cell
@@ -47,7 +47,7 @@ public:
 	\param eos The equation of state
 	*/
 	void Interp(ComputationalCell3D &res,ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm, Vector3D const& target,
-		EquationOfState const& eos,TracerStickerNames const& tsn)const;
+		EquationOfState const& eos)const;
 
 	/*!
 	\brief Returns the gradients
@@ -61,11 +61,10 @@ public:
 	*/
 	vector<Slope3D>& GetSlopesUnlimited(void)const;
 
-	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) override;
+	void BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time) override;
 
 private:
 	EquationOfState const& eos_;
-	TracerStickerNames const& tsn_;
 	Ghost3D const& ghost_;
 	mutable vector<Slope3D> rslopes_;
 	mutable vector<Slope3D> naive_rslopes_;

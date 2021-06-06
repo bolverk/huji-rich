@@ -24,7 +24,7 @@ public:
 		\return Whether the cell satisfies a condition.
 		*/
 		virtual bool operator()(size_t index,const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
-			double time,TracerStickerNames const& tracerstickernames) const = 0;
+			double time) const = 0;
 
 		virtual ~Condition3D(void);
 	};
@@ -44,8 +44,7 @@ public:
 		\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()	(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
-			const vector<ComputationalCell3D>& cells,vector<Conserved3D> &extensives,size_t index,double time,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const vector<ComputationalCell3D>& cells,vector<Conserved3D> &extensives,size_t index,double time) const = 0;
 
 		virtual ~Action3D(void);
 	};
@@ -58,8 +57,7 @@ public:
 	~ConditionExtensiveUpdater3D(void) override;
 
 	void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,const double dt,
-		const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,
-		TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities,
+		const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time, const vector<Vector3D>& edge_velocities,
 		std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const override;
 
 private:
@@ -72,7 +70,7 @@ class ChooseAll : public ConditionExtensiveUpdater3D::Condition3D
 public:
 
 	bool operator()(size_t /*index*/, const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
-		double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const override
+		double /*time*/) const override
 	{
 		return true;
 	}
@@ -85,8 +83,7 @@ public:
 
 
 	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
-		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time,
-		TracerStickerNames const& tracerstickernames)const override;
+		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time)const override;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER3D_HPP

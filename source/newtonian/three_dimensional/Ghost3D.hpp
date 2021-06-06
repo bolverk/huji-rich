@@ -25,8 +25,7 @@ public:
 	\param res A map where the key is the index of the ghost cell and the value is its' comuptational cell
 	*/
 	virtual void operator() (const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const = 0;
+		const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> &res) const = 0;
 
 	/*!
 	\brief Calculates the gradients for the ghost cells
@@ -40,8 +39,7 @@ public:
 	\return The gradient of the ghost cell
 	*/
 	virtual Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-		TracerStickerNames const& tracerstickernames) const = 0;
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const = 0;
 
 	//! \brief Virtual destructor
 	virtual ~Ghost3D(void);
@@ -58,12 +56,10 @@ class RigidWallGenerator3D : public Ghost3D
 {
 public:
 	void operator() (const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> & res) const override;
+		const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> & res) const override;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-		TracerStickerNames const& tracerstickernames) const override;
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const override;
 };
 
 //! \brief Generator for free - flow ghosts
@@ -71,12 +67,10 @@ class FreeFlowGenerator3D : public Ghost3D
 {
 public:
 	void operator() (const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
+		const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-		TracerStickerNames const& tracerstickernames) const override;
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const override;
 };
 
 //! \brief Ghost cell with time independent properties
@@ -92,12 +86,10 @@ public:
   explicit ConstantPrimitiveGenerator3D(ComputationalCell3D const& cell);
 
 	void operator() (const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
+		const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-		TracerStickerNames const& tracerstickernames) const override;
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const override;
 };
 
 //! \brief Class to describe several different ghost cells
@@ -128,12 +120,10 @@ public:
 	SeveralGhostGenerator3D(const vector<Ghost3D*>& ghosts, GhostCriteria3D const& ghostchooser);
 
 	void operator() (const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-		tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
+		const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> &res) const override;
 
 	Slope3D GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-		TracerStickerNames const& tracerstickernames) const override;
+		const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const override;
 private:
 	vector<Ghost3D*> ghosts_;
 	GhostCriteria3D const& ghost_chooser_;

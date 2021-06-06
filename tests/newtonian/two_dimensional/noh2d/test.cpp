@@ -146,7 +146,7 @@ namespace
   {
   public:
     std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& /*tess*/,
-							vector<ComputationalCell> const& /*cells*/, double /*time*/,TracerStickerNames const& /*ts*/)const
+							vector<ComputationalCell> const& /*cells*/, double /*time*/)const
     {
       return std::pair<vector<size_t>, vector<double> >();
     }

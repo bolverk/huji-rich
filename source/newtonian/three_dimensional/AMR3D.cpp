@@ -432,7 +432,7 @@ namespace
 #endif
 
 	void LocalRemove(Tessellation3D const& oldtess, std::vector<size_t> const& ToRemove, AMRExtensiveUpdater3D const& eu,
-		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
+			 std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos,
 		Tessellation3D const& tess, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		std::vector<size_t> neigh,temp2;
@@ -471,7 +471,7 @@ namespace
 					{
 #endif
 						if(dv.first)
-							extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], tsn, interp.GetSlopes()[ToRemove[i]],
+							extensives[neigh[j] - index_remove] += eu.ConvertPrimitveToExtensive3D(cells[ToRemove[i]], eos, dv.second[0], interp.GetSlopes()[ToRemove[i]],
 								oldtess.GetCellCM(ToRemove[i]), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 #ifdef RICH_DEBUG
 				}
@@ -497,7 +497,7 @@ namespace
 
 #ifdef RICH_MPI
 	void MPIRemove(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRemove,
-		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, TracerStickerNames const& tsn,
+		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos,
 		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		vector<vector<size_t> > nghost_index;
@@ -578,8 +578,7 @@ namespace
 #endif
 
 	void LocalRefine(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRefine,
-		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, TracerStickerNames const& tsn,
-		AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
+		std::vector<ComputationalCell3D> const& cells, EquationOfState const& eos, AMRExtensiveUpdater3D const&eu, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		size_t Nrefine = ToRefine.size();
 		std::vector<size_t> neigh, temp2;
@@ -632,7 +631,7 @@ namespace
 						try
 						{
 #endif
-							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
+							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], interp.GetSlopes()[cur_check],
 								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 							extensives[cur_check] -= toadd;
 							//extensives[Norg2 + i].tracers.resize(toadd.tracers.size());
@@ -662,7 +661,7 @@ namespace
 			}
 			else
 			{
-				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg + i), tsn, interp.GetSlopes()[0], 
+				extensives[Norg2 + i] = eu.ConvertPrimitveToExtensive3D(cells[ToRefine[i]], eos, tess.GetVolume(Norg + i), interp.GetSlopes()[0], 
 					Vector3D(), Vector3D());
 				extensives[ToRefine[i]] -= extensives[Norg2 + i];
 				std::cout << "Warning no good poly localrefine" << std::endl;
@@ -814,7 +813,7 @@ AMRExtensiveUpdater3D& AMRExtensiveUpdater3D::operator=
 AMRExtensiveUpdater3D::AMRExtensiveUpdater3D(void) = default;
 
 Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
+	double volume, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
 {
 	Conserved3D res;
 	Vector3D diff(CMnew);
@@ -824,7 +823,7 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 	ComputationalCellAddMult(cell_temp, slope.xderivative, diff.x);
 	ComputationalCellAddMult(cell_temp, slope.yderivative, diff.y);
 	ComputationalCellAddMult(cell_temp, slope.zderivative, diff.z);
-	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, tracerstickernames.tracer_names);
+	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, ComputationalCell3D::tracerNames);
 	const double mass = volume* cell_temp.density;
 	res.mass = mass;
 	res.internal_energy = cell_temp.internal_energy*mass;
@@ -838,7 +837,7 @@ Conserved3D SimpleAMRExtensiveUpdater3D::ConvertPrimitveToExtensive3D(const Comp
 }
 
 Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const ComputationalCell3D& cell, const EquationOfState& eos,
-	double volume, TracerStickerNames const& tracerstickernames, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
+	double volume, Slope3D const& slope, Vector3D const& CMold, Vector3D const& CMnew) const
 {
 	Conserved3D res;
 	Vector3D diff(CMnew);
@@ -847,7 +846,7 @@ Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const Co
 	ComputationalCellAddMult(cell_temp, slope.xderivative, diff.x);
 	ComputationalCellAddMult(cell_temp, slope.yderivative, diff.y);
 	ComputationalCellAddMult(cell_temp, slope.zderivative, diff.z);
-	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, tracerstickernames.tracer_names);
+	cell_temp.internal_energy = eos.dp2e(cell_temp.density, cell_temp.pressure, cell_temp.tracers, ComputationalCell3D::tracerNames);
 	double gamma = 1.0 / std::sqrt(1 - ScalarProd(cell_temp.velocity, cell_temp.velocity));
 	const double mass = volume * cell_temp.density*gamma;
 	res.mass = mass;
@@ -867,12 +866,11 @@ Conserved3D SimpleAMRExtensiveUpdaterSR3D::ConvertPrimitveToExtensive3D(const Co
 SimpleAMRCellUpdater3D::SimpleAMRCellUpdater3D(const vector<string>& toskip) :toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& eos,
-	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
+	double volume, ComputationalCell3D const& old_cell) const
 {
 	for (size_t i = 0; i < toskip_.size(); ++i)
 	{
-		if (*safe_retrieve(old_cell.stickers.begin(), tracerstickernames.sticker_names.begin(),
-			tracerstickernames.sticker_names.end(), toskip_[i]))
+	  if (*safe_retrieve(old_cell.stickers.begin(), ComputationalCell3D::stickerNames.begin(), ComputationalCell3D::stickerNames.end(), toskip_[i]))
 			return old_cell;
 	}
 
@@ -908,11 +906,10 @@ ComputationalCell3D SimpleAMRCellUpdater3D::ConvertExtensiveToPrimitve3D(const C
 SimpleAMRCellUpdaterSR3D::SimpleAMRCellUpdaterSR3D(double G, const vector<string>& toskip) : G_(G), toskip_(toskip) {}
 
 ComputationalCell3D SimpleAMRCellUpdaterSR3D::ConvertExtensiveToPrimitve3D(const Conserved3D& extensive, const EquationOfState& /*eos*/,
-	double volume, ComputationalCell3D const& old_cell, TracerStickerNames const& tracerstickernames) const
+	double volume, ComputationalCell3D const& old_cell) const
 {
 	for (size_t i = 0; i < toskip_.size(); ++i)
-		if (*safe_retrieve(old_cell.stickers.begin(), tracerstickernames.sticker_names.begin(),
-			tracerstickernames.sticker_names.end(), toskip_[i]))
+	  if (*safe_retrieve(old_cell.stickers.begin(), ComputationalCell3D::stickerNames.begin(), ComputationalCell3D::stickerNames.end(), toskip_[i]))
 			return old_cell;
 		//if (safe_retrieve(old_cell.stickers, tracerstickernames.sticker_names, toskip_[i]))
 			//return old_cell;
@@ -973,10 +970,9 @@ void AMR3D::operator() (HDSim3D &sim)
 	std::vector<ComputationalCell3D> &cells = sim.getCells();
 	std::vector<Conserved3D> &extensives = sim.getExtensives();
 	EquationOfState const& eos = eos_;
-	TracerStickerNames tsn = sim.GetTracerStickerNames();
 	double time = sim.getTime();
 	// Get remove list
-	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time, tsn);
+	std::pair<vector<size_t>, vector<double> > ToRemove = remove_.ToRemove(tess, cells, time);
 	// sort
 	vector<size_t> indeces = sort_index(ToRemove.first);
 	ToRemove.second = VectorValues(ToRemove.second, indeces);
@@ -987,7 +983,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	ToRemove = RemoveMPINeighbors(ToRemove.second, ToRemove.first, tess);
 #endif
 	// Get points to refine
-	std::pair<vector<size_t>, std::vector<Vector3D> > ToRefine = refine_.ToRefine(tess, cells, time, tsn);
+	std::pair<vector<size_t>, std::vector<Vector3D> > ToRefine = refine_.ToRefine(tess, cells, time);
 	sort_index(ToRefine.first, indeces);
 	sort(ToRefine.first.begin(), ToRefine.first.end());
 	if (!ToRefine.second.empty())
@@ -1004,7 +1000,7 @@ void AMR3D::operator() (HDSim3D &sim)
 #endif
 	if (ntotal == 0)
 		return;
-	interp_.BuildSlopes(tess, cells, time, tsn);
+	interp_.BuildSlopes(tess, cells, time);
 	// Get new points from refine
 	std::vector<Vector3D> new_points = GetNewPoints(tess, ToRefine
 #ifdef RICH_MPI
@@ -1026,14 +1022,14 @@ void AMR3D::operator() (HDSim3D &sim)
 #endif
 	// Fix extensives for refine
 	extensives.resize(oldtess->GetPointNo() + ToRefine.first.size());
-	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, tsn, *eu_, extensives,interp_);
+	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, *eu_, extensives,interp_);
 #ifdef RICH_MPI
 	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, tsn, cells, extensives,interp_);
 #endif
 	// Remove from extensive the remove cells
 	RemoveVector(extensives, ToRemove.first);
 	// Add the removed extensive to the neighboring cells
-	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tsn, tess, extensives,interp_);
+	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tess, extensives,interp_);
 
 #ifdef RICH_MPI
 	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, tsn, cells, extensives,interp_);
@@ -1046,7 +1042,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	{
 		try
 		{
-			cells[i] = cu_->ConvertExtensiveToPrimitve3D(extensives[i], eos, tess.GetVolume(i), cells[i], tsn);
+			cells[i] = cu_->ConvertExtensiveToPrimitve3D(extensives[i], eos, tess.GetVolume(i), cells[i]);
 		}
 		catch (UniversalError & eo)
 		{
@@ -1079,7 +1075,7 @@ void AMR3D::operator() (HDSim3D &sim)
 		{
 			cells[(Norg - ToRemove.first.size()) + i] = cu_->ConvertExtensiveToPrimitve3D(extensives[(Norg -
 				ToRemove.first.size()) + i], eos, tess.GetVolume((Norg - ToRemove.first.size()) + i),
-				cells[ToRefine.first[i] - index_remove], tsn);
+				cells[ToRefine.first[i] - index_remove]);
 			// Add new ID
 			cells[(Norg - ToRemove.first.size()) + i].ID = Nstart + i;
 		}
@@ -1092,14 +1088,13 @@ void AMR3D::operator() (HDSim3D &sim)
 		}
 	}
 	// Recalc entropy if needed
-	size_t entropy_index = static_cast<size_t>(std::find(tsn.tracer_names.begin(), tsn.tracer_names.end(), std::string("Entropy")) -
-		tsn.tracer_names.begin());
-	if (entropy_index < tsn.tracer_names.size())
+	size_t entropy_index = static_cast<size_t>(std::find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(), std::string("Entropy")) - ComputationalCell3D::tracerNames.begin());
+	if (entropy_index < ComputationalCell3D::tracerNames.size())
 	{
 		size_t Nentropy = cells.size();
 		for (size_t i = 0; i < Nentropy; ++i)
 		{
-			cells[i].tracers[entropy_index] = eos.dp2s(cells[i].density, cells[i].pressure, cells[i].tracers, tsn.tracer_names);
+		  cells[i].tracers[entropy_index] = eos.dp2s(cells[i].density, cells[i].pressure, cells[i].tracers, ComputationalCell3D::tracerNames);
 			extensives[i].tracers[entropy_index] = cells[i].tracers[entropy_index] * extensives[i].mass;
 		}
 	}
