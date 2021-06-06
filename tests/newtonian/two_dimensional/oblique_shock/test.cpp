@@ -68,8 +68,7 @@ namespace
      const vector<ComputationalCell>& cells,
      double /*time*/, 
      const vector<Vector2D>& velocities, 
-     double dt,
-     const TracerStickerNames& /*ts*/) const
+     double dt) const
     {
       //      if (safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
       if(cells[index].stickers[0])
@@ -91,8 +90,7 @@ namespace
      const vector<ComputationalCell>& cells,
      double /*time*/, 
      const vector<Vector2D>& velocities, 
-     double dt,
-     const TracerStickerNames& /*ts*/) const
+     double dt) const
     {
       //      if (!safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
       if(!cells[index].stickers[0])

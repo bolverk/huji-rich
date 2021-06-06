@@ -31,11 +31,10 @@ public:
   \param time The simulation time
   \param velocities Velocities of the points
   \param dt The time step
-  \param tracerstickernames The names of the tracers and stickers
   \return The new velocities
   */
   virtual vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> const& velocities,TracerStickerNames const& tracerstickernames)const;
+	  double dt, vector<Vector2D> const& velocities) const;
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);
