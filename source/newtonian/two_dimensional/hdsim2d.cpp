@@ -110,7 +110,6 @@ hdsim::hdsim
 	fc_(fc),
 	eu_(eu),
 	cu_(cu),
-	tracer_sticker_names_(tracer_sticker_names),
 	cache_data_(tess, pg)
 #ifdef RICH_MPI
 	, proc_update_(proc_update)
@@ -118,12 +117,10 @@ hdsim::hdsim
 {
 	// sort tracers and stickers
 	size_t N = cells_.size();
-	vector<size_t> tindex = sort_index(tracer_sticker_names_.tracer_names);
-	vector<size_t> sindex = sort_index(tracer_sticker_names_.sticker_names);
-	tracer_sticker_names_.tracer_names = VectorValues(tracer_sticker_names_.tracer_names, tindex);
-	tracer_sticker_names_.sticker_names = VectorValues(tracer_sticker_names_.sticker_names, sindex);
-	ComputationalCell::tracerNames = tracer_sticker_names_.tracer_names;
-	ComputationalCell::stickerNames = tracer_sticker_names_.sticker_names;
+	vector<size_t> tindex = sort_index(tracer_sticker_names.tracer_names);
+	vector<size_t> sindex = sort_index(tracer_sticker_names.sticker_names);
+	ComputationalCell::tracerNames = VectorValues(tracer_sticker_names.tracer_names, tindex);
+	ComputationalCell::stickerNames = VectorValues(tracer_sticker_names.sticker_names, sindex);
 	for (size_t i = 0; i < N; ++i)
 	{
 		for (size_t j = 0; j < tindex.size(); ++j)
@@ -653,8 +650,7 @@ void hdsim::recalculateExtensives(void)
 		const double volume = cache_data_.volumes[i];
 		const double mass = volume*cell.density;
 		extensives_[i].mass = mass;
-		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,tracer_sticker_names_.tracer_names)
-			*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,ComputationalCell::tracerNames)*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 		extensives_[i].momentum = mass*cell.velocity;
 //		extensives_[i].tracers.resize(cell.tracers.size());
 		size_t N = cell.tracers.size();

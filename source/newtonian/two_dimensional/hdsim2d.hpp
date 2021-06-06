@@ -77,7 +77,7 @@ private:
 
   const CellUpdater& cu_;
 
-  TracerStickerNames tracer_sticker_names_;
+  //  TracerStickerNames tracer_sticker_names_;
 
   const CacheData cache_data_;
 
