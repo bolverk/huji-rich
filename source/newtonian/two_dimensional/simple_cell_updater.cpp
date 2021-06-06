@@ -64,8 +64,7 @@ namespace
 		const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence,
 		const size_t index,
 		ComputationalCell &res,
-		size_t entropyindex,
-			   TracerStickerNames const & /*tracerstickernames*/)
+		size_t entropyindex)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
@@ -85,20 +84,19 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 	const EquationOfState& eos,
 	vector<Extensive>& extensives,
 	const vector<ComputationalCell>& old,
-	const CacheData& cd,
-	TracerStickerNames const& tracerstickernames) const
+	const CacheData& cd) const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<ComputationalCell> res(N, old[0]);
 
 	size_t tindex = old[0].tracers.size();
-	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(),
-		tracerstickernames.tracer_names.end(), entropy_);
-	if (it != tracerstickernames.tracer_names.end())
-		tindex = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+	vector<string>::const_iterator it = binary_find(ComputationalCell::tracerNames.begin(),
+							ComputationalCell::tracerNames.end(), entropy_);
+	if (it != ComputationalCell::tracerNames.end())
+	  tindex = static_cast<size_t>(it - ComputationalCell::tracerNames.begin());
 
 	for (size_t i = 0; i < N; ++i)
-		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex,tracerstickernames);
+		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex);
 	return res;
 }
 

@@ -83,8 +83,7 @@ public:
 			const EquationOfState& eos,
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
-			const CacheData& cd,
-			TracerStickerNames const& tracerstickernames) const override;
+			const CacheData& cd) const override;
 
 	~SimpleCellUpdater(void) override;
 
