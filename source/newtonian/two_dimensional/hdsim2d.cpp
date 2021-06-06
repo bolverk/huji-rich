@@ -82,7 +82,7 @@ hdsim::hdsim
 	const FluxCalculator& fc,
 	const ExtensiveUpdater& eu,
 	const CellUpdater& cu,
-	const TracerStickerNames& tracer_sticker_names
+	const pair<vector<string>, vector<string> >& tracer_sticker_names
 #ifdef RICH_MPI
 	,const ProcessorUpdate* proc_update
 #endif
@@ -117,10 +117,10 @@ hdsim::hdsim
 {
 	// sort tracers and stickers
 	size_t N = cells_.size();
-	vector<size_t> tindex = sort_index(tracer_sticker_names.tracer_names);
-	vector<size_t> sindex = sort_index(tracer_sticker_names.sticker_names);
-	ComputationalCell::tracerNames = VectorValues(tracer_sticker_names.tracer_names, tindex);
-	ComputationalCell::stickerNames = VectorValues(tracer_sticker_names.sticker_names, sindex);
+	vector<size_t> tindex = sort_index(tracer_sticker_names.first);
+	vector<size_t> sindex = sort_index(tracer_sticker_names.second);
+	ComputationalCell::tracerNames = VectorValues(tracer_sticker_names.first, tindex);
+	ComputationalCell::stickerNames = VectorValues(tracer_sticker_names.second, sindex);
 	for (size_t i = 0; i < N; ++i)
 	{
 		for (size_t j = 0; j < tindex.size(); ++j)

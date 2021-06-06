@@ -315,9 +315,6 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 				(sim, CellVelocityComponentExtractor(&Vector2D::y))),
 			"y_velocity");
 
-	// Tracers
-	//	TracerStickerNames const& tracerstickernames = sim.GetTracerStickerNames();
-	//	size_t Ntracers = sim.getAllCells().front().tracers.size();
 	const size_t Ntracers = ComputationalCell::tracerNames.size();
 	for (size_t i = 0; i < Ntracers; ++i)
 	  write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), ComputationalCell::tracerNames[i]);

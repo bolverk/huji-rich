@@ -205,8 +205,7 @@ int main(void)
   tess.Update(snap.mesh_points);
   init_cells = snap.cells;
 #endif
-  hdsim sim(tess, outer, pg, init_cells, eos, pointmotion, evc, force, tsf, fc, eu, cu,TracerStickerNames (vector<string> (1,"Entropy"),vector
-													   <string>()));
+  hdsim sim(tess, outer, pg, init_cells, eos, pointmotion, evc, force, tsf, fc, eu, cu,{vector<string> (1,"Entropy"),vector<string>()});
 #ifdef restart
   sim.setStartTime(snap.time);
 #endif

@@ -221,7 +221,7 @@ int main(void)
 	    proctess,
 #endif
 	    tess, outer, pg, init_cells, eos, pointmotion, evc_, force, tsf, fc, eu, cu,
-	    TracerStickerNames(vector<string>(1,"Entropy"),vector<string>()));
+	    {vector<string>(1,"Entropy"),vector<string>()});
 
   // Define the AMR 
   double Vmax = 3 * width*width / (np*np);

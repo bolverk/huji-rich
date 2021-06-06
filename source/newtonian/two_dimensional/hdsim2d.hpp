@@ -164,7 +164,7 @@ public:
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
    const CellUpdater& cu,
-   const TracerStickerNames& tracer_sticker_names = TracerStickerNames()
+	  const pair<vector<string>, vector<string> >& tracer_sticker_names = pair<vector<string>, vector<string> >()
 #ifdef RICH_MPI
 		  ,const ProcessorUpdate* proc_update=0
 #endif

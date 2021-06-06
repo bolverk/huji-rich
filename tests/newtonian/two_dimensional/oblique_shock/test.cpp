@@ -295,7 +295,7 @@ namespace
        fc_,
        eu_,
        cu_,
-       TracerStickerNames (vector<string>(),vector<string>(1,"wedge")))
+      {vector<string>(),vector<string>(1,"wedge")})
     {
       write_number(adiabatic_index,
 		   "adiabatic_index.txt");
