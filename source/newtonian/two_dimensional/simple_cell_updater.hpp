@@ -31,7 +31,6 @@ public:
 		  \param cells Computational cells
 		  \param cd Cached data
 		  \param index Cell index
-		  \param tracerstickernames THe names of the stickers and tracers
 		  \return True if condition is met, false otherwise
 		 */
 		virtual bool operator()
@@ -41,8 +40,7 @@ public:
 				const vector<Extensive>& extensives,
 				const vector<ComputationalCell>& cells,
 				const CacheData& cd,
-				const size_t index,
-				TracerStickerNames const& tracerstickernames) const = 0;
+				const size_t index) const = 0;
 	};
 
 	//! \brief Action taken to calculate cell
@@ -112,8 +110,7 @@ public:
 			const vector<Extensive>& extensives,
 			const vector<ComputationalCell>& cells,
 			const CacheData& cd,
-			const size_t index, 
-			TracerStickerNames const& tracerstickernames) const override;
+			const size_t index) const override;
 
 private:
 	const string sticker_name_;

@@ -24,8 +24,7 @@ namespace
 		const CacheData& cd,
 		const size_t index,
 		ComputationalCell &res,
-		size_t entropy_index,
-			    TracerStickerNames const& /*tracerstickernames*/)
+		size_t entropy_index)
 	{
 		Extensive& extensive = extensives[index];
 		const double volume = cd.volumes[index];
@@ -66,17 +65,17 @@ namespace
 		const size_t index,
 		ComputationalCell &res,
 		size_t entropyindex,
-		TracerStickerNames const & tracerstickernames)
+			   TracerStickerNames const & /*tracerstickernames*/)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
-			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index, tracerstickernames))
+			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index))
 			{
 				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index);
 				return;
 			}
 		}
-		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex,tracerstickernames);
+		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex);
 	}
 }
 
@@ -114,13 +113,12 @@ bool HasSticker::operator()
 	const vector<Extensive>& /*extensives*/,
 	const vector<ComputationalCell>& cells,
 	const CacheData& /*cd*/,
-	const size_t index,
-	TracerStickerNames const& tracerstickernames) const
+	const size_t index) const
 {
-	vector<string>::const_iterator it = binary_find(tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
+  vector<string>::const_iterator it = binary_find(ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(),
 		sticker_name_);
-	assert(it != tracerstickernames.sticker_names.end());
-	return cells[index].stickers[static_cast<size_t>(it - tracerstickernames.sticker_names.begin())];
+  assert(it != ComputationalCell::stickerNames.end());
+  return cells[index].stickers[static_cast<size_t>(it - ComputationalCell::stickerNames.begin())];
 }
 
 SkipUpdate::SkipUpdate(void) {}
