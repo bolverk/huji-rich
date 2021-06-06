@@ -60,7 +60,6 @@ public:
 		  \param cells Computational cells
 		  \param cd Cached data
 		  \param index Cell index
-		  \param tracerstickernames THe names of the stickers and tracers
 		  \return Computational cell
 		 */
 		virtual ComputationalCell operator()
@@ -70,8 +69,7 @@ public:
 				const vector<Extensive>& extensives,
 				const vector<ComputationalCell>& cells,
 				const CacheData& cd,
-				const size_t index,
-				TracerStickerNames const& tracerstickernames)const = 0;
+				const size_t index)const = 0;
 	};
 
 	/*! \brief Class constructor
@@ -135,8 +133,7 @@ public:
 			const vector<Extensive>& extensives,
 			const vector<ComputationalCell>& cells,
 			const CacheData& cd,
-			const size_t index,
-			TracerStickerNames const& tracerstickernames) const override;
+			const size_t index) const override;
 };
 
 #endif // SIMPLE_CELL_UPDATER_HPP

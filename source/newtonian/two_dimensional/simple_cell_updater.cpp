@@ -72,7 +72,7 @@ namespace
 		{
 			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index, tracerstickernames))
 			{
-				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index, tracerstickernames);
+				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index);
 				return;
 			}
 		}
@@ -132,8 +132,7 @@ ComputationalCell SkipUpdate::operator()
 	const vector<Extensive>& /*extensives*/,
 	const vector<ComputationalCell>& cells,
 	const CacheData& /*cd*/,
-	const size_t index,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	const size_t index) const
 {
 	return cells[index];
 }
