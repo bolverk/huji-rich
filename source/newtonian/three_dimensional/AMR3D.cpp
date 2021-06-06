@@ -549,7 +549,7 @@ namespace
 						{
 #endif
 						extensives[duplicate_index[i][j][k] - index_remove] += eu.ConvertPrimitveToExtensive3D(
-							cells[nghost_index[i][j]], eos, dv.second[0], tsn,interp.GetSlopes()[nghost_index[i][j]],oldtess.GetCellCM(nghost_index[i][j]),
+							cells[nghost_index[i][j]], eos, dv.second[0], interp.GetSlopes()[nghost_index[i][j]],oldtess.GetCellCM(nghost_index[i][j]),
 							Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 #ifdef RICH_DEBUG
 					}
@@ -671,7 +671,7 @@ namespace
 
 #ifdef RICH_MPI
 	void MPIRefine(Tessellation3D const& oldtess, Tessellation3D const& tess, std::vector<size_t> const& ToRefine,
-		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, TracerStickerNames const& tsn,
+		AMRExtensiveUpdater3D const& eu, EquationOfState const& eos, 
 		std::vector<ComputationalCell3D> const& cells, std::vector<Conserved3D> &extensives,SpatialReconstruction3D &interp)
 	{
 		std::vector<size_t> temp, temp2;
@@ -751,7 +751,7 @@ namespace
 							try
 							{
 #endif
-							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], tsn, interp.GetSlopes()[cur_check],
+							Conserved3D toadd = eu.ConvertPrimitveToExtensive3D(cells[cur_check], eos, dv.second[0], interp.GetSlopes()[cur_check],
 								oldtess.GetCellCM(cur_check), Vector3D(dv.second[1], dv.second[2], dv.second[3]));
 							extensives[cur_check] -= toadd;
 							extensive_tosend[i][j] += toadd;
@@ -1024,7 +1024,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	extensives.resize(oldtess->GetPointNo() + ToRefine.first.size());
 	LocalRefine(*oldtess, tess, ToRefine.first, cells, eos, *eu_, extensives,interp_);
 #ifdef RICH_MPI
-	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, tsn, cells, extensives,interp_);
+	MPIRefine(*oldtess, tess, ToRefine.first, *eu_, eos, cells, extensives,interp_);
 #endif
 	// Remove from extensive the remove cells
 	RemoveVector(extensives, ToRemove.first);
@@ -1032,7 +1032,7 @@ void AMR3D::operator() (HDSim3D &sim)
 	LocalRemove(*oldtess, ToRemove.first, *eu_, cells, eos_, tess, extensives,interp_);
 
 #ifdef RICH_MPI
-	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, tsn, cells, extensives,interp_);
+	MPIRemove(*oldtess, tess, ToRemove.first, *eu_, eos, cells, extensives,interp_);
 #endif
 	// Recalc cells
 	RemoveVector(cells, ToRemove.first);

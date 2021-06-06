@@ -532,7 +532,7 @@ void ConservativeAMR::UpdateCellsRefine
 	vector<Extensive> &extensives,
 	double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+ ,Tessellation const& proctess
 #endif
 	)const
 {
@@ -598,7 +598,7 @@ void ConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+					,Tessellation const& proctess
 #endif
 					)const
 {
@@ -700,13 +700,13 @@ void ConservativeAMR::operator()(hdsim &sim)
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
 		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 		);
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
 		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 			  );
 	// redo cache data
@@ -732,7 +732,7 @@ void NonConservativeAMR::UpdateCellsRefine(Tessellation &tess,
 	OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
 	vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+					   ,Tessellation const& proctess
 #endif
 					   )const
 {
@@ -784,7 +784,7 @@ void NonConservativeAMR::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+					   ,Tessellation const& proctess
 #endif
 	)const
 {
@@ -819,13 +819,13 @@ void NonConservativeAMR::operator()(hdsim &sim)
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
 		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 			  );
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
 		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 			  );
 	// redo cache data
@@ -860,7 +860,7 @@ void ConservativeAMROld::UpdateCellsRefine
 	vector<Extensive> &extensives,
 	double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+ ,Tessellation const& proctess
 #endif
  )const
 {
@@ -909,7 +909,7 @@ void ConservativeAMROld::UpdateCellsRemove(Tessellation &tess,
 	OuterBoundary const& /*obc*/, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 	EquationOfState const& eos, double time
 #ifdef RICH_MPI
-	Tessellation const& proctess
+					   ,Tessellation const& proctess
 #endif
 					   )const
 {
@@ -982,13 +982,13 @@ void ConservativeAMROld::operator()(hdsim &sim)
 	UpdateCellsRefine(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getEos(),
 		sim.getAllExtensives(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 			  );
 	UpdateCellsRemove(sim.getTessellation(), sim.getOuterBoundary(), sim.getAllCells(), sim.getAllExtensives(),
 		sim.getEos(), sim.getTime()
 #ifdef RICH_MPI
-		sim.GetProcTessellation()
+			  ,sim.GetProcTessellation()
 #endif
 			  );
 	// redo cache data

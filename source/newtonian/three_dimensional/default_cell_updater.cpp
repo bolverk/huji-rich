@@ -240,7 +240,7 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
   if (it != ComputationalCell3D::tracerNames.end())
     entropy_index_ = static_cast<size_t>(it - ComputationalCell3D::tracerNames.begin());
 #ifdef RICH_MPI
-	if (entropy_index_ < tracerstickernames.tracer_names.size())
+  if (entropy_index_ < ComputationalCell3D::tracerNames.size())
 	{
 		Conserved3D edummy;
 		MPI_exchange_data(tess, extensives, true,&edummy);
@@ -251,7 +251,7 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 	else
 		regular_updateSR(res, extensives, tess, entropy_index_, eos, G_);
 #ifdef RICH_MPI
-	if (entropy_index_ < tracerstickernames.tracer_names.size())
+	if (entropy_index_ < ComputationalCell3D::tracerNames.size())
 		extensives.resize(tess.GetPointNo());
 #endif
 

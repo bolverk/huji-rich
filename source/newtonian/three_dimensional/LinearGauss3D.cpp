@@ -913,12 +913,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				if (tess.BoundaryFace(boundaryedges[i]))
 				{ 
 					if (pressure_calc_)
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
@@ -1006,12 +1004,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				if (tess.BoundaryFace(boundaryedges[i]))
 				{
 					if (pressure_calc_)
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}

@@ -184,7 +184,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
 		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+				       ,Tessellation const& proctess
 #endif
 				       )const = 0;
 	/*!
@@ -204,7 +204,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+				       ,Tessellation const& proctess
 #endif
 				       )const = 0;
 	//! \brief Virtual destructor
@@ -252,7 +252,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells,EquationOfState const& eos,
 		vector<Extensive> &extensives,double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 
@@ -260,7 +260,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 		EquationOfState const& eos,double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 };
@@ -299,7 +299,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
 		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 
@@ -307,7 +307,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 };
@@ -350,7 +350,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, EquationOfState const& eos,
 		vector<Extensive> &extensives, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 
@@ -358,7 +358,7 @@ public:
 		OuterBoundary const& obc, vector<ComputationalCell> &cells, vector<Extensive> &extensives,
 		EquationOfState const& eos, double time
 #ifdef RICH_MPI
-		Tessellation const& proctess
+			       ,Tessellation const& proctess
 #endif
 			       )const override;
 };
