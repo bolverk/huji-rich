@@ -43,7 +43,7 @@ public:
 #endif
 
   //! \brief THe names of the tracers and stickers
-  TracerStickerNames tracerstickernames;
+  pair<vector<string>, vector<string> > tracerstickernames;
 };
 
 //! \brief Load snapshot data into memory

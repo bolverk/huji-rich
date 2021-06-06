@@ -414,8 +414,8 @@ Snapshot read_hdf5_snapshot
 			stickernames[n] = name;
 			stickers[n] =read_int_vector_from_hdf5(g_stickers, name);
 		}
-		res.tracerstickernames.sticker_names = stickernames;
-		res.tracerstickernames.tracer_names = tracernames;
+		res.tracerstickernames.first = tracernames;
+		res.tracerstickernames.second = stickernames;
 		res.cells.resize(density.size());
 		for (size_t i = 0; i < res.cells.size(); ++i) 
 		{
