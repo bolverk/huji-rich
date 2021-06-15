@@ -384,14 +384,6 @@ namespace {
 			return nullptr;
 	}
 
-	class WalkBookkeeper
-	{
-	public:
-
-	private:
-
-	};
-
 	size_t find_new_facet(const vector<Vector2D>& cor,
 		const vector<facet>& f,
 		size_t point,
