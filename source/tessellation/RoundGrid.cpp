@@ -22,7 +22,6 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 #else
 	tess->Initialise(points,bc);
 #endif
-	double pi= 3.141592653;
 	double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
 
@@ -39,7 +38,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 #endif
 		for(int i=0;i<N;++i)
 		{
-			double R = sqrt(tess->GetVolume(i)/pi);
+			double R = sqrt(tess->GetVolume(i)/M_PI);
 			Vector2D s = tess->GetCellCM(i);
 			Vector2D r = tess->GetMeshPoint(i);
 			double d = abs(s-r);
