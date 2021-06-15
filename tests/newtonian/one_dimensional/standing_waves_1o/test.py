@@ -59,7 +59,7 @@ def main():
     import math
     import h5py
 
-    final_data = h5py.File('final.h5')
+    final_data = h5py.File('final.h5','r')
     x_list = final_data['grid']
     d_list = final_data['density']
     p_list = final_data['pressure']

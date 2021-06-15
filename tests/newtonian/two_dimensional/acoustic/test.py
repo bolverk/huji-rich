@@ -73,8 +73,8 @@ def main():
     import numpy
     import h5py
 
-    initial = h5py.File('initial.h5')
-    final_data = h5py.File('final.h5')
+    initial = h5py.File('initial.h5','r')
+    final_data = h5py.File('final.h5','r')
 
     time = numpy.array(final_data['time'])[0]
     spat_prof = SpatProf(numpy.loadtxt('ambient_density.txt'),

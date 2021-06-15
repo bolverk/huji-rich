@@ -16,7 +16,7 @@ def consolidate_single(fname):
     import numpy
 
     res = {}
-    with h5py.File(fname,'r+') as f:
+    with h5py.File(fname,'r') as f:
         structure = {'geometry':['x_coordinate','y_coordinate'],
                      'hydrodynamic':['density','pressure'],
                      'stickers':['wedge']}

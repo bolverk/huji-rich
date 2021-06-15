@@ -27,7 +27,7 @@ def main():
     import numpy
     import h5py
 
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
     x_list = h5f['grid']
     d_list = h5f['density']
     p_list = h5f['pressure']

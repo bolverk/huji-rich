@@ -16,7 +16,7 @@ def main():
     import numpy
     import h5py
 
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
 
     left = enrs.Primitive(1,10,0);
     right = enrs.Primitive(1,1,0);

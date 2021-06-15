@@ -23,13 +23,13 @@ def main():
         p = []
         v = []
         for fname in glob.glob('process_*_final.h5'):
-            f = h5py.File(fname,'r+')
+            f = h5py.File(fname,'r')
             x.extend(f['x_coordinate'])
             d.extend(f['density'])
             p.extend(f['pressure'])
             v.extend(f['x_velocity'])
     else:
-        h5f = h5py.File('final.h5')
+        h5f = h5py.File('final.h5','r')
         x = h5f['geometry']['x_coordinate']
         d = h5f['hydrodynamic']['density']
         p = h5f['hydrodynamic']['pressure']

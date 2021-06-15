@@ -40,7 +40,7 @@ def main():
         vx_list = []
         vy_list = []
         for fname in glob.glob('process_*_final.h5'):
-            f = h5py.File(fname)
+            f = h5py.File(fname,'r')
             rx_list.extend(f['x_coordinate'])
             ry_list.extend(f['y_coordinate'])
             d_list.extend(f['density'])
@@ -48,7 +48,7 @@ def main():
             vx_list.extend(f['x_velocity'])
             vy_list.extend(f['y_velocity'])
     else:
-        h5f = h5py.File('final.h5')
+        h5f = h5py.File('final.h5','r')
         rx_list = h5f['geometry']['x_coordinate']
         ry_list = h5f['geometry']['y_coordinate']
         d_list = h5f['hydrodynamic']['density']

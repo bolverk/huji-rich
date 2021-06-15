@@ -11,7 +11,7 @@ def consolidate_single(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname,'r+')
+    f = h5py.File(fname,'r')
     #res = {key:numpy.array(f[key]) for key in f}
     res = {}
     res['x_coordinate'] = numpy.array(f['geometry']['x_coordinate'])

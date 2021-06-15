@@ -38,7 +38,7 @@ def consolidate_data_single(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname)
+    f = h5py.File(fname,'r')
 
     res = {}
     for field in f['geometry']:

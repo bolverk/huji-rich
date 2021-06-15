@@ -8,7 +8,7 @@ def consolidate_data(fname):
     import h5py
     import numpy
 
-    f = h5py.File(fname)
+    f = h5py.File(fname,'r')
     data = {'geometry':{},
             'hydrodynamic':{}}
     for field in data:

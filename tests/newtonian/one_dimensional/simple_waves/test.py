@@ -45,13 +45,13 @@ def main():
     import numpy
     import h5py
 
-    init_data = h5py.File('initial.h5')
+    init_data = h5py.File('initial.h5','r')
     x_init = init_data['grid']
     d_init = init_data['density']
     p_init = init_data['pressure']
     v_init = init_data['x_velocity']
 
-    final_data = h5py.File('final.h5')
+    final_data = h5py.File('final.h5','r')
     time = numpy.array(final_data['time'])[0]
     x_numeric = final_data['grid']
     d_numeric = final_data['density']

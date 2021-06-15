@@ -5,7 +5,7 @@ def main():
     import h5py
     import glob
 	
-    with h5py.File('final.h5','r+') as f:
+    with h5py.File('final.h5','r') as f:
         density_list = numpy.array(f['hydrodynamic']['density'])
         chi_2 = numpy.sqrt(sum((density_list-1)**2))/len(density_list)
     mass = numpy.loadtxt('mass.txt')

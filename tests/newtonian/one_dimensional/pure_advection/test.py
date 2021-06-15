@@ -104,8 +104,8 @@ def main():
     if False:
         plot_hydro_vars()
 
-    pcm_data = h5py.File('pcm_final.h5')
-    plm_data = h5py.File('plm_final.h5')
+    pcm_data = h5py.File('pcm_final.h5','r')
+    plm_data = h5py.File('plm_final.h5','r')
     x_list = pcm_data['grid']
     d_list_pcm = pcm_data['density']
     d_list_plm = plm_data['density']

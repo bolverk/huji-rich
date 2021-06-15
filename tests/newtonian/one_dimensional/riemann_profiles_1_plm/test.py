@@ -19,7 +19,7 @@ def main():
     left = enrs.Primitive(1,10,0);
     right = enrs.Primitive(1,1,0);
     prof = enrs.RiemannProfile(left,right,5./3.)
-    h5f = h5py.File('final.h5')
+    h5f = h5py.File('final.h5','r')
     t = h5f['time']
     offset = 0.5
 

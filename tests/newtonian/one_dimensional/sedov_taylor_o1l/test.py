@@ -11,7 +11,7 @@ def consolidate_single(fname):
     import h5py
     import numpy
 
-    with h5py.File(fname,'r+') as f:
+    with h5py.File(fname,'r') as f:
         return {field:numpy.array(f[field]) for field in f}
 
 def consolidate_multiple(f_list):

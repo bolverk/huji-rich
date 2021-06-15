@@ -39,14 +39,14 @@ def main():
         p = []
         v = []
         for fname in glob.glob('process_*_final.h5'):
-            f = h5py.File(fname)
+            f = h5py.File(fname,'r')
             x.extend(f['x_coordinate'])
             d.extend(f['density'])
             p.extend(f['pressure'])
             v.extend(f['x_velocity'])
             t = f['time']
     else:
-        h5f = h5py.File('final.h5')
+        h5f = h5py.File('final.h5','r')
         x_list = h5f['X']
         d_list = h5f['Density']                     
         p_list = h5f['Pressure']
