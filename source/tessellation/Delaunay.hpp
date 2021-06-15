@@ -87,8 +87,6 @@ private:
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
   vector<int> FindContainingTetras(int StartTetra, int point);
   vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
-  vector<vector<int> > FindOuterPointsMPI(OuterBoundary const* obc,vector<Edge> const& edges,
-	  Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist);
   bool IsTripleOut(int index) const;
   int FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
