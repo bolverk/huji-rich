@@ -11,10 +11,12 @@ def main():
 
     import numpy
     import os
-    import imp
+    from importlib.machinery import SourceFileLoader
     import h5py
     import glob
-    enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
+    enrs = SourceFileLoader(
+        'enrs',
+        os.environ['RICH_ROOT']+'/analytic/enrs.py').load_module()
 
     ns = len(glob.glob('process_*_final.h5'))
     if ns>0:

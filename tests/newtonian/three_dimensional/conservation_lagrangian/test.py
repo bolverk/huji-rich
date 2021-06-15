@@ -2,8 +2,6 @@
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 def goodness_of_fit(a1, a2):
 
     import math

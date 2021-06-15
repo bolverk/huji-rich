@@ -10,8 +10,10 @@ def goodness_of_fit(a1, a2):
 def main():
 
     import os
-    import imp
-    enrs = imp.load_source('enrs',os.environ['RICH_ROOT']+'/analytic/enrs.py')
+    from importlib.machinery import SourceFileLoader
+    enrs = SourceFileLoader(
+        'enrs',
+        os.environ['RICH_ROOT']+'/analytic/enrs.py').load_module()
 
     import numpy
     import h5py

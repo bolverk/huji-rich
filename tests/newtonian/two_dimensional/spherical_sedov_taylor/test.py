@@ -28,12 +28,12 @@ def main():
     
     import numpy
     import math
-    import imp
     import h5py
     import os
-    sedov_taylor = imp.load_source(
-        'sedov_taylor',\
-            os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
+    from importlib.machinery import SourceFileLoader
+    sedov_taylor = SourceFileLoader(
+        'sedov_taylor',
+        os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py').load_module()
 
     numeric = consolidate_data('final.h5')
 

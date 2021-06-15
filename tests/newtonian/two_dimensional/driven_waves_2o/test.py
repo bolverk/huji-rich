@@ -11,7 +11,6 @@ def main():
 
     import numpy
     import os
-    import imp
     import h5py
 
     h5f = h5py.File('final.h5','r')

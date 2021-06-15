@@ -53,11 +53,11 @@ class SedovTaylorProfiles:
     def __init__(self, upstream, shock_front, g, w, n ,nip=1000):
 
         import numpy
-        import imp
         import os
-
-        sedov_taylor = imp.load_source('sedov_taylor',
-                                       os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py')
+        from importlib.machinery import SourceFileLoader
+        sedov_taylor = SourceFileLoader(
+            'sedov_taylor',
+            os.environ['RICH_ROOT']+'/analytic/sedov_taylor.py').load_module()
 
         self.upstream = upstream
         ssv_list = numpy.linspace(1e-6+1./g,

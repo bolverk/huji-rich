@@ -39,11 +39,11 @@ def main():
 
     import numpy
     import math
-    import imp
     import os
-    oblique_shock = imp.load_source(\
-        'oblique_shock',\
-            os.environ['RICH_ROOT']+'/analytic/oblique_shock.py')
+    from importlib.machinery import SourceFileLoader
+    oblique_shock = SourceFileLoader(
+        'oblique_shock',
+        os.environ['RICH_ROOT']+'/analytic/oblique_shock.py').load_module()
     import h5py
     import glob
 
