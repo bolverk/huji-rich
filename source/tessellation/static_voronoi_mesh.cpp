@@ -507,7 +507,7 @@ void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const
 			   calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
+	vector<vector<int> > toduplicate = Tri.BuildBoundary(*_bc,_bc->GetBoxEdges());
 
 	eps=1e-8;
 	edges.clear();

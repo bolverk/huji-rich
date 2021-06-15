@@ -802,15 +802,15 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 
 namespace
 {
-	vector<Edge> GetCornerEdges(OuterBoundary const* obc)
+	vector<Edge> GetCornerEdges(OuterBoundary const& obc)
 	{
-		const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
-		const double dy = obc->GetGridBoundary(Up) - obc->GetGridBoundary(Down);
+		const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
+		const double dy = obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
 		vector<Edge> res;
-		const Vector2D RU(obc->GetGridBoundary(Right), obc->GetGridBoundary(Up));
-		const Vector2D LU(obc->GetGridBoundary(Left), obc->GetGridBoundary(Up));
-		const Vector2D LD(obc->GetGridBoundary(Left), obc->GetGridBoundary(Down));
-		const Vector2D RD(obc->GetGridBoundary(Right), obc->GetGridBoundary(Down));
+		const Vector2D RU(obc.GetGridBoundary(Right), obc.GetGridBoundary(Up));
+		const Vector2D LU(obc.GetGridBoundary(Left), obc.GetGridBoundary(Up));
+		const Vector2D LD(obc.GetGridBoundary(Left), obc.GetGridBoundary(Down));
+		const Vector2D RD(obc.GetGridBoundary(Right), obc.GetGridBoundary(Down));
 		res.push_back(Edge(RU, Vector2D(dx, 0) + RU, 0, 0));
 		res.push_back(Edge(RU, Vector2D(0, dy) + RU, 0, 0));
 		res.push_back(Edge(LU, Vector2D(0, dy) + LU, 0, 0));
@@ -863,7 +863,7 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 		//toduplicate[i]=pointstemp;
 	}
 	// Done with sides do corners now
-	vector<Edge> corneredges = GetCornerEdges(&obc);
+	vector<Edge> corneredges = GetCornerEdges(obc);
 	vector<vector<int> > corners(toduplicate.size());
 	for (size_t i = 0; i < toduplicate.size(); ++i)
 	{
@@ -921,11 +921,11 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 	return corners;
 }
 
-void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,
+void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate)
 {
-	const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
-	//	const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
+	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
+	//	const double dy=obc.GetGridBoundary(Up)-obc.GetGridBoundary(Down);
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 		if (toduplicate[static_cast<size_t>(i)].empty())
@@ -968,13 +968,13 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const* obc, vector<Edge> const& edg
 	}
 }
 
-vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Edge> const& edges)
+vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Edge> const& edges)
 {
 	vector<vector<int> > toduplicate = FindOuterPoints(edges);
 #ifdef RICH_MPI
 	OrgIndex.clear();
 #endif
-	if (obc->GetBoundaryType() == Rectengular)
+	if (obc.GetBoundaryType() == Rectengular)
 	{
 		AddRigid(edges, toduplicate);
 #ifdef RICH_MPI
@@ -985,9 +985,9 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 	}
 	else
 	{
-		if (obc->GetBoundaryType() == Periodic)
+		if (obc.GetBoundaryType() == Periodic)
 		{
-			vector<vector<int> > corners = AddPeriodic(*obc, edges, toduplicate);
+			vector<vector<int> > corners = AddPeriodic(obc, edges, toduplicate);
 			for (size_t i = 0; i < 4; ++i)
 				toduplicate.push_back(corners[static_cast<size_t>(i)]);
 		}
@@ -1594,9 +1594,9 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 }
 
 pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
-(OuterBoundary const* obc,
-	Tessellation const& tproc,
-	vector<vector<int> >& Nghost)
+(const OuterBoundary& obc,
+ const Tessellation& tproc,
+ vector<vector<int> >& Nghost)
 {
 	vector<Edge> edges;
 	OrgIndex.clear();
@@ -1605,7 +1605,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	vector<int> edge_index = tproc.GetCellEdges(rank);
 	for (size_t i = 0; i < edge_index.size(); ++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
-	vector<Edge> box_edges = obc->GetBoxEdges();
+	vector<Edge> box_edges = obc.GetBoxEdges();
 	pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
 		findOuterPoints(tproc, edges, box_edges, Nghost);
 	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);

@@ -368,7 +368,7 @@ void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* 
 	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
+	vector<vector<int> > toduplicate = Tri.BuildBoundary(*_bc,_bc->GetBoxEdges());
 
 	eps=1e-8;
 	edges.clear();
@@ -506,7 +506,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges=obc->GetBoxEdges();
-	vector<vector<int> > toduplicate=Tri.BuildBoundary(obc,box_edges);
+	vector<vector<int> > toduplicate=Tri.BuildBoundary(*obc,box_edges);
 
 	eps=1e-8;
 	edges.clear();
@@ -1254,7 +1254,7 @@ vector<int> VoronoiMesh::Update
 	GhostPoints.clear();
 	GhostProcs.clear();
 	NGhostReceived.clear();
-	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(obc, vproc, NGhostReceived);
+	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(*obc, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
 	build_v();
@@ -1331,7 +1331,7 @@ void VoronoiMesh::Initialise_loc
 	size_t npoints = points.size();
 	for (size_t i = 0; i<npoints; ++i)
 		selfindex[i] = i;
-	pair<vector<vector<int> >,vector<int> > ptemp=Tri.BuildBoundary(outer, vproc, NGhostReceived);
+	pair<vector<vector<int> >,vector<int> > ptemp=Tri.BuildBoundary(*outer, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
 	build_v();
