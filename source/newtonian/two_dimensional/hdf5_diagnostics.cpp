@@ -315,18 +315,15 @@ void write_snapshot_to_hdf5(hdsim const& sim, string const& fname,
 				(sim, CellVelocityComponentExtractor(&Vector2D::y))),
 			"y_velocity");
 
-	// Tracers
-	TracerStickerNames const& tracerstickernames = sim.GetTracerStickerNames();
-	//	size_t Ntracers = sim.getAllCells().front().tracers.size();
-	const size_t Ntracers = tracerstickernames.tracer_names.size();
+	const size_t Ntracers = ComputationalCell::tracerNames.size();
 	for (size_t i = 0; i < Ntracers; ++i)
-		write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), tracerstickernames.tracer_names[i]);
+	  write_std_vector_to_hdf5(tracers, serial_generate(TracerSlice(sim, i)), ComputationalCell::tracerNames[i]);
 
 	// Stickers
 	//	size_t Nstickers = sim.getAllCells().front().stickers.size();
-	const size_t Nstickers = tracerstickernames.sticker_names.size();
+	const size_t Nstickers = ComputationalCell::stickerNames.size();
 	for (size_t i = 0; i < Nstickers; ++i)
-		write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), tracerstickernames.sticker_names[i]);
+	  write_std_vector_to_hdf5(stickers, serial_generate(StickerSlice(sim, i)), ComputationalCell::stickerNames[i]);
 
 	// Appendices
 	for (size_t i = 0; i < appendices.size(); ++i)
@@ -414,8 +411,8 @@ Snapshot read_hdf5_snapshot
 			stickernames[n] = name;
 			stickers[n] =read_int_vector_from_hdf5(g_stickers, name);
 		}
-		res.tracerstickernames.sticker_names = stickernames;
-		res.tracerstickernames.tracer_names = tracernames;
+		res.tracerstickernames.first = tracernames;
+		res.tracerstickernames.second = stickernames;
 		res.cells.resize(density.size());
 		for (size_t i = 0; i < res.cells.size(); ++i) 
 		{

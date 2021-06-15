@@ -20,11 +20,10 @@ public:
     \param tess The tessellation
     \param cells Hydrodynamics cells
     \param time The simulation time
-	\param tracerstickernames The names of the tracers and stickers
     \return Velocities of the points
    */
   virtual vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,
-	  double time,TracerStickerNames const& tracerstickernames) const = 0;
+	  double time) const = 0;
 
   /*! \brief Applies a small fix to the velocity of all mesh points once the time step is known
   \param tess The tessellation
@@ -32,11 +31,10 @@ public:
   \param time The simulation time
   \param velocities Velocities of the points
   \param dt The time step
-  \param tracerstickernames The names of the tracers and stickers
   \return The new velocities
   */
   virtual vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> const& velocities,TracerStickerNames const& tracerstickernames)const;
+	  double dt, vector<Vector2D> const& velocities) const;
 
   //! \brief Virtual destructor
   virtual ~PointMotion(void);

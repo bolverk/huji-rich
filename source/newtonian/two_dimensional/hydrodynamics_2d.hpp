@@ -168,7 +168,6 @@ Conserved FluxInBulk(Vector2D const& normaldir,
   \param t Time
   \param dt Time step
   \param extensives Extensive variables
-  \param tracerstickernames The names of the tracers and stickers
  */
 void ExternalForceContribution
 (const Tessellation& tess,
@@ -180,8 +179,7 @@ void ExternalForceContribution
 	const SourceTerm& source,
 	double t,
 	double dt,
-	vector<Extensive>& extensives,
-	TracerStickerNames const& tracerstickernames);
+	vector<Extensive>& extensives);
 
 /*! \brief Returns the position of all mesh generating points
   \param tess Tessellation

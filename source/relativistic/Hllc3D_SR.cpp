@@ -31,14 +31,14 @@ namespace
 namespace
 {
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const& eos, TracerStickerNames const& tsn, double &pstar)
+		EquationOfState const& eos, double &pstar)
 	{
 		double cl = 0, cr = 0;
 #ifdef RICH_DEBUG
 		try
 		{
 #endif
-			cl = eos.dp2c(left.density, left.pressure, left.tracers, tsn.tracer_names);
+		  cl = eos.dp2c(left.density, left.pressure, left.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -55,7 +55,7 @@ namespace
 		try
 		{
 #endif
-			cr = eos.dp2c(right.density, right.pressure, right.tracers, tsn.tracer_names);
+		  cr = eos.dp2c(right.density, right.pressure, right.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -144,7 +144,7 @@ namespace
 }
 
 
-Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, ComputationalCell3D const & right, double velocity, EquationOfState const & eos, TracerStickerNames const & tsn, Vector3D const & normaldir) const
+Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, ComputationalCell3D const & right, double velocity, EquationOfState const & eos, Vector3D const & normaldir) const
 {
 	ReplaceComputationalCell(local_left_, left);
 	double par_left = fastabs(local_left_.velocity - ScalarProd(local_left_.velocity, normaldir)*normaldir);
@@ -157,7 +157,7 @@ Conserved3D Hllc3D_SR::operator()(ComputationalCell3D const & left, Computationa
 	local_right_.velocity.y = par_right;
 	local_right_.velocity.z = 0;
 	double pstar = 0;
-	WaveSpeeds ws = estimate_wave_speeds(local_left_, local_right_, eos, tsn, pstar);
+	WaveSpeeds ws = estimate_wave_speeds(local_left_, local_right_, eos, pstar);
 
 	Conserved3D f_gr;
 	if (ws.left > velocity)

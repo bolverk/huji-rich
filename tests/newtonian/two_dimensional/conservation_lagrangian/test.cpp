@@ -116,7 +116,7 @@ namespace {
 	   fc_,
 	   eu_,
 	   cu_,
-	   TracerStickerNames (vector<string>(1,"tracer"),vector<string>())) {}
+      {vector<string>(1,"tracer"),vector<string>()}) {}
 
     hdsim& getSim(void)
     {

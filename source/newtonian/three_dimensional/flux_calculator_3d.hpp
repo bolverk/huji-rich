@@ -26,12 +26,11 @@ public:
     \param fluxes THe fluxes given as output
     \param dt The timestep
     \param time The time
-    \param tracerstickernames The names of the stickers and tracers
     \return List of riemann problem conditions
    */
 	virtual std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D>& fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 	  const vector<ComputationalCell3D>& cells,const vector<Conserved3D>& extensives,const EquationOfState& eos,
-	  const double time, const double dt,TracerStickerNames const& tracerstickernames) const = 0;
+	  const double time, const double dt) const = 0;
 
   //! \brief Class destructor
   virtual ~FluxCalculator3D(void);
@@ -48,6 +47,6 @@ public:
   \param tsn Tracers and stickers names
  */
 void RotateSolveBack3D(Vector3D const& normal, ComputationalCell3D const& left, ComputationalCell3D const& right,
-	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn);
+	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos);
 
 #endif // FLUX_CALCULATOR_HPP

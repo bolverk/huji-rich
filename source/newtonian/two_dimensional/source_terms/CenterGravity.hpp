@@ -25,8 +25,7 @@ public:
    const vector<ComputationalCell>& cells,
    const vector<Extensive>& fluxes,
    const double time,
-   const int point,
-   TracerStickerNames const& tracerstickernames) const override;
+   const int point) const override;
 
 private:
   const double M_;

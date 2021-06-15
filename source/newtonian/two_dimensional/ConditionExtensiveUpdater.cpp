@@ -25,8 +25,7 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	const CacheData& cd,
 	const vector<ComputationalCell>& cells,
 	vector<Extensive>& extensives,
-	double time,
-	TracerStickerNames const& tracerstickernames) const
+	double time) const
 {
 	const vector<Edge>& edge_list = tess.getAllEdges();
 	Extensive delta(extensives[0]);
@@ -45,9 +44,9 @@ void ConditionExtensiveUpdater::operator()(const vector<Extensive>& fluxes,
 	{
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
+			if (sequence_[j].first->operator()(i, tess, cells, time))
 			{
-				sequence_[j].second->operator()(fluxes, pg, tess, dt, cd, cells, extensives[i], i, time, tracerstickernames);
+			  (*sequence_[j].second)(fluxes, pg, tess, dt, cd, cells, extensives[i], i, time);
 				break;
 			}
 		}
@@ -202,20 +201,19 @@ void ColdFlowsUpdate::operator()
 	const vector<ComputationalCell>& cells,
 	Extensive& extensive,
 	size_t index,
-	double time,
-	TracerStickerNames const& ts)const
+	double time)const
 {
 	if (entropy_index_ < 0)
 	{
-		entropy_index_ = static_cast<int>(lower_bound(ts.tracer_names.begin(), ts.tracer_names.end(), string("Entropy")) - ts.tracer_names.begin());
+	  entropy_index_ = static_cast<int>(lower_bound(ComputationalCell::tracerNames.begin(), ComputationalCell::tracerNames.end(), string("Entropy")) - ComputationalCell::tracerNames.begin());
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_cells_ = ghost_(tess, cells, time);
 		dt_ = dt;
 	}
 	if (lasttime_ < time || dt < dt_ || dt > dt_)
 	{
 		lasttime_ = time;
-		ghost_cells_ = ghost_.operator()(tess, cells, time, ts);
+		ghost_cells_ = ghost_.operator()(tess, cells, time);
 		dt_ = dt;
 	}
 

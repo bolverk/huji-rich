@@ -40,7 +40,7 @@ public:
 		       const std::string& debug_name = "");
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
+		const vector<Conserved3D>& fluxes, const double time,
 		vector<Vector3D> &acc) const override;
 	~ANNSelfGravity() {}
 };

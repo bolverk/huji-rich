@@ -30,8 +30,7 @@ public:
 	\param interp_values Interpolated values
 	*/
 	virtual void operator()(const vector<Conserved3D>& fluxes,const Tessellation3D& tess,
-		const double dt,const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time,
-		TracerStickerNames const& tracerstickernames, const vector<Vector3D>& edge_velocities,
+		const double dt,const vector<ComputationalCell3D>& cells,vector<Conserved3D>& extensives,double time, const vector<Vector3D>& edge_velocities,
 		std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& interp_values) const = 0;
 
 	//! \brief Class constructor

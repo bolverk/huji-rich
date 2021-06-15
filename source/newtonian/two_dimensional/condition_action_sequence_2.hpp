@@ -26,7 +26,6 @@ public:
 		\param edge_velocity Velocity of the edges
 		\param res The flux given as output
 		\param time The time
-		\param tracerstickernames The names of the tracers and stickers
 		*/
 		virtual void operator()
 			(const Edge& edge,
@@ -37,8 +36,7 @@ public:
 				const bool aux,
 				const pair<ComputationalCell, ComputationalCell> & edge_values,
 				Extensive &res,
-				double time,
-				TracerStickerNames const& tracerstickernames) const = 0;
+				double time) const = 0;
 
 	  virtual ~Action2(void);
 
@@ -72,8 +70,7 @@ public:
 			const CacheData& cd,
 			const EquationOfState& eos,
 			const double time,
-			const double dt,
-			TracerStickerNames const& tracerstickernames) const override;
+			const double dt) const override;
 
 private:
 	const vector<pair<const ConditionActionSequence::Condition*, const ConditionActionSequence::Action*> > sequence_;
@@ -100,8 +97,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 
@@ -127,8 +123,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 	const RiemannSolver& rs_;
@@ -153,8 +148,7 @@ public:
 			const EquationOfState& eos,
 			const bool aux,
 			const pair<ComputationalCell, ComputationalCell> & edge_values,
-			Extensive &res, double time,
-			TracerStickerNames const& tracerstickernames) const override;
+			Extensive &res, double time) const override;
 
 private:
 	const bool in_;

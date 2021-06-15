@@ -17,7 +17,7 @@ public:
 	MonopoleSelfGravity3D(size_t resolution,double smoothlength);
 
 	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
+		const vector<Conserved3D>& fluxes, const double time,
 		vector<Vector3D> &acc) const override;
 };
 

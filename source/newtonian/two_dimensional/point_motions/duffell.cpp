@@ -59,7 +59,7 @@ namespace {
 vector<Vector2D> Duffell::operator()
 (const Tessellation& tess,
  const vector<ComputationalCell>& cells,
- double /*time*/,TracerStickerNames const& /*tracerstickernames*/) const
+ double /*time*/) const
 {
   vector<Vector2D> res = extract_velocity(cells,static_cast<size_t>(tess.GetPointNo()));
   for(int i=0;i<iter_;++i)

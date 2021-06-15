@@ -9,7 +9,7 @@ LagrangianExtensiveUpdater3D::LagrangianExtensiveUpdater3D(LagrangianFlux3D cons
 
 void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes, const Tessellation3D & tess,
 	const double dt, const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, double time,
-					      TracerStickerNames const & tracerstickernames, std::vector<Vector3D> const& /*face_vel*/, 
+					      std::vector<Vector3D> const& /*face_vel*/, 
 					      std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > const& /*interp_values*/) const
 {
 	std::vector<Conserved3D> old_extensive(extensives);
@@ -17,16 +17,16 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 	Conserved3D edummy;
 	MPI_exchange_data(tess, old_extensive, true,&edummy);
 #endif
-	size_t indexX = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaX")) - tracerstickernames.tracer_names.begin());
-	size_t indexY = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaY")) - tracerstickernames.tracer_names.begin());
-	size_t indexZ = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaZ")) - tracerstickernames.tracer_names.begin());
+	size_t indexX = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaX")) - ComputationalCell3D::tracerNames.begin());
+	size_t indexY = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaY")) - ComputationalCell3D::tracerNames.begin());
+	size_t indexZ = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaZ")) - ComputationalCell3D::tracerNames.begin());
 
 	size_t N = tess.GetPointNo();
 	// Reduce the area tracer
-	bool AreaChange = indexX < tracerstickernames.tracer_names.size();
+	bool AreaChange = indexX < ComputationalCell3D::tracerNames.size();
 	if (AreaChange)
 	{
 		for (size_t i = 0; i < N; ++i)
@@ -218,9 +218,9 @@ void LagrangianExtensiveUpdater3D::operator()(const vector<Conserved3D>& fluxes,
 		}
 		for (size_t j = 0; j < sequence_.size(); ++j)
 		{
-			if (sequence_[j].first->operator()(i, tess, cells, time, tracerstickernames))
+			if (sequence_[j].first->operator()(i, tess, cells, time))
 			{
-				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives, i, time, tracerstickernames);
+				sequence_[j].second->operator()(fluxes, tess, dt, cells, extensives, i, time);
 				break;
 			}
 		}

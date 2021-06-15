@@ -14,9 +14,9 @@ namespace
 }
 
 void RotateSolveBack3D(Vector3D const& normal, ComputationalCell3D const& left, ComputationalCell3D const& right,
-	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos,TracerStickerNames const& tsn)
+	Vector3D const& face_velocity,RiemannSolver3D const& rs, Conserved3D &res,EquationOfState const& eos)
 {
-	res = rs(left, right, ScalarProd(normal, face_velocity),eos,tsn,normal);
+	res = rs(left, right, ScalarProd(normal, face_velocity),eos,normal);
 	// Add tracers
 	AddTracers(left, right, res);
 }

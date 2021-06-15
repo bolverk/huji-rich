@@ -28,7 +28,6 @@ public:
 	  \param extensives Extensive variables
 	  \param old Old computational cells
 	  \param cd Cached data
-	  \param tracerstickernames The names of the tracers and stickers
 	  \return List of computational cells
 	 */
 	virtual vector<ComputationalCell> operator()
@@ -37,8 +36,7 @@ public:
 			const EquationOfState& eos,
 			vector<Extensive>& extensives,
 			const vector<ComputationalCell>& old,
-			const CacheData& cd,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const CacheData& cd) const = 0;
 
 	//! \brief Class destructor
 	virtual ~CellUpdater(void);

@@ -68,7 +68,7 @@ public:
 	int cycle;
 
 	//! \brief THe names of the tracers and stickers
-	TracerStickerNames tracerstickernames;
+  pair<vector<string>, vector<string> > tracerstickernames;
 
 	//! \brief Lower left corner
 	Vector3D ll;

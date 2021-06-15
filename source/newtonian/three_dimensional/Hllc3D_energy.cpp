@@ -41,7 +41,7 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-					EquationOfState const &eos, TracerStickerNames const& tsn, double /*gamma*/)
+					EquationOfState const &eos, double /*gamma*/)
 	{
 		double cl = 0, cr = 0;
 		const double dl = left.density;
@@ -51,7 +51,7 @@ namespace
 		try
 		{
 #endif
-			cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+		  cl = eos.dp2c(dl, pl, left.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -67,7 +67,7 @@ namespace
 		try
 		{
 #endif
-			cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+		  cr = eos.dp2c(dr, pr, right.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -93,9 +93,9 @@ namespace
 			usl = starred_state(left, sl, ustar);
 			usr = starred_state(right, sr, ustar);
 			newt[0] = usl.internal_energy;
-			double cl2 = eos.de2c(usl.mass, newt[0], newt, tsn.tracer_names);
+			double cl2 = eos.de2c(usl.mass, newt[0], newt, ComputationalCell3D::tracerNames);
 			newt[0] = usr.internal_energy;
-			double cr2 = eos.de2c(usr.mass, newt[0], newt, tsn.tracer_names);
+			double cr2 = eos.de2c(usr.mass, newt[0], newt, ComputationalCell3D::tracerNames);
 		/*	sl = vl - cl2;
 			sr = vr + cr2;
 			if (sl > sr)*/
@@ -186,7 +186,7 @@ Hllc3DEnergy::Hllc3DEnergy(double gamma) :gamma_((gamma + 1) / (2 * gamma))
 {}
 
 Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
-	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
+	EquationOfState const& eos, Vector3D const& normaldir) const
 {
 
 	ComputationalCell3D local_left = left;
@@ -213,7 +213,7 @@ Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, Computatio
 	PrimitiveToConserved(local_right, 1, ur);
 
 
-	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn, gamma_);
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, gamma_);
 
 
 	Conserved3D f_gr;
@@ -257,6 +257,5 @@ Conserved3D Hllc3DEnergy::operator()(ComputationalCell3D const& left, Computatio
 	}
 
 	BoostBack(f_gr, velocity, normaldir, left, right);
-	//	FixNegativeThermalEnergy(f_gr, velocity, normaldir, left, right, local_left, local_right, eos, tsn, HLL);
 	return f_gr;
 }

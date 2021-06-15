@@ -118,8 +118,7 @@ namespace
 	}
 }
 
-void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	TracerStickerNames const& tracerstickernames, const vector<Vector3D> & velocities, vector<char> const& nomove) const
+void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const vector<Vector3D> & velocities, vector<char> const& nomove) const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
@@ -132,7 +131,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	try
 	{
 #endif
-		c =std::max(eos_.dp2c(cells[i].density, cells[i].pressure,cells[i].tracers, tracerstickernames.tracer_names), min_dw_);
+	  c =std::max(eos_.dp2c(cells[i].density, cells[i].pressure,cells[i].tracers, ComputationalCell3D::tracerNames), min_dw_);
 #ifdef RICH_DEBUG
 	}
 	catch (UniversalError &eo)
@@ -147,7 +146,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 }
 
 void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& tess, double dt, vector<ComputationalCell3D> const& cells,
-	TracerStickerNames const& tracerstickernames, vector<Vector3D> & velocities, vector<char> const& nomove)const
+ vector<Vector3D> & velocities, vector<char> const& nomove)const
 {
 	const Vector3D r = tess.GetMeshPoint(i);
 	const Vector3D s = tess.GetCellCM(i);
@@ -162,7 +161,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 	try
 	{
 #endif
-		cs = eos_.dp2c(cells[i].density, cells[i].pressure,	cells[i].tracers, tracerstickernames.tracer_names);
+	  cs = eos_.dp2c(cells[i].density, cells[i].pressure,	cells[i].tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 	}
 	catch (UniversalError &eo)
@@ -181,7 +180,7 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 		{
 #endif
 			cs = std::max(cs, eos_.dp2c(cells[neigh[j]].density, cells[neigh[j]].pressure,
-				cells[static_cast<size_t>(neigh[j])].tracers, tracerstickernames.tracer_names));
+						    cells[static_cast<size_t>(neigh[j])].tracers, ComputationalCell3D::tracerNames));
 			cs = std::max(cs, fastabs(cells[neigh[j]].velocity-cells[i].velocity));
 #ifdef RICH_DEBUG
 			if (!std::isfinite(cs))
@@ -203,19 +202,19 @@ void RoundCells3D::calc_dw(Vector3D &velocity, size_t i, const Tessellation3D& t
 }
 
 void RoundCells3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	double time, TracerStickerNames const& tracerstickernames, vector<Vector3D> &res) const
+	double time, vector<Vector3D> &res) const
 {
-	pm_(tess, cells, time, tracerstickernames, res);
+	pm_(tess, cells, time, res);
 	const size_t n = tess.GetPointNo();
 	if (n == 0)
 		return;
-	size_t Nstick = tracerstickernames.sticker_names.size();
+	size_t Nstick = ComputationalCell3D::stickerNames.size();
 	vector<char> nomove(n, 0);
 	vector<size_t> no_move_indeces;
 	for (size_t i = 0; i < Nstick; ++i)
 	{
 		vector<std::string>::const_iterator it = std::find(no_move_.begin(), no_move_.end(),
-			tracerstickernames.sticker_names.at(i));
+								   ComputationalCell3D::stickerNames.at(i));
 		if (it != no_move_.end())
 			no_move_indeces.push_back(i);
 	}
@@ -239,9 +238,9 @@ void RoundCells3D::operator()(const Tessellation3D& tess, const vector<Computati
 }
 
 void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell3D> const& cells, double time,
-	double dt, vector<Vector3D> &velocities, TracerStickerNames const& tracerstickernames)const
+	double dt, vector<Vector3D> &velocities)const
 {
-	pm_.ApplyFix(tess, cells, time, dt, velocities, tracerstickernames);
+	pm_.ApplyFix(tess, cells, time, dt, velocities);
 #ifdef RICH_MPI
 	Vector3D vdummy;
 	MPI_exchange_data(tess, velocities, true,&vdummy);
@@ -250,12 +249,12 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 	/*if (n == 0)
 		return;*/
 	vector<char> nomove(n, 0);
-	size_t Nstick = tracerstickernames.sticker_names.size();
+	size_t Nstick = ComputationalCell3D::stickerNames.size();
 	vector<size_t> no_move_indeces;
 	for (size_t i = 0; i < Nstick; ++i)
 	{
 		vector<std::string>::const_iterator it = std::find(no_move_.begin(), no_move_.end(),
-			tracerstickernames.sticker_names.at(i));
+								   ComputationalCell3D::stickerNames.at(i));
 		if (it != no_move_.end())
 			no_move_indeces.push_back(i);
 	}
@@ -281,7 +280,7 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 		for (size_t i = 0; i < n; ++i)
 		{
 			if (nomove[i] == 0)
-				calc_dw(velocities.at(i), i, tess, dt, cells, tracerstickernames, velocities, nomove);
+				calc_dw(velocities.at(i), i, tess, dt, cells, velocities, nomove);
 			else
 				velocities.at(i) = Vector3D();
 		}
@@ -291,7 +290,7 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 		for (size_t i = 0; i < n; ++i)
 		{
 			if (nomove[i] == 0)
-				calc_dw(velocities.at(i), i, tess, cells, tracerstickernames, velocities, nomove);
+				calc_dw(velocities.at(i), i, tess, cells, velocities, nomove);
 			else
 				velocities.at(i) = Vector3D();
 		}

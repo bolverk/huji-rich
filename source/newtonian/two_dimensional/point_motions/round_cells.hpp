@@ -38,18 +38,15 @@ public:
 	*/
 	RoundCells(const PointMotion& pm, const EquationOfState& eos, double chi = 0.15, double eta = 0.02,bool cold = false);
 
-  vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time,
-	  TracerStickerNames const& tracerstickernames) const override;
+  vector<Vector2D> operator()(const Tessellation& tess,const vector<ComputationalCell>& cells,double time) const override;
 
   vector<Vector2D> ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	  double dt, vector<Vector2D> const& velocities, TracerStickerNames const& tracerstickernames)const override;
+	  double dt, vector<Vector2D> const& velocities)const override;
 private:
 
-  Vector2D calc_dw(size_t i, const Tessellation& tess,const vector<ComputationalCell>& cells,
-	  TracerStickerNames const& tracerstickernames) const;
+  Vector2D calc_dw(size_t i, const Tessellation& tess,const vector<ComputationalCell>& cells) const;
 
-  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells,
-	  TracerStickerNames const& tracerstickernames)const;
+  Vector2D calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells) const;
 
   const PointMotion& pm_;
   const EquationOfState& eos_;

@@ -4,16 +4,16 @@
 namespace
 {
 	double estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn)
+		EquationOfState const &eos)
 	{
 		const double dl = left.density;
 		const double pl = left.pressure;
 		const double vl = left.velocity.x;
-		const double cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+		const double cl = eos.dp2c(dl, pl, left.tracers, ComputationalCell3D::tracerNames);
 		const double dr = right.density;
 		const double pr = right.pressure;
 		const double vr = right.velocity.x;
-		const double cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+		const double cr = eos.dp2c(dr, pr, right.tracers, ComputationalCell3D::tracerNames);
 		const double sl = std::min(vl - cl, vr - cr);
 		const double sr = std::max(vl + cl, vr + cr);
 		const double ss = (pr - pl + dl*vl*(sl - vl) - dr*vr*(sr - vr)) /
@@ -26,8 +26,7 @@ LMotion3D::LMotion3D(LinearGauss3D const & interp, EquationOfState const & eos,d
 	double max_v_correction) 
 	:interp_(interp), eos_(eos),round_speed_(round_speed),max_v_correction_(max_v_correction){}
 
-void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double /*time*/,
-	TracerStickerNames const & /*tracerstickernames*/, vector<Vector3D>& res) const
+void LMotion3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>& cells, double /*time*/, vector<Vector3D>& res) const
 {
 	size_t N = tess.GetPointNo();
 	res.resize(N);
@@ -36,14 +35,14 @@ void LMotion3D::operator()(const Tessellation3D & tess, const vector<Computation
 }
 
 void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D> const & cells, double time, double dt,
-	vector<Vector3D>& velocities, TracerStickerNames const & tracerstickernames) const
+	vector<Vector3D>& velocities) const
 {
 	size_t N = tess.GetPointNo();
 	velocities.resize(N);
 	std::vector<double> TotalArea(N, 0);
 	vector<std::pair<ComputationalCell3D, ComputationalCell3D> > edge_values;
 	edge_values.resize(tess.GetTotalFacesNumber(), std::pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
-	interp_(tess, cells, time, edge_values, tracerstickernames);
+	interp_(tess, cells, time, edge_values);
 	size_t Nfaces = edge_values.size();
 	vector<double> ws(Nfaces, 0), face_area(Nfaces, 0);
 	std::vector<Vector3D> normals(Nfaces);
@@ -66,15 +65,15 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 		edge_values[j].second.velocity.x = ScalarProd(edge_values[j].second.velocity, normals[j]);
 		edge_values[j].second.velocity.y = par_right;
 		edge_values[j].second.velocity.z = 0;
-		ws[j] = estimate_wave_speeds(edge_values[j].first, edge_values[j].second, eos_, tracerstickernames);
+		ws[j] = estimate_wave_speeds(edge_values[j].first, edge_values[j].second, eos_);
 	}
-	size_t indexX = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaX")) - tracerstickernames.tracer_names.begin());
-	size_t indexY = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaY")) - tracerstickernames.tracer_names.begin());
-	size_t indexZ = static_cast<size_t>(binary_find(tracerstickernames.tracer_names.begin(), tracerstickernames.tracer_names.end(),
-		string("AreaZ")) - tracerstickernames.tracer_names.begin());
-	size_t Ntracers = tracerstickernames.tracer_names.size();
+	size_t indexX = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaX")) - ComputationalCell3D::tracerNames.begin());
+	size_t indexY = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaY")) - ComputationalCell3D::tracerNames.begin());
+	size_t indexZ = static_cast<size_t>(binary_find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(),
+							string("AreaZ")) - ComputationalCell3D::tracerNames.begin());
+	size_t Ntracers = ComputationalCell3D::tracerNames.size();
 	for (size_t i = 0; i < N; ++i)
 	{
 		face_vec const& faces = tess.GetCellFaces(i);
@@ -96,7 +95,7 @@ void LMotion3D::ApplyFix(Tessellation3D const & tess, vector<ComputationalCell3D
 		Vector3D round_speed = factor * (CM / V - tess.GetMeshPoint(i)) / dt;
 		double mag_round = fastabs(round_speed);
 		double max_mag_v = 2 * std::max(mag_v, eos_.dp2c(cells[i].density, cells[i].pressure,
-			cells[i].tracers, tracerstickernames.tracer_names));
+								 cells[i].tracers, ComputationalCell3D::tracerNames));
 		if (mag_round > max_mag_v)
 			round_speed *= max_mag_v / mag_round;
 		velocities[i] += round_speed;

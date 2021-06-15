@@ -28,11 +28,11 @@ ConservativeForce3D::~ConservativeForce3D(void) {}
 
 void ConservativeForce3D::operator()(const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
 	const vector<Conserved3D>& fluxes,const vector<Vector3D>& point_velocities,const double t,double dt,
-	TracerStickerNames const& tracerstickernames,vector<Conserved3D> & extensives) const
+	vector<Conserved3D> & extensives) const
 {
 	size_t N = tess.GetPointNo();
 	vector<Vector3D> acc;
-	acc_(tess, cells, fluxes, t, tracerstickernames, acc);
+	acc_(tess, cells, fluxes, t, acc);
 	dt_ = 0;
 	for (size_t i = 0; i < N; ++i)
 	{

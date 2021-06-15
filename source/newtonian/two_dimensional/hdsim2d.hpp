@@ -77,8 +77,6 @@ private:
 
   const CellUpdater& cu_;
 
-  TracerStickerNames tracer_sticker_names_;
-
   const CacheData cache_data_;
 
 #ifdef RICH_MPI
@@ -145,7 +143,6 @@ public:
     \param fc Flux calculator
     \param eu Extensive updater
     \param cu Cell updater
-    \param tracer_sticker_names The names of the tracers and stickers
     \param proctess Tessellation of the processes
   */
   hdsim
@@ -165,7 +162,7 @@ public:
    const FluxCalculator& fc,
    const ExtensiveUpdater& eu,
    const CellUpdater& cu,
-   const TracerStickerNames& tracer_sticker_names = TracerStickerNames()
+	  const pair<vector<string>, vector<string> >& tracer_sticker_names = pair<vector<string>, vector<string> >()
 #ifdef RICH_MPI
 		  ,const ProcessorUpdate* proc_update=0
 #endif
@@ -262,12 +259,6 @@ public:
     \return Cached data
    */
   const CacheData& getCacheData(void) const;
-
-  /*!
-  \brief Returns the TracerStickerNames
-  \return The TracerStickerNames of the simulation
-  */
-  TracerStickerNames const& GetTracerStickerNames(void)const;
 };
 
 #endif

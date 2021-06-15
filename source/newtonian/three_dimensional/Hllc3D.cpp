@@ -17,7 +17,7 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn, double gamma)
+		EquationOfState const &eos, double gamma)
 	{
 		double cl = 0, cr = 0;
 		const double dl = left.density;
@@ -27,7 +27,7 @@ namespace
 		try
 		{
 #endif
-			cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+		  cl = eos.dp2c(dl, pl, left.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -43,7 +43,7 @@ namespace
 		try
 		{
 #endif
-			cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+		  cr = eos.dp2c(dr, pr, right.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -181,7 +181,7 @@ Hllc3D::Hllc3D(double gamma) :gamma_((gamma + 1) / (2 * gamma))
 {}
 
 Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
-	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
+	EquationOfState const& eos, Vector3D const& normaldir) const
 {
 	double face_v = 0;	
 	double minv = std::min(fastabs(left.velocity), fastabs(right.velocity));
@@ -215,7 +215,7 @@ Conserved3D Hllc3D::operator()(ComputationalCell3D const& left, ComputationalCel
 	PrimitiveToConserved(local_left, 1, ul);
 	PrimitiveToConserved(local_right, 1, ur);
 
-	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, tsn, gamma_);
+	WaveSpeeds ws = estimate_wave_speeds(local_left, local_right, eos, gamma_);
 
 	Conserved3D f_gr;
 	// check if bad wavespeed

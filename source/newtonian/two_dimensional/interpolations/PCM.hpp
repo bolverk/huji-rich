@@ -27,7 +27,7 @@ public:
 		(const Tessellation& tess,
 			const vector<ComputationalCell>& cells,
 			double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-			TracerStickerNames const& tracerstikersnames,CacheData const& cd) const override;
+			CacheData const& cd) const override;
 };
 
 #endif // SPATIAL_RECONSTRUCTION_HPP

@@ -26,8 +26,7 @@ public:
 	  \return Time step
 	 */
 	virtual double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-		const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double time,
-		TracerStickerNames const& tracerstickernames) const = 0;
+		const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double time) const = 0;
 
 	//! \brief Class destructor
 	virtual ~TimeStepFunction3D(void);

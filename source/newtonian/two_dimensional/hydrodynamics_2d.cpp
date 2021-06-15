@@ -355,10 +355,9 @@ void ExternalForceContribution
 	const SourceTerm& force,
 	double t,
 	double dt,
-	vector<Extensive>& extensives,
-	TracerStickerNames const& tracerstickernames)
+	vector<Extensive>& extensives)
 {
-	const vector<Extensive> diff = force(tess, pg, cd, cells, fluxes, point_velocities, t,tracerstickernames);
+	const vector<Extensive> diff = force(tess, pg, cd, cells, fluxes, point_velocities, t);
 	for (size_t i = 0; i < static_cast<size_t>(tess.GetPointNo()); ++i) 
 	{
 		extensives[i].mass += dt*diff[i].mass;

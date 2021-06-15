@@ -3,6 +3,9 @@
 
 using namespace std;
 
+vector<string> ComputationalCell::tracerNames;
+vector<string> ComputationalCell::stickerNames;
+
 ComputationalCell::ComputationalCell(void) :
   density(0), pressure(0), velocity(Vector2D()), tracers(),
   stickers(){}
@@ -130,26 +133,6 @@ Slope::Slope(void) :xderivative(ComputationalCell()), yderivative(ComputationalC
 
 Slope::Slope(ComputationalCell const & x, ComputationalCell const & y) : xderivative(x), yderivative(y)
 {}
-
-TracerStickerNames::TracerStickerNames(void)
-  : tracer_names(vector<string>()), sticker_names(vector<string>()) {}
-
-TracerStickerNames& TracerStickerNames::operator=
-(const TracerStickerNames& other)
-{
-  tracer_names = other.tracer_names;
-  sticker_names = other.sticker_names;
-  return *this;
-}
-
-TracerStickerNames::~TracerStickerNames(void) {}
-
-TracerStickerNames::TracerStickerNames(TracerStickerNames const& other):tracer_names(other.tracer_names),sticker_names(other.sticker_names){}
-
-TracerStickerNames::TracerStickerNames
-(const std::vector<std::string>& tracers,
- const std::vector<std::string>& stickers):
-  tracer_names(tracers),sticker_names(stickers){}
 
 #ifdef RICH_MPI
 size_t ComputationalCell::getChunkSize(void) const

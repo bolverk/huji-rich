@@ -1,7 +1,7 @@
 #include "PeriodicGhostGenerator.hpp"
 
 boost::container::flat_map<size_t, ComputationalCell> PeriodicGhostGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells, double /*time*/, TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	boost::container::flat_map<size_t, ComputationalCell> res;
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterEdgesIndeces(tess);
@@ -18,7 +18,7 @@ boost::container::flat_map<size_t, ComputationalCell> PeriodicGhostGenerator::op
 
 Slope PeriodicGhostGenerator::GetGhostGradient(const Tessellation& tess,
 	const vector<ComputationalCell>& /*cells*/, const vector<Slope>& gradients,
-	size_t ghost_index, double /*time*/, Edge const& /*edge*/, TracerStickerNames const& /*tracerstickernames*/) const
+	size_t ghost_index, double /*time*/, Edge const& /*edge*/) const
 {
 	return gradients[static_cast<size_t>(tess.GetOriginalIndex(static_cast<int>(ghost_index)))];
 }

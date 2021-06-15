@@ -28,7 +28,6 @@ public:
 	  \param cd Cache data
 	  \param cells Computational cells
 	  \param extensives Extensive variables
-	  \param tracerstickernames The names of the tracers and stickers
 	  \param time The time
 	 */
 	virtual void operator()
@@ -39,8 +38,7 @@ public:
 			const CacheData& cd,
 			const vector<ComputationalCell>& cells,
 			vector<Extensive>& extensives,
-			double time,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			double time) const = 0;
 
 	//! \brief Class constructor
 	virtual ~ExtensiveUpdater(void);

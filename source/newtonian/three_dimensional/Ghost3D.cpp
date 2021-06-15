@@ -23,8 +23,7 @@ vector<std::pair<size_t, size_t> > Ghost3D::GetOuterFacesIndeces(Tessellation3D 
 
 
 void RigidWallGenerator3D::operator()(const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, double /*time*/, TracerStickerNames const&
-	/*tracerstickernames*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
+	const vector<ComputationalCell3D>& cells, double /*time*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
 {
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
 	size_t N = ghosts.size();
@@ -60,8 +59,7 @@ void RigidWallGenerator3D::operator()(const Tessellation3D& tess,
 }
 
 Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
-	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/) const
 {
 	Slope3D res;
 //	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
@@ -71,8 +69,7 @@ Slope3D RigidWallGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, c
 }
 
 void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, double /*time*/, TracerStickerNames const&
-	/*tracerstickernames*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
+	const vector<ComputationalCell3D>& cells, double /*time*/, boost::container::flat_map<size_t, ComputationalCell3D> &res) const
 {
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
 	size_t N = ghosts.size();
@@ -106,8 +103,7 @@ void FreeFlowGenerator3D::operator()(const Tessellation3D& tess,
 }
 
 Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
-	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, double /*time*/, size_t /*face_index*/) const
 {
 	Slope3D res;
 //	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
@@ -119,7 +115,7 @@ Slope3D FreeFlowGenerator3D::GetGhostGradient(const Tessellation3D& /*tess*/, co
 ConstantPrimitiveGenerator3D::ConstantPrimitiveGenerator3D(ComputationalCell3D const & cell):cell_(cell) {}
 
 void ConstantPrimitiveGenerator3D::operator()(const Tessellation3D & tess, const vector<ComputationalCell3D>&/*cells*/, 
-	double /*time*/, TracerStickerNames const & /*tracerstickernames*/, boost::container::flat_map<size_t, 
+	double /*time*/, boost::container::flat_map<size_t, 
 	ComputationalCell3D>& res) const
 {
 	vector<std::pair<size_t, size_t> > ghosts = GetOuterFacesIndeces(tess);
@@ -159,7 +155,7 @@ void ConstantPrimitiveGenerator3D::operator()(const Tessellation3D & tess, const
 Slope3D ConstantPrimitiveGenerator3D::GetGhostGradient(const Tessellation3D & /*tess*/, 
 						       const vector<ComputationalCell3D>& /*cells*/, 
 						       const vector<Slope3D>& /*gradients*/, size_t /*ghost_index*/, 
-	double /*time*/, size_t /*face_index*/, TracerStickerNames const & /*tracerstickernames*/) const
+	double /*time*/, size_t /*face_index*/) const
 {
 	Slope3D res;
 //	res.xderivative.tracers.resize(cells[0].tracers.size(), 0);
@@ -175,13 +171,12 @@ SeveralGhostGenerator3D::SeveralGhostGenerator3D(const vector<Ghost3D*>& ghosts,
 	ghosts_(ghosts), ghost_chooser_(ghostchooser){}
 
 void SeveralGhostGenerator3D::operator() (const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, double time, TracerStickerNames const&
-	tracerstickernames, boost::container::flat_map<size_t, ComputationalCell3D> &res) const 
+	const vector<ComputationalCell3D>& cells, double time, boost::container::flat_map<size_t, ComputationalCell3D> &res) const 
 {
 	size_t nghosts = ghosts_.size();
 	vector< boost::container::flat_map<size_t, ComputationalCell3D> > ghost_cells(nghosts);
 	for (size_t i = 0; i < nghosts; ++i)
-		ghosts_[i]->operator()(tess, cells, time, tracerstickernames, ghost_cells[i]);
+		ghosts_[i]->operator()(tess, cells, time, ghost_cells[i]);
 	size_t N = ghost_cells[0].size();
 	res.clear();
 	res.reserve(N);
@@ -194,10 +189,9 @@ void SeveralGhostGenerator3D::operator() (const Tessellation3D& tess,
 }
 
 Slope3D SeveralGhostGenerator3D::GetGhostGradient(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index,
-	TracerStickerNames const& tracerstickernames) const
+	const vector<Slope3D>& gradients, size_t ghost_index, double time, size_t face_index) const
 {
 	return ghosts_[ghost_chooser_.GhostChoose(tess,
-		ghost_index)]->GetGhostGradient(tess, cells, gradients, ghost_index, time, face_index, tracerstickernames);
+		ghost_index)]->GetGhostGradient(tess, cells, gradients, ghost_index, time, face_index);
 }
 

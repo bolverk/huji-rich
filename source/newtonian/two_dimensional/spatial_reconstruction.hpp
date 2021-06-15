@@ -31,7 +31,6 @@ public:
     \param cells Computational cells
 	\param time The sim time
     \param res List of pairs of primitive values on each edge given as output
-	\param tracerstickersnames The names of the tracers and stickers
 	\param cd The cache data of the geometry
    */
   virtual void
@@ -39,7 +38,7 @@ public:
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
    double time, vector<pair<ComputationalCell, ComputationalCell> > &res,
-	  TracerStickerNames const& tracerstickersnames,CacheData const& cd) const = 0;
+	  CacheData const& cd) const = 0;
 
   virtual ~SpatialReconstruction(void);
 };

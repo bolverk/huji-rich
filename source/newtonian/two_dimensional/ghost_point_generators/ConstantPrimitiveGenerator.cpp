@@ -4,7 +4,7 @@ ConstantPrimitiveGenerator::ConstantPrimitiveGenerator(ComputationalCell const& 
 
 Slope ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
 	vector<ComputationalCell> const& /*cells*/, vector<Slope> const& gradients,
-	size_t ghost_index, double /*time*/,Edge const& /*edge*/,TracerStickerNames const& /*tracerstickernames*/)const
+	size_t ghost_index, double /*time*/,Edge const& /*edge*/)const
 {
 	if (tess.GetOriginalIndex(static_cast<int>(ghost_index)) < tess.GetPointNo())
 		return Slope();
@@ -13,7 +13,7 @@ Slope ConstantPrimitiveGenerator::GetGhostGradient(Tessellation const& tess,
 }
 
 boost::container::flat_map<size_t, ComputationalCell> ConstantPrimitiveGenerator::operator() (const Tessellation& tess,
-	const vector<ComputationalCell>& cells, double /*time*/,TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<ComputationalCell>& cells, double /*time*/) const
 {
 	vector<std::pair<size_t, size_t> > outer_edges = GetOuterEdgesIndeces(tess);
 	boost::container::flat_map<size_t, ComputationalCell> res;

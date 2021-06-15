@@ -33,7 +33,7 @@ public:
 		\return A pair of booleans. The first is whether the face satisfies a condition, and the second is an auxiliary variable.
 		*/
 		virtual pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-			const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const = 0;
+			const vector<ComputationalCell3D>& cells) const = 0;
 
 		virtual ~Condition3D(void);
 	};
@@ -57,7 +57,7 @@ public:
 		*/
 		virtual void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 			const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-			double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D,ComputationalCell3D>
+			double time, std::pair<ComputationalCell3D,ComputationalCell3D>
 			const& face_values) const = 0;
 
 		virtual ~Action3D(void);
@@ -80,7 +80,7 @@ public:
 
 	std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& edge_velocities,
 		const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& extensives, const EquationOfState& eos,
-		const double time, const double dt, TracerStickerNames const& tracerstickernames) const override
+		const double time, const double dt) const override
 ;
 
 private:
@@ -100,7 +100,7 @@ public:
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
+		double time,std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values)const override;
 
 private:
@@ -120,7 +120,7 @@ public:
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
+		double time,std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values) const override;
 
 private:
@@ -139,7 +139,7 @@ public:
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-		double time, TracerStickerNames const& tracerstickernames,std::pair<ComputationalCell3D, ComputationalCell3D>
+		double time,std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values) const override;
 
 private:
@@ -169,8 +169,7 @@ public:
 		*/
 		virtual bool operator()(const size_t index,const Tessellation3D& tess,const Vector3D& edge_velocity,
 			const vector<ComputationalCell3D>& cells,const EquationOfState& eos,const bool aux,	
-			const pair<ComputationalCell3D, ComputationalCell3D> & edge_values,	double time,
-			TracerStickerNames const& tracerstickernames) const = 0;
+			const pair<ComputationalCell3D, ComputationalCell3D> & edge_values,	double time) const = 0;
 
 		virtual ~LagrangianCriteria3D();
 	};
@@ -184,7 +183,7 @@ public:
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D &res,
-		double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+		double time, std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values) const override;
 
 	/*! \brief Resets the internal variables
@@ -210,7 +209,7 @@ public:
 	IsBoundaryFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const override;
+		const vector<ComputationalCell3D>& cells)const override;
 };
 
 //! \brief Check if an interface is inside the domain
@@ -221,7 +220,7 @@ public:
 	IsBulkFace3D(void);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const override;
+		const vector<ComputationalCell3D>& cells)const override;
 };
 
 //! \brief Determines if the interface is between a regular and a special cell
@@ -235,7 +234,7 @@ public:
 	explicit RegularSpecialEdge3D(const string& sticker_name);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const override;
+		const vector<ComputationalCell3D>& cells) const override;
 
 private:
 	const string sticker_name_;

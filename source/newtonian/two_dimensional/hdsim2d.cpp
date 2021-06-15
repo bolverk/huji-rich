@@ -41,8 +41,7 @@ namespace
 	vector<Extensive> init_extensives(const Tessellation& tess,
 		const PhysicalGeometry& pg,
 		const vector<ComputationalCell>& cells,
-		const EquationOfState& eos,
-		TracerStickerNames const& tracernames)
+		const EquationOfState& eos)
 	{
 	  size_t Nloop = static_cast<size_t>(tess.GetPointNo());
 		vector<Extensive> res(Nloop);
@@ -54,7 +53,7 @@ namespace
 				(serial_generate(CellEdgesGetter(tess, static_cast<int>(i))));
 			const double mass = volume*cell.density;
 			res[i].mass = mass;
-			res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers,tracernames.tracer_names)*mass +
+			res[i].energy = eos.dp2e(cell.density, cell.pressure, cell.tracers, cell.tracerNames)*mass +
 				0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 			res[i].momentum = mass*cell.velocity;
 			size_t N = cell.tracers.size();
@@ -83,7 +82,7 @@ hdsim::hdsim
 	const FluxCalculator& fc,
 	const ExtensiveUpdater& eu,
 	const CellUpdater& cu,
-	const TracerStickerNames& tracer_sticker_names
+	const pair<vector<string>, vector<string> >& tracer_sticker_names
 #ifdef RICH_MPI
 	,const ProcessorUpdate* proc_update
 #endif
@@ -100,8 +99,7 @@ hdsim::hdsim
 		(tess,
 			pg,
 			cells,
-			eos,
-			tracer_sticker_names)),
+			eos)),
 	point_motion_(point_motion),
 	edge_velocity_calculator_(evc),
 	source_(source),
@@ -112,7 +110,6 @@ hdsim::hdsim
 	fc_(fc),
 	eu_(eu),
 	cu_(cu),
-	tracer_sticker_names_(tracer_sticker_names),
 	cache_data_(tess, pg)
 #ifdef RICH_MPI
 	, proc_update_(proc_update)
@@ -120,10 +117,10 @@ hdsim::hdsim
 {
 	// sort tracers and stickers
 	size_t N = cells_.size();
-	vector<size_t> tindex = sort_index(tracer_sticker_names_.tracer_names);
-	vector<size_t> sindex = sort_index(tracer_sticker_names_.sticker_names);
-	tracer_sticker_names_.tracer_names = VectorValues(tracer_sticker_names_.tracer_names, tindex);
-	tracer_sticker_names_.sticker_names = VectorValues(tracer_sticker_names_.sticker_names, sindex);
+	vector<size_t> tindex = sort_index(tracer_sticker_names.first);
+	vector<size_t> sindex = sort_index(tracer_sticker_names.second);
+	ComputationalCell::tracerNames = VectorValues(tracer_sticker_names.first, tindex);
+	ComputationalCell::stickerNames = VectorValues(tracer_sticker_names.second, sindex);
 	for (size_t i = 0; i < N; ++i)
 	{
 		for (size_t j = 0; j < tindex.size(); ++j)
@@ -138,15 +135,10 @@ hdsim::hdsim
 
 hdsim::~hdsim(void) {}
 
-TracerStickerNames const& hdsim::GetTracerStickerNames(void)const
-{
-	return tracer_sticker_names_;
-}
-
 void hdsim::TimeAdvance(void)
 {
 	vector<Vector2D> point_velocities =
-		point_motion_(tess_, cells_, time_,tracer_sticker_names_);
+		point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
@@ -160,9 +152,9 @@ void hdsim::TimeAdvance(void)
 		cells_,
 		eos_,
 		edge_velocities,
-		time_,tracer_sticker_names_);
+		time_);
 
-	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
 #endif
@@ -179,7 +171,7 @@ void hdsim::TimeAdvance(void)
 			cache_data_,
 			eos_,
 			time_,
-			dt,tracer_sticker_names_);
+			dt);
 
 
 	//  update_extensives(fluxes,
@@ -190,7 +182,7 @@ void hdsim::TimeAdvance(void)
 		cache_data_,
 		cells_,
 		extensives_,
-		time_,tracer_sticker_names_);
+		time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -201,7 +193,7 @@ void hdsim::TimeAdvance(void)
 		source_,
 		time_,
 		dt,
-		extensives_,tracer_sticker_names_);
+		extensives_);
 
 #ifdef RICH_MPI
 	if (proc_update_ != 0)
@@ -228,7 +220,7 @@ void hdsim::TimeAdvance(void)
 #endif
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_);
 
 	time_ += dt;
 	cycle_++;
@@ -237,7 +229,7 @@ void hdsim::TimeAdvance(void)
 void hdsim::TimeAdvanceClip(void)
 {
 	vector<Vector2D> point_velocities =
-		point_motion_(tess_, cells_, time_,tracer_sticker_names_);
+		point_motion_(tess_, cells_, time_);
 
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
@@ -246,9 +238,9 @@ void hdsim::TimeAdvanceClip(void)
 		cells_,
 		eos_,
 		edge_velocities,
-		time_,tracer_sticker_names_);
+		time_);
 
-	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 	edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
@@ -262,7 +254,7 @@ void hdsim::TimeAdvanceClip(void)
 			cache_data_,
 			eos_,
 			time_,
-			dt,tracer_sticker_names_);
+			dt);
 
 
 	//  update_extensives(fluxes,
@@ -272,7 +264,7 @@ void hdsim::TimeAdvanceClip(void)
 		dt,
 		cache_data_,
 		cells_,
-		extensives_, time_,tracer_sticker_names_);
+		extensives_, time_);
 
 	ExternalForceContribution(tess_,
 		pg_,
@@ -283,7 +275,7 @@ void hdsim::TimeAdvanceClip(void)
 		source_,
 		time_,
 		dt,
-		extensives_,tracer_sticker_names_);
+		extensives_);
 	
 	boost::scoped_ptr<Tessellation> oldtess(tess_.clone());
 
@@ -293,7 +285,7 @@ void hdsim::TimeAdvanceClip(void)
 
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,cache_data_);
 
 	time_ += dt;
 	cycle_++;
@@ -316,7 +308,7 @@ namespace
 
 void hdsim::TimeAdvance2Heun(void)
 {
-	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
+	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
@@ -327,9 +319,9 @@ void hdsim::TimeAdvance2Heun(void)
 	vector<Vector2D> edge_velocities =
 		edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
-	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, point_velocities, true);
@@ -346,7 +338,7 @@ void hdsim::TimeAdvance2Heun(void)
 			cache_data_,
 			eos_,
 			time_,
-			dt,tracer_sticker_names_);
+			dt);
 
 	vector<Extensive> mid_extensives = extensives_;
 
@@ -360,9 +352,9 @@ void hdsim::TimeAdvance2Heun(void)
 			source_,
 			time_,
 			dt,
-			mid_extensives,tracer_sticker_names_);
+			mid_extensives);
 
-	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_,tracer_sticker_names_);
+	eu_(mid_fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_);
 
 
 #ifdef RICH_MPI
@@ -394,8 +386,7 @@ void hdsim::TimeAdvance2Heun(void)
 #endif
 	cache_data_.reset();
 
-	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,
-		tracer_sticker_names_);
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
 
 #ifdef RICH_MPI
 	MPI_exchange_data(tess_, mid_cells, true);
@@ -413,7 +404,7 @@ void hdsim::TimeAdvance2Heun(void)
 			cache_data_,
 			eos_,
 			time_,
-			dt,tracer_sticker_names_);
+			dt);
 
 	ExternalForceContribution
 		(tess_,
@@ -425,14 +416,14 @@ void hdsim::TimeAdvance2Heun(void)
 			source_,
 			time_ + dt,
 			dt,
-			mid_extensives,tracer_sticker_names_);
+			mid_extensives);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt,tracer_sticker_names_);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, mid_extensives, time_ + dt);
 
 
 	extensives_ = average_extensive(mid_extensives, extensives_);
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
 	time_ += dt;
 	++cycle_;
@@ -440,18 +431,17 @@ void hdsim::TimeAdvance2Heun(void)
 
 void hdsim::TimeAdvance2MidPointClip(void)
 {
-	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
+	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 	vector<Vector2D> edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
-	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	vector<Extensive> fluxes = fc_(tess_, edge_velocities, cells_, extensives_, cache_data_, eos_, time_, 0.5*dt,
-		tracer_sticker_names_);
+	vector<Extensive> fluxes = fc_(tess_, edge_velocities, cells_, extensives_, cache_data_, eos_, time_, 0.5*dt);
 
 	vector<Extensive> mid_extensives = extensives_;
 
@@ -466,19 +456,19 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	mid_extensives = mid_extensives + FluxFix2(*oldtess, *oldtess, tess_, point_velocities, 0.5*dt, cells_, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives, time_,tracer_sticker_names_);
+	eu_(fluxes, pg_, *oldtess, 0.5*dt, data_temp, cells_, mid_extensives, time_);
 
 	ExternalForceContribution(*oldtess, pg_, data_temp, cells_, fluxes, point_velocities, source_, time_, 0.5*dt,
-		mid_extensives,tracer_sticker_names_);
+		mid_extensives);
 
 	time_ += 0.5*dt;
 	cache_data_.reset();
 
-	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,tracer_sticker_names_);
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt,tracer_sticker_names_);
+	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
@@ -489,13 +479,13 @@ void hdsim::TimeAdvance2MidPointClip(void)
 	extensives_ = extensives_ + FluxFix2(*oldtess, *midtess, tess_, point_velocities, dt, mid_cells, fluxes,
 		edge_velocities, obc_, eos_);
 
-	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_, time_,tracer_sticker_names_);
+	eu_(fluxes, pg_, *midtess, dt, cachetemp2, cells_, extensives_, time_);
 
 	ExternalForceContribution(*midtess, pg_, cachetemp2, mid_cells, fluxes, point_velocities, source_, time_, dt, 
-		extensives_,tracer_sticker_names_);
+		extensives_);
 
 	cache_data_.reset();
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
 	if (cycle_ % 25 == 0)
 	{
@@ -511,25 +501,24 @@ void hdsim::TimeAdvance2MidPointClip(void)
 
 void hdsim::TimeAdvance2MidPoint(void)
 {
-	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_,tracer_sticker_names_);
+	vector<Vector2D> point_velocities = point_motion_(tess_, cells_, time_);
 
 	vector<Vector2D> edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_,tracer_sticker_names_);
+	const double dt = tsf_(tess_, cells_, eos_, edge_velocities, time_);
 
-	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities,tracer_sticker_names_);
+	point_velocities = point_motion_.ApplyFix(tess_, cells_, time_, dt, point_velocities);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	vector<Extensive> fluxes = fc_(tess_, edge_velocities, cells_, extensives_, cache_data_, eos_, time_, 0.5*dt,
-		tracer_sticker_names_);
+	vector<Extensive> fluxes = fc_(tess_, edge_velocities, cells_, extensives_, cache_data_, eos_, time_, 0.5*dt);
 
 	vector<Extensive> mid_extensives = extensives_;
 
-	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives, time_,tracer_sticker_names_);
+	eu_(fluxes, pg_, tess_, 0.5*dt, cache_data_, cells_, mid_extensives, time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, cells_, fluxes, point_velocities, source_, time_, 0.5*dt, 
-		mid_extensives,tracer_sticker_names_);
+		mid_extensives);
 
 	vector<Vector2D> old_points = tess_.GetMeshPoints();
 	old_points.resize(static_cast<size_t>(tess_.GetPointNo()));
@@ -551,25 +540,23 @@ void hdsim::TimeAdvance2MidPoint(void)
 
 	cache_data_.reset();
 
-	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_,
-		tracer_sticker_names_);
+	vector<ComputationalCell> mid_cells = cu_(tess_, pg_, eos_, mid_extensives, cells_, cache_data_);
 
 	edge_velocities = edge_velocity_calculator_(tess_, point_velocities);
 
-	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt,
-		tracer_sticker_names_);
+	fluxes = fc_(tess_, edge_velocities, mid_cells, mid_extensives, cache_data_, eos_, time_, dt);
 
-	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_, time_,tracer_sticker_names_);
+	eu_(fluxes, pg_, tess_, dt, cache_data_, cells_, extensives_, time_);
 
 	ExternalForceContribution(tess_, pg_, cache_data_, mid_cells, fluxes, point_velocities, source_, time_, dt, 
-		extensives_,tracer_sticker_names_);
+		extensives_);
 
 	boost::scoped_ptr<Tessellation> midtess(tess_.clone());
 
 	MoveMeshPoints(point_velocities, dt, tess_, false, old_points);
 	cache_data_.reset();
 
-	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_,tracer_sticker_names_);
+	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_, cache_data_);
 
 	time_ += 0.5*dt;
 	++cycle_;
@@ -652,7 +639,7 @@ vector<ComputationalCell>& hdsim::getAllCells(void)
 void hdsim::recalculatePrimitives(void)
 {
 	cells_ = cu_(tess_, pg_, eos_, extensives_, cells_,
-		cache_data_,tracer_sticker_names_);
+		cache_data_);
 }
 
 void hdsim::recalculateExtensives(void)
@@ -663,8 +650,7 @@ void hdsim::recalculateExtensives(void)
 		const double volume = cache_data_.volumes[i];
 		const double mass = volume*cell.density;
 		extensives_[i].mass = mass;
-		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,tracer_sticker_names_.tracer_names)
-			*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
+		extensives_[i].energy = eos_.dp2e(cell.density, cell.pressure, cell.tracers,ComputationalCell::tracerNames)*mass +	0.5*mass*ScalarProd(cell.velocity, cell.velocity);
 		extensives_[i].momentum = mass*cell.velocity;
 //		extensives_[i].tracers.resize(cell.tracers.size());
 		size_t N = cell.tracers.size();

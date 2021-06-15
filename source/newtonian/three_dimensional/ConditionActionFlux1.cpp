@@ -12,20 +12,20 @@ namespace
 	void choose_action(size_t face, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
 		const EquationOfState& eos, const Vector3D& face_velocity,
 		const vector<pair<const ConditionActionFlux1::Condition3D*, const ConditionActionFlux1::Action3D*> >& sequence,
-		Conserved3D &res, double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+		Conserved3D &res, double time, std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
 			const pair<bool, bool> flag_aux = (*sequence[i].first)
-				(face, tess, cells, tracerstickernames);
+				(face, tess, cells);
 #ifdef RICH_DEBUG
 			try
 			{
 #endif
 				if (flag_aux.first)
 					return (*sequence[i].second)
-					(face, tess, face_velocity, cells, eos, flag_aux.second, res, time, tracerstickernames, face_values);
+					(face, tess, face_velocity, cells, eos, flag_aux.second, res, time, face_values);
 #ifdef RICH_DEBUG
 			}
 			catch (UniversalError &eo)
@@ -57,12 +57,12 @@ namespace
 
 std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > ConditionActionFlux1::operator()(vector<Conserved3D> &fluxes, const Tessellation3D& tess, const vector<Vector3D>& face_velocities,
 												   const vector<ComputationalCell3D>& cells, const vector<Conserved3D>& /*extensives*/, const EquationOfState& eos,
-	const double time, const double /*dt*/, TracerStickerNames const& tracerstickernames) const
+	const double time, const double /*dt*/) const
 {
 	for (size_t i = 0; i < sequence_.size(); ++i)
 		sequence_[i].second->Reset();
 	vector<std::pair<ComputationalCell3D, ComputationalCell3D> > face_values;
-	interp_(tess, cells, time, face_values, tracerstickernames);
+	interp_(tess, cells, time, face_values);
 	fluxes.resize(tess.GetTotalFacesNumber());
 	size_t Nloop = fluxes.size();
 	for (size_t i = 0; i < Nloop; ++i)
@@ -103,7 +103,7 @@ std::vector<std::pair<ComputationalCell3D, ComputationalCell3D> > ConditionActio
 			eo.addEntry("Face vz", face_velocities[i].z);
 			throw eo;
 		}
-		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, tracerstickernames, face_values[i]);
+		choose_action(i, tess, cells, eos, face_velocities[i], sequence_, fluxes[i], time, face_values[i]);
 	}
 	return face_values;
 }
@@ -115,28 +115,13 @@ ConditionActionFlux1::Action3D::~Action3D(void) {}
 RegularFlux3D::RegularFlux3D(const RiemannSolver3D& rs) :
 	rs_(rs) {}
 
-/*namespace
-{
-	void conserved_to_extensive
-		(const Conserved3D& c, const ComputationalCell& cell, Conserved3D &res)
-	{
-		res.mass = c.mass;
-		res.momentum = c.momentum;
-		res.energy = c.energy;
-		res.tracers.resize(cell.tracers.size());
-		size_t N = cell.tracers.size();
-		for (size_t i = 0; i < N; ++i)
-			res.tracers[i] = cell.tracers[i] * c.mass;
-	}
-}*/
-
 void RegularFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool /*aux*/, Conserved3D &res,
-	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	double /*time*/, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
-	RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos, tracerstickernames);
+	RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos);
 }
 
 RigidWallFlux3D::RigidWallFlux3D(const RiemannSolver3D& rs) : rs_(rs) {}
@@ -166,20 +151,20 @@ namespace
 
 void RigidWallFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
-	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	double /*time*/, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
 	std::pair<ComputationalCell3D, ComputationalCell3D>	rigid_states(face_values);
 	rigid_wall_states(rigid_states, normal, aux);
-	RotateSolveBack3D(normal, rigid_states.first, rigid_states.second, face_velocity, rs_, res, eos, tracerstickernames);
+	RotateSolveBack3D(normal, rigid_states.first, rigid_states.second, face_velocity, rs_, res, eos);
 }
 
 FreeFlowFlux3D::FreeFlowFlux3D(const RiemannSolver3D& rs) : rs_(rs) {}
 
 void FreeFlowFlux3D::operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 	const vector<ComputationalCell3D>& /*cells*/, const EquationOfState& eos, const bool aux, Conserved3D &res,
-	double /*time*/, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+	double /*time*/, std::pair<ComputationalCell3D, ComputationalCell3D>
 	const& face_values) const
 {
 	const Vector3D normal = normalize(tess.Normal(face_index));
@@ -188,13 +173,13 @@ void FreeFlowFlux3D::operator()(size_t face_index, const Tessellation3D& tess, c
 		states.second = states.first;
 	else
 		states.first = states.second;
-	RotateSolveBack3D(normal, states.first, states.second, face_velocity, rs_, res, eos, tracerstickernames);
+	RotateSolveBack3D(normal, states.first, states.second, face_velocity, rs_, res, eos);
 }
 
 IsBoundaryFace3D::IsBoundaryFace3D(void) {}
 
 pair<bool, bool> IsBoundaryFace3D::operator()(size_t face_index, const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/) const
+	const vector<ComputationalCell3D>& /*cells*/) const
 {
 	if (!tess.BoundaryFace(face_index))
 		return pair<bool, bool>(false, false);
@@ -207,7 +192,7 @@ pair<bool, bool> IsBoundaryFace3D::operator()(size_t face_index, const Tessellat
 IsBulkFace3D::IsBulkFace3D(void) {}
 
 pair<bool, bool> IsBulkFace3D::operator()(size_t face_index, const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& /*cells*/, TracerStickerNames const& /*tracerstickernames*/)const
+	const vector<ComputationalCell3D>& /*cells*/)const
 {
 	if (tess.BoundaryFace(face_index))
 		return pair<bool, bool>(false, false);
@@ -219,18 +204,18 @@ RegularSpecialEdge3D::RegularSpecialEdge3D(const string& sticker_name) :
 	sticker_name_(sticker_name) {}
 
 pair<bool, bool> RegularSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess,
-	const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames)const
+	const vector<ComputationalCell3D>& cells)const
 {
-	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), tracerstickernames.sticker_names.begin(),
-		tracerstickernames.sticker_names.end(), sticker_name_))
+  if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+		     ComputationalCell3D::stickerNames.end(), sticker_name_))
 	{
-		if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), tracerstickernames.sticker_names.begin(),
-			tracerstickernames.sticker_names.end(), sticker_name_))
+	  if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+			     ComputationalCell3D::stickerNames.end(), sticker_name_))
 			return pair<bool, bool>(false, false);
 		return pair<bool, bool>(true, false);
 	}
-	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), tracerstickernames.sticker_names.begin(),
-		tracerstickernames.sticker_names.end(), sticker_name_))
+  if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+		     ComputationalCell3D::stickerNames.end(), sticker_name_))
 		return pair<bool, bool>(true, true);
 	return pair<bool, bool>(false, false);
 }
@@ -241,22 +226,22 @@ LagrangianFlux3D::LagrangianFlux3D(const LagrangianHLLC3D & rs, const Lagrangian
 
 void LagrangianFlux3D::operator()(size_t face_index, const Tessellation3D & tess, const Vector3D & face_velocity, 
 	const vector<ComputationalCell3D>& cells, const EquationOfState & eos, const bool aux, Conserved3D & res, double time, 
-	TracerStickerNames const & tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D> const & face_values) const
+	 std::pair<ComputationalCell3D, ComputationalCell3D> const & face_values) const
 {
 	size_t N = tess.GetTotalFacesNumber();
 	ws_.resize(N, 0.0);
 	edge_vel_.resize(N, 0.0);
 	Lag_calc_.resize(N, false);
 	const Vector3D normal = normalize(tess.Normal(face_index));
-	if (criteria_(face_index, tess, face_velocity, cells, eos, aux, face_values, time, tracerstickernames))
+	if (criteria_(face_index, tess, face_velocity, cells, eos, aux, face_values, time))
 	{
-		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos, tracerstickernames);
+		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs_, res, eos);
 		ws_[face_index] = rs_.ws;
 		Lag_calc_[face_index] = true;
 	}
 	else
 	{
-		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs2_, res, eos, tracerstickernames);
+		RotateSolveBack3D(normal, face_values.first, face_values.second, face_velocity, rs2_, res, eos);
 		ws_[face_index] = 0;
 		Lag_calc_[face_index] = false;
 	}

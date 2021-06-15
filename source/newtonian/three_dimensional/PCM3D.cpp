@@ -3,14 +3,14 @@
 PCM3D::PCM3D(Ghost3D const& ghost) :ghost_(ghost),slopes_(std::vector<Slope3D>()) {}
 
 void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames)const
+	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res)const
 {
 	// Get ghost points
 	size_t Nfaces = tess.GetTotalFacesNumber();
 	size_t Npoints = tess.GetPointNo();
 	res.resize(Nfaces);
 	boost::container::flat_map<size_t, ComputationalCell3D> ghosts;
-	ghost_(tess, cells, time, tracerstickersnames,ghosts);
+	ghost_(tess, cells, time,ghosts);
 	for (size_t i = 0; i < Nfaces; ++i)
 	{
 		size_t n0 = tess.GetFaceNeighbors(i).first;
@@ -32,7 +32,7 @@ void PCM3D::operator()(const Tessellation3D& tess, const vector<ComputationalCel
 	}
 }
 
-void PCM3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& /*cells*/, double /*time*/, TracerStickerNames const& /*tracerstickersnames*/) 
+void PCM3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& /*cells*/, double /*time*/) 
 {
 	slopes_.resize(tess.GetTotalPointNumber());
 	return;

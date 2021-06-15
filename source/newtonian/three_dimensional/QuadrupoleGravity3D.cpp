@@ -167,7 +167,7 @@ QuadrupoleGravity3D::QuadrupoleGravity3D(size_t res, double smoothlength,bool ou
 smoothlength_(smoothlength),output_(output),potential(vector<double>()){}
 
 void QuadrupoleGravity3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const& /*tracerstickernames*/,
+	const vector<Conserved3D>& /*fluxes*/, const double /*time*/,
 	vector<Vector3D> &acc) const
 {
 	size_t N = tess.GetPointNo();

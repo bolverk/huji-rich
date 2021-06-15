@@ -33,6 +33,9 @@ public:
 	//! \brief Velocity
 	Vector3D velocity;
 
+  static vector<string> tracerNames;
+  static vector<string> stickerNames;
+
 	//! \brief Tracers
 	std::array<double,MAX_TRACERS> tracers;
 

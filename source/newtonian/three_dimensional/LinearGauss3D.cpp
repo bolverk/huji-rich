@@ -209,7 +209,7 @@ namespace
 	}
 
 	ComputationalCell3D interp(ComputationalCell3D const& cell, Slope3D const& slope,
-		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos, TracerStickerNames const& tsn,
+		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos, 
 		bool pressure_calc)
 	{
 		ComputationalCell3D res(cell);
@@ -220,7 +220,7 @@ namespace
 			try
 		{
 			//res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
-			res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
+		  res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, ComputationalCell3D::tracerNames);
 		}
 		catch (UniversalError &eo)
 		{
@@ -240,7 +240,7 @@ namespace
 	}
 
 	void interp23D(ComputationalCell3D &res, Slope3D const& slope,
-		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos, TracerStickerNames const& tsn,
+		Vector3D const& target, Vector3D const& cm, EquationOfState const& eos,
 		bool pressure_calc)
 	{
 		ComputationalCellAddMult(res, slope.xderivative, target.x - cm.x);
@@ -249,9 +249,9 @@ namespace
 		try
 		{
 			if (!pressure_calc)
-				res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, tsn.tracer_names);
+			  res.pressure = eos.de2p(res.density, res.internal_energy, res.tracers, ComputationalCell3D::tracerNames);
 			else
-				res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, tsn.tracer_names);
+			  res.internal_energy = eos.dp2e(res.density, res.pressure, res.tracers, ComputationalCell3D::tracerNames);
 		}
 		catch (UniversalError &eo)
 		{
@@ -264,7 +264,7 @@ namespace
 	void slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
 		vector<ComputationalCell3D> const& neighbors, Slope3D &slope, ComputationalCell3D &cmax,
 		ComputationalCell3D &cmin, ComputationalCell3D &maxdiff, ComputationalCell3D &mindiff,
-		TracerStickerNames const& tracerstickernames, string const& skip_key, Tessellation3D const& tess,
+ string const& skip_key, Tessellation3D const& tess,
 		size_t /*cell_index*/, face_vec const& faces, EquationOfState const& eos)
 	{
 		ReplaceComputationalCell(cmax, cell);
@@ -275,8 +275,8 @@ namespace
 		for (size_t i = 0; i < nloop; ++i)
 		{
 			ComputationalCell3D const& cell_temp = neighbors[i];
-			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
-				tracerstickernames.sticker_names.end(), skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+								ComputationalCell3D::stickerNames.end(), skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -304,7 +304,7 @@ namespace
 		ReplaceComputationalCell(mindiff, cmin);
 		mindiff -= cell;
 		// limit the slope
-		ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[0]), cm, eos, tracerstickernames, false);
+		ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[0]), cm, eos, false);
 		ComputationalCell3D dphi = centroid_val - cell;
 		vector<double> psi(6 + cell.tracers.size(), 1);
 		const size_t nedges = faces.size();
@@ -425,7 +425,7 @@ namespace
 
 	void shocked_slope_limit(ComputationalCell3D const& cell, Vector3D const& cm,
 		vector<ComputationalCell3D> const& neighbors,
-		Slope3D  &slope, double diffusecoeff, TracerStickerNames const& tracerstickernames,
+		Slope3D  &slope, double diffusecoeff,
 		string const& skip_key, Tessellation3D const& tess, size_t cell_index, face_vec const& faces,
 		EquationOfState const& eos)
 	{
@@ -437,8 +437,8 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 		{
 			ComputationalCell3D const& cell_temp = neighbors[i];
-			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), tracerstickernames.sticker_names.begin(),
-				tracerstickernames.sticker_names.end(), skip_key))
+			if (!skip_key.empty() && *safe_retrieve(cell_temp.stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+								ComputationalCell3D::stickerNames.end(), skip_key))
 				continue;
 			cmax.density = std::max(cmax.density, cell_temp.density);
 			cmax.pressure = std::max(cmax.pressure, cell_temp.pressure);
@@ -467,9 +467,9 @@ namespace
 		for (size_t i = 0; i < N; ++i)
 		{
 			if (!skip_key.empty() && *safe_retrieve(neighbors[i].stickers.begin(),
-				tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(), skip_key))
+								ComputationalCell3D::stickerNames.begin(), ComputationalCell3D::stickerNames.end(), skip_key))
 				continue;
-			ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[i]), cm, eos, tracerstickernames, false);
+			ComputationalCell3D centroid_val = interp(cell, slope, tess.FaceCM(faces[i]), cm, eos, false);
 			ComputationalCell3D dphi = centroid_val - cell;
 			// density
 			if (std::abs(dphi.density) > small_factor*std::max(std::abs(maxdiff.density), std::abs(mindiff.density)) || centroid_val.density*cell.density < 0)
@@ -619,7 +619,7 @@ namespace
 		ComputationalCell3D &temp3, ComputationalCell3D &temp4, ComputationalCell3D &temp5,
 		vector<Vector3D> &neighbor_mesh_list,
 		vector<Vector3D> &neighbor_cm_list,
-		TracerStickerNames const& tracerstickernames, string const& skip_key,
+ string const& skip_key,
 		const std::vector<Vector3D> &c_ij, vector<ComputationalCell3D> &neighbor_list)
 	{
 		face_vec const& faces = tess.GetCellFaces(cell_index);
@@ -644,9 +644,9 @@ namespace
 
 		naive_slope_ = res;
 
-		for (size_t i = 0; i < tracerstickernames.tracer_names.size(); ++i)
+		for (size_t i = 0; i < ComputationalCell3D::tracerNames.size(); ++i)
 		{
-			if (std::find(calc_tracers.begin(), calc_tracers.end(), tracerstickernames.tracer_names[i]) == calc_tracers.end())
+		  if (std::find(calc_tracers.begin(), calc_tracers.end(), ComputationalCell3D::tracerNames[i]) == calc_tracers.end())
 			{
 				res.xderivative.tracers[i] = 0;
 				res.yderivative.tracers[i] = 0;
@@ -661,14 +661,14 @@ namespace
 			{
 #endif
 				if (!is_shock(res, tess.GetWidth(cell_index), shockratio, cell, neighbor_list, pressure_ratio,
-					eos.dp2c(cell.density, cell.pressure, cell.tracers, tracerstickernames.tracer_names)))
+					      eos.dp2c(cell.density, cell.pressure, cell.tracers, ComputationalCell3D::tracerNames)))
 				{
 					slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, temp2, temp3, temp4, temp5,
-						tracerstickernames, skip_key, tess, cell_index, faces, eos);
+						skip_key, tess, cell_index, faces, eos);
 				}
 				else
 				{
-					shocked_slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, diffusecoeff, tracerstickernames,
+					shocked_slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, diffusecoeff,
 						skip_key, tess, cell_index, faces, eos);
 				}
 #ifdef RICH_DEBUG
@@ -694,11 +694,11 @@ namespace
 }
 
 void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& cell, size_t cell_index, Vector3D const& cm,
-	Vector3D const& target, EquationOfState const& eos, TracerStickerNames const& tsn)const
+	Vector3D const& target, EquationOfState const& eos)const
 {
 	try
 	{
-		res = interp(cell, rslopes_[cell_index], target, cm, eos, tsn, true);
+		res = interp(cell, rslopes_[cell_index], target, cm, eos, true);
 	}
 	catch (UniversalError &eo)
 	{
@@ -715,17 +715,17 @@ void LinearGauss3D::Interp(ComputationalCell3D &res, ComputationalCell3D const& 
 	}
 }
 
-LinearGauss3D::LinearGauss3D(EquationOfState const& eos, TracerStickerNames const& tsn, Ghost3D const& ghost, bool slf, double delta_v, double theta,
-	double delta_P, bool SR, const vector<string>& calc_tracers, const string& skip_key,bool pressure_calc) : eos_(eos), tsn_(tsn), ghost_(ghost), rslopes_(),
+LinearGauss3D::LinearGauss3D(EquationOfState const& eos, Ghost3D const& ghost, bool slf, double delta_v, double theta,
+	double delta_P, bool SR, const vector<string>& calc_tracers, const string& skip_key,bool pressure_calc) : eos_(eos), ghost_(ghost), rslopes_(),
 	naive_rslopes_(), slf_(slf), shockratio_(delta_v), diffusecoeff_(theta), pressure_ratio_(delta_P), SR_(SR),
 	calc_tracers_(calc_tracers), skip_key_(skip_key), to_skip_(),pressure_calc_(pressure_calc) {}
 
-void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time, TracerStickerNames const& tracerstickersnames) 
+void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, double time) 
 {
 	const size_t CellNumber = tess.GetPointNo();
 	// Get ghost points
 	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
-	ghost_.operator()(tess, cells, time, tracerstickersnames, ghost_cells);
+	ghost_.operator()(tess, cells, time, ghost_cells);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell3D> new_cells(cells);
 	new_cells.resize(tess.GetTotalPointNumber());
@@ -757,7 +757,7 @@ void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<Computat
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
-			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_, c_ij, neighbor_list);
+			neighbor_mesh_list, neighbor_cm_list, skip_key_, c_ij, neighbor_list);
 	}
 #ifdef RICH_MPI
 	// communicate ghost slopes
@@ -766,14 +766,14 @@ void LinearGauss3D::BuildSlopes(Tessellation3D const& tess, std::vector<Computat
 }
 
 void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, double time,
-	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res, TracerStickerNames const& tracerstickersnames) const
+	vector<pair<ComputationalCell3D, ComputationalCell3D> > &res) const
 {
 	const size_t CellNumber = tess.GetPointNo();
 	vector<size_t> boundaryedges;
 	boundaryedges.reserve(static_cast<size_t>(std::pow(static_cast<double>(CellNumber), 0.6666)*8.0));
 	// Get ghost points
 	boost::container::flat_map<size_t, ComputationalCell3D> ghost_cells;
-	ghost_.operator()(tess, cells, time, tracerstickersnames, ghost_cells);
+	ghost_.operator()(tess, cells, time, ghost_cells);
 	// Copy ghost data into new cells vector
 	vector<ComputationalCell3D> new_cells(cells);
 	new_cells.resize(tess.GetTotalPointNumber());
@@ -803,17 +803,17 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 	std::vector<Vector3D> c_ij;
 	res.resize(tess.GetTotalFacesNumber(), pair<ComputationalCell3D, ComputationalCell3D>(cells[0], cells[0]));
 	ComputationalCell3D* cell_ref = nullptr;
-	size_t energy_index = tracerstickersnames.tracer_names.size();
-	vector<string>::const_iterator it = binary_find(tracerstickersnames.tracer_names.begin(),
-		tracerstickersnames.tracer_names.end(), string("Energy"));
-	if (it != tracerstickersnames.tracer_names.end())
-		energy_index = static_cast<size_t>(it - tracerstickersnames.tracer_names.begin());
-	bool energy_fix = energy_index < tracerstickersnames.tracer_names.size();
+	size_t energy_index = ComputationalCell3D::tracerNames.size();
+	vector<string>::const_iterator it = binary_find(ComputationalCell3D::tracerNames.begin(),
+							ComputationalCell3D::tracerNames.end(), string("Energy"));
+	if (it != ComputationalCell3D::tracerNames.end())
+	  energy_index = static_cast<size_t>(it - ComputationalCell3D::tracerNames.begin());
+	bool energy_fix = energy_index < ComputationalCell3D::tracerNames.size();
 	for (size_t i = 0; i < CellNumber; ++i)
 	{
 		calc_slope(tess, new_cells, i, slf_, shockratio_, diffusecoeff_, pressure_ratio_, eos_,
 			calc_tracers_, naive_rslopes_[i], rslopes_[i], temp1, temp2, temp3, temp4, temp5,
-			neighbor_mesh_list, neighbor_cm_list, tracerstickersnames, skip_key_, c_ij, neighbor_list);
+			neighbor_mesh_list, neighbor_cm_list, skip_key_, c_ij, neighbor_list);
 		face_vec const& faces = tess.GetCellFaces(i);
 		const size_t nloop = faces.size();
 		for (size_t j = 0; j < nloop; ++j)
@@ -825,10 +825,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				try
 				{
 					if(pressure_calc_)
-						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, false);
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
@@ -862,10 +862,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				try
 				{
 					if (pressure_calc_)
-						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, true);
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, tsn_, false);
+						interp23D(*cell_ref, rslopes_[i], tess.FaceCM(faces[j]), tess.GetCellCM(i), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
@@ -913,12 +913,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				if (tess.BoundaryFace(boundaryedges[i]))
 				{ 
 					if (pressure_calc_)
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
@@ -926,22 +924,20 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				else
 				{
 					if (pressure_calc_)
-						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
 				}
 #else
 				if (pressure_calc_)
-					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 				else
 				{
-					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 					if (energy_fix)
 						cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 				}
@@ -1008,12 +1004,10 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				if (tess.BoundaryFace(boundaryedges[i]))
 				{
 					if (pressure_calc_)
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-							tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
@@ -1021,22 +1015,20 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				else
 				{
 					if (pressure_calc_)
-						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 					else
 					{
-						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+						interp23D(*cell_ref, rslopes_[N0], tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 						if (energy_fix)
 							cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 					}
 				}
 #else
 				if (pressure_calc_)
-					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, true);
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, true);
 				else
 				{
-					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i],
-						tracerstickersnames), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, tsn_, false);
+					interp23D(*cell_ref, ghost_.GetGhostGradient(tess, cells, rslopes_, N0, time, boundaryedges[i]), tess.FaceCM(boundaryedges[i]), tess.GetCellCM(N0), eos_, false);
 					if (energy_fix)
 						cell_ref->tracers[energy_index] = cell_ref->internal_energy;
 				}

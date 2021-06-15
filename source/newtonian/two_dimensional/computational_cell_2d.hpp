@@ -9,9 +9,13 @@
 /*#include <boost/container/small_vector.hpp>
   typedef boost::container::small_vector<double,0> tvector;
   typedef boost::container::small_vector<bool,0> svector;*/
+#include <vector>
 #include <array>
 #define MAX_TRACERS 5
 #define MAX_STICKERS 4
+
+using std::vector;
+using std::string;
 
 typedef std::array<double, MAX_TRACERS> tvector;
 typedef std::array<bool, MAX_STICKERS> svector;
@@ -38,6 +42,9 @@ public:
 
   //! \brief Velocity
   Vector2D velocity;
+
+  static vector<string> tracerNames;
+  static vector<string> stickerNames;
 
   //! \brief Tracers (can transfer from one cell to another)
   tvector tracers;
@@ -155,40 +162,6 @@ public:
 
   void unserialize(const vector<double>& data) override;
 #endif//RICH_MPI
-};
-//! \brief Class for keeping the names of the tracers and stickers
-class TracerStickerNames
-{
-public:
-  //! \brief The names of the tracers
-  std::vector<std::string> tracer_names;
-  //! \brief The names of the stickers
-  std::vector<std::string> sticker_names;
-
-  //! \brief Default constructor
-  TracerStickerNames(void);
-  /*! 
-    \brief Copy constructor
-    \param other The instance to copy from
-  */
-  TracerStickerNames(TracerStickerNames const& other);
-
-  /*! \brief Assignment operator
-    \param other Source
-    \return Reference to self
-   */
-  TracerStickerNames& operator=(const TracerStickerNames& other);
-
-  /*!
-    \brief Class constructor
-    \param tracers The names of the tracers
-    \param stickers The names of the stickers
-  */
-  TracerStickerNames
-  (const std::vector<std::string>& tracers,
-   const std::vector<std::string>& stickers);
-  //! \brief Class destructor
-  ~TracerStickerNames(void);
 };
 
 #endif // COMPUTATIONAL_CELL_HPP

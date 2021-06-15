@@ -35,8 +35,7 @@ vector<Extensive> CylindricalComplementary::operator()
 	const vector<ComputationalCell>& cells,
 	const vector<Extensive>& /*fluxes*/,
 	const vector<Vector2D>& /*point_velocities*/,
-	const double /*time*/,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	const double /*time*/) const
 {
 	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
 	const Vector2D r_hat = remove_parallel_component(tess.GetMeshPoint(0) - axis_.origin, axis_.direction);

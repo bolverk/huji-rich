@@ -25,7 +25,7 @@ public:
 	  \param tracerstickernames The names of the tracers and stickers
 	 */
 	virtual void operator() (vector<ComputationalCell3D> &res, EquationOfState const& eos,
-		const Tessellation3D& tess,vector<Conserved3D>& extensives,TracerStickerNames const& tracerstickernames)const = 0;
+		const Tessellation3D& tess,vector<Conserved3D>& extensives)const = 0;
 
 		//! \brief Class destructor
 		virtual ~CellUpdater3D(void);

@@ -20,7 +20,7 @@ public:
   vector<Vector2D> operator()
   (const Tessellation& tess,
    const vector<ComputationalCell>& cells,
-   double time,TracerStickerNames const& tracerstickernames) const override;
+   double time) const override;
 
 private:
 

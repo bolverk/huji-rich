@@ -68,8 +68,7 @@ namespace
      const vector<ComputationalCell>& cells,
      double /*time*/, 
      const vector<Vector2D>& velocities, 
-     double dt,
-     const TracerStickerNames& /*ts*/) const
+     double dt) const
     {
       //      if (safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
       if(cells[index].stickers[0])
@@ -91,8 +90,7 @@ namespace
      const vector<ComputationalCell>& cells,
      double /*time*/, 
      const vector<Vector2D>& velocities, 
-     double dt,
-     const TracerStickerNames& /*ts*/) const
+     double dt) const
     {
       //      if (!safe_retrieve(cells[index].stickers,ts.sticker_names,key_))
       if(!cells[index].stickers[0])
@@ -141,7 +139,7 @@ namespace
     pair<bool, bool> operator()
     (const Edge& edge,
      const Tessellation& tess,
-     const vector<ComputationalCell>& /*cells*/,TracerStickerNames const& /*ts*/) const
+     const vector<ComputationalCell>& /*cells*/) const override
     {
       if (tess.GetOriginalIndex(edge.neighbors.first) == tess.GetOriginalIndex(edge.neighbors.second))
 	{
@@ -200,7 +198,7 @@ namespace
      const vector<ComputationalCell>& cells,
      const EquationOfState& eos,
      const bool aux,
-     Extensive &res,double /*time*/,TracerStickerNames const& ts) const
+     Extensive &res,double /*time*/) const override
     {
       if (aux)
 	assert(edge.neighbors.first < tess.GetPointNo());
@@ -224,8 +222,8 @@ namespace
 	(ghost_, cells.at(static_cast<size_t>(edge.neighbors.second)));
       const pair<Primitive, Primitive> left_right =
 	pair<Primitive, Primitive>
-	(convert_to_primitive(cc_left_righ.first, eos, ts),
-	 convert_to_primitive(cc_left_righ.second, eos, ts));
+	(convert_to_primitive(cc_left_righ.first, eos),
+	 convert_to_primitive(cc_left_righ.second, eos));
       const Conserved c = rotate_solve_rotate_back
 	(rs_,
 	 left_right.first,
@@ -297,7 +295,7 @@ namespace
        fc_,
        eu_,
        cu_,
-       TracerStickerNames (vector<string>(),vector<string>(1,"wedge")))
+      {vector<string>(),vector<string>(1,"wedge")})
     {
       write_number(adiabatic_index,
 		   "adiabatic_index.txt");
@@ -341,8 +339,7 @@ namespace
   public:
     ObliqueRefine(double maxV, string key) :maxV_(maxV), key_(key) {}
 
-    vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/,
-			    TracerStickerNames const& /*ts*/)const
+    vector<size_t> ToRefine(Tessellation const& tess, vector<ComputationalCell> const& cells, double /*time*/)const
     {
       vector<size_t> res;
       size_t N = static_cast<size_t>(tess.GetPointNo());
@@ -364,7 +361,7 @@ namespace
     ObliqueRemove(string key, double distanceToWall) :key_(key), distanceToWall_(distanceToWall) {}
 
     std::pair<vector<size_t>, vector<double> > ToRemove(Tessellation const& tess,
-							vector<ComputationalCell> const& cells, double /*time*/,TracerStickerNames const& /*ts*/)const
+							vector<ComputationalCell> const& cells, double /*time*/) const
     {
       std::pair<vector<size_t>, vector<double> > res;
       vector<double> merits;

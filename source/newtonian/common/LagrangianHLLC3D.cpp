@@ -80,7 +80,7 @@ namespace
 	};
 
 	WaveSpeeds estimate_wave_speeds(ComputationalCell3D const& left, ComputationalCell3D const& right,
-		EquationOfState const &eos, TracerStickerNames const& tsn, double pstar)
+		EquationOfState const &eos, double pstar)
 	{
 		double cl = 0, cr = 0;
 		const double dl = left.density;
@@ -90,7 +90,7 @@ namespace
 		try
 		{
 #endif
-			cl = eos.dp2c(dl, pl, left.tracers, tsn.tracer_names);
+		  cl = eos.dp2c(dl, pl, left.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -106,7 +106,7 @@ namespace
 		try
 		{
 #endif
-			cr = eos.dp2c(dr, pr, right.tracers, tsn.tracer_names);
+		  cr = eos.dp2c(dr, pr, right.tracers, ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 		}
 		catch (UniversalError &eo)
@@ -159,7 +159,7 @@ namespace
 LagrangianHLLC3D::LagrangianHLLC3D(bool mass_flux) :massflux_(mass_flux), ws(0) {}
 
 Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, ComputationalCell3D const& right, double velocity,
-	EquationOfState const& eos, TracerStickerNames const& tsn, Vector3D const& normaldir) const
+	EquationOfState const& eos, Vector3D const& normaldir) const
 {
 
 	ComputationalCell3D local_left = left;
@@ -183,14 +183,14 @@ Conserved3D LagrangianHLLC3D::operator()(ComputationalCell3D const& left, Comput
 	Conserved3D f_gr;
 	std::pair<double, double> p_u_star = HLLpu(local_left, local_right, eos);
 	p_u_star.first = std::max(p_u_star.first, 0.0);
-	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, p_u_star.first);
+	WaveSpeeds ws2 = estimate_wave_speeds(local_left, local_right, eos, p_u_star.first);
 	double old_ps = ws2.ps;
-	ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+	ws2 = estimate_wave_speeds(local_left, local_right, eos, ws2.ps);
 	size_t counter = 0;
 	while (ws2.ps > 1.1 * old_ps || old_ps > 1.1 * ws2.ps)
 	{
 		old_ps = ws2.ps;
-		ws2 = estimate_wave_speeds(local_left, local_right, eos, tsn, ws2.ps);
+		ws2 = estimate_wave_speeds(local_left, local_right, eos,  ws2.ps);
 		++counter;
 		if (counter > 54)
 		{

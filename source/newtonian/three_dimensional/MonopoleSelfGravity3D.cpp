@@ -7,7 +7,7 @@ MonopoleSelfGravity3D::MonopoleSelfGravity3D(size_t resolution,double smoothleng
 smoothlength_(smoothlength){}
 
 void MonopoleSelfGravity3D::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const vector<Conserved3D>& /*fluxes*/, const double /*time*/, TracerStickerNames const& /*tracerstickernames*/,
+				       const vector<Conserved3D>& /*fluxes*/, const double /*time*/,
 	vector<Vector3D> &acc) const
 {
 	size_t N = tess.GetPointNo();

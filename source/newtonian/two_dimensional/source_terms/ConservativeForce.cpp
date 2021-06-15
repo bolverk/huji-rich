@@ -50,13 +50,12 @@ vector<Extensive> ConservativeForce::operator()
 	const vector<ComputationalCell>& cells,
 	const vector<Extensive>& fluxes,
 	const vector<Vector2D>& point_velocities,
-	const double t,
-	TracerStickerNames const& tracerstickernames) const
+	const double t) const
 {
 	vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
 	for (size_t i = 0; i < res.size(); ++i)
 	{
-		const Vector2D acc = acc_(tess, cells, fluxes, t, static_cast<int>(i),tracerstickernames);
+		const Vector2D acc = acc_(tess, cells, fluxes, t, static_cast<int>(i));
 		const double volume = cd.volumes[i];
 		res[i].mass = 0;
 		res[i].momentum = volume*cells[i].density*acc;
@@ -68,7 +67,6 @@ vector<Extensive> ConservativeForce::operator()
 			res[i].energy = volume*cells[i].density*ScalarProd(point_velocities[i], acc) + 
 				0.5*ScalarProd(mass_flux, acc);
 		}
-//		res[i].tracers.resize(tracerstickernames.tracer_names.size(),0);
 	}
 	return res;
 }

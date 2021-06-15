@@ -13,8 +13,7 @@ CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl, double SourceCFL, Sourc
 }
 
 double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double /*time*/,
-	TracerStickerNames const& tracerstickernames) const
+	const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double /*time*/) const
 {
 	double res = 0.001*std::numeric_limits<double>::max();
 	size_t N = tess.GetPointNo();
@@ -30,7 +29,7 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 			{
 #endif
 				c = eos.dp2c(cells[i].density, cells[i].pressure, cells[i].tracers,
-					tracerstickernames.tracer_names);
+					     ComputationalCell3D::tracerNames);
 #ifdef RICH_DEBUG
 			}
 			catch (UniversalError &eo)
@@ -75,8 +74,7 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 		if (1.000001*res > old_res)
 		{
 			Vector3D const& v = cells[loc].velocity;
-			double c = eos.dp2c(cells[loc].density, cells[loc].pressure, cells[loc].tracers,
-				tracerstickernames.tracer_names);
+			double c = eos.dp2c(cells[loc].density, cells[loc].pressure, cells[loc].tracers, ComputationalCell3D::tracerNames);
 			std::cout << "Min dt, cell ID " << cells[loc].ID<<" width "<<tess.GetWidth(loc)<<" c "
 				<<c<<" cell_loc "<<tess.GetMeshPoint(loc).x<<"," << tess.GetMeshPoint(loc).y << "," << tess.GetMeshPoint(loc).z
 				<<" cell v "<<cells[loc].velocity.x<<"," << cells[loc].velocity.y << "," << cells[loc].velocity.z << std::endl;

@@ -24,8 +24,7 @@ namespace
 		const CacheData& cd,
 		const size_t index,
 		ComputationalCell &res,
-		size_t entropy_index,
-		TracerStickerNames const& tracerstickernames)
+		size_t entropy_index)
 	{
 		Extensive& extensive = extensives[index];
 		const double volume = cd.volumes[index];
@@ -38,10 +37,10 @@ namespace
 			res.tracers[i] = extensive.tracers[i] / extensive.mass;
 		try
 		{
-			res.pressure = eos.de2p(res.density, energy, res.tracers,tracerstickernames.tracer_names);
+		  res.pressure = eos.de2p(res.density, energy, res.tracers,ComputationalCell::tracerNames);
 			if (entropy_index < res.tracers.size())
 			{
-				res.tracers[entropy_index] = eos.dp2s(res.density, res.pressure, res.tracers,tracerstickernames.tracer_names);
+			  res.tracers[entropy_index] = eos.dp2s(res.density, res.pressure, res.tracers,ComputationalCell::tracerNames);
 				extensive.tracers[entropy_index] = res.tracers[entropy_index] * extensive.mass;
 			}
 		}
@@ -65,18 +64,17 @@ namespace
 		const vector<pair<const SimpleCellUpdater::Condition*, const SimpleCellUpdater::Action*> >& sequence,
 		const size_t index,
 		ComputationalCell &res,
-		size_t entropyindex,
-		TracerStickerNames const & tracerstickernames)
+		size_t entropyindex)
 	{
 		for (size_t i = 0; i < sequence.size(); ++i)
 		{
-			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index, tracerstickernames))
+			if ((*sequence[i].first)(tess, pg, eos, extensives, old, cd, index))
 			{
-				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index, tracerstickernames);
+				res = (*sequence[i].second)(tess, pg, eos, extensives, old, cd, index);
 				return;
 			}
 		}
-		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex,tracerstickernames);
+		regular_update(eos, extensives, old.at(index), cd, index, res, entropyindex);
 	}
 }
 
@@ -86,20 +84,19 @@ vector<ComputationalCell> SimpleCellUpdater::operator()
 	const EquationOfState& eos,
 	vector<Extensive>& extensives,
 	const vector<ComputationalCell>& old,
-	const CacheData& cd,
-	TracerStickerNames const& tracerstickernames) const
+	const CacheData& cd) const
 {
 	size_t N = static_cast<size_t>(tess.GetPointNo());
 	vector<ComputationalCell> res(N, old[0]);
 
 	size_t tindex = old[0].tracers.size();
-	vector<string>::const_iterator it = binary_find(tracerstickernames.tracer_names.begin(),
-		tracerstickernames.tracer_names.end(), entropy_);
-	if (it != tracerstickernames.tracer_names.end())
-		tindex = static_cast<size_t>(it - tracerstickernames.tracer_names.begin());
+	vector<string>::const_iterator it = binary_find(ComputationalCell::tracerNames.begin(),
+							ComputationalCell::tracerNames.end(), entropy_);
+	if (it != ComputationalCell::tracerNames.end())
+	  tindex = static_cast<size_t>(it - ComputationalCell::tracerNames.begin());
 
 	for (size_t i = 0; i < N; ++i)
-		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex,tracerstickernames);
+		update_single(tess, pg, eos, extensives, old, cd, sequence_, i, res[i], tindex);
 	return res;
 }
 
@@ -114,13 +111,12 @@ bool HasSticker::operator()
 	const vector<Extensive>& /*extensives*/,
 	const vector<ComputationalCell>& cells,
 	const CacheData& /*cd*/,
-	const size_t index,
-	TracerStickerNames const& tracerstickernames) const
+	const size_t index) const
 {
-	vector<string>::const_iterator it = binary_find(tracerstickernames.sticker_names.begin(), tracerstickernames.sticker_names.end(),
+  vector<string>::const_iterator it = binary_find(ComputationalCell::stickerNames.begin(), ComputationalCell::stickerNames.end(),
 		sticker_name_);
-	assert(it != tracerstickernames.sticker_names.end());
-	return cells[index].stickers[static_cast<size_t>(it - tracerstickernames.sticker_names.begin())];
+  assert(it != ComputationalCell::stickerNames.end());
+  return cells[index].stickers[static_cast<size_t>(it - ComputationalCell::stickerNames.begin())];
 }
 
 SkipUpdate::SkipUpdate(void) {}
@@ -132,8 +128,7 @@ ComputationalCell SkipUpdate::operator()
 	const vector<Extensive>& /*extensives*/,
 	const vector<ComputationalCell>& cells,
 	const CacheData& /*cd*/,
-	const size_t index,
-	TracerStickerNames const& /*tracerstickernames*/) const
+	const size_t index) const
 {
 	return cells[index];
 }

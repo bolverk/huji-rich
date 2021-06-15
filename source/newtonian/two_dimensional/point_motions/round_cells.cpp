@@ -60,8 +60,7 @@ namespace
 	}
 }
 
-Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<ComputationalCell>& cells,
-	TracerStickerNames const& tracerstickernames) const
+Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<ComputationalCell>& cells) const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -70,12 +69,11 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, const vector<Co
 	if (d < 0.9*eta_*R)
 		return Vector2D(0, 0);
 	const double c = std::max(eos_.dp2c(cells[i].density, cells[i].pressure,
-		cells[i].tracers,tracerstickernames.tracer_names), abs(cells[i].velocity));
+					    cells[i].tracers,ComputationalCell::tracerNames), abs(cells[i].velocity));
 	return chi_*c*(s - r) / R;
 }
 
-Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells,
-	TracerStickerNames const& tracerstickernames)const
+Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vector<ComputationalCell> const& cells) const
 {
 	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
 	const Vector2D s = tess.GetCellCM(static_cast<int>(i));
@@ -86,7 +84,7 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 	vector<int> neigh = tess.GetNeighbors(static_cast<int>(i));
 	size_t N = neigh.size();
 	double cs =std::max(abs(cells[i].velocity), eos_.dp2c(cells[i].density, cells[i].pressure,
-		cells[i].tracers,tracerstickernames.tracer_names));
+							      cells[i].tracers,ComputationalCell::tracerNames));
 	for (size_t j = 0; j < N; ++j)
 	{
 		if (tess.GetOriginalIndex(neigh[j]) == static_cast<int>(i))
@@ -100,30 +98,30 @@ Vector2D RoundCells::calc_dw(size_t i, const Tessellation& tess, double dt,vecto
 }
 
 vector<Vector2D> RoundCells::operator()(const Tessellation& tess, const vector<ComputationalCell>& cells,
-	double time, TracerStickerNames const& tracerstickernames) const
+	double time) const
 {
-	vector<Vector2D> res = pm_(tess, cells, time,tracerstickernames);
+	vector<Vector2D> res = pm_(tess, cells, time);
 	if (!cold_)
 	{
 		for (size_t i = 0; i < res.size(); ++i)
 		{
-			res[i] += calc_dw(i, tess, cells,tracerstickernames);
+			res[i] += calc_dw(i, tess, cells);
 		}
 	}
 	return res;
 }
 
 vector<Vector2D> RoundCells::ApplyFix(Tessellation const& tess, vector<ComputationalCell> const& cells, double time,
-	double dt, vector<Vector2D>const & velocities, TracerStickerNames const& tracerstickernames)const
+	double dt, vector<Vector2D>const & velocities) const
 {
-	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities,tracerstickernames);
+	vector<Vector2D> res = pm_.ApplyFix(tess, cells, time, dt, velocities);
 	res.resize(static_cast<size_t>(tess.GetPointNo()));
 	if (cold_)
 	{
 		const size_t n = res.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			res.at(i) += calc_dw(i, tess, dt,cells,tracerstickernames);
+			res.at(i) += calc_dw(i, tess, dt,cells);
 		}
 	}
 	if (outer_.GetBoundaryType()!=Periodic)
