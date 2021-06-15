@@ -2,7 +2,7 @@
 #include "HilbertOrder.hpp"
 
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-			   OuterBoundary const* bc,int NumberIt,
+			   const OuterBoundary& bc,int NumberIt,
 			   #ifdef RICH_MPI
 			   Tessellation const* tproc,
 			   #endif
@@ -16,11 +16,11 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 		tess=&default_tess;
 #ifdef RICH_MPI
 	if(tproc==0)
-		tess->Initialise(points,bc);
+		tess->Initialise(points,&bc);
 	else
-		tess->Initialise(points,*tproc,bc);
+		tess->Initialise(points,*tproc,&bc);
 #else
-	tess->Initialise(points,bc);
+	tess->Initialise(points,&bc);
 #endif
 	double pi= 3.141592653;
 	double eta_=0.02,chi_=1;

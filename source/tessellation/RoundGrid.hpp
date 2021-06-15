@@ -21,9 +21,9 @@
 	\return The points that give a rounder tessellation
 */
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-	OuterBoundary const* bc,int NumberIt=10,
+	const OuterBoundary& bc,int NumberIt=10,
 			   #ifdef RICH_MPI
-			   Tessellation const* tproc=nullptr,
+			   const Tessellation* tproc=nullptr,
 			   #endif
 			   Tessellation *tess=nullptr);
 #endif //ROUNDGRID
