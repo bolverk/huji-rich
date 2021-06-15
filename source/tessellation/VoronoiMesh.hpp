@@ -51,11 +51,11 @@ public:
 	int GetOriginalIndex(int point) const override;
 
 #ifdef RICH_MPI
-	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
-		OuterBoundary const* outer,bool reorder=true);
+	void Initialise(const vector<Vector2D>& points,Tessellation const& vproc,
+		const OuterBoundary& outer,bool reorder=true);
 #endif
 
-	void Initialise(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true) override;
+	void Initialise(const vector<Vector2D>& points,const OuterBoundary& bc, bool reorder=true) override;
 
   #ifdef RICH_MPI
   /*! \brief Internal initialiser function to avoid virtual function call in the constructor
@@ -64,8 +64,8 @@ public:
      \param outer Outer boundaries
      \param reorder Reordering flag
    */
-	void Initialise_loc(vector<Vector2D> const& points,Tessellation const& vproc,
-		OuterBoundary const* outer,bool reorder=true);
+	void Initialise_loc(const vector<Vector2D>& points,const Tessellation& vproc,
+		const OuterBoundary& outer,bool reorder=true);
 #endif
 
   /*! \brief Initialiser function, distinct from the virtual method
@@ -73,7 +73,7 @@ public:
     \param bc Outer boundary
     \param reorder Reordering flag
    */
-	void Initialise_loc(vector<Vector2D> const& points,OuterBoundary const* bc, bool reorder=true);
+	void Initialise_loc(const vector<Vector2D>& points,const OuterBoundary& bc, bool reorder=true);
 
 	//! \brief Class default constructor.
   VoronoiMesh(void);

@@ -38,7 +38,7 @@ public:
     \param bc Boundary conditions of the computational domain
 	\param HilbertOrder Should the points be rearranged before insertion
    */
-  virtual void Initialise(vector<Vector2D> const& points, OuterBoundary const* bc, bool HilbertOrder = true) = 0;
+  virtual void Initialise(vector<Vector2D> const& points, const OuterBoundary& bc, bool HilbertOrder = true) = 0;
 
 #ifdef RICH_MPI
   /*! \brief Initialises the tessellation
@@ -48,7 +48,7 @@ public:
   \param HilbertOrder Should the points be rearranged before insertion
   */
   virtual void Initialise(vector<Vector2D> const& points,Tessellation const& tess,
-	  OuterBoundary const* outer, bool HilbertOrder = true) = 0;
+	  const OuterBoundary& outer, bool HilbertOrder = true) = 0;
 #endif
 
   /*!
