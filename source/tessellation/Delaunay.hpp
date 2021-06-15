@@ -105,8 +105,8 @@ private:
 
   void AddRigid(vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
-  vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
+  vector<vector<int> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
+  vector<vector<int> > &toduplicate);
   void AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   double GetMaxRadius(int point,int startfacet);

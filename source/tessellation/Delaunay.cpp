@@ -823,11 +823,11 @@ namespace
 	}
 }
 
-vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc, vector<Edge> const& edges,
+vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate)
 {
-	const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
-	const double dy = obc->GetGridBoundary(Up) - obc->GetGridBoundary(Down);
+	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
+	const double dy = obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 		if (toduplicate[static_cast<size_t>(i)].empty())
@@ -863,7 +863,7 @@ vector<vector<int> > Delaunay::AddPeriodic(OuterBoundary const* obc, vector<Edge
 		//toduplicate[i]=pointstemp;
 	}
 	// Done with sides do corners now
-	vector<Edge> corneredges = GetCornerEdges(obc);
+	vector<Edge> corneredges = GetCornerEdges(&obc);
 	vector<vector<int> > corners(toduplicate.size());
 	for (size_t i = 0; i < toduplicate.size(); ++i)
 	{
@@ -987,7 +987,7 @@ vector<vector<int> > Delaunay::BuildBoundary(OuterBoundary const* obc, vector<Ed
 	{
 		if (obc->GetBoundaryType() == Periodic)
 		{
-			vector<vector<int> > corners = AddPeriodic(obc, edges, toduplicate);
+			vector<vector<int> > corners = AddPeriodic(*obc, edges, toduplicate);
 			for (size_t i = 0; i < 4; ++i)
 				toduplicate.push_back(corners[static_cast<size_t>(i)]);
 		}
