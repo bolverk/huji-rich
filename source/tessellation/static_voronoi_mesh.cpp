@@ -500,14 +500,14 @@ namespace {
   }
 }
 
-void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool /*reorder*/)
+void StaticVoronoiMesh::Initialise(const vector<Vector2D>& pv,const OuterBoundary& _bc,bool /*reorder*/)
 {
-	obc=_bc;
+	obc=&_bc;
 	Tri.build_delaunay(UpdatePoints(pv,obc),
 			   calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
+	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc.GetBoxEdges());
 
 	eps=1e-8;
 	edges.clear();
@@ -518,7 +518,7 @@ void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const
 	if(logger)
 		logger->output(*this);
 
-	if(_bc->GetBoundaryType()==Periodic)
+	if(_bc.GetBoundaryType()==Periodic)
 	{
 		for(size_t i=0;i<8;++i)
 		{
@@ -526,7 +526,7 @@ void StaticVoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const
 			GhostProcs.push_back(-1);
 		}
 	}
-	if(_bc->GetBoundaryType()==HalfPeriodic)
+	if(_bc.GetBoundaryType()==HalfPeriodic)
 	{
 		GhostPoints.push_back(toduplicate[0]);
 		GhostPoints.push_back(toduplicate[2]);

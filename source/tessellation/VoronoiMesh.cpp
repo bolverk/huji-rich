@@ -119,7 +119,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise_loc(points,&bc,HOrder);
+	Initialise_loc(points,bc,HOrder);
 }
 
 #ifdef RICH_MPI
@@ -145,7 +145,7 @@ VoronoiMesh::VoronoiMesh
 	OrgCorner(),
 	Nextra(0)
 {
-	Initialise(points,proctess,&bc,HOrder);
+	Initialise(points,proctess,bc,HOrder);
 }
 #endif
 
@@ -352,14 +352,14 @@ namespace
   }
 }
 
-void VoronoiMesh::Initialise(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
+void VoronoiMesh::Initialise(vector<Vector2D>const& pv,const OuterBoundary& _bc,bool reorder)
 {
   Initialise_loc(pv, _bc, reorder);
 }
 
-void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* _bc,bool reorder)
+void VoronoiMesh::Initialise_loc(const vector<Vector2D>& pv,const OuterBoundary& _bc,bool reorder)
 {
-	obc=_bc;
+	obc=&_bc;
 	vector<Vector2D> points;
 	if (reorder)
 		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
@@ -368,7 +368,7 @@ void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* 
 	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc->GetBoxEdges());
+	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc.GetBoxEdges());
 
 	eps=1e-8;
 	edges.clear();
@@ -384,7 +384,7 @@ void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* 
 		CM[i] = CalcCellCM(i);
 
 	size_t counter = pv.size() + 3;
-	if(_bc->GetBoundaryType()==Periodic)
+	if(_bc.GetBoundaryType()==Periodic)
 	{
 		for(size_t i=0;i<8;++i)
 		{
@@ -404,11 +404,11 @@ void VoronoiMesh::Initialise_loc(vector<Vector2D>const& pv,OuterBoundary const* 
 		{
 			GhostPoints.push_back(toduplicate[i]);
 			GhostProcs.push_back(-1);
-			if (_bc->GetBoundaryType() == Rectengular||(i%2)==1)
+			if (_bc.GetBoundaryType() == Rectengular||(i%2)==1)
 			{
 				for (size_t j = 0; j < toduplicate[i].size(); ++j)
 				{
-				  CM[counter] = GetReflection(*_bc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
+				  CM[counter] = GetReflection(_bc, i, CM[static_cast<size_t>(toduplicate[i][j])]);
 				  ++counter;
 				}
 			}
@@ -506,7 +506,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges=obc->GetBoxEdges();
-	vector<vector<int> > toduplicate=Tri.BuildBoundary(obc,box_edges);
+	vector<vector<int> > toduplicate=Tri.BuildBoundary(*obc,box_edges);
 
 	eps=1e-8;
 	edges.clear();
@@ -1254,7 +1254,7 @@ vector<int> VoronoiMesh::Update
 	GhostPoints.clear();
 	GhostProcs.clear();
 	NGhostReceived.clear();
-	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(obc, vproc, NGhostReceived);
+	pair<vector<vector<int> >, vector<int> > ptemp = Tri.BuildBoundary(*obc, vproc, NGhostReceived);
 	GhostPoints = ptemp.first;
 	GhostProcs = ptemp.second;
 	build_v();
@@ -1289,22 +1289,22 @@ vector<int> VoronoiMesh::Update
 }
 
 void VoronoiMesh::Initialise
-(vector<Vector2D> const& pv,
- Tessellation const& vproc,
- OuterBoundary const* outer,bool reorder)
+(const vector<Vector2D>& pv,
+ const Tessellation& vproc,
+ const OuterBoundary& outer,bool reorder)
 {
   Initialise_loc(pv, vproc, outer, reorder);
 }
 
 void VoronoiMesh::Initialise_loc
-(vector<Vector2D> const& pv,
- Tessellation const& vproc,
- OuterBoundary const* outer,bool reorder)
+(const vector<Vector2D>& pv,
+ const Tessellation& vproc,
+ const OuterBoundary& outer,bool reorder)
 {
 	NGhostReceived.clear();
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	obc = outer;
+	obc = &outer;
 	vector<int> cedges;
 	ConvexEdges(cedges, vproc, rank);
 	cell_edges.clear();

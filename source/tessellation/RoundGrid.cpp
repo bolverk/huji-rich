@@ -2,7 +2,7 @@
 #include "HilbertOrder.hpp"
 
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-			   OuterBoundary const* bc,int NumberIt,
+			   const OuterBoundary& bc,int NumberIt,
 			   #ifdef RICH_MPI
 			   Tessellation const* tproc,
 			   #endif

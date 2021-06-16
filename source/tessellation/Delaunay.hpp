@@ -87,8 +87,6 @@ private:
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
   vector<int> FindContainingTetras(int StartTetra, int point);
   vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
-  vector<vector<int> > FindOuterPointsMPI(OuterBoundary const* obc,vector<Edge> const& edges,
-	  Tessellation const& tproc,vector<vector<int> > &Nghost,vector<int> &proclist);
   bool IsTripleOut(int index) const;
   int FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
@@ -107,9 +105,9 @@ private:
 
   void AddRigid(vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
-  vector<vector<int> > AddPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
-  void AddHalfPeriodic(OuterBoundary const* obc,vector<Edge> const& edges,
+  vector<vector<int> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
+  vector<vector<int> > &toduplicate);
+  void AddHalfPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
   double GetMaxRadius(int point,int startfacet);
   void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
@@ -285,7 +283,7 @@ public:
   \param edges The edges of the domain
   \return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
   */
-  vector<vector<int> > BuildBoundary(OuterBoundary const* obc,vector<Edge> const& edges);
+  vector<vector<int> > BuildBoundary(const OuterBoundary& obc,vector<Edge> const& edges);
   /*!
   \brief Builds the boundary points for parallel runs
   \param obc The geometrical boundary conditions
@@ -293,7 +291,7 @@ public:
   \param Nghost The indeces of the ghost cells (order by cpu) in the cor vector. Given as output.
   \return The indeces of the boundary points sent to each cpu and the list of cpus to talk with.
   */
-  pair<vector<vector<int> >,vector<int> > BuildBoundary(OuterBoundary const* obc,Tessellation const& tproc,
+  pair<vector<vector<int> >,vector<int> > BuildBoundary(OuterBoundary const& obc,Tessellation const& tproc,
 	  vector<vector<int> > &Nghost);
   /*!
   \brief Adds the points to the tessellation, used for boundary points
