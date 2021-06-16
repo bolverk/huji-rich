@@ -278,7 +278,6 @@ void hdsim1D::recalculateExtensives(void)
 }
 
 
-// *** Start *** Added by Emma
 void hdsim1D::recalculatePrimitives(void)
 {
     ss_.updateCells(cu_(pg_,
@@ -287,5 +286,5 @@ void hdsim1D::recalculatePrimitives(void)
 		      eos_));
 
 }
-// *** End *** Added by Emma
+
 
