@@ -17,26 +17,13 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
     }();
   VoronoiMesh default_tess;
   tess = tess == nullptr ? &default_tess : tess;
-  assert(tess != nullptr);
-  //  if(tess==nullptr)
-  //		tess=&default_tess;
 #ifdef RICH_MPI
   tproc == 0 ? tess->Initialise(points,bc) : tess->Initialise(points,*tproc,bc);
-  /*
-	if(tproc==0)
-		tess->Initialise(points,bc);
-	else
-		tess->Initialise(points,*tproc,bc);
-  */
 #else
 	tess->Initialise(points,bc);
 #endif
 	const double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
-
-	// Copy the points
-	for(int i=0;i<N;++i)
-	  res[static_cast<size_t>(i)]=tess->GetMeshPoint(i);
 
 	for(int j=0;j<NumberIt;++j)
 	{
@@ -60,12 +47,6 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 		}
 #ifdef RICH_MPI
 		tproc == 0 ? tess->Update(res) : tess->Update(res,*tproc);
-		/*
-		if(tproc==0)
-			tess->Update(res);
-		else
-			tess->Update(res,*tproc);
-		*/
 #else
 		tess->Update(res);
 #endif
