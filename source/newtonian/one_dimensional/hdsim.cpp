@@ -92,19 +92,14 @@ ComputationalCell calc_single_simulationstate
    const double& volume,
    const EquationOfState& eos)
   {
-    Extensive res;
-    res.mass = cell.density*volume;
-    res.momentum = res.mass*cell.velocity;
-    const double kinetic_specific_energy =
-      0.5*pow(abs(cell.velocity),2);
-    const double thermal_specific_energy =
-      eos.dp2e(cell.density, cell.pressure);
-    res.energy = res.mass*
-      (kinetic_specific_energy+thermal_specific_energy);
-    res.tracers = serial_generate<double, double>
-      (cell.tracers,
-       [&](const double& t){return t*res.mass;});
-    return res;
+    SimulationState1D cell;
+    cell.density = ext.mass/volume;
+    cell.velocity = ext.momentum/ext.mass;
+    const double kinetic_specific_energy = 0.5*pow(abs(cell.velocity), 2);
+    const double thermal_specific_energy = ext.energy/ext.mass - kinetic_specific_energy;
+    cell.pressure = eos.de2p(cell.density, thermal_specific_energy);
+    return cell;
+
   }
 
   SimulationState1D calc_simulationstates
@@ -122,7 +117,7 @@ ComputationalCell calc_single_simulationstate
        volumes,
        [&](const ComputationalCell& c,
 	   const double& v){
-	 return calc_single_extensive(c,v,eos);});
+	 return calc_single_simulationstate(c,v,eos);});
   }
 // ***End*** Added by Emma
 #endif
