@@ -40,20 +40,15 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 #else
   tess->Initialise(points,bc);
 #endif
-  vector<Vector2D> res
     (static_cast<size_t>(tess->GetPointNo()));
   for(int j=0;j<NumberIt;++j)
     {
-      res = genNewPoints(*tess);
+      const vector<Vector2D> res = genNewPoints(*tess);
 #ifdef RICH_MPI
       tproc == 0 ? tess->Update(res) : tess->Update(res,*tproc);
 #else
       tess->Update(res);
 #endif
     }
-#ifdef RICH_MPI
-  res=tess->GetMeshPoints();
-  res.resize(static_cast<size_t>(tess->GetPointNo()));
-#endif
-  return res;
+  return genNewPoints(*tess);
 }
