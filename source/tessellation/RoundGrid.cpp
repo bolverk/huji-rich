@@ -15,14 +15,19 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
       ans = VectorValues(ans, indeces);
       return ans;
     }();
-	VoronoiMesh default_tess;
-	if(tess==nullptr)
-		tess=&default_tess;
+  VoronoiMesh default_tess;
+  tess = tess == nullptr ? &default_tess : tess;
+  assert(tess != nullptr);
+  //  if(tess==nullptr)
+  //		tess=&default_tess;
 #ifdef RICH_MPI
+  tproc == 0 ? tess->Initialise(points,bc) : tess->Initialise(points,*tproc,bc);
+  /*
 	if(tproc==0)
 		tess->Initialise(points,bc);
 	else
 		tess->Initialise(points,*tproc,bc);
+  */
 #else
 	tess->Initialise(points,bc);
 #endif
@@ -54,10 +59,13 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			res[static_cast<size_t>(i)]=tess->GetMeshPoint(i)+dw;
 		}
 #ifdef RICH_MPI
+		tproc == 0 ? tess->Update(res) : tess->Update(res,*tproc);
+		/*
 		if(tproc==0)
 			tess->Update(res);
 		else
 			tess->Update(res,*tproc);
+		*/
 #else
 		tess->Update(res);
 #endif
