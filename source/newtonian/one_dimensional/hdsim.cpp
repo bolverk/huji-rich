@@ -313,15 +313,16 @@ void hdsim1D::recalculateExtensives(void)
      eos_);
 }
 
-#if 0
+
 // *** Start *** Added by Emma
-void hdsim1D::recalculateSimulationState(void)
+void hdsim1D::recalculatePrimitives(void)
 {
-  ss_ = calc_simulationstates
-    (pg_,
-     extensives_,
-     eos_);
+  
+    ss_.updateCells(cu_(pg_,
+		        extensives_,
+		        ss_,
+		        eos_));
 
 }
 // *** End *** Added by Emma
-#endif
+
