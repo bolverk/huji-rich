@@ -318,10 +318,11 @@ void hdsim1D::recalculateExtensives(void)
 void hdsim1D::recalculatePrimitives(void)
 {
   
-    ss_.updateCells(cu_(pg_,
-		        extensives_,
-		        ss_,
-		        eos_));
+    ss_ = cu_
+	    (pg_,
+	     extensives_,
+	     ss_,
+	     eos_);
 
 }
 // *** End *** Added by Emma
