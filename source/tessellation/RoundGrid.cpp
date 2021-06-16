@@ -8,13 +8,6 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			   #endif
 	Tessellation *tess)
 {
-  vector<Vector2D> res = [&]
-    {
-      const vector<int> indeces = HilbertOrder(points, static_cast<int>(points.size()));
-      vector<Vector2D> ans(points);
-      ans = VectorValues(ans, indeces);
-      return ans;
-    }();
   VoronoiMesh default_tess;
   tess = tess == nullptr ? &default_tess : tess;
 #ifdef RICH_MPI
@@ -23,12 +16,12 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 	tess->Initialise(points,bc);
 #endif
 	const double eta_=0.02,chi_=1;
-	int N=tess->GetPointNo();
-
-	for(int j=0;j<NumberIt;++j)
+	vector<Vector2D> res
+	  (static_cast<size_t>(tess->GetPointNo()));
+	for(int j=0,N=tess->GetPointNo();j<NumberIt;++j)
 	{
 #ifdef RICH_MPI
-		N=tess->GetPointNo();
+	  N=tess->GetPointNo();
 		res=tess->GetMeshPoints();
 		res.resize(static_cast<size_t>(N));
 #endif
@@ -52,7 +45,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 #endif
 	}
 #ifdef RICH_MPI
-	N=tess->GetPointNo();
+	const int N=tess->GetPointNo();
 	res=tess->GetMeshPoints();
 	res.resize(static_cast<size_t>(N));
 #endif
