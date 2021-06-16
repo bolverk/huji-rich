@@ -85,42 +85,6 @@ namespace {
 	 return calc_single_extensive(c,v,eos);});
   }
 
-#if 0
-// ***Start*** Added by Emma	
-ComputationalCell calc_single_simulationstate
-  (const Extensive& ext,
-   const double& volume,
-   const EquationOfState& eos)
-  {
-    SimulationState1D cell;
-    cell.density = ext.mass/volume;
-    cell.velocity = ext.momentum/ext.mass;
-    const double kinetic_specific_energy = 0.5*pow(abs(cell.velocity), 2);
-    const double thermal_specific_energy = ext.energy/ext.mass - kinetic_specific_energy;
-    cell.pressure = eos.de2p(cell.density, thermal_specific_energy);
-    return cell;
-
-  }
-
-  SimulationState1D calc_simulationstates
-  (const PhysicalGeometry1D& pg,
-   const vector<Extensives>& ext,
-   const EquationOfState& eos)
-  {
-    const vector<double>& vertices = ss.getVertices();
-    const vector<ComputationalCell>& cells = ss.getCells();
-    const vector<double> volumes = diff
-      (serial_generate<double, double>
-       (vertices, [&](const double& r){return pg.calcVolume(r);}));
-    return serial_generate<ComputationalCell, double, Extensive>
-      (cells,
-       volumes,
-       [&](const ComputationalCell& c,
-	   const double& v){
-	 return calc_single_simulationstate(c,v,eos);});
-  }
-// ***End*** Added by Emma
-#endif
 }
 
 hdsim1D::hdsim1D
