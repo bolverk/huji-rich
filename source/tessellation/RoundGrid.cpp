@@ -8,9 +8,13 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			   #endif
 	Tessellation *tess)
 {
-	vector<int> indeces = HilbertOrder(points, static_cast<int>(points.size()));
-	vector<Vector2D> res(points);
-	res = VectorValues(res, indeces);
+  vector<Vector2D> res = [&]
+    {
+      const vector<int> indeces = HilbertOrder(points, static_cast<int>(points.size()));
+      vector<Vector2D> ans(points);
+      ans = VectorValues(ans, indeces);
+      return ans;
+    }();
 	VoronoiMesh default_tess;
 	if(tess==nullptr)
 		tess=&default_tess;
@@ -22,7 +26,7 @@ vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 #else
 	tess->Initialise(points,bc);
 #endif
-	double eta_=0.02,chi_=1;
+	const double eta_=0.02,chi_=1;
 	int N=tess->GetPointNo();
 
 	// Copy the points
