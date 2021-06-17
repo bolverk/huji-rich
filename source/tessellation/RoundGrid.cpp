@@ -21,7 +21,7 @@ namespace {
     const int N = tess.GetPointNo();
     vector<Vector2D> res(static_cast<size_t>(N));
     for(int i=0;i<N;++i)
-      res.at(static_cast<size_t>(i)) = genNewPoint(tess,i);
+      res[static_cast<size_t>(i)] = genNewPoint(tess,i);
     return res;
   }
 }
