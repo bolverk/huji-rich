@@ -85,6 +85,8 @@ public:
   void TimeAdvance2(void);
 
   void recalculateExtensives(void);
+  
+  void recalculatePrimitives(void);
 
   /*! \brief Access to computational domain and hydro cells
     \return Computational domain and hydro cells

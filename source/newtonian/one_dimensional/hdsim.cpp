@@ -84,6 +84,7 @@ namespace {
 	   const double& v){
 	 return calc_single_extensive(c,v,eos);});
   }
+
 }
 
 hdsim1D::hdsim1D
@@ -275,3 +276,15 @@ void hdsim1D::recalculateExtensives(void)
      ss_,
      eos_);
 }
+
+
+void hdsim1D::recalculatePrimitives(void)
+{
+    ss_.updateCells(cu_(pg_,
+		      extensives_,
+		      ss_,
+		      eos_));
+
+}
+
+
