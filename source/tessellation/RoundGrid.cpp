@@ -1,68 +1,54 @@
 #include "RoundGrid.hpp"
 #include "HilbertOrder.hpp"
 
+namespace {
+  Vector2D genNewPoint
+  (const Tessellation& tess,
+   int i)
+  {
+    const double eta_=0.02,chi_=1;
+    const double R = sqrt(tess.GetVolume(i)/M_PI);
+    const Vector2D s = tess.GetCellCM(i);
+    const Vector2D r = tess.GetMeshPoint(i);
+    const double d = abs(s-r);
+    const Vector2D dw =
+      d/eta_/R<0.95 ? Vector2D(0,0) : chi_*0.5*(s-r);
+    return tess.GetMeshPoint(i) + dw;
+  }
+
+  vector<Vector2D> genNewPoints(Tessellation& tess)
+  {
+    const int N = tess.GetPointNo();
+    vector<Vector2D> res(static_cast<size_t>(N));
+    for(int i=0;i<N;++i)
+      res[static_cast<size_t>(i)] = genNewPoint(tess,i);
+    return res;
+  }
+}
+
 vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
 			   const OuterBoundary& bc,int NumberIt,
-			   #ifdef RICH_MPI
+#ifdef RICH_MPI
 			   Tessellation const* tproc,
-			   #endif
-	Tessellation *tess)
+#endif
+			   Tessellation *tess)
 {
-	vector<int> indeces = HilbertOrder(points, static_cast<int>(points.size()));
-	vector<Vector2D> res(points);
-	res = VectorValues(res, indeces);
-	VoronoiMesh default_tess;
-	if(tess==nullptr)
-		tess=&default_tess;
+  VoronoiMesh default_tess;
+  tess = tess == nullptr ? &default_tess : tess;
 #ifdef RICH_MPI
-	if(tproc==0)
-		tess->Initialise(points,bc);
-	else
-		tess->Initialise(points,*tproc,bc);
+  tproc == 0 ? tess->Initialise(points,bc) : tess->Initialise(points,*tproc,bc);
 #else
-	tess->Initialise(points,bc);
+  tess->Initialise(points,bc);
 #endif
-	double pi= 3.141592653;
-	double eta_=0.02,chi_=1;
-	int N=tess->GetPointNo();
-
-	// Copy the points
-	for(int i=0;i<N;++i)
-	  res[static_cast<size_t>(i)]=tess->GetMeshPoint(i);
-
-	for(int j=0;j<NumberIt;++j)
-	{
+    (static_cast<size_t>(tess->GetPointNo()));
+  for(int j=0;j<NumberIt;++j)
+    {
+      const vector<Vector2D> res = genNewPoints(*tess);
 #ifdef RICH_MPI
-		N=tess->GetPointNo();
-		res=tess->GetMeshPoints();
-		res.resize(static_cast<size_t>(N));
-#endif
-		for(int i=0;i<N;++i)
-		{
-			double R = sqrt(tess->GetVolume(i)/pi);
-			Vector2D s = tess->GetCellCM(i);
-			Vector2D r = tess->GetMeshPoint(i);
-			double d = abs(s-r);
-			Vector2D dw;
-			if(d/eta_/R<0.95)
-				dw = 0*s;
-			else
-				dw = chi_*0.5*(s-r);
-			res[static_cast<size_t>(i)]=tess->GetMeshPoint(i)+dw;
-		}
-#ifdef RICH_MPI
-		if(tproc==0)
-			tess->Update(res);
-		else
-			tess->Update(res,*tproc);
+      tproc == 0 ? tess->Update(res) : tess->Update(res,*tproc);
 #else
-		tess->Update(res);
+      tess->Update(res);
 #endif
-	}
-#ifdef RICH_MPI
-	N=tess->GetPointNo();
-	res=tess->GetMeshPoints();
-	res.resize(static_cast<size_t>(N));
-#endif
-	return res;
+    }
+  return genNewPoints(*tess);
 }
