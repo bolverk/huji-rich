@@ -26,29 +26,76 @@ namespace {
   }
 }
 
-vector<Vector2D> RoundGrid(vector<Vector2D> const& points,
-			   const OuterBoundary& bc,int NumberIt,
-#ifdef RICH_MPI
-			   Tessellation const* tproc,
-#endif
-			   Tessellation *tess)
+TessellationHandler::~TessellationHandler(void) = default;
+
+void SerialHandler::initialise
+(Tessellation& tess,
+ const vector<Vector2D>& points,
+ const OuterBoundary& bc) const
 {
-  VoronoiMesh default_tess;
-  tess = tess == nullptr ? &default_tess : tess;
+  tess.Initialise(points, bc);
+}
+
+void SerialHandler::update
+(Tessellation& tess, const vector<Vector2D>& points) const
+{
+  tess.Update(points);
+}
+
 #ifdef RICH_MPI
-  tproc == 0 ? tess->Initialise(points,bc) : tess->Initialise(points,*tproc,bc);
-#else
-  tess->Initialise(points,bc);
+
+ParallelHandler::ParallelHandler(const Tessellation& meta):
+  meta_(meta) {}
+
+void ParallelHandler::initialise
+(Tessellation& tess,
+ const vector<Vector2D>& points,
+ const OuterBoundary& bc) const
+{
+  tess.Initialise(points, meta_, bc);
+}
+
+void ParallelHandler::update
+(Tessellation& tess,
+ const vector<Vector2D>& points) const
+{
+  tess.Update(points, meta_);
+}
+
+#endif // RICH_MPI
+
+vector<Vector2D> RoundGrid(const vector<Vector2D>& points,
+			   const OuterBoundary& bc,
+#ifdef RICH_MPI
+			   const TessellationHandler& th,
+#endif // RICH_MPI
+			   int NumberIt)
+{
+  VoronoiMesh tess;
+  return RoundGrid
+    (points,
+     bc,
+     tess,
+#ifdef RICH_MPI
+     th,
+#endif // RICH_MPI
+     NumberIt);
+}
+
+vector<Vector2D> RoundGrid
+(const vector<Vector2D>& points,
+ const OuterBoundary& bc,
+ Tessellation& tess,
+#ifdef RICH_MPI
+ const TessellationHandler& th,
 #endif
-    (static_cast<size_t>(tess->GetPointNo()));
+ int NumberIt)
+{
+#ifndef RICH_MPI
+  const SerialHandler th;
+#endif //RICH_MPI
+  th.initialise(tess, points, bc);
   for(int j=0;j<NumberIt;++j)
-    {
-      const vector<Vector2D> res = genNewPoints(*tess);
-#ifdef RICH_MPI
-      tproc == 0 ? tess->Update(res) : tess->Update(res,*tproc);
-#else
-      tess->Update(res);
-#endif
-    }
-  return genNewPoints(*tess);
+    th.update(tess, genNewPoints(tess));
+  return genNewPoints(tess);
 }
