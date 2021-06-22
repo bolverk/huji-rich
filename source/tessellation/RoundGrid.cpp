@@ -24,78 +24,143 @@ namespace {
       res[static_cast<size_t>(i)] = genNewPoint(tess,i);
     return res;
   }
-}
 
-TessellationHandler::~TessellationHandler(void) = default;
+  class TessellationHandler
+  {
+  public:
 
-void SerialHandler::initialise
-(Tessellation& tess,
- const vector<Vector2D>& points,
- const OuterBoundary& bc) const
-{
-  tess.Initialise(points, bc);
-}
+    virtual void initialise
+    (Tessellation& tess,
+     const vector<Vector2D>& points,
+     const OuterBoundary& bc) const = 0;
 
-void SerialHandler::update
-(Tessellation& tess, const vector<Vector2D>& points) const
-{
-  tess.Update(points);
+    virtual void update
+    (Tessellation& tess,
+     const vector<Vector2D>& points) const = 0;
+
+    virtual ~TessellationHandler(void) = default;
+  };
+
+  class SerialHandler: public TessellationHandler
+  {
+  public:
+
+    void initialise
+    (Tessellation& tess,
+     const vector<Vector2D>& points,
+     const OuterBoundary& bc) const
+    {
+      tess.Initialise(points, bc);
+    }
+
+    void update
+    (Tessellation& tess, 
+     const vector<Vector2D>& points) const
+    {
+      tess.Update(points);  
+    }
+  };
+
+#ifdef RICH_MPI
+  class ParallelHandler: public TessellationHandler
+  {
+  public:
+
+    ParallelHandler(const Tessellation& meta):
+      meta_(meta) {}
+
+    void initialise
+    (Tessellation& tess,
+     const vector<Vector2D>& points,
+     const OuterBoundary& bc) const
+    {
+      tess.Initialise(points, meta_, bc);
+    }
+
+    void update
+    (Tessellation& tess,
+     const vector<Vector2D>& points) const
+    {
+      tess.Update(points, meta_);
+    }
+
+  private:
+    const Tessellation& meta_;
+  };
+#endif // RICH_MPI
+
+  // Generic function
+  vector<Vector2D> RoundGridG
+  (const vector<Vector2D>& points,
+   const OuterBoundary& bc,
+   Tessellation& tess,
+#ifdef RICH_MPI
+   const TessellationHandler& th,
+#endif
+   int NumberIt)
+  {
+#ifndef RICH_MPI
+    const SerialHandler th;
+#endif //RICH_MPI
+    th.initialise(tess, points, bc);
+    for(int j=0;j<NumberIt;++j)
+      th.update(tess, genNewPoints(tess));
+    return genNewPoints(tess);
+  }
 }
 
 #ifdef RICH_MPI
 
-ParallelHandler::ParallelHandler(const Tessellation& meta):
-  meta_(meta) {}
-
-void ParallelHandler::initialise
-(Tessellation& tess,
- const vector<Vector2D>& points,
- const OuterBoundary& bc) const
-{
-  tess.Initialise(points, meta_, bc);
-}
-
-void ParallelHandler::update
-(Tessellation& tess,
- const vector<Vector2D>& points) const
-{
-  tess.Update(points, meta_);
-}
-
-#endif // RICH_MPI
-
-vector<Vector2D> RoundGrid(const vector<Vector2D>& points,
-			   const OuterBoundary& bc,
-#ifdef RICH_MPI
-			   const TessellationHandler& th,
-#endif // RICH_MPI
-			   int NumberIt)
+vector<Vector2D> RoundGridV
+(vector<Vector2D> const& points,
+ const OuterBoundary& bc,
+ int NumberIt)
 {
   VoronoiMesh tess;
-  return RoundGrid
+  return RoundGridG
+    (points,
+     bc,
+     tess,
+     SerialHandler(),
+     NumberIt);
+}
+
+#endif // RICH_MPI
+
+vector<Vector2D> RoundGridV
+(const vector<Vector2D>& points,
+ const OuterBoundary& bc,
+#ifdef RICH_MPI
+ const Tessellation& meta,
+#endif // RICH_MPI
+ int NumberIt)
+{
+  VoronoiMesh tess;
+  return RoundGridG
     (points,
      bc,
      tess,
 #ifdef RICH_MPI
-     th,
+     ParallelHandler(meta),
 #endif // RICH_MPI
      NumberIt);
 }
 
 vector<Vector2D> RoundGrid
-(const vector<Vector2D>& points,
+(vector<Vector2D> const& points,
  const OuterBoundary& bc,
  Tessellation& tess,
 #ifdef RICH_MPI
- const TessellationHandler& th,
+ const Tessellation& meta,
 #endif
  int NumberIt)
 {
-#ifndef RICH_MPI
-  const SerialHandler th;
-#endif //RICH_MPI
-  th.initialise(tess, points, bc);
-  for(int j=0;j<NumberIt;++j)
-    th.update(tess, genNewPoints(tess));
-  return genNewPoints(tess);
+  return RoundGridG
+    (points,
+     bc,
+     tess,
+#ifdef RICH_MPI
+     ParallelHandler(meta),
+#endif // RICH_MPI
+     NumberIt);
 }

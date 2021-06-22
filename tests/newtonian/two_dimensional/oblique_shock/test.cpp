@@ -251,16 +251,16 @@ namespace
       tess_(
 #ifdef RICH_MPI
 	    proctess_,
-	    RoundGrid
+	    RoundGridV
 	    (RandSquare
 	     (75*75,
 	      proctess_,
 	      outer_.getBoundary().first,
 	      outer_.getBoundary().second),
 	     outer_,
-	     ParallelHandler(proctess_)),
+	     proctess_),
 #else
-	    RoundGrid(RandSquare(75*75,-width / 2, width / 2, -width / 2, width / 2),outer_),
+	    RoundGridV(RandSquare(75*75,-width / 2, width / 2, -width / 2, width / 2),outer_),
 #endif
 	    outer_),
       eos_(adiabatic_index),
