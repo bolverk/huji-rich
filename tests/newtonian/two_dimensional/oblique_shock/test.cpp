@@ -251,10 +251,16 @@ namespace
       tess_(
 #ifdef RICH_MPI
 	    proctess_,
-	    RoundGrid(RandSquare(75*75,proctess_,outer_.getBoundary().first,
-				 outer_.getBoundary().second),outer_,10,&proctess_),
+	    RoundGridV
+	    (RandSquare
+	     (75*75,
+	      proctess_,
+	      outer_.getBoundary().first,
+	      outer_.getBoundary().second),
+	     outer_,
+	     proctess_),
 #else
-	    RoundGrid(RandSquare(75*75,-width / 2, width / 2, -width / 2, width / 2),outer_),
+	    RoundGridV(RandSquare(75*75,-width / 2, width / 2, -width / 2, width / 2),outer_),
 #endif
 	    outer_),
       eos_(adiabatic_index),
@@ -401,9 +407,6 @@ namespace
     NonConservativeAMR amr(refine, remove);
 
     while (tf > sim.getTime()) {
-#ifdef RICH_MPI
-      cout << sim.getTime() << endl;
-#endif // RICH_MPI
       try {
 	sim.TimeAdvance();
 	amr(sim);
