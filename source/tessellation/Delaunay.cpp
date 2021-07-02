@@ -535,6 +535,7 @@ const facet& Delaunay::get_facet(int index) const
 	return f[static_cast<size_t>(index)];
 }
 
+/*
 double Delaunay::get_facet_coordinate(int Facet, int vertice, int dim)
 {
 	if (dim == 0)
@@ -542,6 +543,7 @@ double Delaunay::get_facet_coordinate(int Facet, int vertice, int dim)
 	else
 		return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])].y;
 }
+*/
 
 Vector2D Delaunay::get_point(size_t index) const
 {
