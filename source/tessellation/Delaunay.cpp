@@ -541,19 +541,9 @@ const Vector2D& Delaunay::get_facet_coordinates
   return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])];
 }
 
-Vector2D Delaunay::get_point(size_t index) const
+const Vector2D& Delaunay::get_point(size_t index) const
 {
 	return cor[index];
-}
-
-double Delaunay::get_cor(int index, int dim) const
-{
-	if (dim == 0)
-		return cor[static_cast<size_t>(index)].x;
-	else if (dim == 1)
-		return cor[static_cast<size_t>(index)].y;
-	else
-		throw UniversalError("Error in Delaunay::get_cor. Invalid index");
 }
 
 int Delaunay::get_num_facet(void) const
