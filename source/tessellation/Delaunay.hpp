@@ -184,14 +184,7 @@ public:
     \param index The index of the point.
     \returns The chosen point.
   */
-  Vector2D get_point(size_t index) const;
-
-  /*! \brief Returns a coordinate.
-    \param index The index of the point.
-    \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
-    \returns The chosen coordinate.
-  */
-  double get_cor(int index,int dim) const;
+  const Vector2D& get_point(size_t index) const;
 
   /*! \brief Returns the number of facets.
     \returns The number of facets.
