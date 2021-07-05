@@ -178,7 +178,7 @@ public:
     \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
     \returns The chosen coordinate.
   */
-  double get_facet_coordinate(int Facet,int vertice, int dim);
+  const Vector2D& get_facet_coordinates(int Facet,int vertice);
 
   /*! \brief Returns a point.
     \param index The index of the point.
