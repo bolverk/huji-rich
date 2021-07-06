@@ -3,6 +3,7 @@
 #include <cmath>
 #include "../misc/triplet.hpp"
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
@@ -361,27 +362,38 @@ void Delaunay::update(const vector<Vector2D>& points, vector<Vector2D>
 
 namespace {
 
-	int Triplet<int>::* walk_condition(const vector<Vector2D>& cor,
-		const Triplet<int>& vertices,
-		size_t point)
+  boost::optional<size_t> walk_condition
+  (const vector<Vector2D>& cor,
+   const Triplet<int>& vertices,
+   size_t point)
 	{
+	  for(size_t i=0;i<3;++i){
+	    if (orient2d(TripleConstRef<Vector2D>
+			 (cor[static_cast<size_t>(vertices[i])],
+			  cor[static_cast<size_t>(vertices[(i+1)%3])],
+			  cor[point])) < 0)
+	      return i;
+	  }
+	  return boost::none;
+	  /*
 		if (orient2d(TripleConstRef<Vector2D>
 			(cor[static_cast<size_t>(vertices.first)],
 				cor[static_cast<size_t>(vertices.second)],
 				cor[point])) < 0)
-			return &Triplet<int>::first;
+		  return &Triplet<int>::array<int,3>::data;
 		else if (orient2d(TripleConstRef<Vector2D>
 			(cor[static_cast<size_t>(vertices.second)],
 				cor[static_cast<size_t>(vertices.third)],
 				cor[point])) < 0)
-			return &Triplet<int>::second;
+			return &Triplet<int>::data+1;
 		else if (orient2d(TripleConstRef<Vector2D>
 			(cor[static_cast<size_t>(vertices.third)],
 				cor[static_cast<size_t>(vertices.first)],
 				cor[point])) < 0)
-			return &Triplet<int>::third;
+			return &Triplet<int>::data+2;
 		else
 			return nullptr;
+	  */
 	}
 
 	size_t find_new_facet(const vector<Vector2D>& cor,
@@ -390,11 +402,18 @@ namespace {
 		size_t last_facet)
 	{
 		size_t res = last_facet;
+		auto next = walk_condition
+		  (cor,
+		   f[res].vertices,
+		   point);
+		/*
 		int Triplet<int>::* next = walk_condition(cor,
 			f[res].vertices,
 			point);
+		*/
 		while (next) {
-			res = static_cast<size_t>(f[res].neighbors.*next);
+		  //			res = static_cast<size_t>(f[res].neighbors.*next);
+		  res = static_cast<size_t>(f[res].neighbors[*next]);
 			next = walk_condition(cor,
 				f[res].vertices,
 				point);
