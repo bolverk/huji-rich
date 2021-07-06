@@ -464,34 +464,21 @@ bool Delaunay::IsOuterFacet(int facet)const
 double Delaunay::CalculateRadius(int facet)
 {
 	const double big = 1e10;
-	const double a = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
-	const double b = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[0])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])]);
-	const double c = cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[2])].distance(cor[static_cast<size_t>(f[static_cast<size_t>(facet)].vertices[1])]);
-	const double temp1 = b + c - a;
-	if (temp1 <= 0)
-	{
-		if (a > big*b || a>big*c) // Do we have a small edge?
-			return 0.5*a;
-		else
-			return 0.5*(b + c); // we have 3 points on a line
+	std::array<double, 3> sides;
+	for(int i=0;i<3;++i)
+	  sides[i] = get_facet_coordinates(facet,i).distance
+	    (get_facet_coordinates(facet,(i+1)%3));
+	std::array<double, 3> temps;
+	for(size_t i=0;i<3;++i){
+	  temps[i] = sides[(i+1)%3]+sides[(i+2)%3]-sides[i];
+	  if(temps[i] <= 0)
+	    return (sides[i] > big*sides[(i+1)%3] ||
+		    sides[i] > big*sides[(i+2)%3]) ?
+	      0.5*sides[i] : 0.5*(sides[(i+1)%3]+sides[(i+2)%3]);
 	}
-	const double temp2 = c + a - b;
-	if (temp2 <= 0)
-	{
-		if (b > big*a || b > big*c) // Do we have a small edge?
-			return 0.5*b;
-		else
-			return 0.5*(a + c); // we have 3 points on a line
-	}
-	const double temp3 = b - c + a;
-	if (temp3 <= 0)
-	{
-		if (c > big*b || c > big*a) // Do we have a small edge?
-			return 0.5*c;
-		else
-			return 0.5*(b + a); // we have 3 points on a line
-	}
-	return a*b*c / sqrt((a + b + c)*temp1*temp2*temp3);
+	return sides[0]*sides[1]*sides[2]/
+	  sqrt((sides[0]+sides[1]+sides[2])*
+	       temps[0]*temps[1]*temps[2]);
 }
 
 void Delaunay::CheckInput()
