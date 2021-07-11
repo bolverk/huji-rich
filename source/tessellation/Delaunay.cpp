@@ -5,6 +5,7 @@
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <numeric>
+#include <boost/range/combine.hpp>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
@@ -149,6 +150,20 @@ namespace
 		}
 		throw UniversalError("Error in find_index: Index not found");
 	}
+
+  template<class T1, class T2, int N> std::array<pair<T1, T2>, N> zip2
+  (const std::array<T1, N>& v1, 
+   const std::array<T2, N>& v2)
+  {
+    std::array<pair<T1, T2>, N> res;
+    transform(v1.begin(),
+	      v1.end(),
+	      v2.begin(),
+	      res.begin(),
+	      [](const T1& t1, const T2& t2)
+	      {return pair<T1, T2>(t1, t2);});
+    return res;
+  }
 }
 
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
@@ -217,9 +232,16 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	}
 
 	// check if flipping is needed
-	flip(triangle, static_cast<size_t>(temp_friends.third),flip_stack);
-	flip(static_cast<size_t>(location_pointer) + 1, static_cast<size_t>(temp_friends.first),flip_stack);
-	flip(static_cast<size_t>(location_pointer) + 2, static_cast<size_t>(temp_friends.second),flip_stack);
+
+	for(const auto& zipped : 
+	      zip2<int,int,3>
+	      ({static_cast<int>(triangle), 
+		  location_pointer+1,
+		  location_pointer+2},
+	       {temp_friends.third, 
+		   temp_friends.first,
+		   temp_friends.second}))
+	  flip(zipped.first, zipped.second, flip_stack);
 
 	// _update number of facets
 	location_pointer += 2;
