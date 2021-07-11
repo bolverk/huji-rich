@@ -216,6 +216,38 @@ void Delaunay::update_friends_of_friends
     }
 }
 
+void Delaunay::update_f_in_add_point
+(size_t triangle, const Triplet<int>& temp_friends, size_t index)
+{
+  const Triplet<int> outer(f[triangle].vertices);
+  f[triangle].vertices.set
+    (outer.third,
+     outer.first,
+     static_cast<int>(index));
+  f[triangle].neighbors.set(temp_friends.third,
+			    location_pointer + 1,
+			    location_pointer + 2);
+  const facet facet1
+    (TripleConstRef<int>
+     (outer.first,
+      outer.second,
+      static_cast<int>(index)),
+     TripleConstRef<int>
+     (temp_friends.first,
+      location_pointer + 2,
+      static_cast<int>(triangle)));
+  const facet facet2
+    (TripleConstRef<int>
+     (outer.second,
+      outer.third,
+      static_cast<int>(index)),
+     TripleConstRef<int>
+     (temp_friends.second,
+      static_cast<int>(triangle),
+      location_pointer + 1));
+  f.insert(f.end(), {facet1, facet2});
+}
+
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
@@ -224,48 +256,10 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 		cor[olength + 2]),
 		cor[index]));
 	const size_t triangle = Walk(index);
-	const Triplet<int> outer(f[triangle].vertices);
 	const Triplet<int> temp_friends(f[triangle].neighbors);
-	f[triangle].vertices.set(outer.third, outer.first, static_cast<int>(index));
-	f[triangle].neighbors.set(temp_friends.third,
-		location_pointer + 1,
-		location_pointer + 2);
-	{
-	  const facet facet1
-	    (TripleConstRef<int>
-	     (outer.first,
-	      outer.second,
-	      static_cast<int>(index)),
-	     TripleConstRef<int>
-	     (temp_friends.first,
-	      location_pointer + 2,
-	      static_cast<int>(triangle)));
-	  const facet facet2
-	    (TripleConstRef<int>
-	     (outer.second,
-	      outer.third,
-	      static_cast<int>(index)),
-	     TripleConstRef<int>
-	     (temp_friends.second,
-	      static_cast<int>(triangle),
-	      location_pointer + 1));
-	  f.insert(f.end(), {facet1, facet2});
-	}
-	// _update the friends list of the friends
+	update_f_in_add_point(triangle, temp_friends, index);
 	update_friends_of_friends(triangle, temp_friends);
-	/*
-	for(const auto& itm :
-	      {pair<int,int>(temp_friends.first, 1),
-		 pair<int,int>(temp_friends.second, 2)})
-	  if(itm.first != last_loc){
-	    const size_t i = find_index
-	      (f[static_cast<size_t>(itm.first)],
-	       static_cast<int>(triangle));
-	    f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
-	  }
-	*/
 
-	// Calculate radius if needed
 	if (CalcRadius)
 	  update_radii(triangle);
 

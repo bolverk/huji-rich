@@ -41,6 +41,11 @@ private:
   void update_friends_of_friends
   (size_t triangle, const Triplet<int>& temp_friends);
 
+  void update_f_in_add_point
+  (size_t triangle,
+   const Triplet<int>& temp_friends,
+   size_t index);
+
 #ifdef RICH_MPI
 	vector<int> OrgIndex;
 
