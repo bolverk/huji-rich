@@ -36,6 +36,8 @@ private:
    const Triplet<int>& temp_friends,
    stack<std::pair<size_t, size_t> >& flip_stack);
 
+  void update_radii(size_t triangle);
+
 #ifdef RICH_MPI
 	vector<int> OrgIndex;
 

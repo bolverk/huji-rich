@@ -182,6 +182,26 @@ void Delaunay::check_if_flipping_is_needed
     flip(zipped.first, zipped.second, flip_stack);
 }
 
+void Delaunay::update_radii
+(size_t triangle)
+{
+  radius[static_cast<size_t>(triangle)] = 
+    CalculateRadius(static_cast<int>(triangle));
+  const int n = int(f.size());
+  const int m = int(radius.size());
+  auto func = n > m - 1 ?
+    [](vector<double>& v, double x, double y)
+    {v.insert(v.end(),{x,y});} :
+  n>m ?
+    [](vector<double>& v, double x, double y)
+    {v.back()=x; v.push_back(y);} :
+  [](vector<double>& v, double x, double y)
+    {v.rbegin()[1] = x; v.back() = y;};
+  func(radius,
+       CalculateRadius(location_pointer+1),
+       CalculateRadius(location_pointer+2));
+}
+
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
@@ -231,6 +251,8 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	// Calculate radius if needed
 	if (CalcRadius)
 	{
+	  update_radii(triangle);
+	  /*
 	  radius[static_cast<size_t>(triangle)] = CalculateRadius(static_cast<int>(triangle));
 	  const int n = int(f.size());
 	  const int m = int(radius.size());
@@ -245,22 +267,11 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	  func(radius,
 	       CalculateRadius(location_pointer+1),
 	       CalculateRadius(location_pointer+2));
+	  */
 	}
 
 	check_if_flipping_is_needed
 	  (triangle, temp_friends, flip_stack);
-
-	/*
-	for(const auto& zipped : 
-	      zip2<int,int,3>
-	      ({static_cast<int>(triangle), 
-		  location_pointer+1,
-		  location_pointer+2},
-	       {temp_friends.third, 
-		   temp_friends.first,
-		   temp_friends.second}))
-	  flip(zipped.first, zipped.second, flip_stack);
-	*/
 
 	// _update number of facets
 	location_pointer += 2;
