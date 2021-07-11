@@ -202,6 +202,20 @@ void Delaunay::update_radii
        CalculateRadius(location_pointer+2));
 }
 
+void Delaunay::update_friends_of_friends
+(size_t triangle, const Triplet<int>& temp_friends)
+{
+  for(const auto& itm :
+    {pair<int,int>(temp_friends.first, 1),
+	pair<int,int>(temp_friends.second, 2)})
+    if(itm.first != last_loc){
+      const size_t i = find_index
+	(f[static_cast<size_t>(itm.first)],
+	 static_cast<int>(triangle));
+      f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
+    }
+}
+
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
@@ -238,6 +252,8 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	  f.insert(f.end(), {facet1, facet2});
 	}
 	// _update the friends list of the friends
+	update_friends_of_friends(triangle, temp_friends);
+	/*
 	for(const auto& itm :
 	      {pair<int,int>(temp_friends.first, 1),
 		 pair<int,int>(temp_friends.second, 2)})
@@ -247,28 +263,11 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	       static_cast<int>(triangle));
 	    f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
 	  }
+	*/
 
 	// Calculate radius if needed
 	if (CalcRadius)
-	{
 	  update_radii(triangle);
-	  /*
-	  radius[static_cast<size_t>(triangle)] = CalculateRadius(static_cast<int>(triangle));
-	  const int n = int(f.size());
-	  const int m = int(radius.size());
-	  auto func = n > m - 1 ?
-	    [](vector<double>& v, double x, double y)
-	    {v.insert(v.end(),{x,y});} :
-	    n>m ?
-	    [](vector<double>& v, double x, double y)
-	    {v.back()=x; v.push_back(y);} :
-	    [](vector<double>& v, double x, double y)
-	    {v.rbegin()[1] = x; v.back() = y;};
-	  func(radius,
-	       CalculateRadius(location_pointer+1),
-	       CalculateRadius(location_pointer+2));
-	  */
-	}
 
 	check_if_flipping_is_needed
 	  (triangle, temp_friends, flip_stack);
