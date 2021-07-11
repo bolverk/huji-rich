@@ -7,6 +7,7 @@
 #define TRIPLET_HPP 1
 
 #include "universal_error.hpp"
+#include <array>
 
 //! \brief A collection of three identical references
 template<class T> class TripleConstRef
@@ -36,18 +37,18 @@ template<class T> class TripleConstRef
 };
 
 //! \brief A collection of 3 items of the same type
-template<class T> class Triplet
+template<class T> class Triplet: public std::array<T, 3>
 {
  public:
 
   //! \brief First item
-  T first;
+  T& first;
 
   //! \brief Second item
-  T second;
+  T& second;
 
   //! \brief Third item
-  T third;
+  T& third;
 
   /*! \brief Class constructor
     \param first_i First item
@@ -57,17 +58,19 @@ template<class T> class Triplet
   Triplet(const T& first_i,
 	  const T& second_i,
 	  const T& third_i):
-    first(first_i),
-    second(second_i),
-    third(third_i) {}
+    std::array<T, 3>{{first_i, second_i, third_i}},
+    first((*this)[0]),
+    second((*this)[1]),
+    third((*this)[2]) {}
 
   /*! \brief Class constructor
     \param tcr References to three items
    */
   explicit Triplet(const TripleConstRef<int>& tcr):
-    first(tcr.first),
-    second(tcr.second),
-    third(tcr.third) {}
+    Triplet(tcr.first, tcr.second, tcr.third) {}
+
+  explicit Triplet(const Triplet& other):
+    Triplet(other[0], other[1], other[2]) {}
 
   /*! \brief Changle all items
     \param first_i First item
@@ -83,30 +86,10 @@ template<class T> class Triplet
     third = third_i;
   }
 
-  /*! \brief Random access operator
-    \param i index
-    \return Reference to appropriate item
-   */
-  const T& operator[](size_t i) const
+  Triplet& operator=(const Triplet& other)
   {
-    assert(i<3);
-    static const T Triplet<T>::* temp [3] = {&Triplet<T>::first,
-					    &Triplet<T>::second,
-					    &Triplet<T>::third};
-    return this->*temp[i];
-  }
-
-  /*! \brief Random access operator
-    \param i index
-    \return Reference to appropriate item
-   */
-  T& operator[](size_t i)
-  {
-    assert(i<3);
-    static T Triplet<T>::* temp [] = {&Triplet<T>::first,
-					    &Triplet<T>::second,
-					    &Triplet<T>::third};
-    return this->*temp[i];
+    std::array<T,3>::operator=(other);
+    return *this;
   }
 };
 

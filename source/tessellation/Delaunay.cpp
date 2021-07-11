@@ -3,28 +3,30 @@
 #include <cmath>
 #include "../misc/triplet.hpp"
 #include <boost/foreach.hpp>
+#include <boost/optional.hpp>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
 
 namespace {
-	pair<int, int> find_diff(const facet& f1, const facet& f2)
-	{
-		if (f1.vertices.first != f2.vertices.first &&
-			f1.vertices.first != f2.vertices.second &&
-			f1.vertices.first != f2.vertices.third)
-			return pair<int, int>(f1.vertices.first, 0);
-		else if (f1.vertices.second != f2.vertices.first &&
-			f1.vertices.second != f2.vertices.second &&
-			f1.vertices.second != f2.vertices.third)
-			return pair<int, int>(f1.vertices.second, 1);
-		else if (f1.vertices.third != f2.vertices.first &&
-			f1.vertices.third != f2.vertices.second &&
-			f1.vertices.third != f2.vertices.third)
-			return pair<int, int>(f1.vertices.third, 2);
-		else
-			throw UniversalError("Delaunay, Couldn't find difference bewteen two facets");
-	}
+
+  template<class T> bool is_in(const T& t, const Triplet<T>& trip)
+  {
+    for(auto s : trip){
+      if(t==s)
+	return true;
+    }
+    return false;
+  }
+
+  pair<int, int> find_diff(const facet& f1, const facet& f2)
+  {
+    for(size_t i=0;i<3;++i){
+      if(not is_in(f1.vertices[i],f2.vertices))
+	return pair<int,int>(f1.vertices[i],i);
+    }
+    throw UniversalError("Delaunay, Couldn't find difference bewteen two facets");
+  }
 }
 
 Delaunay::DataOnlyForBuild::DataOnlyForBuild() :copied(vector<vector<char> >())
@@ -361,27 +363,19 @@ void Delaunay::update(const vector<Vector2D>& points, vector<Vector2D>
 
 namespace {
 
-	int Triplet<int>::* walk_condition(const vector<Vector2D>& cor,
-		const Triplet<int>& vertices,
-		size_t point)
+  boost::optional<size_t> walk_condition
+  (const vector<Vector2D>& cor,
+   const Triplet<int>& vertices,
+   size_t point)
 	{
-		if (orient2d(TripleConstRef<Vector2D>
-			(cor[static_cast<size_t>(vertices.first)],
-				cor[static_cast<size_t>(vertices.second)],
-				cor[point])) < 0)
-			return &Triplet<int>::first;
-		else if (orient2d(TripleConstRef<Vector2D>
-			(cor[static_cast<size_t>(vertices.second)],
-				cor[static_cast<size_t>(vertices.third)],
-				cor[point])) < 0)
-			return &Triplet<int>::second;
-		else if (orient2d(TripleConstRef<Vector2D>
-			(cor[static_cast<size_t>(vertices.third)],
-				cor[static_cast<size_t>(vertices.first)],
-				cor[point])) < 0)
-			return &Triplet<int>::third;
-		else
-			return nullptr;
+	  for(size_t i=0;i<3;++i){
+	    if (orient2d(TripleConstRef<Vector2D>
+			 (cor[static_cast<size_t>(vertices[i])],
+			  cor[static_cast<size_t>(vertices[(i+1)%3])],
+			  cor[point])) < 0)
+	      return i;
+	  }
+	  return boost::none;
 	}
 
 	size_t find_new_facet(const vector<Vector2D>& cor,
@@ -390,11 +384,12 @@ namespace {
 		size_t last_facet)
 	{
 		size_t res = last_facet;
-		int Triplet<int>::* next = walk_condition(cor,
-			f[res].vertices,
-			point);
+		auto next = walk_condition
+		  (cor,
+		   f[res].vertices,
+		   point);
 		while (next) {
-			res = static_cast<size_t>(f[res].neighbors.*next);
+		  res = static_cast<size_t>(f[res].neighbors[*next]);
 			next = walk_condition(cor,
 				f[res].vertices,
 				point);
