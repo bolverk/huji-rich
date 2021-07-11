@@ -46,6 +46,9 @@ private:
    const Triplet<int>& temp_friends,
    size_t index);
 
+  bool is_point_inside_big_triangle
+  (size_t index) const;
+
 #ifdef RICH_MPI
 	vector<int> OrgIndex;
 

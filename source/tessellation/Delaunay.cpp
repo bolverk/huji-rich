@@ -248,26 +248,32 @@ void Delaunay::update_f_in_add_point
   f.insert(f.end(), {facet1, facet2});
 }
 
+bool Delaunay::is_point_inside_big_triangle
+(size_t index) const
+{
+  return InTriangle
+    (TripleConstRef<Vector2D>
+     (cor[olength],
+      cor[olength + 1],
+      cor[olength + 2]),
+     cor[index]);
+}
+
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
-	// Check if point is inside big triangle
-	assert(InTriangle(TripleConstRef<Vector2D>(cor[olength],
-		cor[olength + 1],
-		cor[olength + 2]),
-		cor[index]));
-	const size_t triangle = Walk(index);
-	const Triplet<int> temp_friends(f[triangle].neighbors);
-	update_f_in_add_point(triangle, temp_friends, index);
-	update_friends_of_friends(triangle, temp_friends);
+  assert(is_point_inside_big_triangle(index));
+  const size_t triangle = Walk(index);
+  const Triplet<int> temp_friends(f[triangle].neighbors);
+  update_f_in_add_point(triangle, temp_friends, index);
+  update_friends_of_friends(triangle, temp_friends);
 
-	if (CalcRadius)
-	  update_radii(triangle);
+  if (CalcRadius)
+    update_radii(triangle);
 
-	check_if_flipping_is_needed
-	  (triangle, temp_friends, flip_stack);
+  check_if_flipping_is_needed(triangle, temp_friends, flip_stack);
 
-	// _update number of facets
-	location_pointer += 2;
+  // _update number of facets
+  location_pointer += 2;
 }
 
 void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_stack)
