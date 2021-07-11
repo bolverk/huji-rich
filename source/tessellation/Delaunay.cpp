@@ -166,6 +166,22 @@ namespace
   }
 }
 
+void Delaunay::check_if_flipping_is_needed
+(size_t triangle,
+ const Triplet<int>& temp_friends,
+ stack<std::pair<size_t, size_t> >& flip_stack)
+{
+  for(const auto& zipped : 
+	zip2<int,int,3>
+	({static_cast<int>(triangle), 
+	    location_pointer+1,
+	    location_pointer+2},
+	{temp_friends.third, 
+	    temp_friends.first,
+	    temp_friends.second}))
+    flip(zipped.first, zipped.second, flip_stack);
+}
+
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
 	// Check if point is inside big triangle
@@ -231,8 +247,10 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 	       CalculateRadius(location_pointer+2));
 	}
 
-	// check if flipping is needed
+	check_if_flipping_is_needed
+	  (triangle, temp_friends, flip_stack);
 
+	/*
 	for(const auto& zipped : 
 	      zip2<int,int,3>
 	      ({static_cast<int>(triangle), 
@@ -242,6 +260,7 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 		   temp_friends.first,
 		   temp_friends.second}))
 	  flip(zipped.first, zipped.second, flip_stack);
+	*/
 
 	// _update number of facets
 	location_pointer += 2;
