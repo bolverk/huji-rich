@@ -31,6 +31,24 @@ class Delaunay
 {
 private:
 
+  void check_if_flipping_is_needed
+  (size_t triangle,
+   const Triplet<int>& temp_friends,
+   stack<std::pair<size_t, size_t> >& flip_stack);
+
+  void update_radii(size_t triangle);
+
+  void update_friends_of_friends
+  (size_t triangle, const Triplet<int>& temp_friends);
+
+  void update_f_in_add_point
+  (size_t triangle,
+   const Triplet<int>& temp_friends,
+   size_t index);
+
+  bool is_point_inside_big_triangle
+  (size_t index) const;
+
 #ifdef RICH_MPI
 	vector<int> OrgIndex;
 

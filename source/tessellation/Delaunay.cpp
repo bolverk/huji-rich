@@ -4,6 +4,8 @@
 #include "../misc/triplet.hpp"
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
+#include <numeric>
+#include <boost/range/combine.hpp>
 #ifdef RICH_MPI
 #include <mpi.h>
 #endif // RICH_MPI
@@ -113,26 +115,30 @@ namespace
 		return true;
 	}
 
-	vector<double> CellSize(vector<Vector2D> const& points)
+  template<class S, class T> T convert_reduce
+  (const vector<S>& slist,
+   const std::function<T(S)>& f_con,
+   const std::function<T(T,T)>& f_red)
+  {
+    T res = f_con(slist.front());
+    for(size_t i=1;i<slist.size();++i)
+      res = f_red(res, f_con(slist[i]));
+    return res;
+  }
+
+  std::array<double,4> CellSize(vector<Vector2D> const& points)
 	{
-		int n = static_cast<int>(points.size());
-		double minx = points[0].x;
-		double miny = points[0].y;
-		double maxx = minx;
-		double maxy = miny;
-		for (int i = 1; i < n; ++i)
-		{
-			minx = min(points[static_cast<size_t>(i)].x, minx);
-			miny = min(points[static_cast<size_t>(i)].y, miny);
-			maxx = max(points[static_cast<size_t>(i)].x, maxx);
-			maxy = max(points[static_cast<size_t>(i)].y, maxy);
-		}
-		vector<double> res(4);
-		res[0] = minx;
-		res[1] = maxx;
-		res[2] = miny;
-		res[3] = maxy;
-		return res;
+	  std::array<double,4> res;
+	  size_t counter = 0;
+	  for(const auto& comp : {&Vector2D::x, &Vector2D::y}){
+	    for(const auto& fop : {&fmin, &fmax})
+	      res[counter++] =
+		convert_reduce<Vector2D, double>
+		(points,
+		 [&comp](const Vector2D& p){return p.*comp;},
+		 fop);
+	  }
+	  return res;
 	}
 
 	size_t find_index(facet const& fc, int i)
@@ -144,76 +150,130 @@ namespace
 		}
 		throw UniversalError("Error in find_index: Index not found");
 	}
+
+  template<class T1, class T2, int N> std::array<pair<T1, T2>, N> zip2
+  (const std::array<T1, N>& v1, 
+   const std::array<T2, N>& v2)
+  {
+    std::array<pair<T1, T2>, N> res;
+    transform(v1.begin(),
+	      v1.end(),
+	      v2.begin(),
+	      res.begin(),
+	      [](const T1& t1, const T2& t2)
+	      {return pair<T1, T2>(t1, t2);});
+    return res;
+  }
+}
+
+void Delaunay::check_if_flipping_is_needed
+(size_t triangle,
+ const Triplet<int>& temp_friends,
+ stack<std::pair<size_t, size_t> >& flip_stack)
+{
+  for(const auto& zipped : 
+	zip2<int,int,3>
+	({static_cast<int>(triangle), 
+	    location_pointer+1,
+	    location_pointer+2},
+	{temp_friends.third, 
+	    temp_friends.first,
+	    temp_friends.second}))
+    flip(zipped.first, zipped.second, flip_stack);
+}
+
+void Delaunay::update_radii
+(size_t triangle)
+{
+  radius[static_cast<size_t>(triangle)] = 
+    CalculateRadius(static_cast<int>(triangle));
+  const int n = int(f.size());
+  const int m = int(radius.size());
+  auto func = n > m - 1 ?
+    [](vector<double>& v, double x, double y)
+    {v.insert(v.end(),{x,y});} :
+  n>m ?
+    [](vector<double>& v, double x, double y)
+    {v.back()=x; v.push_back(y);} :
+  [](vector<double>& v, double x, double y)
+    {v.rbegin()[1] = x; v.back() = y;};
+  func(radius,
+       CalculateRadius(location_pointer+1),
+       CalculateRadius(location_pointer+2));
+}
+
+void Delaunay::update_friends_of_friends
+(size_t triangle, const Triplet<int>& temp_friends)
+{
+  for(const auto& itm :
+    {pair<int,int>(temp_friends.first, 1),
+	pair<int,int>(temp_friends.second, 2)})
+    if(itm.first != last_loc){
+      const size_t i = find_index
+	(f[static_cast<size_t>(itm.first)],
+	 static_cast<int>(triangle));
+      f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
+    }
+}
+
+void Delaunay::update_f_in_add_point
+(size_t triangle, const Triplet<int>& temp_friends, size_t index)
+{
+  const Triplet<int> outer(f[triangle].vertices);
+  f[triangle].vertices.set
+    (outer.third,
+     outer.first,
+     static_cast<int>(index));
+  f[triangle].neighbors.set(temp_friends.third,
+			    location_pointer + 1,
+			    location_pointer + 2);
+  const facet facet1
+    (TripleConstRef<int>
+     (outer.first,
+      outer.second,
+      static_cast<int>(index)),
+     TripleConstRef<int>
+     (temp_friends.first,
+      location_pointer + 2,
+      static_cast<int>(triangle)));
+  const facet facet2
+    (TripleConstRef<int>
+     (outer.second,
+      outer.third,
+      static_cast<int>(index)),
+     TripleConstRef<int>
+     (temp_friends.second,
+      static_cast<int>(triangle),
+      location_pointer + 1));
+  f.insert(f.end(), {facet1, facet2});
+}
+
+bool Delaunay::is_point_inside_big_triangle
+(size_t index) const
+{
+  return InTriangle
+    (TripleConstRef<Vector2D>
+     (cor[olength],
+      cor[olength + 1],
+      cor[olength + 2]),
+     cor[index]);
 }
 
 void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack)
 {
-	// Check if point is inside big triangle
-	assert(InTriangle(TripleConstRef<Vector2D>(cor[olength],
-		cor[olength + 1],
-		cor[olength + 2]),
-		cor[index]));
-	const size_t triangle = Walk(index);
-	const Triplet<int> outer(f[triangle].vertices);
-	const Triplet<int> temp_friends(f[triangle].neighbors);
-	f[triangle].vertices.set(outer.third, outer.first, static_cast<int>(index));
-	f[triangle].neighbors.set(temp_friends.third,
-		location_pointer + 1,
-		location_pointer + 2);
-	f.push_back(facet(TripleConstRef<int>(outer.first,
-		outer.second,
-		static_cast<int>(index)),
-		TripleConstRef<int>(temp_friends.first,
-			location_pointer + 2,
-			static_cast<int>(triangle))));
-	f.push_back(facet(TripleConstRef<int>(outer.second,
-		outer.third,
-		static_cast<int>(index)),
-		TripleConstRef<int>(temp_friends.second,
-			static_cast<int>(triangle),
-			location_pointer + 1)));
-	// _update the friends list of the friends
-	if (temp_friends.second != last_loc)
-	{
-		const size_t i = find_index(f[static_cast<size_t>(temp_friends.second)], static_cast<int>(triangle));
-		f[static_cast<size_t>(temp_friends.second)].neighbors[i] = location_pointer + 2;
-	}
-	if (temp_friends.first != last_loc)
-	{
-		const size_t i = find_index(f[static_cast<size_t>(temp_friends.first)], static_cast<int>(triangle));
-		f[static_cast<size_t>(temp_friends.first)].neighbors[i] = location_pointer + 1;
-	}
-	// Calculate radius if needed
-	if (CalcRadius)
-	{
-		radius[static_cast<size_t>(triangle)] = CalculateRadius(static_cast<int>(triangle));
-		int n = int(f.size());
-		int m = int(radius.size());
-		if (n > m - 1)
-		{
-			radius.push_back(CalculateRadius(location_pointer + 1));
-			radius.push_back(CalculateRadius(location_pointer + 2));
-		}
-		else
-			if (n > m)
-			{
-				radius[static_cast<size_t>(location_pointer) + 1] = CalculateRadius(location_pointer + 1);
-				radius.push_back(CalculateRadius(location_pointer + 2));
-			}
-			else
-			{
-				radius[static_cast<size_t>(location_pointer) + 1] = CalculateRadius(location_pointer + 1);
-				radius[static_cast<size_t>(location_pointer) + 2] = CalculateRadius(location_pointer + 2);
-			}
-	}
+  assert(is_point_inside_big_triangle(index));
+  const size_t triangle = Walk(index);
+  const Triplet<int> temp_friends(f[triangle].neighbors);
+  update_f_in_add_point(triangle, temp_friends, index);
+  update_friends_of_friends(triangle, temp_friends);
 
-	// check if flipping is needed
-	flip(triangle, static_cast<size_t>(temp_friends.third),flip_stack);
-	flip(static_cast<size_t>(location_pointer) + 1, static_cast<size_t>(temp_friends.first),flip_stack);
-	flip(static_cast<size_t>(location_pointer) + 2, static_cast<size_t>(temp_friends.second),flip_stack);
+  if (CalcRadius)
+    update_radii(triangle);
 
-	// _update number of facets
-	location_pointer += 2;
+  check_if_flipping_is_needed(triangle, temp_friends, flip_stack);
+
+  // _update number of facets
+  location_pointer += 2;
 }
 
 void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_stack)
@@ -304,7 +364,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 
 	// add the 3 extreme points
 	Vector2D p_temp;
-	vector<double> cellsize = CellSize(cell_points);
+	const auto cellsize = CellSize(cell_points);
 	double width = cellsize[1] - cellsize[0];
 	double height = cellsize[3] - cellsize[2];
 	width = max(width, height);
