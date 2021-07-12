@@ -141,7 +141,7 @@ public:
     \param index Index of a point
     \return Original index
    */
-	int GetOrgIndex(int index)const;
+	int GetOrgIndex(size_t index)const;
 #endif
   /*! \brief Changes the cor olength
     \param n The new length;

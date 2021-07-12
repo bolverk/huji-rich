@@ -1641,9 +1641,9 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);
 }
 
-int Delaunay::GetOrgIndex(int index)const
+int Delaunay::GetOrgIndex(size_t index)const
 {
-	if (index < static_cast<int>(olength))
+	if (index < olength)
 		return static_cast<int>(olength);
 	else
 		return OrgIndex.at(index - 3 - static_cast<int>(olength));
