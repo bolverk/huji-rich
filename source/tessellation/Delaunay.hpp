@@ -141,7 +141,7 @@ public:
     \param index Index of a point
     \return Original index
    */
-	int GetOrgIndex(size_t index)const;
+	size_t GetOrgIndex(size_t index)const;
 #endif
   /*! \brief Changes the cor olength
     \param n The new length;
@@ -243,7 +243,7 @@ public:
     \param NewPoint The index of the duplicated point
     \return The original index
   */
-  int GetOriginalIndex(int NewPoint) const;
+  int  GetOriginalIndex(int NewPoint) const;
 
   /*!
     \brief Returns the original length of the points (without duplicated points)

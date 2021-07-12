@@ -196,7 +196,7 @@ int VoronoiMesh::GetOriginalIndex(int point) const
 	else
 	{
 #ifdef RICH_MPI
-		return Tri.GetOrgIndex(point);
+	  return static_cast<int>(Tri.GetOrgIndex(point));
 #else
 		int counter=0;
 		if(point<Nextra)
