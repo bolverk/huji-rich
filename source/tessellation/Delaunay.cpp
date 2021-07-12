@@ -1646,7 +1646,7 @@ size_t Delaunay::GetOrgIndex(size_t index)const
 	if (index < olength)
 		return olength;
 	else
-		return OrgIndex.at(index - 3 - static_cast<int>(olength));
+		return OrgIndex.at(index - 3 - olength);
 }
 
 #endif // RICH_MPI
