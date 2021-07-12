@@ -57,7 +57,7 @@ Delaunay::Delaunay(void) :
 	olength(0), location_pointer(0), last_loc(0),
 	logger(nullptr)
 #ifdef RICH_MPI
-	,OrgIndex(vector<int>())
+	,OrgIndex(vector<size_t>())
 #endif
 {}
 
@@ -1605,7 +1605,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 		{
 			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
-			OrgIndex.push_back(static_cast<int>(cor.size() + j));
+			OrgIndex.push_back(cor.size() + j);
 		}
 		AddBoundaryPoints(incoming.at(i));
 	}

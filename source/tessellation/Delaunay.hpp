@@ -50,7 +50,7 @@ private:
   (size_t index) const;
 
 #ifdef RICH_MPI
-	vector<int> OrgIndex;
+	vector<size_t> OrgIndex;
 
   int findSomeOuterPoint(void);
 
