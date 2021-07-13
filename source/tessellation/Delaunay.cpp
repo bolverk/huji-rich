@@ -185,9 +185,9 @@ void Delaunay::update_radii
 (size_t triangle)
 {
   radius[triangle] = 
-    CalculateRadius(static_cast<int>(triangle));
-  const int n = int(f.size());
-  const int m = int(radius.size());
+    CalculateRadius(triangle);
+  const auto n = f.size();
+  const auto m = radius.size();
   auto func = n > m - 1 ?
     [](vector<double>& v, double x, double y)
     {v.insert(v.end(),{x,y});} :
@@ -197,8 +197,8 @@ void Delaunay::update_radii
   [](vector<double>& v, double x, double y)
     {v.rbegin()[1] = x; v.back() = y;};
   func(radius,
-       CalculateRadius(static_cast<int>(location_pointer)+1),
-       CalculateRadius(static_cast<int>(location_pointer)+2));
+       CalculateRadius(location_pointer+1),
+       CalculateRadius(location_pointer+2));
 }
 
 void Delaunay::update_friends_of_friends
