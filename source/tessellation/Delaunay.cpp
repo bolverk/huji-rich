@@ -729,16 +729,16 @@ vector<size_t> Delaunay::GetOuterFacets(size_t start_facet, size_t real_point, s
 		size_t old_current = cur_facet;
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-			if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2) &&
-			    containing_facets[static_cast<size_t>(i)] != static_cast<size_t>(old_current))
-			  cur_facet = static_cast<int>(containing_facets[static_cast<size_t>(i)]);
-			if (!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2))
-				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
+		  if (IsEdgeFacet(f, f[(containing_facets[i])], olength2) &&
+		      containing_facets[i] != old_current)
+		    cur_facet = containing_facets[i];
+			if (!IsOuterQuick(f[containing_facets[i]], olength2))
+			  f_temp.push_back(containing_facets[i]);
 		}
-		point_index = static_cast<int>((1 + FindPointInFacet(cur_facet, real_point)) % 3);
+		point_index = (1 + FindPointInFacet(cur_facet, real_point)) % 3;
 		if (IsTripleOut(cur_facet))
 			point_index = (point_index + 1) % 3;
-		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
+		real_point = f[cur_facet].vertices[point_index];
 	} while (start_facet != cur_facet);
 	sort(f_temp.begin(), f_temp.end());
 	f_temp = unique(f_temp);
