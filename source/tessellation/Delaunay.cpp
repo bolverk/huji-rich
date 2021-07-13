@@ -843,26 +843,16 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 {
 	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
 	const double dy = obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
+	const std::array<Vector2D,4> changes1 = 
+	  {Vector2D(-dx,0),
+	   Vector2D(0,-dy),
+	   Vector2D(dx,0),
+	   Vector2D(0,dy)};
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		if (toduplicate[static_cast<size_t>(i)].empty())
+		if (toduplicate[i].empty())
 			continue;
-		Vector2D change;
-		switch (i)
-		{
-		case(0) :
-			change.x = -dx;
-			break;
-		case(1) :
-			change.y = -dy;
-			break;
-		case(2) :
-			change.x = dx;
-			break;
-		case(3) :
-			change.y = dy;
-			break;
-		}
+		const Vector2D change = changes1[i];
 		vector<Vector2D> toadd(toduplicate[i].size());
 		transform(toduplicate[i].begin(),
 			  toduplicate[i].end(),
