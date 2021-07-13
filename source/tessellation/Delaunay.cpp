@@ -649,54 +649,47 @@ size_t Delaunay::GetCorSize(void)const
 bool Delaunay::IsTripleOut(size_t index) const
 {
 	int counter = 0;
-	//	for (size_t i = 0; i < 3; ++i)
 	for(auto neighbor : f[index].neighbors)
 	  counter += IsOuterFacet(neighbor);
-	    /*
-	  if (IsOuterFacet(f[index].neighbors[i]))
-			++counter;
-	    */
 	return counter > 1;
-	/*
-	if (counter > 1)
-		return true;
-	else
-		return false;
-	*/
 }
 
-int Delaunay::FindTripleLoc(facet const& fct)const
+size_t Delaunay::FindTripleLoc(const facet& fct) const
 {
 	for (size_t i = 0; i < 3; ++i)
-	  if (!IsOuterFacet(static_cast<int>(fct.neighbors[i])))
-			return static_cast<int>((i + 1) % 3);
+	  if (!IsOuterFacet(fct.neighbors[i]))
+			return (i + 1) % 3;
 	throw UniversalError("Trouble in constructing boundary triangles. No inner neighbor");
 }
 
 namespace
 {
-	bool IsOuterQuick(facet const& f, int olength)
+	bool IsOuterQuick(const facet& f, size_t olength)
 	{
 		for (size_t i = 0; i < 3; ++i)
-		  if (f.vertices[i] >= static_cast<size_t>(olength))
+		  if (f.vertices[i] >= olength)
 				return true;
 		return false;
 	}
 
-	bool IsEdgeFacet(vector<facet> const& facets, facet const& f, int olength)
+	bool IsEdgeFacet(const vector<facet>& facets, const facet& f, size_t olength)
 	{
-		int counter = 0;
+	  //		int counter = 0;
 		for (size_t i = 0; i < 3; ++i)
 		{
-		  if (f.vertices[i] >= static_cast<size_t>(olength))
+		  if (f.vertices[i] >= olength)
 				return false;
-			if (IsOuterQuick(facets[static_cast<size_t>(f.neighbors[static_cast<size_t>(i)])], olength))
-				++counter;
+			if (IsOuterQuick(facets[f.neighbors[i]], olength))
+			  return true;
+			  //			++counter;
 		}
+		return false;
+		/*
 		if (counter > 0)
 			return true;
 		else
 			return false;
+		*/
 	}
 
 	bool CircleSegmentIntersect(Edge const& edge, Vector2D const& center, double R)
