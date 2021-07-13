@@ -880,19 +880,17 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 	// Done with sides do corners now
 	vector<Edge> corneredges = GetCornerEdges(obc);
 	vector<vector<int> > corners(toduplicate.size());
-	for (size_t i = 0; i < toduplicate.size(); ++i)
-	{
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
-		{
-			const int facet_loc = static_cast<int>(Walk(static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])));
-			const Vector2D center = cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
-			const double R = 2 * GetMaxRadius(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)], facet_loc);
-			if (CircleSegmentIntersect(corneredges[2 * static_cast<size_t>(i)], center, R))
-				corners[static_cast<size_t>(i)].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-			if (CircleSegmentIntersect(corneredges[(2 * static_cast<size_t>(i) + 7) % 8], center, R))
-				corners[(static_cast<size_t>(i) + 3) % 4].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-		}
-	}
+	for (size_t i = 0; i < toduplicate.size(); ++i){
+	  for (size_t j = 0; j < toduplicate[i].size(); ++j){
+	      const size_t facet_loc = Walk(toduplicate[i][j]);
+	      const Vector2D center = cor[toduplicate[i][j]];
+	      const double R = 2*GetMaxRadius(toduplicate[i][j], facet_loc);
+	      if (CircleSegmentIntersect(corneredges[2*i], center, R))
+		corners[i].push_back(toduplicate[i][j]);
+	      if (CircleSegmentIntersect(corneredges[(2*i+7)%8], center, R))
+		corners[(i + 3) % 4].push_back(toduplicate[i][j]);
+	    }
+		 }
 	for (size_t i = 0; i < corners.size(); ++i)
 	{
 		if (corners[static_cast<size_t>(i)].empty())
@@ -920,18 +918,16 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 			break;
 		}
 		vector<Vector2D> toadd;
-		toadd.reserve(corners[static_cast<size_t>(i)].size());
+		toadd.reserve(corners[i].size());
 		//		vector<int> pointstemp(corners[i].size());
-		for (size_t j = 0; j < corners[static_cast<size_t>(i)].size(); ++j)
+		for (size_t j = 0; j < corners[i].size(); ++j)
 		{
-			toadd.push_back(cor[static_cast<size_t>(corners[static_cast<size_t>(i)][static_cast<size_t>(j)])] + change);
-			//		pointstemp[j]=j;
+			toadd.push_back(cor[corners[i][j]] + change);
 		}
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(corners[static_cast<size_t>(i)], order);
-		//	corners[i]=pointstemp;
+		ReArrangeVector(corners[i], order);
 	}
 	return corners;
 }
