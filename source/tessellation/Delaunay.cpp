@@ -1436,7 +1436,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	vector<vector<int> > &to_duplicate,
 	vector<vector<int> >& self_points,
 	const vector<Edge>& box_edges,
-	vector<vector<int> > &NghostIndex)
+	vector<vector<size_t> >& NghostIndex)
 {
 	const vector<vector<int> > boundary_points =
 		boundary_intersection_check(box_edges, to_duplicate);
@@ -1638,7 +1638,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	vector<Edge> box_edges = obc.GetBoxEdges();
 	pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
 		findOuterPoints(tproc, edges, box_edges, Nghost);
-	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);
+	auto aux1 = adapter2<int, size_t>(Nghost);
+	auto ans = FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, aux1);
+	Nghost = adapter2<size_t, int>(aux1);
+	return ans;
 }
 
 size_t Delaunay::GetOrgIndex(size_t index)const

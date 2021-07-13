@@ -24,6 +24,34 @@
 #ifdef RICH_MPI
 #include "find_affected_cells.hpp"
 #endif
+#include <functional>
+
+template<class S, class T> vector<T> vransform
+(const vector<S>& v,
+ const std::function<T(S)>& f)
+{
+  vector<T> res(v.size());
+  transform(v.begin(),
+	    v.end(),
+	    res.begin(),
+	    f);
+  return res;
+}
+
+template<class S, class T> vector<T> adapter1
+(const vector<S>& v)
+{
+  return vransform<S,T>
+    (v, [](const S& s){return static_cast<T>(s);});
+}
+
+template<class S, class T> vector<vector<T> > adapter2
+(const vector<vector<S> >& v)
+{
+  return vransform<vector<S>, vector<T> >
+    (v, adapter1<S, T>);
+}
+
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg
 */
@@ -63,7 +91,7 @@ private:
    vector<vector<int> > &to_duplicate,
    vector<vector<int> >& self_points,
    const vector<Edge>& box_edges,
-	  vector<vector<int> > &NghostIndex);
+	  vector<vector<size_t> > &NghostIndex);
 
   vector<vector<int> > boundary_intersection_check
   (const vector<Edge>& edges,
