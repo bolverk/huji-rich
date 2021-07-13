@@ -155,7 +155,7 @@ private:
   vector<vector<int> > &toduplicate);
   void AddHalfPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
 	vector<vector<int> > &toduplicate);
-  double GetMaxRadius(int point,int startfacet);
+  double GetMaxRadius(size_t point,size_t startfacet);
   void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	  vector<int> const& neigh,vector<vector<int> > &Nghost);
   vector<size_t> GetOuterFacets(size_t cur_facet,size_t real_point,size_t olength);

@@ -1047,12 +1047,12 @@ Vector2D Delaunay::GetCircleCenter(size_t index)const
 	   (-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
 }
 
-double Delaunay::GetMaxRadius(int point, int startfacet)
+double Delaunay::GetMaxRadius(size_t point, size_t startfacet)
 {
 	double res = 0;
-	vector<int> neigh = adapter1<size_t,int>(FindContainingTetras(startfacet, point));
-	for (size_t i = 0; i < neigh.size(); ++i)
-		res = max(res, radius[static_cast<size_t>(neigh[static_cast<size_t>(i)])]);
+	const vector<size_t> neigh = FindContainingTetras(startfacet, point);
+	for (size_t ni : neigh)
+	  res = max(res, radius[ni]);
 	return res;
 }
 
