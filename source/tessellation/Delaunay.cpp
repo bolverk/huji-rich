@@ -745,36 +745,24 @@ vector<size_t> Delaunay::GetOuterFacets(size_t start_facet, size_t real_point, s
 	return f_temp; //adapter1<size_t,int>(f_temp);
 }
 
-vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
+vector<vector<size_t> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
 	// We add the points in a counter clockwise fashion
-	vector<vector<int> > res(edges.size());
 	if (olength < 100)
-	{
-	  return vector<vector<int> >
+	  return vector<vector<size_t> >
 	    (edges.size(),
 	     [](size_t n)
-	     {vector<int> ans(n);
+	     {vector<size_t> ans(n);
 	       iota(ans.begin(), ans.end(),0);
 	       return ans;}(olength));
-	  /*
-	  transform(res.begin(),
-		    res.end(),
-		for (size_t j = 0; j < edges.size(); ++j)
-		{
-			res[j].resize(olength);
-			std::iota(res[j].begin(), res[j].end(), 0);
-		}
-		return res;
-	  */
-	}
-	vector<int> res_temp, outer_points, f_temp /*, f_add(f.size(), 0)*/;
+	vector<vector<int> > res(edges.size());
+	vector<int> res_temp, outer_points, f_temp;
 	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	// Walk to an outer point
-	int cur_facet = static_cast<int>(Walk(olength));
-	vector<vector<int> > toduplicate(edges.size());
+	size_t cur_facet = Walk(olength);
+	vector<vector<size_t> > toduplicate(edges.size());
 	vector<bool> checked(f.size(), false);
 	AddOuterFacets(cur_facet, toduplicate, edges, checked);
 	for (size_t i = 0; i < edges.size(); ++i)
@@ -997,7 +985,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 
 vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Edge> const& edges)
 {
-	vector<vector<int> > toduplicate = FindOuterPoints(edges);
+  vector<vector<int> > toduplicate = adapter2<size_t, int>(FindOuterPoints(edges));
 #ifdef RICH_MPI
 	OrgIndex.clear();
 #endif
@@ -1090,11 +1078,11 @@ double Delaunay::GetMaxRadius(int point, int startfacet)
 	return res;
 }
 
-void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
+void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 	vector<Edge> const& edges, vector<bool> &checked)
 {
 	stack<int> tocheck;
-	tocheck.push(tri);
+	tocheck.push(static_cast<int>(tri));
 	while (!tocheck.empty())
 	{
 		int cur_facet = tocheck.top();

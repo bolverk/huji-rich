@@ -132,12 +132,12 @@ private:
   double FindMaxRadius(size_t point);
   void FindContainingTetras(size_t StartTetra,size_t point,vector<size_t> &tetras);
   vector<size_t> FindContainingTetras(size_t StartTetra, size_t point);
-  vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
+  vector<vector<size_t> > FindOuterPoints(vector<Edge> const& edges);
   bool IsTripleOut(size_t index) const;
   size_t FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked)const;
-  void AddOuterFacets(int tri,vector<vector<int> > &toduplicate,vector<Edge>
+  void AddOuterFacets(size_t tri,vector<vector<size_t> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked);
 
   vector<vector<int> > AddOuterFacetsMPI
