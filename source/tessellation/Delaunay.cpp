@@ -173,18 +173,18 @@ void Delaunay::check_if_flipping_is_needed
   for(const auto& zipped : 
 	zip2<size_t,size_t,3>
 	({triangle, 
-	    static_cast<size_t>(location_pointer)+1,
-	    static_cast<size_t>(location_pointer)+2},
-	{static_cast<size_t>(temp_friends.third), 
-	    static_cast<size_t>(temp_friends.first),
-	    static_cast<size_t>(temp_friends.second)}))
+	    location_pointer+1,
+	    location_pointer+2},
+	{temp_friends.third, 
+	    temp_friends.first,
+	    temp_friends.second}))
     flip(zipped.first, zipped.second, flip_stack);
 }
 
 void Delaunay::update_radii
 (size_t triangle)
 {
-  radius[static_cast<size_t>(triangle)] = 
+  radius[triangle] = 
     CalculateRadius(static_cast<int>(triangle));
   const int n = int(f.size());
   const int m = int(radius.size());
@@ -519,13 +519,13 @@ bool Delaunay::IsOuterFacet(int facet)const
 	return false;
 }
 
-double Delaunay::CalculateRadius(int facet)
+double Delaunay::CalculateRadius(size_t facet)
 {
 	const double big = 1e10;
 	std::array<double, 3> sides;
 	for(int i=0;i<3;++i)
-	  sides[i] = get_facet_coordinates(facet,i).distance
-	    (get_facet_coordinates(facet,(i+1)%3));
+	  sides[i] = get_facet_coordinates(static_cast<int>(facet),i).distance
+	    (get_facet_coordinates(static_cast<int>(facet),(i+1)%3));
 	std::array<double, 3> temps;
 	for(size_t i=0;i<3;++i){
 	  temps[i] = sides[(i+1)%3]+sides[(i+2)%3]-sides[i];

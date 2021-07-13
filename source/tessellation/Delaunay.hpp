@@ -127,7 +127,7 @@ private:
   void flip(size_t i,size_t j, stack<std::pair<size_t, size_t> > & flip_stack);
   size_t Walk(size_t point);
   void CheckInput();
-  double CalculateRadius(int facet);
+  double CalculateRadius(size_t facet);
   int FindPointInFacet(int facet,int point);
   double FindMaxRadius(int point);
   void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
