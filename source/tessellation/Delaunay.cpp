@@ -891,13 +891,19 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 		corners[(i + 3) % 4].push_back(toduplicate[i][j]);
 	    }
 		 }
+	  const std::array<Vector2D, 4> changes = 
+	    {Vector2D(-dx,-dy),
+	     Vector2D(dx,-dy),
+	     Vector2D(dx,dy),
+	     Vector2D(-dx,dy)};
 	for (size_t i = 0; i < corners.size(); ++i)
 	{
-		if (corners[static_cast<size_t>(i)].empty())
+		if (corners[i].empty())
 			continue;
-		sort(corners[static_cast<size_t>(i)].begin(), corners[static_cast<size_t>(i)].end());
-		corners[static_cast<size_t>(i)] = unique(corners[static_cast<size_t>(i)]);
-		Vector2D change;
+		sort(corners[i].begin(), corners[i].end());
+		corners[i] = unique(corners[i]);
+		const Vector2D change = changes[i];
+		/*
 		switch (i)
 		{
 		case(0) :
@@ -917,6 +923,7 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 			change.x = -dx;
 			break;
 		}
+		*/
 		vector<Vector2D> toadd;
 		toadd.reserve(corners[i].size());
 		//		vector<int> pointstemp(corners[i].size());
