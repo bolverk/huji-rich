@@ -202,7 +202,7 @@ void Delaunay::update_radii
 }
 
 void Delaunay::update_friends_of_friends
-(size_t triangle, const Triplet<int>& temp_friends)
+(size_t triangle, const Triplet<size_t>& temp_friends)
 {
   for(const auto& itm :
     {pair<int,int>(temp_friends.first, 1),
@@ -268,7 +268,7 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
      static_cast<size_t>(temp_friends.second),
      static_cast<size_t>(temp_friends.third));
   update_f_in_add_point(triangle, temp_friends, index);
-  update_friends_of_friends(triangle, temp_friends);
+  update_friends_of_friends(triangle, temp_friends1);
 
   if (CalcRadius)
     update_radii(triangle);

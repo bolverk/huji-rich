@@ -67,7 +67,7 @@ private:
   void update_radii(size_t triangle);
 
   void update_friends_of_friends
-  (size_t triangle, const Triplet<int>& temp_friends);
+  (size_t triangle, const Triplet<size_t>& temp_friends);
 
   void update_f_in_add_point
   (size_t triangle,
