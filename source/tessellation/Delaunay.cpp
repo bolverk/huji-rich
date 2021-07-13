@@ -1157,7 +1157,7 @@ vector<vector<size_t> > Delaunay::AddOuterFacetsMPI
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
-			int max_neigh = 0;
+			size_t max_neigh = 0;
 			if (f[cur_facet].vertices[i] >= olength ||
 			    checked[f[cur_facet].vertices[i]])
 				continue;
@@ -1177,36 +1177,35 @@ vector<vector<size_t> > Delaunay::AddOuterFacetsMPI
 				RemoveVal(cputosendto,rank);
 				if (!recursive) 
 				{
-				  const vector<int> self_intersection = adapter1<size_t,int>(calc_self_intersection(own_edges, circ));
+				  const vector<size_t> self_intersection = calc_self_intersection(own_edges, circ);
 					if (!self_intersection.empty())
 						added = true;
-					BOOST_FOREACH(int sindex, self_intersection)
-					  res[static_cast<size_t>(sindex)].push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
+					BOOST_FOREACH(size_t sindex, self_intersection)
+					  res[sindex].push_back(f[cur_facet].vertices[i]);
 				}
 				else
 				{
 					for (size_t jj = 0; jj < 3; ++jj)
-					  max_neigh = max(max_neigh, static_cast<int>(f[static_cast<size_t>(neighs[k])].vertices[jj]));
+					  max_neigh = max(max_neigh, f[neighs[k]].vertices[jj]);
 				}
 				if (!cputosendto.empty())
 				{
 					added = true;
 					for (size_t j = 0; j < cputosendto.size(); ++j)
 					{
-						size_t index = static_cast<size_t>(find(neigh.begin(), neigh.end(), cputosendto[j])
-							- neigh.begin());
+					  size_t index = find(neigh.begin(), neigh.end(), cputosendto[j]) - neigh.begin();
 						if (index < neigh.size())
-						  toduplicate.at(index).push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
+						  toduplicate.at(index).push_back(f[cur_facet].vertices[i]);
 						else {
 							neigh.push_back(cputosendto[j]);
 							toduplicate.push_back
-							  (vector<size_t>(1, f[static_cast<size_t>(cur_facet)].vertices[i]));
+							  (vector<size_t>(1, f[cur_facet].vertices[i]));
 						}
 					}
 				}
 			}
-			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])] = true;
-			if (added||(recursive&&static_cast<size_t>(max_neigh)>=olength))
+			checked[f[cur_facet].vertices[i]] = true;
+			if (added||(recursive && max_neigh>=olength))
 			{
 				for (size_t j = 0; j < neighs.size(); ++j)
 				{
