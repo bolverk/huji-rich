@@ -158,7 +158,7 @@ private:
   double GetMaxRadius(int point,int startfacet);
   void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	  vector<int> const& neigh,vector<vector<int> > &Nghost);
-  vector<int> GetOuterFacets(int cur_facet,int real_point,int olength);
+  vector<size_t> GetOuterFacets(size_t cur_facet,size_t real_point,size_t olength);
 
   Delaunay& operator=(const Delaunay& origin);
 

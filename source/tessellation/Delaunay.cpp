@@ -674,22 +674,14 @@ namespace
 
 	bool IsEdgeFacet(const vector<facet>& facets, const facet& f, size_t olength)
 	{
-	  //		int counter = 0;
 		for (size_t i = 0; i < 3; ++i)
 		{
 		  if (f.vertices[i] >= olength)
-				return false;
-			if (IsOuterQuick(facets[f.neighbors[i]], olength))
-			  return true;
-			  //			++counter;
+		    return false;
+		  if (IsOuterQuick(facets[f.neighbors[i]], olength))
+		    return true;
 		}
 		return false;
-		/*
-		if (counter > 0)
-			return true;
-		else
-			return false;
-		*/
 	}
 
 	bool CircleSegmentIntersect(Edge const& edge, Vector2D const& center, double R)
@@ -720,12 +712,12 @@ namespace
 	}
 }
 
-vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olength2)
+vector<size_t> Delaunay::GetOuterFacets(size_t start_facet, size_t real_point, size_t olength2)
 {
-	int cur_facet = start_facet;
+	size_t cur_facet = start_facet;
 	vector<size_t> f_temp, containing_facets;
-	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*olength2)));
-	int point_index = static_cast<int>(FindPointInFacet(static_cast<size_t>(cur_facet), static_cast<size_t>(real_point)));
+	f_temp.reserve(static_cast<size_t>(10 * sqrt(static_cast<double>(olength2))));
+	size_t point_index = FindPointInFacet(cur_facet, real_point);
 	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
 	{
 		point_index = (point_index + 1) % 3;
@@ -739,7 +731,7 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 	do
 	{
 		FindContainingTetras(cur_facet, real_point, containing_facets);
-		int old_current = cur_facet;
+		size_t old_current = cur_facet;
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
 			if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2) &&
@@ -755,7 +747,7 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 	} while (start_facet != cur_facet);
 	sort(f_temp.begin(), f_temp.end());
 	f_temp = unique(f_temp);
-	return adapter1<size_t,int>(f_temp);
+	return f_temp; //adapter1<size_t,int>(f_temp);
 }
 
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
