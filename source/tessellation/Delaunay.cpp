@@ -386,15 +386,14 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 		f[0].neighbors[i] = last_loc;
 	location_pointer = 0;
 	// add the points
-	size_t nloop = static_cast<size_t>(length) - 3;
+	size_t nloop = length - 3;
 	stack<std::pair<size_t, size_t> > flip_stack;
 	for (size_t i = 0; i < nloop; i++)
 		add_point(i,flip_stack);
 	// Calculate radius
 	radius.resize(f.size());
-	int n = int(f.size());
-	for (int i = 0; i < n; ++i)
-		radius[static_cast<size_t>(i)] = CalculateRadius(i);
+	for (size_t i = 0, n = f.size(); i < n; ++i)
+		radius[i] = CalculateRadius(i);
 	CalcRadius = true;
 }
 
