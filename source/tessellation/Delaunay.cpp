@@ -619,19 +619,19 @@ vector<Vector2D>& Delaunay::GetMeshPoints(void)
 	return cor;
 }
 
-int Delaunay::GetTotalLength(void)
+size_t Delaunay::GetTotalLength(void)
 {
-	return static_cast<int>(cor.size());
+	return cor.size();
 }
 
 void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 {
-	int n = static_cast<int>(points.size());
+	size_t n = points.size();
 	stack<std::pair<size_t, size_t> > flip_stack;
 	//	vector<int> order=HilbertOrder(points,n);
-	for (int i = 0; i < n; ++i)
+	for (size_t i = 0; i < n; ++i)
 	{
-		cor.push_back(points[static_cast<size_t>(i)]);
+		cor.push_back(points[i]);
 		add_point(cor.size() - 1,flip_stack);
 	}
 }
@@ -641,21 +641,28 @@ void Delaunay::AddAditionalPoint(Vector2D const& vec)
 	cor.push_back(vec);
 }
 
-int Delaunay::GetCorSize(void)const
+size_t Delaunay::GetCorSize(void)const
 {
-	return static_cast<int>(cor.size());
+	return cor.size();
 }
 
-bool Delaunay::IsTripleOut(int index) const
+bool Delaunay::IsTripleOut(size_t index) const
 {
 	int counter = 0;
-	for (size_t i = 0; i < 3; ++i)
-	  if (IsOuterFacet(static_cast<int>(f[static_cast<size_t>(index)].neighbors[i])))
+	//	for (size_t i = 0; i < 3; ++i)
+	for(auto neighbor : f[index].neighbors)
+	  counter += IsOuterFacet(neighbor);
+	    /*
+	  if (IsOuterFacet(f[index].neighbors[i]))
 			++counter;
+	    */
+	return counter > 1;
+	/*
 	if (counter > 1)
 		return true;
 	else
 		return false;
+	*/
 }
 
 int Delaunay::FindTripleLoc(facet const& fct)const

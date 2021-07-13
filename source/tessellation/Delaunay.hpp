@@ -133,7 +133,7 @@ private:
   void FindContainingTetras(size_t StartTetra,size_t point,vector<size_t> &tetras);
   vector<size_t> FindContainingTetras(size_t StartTetra, size_t point);
   vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
-  bool IsTripleOut(int index) const;
+  bool IsTripleOut(size_t index) const;
   int FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked)const;
@@ -288,7 +288,7 @@ public:
   /*! \brief Returns the length of all the points (included duplicated)
     \return The length of all of the points
   */
-  int GetTotalLength(void);
+  size_t GetTotalLength(void);
 
   /*! \brief return the facet's radius
     \param facet The facet to check
@@ -305,7 +305,7 @@ public:
   \brief Gets the size of the cor vector.
   \return The size of the cor vector.
   */
-  int GetCorSize(void)const;
+  size_t GetCorSize(void)const;
   
   /*!
   \brief Returns the center of the circumscribed circle of a facet
