@@ -361,12 +361,20 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	CheckInput();
 
 	// add the 3 extreme points
-	Vector2D p_temp;
+	//Vector2D p_temp;
 	const auto cellsize = CellSize(cell_points);
 	double width = cellsize[1] - cellsize[0];
 	double height = cellsize[3] - cellsize[2];
 	width = max(width, height);
 	height = max(width, height);
+	cor.insert(cor.end(),
+		   {Vector2D(cellsize[0] - 100 * width,
+			     cellsize[2] - 100 * height),
+		       Vector2D(cellsize[1] + 100 * width,
+				cellsize[2] - 100 * height),
+		       Vector2D((cellsize[0] + cellsize[1]) / 2.0,
+				cellsize[3] + 100 * height)});
+	/*
 	p_temp.x = cellsize[0] - 100 * width;
 	p_temp.y = cellsize[2] - 100 * height;
 	cor.push_back(p_temp);
@@ -376,6 +384,7 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	p_temp.x = (cellsize[0] + cellsize[1]) / 2.0;
 	p_temp.y = cellsize[3] + 100 * height;
 	cor.push_back(p_temp);
+	*/
 	// Create the big triangle, and assign friends
 	f.push_back([&len, this]{
 	    facet ans;
