@@ -312,7 +312,7 @@ public:
   \param index The index of the facet
   \returns The circumscribed circle's center
   */
-  Vector2D GetCircleCenter(int index)const;
+  Vector2D GetCircleCenter(size_t index)const;
 
   //! \brief Diagnostics
   delaunay_loggers::DelaunayLogger* logger;

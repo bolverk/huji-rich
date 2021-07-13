@@ -1014,7 +1014,7 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 	return toduplicate;
 }
 
-Vector2D Delaunay::GetCircleCenter(int index)const
+Vector2D Delaunay::GetCircleCenter(size_t index)const
 {
 	Vector2D center;
 	facet const& F = f[static_cast<size_t>(index)];
@@ -1081,18 +1081,19 @@ double Delaunay::GetMaxRadius(int point, int startfacet)
 void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 	vector<Edge> const& edges, vector<bool> &checked)
 {
-	stack<int> tocheck;
-	tocheck.push(static_cast<int>(tri));
+	stack<size_t> tocheck;
+	tocheck.push(tri);
 	while (!tocheck.empty())
 	{
-		int cur_facet = tocheck.top();
+		size_t cur_facet = tocheck.top();
 		tocheck.pop();
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
-			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= olength))
+			if (checked[f[cur_facet].vertices[i]] || 
+			    f[cur_facet].vertices[i] >= olength)
 				continue;
-			vector<int> neigh = adapter1<size_t,int>(FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])));
+			vector<size_t> neigh = FindContainingTetras(cur_facet, f[cur_facet].vertices[i]);
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
 				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
