@@ -257,7 +257,7 @@ public:
     \param index The index to the facet
     \return The area
   */
-  double triangle_area(int index);
+  double triangle_area(size_t index);
 
   /*!
     \brief Updates the triangulation

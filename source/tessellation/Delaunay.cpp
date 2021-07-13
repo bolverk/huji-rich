@@ -397,12 +397,12 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	CalcRadius = true;
 }
 
-double Delaunay::triangle_area(int index)
+double Delaunay::triangle_area(size_t index)
 {
 	const TripleConstRef<Vector2D> p
-		(cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.first)],
-			cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.second)],
-			cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.third)]);
+		(cor[f[index].vertices.first],
+		 cor[f[index].vertices.second],
+		 cor[f[index].vertices.third]);
 	const double x1 = p.third.x - p.first.x;
 	const double x2 = p.second.x - p.first.x;
 	const double y1 = p.third.y - p.first.y;
