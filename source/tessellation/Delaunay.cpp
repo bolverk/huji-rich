@@ -171,13 +171,13 @@ void Delaunay::check_if_flipping_is_needed
  stack<std::pair<size_t, size_t> >& flip_stack)
 {
   for(const auto& zipped : 
-	zip2<int,int,3>
-	({static_cast<int>(triangle), 
-	    location_pointer+1,
-	    location_pointer+2},
-	{temp_friends.third, 
-	    temp_friends.first,
-	    temp_friends.second}))
+	zip2<size_t,size_t,3>
+	({triangle, 
+	    static_cast<size_t>(location_pointer)+1,
+	    static_cast<size_t>(location_pointer)+2},
+	{static_cast<size_t>(temp_friends.third), 
+	    static_cast<size_t>(temp_friends.first),
+	    static_cast<size_t>(temp_friends.second)}))
     flip(zipped.first, zipped.second, flip_stack);
 }
 
