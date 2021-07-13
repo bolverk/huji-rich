@@ -1102,15 +1102,15 @@ namespace
 		return res;
 	}
 
-	vector<int> calc_self_intersection
-		(const vector<Edge>& edge_list,
-			const Circle& circle)
+	vector<size_t> calc_self_intersection
+	(const vector<Edge>& edge_list,
+	 const Circle& circle)
 	{
-		vector<int> res;
+		vector<size_t> res;
 		for (size_t i = 0; i < edge_list.size(); ++i) {
 			const Edge& edge = edge_list.at(i);
 			if (edge_circle_intersect(edge, circle))
-				res.push_back(static_cast<int>(i));
+				res.push_back(i);
 		}
 		return res;
 	}
@@ -1133,7 +1133,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 		res.resize(own_edges.size());
 	stack<int> tocheck = initialise_tocheck
 	  (adapter1<size_t,int>(FindContainingTetras
-				(static_cast<int>(Walk(static_cast<size_t>(point))), point)));
+				(static_cast<int>(Walk(point)), point)));
 	if (recursive)
 	{
 		vector<int> allouter;
@@ -1160,16 +1160,13 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 		{
 			bool added = false;
 			int max_neigh = 0;
-			if (f[static_cast<size_t>(cur_facet)].vertices[i] >=
-				olength)
+			if (f[cur_facet].vertices[i] >= olength ||
+			    checked[f[cur_facet].vertices[i]])
 				continue;
-			if (checked[static_cast<size_t>
-				(f[static_cast<size_t>(cur_facet)].vertices[i])])
-				continue;
-			vector<int> neighs = adapter1<size_t,int>(FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i])));
+			vector<int> neighs = adapter1<size_t,int>(FindContainingTetras(cur_facet, f[cur_facet].vertices[i]));
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
-				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
+				Circle circ(GetCircleCenter(neighs[k]), radius[neighs[k]]);
 				vector<int> cputosendto;
 				if (recursive)
 					find_affected_cells_recursive(tproc,rank, circ, cputosendto);
@@ -1182,7 +1179,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				RemoveVal(cputosendto,rank);
 				if (!recursive) 
 				{
-					const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
+				  const vector<int> self_intersection = adapter1<size_t,int>(calc_self_intersection(own_edges, circ));
 					if (!self_intersection.empty())
 						added = true;
 					BOOST_FOREACH(int sindex, self_intersection)
