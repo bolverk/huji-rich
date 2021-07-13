@@ -1056,6 +1056,15 @@ double Delaunay::GetMaxRadius(size_t point, size_t startfacet)
 	return res;
 }
 
+namespace {
+  template<class T> void multipush(const vector<T>& v,
+			      stack<T>& s)
+  {
+    for(const T& t : v)
+      s.push(t);
+  }
+}
+
 void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 	vector<Edge> const& edges, vector<bool> &checked)
 {
@@ -1074,22 +1083,29 @@ void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 			vector<size_t> neigh = FindContainingTetras(cur_facet, f[cur_facet].vertices[i]);
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
-				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
+				Vector2D center = GetCircleCenter(neigh[k]);
 				for (size_t l = 0; l < edges.size(); ++l)
 				{
-					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, radius[static_cast<size_t>(neigh[static_cast<size_t>(k)])]))
+					if (CircleSegmentIntersect(edges[l], center, radius[neigh[k]]))
 					{
-					  toduplicate[static_cast<size_t>(l)].push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]));
+					  toduplicate[l].push_back(f[cur_facet].vertices[i]);
 						added = true;
 					}
 				}
 			}
 			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] = true;
 			if (added)
+			  for_each(neigh.begin(),
+				   neigh.end(),
+				   [&tocheck](size_t x)
+				   {tocheck.push(x);});
+			//			  multipush<size_t>(neigh, tocheck);
+			/*
 			{
 				for (size_t j = 0; j < neigh.size(); ++j)
-					tocheck.push(neigh[static_cast<size_t>(j)]);
+					tocheck.push(neigh[j]);
 			}
+			*/
 		}
 	}
 }
