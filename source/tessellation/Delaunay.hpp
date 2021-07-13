@@ -128,10 +128,10 @@ private:
   size_t Walk(size_t point);
   void CheckInput();
   double CalculateRadius(size_t facet);
-  int FindPointInFacet(int facet,int point);
-  double FindMaxRadius(int point);
-  void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
-  vector<int> FindContainingTetras(int StartTetra, int point);
+  size_t FindPointInFacet(size_t facet,size_t point);
+  double FindMaxRadius(size_t point);
+  void FindContainingTetras(size_t StartTetra,size_t point,vector<size_t> &tetras);
+  vector<size_t> FindContainingTetras(size_t StartTetra, size_t point);
   vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
   bool IsTripleOut(int index) const;
   int FindTripleLoc(facet const& f)const;

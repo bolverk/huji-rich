@@ -457,30 +457,34 @@ namespace {
 
 size_t Delaunay::Walk(size_t point)
 {
-	lastFacet = find_new_facet(cor, f, point, static_cast<size_t>(lastFacet));
+	lastFacet = find_new_facet(cor, f, point, lastFacet);
 	return lastFacet;
 }
 
-vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
+vector<size_t> Delaunay::FindContainingTetras(size_t StartTetra, size_t point)
 {
-	vector<int> res;
-	FindContainingTetras(StartTetra, point, res);
-	return res;
+  vector<size_t> res;
+  FindContainingTetras(StartTetra, point, res);
+  return res;
 }
 
-double Delaunay::FindMaxRadius(int point)
+double Delaunay::FindMaxRadius(size_t point)
 {
-	const vector<int> vec = FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))), point);
+	const vector<size_t> vec = FindContainingTetras(Walk(point), point);
 	double r = 0;
+	/*
 	for (size_t i = 0; i < vec.size(); ++i)
-		r = max(r, radius[static_cast<size_t>(vec[static_cast<size_t>(i)])]);
+		r = max(r, radius[vec[i]]);
+	*/
+	for(size_t vv : vec)
+	  r = max(r, radius[vv]);
 	return 2 * r;
 }
 
-void Delaunay::FindContainingTetras(int StartFacet, int point, vector<int> &result)
+void Delaunay::FindContainingTetras(size_t StartFacet, size_t point, vector<size_t> &result)
 {
 	result.clear();
-	int PointLocation = FindPointInFacet(StartFacet, point);
+	size_t PointLocation = FindPointInFacet(StartFacet, point);
 	auto NextFacet = f[static_cast<size_t>(StartFacet)].neighbors[static_cast<size_t>(PointLocation)];
 	result.reserve(12);
 	result.push_back(static_cast<int>(NextFacet));
@@ -492,14 +496,14 @@ void Delaunay::FindContainingTetras(int StartFacet, int point, vector<int> &resu
 	}
 }
 
-int Delaunay::FindPointInFacet(int facet, int point)
+size_t Delaunay::FindPointInFacet(size_t facet, size_t point)
 {
-	for (int i = 0; i < 3; ++i)
+	for (size_t i = 0; i < 3; ++i)
 	  if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == static_cast<size_t>(point))
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
-	eo.addEntry("Facet number", facet);
-	eo.addEntry("Point number", point);
+	eo.addEntry("Facet number", static_cast<int>(facet));
+	eo.addEntry("Point number", static_cast<int>(point));
 	throw eo;
 }
 
@@ -719,9 +723,9 @@ namespace
 vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olength2)
 {
 	int cur_facet = start_facet;
-	vector<int> f_temp, containing_facets;
+	vector<size_t> f_temp, containing_facets;
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*olength2)));
-	int point_index = FindPointInFacet(cur_facet, real_point);
+	int point_index = static_cast<int>(FindPointInFacet(static_cast<size_t>(cur_facet), static_cast<size_t>(real_point)));
 	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
 	{
 		point_index = (point_index + 1) % 3;
@@ -739,19 +743,19 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
 			if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2) &&
-				containing_facets[static_cast<size_t>(i)] != old_current)
-				cur_facet = containing_facets[static_cast<size_t>(i)];
+			    containing_facets[static_cast<size_t>(i)] != static_cast<size_t>(old_current))
+			  cur_facet = static_cast<int>(containing_facets[static_cast<size_t>(i)]);
 			if (!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2))
 				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
 		}
-		point_index = (1 + FindPointInFacet(cur_facet, real_point)) % 3;
+		point_index = static_cast<int>((1 + FindPointInFacet(cur_facet, real_point)) % 3);
 		if (IsTripleOut(cur_facet))
 			point_index = (point_index + 1) % 3;
 		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
 	} while (start_facet != cur_facet);
 	sort(f_temp.begin(), f_temp.end());
 	f_temp = unique(f_temp);
-	return f_temp;
+	return adapter1<size_t,int>(f_temp);
 }
 
 vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
@@ -1084,7 +1088,7 @@ Vector2D Delaunay::GetCircleCenter(int index)const
 double Delaunay::GetMaxRadius(int point, int startfacet)
 {
 	double res = 0;
-	vector<int> neigh = FindContainingTetras(startfacet, point);
+	vector<int> neigh = adapter1<size_t,int>(FindContainingTetras(startfacet, point));
 	for (size_t i = 0; i < neigh.size(); ++i)
 		res = max(res, radius[static_cast<size_t>(neigh[static_cast<size_t>(i)])]);
 	return res;
@@ -1104,7 +1108,7 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 			bool added = false;
 			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= olength))
 				continue;
-			vector<int> neigh = FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]));
+			vector<int> neigh = adapter1<size_t,int>(FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])));
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
 				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
@@ -1198,8 +1202,8 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	if (!recursive)
 		res.resize(own_edges.size());
 	stack<int> tocheck = initialise_tocheck
-		(FindContainingTetras
-			(static_cast<int>(Walk(static_cast<size_t>(point))), point));
+	  (adapter1<size_t,int>(FindContainingTetras
+				(static_cast<int>(Walk(static_cast<size_t>(point))), point)));
 	if (recursive)
 	{
 		vector<int> allouter;
@@ -1207,8 +1211,8 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 		{
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			{
-				vector<int> temp = FindContainingTetras
-					(static_cast<int>(Walk(static_cast<size_t>(toduplicate[i][j]))), toduplicate[i][j]);
+			  vector<int> temp = adapter1<size_t,int>(FindContainingTetras
+								  (static_cast<int>(Walk(static_cast<size_t>(toduplicate[i][j]))), toduplicate[i][j]));
 				for (size_t k = 0; k < temp.size(); ++k)
 					allouter.push_back(temp[k]);
 			}
@@ -1232,7 +1236,7 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 			if (checked[static_cast<size_t>
 				(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
-			vector<int> neighs = FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
+			vector<int> neighs = adapter1<size_t,int>(FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i])));
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
