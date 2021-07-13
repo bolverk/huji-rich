@@ -197,8 +197,8 @@ void Delaunay::update_radii
   [](vector<double>& v, double x, double y)
     {v.rbegin()[1] = x; v.back() = y;};
   func(radius,
-       CalculateRadius(location_pointer+1),
-       CalculateRadius(location_pointer+2));
+       CalculateRadius(static_cast<int>(location_pointer)+1),
+       CalculateRadius(static_cast<int>(location_pointer)+2));
 }
 
 void Delaunay::update_friends_of_friends
@@ -211,7 +211,7 @@ void Delaunay::update_friends_of_friends
       const size_t i = find_index
 	(f[static_cast<size_t>(itm.first)],
 	 static_cast<int>(triangle));
-      f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
+      f[static_cast<size_t>(itm.first)].neighbors[i] = static_cast<int>(location_pointer) + itm.second;
     }
 }
 
@@ -224,8 +224,8 @@ void Delaunay::update_f_in_add_point
      outer.first,
      static_cast<int>(index));
   f[triangle].neighbors.set(temp_friends.third,
-			    location_pointer + 1,
-			    location_pointer + 2);
+			    static_cast<int>(location_pointer) + 1,
+			    static_cast<int>(location_pointer) + 2);
   const facet facet1
     (TripleConstRef<int>
      (outer.first,
@@ -233,7 +233,7 @@ void Delaunay::update_f_in_add_point
       static_cast<int>(index)),
      TripleConstRef<int>
      (temp_friends.first,
-      location_pointer + 2,
+      static_cast<int>(location_pointer) + 2,
       static_cast<int>(triangle)));
   const facet facet2
     (TripleConstRef<int>
@@ -243,7 +243,7 @@ void Delaunay::update_f_in_add_point
      TripleConstRef<int>
      (temp_friends.second,
       static_cast<int>(triangle),
-      location_pointer + 1));
+      static_cast<int>(location_pointer) + 1));
   f.insert(f.end(), {facet1, facet2});
 }
 

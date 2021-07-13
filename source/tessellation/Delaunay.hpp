@@ -119,7 +119,7 @@ private:
   vector<Vector2D> cor;
   int length;
   size_t olength;
-  int location_pointer;
+  size_t location_pointer;
   int last_loc;
 
   bool IsOuterFacet(int facet)const;
