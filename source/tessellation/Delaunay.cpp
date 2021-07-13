@@ -144,7 +144,7 @@ namespace
 	{
 		for (size_t j = 0; j < 3; ++j)
 		{
-		  if (static_cast<size_t>(fc.neighbors[j]) == i)
+		  if (fc.neighbors[j] == i)
 				return j;
 		}
 		throw UniversalError("Error in find_index: Index not found");
@@ -207,11 +207,11 @@ void Delaunay::update_friends_of_friends
   for(const auto& itm :
     {pair<int,int>(temp_friends.first, 1),
 	pair<int,int>(temp_friends.second, 2)})
-    if(itm.first != last_loc){
+    if(static_cast<size_t>(itm.first) != last_loc){
       const size_t i = find_index
 	(f[itm.first],
 	 triangle);
-      f[static_cast<size_t>(itm.first)].neighbors[i] = static_cast<int>(location_pointer) + itm.second;
+      f[itm.first].neighbors[i] = location_pointer + itm.second;
     }
 }
 
@@ -222,10 +222,10 @@ void Delaunay::update_f_in_add_point
   f[triangle].vertices.set
     (outer.third,
      outer.first,
-     static_cast<int>(index));
+     index);
   f[triangle].neighbors.set(temp_friends.third,
-			    static_cast<int>(location_pointer) + 1,
-			    static_cast<int>(location_pointer) + 2);
+			    location_pointer + 1,
+			    location_pointer + 2);
   const facet facet1
     (TripleConstRef<size_t>
      (outer.first,
@@ -239,11 +239,11 @@ void Delaunay::update_f_in_add_point
     (TripleConstRef<size_t>
      (outer.second,
       outer.third,
-      static_cast<int>(index)),
+      index),
      TripleConstRef<size_t>
      (temp_friends.second,
-      static_cast<int>(triangle),
-      static_cast<int>(location_pointer) + 1));
+      triangle,
+      location_pointer + 1));
   f.insert(f.end(), {facet1, facet2});
 }
 
@@ -277,7 +277,7 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 
 void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_stack)
 {
-	if (j == static_cast<size_t>(last_loc))
+	if (j == last_loc)
 		return;
 	flip_stack.push(std::pair<size_t, size_t>(i, j));
 	while (!flip_stack.empty())
@@ -599,7 +599,7 @@ int Delaunay::get_length(void) const
 
 int Delaunay::get_last_loc(void) const
 {
-	return last_loc;
+  return static_cast<int>(last_loc);
 }
 
 void Delaunay::set_point(int index, Vector2D p)

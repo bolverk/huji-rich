@@ -120,7 +120,7 @@ private:
   int length;
   size_t olength;
   size_t location_pointer;
-  int last_loc;
+  size_t last_loc;
 
   bool IsOuterFacet(int facet)const;
   void add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack);
