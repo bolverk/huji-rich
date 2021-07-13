@@ -943,7 +943,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 	//	const double dy=obc.GetGridBoundary(Up)-obc.GetGridBoundary(Down);
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		if (toduplicate[static_cast<size_t>(i)].empty())
+		if (toduplicate[i].empty())
 			continue;
 		Vector2D change;
 		switch (i)
@@ -960,25 +960,25 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 			break;
 		}
 		vector<Vector2D> toadd;
-		toadd.reserve(toduplicate[static_cast<size_t>(i)].size());
-		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
-		Vector2D par(Parallel(edges[static_cast<size_t>(i)]));
+		toadd.reserve(toduplicate[i].size());
+		//vector<int> pointstemp(toduplicate[i].size());
+		Vector2D par(Parallel(edges[i]));
 		par = par / abs(par);
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
+		for (size_t j = 0; j < toduplicate[i].size(); ++j)
 		{
-			Vector2D temp = cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
+			Vector2D temp = cor[toduplicate[i][j]];
 			if (i % 2 == 1)
 			{
-				temp -= edges[static_cast<size_t>(i)].vertices.first;
-				temp = 2 * par*ScalarProd(par, temp) - temp + edges[static_cast<size_t>(i)].vertices.first;
+				temp -= edges[i].vertices.first;
+				temp = 2 * par*ScalarProd(par, temp) - temp + edges[i].vertices.first;
 			}
 			toadd.push_back(temp + change);
 			//pointstemp[j]=j;
 		}
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
+		       vector<size_t> order = adapter1<int,size_t>(HilbertOrder(toadd, static_cast<int>(toadd.size())));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[static_cast<size_t>(i)], order);
+		ReArrangeVector(toduplicate[i], order);
 		//toduplicate[i]=pointstemp;
 	}
 }
@@ -1004,7 +1004,7 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 		{
 			vector<vector<int> > corners = AddPeriodic(obc, edges, toduplicate);
 			for (size_t i = 0; i < 4; ++i)
-				toduplicate.push_back(corners[static_cast<size_t>(i)]);
+				toduplicate.push_back(corners[i]);
 		}
 		else
 		{
@@ -1056,15 +1056,6 @@ double Delaunay::GetMaxRadius(size_t point, size_t startfacet)
 	return res;
 }
 
-namespace {
-  template<class T> void multipush(const vector<T>& v,
-			      stack<T>& s)
-  {
-    for(const T& t : v)
-      s.push(t);
-  }
-}
-
 void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 	vector<Edge> const& edges, vector<bool> &checked)
 {
@@ -1093,19 +1084,12 @@ void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 					}
 				}
 			}
-			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] = true;
+			checked[f[cur_facet].vertices[i]] = true;
 			if (added)
 			  for_each(neigh.begin(),
 				   neigh.end(),
 				   [&tocheck](size_t x)
 				   {tocheck.push(x);});
-			//			  multipush<size_t>(neigh, tocheck);
-			/*
-			{
-				for (size_t j = 0; j < neigh.size(); ++j)
-					tocheck.push(neigh[j]);
-			}
-			*/
 		}
 	}
 }
