@@ -548,14 +548,14 @@ int Delaunay::GetOriginalIndex(int NewPoint) const
 	return NewPoint;
 }
 
-double Delaunay::GetFacetRadius(int facet) const
+double Delaunay::GetFacetRadius(size_t facet) const
 {
-	return radius[static_cast<size_t>(facet)];
+	return radius[facet];
 }
 
-void Delaunay::ChangeOlength(int n)
+void Delaunay::ChangeOlength(size_t n)
 {
-	olength = static_cast<size_t>(n);
+  olength = n;
 }
 
 void Delaunay::Changelength(int n)
@@ -589,12 +589,12 @@ const Vector2D& Delaunay::get_point(size_t index) const
 	return cor[index];
 }
 
-int Delaunay::get_num_facet(void) const
+size_t Delaunay::get_num_facet(void) const
 {
-	return static_cast<int>(f.size());
+	return f.size();
 }
 
-int Delaunay::get_length(void) const
+size_t Delaunay::get_length(void) const
 {
 	return length - 3;
 }

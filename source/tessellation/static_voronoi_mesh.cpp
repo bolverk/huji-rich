@@ -348,7 +348,7 @@ Vector2D StaticVoronoiMesh::CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D r
 bool StaticVoronoiMesh::NearBoundary(int index) const
 {
 	const int n=int(mesh_vertices[static_cast<size_t>(index)].size());
-	const int N=Tri.get_length();
+	const int N=static_cast<int>(Tri.get_length());
 	for(int i=0;i<n;++i)
 	{
 	  const int n0=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.first;
@@ -435,11 +435,11 @@ void StaticVoronoiMesh::build_v()
 	Vector2D p_temp;
 	mesh_vertices.clear();
 	mesh_vertices.resize(static_cast<size_t>(Tri.get_length()));
-	edges.reserve(static_cast<size_t>(Tri.get_length()*3.5));
+	edges.reserve(static_cast<size_t>(static_cast<double>(Tri.get_length())*3.5));
 	int N=Tri.GetOriginalLength();
 	for(int i=0;i<N;++i)
 		mesh_vertices[static_cast<size_t>(i)].reserve(7);
-	int Nfacets=Tri.get_num_facet();
+	int Nfacets=static_cast<int>(Tri.get_num_facet());
 	vector<Vector2D> centers(static_cast<size_t>(Nfacets));
 	for(int i=0;i<Nfacets;++i)
 		centers[static_cast<size_t>(i)]=Tri.GetCircleCenter(i);
@@ -541,8 +541,8 @@ void StaticVoronoiMesh::Initialise(const vector<Vector2D>& pv,const OuterBoundar
 
 bool StaticVoronoiMesh::legal_edge(Edge *e) //checks if both ends of the edge are outside the grid and that the edge doesn't cross the grid
 {
-	if((e->neighbors.first<Tri.get_length())||
-		(e->neighbors.second<Tri.get_length()))
+  if((e->neighbors.first<static_cast<int>(Tri.get_length()))||
+     (e->neighbors.second<static_cast<int>(Tri.get_length())))
 		return true;
 	else
 		return false;
@@ -646,7 +646,7 @@ Tessellation* StaticVoronoiMesh::clone(void)const
 
 int StaticVoronoiMesh::GetPointNo(void) const
 {
-	return Tri.get_length();
+  return static_cast<int>(Tri.get_length());
 }
 
 Vector2D StaticVoronoiMesh::GetMeshPoint(int index) const

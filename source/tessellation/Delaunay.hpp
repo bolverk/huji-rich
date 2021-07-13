@@ -174,7 +174,7 @@ public:
   /*! \brief Changes the cor olength
     \param n The new length;
   */
-  void ChangeOlength(int n);
+  void ChangeOlength(size_t n);
 
   /*! \brief Changes the cor length
     \param n The new length
@@ -235,12 +235,12 @@ public:
   /*! \brief Returns the number of facets.
     \returns The number of facets.
   */
-  int get_num_facet(void)const;
+  size_t get_num_facet(void)const;
 
   /*! \brief Returns the number of points
     \returns The number of points.
   */
-  int get_length(void) const;
+  size_t get_length(void) const;
 
   /*! \brief Returns the last location, a number used to identify the fact that the neighbor of a facet is empty.
     \returns The last location.
@@ -294,7 +294,7 @@ public:
     \param facet The facet to check
     \return The facet's radius
   */
-  double GetFacetRadius(int facet) const;
+  double GetFacetRadius(size_t facet) const;
 
   /*!
   \brief Adds a point to the cor vector. Used in periodic boundaries with AMR.
