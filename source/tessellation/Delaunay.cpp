@@ -751,13 +751,22 @@ vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 	vector<vector<int> > res(edges.size());
 	if (olength < 100)
 	{
+	  return vector<vector<int> >
+	    (edges.size(),
+	     [](size_t n)
+	     {vector<int> ans(n);
+	       iota(ans.begin(), ans.end(),0);
+	       return ans;}(olength));
+	  /*
+	  transform(res.begin(),
+		    res.end(),
 		for (size_t j = 0; j < edges.size(); ++j)
 		{
-			res[static_cast<size_t>(j)].resize(static_cast<size_t>(olength));
-			for (size_t i = 0; i < olength; ++i)
-				res[static_cast<size_t>(j)][i] = static_cast<int>(i);
+			res[j].resize(olength);
+			std::iota(res[j].begin(), res[j].end(), 0);
 		}
 		return res;
+	  */
 	}
 	vector<int> res_temp, outer_points, f_temp /*, f_add(f.size(), 0)*/;
 	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
