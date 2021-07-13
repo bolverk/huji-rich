@@ -459,9 +459,9 @@ void WriteDelaunay(Delaunay const& tri, string const& filename)
 
 	for (int i = 0; i < nfacets; ++i)
 	{
-		facets.push_back(tri.get_facet(i).vertices.first);
-		facets.push_back(tri.get_facet(i).vertices.second);
-		facets.push_back(tri.get_facet(i).vertices.third);
+	  facets.push_back(static_cast<int>(tri.get_facet(i).vertices.first));
+	  facets.push_back(static_cast<int>(tri.get_facet(i).vertices.second));
+	  facets.push_back(static_cast<int>(tri.get_facet(i).vertices.third));
 	}
 
 	write_std_vector_to_hdf5(file, x_cor, "x_coordinate");

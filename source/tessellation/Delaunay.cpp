@@ -140,11 +140,11 @@ namespace
 	  return res;
 	}
 
-	size_t find_index(facet const& fc, int i)
+	size_t find_index(facet const& fc, size_t i)
 	{
 		for (size_t j = 0; j < 3; ++j)
 		{
-			if (fc.neighbors[j] == i)
+		  if (static_cast<size_t>(fc.neighbors[j]) == i)
 				return j;
 		}
 		throw UniversalError("Error in find_index: Index not found");
@@ -209,16 +209,16 @@ void Delaunay::update_friends_of_friends
 	pair<int,int>(temp_friends.second, 2)})
     if(itm.first != last_loc){
       const size_t i = find_index
-	(f[static_cast<size_t>(itm.first)],
-	 static_cast<int>(triangle));
+	(f[itm.first],
+	 triangle);
       f[static_cast<size_t>(itm.first)].neighbors[i] = static_cast<int>(location_pointer) + itm.second;
     }
 }
 
 void Delaunay::update_f_in_add_point
-(size_t triangle, const Triplet<int>& temp_friends, size_t index)
+(size_t triangle, const Triplet<size_t>& temp_friends, size_t index)
 {
-  const Triplet<int> outer(f[triangle].vertices);
+  const Triplet<size_t> outer(f[triangle].vertices);
   f[triangle].vertices.set
     (outer.third,
      outer.first,
@@ -227,20 +227,20 @@ void Delaunay::update_f_in_add_point
 			    static_cast<int>(location_pointer) + 1,
 			    static_cast<int>(location_pointer) + 2);
   const facet facet1
-    (TripleConstRef<int>
+    (TripleConstRef<size_t>
      (outer.first,
       outer.second,
-      static_cast<int>(index)),
-     TripleConstRef<int>
+      index),
+     TripleConstRef<size_t>
      (temp_friends.first,
-      static_cast<int>(location_pointer) + 2,
-      static_cast<int>(triangle)));
+      location_pointer + 2,
+      triangle));
   const facet facet2
-    (TripleConstRef<int>
+    (TripleConstRef<size_t>
      (outer.second,
       outer.third,
       static_cast<int>(index)),
-     TripleConstRef<int>
+     TripleConstRef<size_t>
      (temp_friends.second,
       static_cast<int>(triangle),
       static_cast<int>(location_pointer) + 1));
@@ -262,18 +262,14 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 {
   assert(is_point_inside_big_triangle(index));
   const size_t triangle = Walk(index);
-  const Triplet<int> temp_friends(f[triangle].neighbors);
-  const Triplet<size_t> temp_friends1
-    (static_cast<size_t>(temp_friends.first),
-     static_cast<size_t>(temp_friends.second),
-     static_cast<size_t>(temp_friends.third));
+  const Triplet<size_t> temp_friends(f[triangle].neighbors);
   update_f_in_add_point(triangle, temp_friends, index);
-  update_friends_of_friends(triangle, temp_friends1);
+  update_friends_of_friends(triangle, temp_friends);
 
   if (CalcRadius)
     update_radii(triangle);
 
-  check_if_flipping_is_needed(triangle, temp_friends1, flip_stack);
+  check_if_flipping_is_needed(triangle, temp_friends, flip_stack);
 
   // _update number of facets
   location_pointer += 2;
@@ -300,23 +296,23 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 			cor[static_cast<size_t>(check.first)]) > 0)
 		{
 			//The point is in a circle change the facets and their friends
-			const int v1 = prefetch_1.vertices[static_cast<size_t>(other.second + 1) % 3];
-			const int f1 = prefetch_1.neighbors[static_cast<size_t>(other.second)];
-			const int f12 = prefetch_1.neighbors[static_cast<size_t>(other.second + 2) % 3];
+			const auto v1 = prefetch_1.vertices[static_cast<size_t>(other.second + 1) % 3];
+			const auto f1 = prefetch_1.neighbors[static_cast<size_t>(other.second)];
+			const auto f12 = prefetch_1.neighbors[static_cast<size_t>(other.second + 2) % 3];
 			facet& prefetch_2 = f[indexes.second];
-			const int v2 = prefetch_2.vertices[static_cast<size_t>(check.second + 1) % 3];
-			const int f2 = prefetch_2.neighbors[static_cast<size_t>(check.second + 2) % 3];
-			const int f22 = prefetch_2.neighbors[static_cast<size_t>(check.second)];
+			const auto v2 = prefetch_2.vertices[static_cast<size_t>(check.second + 1) % 3];
+			const auto f2 = prefetch_2.neighbors[static_cast<size_t>(check.second + 2) % 3];
+			const auto f22 = prefetch_2.neighbors[static_cast<size_t>(check.second)];
 			prefetch_1.vertices.set(other.first, v1, check.first);
 			prefetch_2.vertices.set(check.first, v2, other.first);
 			prefetch_1.neighbors.set(f1, f2, static_cast<int>(indexes.second));
 			prefetch_2.neighbors.set(f22, f12, static_cast<int>(indexes.first));
 			// change the friends of the friends if needed
-			if (f2 != last_loc)
+			if (f2 != static_cast<size_t>(last_loc))
 			{
 				f[static_cast<size_t>(f2)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f2)], static_cast<int>(indexes.second)))] = static_cast<int>(indexes.first);
 			}
-			if (f12 != last_loc)
+			if (f12 != static_cast<size_t>(last_loc))
 			{
 				f[static_cast<size_t>(f12)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f12)], static_cast<int>(indexes.first)))] = static_cast<int>(indexes.second);
 			}
@@ -329,10 +325,10 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 			// clear the checked facets
 			flip_stack.pop();
 			// push into the stack the new facets to check
-			if (prefetch_2.neighbors.first != last_loc)
+			if (prefetch_2.neighbors.first != static_cast<size_t>(last_loc))
 				flip_stack.push(std::pair<size_t, size_t>(indexes.second,
 					static_cast<size_t>(prefetch_2.neighbors.first)));
-			if (prefetch_1.neighbors.second != last_loc)
+			if (prefetch_1.neighbors.second != static_cast<size_t>(last_loc))
 				flip_stack.push(std::pair<size_t, size_t>(indexes.first,
 					static_cast<size_t>(prefetch_1.neighbors.second)));
 		}
@@ -428,7 +424,7 @@ namespace {
 
   boost::optional<size_t> walk_condition
   (const vector<Vector2D>& cor,
-   const Triplet<int>& vertices,
+   const Triplet<size_t>& vertices,
    size_t point)
 	{
 	  for(size_t i=0;i<3;++i){
@@ -487,21 +483,21 @@ void Delaunay::FindContainingTetras(int StartFacet, int point, vector<int> &resu
 {
 	result.clear();
 	int PointLocation = FindPointInFacet(StartFacet, point);
-	int NextFacet = f[static_cast<size_t>(StartFacet)].neighbors[static_cast<size_t>(PointLocation)];
+	auto NextFacet = f[static_cast<size_t>(StartFacet)].neighbors[static_cast<size_t>(PointLocation)];
 	result.reserve(12);
-	result.push_back(NextFacet);
-	while (NextFacet != StartFacet)
+	result.push_back(static_cast<int>(NextFacet));
+	while (NextFacet != static_cast<size_t>(StartFacet))
 	{
-		PointLocation = FindPointInFacet(NextFacet, point);
+	  PointLocation = FindPointInFacet(static_cast<int>(NextFacet), point);
 		NextFacet = f[static_cast<size_t>(NextFacet)].neighbors[static_cast<size_t>(PointLocation)];
-		result.push_back(NextFacet);
+		result.push_back(static_cast<int>(NextFacet));
 	}
 }
 
 int Delaunay::FindPointInFacet(int facet, int point)
 {
 	for (int i = 0; i < 3; ++i)
-		if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == point)
+	  if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == static_cast<size_t>(point))
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
 	eo.addEntry("Facet number", facet);
@@ -514,7 +510,7 @@ bool Delaunay::IsOuterFacet(int facet)const
 	//int PointNum=length-1;
 	for (int i = 0; i<3; ++i)
 		for (size_t j = 0; j < 3; ++j)
-			if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == static_cast<int>(olength + j))
+			if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == olength + j)
 				return true;
 	return false;
 }
@@ -652,7 +648,7 @@ bool Delaunay::IsTripleOut(int index) const
 {
 	int counter = 0;
 	for (size_t i = 0; i < 3; ++i)
-		if (IsOuterFacet(f[static_cast<size_t>(index)].neighbors[static_cast<size_t>(i)]))
+	  if (IsOuterFacet(static_cast<int>(f[static_cast<size_t>(index)].neighbors[i])))
 			++counter;
 	if (counter > 1)
 		return true;
@@ -663,7 +659,7 @@ bool Delaunay::IsTripleOut(int index) const
 int Delaunay::FindTripleLoc(facet const& fct)const
 {
 	for (size_t i = 0; i < 3; ++i)
-		if (!IsOuterFacet(fct.neighbors[static_cast<size_t>(i)]))
+	  if (!IsOuterFacet(static_cast<int>(fct.neighbors[i])))
 			return static_cast<int>((i + 1) % 3);
 	throw UniversalError("Trouble in constructing boundary triangles. No inner neighbor");
 }
@@ -673,7 +669,7 @@ namespace
 	bool IsOuterQuick(facet const& f, int olength)
 	{
 		for (size_t i = 0; i < 3; ++i)
-			if (f.vertices[static_cast<size_t>(i)] >= olength)
+		  if (f.vertices[i] >= static_cast<size_t>(olength))
 				return true;
 		return false;
 	}
@@ -683,7 +679,7 @@ namespace
 		int counter = 0;
 		for (size_t i = 0; i < 3; ++i)
 		{
-			if (f.vertices[static_cast<size_t>(i)] >= olength)
+		  if (f.vertices[i] >= static_cast<size_t>(olength))
 				return false;
 			if (IsOuterQuick(facets[static_cast<size_t>(f.neighbors[static_cast<size_t>(i)])], olength))
 				++counter;
@@ -731,12 +727,12 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
 	{
 		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
+		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
 	}
 	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
 	{
 		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
+		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
 	}
 	do
 	{
@@ -753,7 +749,7 @@ vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olengt
 		point_index = (1 + FindPointInFacet(cur_facet, real_point)) % 3;
 		if (IsTripleOut(cur_facet))
 			point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
+		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
 	} while (start_facet != cur_facet);
 	sort(f_temp.begin(), f_temp.end());
 	f_temp = unique(f_temp);
@@ -1108,9 +1104,9 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
-			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= static_cast<int>(olength)))
+			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= olength))
 				continue;
-			vector<int> neigh = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
+			vector<int> neigh = FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]));
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
 				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
@@ -1118,7 +1114,7 @@ void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
 				{
 					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, radius[static_cast<size_t>(neigh[static_cast<size_t>(k)])]))
 					{
-						toduplicate[static_cast<size_t>(l)].push_back(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
+					  toduplicate[static_cast<size_t>(l)].push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]));
 						added = true;
 					}
 				}
@@ -1138,7 +1134,7 @@ int Delaunay::findSomeOuterPoint(void)
 {
 	const size_t cur_facet = Walk(olength);
 	for (size_t i = 0; i < 3; ++i) {
-		const int candidate = f.at(cur_facet).vertices[i];
+	  const int candidate = static_cast<int>(f.at(cur_facet).vertices[i]);
 		if (candidate < static_cast<int>(olength))
 			return candidate;
 	}
@@ -1233,12 +1229,12 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 			bool added = false;
 			int max_neigh = 0;
 			if (f[static_cast<size_t>(cur_facet)].vertices[i] >=
-				static_cast<int>(olength))
+				olength)
 				continue;
 			if (checked[static_cast<size_t>
 				(f[static_cast<size_t>(cur_facet)].vertices[i])])
 				continue;
-			vector<int> neighs = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[i]);
+			vector<int> neighs = FindContainingTetras(cur_facet, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
 				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
@@ -1258,12 +1254,12 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 					if (!self_intersection.empty())
 						added = true;
 					BOOST_FOREACH(int sindex, self_intersection)
-						res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+					  res[static_cast<size_t>(sindex)].push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
 				}
 				else
 				{
 					for (size_t jj = 0; jj < 3; ++jj)
-						max_neigh = max(max_neigh, f[static_cast<size_t>(neighs[k])].vertices[jj]);
+					  max_neigh = max(max_neigh, static_cast<int>(f[static_cast<size_t>(neighs[k])].vertices[jj]));
 				}
 				if (!cputosendto.empty())
 				{
@@ -1273,11 +1269,11 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 						size_t index = static_cast<size_t>(find(neigh.begin(), neigh.end(), cputosendto[j])
 							- neigh.begin());
 						if (index < neigh.size())
-							toduplicate.at(index).push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+						  toduplicate.at(index).push_back(static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i]));
 						else {
 							neigh.push_back(cputosendto[j]);
 							toduplicate.push_back
-								(vector<int>(1, f[static_cast<size_t>(cur_facet)].vertices[i]));
+							  (vector<int>(1, static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[i])));
 						}
 					}
 				}

@@ -71,7 +71,7 @@ private:
 
   void update_f_in_add_point
   (size_t triangle,
-   const Triplet<int>& temp_friends,
+   const Triplet<size_t>& temp_friends,
    size_t index);
 
   bool is_point_inside_big_triangle
