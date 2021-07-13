@@ -312,25 +312,24 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 			{
 				f[f2].neighbors[find_index(f[f2], indexes.second)] = indexes.first;
 			}
-			if (f12 != static_cast<size_t>(last_loc))
+			if (f12 != last_loc)
 			{
-				f[static_cast<size_t>(f12)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f12)], static_cast<int>(indexes.first)))] = static_cast<int>(indexes.second);
+				f[f12].neighbors[find_index(f[f12], indexes.first)] = indexes.second;
 			}
 			// Calculate the new radius if needed
 			if (CalcRadius)
 			{
-				radius[indexes.first] = CalculateRadius(static_cast<int>(indexes.first));
-				radius[indexes.second] = CalculateRadius(static_cast<int>(indexes.second));
+				radius[indexes.first] = CalculateRadius(indexes.first);
+				radius[indexes.second] = CalculateRadius(indexes.second);
 			}
 			// clear the checked facets
 			flip_stack.pop();
 			// push into the stack the new facets to check
-			if (prefetch_2.neighbors.first != static_cast<size_t>(last_loc))
-				flip_stack.push(std::pair<size_t, size_t>(indexes.second,
-					static_cast<size_t>(prefetch_2.neighbors.first)));
-			if (prefetch_1.neighbors.second != static_cast<size_t>(last_loc))
+			if (prefetch_2.neighbors.first != last_loc)
+			  flip_stack.push({indexes.second, prefetch_2.neighbors.first});
+			if (prefetch_1.neighbors.second != last_loc)
 				flip_stack.push(std::pair<size_t, size_t>(indexes.first,
-					static_cast<size_t>(prefetch_1.neighbors.second)));
+					prefetch_1.neighbors.second));
 		}
 		else
 		{
@@ -347,16 +346,16 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	lastFacet = 0;
 	CalcRadius = false;
 	length = int(vp.size() + 3);
-	int len = length - 3;
-	olength = static_cast<size_t>(len);
+	size_t len = length - 3;
+	olength = len;
 	f.clear();
 	cor.clear();
-	f.reserve(static_cast<size_t>(2 * length + 1 + static_cast<int>(17 * sqrt(1.*length))));
-	cor.reserve(static_cast<size_t>(length + 9 * static_cast<int>(sqrt(1.*length))));
+	f.reserve(2 * length + 1 + static_cast<size_t>(17 * sqrt(1.*length)));
+	cor.reserve(length + 9 * static_cast<size_t>(sqrt(1.*length)));
 	last_loc = INT_MAX;
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
-		cor.push_back(vp[static_cast<size_t>(i)]);
+		cor.push_back(vp[i]);
 	}
 	// Check point input
 	CheckInput();
