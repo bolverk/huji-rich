@@ -863,20 +863,12 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 			change.y = dy;
 			break;
 		}
-		vector<Vector2D> toadd;
-		toadd.reserve(toduplicate[static_cast<size_t>(i)].size());
-		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
-		for_each(toduplicate[i].begin(),
-			 toduplicate[i].end(),
-			 [&toadd,&change,this](size_t x)
-			 {toadd.push_back(cor[x]+change);});
-		/*
-		for (size_t j = 0; j < toduplicate[i].size(); ++j)
-		{
-			toadd.push_back(cor[toduplicate[i][j]] + change);
-			//	pointstemp[j]=j;
-		}
-		*/
+		vector<Vector2D> toadd(toduplicate[i].size());
+		transform(toduplicate[i].begin(),
+			  toduplicate[i].end(),
+			  toadd.begin(),
+			  [&change,this](size_t x)
+			  {return cor[x]+change;});
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
