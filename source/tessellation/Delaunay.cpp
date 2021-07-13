@@ -377,13 +377,13 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	p_temp.y = cellsize[3] + 100 * height;
 	cor.push_back(p_temp);
 	// Create the big triangle, and assign friends
-	facet f_temp;
-	f.push_back(f_temp);
-	f[0].vertices[0] = len;
-	f[0].vertices[1] = len + 1;
-	f[0].vertices[2] = len + 2;
-	for (size_t i = 0; i < 3; i++)
-		f[0].neighbors[i] = last_loc;
+	f.push_back([&len, this]{
+	    facet ans;
+	    for(size_t i=0;i<3;++i){
+	      ans.vertices[i] = len+i;
+	      ans.neighbors[i] = last_loc;
+	    }
+	    return ans;}());
 	location_pointer = 0;
 	// add the points
 	size_t nloop = length - 3;
@@ -918,21 +918,6 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 		if (toduplicate[i].empty())
 			continue;
 		const Vector2D change = changes[i];
-		/*
-		switch (i)
-		{
-		case(0) :
-			change.x = -dx;
-			break;
-		case(1) :
-			break;
-		case(2) :
-			change.x = dx;
-			break;
-		case(3) :
-			break;
-		}
-		*/
 		vector<Vector2D> toadd;
 		toadd.reserve(toduplicate[i].size());
 		//vector<int> pointstemp(toduplicate[i].size());
