@@ -599,19 +599,19 @@ size_t Delaunay::get_length(void) const
 	return length - 3;
 }
 
-int Delaunay::get_last_loc(void) const
+size_t Delaunay::get_last_loc(void) const
 {
-  return static_cast<int>(last_loc);
+  return last_loc;
 }
 
-void Delaunay::set_point(int index, Vector2D p)
+void Delaunay::set_point(size_t index, Vector2D p)
 {
-	cor[static_cast<size_t>(index)] = p;
+  cor[index] = p;
 }
 
-int Delaunay::GetOriginalLength(void) const
+size_t Delaunay::GetOriginalLength(void) const
 {
-	return static_cast<int>(olength);
+  return olength;
 }
 
 vector<Vector2D>& Delaunay::GetMeshPoints(void)

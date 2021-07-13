@@ -245,13 +245,13 @@ public:
   /*! \brief Returns the last location, a number used to identify the fact that the neighbor of a facet is empty.
     \returns The last location.
   */
-  int get_last_loc(void) const;
+  size_t get_last_loc(void) const;
 
   /*! \brief Change Mesh point.
     \param index The index of the point to change.
     \param p The new point to set.
   */
-  void set_point(int index, Vector2D p);
+  void set_point(size_t index, Vector2D p);
 
   /*! \brief Returns the area of the triangle. Negative result means the triangle isn't right handed.
     \param index The index to the facet
@@ -277,7 +277,7 @@ public:
     \brief Returns the original length of the points (without duplicated points)
     \return The original length
   */
-  int GetOriginalLength(void) const;
+  size_t GetOriginalLength(void) const;
 
   /*!
     \brief Returns a refrence to the points

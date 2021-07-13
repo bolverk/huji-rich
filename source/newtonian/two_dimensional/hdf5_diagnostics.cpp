@@ -466,7 +466,7 @@ void WriteDelaunay(Delaunay const& tri, string const& filename)
 
 	write_std_vector_to_hdf5(file, x_cor, "x_coordinate");
 	write_std_vector_to_hdf5(file, y_cor, "y_coordinate");
-	write_std_vector_to_hdf5(file, vector<int>(1, tri.GetOriginalLength()), "point number");
+	write_std_vector_to_hdf5(file, vector<int>(1, static_cast<int>(tri.GetOriginalLength())), "point number");
 	write_std_vector_to_hdf5(file, facets, "triangles");
 }
 

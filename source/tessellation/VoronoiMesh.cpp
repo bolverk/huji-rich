@@ -279,7 +279,7 @@ void VoronoiMesh::build_v()
 	mesh_vertices.clear();
 	mesh_vertices.resize(static_cast<size_t>(Tri.get_length()));
 	edges.reserve(static_cast<size_t>(static_cast<double>(Tri.get_length())*3.5));
-	int N=Tri.GetOriginalLength();
+	int N=static_cast<int>(Tri.GetOriginalLength());
 	for(int i=0;i<N;++i)
 		mesh_vertices[static_cast<size_t>(i)].reserve(7);
 	int Nfacets=static_cast<int>(Tri.get_num_facet());
@@ -310,9 +310,9 @@ void VoronoiMesh::build_v()
 									  Tri.GetFacetRadius(static_cast<int>(to_check.neighbors[static_cast<size_t>(j)]))))
 					{
 						{
-							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
+						  if(edge_temp.neighbors.first<static_cast<int>(Tri.GetOriginalLength()))
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back(static_cast<int>(edges.size()));
-							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
+						  if(edge_temp.neighbors.second<static_cast<int>(Tri.GetOriginalLength()))
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back(static_cast<int>(edges.size()));
 							edges.push_back(edge_temp);
 						}
@@ -799,7 +799,7 @@ vector<int> VoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box_edges
 
 bool VoronoiMesh::CloseToBorder(int point,int &border)
 {
-	int olength=Tri.GetOriginalLength();
+  int olength=static_cast<int>(Tri.GetOriginalLength());
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
 	for(int i=0;i<n;++i)
 	{
@@ -817,7 +817,7 @@ vector<int> VoronoiMesh::GetBorderingCells(vector<int> const& copied,
 	vector<int> const& totest,int tocheck,vector<int> tempresult,int outer)
 {
 	int border,test;
-	int olength=Tri.GetOriginalLength();
+	int olength=static_cast<int>(Tri.GetOriginalLength());
 	tempresult.push_back(tocheck);
 	sort(tempresult.begin(),tempresult.end());
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(tocheck)].size());
@@ -875,7 +875,7 @@ void VoronoiMesh::GetRealNeighbor(vector<int> &result,int point) const
 {
 	result.reserve(7);
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
-	int olength=Tri.GetOriginalLength();
+	int olength=static_cast<int>(Tri.GetOriginalLength());
 	for(int i=0;i<n;++i)
 	{
 	  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first==point)
@@ -1002,7 +1002,7 @@ void VoronoiMesh::GetCorners(vector<vector<int> > &copied,
 void VoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &totest)
 {
   int nsides=static_cast<int>(copied.size());
-	int olength=Tri.GetOriginalLength();
+  int olength=static_cast<int>(Tri.GetOriginalLength());
 	// sort the vectors
 	for(int i=0;i<nsides;++i)
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());
