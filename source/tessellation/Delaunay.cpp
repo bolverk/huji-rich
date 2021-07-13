@@ -1093,10 +1093,10 @@ namespace
 		return res;
 	}
 
-	stack<int> initialise_tocheck
-		(const vector<int>& neightemp)
+	stack<size_t> initialise_tocheck
+		(const vector<size_t>& neightemp)
 	{
-		stack<int> res;
+		stack<size_t> res;
 		for (size_t i = 0; i < neightemp.size(); ++i)
 			res.push(neightemp[i]);
 		return res;
@@ -1131,18 +1131,16 @@ vector<vector<size_t> > Delaunay::AddOuterFacetsMPI
 	vector<int> vtemp;
 	if (!recursive)
 		res.resize(own_edges.size());
-	stack<int> tocheck = initialise_tocheck
-	  (adapter1<size_t,int>(FindContainingTetras
-				(Walk(point), point)));
+	stack<size_t> tocheck = initialise_tocheck
+	  (FindContainingTetras(Walk(point), point));
 	if (recursive)
 	{
-		vector<int> allouter;
+		vector<size_t> allouter;
 		for (size_t i = 0; i < toduplicate.size(); ++i)
 		{
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			{
-			  vector<int> temp = adapter1<size_t,int>(FindContainingTetras
-								  (static_cast<int>(Walk(toduplicate[i][j])), toduplicate[i][j]));
+			  vector<size_t> temp = FindContainingTetras(Walk(toduplicate[i][j]), toduplicate[i][j]);
 				for (size_t k = 0; k < temp.size(); ++k)
 					allouter.push_back(temp[k]);
 			}
@@ -1154,7 +1152,7 @@ vector<vector<size_t> > Delaunay::AddOuterFacetsMPI
 	}
 	while (!tocheck.empty())
 	{
-		int cur_facet = tocheck.top();
+		size_t cur_facet = tocheck.top();
 		tocheck.pop();
 		for (size_t i = 0; i < 3; ++i)
 		{
