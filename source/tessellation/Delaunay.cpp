@@ -1062,13 +1062,13 @@ void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 }
 
 #ifdef RICH_MPI
-int Delaunay::findSomeOuterPoint(void)
+size_t Delaunay::findSomeOuterPoint(void)
 {
 	const size_t cur_facet = Walk(olength);
 	for (size_t i = 0; i < 3; ++i) {
-	  const int candidate = static_cast<int>(f.at(cur_facet).vertices[i]);
-		if (candidate < static_cast<int>(olength))
-			return candidate;
+	  const size_t candidate = f.at(cur_facet).vertices[i];
+	  if (candidate < olength)
+	      return candidate;
 	}
 	assert(false && "something went wrong");
 }

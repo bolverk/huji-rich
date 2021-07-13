@@ -80,7 +80,7 @@ private:
 #ifdef RICH_MPI
 	vector<size_t> OrgIndex;
 
-  int findSomeOuterPoint(void);
+  size_t findSomeOuterPoint(void);
 
   pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
 	  const vector<Edge>& edge_list,const vector<Edge>& box_edges,vector<vector<int> > &NghostIndex);
