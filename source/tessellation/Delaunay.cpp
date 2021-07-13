@@ -866,15 +866,21 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 		vector<Vector2D> toadd;
 		toadd.reserve(toduplicate[static_cast<size_t>(i)].size());
 		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
+		for_each(toduplicate[i].begin(),
+			 toduplicate[i].end(),
+			 [&toadd,&change,this](size_t x)
+			 {toadd.push_back(cor[x]+change);});
+		/*
+		for (size_t j = 0; j < toduplicate[i].size(); ++j)
 		{
-			toadd.push_back(cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])] + change);
+			toadd.push_back(cor[toduplicate[i][j]] + change);
 			//	pointstemp[j]=j;
 		}
+		*/
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[static_cast<size_t>(i)], order);
+		ReArrangeVector(toduplicate[i], order);
 		//toduplicate[i]=pointstemp;
 	}
 	// Done with sides do corners now
@@ -907,12 +913,6 @@ vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge
 		toadd.reserve(corners[i].size());
 		for(auto x : corners[i])
 		  toadd.push_back(cor[x]+change);
-		/*
-		for (size_t j = 0; j < corners[i].size(); ++j)
-		{
-			toadd.push_back(cor[corners[i][j]] + change);
-		}
-		*/
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
