@@ -1275,8 +1275,8 @@ Delaunay::findOuterPoints
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
-				status.MPI_SOURCE) - neighbors_own_edges.begin());
+			size_t location = std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
+				status.MPI_SOURCE) - neighbors_own_edges.begin();
 			if (location >= neighbors_own_edges.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
@@ -1456,7 +1456,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		for (size_t j = 0; j < to_duplicate.at(i).size(); ++j) {
 
 			if (it != old_neighbors.end()) {
-				const size_t my_index = static_cast<size_t>(it - old_neighbors.begin());
+				const size_t my_index = it - old_neighbors.begin();
 				if (!binary_search
 					(to_duplicate_2.at(my_index).begin(),
 						to_duplicate_2.at(my_index).end(),
@@ -1500,8 +1500,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) -
-				neighbors_own_edges.begin());
+			size_t location = std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) - neighbors_own_edges.begin();
 			if (location >= neighbors_own_edges.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
