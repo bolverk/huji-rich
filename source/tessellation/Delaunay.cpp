@@ -1016,7 +1016,6 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 
 Vector2D Delaunay::GetCircleCenter(size_t index)const
 {
-	Vector2D center;
 	const facet& F = f[index];
 	double x1 = cor[F.vertices[0]].x;
 	double x2 = cor[F.vertices[1]].x;
@@ -1028,45 +1027,24 @@ Vector2D Delaunay::GetCircleCenter(size_t index)const
 	const double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
 	const double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
 	const double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
-	int scenario = 0;
-	if (d12 < 0.1*(d23 + d13))
-		scenario = 1;
-	else
-		if (d23 < 0.1*(d13 + d12))
-			scenario = 3;
-		else
-			if (d13 < 0.1*(d23 + d12))
-				scenario = 2;
-	switch (scenario)
-	{
-	case(0) :
-	case(1) :
-	case(2) :
-	{
-		x2 -= x1;
-		x3 -= x1;
-		y2 -= y1;
-		y3 -= y1;
-		double d_inv = 1 / (2 * (x2*y3 - y2*x3));
-		center.Set((y3*(x2*x2 + y2*y2) - y2*(x3*x3 + y3*y3))*d_inv + x1,
-			(-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
-		break;
+	if(d23 < 0.1*(d13+d12)){
+	  x1 -= x2;
+	  x3 -= x2;
+	  y1 -= y2;
+	  y3 -= y2;
+	  const double d_inv = 1 / (2 * (x3*y1 - y3*x1));
+	  return Vector2D
+	    ((y1*(x3*x3 + y3*y3) - y3*(x1*x1 + y1*y1))*d_inv + x2,
+	     (x3*(x1*x1 + y1*y1) - x1*(x3*x3 + y3*y3))*d_inv + y2);
 	}
-	case(3) :
-	{
-		x1 -= x2;
-		x3 -= x2;
-		y1 -= y2;
-		y3 -= y2;
-		double d_inv = 1 / (2 * (x3*y1 - y3*x1));
-		center.Set((y1*(x3*x3 + y3*y3) - y3*(x1*x1 + y1*y1))*d_inv + x2,
-			(x3*(x1*x1 + y1*y1) - x1*(x3*x3 + y3*y3))*d_inv + y2);
-		break;
-	}
-	default:
-		throw UniversalError("Unhandled case in switch statement VoronoiMesh::get_center");
-	}
-	return center;
+	x2 -= x1;
+	x3 -= x1;
+	y2 -= y1;
+	y3 -= y1;
+	const double d_inv = 1 / (2 * (x2*y3 - y2*x3));
+	return Vector2D
+	  ((y3*(x2*x2 + y2*y2) - y2*(x3*x3 + y3*y3))*d_inv + x1,
+	   (-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
 }
 
 double Delaunay::GetMaxRadius(int point, int startfacet)
