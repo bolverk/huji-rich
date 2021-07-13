@@ -908,11 +908,17 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 {
 	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
 	//	const double dy=obc.GetGridBoundary(Up)-obc.GetGridBoundary(Down);
+	const std::array<Vector2D,4> changes = 
+	  {Vector2D(-dx,0),
+	   Vector2D(-dx,0),
+	   Vector2D(dx,0),
+	   Vector2D(dx,0)};
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 		if (toduplicate[i].empty())
 			continue;
-		Vector2D change;
+		const Vector2D change = changes[i];
+		/*
 		switch (i)
 		{
 		case(0) :
@@ -926,6 +932,7 @@ void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edg
 		case(3) :
 			break;
 		}
+		*/
 		vector<Vector2D> toadd;
 		toadd.reserve(toduplicate[i].size());
 		//vector<int> pointstemp(toduplicate[i].size());
