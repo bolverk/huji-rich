@@ -368,7 +368,7 @@ void VoronoiMesh::Initialise_loc(const vector<Vector2D>& pv,const OuterBoundary&
 	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc.GetBoxEdges());
+	vector<vector<int> > toduplicate = adapter2<size_t,int>(Tri.BuildBoundary(_bc,_bc.GetBoxEdges()));
 
 	eps=1e-8;
 	edges.clear();
@@ -506,7 +506,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<Edge> box_edges=obc->GetBoxEdges();
-	vector<vector<int> > toduplicate=Tri.BuildBoundary(*obc,box_edges);
+	vector<vector<int> > toduplicate=adapter2<size_t,int>(Tri.BuildBoundary(*obc,box_edges));
 
 	eps=1e-8;
 	edges.clear();

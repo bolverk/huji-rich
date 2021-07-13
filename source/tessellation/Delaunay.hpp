@@ -82,20 +82,20 @@ private:
 
   size_t findSomeOuterPoint(void);
 
-  pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
+  pair<vector<vector<size_t> >, vector<vector<size_t> > > findOuterPoints(const Tessellation& t_proc,
 	  const vector<Edge>& edge_list,const vector<Edge>& box_edges,vector<vector<int> > &NghostIndex);
 
   pair<vector<vector<int> >, vector<int> > FindOuterPoints2
   (const Tessellation& t_proc,
    const vector<Edge>& edge_list,
-   vector<vector<int> > &to_duplicate,
+   vector<vector<size_t> > &to_duplicate,
    vector<vector<int> >& self_points,
    const vector<Edge>& box_edges,
 	  vector<vector<size_t> > &NghostIndex);
 
-  vector<vector<int> > boundary_intersection_check
+  vector<vector<size_t> > boundary_intersection_check
   (const vector<Edge>& edges,
-   const vector<vector<int> >& to_duplicate);
+   const vector<vector<size_t> >& to_duplicate);
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
@@ -140,9 +140,9 @@ private:
   void AddOuterFacets(size_t tri,vector<vector<size_t> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked);
 
-  vector<vector<int> > AddOuterFacetsMPI
+  vector<vector<size_t> > AddOuterFacetsMPI
   (int point,
-   vector<vector<int> > &toduplicate,
+   vector<vector<size_t> > &toduplicate,
    vector<int> &neigh,
    vector<bool> &checked,
    const Tessellation& tproc,
@@ -150,11 +150,11 @@ private:
    bool recursive = false);
 
   void AddRigid(vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
-  vector<vector<int> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
-  vector<vector<int> > &toduplicate);
+	vector<vector<size_t> > &toduplicate);
+  vector<vector<size_t> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
+  vector<vector<size_t> > &toduplicate);
   void AddHalfPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
+	vector<vector<size_t> > &toduplicate);
   double GetMaxRadius(size_t point,size_t startfacet);
   void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	  vector<int> const& neigh,vector<vector<int> > &Nghost);
@@ -322,7 +322,7 @@ public:
   \param edges The edges of the domain
   \return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
   */
-  vector<vector<int> > BuildBoundary(const OuterBoundary& obc,vector<Edge> const& edges);
+  vector<vector<size_t> > BuildBoundary(const OuterBoundary& obc,vector<Edge> const& edges);
   /*!
   \brief Builds the boundary points for parallel runs
   \param obc The geometrical boundary conditions
