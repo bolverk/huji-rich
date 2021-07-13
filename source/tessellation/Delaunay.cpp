@@ -718,15 +718,10 @@ vector<size_t> Delaunay::GetOuterFacets(size_t start_facet, size_t real_point, s
 	vector<size_t> f_temp, containing_facets;
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(static_cast<double>(olength2))));
 	size_t point_index = FindPointInFacet(cur_facet, real_point);
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
+	if (IsOuterQuick(f[f[cur_facet].neighbors[point_index]], olength2))
 	{
 		point_index = (point_index + 1) % 3;
-		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
-	}
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
-	{
-		point_index = (point_index + 1) % 3;
-		real_point = static_cast<int>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)]);
+		real_point = f[cur_facet].vertices[point_index];
 	}
 	do
 	{
