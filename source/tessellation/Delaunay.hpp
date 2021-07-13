@@ -61,7 +61,7 @@ private:
 
   void check_if_flipping_is_needed
   (size_t triangle,
-   const Triplet<int>& temp_friends,
+   const Triplet<size_t>& temp_friends,
    stack<std::pair<size_t, size_t> >& flip_stack);
 
   void update_radii(size_t triangle);

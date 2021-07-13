@@ -167,7 +167,7 @@ namespace
 
 void Delaunay::check_if_flipping_is_needed
 (size_t triangle,
- const Triplet<int>& temp_friends,
+ const Triplet<size_t>& temp_friends,
  stack<std::pair<size_t, size_t> >& flip_stack)
 {
   for(const auto& zipped : 
@@ -263,13 +263,17 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
   assert(is_point_inside_big_triangle(index));
   const size_t triangle = Walk(index);
   const Triplet<int> temp_friends(f[triangle].neighbors);
+  const Triplet<size_t> temp_friends1
+    (static_cast<size_t>(temp_friends.first),
+     static_cast<size_t>(temp_friends.second),
+     static_cast<size_t>(temp_friends.third));
   update_f_in_add_point(triangle, temp_friends, index);
   update_friends_of_friends(triangle, temp_friends);
 
   if (CalcRadius)
     update_radii(triangle);
 
-  check_if_flipping_is_needed(triangle, temp_friends, flip_stack);
+  check_if_flipping_is_needed(triangle, temp_friends1, flip_stack);
 
   // _update number of facets
   location_pointer += 2;
