@@ -427,8 +427,8 @@ namespace {
 	{
 	  for(size_t i=0;i<3;++i){
 	    if (orient2d(TripleConstRef<Vector2D>
-			 (cor[static_cast<size_t>(vertices[i])],
-			  cor[static_cast<size_t>(vertices[(i+1)%3])],
+			 (cor[vertices[i]],
+			  cor[vertices[(i+1)%3]],
 			  cor[point])) < 0)
 	      return i;
 	  }
@@ -446,10 +446,10 @@ namespace {
 		   f[res].vertices,
 		   point);
 		while (next) {
-		  res = static_cast<size_t>(f[res].neighbors[*next]);
-			next = walk_condition(cor,
-				f[res].vertices,
-				point);
+		  res = f[res].neighbors[*next];
+		  next = walk_condition(cor,
+					f[res].vertices,
+					point);
 		}
 		return res;
 	}
@@ -457,8 +457,8 @@ namespace {
 
 size_t Delaunay::Walk(size_t point)
 {
-	lastFacet = static_cast<int>(find_new_facet(cor, f, point, static_cast<size_t>(lastFacet)));
-	return static_cast<size_t>(lastFacet);
+	lastFacet = find_new_facet(cor, f, point, static_cast<size_t>(lastFacet));
+	return lastFacet;
 }
 
 vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)

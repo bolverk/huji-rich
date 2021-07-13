@@ -99,7 +99,7 @@ private:
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
-  int lastFacet; //last facet to be checked in Walk
+  size_t lastFacet; //last facet to be checked in Walk
   bool CalcRadius;
 
   class DataOnlyForBuild
