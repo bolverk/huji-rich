@@ -485,21 +485,21 @@ void Delaunay::FindContainingTetras(size_t StartFacet, size_t point, vector<size
 {
 	result.clear();
 	size_t PointLocation = FindPointInFacet(StartFacet, point);
-	auto NextFacet = f[static_cast<size_t>(StartFacet)].neighbors[static_cast<size_t>(PointLocation)];
+	auto NextFacet = f[StartFacet].neighbors[PointLocation];
 	result.reserve(12);
-	result.push_back(static_cast<int>(NextFacet));
-	while (NextFacet != static_cast<size_t>(StartFacet))
+	result.push_back(NextFacet);
+	while (NextFacet != StartFacet)
 	{
-	  PointLocation = FindPointInFacet(static_cast<int>(NextFacet), point);
-		NextFacet = f[static_cast<size_t>(NextFacet)].neighbors[static_cast<size_t>(PointLocation)];
-		result.push_back(static_cast<int>(NextFacet));
+	  PointLocation = FindPointInFacet(NextFacet, point);
+		NextFacet = f[NextFacet].neighbors[PointLocation];
+		result.push_back(NextFacet);
 	}
 }
 
 size_t Delaunay::FindPointInFacet(size_t facet, size_t point)
 {
 	for (size_t i = 0; i < 3; ++i)
-	  if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == static_cast<size_t>(point))
+	  if (f[facet].vertices[i] == point)
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
 	eo.addEntry("Facet number", static_cast<int>(facet));
@@ -507,12 +507,12 @@ size_t Delaunay::FindPointInFacet(size_t facet, size_t point)
 	throw eo;
 }
 
-bool Delaunay::IsOuterFacet(int facet)const
+bool Delaunay::IsOuterFacet(size_t facet)const
 {
 	//int PointNum=length-1;
-	for (int i = 0; i<3; ++i)
+	for (size_t i = 0; i<3; ++i)
 		for (size_t j = 0; j < 3; ++j)
-			if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == olength + j)
+			if (f[facet].vertices[i] == olength + j)
 				return true;
 	return false;
 }
@@ -522,8 +522,8 @@ double Delaunay::CalculateRadius(size_t facet)
 	const double big = 1e10;
 	std::array<double, 3> sides;
 	for(int i=0;i<3;++i)
-	  sides[i] = get_facet_coordinates(static_cast<int>(facet),i).distance
-	    (get_facet_coordinates(static_cast<int>(facet),(i+1)%3));
+	  sides[i] = get_facet_coordinates(facet,i).distance
+	    (get_facet_coordinates(facet,(i+1)%3));
 	std::array<double, 3> temps;
 	for(size_t i=0;i<3;++i){
 	  temps[i] = sides[(i+1)%3]+sides[(i+2)%3]-sides[i];
@@ -573,15 +573,15 @@ const vector<Vector2D>& Delaunay::getCor(void) const
 	return cor;
 }
 
-const facet& Delaunay::get_facet(int index) const
+const facet& Delaunay::get_facet(size_t index) const
 {
-	return f[static_cast<size_t>(index)];
+	return f[index];
 }
 
 const Vector2D& Delaunay::get_facet_coordinates
-(int Facet, int vertice)
+(size_t Facet, size_t vertice)
 {
-  return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])];
+  return cor[f[Facet].vertices[vertice]];
 }
 
 const Vector2D& Delaunay::get_point(size_t index) const

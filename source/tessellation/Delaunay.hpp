@@ -122,7 +122,7 @@ private:
   size_t location_pointer;
   size_t last_loc;
 
-  bool IsOuterFacet(int facet)const;
+  bool IsOuterFacet(size_t facet)const;
   void add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack);
   void flip(size_t i,size_t j, stack<std::pair<size_t, size_t> > & flip_stack);
   size_t Walk(size_t point);
@@ -216,7 +216,7 @@ public:
     \param index Facet index
     \returns A reference to the selected facet.
   */
-  const facet& get_facet(int index) const;
+  const facet& get_facet(size_t index) const;
 
   /*! \brief Returns a coordinate of a vertice.
     \param Facet The index of the facet to check.
@@ -224,7 +224,7 @@ public:
     \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
     \returns The chosen coordinate.
   */
-  const Vector2D& get_facet_coordinates(int Facet,int vertice);
+  const Vector2D& get_facet_coordinates(size_t Facet,size_t vertice);
 
   /*! \brief Returns a point.
     \param index The index of the point.
