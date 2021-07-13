@@ -66,7 +66,7 @@ template<class T> class Triplet: public std::array<T, 3>
   /*! \brief Class constructor
     \param tcr References to three items
    */
-  explicit Triplet(const TripleConstRef<int>& tcr):
+  explicit Triplet(const TripleConstRef<T>& tcr):
     Triplet(tcr.first, tcr.second, tcr.third) {}
 
   explicit Triplet(const Triplet& other):

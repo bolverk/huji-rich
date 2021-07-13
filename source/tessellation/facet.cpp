@@ -9,8 +9,8 @@ facet::facet(const facet & other):
   neighbors(other.neighbors)
 {}
 
-facet::facet(const TripleConstRef<int>& vertices_i,
-	     const TripleConstRef<int>& neighbors_i):
+facet::facet(const TripleConstRef<size_t>& vertices_i,
+	     const TripleConstRef<size_t>& neighbors_i):
   vertices(vertices_i),
   neighbors(neighbors_i) {}
 

@@ -21,10 +21,10 @@ class facet
 public:
 
   //! \brief Indices of vertices
-  Triplet<int> vertices;
+  Triplet<size_t> vertices;
 
   //! \brief Indices of neighboring facets
-  Triplet<int> neighbors;
+  Triplet<size_t> neighbors;
 
 	//! \brief Defualt constructor. Sets vertices and friends to zero.
 	facet();
@@ -36,8 +36,8 @@ public:
     \param vertices_i Vertices indices
     \param neighbors_i Neighbor indices
    */
-  facet(const TripleConstRef<int>& vertices_i,
-	const TripleConstRef<int>& neighbors_i);
+  facet(const TripleConstRef<size_t>& vertices_i,
+	const TripleConstRef<size_t>& neighbors_i);
   
 	//! \brief Class destructor
 	~facet();
