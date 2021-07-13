@@ -104,15 +104,14 @@ namespace
 	}
 
 	// Assume cell is orederd in convexhull counterclockwise
-	bool InCell(vector<Vector2D> const& points, Vector2D const& p)
+	bool InCell(const vector<Vector2D>& points, 
+		    const Vector2D& p)
 	{
-		int n = static_cast<int>(points.size());
-		for (int i = 0; i < n; ++i)
-		{
-			if (CrossProduct(points[static_cast<size_t>(i)] - p, points[static_cast<size_t>((i + 1) % n)] - p) < 0)
-				return false;
-		}
-		return true;
+	  for (size_t i = 0, n = points.size(); i < n; ++i){
+	    if (CrossProduct(points[i] - p, points[(i + 1) % n] - p) < 0)
+	      return false;
+	  }
+	  return true;
 	}
 
   template<class S, class T> T convert_reduce
@@ -1554,7 +1553,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	{
 		const int dest = neighbors_own_edges.at(i);
 		tosend[i] = list_serialize(VectorValues(cor, messages.at(i)));
-		int size = static_cast<int>(tosend[i].size());
+		auto size = static_cast<int>(tosend[i].size());
 		if (size > 0)
 		{
 			if (size < 2)
