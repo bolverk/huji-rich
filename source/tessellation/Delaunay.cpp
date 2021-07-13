@@ -205,9 +205,9 @@ void Delaunay::update_friends_of_friends
 (size_t triangle, const Triplet<size_t>& temp_friends)
 {
   for(const auto& itm :
-    {pair<int,int>(temp_friends.first, 1),
-	pair<int,int>(temp_friends.second, 2)})
-    if(static_cast<size_t>(itm.first) != last_loc){
+    {pair<size_t,size_t>(temp_friends.first, 1),
+	pair<size_t,size_t>(temp_friends.second, 2)})
+    if(itm.first != last_loc){
       const size_t i = find_index
 	(f[itm.first],
 	 triangle);
@@ -290,27 +290,27 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 			f[indexes.second]);
 
 		facet& prefetch_1 = f[indexes.first];
-		if (incircle(cor[static_cast<size_t>(prefetch_1.vertices.first)],
-			cor[static_cast<size_t>(prefetch_1.vertices.second)],
-			cor[static_cast<size_t>(prefetch_1.vertices.third)],
-			cor[static_cast<size_t>(check.first)]) > 0)
+		if (incircle(cor[prefetch_1.vertices.first],
+			cor[prefetch_1.vertices.second],
+			cor[prefetch_1.vertices.third],
+			cor[check.first]) > 0)
 		{
 			//The point is in a circle change the facets and their friends
-			const auto v1 = prefetch_1.vertices[static_cast<size_t>(other.second + 1) % 3];
-			const auto f1 = prefetch_1.neighbors[static_cast<size_t>(other.second)];
-			const auto f12 = prefetch_1.neighbors[static_cast<size_t>(other.second + 2) % 3];
+		  const auto v1 = prefetch_1.vertices[(other.second + 1) % 3];
+			const auto f1 = prefetch_1.neighbors[other.second];
+			const auto f12 = prefetch_1.neighbors[(other.second + 2) % 3];
 			facet& prefetch_2 = f[indexes.second];
-			const auto v2 = prefetch_2.vertices[static_cast<size_t>(check.second + 1) % 3];
-			const auto f2 = prefetch_2.neighbors[static_cast<size_t>(check.second + 2) % 3];
-			const auto f22 = prefetch_2.neighbors[static_cast<size_t>(check.second)];
+			const auto v2 = prefetch_2.vertices[(check.second + 1) % 3];
+			const auto f2 = prefetch_2.neighbors[(check.second + 2) % 3];
+			const auto f22 = prefetch_2.neighbors[check.second];
 			prefetch_1.vertices.set(other.first, v1, check.first);
 			prefetch_2.vertices.set(check.first, v2, other.first);
-			prefetch_1.neighbors.set(f1, f2, static_cast<int>(indexes.second));
-			prefetch_2.neighbors.set(f22, f12, static_cast<int>(indexes.first));
+			prefetch_1.neighbors.set(f1, f2, indexes.second);
+			prefetch_2.neighbors.set(f22, f12, indexes.first);
 			// change the friends of the friends if needed
-			if (f2 != static_cast<size_t>(last_loc))
+			if (f2 != last_loc)
 			{
-				f[static_cast<size_t>(f2)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f2)], static_cast<int>(indexes.second)))] = static_cast<int>(indexes.first);
+				f[f2].neighbors[find_index(f[f2], indexes.second)] = indexes.first;
 			}
 			if (f12 != static_cast<size_t>(last_loc))
 			{
