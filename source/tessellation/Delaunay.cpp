@@ -1017,17 +1017,17 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 Vector2D Delaunay::GetCircleCenter(size_t index)const
 {
 	Vector2D center;
-	facet const& F = f[static_cast<size_t>(index)];
-	double x1 = cor[static_cast<size_t>(F.vertices[0])].x;
-	double x2 = cor[static_cast<size_t>(F.vertices[1])].x;
-	double x3 = cor[static_cast<size_t>(F.vertices[2])].x;
-	double y1 = cor[static_cast<size_t>(F.vertices[0])].y;
-	double y2 = cor[static_cast<size_t>(F.vertices[1])].y;
-	double y3 = cor[static_cast<size_t>(F.vertices[2])].y;
+	const facet& F = f[index];
+	double x1 = cor[F.vertices[0]].x;
+	double x2 = cor[F.vertices[1]].x;
+	double x3 = cor[F.vertices[2]].x;
+	double y1 = cor[F.vertices[0]].y;
+	double y2 = cor[F.vertices[1]].y;
+	double y3 = cor[F.vertices[2]].y;
 	// Do we have a case where two point are very close compared to the third?
-	double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
-	double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
-	double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
+	const double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
+	const double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
+	const double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
 	int scenario = 0;
 	if (d12 < 0.1*(d23 + d13))
 		scenario = 1;
