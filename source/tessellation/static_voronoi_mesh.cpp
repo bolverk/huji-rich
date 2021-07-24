@@ -348,7 +348,7 @@ Vector2D StaticVoronoiMesh::CalcFaceVelocity(Vector2D wl, Vector2D wr,Vector2D r
 bool StaticVoronoiMesh::NearBoundary(int index) const
 {
 	const int n=int(mesh_vertices[static_cast<size_t>(index)].size());
-	const int N=Tri.get_length();
+	const int N=static_cast<int>(Tri.get_length());
 	for(int i=0;i<n;++i)
 	{
 	  const int n0=edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(index)][static_cast<size_t>(i)])].neighbors.first;
@@ -435,11 +435,11 @@ void StaticVoronoiMesh::build_v()
 	Vector2D p_temp;
 	mesh_vertices.clear();
 	mesh_vertices.resize(static_cast<size_t>(Tri.get_length()));
-	edges.reserve(static_cast<size_t>(Tri.get_length()*3.5));
-	int N=Tri.GetOriginalLength();
+	edges.reserve(static_cast<size_t>(static_cast<double>(Tri.get_length())*3.5));
+	int N=static_cast<int>(Tri.GetOriginalLength());
 	for(int i=0;i<N;++i)
 		mesh_vertices[static_cast<size_t>(i)].reserve(7);
-	int Nfacets=Tri.get_num_facet();
+	int Nfacets=static_cast<int>(Tri.get_num_facet());
 	vector<Vector2D> centers(static_cast<size_t>(Nfacets));
 	for(int i=0;i<Nfacets;++i)
 		centers[static_cast<size_t>(i)]=Tri.GetCircleCenter(i);
@@ -449,31 +449,31 @@ void StaticVoronoiMesh::build_v()
 		to_check=Tri.get_facet(i);
 		for(j=0;j<3;++j)
 		{
-			if(to_check.neighbors[static_cast<size_t>(j)]==Tri.get_last_loc())
+		  if(to_check.neighbors[static_cast<size_t>(j)]==static_cast<size_t>(Tri.get_last_loc()))
 				continue;
-			if(to_check.neighbors[static_cast<size_t>(j)]<i)
+		  if(to_check.neighbors[static_cast<size_t>(j)]<static_cast<size_t>(i))
 				continue;
 			center_temp=centers[static_cast<size_t>(to_check.neighbors[static_cast<size_t>(j)])];
 			{
 				edge_temp.vertices.first = center;
 				edge_temp.vertices.second = center_temp;
-				edge_temp.neighbors.first = to_check.vertices[static_cast<size_t>(j)];
-				edge_temp.neighbors.second = to_check.vertices[static_cast<size_t>(j+1)%3];
+				edge_temp.neighbors.first = static_cast<int>(to_check.vertices[static_cast<size_t>(j)]);
+				edge_temp.neighbors.second = static_cast<int>(to_check.vertices[static_cast<size_t>(j+1)%3]);
 
 				if(legal_edge(&edge_temp))
 				{
 					// I added a change here, if edge has zero length I don't add it.
 					if(edge_temp.GetLength()>eps*sqrt(Tri.GetFacetRadius(i)*
-						Tri.GetFacetRadius(to_check.neighbors[static_cast<size_t>(j)])))
+									  Tri.GetFacetRadius(static_cast<int>(to_check.neighbors[static_cast<size_t>(j)]))))
 					{
 						{
-							if(edge_temp.neighbors.first<Tri.GetOriginalLength())
+						  if(edge_temp.neighbors.first<static_cast<int>(Tri.GetOriginalLength()))
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.first)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
 													static_cast<size_t>(edge_temp.neighbors.first))))
 									edge_temp.neighbors.first = -1;
-							if(edge_temp.neighbors.second<Tri.GetOriginalLength())
+						  if(edge_temp.neighbors.second<static_cast<int>(Tri.GetOriginalLength()))
 								mesh_vertices[static_cast<size_t>(edge_temp.neighbors.second)].push_back(static_cast<int>(edges.size()));
 							else
 								if(obc->PointIsReflective(Tri.get_point(
@@ -507,7 +507,7 @@ void StaticVoronoiMesh::Initialise(const vector<Vector2D>& pv,const OuterBoundar
 			   calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
-	vector<vector<int> > toduplicate = Tri.BuildBoundary(_bc,_bc.GetBoxEdges());
+	vector<vector<int> > toduplicate = adapter2<size_t,int>(Tri.BuildBoundary(_bc,_bc.GetBoxEdges()));
 
 	eps=1e-8;
 	edges.clear();
@@ -541,8 +541,8 @@ void StaticVoronoiMesh::Initialise(const vector<Vector2D>& pv,const OuterBoundar
 
 bool StaticVoronoiMesh::legal_edge(Edge *e) //checks if both ends of the edge are outside the grid and that the edge doesn't cross the grid
 {
-	if((e->neighbors.first<Tri.get_length())||
-		(e->neighbors.second<Tri.get_length()))
+  if((e->neighbors.first<static_cast<int>(Tri.get_length()))||
+     (e->neighbors.second<static_cast<int>(Tri.get_length())))
 		return true;
 	else
 		return false;
@@ -646,7 +646,7 @@ Tessellation* StaticVoronoiMesh::clone(void)const
 
 int StaticVoronoiMesh::GetPointNo(void) const
 {
-	return Tri.get_length();
+  return static_cast<int>(Tri.get_length());
 }
 
 Vector2D StaticVoronoiMesh::GetMeshPoint(int index) const
@@ -830,7 +830,7 @@ vector<int> StaticVoronoiMesh::CellIntersectOuterBoundary(vector<Edge> const&box
 
 bool StaticVoronoiMesh::CloseToBorder(int point,int &border)
 {
-	int olength=Tri.GetOriginalLength();
+  int olength=static_cast<int>(Tri.GetOriginalLength());
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
 	for(int i=0;i<n;++i)
 	{
@@ -848,7 +848,7 @@ vector<int> StaticVoronoiMesh::GetBorderingCells(vector<int> const& copied,
 	vector<int> const& totest,int tocheck,vector<int> tempresult,int outer)
 {
 	int border,test;
-	int olength=Tri.GetOriginalLength();
+	int olength=static_cast<int>(Tri.GetOriginalLength());
 	tempresult.push_back(tocheck);
 	sort(tempresult.begin(),tempresult.end());
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(tocheck)].size());
@@ -906,7 +906,7 @@ void StaticVoronoiMesh::GetRealNeighbor(vector<int> &result,int point) const
 {
 	result.reserve(7);
 	int n=static_cast<int>(mesh_vertices[static_cast<size_t>(point)].size());
-	int olength=Tri.GetOriginalLength();
+	int olength=static_cast<int>(Tri.GetOriginalLength());
 	for(int i=0;i<n;++i)
 	{
 	  if(edges[static_cast<size_t>(mesh_vertices[static_cast<size_t>(point)][static_cast<size_t>(i)])].neighbors.first==point)
@@ -1032,7 +1032,7 @@ void StaticVoronoiMesh::GetCorners(vector<vector<int> > &copied,
 void StaticVoronoiMesh::GetToTest(vector<vector<int> > &copied,vector<vector<int> > &totest)
 {
   int nsides=static_cast<int>(copied.size());
-	int olength=Tri.GetOriginalLength();
+  int olength=static_cast<int>(Tri.GetOriginalLength());
 	// sort the vectors
 	for(int i=0;i<nsides;++i)
 		sort(copied[static_cast<size_t>(i)].begin(),copied[static_cast<size_t>(i)].end());

@@ -30,12 +30,12 @@ void BinaryLogger::output(vector<Vector2D> const& cor,
 
   for(size_t i=0;i<f.size();++i){
     for(size_t j=0;j<3;++j)
-      binary_write_single_int(f[i].vertices[j],file_handle);
+      binary_write_single_int(static_cast<int>(f[i].vertices[j]),file_handle);
   }
 
   for(size_t i=0;i<f.size();++i){
     for(size_t j=0;j<3;++j)
-      binary_write_single_int(f[i].neighbors[j],file_handle);
+      binary_write_single_int(static_cast<int>(f[i].neighbors[j]),file_handle);
   }
 
   file_handle.close();

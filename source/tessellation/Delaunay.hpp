@@ -24,6 +24,34 @@
 #ifdef RICH_MPI
 #include "find_affected_cells.hpp"
 #endif
+#include <functional>
+
+template<class S, class T> vector<T> vransform
+(const vector<S>& v,
+ const std::function<T(S)>& f)
+{
+  vector<T> res(v.size());
+  transform(v.begin(),
+	    v.end(),
+	    res.begin(),
+	    f);
+  return res;
+}
+
+template<class S, class T> vector<T> adapter1
+(const vector<S>& v)
+{
+  return vransform<S,T>
+    (v, [](const S& s){return static_cast<T>(s);});
+}
+
+template<class S, class T> vector<vector<T> > adapter2
+(const vector<vector<S> >& v)
+{
+  return vransform<vector<S>, vector<T> >
+    (v, adapter1<S, T>);
+}
+
 /*! \brief The Delaunay data structure. Gets a set of points and constructs the Delaunay tessellation.
   \author Elad Steinberg
 */
@@ -33,45 +61,45 @@ private:
 
   void check_if_flipping_is_needed
   (size_t triangle,
-   const Triplet<int>& temp_friends,
+   const Triplet<size_t>& temp_friends,
    stack<std::pair<size_t, size_t> >& flip_stack);
 
   void update_radii(size_t triangle);
 
   void update_friends_of_friends
-  (size_t triangle, const Triplet<int>& temp_friends);
+  (size_t triangle, const Triplet<size_t>& temp_friends);
 
   void update_f_in_add_point
   (size_t triangle,
-   const Triplet<int>& temp_friends,
+   const Triplet<size_t>& temp_friends,
    size_t index);
 
   bool is_point_inside_big_triangle
   (size_t index) const;
 
 #ifdef RICH_MPI
-	vector<int> OrgIndex;
+	vector<size_t> OrgIndex;
 
-  int findSomeOuterPoint(void);
+  size_t findSomeOuterPoint(void);
 
-  pair<vector<vector<int> >, vector<vector<int> > > findOuterPoints(const Tessellation& t_proc,
+  pair<vector<vector<size_t> >, vector<vector<size_t> > > findOuterPoints(const Tessellation& t_proc,
 	  const vector<Edge>& edge_list,const vector<Edge>& box_edges,vector<vector<int> > &NghostIndex);
 
   pair<vector<vector<int> >, vector<int> > FindOuterPoints2
   (const Tessellation& t_proc,
    const vector<Edge>& edge_list,
-   vector<vector<int> > &to_duplicate,
+   vector<vector<size_t> > &to_duplicate,
    vector<vector<int> >& self_points,
    const vector<Edge>& box_edges,
-	  vector<vector<int> > &NghostIndex);
+	  vector<vector<size_t> > &NghostIndex);
 
-  vector<vector<int> > boundary_intersection_check
+  vector<vector<size_t> > boundary_intersection_check
   (const vector<Edge>& edges,
-   const vector<vector<int> >& to_duplicate);
+   const vector<vector<size_t> >& to_duplicate);
 #endif // RICH_MPI
 
   enum Sides{RIGHT,UP,LEFT,DOWN,LU,LD,RU,RD};
-  int lastFacet; //last facet to be checked in Walk
+  size_t lastFacet; //last facet to be checked in Walk
   bool CalcRadius;
 
   class DataOnlyForBuild
@@ -91,30 +119,30 @@ private:
   vector<Vector2D> cor;
   int length;
   size_t olength;
-  int location_pointer;
-  int last_loc;
+  size_t location_pointer;
+  size_t last_loc;
 
-  bool IsOuterFacet(int facet)const;
+  bool IsOuterFacet(size_t facet)const;
   void add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_stack);
   void flip(size_t i,size_t j, stack<std::pair<size_t, size_t> > & flip_stack);
   size_t Walk(size_t point);
   void CheckInput();
-  double CalculateRadius(int facet);
-  int FindPointInFacet(int facet,int point);
-  double FindMaxRadius(int point);
-  void FindContainingTetras(int StartTetra,int point,vector<int> &tetras);
-  vector<int> FindContainingTetras(int StartTetra, int point);
-  vector<vector<int> > FindOuterPoints(vector<Edge> const& edges);
-  bool IsTripleOut(int index) const;
-  int FindTripleLoc(facet const& f)const;
+  double CalculateRadius(size_t facet);
+  size_t FindPointInFacet(size_t facet,size_t point);
+  double FindMaxRadius(size_t point);
+  void FindContainingTetras(size_t StartTetra,size_t point,vector<size_t> &tetras);
+  vector<size_t> FindContainingTetras(size_t StartTetra, size_t point);
+  vector<vector<size_t> > FindOuterPoints(vector<Edge> const& edges);
+  bool IsTripleOut(size_t index) const;
+  size_t FindTripleLoc(facet const& f)const;
   void AddFacetDuplicate(int index,vector<vector<int> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked)const;
-  void AddOuterFacets(int tri,vector<vector<int> > &toduplicate,vector<Edge>
+  void AddOuterFacets(size_t tri,vector<vector<size_t> > &toduplicate,vector<Edge>
 	const& edges,vector<bool> &checked);
 
-  vector<vector<int> > AddOuterFacetsMPI
+  vector<vector<size_t> > AddOuterFacetsMPI
   (int point,
-   vector<vector<int> > &toduplicate,
+   vector<vector<size_t> > &toduplicate,
    vector<int> &neigh,
    vector<bool> &checked,
    const Tessellation& tproc,
@@ -122,15 +150,15 @@ private:
    bool recursive = false);
 
   void AddRigid(vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
-  vector<vector<int> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
-  vector<vector<int> > &toduplicate);
+	vector<vector<size_t> > &toduplicate);
+  vector<vector<size_t> > AddPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
+  vector<vector<size_t> > &toduplicate);
   void AddHalfPeriodic(const OuterBoundary& obc,vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate);
-  double GetMaxRadius(int point,int startfacet);
+	vector<vector<size_t> > &toduplicate);
+  double GetMaxRadius(size_t point,size_t startfacet);
   void SendRecvFirstBatch(vector<vector<Vector2D> > &tosend,
 	  vector<int> const& neigh,vector<vector<int> > &Nghost);
-  vector<int> GetOuterFacets(int cur_facet,int real_point,int olength);
+  vector<size_t> GetOuterFacets(size_t cur_facet,size_t real_point,size_t olength);
 
   Delaunay& operator=(const Delaunay& origin);
 
@@ -141,12 +169,12 @@ public:
     \param index Index of a point
     \return Original index
    */
-	int GetOrgIndex(int index)const;
+	size_t GetOrgIndex(size_t index)const;
 #endif
   /*! \brief Changes the cor olength
     \param n The new length;
   */
-  void ChangeOlength(int n);
+  void ChangeOlength(size_t n);
 
   /*! \brief Changes the cor length
     \param n The new length
@@ -188,7 +216,7 @@ public:
     \param index Facet index
     \returns A reference to the selected facet.
   */
-  const facet& get_facet(int index) const;
+  const facet& get_facet(size_t index) const;
 
   /*! \brief Returns a coordinate of a vertice.
     \param Facet The index of the facet to check.
@@ -196,7 +224,7 @@ public:
     \param dim If dim=0 returns the x-coordinate else returns the y-coordinate.
     \returns The chosen coordinate.
   */
-  const Vector2D& get_facet_coordinates(int Facet,int vertice);
+  const Vector2D& get_facet_coordinates(size_t Facet,size_t vertice);
 
   /*! \brief Returns a point.
     \param index The index of the point.
@@ -207,29 +235,29 @@ public:
   /*! \brief Returns the number of facets.
     \returns The number of facets.
   */
-  int get_num_facet(void)const;
+  size_t get_num_facet(void)const;
 
   /*! \brief Returns the number of points
     \returns The number of points.
   */
-  int get_length(void) const;
+  size_t get_length(void) const;
 
   /*! \brief Returns the last location, a number used to identify the fact that the neighbor of a facet is empty.
     \returns The last location.
   */
-  int get_last_loc(void) const;
+  size_t get_last_loc(void) const;
 
   /*! \brief Change Mesh point.
     \param index The index of the point to change.
     \param p The new point to set.
   */
-  void set_point(int index, Vector2D p);
+  void set_point(size_t index, Vector2D p);
 
   /*! \brief Returns the area of the triangle. Negative result means the triangle isn't right handed.
     \param index The index to the facet
     \return The area
   */
-  double triangle_area(int index);
+  double triangle_area(size_t index);
 
   /*!
     \brief Updates the triangulation
@@ -243,13 +271,13 @@ public:
     \param NewPoint The index of the duplicated point
     \return The original index
   */
-  int GetOriginalIndex(int NewPoint) const;
+  int  GetOriginalIndex(int NewPoint) const;
 
   /*!
     \brief Returns the original length of the points (without duplicated points)
     \return The original length
   */
-  int GetOriginalLength(void) const;
+  size_t GetOriginalLength(void) const;
 
   /*!
     \brief Returns a refrence to the points
@@ -260,13 +288,13 @@ public:
   /*! \brief Returns the length of all the points (included duplicated)
     \return The length of all of the points
   */
-  int GetTotalLength(void);
+  size_t GetTotalLength(void);
 
   /*! \brief return the facet's radius
     \param facet The facet to check
     \return The facet's radius
   */
-  double GetFacetRadius(int facet) const;
+  double GetFacetRadius(size_t facet) const;
 
   /*!
   \brief Adds a point to the cor vector. Used in periodic boundaries with AMR.
@@ -277,14 +305,14 @@ public:
   \brief Gets the size of the cor vector.
   \return The size of the cor vector.
   */
-  int GetCorSize(void)const;
+  size_t GetCorSize(void)const;
   
   /*!
   \brief Returns the center of the circumscribed circle of a facet
   \param index The index of the facet
   \returns The circumscribed circle's center
   */
-  Vector2D GetCircleCenter(int index)const;
+  Vector2D GetCircleCenter(size_t index)const;
 
   //! \brief Diagnostics
   delaunay_loggers::DelaunayLogger* logger;
@@ -294,7 +322,7 @@ public:
   \param edges The edges of the domain
   \return The indeces of the boundary points for each edge, can be larger than the number of edges since it include corners at the end
   */
-  vector<vector<int> > BuildBoundary(const OuterBoundary& obc,vector<Edge> const& edges);
+  vector<vector<size_t> > BuildBoundary(const OuterBoundary& obc,vector<Edge> const& edges);
   /*!
   \brief Builds the boundary points for parallel runs
   \param obc The geometrical boundary conditions

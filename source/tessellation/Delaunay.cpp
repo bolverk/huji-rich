@@ -57,7 +57,7 @@ Delaunay::Delaunay(void) :
 	olength(0), location_pointer(0), last_loc(0),
 	logger(nullptr)
 #ifdef RICH_MPI
-	,OrgIndex(vector<int>())
+	,OrgIndex(vector<size_t>())
 #endif
 {}
 
@@ -104,15 +104,14 @@ namespace
 	}
 
 	// Assume cell is orederd in convexhull counterclockwise
-	bool InCell(vector<Vector2D> const& points, Vector2D const& p)
+	bool InCell(const vector<Vector2D>& points, 
+		    const Vector2D& p)
 	{
-		int n = static_cast<int>(points.size());
-		for (int i = 0; i < n; ++i)
-		{
-			if (CrossProduct(points[static_cast<size_t>(i)] - p, points[static_cast<size_t>((i + 1) % n)] - p) < 0)
-				return false;
-		}
-		return true;
+	  for (size_t i = 0, n = points.size(); i < n; ++i){
+	    if (CrossProduct(points[i] - p, points[(i + 1) % n] - p) < 0)
+	      return false;
+	  }
+	  return true;
 	}
 
   template<class S, class T> T convert_reduce
@@ -141,11 +140,11 @@ namespace
 	  return res;
 	}
 
-	size_t find_index(facet const& fc, int i)
+	size_t find_index(facet const& fc, size_t i)
 	{
 		for (size_t j = 0; j < 3; ++j)
 		{
-			if (fc.neighbors[j] == i)
+		  if (fc.neighbors[j] == i)
 				return j;
 		}
 		throw UniversalError("Error in find_index: Index not found");
@@ -168,12 +167,12 @@ namespace
 
 void Delaunay::check_if_flipping_is_needed
 (size_t triangle,
- const Triplet<int>& temp_friends,
+ const Triplet<size_t>& temp_friends,
  stack<std::pair<size_t, size_t> >& flip_stack)
 {
   for(const auto& zipped : 
-	zip2<int,int,3>
-	({static_cast<int>(triangle), 
+	zip2<size_t,size_t,3>
+	({triangle, 
 	    location_pointer+1,
 	    location_pointer+2},
 	{temp_friends.third, 
@@ -185,10 +184,10 @@ void Delaunay::check_if_flipping_is_needed
 void Delaunay::update_radii
 (size_t triangle)
 {
-  radius[static_cast<size_t>(triangle)] = 
-    CalculateRadius(static_cast<int>(triangle));
-  const int n = int(f.size());
-  const int m = int(radius.size());
+  radius[triangle] = 
+    CalculateRadius(triangle);
+  const auto n = f.size();
+  const auto m = radius.size();
   auto func = n > m - 1 ?
     [](vector<double>& v, double x, double y)
     {v.insert(v.end(),{x,y});} :
@@ -203,47 +202,47 @@ void Delaunay::update_radii
 }
 
 void Delaunay::update_friends_of_friends
-(size_t triangle, const Triplet<int>& temp_friends)
+(size_t triangle, const Triplet<size_t>& temp_friends)
 {
   for(const auto& itm :
-    {pair<int,int>(temp_friends.first, 1),
-	pair<int,int>(temp_friends.second, 2)})
+    {pair<size_t,size_t>(temp_friends.first, 1),
+	pair<size_t,size_t>(temp_friends.second, 2)})
     if(itm.first != last_loc){
       const size_t i = find_index
-	(f[static_cast<size_t>(itm.first)],
-	 static_cast<int>(triangle));
-      f[static_cast<size_t>(itm.first)].neighbors[i] = location_pointer + itm.second;
+	(f[itm.first],
+	 triangle);
+      f[itm.first].neighbors[i] = location_pointer + itm.second;
     }
 }
 
 void Delaunay::update_f_in_add_point
-(size_t triangle, const Triplet<int>& temp_friends, size_t index)
+(size_t triangle, const Triplet<size_t>& temp_friends, size_t index)
 {
-  const Triplet<int> outer(f[triangle].vertices);
+  const Triplet<size_t> outer(f[triangle].vertices);
   f[triangle].vertices.set
     (outer.third,
      outer.first,
-     static_cast<int>(index));
+     index);
   f[triangle].neighbors.set(temp_friends.third,
 			    location_pointer + 1,
 			    location_pointer + 2);
   const facet facet1
-    (TripleConstRef<int>
+    (TripleConstRef<size_t>
      (outer.first,
       outer.second,
-      static_cast<int>(index)),
-     TripleConstRef<int>
+      index),
+     TripleConstRef<size_t>
      (temp_friends.first,
       location_pointer + 2,
-      static_cast<int>(triangle)));
+      triangle));
   const facet facet2
-    (TripleConstRef<int>
+    (TripleConstRef<size_t>
      (outer.second,
       outer.third,
-      static_cast<int>(index)),
-     TripleConstRef<int>
+      index),
+     TripleConstRef<size_t>
      (temp_friends.second,
-      static_cast<int>(triangle),
+      triangle,
       location_pointer + 1));
   f.insert(f.end(), {facet1, facet2});
 }
@@ -263,7 +262,7 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 {
   assert(is_point_inside_big_triangle(index));
   const size_t triangle = Walk(index);
-  const Triplet<int> temp_friends(f[triangle].neighbors);
+  const Triplet<size_t> temp_friends(f[triangle].neighbors);
   update_f_in_add_point(triangle, temp_friends, index);
   update_friends_of_friends(triangle, temp_friends);
 
@@ -278,7 +277,7 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
 
 void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_stack)
 {
-	if (j == static_cast<size_t>(last_loc))
+	if (j == last_loc)
 		return;
 	flip_stack.push(std::pair<size_t, size_t>(i, j));
 	while (!flip_stack.empty())
@@ -291,47 +290,46 @@ void Delaunay::flip(size_t i, size_t j, stack<std::pair<size_t, size_t> > &flip_
 			f[indexes.second]);
 
 		facet& prefetch_1 = f[indexes.first];
-		if (incircle(cor[static_cast<size_t>(prefetch_1.vertices.first)],
-			cor[static_cast<size_t>(prefetch_1.vertices.second)],
-			cor[static_cast<size_t>(prefetch_1.vertices.third)],
-			cor[static_cast<size_t>(check.first)]) > 0)
+		if (incircle(cor[prefetch_1.vertices.first],
+			cor[prefetch_1.vertices.second],
+			cor[prefetch_1.vertices.third],
+			cor[check.first]) > 0)
 		{
 			//The point is in a circle change the facets and their friends
-			const int v1 = prefetch_1.vertices[static_cast<size_t>(other.second + 1) % 3];
-			const int f1 = prefetch_1.neighbors[static_cast<size_t>(other.second)];
-			const int f12 = prefetch_1.neighbors[static_cast<size_t>(other.second + 2) % 3];
+		  const auto v1 = prefetch_1.vertices[(other.second + 1) % 3];
+			const auto f1 = prefetch_1.neighbors[other.second];
+			const auto f12 = prefetch_1.neighbors[(other.second + 2) % 3];
 			facet& prefetch_2 = f[indexes.second];
-			const int v2 = prefetch_2.vertices[static_cast<size_t>(check.second + 1) % 3];
-			const int f2 = prefetch_2.neighbors[static_cast<size_t>(check.second + 2) % 3];
-			const int f22 = prefetch_2.neighbors[static_cast<size_t>(check.second)];
+			const auto v2 = prefetch_2.vertices[(check.second + 1) % 3];
+			const auto f2 = prefetch_2.neighbors[(check.second + 2) % 3];
+			const auto f22 = prefetch_2.neighbors[check.second];
 			prefetch_1.vertices.set(other.first, v1, check.first);
 			prefetch_2.vertices.set(check.first, v2, other.first);
-			prefetch_1.neighbors.set(f1, f2, static_cast<int>(indexes.second));
-			prefetch_2.neighbors.set(f22, f12, static_cast<int>(indexes.first));
+			prefetch_1.neighbors.set(f1, f2, indexes.second);
+			prefetch_2.neighbors.set(f22, f12, indexes.first);
 			// change the friends of the friends if needed
 			if (f2 != last_loc)
 			{
-				f[static_cast<size_t>(f2)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f2)], static_cast<int>(indexes.second)))] = static_cast<int>(indexes.first);
+				f[f2].neighbors[find_index(f[f2], indexes.second)] = indexes.first;
 			}
 			if (f12 != last_loc)
 			{
-				f[static_cast<size_t>(f12)].neighbors[static_cast<size_t>(find_index(f[static_cast<size_t>(f12)], static_cast<int>(indexes.first)))] = static_cast<int>(indexes.second);
+				f[f12].neighbors[find_index(f[f12], indexes.first)] = indexes.second;
 			}
 			// Calculate the new radius if needed
 			if (CalcRadius)
 			{
-				radius[indexes.first] = CalculateRadius(static_cast<int>(indexes.first));
-				radius[indexes.second] = CalculateRadius(static_cast<int>(indexes.second));
+				radius[indexes.first] = CalculateRadius(indexes.first);
+				radius[indexes.second] = CalculateRadius(indexes.second);
 			}
 			// clear the checked facets
 			flip_stack.pop();
 			// push into the stack the new facets to check
 			if (prefetch_2.neighbors.first != last_loc)
-				flip_stack.push(std::pair<size_t, size_t>(indexes.second,
-					static_cast<size_t>(prefetch_2.neighbors.first)));
+			  flip_stack.push({indexes.second, prefetch_2.neighbors.first});
 			if (prefetch_1.neighbors.second != last_loc)
 				flip_stack.push(std::pair<size_t, size_t>(indexes.first,
-					static_cast<size_t>(prefetch_1.neighbors.second)));
+					prefetch_1.neighbors.second));
 		}
 		else
 		{
@@ -348,64 +346,59 @@ void Delaunay::build_delaunay(vector<Vector2D>const& vp, vector<Vector2D> const&
 	lastFacet = 0;
 	CalcRadius = false;
 	length = int(vp.size() + 3);
-	int len = length - 3;
-	olength = static_cast<size_t>(len);
+	size_t len = length - 3;
+	olength = len;
 	f.clear();
 	cor.clear();
-	f.reserve(static_cast<size_t>(2 * length + 1 + static_cast<int>(17 * sqrt(1.*length))));
-	cor.reserve(static_cast<size_t>(length + 9 * static_cast<int>(sqrt(1.*length))));
+	f.reserve(2 * length + 1 + static_cast<size_t>(17 * sqrt(1.*length)));
+	cor.reserve(length + 9 * static_cast<size_t>(sqrt(1.*length)));
 	last_loc = INT_MAX;
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
-		cor.push_back(vp[static_cast<size_t>(i)]);
+		cor.push_back(vp[i]);
 	}
 	// Check point input
 	CheckInput();
 
 	// add the 3 extreme points
-	Vector2D p_temp;
 	const auto cellsize = CellSize(cell_points);
-	double width = cellsize[1] - cellsize[0];
-	double height = cellsize[3] - cellsize[2];
-	width = max(width, height);
-	height = max(width, height);
-	p_temp.x = cellsize[0] - 100 * width;
-	p_temp.y = cellsize[2] - 100 * height;
-	cor.push_back(p_temp);
-	p_temp.x = cellsize[1] + 100 * width;
-	p_temp.y = cellsize[2] - 100 * height;
-	cor.push_back(p_temp);
-	p_temp.x = (cellsize[0] + cellsize[1]) / 2.0;
-	p_temp.y = cellsize[3] + 100 * height;
-	cor.push_back(p_temp);
+	const double width = cellsize[1] - cellsize[0];
+	const double height = cellsize[3] - cellsize[2];
+	const double extent = max(width, height);
+	cor.insert(cor.end(),
+		   {Vector2D(cellsize[0] - 100 * extent,
+			     cellsize[2] - 100 * extent),
+		       Vector2D(cellsize[1] + 100 * extent,
+				cellsize[2] - 100 * extent),
+		       Vector2D((cellsize[0] + cellsize[1]) / 2.0,
+				cellsize[3] + 100 * extent)});
 	// Create the big triangle, and assign friends
-	facet f_temp;
-	f.push_back(f_temp);
-	f[0].vertices[0] = len;
-	f[0].vertices[1] = len + 1;
-	f[0].vertices[2] = len + 2;
-	for (size_t i = 0; i < 3; i++)
-		f[0].neighbors[i] = last_loc;
+	f.push_back([&len, this]{
+	    facet ans;
+	    for(size_t i=0;i<3;++i){
+	      ans.vertices[i] = len+i;
+	      ans.neighbors[i] = last_loc;
+	    }
+	    return ans;}());
 	location_pointer = 0;
 	// add the points
-	size_t nloop = static_cast<size_t>(length) - 3;
+	size_t nloop = length - 3;
 	stack<std::pair<size_t, size_t> > flip_stack;
 	for (size_t i = 0; i < nloop; i++)
 		add_point(i,flip_stack);
 	// Calculate radius
 	radius.resize(f.size());
-	int n = int(f.size());
-	for (int i = 0; i < n; ++i)
-		radius[static_cast<size_t>(i)] = CalculateRadius(i);
+	for (size_t i = 0, n = f.size(); i < n; ++i)
+		radius[i] = CalculateRadius(i);
 	CalcRadius = true;
 }
 
-double Delaunay::triangle_area(int index)
+double Delaunay::triangle_area(size_t index)
 {
 	const TripleConstRef<Vector2D> p
-		(cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.first)],
-			cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.second)],
-			cor[static_cast<size_t>(f[static_cast<size_t>(index)].vertices.third)]);
+		(cor[f[index].vertices.first],
+		 cor[f[index].vertices.second],
+		 cor[f[index].vertices.third]);
 	const double x1 = p.third.x - p.first.x;
 	const double x2 = p.second.x - p.first.x;
 	const double y1 = p.third.y - p.first.y;
@@ -425,13 +418,13 @@ namespace {
 
   boost::optional<size_t> walk_condition
   (const vector<Vector2D>& cor,
-   const Triplet<int>& vertices,
+   const Triplet<size_t>& vertices,
    size_t point)
 	{
 	  for(size_t i=0;i<3;++i){
 	    if (orient2d(TripleConstRef<Vector2D>
-			 (cor[static_cast<size_t>(vertices[i])],
-			  cor[static_cast<size_t>(vertices[(i+1)%3])],
+			 (cor[vertices[i]],
+			  cor[vertices[(i+1)%3]],
 			  cor[point])) < 0)
 	      return i;
 	  }
@@ -449,10 +442,10 @@ namespace {
 		   f[res].vertices,
 		   point);
 		while (next) {
-		  res = static_cast<size_t>(f[res].neighbors[*next]);
-			next = walk_condition(cor,
-				f[res].vertices,
-				point);
+		  res = f[res].neighbors[*next];
+		  next = walk_condition(cor,
+					f[res].vertices,
+					point);
 		}
 		return res;
 	}
@@ -460,63 +453,67 @@ namespace {
 
 size_t Delaunay::Walk(size_t point)
 {
-	lastFacet = static_cast<int>(find_new_facet(cor, f, point, static_cast<size_t>(lastFacet)));
-	return static_cast<size_t>(lastFacet);
+	lastFacet = find_new_facet(cor, f, point, lastFacet);
+	return lastFacet;
 }
 
-vector<int> Delaunay::FindContainingTetras(int StartTetra, int point)
+vector<size_t> Delaunay::FindContainingTetras(size_t StartTetra, size_t point)
 {
-	vector<int> res;
-	FindContainingTetras(StartTetra, point, res);
-	return res;
+  vector<size_t> res;
+  FindContainingTetras(StartTetra, point, res);
+  return res;
 }
 
-double Delaunay::FindMaxRadius(int point)
+double Delaunay::FindMaxRadius(size_t point)
 {
-	const vector<int> vec = FindContainingTetras(static_cast<int>(Walk(static_cast<size_t>(point))), point);
+	const vector<size_t> vec = FindContainingTetras(Walk(point), point);
 	double r = 0;
+	/*
 	for (size_t i = 0; i < vec.size(); ++i)
-		r = max(r, radius[static_cast<size_t>(vec[static_cast<size_t>(i)])]);
+		r = max(r, radius[vec[i]]);
+	*/
+	for(size_t vv : vec)
+	  r = max(r, radius[vv]);
 	return 2 * r;
 }
 
-void Delaunay::FindContainingTetras(int StartFacet, int point, vector<int> &result)
+void Delaunay::FindContainingTetras(size_t StartFacet, size_t point, vector<size_t> &result)
 {
 	result.clear();
-	int PointLocation = FindPointInFacet(StartFacet, point);
-	int NextFacet = f[static_cast<size_t>(StartFacet)].neighbors[static_cast<size_t>(PointLocation)];
+	size_t PointLocation = FindPointInFacet(StartFacet, point);
+	auto NextFacet = f[StartFacet].neighbors[PointLocation];
 	result.reserve(12);
 	result.push_back(NextFacet);
 	while (NextFacet != StartFacet)
 	{
-		PointLocation = FindPointInFacet(NextFacet, point);
-		NextFacet = f[static_cast<size_t>(NextFacet)].neighbors[static_cast<size_t>(PointLocation)];
+	  PointLocation = FindPointInFacet(NextFacet, point);
+		NextFacet = f[NextFacet].neighbors[PointLocation];
 		result.push_back(NextFacet);
 	}
 }
 
-int Delaunay::FindPointInFacet(int facet, int point)
+size_t Delaunay::FindPointInFacet(size_t facet, size_t point)
 {
-	for (int i = 0; i < 3; ++i)
-		if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == point)
+	for (size_t i = 0; i < 3; ++i)
+	  if (f[facet].vertices[i] == point)
 			return i;
 	UniversalError eo("Error in Delaunay, FindPointInFacet");
-	eo.addEntry("Facet number", facet);
-	eo.addEntry("Point number", point);
+	eo.addEntry("Facet number", static_cast<int>(facet));
+	eo.addEntry("Point number", static_cast<int>(point));
 	throw eo;
 }
 
-bool Delaunay::IsOuterFacet(int facet)const
+bool Delaunay::IsOuterFacet(size_t facet)const
 {
 	//int PointNum=length-1;
-	for (int i = 0; i<3; ++i)
+	for (size_t i = 0; i<3; ++i)
 		for (size_t j = 0; j < 3; ++j)
-			if (f[static_cast<size_t>(facet)].vertices[static_cast<size_t>(i)] == static_cast<int>(olength + j))
+			if (f[facet].vertices[i] == olength + j)
 				return true;
 	return false;
 }
 
-double Delaunay::CalculateRadius(int facet)
+double Delaunay::CalculateRadius(size_t facet)
 {
 	const double big = 1e10;
 	std::array<double, 3> sides;
@@ -547,14 +544,14 @@ int Delaunay::GetOriginalIndex(int NewPoint) const
 	return NewPoint;
 }
 
-double Delaunay::GetFacetRadius(int facet) const
+double Delaunay::GetFacetRadius(size_t facet) const
 {
-	return radius[static_cast<size_t>(facet)];
+	return radius[facet];
 }
 
-void Delaunay::ChangeOlength(int n)
+void Delaunay::ChangeOlength(size_t n)
 {
-	olength = static_cast<size_t>(n);
+  olength = n;
 }
 
 void Delaunay::Changelength(int n)
@@ -572,15 +569,15 @@ const vector<Vector2D>& Delaunay::getCor(void) const
 	return cor;
 }
 
-const facet& Delaunay::get_facet(int index) const
+const facet& Delaunay::get_facet(size_t index) const
 {
-	return f[static_cast<size_t>(index)];
+	return f[index];
 }
 
 const Vector2D& Delaunay::get_facet_coordinates
-(int Facet, int vertice)
+(size_t Facet, size_t vertice)
 {
-  return cor[static_cast<size_t>(f[static_cast<size_t>(Facet)].vertices[static_cast<size_t>(vertice)])];
+  return cor[f[Facet].vertices[vertice]];
 }
 
 const Vector2D& Delaunay::get_point(size_t index) const
@@ -588,29 +585,29 @@ const Vector2D& Delaunay::get_point(size_t index) const
 	return cor[index];
 }
 
-int Delaunay::get_num_facet(void) const
+size_t Delaunay::get_num_facet(void) const
 {
-	return static_cast<int>(f.size());
+	return f.size();
 }
 
-int Delaunay::get_length(void) const
+size_t Delaunay::get_length(void) const
 {
 	return length - 3;
 }
 
-int Delaunay::get_last_loc(void) const
+size_t Delaunay::get_last_loc(void) const
 {
-	return last_loc;
+  return last_loc;
 }
 
-void Delaunay::set_point(int index, Vector2D p)
+void Delaunay::set_point(size_t index, Vector2D p)
 {
-	cor[static_cast<size_t>(index)] = p;
+  cor[index] = p;
 }
 
-int Delaunay::GetOriginalLength(void) const
+size_t Delaunay::GetOriginalLength(void) const
 {
-	return static_cast<int>(olength);
+  return olength;
 }
 
 vector<Vector2D>& Delaunay::GetMeshPoints(void)
@@ -618,19 +615,19 @@ vector<Vector2D>& Delaunay::GetMeshPoints(void)
 	return cor;
 }
 
-int Delaunay::GetTotalLength(void)
+size_t Delaunay::GetTotalLength(void)
 {
-	return static_cast<int>(cor.size());
+	return cor.size();
 }
 
 void Delaunay::AddBoundaryPoints(vector<Vector2D> const& points)
 {
-	int n = static_cast<int>(points.size());
+	size_t n = points.size();
 	stack<std::pair<size_t, size_t> > flip_stack;
 	//	vector<int> order=HilbertOrder(points,n);
-	for (int i = 0; i < n; ++i)
+	for (size_t i = 0; i < n; ++i)
 	{
-		cor.push_back(points[static_cast<size_t>(i)]);
+		cor.push_back(points[i]);
 		add_point(cor.size() - 1,flip_stack);
 	}
 }
@@ -640,55 +637,47 @@ void Delaunay::AddAditionalPoint(Vector2D const& vec)
 	cor.push_back(vec);
 }
 
-int Delaunay::GetCorSize(void)const
+size_t Delaunay::GetCorSize(void)const
 {
-	return static_cast<int>(cor.size());
+	return cor.size();
 }
 
-bool Delaunay::IsTripleOut(int index) const
+bool Delaunay::IsTripleOut(size_t index) const
 {
 	int counter = 0;
-	for (size_t i = 0; i < 3; ++i)
-		if (IsOuterFacet(f[static_cast<size_t>(index)].neighbors[static_cast<size_t>(i)]))
-			++counter;
-	if (counter > 1)
-		return true;
-	else
-		return false;
+	for(auto neighbor : f[index].neighbors)
+	  counter += IsOuterFacet(neighbor);
+	return counter > 1;
 }
 
-int Delaunay::FindTripleLoc(facet const& fct)const
+size_t Delaunay::FindTripleLoc(const facet& fct) const
 {
 	for (size_t i = 0; i < 3; ++i)
-		if (!IsOuterFacet(fct.neighbors[static_cast<size_t>(i)]))
-			return static_cast<int>((i + 1) % 3);
+	  if (!IsOuterFacet(fct.neighbors[i]))
+			return (i + 1) % 3;
 	throw UniversalError("Trouble in constructing boundary triangles. No inner neighbor");
 }
 
 namespace
 {
-	bool IsOuterQuick(facet const& f, int olength)
+	bool IsOuterQuick(const facet& f, size_t olength)
 	{
 		for (size_t i = 0; i < 3; ++i)
-			if (f.vertices[static_cast<size_t>(i)] >= olength)
+		  if (f.vertices[i] >= olength)
 				return true;
 		return false;
 	}
 
-	bool IsEdgeFacet(vector<facet> const& facets, facet const& f, int olength)
+	bool IsEdgeFacet(const vector<facet>& facets, const facet& f, size_t olength)
 	{
-		int counter = 0;
 		for (size_t i = 0; i < 3; ++i)
 		{
-			if (f.vertices[static_cast<size_t>(i)] >= olength)
-				return false;
-			if (IsOuterQuick(facets[static_cast<size_t>(f.neighbors[static_cast<size_t>(i)])], olength))
-				++counter;
+		  if (f.vertices[i] >= olength)
+		    return false;
+		  if (IsOuterQuick(facets[f.neighbors[i]], olength))
+		    return true;
 		}
-		if (counter > 0)
-			return true;
-		else
-			return false;
+		return false;
 	}
 
 	bool CircleSegmentIntersect(Edge const& edge, Vector2D const& center, double R)
@@ -719,79 +708,71 @@ namespace
 	}
 }
 
-vector<int> Delaunay::GetOuterFacets(int start_facet, int real_point, int olength2)
+vector<size_t> Delaunay::GetOuterFacets(size_t start_facet, size_t real_point, size_t olength2)
 {
-	int cur_facet = start_facet;
-	vector<int> f_temp, containing_facets;
-	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*olength2)));
-	int point_index = FindPointInFacet(cur_facet, real_point);
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
+	size_t cur_facet = start_facet;
+	vector<size_t> f_temp, containing_facets;
+	f_temp.reserve(static_cast<size_t>(10 * sqrt(static_cast<double>(olength2))));
+	size_t point_index = FindPointInFacet(cur_facet, real_point);
+	if (IsOuterQuick(f[f[cur_facet].neighbors[point_index]], olength2))
 	{
 		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
-	}
-	if (IsOuterQuick(f[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].neighbors[static_cast<size_t>(point_index)])], olength2))
-	{
-		point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
+		real_point = f[cur_facet].vertices[point_index];
 	}
 	do
 	{
 		FindContainingTetras(cur_facet, real_point, containing_facets);
-		int old_current = cur_facet;
+		size_t old_current = cur_facet;
 		for (size_t i = 0; i < containing_facets.size(); ++i)
 		{
-			if (IsEdgeFacet(f, f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2) &&
-				containing_facets[static_cast<size_t>(i)] != old_current)
-				cur_facet = containing_facets[static_cast<size_t>(i)];
-			if (!IsOuterQuick(f[static_cast<size_t>(containing_facets[static_cast<size_t>(i)])], olength2))
-				f_temp.push_back(containing_facets[static_cast<size_t>(i)]);
+		  if (IsEdgeFacet(f, f[(containing_facets[i])], olength2) &&
+		      containing_facets[i] != old_current)
+		    cur_facet = containing_facets[i];
+			if (!IsOuterQuick(f[containing_facets[i]], olength2))
+			  f_temp.push_back(containing_facets[i]);
 		}
 		point_index = (1 + FindPointInFacet(cur_facet, real_point)) % 3;
 		if (IsTripleOut(cur_facet))
 			point_index = (point_index + 1) % 3;
-		real_point = f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(point_index)];
+		real_point = f[cur_facet].vertices[point_index];
 	} while (start_facet != cur_facet);
 	sort(f_temp.begin(), f_temp.end());
 	f_temp = unique(f_temp);
-	return f_temp;
+	return f_temp; //adapter1<size_t,int>(f_temp);
 }
 
-vector<vector<int> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
+vector<vector<size_t> > Delaunay::FindOuterPoints(vector<Edge> const& edges)
 {
 	// We add the points in a counter clockwise fashion
-	vector<vector<int> > res(edges.size());
 	if (olength < 100)
-	{
-		for (size_t j = 0; j < edges.size(); ++j)
-		{
-			res[static_cast<size_t>(j)].resize(static_cast<size_t>(olength));
-			for (size_t i = 0; i < olength; ++i)
-				res[static_cast<size_t>(j)][i] = static_cast<int>(i);
-		}
-		return res;
-	}
-	vector<int> res_temp, outer_points, f_temp /*, f_add(f.size(), 0)*/;
+	  return vector<vector<size_t> >
+	    (edges.size(),
+	     [](size_t n)
+	     {vector<size_t> ans(n);
+	       iota(ans.begin(), ans.end(),0);
+	       return ans;}(olength));
+	vector<vector<int> > res(edges.size());
+	vector<int> res_temp, outer_points, f_temp;
 	res_temp.reserve(static_cast<size_t>(20 * sqrt(1.0*static_cast<double>(olength))));
 	f_temp.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	outer_points.reserve(static_cast<size_t>(10 * sqrt(1.0*static_cast<double>(olength))));
 	// Walk to an outer point
-	int cur_facet = static_cast<int>(Walk(olength));
-	vector<vector<int> > toduplicate(edges.size());
+	size_t cur_facet = Walk(olength);
+	vector<vector<size_t> > toduplicate(edges.size());
 	vector<bool> checked(f.size(), false);
 	AddOuterFacets(cur_facet, toduplicate, edges, checked);
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		sort(toduplicate[static_cast<size_t>(i)].begin(), toduplicate[static_cast<size_t>(i)].end());
-		toduplicate[static_cast<size_t>(i)] = unique(toduplicate[static_cast<size_t>(i)]);
+		sort(toduplicate[i].begin(), toduplicate[i].end());
+		toduplicate[i] = unique(toduplicate[i]);
 	}
 	return toduplicate;
 }
 
 void Delaunay::AddRigid(vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate)
+	vector<vector<size_t> > &toduplicate)
 {
-	vector<int> toremove;
+	vector<size_t> toremove;
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
 		toremove.clear();
@@ -803,16 +784,16 @@ void Delaunay::AddRigid(vector<Edge> const& edges,
 		par = par / abs(par);
 		for (size_t j = 0; j < toduplicate[i].size(); ++j)
 		{
-			Vector2D temp = cor[static_cast<size_t>(toduplicate[i][j])] - edges[i].vertices.first;
+			Vector2D temp = cor[toduplicate[i][j]] - edges[i].vertices.first;
 			temp = 2 * par*ScalarProd(par, temp) - temp + edges[i].vertices.first;
 			if (InTriangle(TripleConstRef<Vector2D>
-				(cor[static_cast<size_t>(olength)],
-					cor[static_cast<size_t>(olength + 1)],
-					cor[static_cast<size_t>(olength + 2)]),
+				(cor[olength],
+					cor[olength + 1],
+					cor[olength + 2]),
 				temp))
 				toadd.push_back(temp);
 			else
-				toremove.push_back(static_cast<int>(j));
+				toremove.push_back(j);
 		}
 		RemoveVector(toduplicate[i], toremove);
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
@@ -853,154 +834,113 @@ namespace
 	}
 }
 
-vector<vector<int> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate)
+vector<vector<size_t> > Delaunay::AddPeriodic(const OuterBoundary& obc, vector<Edge> const& edges,
+	vector<vector<size_t> > &toduplicate)
 {
 	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
 	const double dy = obc.GetGridBoundary(Up) - obc.GetGridBoundary(Down);
+	const std::array<Vector2D,4> changes1 = 
+	  {Vector2D(-dx,0),
+	   Vector2D(0,-dy),
+	   Vector2D(dx,0),
+	   Vector2D(0,dy)};
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		if (toduplicate[static_cast<size_t>(i)].empty())
+		if (toduplicate[i].empty())
 			continue;
-		Vector2D change;
-		switch (i)
-		{
-		case(0) :
-			change.x = -dx;
-			break;
-		case(1) :
-			change.y = -dy;
-			break;
-		case(2) :
-			change.x = dx;
-			break;
-		case(3) :
-			change.y = dy;
-			break;
-		}
-		vector<Vector2D> toadd;
-		toadd.reserve(toduplicate[static_cast<size_t>(i)].size());
-		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
-		{
-			toadd.push_back(cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])] + change);
-			//	pointstemp[j]=j;
-		}
+		const Vector2D change = changes1[i];
+		vector<Vector2D> toadd(toduplicate[i].size());
+		transform(toduplicate[i].begin(),
+			  toduplicate[i].end(),
+			  toadd.begin(),
+			  [&change,this](size_t x)
+			  {return cor[x]+change;});
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[static_cast<size_t>(i)], order);
+		ReArrangeVector(toduplicate[i], order);
 		//toduplicate[i]=pointstemp;
 	}
 	// Done with sides do corners now
 	vector<Edge> corneredges = GetCornerEdges(obc);
-	vector<vector<int> > corners(toduplicate.size());
-	for (size_t i = 0; i < toduplicate.size(); ++i)
-	{
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
-		{
-			const int facet_loc = static_cast<int>(Walk(static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])));
-			const Vector2D center = cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
-			const double R = 2 * GetMaxRadius(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)], facet_loc);
-			if (CircleSegmentIntersect(corneredges[2 * static_cast<size_t>(i)], center, R))
-				corners[static_cast<size_t>(i)].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-			if (CircleSegmentIntersect(corneredges[(2 * static_cast<size_t>(i) + 7) % 8], center, R))
-				corners[(static_cast<size_t>(i) + 3) % 4].push_back(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)]);
-		}
-	}
+	vector<vector<size_t> > corners(toduplicate.size());
+	for (size_t i = 0; i < toduplicate.size(); ++i){
+	  for (size_t j = 0; j < toduplicate[i].size(); ++j){
+	      const size_t facet_loc = Walk(toduplicate[i][j]);
+	      const Vector2D center = cor[toduplicate[i][j]];
+	      const double R = 2*GetMaxRadius(toduplicate[i][j], facet_loc);
+	      if (CircleSegmentIntersect(corneredges[2*i], center, R))
+		corners[i].push_back(toduplicate[i][j]);
+	      if (CircleSegmentIntersect(corneredges[(2*i+7)%8], center, R))
+		corners[(i + 3) % 4].push_back(toduplicate[i][j]);
+	    }
+		 }
+	  const std::array<Vector2D, 4> changes = 
+	    {Vector2D(-dx,-dy),
+	     Vector2D(dx,-dy),
+	     Vector2D(dx,dy),
+	     Vector2D(-dx,dy)};
 	for (size_t i = 0; i < corners.size(); ++i)
 	{
-		if (corners[static_cast<size_t>(i)].empty())
+		if (corners[i].empty())
 			continue;
-		sort(corners[static_cast<size_t>(i)].begin(), corners[static_cast<size_t>(i)].end());
-		corners[static_cast<size_t>(i)] = unique(corners[static_cast<size_t>(i)]);
-		Vector2D change;
-		switch (i)
-		{
-		case(0) :
-			change.x = -dx;
-			change.y = -dy;
-			break;
-		case(1) :
-			change.y = -dy;
-			change.x = dx;
-			break;
-		case(2) :
-			change.x = dx;
-			change.y = dy;
-			break;
-		case(3) :
-			change.y = dy;
-			change.x = -dx;
-			break;
-		}
+		sort(corners[i].begin(), corners[i].end());
+		corners[i] = unique(corners[i]);
+		const Vector2D change = changes[i];
 		vector<Vector2D> toadd;
-		toadd.reserve(corners[static_cast<size_t>(i)].size());
-		//		vector<int> pointstemp(corners[i].size());
-		for (size_t j = 0; j < corners[static_cast<size_t>(i)].size(); ++j)
-		{
-			toadd.push_back(cor[static_cast<size_t>(corners[static_cast<size_t>(i)][static_cast<size_t>(j)])] + change);
-			//		pointstemp[j]=j;
-		}
+		toadd.reserve(corners[i].size());
+		for(auto x : corners[i])
+		  toadd.push_back(cor[x]+change);
 		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(corners[static_cast<size_t>(i)], order);
-		//	corners[i]=pointstemp;
+		ReArrangeVector(corners[i], order);
 	}
 	return corners;
 }
 
 void Delaunay::AddHalfPeriodic(OuterBoundary const& obc, vector<Edge> const& edges,
-	vector<vector<int> > &toduplicate)
+	vector<vector<size_t> > &toduplicate)
 {
 	const double dx = obc.GetGridBoundary(Right) - obc.GetGridBoundary(Left);
 	//	const double dy=obc.GetGridBoundary(Up)-obc.GetGridBoundary(Down);
+	const std::array<Vector2D,4> changes = 
+	  {Vector2D(-dx,0),
+	   Vector2D(-dx,0),
+	   Vector2D(dx,0),
+	   Vector2D(dx,0)};
 	for (size_t i = 0; i < edges.size(); ++i)
 	{
-		if (toduplicate[static_cast<size_t>(i)].empty())
+		if (toduplicate[i].empty())
 			continue;
-		Vector2D change;
-		switch (i)
-		{
-		case(0) :
-			change.x = -dx;
-			break;
-		case(1) :
-			break;
-		case(2) :
-			change.x = dx;
-			break;
-		case(3) :
-			break;
-		}
+		const Vector2D change = changes[i];
 		vector<Vector2D> toadd;
-		toadd.reserve(toduplicate[static_cast<size_t>(i)].size());
-		//vector<int> pointstemp(toduplicate[static_cast<size_t>(i)].size());
-		Vector2D par(Parallel(edges[static_cast<size_t>(i)]));
+		toadd.reserve(toduplicate[i].size());
+		//vector<int> pointstemp(toduplicate[i].size());
+		Vector2D par(Parallel(edges[i]));
 		par = par / abs(par);
-		for (size_t j = 0; j < toduplicate[static_cast<size_t>(i)].size(); ++j)
+		for (size_t j = 0; j < toduplicate[i].size(); ++j)
 		{
-			Vector2D temp = cor[static_cast<size_t>(toduplicate[static_cast<size_t>(i)][static_cast<size_t>(j)])];
+			Vector2D temp = cor[toduplicate[i][j]];
 			if (i % 2 == 1)
 			{
-				temp -= edges[static_cast<size_t>(i)].vertices.first;
-				temp = 2 * par*ScalarProd(par, temp) - temp + edges[static_cast<size_t>(i)].vertices.first;
+				temp -= edges[i].vertices.first;
+				temp = 2 * par*ScalarProd(par, temp) - temp + edges[i].vertices.first;
 			}
 			toadd.push_back(temp + change);
 			//pointstemp[j]=j;
 		}
-		vector<int> order = HilbertOrder(toadd, static_cast<int>(toadd.size()));
+		       vector<size_t> order = adapter1<int,size_t>(HilbertOrder(toadd, static_cast<int>(toadd.size())));
 		ReArrangeVector(toadd, order);
 		AddBoundaryPoints(toadd);
-		ReArrangeVector(toduplicate[static_cast<size_t>(i)], order);
+		ReArrangeVector(toduplicate[i], order);
 		//toduplicate[i]=pointstemp;
 	}
 }
 
-vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Edge> const& edges)
+vector<vector<size_t> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Edge> const& edges)
 {
-	vector<vector<int> > toduplicate = FindOuterPoints(edges);
+  vector<vector<size_t> > toduplicate = FindOuterPoints(edges);
 #ifdef RICH_MPI
 	OrgIndex.clear();
 #endif
@@ -1017,9 +957,9 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 	{
 		if (obc.GetBoundaryType() == Periodic)
 		{
-			vector<vector<int> > corners = AddPeriodic(obc, edges, toduplicate);
+			vector<vector<size_t> > corners = AddPeriodic(obc, edges, toduplicate);
 			for (size_t i = 0; i < 4; ++i)
-				toduplicate.push_back(corners[static_cast<size_t>(i)]);
+				toduplicate.push_back(corners[i]);
 		}
 		else
 		{
@@ -1029,115 +969,94 @@ vector<vector<int> > Delaunay::BuildBoundary(const OuterBoundary& obc, vector<Ed
 	return toduplicate;
 }
 
-Vector2D Delaunay::GetCircleCenter(int index)const
+Vector2D Delaunay::GetCircleCenter(size_t index)const
 {
-	Vector2D center;
-	facet const& F = f[static_cast<size_t>(index)];
-	double x1 = cor[static_cast<size_t>(F.vertices[0])].x;
-	double x2 = cor[static_cast<size_t>(F.vertices[1])].x;
-	double x3 = cor[static_cast<size_t>(F.vertices[2])].x;
-	double y1 = cor[static_cast<size_t>(F.vertices[0])].y;
-	double y2 = cor[static_cast<size_t>(F.vertices[1])].y;
-	double y3 = cor[static_cast<size_t>(F.vertices[2])].y;
+	const facet& F = f[index];
+	double x1 = cor[F.vertices[0]].x;
+	double x2 = cor[F.vertices[1]].x;
+	double x3 = cor[F.vertices[2]].x;
+	double y1 = cor[F.vertices[0]].y;
+	double y2 = cor[F.vertices[1]].y;
+	double y3 = cor[F.vertices[2]].y;
 	// Do we have a case where two point are very close compared to the third?
-	double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
-	double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
-	double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
-	int scenario = 0;
-	if (d12 < 0.1*(d23 + d13))
-		scenario = 1;
-	else
-		if (d23 < 0.1*(d13 + d12))
-			scenario = 3;
-		else
-			if (d13 < 0.1*(d23 + d12))
-				scenario = 2;
-	switch (scenario)
-	{
-	case(0) :
-	case(1) :
-	case(2) :
-	{
-		x2 -= x1;
-		x3 -= x1;
-		y2 -= y1;
-		y3 -= y1;
-		double d_inv = 1 / (2 * (x2*y3 - y2*x3));
-		center.Set((y3*(x2*x2 + y2*y2) - y2*(x3*x3 + y3*y3))*d_inv + x1,
-			(-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
-		break;
+	const double d12 = (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2);
+	const double d23 = (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2);
+	const double d13 = (x1 - x3)*(x1 - x3) + (y1 - y3)*(y1 - y3);
+	if(d23 < 0.1*(d13+d12)){
+	  x1 -= x2;
+	  x3 -= x2;
+	  y1 -= y2;
+	  y3 -= y2;
+	  const double d_inv = 1 / (2 * (x3*y1 - y3*x1));
+	  return Vector2D
+	    ((y1*(x3*x3 + y3*y3) - y3*(x1*x1 + y1*y1))*d_inv + x2,
+	     (x3*(x1*x1 + y1*y1) - x1*(x3*x3 + y3*y3))*d_inv + y2);
 	}
-	case(3) :
-	{
-		x1 -= x2;
-		x3 -= x2;
-		y1 -= y2;
-		y3 -= y2;
-		double d_inv = 1 / (2 * (x3*y1 - y3*x1));
-		center.Set((y1*(x3*x3 + y3*y3) - y3*(x1*x1 + y1*y1))*d_inv + x2,
-			(x3*(x1*x1 + y1*y1) - x1*(x3*x3 + y3*y3))*d_inv + y2);
-		break;
-	}
-	default:
-		throw UniversalError("Unhandled case in switch statement VoronoiMesh::get_center");
-	}
-	return center;
+	x2 -= x1;
+	x3 -= x1;
+	y2 -= y1;
+	y3 -= y1;
+	const double d_inv = 1 / (2 * (x2*y3 - y2*x3));
+	return Vector2D
+	  ((y3*(x2*x2 + y2*y2) - y2*(x3*x3 + y3*y3))*d_inv + x1,
+	   (-x3*(x2*x2 + y2*y2) + x2*(x3*x3 + y3*y3))*d_inv + y1);
 }
 
-double Delaunay::GetMaxRadius(int point, int startfacet)
+double Delaunay::GetMaxRadius(size_t point, size_t startfacet)
 {
 	double res = 0;
-	vector<int> neigh = FindContainingTetras(startfacet, point);
-	for (size_t i = 0; i < neigh.size(); ++i)
-		res = max(res, radius[static_cast<size_t>(neigh[static_cast<size_t>(i)])]);
+	const vector<size_t> neigh = FindContainingTetras(startfacet, point);
+	for (size_t ni : neigh)
+	  res = max(res, radius[ni]);
 	return res;
 }
 
-void Delaunay::AddOuterFacets(int tri, vector<vector<int> > &toduplicate,
+void Delaunay::AddOuterFacets(size_t tri, vector<vector<size_t> > &toduplicate,
 	vector<Edge> const& edges, vector<bool> &checked)
 {
-	stack<int> tocheck;
+	stack<size_t> tocheck;
 	tocheck.push(tri);
 	while (!tocheck.empty())
 	{
-		int cur_facet = tocheck.top();
+		size_t cur_facet = tocheck.top();
 		tocheck.pop();
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
-			if (checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] || (f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)] >= static_cast<int>(olength)))
+			if (checked[f[cur_facet].vertices[i]] || 
+			    f[cur_facet].vertices[i] >= olength)
 				continue;
-			vector<int> neigh = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
+			vector<size_t> neigh = FindContainingTetras(cur_facet, f[cur_facet].vertices[i]);
 			for (size_t k = 0; k < neigh.size(); ++k)
 			{
-				Vector2D center = GetCircleCenter(neigh[static_cast<size_t>(k)]);
+				Vector2D center = GetCircleCenter(neigh[k]);
 				for (size_t l = 0; l < edges.size(); ++l)
 				{
-					if (CircleSegmentIntersect(edges[static_cast<size_t>(l)], center, radius[static_cast<size_t>(neigh[static_cast<size_t>(k)])]))
+					if (CircleSegmentIntersect(edges[l], center, radius[neigh[k]]))
 					{
-						toduplicate[static_cast<size_t>(l)].push_back(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)]);
+					  toduplicate[l].push_back(f[cur_facet].vertices[i]);
 						added = true;
 					}
 				}
 			}
-			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[static_cast<size_t>(i)])] = true;
+			checked[f[cur_facet].vertices[i]] = true;
 			if (added)
-			{
-				for (size_t j = 0; j < neigh.size(); ++j)
-					tocheck.push(neigh[static_cast<size_t>(j)]);
-			}
+			  for_each(neigh.begin(),
+				   neigh.end(),
+				   [&tocheck](size_t x)
+				   {tocheck.push(x);});
 		}
 	}
 }
 
 #ifdef RICH_MPI
-int Delaunay::findSomeOuterPoint(void)
+size_t Delaunay::findSomeOuterPoint(void)
 {
 	const size_t cur_facet = Walk(olength);
 	for (size_t i = 0; i < 3; ++i) {
-		const int candidate = f.at(cur_facet).vertices[i];
-		if (candidate < static_cast<int>(olength))
-			return candidate;
+	  const size_t candidate = f.at(cur_facet).vertices[i];
+	  if (candidate < olength)
+	      return candidate;
 	}
 	assert(false && "something went wrong");
 }
@@ -1162,32 +1081,32 @@ namespace
 		return res;
 	}
 
-	stack<int> initialise_tocheck
-		(const vector<int>& neightemp)
+	stack<size_t> initialise_tocheck
+		(const vector<size_t>& neightemp)
 	{
-		stack<int> res;
+		stack<size_t> res;
 		for (size_t i = 0; i < neightemp.size(); ++i)
 			res.push(neightemp[i]);
 		return res;
 	}
 
-	vector<int> calc_self_intersection
-		(const vector<Edge>& edge_list,
-			const Circle& circle)
+	vector<size_t> calc_self_intersection
+	(const vector<Edge>& edge_list,
+	 const Circle& circle)
 	{
-		vector<int> res;
+		vector<size_t> res;
 		for (size_t i = 0; i < edge_list.size(); ++i) {
 			const Edge& edge = edge_list.at(i);
 			if (edge_circle_intersect(edge, circle))
-				res.push_back(static_cast<int>(i));
+				res.push_back(i);
 		}
 		return res;
 	}
 }
 
-vector<vector<int> > Delaunay::AddOuterFacetsMPI
+vector<vector<size_t> > Delaunay::AddOuterFacetsMPI
 (int point,
-	vector<vector<int> > &toduplicate,
+	vector<vector<size_t> > &toduplicate,
 	vector<int> &neigh,
 	vector<bool> &checked,
 	Tessellation const &tproc,
@@ -1196,22 +1115,20 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	vector<vector<int> > res;
+	vector<vector<size_t> > res;
 	vector<int> vtemp;
 	if (!recursive)
 		res.resize(own_edges.size());
-	stack<int> tocheck = initialise_tocheck
-		(FindContainingTetras
-			(static_cast<int>(Walk(static_cast<size_t>(point))), point));
+	stack<size_t> tocheck = initialise_tocheck
+	  (FindContainingTetras(Walk(point), point));
 	if (recursive)
 	{
-		vector<int> allouter;
+		vector<size_t> allouter;
 		for (size_t i = 0; i < toduplicate.size(); ++i)
 		{
 			for (size_t j = 0; j < toduplicate[i].size(); ++j)
 			{
-				vector<int> temp = FindContainingTetras
-					(static_cast<int>(Walk(static_cast<size_t>(toduplicate[i][j]))), toduplicate[i][j]);
+			  vector<size_t> temp = FindContainingTetras(Walk(toduplicate[i][j]), toduplicate[i][j]);
 				for (size_t k = 0; k < temp.size(); ++k)
 					allouter.push_back(temp[k]);
 			}
@@ -1223,22 +1140,19 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	}
 	while (!tocheck.empty())
 	{
-		int cur_facet = tocheck.top();
+		size_t cur_facet = tocheck.top();
 		tocheck.pop();
 		for (size_t i = 0; i < 3; ++i)
 		{
 			bool added = false;
-			int max_neigh = 0;
-			if (f[static_cast<size_t>(cur_facet)].vertices[i] >=
-				static_cast<int>(olength))
+			size_t max_neigh = 0;
+			if (f[cur_facet].vertices[i] >= olength ||
+			    checked[f[cur_facet].vertices[i]])
 				continue;
-			if (checked[static_cast<size_t>
-				(f[static_cast<size_t>(cur_facet)].vertices[i])])
-				continue;
-			vector<int> neighs = FindContainingTetras(cur_facet, f[static_cast<size_t>(cur_facet)].vertices[i]);
+			vector<int> neighs = adapter1<size_t,int>(FindContainingTetras(cur_facet, f[cur_facet].vertices[i]));
 			for (size_t k = 0; k < neighs.size(); ++k)
 			{
-				Circle circ(GetCircleCenter(neighs[k]), radius[static_cast<size_t>(neighs[k])]);
+				Circle circ(GetCircleCenter(neighs[k]), radius[neighs[k]]);
 				vector<int> cputosendto;
 				if (recursive)
 					find_affected_cells_recursive(tproc,rank, circ, cputosendto);
@@ -1251,36 +1165,35 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 				RemoveVal(cputosendto,rank);
 				if (!recursive) 
 				{
-					const vector<int> self_intersection = calc_self_intersection(own_edges, circ);
+				  const vector<size_t> self_intersection = calc_self_intersection(own_edges, circ);
 					if (!self_intersection.empty())
 						added = true;
-					BOOST_FOREACH(int sindex, self_intersection)
-						res[static_cast<size_t>(sindex)].push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+					BOOST_FOREACH(size_t sindex, self_intersection)
+					  res[sindex].push_back(f[cur_facet].vertices[i]);
 				}
 				else
 				{
 					for (size_t jj = 0; jj < 3; ++jj)
-						max_neigh = max(max_neigh, f[static_cast<size_t>(neighs[k])].vertices[jj]);
+					  max_neigh = max(max_neigh, f[neighs[k]].vertices[jj]);
 				}
 				if (!cputosendto.empty())
 				{
 					added = true;
 					for (size_t j = 0; j < cputosendto.size(); ++j)
 					{
-						size_t index = static_cast<size_t>(find(neigh.begin(), neigh.end(), cputosendto[j])
-							- neigh.begin());
+					  size_t index = find(neigh.begin(), neigh.end(), cputosendto[j]) - neigh.begin();
 						if (index < neigh.size())
-							toduplicate.at(index).push_back(f[static_cast<size_t>(cur_facet)].vertices[i]);
+						  toduplicate.at(index).push_back(f[cur_facet].vertices[i]);
 						else {
 							neigh.push_back(cputosendto[j]);
 							toduplicate.push_back
-								(vector<int>(1, f[static_cast<size_t>(cur_facet)].vertices[i]));
+							  (vector<size_t>(1, f[cur_facet].vertices[i]));
 						}
 					}
 				}
 			}
-			checked[static_cast<size_t>(f[static_cast<size_t>(cur_facet)].vertices[i])] = true;
-			if (added||(recursive&&static_cast<size_t>(max_neigh)>=olength))
+			checked[f[cur_facet].vertices[i]] = true;
+			if (added||(recursive && max_neigh>=olength))
 			{
 				for (size_t j = 0; j < neighs.size(); ++j)
 				{
@@ -1293,28 +1206,28 @@ vector<vector<int> > Delaunay::AddOuterFacetsMPI
 	return res;
 }
 
-pair<vector<vector<int> >, vector<vector<int> > >
+pair<vector<vector<size_t> >, vector<vector<size_t> > >
 Delaunay::findOuterPoints
 (const Tessellation& t_proc,
 	const vector<Edge>& edge_list,
 	const vector<Edge>& box_edges,
 	vector<vector<int> > &NghostIndex)
 {
-	vector<int> neighbors_own_edges =
+	auto neighbors_own_edges =
 		calc_neighbors_own_edges(t_proc, edge_list);
 	const size_t some_outer_point = findSomeOuterPoint();
 
-	vector<vector<int> > to_duplicate(neighbors_own_edges.size());
+	vector<vector<size_t> > to_duplicate(neighbors_own_edges.size());
 	vector<bool> checked(olength, false);
-	vector<vector<int> > self_points =
+	vector<vector<size_t> > self_points =
 		AddOuterFacetsMPI
 		(static_cast<int>(some_outer_point),
 			to_duplicate, // indices of points to send
-			neighbors_own_edges, // Rank of processes to send to
+		 neighbors_own_edges, // Rank of processes to send to
 			checked,
 			t_proc,
 			box_edges);
-	BOOST_FOREACH(vector<int>& line, to_duplicate) 
+	BOOST_FOREACH(vector<size_t>& line, to_duplicate) 
 	{
 		sort(line.begin(), line.end());
 		line = unique(line);
@@ -1350,8 +1263,8 @@ Delaunay::findOuterPoints
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
-				status.MPI_SOURCE) - neighbors_own_edges.begin());
+			size_t location = std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(),
+				status.MPI_SOURCE) - neighbors_own_edges.begin();
 			if (location >= neighbors_own_edges.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
@@ -1370,7 +1283,7 @@ Delaunay::findOuterPoints
 	}
 	MPI_Waitall(static_cast<int>(req.size()), &req[0], MPI_STATUSES_IGNORE);
 	// Incorporate points recieved into triangulation
-	BOOST_FOREACH(vector<int> &line, self_points)
+	BOOST_FOREACH(vector<size_t> &line, self_points)
 	{
 		sort(line.begin(), line.end());
 		line = unique(line);
@@ -1392,7 +1305,7 @@ Delaunay::findOuterPoints
 		AddBoundaryPoints(incoming.at(i));
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
-	return pair<vector<vector<int> >, vector<vector<int> > >
+	return pair<vector<vector<size_t> >, vector<vector<size_t> > >
 		(to_duplicate, self_points);
 }
 
@@ -1409,17 +1322,17 @@ namespace {
 	}
 }
 
-vector<vector<int> >
+vector<vector<size_t> >
 Delaunay::boundary_intersection_check
 (const vector<Edge>& edges,
-	const vector<vector<int> >& to_duplicate)
+	const vector<vector<size_t> >& to_duplicate)
 {
-	vector<vector<int> > res;
+	vector<vector<size_t> > res;
 	res.reserve(edges.size());
 	BOOST_FOREACH(const Edge& edge, edges) {
-		res.push_back(vector<int>());
-		BOOST_FOREACH(const vector<int>& line, to_duplicate) {
-			BOOST_FOREACH(const int index, line) {
+		res.push_back(vector<size_t>());
+		BOOST_FOREACH(const vector<size_t>& line, to_duplicate) {
+			BOOST_FOREACH(const size_t index, line) {
 				const Circle circle
 					(GetCircleCenter(index), radius[index]);
 				if (edge_circle_intersect(edge, circle))
@@ -1433,19 +1346,19 @@ Delaunay::boundary_intersection_check
 pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 (const Tessellation& t_proc,
 	const vector<Edge>& edge_list,
-	vector<vector<int> > &to_duplicate,
+	vector<vector<size_t> > &to_duplicate,
 	vector<vector<int> >& self_points,
 	const vector<Edge>& box_edges,
-	vector<vector<int> > &NghostIndex)
+	vector<vector<size_t> >& NghostIndex)
 {
-	const vector<vector<int> > boundary_points =
+	const vector<vector<size_t> > boundary_points =
 		boundary_intersection_check(box_edges, to_duplicate);
-	vector<vector<int> > real_boundary_points
+	vector<vector<size_t> > real_boundary_points
 		(box_edges.size());
 	for (size_t i = 0; i < boundary_points.size(); ++i)
 	{
 		sort(self_points.at(i).begin(), self_points.at(i).end());
-		BOOST_FOREACH(int bp, boundary_points.at(i))
+		BOOST_FOREACH(size_t bp, boundary_points.at(i))
 		{
 			if (!binary_search(self_points.at(i).begin(),
 				self_points.at(i).end(),
@@ -1459,14 +1372,14 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		real_boundary_points.at(i) = unique(real_boundary_points.at(i));
 	}
 
-	vector<vector<int> > to_duplicate_2 = to_duplicate;
-	BOOST_FOREACH(vector<int>& line, to_duplicate_2)
+	vector<vector<size_t> > to_duplicate_2 = to_duplicate;
+	BOOST_FOREACH(vector<size_t>& line, to_duplicate_2)
 		sort(line.begin(), line.end());
 	vector<int> neighbors_own_edges =
 		calc_neighbors_own_edges(t_proc, edge_list);
 	vector<int> old_neighbors = neighbors_own_edges;
 	assert(!to_duplicate.empty());
-	BOOST_FOREACH(const vector<int>& line, to_duplicate)
+	BOOST_FOREACH(const vector<size_t>& line, to_duplicate)
 		assert(!line.empty());
 	vector<bool> checked(olength, false);
 	const size_t some_outer_point = to_duplicate[0][0];
@@ -1531,15 +1444,15 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		for (size_t j = 0; j < to_duplicate.at(i).size(); ++j) {
 
 			if (it != old_neighbors.end()) {
-				const size_t my_index = static_cast<size_t>(it - old_neighbors.begin());
+				const size_t my_index = it - old_neighbors.begin();
 				if (!binary_search
 					(to_duplicate_2.at(my_index).begin(),
 						to_duplicate_2.at(my_index).end(),
 						to_duplicate.at(i).at(j)))
-					messages.at(i).push_back(to_duplicate.at(i).at(j));
+				  messages.at(i).push_back(static_cast<int>(to_duplicate.at(i).at(j)));
 			}
 			else
-				messages.at(i).push_back(to_duplicate.at(i).at(j));
+			  messages.at(i).push_back(static_cast<int>(to_duplicate.at(i).at(j)));
 		}
 	}
 	MPI_Waitall(static_cast<int>(neighbors_own_edges.size()), &req[0], MPI_STATUSES_IGNORE);
@@ -1554,7 +1467,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	{
 		const int dest = neighbors_own_edges.at(i);
 		tosend[i] = list_serialize(VectorValues(cor, messages.at(i)));
-		int size = static_cast<int>(tosend[i].size());
+		auto size = static_cast<int>(tosend[i].size());
 		if (size > 0)
 		{
 			if (size < 2)
@@ -1575,8 +1488,7 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 		MPI_Recv(&temprecv[0], count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		if (status.MPI_TAG == 0)
 		{
-			size_t location = static_cast<size_t>(std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) -
-				neighbors_own_edges.begin());
+			size_t location = std::find(neighbors_own_edges.begin(), neighbors_own_edges.end(), status.MPI_SOURCE) - neighbors_own_edges.begin();
 			if (location >= neighbors_own_edges.size())
 				throw UniversalError("Bad location in mpi exchange");
 			try
@@ -1604,8 +1516,8 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 	{
 		for (size_t j = 0; j < incoming.at(i).size(); ++j)
 		{
-			NghostIndex[i].push_back(static_cast<int>(cor.size() + j));
-			OrgIndex.push_back(static_cast<int>(cor.size() + j));
+			NghostIndex[i].push_back(cor.size() + j);
+			OrgIndex.push_back(cor.size() + j);
 		}
 		AddBoundaryPoints(incoming.at(i));
 	}
@@ -1620,7 +1532,10 @@ pair<vector<vector<int> >, vector<int> > Delaunay::FindOuterPoints2
 			self_points[i].insert(self_points[i].end(), real_boundary_points[i].begin(),
 				real_boundary_points[i].end());
 
-	return  pair<vector<vector<int> >,vector<int> > (to_duplicate,neighbors_own_edges);
+	return  pair<vector<vector<int> >,vector<int> > 
+	  (adapter2<size_t,int>(to_duplicate),
+	   neighbors_own_edges);
+	//	   adapter1<size_t,int>(neighbors_own_edges));
 }
 
 pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
@@ -1636,17 +1551,25 @@ pair<vector<vector<int> >, vector<int> > Delaunay::BuildBoundary
 	for (size_t i = 0; i < edge_index.size(); ++i)
 		edges.push_back(tproc.GetEdge(edge_index[i]));
 	vector<Edge> box_edges = obc.GetBoxEdges();
-	pair<vector<vector<int> >, vector<vector<int> > > to_duplicate =
+	auto to_duplicate =
 		findOuterPoints(tproc, edges, box_edges, Nghost);
-	return FindOuterPoints2(tproc,edges,to_duplicate.first, to_duplicate.second,box_edges, Nghost);
+	auto aux1 = adapter2<int, size_t>(Nghost);
+	auto aux2 = adapter2<size_t, int>(to_duplicate.second);
+	auto ans = FindOuterPoints2(tproc,edges,
+				    to_duplicate.first,
+				    aux2,
+				    box_edges, aux1);
+	Nghost = adapter2<size_t, int>(aux1);
+	to_duplicate.second = adapter2<int, size_t>(aux2);
+	return ans;
 }
 
-int Delaunay::GetOrgIndex(int index)const
+size_t Delaunay::GetOrgIndex(size_t index)const
 {
-	if (index < static_cast<int>(olength))
-		return static_cast<int>(olength);
+	if (index < olength)
+		return olength;
 	else
-		return OrgIndex.at(index - 3 - static_cast<int>(olength));
+		return OrgIndex.at(index - 3 - olength);
 }
 
 #endif // RICH_MPI
