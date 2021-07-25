@@ -30,9 +30,45 @@ namespace
 		res.reserve(points.size());
 		const double dx=obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left);
 		const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
+		const auto periodic_behaviour = [dx, dy, obc]
+		  (const Vector2D& r)
+		  {
+		    Vector2D temp = r;
+		    if(temp.x>obc->GetGridBoundary(Right))
+		      temp.x-=dx;
+		    if(temp.x<obc->GetGridBoundary(Left))
+		      temp.x+=dx;
+		    if(temp.y>obc->GetGridBoundary(Up))
+		      temp.y-=dy;
+		    if(temp.y<obc->GetGridBoundary(Down))
+		      temp.y+=dy;
+		    return temp;
+		  };
+		const auto half_periodic_behaviour = [dx, dy, obc]
+		  (const Vector2D& r)
+		  {
+		    Vector2D temp = r;
+		    if(temp.x>obc->GetGridBoundary(Right))
+		      temp.x-=dx;
+		    if(temp.x<obc->GetGridBoundary(Left))
+		      temp.x+=dx;
+		    return temp;
+		  };
+		const auto default_behaviour = [dx, dy, obc]
+		  (const Vector2D& r)
+		  {
+		    return r;
+		  };
+		std::function<Vector2D(Vector2D)> behaviour = default_behaviour;
+		if(obc->GetBoundaryType() == Periodic)
+		  behaviour = periodic_behaviour;
+		if(obc->GetBoundaryType() == HalfPeriodic)
+		  behaviour = half_periodic_behaviour;
 		for(size_t i=0, npoints = points.size();i<npoints;++i)
 		{
-			Vector2D temp(points[static_cast<size_t>(i)]);
+		  res.push_back(behaviour(points[i]));
+		  /*
+			Vector2D temp(points[i]);
 			if(obc->GetBoundaryType()==Periodic)
 			{
 				if(temp.x>obc->GetGridBoundary(Right))
@@ -52,40 +88,10 @@ namespace
 					temp.x+=dx;
 			}
 			res.push_back(temp);
+		  */
 		}
 		return res;
 	}
-
-  /*
-	template <typename T>
-	bool EmptyVectorVector(vector<vector<T> > const& v)
-	{
-		int n=static_cast<int>(v.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v[static_cast<size_t>(i)].empty())
-				return false;
-		}
-		return true;
-	}
-  */
-
-  /*
-	template <typename T>
-	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
-		vector<vector<T> > const& v2)
-	{
-		vector<vector<T> > res(v1);
-		assert(v1.size()==v2.size());
-		int n=static_cast<int>(v1.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v2[static_cast<size_t>(i)].empty())
-				res[static_cast<size_t>(i)].insert(res[static_cast<size_t>(i)].end(),v2[static_cast<size_t>(i)].begin(),v2[static_cast<size_t>(i)].end());
-		}
-		return res;
-	}
-  */
 }
 
 VoronoiMesh::VoronoiMesh
