@@ -20,16 +20,6 @@ namespace
       v = unique(v);
     }
   }
-
-  /*
-  vector<Vector2D> my_convex_hull(const Tessellation& tess,
-				  int index)
-  {
-    vector<Vector2D> res;
-    ConvexHull(res,tess,index);
-    return res;
-  }
-  */
 #endif
 
 	vector<Vector2D> UpdatePoints(vector<Vector2D> const& points,OuterBoundary const* obc)
@@ -38,10 +28,9 @@ namespace
 			return points;
 		vector<Vector2D> res;
 		res.reserve(points.size());
-		int npoints=static_cast<int>(points.size());
 		const double dx=obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left);
 		const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
-		for(int i=0;i<npoints;++i)
+		for(size_t i=0, npoints = points.size();i<npoints;++i)
 		{
 			Vector2D temp(points[static_cast<size_t>(i)]);
 			if(obc->GetBoundaryType()==Periodic)
