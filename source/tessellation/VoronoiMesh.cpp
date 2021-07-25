@@ -26,8 +26,6 @@ namespace
 	{
 		if(obc->GetBoundaryType()==Rectengular)
 			return points;
-		vector<Vector2D> res;
-		res.reserve(points.size());
 		const double dx=obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left);
 		const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
 		const auto periodic_behaviour = [dx, dy, obc]
@@ -64,32 +62,12 @@ namespace
 		  behaviour = periodic_behaviour;
 		if(obc->GetBoundaryType() == HalfPeriodic)
 		  behaviour = half_periodic_behaviour;
-		for(size_t i=0, npoints = points.size();i<npoints;++i)
-		{
-		  res.push_back(behaviour(points[i]));
-		  /*
-			Vector2D temp(points[i]);
-			if(obc->GetBoundaryType()==Periodic)
-			{
-				if(temp.x>obc->GetGridBoundary(Right))
-					temp.x-=dx;
-				if(temp.x<obc->GetGridBoundary(Left))
-					temp.x+=dx;
-				if(temp.y>obc->GetGridBoundary(Up))
-					temp.y-=dy;
-				if(temp.y<obc->GetGridBoundary(Down))
-					temp.y+=dy;
-			}
-			if(obc->GetBoundaryType()==HalfPeriodic)
-			{
-				if(temp.x>obc->GetGridBoundary(Right))
-					temp.x-=dx;
-				if(temp.x<obc->GetGridBoundary(Left))
-					temp.x+=dx;
-			}
-			res.push_back(temp);
-		  */
-		}
+
+		vector<Vector2D> res(points.size());
+		transform(points.begin(),
+			  points.end(),
+			  res.begin(),
+			  behaviour);
 		return res;
 	}
 }
