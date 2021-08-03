@@ -1,4 +1,6 @@
-//#define _USE_MATH_DEFINES
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 #include "physical_geometry_1d.hpp"
 
