@@ -28,6 +28,18 @@ public:
 	virtual ~Acceleration3D(void);
 };
 
+class ConstantAcceleration3D : public Acceleration3D
+{
+private:
+	Vector3D const g_;
+public:
+	ConstantAcceleration3D(Vector3D const g);
+
+	void operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
+		const vector<Conserved3D>& fluxes, const double time, TracerStickerNames const& tracerstickernames,
+		vector<Vector3D>& acc) const;
+};
+
 /*! \brief Class for conservative forces
 \author Elad Steinberg
 */
