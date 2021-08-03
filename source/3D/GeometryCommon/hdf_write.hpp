@@ -133,7 +133,7 @@ void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
 	const vector<DiagnosticAppendix3D*>& appendices = vector<DiagnosticAppendix3D*>()
 #ifdef RICH_MPI
-	,bool mpi_write = false
+	,bool mpi_write = true
 #endif
 );
 #endif // HDF_WRITE
