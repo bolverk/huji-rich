@@ -27,7 +27,7 @@ else ifeq ($(MODE),icpl)
 	LINT_FLAGS := 
 	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
 else ifeq ($(MODE),icpl_mpi)
-	CC := mpiCC
+	CC := mpic++
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/ -fp-model precise  -std=c++11 -qopenmp
 	LINT_FLAGS := 
 	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
