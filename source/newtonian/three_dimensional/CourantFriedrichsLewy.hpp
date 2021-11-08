@@ -18,25 +18,22 @@ public:
 	  \param cfl CFL number
 	  \param source The source term for the simulation
 	  \param SourceCFL CFL number for the source term
-	  \param debug Logging flag
 	 */
-	explicit CourantFriedrichsLewy(double cfl,double SourceCFL, SourceTerm3D const& source,
-		bool debug=false);
+	explicit CourantFriedrichsLewy(double cfl, double SourceCFL, SourceTerm3D const& source,
+		bool debug = false);
 
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
-		const vector<Vector3D>& face_velocities,const double time, TracerStickerNames const& tracerstickernames) const override;
+		const vector<Vector3D>& face_velocities, const double time, TracerStickerNames const& tracerstickernames) const;
 
-  /*! \brief Override the time step
-    \param dt New time step
-   */
 	void SetTimeStep(double dt);
 
 private:
-	const double cfl_,sourcecfl_;
+	const double cfl_, sourcecfl_;
 	SourceTerm3D const& source_;
 	const bool debug_;
 	mutable bool first_try_;
-	double dt_first_;
+	mutable double dt_first_;
+	mutable double last_time_;
 };
 
 #endif // COURANT_FRIEDRICHS_LEWY_HPP
