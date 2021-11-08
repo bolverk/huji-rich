@@ -6,16 +6,11 @@
 #include "HilbertOrder3D.hpp"
 #include <boost/foreach.hpp>
 #include <iostream>
+#include "../../misc/utils.hpp"
 //#define runcheks 1
 
 namespace
 {
-
-  bool close2zero(const double x, const double thres=1e-12)
-  {
-    return std::abs(x)<thres;
-  }
-
   bool InsideBigTetra(Vector3D const& tocheck, vector<Vector3D> const& cor, size_t Norg)
   {
     int sum = 0;

@@ -12,9 +12,9 @@ class Tetrahedron
 {
 public:
   //! \brief Indices of vertices
-	size_t points[4];
+	std::size_t points[4];
   //! \brief Indices of neighbours
-	size_t neighbors[4];
+	std::size_t neighbors[4];
 
 	Tetrahedron();
 

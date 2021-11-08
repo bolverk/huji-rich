@@ -61,3 +61,16 @@ double ConservativeForce3D::SuggestInverseTimeStep(void)const
 {
 	return dt_;
 }
+
+ConstantAcceleration3D::ConstantAcceleration3D(Vector3D const g): g_(g){}
+
+void ConstantAcceleration3D::operator()(const Tessellation3D& tess, 
+	const vector<ComputationalCell3D>& /*cells*/, const vector<Conserved3D>& 
+	/*fluxes*/, const double /*time*/, TracerStickerNames const& 
+	/*tracerstickernames*/, vector<Vector3D>& acc) const
+{
+	size_t const N = tess.GetPointNo();
+	acc.resize(N);
+	for (size_t i = 0; i < N; ++i)
+		acc[i] = g_;
+}

@@ -126,6 +126,21 @@ public:
 private:
 	const RiemannSolver3D& rs_;
 };
+//! \brief Calculates zero flux
+class ZeroFlux3D : public ConditionActionFlux1::Action3D
+{
+public:
+
+	/*! \brief Class constructor
+	*/
+	explicit ZeroFlux3D() { ; }
+
+	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
+		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D& res,
+		double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+		const& face_values) const override;
+
+};
 
 //! \brief Estimate flux assuming free flow boundary conditions
 class FreeFlowFlux3D : public ConditionActionFlux1::Action3D
@@ -240,6 +255,22 @@ private:
 	const string sticker_name_;
 };
 
+//! \brief Determines if the interface is between two special cells
+class BothSpecialEdge3D : public ConditionActionFlux1::Condition3D
+{
+public:
+
+	/*! \brief Class constructor
+	\param sticker_name Sticker name
+	*/
+	explicit BothSpecialEdge3D(const string& sticker_name);
+
+	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
+		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const override;
+
+private:
+	const string sticker_name_;
+};
 
 
 #endif //CONDITION_ACTION_FLUX1_HPP

@@ -21,6 +21,16 @@ else ifeq ($(MODE),parallel_intel)
 	LINT_FLAGS := 
 	LFLAGS := -lclipper -lr3d
 	ARCHIVER_FUNC := xiar
+else ifeq ($(MODE),icpl)
+	CC := icpc
+	OPTIMIZATION_FLAGS := -O3 -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/ -fp-model precise  -std=c++11 -qopenmp
+	LINT_FLAGS := 
+	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
+else ifeq ($(MODE),icpl_mpi)
+	CC := mpic++
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/ -fp-model precise  -std=c++11 -qopenmp
+	LINT_FLAGS := 
+	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
 else ifeq ($(MODE),nasa_intel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := icpc
@@ -87,20 +97,31 @@ ifeq ($(DEBUG),on)
 endif
 CFLAGS := $(LINT_FLAGS) $(OPTIMIZATION_FLAGS)
 
-$(DUMP_FOLDER)/normal_termination.res: $(DUMP_FOLDER)/test.exe
-	cd $(DUMP_FOLDER) && $(PREXECUTE) ./test.exe
-
 $(DUMP_FOLDER)/test.exe: $(ENDEMIC_OBJECTS) | ../library_$(MODE)/librich.a
 	echo "$(ENDEMIC_SOURCES)"
 	$(CC) $^ $| -o $@ $(LFLAGS) -lhdf5 -lhdf5_cpp -L $(HDF5_LIB_PATH)
 
 ../library_$(MODE)/librich.a:
+ifeq ($(MODE),$(filter $(MODE),icpl icpl_mpi))
+	$(MAKE) -C .. set_environ_vars_icpl.sh
+	`cat ../set_environ_vars_icpl.sh` && \
+	$(MAKE) -C .. MODE=$(MODE)
+else
 	$(MAKE) -C .. set_environ_vars.sh
 	`cat ../set_environ_vars.sh` && \
 	$(MAKE) -C .. MODE=$(MODE)
+endif
 
 $(ENDEMIC_OBJECTS): $(DUMP_FOLDER)/%.o: $(TARGET)/%.cpp
+ifeq ($(MODE),$(filter $(MODE),icpl icpl_mpi))
+	mkdir -p $(DUMP_FOLDER)
+	$(MAKE) -C .. set_environ_vars_icpl.sh
+	`cat ../set_environ_vars_icpl.sh` && \
+	$(CC) $(CFLAGS) -c $< -o $@ -I ..
+else
 	mkdir -p $(DUMP_FOLDER)
 	$(MAKE) -C .. set_environ_vars.sh
 	`cat ../set_environ_vars.sh` && \
 	$(CC) $(CFLAGS) -c $< -o $@ -I ..
+endif
+	

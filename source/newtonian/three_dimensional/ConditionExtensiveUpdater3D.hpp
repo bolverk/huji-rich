@@ -4,6 +4,7 @@
 #include "extensive_updater3d.hpp"
 #include "LinearGauss3D.hpp"
 #include "../common/equation_of_state.hpp"
+#include "../../misc/utils.hpp"
 
 //! \brief Updates the extensives based on a series of conditions and actions. Does a normal update of all cells before going into the conditions check
 class ConditionExtensiveUpdater3D : public ExtensiveUpdater3D
@@ -76,14 +77,36 @@ public:
 	}
 };
 
+class StickerChoose : public ConditionExtensiveUpdater3D::Condition3D
+{
+private:
+	std::string const sticker_name_;
+public:
+	StickerChoose(std::string const sticker_name) : sticker_name_(sticker_name) {}
+
+	bool operator()(size_t index, const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
+		double /*time*/, TracerStickerNames const& tracerstickernames) const override
+	{
+		return *safe_retrieve(cells[index].stickers.begin(), tracerstickernames.sticker_names.begin(),
+			tracerstickernames.sticker_names.end(), sticker_name_);
+	}
+};
+
 //! \brief Default extensive updater
 class RegularExtensiveUpdate3D : public ConditionExtensiveUpdater3D::Action3D
 {
 public:
-
-
 	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
 		const vector<ComputationalCell3D>& cells, vector<Conserved3D> &extensives, size_t index, double time)const override;
+};
+
+//! \brief Default extensive updater
+class NoExtensiveUpdate3D : public ConditionExtensiveUpdater3D::Action3D
+{
+public:
+	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
+		const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, size_t index, double time,
+		TracerStickerNames const& tracerstickernames)const override;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER3D_HPP
