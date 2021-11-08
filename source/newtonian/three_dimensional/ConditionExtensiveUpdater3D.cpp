@@ -199,3 +199,11 @@ void RegularExtensiveUpdate3D::operator()(const vector<Conserved3D>& /*fluxes*/,
 	//assert(extensives[index].internal_energy > 0);
 	return;
 }
+
+void NoExtensiveUpdate3D::operator()(const vector<Conserved3D>& fluxes, 
+	const Tessellation3D& tess, const double dt, const vector<ComputationalCell3D>& cells, 
+	vector<Conserved3D>& extensives, size_t index, double time, 
+	TracerStickerNames const& tracerstickernames) const
+{
+	PrimitiveToConserved(cells[index], tess.GetVolume(index), extensives[index]);
+}
