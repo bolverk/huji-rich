@@ -16,13 +16,13 @@ else ifeq ($(MODE),parallel)
 else ifeq ($(MODE),icpl_mpi)
 	CCC = icc
 	CC = mpic++
-	OPTIMIZATION_FLAGS = -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
+	OPTIMIZATION_FLAGS = -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I $(HDF5_DIR)/include -I $(Boost_DIR)/include  -fp-model precise
 	LINT_FLAGS = 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),icpl)
 	CCC = icc
 	CC = icpc
-	OPTIMIZATION_FLAGS = -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
+	OPTIMIZATION_FLAGS = -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I $(HDF5_DIR)/include -I $(Boost_DIR)/include -fp-model precise
 	LINT_FLAGS = 
 	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),parallel_time)

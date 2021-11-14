@@ -23,14 +23,14 @@ else ifeq ($(MODE),parallel_intel)
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),icpl)
 	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/ -fp-model precise  -std=c++11 -qopenmp
+	OPTIMIZATION_FLAGS := -O3 -march=core-avx2 -I $(HDF5_DIR)/include -I $(Boost_DIR)/include -fp-model precise  -std=c++11 -qopenmp
 	LINT_FLAGS := 
-	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
+	LFLAGS := -L $(HDF5_DIR)/lib -lclipper -lr3d -qopenmp
 else ifeq ($(MODE),icpl_mpi)
-	CC := mpic++
-	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/ -fp-model precise  -std=c++11 -qopenmp
+	CC = mpic++
+	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -march=core-avx2 -I $(HDF5_DIR)/include -I $(Boost_DIR)/include -fp-model precise  -std=c++11 -qopenmp
 	LINT_FLAGS := 
-	LFLAGS := -L /software/x86_64/3.10.0/hdf5/1.10.4_cxx/lib/ -lclipper -lr3d -qopenmp
+	LFLAGS := -L $(HDF5_DIR)/lib -lclipper -lr3d -qopenmp
 else ifeq ($(MODE),nasa_intel)
 	PREXECUTE := mpirun -np $(NUM_PROCESSES)
 	CC := icpc
