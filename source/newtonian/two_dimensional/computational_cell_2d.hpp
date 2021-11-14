@@ -11,6 +11,7 @@
   typedef boost::container::small_vector<bool,0> svector;*/
 #include <vector>
 #include <array>
+#include <string>
 #define MAX_TRACERS 5
 #define MAX_STICKERS 4
 

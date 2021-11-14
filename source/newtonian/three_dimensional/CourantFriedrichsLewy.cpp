@@ -13,8 +13,7 @@ CourantFriedrichsLewy::CourantFriedrichsLewy(double cfl, double SourceCFL, Sourc
 }
 
 double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells,
-	const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double time,
-	TracerStickerNames const& tracerstickernames) const
+	const EquationOfState& eos, const vector<Vector3D>& face_velocities, const double time) const
 {
 	double res = 0.001 * std::numeric_limits<double>::max();
 	size_t N = tess.GetPointNo();

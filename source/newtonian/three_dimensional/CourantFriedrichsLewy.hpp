@@ -23,7 +23,7 @@ public:
 		bool debug = false);
 
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
-		const vector<Vector3D>& face_velocities, const double time, TracerStickerNames const& tracerstickernames) const;
+		const vector<Vector3D>& face_velocities, const double time) const;
 
 	void SetTimeStep(double dt);
 

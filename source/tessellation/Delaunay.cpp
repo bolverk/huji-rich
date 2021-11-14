@@ -128,15 +128,22 @@ namespace
   std::array<double,4> CellSize(vector<Vector2D> const& points)
 	{
 	  std::array<double,4> res;
-	  size_t counter = 0;
-	  for(const auto& comp : {&Vector2D::x, &Vector2D::y}){
-	    for(const auto& fop : {&fmin, &fmax})
-	      res[counter++] =
-		convert_reduce<Vector2D, double>
-		(points,
-		 [&comp](const Vector2D& p){return p.*comp;},
-		 fop);
+	  size_t const n = points.size();
+	  double minx = points[0].x;
+	  double miny = points[0].y;
+	  double maxx = minx;
+	  double maxy = miny;
+	  for (size_t i = 1; i < n; ++i)
+	  {
+		  minx = std::min(points[i].x, minx);
+		  miny = std::min(points[i].y, miny);
+		  maxx = std::max(points[i].x, maxx);
+		  maxy = std::max(points[i].y, maxy);
 	  }
+	  res[0] = minx;
+	  res[1] = maxx;
+	  res[2] = miny;
+	  res[3] = maxy;
 	  return res;
 	}
 
@@ -179,26 +186,6 @@ void Delaunay::check_if_flipping_is_needed
 	    temp_friends.first,
 	    temp_friends.second}))
     flip(zipped.first, zipped.second, flip_stack);
-}
-
-void Delaunay::update_radii
-(size_t triangle)
-{
-  radius[triangle] = 
-    CalculateRadius(triangle);
-  const auto n = f.size();
-  const auto m = radius.size();
-  auto func = n > m - 1 ?
-    [](vector<double>& v, double x, double y)
-    {v.insert(v.end(),{x,y});} :
-  n>m ?
-    [](vector<double>& v, double x, double y)
-    {v.back()=x; v.push_back(y);} :
-  [](vector<double>& v, double x, double y)
-    {v.rbegin()[1] = x; v.back() = y;};
-  func(radius,
-       CalculateRadius(location_pointer+1),
-       CalculateRadius(location_pointer+2));
 }
 
 void Delaunay::update_friends_of_friends
@@ -266,8 +253,30 @@ void Delaunay::add_point(size_t index,stack<std::pair<size_t, size_t> > &flip_st
   update_f_in_add_point(triangle, temp_friends, index);
   update_friends_of_friends(triangle, temp_friends);
 
-  if (CalcRadius)
-    update_radii(triangle);
+	if (CalcRadius)
+	{
+		radius[static_cast<size_t>(triangle)] = CalculateRadius(static_cast<int>(triangle));
+		int n = int(f.size());
+		int m = int(radius.size());
+		if (n > m - 1)
+		{
+			radius.push_back(CalculateRadius(location_pointer + 1));
+			radius.push_back(CalculateRadius(location_pointer + 2));
+		}
+		else
+		{
+			if (n > m)
+			{
+				radius[static_cast<size_t>(location_pointer) + 1] = CalculateRadius(location_pointer + 1);
+				radius.push_back(CalculateRadius(location_pointer + 2));
+			}
+			else
+			{
+				radius[static_cast<size_t>(location_pointer) + 1] = CalculateRadius(location_pointer + 1);
+				radius[static_cast<size_t>(location_pointer) + 2] = CalculateRadius(location_pointer + 2);
+			}
+		}
+	}
 
   check_if_flipping_is_needed(triangle, temp_friends, flip_stack);
 

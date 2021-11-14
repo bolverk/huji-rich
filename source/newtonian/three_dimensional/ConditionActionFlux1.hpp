@@ -137,7 +137,7 @@ public:
 
 	void operator()(size_t face_index, const Tessellation3D& tess, const Vector3D& face_velocity,
 		const vector<ComputationalCell3D>& cells, const EquationOfState& eos, const bool aux, Conserved3D& res,
-		double time, TracerStickerNames const& tracerstickernames, std::pair<ComputationalCell3D, ComputationalCell3D>
+		double time, std::pair<ComputationalCell3D, ComputationalCell3D>
 		const& face_values) const override;
 
 };
@@ -266,7 +266,7 @@ public:
 	explicit BothSpecialEdge3D(const string& sticker_name);
 
 	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
-		const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const override;
+		const vector<ComputationalCell3D>& cells) const override;
 
 private:
 	const string sticker_name_;

@@ -260,12 +260,14 @@ LagrangianFlux3D::LagrangianCriteria3D::~LagrangianCriteria3D(){}
 BothSpecialEdge3D::BothSpecialEdge3D(const string& sticker_name):sticker_name_(sticker_name)
 {}
 
-pair<bool, bool> BothSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, TracerStickerNames const& tracerstickernames) const
+pair<bool, bool> BothSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells) const
 {
-	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), tracerstickernames.sticker_names.begin(),
-		tracerstickernames.sticker_names.end(), sticker_name_) &&
-		*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), tracerstickernames.sticker_names.begin(),
-		tracerstickernames.sticker_names.end(), sticker_name_))
+	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), 
+		ComputationalCell3D::stickerNames.begin(),
+		ComputationalCell3D::stickerNames.end(), sticker_name_) &&
+		*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), 
+			ComputationalCell3D::stickerNames.begin(),
+			ComputationalCell3D::stickerNames.end(), sticker_name_))
 			return pair<bool, bool>(true, false);
 	else
 		return pair<bool, bool>(false, false);
@@ -274,14 +276,13 @@ pair<bool, bool> BothSpecialEdge3D::operator()(size_t face_index, const Tessella
 void ZeroFlux3D::operator()(size_t /*face_index*/, const Tessellation3D& /*tess*/, 
 	const Vector3D& /*face_velocity*/, const vector<ComputationalCell3D>& 
 	/*cells*/, const EquationOfState& /*eos*/, const bool /*aux*/, Conserved3D& res, 
-	double /*time*/, TracerStickerNames const& tracerstickernames, 
-	std::pair<ComputationalCell3D, ComputationalCell3D> const& /*face_values*/) const
+	double /*time*/, std::pair<ComputationalCell3D, ComputationalCell3D> const& /*face_values*/) const
 {
 	res.energy = 0;
 	res.internal_energy = 0;
 	res.mass = 0;
 	res.momentum = Vector3D();
-	size_t const Ntracers = tracerstickernames.tracer_names.size();
+	size_t const Ntracers = ComputationalCell3D::tracerNames.size();
 	for (size_t i = 0; i < Ntracers; ++i)
 		res.tracers[i] = 0;
 }

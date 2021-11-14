@@ -85,10 +85,10 @@ public:
 	StickerChoose(std::string const sticker_name) : sticker_name_(sticker_name) {}
 
 	bool operator()(size_t index, const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& cells,
-		double /*time*/, TracerStickerNames const& tracerstickernames) const override
+		double /*time*/) const override
 	{
-		return *safe_retrieve(cells[index].stickers.begin(), tracerstickernames.sticker_names.begin(),
-			tracerstickernames.sticker_names.end(), sticker_name_);
+		return *safe_retrieve(cells[index].stickers.begin(), ComputationalCell3D::stickerNames.begin(),
+			ComputationalCell3D::stickerNames.end(), sticker_name_);
 	}
 };
 
@@ -105,8 +105,7 @@ class NoExtensiveUpdate3D : public ConditionExtensiveUpdater3D::Action3D
 {
 public:
 	void operator()	(const vector<Conserved3D>& fluxes, const Tessellation3D& tess, const double dt,
-		const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, size_t index, double time,
-		TracerStickerNames const& tracerstickernames)const override;
+		const vector<ComputationalCell3D>& cells, vector<Conserved3D>& extensives, size_t index, double time)const override;
 };
 
 #endif // CONDITION_EXTENSIVE_UPDATER3D_HPP

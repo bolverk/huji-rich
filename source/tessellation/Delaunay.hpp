@@ -64,8 +64,6 @@ private:
    const Triplet<size_t>& temp_friends,
    stack<std::pair<size_t, size_t> >& flip_stack);
 
-  void update_radii(size_t triangle);
-
   void update_friends_of_friends
   (size_t triangle, const Triplet<size_t>& temp_friends);
 
