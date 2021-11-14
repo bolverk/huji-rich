@@ -7,30 +7,30 @@ CCC := gcc
 LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wno-long-long -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wconversion
 ARCHIVER_FUNC := ar
 ifeq ($(MODE),debug)
-	OPTIMIZATION_FLAGS := -O0 -g -pg -std=c++11
+	OPTIMIZATION_FLAGS = -O0 -g -pg -std=c++11
 	LINT_FLAGS :=
 else ifeq ($(MODE),parallel)
-	CC := mpiCC
+	CC = mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),icpl_mpi)
-	CCC := icc
-	CC := mpic++
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
+	CCC = icc
+	CC = mpic++
+	OPTIMIZATION_FLAGS = -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
 	LINT_FLAGS = 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),icpl)
-	CCC := icc
-	CC := icpc
-	OPTIMIZATION_FLAGS := -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
+	CCC = icc
+	CC = icpc
+	OPTIMIZATION_FLAGS = -O3 -std=c++11 -DOMPI_SKIP_MPICXX -march=core-avx2 -I /software/x86_64/3.10.0/hdf5/1.10.4_cxx/include/  -fp-model precise
 	LINT_FLAGS = 
-	ARCHIVER_FUNC := xiar
+	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),parallel_time)
-	CC := mpiCC
+	CC = mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -std=c++11 -DOMPI_SKIP_MPICXX -Dtiming -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),parallel_profile)
-	CC := mpiCC
+	CC = mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -g -pg -std=c++11 -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),debug_parallel)
@@ -38,46 +38,46 @@ else ifeq ($(MODE),debug_parallel)
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O0 -g -pg -frecord-gcc-switches -DOMPI_SKIP_MPICXX -std=c++11
 	LINT_FLAGS := 
 else ifeq ($(MODE),parallel_check)
-	CC := mpiCC
+	CC = mpiCC
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -D_GLIBCXX_DEBUG -DOMPI_SKIP_MPICXX -std=c++11 -fno-expensive-optimizations
 	LINT_FLAGS = -Werror -Wall -Wextra -pedantic -Wfatal-errors -Weffc++ -Wshadow -Wmissing-declarations -Wno-long-long -Wno-effc++ -Wno-parentheses -Wno-reorder -Wno-shadow -Wconversion
 else ifeq ($(MODE),intel)
-	CC := icpc
-	CCC := icc
+	CC = icpc
+	CCC = icc
 	OPTIMIZATION_FLAGS := -O3 -ipo -xHost -fp-model precise -std=c++11
 	LINT_FLAGS := 
-	ARCHIVER_FUNC := xiar
+	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),parallel_intel)
-	CCC := icc
-	CC := mpiicpc
+	CCC = icc
+	CC = mpiicpc
 	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -ipo -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -qopenmp
 	LINT_FLAGS = 
-	ARCHIVER_FUNC := xiar
+	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),TACC)
-	CCC := icc
-	CC := mpicxx
+	CCC = icc
+	CC = mpicxx
 	OPTIMIZATION_FLAGS := -O3 -DRICH_MPI -ipo -xSKYLAKE -fp-model precise  -std=c++11 -DMPI_NO_CPPBIND
 	LINT_FLAGS := 
 	ARCHIVER_FUNC := xiar
 else ifeq ($(MODE),nasa_intel)
-	CCC := icc
-	CC := icpc
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O3 -xAVX -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -lmpi -lmpi++ -DMPI_NO_CPPBIND
+	CCC = icc
+	CC = icpc
+	OPTIMIZATION_FLAGS = -DRICH_MPI -O3 -xAVX -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -lmpi -lmpi++ -DMPI_NO_CPPBIND
 	LINT_FLAGS = 
-	ARCHIVER_FUNC := xiar
+	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),parallel_intel_check)
-	CCC := icc
-	CC := mpiicpc
-	OPTIMIZATION_FLAGS := -DRICH_MPI -O2 -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -D_GLIBCXX_DEBUG -fp-trap=common
+	CCC = icc
+	CC = mpiicpc
+	OPTIMIZATION_FLAGS = -DRICH_MPI -O2 -xHost -fp-model precise -std=c++11 -DOMPI_SKIP_MPICXX -D_GLIBCXX_DEBUG -fp-trap=common
 	LINT_FLAGS = 
-	ARCHIVER_FUNC := xiar
+	ARCHIVER_FUNC = xiar
 else ifeq ($(MODE),clang)
 	CC := clang++
 	OPTIMIZATION_FLAGS := -Weverything -ferror-limit=1 -Wno-error=padded -Wno-c++98-compat-pedantic -Wno-c++98-compat
 	LINT_FLAGS := 
 else
 	MODE = production
-	OPTIMIZATION_FLAGS := -O3 -march=native -std=c++0x -fno-expensive-optimizations
+	OPTIMIZATION_FLAGS = -O3 -march=native -std=c++0x -fno-expensive-optimizations
 endif
 ifeq ($(DEBUG),on)
 	OPTIMIZATION_FLAGS += -DRICH_DEBUG
