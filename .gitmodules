@@ -1,0 +1,3 @@
+[submodule "compilation/buildutils"]
+	path = compilation/buildutils
+	url = https://gitlab.com/nadavhalahmi/buildutils.git
