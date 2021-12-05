@@ -4,3 +4,6 @@
 [submodule "r3d"]
 	path = r3d
 	url = https://github.com/devonmpowell/r3d.git
+[submodule "source/cppversion"]
+	path = source/cppversion
+	url = https://gitlab.com/omrycohen/cppversion.git
