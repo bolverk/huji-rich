@@ -119,6 +119,8 @@ double& Vector3D::operator[](size_t index)
 	if (index == 2)
 		return z;
 	assert(false);
+	double *temp = new double(std::numeric_limits<double>::signaling_NaN());
+	return *temp;
 }
 
 double Vector3D::operator[](size_t index)const
@@ -130,6 +132,7 @@ double Vector3D::operator[](size_t index)const
 	if (index == 2)
 		return z;
 	assert(false);
+	return std::numeric_limits<double>::signaling_NaN();
 }
 
 #ifdef __INTEL_COMPILER

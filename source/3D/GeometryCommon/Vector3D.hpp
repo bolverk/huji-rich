@@ -7,6 +7,7 @@
 #define Vector3D_HPP 1
 
 #include <vector>
+#include <limits>
 #include <cmath>
 #include "../../misc/serializable.hpp"
 

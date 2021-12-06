@@ -45,6 +45,8 @@ namespace {
   {
   public:
 
+    SerialHandler(){;}
+
     void initialise
     (Tessellation& tess,
      const vector<Vector2D>& points,

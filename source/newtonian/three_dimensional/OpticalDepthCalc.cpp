@@ -72,6 +72,7 @@ namespace
 			}
 		}
 		assert(false);
+		return 0;
 	}
 
 #ifdef RICH_MPI
