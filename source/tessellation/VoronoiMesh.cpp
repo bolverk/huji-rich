@@ -1365,16 +1365,16 @@ void VoronoiMesh::Initialise_loc
 
 
 vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int rank,
-	vector<Vector2D> const& points, OuterBoundary const* obc, vector<size_t> &selfindex,
+	vector<Vector2D> const& points, OuterBoundary const* Obc, vector<size_t> &self_index,
 	vector<int> &sentproc, vector<vector<int> > &sentpoints)
 {
 	vector<Vector2D> res;
 	res.reserve(points.size());
-	selfindex.clear();
+	self_index.clear();
 	size_t npoints = points.size();
 	size_t nproc = static_cast<size_t>(vproc.GetPointNo());
-	const double dx = obc->GetGridBoundary(Right) - obc->GetGridBoundary(Left);
-	const double dy = obc->GetGridBoundary(Up) - obc->GetGridBoundary(Down);
+	const double dx = Obc->GetGridBoundary(Right) - Obc->GetGridBoundary(Left);
+	const double dy = Obc->GetGridBoundary(Up) - Obc->GetGridBoundary(Down);
 	vector<Vector2D> cproc;
 	ConvexHull(cproc, vproc, rank);
 	vector<int> neighbors = vproc.GetNeighbors(rank);
@@ -1396,28 +1396,28 @@ vector<Vector2D> VoronoiMesh::UpdateMPIPoints(Tessellation const& vproc, int ran
 	for (size_t i = 0; i<npoints; ++i)
 	{
 		Vector2D temp=points[i];
-		if (obc->GetBoundaryType() == Periodic)
+		if (Obc->GetBoundaryType() == Periodic)
 		{
-			if (temp.x>obc->GetGridBoundary(Right))
+			if (temp.x>Obc->GetGridBoundary(Right))
 				temp.x -= dx;
-			if (temp.x<obc->GetGridBoundary(Left))
+			if (temp.x<Obc->GetGridBoundary(Left))
 				temp.x += dx;
-			if (temp.y>obc->GetGridBoundary(Up))
+			if (temp.y>Obc->GetGridBoundary(Up))
 				temp.y -= dy;
-			if (temp.y<obc->GetGridBoundary(Down))
+			if (temp.y<Obc->GetGridBoundary(Down))
 				temp.y += dy;
 		}
-		if (obc->GetBoundaryType() == HalfPeriodic)
+		if (Obc->GetBoundaryType() == HalfPeriodic)
 		{
-			if (temp.x>obc->GetGridBoundary(Right))
+			if (temp.x>Obc->GetGridBoundary(Right))
 				temp.x -= dx;
-			if (temp.x<obc->GetGridBoundary(Left))
+			if (temp.x<Obc->GetGridBoundary(Left))
 				temp.x += dx;
 		}
 		if (PointInCell(cproc, temp))
 		{
 			res.push_back(temp);
-			selfindex.push_back(i);
+			self_index.push_back(i);
 			continue;
 		}
 		bool good = false;

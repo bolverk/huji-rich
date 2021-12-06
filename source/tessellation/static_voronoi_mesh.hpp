@@ -52,8 +52,8 @@ public:
 	int GetOriginalIndex(int point) const override;
 
 #ifdef RICH_MPI
-	void Initialise(vector<Vector2D> const& points,Tessellation const& vproc,
-		const OuterBoundary& outer,bool HilbertOrder=true) override;
+	void Initialise(vector<Vector2D> const& /*points*/, Tessellation const& /*vproc*/,
+		const OuterBoundary& /*outer*/,bool /*HilbertOrder*/) override {throw UniversalError("StaticVoronoiMesh::Initialise not implemented");}
 #endif
 
 	void Initialise(const vector<Vector2D>& points,const OuterBoundary& bc, bool HilbertOrder = true) override;
@@ -71,8 +71,8 @@ public:
 	*/
   StaticVoronoiMesh(StaticVoronoiMesh const& other);
 
-  #ifdef RICH_MPI
-	vector<int> Update(const vector<Vector2D>& points,const Tessellation& vproc, bool HilbertOrder = false);
+#ifdef RICH_MPI
+	vector<int> Update(const vector<Vector2D>& /*points*/,const Tessellation& /*vproc*/, bool /*HilbertOrder*/) {throw UniversalError("StaticVoronoiMesh::Update not implemented");}
 #endif // RICH_MPI
 
 	vector<int> Update(const vector<Vector2D>& points, bool HilbertOrder = false) override;

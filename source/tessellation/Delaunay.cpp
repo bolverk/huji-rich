@@ -1068,6 +1068,7 @@ size_t Delaunay::findSomeOuterPoint(void)
 	      return candidate;
 	}
 	assert(false && "something went wrong");
+	return 0;
 }
 
 namespace 
