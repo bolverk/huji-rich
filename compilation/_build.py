@@ -55,7 +55,7 @@ def _run_cmake(*, build_dir, exe_name, config, SysLibsDict, test_dir, definition
         common_cxx_flags += " -diag-remark=13397,13401,15552 "
         cmake_cxx_standard = "14"
         cmake_cxx_flags = " -ansi-alias -fimf-arch-consistency=true "
-        cmake_cxx_flags_debug = " -fp-model consistent "
+        cmake_cxx_flags_debug = " -fp-model consistent -diag-disable=openmp -Wno-unknown-pragmas "
         cmake_cxx_flags_release = " -no-prec-div -fp-model precise -march=core-avx2 -qopenmp "
     else:
         logger.error(f"no known compiler was given at head of {config}")
