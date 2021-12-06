@@ -1,3 +1,6 @@
 external_libraries
 library_*
 runs/temp_*
+build
+*.pyc
+__pycache__
