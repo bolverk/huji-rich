@@ -4,3 +4,4 @@ runs/temp_*
 build
 *.pyc
 __pycache__
+runs/
