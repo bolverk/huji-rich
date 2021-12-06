@@ -1,0 +1,9 @@
+[
+    "slurm/_21.08.0",
+    "cmake/3.20.2",
+    "hdf5/1.10.1_cxx",
+    "gcc/10.3.0",
+    "openmpi/4.1.1/Intel/OneApi-2021.4.0",
+    "Intel/OneApi/2021.4.0/compiler/2021.4.0",
+    "boost/1.74.0",
+]
