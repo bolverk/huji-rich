@@ -180,7 +180,7 @@ ANNdecomp trySimpleShrink(				// try a simple shrink
 //		a row.  Since the tight box is fixed, we cannot shrink twice
 //		consecutively.)
 //----------------------------------------------------------------------
-const float BD_GAP_THRESH = 0.5;		// gap threshold (must be < 1)
+const double BD_GAP_THRESH = 0.5;		// gap threshold (must be < 1)
 const int   BD_CT_THRESH  = 2;			// min number of shrink sides
 
 ANNdecomp trySimpleShrink(				// try a simple shrink
