@@ -18,9 +18,12 @@ import gen_version
 
 def _run_cmake(*, build_dir, exe_name, config, SysLibsDict, test_dir, definitionOfReal=8):
 
-    common_cxx_flags = " -std=c++14 -Wall -Wextra -pedantic-errors -Wshadow -fno-common -fstack-protector-all -rdynamic -Werror "
+    common_cxx_flags = " -std=c++14 -Wextra -Wshadow -fno-common -fstack-protector-all -rdynamic -Werror "
     common_cxx_flags_debug = " -DDEBUG -O0 -g3 -gdwarf-3 "
     common_cxx_flags_release = " -DNDEBUG -O3 -DOMPI_SKIP_MPICXX "
+
+    hdf5_lib_dir = SysLibsDict["hdf5_lib_dir"]
+    hdf5_include_dir = SysLibsDict["hdf5_include"]
 
     if config.startswith("gnu"):
         fortran_compiler = SysLibsDict["gfortran"]
@@ -32,11 +35,8 @@ def _run_cmake(*, build_dir, exe_name, config, SysLibsDict, test_dir, definition
         c_compiler = SysLibsDict["gcc"]
         cxx_compiler = SysLibsDict["g++"]
 
-        hdf5_lib_dir = SysLibsDict["hdf5_lib_dir_gfortran"]
-        hdf5_include_dir = SysLibsDict["hdf5_include_gfortran"]
-
-        cmake_cxx_standard = "17"
-        cmake_cxx_flags = " -Wpedantic -Wdouble-promotion -fstrict-aliasing "
+        cmake_cxx_standard = "14"
+        cmake_cxx_flags = " -Wdouble-promotion -fstrict-aliasing -Wno-deprecated-copy "
         cmake_cxx_flags_debug = " -D_GLIBCXX_DEBUG "
         cmake_cxx_flags_release = " "
     elif config.startswith("intel"):
@@ -48,11 +48,8 @@ def _run_cmake(*, build_dir, exe_name, config, SysLibsDict, test_dir, definition
 
         c_compiler = SysLibsDict["icc"]
         cxx_compiler = SysLibsDict["icpc"]
-
-        hdf5_lib_dir = SysLibsDict["hdf5_lib_dir_intel"]
-        hdf5_include_dir = SysLibsDict["hdf5_include_intel"]
-        
-        common_cxx_flags += " -diag-remark=13397,13401,15552 "
+       
+        common_cxx_flags += " -diag-remark=13397,13401,15552 -pedantic-errors -Wall "
         cmake_cxx_standard = "14"
         cmake_cxx_flags = " -ansi-alias -fimf-arch-consistency=true "
         cmake_cxx_flags_debug = " -fp-model consistent -diag-disable=openmp -Wno-unknown-pragmas "
@@ -62,8 +59,12 @@ def _run_cmake(*, build_dir, exe_name, config, SysLibsDict, test_dir, definition
     
     if "MPI" in config:
         common_cxx_flags += " -DRICH_MPI "
-        c_compiler = SysLibsDict["mpicc"]
-        cxx_compiler = SysLibsDict["mpic++"]
+        if "gnu" in config:
+            c_compiler = SysLibsDict["mpicc_gcc"]
+            cxx_compiler = SysLibsDict["mpic++_gcc"]
+        else:
+            c_compiler = SysLibsDict["mpicc"]
+            cxx_compiler = SysLibsDict["mpic++"]
 
     if "Release" in config:
         build_type = "Release"

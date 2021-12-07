@@ -8,7 +8,7 @@ parser.add_argument("--test_name", default="", help="The name of the test to com
 
 parser.add_argument("--make_dir", default=root_dir, help="The relative path to the build directory")
 
-configurations = {"intelRelease", "intelDebug", "intelReleaseMPI", "intelDebugMPI", "gnuRelease", "gnuDebug"}
+configurations = {"intelRelease", "intelDebug", "intelReleaseMPI", "intelDebugMPI", "gnuRelease", "gnuDebug", "gnuReleaseMPI", "gnuDebugMPI"}
 
 def allowed_configuration(string):
     if "all_configurations" == string:
