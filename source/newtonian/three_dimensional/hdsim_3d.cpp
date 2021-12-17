@@ -282,7 +282,7 @@ void HDSim3D::timeAdvance2(void)
 			proc_update_->Update(tproc_, tess_);
 			std::vector<Vector3D> &oldpoints = tess_.accessMeshPoints();
 			oldpoints.resize(tess_.GetPointNo());
-			std::vector<Vector3D> newpoints = tess_.UpdateMPIPoints(tproc_, rank,oldpoints, selfindex, sentproc, sentpoints);
+			std::vector<Vector3D> newpoints = tess_.UpdateMPIPoints(tproc_, rank, oldpoints, selfindex, sentproc, sentpoints);
 			MPI_Barrier(MPI_COMM_WORLD);
 			tess_.GetPointNo() = newpoints.size();
 			tess_.GetSentPoints() = sentpoints;
