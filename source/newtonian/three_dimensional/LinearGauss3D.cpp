@@ -54,6 +54,8 @@ namespace
 			size_t other_cell = (tess.GetFaceNeighbors(faces[i]).first == cell_index) ?
 				tess.GetFaceNeighbors(faces[i]).second : tess.GetFaceNeighbors(faces[i]).first;
 			ReplaceComputationalCell(res[i], cells[other_cell]);
+			if(!std::isfinite(cells[other_cell].density))
+				throw UniversalError("Bad density getneighborcell");
 		}
 	}
 
@@ -671,6 +673,12 @@ namespace
 					shocked_slope_limit(cell, tess.GetCellCM(cell_index), neighbor_list, res, diffusecoeff,
 						skip_key, tess, cell_index, faces, eos);
 				}
+				if(!std::isfinite( res.xderivative.density))
+				{
+					UniversalError eo("Bad slope limited");
+					eo.addEntry("boundary_slope", boundary_slope);
+					throw eo;
+				}
 #ifdef RICH_DEBUG
 			}
 			catch (UniversalError &eo)
@@ -836,6 +844,9 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				}
 				catch (UniversalError &eo)
 				{
+					eo.addEntry("dslope_x",  rslopes_[i].xderivative.density);
+					eo.addEntry("dslope_y",  rslopes_[i].yderivative.density);
+					eo.addEntry("dslope_z",  rslopes_[i].zderivative.density);
 					eo.addEntry("Old density", new_cells[i].density);
 					eo.addEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.addEntry("Face", static_cast<double>(faces[j]));
@@ -873,6 +884,9 @@ void LinearGauss3D::operator()(const Tessellation3D& tess, const vector<Computat
 				}
 				catch (UniversalError &eo)
 				{
+					eo.addEntry("dslope_x1",  rslopes_[i].xderivative.density);
+					eo.addEntry("dslope_y1",  rslopes_[i].yderivative.density);
+					eo.addEntry("dslope_z1",  rslopes_[i].zderivative.density);
 					eo.addEntry("Old density", new_cells[i].density);
 					eo.addEntry("Old internal energy", new_cells[i].internal_energy);
 					eo.addEntry("Face", static_cast<double>(faces[j]));
