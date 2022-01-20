@@ -61,7 +61,7 @@ public:
     \param cu Cell updater
     \param eu Extensive updater
     \param source Source term
-    \param tsn The names of the stickers and tracers
+    \param tsn The names of the tracers and stickers, first is the tracers and second is stickers
     \param proc_update How to load balance
     \param SR Special relativity flag
     \param new_start Rerun indication
