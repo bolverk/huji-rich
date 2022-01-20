@@ -105,8 +105,8 @@ HDSim3D::HDSim3D(Tessellation3D& tess,
 #endif
 	const bool validity_check = tess.GetPointNo() == cells.size();
 	assert(validity_check);
-	assert(tsn.first.size() <= MAX_STICKERS);
-	assert(tsn.second.size() <= MAX_TRACERS);
+	assert(tsn.second.size() <= MAX_STICKERS);
+	assert(tsn.first.size() <= MAX_TRACERS);
 	// sort tracers and stickers
 	size_t N = tess.GetPointNo();
 	vector<size_t> tindex = sort_index(tsn.first);
