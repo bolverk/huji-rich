@@ -273,6 +273,30 @@ pair<bool, bool> BothSpecialEdge3D::operator()(size_t face_index, const Tessella
 		return pair<bool, bool>(false, false);
 }
 
+TwoSpecialEdge3D::TwoSpecialEdge3D(const string& sticker_name1, const string& sticker_name2):
+	sticker_name1_(sticker_name1), sticker_name2_(sticker_name2){}
+
+pair<bool, bool> TwoSpecialEdge3D::operator()(size_t face_index, const Tessellation3D& tess, const vector<ComputationalCell3D>& cells) const
+{
+	if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), 
+			ComputationalCell3D::stickerNames.begin(),
+			ComputationalCell3D::stickerNames.end(), sticker_name1_) &&
+		*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), 
+			ComputationalCell3D::stickerNames.begin(),
+			ComputationalCell3D::stickerNames.end(), sticker_name2_))
+		return pair<bool, bool>(true, false);
+	else
+		if (*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).first).stickers.begin(), 
+				ComputationalCell3D::stickerNames.begin(),
+				ComputationalCell3D::stickerNames.end(), sticker_name2_) &&
+			*safe_retrieve(cells.at(tess.GetFaceNeighbors(face_index).second).stickers.begin(), 
+				ComputationalCell3D::stickerNames.begin(),
+				ComputationalCell3D::stickerNames.end(), sticker_name1_))
+			return pair<bool, bool>(true, true);
+		else
+			return pair<bool, bool>(false, false);
+}
+
 void ZeroFlux3D::operator()(size_t /*face_index*/, const Tessellation3D& /*tess*/, 
 	const Vector3D& /*face_velocity*/, const vector<ComputationalCell3D>& 
 	/*cells*/, const EquationOfState& /*eos*/, const bool /*aux*/, Conserved3D& res, 

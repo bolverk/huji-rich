@@ -272,5 +272,24 @@ private:
 	const string sticker_name_;
 };
 
+//! \brief Determines if the interface is between two special cells
+class TwoSpecialEdge3D : public ConditionActionFlux1::Condition3D
+{
+public:
+
+	/*! \brief Class constructor
+	\param sticker_name1 First sticker name
+	\param sticker_name2 Second sticker name
+	*/
+	explicit TwoSpecialEdge3D(const string& sticker_name1, const string& sticker_name2);
+
+	pair<bool, bool> operator()(size_t face_index, const Tessellation3D& tess,
+		const vector<ComputationalCell3D>& cells) const override;
+
+private:
+	const string sticker_name1_;
+	const string sticker_name2_;
+};
+
 
 #endif //CONDITION_ACTION_FLUX1_HPP
