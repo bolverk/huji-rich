@@ -744,6 +744,17 @@ Iter binary_find(Iter begin, Iter end, T val)
 		return end; // not found
 }
 
+template<typename T> size_t binary_index_find(std::vector<T> const& data, T const& key)
+{
+	auto it = std::lower_bound(data.begin(), data.end(), key);
+	if(it == data.end())
+		throw UniversalError("Key not found in binary_index_find");
+	size_t const index = static_cast<size_t>(it - data.begin());
+	if(data[index] != key)
+		throw UniversalError("Key not equal found in binary_index_find");
+	return index;
+}
+
 /*! \brief Checks for existence and retrieves entry from flat map
 \param data Data vector
 \param key Key to look for
