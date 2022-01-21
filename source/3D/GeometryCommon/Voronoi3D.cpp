@@ -726,7 +726,6 @@ vector<Vector3D> Voronoi3D::CreateBoundaryPointsMPI(vector<std::pair<std::size_t
   vector<Face> box_faces = BuildBox(ll_, ur_);
   vector<Vector3D> box_normals = GetBoxNormals(ll_, ur_);
   vector<vector<size_t> > box_candidates(box_normals.size());
-  vector<vector<size_t> > new_self_duplicate; //(box_normals.size());
   self_duplicate.resize(box_faces.size());
 
   int rank = 0;
@@ -2049,6 +2048,9 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
   if (((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3)*tol < (4 * Rcheck0)) || ((Rcheck0 + Rcheck1 + Rcheck2 + Rcheck3) > (tol * 4 * Rcheck0)))
     return CalcTetraRadiusCenterHiPrecision(index);
   if (Rcheck0 > tol*Rres || Rcheck0*tol < Rres)
+    return CalcTetraRadiusCenterHiPrecision(index);
+  double const a_tol = 1e-6;
+  if(std::abs(a) < Rres * a_tol)
     return CalcTetraRadiusCenterHiPrecision(index);
   return Rres;
 }
