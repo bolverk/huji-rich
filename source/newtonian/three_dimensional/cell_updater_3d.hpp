@@ -22,7 +22,6 @@ public:
 	  \param extensives The extensive conserved variables
 	  \param eos Equation of state
 	  \param tess The tessellation
-	  \param tracerstickernames The names of the tracers and stickers
 	 */
 	virtual void operator() (vector<ComputationalCell3D> &res, EquationOfState const& eos,
 		const Tessellation3D& tess,vector<Conserved3D>& extensives)const = 0;
