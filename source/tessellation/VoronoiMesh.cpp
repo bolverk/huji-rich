@@ -20,83 +20,58 @@ namespace
       v = unique(v);
     }
   }
-
-  /*
-  vector<Vector2D> my_convex_hull(const Tessellation& tess,
-				  int index)
-  {
-    vector<Vector2D> res;
-    ConvexHull(res,tess,index);
-    return res;
-  }
-  */
 #endif
 
-	vector<Vector2D> UpdatePoints(vector<Vector2D> const& points,OuterBoundary const* obc)
+	vector<Vector2D> UpdatePoints
+	(const vector<Vector2D>& points,
+	 const OuterBoundary& obc)
 	{
-		if(obc->GetBoundaryType()==Rectengular)
+		if(obc.GetBoundaryType()==Rectengular)
 			return points;
-		vector<Vector2D> res;
-		res.reserve(points.size());
-		int npoints=static_cast<int>(points.size());
-		const double dx=obc->GetGridBoundary(Right)-obc->GetGridBoundary(Left);
-		const double dy=obc->GetGridBoundary(Up)-obc->GetGridBoundary(Down);
-		for(int i=0;i<npoints;++i)
-		{
-			Vector2D temp(points[static_cast<size_t>(i)]);
-			if(obc->GetBoundaryType()==Periodic)
-			{
-				if(temp.x>obc->GetGridBoundary(Right))
-					temp.x-=dx;
-				if(temp.x<obc->GetGridBoundary(Left))
-					temp.x+=dx;
-				if(temp.y>obc->GetGridBoundary(Up))
-					temp.y-=dy;
-				if(temp.y<obc->GetGridBoundary(Down))
-					temp.y+=dy;
-			}
-			if(obc->GetBoundaryType()==HalfPeriodic)
-			{
-				if(temp.x>obc->GetGridBoundary(Right))
-					temp.x-=dx;
-				if(temp.x<obc->GetGridBoundary(Left))
-					temp.x+=dx;
-			}
-			res.push_back(temp);
-		}
+		const double dx=obc.GetGridBoundary(Right)-obc.GetGridBoundary(Left);
+		const double dy=obc.GetGridBoundary(Up)-obc.GetGridBoundary(Down);
+		const auto periodic_behaviour = [dx, dy, &obc]
+		  (const Vector2D& r)
+		  {
+		    Vector2D temp = r;
+		    if(temp.x>obc.GetGridBoundary(Right))
+		      temp.x-=dx;
+		    if(temp.x<obc.GetGridBoundary(Left))
+		      temp.x+=dx;
+		    if(temp.y>obc.GetGridBoundary(Up))
+		      temp.y-=dy;
+		    if(temp.y<obc.GetGridBoundary(Down))
+		      temp.y+=dy;
+		    return temp;
+		  };
+		const auto half_periodic_behaviour = [dx, dy, &obc]
+		  (const Vector2D& r)
+		  {
+		    Vector2D temp = r;
+		    if(temp.x>obc.GetGridBoundary(Right))
+		      temp.x-=dx;
+		    if(temp.x<obc.GetGridBoundary(Left))
+		      temp.x+=dx;
+		    return temp;
+		  };
+		const auto default_behaviour = []
+		  (const Vector2D& r)
+		  {
+		    return r;
+		  };
+		std::function<Vector2D(Vector2D)> behaviour = default_behaviour;
+		if(obc.GetBoundaryType() == Periodic)
+		  behaviour = periodic_behaviour;
+		if(obc.GetBoundaryType() == HalfPeriodic)
+		  behaviour = half_periodic_behaviour;
+
+		vector<Vector2D> res(points.size());
+		transform(points.begin(),
+			  points.end(),
+			  res.begin(),
+			  behaviour);
 		return res;
 	}
-
-  /*
-	template <typename T>
-	bool EmptyVectorVector(vector<vector<T> > const& v)
-	{
-		int n=static_cast<int>(v.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v[static_cast<size_t>(i)].empty())
-				return false;
-		}
-		return true;
-	}
-  */
-
-  /*
-	template <typename T>
-	vector<vector<T> > CombineVectorVector(vector<vector<T> > const& v1,
-		vector<vector<T> > const& v2)
-	{
-		vector<vector<T> > res(v1);
-		assert(v1.size()==v2.size());
-		int n=static_cast<int>(v1.size());
-		for(int i=0;i<n;++i)
-		{
-			if(!v2[static_cast<size_t>(i)].empty())
-				res[static_cast<size_t>(i)].insert(res[static_cast<size_t>(i)].end(),v2[static_cast<size_t>(i)].begin(),v2[static_cast<size_t>(i)].end());
-		}
-		return res;
-	}
-  */
 }
 
 VoronoiMesh::VoronoiMesh
@@ -365,7 +340,7 @@ void VoronoiMesh::Initialise_loc(const vector<Vector2D>& pv,const OuterBoundary&
 		points = VectorValues(pv, HilbertOrder(pv, static_cast<int>(pv.size())));
 	else
 		points = pv;
-	Tri.build_delaunay(UpdatePoints(points,obc),calc_procpoints(*obc));
+	Tri.build_delaunay(UpdatePoints(points,*obc),calc_procpoints(*obc));
 
 	Nextra=static_cast<int>(Tri.ChangeCor().size());
 	vector<vector<int> > toduplicate = adapter2<size_t,int>(Tri.BuildBoundary(_bc,_bc.GetBoxEdges()));
@@ -494,7 +469,7 @@ vector<int> VoronoiMesh::Update(const vector<Vector2D>& pv,bool reorder)
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Right),obc->GetGridBoundary(Up)));
 	procpoints.push_back(Vector2D(obc->GetGridBoundary(Left),obc->GetGridBoundary(Up)));
 
-	vector<Vector2D> points = UpdatePoints(pv, obc);
+	vector<Vector2D> points = UpdatePoints(pv, *obc);
 	vector<int> HilbertIndeces;
 	if (reorder)
 	{
