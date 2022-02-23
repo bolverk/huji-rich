@@ -409,7 +409,7 @@ std::pair<bool, std::array<double,4> > PolyhedraIntersection(Tessellation3D cons
 		m[0] = 0;
 		r3d_reduce(&poly, &m[0], 1);
 		m[0] = std::abs(m[0]);
-		if (!(m[0] > 0))
+		if (!(m[0] > 0) || !std::isfinite(m[0]))
 			res.first = false;
 		for (size_t j = 1; j < 4; ++j)
 			m[j] /= m[0];

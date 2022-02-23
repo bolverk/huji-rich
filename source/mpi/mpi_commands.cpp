@@ -389,8 +389,6 @@ vector<vector<vector<double> > > MPI_exchange_data(const Tessellation3D& tess, v
 
 void MPI_exchange_data2(const Tessellation3D& tess, vector<double>& cells, bool ghost_or_sent)
 {
-	if (cells.empty())
-		throw UniversalError("Empty double cell vector in MPI_exchange_data");
 	vector<int> correspondents;
 	vector<vector<size_t> > duplicated_points;
 	if (ghost_or_sent)
@@ -414,7 +412,7 @@ void MPI_exchange_data2(const Tessellation3D& tess, vector<double>& cells, bool 
 
 	const vector<vector<size_t> >& ghost_indices = tess.GetGhostIndeces();
 	if (ghost_or_sent)
-		cells.resize(tess.GetTotalPointNumber(), cells[0]);
+		cells.resize(tess.GetTotalPointNumber());
 	else
 		cells = VectorValues(cells, tess.GetSelfIndex());
 	for (size_t i = 0; i < correspondents.size(); ++i)
