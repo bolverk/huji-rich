@@ -6,44 +6,8 @@
 
 using std::array;
 
-namespace {
-  class TriIndex
-  {
-  public:
-
-    TriIndex(size_t nx, size_t ny, size_t nz):
-      indices_({0,0,0}),
-      ranges_({nx,ny,nz}) {}
-
-    const array<size_t, 3>& get(void)
-    {
-      return indices_;
-    }
-
-    TriIndex& operator++(void)
-    {
-      ++indices_[0];
-      for(size_t i=0;i<2;++i){
-	if(indices_[i]>=ranges_[i]){
-	  indices_[i] -= ranges_[i];
-	  ++indices_[i+1];
-	}
-      }
-      return *this;
-    }
-
-    bool shouldContinue(void)
-    {
-      return indices_[2]<ranges_[2];
-    }
-
-  private:
-    array<size_t, 3> indices_;
-    const array<size_t, 3> ranges_;
-  };
-}
-
-vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, Vector3D const& lower_left, Vector3D const& upper_right)
+ vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, Vector3D const& lower_left, Vector3D const& upper_right,
+	Voronoi3D const* tproc)
 {
 	assert(upper_right.x > lower_left.x);
 	assert(upper_right.y > lower_left.y);
@@ -56,24 +20,22 @@ vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, V
 		static_cast<double>(ny);
 	const double dz = (upper_right.z - lower_left.z) /
 		static_cast<double>(nz);
+	int rank = 0;
+#ifdef RICH_MPI
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+	for(size_t i = 0; i < nx; ++i)
+		for(size_t j = 0; j < ny; ++j)
+			for(size_t k = 0; k < nz; ++k)
+			{
 
-	for(TriIndex ti(nx, ny, nz);
-	    ti.shouldContinue();
-	    ++ti)
-	  res.push_back
-	    (Vector3D
-	     (lower_left.x+0.5*dx+static_cast<double>(ti.get()[0])*dx,
-	      lower_left.y+0.5*dy+static_cast<double>(ti.get()[1])*dy,
-	      lower_left.z+0.5*dz+static_cast<double>(ti.get()[2])*dz));
-	/*
-	
-	for (double x = lower_left.x + 0.5*dx; x < upper_right.x; x += dx)
-	{
-		for (double y = lower_left.y + 0.5*dy; y < upper_right.y; y += dy)
-			for (double z = lower_left.z + 0.5*dz; z < upper_right.z; z += dz)
-				res.push_back(Vector3D(x, y, z));
-	}
-	*/
+				Vector3D new_point = Vector3D(lower_left.x+0.5*dx+i*dx, lower_left.y+0.5*dy+j*dy, lower_left.z+0.5*dz+k*dz);
+				if (tproc == nullptr)
+					res.push_back(new_point);
+				else
+					if (PointInPoly(*tproc, new_point, static_cast<size_t>(rank)))
+						res.push_back(new_point);	
+			}
 	return res;
 }
 

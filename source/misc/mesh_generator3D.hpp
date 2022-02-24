@@ -21,20 +21,21 @@
 \param nz Number of points along the z axis
 \param lower_left Lower left point
 \param upper_right Upper right point
+\param tproc Tessellation of the domain decompesition
 \return Set of three dimensional points
 */
 vector<Vector3D> CartesianMesh(std::size_t nx, std::size_t ny, std::size_t nz, Vector3D const& lower_left,
-	Vector3D const& upper_right);
+	Vector3D const& upper_right, Voronoi3D const* tproc = nullptr);
 
 /*!
 \brief Generates a random grid with uniform point density and a constant seed
 \param PointNum The number of points.
 \param ll The lower left point of the domain
 \param ur The upper right point of the domain
-\param tproc Meta tessellation
+\param tproc Tessellation of the domain decompesition
 \return List of three dimensional points
 */
-vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur,Voronoi3D const* tproc = nullptr);
+vector<Vector3D> RandRectangular(std::size_t PointNum, Vector3D const& ll, Vector3D const& ur, Voronoi3D const* tproc = nullptr);
 
 /*! \brief Generates a random grid with uniform point density and a constant seed
   \param PointNum Number of points
