@@ -41,14 +41,18 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 #endif
 			Vector3D const& v = cells[i].velocity;
 			face_vec const& faces = tess.GetCellFaces(i);
-			size_t Nloop = faces.size();
+			size_t const Nloop = faces.size();
+			double max_face_area = 0;
 			for (size_t j = 0; j < Nloop; ++j)
 			{
 				Vector3D n = tess.Normal(faces[j]);
 				n *= 1.0 / fastabs(n);
 				res_temp = fmax(res_temp, (c + std::abs(ScalarProd(n, v - face_velocities[faces[j]]))));
+				max_face_area = std::max(max_face_area, tess.GetArea(faces[j]));
 			}
-			res_temp = tess.GetWidth(i) / res_temp;
+			double cell_effective_radius = std::min(tess.GetWidth(i), tess.GetVolume(i) / 
+				max_face_area);
+			res_temp = cell_effective_radius / res_temp;
 			if (res_temp < res)
 			{
 				res = res_temp;
