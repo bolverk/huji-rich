@@ -2,6 +2,12 @@
 
 namespace
 {
+    // Larsen second order flux limiter, taken from eq. 10 in "Diffusion, P1, and other approximate forms of radiation transport"
+    double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value)
+    {
+        return 1.0 / (1 + ScalarProd(grad, grad) * 9 * D * D / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
+    }
+
     double CalcFluxLimiter(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const key_index, double const D,
         std::vector<size_t> const& neighbors, face_vec const& faces)
     {
@@ -32,7 +38,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     size_t const Nlocal = tess.GetPointNo();
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
-    std::vector<double> D(Nlocal), flux_limiter(Nlocal);
+    std::vector<double> D(Nlocal);
     std::vector<size_t> neighbors;
     face_vec faces;
     for(size_t i = 0; i < Nlocal; ++i)
@@ -42,10 +48,6 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         b[i] = Er * volume;
         x0[i] = Er;
         D[i] = D_coefficient_calcualtor_.CalcDiffusionCoefficient(i, cells);
-        faces = tess.GetCellFaces(i);
-        tess.GetNeighbors(i, neighbors);
-        flux_limiter[i] = CalcFluxLimiter(tess, cells, i, key_index, D[i], neighbors, faces);
-        D[i] *= flux_limiter[i];
     }
 #ifdef RICH_MPI
     MPI_exchange_data2(tess, D, true);
@@ -87,7 +89,8 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
                     Vector3D const cm_ij = CM - tess.GetCellCM(neighbor_j);
                     Vector3D const grad_E = cm_ij * (1.0 / ScalarProd(cm_ij, cm_ij));
                     Vector3D const r_ij = point - tess.GetMeshPoint(neighbor_j);
-                    double const mid_D = 0.5 * (D[neighbor_j] + Dcell);
+                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er[i] - Er[neighbor_j]), Dcell, 0.5 * (Er[i] + Er[neighbor_j]));
+                    double const mid_D = 0.5 * (D[neighbor_j] + Dcell) * flux_limiter;
                     double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(faces[j]) / abs(r_ij))) * dt * mid_D; 
                     if(neighbor_j < Nlocal)
                     {
