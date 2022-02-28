@@ -2,32 +2,77 @@
 
 namespace
 {
+    // Vector3D calc_grad(double const cell,
+	// 	Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<double> const& neighbors,
+	// 	vector<Vector3D> const& neighbor_centers, vector<Vector3D> const& neigh_cm, Tessellation3D const& tess,
+	// 	Slope3D &temp, face_vec const& faces, std::vector<Vector3D>& c_ij)
+	// {
+    //     Vector3D v_temp(0, 0, 0);
+	// 	size_t n = neighbor_centers.size();
+	// 	// Create the matrix to invert and the vector to compare
+	// 	std::array<double, 9>  m;
+	// 	std::fill_n(m.begin(), 9, 0.0);
+	// 	Vector3D c_ij;
+
+	// 	for (size_t i = 0; i < n; i++)
+	// 	{
+	// 		c_ij = neigh_cm[i];
+	// 		c_ij += cell_cm;
+	// 		c_ij *= -0.5;
+	// 		c_ij += tess.FaceCM(faces[i]);
+	// 		const Vector3D r_ij = normalize(neighbor_centers[i] - center);
+	// 		const double A = tess.GetArea(faces[i]);
+	// 		m[0] -= c_ij.x*r_ij.x*A;
+	// 		m[1] -= c_ij.y*r_ij.x*A;
+	// 		m[2] -= c_ij.z*r_ij.x*A;
+	// 		m[3] -= c_ij.x*r_ij.y*A;
+	// 		m[4] -= c_ij.y*r_ij.y*A;
+	// 		m[5] -= c_ij.z*r_ij.y*A;
+	// 		m[6] -= c_ij.x*r_ij.z*A;
+	// 		m[7] -= c_ij.y*r_ij.z*A;
+	// 		m[8] -= c_ij.z*r_ij.z*A;
+    //         v_temp += (A * (cell + neighbors[i])) * r_ij;
+	// 	}
+	// 	double const v_inv = 1.0 / cell_volume;
+	// 	for (size_t i = 0; i < 9; ++i)
+	// 		m[i] *= v_inv;
+	// 	m[0] += 1;
+	// 	m[4] += 1;
+	// 	m[8] += 1;
+	// 	// Find the det
+	// 	const double det = -m[2] * m[4] * m[6] + m[1] * m[5] * m[6] + m[2] * m[3] * m[7] - m[0] * m[5] * m[7] -
+	// 		m[1] * m[3] * m[8] + m[0] * m[4] * m[8];
+	// 	// Check none singular
+	// 	if (std::abs(det) < 1e-10)
+	// 	{
+	// 		UniversalError eo("Singular matrix in calc_grad");
+	// 		throw eo;
+	// 	}
+	// 	// Invert the matrix
+	// 	std::array<double, 9>  m_inv;
+	// 	std::fill_n(m_inv.begin(), 9, 0);
+	// 	m_inv[0] = m[4] * m[8] - m[5] * m[7];
+	// 	m_inv[1] = m[2] * m[7] - m[1] * m[8];
+	// 	m_inv[2] = m[1] * m[5] - m[2] * m[4];
+	// 	m_inv[3] = m[5] * m[6] - m[3] * m[8];
+	// 	m_inv[4] = m[0] * m[8] - m[2] * m[6];
+	// 	m_inv[5] = m[2] * m[3] - m[5] * m[0];
+	// 	m_inv[6] = m[3] * m[7] - m[6] * m[4];
+	// 	m_inv[7] = m[6] * m[1] - m[0] * m[7];
+	// 	m_inv[8] = m[4] * m[0] - m[1] * m[3];
+    //     double const det_volume_inverse = 1.0 / (2 * cell_volume * det);
+	// 	for (size_t i = 0; i < 9; ++i)
+	// 		m_inv[i] *= det_volume_inverse;
+    //     Vector3D res(v_temp.x * m_inv[0] + v_temp.y * m_inv[1] + v_temp.z * m_inv[2],
+    //         v_temp.x * m_inv[3] + v_temp.y * m_inv[4] + v_temp.z * m_inv[5],
+    //         v_temp.x * m_inv[6] + v_temp.y * m_inv[7] + v_temp.z * m_inv[8]);
+    //     return res;
+	// }
+
     // Larsen second order flux limiter, taken from eq. 10 in "Diffusion, P1, and other approximate forms of radiation transport"
     double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value)
     {
         return 1.0 / (1 + ScalarProd(grad, grad) * 9 * D * D / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
-    }
-
-    double CalcFluxLimiter(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const key_index, double const D,
-        std::vector<size_t> const& neighbors, face_vec const& faces)
-    {
-        // Calculate grad(key)
-        Vector3D const point = tess.GetMeshPoint(index); 
-        size_t const Nneigh = neighbors.size();
-        double const cell_value = cells[index].tracers[key_index] * cells[index].density;
-        Vector3D grad_key;
-        for(size_t j = 0; j < Nneigh; ++j)
-        {
-            // Here we ignore outside cells, this needs to be changed to a general boundary condition
-            size_t const neighbor_j = neighbors[j];
-            Vector3D const r_ij = point - tess.GetMeshPoint(neighbor_j);
-            if(!tess.IsPointOutsideBox(neighbor_j))
-                grad_key += r_ij * (tess.GetArea(faces[j]) * 0.5 * (cell_value + cells[neighbor_j].tracers[key_index] * cells[neighbor_j].density) / abs(r_ij));
-            else
-                grad_key += r_ij * (tess.GetArea(faces[j]) * cell_value  / abs(r_ij));
-        }
-        grad_key *= 1.0 / tess.GetVolume(index);
-        return 1.0 / std::sqrt(1 + D * D * ScalarProd(grad_key, grad_key) / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
     }
 }
 
@@ -78,6 +123,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         Vector3D const CM = tess.GetCellCM(i);
         Vector3D const point = tess.GetMeshPoint(i); 
         double const Dcell = D[i];
+        double const Er = cells[i].tracers[key_index] * cells[i].density;
         for(size_t j = 0; j < Nneigh; ++j)
         {
             // Here we assume no flux to outside cells, this needs to be changed to a general boundary condition
@@ -86,10 +132,11 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
             {
                 if(!tess.IsPointOutsideBox(neighbor_j))
                 {
+                    double const Er_j = cells[neighbor_j].tracers[key_index] * cells[neighbor_j].density;
                     Vector3D const cm_ij = CM - tess.GetCellCM(neighbor_j);
                     Vector3D const grad_E = cm_ij * (1.0 / ScalarProd(cm_ij, cm_ij));
                     Vector3D const r_ij = point - tess.GetMeshPoint(neighbor_j);
-                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er[i] - Er[neighbor_j]), Dcell, 0.5 * (Er[i] + Er[neighbor_j]));
+                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), Dcell, 0.5 * (Er + Er_j));
                     double const mid_D = 0.5 * (D[neighbor_j] + Dcell) * flux_limiter;
                     double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(faces[j]) / abs(r_ij))) * dt * mid_D; 
                     if(neighbor_j < Nlocal)
