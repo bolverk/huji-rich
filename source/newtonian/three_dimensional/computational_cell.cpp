@@ -1,12 +1,12 @@
 #include "computational_cell.hpp"
 
 ComputationalCell3D::ComputationalCell3D(void):
-  density(0), pressure(0),internal_energy(0),ID(0), velocity(), tracers(),stickers() {}
+  density(0), pressure(0),internal_energy(0),temperature(0),ID(0), velocity(), tracers(),stickers() {}
 
 ComputationalCell3D::ComputationalCell3D(double density_i,
 				     double pressure_i,double internal_energy_i,size_t ID_i,
 				     const Vector3D& velocity_i):
-  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
+  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),temperature(0),ID(ID_i),
   velocity(velocity_i), tracers(),stickers() {}
 
 ComputationalCell3D::ComputationalCell3D(double density_i,
@@ -14,13 +14,14 @@ ComputationalCell3D::ComputationalCell3D(double density_i,
 				     const Vector3D& velocity_i,
 				     const std::array<double,MAX_TRACERS>& tracers_i,
 					 const std::array<bool,MAX_STICKERS>& stickers_i):
-  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),ID(ID_i),
+  density(density_i), pressure(pressure_i),internal_energy(internal_energy_i),temperature(0),ID(ID_i),
   velocity(velocity_i), tracers(tracers_i),stickers(stickers_i) {}
 
 ComputationalCell3D::ComputationalCell3D(const ComputationalCell3D& other):
 density(other.density),
 pressure(other.pressure),
 internal_energy(other.internal_energy),
+temperature(other.temperature),
 ID(other.ID),
 velocity(other.velocity),
 tracers(other.tracers),
@@ -32,6 +33,7 @@ ComputationalCell3D& ComputationalCell3D::operator=(ComputationalCell3D const& o
 	density = other.density;
 	pressure = other.pressure;
 	internal_energy = other.internal_energy;
+	temperature = other.temperature;
 	velocity = other.velocity;
 	tracers = other.tracers;
 	stickers = other.stickers;
@@ -45,6 +47,7 @@ ComputationalCell3D& ComputationalCell3D::operator+=(ComputationalCell3D const& 
 	this->pressure += other.pressure;
 	this->internal_energy += other.internal_energy;
 	this->velocity += other.velocity;
+	this->temperature += other.temperature;
 	//assert(this->tracers.size() == other.tracers.size());
 	//size_t N = this->tracers.size();
 #ifdef __INTEL_COMPILER
@@ -61,6 +64,7 @@ ComputationalCell3D& ComputationalCell3D::operator-=(ComputationalCell3D const& 
 	this->pressure -= other.pressure;
 	this->internal_energy -= other.internal_energy;
 	this->velocity -= other.velocity;
+	this->temperature -= other.temperature;
 	//assert(this->tracers.size() == other.tracers.size());
 	//size_t N = this->tracers.size();
 #ifdef __INTEL_COMPILER
@@ -77,6 +81,7 @@ ComputationalCell3D& ComputationalCell3D::operator*=(double s)
 	this->pressure *= s;
 	this->internal_energy *= s;
 	this->velocity *= s;
+	this->temperature *= s;
 	//size_t N = this->tracers.size();
 	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		this->tracers[j] *= s;
@@ -89,7 +94,7 @@ vector<string> ComputationalCell3D::stickerNames;
 #ifdef RICH_MPI
 size_t ComputationalCell3D::getChunkSize(void) const
 {
-	return 7 + tracers.size() + stickers.size();
+	return 8 + tracers.size() + stickers.size();
 }
 
 vector<double> ComputationalCell3D::serialize(void) const
@@ -101,8 +106,9 @@ vector<double> ComputationalCell3D::serialize(void) const
 	res.at(3) = velocity.y;
 	res.at(4) = velocity.z;
 	res.at(5) = internal_energy;
-	res.at(6) = static_cast<double>(ID);
-	size_t counter = 7;
+	res.at(6) = temperature;
+	res.at(7) = static_cast<double>(ID);
+	size_t counter = 8;
 	//size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -128,8 +134,9 @@ void ComputationalCell3D::unserialize
 	velocity.y = data.at(3);
 	velocity.z = data.at(4);
 	internal_energy = data.at(5);
-	ID = static_cast<size_t>(std::llround(data.at(6)));
-	size_t counter = 7;
+	temperature = data.at(6);
+	ID = static_cast<size_t>(std::llround(data.at(7)));
+	size_t counter = 8;
 	//size_t N = tracers.size();
 #ifdef __INTEL_COMPILER
 #pragma ivdep
@@ -179,6 +186,7 @@ void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D cons
 	res.pressure += other.pressure*scalar;
 	res.internal_energy += other.internal_energy*scalar;
 	res.velocity += other.velocity*scalar;
+	res.temperature += other.temperature;
 	//assert(res.tracers.size() == other.tracers.size());
 	//size_t N = res.tracers.size();
 #ifdef __INTEL_COMPILER
@@ -205,10 +213,11 @@ ComputationalCell3D operator-(ComputationalCell3D const& p1, ComputationalCell3D
 ComputationalCell3D operator/(ComputationalCell3D const& p, double s)
 {
 	ComputationalCell3D res(p);
-	double s_1 = 1.0 / s;
+	double const s_1 = 1.0 / s;
 	res.density *= s_1;
 	res.pressure *= s_1;
 	res.internal_energy *= s_1;
+	res.temperature *= s_1;
 	//size_t N = res.tracers.size();
 	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res.tracers[j] *= s_1;
@@ -222,6 +231,7 @@ ComputationalCell3D operator*(ComputationalCell3D const& p, double s)
 	res.density *= s;
 	res.pressure *= s;
 	res.internal_energy *= s;
+	res.temperature *= s;
 	//size_t N = res.tracers.size();
 	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res.tracers[j] *= s;
@@ -241,6 +251,7 @@ void ReplaceComputationalCell(ComputationalCell3D & cell, ComputationalCell3D co
 	cell.internal_energy = other.internal_energy;
 	cell.ID = other.ID;
 	cell.velocity = other.velocity;
+	cell.temperature = other.temperature;
 	//size_t N = other.tracers.size();
 	//cell.tracers.resize(N);
 #ifdef __INTEL_COMPILER

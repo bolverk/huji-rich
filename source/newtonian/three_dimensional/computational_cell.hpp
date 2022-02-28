@@ -27,6 +27,9 @@ public:
 	//! \brief Internal energy
 	double internal_energy;
 
+	//! \brief Temperature
+	double temperature;
+
 	//! \brief Unique ID
 	size_t ID;
 
