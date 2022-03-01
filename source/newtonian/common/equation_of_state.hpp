@@ -82,6 +82,26 @@ public:
   virtual double sd2p(double s, double d,
 	  tvector const& tracers = tvector(), vector<string> const& tracernames = vector<string>()) const = 0;
 
+/*! \brief Calculates the heat capacity (Cv) per unit mass
+    \param d Density
+    \param T Temperature
+    \param tracers Tracers
+	\param tracernames The names of the tracers
+    \return Heat capacity per unit mass
+  */
+  virtual double dT2cv(double const d, double const T,
+	  tvector const& tracers = tvector(), vector<string> const& tracernames = vector<string>()) const;
+
+/*! \brief Calculates the temperature
+    \param d Density
+    \param e Thermal energy per unit mass
+    \param tracers Tracers
+	\param tracernames The names of the tracers
+    \return The temperature
+  */
+  virtual double de2T(double const d, double const e,
+	  tvector const& tracers = tvector(), vector<string> const& tracernames = vector<string>()) const;
+
   virtual ~EquationOfState(void);
 };
 

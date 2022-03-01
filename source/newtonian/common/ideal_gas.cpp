@@ -1,9 +1,13 @@
 #include <cmath>
 #include "ideal_gas.hpp"
 #include "../../misc/universal_error.hpp"
+#include <limits>
 
-IdealGas::IdealGas(double AdiabaticIndex) :
-	g_(AdiabaticIndex) {}
+IdealGas::IdealGas(double const AdiabaticIndex) : g_(AdiabaticIndex), f_(std::numeric_limits<double>::signaling_NaN()), 
+	beta_(std::numeric_limits<double>::signaling_NaN()), mu_(std::numeric_limits<double>::signaling_NaN()) {}
+
+IdealGas::IdealGas(double const AdiabaticIndex, double const f, double const beta, double const mu) :
+	g_(AdiabaticIndex), f_(f), beta_(beta), mu_(mu) {}
 
 double IdealGas::getAdiabaticIndex(void) const
 {
@@ -99,4 +103,14 @@ double IdealGas::sd2p(double s, double d, tvector const& /*tracers*/, vector<str
 	}
 	assert(s > 0 && d > 0);
 	return s * pow(d, g_);
+}
+
+double IdealGas::dT2cv(double const d, double const T, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
+{
+	return f_ * beta_ * std::pow(T, beta_ - 1) * std::pow(d, -mu_);
+}
+
+double IdealGas::de2T(double const d, double const e, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
+{
+	return std::pow(std::pow(d, mu_) * e / f_, 1.0 / beta_);
 }
