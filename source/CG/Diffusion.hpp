@@ -2,6 +2,7 @@
 #define DIFFUSION_HPP 1
 
 #include "conj_grad_solve.hpp"
+#include "source/newtonian/common/equation_of_state.hpp"
 
 using namespace CG;
 
@@ -69,8 +70,9 @@ public:
 \brief Class constructor
 \param D_coefficient_calcualtor Class for calcualting the diffusion coefficients
 */
-    Diffusion(DiffusionCoefficientCalculator const& D_coefficient_calcualtor, DiffusionBoundaryCalculator const& boundary_calc) : D_coefficient_calcualtor_(D_coefficient_calcualtor),
-        boundary_calc_(boundary_calc) {}
+    Diffusion(DiffusionCoefficientCalculator const& D_coefficient_calcualtor, DiffusionBoundaryCalculator const& boundary_calc,
+        EquationOfState const& eos) : D_coefficient_calcualtor_(D_coefficient_calcualtor),
+        boundary_calc_(boundary_calc), eos_(eos) {}
 
     void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
             double const dt, std::vector<double>& b, std::vector<double>& x0) const override;

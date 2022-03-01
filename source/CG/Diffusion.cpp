@@ -83,7 +83,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     size_t const Nlocal = tess.GetPointNo();
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
-    std::vector<double> D(Nlocal);
+    std::vector<double> D(Nlocal), fleck_factor(Nlocal);
     std::vector<size_t> neighbors;
     face_vec faces;
     for(size_t i = 0; i < Nlocal; ++i)
@@ -93,6 +93,11 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         b[i] = Er * volume;
         x0[i] = Er;
         D[i] = D_coefficient_calcualtor_.CalcDiffusionCoefficient(i, cells);
+        double const T = cells[i].temperature;
+        double const sigma_planck = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
+        double const beta = 4 * CG::radiation_constant * T * T * T / (cells[i].density * eos_.dT2cv(cells[i].density, T, cells[i].tracers, ComputationalCell3D::tracerNames));
+        fleck_factor[i] = 1.0 / (1 +sigma_planck * CG::speed_of_light * dt * beta);
+        b[i] += volume * fleck_factor[i] * dt * CG::speed_of_light * sigma_planck * T * T * T * T * CG::radiation_constant;
     }
 #ifdef RICH_MPI
     MPI_exchange_data2(tess, D, true);
@@ -112,7 +117,9 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     {
         A_indeces[i].push_back(i);
         double const volume = tess.GetVolume(i);
-        A[i].push_back(volume);
+        double const sigma_planck = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
+        double const T = cells[i].temperature;
+        A[i].push_back(volume * (1 + fleck_factor[i] * dt * CG::speed_of_light * sigma_planck));
     }
 
     for(size_t i = 0; i < Nlocal; ++i)
