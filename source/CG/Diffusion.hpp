@@ -56,7 +56,7 @@ class DiffusionSideBoundary : public DiffusionBoundaryCalculator
     DiffusionSideBoundary(double const T): T_(T){}
 
     void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
-        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const;
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const override;
     private:
         double const T_;
 };
@@ -73,10 +73,11 @@ public:
         boundary_calc_(boundary_calc) {}
 
     void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
-            double const dt, std::vector<double>& b, std::vector<double>& x0) const;
+            double const dt, std::vector<double>& b, std::vector<double>& x0) const override;
 private:
     DiffusionCoefficientCalculator const& D_coefficient_calcualtor_;
     DiffusionBoundaryCalculator const& boundary_calc_;
+    EquationOfState const& eos_;
 };
 
 //! D=D0*rho^alpha*T^beta
@@ -87,9 +88,9 @@ private:
 public:
     PowerLawOpacity(double const D0, double const alpha, double const beta): D0_(D0), alpha_(alpha), beta_(beta){}
 
-    double CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const;
+    double CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const override;
 
-    double CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const;
+    double CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const override;
 };
 
 #endif
