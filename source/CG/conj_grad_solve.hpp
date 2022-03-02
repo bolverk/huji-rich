@@ -15,6 +15,7 @@
 #include <boost/container/small_vector.hpp>
 #include "source/3D/GeometryCommon/Tessellation3D.hpp"
 #include "source/newtonian/three_dimensional/computational_cell.hpp"
+#include "source/newtonian/three_dimensional/conserved_3d.hpp"
 #include "source/misc/utils.hpp"
 
 namespace CG
@@ -45,6 +46,17 @@ namespace CG
         */
         virtual void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
             double const dt, std::vector<double>& b, std::vector<double>& x0) const = 0;
+        /*!
+        \brief This method does post processing after the CG has finished (e.g. update the thermal energy)
+        \param tess The tesselation
+        \param extensives The extensives
+        \param dt The time step
+        \param cells The primitive variables
+        \param CG_result The result from the CG
+        \param key_name The name of the tracer for the CG (e.g. radiation density)
+        */
+        virtual void PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& extensives, double const dt, std::vector<ComputationalCell3D>& cells,
+            std::vector<double>const& CG_result, std::string const& key_name)const = 0;
     };
 
     //! The fastest implementation of conjugate gradient algorithm, using data-based parallelism only
