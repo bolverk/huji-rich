@@ -1,5 +1,6 @@
 #include "conj_grad_solve.hpp"
 #include <limits>
+
 namespace CG
 {
     // Matrix times vector
@@ -23,6 +24,17 @@ namespace CG
             }
             result[i] = dot_prod;
         }
+    }
+
+    std::vector<double> vector_rescale(std::vector<double> const& a, std::vector<double> const& b)
+    {
+        size_t const N = a.size();
+        if(a.size() != b.size())
+            throw UniversalError("Sizes do not match in vector_rescale");
+        std::vector<double> res(N);
+        for(size_t i = 0; i < N; ++i)
+            res[i] = a[i] * b[i];
+        return res;
     }
 
     // Linear combination of vectors
@@ -55,6 +67,25 @@ namespace CG
 #endif
         return sub_prod;
     }
+    
+    void build_M(const mat &sub_A_values, const size_t_mat &sub_A_indices, std::vector<double> &M)
+    {
+        size_t const sub_num_rows = sub_A_values.size();
+        size_t const sub_num_cols = sub_A_values[0].size();
+        M.resize(sub_num_rows);
+        for (size_t i = 0; i < sub_num_rows; i++) {
+            for (size_t j = 0; j < sub_num_cols; j++) {
+                if(sub_A_indices[i][j] == max_size_t)
+                    break;
+                if(sub_A_indices[i][j] == i)
+                {
+                    M[i] = 1.0 / sub_A_values[i][j];
+                    //M[i] = 1.0;
+                    break;
+                }
+            }
+        }
+    }
 
     std::vector<double> conj_grad_solver(const double tolerance, int &total_iters,
         Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
@@ -79,7 +110,8 @@ namespace CG
         std::vector<double> b;
         std::vector<double> sub_x; // this is for the initial guess
         matrix_builder.BuildMatrix(tess, A, A_indeces, cells, key_name, dt, b, sub_x);
-
+        std::vector<double> M; // The preconditioner
+        build_M(A, A_indeces, M);
         
 #ifdef RICH_MPI
         MPI_exchange_data2(tess, sub_x, true);
@@ -91,12 +123,14 @@ namespace CG
         std::vector<double> sub_p(sub_r);
         sub_p.resize(Nlocal);
         sub_x.resize(Nlocal);
+        sub_p = vector_rescale(sub_p, M);
         std::vector<double> result1, result2, result3, p(sub_p);
 #ifdef RICH_MPI
         MPI_exchange_data2(tess, p, true);
         MPI_Allreduce(MPI_IN_PLACE, &Nlocal, 1, MPI_UNSIGNED_LONG, MPI_SUM, MPI_COMM_WORLD);
 #endif
-        double sub_r_sqrd = mpi_dot_product(sub_r, sub_r);
+        double sub_r_sqrd = mpi_dot_product(sub_r, sub_p);
+        double sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
         double sub_r_sqrd_old = 0, sub_p_by_ap = 0, alpha = 0, beta = 0;
         bool good_end = false;
         // Main Conjugate Gradient loop
@@ -118,8 +152,9 @@ namespace CG
             double max_x = *std::max_element(sub_x.begin(), sub_x.end());
             vec_lin_combo(1.0, sub_r, -alpha, sub_a_times_p, result2);
             sub_r = result2;
-
-            sub_r_sqrd = mpi_dot_product(sub_r, sub_r);
+            sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
+            result2 = vector_rescale(sub_r, M);
+            sub_r_sqrd = mpi_dot_product(sub_r, result2);
 
     #ifdef RICH_MPI
             MPI_Allreduce(MPI_IN_PLACE, &max_x, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
@@ -127,7 +162,7 @@ namespace CG
     #endif
             // recall that we can't have a 'break' within an openmp parallel region, so end it here then all threads are merged, and the convergence is checked
             // Convergence test
-            if (std::sqrt(sub_r_sqrd / Nlocal) < tolerance * max_x) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
+            if (std::sqrt(sub_r_sqrd_convergence / Nlocal) < tolerance * max_x) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
 #ifdef RICH_MPI
                 if(rank == 0)
 #endif
@@ -139,7 +174,7 @@ namespace CG
 
             beta = sub_r_sqrd / sub_r_sqrd_old;       
             
-            vec_lin_combo(1.0, sub_r, beta, sub_p, result3);             // Next gradient
+            vec_lin_combo(1.0, result2, beta, sub_p, result3);             // Next gradient
             sub_p = result3;
             p = sub_p;
     #ifdef RICH_MPI
