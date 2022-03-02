@@ -12,6 +12,7 @@
 #include "extensive_updater3d.hpp"
 #include "../../mpi/ProcessorUpdate3D.hpp"
 #include "SourceTerm3D.hpp"
+#include "source/CG/conj_grad_solve.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
@@ -174,6 +175,8 @@ public:
   \return t The maximum ID number ofr all cells
   */
   size_t & GetMaxID(void);
+
+  double RadiationTimeStep(double const dt, CG::MatrixBuilder const& matrix_builder, std::string const& key);
 
 private:
   Tessellation3D& tess_;

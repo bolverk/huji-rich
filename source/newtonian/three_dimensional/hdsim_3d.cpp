@@ -827,3 +827,27 @@ size_t& HDSim3D::GetMaxID(void)
 {
 	return Max_ID_;
 }
+
+double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matrix_builder, std::string const& key)
+{
+	int total_iters = 0;
+	double const CG_eps = 1e-10;
+	std::vector<double> new_Er = CG::conj_grad_solver(CG_eps, total_iters, tess_, cells_ , key, dt, matrix_builder);
+	size_t const N = tess_.GetPointNo();
+	double const max_Er = *std::max_element(new_Er.begin(), new_Er.end());
+	double max_diff = 0;
+	for(size_t i = 0; i < N; ++i)
+	{
+		double const diff = std::abs(new_Er[i] - cells_[i].tracers[0] * cells_[i].density) / (new_Er[i] + 0.001 * max_Er);
+		max_diff = std::max(max_diff, diff);
+	}
+	matrix_builder.PostCG(tess_, extensive_, dt, cells_, new_Er, key);
+#ifdef RICH_MPI
+	ComputationalCell3D cdummy;
+	MPI_exchange_data(tess_, cells_, true, &cdummy);
+	MPI_Allreduce(MPI_IN_PLACE, &max_diff, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+#endif
+	pt_.updateTime(dt);
+	pt_.updateCycle();
+	return dt * std::min(0.01 / max_diff, 1.1);
+}
