@@ -72,7 +72,7 @@ namespace
     // Larsen second order flux limiter, taken from eq. 10 in "Diffusion, P1, and other approximate forms of radiation transport"
     double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value)
     {
-        return 1.0 / (1 + ScalarProd(grad, grad) * 9 * D * D / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
+        return 1.0 / std::sqrt(1 + ScalarProd(grad, grad) * D * D / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
     }
 }
 
@@ -232,11 +232,10 @@ void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t
 
 double PowerLawOpacity::CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const
 {
-    double const T = std::pow(cells[index].tracers[0] * cells[index].density / CG::radiation_constant, 0.25);
-    return D0_ * std::pow(cells[index].density, alpha_) * std::pow(T, beta_);
+    return D0_ * std::pow(cells[index].density, alpha_) * std::pow(cells[index].temperature, beta_);
 }
 
 double PowerLawOpacity::CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const
 {
-    return CalcDiffusionCoefficient(index, cells);
+    return CG::speed_of_light / (3 * CalcDiffusionCoefficient(index, cells));
 }
