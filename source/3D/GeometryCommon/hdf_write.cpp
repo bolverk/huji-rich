@@ -268,6 +268,10 @@ void WriteSnapshot3D(HDSim3D const& sim, std::string const& filename,
     temp[i] = cells[i].velocity.z;
   write_std_vector_to_hdf5(writegroup, temp, "Vz");
 
+  for (size_t i = 0; i < Ncells; ++i)
+    temp[i] = cells[i].temperature;
+  write_std_vector_to_hdf5(writegroup, temp, "Temperature");
+
   Group tracers, stickers;
 #ifdef RICH_MPI
   if (mpi_write)
@@ -382,6 +386,7 @@ Snapshot3D ReadSnapshot3D(const string& fname
   // Hydrodynamic
   {
     const vector<double> density = read_double_vector_from_hdf5(read_location, "Density");
+    const vector<double> temperature = read_double_vector_from_hdf5(read_location, "Temperature");
     const vector<double> pressure = read_double_vector_from_hdf5(read_location, "Pressure");
     const vector<double> energy = read_double_vector_from_hdf5(read_location, "InternalEnergy");
     vector<size_t> IDs(density.size(), 0);
@@ -421,6 +426,7 @@ Snapshot3D ReadSnapshot3D(const string& fname
     for (size_t i = 0; i < res.cells.size(); ++i)
       {
 	res.cells.at(i).density = density.at(i);
+  res.cells.at(i).temperature = temperature.at(i);
 	res.cells.at(i).pressure = pressure.at(i);
 	res.cells.at(i).internal_energy = energy.at(i);
 	res.cells.at(i).ID = IDs[i];
