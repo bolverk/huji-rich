@@ -114,3 +114,8 @@ double IdealGas::de2T(double const d, double const e, tvector const& /*tracers*/
 {
 	return std::pow(std::pow(d, mu_) * e / f_, 1.0 / beta_);
 }
+
+double IdealGas::dT2e(double const d, double const T, tvector const& /*tracers*/, vector<string> const& /*tracernames*/) const
+{
+	return f_ * std::pow(T, beta_) * std::pow(d, -mu_);
+}

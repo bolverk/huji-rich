@@ -51,6 +51,8 @@ public:
   double dT2cv(double const d, double const T, tvector const& tracers, vector<string> const& tracernames) const override;
 
   double de2T(double const d, double const T, tvector const& tracers, vector<string> const& tracernames) const override;
+
+  double dT2e(double const d, double const T, tvector const& tracers, vector<string> const& tracernames) const override;
 };
 
 #endif // IDEAL_GAS_HPP

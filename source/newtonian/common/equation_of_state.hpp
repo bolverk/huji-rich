@@ -102,6 +102,17 @@ public:
   virtual double de2T(double const d, double const e,
 	  tvector const& tracers = tvector(), vector<string> const& tracernames = vector<string>()) const;
 
+  
+/*! \brief Calculates the internal energy
+    \param d Density
+    \param T temperature
+    \param tracers Tracers
+	\param tracernames The names of the tracers
+    \return Thermal energy per unit mass
+  */
+  virtual double dT2e(double const d, double const T,
+	  tvector const& tracers = tvector(), vector<string> const& tracernames = vector<string>()) const;
+
   virtual ~EquationOfState(void);
 };
 
