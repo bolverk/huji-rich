@@ -83,7 +83,9 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     size_t const Nlocal = tess.GetPointNo();
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
-    std::vector<double> D(Nlocal), fleck_factor(Nlocal);
+    std::vector<double> D(Nlocal);
+    fleck_factor_.resize(Nlocal);
+    sigma_planck_.resize(Nlocal);
     std::vector<size_t> neighbors;
     face_vec faces;
     for(size_t i = 0; i < Nlocal; ++i)
@@ -94,10 +96,10 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         x0[i] = Er;
         D[i] = D_coefficient_calcualtor_.CalcDiffusionCoefficient(i, cells);
         double const T = cells[i].temperature;
-        double const sigma_planck = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
+        sigma_planck_[i] = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
         double const beta = 4 * CG::radiation_constant * T * T * T / (cells[i].density * eos_.dT2cv(cells[i].density, T, cells[i].tracers, ComputationalCell3D::tracerNames));
-        fleck_factor[i] = 1.0 / (1 +sigma_planck * CG::speed_of_light * dt * beta);
-        b[i] += volume * fleck_factor[i] * dt * CG::speed_of_light * sigma_planck * T * T * T * T * CG::radiation_constant;
+        fleck_factor_[i] = 1.0 / (1 + sigma_planck_[i] * CG::speed_of_light * dt * beta);
+        b[i] += volume * fleck_factor_[i] * dt * CG::speed_of_light * sigma_planck_[i] * T * T * T * T * CG::radiation_constant;
     }
 #ifdef RICH_MPI
     MPI_exchange_data2(tess, D, true);
@@ -117,9 +119,8 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     {
         A_indeces[i].push_back(i);
         double const volume = tess.GetVolume(i);
-        double const sigma_planck = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
         double const T = cells[i].temperature;
-        A[i].push_back(volume * (1 + fleck_factor[i] * dt * CG::speed_of_light * sigma_planck));
+        A[i].push_back(volume * (1 + fleck_factor_[i] * dt * CG::speed_of_light * sigma_planck_[i]));
     }
 
     for(size_t i = 0; i < Nlocal; ++i)
@@ -143,8 +144,9 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
                     Vector3D const cm_ij = CM - tess.GetCellCM(neighbor_j);
                     Vector3D const grad_E = cm_ij * (1.0 / ScalarProd(cm_ij, cm_ij));
                     Vector3D const r_ij = point - tess.GetMeshPoint(neighbor_j);
-                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), Dcell, 0.5 * (Er + Er_j));
-                    double const mid_D = 0.5 * (D[neighbor_j] + Dcell) * flux_limiter;
+                    double mid_D = 0.5 * (D[neighbor_j] + Dcell);
+                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), mid_D, 0.5 * (Er + Er_j));
+                    mid_D *= flux_limiter;
                     double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(faces[j]) / abs(r_ij))) * dt * mid_D; 
                     if(neighbor_j < Nlocal)
                     {
@@ -172,6 +174,49 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         A[i].resize(max_neigh, 0);
         A_indeces[i].resize(max_neigh, max_size_t);
     }
+}
+
+void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& extensives, double const dt, std::vector<ComputationalCell3D>& cells,
+        std::vector<double>const& CG_result, std::string const& key_name)const
+{
+    size_t const N = tess.GetPointNo();
+    size_t const key_index = binary_index_find(ComputationalCell3D::tracerNames, key_name);
+    bool const entropy = !(std::find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(), std::string("Entropy")) ==
+			 ComputationalCell3D::tracerNames.end());
+    size_t const entropy_index = static_cast<size_t>(std::find(ComputationalCell3D::tracerNames.begin(),
+							     ComputationalCell3D::tracerNames.end(), std::string("Entropy")) - ComputationalCell3D::tracerNames.begin());
+    size_t max_index = 0;
+    double maxT = 0;
+    for(size_t i = 0; i < N; ++i)
+    {
+        double const volume = tess.GetVolume(i);
+        extensives[i].tracers[key_index] = CG_result[i] * volume;
+        double const T = cells[i].temperature;
+        double const dE = fleck_factor_[i] * CG::speed_of_light * dt * sigma_planck_[i] * (CG_result[i] - T * T * T * T * CG::radiation_constant) * volume;
+        extensives[i].energy += dE;
+        extensives[i].internal_energy += dE;
+        if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy))
+            throw UniversalError("Bad internal energy in Diffusion::PostCG");
+        cells[i].internal_energy = extensives[i].internal_energy / extensives[i].mass;
+        cells[i].temperature = eos_.de2T(cells[i].density, cells[i].internal_energy, cells[i].tracers, ComputationalCell3D::tracerNames);
+        cells[i].pressure = eos_.de2p(cells[i].density, cells[i].internal_energy, cells[i].tracers, ComputationalCell3D::tracerNames);
+        cells[i].tracers[key_index] = extensives[i].tracers[key_index] / extensives[i].mass;
+        if(entropy)
+        {
+            cells[i].tracers[entropy_index] = eos_.dp2s(cells[i].density, cells[i].pressure, cells[i].tracers, ComputationalCell3D::tracerNames);
+            extensives[i].tracers[entropy_index] = cells[i].tracers[entropy_index] * extensives[i].mass;
+        }
+        if(T > maxT)
+        {
+            max_index = i;
+            maxT = T;
+        }
+    }
+    fleck_factor_.clear();
+    fleck_factor_.shrink_to_fit();
+    sigma_planck_.clear();
+    sigma_planck_.shrink_to_fit();
+    //std::cout<<"T "<<maxT<<" i "<<max_index<<std::endl;
 }
 
 void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 
