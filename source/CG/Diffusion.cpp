@@ -229,6 +229,9 @@ void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t
         b += 2 * Area * dt * CG::stefan_boltzman * T_ * T_ * T_ * T_;
     }
 }
+void DiffusionClosedBox::SetBoundaryValues(Tessellation3D const& /*tess*/, size_t const /*index*/, size_t const /*outside_point*/, double const /*dt*/, 
+        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/)const
+{}
 
 double PowerLawOpacity::CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const
 {

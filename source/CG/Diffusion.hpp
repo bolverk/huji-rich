@@ -62,6 +62,14 @@ class DiffusionSideBoundary : public DiffusionBoundaryCalculator
         double const T_;
 };
 
+//! \brief Class with constant blackbody temperature on the left x side and zero flux on other sides
+class DiffusionClosedBox : public DiffusionBoundaryCalculator
+{
+    public:
+    void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const override;
+};
+
 //! \brief Class for calculating diffusion matrix data for the CG solver
 class Diffusion : public CG::MatrixBuilder
 {
