@@ -94,9 +94,9 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         double const Er = cells[i].tracers[key_index] * cells[i].density;
         b[i] = Er * volume;
         x0[i] = Er;
-        D[i] = D_coefficient_calcualtor_.CalcDiffusionCoefficient(i, cells);
+        D[i] = D_coefficient_calcualtor.CalcDiffusionCoefficient(cells[i]);
         double const T = cells[i].temperature;
-        sigma_planck_[i] = D_coefficient_calcualtor_.CalcPlanckOpacity(i, cells);
+        sigma_planck[i] = D_coefficient_calcualtor.CalcPlanckOpacity(cells[i]);
         double const beta = 4 * CG::radiation_constant * T * T * T / (cells[i].density * eos_.dT2cv(cells[i].density, T, cells[i].tracers, ComputationalCell3D::tracerNames));
         fleck_factor_[i] = 1.0 / (1 + sigma_planck_[i] * CG::speed_of_light * dt * beta);
         b[i] += volume * fleck_factor_[i] * dt * CG::speed_of_light * sigma_planck_[i] * T * T * T * T * CG::radiation_constant;
@@ -233,8 +233,16 @@ void DiffusionClosedBox::SetBoundaryValues(Tessellation3D const& /*tess*/, size_
         std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/)const
 {}
 
-double PowerLawOpacity::CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const
+
+double PowerLawOpacity::CalcDiffusionCoefficient(ComputationalCell3D const& cell) const
 {
+    return D0_ * std::pow(cell.density, alpha_) * std::pow(cell.temperature, beta_);
+}
+
+double PowerLawOpacity::CalcPlanckOpacity(ComputationalCell3D const& cell) const
+{
+    return CG::speed_of_light / (3 * CalcDiffusionCoefficient(cell));
+}
     return D0_ * std::pow(cells[index].density, alpha_) * std::pow(cells[index].temperature, beta_);
 }
 

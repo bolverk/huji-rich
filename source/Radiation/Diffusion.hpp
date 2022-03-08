@@ -17,18 +17,16 @@ class DiffusionCoefficientCalculator
 public:
 /*!
     \brief Calculates the diffusion coefficient
-    \param index The index of the cell
-    \param cells The primitive variables
+    \param cell The primitive variables
     \return The diffusion coefficient (default units are cm^2/sec)
 */
-virtual double CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const = 0;
+virtual double CalcDiffusionCoefficient(ComputationalCell3D const& cell) const = 0;
 /*!
     \brief Calculates the Planck opacity
-    \param index The index of the cell
-    \param cells The primitive variables
+    \param cell The primitive variables
     \return The planck opacity (default units are 1/cm)
 */
-virtual double CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const = 0;
+virtual double CalcPlanckOpacity(ComputationalCell3D const& cell) const = 0;
 };
 
 //! \brief Class for assigning boundary conditions for diffusion
@@ -109,9 +107,9 @@ private:
 public:
     PowerLawOpacity(double const D0, double const alpha, double const beta): D0_(D0), alpha_(alpha), beta_(beta){}
 
-    double CalcDiffusionCoefficient(size_t const index, std::vector<ComputationalCell3D> const& cells) const override;
+    double CalcDiffusionCoefficient(ComputationalCell3D const& cell) const override;
 
-    double CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const override;
+    double CalcPlanckOpacity(ComputationalCell3D const& cell) const override;
 };
 
 #endif
