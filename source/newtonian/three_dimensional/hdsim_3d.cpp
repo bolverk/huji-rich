@@ -5,6 +5,35 @@
 #ifdef RICH_MPI
 #include "../../mpi/mpi_commands.hpp"
 #endif
+#include <chrono>
+
+namespace
+{
+	#ifdef RICH_MPI
+	double get_time()
+	{
+		return MPI_Wtime();
+	}
+	#else
+	std::chrono::time_point<std::chrono::high_resolution_clock> get_time()
+	{
+		return std::chrono::high_resolution_clock::now();
+	}
+	#endif
+
+	template <class T>
+	void DisplayTime(T const& t1, T const& t2, std::string const& msg)
+	{
+		#ifdef RICH_MPI
+			int rank = -1;
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+			if(rank == 0)
+				std::cout<<msg<<" "<<t2 - t1<<" seconds"<<std::endl;
+		#else
+			std::cout<<msg<< std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count()<<" seconds"<<std::endl;
+		#endif
+	}
+}
 
 Tessellation3D& HDSim3D::getTesselation(void)
 {
@@ -300,11 +329,14 @@ void HDSim3D::timeAdvance2(void)
 			load = 0.0;
 	}
 #endif
+	auto t1 = get_time();
 	UpdateTessellation(tess_, point_vel, dt
 #ifdef RICH_MPI
 		, tproc_
 #endif
 	);
+	auto t2 = get_time();
+	DisplayTime(t1, t2, "Voronoi build time");
 #ifdef RICH_MPI
 	// Keep relevant points
 	MPI_exchange_data(tess_, mid_extensives, false, &edummy);
