@@ -165,7 +165,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
                     }
                 }
                 else
-                    boundary_calc_.SetBoundaryValues(tess, i, neighbor_j, dt, cells, key_index, tess.GetArea(faces[j]), A[i][0], b[i]);
+                    boundary_calc_.SetBoundaryValues(tess, i, neighbor_j, dt, cells, key_index, tess.GetArea(faces[j]), A[i][0], b[i], faces[j]);
             }
         }
     }
@@ -220,7 +220,7 @@ void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& ext
 }
 
 void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 
-        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const Area, double& A, double &b)const
+        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const Area, double& A, double &b, size_t const /*face_index*/)const
 {
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
@@ -230,7 +230,7 @@ void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t
     }
 }
 void DiffusionClosedBox::SetBoundaryValues(Tessellation3D const& /*tess*/, size_t const /*index*/, size_t const /*outside_point*/, double const /*dt*/, 
-        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/)const
+        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/, size_t const /*face_index*/)const
 {}
 
 

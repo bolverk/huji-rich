@@ -34,7 +34,7 @@ class DiffusionBoundaryCalculator
 {
     public:
     /*!
-\brief Sets the boundary values
+\brief Sets the boundary values for the matrix build in A*x=b
 \param tess The tesselation
 \param index The index of the cell that is adjacent to a boundary
 \param outside_point The index of the cell that is outside
@@ -44,9 +44,10 @@ class DiffusionBoundaryCalculator
 \param b the value in the b vector to change, given as input and output
 \param Area The area of the interface between the two cells
 \param dt The time step
+\param face_index The index of the interface
     */
 virtual void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
-    std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const = 0;
+    std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const = 0;
 };
 
 //! \brief Class with constant blackbody temperature on the left x side and zero flux on other sides
