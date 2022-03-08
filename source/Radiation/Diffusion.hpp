@@ -74,7 +74,10 @@ class DiffusionSideBoundary : public DiffusionBoundaryCalculator
     DiffusionSideBoundary(double const T): T_(T){}
 
     void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
-        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const override;
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const override;
+
+    void GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+        std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const override;
     private:
         double const T_;
 };
@@ -84,7 +87,10 @@ class DiffusionClosedBox : public DiffusionBoundaryCalculator
 {
     public:
     void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
-        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b)const override;
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const override;
+    
+    void GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+        std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const override;
 };
 
 //! \brief Class for calculating diffusion matrix data for the CG solver
