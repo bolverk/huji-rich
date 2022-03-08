@@ -870,7 +870,7 @@ double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matr
 	double max_diff = 0;
 	for(size_t i = 0; i < N; ++i)
 	{
-		double const diff = std::abs(new_Er[i] - cells_[i].tracers[0] * cells_[i].density) / (new_Er[i] + 0.001 * max_Er);
+		double const diff = std::abs(new_Er[i] - cells_[i].tracers[0] * cells_[i].density) / (new_Er[i] + 0.01 * max_Er);
 		max_diff = std::max(max_diff, diff);
 	}
 	matrix_builder.PostCG(tess_, extensive_, dt, cells_, new_Er, key);
@@ -881,5 +881,5 @@ double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matr
 #endif
 	pt_.updateTime(dt);
 	pt_.updateCycle();
-	return dt * std::min(0.01 / max_diff, 1.1);
+	return dt * std::min(0.05 / max_diff, 1.1);
 }
