@@ -48,6 +48,19 @@ class DiffusionBoundaryCalculator
     */
 virtual void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
     std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const = 0;
+    /*!
+\brief Sets the outside values for the Froce calcualtion if needed
+\param tess The tesselation
+\param index The index of the cell that is adjacent to a boundary
+\param outside_point The index of the cell that is outside
+\param cell The primitve cells
+\param key_index The index of the tracer to calculate for
+\param key_outside The value of the key in the outside cell, given as output
+\param v_outside The value of the velocity, given as output
+\param new_keys The values of the new keys after the CG step
+    */
+virtual void GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const = 0;
 };
 
 //! \brief Class with constant blackbody temperature on the left x side and zero flux on other sides

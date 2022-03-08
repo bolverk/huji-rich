@@ -229,10 +229,30 @@ void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t
         b += 2 * Area * dt * CG::stefan_boltzman * T_ * T_ * T_ * T_;
     }
 }
+
+void DiffusionSideBoundary::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
+{
+    double const R = tess.GetWidth(index);
+    if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
+        key_outside = CG::radiation_constant * T_ * T_ * T_ * T_;
+    else
+        key_outside = new_keys[index];
+    v_outside = cells[index].velocity;
+}
+
 void DiffusionClosedBox::SetBoundaryValues(Tessellation3D const& /*tess*/, size_t const /*index*/, size_t const /*outside_point*/, double const /*dt*/, 
         std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/, size_t const /*face_index*/)const
 {}
 
+void DiffusionClosedBox::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
+{
+    key_outside = new_keys[index];
+    Vector3D normal = normalize(tess.GetMeshPoint(outside_point) - tess.GetMeshPoint(index));
+    v_outside = cells[index].velocity;
+    v_outside -= 2 * normal * ScalarProd(normal, v_outside);
+}
 
 double PowerLawOpacity::CalcDiffusionCoefficient(ComputationalCell3D const& cell) const
 {
@@ -246,7 +266,28 @@ double PowerLawOpacity::CalcPlanckOpacity(ComputationalCell3D const& cell) const
     return D0_ * std::pow(cells[index].density, alpha_) * std::pow(cells[index].temperature, beta_);
 }
 
-double PowerLawOpacity::CalcPlanckOpacity(size_t const index, std::vector<ComputationalCell3D> const& cells) const
+void DiffusionXInflowBoundary::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
 {
-    return CG::speed_of_light / (3 * CalcDiffusionCoefficient(index, cells));
+    double const R = tess.GetWidth(index);
+    if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
+    {
+        key_outside = left_state_.tracers[key_index] * left_state_.density;
+        v_outside = left_state_.velocity;
+    }
+    else
+    {
+        if(tess.GetMeshPoint(index).x < (tess.GetMeshPoint(outside_point).x - R * 1e-4))
+        {
+            key_outside = right_state_.tracers[key_index] * right_state_.density;
+            v_outside = right_state_.velocity;
+        }
+        else
+        {
+            key_outside = new_keys[index];
+            Vector3D normal = normalize(tess.GetMeshPoint(outside_point) - tess.GetMeshPoint(index));
+            v_outside = cells[index].velocity;
+            v_outside -= 2 * normal * ScalarProd(normal, v_outside);
+        }
+    }
 }
