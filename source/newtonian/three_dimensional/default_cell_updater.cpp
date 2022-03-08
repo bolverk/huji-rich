@@ -45,7 +45,7 @@ namespace
 
 	void regular_update(std::vector<ComputationalCell3D> &res, std::vector<Conserved3D> & extensives,
 		Tessellation3D const& tess, size_t entropy_index,
-		EquationOfState const& eos)
+		EquationOfState const& eos, bool const includes_temperature)
 	{
 		size_t Nloop = tess.GetPointNo();
 		size_t Ntracers = ComputationalCell3D::tracerNames.size();
@@ -113,6 +113,8 @@ namespace
 				  res[i].pressure = eos.de2p(res[i].density, energy, res[i].tracers, ComputationalCell3D::tracerNames);
 					res[i].internal_energy = energy;
 				}
+				if(includes_temperature)
+					res[i].temperature = eos.de2T(res[i].density, energy, res[i].tracers, ComputationalCell3D::tracerNames);
 				if (!(res[i].density > 0) || !(res[i].pressure > 0) || (!std::isfinite(fastabs(extensives[i].momentum))))
 				{
 					UniversalError eo("Negative quantity in cell update");
@@ -229,7 +231,7 @@ namespace
 
 }
 
-DefaultCellUpdater::DefaultCellUpdater(bool SR, double G) :SR_(SR), G_(G), entropy_index_(9999999) {}
+DefaultCellUpdater::DefaultCellUpdater(bool SR, double G, bool const includes_temperature) :SR_(SR), G_(G), includes_temperature_(includes_temperature), entropy_index_(9999999) {}
 
 void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOfState const& eos,
 	const Tessellation3D& tess, vector<Conserved3D>& extensives) const
@@ -247,7 +249,7 @@ void DefaultCellUpdater::operator()(vector<ComputationalCell3D> &res, EquationOf
 	}
 #endif
 	if (!SR_)
-		regular_update(res, extensives, tess, entropy_index_, eos);
+		regular_update(res, extensives, tess, entropy_index_, eos, includes_temperature_);
 	else
 		regular_updateSR(res, extensives, tess, entropy_index_, eos, G_);
 #ifdef RICH_MPI
