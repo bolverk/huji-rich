@@ -87,6 +87,11 @@ namespace CG
         }
     }
 
+    static bool abs_compare(double a, double b)
+    {
+        return (std::abs(a) < std::abs(b));
+    }
+
     std::vector<double> conj_grad_solver(const double tolerance, int &total_iters,
         Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
         double const dt, MatrixBuilder const& matrix_builder)  //total_iters is to store # of iters in it
@@ -112,8 +117,14 @@ namespace CG
         matrix_builder.BuildMatrix(tess, A, A_indeces, cells, key_name, dt, b, sub_x);
         std::vector<double> M; // The preconditioner
         build_M(A, A_indeces, M);
+        // Find maximum value of A, this is used for normalization of the error
+        double maxA = 0;
+        for(size_t i = 0; i < A.size(); ++i)
+            for(size_t j = 0; j < A[i].size(); ++j)
+                maxA = std::max(maxA, std::abs(A[i][j]));
         
 #ifdef RICH_MPI
+        MPI_Allreduce(MPI_IN_PLACE, &maxA, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
         MPI_exchange_data2(tess, sub_x, true);
 #endif
         std::vector<double> r_old, sub_a_times_p;
@@ -149,20 +160,23 @@ namespace CG
             // Next estimate of solution
             vec_lin_combo(1.0, sub_x, alpha, sub_p, result1);
             sub_x = result1;
-            double max_x = *std::max_element(sub_x.begin(), sub_x.end());
+            double max_values[2]; 
+            max_values[0] = *std::max_element(sub_x.begin(), sub_x.end());
             vec_lin_combo(1.0, sub_r, -alpha, sub_a_times_p, result2);
             sub_r = result2;
+            max_values[1] = *std::max_element(sub_r.begin(), sub_r.end(), abs_compare);
             sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
             result2 = vector_rescale(sub_r, M);
             sub_r_sqrd = mpi_dot_product(sub_r, result2);
 
     #ifdef RICH_MPI
-            MPI_Allreduce(MPI_IN_PLACE, &max_x, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, max_values, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
             // MPI_Allreduce(MPI_IN_PLACE, &sub_r_sqrd, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     #endif
             // recall that we can't have a 'break' within an openmp parallel region, so end it here then all threads are merged, and the convergence is checked
             // Convergence test
-            if (std::sqrt(sub_r_sqrd_convergence / Nlocal) < tolerance * max_x) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
+            if (std::sqrt(sub_r_sqrd_convergence / Nlocal) < tolerance * max_values[0] * maxA 
+                && max_values[1] < max_values[0] * 1e-4 * maxA) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
 #ifdef RICH_MPI
                 if(rank == 0)
 #endif
