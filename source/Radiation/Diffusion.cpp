@@ -1,6 +1,6 @@
 #include "Diffusion.hpp"
 
-namespace
+namespace CG
 {
     // Vector3D calc_grad(double const cell,
 	// 	Vector3D const& center, Vector3D const& cell_cm, double cell_volume, vector<double> const& neighbors,
@@ -84,8 +84,8 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
     std::vector<double> D(Nlocal);
-    fleck_factor_.resize(Nlocal);
-    sigma_planck_.resize(Nlocal);
+    fleck_factor.resize(Nlocal);
+    sigma_planck.resize(Nlocal);
     std::vector<size_t> neighbors;
     face_vec faces;
     for(size_t i = 0; i < Nlocal; ++i)
@@ -98,8 +98,8 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         double const T = cells[i].temperature;
         sigma_planck[i] = D_coefficient_calcualtor.CalcPlanckOpacity(cells[i]);
         double const beta = 4 * CG::radiation_constant * T * T * T / (cells[i].density * eos_.dT2cv(cells[i].density, T, cells[i].tracers, ComputationalCell3D::tracerNames));
-        fleck_factor_[i] = 1.0 / (1 + sigma_planck_[i] * CG::speed_of_light * dt * beta);
-        b[i] += volume * fleck_factor_[i] * dt * CG::speed_of_light * sigma_planck_[i] * T * T * T * T * CG::radiation_constant;
+        fleck_factor[i] = 1.0 / (1 + sigma_planck[i] * CG::speed_of_light * dt * beta);
+        b[i] += volume * fleck_factor[i] * dt * CG::speed_of_light * sigma_planck[i] * T * T * T * T * CG::radiation_constant;
     }
 #ifdef RICH_MPI
     MPI_exchange_data2(tess, D, true);
@@ -120,7 +120,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         A_indeces[i].push_back(i);
         double const volume = tess.GetVolume(i);
         double const T = cells[i].temperature;
-        A[i].push_back(volume * (1 + fleck_factor_[i] * dt * CG::speed_of_light * sigma_planck_[i]));
+        A[i].push_back(volume * (1 + fleck_factor[i] * dt * CG::speed_of_light * sigma_planck[i]));
     }
 
     for(size_t i = 0; i < Nlocal; ++i)
@@ -192,7 +192,7 @@ void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& ext
         double const volume = tess.GetVolume(i);
         extensives[i].tracers[key_index] = CG_result[i] * volume;
         double const T = cells[i].temperature;
-        double const dE = fleck_factor_[i] * CG::speed_of_light * dt * sigma_planck_[i] * (CG_result[i] - T * T * T * T * CG::radiation_constant) * volume;
+        double const dE = fleck_factor[i] * CG::speed_of_light * dt * sigma_planck[i] * (CG_result[i] - T * T * T * T * CG::radiation_constant) * volume;
         extensives[i].energy += dE;
         extensives[i].internal_energy += dE;
         if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy))
@@ -212,11 +212,10 @@ void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& ext
             maxT = T;
         }
     }
-    fleck_factor_.clear();
-    fleck_factor_.shrink_to_fit();
-    sigma_planck_.clear();
-    sigma_planck_.shrink_to_fit();
-    //std::cout<<"T "<<maxT<<" i "<<max_index<<std::endl;
+    fleck_factor.clear();
+    fleck_factor.shrink_to_fit();
+    sigma_planck.clear();
+    sigma_planck.shrink_to_fit();
 }
 
 void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 

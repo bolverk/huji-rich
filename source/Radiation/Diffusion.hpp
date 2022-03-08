@@ -99,24 +99,26 @@ class Diffusion : public CG::MatrixBuilder
 public:
 /*!
 \brief Class constructor
-\param D_coefficient_calcualtor Class for calcualting the diffusion coefficients
+\param D_coefficient_calc Class for calcualting the diffusion coefficients
 \param eos The equation of state
 \param boundary_calc Class to calcualte the values for the boundary conditions
 */
-    Diffusion(DiffusionCoefficientCalculator const& D_coefficient_calcualtor, DiffusionBoundaryCalculator const& boundary_calc,
-        EquationOfState const& eos) : D_coefficient_calcualtor_(D_coefficient_calcualtor),
-        boundary_calc_(boundary_calc), eos_(eos), sigma_planck_(), fleck_factor_() {}
+    Diffusion(DiffusionCoefficientCalculator const& D_coefficient_calc, DiffusionBoundaryCalculator const& boundary_calc,
+        EquationOfState const& eos) : D_coefficient_calcualtor(D_coefficient_calc),
+        boundary_calc_(boundary_calc), eos_(eos), sigma_planck(), fleck_factor() {}
 
     void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
             double const dt, std::vector<double>& b, std::vector<double>& x0) const override;
 
     void PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& extensives, double const dt, std::vector<ComputationalCell3D>& cells,
         std::vector<double>const& CG_result, std::string const& key_name)const override;
-private:
-    DiffusionCoefficientCalculator const& D_coefficient_calcualtor_;
+
+    DiffusionCoefficientCalculator const& D_coefficient_calcualtor;
+    mutable std::vector<double> sigma_planck, fleck_factor;
     DiffusionBoundaryCalculator const& boundary_calc_;
+private:  
     EquationOfState const& eos_;
-    mutable std::vector<double> sigma_planck_, fleck_factor_;
+    
 };
 
 //! D=D0*rho^alpha*T^beta
