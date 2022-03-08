@@ -263,7 +263,42 @@ double PowerLawOpacity::CalcPlanckOpacity(ComputationalCell3D const& cell) const
 {
     return CG::speed_of_light / (3 * CalcDiffusionCoefficient(cell));
 }
-    return D0_ * std::pow(cells[index].density, alpha_) * std::pow(cells[index].temperature, beta_);
+
+void DiffusionXInflowBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const
+{
+    double const R = tess.GetWidth(index);
+    if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
+    {
+        double const Er_j = left_state_.tracers[key_index] * left_state_.density;
+        double const Er = cells[index].tracers[key_index] * cells[index].density;
+        double const dx = tess.GetCellCM(index).x - tess.GetBoxCoordinates().first.x;
+        Vector3D const grad_E = Vector3D(1, 0, 0) * (1.0 / (2 * dx));
+        Vector3D const r_ij = tess.GetMeshPoint(index) - tess.GetMeshPoint(outside_point);
+        double mid_D = 0.5 * (D_calc_.CalcDiffusionCoefficient(cells[index]) + D_calc_.CalcDiffusionCoefficient(left_state_));
+        double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), mid_D, 0.5 * (Er + Er_j));
+        mid_D *= flux_limiter;
+        double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(face_index) / abs(r_ij))) * dt * mid_D; 
+        A += flux;
+        b += flux * Er_j;
+    }
+    else
+    {
+        if(tess.GetMeshPoint(index).x < (tess.GetMeshPoint(outside_point).x - R * 1e-4))
+        {
+            double const Er_j = right_state_.tracers[key_index] * right_state_.density;
+            double const Er = cells[index].tracers[key_index] * cells[index].density;
+            double const dx = tess.GetBoxCoordinates().second.x - tess.GetCellCM(index).x;
+            Vector3D const grad_E = Vector3D(-1, 0, 0) * (1.0 / (2 * dx));
+            Vector3D const r_ij = tess.GetMeshPoint(index) - tess.GetMeshPoint(outside_point);
+            double mid_D = 0.5 * (D_calc_.CalcDiffusionCoefficient(cells[index]) + D_calc_.CalcDiffusionCoefficient(right_state_));
+            double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), mid_D, 0.5 * (Er + Er_j));
+            mid_D *= flux_limiter;
+            double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(face_index) / abs(r_ij))) * dt * mid_D; 
+            A += flux;
+            b += flux * Er_j;
+        }
+    }
 }
 
 void DiffusionXInflowBoundary::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,

@@ -131,5 +131,24 @@ public:
 
     double CalcPlanckOpacity(ComputationalCell3D const& cell) const override;
 };
+//! \brief Class with constant states on the x sides and zero flux on other sides
+class DiffusionXInflowBoundary : public DiffusionBoundaryCalculator
+{
+    public:
+    /*!
+    \brief Class constructor
+    \param T Boundary temperature, in kelvin
+    */
+    DiffusionXInflowBoundary(ComputationalCell3D const& left_state, ComputationalCell3D const& right_state,
+        DiffusionCoefficientCalculator const& D_calc): left_state_(left_state), right_state_(right_state), D_calc_(D_calc){}
 
+    void SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt,
+        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const override;
+    
+    void GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
+        std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const override;
+    private:
+        ComputationalCell3D const& left_state_, right_state_;
+        DiffusionCoefficientCalculator const& D_calc_;
+};
 #endif
