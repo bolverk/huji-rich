@@ -6,6 +6,11 @@
 
 using namespace CG;
 
+namespace CG
+{
+     double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value);
+}
+
 //! \brief Abstract class for calculating the needed data for diffusion
 class DiffusionCoefficientCalculator
 {
