@@ -197,6 +197,9 @@ namespace CG
         }
         if(not good_end)
             throw UniversalError("CG did not converge");
+#ifdef RICH_MPI
+        MPI_exchange_data2(tess, sub_x, true);
+#endif
         return sub_x;
     }
 
