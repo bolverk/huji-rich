@@ -12,7 +12,7 @@
 #include "extensive_updater3d.hpp"
 #include "../../mpi/ProcessorUpdate3D.hpp"
 #include "SourceTerm3D.hpp"
-#include "source/CG/conj_grad_solve.hpp"
+#include "source/Radiation/conj_grad_solve.hpp"
 
 //! \brief Three dimensional simulation
 class HDSim3D
