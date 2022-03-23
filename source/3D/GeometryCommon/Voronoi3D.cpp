@@ -1841,7 +1841,7 @@ void Voronoi3D::MPIFirstIntersections(Tessellation3D const &tproc, vector<std::p
             {
               double r1 = fastabs(point - neigh_points[z]);
               double temp = r0 > r1 ? r1 / r0 : r0 / r1;
-              if (temp > 0.9 && r1 < 2 * radii[z])
+              if (temp > 0.75 && r1 < 2.5 * radii[z])
                 to_add.push_back(z);
               if (r1 * mind_1 < 1)
               {
