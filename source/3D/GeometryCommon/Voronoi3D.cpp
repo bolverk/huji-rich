@@ -2031,7 +2031,7 @@ double Voronoi3D::CalcTetraRadiusCenter(std::size_t index)
   if (Rcheck0 > tol * Rres || Rcheck0 * tol < Rres)
     return CalcTetraRadiusCenterHiPrecision(index);
   double const a_tol = 1e-6;
-  if (std::abs(a) < Rres * a_tol)
+  if (std::abs(a) < Rres * Rres * Rres * a_tol)
     return CalcTetraRadiusCenterHiPrecision(index);
   return Rres;
 }
