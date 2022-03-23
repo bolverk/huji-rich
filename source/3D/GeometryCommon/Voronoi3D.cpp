@@ -1540,16 +1540,16 @@ void Voronoi3D::FindIntersectionsFirstMPI(vector<std::size_t> &res, std::size_t 
   std::size_t Ntetra = PointTetras_[point].size();
   size_t Nfaces = faces.size();
   skipped = true;
+  double maxR = GetRadius(PointTetras_[point].at(0));
+  for (std::size_t j = 1; j < Ntetra; ++j)
+    maxR = std::max(maxR, GetRadius(PointTetras_[point][j]));
   for (size_t i = 0; i < Nfaces; ++i)
   {
     Face const &f = faces[i];
     Vector3D normal = CrossProduct(f.vertices[1] - f.vertices[0], f.vertices[2] - f.vertices[0]);
     normal *= (1.0 / fastsqrt(ScalarProd(normal, normal)));
 
-    // Quick check if there is no intersection for sure
-    double maxR = GetRadius(PointTetras_[point].at(0));
-    for (std::size_t j = 1; j < Ntetra; ++j)
-      maxR = std::max(maxR, GetRadius(PointTetras_[point][j]));
+    // Quick check if there is no intersection for sure 
     sphere.radius = 2 * maxR;
     sphere.center = GetMeshPoint(point);
     if (!FaceSphereIntersections(f, sphere, normal))
