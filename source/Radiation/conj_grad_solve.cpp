@@ -161,10 +161,16 @@ namespace CG
             vec_lin_combo(1.0, sub_x, alpha, sub_p, result1);
             sub_x = result1;
             double max_values[2]; 
-            max_values[0] = *std::max_element(sub_x.begin(), sub_x.end());
+            max_values[0] = std::abs(*std::max_element(sub_x.begin(), sub_x.end()));
             vec_lin_combo(1.0, sub_r, -alpha, sub_a_times_p, result2);
             sub_r = result2;
-            max_values[1] = *std::max_element(sub_r.begin(), sub_r.end(), abs_compare);
+            max_values[1] = 0;
+            for(size_t j = 0; j < Nlocal; ++j)
+            {
+                double const local_scale = std::max(std::abs(b[j]), std::abs(A[j][0] * sub_x[j]));
+                max_values[1] = std::max(max_values[1], std::abs(sub_r[j]));
+            }
+            max_values[1] /= local_scale;
             sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
             result2 = vector_rescale(sub_r, M);
             sub_r_sqrd = mpi_dot_product(sub_r, result2);
