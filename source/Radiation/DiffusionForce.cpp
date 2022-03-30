@@ -7,7 +7,7 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
 		vector<Conserved3D> &extensives) const
 {
     int total_iters = 0;
-	double const CG_eps = 1e-7;
+	double const CG_eps = 1e-8;
 	std::vector<double> new_Er = CG::conj_grad_solver(CG_eps, total_iters, tess, cells , key_, dt, diffusion_);
 	size_t const N = tess.GetPointNo();
 	double max_Er = *std::max_element(new_Er.begin(), new_Er.end());
