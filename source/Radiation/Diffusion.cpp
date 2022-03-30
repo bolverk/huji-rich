@@ -72,7 +72,10 @@ namespace CG
     // Larsen second order flux limiter, taken from eq. 10 in "Diffusion, P1, and other approximate forms of radiation transport"
     double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value)
     {
-        return 1.0 / std::sqrt(1 + ScalarProd(grad, grad) * D * D / (cell_value * cell_value * CG::speed_of_light * CG::speed_of_light));
+        double const R = std::max(3 * abd(grad) * D / (cell_value * CG::speed_of_light), 1e20 * std::numeric_limits<double>::min());
+        if(R < 1e-2) //series expansion
+            return 1 - R * R / 15 + 2 * R * R * R * R /315;
+        return 3 * (1.0 / std::tanh(R) - 1.0 / R) / R;
     }
 }
 
