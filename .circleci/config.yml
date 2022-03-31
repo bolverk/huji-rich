@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  say-hello:
+  check_compilation:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -20,11 +20,12 @@ jobs:
       - run: make external_libraries/lib/libclipper.a
       - run: export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_66_0:`pwd`/external_libraries/include:`pwd`/external_libraries/spdlog/include
       - run: make external_libraries/include/H5Cpp.h
+      - run: make set_environ_vars.sh && `cat set_environ_vars.sh` 
       - run: make
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  check_compilation-workflow:
     jobs:
-      - say-hello
+      - check_compilation
