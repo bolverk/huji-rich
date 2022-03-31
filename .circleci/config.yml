@@ -22,7 +22,8 @@ jobs:
       - run: make external_libraries/include/H5Cpp.h
       - run: make external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a
       - run: make external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
-      - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+      - run: sudo apt-get update
+      #- run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
       - run: sudo apt-get install libhdf5-serial-dev
       - run: make set_environ_vars.sh && `cat set_environ_vars.sh` 
       - run: make
