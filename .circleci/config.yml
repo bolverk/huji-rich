@@ -15,7 +15,6 @@ jobs:
     steps:
       - checkout
       - run: make external_libraries/boost_dump/boost_1_66_0/boost/container/static_vector.hpp
-      - run: make external_libraries/spdlog/include
       - run: mkdir -p external_libraries/lib/
       - run: mkdir -p external_libraries/include/
       - run: make external_libraries/lib/libclipper.a
