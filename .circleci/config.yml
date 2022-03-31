@@ -25,8 +25,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
       - run: sudo apt-get install libhdf5-serial-dev
-      - run: make set_environ_vars.sh && `cat set_environ_vars.sh` 
-      - run: make
+      - run: make set_environ_vars.sh && `cat set_environ_vars.sh` && make
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
