@@ -173,3 +173,9 @@ external_libraries/dump_clipper/dclipper.o: external_libraries/include/clipper.h
 
 external_libraries/lib/libdclipper.a: external_libraries/dump_clipper/dclipper.o
 	$(ARCHIVER_FUNC) cr $@ $^ 
+
+external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h
+	cd external_libraries/ann_tree_dump/ann_1.1.2 && make linux-g++
+
+external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
+	cd external_libraries/ann_tree_dump/ && tar xf ./ann_1.1.2.tar.gz
