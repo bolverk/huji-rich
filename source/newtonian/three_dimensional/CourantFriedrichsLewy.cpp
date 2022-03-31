@@ -64,7 +64,7 @@ double CourantFriedrichsLewy::operator()(const Tessellation3D& tess, const vecto
 	MPI_Allreduce(&res, &new_res, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 	res = new_res;
 #endif
-	if (first_try_ && dt_first_ > 0 || (last_time_ == time && dt_first_ > 0))
+	if ((first_try_ && dt_first_ > 0) || (last_time_ == time && dt_first_ > 0))
 	{
 		res = std::min(res, dt_first_);
 		first_try_ = false;
