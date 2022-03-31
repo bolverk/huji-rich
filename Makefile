@@ -179,3 +179,8 @@ external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a: | external_libraries/an
 
 external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h: | external_libraries/ann_tree_dump/ann_1.1.2.tar.gz
 	cd external_libraries/ann_tree_dump/ && tar xf ./ann_1.1.2.tar.gz
+
+external_libraries/ann_tree_dump/ann_1.1.2.tar.gz:
+	mkdir -p external_libraries/ann_tree_dump
+	cd external_libraries/ann_tree_dump && \
+	wget http://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
