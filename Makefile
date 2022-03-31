@@ -119,7 +119,7 @@ set_environ_vars.sh: | external_libraries/include/H5Cpp.h external_libraries/boo
 	echo export\ LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ LD_PATH=$(LD_PATH):`pwd`/external_libraries/lib:`pwd`/external_libraries/ann_tree_dump/ann_1.1.2/lib >> set_environ_vars.sh
 	echo export\ RICH_ROOT=`pwd` >> set_environ_vars.sh
-	external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.3/c++/src/H5Cpp.h
+external_libraries/include/H5Cpp.h: external_libraries/hdf5_dump/hdf5-1.10.3/c++/src/H5Cpp.h
 		cd external_libraries/hdf5_dump/hdf5-1.10.3 && \
 		./configure --enable-cxx --prefix=`cd ../.. && pwd`
 		cd external_libraries/hdf5_dump/hdf5-1.10.3 && make
