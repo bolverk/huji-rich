@@ -20,6 +20,8 @@ jobs:
       - run: make external_libraries/lib/libclipper.a
       - run: export CPLUS_INCLUDE_PATH=$(CPLUS_INCLUDE_PATH):`pwd`/external_libraries/boost_dump/boost_1_66_0:`pwd`/external_libraries/include:`pwd`/external_libraries/spdlog/include
       - run: make external_libraries/include/H5Cpp.h
+      - run: make external_libraries/ann_tree_dump/ann_1.1.2/lib/libANN.a
+      - run: make external_libraries/ann_tree_dump/ann_1.1.2/include/ANN/ANN.h 
       - run: make set_environ_vars.sh && `cat set_environ_vars.sh` 
       - run: make
 
