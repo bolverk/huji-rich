@@ -354,6 +354,11 @@ public:
     \param ur Upper right
    */
   virtual void SetBox(Vector3D const& ll, Vector3D const& ur) = 0;
+/*!
+\brief Access method to box faces
+\return The box faces
+*/
+  virtual std::vector<Face>& ModifyBoxFaces(void) = 0;
 };
 
 /*! \brief Create a subset of a vector of points
