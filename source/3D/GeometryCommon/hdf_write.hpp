@@ -115,6 +115,7 @@ Snapshot3D ReDistributeData3D(string const& filename, Tessellation3D const& proc
  */
 void WriteVoronoi(Voronoi3D const& tri, std::string const& filename);
 
+std::vector<Vector3D> ReadVoronoiPoints(std::string const& filename);
 
 #if RICH_MPI
 /*! \brief Write snapshot to file
