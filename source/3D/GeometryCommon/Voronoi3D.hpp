@@ -117,6 +117,7 @@ private:
   Voronoi3D(Voronoi3D const &other);
   std::array<Vector3D, 4> temp_points_;
   std::array<Vector3D, 5> temp_points2_;
+  std::vector<Face> box_faces_;
 public:
 #ifdef RICH_MPI
   /*! \brief Update meta tessellation
@@ -151,6 +152,8 @@ public:
     \param ur Upper right
    */
   Voronoi3D(Vector3D const& ll, Vector3D const& ur);
+
+  Voronoi3D(std::vector<Face> const& box_faces);
 
   void output(std::string const& filename)const override;
 
@@ -375,5 +378,7 @@ public:
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);
+
+bool PointInPoly(std::vector<Face> const& faces, Vector3D const &point);
 
 #endif // VORONOI3D_HPP
