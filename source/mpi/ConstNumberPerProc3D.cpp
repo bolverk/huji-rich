@@ -529,52 +529,26 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 	dy = old_dy;
 	dz = old_dz;
 	// Make sure not out of bounds
-	const double close = 0.999;
-	const double wx = tproc.GetWidth(rank);
-	Vector3D ll = tproc.GetBoxCoordinates().first;
-	Vector3D ur = tproc.GetBoxCoordinates().second;
-	const Vector3D center(0.5*(ll + ur));
-	if (point.x + dx > (ur.x - (1 - close)*wx))
+	for (size_t i = 0; i < Nneigh; ++i)
 	{
-		if ((ur.x - point.x) < ((1 - close)*wx))
-			dx = -wx * (1 - close);
-		else
-			dx = 0.5*(ur.x - point.x);
-	}
-	if ((point.x + dx) < (ll.x + (1 - close)*wx))
-	{
-		if ((-ll.x + point.x) < ((1 - close)*wx))
-			dx = wx * (1 - close);
-		else
-			dx = -0.5*(-ll.x + point.x);
-	}
-	if (point.y + dy > (ur.y - (1 - close)*wx))
-	{
-		if ((ur.y - point.y) < ((1 - close)*wx))
-			dy = -wx * (1 - close);
-		else
-			dy = 0.5*(ur.y - point.y);
-	}
-	if ((point.y + dy) < (ll.y + (1 - close)*wx))
-	{
-		if ((-ll.y + point.y) < ((1 - close)*wx))
-			dy = wx * (1 - close);
-		else
-			dy = -0.5*(-ll.y + point.y);
-	}
-	if (point.z + dz > (ur.z - (1 - close)*wx))
-	{
-		if ((ur.z - point.z) < ((1 - close)*wx))
-			dz = -wx * (1 - close);
-		else
-			dz = 0.5*(ur.z - point.z);
-	}
-	if ((point.z + dz) < (ll.z + (1 - close)*wx))
-	{
-		if ((-ll.z + point.z) < ((1 - close)*wx))
-			dz = wx * (1 - close);
-		else
-			dz = -0.5*(-ll.z + point.z);
+		size_t const neighbor = neigh[i];
+		if(neighbor >= nproc)
+		{
+			if(tproc.IsPointOutsideBox(neighbor))
+			{
+				Vector3D const diff = tproc.GetMeshPoint(neighbor) - point;
+				double const R_diff = fastabs(diff);
+				Vector3D dmove = Vector3D(dx, dy, dz);
+				double const v_diff = ScalarProd(dmove, diff) / R_diff;
+				if(v_diff > 0.45 * R_diff)
+				{
+					dmove *= R_diff * 0.45 / v_diff;
+					dx = dmove.x;
+					dy = dmove.y;
+					dz = dmove.z;
+				}
+			}
+		}
 	}
 	Vector3D cor = point + Vector3D(dx, dy, dz);
 	// Have all processors have the same points
