@@ -320,26 +320,50 @@ namespace
     return bigtet;
   }
 
-void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Vector3D> const& face_points, std::array<size_t, 128> &temp, double areascale)
+void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Vector3D> const& face_points, std::array<double, 128> &area_vec_temp)
   {
     size_t const N = indeces.size();
-    double angle = fastabs(CrossProduct(face_points[indeces[0]] - face_points[indeces[N - 1]], face_points[indeces[1]] - face_points[indeces[N - 1]]));
-    if(angle > areascale * 1e-14)
-      temp[0] = indeces[0];
-    else
-      temp[0] =  std::numeric_limits<size_t>::max();
+    double const small_fraction = 1e-14;
+    double const medium_fraction = 3e-1;
+    // Find correct normal
+    Vector3D good_normal;
+    for(size_t i = 0; i < N; ++i)
+    {
+      area_vec_temp[i] = fastabs(CrossProduct(face_points[indeces[i]] - face_points[indeces[(N + i - 1) % N]], face_points[indeces[(i + 1) % N]] 
+      - face_points[indeces[(N + i - 1) % N]]));
+    }
+    double const area_scale = *std::max_elment(area_vec_temp.begin(), area_vec_temp.begin() + N);
+    good_normal = CrossProduct(face_points[indeces[0]] - face_points[indeces[N - 1]], face_points[indeces[1]] 
+      - face_points[indeces[N - 1]]);
+    good_normal *= 1.0 / fastabs(good_normal);
     for(size_t i = 1; i < N; ++i)
     {
-      angle = fastabs(CrossProduct(face_points[indeces[i]] - face_points[indeces[i - 1]], face_points[indeces[(i + 1)%N]] - face_points[indeces[i - 1]]));
-      if(angle > areascale * 1e-14)
-        temp[i] = indeces[i];
-      else
-        temp[i] = std::numeric_limits<size_t>::max();
+      if(area_vec_temp[i] > area_scale * medium_fraction)
+      {
+        good_normal = CrossProduct(face_points[indeces[i]] - face_points[indeces[i - 1]], face_points[indeces[(i + 1) % N]] 
+          - face_points[indeces[i - 1]]);
+        good_normal *= 1.0 / fastabs(good_normal);
+        break;
+      }
     }
-    indeces.clear();
-    for(size_t i = 0; i < N; ++i)
-      if(temp[i] != std::numeric_limits<size_t>::max())
-        indeces.push_back(temp[i]);
+    size_t Nindeces = indeces.size();
+    for(size_t i = 0; i < Nindeces; ++i)
+    {
+      Vector3D normal_temp = CrossProduct(face_points[indeces[i]] - face_points[indeces[(N + i - 1) % N]], face_points[indeces[(i + 1) % N]] 
+        - face_points[indeces[(N + i - 1) % N]]);
+      double const area = fastabs(normal_temp);
+      normal_temp *= 1.0 / area;
+      if(area < area_scale * small_fraction || ScalarProd(normal_temp, good_normal) < 0.99998)
+      {
+        indeces.erase(indeces.begin() + i);
+        if(i == indeces.size() - 1)
+          break;
+        --i;
+        Nindeces = indeces.size();
+      }
+    }
+    if(Nindeces < 3)
+      throw UniversalError("Not enough point in face in CleanSameLine");
   }
 
   void MakeRightHandFace(boost::container::small_vector<size_t, 8> &indeces, Vector3D const &point, vector<Vector3D> const &face_points,
@@ -1452,6 +1476,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const &order)
   boost::container::flat_set<size_t> neigh_set;
   point_vec *temp_points_in_face;
   std::array<Vector3D, 128> clean_vec;
+  std::array<double, 128> area_vec_temp;
 
   //std::vector<Vector3D, boost::alignment::aligned_allocator<Vector3D, 32> > clean_vec;
   for (size_t i = 0; i < Norg_; ++i)
@@ -1507,7 +1532,7 @@ void Voronoi3D::BuildVoronoi(std::vector<size_t> const &order)
             }
             // Make faces right handed
             MakeRightHandFace(*temp_points_in_face, del_.points_[point], tetra_centers_, temp3, area_[FaceCounter]);
-            CleanSameLine(*temp_points_in_face, tetra_centers_, temp3, area_[FaceCounter]);
+            CleanSameLine(*temp_points_in_face, tetra_centers_, area_vec_temp);
             FaceNeighbors_[FaceCounter].first = point;
             FaceNeighbors_[FaceCounter].second = point_other;
 
