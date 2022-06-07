@@ -36,6 +36,9 @@ public:
 	//! \brief Velocity
 	Vector3D velocity;
 
+	//! \brief Radiation enregy per unit mass
+	double Erad;
+
   static vector<string> tracerNames;
   static vector<string> stickerNames;
 
