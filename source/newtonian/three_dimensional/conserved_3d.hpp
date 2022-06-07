@@ -23,6 +23,9 @@ public:
 	//! \brief Internal energy
 	double internal_energy;
 
+	//! \brief Radiation energy
+	double Erad;
+
 	//! \brief Tracers
 	std::array<double,MAX_TRACERS> tracers;
 

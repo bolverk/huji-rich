@@ -3,19 +3,20 @@
 using std::size_t;
 
 Conserved3D::Conserved3D(void) :
-	mass(0), momentum(), energy(0), internal_energy(0), tracers() {}
+	mass(0), momentum(), energy(0), internal_energy(0), Erad(0), tracers() {}
 
 Conserved3D::Conserved3D(double mass_i,
 	const Vector3D& momentum_i,
 	double energy_i, double internal_energy_i) :
-	mass(mass_i), momentum(momentum_i), energy(energy_i), internal_energy(internal_energy_i), tracers() {}
+	mass(mass_i), momentum(momentum_i), energy(energy_i), internal_energy(internal_energy_i), 
+	Erad(0), tracers() {}
 
 Conserved3D::Conserved3D(double mass_i,
 	const Vector3D& momentum_i,
 	double energy_i, double internal_energy_i,
 	const std::array<double, MAX_TRACERS >& tracers_i) :
 	mass(mass_i), momentum(momentum_i),
-	energy(energy_i), internal_energy(internal_energy_i), tracers(tracers_i) {}
+	energy(energy_i), internal_energy(internal_energy_i), Erad(0), tracers(tracers_i) {}
 
 namespace
 {
@@ -45,6 +46,7 @@ Conserved3D& Conserved3D::operator-=(const Conserved3D& diff)
 	momentum -= diff.momentum;
 	energy -= diff.energy;
 	internal_energy -= diff.internal_energy;
+	Erad -= diff.Erad;
 	for (size_t i = 0; i < MAX_TRACERS; ++i)
 		tracers[i] -= diff.tracers[i];
 	return *this;
@@ -56,6 +58,7 @@ Conserved3D& Conserved3D::operator+=(const Conserved3D& diff)
 	momentum += diff.momentum;
 	energy += diff.energy;
 	internal_energy += diff.internal_energy;
+	Erad += diff.Erad;
 	for (size_t i = 0; i < tracers.size(); ++i)
 		tracers[i] += diff.tracers[i];
 	return *this;
@@ -64,7 +67,7 @@ Conserved3D& Conserved3D::operator+=(const Conserved3D& diff)
 #ifdef RICH_MPI
 size_t Conserved3D::getChunkSize(void) const
 {
-	return 6 + tracers.size();
+	return 7 + tracers.size();
 }
 
 vector<double> Conserved3D::serialize(void) const
@@ -76,7 +79,8 @@ vector<double> Conserved3D::serialize(void) const
 	res.at(3) = momentum.y;
 	res.at(4) = momentum.z;
 	res.at(5) = internal_energy;
-	size_t counter = 6;
+	res.at(6) = Erad;
+	size_t counter = 7;
 	//size_t N = tracers.size();
 	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		res[j + counter] = tracers[j];
@@ -92,7 +96,8 @@ void Conserved3D::unserialize(const vector<double>& data)
 	momentum.y = data.at(3);
 	momentum.z = data.at(4);
 	internal_energy = data.at(5);
-	size_t counter = 6;
+	Erad = data.at(6);
+	size_t counter = 7;
 	//size_t N = tracers.size();
 	for (size_t j = 0; j < MAX_TRACERS; ++j)
 		tracers[j] = data.at(counter + j);
@@ -101,28 +106,28 @@ void Conserved3D::unserialize(const vector<double>& data)
 
 Conserved3D operator*(double s, const Conserved3D& c)
 {
-	return Conserved3D(s*c.mass,
+	Conserved3D res(s*c.mass,
 		s*c.momentum,
 		s*c.energy, s*c.internal_energy,
 		s*c.tracers);
+	res.Erad = s * c.Erad;
+	return res;
 }
 
 Conserved3D operator*(const Conserved3D& c, double s)
 {
-	return Conserved3D(s*c.mass,
-		s*c.momentum,
-		s*c.energy, s*c.internal_energy,
-		s*c.tracers);
+	return s * c;
 }
 
 
 Conserved3D operator/(const Conserved3D& c, double s)
 {
 	double s_1 = 1.0 / s;
-	return Conserved3D(c.mass * s_1,
+	Conserved3D res(c.mass * s_1,
 		c.momentum * s_1,
 		c.energy * s_1, c.internal_energy * s_1,
 		s_1 * c.tracers);
+	res.Erad = c.Erad * s_1;
 }
 
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res)
@@ -132,6 +137,7 @@ void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved
 	res.momentum *= res.mass;
 	res.internal_energy = res.mass*cell.internal_energy;
 	res.energy = res.mass*0.5*ScalarProd(cell.velocity, cell.velocity) + res.internal_energy;
+	res.Erad = cell.Erad * res.mass;
 	//size_t N = cell.tracers.size();
 	//res.tracers.resize(N);
 	for (size_t i = 0; i < MAX_TRACERS; ++i)
@@ -144,6 +150,7 @@ void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserv
 	res.mass = cell.density*vol*gamma;
 	const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, ComputationalCell3D::tracerNames);
 	res.internal_energy = enthalpy * res.mass;
+	res.Erad = res.mass * Erad;
 	if (fastabs(cell.velocity) < 1e-5)
 		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* res.mass - cell.pressure*vol;
 	else
@@ -175,6 +182,7 @@ Conserved3D& Conserved3D::operator*=(double s)
 	this->momentum *= s;
 	this->energy *= s;
 	this->internal_energy *= s;
+	this->Erad *= s;
 	size_t N = this->tracers.size();
 	for (size_t j = 0; j < N; ++j)
 		this->tracers[j] *= s;
