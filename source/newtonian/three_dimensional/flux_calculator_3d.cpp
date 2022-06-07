@@ -7,7 +7,7 @@ namespace
 	void AddTracers(ComputationalCell3D const& left, ComputationalCell3D const& right, Conserved3D &res)
 	{
 		size_t ntracers = left.tracers.size();
-//		res.tracers.resize(ntracers);
+		res.Erad = (res.mass > 0 ? left.Erad : right.Erad) * res.mass;
 		for (size_t i = 0; i < ntracers; ++i)
 			res.tracers[i] = (res.mass>0 ? left.tracers[i] : right.tracers[i])*res.mass;
 	}
