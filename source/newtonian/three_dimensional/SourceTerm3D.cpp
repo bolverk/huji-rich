@@ -1,10 +1,11 @@
 #include "SourceTerm3D.hpp"
+#include <limits>
 
 SourceTerm3D::~SourceTerm3D(void){}
 
 double SourceTerm3D::SuggestInverseTimeStep(void)const
 {
-	return 0;
+	return 100 * std::numeric_limits<double>::min();
 }
 
 void ZeroForce3D::operator()(const Tessellation3D& /*tess*/, const vector<ComputationalCell3D>& /*cells*/,
