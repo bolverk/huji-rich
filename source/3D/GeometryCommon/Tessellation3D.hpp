@@ -363,7 +363,7 @@ public:
 \brief Access method to box faces
 \return The box faces
 */
-  virtual std::vector<Face> GetBoxFace(void) const = 0;
+  virtual std::vector<Face> GetBoxFaces(void) const = 0;
 };
 
 /*! \brief Create a subset of a vector of points
