@@ -18,9 +18,10 @@ public:
 	  \param cfl CFL number
 	  \param source The source term for the simulation
 	  \param SourceCFL CFL number for the source term
+	  \param no_calc Name of stickers of cells not to take into account for dt calculation
 	 */
 	explicit CourantFriedrichsLewy(double cfl, double SourceCFL, SourceTerm3D const& source,
-		bool debug = false);
+		std::vector<std::string> no_calc = std::vector<std::string> (),	bool debug = false);
 
 	double operator()(const Tessellation3D& tess, const vector<ComputationalCell3D>& cells, const EquationOfState& eos,
 		const vector<Vector3D>& face_velocities, const double time) const;
@@ -30,6 +31,7 @@ public:
 private:
 	const double cfl_, sourcecfl_;
 	SourceTerm3D const& source_;
+	std::vector<std::string> const no_calc_;
 	const bool debug_;
 	mutable bool first_try_;
 	mutable double dt_first_;
