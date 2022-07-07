@@ -15,6 +15,8 @@ vector<Vector3D> RoundGrid3D(vector<Vector3D> const& points, Vector3D const& ll,
 	if (tess == nullptr)
 		tess = &default_tess;
 #ifdef RICH_MPI
+	if(tproc->GetBoxFaces().size() > 0)
+		tess->ModifyBoxFaces() = tproc->GetBoxFaces();
 	tess->Build(points, *tproc);
 #else
 	tess->Build(points);
