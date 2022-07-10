@@ -93,7 +93,7 @@ namespace CG
     }
 
     std::vector<double> conj_grad_solver(const double tolerance, int &total_iters,
-        Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
+        Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,
         double const dt, MatrixBuilder const& matrix_builder)  //total_iters is to store # of iters in it
     {
         size_t Nlocal = tess.GetPointNo();
@@ -114,7 +114,7 @@ namespace CG
         size_t_mat A_indeces;
         std::vector<double> b;
         std::vector<double> sub_x; // this is for the initial guess
-        matrix_builder.BuildMatrix(tess, A, A_indeces, cells, key_name, dt, b, sub_x);
+        matrix_builder.BuildMatrix(tess, A, A_indeces, cells, dt, b, sub_x);
         std::vector<double> M; // The preconditioner
         build_M(A, A_indeces, M);
         // Find maximum value of A, this is used for normalization of the error
@@ -168,9 +168,8 @@ namespace CG
             for(size_t j = 0; j < Nlocal; ++j)
             {
                 double const local_scale = std::max(std::abs(b[j]), std::abs(A[j][0] * sub_x[j]));
-                max_values[1] = std::max(max_values[1], std::abs(sub_r[j]));
+                max_values[1] = std::max(max_values[1], std::abs(sub_r[j]) / local_scale);
             }
-            max_values[1] /= local_scale;
             sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
             result2 = vector_rescale(sub_r, M);
             sub_r_sqrd = mpi_dot_product(sub_r, result2);
@@ -182,7 +181,7 @@ namespace CG
             // recall that we can't have a 'break' within an openmp parallel region, so end it here then all threads are merged, and the convergence is checked
             // Convergence test
             if (std::sqrt(sub_r_sqrd_convergence / Nlocal) < tolerance * max_values[0] * maxA 
-                && max_values[1] < max_values[0] * 1e-4 * maxA) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
+                && max_values[1] < 1e-6) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
 #ifdef RICH_MPI
                 if(rank == 0)
 #endif

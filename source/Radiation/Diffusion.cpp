@@ -72,17 +72,16 @@ namespace CG
     // Larsen second order flux limiter, taken from eq. 10 in "Diffusion, P1, and other approximate forms of radiation transport"
     double CalcSingleFluxLimiter(Vector3D const& grad, double const D, double const cell_value)
     {
-        double const R = std::max(3 * abd(grad) * D / (cell_value * CG::speed_of_light), 1e20 * std::numeric_limits<double>::min());
+        double const R = std::max(3 * abs(grad) * D / (cell_value * CG::speed_of_light), 1e20 * std::numeric_limits<double>::min());
         if(R < 1e-2) //series expansion
             return 1 - R * R / 15 + 2 * R * R * R * R /315;
         return 3 * (1.0 / std::tanh(R) - 1.0 / R) / R;
     }
 }
 
-void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, std::string const& key_name,
-    double const dt, std::vector<double>& b, std::vector<double>& x0) const
+void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells,
+    double const dt, std::vector<double>& b, std::vector<double>& x0, double const current_time) const
 {
-    size_t const key_index = binary_index_find(ComputationalCell3D::tracerNames, key_name);
     size_t const Nlocal = tess.GetPointNo();
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
@@ -91,17 +90,26 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     sigma_planck.resize(Nlocal);
     std::vector<size_t> neighbors;
     face_vec faces;
+    std::vector<size_t> zero_indeces;
+    size_t const Nzero = zero_cells_.size();
+    for(size_t i = 0; i < Nzero; ++i)
+        zero_indeces.push_back(binary_index_find(ComputationalCell3D::stickerNames, zero_cells_[i]));
+    double const zero_value = 1e-10;
     for(size_t i = 0; i < Nlocal; ++i)
     {
         double const volume = tess.GetVolume(i);
-        double const Er = cells[i].tracers[key_index] * cells[i].density;
-        b[i] = Er * volume;
-        x0[i] = Er;
         D[i] = D_coefficient_calcualtor.CalcDiffusionCoefficient(cells[i]);
         double const T = cells[i].temperature;
         sigma_planck[i] = D_coefficient_calcualtor.CalcPlanckOpacity(cells[i]);
         double const beta = 4 * CG::radiation_constant * T * T * T / (cells[i].density * eos_.dT2cv(cells[i].density, T, cells[i].tracers, ComputationalCell3D::tracerNames));
         fleck_factor[i] = 1.0 / (1 + sigma_planck[i] * CG::speed_of_light * dt * beta);
+        bool set_to_zero = false;
+        for(size_t j = 0; j < Nzero; ++j)
+            if(cells[i].stickers[zero_indeces[j]])
+                set_to_zero = true;
+        double const Er = cells[i].Erad * cells[i].density * (set_to_zero ? zero_value : 1);
+        b[i] = Er * volume;
+        x0[i] = Er;       
         b[i] += volume * fleck_factor[i] * dt * CG::speed_of_light * sigma_planck[i] * T * T * T * T * CG::radiation_constant;
     }
 #ifdef RICH_MPI
@@ -134,7 +142,11 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
         Vector3D const CM = tess.GetCellCM(i);
         Vector3D const point = tess.GetMeshPoint(i); 
         double const Dcell = D[i];
-        double const Er = cells[i].tracers[key_index] * cells[i].density;
+        double const Er = cells[i].Erad * cells[i].density;
+        bool self_zero = false;
+        for(size_t k = 0; k < Nzero; ++k)
+            if(cells[i].stickers[zero_indeces[k]])
+                self_zero = true;
         for(size_t j = 0; j < Nneigh; ++j)
         {
             // Here we assume no flux to outside cells, this needs to be changed to a general boundary condition
@@ -143,14 +155,18 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
             {
                 if(!tess.IsPointOutsideBox(neighbor_j))
                 {
-                    double const Er_j = cells[neighbor_j].tracers[key_index] * cells[neighbor_j].density;
+                    bool set_to_zero = false;
+                    for(size_t k = 0; k < Nzero; ++k)
+                        if(cells[neighbor_j].stickers[zero_indeces[k]])
+                            set_to_zero = true;
+                    double const Er_j = cells[neighbor_j].Erad * cells[neighbor_j].density * (set_to_zero ? zero_value : 1);
                     Vector3D const cm_ij = CM - tess.GetCellCM(neighbor_j);
                     Vector3D const grad_E = cm_ij * (1.0 / ScalarProd(cm_ij, cm_ij));
                     Vector3D const r_ij = point - tess.GetMeshPoint(neighbor_j);
                     double mid_D = 0.5 * (D[neighbor_j] + Dcell);
-                    double const flux_limiter = CalcSingleFluxLimiter(grad_E * (Er - Er_j), mid_D, 0.5 * (Er + Er_j));
+                    double const flux_limiter = flux_limiter_ ? CalcSingleFluxLimiter(grad_E * (Er - Er_j), mid_D, 0.5 * (Er + Er_j)) : 1;
                     mid_D *= flux_limiter;
-                    double const flux = ScalarProd(grad_E, r_ij * (tess.GetArea(faces[j]) / abs(r_ij))) * dt * mid_D; 
+                    double const flux = (self_zero || set_to_zero) ? tess.GetArea(faces[j]) * dt * CG::speed_of_light * 0.5 : ScalarProd(grad_E, r_ij * (tess.GetArea(faces[j]) / abs(r_ij))) * dt * mid_D; 
                     if(neighbor_j < Nlocal)
                     {
                         A[i][0] += flux;
@@ -168,7 +184,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
                     }
                 }
                 else
-                    boundary_calc_.SetBoundaryValues(tess, i, neighbor_j, dt, cells, key_index, tess.GetArea(faces[j]), A[i][0], b[i], faces[j]);
+                    boundary_calc_.SetBoundaryValues(tess, i, neighbor_j, dt, cells, tess.GetArea(faces[j]), A[i][0], b[i], faces[j]);
             }
         }
     }
@@ -180,20 +196,26 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
 }
 
 void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& extensives, double const dt, std::vector<ComputationalCell3D>& cells,
-        std::vector<double>const& CG_result, std::string const& key_name)const
+        std::vector<double>const& CG_result)const
 {
     size_t const N = tess.GetPointNo();
-    size_t const key_index = binary_index_find(ComputationalCell3D::tracerNames, key_name);
     bool const entropy = !(std::find(ComputationalCell3D::tracerNames.begin(), ComputationalCell3D::tracerNames.end(), std::string("Entropy")) ==
-			 ComputationalCell3D::tracerNames.end());
+		ComputationalCell3D::tracerNames.end());
     size_t const entropy_index = static_cast<size_t>(std::find(ComputationalCell3D::tracerNames.begin(),
-							     ComputationalCell3D::tracerNames.end(), std::string("Entropy")) - ComputationalCell3D::tracerNames.begin());
-    size_t max_index = 0;
-    double maxT = 0;
+        ComputationalCell3D::tracerNames.end(), std::string("Entropy")) - ComputationalCell3D::tracerNames.begin());
+    std::vector<size_t> zero_indeces;
+    size_t const Nzero = zero_cells_.size();
+    for(size_t i = 0; i < Nzero; ++i)
+        zero_indeces.push_back(binary_index_find(ComputationalCell3D::stickerNames, zero_cells_[i]));
+  
     for(size_t i = 0; i < N; ++i)
     {
+        bool self_zero = false;
+        for(size_t j = 0; j < Nzero; ++j)
+            if(cells[i].stickers[zero_indeces[j]])
+                self_zero = true;
         double const volume = tess.GetVolume(i);
-        extensives[i].tracers[key_index] = CG_result[i] * volume;
+        extensives[i].Erad = CG_result[i] * volume;
         double const T = cells[i].temperature;
         double const dE = fleck_factor[i] * CG::speed_of_light * dt * sigma_planck[i] * (CG_result[i] - T * T * T * T * CG::radiation_constant) * volume;
         extensives[i].energy += dE;
@@ -203,26 +225,18 @@ void Diffusion::PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& ext
         cells[i].internal_energy = extensives[i].internal_energy / extensives[i].mass;
         cells[i].temperature = eos_.de2T(cells[i].density, cells[i].internal_energy, cells[i].tracers, ComputationalCell3D::tracerNames);
         cells[i].pressure = eos_.de2p(cells[i].density, cells[i].internal_energy, cells[i].tracers, ComputationalCell3D::tracerNames);
-        cells[i].tracers[key_index] = extensives[i].tracers[key_index] / extensives[i].mass;
+        cells[i].Erad = extensives[i].Erad / extensives[i].mass;
         if(entropy)
         {
             cells[i].tracers[entropy_index] = eos_.dp2s(cells[i].density, cells[i].pressure, cells[i].tracers, ComputationalCell3D::tracerNames);
             extensives[i].tracers[entropy_index] = cells[i].tracers[entropy_index] * extensives[i].mass;
         }
-        if(T > maxT)
-        {
-            max_index = i;
-            maxT = T;
-        }
+
     }
-    fleck_factor.clear();
-    fleck_factor.shrink_to_fit();
-    sigma_planck.clear();
-    sigma_planck.shrink_to_fit();
 }
 
 void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 
-        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const Area, double& A, double &b, size_t const /*face_index*/)const
+        std::vector<ComputationalCell3D> const& /*cells*/, double const Area, double& A, double &b, size_t const /*face_index*/)const
 {
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
@@ -233,24 +247,24 @@ void DiffusionSideBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t
 }
 
 void DiffusionSideBoundary::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
-    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
+    std::vector<double> const& new_E, double& E_outside, Vector3D& v_outside)const
 {
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
-        key_outside = CG::radiation_constant * T_ * T_ * T_ * T_;
+        E_outside = CG::radiation_constant * T_ * T_ * T_ * T_;
     else
-        key_outside = new_keys[index];
+        E_outside = new_keys[index];
     v_outside = cells[index].velocity;
 }
 
 void DiffusionClosedBox::SetBoundaryValues(Tessellation3D const& /*tess*/, size_t const /*index*/, size_t const /*outside_point*/, double const /*dt*/, 
-        std::vector<ComputationalCell3D> const& /*cells*/, size_t const /*key_index*/, double const /*Area*/, double& /*A*/, double& /*b*/, size_t const /*face_index*/)const
+        std::vector<ComputationalCell3D> const& /*cells*/, double const /*Area*/, double& /*A*/, double& /*b*/, size_t const /*face_index*/)const
 {}
 
 void DiffusionClosedBox::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
-    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
+    std::vector<double> const& new_E, double& E_outside, Vector3D& v_outside)const
 {
-    key_outside = new_keys[index];
+    E_outside = new_E[index];
     Vector3D normal = normalize(tess.GetMeshPoint(outside_point) - tess.GetMeshPoint(index));
     v_outside = cells[index].velocity;
     v_outside -= 2 * normal * ScalarProd(normal, v_outside);
@@ -267,13 +281,13 @@ double PowerLawOpacity::CalcPlanckOpacity(ComputationalCell3D const& cell) const
 }
 
 void DiffusionXInflowBoundary::SetBoundaryValues(Tessellation3D const& tess, size_t const index, size_t const outside_point, double const dt, 
-        std::vector<ComputationalCell3D> const& cells, size_t const key_index, double const Area, double& A, double &b, size_t const face_index)const
+        std::vector<ComputationalCell3D> const& cells, double const Area, double& A, double &b, size_t const face_index)const
 {
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
     {
-        double const Er_j = left_state_.tracers[key_index] * left_state_.density;
-        double const Er = cells[index].tracers[key_index] * cells[index].density;
+        double const Er_j = left_state_.Erad * left_state_.density;
+        double const Er = cells[index].Erad * cells[index].density;
         double const dx = tess.GetCellCM(index).x - tess.GetBoxCoordinates().first.x;
         Vector3D const grad_E = Vector3D(1, 0, 0) * (1.0 / (2 * dx));
         Vector3D const r_ij = tess.GetMeshPoint(index) - tess.GetMeshPoint(outside_point);
@@ -288,8 +302,8 @@ void DiffusionXInflowBoundary::SetBoundaryValues(Tessellation3D const& tess, siz
     {
         if(tess.GetMeshPoint(index).x < (tess.GetMeshPoint(outside_point).x - R * 1e-4))
         {
-            double const Er_j = right_state_.tracers[key_index] * right_state_.density;
-            double const Er = cells[index].tracers[key_index] * cells[index].density;
+            double const Er_j = right_state_.Erad * right_state_.density;
+            double const Er = cells[index].Erad * cells[index].density;
             double const dx = tess.GetBoxCoordinates().second.x - tess.GetCellCM(index).x;
             Vector3D const grad_E = Vector3D(-1, 0, 0) * (1.0 / (2 * dx));
             Vector3D const r_ij = tess.GetMeshPoint(index) - tess.GetMeshPoint(outside_point);
@@ -304,24 +318,24 @@ void DiffusionXInflowBoundary::SetBoundaryValues(Tessellation3D const& tess, siz
 }
 
 void DiffusionXInflowBoundary::GetOutSideValues(Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells, size_t const index, size_t const outside_point,
-    std::vector<double> const& new_keys, double& key_outside, Vector3D& v_outside, size_t const key_index)const
+    std::vector<double> const& new_E, double& E_outside, Vector3D& v_outside)const
 {
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
     {
-        key_outside = left_state_.tracers[key_index] * left_state_.density;
+        E_outside = left_state_.tracers[key_index] * left_state_.density;
         v_outside = left_state_.velocity;
     }
     else
     {
         if(tess.GetMeshPoint(index).x < (tess.GetMeshPoint(outside_point).x - R * 1e-4))
         {
-            key_outside = right_state_.tracers[key_index] * right_state_.density;
+            E_outside = right_state_.tracers[key_index] * right_state_.density;
             v_outside = right_state_.velocity;
         }
         else
         {
-            key_outside = new_keys[index];
+            E_outside = new_keys[index];
             Vector3D normal = normalize(tess.GetMeshPoint(outside_point) - tess.GetMeshPoint(index));
             v_outside = cells[index].velocity;
             v_outside -= 2 * normal * ScalarProd(normal, v_outside);

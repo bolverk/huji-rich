@@ -7,7 +7,8 @@ class DiffusionForce : public SourceTerm3D
 {
 public:
 
-    DiffusionForce(Diffusion const& diffusion, std::string const& key): diffusion_(diffusion), key_(key), next_dt_(1e-6 * std::numeric_limits<double>::max()){}
+    DiffusionForce(Diffusion const& diffusion, EquationOfState const& eos, bool const momentum_limit = true): diffusion_(diffusion),
+      next_dt_(1e-6 * std::numeric_limits<double>::max()), eos_(eos), momentum_limit_(momentum_limit){}
 
     void operator()(const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
 		const vector<Conserved3D>& fluxes,const vector<Vector3D>& point_velocities, const double t,double dt,
@@ -16,8 +17,9 @@ public:
     double SuggestInverseTimeStep(void)const;
 private:
     Diffusion const& diffusion_;
-    std::string const key_;
     mutable double next_dt_;
+    EquationOfState const& eos_;
+    bool const momentum_limit_;
 };
 
 #endif
