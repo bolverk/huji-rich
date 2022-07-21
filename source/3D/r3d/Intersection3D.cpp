@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "../../misc/utils.hpp"
 #include <array>
+#include <iomanip>
 
 namespace
 {
@@ -164,7 +165,7 @@ namespace
 		}
 	}
 
-	bool CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds)
+	bool CleanDuplicates2(vector<size_t> &all_indeces, vector<vector<int> > &face_inds, std::vector<Vector3D> const& points)
 	{
 		size_t Nindeces = all_indeces.size();
 		size_t Nfaces = face_inds.size();
@@ -212,8 +213,38 @@ namespace
 			if (counter[i] == 0)
 				too_many.push_back(i);
 			else
-				if (counter[i] != 3)
-					res = false;
+				if(counter[i] < 3)
+				{
+					size_t found = 0;
+					for(size_t k = 0; k < Nfaces; ++k)
+					{
+						size_t const Ninface = face_inds[k].size();
+						for(size_t j = 0; j < Ninface; ++j)
+						{
+							if(face_inds[k][j] == atatic_cast<int>(all_indeces[i]))
+							{
+								++found;
+								double const maxR = fastabs(points[face_inds[k][(j + 1) % Ninface]] - points[face_inds[k][(j + Ninface - 1) % Ninface]]);
+								if(fastabs(CrossProduct(points[face_inds[k][j]] - points[face_inds[k][(j + Ninface - 1) % Ninface]], 
+									points[face_inds[k][(j + 1) % Ninface]] - points[face_inds[k][(j + Ninface - 1) % Ninface]])) < maxR * maxR * 1e-3)
+								{
+									too_many.push_back(i);
+									face_inds[k].erase(face_inds[k].begin() + j);
+								}
+								break;
+							}
+						}
+						if(found == counter[i])
+							break;
+					}
+				}
+				else
+					if (counter[i] != 3)
+					{
+						res = false;
+						std::cout<<"Bad point "<<all_indeces[i]<<std::endl;
+					}
+					
 		RemoveVector(all_indeces, too_many);
 		return res;
 	}
@@ -297,9 +328,9 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, poi
 
 	// make sure no duplicate points
 	CleanDuplicates(all_indeces, faceinds, all_vertices);
-	CleanDuplicates2(all_indeces, faceinds);
+	CleanDuplicates2(all_indeces, faceinds, all_vertices);
 	CleanDuplicates(all_indeces, faceinds, all_vertices);
-	bool goodpoly = CleanDuplicates2(all_indeces, faceinds);
+	bool goodpoly = CleanDuplicates2(all_indeces, faceinds, all_vertices);
 	if (!goodpoly)
 	{
 		std::cout << "Bad polygon in cell " << oldcell << std::endl;
@@ -318,7 +349,7 @@ bool GetPoly(Tessellation3D const & oldtess, size_t oldcell, r3d_poly &poly, poi
 		for (size_t i = 0; i < all_indeces.size(); ++i)
 		{
 			Vector3D p = all_vertices[all_indeces[i]];
-			std::cout << "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
+			std::cout << std::setprecision(15)<< "Point " << all_indeces[i] << " " << p.x << " " << p.y << " " << p.z << std::endl;
 		}
 		return false;
 	}
