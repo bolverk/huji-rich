@@ -376,7 +376,9 @@ public:
   */
   void SetBox(Vector3D const& ll, Vector3D const& ur) override;
 
-  std::vector<Face> GetBoxFace(void) const {return box_faces_;}
+  std::vector<Face> GetBoxFaces(void) const {return box_faces_;}
+
+  std::vector<Face>& ModifyBoxFaces(void) {return box_faces_;}
 };
 
 bool PointInPoly(Tessellation3D const& tess, Vector3D const& point, std::size_t index);

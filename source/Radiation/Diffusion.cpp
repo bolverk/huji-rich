@@ -85,7 +85,7 @@ void Diffusion::BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_in
     size_t const Nlocal = tess.GetPointNo();
     b.resize(Nlocal, 0);
     x0.resize(Nlocal, 0);
-    std::vector<double> D(Nlocal);
+    D.resize(Nlocal);
     fleck_factor.resize(Nlocal);
     sigma_planck.resize(Nlocal);
     std::vector<size_t> neighbors;
@@ -253,7 +253,7 @@ void DiffusionSideBoundary::GetOutSideValues(Tessellation3D const& tess, std::ve
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
         E_outside = CG::radiation_constant * T_ * T_ * T_ * T_;
     else
-        E_outside = new_keys[index];
+        E_outside = new_E[index];
     v_outside = cells[index].velocity;
 }
 
@@ -323,19 +323,19 @@ void DiffusionXInflowBoundary::GetOutSideValues(Tessellation3D const& tess, std:
     double const R = tess.GetWidth(index);
     if(tess.GetMeshPoint(index).x > (tess.GetMeshPoint(outside_point).x + R * 1e-4))
     {
-        E_outside = left_state_.tracers[key_index] * left_state_.density;
+        E_outside = left_state_.Erad * left_state_.density;
         v_outside = left_state_.velocity;
     }
     else
     {
         if(tess.GetMeshPoint(index).x < (tess.GetMeshPoint(outside_point).x - R * 1e-4))
         {
-            E_outside = right_state_.tracers[key_index] * right_state_.density;
+            E_outside = right_state_.Erad * right_state_.density;
             v_outside = right_state_.velocity;
         }
         else
         {
-            E_outside = new_keys[index];
+            E_outside = new_E[index];
             Vector3D normal = normalize(tess.GetMeshPoint(outside_point) - tess.GetMeshPoint(index));
             v_outside = cells[index].velocity;
             v_outside -= 2 * normal * ScalarProd(normal, v_outside);

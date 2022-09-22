@@ -621,7 +621,12 @@ namespace
 				res.zderivative.tracers[i] = 0;
 			}
 		}
-
+		res.xderivative.Erad = 0;
+		res.yderivative.Erad = 0;
+		res.zderivative.Erad = 0;
+		res.xderivative.temperature = 0;
+		res.yderivative.temperature = 0;
+		res.zderivative.temperature = 0;
 		if (slf)
 		{
 #ifdef RICH_DEBUG

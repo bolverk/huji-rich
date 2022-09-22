@@ -13,7 +13,7 @@
 #include <array>
 #include <string>
 #define MAX_TRACERS 5
-#define MAX_STICKERS 4
+#define MAX_STICKERS 5
 
 using std::vector;
 using std::string;

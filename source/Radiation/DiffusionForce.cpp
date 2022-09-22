@@ -9,8 +9,6 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
  #ifdef RICH_MPI
     int rank = -1;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::pair<double, int> max_data(max_diff, rank);         
-    MPI_Allreduce(MPI_IN_PLACE, &max_data, 1, MPI_DOUBLE_INT, MPI_MAXLOC, MPI_COMM_WORLD);
 #endif
     std::vector<Conserved3D> old_extensives(extensives);
     std::vector<size_t> neighbors;
@@ -20,9 +18,11 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
     std::vector<double> new_Er(N, 0);
     for(size_t i = 0; i < N; ++i)
         new_Er[i] = cells[i].Erad * cells[i].density;
+    if(N == 0)
+        std::cout<<"Zero nubmer of cells in DiffForce"<<std::endl;
 	double max_Er = *std::max_element(new_Er.begin(), new_Er.end());
 #ifdef RICH_MPI
-    MPI_exchange_data2(tess, max_Er, true);
+    MPI_exchange_data2(tess, new_Er, true);
     MPI_Allreduce(MPI_IN_PLACE, &max_Er, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 #endif
     size_t const Nzero = diffusion_.zero_cells_.size();
@@ -41,13 +41,6 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
         if(not to_calc)
             continue;
         double const volume = tess.GetVolume(i);
-        // The transport contribution
-        extensives[i].Erad = new_Er[i] * volume;
-        double const T = cells[i].temperature;
-        // The contribution from matter-radiation coupling
-        double const dE = diffusion_.fleck_factor[i] * CG::speed_of_light * dt * diffusion_.sigma_planck[i] * (new_Er[i] - T * T * T * T * CG::radiation_constant) * volume;
-        extensives[i].energy += dE;
-        extensives[i].internal_energy += dE;
         // Calcualte gradient of radiation field
         faces = tess.GetCellFaces(i);
         tess.GetNeighbors(i, neighbors);
@@ -65,7 +58,7 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
             else
             {
                 Vector3D dummy_v;
-                diffusion_.boundary_calc_.GetOutSideValues(tess, cells, i, neighbor_j, new_Er, Emid, dummy_v, key_index);
+                diffusion_.boundary_calc_.GetOutSideValues(tess, cells, i, neighbor_j, new_Er, Emid, dummy_v);
                 Emid *= 0.5;
                 Emid += 0.5 * new_Er[i];
             }
@@ -75,7 +68,7 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
         double const D = diffusion_.D_coefficient_calcualtor.CalcDiffusionCoefficient(cells[i]);
         flux_limiter[i] = diffusion_.flux_limiter_ ? CG::CalcSingleFluxLimiter(gradE, D, new_Er[i]) : 1;
         R2[i] = diffusion_.flux_limiter_ ? flux_limiter[i] / 3 + boost::math::pow<2>(flux_limiter[i] * abs(gradE) * D 
-            / (CG::speed_of_light * new_Er[i])) : 1.0 / 3.0
+            / (CG::speed_of_light * new_Er[i])) : 1.0 / 3.0;
         if(not momentum_limit_)
         {
             flux_limiter[i] = 1;
@@ -103,7 +96,14 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
         if(not diffusion_.flux_limiter_ && extensives[i].Erad < 0 && new_Er[i] < max_Er * 1e-6)
             extensives[i].Erad = old_extensives[i].Erad;
         if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy) || extensives[i].Erad < 0)
-            throw UniversalError("Negative energy in DiffusionForce");
+        {
+            UniversalError eo("Negative energy in DiffusionForce");
+            eo.addEntry("new_Er", new_Er[i]);
+            eo.addEntry("internal_energy", extensives[i].internal_energy);
+            eo.addEntry("Erad", extensives[i].Erad);
+            eo.addEntry("X", point.x);
+            throw eo;
+        }
     }
 #ifdef RICH_MPI
     MPI_exchange_data2(tess, R2, true);
@@ -138,7 +138,7 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
             }
             else
             {
-                diffusion_.boundary_calc_.GetOutSideValues(tess, cells, i, neighbor_j, new_Er, Er_outside, velocity_outside, key_index);
+                diffusion_.boundary_calc_.GetOutSideValues(tess, cells, i, neighbor_j, new_Er, Er_outside, velocity_outside);
                 R2_outside = R2[i];
                 density_outside = cells[i].density;
             }
@@ -155,39 +155,35 @@ void DiffusionForce::operator()(const Tessellation3D& tess, const vector<Computa
         if(not diffusion_.flux_limiter_ && extensives[i].Erad < 0 && new_Er[i] < max_Er * 1e-6)
             extensives[i].Erad = old_extensives[i].Erad;
         if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy) || extensives[i].Erad < 0)
-            throw UniversalError("Negative energy in DiffusionForce");
+            throw UniversalError("Negative energy in DiffusionForce2");
         double const D = diffusion_.D_coefficient_calcualtor.CalcDiffusionCoefficient(cells[i]);
         dE = (1.5 - 0.5 * R2[i]) * std::min(diffusion_.D_coefficient_calcualtor.CalcPlanckOpacity(cells[i]), 3 * CG::speed_of_light / D) * tess.GetVolume(i) * dt *
             new_Er[i] * ScalarProd(cells[i].velocity, cells[i].velocity) / CG::speed_of_light;
         extensives[i].Erad += dE ;
         extensives[i].energy -= dE;
         extensives[i].internal_energy -= dE;
-        if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy) || extensives[i].tracers[key_index] < 0)
+        if(extensives[i].internal_energy < 0 || !std::isfinite(extensives[i].internal_energy) || extensives[i].Erad < 0)
             throw UniversalError("Bad internal energy in DiffusionForce::operator()");
     }
 
 
     double max_diff = 0;
     size_t max_loc = 0;
-    size_t const key_index = binary_index_find(ComputationalCell3D::tracerNames, key_);
     for(size_t i = 0; i < N; ++i)
     {
-        double const diff = std::abs(new_Er[i] - cells[i].tracers[key_index] * cells[i].density) / (new_Er[i] + 0.01 * max_Er);
+        double const diff = std::abs(new_Er[i] - cells[i].Erad * cells[i].density) / (new_Er[i] + 0.005 * max_Er);
         if(diff > max_diff)
         {
             max_diff = diff;
             max_loc = i;
         }
     }
-
-
-
-
-    diffusion_.fleck_factor.clear();
-    diffusion_.fleck_factor.shrink_to_fit();
-    diffusion_.sigma_planck.clear();
-    diffusion_.sigma_planck.shrink_to_fit();
-	next_dt_ = dt * std::min(0.1 / max_diff, 1.1);
+#ifdef RICH_MPI
+    std::pair<double, int> max_data(max_diff, rank);         
+    MPI_Allreduce(MPI_IN_PLACE, &max_data, 1, MPI_DOUBLE_INT, MPI_MAXLOC, MPI_COMM_WORLD);
+    max_diff = max_data.first;
+#endif
+	next_dt_ = dt * std::min(0.05 / max_diff, 1.1);
 }   
 
 

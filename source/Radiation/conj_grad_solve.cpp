@@ -94,7 +94,7 @@ namespace CG
 
     std::vector<double> conj_grad_solver(const double tolerance, int &total_iters,
         Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,
-        double const dt, MatrixBuilder const& matrix_builder)  //total_iters is to store # of iters in it
+        double const dt, MatrixBuilder const& matrix_builder, double const time)  //total_iters is to store # of iters in it
     {
         size_t Nlocal = tess.GetPointNo();
         
@@ -114,40 +114,47 @@ namespace CG
         size_t_mat A_indeces;
         std::vector<double> b;
         std::vector<double> sub_x; // this is for the initial guess
-        matrix_builder.BuildMatrix(tess, A, A_indeces, cells, dt, b, sub_x);
+        matrix_builder.BuildMatrix(tess, A, A_indeces, cells, dt, b, sub_x, time);
         std::vector<double> M; // The preconditioner
         build_M(A, A_indeces, M);
-        // Find maximum value of A, this is used for normalization of the error
-        double maxA = 0;
-        for(size_t i = 0; i < A.size(); ++i)
-            for(size_t j = 0; j < A[i].size(); ++j)
-                maxA = std::max(maxA, std::abs(A[i][j]));
-        
-#ifdef RICH_MPI
-        MPI_Allreduce(MPI_IN_PLACE, &maxA, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-        MPI_exchange_data2(tess, sub_x, true);
-#endif
+
         std::vector<double> r_old, sub_a_times_p;
         std::vector<double> sub_r;
+#ifdef RICH_MPI
+        MPI_exchange_data2(tess, sub_x, true);
+#endif
         mat_times_vec(A, A_indeces, sub_x, sub_a_times_p);
+        // Find maximum value of A, this is used for normalization of the error
+        double maxA[2] = {0, 0};
+        for(size_t i = 0; i < A.size(); ++i)
+        {
+            maxA[0] = std::max(maxA[0], std::abs(sub_x[i]));
+            maxA[1] = std::max(maxA[1], std::abs(b[i]));
+        }       
+#ifdef RICH_MPI
+        MPI_Allreduce(MPI_IN_PLACE, &maxA, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+#endif
         vec_lin_combo(1.0, b, -1.0, sub_a_times_p, sub_r);    
         std::vector<double> sub_p(sub_r);
         sub_p.resize(Nlocal);
         sub_x.resize(Nlocal);
         sub_p = vector_rescale(sub_p, M);
         std::vector<double> result1, result2, result3, p(sub_p);
+        std::vector<double> old_x = sub_x;
+        size_t Ntotal = Nlocal;
 #ifdef RICH_MPI
         MPI_exchange_data2(tess, p, true);
-        MPI_Allreduce(MPI_IN_PLACE, &Nlocal, 1, MPI_UNSIGNED_LONG, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(&Nlocal, &Ntotal, 1, MPI_UNSIGNED_LONG, MPI_SUM, MPI_COMM_WORLD);
 #endif
         double sub_r_sqrd = mpi_dot_product(sub_r, sub_p);
         double sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
         double sub_r_sqrd_old = 0, sub_p_by_ap = 0, alpha = 0, beta = 0;
         bool good_end = false;
+        double max_values[2] = {0, 0};
         // Main Conjugate Gradient loop
         // this loop must be serial b/c CG is an iterative method
         for (int i = 0; i < max_iter; i++) {
-            // note: make sure matrix is big enough for thenumber of processors you are using!
+            // note: make sure matrix is big enough for the number of processors you are using!
             r_old = sub_r;                 // Store previous residual
             sub_r_sqrd_old = sub_r_sqrd;  // save a recalculation of r_old^2 later
 
@@ -160,15 +167,18 @@ namespace CG
             // Next estimate of solution
             vec_lin_combo(1.0, sub_x, alpha, sub_p, result1);
             sub_x = result1;
-            double max_values[2]; 
-            max_values[0] = std::abs(*std::max_element(sub_x.begin(), sub_x.end()));
             vec_lin_combo(1.0, sub_r, -alpha, sub_a_times_p, result2);
             sub_r = result2;
+            size_t max_loc = 0;
             max_values[1] = 0;
+            max_values[0] = 0;
             for(size_t j = 0; j < Nlocal; ++j)
             {
-                double const local_scale = std::max(std::abs(b[j]), std::abs(A[j][0] * sub_x[j]));
-                max_values[1] = std::max(max_values[1], std::abs(sub_r[j]) / local_scale);
+                double const local_scale = std::abs(b[j]);
+                if(std::abs(sub_r[j]) / (local_scale + maxA[1] * 1e-3) > max_values[1])
+                    max_loc = j;
+                max_values[1] = std::max(max_values[1], std::abs(sub_r[j]) / (local_scale + maxA[1] * 0.1));
+                max_values[0] = std::max(max_values[0], std::abs(sub_x[j] - old_x[j]) / (std::abs(sub_x[j]) + std::numeric_limits<double>::min() * 100 + maxA[0] * 1e-4));
             }
             sub_r_sqrd_convergence = mpi_dot_product(sub_r, sub_r);
             result2 = vector_rescale(sub_r, M);
@@ -176,12 +186,11 @@ namespace CG
 
     #ifdef RICH_MPI
             MPI_Allreduce(MPI_IN_PLACE, max_values, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-            // MPI_Allreduce(MPI_IN_PLACE, &sub_r_sqrd, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     #endif
             // recall that we can't have a 'break' within an openmp parallel region, so end it here then all threads are merged, and the convergence is checked
             // Convergence test
-            if (std::sqrt(sub_r_sqrd_convergence / Nlocal) < tolerance * max_values[0] * maxA 
-                && max_values[1] < 1e-6) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
+            if (std::sqrt(sub_r_sqrd_convergence / Ntotal) < tolerance * maxA [1]
+                && max_values[1] < 1e-6 && max_values[0] < 1e-6) { // norm is just sqrt(dot product so don't need to use a separate norm fnc) // vector norm needs to use a all reduce!
 #ifdef RICH_MPI
                 if(rank == 0)
 #endif
@@ -190,7 +199,7 @@ namespace CG
                 good_end = true;
                 break;
             }
-
+            old_x = sub_x;
             beta = sub_r_sqrd / sub_r_sqrd_old;       
             
             vec_lin_combo(1.0, result2, beta, sub_p, result3);             // Next gradient

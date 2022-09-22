@@ -128,6 +128,7 @@ Conserved3D operator/(const Conserved3D& c, double s)
 		c.energy * s_1, c.internal_energy * s_1,
 		s_1 * c.tracers);
 	res.Erad = c.Erad * s_1;
+	return res;
 }
 
 void PrimitiveToConserved(ComputationalCell3D const& cell, double vol, Conserved3D &res)
@@ -150,7 +151,7 @@ void PrimitiveToConservedSR(ComputationalCell3D const& cell, double vol, Conserv
 	res.mass = cell.density*vol*gamma;
 	const double enthalpy = eos.dp2e(cell.density, cell.pressure, cell.tracers, ComputationalCell3D::tracerNames);
 	res.internal_energy = enthalpy * res.mass;
-	res.Erad = res.mass * Erad;
+	res.Erad = res.mass * cell.Erad;
 	if (fastabs(cell.velocity) < 1e-5)
 		res.energy = (gamma*enthalpy + 0.5*ScalarProd(cell.velocity, cell.velocity))* res.mass - cell.pressure*vol;
 	else

@@ -178,7 +178,7 @@ public:
 
   double RadiationTimeStep(double const dt, CG::MatrixBuilder const& matrix_builder, bool const nohydro = false);
 
-  double getTimeStep(void) const {return dt_};
+  double getTimeStep(void) const {return dt_;}
 
 private:
   Tessellation3D& tess_;

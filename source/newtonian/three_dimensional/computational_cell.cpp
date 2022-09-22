@@ -194,8 +194,8 @@ void ComputationalCellAddMult(ComputationalCell3D &res, ComputationalCell3D cons
 	res.pressure += other.pressure*scalar;
 	res.internal_energy += other.internal_energy*scalar;
 	res.velocity += other.velocity*scalar;
-	res.temperature += other.temperature;
-	res.Erad += other.Erad;
+	res.temperature += other.temperature*scalar;
+	res.Erad += other.Erad*scalar;
 	//assert(res.tracers.size() == other.tracers.size());
 	//size_t N = res.tracers.size();
 #ifdef __INTEL_COMPILER

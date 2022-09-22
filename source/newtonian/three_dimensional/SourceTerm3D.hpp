@@ -26,7 +26,7 @@ public:
 	\param extensives The updates extenesives, given as input and output.
 	*/
 	virtual void operator()(const Tessellation3D& tess,const vector<ComputationalCell3D>& cells,
-		const vector<Conserved3D>& fluxes,const vector<Vector3D>& point_velocities,const double t,double dt,
+		const vector<Conserved3D>& fluxes,const vector<Vector3D>& point_velocities, const double t, double dt,
 		vector<Conserved3D> &extensives) const = 0;
 
   /*! \brief Informs simulation about the time step

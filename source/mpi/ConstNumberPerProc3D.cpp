@@ -534,10 +534,16 @@ void ConstNumberPerProc3D::Update(Tessellation3D& tproc, Tessellation3D const& t
 		size_t const neighbor = neigh[i];
 		if(neighbor >= nproc)
 		{
-			if(tproc.IsPointOutsideBox(neighbor))
+			Vector3D const diff = tproc.GetMeshPoint(neighbor) - point;
+			double const R_diff = fastabs(diff);
+			if(R_diff < 0.1 * MyR)
 			{
-				Vector3D const diff = tproc.GetMeshPoint(neighbor) - point;
-				double const R_diff = fastabs(diff);
+				dx = -diff.x * 0.1 * MyR / R_diff;
+				dy = -diff.y * 0.1 * MyR / R_diff;
+				dz = -diff.z * 0.1 * MyR / R_diff;
+			}
+			else
+			{
 				Vector3D dmove = Vector3D(dx, dy, dz);
 				double const v_diff = ScalarProd(dmove, diff) / R_diff;
 				if(v_diff > 0.45 * R_diff)

@@ -221,7 +221,7 @@ namespace
 						size_t const Ninface = face_inds[k].size();
 						for(size_t j = 0; j < Ninface; ++j)
 						{
-							if(face_inds[k][j] == atatic_cast<int>(all_indeces[i]))
+							if(face_inds[k][j] == static_cast<int>(all_indeces[i]))
 							{
 								++found;
 								double const maxR = fastabs(points[face_inds[k][(j + 1) % Ninface]] - points[face_inds[k][(j + Ninface - 1) % Ninface]]);

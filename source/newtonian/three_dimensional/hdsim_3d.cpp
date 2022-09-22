@@ -321,7 +321,11 @@ void HDSim3D::timeAdvance2(void)
 			vector<vector<size_t> > sentpoints;
 			vector<int> sentproc;
 			MPI_Barrier(MPI_COMM_WORLD);
+			if(rank==0)
+				std::cout<<"Starting load move"<<std::endl;
 			proc_update_->Update(tproc_, tess_);
+			if(rank==0)
+				std::cout<<"Done load move"<<std::endl;
 			std::vector<Vector3D> &oldpoints = tess_.accessMeshPoints();
 			oldpoints.resize(tess_.GetPointNo());
 			std::vector<Vector3D> newpoints = tess_.UpdateMPIPoints(tproc_, rank, oldpoints, selfindex, sentproc, sentpoints);
@@ -896,6 +900,8 @@ double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matr
 	int total_iters = 0;
 	double const CG_eps = 1e-10;
 	size_t const N = tess_.GetPointNo();
+	if(N == 0)
+		std::cout<<"Zero cells in RadiationTimeStep"<<std::endl;
 	std::vector<double> old_Er(N, 0);
 	std::vector<double> new_Er = CG::conj_grad_solver(CG_eps, total_iters, tess_, cells_ , dt, matrix_builder, pt_.getTime());
 	double max_Er = *std::max_element(new_Er.begin(), new_Er.end());
@@ -905,7 +911,7 @@ double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matr
 	size_t const Nzero = matrix_builder.zero_cells_.size();
 	std::vector<size_t> zero_indeces;
 	for(size_t i = 0; i < Nzero; ++i)
-		zero_indeces.push_back(binary_index_find(ComputationalCell3D::stickerNames, matrix_builder.zero_cells[i]));
+		zero_indeces.push_back(binary_index_find(ComputationalCell3D::stickerNames, matrix_builder.zero_cells_[i]));
 
 	matrix_builder.PostCG(tess_, extensive_, dt, cells_, new_Er);
 
@@ -930,8 +936,8 @@ double HDSim3D::RadiationTimeStep(double const dt, CG::MatrixBuilder const& matr
 	}
 #ifdef RICH_MPI
 	int rank = -1;
-	MPI_Comm_rank(MPI_COMM_WORLD< &rank);
-	std::pair<double, int> max_data(mad_diff, rank);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	std::pair<double, int> max_data(max_diff, rank);
 	MPI_Allreduce(MPI_IN_PLACE, &max_data, 1, MPI_DOUBLE_INT, MPI_MAXLOC, MPI_COMM_WORLD);
 	max_diff = max_data.first;
 	if(rank == max_data.second)

@@ -4,8 +4,8 @@
 #include "../../mpi/mpi_commands.hpp"
 #endif
 
-RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos, Vector3D const& ll, Vector3D const& ur,
-	double chi, double eta, bool cold, double min_dw, double dt_speed, const vector<std::string>& no_move) : pm_(pm), eos_(eos), ll_(ll), ur_(ur), chi_(chi),
+RoundCells3D::RoundCells3D(const PointMotion3D& pm, const EquationOfState& eos,
+	double chi, double eta, bool cold, double min_dw, double dt_speed, const vector<std::string>& no_move) : pm_(pm), eos_(eos), chi_(chi),
 	eta_(eta), cold_(cold), min_dw_(min_dw),dt_speed_(dt_speed),no_move_(no_move) {}
 
 namespace
@@ -60,59 +60,32 @@ namespace
 		}
 	}
 
-	void CorrectPointsOverShoot(vector<Vector3D> &v, double dt, Tessellation3D const& tess, Vector3D const& ll,
-		Vector3D const& ur)
+	void CorrectPointsOverShoot(vector<Vector3D> &v, double dt, Tessellation3D const& tess)
 	{
 		// check that we don't go outside grid
-		size_t n = tess.GetPointNo();
+		size_t const n = tess.GetPointNo();
 		const double inv_dt = 1.0 / dt;
+		std::vector<size_t> neighbors;
 		for (size_t i = 0; i < n; ++i)
 		{
-			Vector3D point(tess.GetMeshPoint(i));
-			double R = tess.GetWidth(i);
-			if ((v[i].x*dt * 2 + point.x) > ur.x)
+			Vector3D const point(tess.GetMeshPoint(i));
+			tess.GetNeighbors(i, neighbors);
+			size_t const Nneighbors = neighbors.size();
+			for(size_t j = 0; j < Nneighbors; ++j)
 			{
-				double factor = 0.25*(ur.x - point.x)*inv_dt / fastabs(v[i]);
-				if (R*0.1 > (ur.x - point.x))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
+				size_t const neighbor = neighbors[j];
+				if(neighbor >= n)
+				{
+					if(tess.IsPointOutsideBox(neighbor))
+					{
+						Vector3D const diff = tess.GetMeshPoint(neighbor) - point;
+						double const R_diff = fastabs(diff);
+						double const v_diff = ScalarProd(v[i] * dt, diff) / R_diff;
+						if(v_diff > 0.3 * R_diff)
+							v[i] *= R_diff * 0.3 / v_diff;
+					}
+				}
 			}
-			if ((v[i].y*dt * 2 + point.y) > ur.y)
-			{
-				double factor = 0.25*(ur.y - point.y)*inv_dt / fastabs(v[i]);
-				if (R*0.1 > (ur.y - point.y))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
-			}
-			if ((v[i].z*dt * 2 + point.z) > ur.z)
-			{
-				double factor = 0.25*(ur.z - point.z)*inv_dt / fastabs(v[i]);
-				if (R*0.1 > (ur.z - point.z))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
-			}
-			if ((v[i].x*dt * 2 + point.x) < ll.x)
-			{
-				double factor = 0.25*(point.x - ll.x)*inv_dt / fastabs(v[i]);
-				if (R*0.1 > (point.x - ll.x))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
-			}
-			if ((v[i].y*dt * 2 + point.y) < ll.y)
-			{
-				double factor = 0.25*(point.y - ll.y)*	inv_dt / fastabs(v[i]);
-				if (R*0.1 > (point.y - ll.y))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
-			}
-			if ((v[i].z*dt * 2 + point.z) < ll.z)
-			{
-				double factor = 0.25*(point.z - ll.z)*	inv_dt / fastabs(v[i]);
-				if (R*0.1 > (point.z - ll.z))
-					factor *= -0.1;
-				v[i] = v[i] * factor;
-			}
-
 		}
 		return;
 	}
@@ -300,11 +273,5 @@ void RoundCells3D::ApplyFix(Tessellation3D const& tess, vector<ComputationalCell
 		SlowDown(velocities[i], tess, tess.GetWidth(i), i, velocities, nomove);
 #endif
 	velocities.resize(n);
-	CorrectPointsOverShoot(velocities, dt, tess, ll_, ur_);
-	}
-
-void RoundCells3D::ChangeBox(Vector3D const & ll, Vector3D const & ur)
-{
-	ll_ = ll;
-	ur_ = ur;
+	CorrectPointsOverShoot(velocities, dt, tess);
 }

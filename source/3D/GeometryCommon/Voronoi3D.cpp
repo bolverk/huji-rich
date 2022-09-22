@@ -322,6 +322,7 @@ namespace
 
 void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Vector3D> const& face_points, std::array<double, 128> &area_vec_temp)
   {
+    point_vec old;
     size_t const N = indeces.size();
     double const small_fraction = 1e-14;
     double const medium_fraction = 3e-1;
@@ -331,8 +332,9 @@ void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Ve
     {
       area_vec_temp[i] = fastabs(CrossProduct(face_points[indeces[i]] - face_points[indeces[(N + i - 1) % N]], face_points[indeces[(i + 1) % N]] 
       - face_points[indeces[(N + i - 1) % N]]));
+      old.push_back(indeces[i]);
     }
-    double const area_scale = *std::max_elment(area_vec_temp.begin(), area_vec_temp.begin() + N);
+    double const area_scale = *std::max_element(area_vec_temp.begin(), area_vec_temp.begin() + N);
     good_normal = CrossProduct(face_points[indeces[0]] - face_points[indeces[N - 1]], face_points[indeces[1]] 
       - face_points[indeces[N - 1]]);
     good_normal *= 1.0 / fastabs(good_normal);
@@ -363,7 +365,30 @@ void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Ve
       }
     }
     if(Nindeces < 3)
-      throw UniversalError("Not enough point in face in CleanSameLine");
+    {
+      UniversalError eo("Not enough point in face in CleanSameLine");
+      eo.addEntry("original size", old.size());
+      eo.addEntry("Area scale", area_scale);
+      std::cout<<std::setprecision(15)<<std::endl;
+      eo.addEntry("Normal x", good_normal.x);
+      eo.addEntry("Normal y", good_normal.y);
+      eo.addEntry("Normal z", good_normal.z);
+      eo.addEntry("Point0 x", face_points[old[0]].x);
+      eo.addEntry("Point0 y", face_points[old[0]].y);
+      eo.addEntry("Point0 z", face_points[old[0]].z);
+      for(size_t i = 1; i < old.size(); ++i)
+      {
+        Vector3D normal_temp = CrossProduct(face_points[old[i]] - face_points[old[i - 1]], face_points[old[(i + 1) % old.size()]] - face_points[old[i - 1]]);
+        normal_temp *= 1.0 /fastabs(normal_temp);
+        double const s = ScalarProd(normal_temp, good_normal);
+        eo.addEntry("Point" + std::to_string(i) + " x", face_points[old[i]].x);
+        eo.addEntry("Point" + std::to_string(i) + " y", face_points[old[i]].y);
+        eo.addEntry("Point" + std::to_string(i) + " z", face_points[old[i]].z);
+        eo.addEntry("Area", area_vec_temp[i]);
+        eo.addEntry("s", s);
+      }
+      throw eo;
+    }
   }
 
   void MakeRightHandFace(boost::container::small_vector<size_t, 8> &indeces, Vector3D const &point, vector<Vector3D> const &face_points,
@@ -420,7 +445,8 @@ void CleanSameLine(boost::container::small_vector<size_t, 8> &indeces, vector<Ve
       if (point != N0 && point != N1 && cur_tetra.neighbors[i] != last_tetra)
         break;
     }
-    assert(i < 4);
+    if(i >= 4)
+      throw UniversalError("Bad NextLoopTetra");
     return cur_tetra.neighbors[i];
   }
 

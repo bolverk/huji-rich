@@ -106,7 +106,7 @@ public:
         boundary_calc_(boundary_calc), eos_(eos), flux_limiter_(flux_limiter), sigma_planck(), fleck_factor(), CG::MatrixBuilder(zero_cells) {}
 
     void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells, 
-            double const dt, std::vector<double>& b, std::vector<double>& x0) const override;
+            double const dt, std::vector<double>& b, std::vector<double>& x0, double const current_time) const override;
 
     void PostCG(Tessellation3D const& tess, std::vector<Conserved3D>& extensives, double const dt, std::vector<ComputationalCell3D>& cells,
         std::vector<double>const& CG_result)const override;

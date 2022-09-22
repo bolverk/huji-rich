@@ -32,9 +32,8 @@ namespace CG
     //! \brief Class that build the data for the solution of the linear system A*x=b
     class MatrixBuilder
     {
-        MatrixBuilder(std::vector<std::string> const zero_cells = std::vector<std::string> ()) : zero_cells_(zero_cells){}
-
-        public:
+         public:
+            MatrixBuilder(std::vector<std::string> const zero_cells = std::vector<std::string> ()) : zero_cells_(zero_cells){}
         /*!
             \brief Builds the initial conditions for the CG method to solve A*x=b
             \param tess The tessellation
@@ -47,7 +46,7 @@ namespace CG
             \param current_time The time
         */
         virtual void BuildMatrix(Tessellation3D const& tess, mat& A, size_t_mat& A_indeces, std::vector<ComputationalCell3D> const& cells,
-            double const dt, std::vector<double>& b, std::vector<double>& x0, doubel const current_time) const = 0;
+            double const dt, std::vector<double>& b, std::vector<double>& x0, double const current_time) const = 0;
         /*!
         \brief This method does post processing after the CG has finished (e.g. update the thermal energy)
         \param tess The tesselation
@@ -65,7 +64,7 @@ namespace CG
     //! The fastest implementation of conjugate gradient algorithm, using data-based parallelism only
     std::vector<double> conj_grad_solver(const double tolerance, int &total_iters,
         Tessellation3D const& tess, std::vector<ComputationalCell3D> const& cells,
-        double const dt, MatrixBuilder const& matrix_builder);
+        double const dt, MatrixBuilder const& matrix_builder, double const time);
 }
 
 #endif

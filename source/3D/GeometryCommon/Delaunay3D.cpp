@@ -1010,12 +1010,15 @@ bool Delaunay3D::CheckCorrect(void)
 	    {
 	      size_t loctemp=4;
 	      GetOppositePoint(tetras_[T.neighbors[j]], i, loctemp);
-	      assert(loctemp < 4);
+        if(loctemp >= 4)
+          throw UniversalError("bad loctemp CheckCorrect");
 	      std::size_t other=4;
 	      GetOppositePoint(tetras_[T.neighbors[j]], i,other);
-	      assert(other < 4);
+	      if(other >= 4)
+          throw UniversalError("bad other CheckCorrect");
 	      b5_temp_[4] = points_[tetras_[T.neighbors[j]].points[other]];
-	      assert(!(insphere(b5_temp_) < 0));
+	      if((insphere(b5_temp_) < 0))
+          throw UniversalError("bad insphere CheckCorrect");
 	    }
 	}			
     }
